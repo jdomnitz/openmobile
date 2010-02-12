@@ -383,7 +383,7 @@ namespace OpenMobile.Controls
                     return;
                 selectedIndex = value;
                 if (SelectedIndexChanged != null)
-                    SelectedIndexChanged(this, 0);
+                    new Thread(delegate() { SelectedIndexChanged(this, screen); }).Start();
             }
             void throwtmr_Elapsed(object sender, ElapsedEventArgs e)
             {

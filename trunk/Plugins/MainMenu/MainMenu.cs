@@ -173,7 +173,7 @@ public sealed class MainMenu : IHighLevel
 
         void MainMenu_OnClick(object sender, int screen)
         {
-            switch(((OMButton)sender).Tag)
+            switch(((OMButton)sender).Tag.ToString())
             {
                 case "Exit":
                     theHost.execute(eFunction.closeProgram);
@@ -182,7 +182,7 @@ public sealed class MainMenu : IHighLevel
                     return;
                 default:
                     theHost.execute(eFunction.TransitionFromPanel, screen.ToString(),"MainMenu");
-                    if (theHost.execute(eFunction.TransitionToPanel,screen.ToString(), ((OMButton)sender).Tag)==false)
+                    if (theHost.execute(eFunction.TransitionToPanel,screen.ToString(), ((OMButton)sender).Tag.ToString())==false)
                         theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
                     theHost.execute(eFunction.ExecuteTransition,screen.ToString());
                     break;
@@ -214,6 +214,8 @@ public sealed class MainMenu : IHighLevel
                 return name;
             if (name == "Exit")
                 return name;
+            if (name == "About")
+                return name;
             object pl = new object();
             theHost.getData(eGetData.GetPlugins, name, out pl);
             if (pl == null)
@@ -236,7 +238,9 @@ public sealed class MainMenu : IHighLevel
 
         void cancel_OnClick(object sender, int screen)
         {
-            theHost.execute(eFunction.goBack,screen.ToString());
+            theHost.execute(eFunction.TransitionFromSettings,screen.ToString(),"MainMenu");
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"None");
         }
 
         string currentlySetting;
@@ -264,6 +268,7 @@ public sealed class MainMenu : IHighLevel
             list.Clear();
             list.Add("Not Set");
             list.Add("Exit");
+            list.Add("About");
             Type hl = typeof(IHighLevel); //performance improvement
             foreach (IBasePlugin b in (List<IBasePlugin>)o)
             {

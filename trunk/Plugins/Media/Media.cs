@@ -1,4 +1,24 @@
-﻿using System;
+﻿/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
@@ -21,6 +41,14 @@ namespace Media
         public eLoadStatus initialize(IPluginHost host)
         {
             OMPanel p = new OMPanel();
+            currentAlbums = new List<mediaInfo>[host.InstanceCount];
+            currentSongs = new List<mediaInfo>[host.InstanceCount];
+            kickDown = new bool[host.InstanceCount];
+            for (int i = 0; i < host.InstanceCount; i++)
+            {
+                currentAlbums[i] = new List<mediaInfo>();
+                currentSongs[i] = new List<mediaInfo>();
+            }
             manager = new ScreenManager(host.ScreenCount);
             theHost = host;
             imageItem item = theHost.getSkinImage("MediaSlider");
@@ -270,9 +298,9 @@ namespace Media
             OMList l = (OMList)sender;
             if (l.SelectedIndex < 0)
                 return;
-            loadSongs(currentAlbums[l.SelectedIndex].Artist,currentAlbums[l.SelectedIndex].Album, screen);
-            theHost.setPlaylist(currentSongs,theHost.instanceForScreen(screen));
-            theHost.execute(eFunction.loadAVPlayer, screen.ToString(), "OMPlayer"); //More efficient then checking first
+            loadSongs(currentAlbums[theHost.instanceForScreen(screen)][l.SelectedIndex].Artist, currentAlbums[theHost.instanceForScreen(screen)][l.SelectedIndex].Album, screen);
+            theHost.setPlaylist(currentSongs[theHost.instanceForScreen(screen)],theHost.instanceForScreen(screen));
+            theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), "OMPlayer"); //More efficient then checking first
             theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
         }
 
@@ -281,28 +309,53 @@ namespace Media
             OMList l=(OMList)sender;
             if (l.SelectedIndex < 0)
                 return;
-            loadSongs(l[l.SelectedIndex].text, screen);
-            theHost.setPlaylist(currentSongs,theHost.instanceForScreen(screen));
+            playSongs(l[l.SelectedIndex].text, screen);
+            theHost.setPlaylist(currentSongs[theHost.instanceForScreen(screen)], theHost.instanceForScreen(screen));
+            //theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), "OMPlayer"); //More efficient then checking first
+            //theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
         }
-
         private void loadSongs(string artist, int screen)
         {
-            object o;
-            lock (this)
+            kickDown[screen] = true;
+            lock (currentSongs[theHost.instanceForScreen(screen)])
             {
+                object o;
+                kickDown[screen] = false;
                 theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
                 IMediaDatabase db = (IMediaDatabase)o;
                 db.beginGetSongsByArtist(artist, true);
-                currentSongs.Clear();
+                currentSongs[theHost.instanceForScreen(screen)].Clear();
+                mediaInfo info = db.getNextMedia();
+                OMList l = ((OMList)manager[screen]["Media.List1"]);
+                l.Clear();
+                while ((info != null)&&(kickDown[screen]==false))
+                {
+                    if (l.AddDistinct(new OMListItem(info.Name,info.coverArt))==true)
+                        currentSongs[theHost.instanceForScreen(screen)].Add(info);
+                    info = db.getNextMedia();
+                }
+                db.endSearch();
+            }
+        }
+
+        private void playSongs(string artist, int screen)
+        {
+            object o;
+            lock (currentSongs[theHost.instanceForScreen(screen)])
+            {
+                theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
+                IMediaDatabase db = (IMediaDatabase)o;
+                db.beginGetSongsByArtist(artist, false);
+                currentSongs[theHost.instanceForScreen(screen)].Clear();
                 mediaInfo info = db.getNextMedia();
                 if (info != null)
                 {
-                    theHost.execute(eFunction.loadAVPlayer, screen.ToString(), "OMPlayer"); //More efficient then checking first
-                    theHost.execute(eFunction.Play, screen.ToString(), info.Location);
+                    theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), "OMPlayer"); //More efficient then checking first
+                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), info.Location);
                 }
                 while (info != null)
                 {
-                    currentSongs.Add(info);
+                    currentSongs[theHost.instanceForScreen(screen)].Add(info);
                     info = db.getNextMedia();
                 }
                 db.endSearch();
@@ -311,12 +364,12 @@ namespace Media
 
         void List1_OnClick(object sender, int screen)
         {
-            if (currentSongs.Count == 0)
+            if (currentSongs[theHost.instanceForScreen(screen)].Count == 0)
                 return;
-            if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[((OMList)sender).SelectedIndex].Location) == false)
+            if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location) == false)
             {
-                theHost.execute(eFunction.loadAVPlayer, screen.ToString(), "OMPlayer");
-                theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[((OMList)sender).SelectedIndex].Location);
+                theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), "OMPlayer");
+                theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location);
             }
         }
 
@@ -332,27 +385,31 @@ namespace Media
 
         void List2_SelectedIndexChanged(OMList sender, int screen)
         {
-            if ((sender.SelectedIndex < 0)||(sender.SelectedIndex>=currentAlbums.Count))
+            if ((sender.SelectedIndex < 0) || (sender.SelectedIndex >= currentAlbums[theHost.instanceForScreen(screen)].Count))
                 return;
-            loadSongs(currentAlbums[sender.SelectedIndex].Artist,currentAlbums[sender.SelectedIndex].Album, screen);
+            loadSongs(currentAlbums[theHost.instanceForScreen(screen)][sender.SelectedIndex].Artist, currentAlbums[theHost.instanceForScreen(screen)][sender.SelectedIndex].Album, screen);
         }
 
         private void loadSongs(string artist,string album, int screen)
         {
-            object o;
-            lock (this)
+            kickDown[screen] = true;
+            lock (currentSongs[theHost.instanceForScreen(screen)])
             {
+                object o;
+                kickDown[screen] = false;
                 theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
+                if (o == null)
+                    return;
                 IMediaDatabase db = (IMediaDatabase)o;
                 db.beginGetSongsByAlbum(artist, album, true);
                 OMList l = ((OMList)manager[screen]["Media.List1"]);
                 l.Clear();
-                currentSongs.Clear();
+                currentSongs[theHost.instanceForScreen(screen)].Clear();
                 mediaInfo info = db.getNextMedia();
-                while (info != null)
+                while ((info != null)&&(kickDown[screen]==false))
                 {
                     if (l.AddDistinct(new OMListItem(info.Name, info.coverArt)) == true)
-                        currentSongs.Add(info);
+                        currentSongs[theHost.instanceForScreen(screen)].Add(info);
                     info = db.getNextMedia();
                 }
                 db.endSearch();
@@ -375,14 +432,16 @@ namespace Media
             if (sender.SelectedIndex<0)
                 return;
             loadAlbums(sender[sender.SelectedIndex].text,screen);
+            loadSongs(sender[sender.SelectedIndex].text, screen);
         }
-        private List<mediaInfo> currentSongs = new List<mediaInfo>();
-        private List<mediaInfo> currentAlbums = new List<mediaInfo>();
+        private List<mediaInfo>[] currentSongs;
+        private bool[] kickDown; //Kicks a thread out of processing songs if another is waiting
+        private List<mediaInfo>[] currentAlbums;
         private void loadAlbums(string artist,int screen)
         {
-            object o;
-            lock (this)
+            lock (currentAlbums[theHost.instanceForScreen(screen)])
                 {
+                object o;
                 theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
                 if (o == null)
                     return;
@@ -390,13 +449,13 @@ namespace Media
                 db.beginGetAlbums(artist, true);
                 OMList l = ((OMList)manager[screen]["Media.List2"]);
                 l.Clear();
-                currentAlbums.Clear();
-                currentSongs.Clear();
+                currentAlbums[theHost.instanceForScreen(screen)].Clear();
+                currentSongs[theHost.instanceForScreen(screen)].Clear();
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
                     if (l.AddDistinct(new OMListItem(info.Album, info.coverArt)) == true)
-                        currentAlbums.Add(info);
+                        currentAlbums[theHost.instanceForScreen(screen)].Add(info);
                     info = db.getNextMedia();
                 }
                 db.endSearch();
@@ -490,6 +549,8 @@ namespace Media
                         {
                             l.Left = i - 2;
                         }
+                        //OMList c=(OMList)l1;
+                        //loadSongs(c[c.SelectedIndex].text, screen);
                     }
                     Thread.Sleep(25);
                 }
@@ -550,8 +611,6 @@ namespace Media
                         list[i] = ((OMList)manager[i][3]);
                         list[i].Clear();
                     }
-                    list[0].Add("TOP0");
-                    list[1].Add("TOP1");
                     while (info != null)
                     {
                         for(int i=0;i<theHost.ScreenCount;i++)

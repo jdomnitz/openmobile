@@ -28,7 +28,7 @@ using OpenMobile.Controls;
 
 namespace OpenMobile
 {
-    public partial class UI : Form
+    public partial class RenderingWindow : Form
     {
         private OMPanel p=new OMPanel();
         OMControl varHighlighted;
@@ -75,7 +75,7 @@ namespace OpenMobile
         {
             return this.Handle;
         }
-        public UI(int s)
+        public RenderingWindow(int s)
         {
             this.screen = s;
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
@@ -346,6 +346,11 @@ namespace OpenMobile
 
         private void tmrClosing_Tick(object sender, EventArgs e)
         {
+            if (Core.exitTransition == false)
+            {
+                Application.Exit();
+                return;
+            }
             if (this.Opacity > 0.1)
                 this.Opacity -= 0.04;
             else
@@ -617,7 +622,7 @@ namespace OpenMobile
             }
         }
         
-        private void UI_KeyUp(object sender, KeyEventArgs e)
+        public void UI_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
             { //Escape full screen
@@ -642,8 +647,8 @@ namespace OpenMobile
 
         public static void closeRenderer()
         {
-            for (int i = 0; i < Core.UICollection.Count; i++)
-                Core.UICollection[i].closeMe();
+            for (int i = 0; i < Core.RenderingWindows.Count; i++)
+                Core.RenderingWindows[i].closeMe();
         }
 
         private void UI_Resize(object sender, EventArgs e)
@@ -737,7 +742,7 @@ namespace OpenMobile
             ofsetOut = new Point(0, 0);
             transitioning = false;
         }
-        private void UI_KeyDown(object sender, KeyEventArgs e)
+        public void UI_KeyDown(object sender, KeyEventArgs e)
         {
             if (highlighted == null)
             {
@@ -748,7 +753,7 @@ namespace OpenMobile
                     OMControl b=null;
                     for (int i = 0; i < p.controlCount; i++)
                         if ((p[i].GetType()==typeof(OMButton))||(p[i].GetType()==typeof(OMTextBox)))
-                            if ((p[i].Left < left) && (p[i].Top < top)&&(inBounds(p[i].toRegion(),this.Bounds)==true))
+                            if ((p[i].Left < left) && (p[i].Top < top)&&(inBounds(p[i].toRegion(),this.DisplayRectangle)==true))
                             {
                                 b = p[i];
                                 top = b.Top;

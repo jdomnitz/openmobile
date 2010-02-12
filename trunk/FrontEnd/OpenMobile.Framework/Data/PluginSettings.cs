@@ -46,7 +46,7 @@ namespace OpenMobile.Data
         /// </summary>
         public void createDB()
         {
-            var k = new ResourceManager("OpenMobile.Framework.Data.SQL", Assembly.GetExecutingAssembly());
+            var k = new ResourceManager("OpenMobile.Data.SQL", Assembly.GetExecutingAssembly());
             SQLiteCommand cmd = new SQLiteCommand(k.GetString("OMData"), asyncCon);
             cmd.ExecuteNonQuery();
         }

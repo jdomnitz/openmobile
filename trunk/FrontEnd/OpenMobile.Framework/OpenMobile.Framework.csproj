@@ -102,6 +102,7 @@
     <Compile Include="Data\Vehicle.cs" />
     <Compile Include="Data\Weather.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="helperFunctions\Globalization.cs" />
     <Compile Include="Math\Calculation.cs" />
     <Compile Include="helperFunctions\Encryption.cs" />
     <Compile Include="helperFunctions\General.cs" />

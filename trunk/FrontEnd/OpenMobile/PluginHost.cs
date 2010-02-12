@@ -44,7 +44,7 @@ namespace OpenMobile
         private bool internetAccess;
         private string ipAddress;
         private List<mediaInfo>[] queued;
-        private int currentPosition;
+        private int[] currentPosition;
         public HalInterface hal;
 
         historyItem[,] history = new historyItem[screenCount, 5];
@@ -67,7 +67,11 @@ namespace OpenMobile
             {
                 return ((IHighLevel)getPluginByName(name)).loadPanel("",screen);
             }
-            catch (Exception) { return null; }
+            catch (Exception) {
+                if (name == "About")
+                    return BuiltInComponents.AboutPanel();
+                return null;
+            }
         }
         private eMediaType classifySource(string source)
         {
@@ -101,7 +105,7 @@ namespace OpenMobile
         }
         public bool setPlaylist(List<mediaInfo> source,int instance)
         {
-            currentPosition = 0;
+            currentPosition[instance] = 0;
             queued[instance].Clear();
             queued[instance].AddRange(source.GetRange(0, source.Count));
             return true;
@@ -162,15 +166,15 @@ namespace OpenMobile
         }
         public IntPtr UIHandle(int screen)
         {
-            if ((screen < 0) || (screen >= Core.UICollection.Count))
+            if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return (IntPtr)(-1); //Out of bounds
-            if (Core.UICollection[screen].InvokeRequired == true)
+            if (Core.RenderingWindows[screen].InvokeRequired == true)
             {
-                UI.getVal val = new UI.getVal(Core.UICollection[screen].getHandle);
-                return (IntPtr)Core.UICollection[screen].Invoke(val);
+                RenderingWindow.getVal val = new RenderingWindow.getVal(Core.RenderingWindows[screen].getHandle);
+                return (IntPtr)Core.RenderingWindows[screen].Invoke(val);
             }
             else
-                return Core.UICollection[screen].Handle;
+                return Core.RenderingWindows[screen].Handle;
         }
 
         public Int32 RenderFirst
@@ -190,6 +194,7 @@ namespace OpenMobile
             queued = new List<mediaInfo>[screenCount];
             currentMediaPlayer = new IAVPlayer[screenCount];
             currentTunedContent = new ITunedContent[screenCount];
+            currentPosition = new int[screenCount];
             for (int i = 0; i < screenCount; i++)
             {
                 history[i, 0] = new historyItem(false, "MainMenu");
@@ -318,9 +323,9 @@ namespace OpenMobile
             switch (function)
             {
                 case eFunction.closeProgram:
-                    lock (Core.UICollection[0])
+                    lock (Core.RenderingWindows[0])
                     {
-                        UI.closeRenderer();
+                        RenderingWindow.closeRenderer();
                         raiseSystemEvent(eFunction.closeProgram,"","","");
                         hal.snd("45");
                     }
@@ -394,9 +399,9 @@ namespace OpenMobile
                     int ex;
                     if (int.TryParse(arg, out ex) == true)
                     {
-                        lock (Core.UICollection[ex])
+                        lock (Core.RenderingWindows[ex])
                         {
-                            Core.UICollection[ex].executeTransition(eGlobalTransition.Crossfade);
+                            Core.RenderingWindows[ex].executeTransition(eGlobalTransition.Crossfade);
                             raiseSystemEvent(eFunction.ExecuteTransition, "Crossfade", "", "");
                         }
                         return true;
@@ -411,10 +416,10 @@ namespace OpenMobile
                             OMPanel c = getSettingsPanelByName(history[us, 0].pluginName, us);
                             if (c==null)
                                 return false;
-                            lock (Core.UICollection[us])
+                            lock (Core.RenderingWindows[us])
                             {
-                                Core.UICollection[us].transitionOutPanel(c);
-                                Core.UICollection[us].executeTransition(eGlobalTransition.None);
+                                Core.RenderingWindows[us].transitionOutPanel(c);
+                                Core.RenderingWindows[us].executeTransition(eGlobalTransition.None);
                             }
                             raiseSystemEvent(eFunction.UnloadSettings, arg, "", "");
                             return true;
@@ -428,9 +433,9 @@ namespace OpenMobile
                         OMPanel q = getPanelByName(history[tp, 0].pluginName, tp);
                         if (q == null)
                             return false;
-                        lock (Core.UICollection[tp])
+                        lock (Core.RenderingWindows[tp])
                         {
-                            Core.UICollection[tp].transitionInPanel(q);
+                            Core.RenderingWindows[tp].transitionInPanel(q);
                             raiseSystemEvent(eFunction.TransitionToPanel, arg, history[tp, 0].pluginName, "");
                             history[tp, 4] = history[tp, 3];
                             history[tp, 3] = history[tp, 2];
@@ -452,9 +457,9 @@ namespace OpenMobile
                             k= getPanelByName(history[tf,0].pluginName, tf);
                         if (k == null)
                             return false;
-                        lock (Core.UICollection[tf])
+                        lock (Core.RenderingWindows[tf])
                         {
-                            Core.UICollection[tf].transitionOutPanel(k);
+                            Core.RenderingWindows[tf].transitionOutPanel(k);
                         }
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg, history[tf, 0].pluginName, "");
                         return true;
@@ -471,9 +476,9 @@ namespace OpenMobile
                             k = getPanelByName(history[tfs, 0].pluginName, tfs);
                         if (k == null)
                             return false;
-                        lock (Core.UICollection[tfs])
+                        lock (Core.RenderingWindows[tfs])
                         {
-                            Core.UICollection[tfs].transitionOutPanel(k);
+                            Core.RenderingWindows[tfs].transitionOutPanel(k);
                         }
                         raiseSystemEvent(eFunction.TransitionFromSettings, arg, history[tfs, 0].pluginName, "");
                         return true;
@@ -501,6 +506,12 @@ namespace OpenMobile
                 case eFunction.unloadAVPlayer:
                     if (int.TryParse(arg,out ret)==true)
                     {
+                        try
+                        {
+                            if (currentMediaPlayer[ret].getPlayerStatus(ret) == ePlayerStatus.Playing)
+                                currentMediaPlayer[ret].stop(ret);
+                        }
+                        catch (Exception) { }
                         currentMediaPlayer[ret].OnMediaEvent -= raiseMediaEvent;
                         currentMediaPlayer[ret] = null;
                         raiseSystemEvent(eFunction.unloadAVPlayer, arg, "", "");
@@ -545,14 +556,14 @@ namespace OpenMobile
                             {
                                 result = Framework.Math.Calculation.RandomNumber(0, queued[ret].Count);
                             }
-                            while (currentPosition == result);
-                            currentPosition = result;
+                            while (currentPosition[ret] == result);
+                            currentPosition[ret] = result;
                         }
                         else
-                            currentPosition++;
-                        if (currentPosition == queued[ret].Count)
-                            currentPosition = 0;
-                        return execute(eFunction.Play, arg, queued[ret][currentPosition].Location);
+                            currentPosition[ret]++;
+                        if (currentPosition[ret] == queued[ret].Count)
+                            currentPosition[ret] = 0;
+                        return execute(eFunction.Play, arg, queued[ret][currentPosition[ret]].Location);
                     }
                     return false;
                 case eFunction.previousMedia:
@@ -560,10 +571,10 @@ namespace OpenMobile
                     {
                         if (queued[ret].Count == 0)
                             return false;
-                        currentPosition--;
-                        if (currentPosition == -1)
-                            currentPosition = queued[ret].Count - 1;
-                        return execute(eFunction.Play, arg, queued[ret][currentPosition].Location);
+                        currentPosition[ret]--;
+                        if (currentPosition[ret] == -1)
+                            currentPosition[ret] = queued[ret].Count - 1;
+                        return execute(eFunction.Play, arg, queued[ret][currentPosition[ret]].Location);
                     }
                     return false;
                 case eFunction.scanBackward:
@@ -655,9 +666,9 @@ namespace OpenMobile
                 case eFunction.TransitionFromAny:
                     if (int.TryParse(arg, out ret) == true)
                     {
-                        if ((ret < 0) || (ret >= Core.UICollection.Count))
+                        if ((ret < 0) || (ret >= Core.RenderingWindows.Count))
                             return false;
-                        Core.UICollection[ret].transitionOutEverything();
+                        Core.RenderingWindows[ret].transitionOutEverything();
                         return true;
                     }
                     return false;
@@ -676,10 +687,10 @@ namespace OpenMobile
                         OMPanel q = getSettingsPanelByName(arg2, ls);
                         if (q == null)
                             return false;
-                        lock (Core.UICollection[ls])
+                        lock (Core.RenderingWindows[ls])
                         {
-                            Core.UICollection[ls].transitionInPanel(q);
-                            Core.UICollection[ls].executeTransition(eGlobalTransition.None);
+                            Core.RenderingWindows[ls].transitionInPanel(q);
+                            Core.RenderingWindows[ls].executeTransition(eGlobalTransition.None);
                             raiseSystemEvent(eFunction.LoadSettings, arg1, arg2, "");
                             history[ls, 4] = history[ls, 3];
                             history[ls, 3] = history[ls, 2];
@@ -699,10 +710,10 @@ namespace OpenMobile
                             OMPanel c = getSettingsPanelByName(arg2, us);
                             if (c == null)
                                 return false;
-                            lock (Core.UICollection[us])
+                            lock (Core.RenderingWindows[us])
                             {
-                                Core.UICollection[us].transitionOutPanel(c);
-                                Core.UICollection[us].executeTransition(eGlobalTransition.None);
+                                Core.RenderingWindows[us].transitionOutPanel(c);
+                                Core.RenderingWindows[us].executeTransition(eGlobalTransition.None);
                             }
                             raiseSystemEvent(eFunction.UnloadSettings, arg1, arg2, "");
                             return true;
@@ -716,9 +727,9 @@ namespace OpenMobile
                         OMPanel r=getPanelByName(arg2, tp);
                         if (r == null)
                             return false;
-                        lock (Core.UICollection[tp])
+                        lock (Core.RenderingWindows[tp])
                         {
-                            Core.UICollection[tp].transitionInPanel(r);
+                            Core.RenderingWindows[tp].transitionInPanel(r);
                             raiseSystemEvent(eFunction.TransitionToPanel, arg1, arg2, "");
                             history[tp, 4] = history[tp, 3];
                             history[tp, 3] = history[tp, 2];
@@ -736,9 +747,9 @@ namespace OpenMobile
                         OMPanel j = getPanelByName(arg2, tfp);
                         if (j == null)
                             return false;
-                        lock (Core.UICollection[tfp])
+                        lock (Core.RenderingWindows[tfp])
                         {
-                            Core.UICollection[tfp].transitionOutPanel(j);
+                            Core.RenderingWindows[tfp].transitionOutPanel(j);
                         }
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg1, arg2, "");
                         return true;
@@ -748,9 +759,9 @@ namespace OpenMobile
                     int ts;
                     if (int.TryParse(arg1, out ts) == true)
                     {
-                        lock (Core.UICollection[ts])
+                        lock (Core.RenderingWindows[ts])
                         {
-                            Core.UICollection[ts].transitionInPanel(getSettingsPanelByName(arg2, ts));
+                            Core.RenderingWindows[ts].transitionInPanel(getSettingsPanelByName(arg2, ts));
                             raiseSystemEvent(eFunction.TransitionToSettings, arg1, arg2, "");
                             history[ts, 4] = history[ts, 3];
                             history[ts, 3] = history[ts, 2];
@@ -768,9 +779,9 @@ namespace OpenMobile
                         OMPanel u = getSettingsPanelByName(arg2, tfs);
                         if (u == null)
                             return false;
-                        lock (Core.UICollection[tfs])
+                        lock (Core.RenderingWindows[tfs])
                         {
-                            Core.UICollection[tfs].transitionOutPanel(u);
+                            Core.RenderingWindows[tfs].transitionOutPanel(u);
                             raiseSystemEvent(eFunction.TransitionFromSettings, arg1, arg2, "");
                         }
                         return true;
@@ -789,9 +800,9 @@ namespace OpenMobile
                     int ex;
                     if (int.TryParse(arg1, out ex) == true)
                     {
-                        lock (Core.UICollection[ex])
+                        lock (Core.RenderingWindows[ex])
                         {
-                            Core.UICollection[ex].executeTransition(effect);
+                            Core.RenderingWindows[ex].executeTransition(effect);
                         }
                         raiseSystemEvent(eFunction.ExecuteTransition, arg1, arg2, "");
                         return true;
@@ -830,6 +841,7 @@ namespace OpenMobile
                         {
                             if (player == null)
                                 return false;
+                            //Hook it if its not already hooked
                             if (Array.Exists<IAVPlayer>(currentMediaPlayer, a => a == player) == false)
                                 player.OnMediaEvent += raiseMediaEvent;
                             currentMediaPlayer[ret] = player;
@@ -919,6 +931,17 @@ namespace OpenMobile
                         return currentTunedContent[ret].tuneTo(ret, arg2);
                     }
                     return false;
+                case eFunction.backgroundOperationStatus:
+                    raiseSystemEvent(eFunction.backgroundOperationStatus, arg1, arg2, "");
+                    return true;
+                case eFunction.sendKeyPress:
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        if ((arg2 == null)||(arg2==""))
+                            return false;
+                        return (InputRouter.SendKeyDown(ret,arg2)&&InputRouter.SendKeyUp(ret,arg2));
+                    }
+                    return false;
             }
             return false;
         }
@@ -935,9 +958,9 @@ namespace OpenMobile
                         OMPanel b = getSettingsPanelByName(arg2, arg3, ts);
                         if (b == null)
                             return false;
-                        lock (Core.UICollection[ts])
+                        lock (Core.RenderingWindows[ts])
                         {
-                            Core.UICollection[ts].transitionInPanel(b);
+                            Core.RenderingWindows[ts].transitionInPanel(b);
                             raiseSystemEvent(eFunction.TransitionToSettings, arg1, arg2, arg3);
                             history[ts, 4] = history[ts, 3];
                             history[ts, 3] = history[ts, 2];
@@ -952,9 +975,9 @@ namespace OpenMobile
                     int tf;
                     if (int.TryParse(arg1, out tf) == true)
                     {
-                        lock (Core.UICollection[tf])
+                        lock (Core.RenderingWindows[tf])
                         {
-                            Core.UICollection[tf].transitionOutPanel(getSettingsPanelByName(arg2, arg3, tf));
+                            Core.RenderingWindows[tf].transitionOutPanel(getSettingsPanelByName(arg2, arg3, tf));
                         }
                         raiseSystemEvent(eFunction.TransitionFromSettings, arg1, arg2, arg3);
                         return true;
@@ -967,9 +990,9 @@ namespace OpenMobile
                         OMPanel q = getPanelByName(arg2, arg3, tp);
                         if (q == null)
                             return false;
-                        lock (Core.UICollection[tp])
+                        lock (Core.RenderingWindows[tp])
                         {
-                            Core.UICollection[tp].transitionInPanel(q);
+                            Core.RenderingWindows[tp].transitionInPanel(q);
                             raiseSystemEvent(eFunction.TransitionToPanel,arg1, arg2,arg3);
                             history[tp, 4] = history[tp, 3];
                             history[tp, 3] = history[tp, 2];
@@ -987,9 +1010,9 @@ namespace OpenMobile
                         OMPanel w = getPanelByName(arg2, arg3, tfp);
                         if (w == null)
                             return false;
-                        lock(Core.UICollection[tfp])
+                        lock(Core.RenderingWindows[tfp])
                         {
-                            Core.UICollection[tfp].transitionOutPanel(w);
+                            Core.RenderingWindows[tfp].transitionOutPanel(w);
                         }
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg1, arg2, arg3);
                         return true;
@@ -1004,10 +1027,10 @@ namespace OpenMobile
                             OMPanel c = getSettingsPanelByName(arg2,arg3, us);
                             if (c == null)
                                 return false;
-                            lock (Core.UICollection[us])
+                            lock (Core.RenderingWindows[us])
                             {
-                                Core.UICollection[us].transitionOutPanel(c);
-                                Core.UICollection[us].executeTransition(eGlobalTransition.None);
+                                Core.RenderingWindows[us].transitionOutPanel(c);
+                                Core.RenderingWindows[us].executeTransition(eGlobalTransition.None);
                             }
                             raiseSystemEvent(eFunction.UnloadSettings, arg1, arg2, arg3);
                             return true;
@@ -1021,10 +1044,10 @@ namespace OpenMobile
                         OMPanel q = getSettingsPanelByName(arg2,arg3, ls);
                         if (q == null)
                             return false;
-                        lock (Core.UICollection[ls])
+                        lock (Core.RenderingWindows[ls])
                         {
-                            Core.UICollection[ls].transitionInPanel(q);
-                            Core.UICollection[ls].executeTransition(eGlobalTransition.None);
+                            Core.RenderingWindows[ls].transitionInPanel(q);
+                            Core.RenderingWindows[ls].executeTransition(eGlobalTransition.None);
                             raiseSystemEvent(eFunction.LoadSettings, arg1, arg2, arg3);
                             history[ls, 4] = history[ls, 3];
                             history[ls, 3] = history[ls, 2];

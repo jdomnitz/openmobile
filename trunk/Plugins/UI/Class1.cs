@@ -1,10 +1,30 @@
-﻿using System;
+﻿/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System;
+using System.Drawing;
+using System.Threading;
 using System.Timers;
 using OpenMobile.Controls;
-using OpenMobile.Plugin;
-using System.Drawing;
 using OpenMobile.Framework;
-using System.Threading;
+using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
@@ -61,7 +81,6 @@ namespace OpenMobile
         {
             theHost.OnMediaEvent -= theHost_OnMediaEvent;
             theHost.OnSystemEvent -= theHost_OnSystemEvent;
-            theHost = null;
             tick.Dispose();
             manager.Dispose();
             GC.SuppressFinalize(this);
@@ -176,7 +195,7 @@ namespace OpenMobile
             skipBackwardButton.OnClick += new userInteraction(skipBackwardButton_OnClick);
             skipBackwardButton.Transition = eButtonTransition.None;
             OMLabel elapsed = new OMLabel(840,650,140,100);
-            elapsed.Name = "UI.elapsed";
+            elapsed.Name = "UI.Elapsed";
             elapsed.OutlineColor = Color.Blue;
             elapsed.Format = textFormat.Glow;
             elapsed.Font = new Font(FontFamily.GenericSansSerif,26F);
@@ -217,12 +236,12 @@ namespace OpenMobile
 
         void skipBackwardButton_OnClick(object sender, int screen)
         {
-            theHost.execute(eFunction.previousMedia,screen.ToString());
+            theHost.execute(eFunction.previousMedia,theHost.instanceForScreen(screen).ToString());
         }
 
         void skipForwardButton_OnClick(object sender, int screen)
         {
-            theHost.execute(eFunction.nextMedia,screen.ToString());
+            theHost.execute(eFunction.nextMedia,theHost.instanceForScreen(screen).ToString());
         }
 
         void theHost_OnSystemEvent(eFunction function, string arg1, string arg2,string arg3)
@@ -266,7 +285,7 @@ namespace OpenMobile
 
         void slider_OnSliderMoved(OMSlider sender,int screen)
         {
-            theHost.execute(eFunction.setPosition, screen.ToString(),sender.Value.ToString());
+            theHost.execute(eFunction.setPosition, theHost.instanceForScreen(screen).ToString(),sender.Value.ToString());
         }
 
         void theHost_OnStorageEvent(eMediaType type, string arg)
@@ -312,7 +331,7 @@ namespace OpenMobile
             {
                 for (int j = 0; j < theHost.ScreenCount; j++)
                 {
-                    ((OMLabel)manager[j]["UI.Time"]).Text = "";
+                    ((OMLabel)manager[j]["UI.Elapsed"]).Text = "";
                     ((OMSlider)manager[j]["UI.Slider"]).Value = 0;
                 }
                 return;
@@ -321,7 +340,7 @@ namespace OpenMobile
                 for (int j = 0; j < theHost.ScreenCount; j++)
                 {
                     ((OMSlider)manager[j]["UI.Slider"]).Value = i;
-                    ((OMLabel)manager[j]["UI.Time"]).Text = (formatTime(i) + " " + formatTime(((OMSlider)manager[j]["UI.Slider"]).Maximum));
+                    ((OMLabel)manager[j]["UI.Elapsed"]).Text = (formatTime(i) + " " + formatTime(((OMSlider)manager[j]["UI.Slider"]).Maximum));
                 }
         }
 
@@ -460,9 +479,9 @@ namespace OpenMobile
             {
                 mediaInfo info = theHost.getPlayingMedia(instance);
                 imageItem it = new imageItem(info.coverArt);
-                for(int i=0;i<theHost.ScreenCount;i++)
+                //for(int i=0;i<theHost.ScreenCount;i++)
                 {
-                    OMPanel p = manager[i];
+                    OMPanel p = manager[instance]; //ToDo - GetScreenFromInstance
                     ((OMLabel)p[5]).Text = info.Name;
                     ((OMLabel)p[6]).Text = info.Artist;
                     ((OMLabel)p[7]).Text = info.Album;
@@ -474,24 +493,26 @@ namespace OpenMobile
             }
             else if (function == eFunction.setPlaybackSpeed)
             {
-                for (int i = 0; i < theHost.ScreenCount; i++)
+                //ToDo - GetScreenFromInstance
+                //for (int i = 0; i < theHost.ScreenCount; i++)
                 {
-                    ((OMButton)manager[i][9]).Image = theHost.getSkinImage("Play");
-                    ((OMButton)manager[i][9]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                    ((OMButton)manager[instance][9]).Image = theHost.getSkinImage("Play");
+                    ((OMButton)manager[instance][9]).DownImage = theHost.getSkinImage("Play.Highlighted");
                 }
             }
             else if (function == eFunction.Stop)
             {
-                for(int i=0;i<theHost.ScreenCount;i++)
+                //ToDo - GetScreenFromInstance
+                //for(int i=0;i<theHost.ScreenCount;i++)
                 {
-                    OMPanel p = manager[i];
+                    OMPanel p = manager[instance];
                     ((OMLabel)p[5]).Text = "";
                     ((OMLabel)p[6]).Text = "";
                     ((OMLabel)p[7]).Text = "";
                     ((OMImage)p[8]).Image = blank;
                     ((OMButton)p[9]).Image = theHost.getSkinImage("Play");
                     ((OMButton)p[9]).DownImage = theHost.getSkinImage("Play.Highlighted");
-                    ((OMLabel)p["UI.Time"]).Text = "";
+                    ((OMLabel)p["UI.Elapsed"]).Text = "";
                     ((OMSlider)p["UI.Slider"]).Value = 0;
                 }
             }
