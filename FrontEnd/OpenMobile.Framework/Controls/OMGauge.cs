@@ -216,6 +216,10 @@ namespace OpenMobile.Controls
             }
         }
         private Color backColor;
+        /// <summary>
+        /// The back color of the gauge
+        /// </summary>
+        [Description("The controls Background Color")]
         public Color BackColor
         {
             get
@@ -741,6 +745,10 @@ namespace OpenMobile.Controls
         }
         #endregion
 
+        /// <summary>
+        /// The controls height in pixels
+        /// </summary>
+        [CategoryAttribute("General"), DescriptionAttribute("Sets the height of the control")]
         public override int Height
         {
             get
@@ -749,10 +757,26 @@ namespace OpenMobile.Controls
             }
             set
             {
-                controlHeight = value;
+                if (controlHeight == value)
+                    return;
+                if (value >= controlHeight)
+                {
+                    controlHeight = value;
+                    refreshMe(this.toRegion());
+                }
+                else
+                {
+                    Rectangle r = this.toRegion();
+                    controlHeight = value;
+                    refreshMe(r);
+                }
             }
         }
 
+        /// <summary>
+        /// The controls width in pixels
+        /// </summary>
+        [CategoryAttribute("General"), DescriptionAttribute("Sets the width of the control")]
         public override int Width
         {
             get
@@ -761,10 +785,26 @@ namespace OpenMobile.Controls
             }
             set
             {
-                controlWidth = value;
+                if (value == controlWidth)
+                    return;
+                if (value >= controlWidth)
+                {
+                    controlWidth = value;
+                    refreshMe(this.toRegion());
+                }
+                else
+                {
+                    Rectangle r = this.toRegion();
+                    controlWidth = value;
+                    refreshMe(r);
+                }
             }
         }
 
+        /// <summary>
+        /// The distance between the top edge of the control and the top edge of the user interface
+        /// </summary>
+        [CategoryAttribute("General"), DescriptionAttribute("Sets the top position of the control")]
         public override int Top
         {
             get
@@ -773,10 +813,17 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (controlTop == value)
+                    return;
+                int oldtop = controlTop;
                 controlTop = value;
+                refreshMe(new Rectangle(controlLeft, controlTop > oldtop ? oldtop : controlTop, controlWidth + 2, controlHeight + Math.Abs(oldtop - controlTop) + 2));
             }
         }
-
+        /// <summary>
+        /// The distance between the left edge of the control and the left edge of the user interface
+        /// </summary>
+        [CategoryAttribute("General"), DescriptionAttribute("Sets the left position of the control")]
         public override int Left
         {
             get
@@ -785,7 +832,11 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (controlLeft == value)
+                    return;
+                int oldleft = controlLeft;
                 controlLeft = value;
+                refreshMe(new Rectangle(controlLeft > oldleft ? oldleft : controlLeft, controlTop, controlWidth + Math.Abs(oldleft - controlLeft), controlHeight));
             }
         }
         /// <summary>

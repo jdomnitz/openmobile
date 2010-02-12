@@ -35,8 +35,9 @@ namespace OpenMobile
     public static class Core
     {
         public static PluginHost theHost = new PluginHost();
-        public static List<UI> UICollection=new List<UI>(theHost.ScreenCount);
+        public static List<RenderingWindow> RenderingWindows=new List<RenderingWindow>(theHost.ScreenCount);
         public static List<IBasePlugin> pluginCollection = new List<IBasePlugin>();
+        public static bool exitTransition = true;
 
         private static void loadMainMenu()
         {
@@ -51,16 +52,19 @@ namespace OpenMobile
             pluginCollection.Add(mmPlugin);
             mmPlugin.initialize(theHost);
             var a=mmPlugin.GetType().GetCustomAttributes(typeof(InitialTransition),false);
-            for (int i = 0; i <UICollection.Count; i++)
+            for (int i = 0; i <RenderingWindows.Count; i++)
             {
-                UICollection[i].transitionInPanel(availablePlugin.loadPanel("", i));
-                UICollection[i].transitionInPanel(mmPlugin.loadPanel("", i));
+                RenderingWindows[i].transitionInPanel(availablePlugin.loadPanel("", i));
+                RenderingWindows[i].transitionInPanel(mmPlugin.loadPanel("", i));
                 theHost.raiseSystemEvent(eFunction.TransitionToPanel, i.ToString(), "MainMenu", "");
                 if (a.Length==0)
-                    UICollection[i].executeTransition(eGlobalTransition.None);
+                    RenderingWindows[i].executeTransition(eGlobalTransition.None);
                 else
-                    UICollection[i].executeTransition(((InitialTransition)a[0]).Transition);
+                    RenderingWindows[i].executeTransition(((InitialTransition)a[0]).Transition);
             }
+            var b = mmPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
+            if (b.Length > 0)
+                exitTransition=((FinalTransition)b[0]).Transition;
         }
         /// <summary>
         /// Load each of the plugins into the plugin's array (pluginCollection)
@@ -236,7 +240,7 @@ namespace OpenMobile
                     settings.createDB();
                 if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
                 {
-                    UICollection[0].Invoke(UICollection[0].ShowMessage, new object[] { (object)"A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run." });
+                    RenderingWindows[0].Invoke(RenderingWindows[0].ShowMessage, new object[] { (object)"A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run." });
                     Application.Exit();
                     return;
                 }
@@ -251,33 +255,43 @@ namespace OpenMobile
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
             SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(theHost.SystemEvents_PowerModeChanged);
             SystemEvents.SessionEnding += new SessionEndingEventHandler(theHost.SystemEvents_SessionEnding);
-            if (Net.Network.checkForInternet() == Net.Network.connectionStatus.InternetAccess)
+            OpenMobile.Threading.TaskManager.Enable(); //Start executing background tasks
+            if (Net.Network.IsAvailable==true)
                 theHost.raiseSystemEvent(eFunction.connectedToInternet, "", "", "");
             pluginCollection.TrimExcess();
-            OpenMobile.Threading.TaskManager.Enable(); //Start executing background tasks
         }
 
         [STAThread]
         public static void Main()
         {
-            //
-            for (int i = 0; i < UICollection.Capacity; i++)
-                UICollection.Add(new UI(i));
+            for (int i = 0; i < RenderingWindows.Capacity; i++)
+                RenderingWindows.Add(new RenderingWindow(i));
             Thread rapidMenu=new Thread(new ThreadStart(Core.initialize));
             rapidMenu.Start();
-            if ((Environment.GetCommandLineArgs().Length>1)&&(Environment.GetCommandLineArgs()[1] == "-fullscreen"))
+            if (Environment.GetCommandLineArgs().Length > 1)
             {
-                for (int i = 0; i < UICollection.Count; i++)
+                if (Environment.GetCommandLineArgs()[1] == "-fullscreen")
                 {
-                    UICollection[i].fullscreen = true;
-                    UICollection[i].FormBorderStyle = FormBorderStyle.None;
-                    UICollection[i].TopMost = true;
-                    UICollection[i].WindowState = FormWindowState.Maximized;
+                    for (int i = 0; i < RenderingWindows.Count; i++)
+                    {
+                        RenderingWindows[i].fullscreen = true;
+                        RenderingWindows[i].FormBorderStyle = FormBorderStyle.None;
+                        RenderingWindows[i].TopMost = true;
+                        RenderingWindows[i].WindowState = FormWindowState.Maximized;
+                    }
+                }
+                if (Environment.GetCommandLineArgs()[1].StartsWith("-size=")==true)
+                {
+                    string[] part = Environment.GetCommandLineArgs()[1].Substring(6).Split(new char[] { 'x' });
+                    for (int i = 0; i < RenderingWindows.Count; i++)
+                    {
+                        RenderingWindows[i].Size = new System.Drawing.Size(int.Parse(part[0]), int.Parse(part[1]));
+                    }
                 }
             }
             for (int i = 1; i < theHost.ScreenCount; i++)
-                UICollection[i].Show();
-            Application.Run(UICollection[0]);
+                RenderingWindows[i].Show();
+            Application.Run(RenderingWindows[0]);
             foreach (IBasePlugin p in pluginCollection)
                 p.Dispose();
             Environment.Exit(0); //Force

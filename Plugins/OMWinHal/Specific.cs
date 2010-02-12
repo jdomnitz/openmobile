@@ -19,14 +19,10 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using OMHal;
-using OpenMobile.Plugin;
+using OpenMobile;
 using OSSpecificLib.CoreAudioApi;
 
-namespace OpenMobile.Framework
+namespace OMHal
 {
     /// <summary>
     /// OS Specific Functions
@@ -43,8 +39,8 @@ namespace OpenMobile.Framework
         {
             if (os.Version.Major < 6)
             {
-                uint volume = OpenMobile.Framework.OSSpecificLib.XPVolume.GetVolume();
-                if (OpenMobile.Framework.OSSpecificLib.XPVolume.IsMuted() == true)
+                uint volume = XPVolume.GetVolume();
+                if (XPVolume.IsMuted() == true)
                     return -1; //Mute
                 return (int)volume;
             }
@@ -66,15 +62,15 @@ namespace OpenMobile.Framework
             {
                 if (volume == -1)
                 {
-                    OpenMobile.Framework.OSSpecificLib.XPVolume.SetMute(true);
+                    XPVolume.SetMute(true);
                 }
-                OpenMobile.Framework.OSSpecificLib.XPVolume.MixerInfo mi = OpenMobile.Framework.OSSpecificLib.XPVolume.GetMixerControls();
+                XPVolume.MixerInfo mi = XPVolume.GetMixerControls();
                 mi.muteCtl = 0;
                 uint vol;
                 vol = (uint)((volume - 1) * (ushort.MaxValue) / 100);
                 vol = (vol & (vol << 16));
-                OpenMobile.Framework.OSSpecificLib.XPVolume.SetVolume(mi);
-                OpenMobile.Framework.OSSpecificLib.XPVolume.waveOutSetVolume(IntPtr.Zero, vol);
+                XPVolume.SetVolume(mi);
+                XPVolume.waveOutSetVolume(IntPtr.Zero, vol);
             }
             else
             {
@@ -102,8 +98,8 @@ namespace OpenMobile.Framework
             {
                 uint CALLBACK_WINDOW = 0x00010000;
                 IntPtr tmp;
-                int result = OpenMobile.Framework.OSSpecificLib.XPVolume.mixerOpen(out tmp, 0, handle, IntPtr.Zero, CALLBACK_WINDOW);
-                if (OpenMobile.Framework.OSSpecificLib.XPVolume.IsMuted() == true)
+                int result = XPVolume.mixerOpen(out tmp, 0, handle, IntPtr.Zero, CALLBACK_WINDOW);
+                if (XPVolume.IsMuted() == true)
                     Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","","");
                 return (result == 0);
             }

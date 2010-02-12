@@ -63,8 +63,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuiltInComponents.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="HalInterface.cs" />
+    <Compile Include="InputRouter.cs" />
     <Compile Include="PluginHost.cs" />
     <Compile Include="StorageAnalyzer.cs" />
     <Compile Include="UI.cs">

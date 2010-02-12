@@ -20,7 +20,7 @@
 *********************************************************************************/
 namespace OpenMobile
 {
-    partial class UI
+    partial class RenderingWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -85,11 +85,11 @@ namespace OpenMobile
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.UI_MouseClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.UI_MouseDown);
             this.MouseLeave += new System.EventHandler(this.UI_MouseLeave);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.UI_KeyUp);
+            this.KeyUp += InputRouter.SourceUp;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.UI_FormClosing);
             this.Resize += new System.EventHandler(this.UI_Resize);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.UI_MouseMove);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.UI_KeyDown);
+            this.KeyDown += InputRouter.SourceDown;
             this.ResumeLayout(false);
 
         }

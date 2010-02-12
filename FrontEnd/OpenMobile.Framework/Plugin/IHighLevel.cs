@@ -70,4 +70,29 @@ namespace OpenMobile.Plugin
             }
         }
     }
+    /// <summary>
+    /// Enables/Disables the window closing transition
+    /// </summary>
+    public class FinalTransition : Attribute
+    {
+        bool t;
+        /// <summary>
+        /// Enables/Disables the window closing transition
+        /// </summary>
+        /// <param name="fade"></param>
+        public FinalTransition(bool fade)
+        {
+            t = fade;
+        }
+        /// <summary>
+        /// Enables/Disables the window closing transition
+        /// </summary>
+        public bool Transition
+        {
+            get
+            {
+                return t;
+            }
+        }
+    }
 }

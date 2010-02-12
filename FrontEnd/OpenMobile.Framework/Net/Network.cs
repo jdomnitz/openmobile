@@ -38,10 +38,23 @@ namespace OpenMobile.Net
         /// The Local IP Address of this computer
         /// </summary>
         public static string ipAddress;
+
+        private static int available;
         /// <summary>
         /// True if a network connection is available
         /// </summary>
-        public static bool IsAvailable;
+        public static bool IsAvailable
+        {
+            get
+            {
+                if (available == 0)
+                    return (checkForInternet()==connectionStatus.InternetAccess);
+                else if (available == 2)
+                    return true;
+                else
+                    return false; //Return no if unsure
+            }
+        }
 
         /// <summary>
         /// Initialize network hooks
@@ -160,7 +173,7 @@ namespace OpenMobile.Net
             }
             catch (System.Net.WebException)
             {
-                IsAvailable = false;
+                available=1;
                 return connectionStatus.NoInternet;
             }
             if (response.Headers["Server"] != "gws")
@@ -171,7 +184,7 @@ namespace OpenMobile.Net
             else
             {
                 response.Close();
-                IsAvailable = true;
+                available=2;
                 return connectionStatus.InternetAccess;
             }
         }
@@ -190,7 +203,10 @@ namespace OpenMobile.Net
 
         private void NetworkChange_NetworkAvailabilityChanged(object sender, System.Net.NetworkInformation.NetworkAvailabilityEventArgs e)
         {
-            IsAvailable= e.IsAvailable;
+            if (e.IsAvailable == true)
+                available = 2;
+            else
+                available = 1;
         }
     }
 }

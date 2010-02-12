@@ -770,6 +770,14 @@ namespace OpenMobile
         /// </summary>
         powerOffDevice=66,
         /// <summary>
+        /// Sends a keypress to the target UI window
+        /// Possible keys: Up, Down, Left, Right, Enter, ScrollUp, ScrollDown
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// <para>Arg2: Key</para>
+        /// </summary>
+        sendKeyPress=67,
+        /// <summary>
         /// Go back to the previous panel
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
@@ -976,7 +984,7 @@ namespace OpenMobile
         /// <summary>
         /// An iPod
         /// </summary>
-        iPod	=	11,
+        iPodiPhone	=	11,
         /// <summary>
         /// A bluetooth audio device
         /// </summary>

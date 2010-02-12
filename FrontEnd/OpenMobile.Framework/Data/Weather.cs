@@ -18,7 +18,6 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-
 using System;
 using System.Data.SQLite;
 using System.Text;
@@ -44,35 +43,35 @@ namespace OpenMobile.Data
             /// <summary>
             /// North
             /// </summary>
-            North,
+            N,
             /// <summary>
             /// West
             /// </summary>
-            West,
+            W,
             /// <summary>
             /// East
             /// </summary>
-            East,
+            E,
             /// <summary>
             /// South
             /// </summary>
-            South,
+            S,
             /// <summary>
             /// North-West
             /// </summary>
-            NorthWest,
+            NW,
             /// <summary>
             /// North-East
             /// </summary>
-            NorthEast,
+            NE,
             /// <summary>
             /// South-West
             /// </summary>
-            SouthWest,
+            SW,
             /// <summary>
             /// South-East
             /// </summary>
-            SouthEast
+            SE
         }
         /// <summary>
         /// Weather Conditions
@@ -208,7 +207,7 @@ namespace OpenMobile.Data
             /// <summary>
             /// Wind Speed
             /// </summary>
-            public int windSpeed;
+            public float windSpeed;
             /// <summary>
             /// % chance of precipitation
             /// </summary>
@@ -235,7 +234,7 @@ namespace OpenMobile.Data
                 throw new ArgumentException();
             weather w = new weather();
             {
-                w.conditions = (weatherConditions)Enum.Parse(typeof(weatherConditions), reader["Conditions"].ToString());
+                w.conditions = (weatherConditions)Enum.Parse(typeof(weatherConditions), reader.GetString(reader.GetOrdinal("Conditions")));
                 w.dewPoint = reader.GetFloat(reader.GetOrdinal("dewPoint"));
                 w.highTemp = reader.GetFloat(reader.GetOrdinal("highTemp"));
                 w.lowTemp = reader.GetFloat(reader.GetOrdinal("lowTemp"));
@@ -243,15 +242,14 @@ namespace OpenMobile.Data
                 w.dewPoint = reader.GetFloat(reader.GetOrdinal("dewPoint"));
                 w.humidity = reader.GetInt32(reader.GetOrdinal("Humidity"));
                 w.UVIndex = reader.GetInt32(reader.GetOrdinal("UVIndex"));
-                w.windDirection = (direction)Enum.Parse(typeof(direction),reader["windDirection"].ToString());
-                w.windSpeed = reader.GetInt32(reader.GetOrdinal("windSpeed"));
+                w.windDirection = (direction)Enum.Parse(typeof(direction), reader.GetString(reader.GetOrdinal("windDirection")));
+                w.windSpeed = reader.GetFloat(reader.GetOrdinal("windSpeed"));
                 w.precipitationPercent=reader.GetInt32(reader.GetOrdinal("precip"));
                 w.location = location;
                 w.feelsLike = reader.GetFloat(reader.GetOrdinal("feelsLike"));
                 w.date =DateTime.Parse(reader["Date"].ToString());
             }
             reader.Close();
-            con.Close();
             return w;
         }
         SQLiteConnection con;
@@ -306,8 +304,16 @@ namespace OpenMobile.Data
                 cmd.CommandText = query.ToString();
                 cmd.ExecuteNonQuery();
             }
-            con.Close();
             return true;
+        }
+        /// <summary>
+        /// Removes all weather data from before today
+        /// </summary>
+        /// <returns></returns>
+        public static void PurgeOld()
+        {
+            using(Weather w = new Weather())
+                w.purgeOld();
         }
         /// <summary>
         /// Removes all weather data from before today
@@ -316,7 +322,7 @@ namespace OpenMobile.Data
         public bool purgeOld()
         {
             SQLiteCommand cmd = con.CreateCommand();
-            cmd.CommandText = "DELETE FROM Weather WHERE Date<'" + DateTime.Today + "')";
+            cmd.CommandText = "DELETE FROM Weather WHERE Date<'" + DateTime.Today+"'";
             cmd.ExecuteNonQuery();
             return true;
         }

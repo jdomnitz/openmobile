@@ -21,7 +21,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace OpenMobile.Framework.OSSpecificLib
+namespace OMHal
 {
     sealed class XPVolume
     {

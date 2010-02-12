@@ -199,6 +199,40 @@ namespace OpenMobile.Framework.Math
         /// </summary>
         Mach
     }
+    /// <summary>
+    /// Unit types to represent distance
+    /// </summary>
+    public enum distanceTypes
+    {
+        /// <summary>
+        /// Centimeters
+        /// </summary>
+        centimeters,
+        /// <summary>
+        /// Millimeters
+        /// </summary>
+        millimeters,
+        /// <summary>
+        /// Inches
+        /// </summary>
+        inches,
+        /// <summary>
+        /// Feet
+        /// </summary>
+        feet,
+        /// <summary>
+        /// Meters
+        /// </summary>
+        meters,
+        /// <summary>
+        /// Kilometers
+        /// </summary>
+        kilometers,
+        /// <summary>
+        /// Miles
+        /// </summary>
+        miles
+    }
 
     /// <summary>
     /// Unit types to represent Fuel Consumption
@@ -312,12 +346,56 @@ namespace OpenMobile.Framework.Math
         /// </summary>
         /// <param name="value"></param>
         /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static double convertSpeed(double value, speedTypes source, speedTypes target)
+        {
+            if (source == target)
+                return value;
+            switch (source)
+            {
+                case speedTypes.metersPerSecond:
+                    break;
+                case speedTypes.milesPerHour:
+                    value = value * 0.44704;
+                    break;
+                case speedTypes.kilometersPerHour:
+                    value = value / 3.6;
+                    break;
+                case speedTypes.knots:
+                    value = value * 0.514444444;
+                    break;
+                case speedTypes.Mach:
+                    value = value * 340;
+                    break;
+            }
+            switch (target)
+            {
+                case speedTypes.metersPerSecond:
+                    return value;
+                case speedTypes.Mach:
+                    return value / 340;
+                case speedTypes.kilometersPerHour:
+                    return value * 3.6;
+                case speedTypes.milesPerHour:
+                    return value * 2.23693629;
+                case speedTypes.knots:
+                    return value * 1.943845;
+            }
+            throw new ArgumentException("Unknown Type");
+        }
+        /// <summary>
+        /// Converts the value in the source unit of measure to a value in the target unit of measure.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="source"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static double convertSpeed(double value, speedTypes source, speedTypes result)
+        public static double convertDistance(double value, distanceTypes source, distanceTypes result)
         {
             throw new NotImplementedException();
         }
+
         /// <summary>
         /// Converts the value in the source unit of measure to a value in the target unit of measure.
         /// </summary>
@@ -388,7 +466,7 @@ namespace OpenMobile.Framework.Math
         /// </summary>
         /// <param name="degrees"></param>
         /// <returns></returns>
-        public float CtoF(float degrees)
+        public static double CtoF(double degrees)
         {
             try
             {
@@ -401,7 +479,7 @@ namespace OpenMobile.Framework.Math
         /// </summary>
         /// <param name="degrees"></param>
         /// <returns></returns>
-        public float FtoC(float degrees)
+        public static double FtoC(double degrees)
         {
             try
             {

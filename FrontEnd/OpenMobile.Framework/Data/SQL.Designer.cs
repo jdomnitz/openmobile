@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OpenMobile.Framework.Data {
+namespace OpenMobile.Data {
     using System;
     
     

@@ -38,7 +38,7 @@
             this.Name = "Form1";
             this.Opacity = 0;
             this.ShowInTaskbar = false;
-            this.Text = "Form1";
+            this.Text = "OMWinHal";
             this.ResumeLayout(false);
 
         }
