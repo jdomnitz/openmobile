@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OpenMobile.Framework</RootNamespace>
+    <AssemblyName>OpenMobile.Framework</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\OpenMobile.Framework.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\OpenMobile.Framework.XML</DocumentationFile>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.61.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\openOBD\openOBD\bin\Debug\System.Data.SQLite.DLL</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.XML" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\Editing\CustomColor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Editing\CustomColor.Designer.cs">
+      <DependentUpon>CustomColor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\IClickable.cs" />
+    <Compile Include="Controls\Editing\LuminositySlider.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Editing\LuminositySlider.Designer.cs">
+      <DependentUpon>LuminositySlider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\IHighlightable.cs" />
+    <Compile Include="Controls\OMAnimatedLabel.cs" />
+    <Compile Include="Controls\OMButton.cs" />
+    <Compile Include="Controls\OMCheckbox.cs" />
+    <Compile Include="Controls\OMControl.cs" />
+    <Compile Include="Controls\OMGauge.cs" />
+    <Compile Include="Controls\OMImage.cs" />
+    <Compile Include="Controls\OMLabel.cs" />
+    <Compile Include="Controls\OMList.cs" />
+    <Compile Include="Controls\OMMessageBox.cs" />
+    <Compile Include="Controls\OMPanel.cs" />
+    <Compile Include="Controls\OMProgress.cs" />
+    <Compile Include="Controls\OMSlider.cs" />
+    <Compile Include="Controls\OMTextBox.cs" />
+    <Compile Include="Controls\Editing\TransparentColorPicker.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Editing\TransparentColorPicker.Designer.cs">
+      <DependentUpon>TransparentColorPicker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Calendar.cs" />
+    <Compile Include="Data\Collections.cs" />
+    <Compile Include="Data\Contacts.cs" />
+    <Compile Include="Data\GasStations.cs" />
+    <Compile Include="Data\Messages.cs" />
+    <Compile Include="Data\Personal.cs" />
+    <Compile Include="Data\Phone.cs" />
+    <Compile Include="Data\PluginSettings.cs" />
+    <Compile Include="Data\SQL.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SQL.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Tasks.cs" />
+    <Compile Include="Data\Vehicle.cs" />
+    <Compile Include="Data\Weather.cs" />
+    <Compile Include="Global.cs" />
+    <Compile Include="Math\Calculation.cs" />
+    <Compile Include="helperFunctions\Encryption.cs" />
+    <Compile Include="helperFunctions\General.cs" />
+    <Compile Include="Math\Evaluator.cs" />
+    <Compile Include="Net\Connections.cs" />
+    <Compile Include="Net\Network.cs" />
+    <Compile Include="Math\SunTimes.cs" />
+    <Compile Include="IPluginHost.cs" />
+    <Compile Include="Media\ManagedTagReader.cs" />
+    <Compile Include="Media\Playlist.cs" />
+    <Compile Include="Net\RSS.cs" />
+    <Compile Include="OSSpecific.cs" />
+    <Compile Include="Plugin\IAVPlayer.cs" />
+    <Compile Include="Plugin\IBasePlugin.cs" />
+    <Compile Include="Plugin\IBluetooth.cs" />
+    <Compile Include="Plugin\IDataProvider.cs" />
+    <Compile Include="Plugin\IHighLevel.cs" />
+    <Compile Include="Plugin\IMediaDatabase.cs" />
+    <Compile Include="Plugin\INavigation.cs" />
+    <Compile Include="Plugin\INetwork.cs" />
+    <Compile Include="Plugin\IOther.cs" />
+    <Compile Include="Plugin\IPlayer.cs" />
+    <Compile Include="Plugin\IRawHardware.cs" />
+    <Compile Include="Plugin\ISpeech.cs" />
+    <Compile Include="Plugin\ITunedContent.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Controls\Renderer.cs" />
+    <Compile Include="ScreenManager.cs" />
+    <Compile Include="Serializer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskManager.cs" />
+    <Compile Include="Widget.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Controls\Editing\CustomColor.resx">
+      <DependentUpon>CustomColor.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Editing\LuminositySlider.resx">
+      <DependentUpon>LuminositySlider.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Editing\TransparentColorPicker.resx">
+      <DependentUpon>TransparentColorPicker.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Data\SQL.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SQL.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TagLib\TagLib.csproj">
+      <Project>{087D2157-E9B3-4CE1-8304-89B421328111}</Project>
+      <Name>TagLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
