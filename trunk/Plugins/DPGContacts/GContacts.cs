@@ -157,7 +157,7 @@ namespace DPGContacts
             response.Close();
             responseStream.Close();
             using (PluginSettings s = new PluginSettings())
-                s.setSetting("Plugins.DPGContacts.LastUpdate", DateTime.Now.ToUniversalTime().ToString("s"));
+                s.setSetting("Plugins.DPGContacts.LastUpdate", DateTime.Now.ToString("s"));
             status = 1;
         }
 
@@ -165,9 +165,19 @@ namespace DPGContacts
         {
             if (OpenMobile.Net.Network.IsAvailable == true)
             {
-                status = 0;
-                OpenMobile.Threading.TaskManager.QueueTask(getContacts, OpenMobile.priority.MediumHigh);
-                return true;
+                string dat = "";
+                using (PluginSettings s = new PluginSettings())
+                    dat = s.getSetting("Plugins.DPGContacts.LastUpdate");
+                if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 60))
+                {
+                    status = 0;
+                    OpenMobile.Threading.TaskManager.QueueTask(getContacts, OpenMobile.priority.Normal);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -216,7 +226,7 @@ namespace DPGContacts
 
         public float pluginVersion
         {
-            get { return 0.1F; }
+            get { return 0.2F; }
         }
 
         public string pluginDescription
@@ -244,7 +254,13 @@ namespace DPGContacts
         void host_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
         {
             if (function == eFunction.connectedToInternet)
-                refreshData();
+            {
+                string dat = "";
+                using (PluginSettings s = new PluginSettings())
+                    dat=s.getSetting("Plugins.DPGContacts.LastUpdate");
+                if ((dat=="")||((DateTime.Now- DateTime.Parse(dat)).Minutes>60))
+                    refreshData();
+            }
         }
 
         #endregion

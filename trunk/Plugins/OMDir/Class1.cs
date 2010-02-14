@@ -123,7 +123,7 @@ namespace OMDir
             OMList r=(OMList)manager[screen][2];
             r.Tag = l.Tag;
             l.Clear();
-            if (System.IO.Path.GetPathRoot(l.Tag) == l.Tag)
+            if (System.IO.Path.GetPathRoot(l.Tag.ToString()) == l.Tag.ToString())
             {
                 l.Tag = "";
                 loadRoot(l);
@@ -131,13 +131,13 @@ namespace OMDir
             }
             else
             {
-                l.Tag = Directory.GetParent(l.Tag).FullName;
-                DirectoryInfo fInfo = new DirectoryInfo(l.Tag);
+                l.Tag = Directory.GetParent(l.Tag.ToString()).FullName;
+                DirectoryInfo fInfo = new DirectoryInfo(l.Tag.ToString());
                 foreach (DirectoryInfo s in fInfo.GetDirectories())
                     if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                         l.Add(new OMListItem(s.Name, folder));
             }
-            l.Select(l.indexOf(new DirectoryInfo(r.Tag).Name));
+            l.Select(l.indexOf(new DirectoryInfo(r.Tag.ToString()).Name));
             left_OnClick(l, screen); //refresh the right screen
         }
 
@@ -149,9 +149,10 @@ namespace OMDir
 
         private string translateLocal(OMList l)
         {
-            string source = OpenMobile.Path.Combine(l.Tag, l[l.SelectedIndex].text);
-            if (l.Tag == "")
+            string source="";
+            if (l.Tag == null)
             {
+                source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
                 switch (source)
                 {
                     case "Desktop":
@@ -191,14 +192,14 @@ namespace OMDir
             OMList l = ((OMList)manager[screen][1]);
             if (r.SelectedIndex==-1)
                 return;
-            string source = OpenMobile.Path.Combine(r.Tag, r[r.SelectedIndex].text);
+            string source = OpenMobile.Path.Combine(r.Tag.ToString(), r[r.SelectedIndex].text);
             if (System.IO.Path.HasExtension(source) == true)
             {
                 theHost.execute(eFunction.userInputReady, screen.ToString(), "Dir", source);
                 return;
             }
             l.Clear();
-            DirectoryInfo fInfo = new DirectoryInfo(r.Tag);
+            DirectoryInfo fInfo = new DirectoryInfo(r.Tag.ToString());
             foreach (DirectoryInfo s in fInfo.GetDirectories())
                 if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                     l.Add(new OMListItem(s.Name, folder));

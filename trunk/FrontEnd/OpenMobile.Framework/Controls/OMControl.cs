@@ -121,7 +121,10 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (visible == value)
+                    return;
                 visible = value;
+                refreshMe(this.toRegion());
             }
         }
 

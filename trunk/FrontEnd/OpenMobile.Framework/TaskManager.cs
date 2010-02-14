@@ -104,7 +104,7 @@ namespace OpenMobile.Threading
                     taskItem current = getNext();
                     current.function.Invoke();
                 }
-                catch (Exception) { }
+                catch { }
                 if (tasks.Count>0)
                     sync.Set();
             }

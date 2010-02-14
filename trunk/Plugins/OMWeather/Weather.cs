@@ -48,7 +48,7 @@ namespace ControlDemo
             p = new OMPanel();
             widget = new OMPanel();
             theHost = host;
-            imageItem opt1 = theHost.getSkinImage("NotSet");
+            imageItem opt1 = theHost.getSkinImage("Weather|NotSet");
             Font f = new Font("Microsoft Sans Serif", 36F);
             OMLabel Title = new OMLabel();
             Title.Font = new Font("Playbill", 48F);
@@ -111,12 +111,14 @@ namespace ControlDemo
             OMLabel day3 = new OMLabel();
             day3.Top = 285;
             day3.Left = 295;
+            day3.Width = 150;
             day3.Text = DateTime.Today.AddDays(2).DayOfWeek.ToString();
             day3.Mode = modeType.Resizing;
             day3.Name = "day3";
             OMLabel day4 = new OMLabel();
             day4.Top = 285;
             day4.Left = 515;
+            day4.Width = 150;
             day4.Text = DateTime.Today.AddDays(3).DayOfWeek.ToString();
             day4.Name = "day4";
             OMLabel day5 = new OMLabel();
@@ -124,6 +126,7 @@ namespace ControlDemo
             day5.Left = 769;
             day5.Text = DateTime.Today.AddDays(4).DayOfWeek.ToString();
             day5.Name = "day5";
+            day5.Width = 150;
             OMImage day2img = new OMImage();
             day2img.Image = opt1;
             day2img.Top = 350;
@@ -248,7 +251,7 @@ namespace ControlDemo
             ((OMLabel)p[0]).Text = "Currently in "+data.location;
             ((OMLabel)p[1]).Text = "High: "+Globalization.convertToLocalTemp(data.highTemp,true);
             ((OMLabel)p[2]).Text = "Low: " + Globalization.convertToLocalTemp(data.lowTemp, true);
-            ((OMImage)p[3]).Image = theHost.getSkinImage(data.conditions.ToString());
+            ((OMImage)p[3]).Image = theHost.getSkinImage("Weather|"+data.conditions.ToString());
             ((OMLabel)p[4]).Text = "Now: " + Globalization.convertToLocalTemp(data.temp, true);
             ((OMLabel)p[5]).Text = "Humidity: "+data.humidity + '%';
             ((OMLabel)p[6]).Text = "Wind: "+Globalization.convertSpeedToLocal(data.windSpeed,true) + ' '+data.windDirection;
@@ -258,7 +261,7 @@ namespace ControlDemo
                 data = provider.readWeather(loc, DateTime.Today.AddDays(1)); //Tomorrow
                 ((OMLabel)p[16]).Text = "High: " + Globalization.convertToLocalTemp(data.highTemp, true);
                 ((OMLabel)p[17]).Text = "Low: " + Globalization.convertToLocalTemp(data.lowTemp, true);
-                ((OMImage)p[12]).Image = theHost.getSkinImage(data.conditions.ToString());
+                ((OMImage)p[12]).Image = theHost.getSkinImage("Weather|" + data.conditions.ToString());
             }
             catch (Exception) { return; }
             try
@@ -266,7 +269,7 @@ namespace ControlDemo
                 data = provider.readWeather(loc, DateTime.Today.AddDays(2));
                 ((OMLabel)p[18]).Text = "High: " + Globalization.convertToLocalTemp(data.highTemp, true);
                 ((OMLabel)p[21]).Text = "Low: " + Globalization.convertToLocalTemp(data.lowTemp, true);
-                ((OMImage)p[13]).Image = theHost.getSkinImage(data.conditions.ToString());
+                ((OMImage)p[13]).Image = theHost.getSkinImage("Weather|" + data.conditions.ToString());
             }
             catch (Exception) { return; }
             try
@@ -274,7 +277,7 @@ namespace ControlDemo
                 data = provider.readWeather(loc, DateTime.Today.AddDays(3));
                 ((OMLabel)p[19]).Text = "High: " + Globalization.convertToLocalTemp(data.highTemp, true);
                 ((OMLabel)p[22]).Text = "Low: " + Globalization.convertToLocalTemp(data.lowTemp, true);
-                ((OMImage)p[14]).Image = theHost.getSkinImage(data.conditions.ToString());
+                ((OMImage)p[14]).Image = theHost.getSkinImage("Weather|" + data.conditions.ToString());
             }
             catch (Exception) { return; }
             try
@@ -282,7 +285,7 @@ namespace ControlDemo
                 data = provider.readWeather(loc, DateTime.Today.AddDays(4));
                 ((OMLabel)p[20]).Text = "High: " + Globalization.convertToLocalTemp(data.highTemp, true);
                 ((OMLabel)p[23]).Text = "Low: " + Globalization.convertToLocalTemp(data.lowTemp, true);
-                ((OMImage)p[15]).Image = theHost.getSkinImage(data.conditions.ToString());
+                ((OMImage)p[15]).Image = theHost.getSkinImage("Weather|" + data.conditions.ToString());
             }
             catch (Exception) { return; }
         }

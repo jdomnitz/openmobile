@@ -1168,14 +1168,15 @@ namespace OpenMobile
             if (e == eFunction.nextMedia)
                 execute(eFunction.nextMedia, instance.ToString());
         }
-        public void raiseKeyPressEvent(keypressType type,KeyEventArgs arg)
+        public bool raiseKeyPressEvent(keypressType type,KeyEventArgs arg)
         {
             try
             {
                 if (OnKeyPress!=null)
-                    OnKeyPress(type, arg);
+                    return OnKeyPress(type, arg);
             }
             catch (Exception) { }
+            return false;
         }
 
         public event SystemEvent OnSystemEvent;
@@ -1204,7 +1205,7 @@ namespace OpenMobile
                 {
                     try
                     {
-                        im.image = Image.FromFile(Path.Combine(SkinPath, imageName + ".png"));
+                        im.image = Image.FromFile(Path.Combine(SkinPath, imageName.Replace('|',System.IO.Path.DirectorySeparatorChar) + ".png"));
                         im.name = imageName;
                         imageCache.Add(im);
                         return im;
@@ -1219,7 +1220,7 @@ namespace OpenMobile
             {
                 try
                 {
-                    imageItem item = new imageItem(Image.FromFile(Path.Combine(skinpath, imageName + ".png")));
+                    imageItem item = new imageItem(Image.FromFile(Path.Combine(skinpath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png")));
                     item.name = imageName;
                     return item;
                 }

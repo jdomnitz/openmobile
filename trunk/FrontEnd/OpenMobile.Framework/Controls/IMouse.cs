@@ -19,19 +19,28 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 
-using OpenMobile.Controls;
-namespace OpenMobile.Plugin
+// This interface is added by Borte
+
+namespace OpenMobile.Controls
 {
     /// <summary>
-    /// Plugins that do not fall under another plugin category
+    /// Controls that support mouse interaction (Added by Borte)
     /// </summary>
-    public interface IOther:IBasePlugin
+    public interface IMouse
     {
         /// <summary>
-        /// Returns the settings panel for the UI to load (if implemented)
+        /// Mouse moved over the control
         /// </summary>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
-        OMPanel loadSettings(string name, int screen);
+        void MouseMove(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale);
+
+        /// <summary>
+        /// MouseDown event for this control
+        /// </summary>
+        void MouseDown(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale);
+
+        /// <summary>
+        /// MouseUp event for this control
+        /// </summary>
+        void MouseUp(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale);
     }
 }

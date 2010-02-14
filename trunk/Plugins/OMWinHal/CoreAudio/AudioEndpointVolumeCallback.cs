@@ -41,7 +41,7 @@ namespace OSSpecificLib.CoreAudioApi
             _Parent = parent;
         }
         
-        public int OnNotify(IntPtr NotifyData)
+        public void OnNotify(IntPtr NotifyData)
         {
             //Since AUDIO_VOLUME_NOTIFICATION_DATA is dynamic in length based on the
             //number of audio channels available we cannot just call PtrToStructure 
@@ -67,7 +67,7 @@ namespace OSSpecificLib.CoreAudioApi
             //Create combined structure and Fire Event in parent class.
             AudioVolumeNotificationData NotificationData = new AudioVolumeNotificationData(data.guidEventContext, data.bMuted, data.fMasterVolume, voldata);
             _Parent.FireNotification(NotificationData);
-            return 0; //S_OK
+            return;
         }
     }
 }

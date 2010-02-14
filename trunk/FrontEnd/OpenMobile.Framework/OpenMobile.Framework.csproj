@@ -66,6 +66,9 @@
       <DependentUpon>LuminositySlider.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\IHighlightable.cs" />
+    <Compile Include="Controls\IKey.cs" />
+    <Compile Include="Controls\IMouse.cs" />
+    <Compile Include="Controls\IThrow.cs" />
     <Compile Include="Controls\OMAnimatedLabel.cs" />
     <Compile Include="Controls\OMButton.cs" />
     <Compile Include="Controls\OMCheckbox.cs" />

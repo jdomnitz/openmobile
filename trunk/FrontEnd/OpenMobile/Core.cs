@@ -43,12 +43,33 @@ namespace OpenMobile
         {
 
             Assembly pluginAssembly = Assembly.Load("UI");
-            IHighLevel availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetTypes()[0]);
+            //Modifications by Borte
+            IHighLevel availablePlugin=null;
+            try
+            {
+                availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetTypes()[0]);
+            }
+            catch 
+            {
+                //handled below
+            }
+            if (availablePlugin==null)
+                availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
+            //End Modifications by Borte
             pluginCollection.Add(availablePlugin);
             availablePlugin.initialize(theHost);
             
             pluginAssembly = Assembly.Load("MainMenu");
-            IHighLevel mmPlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetTypes()[0]);
+            //Modifications by Borte
+            IHighLevel mmPlugin=null;
+            try
+            {
+                mmPlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetTypes()[0]);
+            }
+            catch { }
+            if (mmPlugin == null)
+                mmPlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.MainMenu"));
+            //End Modifications by Borte
             pluginCollection.Add(mmPlugin);
             mmPlugin.initialize(theHost);
             var a=mmPlugin.GetType().GetCustomAttributes(typeof(InitialTransition),false);
@@ -270,7 +291,7 @@ namespace OpenMobile
             rapidMenu.Start();
             if (Environment.GetCommandLineArgs().Length > 1)
             {
-                if (Environment.GetCommandLineArgs()[1] == "-fullscreen")
+                if (Environment.GetCommandLineArgs()[1].ToLower() == "-fullscreen")
                 {
                     for (int i = 0; i < RenderingWindows.Count; i++)
                     {
@@ -280,12 +301,16 @@ namespace OpenMobile
                         RenderingWindows[i].WindowState = FormWindowState.Maximized;
                     }
                 }
-                if (Environment.GetCommandLineArgs()[1].StartsWith("-size=")==true)
+                if (Environment.GetCommandLineArgs()[1].ToLower().StartsWith("-size=")==true)
                 {
                     string[] part = Environment.GetCommandLineArgs()[1].Substring(6).Split(new char[] { 'x' });
                     for (int i = 0; i < RenderingWindows.Count; i++)
                     {
-                        RenderingWindows[i].Size = new System.Drawing.Size(int.Parse(part[0]), int.Parse(part[1]));
+                        try
+                        {
+                            RenderingWindows[i].Size = new System.Drawing.Size(int.Parse(part[0]), int.Parse(part[1]));
+                        }
+                        catch (ArgumentException) { break; }
                     }
                 }
             }

@@ -26,11 +26,15 @@ namespace OpenMobile
     {
         public static void SourceUp(object sender, KeyEventArgs e)
         {
+            if (Core.theHost.raiseKeyPressEvent(keypressType.KeyUp, e) == true)
+                return; //If an app handles it first don't show the UI
             for (int i = 0; i < Core.RenderingWindows.Count;i++ )
                 Core.RenderingWindows[i].UI_KeyUp(sender, e);
         }
         public static void SourceDown(object sender, KeyEventArgs e)
         {
+            if (Core.theHost.raiseKeyPressEvent(keypressType.KeyDown,e)==true)
+                return; //If an app handles it first don't show the UI
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
                 Core.RenderingWindows[i].UI_KeyDown(sender, e);
         }

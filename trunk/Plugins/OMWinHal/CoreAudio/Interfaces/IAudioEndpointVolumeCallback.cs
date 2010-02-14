@@ -30,7 +30,7 @@ namespace OSSpecificLib.CoreAudioApi.Interfaces
      InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAudioEndpointVolumeCallback 
     {
-        int OnNotify(IntPtr pNotifyData);
+        void OnNotify(IntPtr pNotifyData);
     };
 
 }

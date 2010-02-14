@@ -19,19 +19,32 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 
-using OpenMobile.Controls;
-namespace OpenMobile.Plugin
+// This interface is added by Borte
+
+namespace OpenMobile.Controls
 {
     /// <summary>
-    /// Plugins that do not fall under another plugin category
+    /// Controls that support being "thrown" (meaning receiving mouseover events even when the mouse is not over the control) (Added by Borte)
+    /// NOTE: All distance values will be scaled so they are uniform at all resolutions
     /// </summary>
-    public interface IOther:IBasePlugin
+    public interface IThrow
     {
         /// <summary>
-        /// Returns the settings panel for the UI to load (if implemented)
+        /// Fired when a control is "thrown" (a control will continue to receive mousemove events even when the mouse is outside the control)
         /// </summary>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
-        OMPanel loadSettings(string name, int screen);
+        /// <param name="screen">Screen the event occured on</param>
+        /// <param name="TotalDistance">Distance mouse has been moved from throw start location</param>
+        /// <param name="RelativeDistance">Relative distance mouse has been moved from throw start location</param>
+        void MouseThrow(int screen, System.Drawing.Point TotalDistance, System.Drawing.Point RelativeDistance);
+
+        /// <summary>
+        /// Throw is started 
+        /// </summary>
+        void MouseThrowStart(int screen, System.Drawing.Point StartLocation);
+
+        /// <summary>
+        /// Throw is ended
+        /// </summary>
+        void MouseThrowEnd(int screen, System.Drawing.Point EndLocation);
     }
 }
