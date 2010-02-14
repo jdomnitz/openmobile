@@ -19,19 +19,25 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 
-using OpenMobile.Controls;
-namespace OpenMobile.Plugin
+// This interface is added by Borte
+
+namespace OpenMobile.Controls
 {
     /// <summary>
-    /// Plugins that do not fall under another plugin category
+    /// Controls that support key handling (Added by Borte)
     /// </summary>
-    public interface IOther:IBasePlugin
+    public interface IKey
     {
         /// <summary>
-        /// Returns the settings panel for the UI to load (if implemented)
+        /// KeyDown when the control has focus
+        /// Return true if you don't want the ui to handle the keypress, otherwise return false
         /// </summary>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
-        OMPanel loadSettings(string name, int screen);
+        bool KeyDown(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale);
+
+        /// <summary>
+        /// KeyUp when the control has focus
+        /// Return true if you don't want the ui to handle the keypress, otherwise return false
+        /// </summary>
+        bool KeyUp(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale);
     }
 }

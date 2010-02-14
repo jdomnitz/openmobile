@@ -69,17 +69,17 @@
     <Compile Include="InputRouter.cs" />
     <Compile Include="PluginHost.cs" />
     <Compile Include="StorageAnalyzer.cs" />
-    <Compile Include="UI.cs">
+    <Compile Include="RenderingWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI.Designer.cs">
-      <DependentUpon>UI.cs</DependentUpon>
+    <Compile Include="RenderingWindow.Designer.cs">
+      <DependentUpon>RenderingWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="UI.resx">
-      <DependentUpon>UI.cs</DependentUpon>
+    <EmbeddedResource Include="RenderingWindow.resx">
+      <DependentUpon>RenderingWindow.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

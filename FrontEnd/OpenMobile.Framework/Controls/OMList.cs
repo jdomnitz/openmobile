@@ -594,6 +594,8 @@ namespace OpenMobile.Controls
             {
                 OMList ret = (OMList)this.MemberwiseClone();
                 ret.declare();
+                if (this.items.Count > 0)
+                    ret.items.AddRange(this.items.GetRange(0, this.items.Count));
                 return ret;
             }
             

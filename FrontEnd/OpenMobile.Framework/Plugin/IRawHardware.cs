@@ -19,6 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 
+using OpenMobile.Controls;
 namespace OpenMobile.Plugin
 {
     /// <summary>
@@ -26,6 +27,12 @@ namespace OpenMobile.Plugin
     /// </summary>
     public interface IRawHardware:IBasePlugin
     {
+        /// <summary>
+        /// Returns the settings panel for the UI to load
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
+        OMPanel loadSettings(string name, int screen);
         /// <summary>
         /// Convert the string name of the value you are trying to read or write to a PID
         /// </summary>

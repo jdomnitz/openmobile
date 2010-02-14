@@ -188,9 +188,19 @@ namespace DPGCalendar
         {
             if (OpenMobile.Net.Network.IsAvailable == true)
             {
-                status = 0;
-                OpenMobile.Threading.TaskManager.QueueTask(getCal, OpenMobile.priority.MediumHigh);
-                return true;
+                string dat = "";
+                using (PluginSettings s = new PluginSettings())
+                    dat = s.getSetting("Plugins.DPGCalendar.LastUpdate");
+                if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 30))
+                {
+                    status = 0;
+                    OpenMobile.Threading.TaskManager.QueueTask(getCal, OpenMobile.priority.MediumHigh);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -268,7 +278,13 @@ namespace DPGCalendar
         void host_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
         {
             if (function == eFunction.connectedToInternet)
-                refreshData();
+            {
+                string dat = "";
+                using (PluginSettings s = new PluginSettings())
+                    dat = s.getSetting("Plugins.DPGCalendar.LastUpdate");
+                if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 20))
+                    refreshData();
+            }
         }
 
         public void Dispose()

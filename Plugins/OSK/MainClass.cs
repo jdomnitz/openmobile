@@ -131,7 +131,7 @@ namespace OpenMobile
         }
 
         //Add physical keyboard input to the textbox
-        void theHost_OnKeyPress(keypressType type, System.Windows.Forms.KeyEventArgs arg)
+        bool theHost_OnKeyPress(keypressType type, System.Windows.Forms.KeyEventArgs arg)
         {
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
@@ -145,43 +145,49 @@ namespace OpenMobile
                             text.Text += arg.KeyCode.ToString();
                         else
                             text.Text += arg.KeyCode.ToString().ToLower();
-                    switch (arg.KeyValue)
-                    {
-                        case 13:
-                            theHost.execute(eFunction.userInputReady,i.ToString(), "OSK", text.Text);
-                            break;
-                        case 32:
-                            text.Text += " ";
-                            break;
-                        case 8:
-                            if (text.Text.Length > 0)
-                                text.Text = text.Text.Remove(text.Text.Length - 1);
-                            break;
-                        case 190:
-                            text.Text += '.';
-                            break;
-                        case 186:
-                            if (arg.Shift == true)
-                                text.Text += ':';
-                            else
-                                text.Text += ';';
-                            break;
-                        case 188:
-                            text.Text += ',';
-                            break;
-                        case 191:
-                            if (arg.Shift == true)
-                                text.Text += '?';
-                            else
-                                text.Text += '/';
-                            break;
-                        case 220:
-                            if (arg.Shift == false)
-                                text.Text += '\\';
-                            break;
+                    else{
+                        switch (arg.KeyValue)
+                        {
+                            case 13:
+                                theHost.execute(eFunction.userInputReady, i.ToString(), "OSK", text.Text);
+                                break;
+                            case 32:
+                                text.Text += " ";
+                                break;
+                            case 8:
+                                if (text.Text.Length > 0)
+                                    text.Text = text.Text.Remove(text.Text.Length - 1);
+                                break;
+                            case 190:
+                                text.Text += '.';
+                                break;
+                            case 186:
+                                if (arg.Shift == true)
+                                    text.Text += ':';
+                                else
+                                    text.Text += ';';
+                                break;
+                            case 188:
+                                text.Text += ',';
+                                break;
+                            case 191:
+                                if (arg.Shift == true)
+                                    text.Text += '?';
+                                else
+                                    text.Text += '/';
+                                break;
+                            case 220:
+                                if (arg.Shift == false)
+                                    text.Text += '\\';
+                                break;
+                            default:
+                                return false;
+                        }
                     }
+                    return true;
                 }
             }
+            return false;
         }
 
         //Each time a button is pressed we add its character to the textbox
