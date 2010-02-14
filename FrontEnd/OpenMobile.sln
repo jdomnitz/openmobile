@@ -5,7 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile", "OpenMobile\Op
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Framework", "OpenMobile.Framework\OpenMobile.Framework.csproj", "{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMHal", "..\Plugins\OMHal\OMHal.csproj", "{4C918B7A-72C6-4CBA-9839-C5A9FB564B32}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMWinHal", "..\Plugins\OMWinHal\OMWinHal.csproj", "{4C918B7A-72C6-4CBA-9839-C5A9FB564B32}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainMenu", "..\Plugins\MainMenu\MainMenu.csproj", "{E5B7B6AE-8B54-4D78-9E78-A5DA277DD30A}"
 EndProject
