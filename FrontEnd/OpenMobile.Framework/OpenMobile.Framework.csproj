@@ -70,6 +70,7 @@
     <Compile Include="Controls\IMouse.cs" />
     <Compile Include="Controls\IThrow.cs" />
     <Compile Include="Controls\OMAnimatedLabel.cs" />
+    <Compile Include="Controls\OMBasicShape.cs" />
     <Compile Include="Controls\OMButton.cs" />
     <Compile Include="Controls\OMCheckbox.cs" />
     <Compile Include="Controls\OMControl.cs" />
@@ -160,7 +161,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Plugins\TagLib\TagLib.csproj">
+    <ProjectReference Include="..\TagLib\TagLib.csproj">
       <Project>{087D2157-E9B3-4CE1-8304-89B421328111}</Project>
       <Name>TagLib</Name>
     </ProjectReference>

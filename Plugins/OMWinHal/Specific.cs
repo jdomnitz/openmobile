@@ -64,6 +64,10 @@ namespace OMHal
                 {
                     XPVolume.SetMute(true);
                 }
+                else if (volume == -2)
+                {
+                    XPVolume.SetMute(false);
+                }
                 XPVolume.MixerInfo mi = XPVolume.GetMixerControls();
                 mi.muteCtl = 0;
                 uint vol;
@@ -78,6 +82,8 @@ namespace OMHal
                 {
                     if (volume == -1)
                         device.AudioEndpointVolume.Mute = true;
+                    else if(volume==-2)
+                        device.AudioEndpointVolume.Mute=false;
                     else
                     {
                         device.AudioEndpointVolume.MasterVolumeLevelScalar = ((float)volume / 100.0f);
@@ -132,7 +138,7 @@ namespace OMHal
         {
             if (os.Version.Major < 6) //Xp
             {
-                //ToDo - Implement on XP
+                //UNDONE - Implement on XP
                 return null;
             }
             else

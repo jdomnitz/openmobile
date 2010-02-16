@@ -493,7 +493,7 @@ namespace OpenMobile.Controls
             /// <param name="e">Rendering Parameters</param>
             public override void Render(Graphics g,renderingParams e)
             {
-                lock (this)
+                lock (g)
                 {
                     if (this.Width == 0)
                         return;
@@ -557,9 +557,12 @@ namespace OpenMobile.Controls
                             case eListStyle.DroidStyleImage:
                             case eListStyle.DroidStyleText:
                                 imgSze = 6;
-                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
+                                g.SmoothingMode = SmoothingMode.AntiAlias;
                                 if (selectedIndex==i)
                                     g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp*selectedItemColor1.A*0.6),selectedItemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
+                                else
+                                    g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
+                                g.SmoothingMode = SmoothingMode.Default;
                                 break;
                         }
                         if ((i < items.Count) && (i >= 0))

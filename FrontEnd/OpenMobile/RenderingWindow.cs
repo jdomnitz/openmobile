@@ -25,6 +25,7 @@ using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using OpenMobile.Controls;
+using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
@@ -47,6 +48,7 @@ namespace OpenMobile
         Point ofsetOut = new Point(0, 0);
         public displayMessage ShowMessage;
         private eGlobalTransition currentTransition;
+        public create invokeOnMain;
         private bool transitioning = false;
         public bool fullscreen = false;
         // Start of code added by Borte
@@ -99,8 +101,12 @@ namespace OpenMobile
             InitializeComponent();
             this.Text = "Open Mobile v" + Assembly.GetCallingAssembly().GetName().Version +" ("+OpenMobile.Framework.OSSpecific.getOSVersion()+") Screen "+(screen+1).ToString();
             ShowMessage += new displayMessage(showMessage);
+            invokeOnMain += new create(createNew);
         }
-
+        public ISpeech createNew(Type t)
+        {
+            return (ISpeech)Activator.CreateInstance(t);
+        }
         public void showMessage(string s)
         {
             MessageBox.Show(s);
@@ -110,8 +116,8 @@ namespace OpenMobile
         {
             set
             {
-                base.Width = value + 16;
                 initialWidth = value;
+                base.Width = value + 16;
             }
             get
             {
@@ -122,8 +128,8 @@ namespace OpenMobile
         {
             set
             {
-                base.Height = value + 38;
                 initialHeight = value;
+                base.Height = value + 38;
             }
             get
             {
@@ -396,7 +402,7 @@ namespace OpenMobile
                 Application.Exit();
         } 
         #endregion
-
+        private List<Point> currentGesture;
         #region MouseHandlers
         private void UI_MouseMove(object sender, MouseEventArgs e)
         {
@@ -429,10 +435,10 @@ namespace OpenMobile
                         ThrowStarted = false;  // Reset throw data (Added by Borte)
                         if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                         {
-                            Point ThrowTotalDistance=new Point((int)((e.X - ThrowStart.X+0.5)/widthScale),(int)((e.Y - ThrowStart.Y+0.5)/heightScale));
+                            Point ThrowTotalDistance = new Point((int)((e.X - ThrowStart.X + 0.5) / widthScale), (int)((e.Y - ThrowStart.Y + 0.5) / heightScale));
                             ThrowRelativeDistance.X = e.X - ThrowRelativeDistance.X;
                             ThrowRelativeDistance.Y = e.Y - ThrowRelativeDistance.Y;
-                            ((IThrow)highlighted).MouseThrow(screen,ThrowTotalDistance, new Point((int)(ThrowRelativeDistance.X+0.5/widthScale),(int)(ThrowRelativeDistance.Y+0.5/heightScale)));
+                            ((IThrow)highlighted).MouseThrow(screen, ThrowTotalDistance, new Point((int)(ThrowRelativeDistance.X + 0.5 / widthScale), (int)(ThrowRelativeDistance.Y + 0.5 / heightScale)));
                             ThrowRelativeDistance = e.Location;
                         }
                         else    // End of code added by Borte
@@ -454,38 +460,54 @@ namespace OpenMobile
             }
             else
             {
-                for (int i = Core.theHost.RenderFirst - 1; i >= 0; i--)
+                if (e.Button == MouseButtons.Left)
                 {
-                    checkControl(i, ref done, ref e);
-                    if (done == true)
-                        break;
+                    if (currentGesture == null)
+                    {
+                        currentGesture = new List<Point>();
+                        currentMode = modeType.gesturing;
+                    }
+                    Graphics g = Graphics.FromHwnd(this.Handle);
+                    g.FillEllipse(Brushes.Red,new Rectangle(e.X-10,e.Y-10,20,20));
+                    currentGesture.Add(e.Location);
+                    if (lastClick != null)
+                        lastClick.Mode = modeType.Highlighted;
                 }
-                if (done == false)
+                else
                 {
-                    for (int i = p.controlCount - 1; i >= Core.theHost.RenderFirst; i--)
+                    for (int i = Core.theHost.RenderFirst - 1; i >= 0; i--)
                     {
                         checkControl(i, ref done, ref e);
                         if (done == true)
                             break;
                     }
-                }
-                if (highlighted != null)
-                {
-                    if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
-                        ((IMouse)highlighted).MouseMove(screen, e, widthScale, heightScale);
-                    if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
-                        if (ThrowStarted)
-                            if (Math.Abs(e.X - ThrowStart.X) > 3 || (Math.Abs(e.Y - ThrowStart.Y) > 3))
-                            {
-                                ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart);
-                                currentMode = modeType.Scrolling;
-                            }
-
                     if (done == false)
                     {
-                        if (typeof(IHighlightable).IsInstanceOfType(highlighted) == true)
-                            UpdateThisControl(highlighted.toRegion());
-                        highlighted = null;
+                        for (int i = p.controlCount - 1; i >= Core.theHost.RenderFirst; i--)
+                        {
+                            checkControl(i, ref done, ref e);
+                            if (done == true)
+                                break;
+                        }
+                    }
+                    if (highlighted != null)
+                    {
+                        if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
+                            ((IMouse)highlighted).MouseMove(screen, e, widthScale, heightScale);
+                        if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
+                            if (ThrowStarted)
+                                if (Math.Abs(e.X - ThrowStart.X) > 3 || (Math.Abs(e.Y - ThrowStart.Y) > 3))
+                                {
+                                    ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart);
+                                    currentMode = modeType.Scrolling;
+                                }
+
+                        if (done == false)
+                        {
+                            if (typeof(IHighlightable).IsInstanceOfType(highlighted) == true)
+                                UpdateThisControl(highlighted.toRegion());
+                            highlighted = null;
+                        }
                     }
                 }
             }
@@ -527,7 +549,7 @@ namespace OpenMobile
             {
                 if (currentMode == modeType.Highlighted)
                 {   
-                    if (typeof(IClickable).IsInstanceOfType(highlighted))
+                    if (typeof(OMButton).IsInstanceOfType(highlighted))
                     {
                         if (p.DoubleClickable == false)
                         {
@@ -602,6 +624,8 @@ namespace OpenMobile
         private void tmrLongClick_Tick(object sender, EventArgs e)
         {
             tmrLongClick.Enabled = false;
+            if (currentMode == modeType.gesturing)
+                return;
             if ((highlighted != null)&&(typeof(IClickable).IsInstanceOfType(highlighted)==true))
                 try
                 {
@@ -692,11 +716,23 @@ namespace OpenMobile
                 else if ((highlighted != null) && ((OMList)highlighted).Thrown != 0)
                     ((OMList)highlighted).Ticking = true;
             }
+            else if (currentMode == modeType.gesturing)
+            {
+                AlphaRecognizer rec = new AlphaRecognizer();
+                rec.Initialize();
+                for(int i=0;i<currentGesture.Count;i++)
+                    rec.AddPoint(currentGesture[i],false);
+                Core.theHost.execute(eFunction.gesture,screen.ToString(), rec.Recognize());
+                currentGesture = null;
+                currentMode = modeType.Highlighted;
+                UI_MouseMove(sender, new MouseEventArgs(MouseButtons.None,0,e.X,e.Y,0));
+                Invalidate();
+            }
             ThrowStart.X = -1;
             ThrowStarted = false;
         } 
         #endregion
-
+        public delegate ISpeech create(Type t);
         #region OtherUIEvents
         private void UI_FormClosing(object sender, FormClosingEventArgs e)
         {

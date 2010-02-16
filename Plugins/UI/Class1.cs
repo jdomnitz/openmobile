@@ -53,7 +53,7 @@ namespace OpenMobile
 
         public float pluginVersion
         {
-            get { return 0.1F; }
+            get { return 0.6F; }
         }
 
         public string pluginDescription
@@ -135,13 +135,17 @@ namespace OpenMobile
             mediaButton.Image = theHost.getSkinImage("MediaButton");
             mediaButton.Transition = eButtonTransition.None;
             mediaButton.FocusImage = theHost.getSkinImage("MediaButtonFocus");
-            mediaButton.Name = "mediaButton";
+            mediaButton.Name = "UI.mediaButton";
             mediaButton.OnClick += new userInteraction(mediaButton_OnClick);
             OMButton Back = new OMButton(831,533,160,70);
             Back.Image = theHost.getSkinImage("BackButton");
             Back.FocusImage = theHost.getSkinImage("BackButtonFocus");
-            Back.Name = "Back";
             Back.OnClick += new userInteraction(Back_OnClick);
+            OMButton speech = new OMButton(631, 533, 160, 70);
+            speech.Image = theHost.getSkinImage("Tab");
+            speech.Text = "Speak";
+            speech.Name = "UI.speech";
+            speech.OnClick += new userInteraction(speech_OnClick);
             OMButton HomeButton = new OMButton(863,0,130,90);
             HomeButton.Image = theHost.getSkinImage("HomeButton");
             HomeButton.FocusImage = theHost.getSkinImage("HomeButtonFocus");
@@ -199,7 +203,24 @@ namespace OpenMobile
             elapsed.OutlineColor = Color.Blue;
             elapsed.Format = textFormat.Glow;
             elapsed.Font = new Font(FontFamily.GenericSansSerif,26F);
+            //Speech
+            OMImage imgSpeak = new OMImage(350, 200, 300, 300);
+            imgSpeak.Image = theHost.getSkinImage("Speech", false);
+            imgSpeak.Name = "UI.imgSpeak";
+            imgSpeak.Visible = false;
+            OMLabel caption = new OMLabel(300, 150, 400, 50);
+            caption.Font = new Font(FontFamily.GenericSerif, 48F);
+            caption.Text = "Speak Now";
+            caption.Format = textFormat.BoldShadow;
+            caption.Visible = false;
+            caption.Name = "UI.caption";
+            OMBasicShape shape = new OMBasicShape(0, 0, 1000, 600);
+            shape.Shape = shapes.Rectangle;
+            shape.FillColor = Color.FromArgb(130, Color.Black);
+            shape.Visible = false;
+            //***
             p.addControl(Back);
+            p.addControl(speech);
             p.addControl(mediaButton);
             p.addControl(mediaBar);
             p.addControl(Image2);
@@ -217,6 +238,9 @@ namespace OpenMobile
             p.addControl(elapsed);
             p.addControl(slider);
             p.addControl(HomeButton);
+            p.addControl(shape);
+            p.addControl(caption);
+            p.addControl(imgSpeak);
             p.BackgroundType = backgroundStyle.Gradiant;
             p.BackgroundColor1 = Color.FromArgb(0, 0, 4);
             p.BackgroundColor2 = Color.FromArgb(0, 0, 20);
@@ -227,10 +251,27 @@ namespace OpenMobile
             return eLoadStatus.LoadSuccessful;
         }
 
+        void speech_OnClick(object sender, int screen)
+        {
+            theHost.execute(eFunction.listenForSpeech);
+            showSpeech(screen);
+        }
+        private void showSpeech(int screen)
+        {
+            manager[screen][21].Visible = true;
+            manager[screen][20].Visible = true;
+            manager[screen][19].Visible = true;
+        }
+        private void hideSpeech(int screen)
+        {
+            manager[screen][21].Visible = false;
+            manager[screen][20].Visible = false;
+            manager[screen][19].Visible = false;
+        }
         void statusReset_Elapsed(object sender, ElapsedEventArgs e)
         {
             for(int i=0;i<theHost.ScreenCount;i++)
-                ((OMLabel)manager[i][5]).Text="";
+                ((OMLabel)manager[i][6]).Text="";
             statusReset.Enabled = false;
         }
 
@@ -251,7 +292,7 @@ namespace OpenMobile
                 statusReset.Enabled = false;
                 statusReset.Enabled = true;
                 for (int i = 0; i < theHost.ScreenCount; i++)
-                    ((OMLabel)manager[i][5]).Text = arg1;
+                    ((OMLabel)manager[i][6]).Text = arg1;
             }
             if (function == eFunction.systemVolumeChanged)
             {
@@ -259,7 +300,7 @@ namespace OpenMobile
                 {
                     for (int i = 0; i < theHost.ScreenCount; i++)
                     {
-                        OMButton b = ((OMButton)manager[i][4]);
+                        OMButton b = ((OMButton)manager[i][5]);
                         b.Image = theHost.getSkinImage("VolumeButtonMuted");
                         b.FocusImage = theHost.getSkinImage("VolumeButtonMutedFocus");
                     }
@@ -268,11 +309,39 @@ namespace OpenMobile
                 {
                     for (int i = 0; i < theHost.ScreenCount; i++)
                     {
-                        OMButton b = ((OMButton)manager[i][4]);
+                        OMButton b = ((OMButton)manager[i][5]);
                         b.Image = theHost.getSkinImage("VolumeButton");
                         b.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
                     }
                 }
+            }
+            if (function == eFunction.stopListeningForSpeech)
+                hideSpeech(0); //ToDo - Instance specific
+            if (function == eFunction.gesture)
+            {
+                if (arg3!="OSK")
+                    switch (arg2)
+                    {
+                        case "M":
+                            theHost.execute(eFunction.TransitionFromAny, arg1);
+                            theHost.execute(eFunction.TransitionToPanel, arg1, "Media");
+                            theHost.execute(eFunction.ExecuteTransition, arg1);
+                            break;
+                        case "H":
+                            theHost.execute(eFunction.TransitionFromAny, arg1);
+                            theHost.execute(eFunction.TransitionToPanel, arg1, "MainMenu");
+                            theHost.execute(eFunction.ExecuteTransition, arg1);
+                            break;
+                        case " ":
+                            theHost.execute(eFunction.nextMedia,theHost.instanceForScreen(int.Parse(arg1)).ToString());
+                            break;
+                        case "I":
+                            playButton_OnClick(null, int.Parse(arg1));
+                            break;
+                        case "back":
+                            theHost.execute(eFunction.previousMedia, theHost.instanceForScreen(int.Parse(arg1)).ToString());
+                            break;
+                    }
             }
         }
 
@@ -295,7 +364,7 @@ namespace OpenMobile
                 statusReset.Enabled = false;
                 statusReset.Enabled = true;
                 for (int i = 0; i < theHost.ScreenCount; i++)
-                    ((OMLabel)manager[i][5]).Text = "Drive Inserted: " + arg;
+                    ((OMLabel)manager[i][6]).Text = "Drive Inserted: " + arg;
             }
         }
 
@@ -309,8 +378,8 @@ namespace OpenMobile
             if (speed > 1)
             {
                 theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(), "1");
-                ((OMButton)manager[screen][9]).Image = theHost.getSkinImage("Pause");
-                ((OMButton)manager[screen][9]).DownImage = theHost.getSkinImage("Pause.Highlighted");
+                ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("Pause");
+                ((OMButton)manager[screen][10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
             }
             else
             {
@@ -323,25 +392,23 @@ namespace OpenMobile
         void tick_Elapsed(object sender, ElapsedEventArgs e)
         {
             object o;
-            theHost.getData(eGetData.GetMediaPosition, "","0", out o); //To Do - instance should be dynamic
-            if (o == null)
-                return;
-            int i = Convert.ToInt32(o);
-            if (i == -1)
+            for (int j = 0; j < theHost.ScreenCount; j++)
             {
-                for (int j = 0; j < theHost.ScreenCount; j++)
+                theHost.getData(eGetData.GetMediaPosition, "", theHost.instanceForScreen(j).ToString(), out o);
+                if (o == null)
+                    continue;
+                int i = Convert.ToInt32(o);
+                if (i == -1)
                 {
+
                     ((OMLabel)manager[j]["UI.Elapsed"]).Text = "";
                     ((OMSlider)manager[j]["UI.Slider"]).Value = 0;
-                }
-                return;
-            }
-            if ((i < ((OMSlider)manager[0]["UI.Slider"]).Maximum) && (i >= 0))
-                for (int j = 0; j < theHost.ScreenCount; j++)
+                }else if ((i < ((OMSlider)manager[0]["UI.Slider"]).Maximum) && (i >= 0))
                 {
                     ((OMSlider)manager[j]["UI.Slider"]).Value = i;
                     ((OMLabel)manager[j]["UI.Elapsed"]).Text = (formatTime(i) + " " + formatTime(((OMSlider)manager[j]["UI.Slider"]).Maximum));
                 }
+            }
         }
 
         private string formatTime(int seconds)
@@ -359,8 +426,8 @@ namespace OpenMobile
             if (speed < 0)
             {
                 theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(),"1");
-                ((OMButton)manager[screen][9]).Image = theHost.getSkinImage("Pause");
-                ((OMButton)manager[screen][9]).DownImage = theHost.getSkinImage("Pause.Highlighted");
+                ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("Pause");
+                ((OMButton)manager[screen][10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
             }
             else
                 theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(), (2 * speed).ToString());
@@ -387,9 +454,8 @@ namespace OpenMobile
                     }
                     OMPanel p = manager[screen];
                     {
-                            p[1].Top -= 17;
-                            p[2].Top -= 20;
-                            p[9].Top -= 20;
+                            p[2].Top -= 17;
+                            p[3].Top -= 20;
                             p[10].Top -= 20;
                             p[11].Top -= 20;
                             p[12].Top -= 20;
@@ -397,6 +463,7 @@ namespace OpenMobile
                             p[14].Top -= 20;
                             p[15].Top -= 20;
                             p[16].Top -= 20;
+                            p[17].Top -= 20;
                     }
                 }
                 else
@@ -407,9 +474,8 @@ namespace OpenMobile
                         return;
                     }
                     OMPanel p = manager[screen];
-                        p[1].Top += 17;
-                        p[2].Top += 20;
-                        p[9].Top += 20;
+                        p[2].Top += 17;
+                        p[3].Top += 20;
                         p[10].Top += 20;
                         p[11].Top += 20;
                         p[12].Top += 20;
@@ -417,6 +483,7 @@ namespace OpenMobile
                         p[14].Top += 20;
                         p[15].Top += 20;
                         p[16].Top += 20;
+                        p[17].Top += 20;
                 }
                 timerIteration++;
                 Thread.Sleep(50);
@@ -435,16 +502,16 @@ namespace OpenMobile
                 if (status == ePlayerStatus.Playing)
                 {
                     theHost.execute(eFunction.Pause, screen.ToString());
-                    ((OMButton)manager[screen][9]).Image = theHost.getSkinImage("Play");
-                    ((OMButton)manager[screen][9]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                    ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("Play");
+                    ((OMButton)manager[screen][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
                 }
                 else
                 {
                     if ((status == ePlayerStatus.FastForwarding) || (status == ePlayerStatus.Rewinding))
                     {
                         theHost.execute(eFunction.setPlaybackSpeed, screen.ToString(), "1");
-                        ((OMButton)manager[screen][9]).Image = theHost.getSkinImage("Pause");
-                        ((OMButton)manager[screen][9]).DownImage = theHost.getSkinImage("Pause.Highlighted");
+                        ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("Pause");
+                        ((OMButton)manager[screen][10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
                     }
                     else
                     {
@@ -456,7 +523,7 @@ namespace OpenMobile
 
         void mediaButton_OnClick(object sender, int screen)
         {
-            if (manager[screen][1].Top == 397)
+            if (manager[screen][2].Top == 397)
             {
                 timerForward = true;
                 moveMediaBar(screen);
@@ -479,41 +546,48 @@ namespace OpenMobile
             {
                 mediaInfo info = theHost.getPlayingMedia(instance);
                 imageItem it = new imageItem(info.coverArt);
-                //for(int i=0;i<theHost.ScreenCount;i++)
+                for(int i=0;i<theHost.ScreenCount;i++)
                 {
-                    OMPanel p = manager[instance]; //ToDo - GetScreenFromInstance
-                    ((OMLabel)p[5]).Text = info.Name;
-                    ((OMLabel)p[6]).Text = info.Artist;
-                    ((OMLabel)p[7]).Text = info.Album;
-                    ((OMImage)p[8]).Image = it;
-                    ((OMButton)p[9]).Image = theHost.getSkinImage("Pause");
-                    ((OMButton)p[9]).DownImage = theHost.getSkinImage("Pause.Highlighted");
-                    ((OMSlider)p[16]).Maximum = info.Length;
+                    if (theHost.instanceForScreen(i) == instance)
+                    {
+                        OMPanel p = manager[i];
+                        ((OMLabel)p[6]).Text = info.Name;
+                        ((OMLabel)p[7]).Text = info.Artist;
+                        ((OMLabel)p[8]).Text = info.Album;
+                        ((OMImage)p[9]).Image = it;
+                        ((OMButton)p[10]).Image = theHost.getSkinImage("Pause");
+                        ((OMButton)p[10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
+                        ((OMSlider)p[17]).Maximum = info.Length;
+                    }
                 }
             }
             else if (function == eFunction.setPlaybackSpeed)
             {
-                //ToDo - GetScreenFromInstance
-                //for (int i = 0; i < theHost.ScreenCount; i++)
+                for (int i = 0; i < theHost.ScreenCount; i++)
                 {
-                    ((OMButton)manager[instance][9]).Image = theHost.getSkinImage("Play");
-                    ((OMButton)manager[instance][9]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                    if (theHost.instanceForScreen(i) == instance)
+                    {
+                        ((OMButton)manager[instance][10]).Image = theHost.getSkinImage("Play");
+                        ((OMButton)manager[instance][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                    }
                 }
             }
             else if (function == eFunction.Stop)
             {
-                //ToDo - GetScreenFromInstance
-                //for(int i=0;i<theHost.ScreenCount;i++)
+                for (int i = 0; i < theHost.ScreenCount; i++)
                 {
-                    OMPanel p = manager[instance];
-                    ((OMLabel)p[5]).Text = "";
-                    ((OMLabel)p[6]).Text = "";
-                    ((OMLabel)p[7]).Text = "";
-                    ((OMImage)p[8]).Image = blank;
-                    ((OMButton)p[9]).Image = theHost.getSkinImage("Play");
-                    ((OMButton)p[9]).DownImage = theHost.getSkinImage("Play.Highlighted");
-                    ((OMLabel)p["UI.Elapsed"]).Text = "";
-                    ((OMSlider)p["UI.Slider"]).Value = 0;
+                    if (theHost.instanceForScreen(i) == instance)
+                    {
+                        OMPanel p = manager[i];
+                        ((OMLabel)p[6]).Text = "";
+                        ((OMLabel)p[7]).Text = "";
+                        ((OMLabel)p[8]).Text = "";
+                        ((OMImage)p[9]).Image = blank;
+                        ((OMButton)p[10]).Image = theHost.getSkinImage("Play");
+                        ((OMButton)p[10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                        ((OMLabel)p["UI.Elapsed"]).Text = "";
+                        ((OMSlider)p["UI.Slider"]).Value = 0;
+                    }
                 }
             }
         }

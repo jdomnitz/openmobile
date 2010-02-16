@@ -164,7 +164,6 @@ namespace Media
 		    Save.Image=opt1;
 		    Save.FocusImage=opt2;
 		    Save.Text="Save";
-		    Save.Mode=modeType.Resizing;
 		    Save.Name="Media.Save";
             Save.OnClick += new userInteraction(Save_OnClick);
 		    OMButton Cancel=new OMButton(14,255,200,110);
@@ -208,7 +207,19 @@ namespace Media
             settings.addControl(dbSelection);
             settings.addControl(AutoStart);
             settingsManager.loadPanel(settings);
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.backgroundOperationStatus)
+            {
+                if (arg1 == "Indexing Complete!")
+                {
+                    loadList();
+                }
+            }
         }
         private List<string> dbPlugins;
 

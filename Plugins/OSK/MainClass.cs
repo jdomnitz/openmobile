@@ -79,7 +79,7 @@ namespace OpenMobile
         }
         public float pluginVersion
         {
-            get { return 0.1F; }
+            get { return 0.3F; }
         }
 
         public string pluginDescription
@@ -123,11 +123,27 @@ namespace OpenMobile
                     ((OMButton)symKeyboard[i]).OnClick += handler;
             //Here we hook the keyboard in case characters are typed
             theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             //And then load the panel into the screen manager
             manager.loadPanel(regularKeyboard);
             symManager.loadPanel(symKeyboard);
             //And when everything is all ready to go...we return true
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.gesture)
+            {
+                if (arg3 == "OSK")
+                {
+                    OMTextBox tb = (OMTextBox)manager[int.Parse(arg1)]["Text"];
+                    if (arg2=="back")
+                        tb.Text=tb.Text.Remove(tb.Text.Length-1);
+                    else
+                        tb.Text+=arg2;
+                }
+            }
         }
 
         //Add physical keyboard input to the textbox
@@ -255,8 +271,10 @@ namespace OpenMobile
         //Dispose of any objects you created
         public void Dispose()
         {
-            symManager.Dispose();
-            manager.Dispose();
+            if (symManager!=null)
+                symManager.Dispose();
+            if (manager!=null)
+                manager.Dispose();
             GC.SuppressFinalize(this);
         }
 
