@@ -675,6 +675,7 @@ namespace OpenMobile
         /// Sets the system volume
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Volume [int -1(mute) to 100]</para>
+        /// <para>Note: -2 May be used as unmute</para>
         /// </summary>
         setSystemVolume=34,
         /// <summary>
@@ -703,18 +704,23 @@ namespace OpenMobile
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Context Name</para>
         /// </summary>
-        loadSpeechContext=50,
+        loadSpeechContext=49,
         /// <summary>
         /// Adds an item to a speech recognition context
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Context Name</para>
         /// <para>Arg2: Recognition String</para>
         /// </summary>
-        addSpeechContext=51,
+        addSpeechContext=50,
         /// <summary>
         /// Listen for a speech command
         /// </summary>
-        listenForSpeech=52,
+        listenForSpeech=51,
+        /// <summary>
+        /// Stop listening for speech commands
+        /// Also occurs as an event when speech recognition times out
+        /// </summary>
+        stopListeningForSpeech=52,
         /// <summary>
         /// Speak the indicated text
         /// <para>---------------------------------------</para>
@@ -778,12 +784,27 @@ namespace OpenMobile
         /// </summary>
         sendKeyPress=67,
         /// <summary>
+        /// Occurs when a new monitor is detected by the system
+        /// </summary>
+        screenAdded=68,
+        /// <summary>
+        /// Occurs when a monitor is removed from the system
+        /// </summary>
+        screenRemoved=69,
+        /// <summary>
         /// Go back to the previous panel
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// <para>Arg2: (Optional) TransitionType</para>
         /// </summary>
-        goBack=80
+        goBack=80,
+        /// <summary>
+        /// A gesture has been recognized
+        /// Arg1: Screen
+        /// Arg2: Character
+        /// Arg3: Plugin (The name of the plugin with the top most panel)
+        /// </summary>
+        gesture=100
     }
     /// <summary>
     /// The status of a plugins initialization

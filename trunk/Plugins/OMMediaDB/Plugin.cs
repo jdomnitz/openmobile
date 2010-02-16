@@ -292,6 +292,7 @@ namespace OMMediaDB
                     s = new StringBuilder("INSERT INTO tblAlbum(Album,Artist)VALUES('");
                 s.Append(General.escape(info.Album));
                 s.Append("','");
+                info.Artist = correctArtist(info.Artist);
                 if (info.coverArt != null)
                 {
                     s.Append(General.escape(info.Artist));
@@ -312,6 +313,21 @@ namespace OMMediaDB
                 albumNum=(long)command.ExecuteScalar();
             }
             album = info.Album;
+        }
+
+        private string correctArtist(string p)
+        {
+            using (SQLiteCommand command = bCon.CreateCommand())
+            {
+                StringBuilder s = new StringBuilder("SELECT Artist FROM tblAlbum WHERE UPPER(Artist)='");
+                s.Append(General.escape(p.Replace("  "," ").ToUpper()) + "'");
+                command.CommandText = s.ToString();
+                object id = command.ExecuteScalar();
+                if (id == null)
+                    return p;
+                else
+                    return id.ToString();
+            }
         }
 
         public bool supportsFileIndexing { get { return true; } }

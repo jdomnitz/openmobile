@@ -72,24 +72,22 @@ namespace OpenMobile
             // 
             // tmrLongClick
             // 
-            this.tmrLongClick.Interval = 1000;
+            this.tmrLongClick.Interval = 500;
             this.tmrLongClick.Tick += new System.EventHandler(this.tmrLongClick_Tick);
             // 
-            // UI
+            // RenderingWindow
             // 
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(1000, 600);
-            this.Name = "UI";
+            this.Name = "RenderingWindow";
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.UI_MouseUp);
             this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.UI_MouseDoubleClick);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.UI_MouseClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.UI_MouseDown);
             this.MouseLeave += new System.EventHandler(this.UI_MouseLeave);
-            this.KeyUp += InputRouter.SourceUp;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.UI_FormClosing);
             this.Resize += new System.EventHandler(this.UI_Resize);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.UI_MouseMove);
-            this.KeyDown += InputRouter.SourceDown;
             this.ResumeLayout(false);
 
         }

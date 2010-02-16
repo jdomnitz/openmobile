@@ -28,6 +28,7 @@ using DirectShowLib;
 using OpenMobile;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
+using OpenMobile.Data;
 
 namespace OMPlayer
 {
@@ -36,7 +37,6 @@ namespace OMPlayer
     // Fields
     private static IntPtr hDrain = IntPtr.Zero;
     private AVPlayer[] player;
-    private Thread[] t;
     private static IPluginHost theHost;
     private const int WMGraphNotify = 0x40d;
 
@@ -48,8 +48,7 @@ namespace OMPlayer
         if (player[instance] == null)
         {
             player[instance] = new AVPlayer(instance);
-            AVPlayer player1 = player[instance];
-            player1.OnMediaEvent = (MediaEvent) Delegate.Combine(player1.OnMediaEvent, new MediaEvent(forwardEvent));
+            player[instance].OnMediaEvent+= new MediaEvent(forwardEvent);
         }
     }
 
@@ -126,33 +125,37 @@ namespace OMPlayer
     private void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
     {
         if (function == eFunction.closeProgram)
-        {/*
+        {
             using (PluginSettings settings = new PluginSettings())
             {
-                if (nowPlaying != null)
+                for (int i = 0; i < theHost.ScreenCount; i++)
                 {
-                    if (getPlayerStatus(0) == ePlayerStatus.Stopped)
+                    int k = theHost.instanceForScreen(i);
+                    if ((player[k]!=null)&&(player[k].nowPlaying != null))
                     {
-                        settings.setSetting("Music.LastPlayingURL", "");
-                        return;
-                    }
-                    settings.setSetting("Music.LastPlayingURL", nowPlaying.Location);
-                    double position;
-                    if (mediaPosition != null)
-                    {
-                        mediaPosition.get_CurrentPosition(out position);
-                        settings.setSetting("Music.LastPlayingPosition", position.ToString());
+                        if ((getPlayerStatus(k) == ePlayerStatus.Stopped) || (getPlayerStatus(k) == ePlayerStatus.Ready))
+                        {
+                            settings.setSetting("Music.Instance"+k.ToString()+".LastPlayingURL", "");
+                            continue;
+                        }
+                        settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", player[k].nowPlaying.Location);
+                        double position;
+                        if (player[k].mediaPosition != null)
+                        {
+                            player[k].mediaPosition.get_CurrentPosition(out position);
+                            settings.setSetting("Music.Instance"+k.ToString()+".LastPlayingPosition", position.ToString());
+                        }
+                        else
+                        {
+                            settings.setSetting("Music.Instance"+k.ToString()+".LastPlayingURL", "");
+                        }
                     }
                     else
                     {
-                        settings.setSetting("Music.LastPlayingURL", "");
+                        settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", "");
                     }
                 }
-                else
-                {
-                    settings.setSetting("Music.LastPlayingURL", "");
-                }
-            }*/
+            }
         }
     }
 
@@ -170,26 +173,28 @@ namespace OMPlayer
     {
         theHost = host;
         player = new AVPlayer[theHost.InstanceCount];
-        t = new Thread[theHost.InstanceCount];
         host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
-        /*
         using (PluginSettings setting = new PluginSettings())
         {
             if (setting.getSetting("Music.AutoResume") == "True")
             {
-                host.execute(eFunction.loadAVPlayer, "0", "OMPlayer");
-                play(0, setting.getSetting("Music.LastPlayingURL"), eMediaType.Local);
-                if (mediaPosition == null)
-                    return eLoadStatus.LoadSuccessful;
-                double pos;
-                if (double.TryParse(setting.getSetting("Music.LastPlayingPosition"), out pos) == true)
+                for (int i = 0; i < theHost.ScreenCount; i++)
                 {
-                    if (pos > 1)
-                        pos -= 1;
-                    mediaPosition.put_CurrentPosition(pos);
+                    int k = theHost.instanceForScreen(i);
+                    host.execute(eFunction.loadAVPlayer, k.ToString(), "OMPlayer");
+                    play(k, setting.getSetting("Music.Instance"+k.ToString()+".LastPlayingURL"), eMediaType.Local);
+                    if (player[k].mediaPosition == null)
+                        return eLoadStatus.LoadSuccessful;
+                    double pos;
+                    if (double.TryParse(setting.getSetting("Music.Instance" + k.ToString() + ".LastPlayingPosition"), out pos) == true)
+                    {
+                        if (pos > 1)
+                            pos -= 1;
+                        player[k].mediaPosition.put_CurrentPosition(pos);
+                    }
                 }
             }
-        }*/
+        }
         return eLoadStatus.LoadSuccessful;
     }
 
@@ -221,7 +226,6 @@ namespace OMPlayer
         {
             player[instance].currentState = ePlayerStatus.Playing;
             OnMediaEvent(eFunction.Play, instance, "");
-            player[instance].pos = 0;
             return true;
         }
         return false;
@@ -232,23 +236,7 @@ namespace OMPlayer
         try
         {
             checkInstance(instance);
-            lock (player[instance])
-            {
-                if (player[instance].currentState == ePlayerStatus.Playing)
-                    stop(instance);
-                if (player[instance].PlayMovieInWindow(url)==false)
-                    return false;
-            }
-            player[instance].pos = 0;
-            player[instance].nowPlaying = TagReader.getInfo(url);
-            if (player[instance].nowPlaying.coverArt == null)
-                player[instance].nowPlaying.coverArt = TagReader.getFolderImage(player[instance].nowPlaying.Location);
-            OnMediaEvent(eFunction.Play, instance, url);
-            if (t[instance] != null)
-                t[instance].Abort();
-            t[instance] = new Thread(new ThreadStart(player[instance].waitForStop));
-            t[instance].Start();
-            return true;
+            return player[instance].play(url);
         }
         catch (Exception)
         {
@@ -306,28 +294,7 @@ namespace OMPlayer
     public bool stop(int instance)
     {
         checkInstance(instance);
-        DsLong pos = new DsLong(0);
-
-        if ((player[instance].currentState == ePlayerStatus.Paused) || (player[instance].currentState == ePlayerStatus.Playing))
-        {
-        retry:
-            lock (player[instance])
-            {
-                if ((player[instance].mediaControl == null) || (player[instance].mediaSeeking == null))
-                    return false;
-                try
-                {
-                    player[instance].currentState = ePlayerStatus.Ready;
-                    player[instance].mediaControl.Stop();
-                    player[instance].mediaPosition.put_CurrentPosition((double)instance);
-                }
-                catch (AccessViolationException) { Thread.Sleep(50); if (Thread.CurrentThread.Name != "1") { Thread.CurrentThread.Name = "1"; goto retry; } return false; }
-                player[instance].mediaControl = null;
-                player[instance].isAudioOnly = true;
-                OnMediaEvent(eFunction.Stop, instance, "");
-            }
-        }
-        return true;
+        return player[instance].stop();
     }
 
     // Properties
@@ -401,7 +368,7 @@ namespace OMPlayer
         public IBasicAudio basicAudio = null;
         private IBasicVideo basicVideo = null;
         public double currentPlaybackRate = 1.0;
-        public ePlayerStatus currentState = ePlayerStatus.Stopped;
+        public ePlayerStatus currentState = ePlayerStatus.Ready;
         public int currentVolume = 100;
         public IGraphBuilder graphBuilder = null;
         private int instance = -1;
@@ -414,6 +381,7 @@ namespace OMPlayer
         public MediaEvent OnMediaEvent;
         public double pos = -1.0;
         private IVideoWindow videoWindow = null;
+        private Thread t;
 
         // Methods
         public AVPlayer(int instanceNum)
@@ -446,6 +414,50 @@ namespace OMPlayer
                 }
             }
         }
+        public bool play(string url)
+        {
+            lock (this)
+            {
+                if (currentState == ePlayerStatus.Playing)
+                    stop();
+                if (PlayMovieInWindow(url) == false)
+                    return false;
+            }
+            pos = 0;
+            nowPlaying = TagReader.getInfo(url);
+            if (nowPlaying.coverArt == null)
+                nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
+            OnMediaEvent(eFunction.Play, instance, url);
+            if (t != null)
+                t.Abort();
+            t = new Thread(new ThreadStart(waitForStop));
+            t.Name = instance.ToString();
+            t.Start();
+            return true;
+        }
+        public bool stop()
+        {
+            if ((currentState == ePlayerStatus.Paused) || (currentState == ePlayerStatus.Playing))
+            {
+            retry:
+                lock (this)
+                {
+                    if ((mediaControl == null) || (mediaSeeking == null))
+                        return false;
+                    try
+                    {
+                        currentState = ePlayerStatus.Ready;
+                        mediaControl.Stop();
+                        mediaPosition.put_CurrentPosition((double)instance);
+                    }
+                    catch (AccessViolationException) { Thread.Sleep(50); if (Thread.CurrentThread.Name != "1") { Thread.CurrentThread.Name = "1"; goto retry; } return false; }
+                    mediaControl = null;
+                    isAudioOnly = true;
+                    OnMediaEvent(eFunction.Stop, instance, "");
+                }
+            }
+            return true;
+        }
 
         public void CloseClip()
         {
@@ -463,7 +475,6 @@ namespace OMPlayer
                 currentState = ePlayerStatus.Ready;
             }
         }
-
         private void CloseInterfaces()
         {
             try
@@ -522,7 +533,6 @@ namespace OMPlayer
             {
             }
         }
-
         public double getCurrentPos()
         {
             double time;
@@ -530,36 +540,12 @@ namespace OMPlayer
             {
                 mediaPosition.get_CurrentPosition(out time);
             }
-            return (double) ((float) time);
-        }
-
-        private void HandleGraphEvent()
-        {
-            int hr = 0;
-            if (mediaEventEx != null)
-            {
-                EventCode evCode;
-                IntPtr evParam1;
-                IntPtr evParam2;
-                while (mediaEventEx.GetEvent(out evCode, out evParam1, out evParam2, 0) == 0)
-                {
-                    hr = mediaEventEx.FreeEventParams(evCode, evParam1, evParam2);
-                    if (evCode == EventCode.Complete)
-                    {
-                        DsLong pos = new DsLong(0L);
-                        if (mediaSeeking.SetPositions(pos, AMSeekingSeekingFlags.AbsolutePositioning, null, AMSeekingSeekingFlags.NoPositioning) < 0)
-                        {
-                            hr = mediaControl.Stop();
-                            hr = mediaControl.Run();
-                        }
-                    }
-                }
-            }
+            return time;
         }
 
         private int InitVideoWindow(int nMultiplier, int nDivider)
         {
-            Form f = (Form) Control.FromHandle(OMPlayer.theHost.UIHandle(0));
+            Form f = (Form) Control.FromHandle(OMPlayer.theHost.UIHandle(instance));
             return videoWindow.SetWindowPosition(0, 0, f.Width, f.Height);
         }
 
@@ -589,7 +575,7 @@ namespace OMPlayer
                 DsError.ThrowExceptionForHR(hr);
                 if (!isAudioOnly)
                 {
-                    DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(0)));
+                    DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(instance)));
                     DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
                     DsError.ThrowExceptionForHR(InitVideoWindow(1, 1));
                 }
@@ -641,7 +627,7 @@ namespace OMPlayer
             return hr;
         }
 
-        public void waitForStop()
+        private void waitForStop()
         {
             if (mediaControl != null)
             {
@@ -657,6 +643,8 @@ namespace OMPlayer
                     }
                     if ((currentState != ePlayerStatus.Paused) && (pos == lastPosition))
                     {
+                        if ((currentState == ePlayerStatus.Stopped)||(currentState==ePlayerStatus.Ready))
+                            return;
                         currentState = ePlayerStatus.Stopped;
                         OnMediaEvent(eFunction.Stop, instance, "");
                         if (currentState != ePlayerStatus.Ready)

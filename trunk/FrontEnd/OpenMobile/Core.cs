@@ -38,6 +38,7 @@ namespace OpenMobile
         public static List<RenderingWindow> RenderingWindows=new List<RenderingWindow>(theHost.ScreenCount);
         public static List<IBasePlugin> pluginCollection = new List<IBasePlugin>();
         public static bool exitTransition = true;
+        public static bool FullScreen = false;
 
         private static void loadMainMenu()
         {
@@ -201,7 +202,8 @@ namespace OpenMobile
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
                         {
-                            ISpeech availablePlugin = (ISpeech)Activator.CreateInstance(pluginType);
+                            //ISpeech availablePlugin = (ISpeech)Activator.CreateInstance(pluginType);
+                            ISpeech availablePlugin = (ISpeech)Core.RenderingWindows[0].Invoke(RenderingWindows[0].invokeOnMain,new object[]{(object)pluginType});
                             pluginCollection.Add(availablePlugin);
                             return;
                         }
@@ -274,9 +276,10 @@ namespace OpenMobile
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete,"","","");
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(theHost.NetworkChange_NetworkAvailabilityChanged);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
+            OpenMobile.Threading.TaskManager.Enable(); //Start executing background tasks
             SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(theHost.SystemEvents_PowerModeChanged);
             SystemEvents.SessionEnding += new SessionEndingEventHandler(theHost.SystemEvents_SessionEnding);
-            OpenMobile.Threading.TaskManager.Enable(); //Start executing background tasks
+            SystemEvents.DisplaySettingsChanged+=new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);
             if (Net.Network.IsAvailable==true)
                 theHost.raiseSystemEvent(eFunction.connectedToInternet, "", "", "");
             pluginCollection.TrimExcess();
@@ -293,6 +296,7 @@ namespace OpenMobile
             {
                 if (Environment.GetCommandLineArgs()[1].ToLower() == "-fullscreen")
                 {
+                    FullScreen = true;
                     for (int i = 0; i < RenderingWindows.Count; i++)
                     {
                         RenderingWindows[i].fullscreen = true;
