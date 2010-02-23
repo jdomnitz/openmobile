@@ -47,10 +47,11 @@ namespace OpenMobile.Plugin
         /// <param name="recoText"></param>
         void addToContext(string contextName, string recoText);
         /// <summary>
-        /// Speak the specified text.  Return true if successful, throw NotImplementedException if not supported
+        /// Speak the specified text.  Return true if successful
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
+        /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
         bool speak(string text);
         /// <summary>
         /// Stop Speaking and purge the speech buffer

@@ -39,7 +39,7 @@ namespace OpenMobile
             description.Text += "Borte - Developer\r\n";
             description.Text += "Extide - Developer\r\n";
             description.Text += "\r\nSupporting Projects:\r\n";
-            description.Text += "TagLib Sharp\r\nThe Mono Project\r\niPod Sharp\r\nDBusSharp\r\nSQLite\r\nAqua Gauge\r\nCoreAudio";
+            description.Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, SQLite, Aqua Gauge and CoreAudio";
             p.addControl(description);
             return p;
         }

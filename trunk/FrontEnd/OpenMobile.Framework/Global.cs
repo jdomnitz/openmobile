@@ -190,7 +190,11 @@ namespace OpenMobile
         /// <summary>
         /// A custom text and image style
         /// </summary>
-        DroidStyleImage=7
+        DroidStyleImage=7,
+        /// <summary>
+        /// A custom text list style with subitem support
+        /// </summary>
+        MultiList=8
     }
 
     /// <summary>
@@ -264,6 +268,10 @@ namespace OpenMobile
         /// </summary>
         public Image image;
         /// <summary>
+        /// An optional subitem for the list
+        /// </summary>
+        public string subItem;
+        /// <summary>
         /// Creates a new list item
         /// </summary>
         /// <param name="text"></param>
@@ -280,6 +288,11 @@ namespace OpenMobile
         {
             this.text = text;
             this.image = image;
+        }
+        public OMListItem(string text, string subitm)
+        {
+            this.text = text;
+            this.subItem=subitm;
         }
     }
     
@@ -799,12 +812,51 @@ namespace OpenMobile
         /// </summary>
         goBack=80,
         /// <summary>
-        /// A gesture has been recognized
-        /// Arg1: Screen
-        /// Arg2: Character
-        /// Arg3: Plugin (The name of the plugin with the top most panel)
+        /// Occurs when important settings have changed (used to trigger a settings refresh)
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: (Optional) Type (Plugin Specific)</para>
         /// </summary>
-        gesture=100
+        settingsChanged=81,
+        /// <summary>
+        /// A gesture has been recognized
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen</para>
+        /// <para>Arg2: Character</para>
+        /// <para>Arg3: Plugin (The name of the plugin with the top most panel)</para>
+        /// </summary>
+        gesture=100,
+        //Navigation:
+        /// <summary>
+        /// Instructs the navigation engine to construct a route to the given address
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Address</para>
+        /// <para>Arg2: (Optional) Routing Type (Plugin Specific)</para>
+        /// </summary>
+        navigateToAddress=200,
+        /// <summary>
+        /// Instructs the navigation engine to construct a route to the given point of interest
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: POI Name</para>
+        /// <para>Arg2: (Optional) location to search from (default is current)</para>
+        /// </summary>
+        navigateToPOI=201,
+        /// <summary>
+        /// Occurs when the navigation engine calculates a route
+        /// </summary>
+        routeCalculated=202,
+        /// <summary>
+        /// Occurs when a turn is approaching (distince dependent on road type)
+        /// </summary>
+        turnApproaching=203,
+
+        //Bluetooth:
+        /// <summary>
+        /// Dials the given number
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Phone Number (without seperators)</para>
+        /// <para>Arg2: (Optional) Display Name</para>
+        /// </summary>
+        dialNumber=300
     }
     /// <summary>
     /// The status of a plugins initialization
@@ -1171,7 +1223,11 @@ namespace OpenMobile
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetPlaybackSpeed=11
+        GetPlaybackSpeed=11,
+        /// <summary>
+        /// Returns a list of audio devices available on the system
+        /// </summary>
+        GetAudioDevices=12
     }
 
     /// <summary>
