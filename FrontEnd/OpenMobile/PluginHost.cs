@@ -39,6 +39,7 @@ namespace OpenMobile
         private int renderfirst;
         private static int screenCount = Screen.AllScreens.Length;
         private int instanceCount = -1;
+        private int[] instance;
         private string skinpath;
         private string datapath;
         private string pluginpath;
@@ -112,8 +113,30 @@ namespace OpenMobile
             return true;
         }
         public int instanceForScreen(int screen)
+        { //Instance numbers are incremented by 1 so that "not set"==0
+            if (instance == null)
+                instance = new int[ScreenCount];
+            if (instance[screen] == 0)
+                instance[screen] = getInstance(screen);
+            if (instance[screen] == 0)
+                return 0;
+            return instance[screen]-1;
+        }
+
+        private int getInstance(int screen)
         {
-            return screen; //ToDo - Create/Reference instance/screen settings
+            string str;
+            using(PluginSettings settings=new PluginSettings())
+                str=settings.getSetting("Screen"+(screen+1).ToString()+".SoundCard");
+            if (str=="")
+                return 0;
+            string[] devs;
+            try
+            {
+                devs = ((IAVPlayer)Core.pluginCollection.Find(p => typeof(IAVPlayer).IsInstanceOfType(p) == true)).OutputDevices;
+            }
+            catch (NullReferenceException) { return 0; }
+            return Array.FindIndex(devs, p => p.Replace("  "," ") == str)+1;
         }
         public string SkinPath
         {
@@ -192,15 +215,14 @@ namespace OpenMobile
 
         public PluginHost()
         {
-            queued = new List<mediaInfo>[screenCount];
-            currentMediaPlayer = new IAVPlayer[screenCount];
-            currentTunedContent = new ITunedContent[screenCount];
-            currentPosition = new int[screenCount];
+            queued = new List<mediaInfo>[8];
+            currentMediaPlayer = new IAVPlayer[8];
+            currentTunedContent = new ITunedContent[8];
+            currentPosition = new int[8];
             for (int i = 0; i < screenCount; i++)
-            {
                 history[i, 0] = new historyItem(false, "MainMenu");
+            for (int i = 0; i < 8; i++)
                 queued[i] = new List<mediaInfo>();
-            }
         }
 
         public void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
@@ -378,6 +400,10 @@ namespace OpenMobile
                     return Net.Connections.connect(this);
                 case eFunction.disconnectFromInternet:
                     return Net.Connections.disconnect(this);
+                case eFunction.settingsChanged:
+                    for (int i = 0; i < screenCount; i++)
+                        instance[i] = getInstance(i);
+                    return true;
             }
             return false;
         }
@@ -1184,6 +1210,14 @@ namespace OpenMobile
         }
         public bool sendMessage(string to,string from, string message)
         {
+            if (to == "RenderingWindow")
+            {
+                if (message == "Identify")
+                    for (int i = 0; i < screenCount; i++)
+                        Core.RenderingWindows[i].Invoke(Core.RenderingWindows[i].identify);
+                if (message=="Redraw")
+                    Core.RenderingWindows[0].Invoke(Core.RenderingWindows[0].redraw);
+            }
             try
             {
                 using (IBasePlugin plugin = Core.pluginCollection.Find(i => i.pluginName == to))
@@ -1376,6 +1410,13 @@ namespace OpenMobile
                             cInf.Add(c);
                     }
                     data = cInf;
+                    break;
+                case eGetData.GetAudioDevices:
+                    try
+                    {
+                        data= ((IAVPlayer)Core.pluginCollection.Find(p => typeof(IAVPlayer).IsInstanceOfType(p) == true)).OutputDevices;
+                    }
+                    catch (Exception) { data = null; }
                     break;
             }
         }

@@ -147,7 +147,7 @@ namespace OpenMobile
         /// <param name="secondColor"></param>
         public static void renderText(Graphics g, int x, int y, int w, int h, string text, Font font, textFormat format, Alignment alignment, float transparency,int modifyFont,Color color,Color secondColor)
         {
-            if (text == "")
+            if ((text==null)||(text == ""))
                 return;
             FontStyle f = FontStyle.Regular;
             if ((format == textFormat.Bold) || (format == textFormat.BoldShadow))

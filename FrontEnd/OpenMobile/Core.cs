@@ -282,6 +282,10 @@ namespace OpenMobile
             SystemEvents.DisplaySettingsChanged+=new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);
             if (Net.Network.IsAvailable==true)
                 theHost.raiseSystemEvent(eFunction.connectedToInternet, "", "", "");
+            using (PluginSettings settings = new PluginSettings())
+                if (settings.getSetting("UI.HideCursor") == "True")
+                    for (int i = 0; i < RenderingWindows.Count; i++)
+                        RenderingWindows[i].hideCursor();
             pluginCollection.TrimExcess();
         }
 

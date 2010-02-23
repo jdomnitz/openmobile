@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using OpenMobile;
+using OpenMobile.Controls;
 
 namespace OMDebug
 {
@@ -15,7 +16,10 @@ namespace OMDebug
         {
             throw new NotImplementedException();
         }
-
+        public OMPanel loadSettings(string name, int screen)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
 
         #region IBasePlugin Members

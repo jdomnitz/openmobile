@@ -28,12 +28,12 @@ namespace OpenMobile.Net
     /// <summary>
     /// Handles general network/internet information
     /// </summary>
-    public sealed class Network
+    public static class Network
     {
         /// <summary>
         /// The hostname of the local computer
         /// </summary>
-        public static string hostname;
+        public static string hostname=System.Net.Dns.GetHostName();
         /// <summary>
         /// The Local IP Address of this computer
         /// </summary>
@@ -54,16 +54,6 @@ namespace OpenMobile.Net
                 else
                     return false; //Return no if unsure
             }
-        }
-
-        /// <summary>
-        /// Initialize network hooks
-        /// </summary>
-        public Network()
-        {
-            System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += new System.Net.NetworkInformation.NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
-            System.Net.NetworkInformation.NetworkChange.NetworkAddressChanged += new System.Net.NetworkInformation.NetworkAddressChangedEventHandler(NetworkChange_NetworkAddressChanged);
-            hostname = System.Net.Dns.GetHostName();
         }
 
         /// <summary>
@@ -187,26 +177,6 @@ namespace OpenMobile.Net
                 available=2;
                 return connectionStatus.InternetAccess;
             }
-        }
-
-        private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
-        {
-            foreach (System.Net.IPAddress i in System.Net.Dns.GetHostAddresses(hostname))
-            {
-                if (i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    if (i.ToString() == "127.0.0.1")
-                        ipAddress = "0.0.0.0";
-                    else
-                        ipAddress = i.ToString();
-            }
-        }
-
-        private void NetworkChange_NetworkAvailabilityChanged(object sender, System.Net.NetworkInformation.NetworkAvailabilityEventArgs e)
-        {
-            if (e.IsAvailable == true)
-                available = 2;
-            else
-                available = 1;
         }
     }
 }

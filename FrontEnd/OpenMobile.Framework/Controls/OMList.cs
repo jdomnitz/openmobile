@@ -139,8 +139,6 @@ namespace OpenMobile.Controls
             }
         }
         
-        //ToDo - Implement horizontal lists
-        
         /// <summary>
         /// Gets or Sets list items
         /// </summary>
@@ -505,8 +503,10 @@ namespace OpenMobile.Controls
                     Region r = g.Clip; //Save the drawing size
                     g.SetClip(this.toRegion()); //But only draw out control
                     if (background!=Color.Transparent)
-                        g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp*background.A), background)), new Rectangle(Left,Top,Width,Height));
+                        g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp*background.A), background)), new Rectangle(Left+1,Top+1,Width-2,Height-2));
                     h = (int)(g.MeasureString("A", Font).Height + 0.5); //Round up
+                    if (ListStyle == eListStyle.MultiList)
+                        h = (int)(h*1.75);
                     int ofset = 0;
                     if (((int)style & 1)  == 1)
                     {
@@ -564,18 +564,49 @@ namespace OpenMobile.Controls
                                     g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
                                 g.SmoothingMode = SmoothingMode.Default;
                                 break;
+                            case eListStyle.MultiList:
+                                g.SmoothingMode = SmoothingMode.AntiAlias;
+                                if (selectedIndex == i)
+                                    g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 1));
+                                else
+                                    g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 1));
+                                g.SmoothingMode = SmoothingMode.Default;
+                                break;
                         }
                         if ((i < items.Count) && (i >= 0))
                         {
                             using (StringFormat f = new StringFormat(StringFormatFlags.NoWrap))
                             {
-                                f.Alignment = StringAlignment.Center;
-                                f.LineAlignment = StringAlignment.Center;
-                                f.Trimming = StringTrimming.EllipsisCharacter;
-                                if (selectedIndex == i)
-                                    g.DrawString(items[i].text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * highlightColor.A), highlightColor)), new RectangleF(rect.Left + ofset, rect.Top, rect.Width-ofset, rect.Height), f);
+                                if (ListStyle == eListStyle.MultiList)
+                                {
+                                    f.Alignment = StringAlignment.Near;
+                                    f.LineAlignment = StringAlignment.Near;
+                                    using (Font fnt = new Font(this.Font.FontFamily.Name, this.Font.Size * 0.7F,FontStyle.Bold))
+                                    {
+                                        if (selectedIndex == i)
+                                        {
+                                            g.DrawString(items[i].text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * highlightColor.A), highlightColor)), new RectangleF(rect.Left + ofset, rect.Top, rect.Width - ofset, rect.Height), f);
+                                            f.LineAlignment = StringAlignment.Far;
+                                            g.DrawString(items[i].subItem, fnt, new SolidBrush(Color.FromArgb((int)(0.5 * tmp * highlightColor.A), highlightColor)), new RectangleF(rect.Left + ofset, rect.Top, rect.Width - ofset, rect.Height), f);
+                                        }
+                                        else
+                                        {
+                                            g.DrawString(items[i].text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * Color.A), Color)), new RectangleF(rect.Left + ofset, rect.Top, rect.Width - ofset, rect.Height), f);
+                                            f.LineAlignment = StringAlignment.Far;
+                                            g.DrawString(items[i].subItem, fnt, new SolidBrush(Color.FromArgb((int)(tmp * 0.5 * Color.A), Color)), new RectangleF(rect.Left + ofset, rect.Top, rect.Width - ofset, rect.Height), f);
+                                        }
+                                    }
+                                }
                                 else
-                                    g.DrawString(items[i].text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * Color.A), Color)), new RectangleF(rect.Left + ofset, rect.Top, rect.Width - ofset, rect.Height), f);
+                                {
+                                    f.Alignment = StringAlignment.Center;
+                                    f.LineAlignment = StringAlignment.Center;
+                                    f.Trimming = StringTrimming.EllipsisCharacter;
+                                    if (selectedIndex == i)
+                                        g.DrawString(items[i].text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * highlightColor.A), highlightColor)), new RectangleF(rect.Left + ofset, rect.Top, rect.Width - ofset, rect.Height), f);
+                                    else
+                                        g.DrawString(items[i].text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * Color.A), Color)), new RectangleF(rect.Left + ofset, rect.Top, rect.Width - ofset, rect.Height), f);
+                                }
                             }
                             if (ofset == 0)
                                 continue;

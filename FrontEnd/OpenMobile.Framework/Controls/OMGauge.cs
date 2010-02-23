@@ -920,5 +920,15 @@ namespace OpenMobile.Controls
         {
             return new Rectangle(controlLeft, controlTop, controlWidth, controlHeight);
         }
+        /// <summary>
+        /// Returns the type of control
+        /// </summary>
+        public static new string TypeName
+        {
+            get
+            {
+                return "Gauge";
+            }
+        }
     }
 }

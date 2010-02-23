@@ -32,6 +32,14 @@ namespace OpenMobile.Data
     public struct contact
     {
         /// <summary>
+        /// Contact's Address
+        /// </summary>
+        public string Address;
+        /// <summary>
+        /// Contacts Birthday
+        /// </summary>
+        public DateTime Birthday;
+        /// <summary>
         /// Contact Name
         /// </summary>
         public string name;
@@ -89,7 +97,7 @@ namespace OpenMobile.Data
             asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Application.StartupPath, "Data", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
             cmd = asyncCon.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Phonebook";
+            cmd.CommandText = "SELECT * FROM Phonebook order by name";
             asyncReader = cmd.ExecuteReader();
             return true;
         }

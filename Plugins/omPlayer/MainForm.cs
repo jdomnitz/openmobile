@@ -93,7 +93,7 @@ namespace OMPlayer
             if (d[i].Name.Contains("DirectSound"))
                 lst.Add(d[i].Mon);
         }
-        if (dev < lst.Count)
+        if ((dev < lst.Count)&&(dev>=0))
             return lst[dev];
         return lst[0];
     }
@@ -558,7 +558,7 @@ namespace OMPlayer
             {
                 graphBuilder = (IGraphBuilder) new FilterGraph();
                 IBaseFilter source = null;
-                hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance + 1), null, "OutputDevice", out source);
+                hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance), null, "OutputDevice", out source);
                 hr = graphBuilder.RenderFile(filename, null);
                 if (hr != 0)
                 {

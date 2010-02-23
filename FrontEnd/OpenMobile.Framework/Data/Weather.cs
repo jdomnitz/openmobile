@@ -141,23 +141,39 @@ namespace OpenMobile.Data
             /// <summary>
             /// Tropical Storm
             /// </summary>
-            tropicalStorm,
+            TropicalStorm,
             /// <summary>
             /// Hurricane
             /// </summary>
-            hurricane,
+            Hurricane,
             /// <summary>
             /// Tornado
             /// </summary>
-            tornado,
+            Tornado,
             /// <summary>
             /// Windy
             /// </summary>
-            windy,
+            Windy,
             /// <summary>
             /// Fog
             /// </summary>
-            foggy
+            Foggy,
+            /// <summary>
+            /// Dusty
+            /// </summary>
+            Dust,
+            /// <summary>
+            /// Hazy
+            /// </summary>
+            Haze,
+            /// <summary>
+            /// Hot
+            /// </summary>
+            Hot,
+            /// <summary>
+            /// Smoke
+            /// </summary>
+            Smoke
         }
         /// <summary>
         /// Weather Data
