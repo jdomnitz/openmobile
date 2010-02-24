@@ -18,6 +18,8 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
+//this.KeyUp += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceUp);
+//this.KeyDown+=new System.Windows.Forms.KeyEventHandler(InputRouter.SourceDown);
 namespace OpenMobile
 {
     partial class RenderingWindow
@@ -88,6 +90,8 @@ namespace OpenMobile
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.UI_FormClosing);
             this.Resize += new System.EventHandler(this.UI_Resize);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.UI_MouseMove);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceUp);
+            this.KeyDown+=new System.Windows.Forms.KeyEventHandler(InputRouter.SourceDown);
             this.ResumeLayout(false);
 
         }
