@@ -287,37 +287,6 @@ namespace TagLib.Riff {
 		}
 		
 		/// <summary>
-		///    Gets the values for a specified item in the current
-		///    instance as a <see cref="StringCollection" />.
-		/// </summary>
-		/// <param name="id">
-		///    A ByteVector object containing the ID of
-		///    the item to set.
-		/// </param>
-		/// <returns>
-		///    A <see cref="StringCollection" /> object containing the
-		///    values of the specified item.
-		/// </returns>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="id" /> is <see langword="null" />.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		///    <paramref name="id" /> isn't exactly four bytes long.
-		/// </exception>
-		[Obsolete("Use GetValuesAsStrings(ByteVector)")]
-		public StringCollection GetValuesAsStringCollection (ByteVector id)
-		{
-			if (id == null)
-				throw new ArgumentNullException ("id");
-			
-			if (id.Count != 4)
-				throw new ArgumentException (
-					"ID must be 4 bytes long.", "id");
-			
-			return new StringCollection (GetValuesAsStrings (id));
-		}
-		
-		/// <summary>
 		///    Gets the value for a specified item in the current
 		///    instance as a <see cref="uint"/>.
 		/// </summary>

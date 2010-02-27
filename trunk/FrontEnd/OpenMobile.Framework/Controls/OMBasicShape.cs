@@ -23,14 +23,41 @@ using System.Drawing;
 
 namespace OpenMobile.Controls
 {
+    /// <summary>
+    /// Available Shapes
+    /// </summary>
     public enum shapes
     {
+        /// <summary>
+        /// Draws a Rectangle (or Square)
+        /// </summary>
         Rectangle=0,
-        Triangle=1
+        /// <summary>
+        /// Draws a Triangle
+        /// </summary>
+        Triangle=1,
+        /// <summary>
+        /// Draws an Oval/Ellipse/Circle
+        /// </summary>
+        Oval=2,
+        /// <summary>
+        /// Draws a Rounded Rectangle
+        /// </summary>
+        RoundedRectangle=3
     }
+    /// <summary>
+    /// Allows drawing of basic shapes
+    /// </summary>
     public class OMBasicShape:OMControl
     {
         private int left, top, width, height;
+        /// <summary>
+        /// Creates a new Basic Shape
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
         public OMBasicShape(int x, int y, int w, int h)
         {
             left = x;
@@ -130,7 +157,11 @@ namespace OpenMobile.Controls
                 refreshMe(new Rectangle(left > oldleft ? oldleft : left, top, width + System.Math.Abs(oldleft - left), height));
             }
         }
-
+        /// <summary>
+        /// Draws the basic shape
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
         public override void Render(System.Drawing.Graphics g, renderingParams e)
         {
             switch (shape)
@@ -141,10 +172,19 @@ namespace OpenMobile.Controls
                 case shapes.Triangle:
                     g.FillPolygon(new SolidBrush(fillColor),new Point[]{new Point(left,top+height),new Point(left+width,top+height),new Point(left+(width/2),top)});
                     break;
+                case shapes.Oval:
+                    g.FillEllipse(new SolidBrush(fillColor), toRegion());
+                    break;
+                case shapes.RoundedRectangle:
+                    Renderer.FillRoundRectangle(g, new SolidBrush(fillColor), new RectangleF(this.left, this.top, this.width, this.height), 10F);
+                    break;
             }
         }
         private shapes shape;
         private Color fillColor;
+        /// <summary>
+        /// The shape to draw
+        /// </summary>
         public shapes Shape
         {
             set
@@ -156,6 +196,9 @@ namespace OpenMobile.Controls
                 return shape;
             }
         }
+        /// <summary>
+        /// The fill color of the Shape
+        /// </summary>
         public Color FillColor
         {
             get
@@ -167,6 +210,10 @@ namespace OpenMobile.Controls
                 fillColor = value;
             }
         }
+        /// <summary>
+        /// Returns a rectangle representing the area covered
+        /// </summary>
+        /// <returns></returns>
         public override Rectangle toRegion()
         {
             return new Rectangle(Left,Top,Width,Height);
@@ -174,7 +221,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Returns the type of control
         /// </summary>
-        public static new string TypeName
+        public static string TypeName
         {
             get
             {

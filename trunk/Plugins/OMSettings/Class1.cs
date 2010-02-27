@@ -1,13 +1,31 @@
-﻿using System;
+﻿/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OpenMobile.Plugin;
-using OpenMobile.Controls;
-using OpenMobile.Framework;
 using System.Drawing;
 using OpenMobile;
+using OpenMobile.Controls;
 using OpenMobile.Data;
+using OpenMobile.Framework;
+using OpenMobile.Plugin;
 
 namespace OMSettings
 {
@@ -183,17 +201,74 @@ namespace OMSettings
             if (o!=null)
                 devices=new List<string>((string[])o);
             #endregion
+            #region data
+            OMPanel data = new OMPanel("data");
+            OMButton Save2 = new OMButton(13, 136, 200, 110);
+            Save2.Image = theHost.getSkinImage("Full");
+            Save2.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            Save2.Text = "Save";
+            Save2.Name = "Media.Save";
+            Save2.OnClick += new userInteraction(Save2_OnClick);
+            Save2.Transition = eButtonTransition.None;
+            OMLabel Heading = new OMLabel(300, 80, 600, 100);
+            Heading.Font = new Font("Microsoft Sans Serif", 36F);
+            Heading.Text = "Google Account Info";
+            Label.Name = "Label";
+            OMLabel udesc = new OMLabel(220, 180, 200, 50);
+            udesc.Text = "Username:";
+            udesc.Font = new Font("Microsoft Sans Serif", 24F);
+            OMLabel pdesc = new OMLabel(220, 240, 200, 50);
+            pdesc.Text = "Password:";
+            pdesc.Font= new Font("Microsoft Sans Serif", 24F);
+            OMTextBox user = new OMTextBox(450, 180, 500, 50);
+            user.Font = new Font("Microsoft Sans Serif", 28F);
+            user.TextAlignment = Alignment.CenterLeft;
+            user.OnClick += new userInteraction(user_OnClick);
+            OMTextBox pass = new OMTextBox(450, 240, 500, 50);
+            pass.Font = new Font("Microsoft Sans Serif", 28F);
+            pass.Flags = textboxFlags.Password;
+            pass.OnClick += new userInteraction(user_OnClick);
+            pass.TextAlignment = Alignment.CenterLeft;
+            data.addControl(Save2);
+            data.addControl(Cancel);
+            data.addControl(Heading);
+            data.addControl(udesc);
+            data.addControl(pdesc);
+            data.addControl(user);
+            data.addControl(pass);
+            manager.loadPanel(data);
+            #endregion
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void user_OnClick(object sender, int screen)
+        {
+            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+            ((OMTextBox)sender).Text=input.getText(screen, "OMSettings", false, "data");
+        }
+
+        void Save2_OnClick(object sender, int screen)
+        {
+            Personal.setPassword(Personal.ePassword.google,((OMTextBox)manager[screen,"data"][6]).Text,"GOOGLEPW");
+            Collections.personalInfo.googleUsername = ((OMTextBox)manager[screen, "data"][5]).Text;
+            if (Collections.personalInfo.googleUsername.EndsWith("@gmail.com") == false)
+                Collections.personalInfo.googleUsername += "@gmail.com";
+            Personal.writeInfo();
+            theHost.execute(eFunction.TransitionFromAny, screen.ToString());
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
         }
 
         void identify_OnClick(object sender, int screen)
         {
-            theHost.sendMessage("RenderingWindow", "MultiZone", "Identify");
+            theHost.sendMessage("RenderingWindow", "OMSettings", "Identify");
         }
 
         void Cancel_OnClick(object sender, int screen)
         {
-            theHost.execute(eFunction.goBack,screen.ToString());
+            theHost.execute(eFunction.TransitionFromAny,screen.ToString());
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
         }
 
         void Save_OnClick(object sender, int screen)
@@ -201,7 +276,9 @@ namespace OMSettings
             string scr=((OMLabel)manager[screen, "zone"][6]).Text;
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting("Screen" + scr.Substring(5) + ".SoundCard", ((OMLabel)manager[screen, "zone"][5]).Text);
-            theHost.execute(eFunction.goBack,screen.ToString());
+            theHost.execute(eFunction.TransitionFromAny, screen.ToString());
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
             theHost.execute(eFunction.settingsChanged);
         }
 
@@ -246,10 +323,19 @@ namespace OMSettings
         {
             switch (sender.SelectedIndex)
             {
+                case 2:
+                    Personal.readInfo();
+                    ((OMTextBox)manager[screen, "data"][6]).Text=Personal.getPassword(Personal.ePassword.google, "GOOGLEPW");
+                    ((OMTextBox)manager[screen, "data"][5]).Text = Collections.personalInfo.googleUsername;
+
+                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "data");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+                    break;
                 case 3:
-                    bool b=theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    b = theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "MultiZone");
-                    b = theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "MultiZone");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
                     break;
             }
         }

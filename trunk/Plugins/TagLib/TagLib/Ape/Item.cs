@@ -183,37 +183,6 @@ namespace TagLib.Ape {
 		
 		/// <summary>
 		///    Constructs and initializes a new instance of <see
-		///    cref="Item" /> with a specified key and collection of
-		///    values.
-		/// </summary>
-		/// <param name="key">
-		///    A <see cref="string" /> object containing the key to use
-		///    for the current instance.
-		/// </param>
-		/// <param name="value">
-		///    A <see cref="StringCollection" /> object containing the
-		///    values to store in the new instance.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="key" /> or <paramref name="value" /> is
-		///    <see langword="null" />.
-		/// </exception>
-		/// <seealso cref="Item(string,string[])" />
-		[Obsolete("Use Item(string,string[])")]
-		public Item (string key, StringCollection value)
-		{
-			if (key == null)
-				throw new ArgumentNullException ("key");
-			
-			if (value == null)
-				throw new ArgumentNullException ("value");
-			
-			this.key = key;
-			this.text = value.ToArray ();
-		}
-		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
 		///    cref="Item" /> with a specified key and raw data.
 		/// </summary>
 		/// <param name="key">

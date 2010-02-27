@@ -246,31 +246,6 @@ namespace TagLib.Riff
 		}
 		
 		/// <summary>
-		///    Gets the values for a specified item in the current
-		///    instance as a <see cref="StringCollection" />.
-		/// </summary>
-		/// <param name="id">
-		///    A ByteVector object containing the ID of
-		///    the item to set.
-		/// </param>
-		/// <returns>
-		///    A <see cref="StringCollection" /> object containing the
-		///    values of the specified item.
-		/// </returns>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="id" /> is <see langword="null" />.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		///    <paramref name="id" /> isn't exactly four bytes long.
-		/// </exception>
-		[Obsolete("Use GetValuesAsStrings(ByteVector)")]
-		public StringCollection GetValuesAsStringCollection (ByteVector id)
-		{
-			return new StringCollection (
-				fields.GetValuesAsStrings (id));
-		}
-		
-		/// <summary>
 		///    Gets the value for a specified item in the current
 		///    instance as a <see cref="uint"/>.
 		/// </summary>
@@ -381,31 +356,6 @@ namespace TagLib.Riff
 		///    <paramref name="id" /> isn't exactly four bytes long.
 		/// </exception>
 		public void SetValue (ByteVector id, uint value)
-		{
-			fields.SetValue (id, value);
-		}
-		
-		/// <summary>
-		///    Sets the value for a specified item in the current
-		///    instance to the contents of a <see
-		///    cref="StringCollection" />.
-		/// </summary>
-		/// <param name="id">
-		///    A ByteVector object containing the ID of
-		///    the item to set.
-		/// </param>
-		/// <param name="value">
-		///    A <see cref="StringCollection" /> object containing the
-		///    values to store in the specified item.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="id" /> is <see langword="null" />.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		///    <paramref name="id" /> isn't exactly four bytes long.
-		/// </exception>
-		[Obsolete("Use SetValue(ByteVector,string[])")]
-		public void SetValue (ByteVector id, StringCollection value)
 		{
 			fields.SetValue (id, value);
 		}

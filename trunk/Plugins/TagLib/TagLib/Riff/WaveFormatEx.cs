@@ -66,26 +66,6 @@ namespace TagLib.Riff {
 		/// <summary>
 		///    Constructs and initializes a new instance of <see
 		///    cref="WaveFormatEx" /> by reading the raw structure from
-		///    the beginning of a ByteVector object.
-		/// </summary>
-		/// <param name="data">
-		///    A ByteVector object containing the raw
-		///    data structure.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="data" /> is <see langword="null" />.
-		/// </exception>
-		/// <exception cref="CorruptFileException">
-		///    <paramref name="data" /> contains less than 16 bytes.
-		/// </exception>
-		[Obsolete("Use WaveFormatEx(ByteVector,int)")]
-		public WaveFormatEx (ByteVector data) : this (data, 0)
-		{
-		}
-		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="WaveFormatEx" /> by reading the raw structure from
 		///    a specified position in a ByteVector
 		///    object.
 		/// </summary>

@@ -63,6 +63,8 @@ namespace OpenMobile.helperFunctions
         /// <returns></returns>
         public static string AESDecrypt(string CipherText, string salt)
         {
+            if (CipherText == null)
+                return "";
             byte[] SaltValueBytes = Encoding.ASCII.GetBytes(salt);
             byte[] InitialVectorBytes = Encoding.ASCII.GetBytes("DOMNITZSOLUTIONS");
             byte[] CipherTextBytes = Convert.FromBase64String(CipherText);

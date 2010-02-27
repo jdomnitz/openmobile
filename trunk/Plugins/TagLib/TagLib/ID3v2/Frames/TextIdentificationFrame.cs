@@ -494,26 +494,6 @@ namespace TagLib.Id3v2 {
 		
 		
 		#region Public Properties
-		
-		/// <summary>
-		///    Gets the text contained in the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="StringCollection" /> object containing the
-		///    text contained in the current instance.
-		/// </value>
-		/// <remarks>
-		///    Modifying the contents of the returned value will not
-		///    modify the contents of the current instance.
-		/// </remarks>
-		[Obsolete("Use TextInformationFrame.Text")]
-		public StringCollection FieldList {
-			get {
-				ParseRawData ();
-				return new StringCollection (Text);
-			}
-		}
-		
 		/// <summary>
 		///    Gets and sets the text contained in the current
 		///    instance.
@@ -578,35 +558,6 @@ namespace TagLib.Id3v2 {
 		
 		
 		#region Public Methods
-		
-		/// <summary>
-		///    Sets the text contained in the current instance.
-		/// </summary>
-		/// <param name="fields">
-		///    A <see cref="StringCollection" /> object containing text
-		///    to store in the current instance.
-		/// </param>
-		[Obsolete("Use TextInformationFrame.Text")]
-		public void SetText (StringCollection fields)
-		{
-			raw_data = null;
-			Text = fields != null ? fields.ToArray () : null;
-		}
-		
-		/// <summary>
-		///    Sets the text contained in the current instance.
-		/// </summary>
-		/// <param name="text">
-		///    A string[] containing text to store in the
-		///    current instance.
-		/// </param>
-		[Obsolete("Use TextInformationFrame.Text")]
-		public void SetText (params string [] text)
-		{
-			raw_data = null;
-			Text = text;
-		}
-		
 		/// <summary>
 		///    Gets a string representation of the current instance.
 		/// </summary>
@@ -776,37 +727,6 @@ namespace TagLib.Id3v2 {
 		                                        bool create)
 		{
 			return Get (tag, ident, Tag.DefaultEncoding, create);
-		}
-		
-		/// <summary>
-		///    Gets a <see cref="TextInformationFrame" /> object of a
-		///    specified type from a specified tag.
-		/// </summary>
-		/// <param name="tag">
-		///    A <see cref="Tag" /> object to search for the specified
-		///    tag in.
-		/// </param>
-		/// <param name="ident">
-		///    A ByteVector object containing the frame
-		///    identifer to search for.
-		/// </param>
-		/// <returns>
-		///    A <see cref="TextInformationFrame" /> object containing
-		///    the frame found in <paramref name="tag" /> or <see
-		///    langword="null" /> if no value was found.
-		/// </returns>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="tag" /> or <paramref name="type" /> is
-		///    <see langword="null" />.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		///    <paramref name="type" /> is not exactly four bytes long.
-		/// </exception>
-		[Obsolete("Use TextInformationFrame.Get(Tag,ByteVector,bool)")]
-		public static TextInformationFrame Get (Tag tag,
-		                                        ByteVector ident)
-		{
-			return Get (tag, ident, false);
 		}
 		
 		#endregion
@@ -1315,28 +1235,6 @@ namespace TagLib.Id3v2 {
 		{
 			return Get (tag, description, Tag.DefaultEncoding,
 				create);
-		}
-		
-		/// <summary>
-		///    Gets a specified user text frame from the specified tag.
-		/// </summary>
-		/// <param name="tag">
-		///    A <see cref="Tag" /> object to search in.
-		/// </param>
-		/// <param name="description">
-		///    A <see cref="string" /> specifying the description to
-		///    match.
-		/// </param>
-		/// <returns>
-		///    A <see cref="UserTextInformationFrame" /> object
-		///    containing the matching frame, or <see langword="null" />
-		///    if a match wasn't found.
-		/// </returns>
-		[Obsolete("Use UserTextInformationFrame.Get(Tag,string,bool)")]
-		public static UserTextInformationFrame Get (Tag tag,
-		                                            string description)
-		{
-			return Get (tag, description, false);
 		}
 		
 #endregion

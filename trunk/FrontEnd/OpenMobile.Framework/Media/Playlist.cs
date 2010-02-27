@@ -226,5 +226,12 @@ namespace OpenMobile.Media
                 ret.Add(new mediaInfo(source[i]));
             return ret;
         }
+        public static List<mediaInfo> Convert(string[] source)
+        {
+            List<mediaInfo> ret = new List<mediaInfo>(source.Length);
+            for (int i = 0; i < source.Length; i++)
+                ret.Add(new mediaInfo(source[i]));
+            return ret;
+        }
     }
 }

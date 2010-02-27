@@ -295,31 +295,6 @@ namespace TagLib.Id3v2 {
 		
 		#endregion
 		
-		
-		
-		#region Public Static Methods
-		
-		/// <summary>
-		///    Gets the text delimiter for a specified encoding.
-		/// </summary>
-		/// <param name="type">
-		///    A <see cref="StringType" /> value specifying the encoding
-		///    to get the delimiter for.
-		/// </param>
-		/// <returns>
-		///    A ByteVector object containing the
-		///    delimiter for the specified encoding.
-		/// </returns>
-		[Obsolete("Use ByteVector.TextDelimiter.")]
-		public static ByteVector TextDelimiter (StringType type)
-		{
-			return ByteVector.TextDelimiter (type);
-		}
-		
-		#endregion
-		
-		
-		
 		#region Protected Methods
 		
 		/// <summary>

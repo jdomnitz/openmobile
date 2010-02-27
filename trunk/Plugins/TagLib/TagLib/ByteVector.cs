@@ -1269,33 +1269,6 @@ namespace TagLib {
 		}
 		
 		/// <summary>
-		///    Converts all data after a specified index in the current
-		///    instance to a <see cref="string"/> object using a
-		///    specified encoding.
-		/// </summary>
-		/// <param name="type">
-		///    A <see cref="StringType"/> value indicating the encoding
-		///    to use when converting to a <see cref="string"/> object.
-		/// </param>
-		/// <param name="offset">
-		///    A <see cref="int"/> value specify the index in the
-		///    current instance at which to start converting.
-		/// </param>
-		/// <returns>
-		///    A <see cref="string"/> object containing the converted
-		///    text.
-		/// </returns>
-		/// <exception cref="ArgumentOutOfRangeException">
-		///    <paramref name="offset" /> is less than zero or greater
-		///    than the total number of bytes.
-		/// </exception>
-		[Obsolete ("Use ToString(StringType,int,int)")]
-		public string ToString (StringType type, int offset)
-		{
-			return ToString (type, offset, Count - offset);
-		}
-		
-		/// <summary>
 		///    Converts the current instance into a <see cref="string"/>
 		///    object using a specified encoding.
 		/// </summary>
@@ -1875,23 +1848,6 @@ namespace TagLib {
 		public static ByteVector FromString(string text, int length)
 		{
 			return FromString(text, StringType.UTF8, length);
-		}
-		
-		/// <summary>
-		///    Converts an string into a encoded data representation.
-		/// </summary>
-		/// <param name="text">
-		///    A <see cref="string"/> object containing the text to
-		///    convert.
-		/// </param>
-		/// <returns>
-		///    A <see cref="ByteVector"/> object containing the encoded
-		///    representation of <paramref name="text" />.
-		/// </returns>
-		[Obsolete("Use FromString(string,StringType)")]
-		public static ByteVector FromString(string text)
-		{
-			return FromString (text, StringType.UTF8);
 		}
 		
 		/// <summary>

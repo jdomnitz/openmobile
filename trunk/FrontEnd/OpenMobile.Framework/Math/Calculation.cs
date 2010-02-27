@@ -54,14 +54,6 @@ namespace OpenMobile.Framework.Math
     public enum areaTypes
     {
         /// <summary>
-        /// 100m^2
-        /// </summary>
-        are,
-        /// <summary>
-        /// 1000sq. meters
-        /// </summary>
-        hectare,
-        /// <summary>
         /// Square Kilometre
         /// </summary>
         squareKilometre,
@@ -101,29 +93,13 @@ namespace OpenMobile.Framework.Math
         /// </summary>
         cubicMeters,
         /// <summary>
-        /// Cubic Decimeters
-        /// </summary>
-        cubicDecimeters,
-        /// <summary>
         /// Cubic Centimeters
         /// </summary>
         cubicCentimeters,
         /// <summary>
-        /// Cubic Millimeters
-        /// </summary>
-        cubicMillimeters,
-        /// <summary>
-        /// Hectoliters
-        /// </summary>
-        hectoliters,
-        /// <summary>
         /// Liters
         /// </summary>
         liters,
-        /// <summary>
-        /// Centiliters
-        /// </summary>
-        centiliters,
         /// <summary>
         /// Milliliters
         /// </summary>
@@ -133,45 +109,27 @@ namespace OpenMobile.Framework.Math
         /// </summary>
         cubicInches,
         /// <summary>
-        /// Cubic Feet
-        /// </summary>
-        cubicFeet,
-        /// <summary>
-        /// Cubic Yard
-        /// </summary>
-        cubicYards,
-        /// <summary>
         /// Liquid Gallons (US)
         /// </summary>
-        usLiquidGallons,
+        usGallons,
         /// <summary>
-        /// Dry Gallons (US)
+        /// Liquid Gallons (UK)
         /// </summary>
-        usDryGallons,
-        /// <summary>
-        /// Liquid Gallons (US)
-        /// </summary>
-        impLiquidGallons,
-        /// <summary>
-        /// Barrels of oil
-        /// </summary>
-        barrels,
-        /// <summary>
-        /// Cups
-        /// </summary>
-        cups,
+        impGallons,
+        /*
         /// <summary>
         /// Fluid Onces (UK)
         /// </summary>
-        fluidOuncesUK,
+        //fluidOuncesUK,
         /// <summary>
         /// Fluid Onces (US)
         /// </summary>
-        fluidOuncesUS,
+        //fluidOuncesUS,
         /// <summary>
         /// Pints (UK)
         /// </summary>
-        pintsUK
+        //pintsUK
+        */
     }
     /// <summary>
     /// Unit types to represent Speed
@@ -243,14 +201,15 @@ namespace OpenMobile.Framework.Math
         /// Miles/US Gallon
         /// </summary>
         milesPerGallonUS, 
+        /*
         /// <summary>
         /// KM/US Gallon
         /// </summary>
-        kmPerGallonUS,
+        //kmPerGallonUS,
         /// <summary>
         /// Miles/UK Gallon
         /// </summary>
-        milesPerGallonUK,
+        //milesPerGallonUK,*/
         /// <summary>
         /// KM/UK Gallon
         /// </summary>
@@ -267,14 +226,16 @@ namespace OpenMobile.Framework.Math
         /// US Gallons/100 Miles
         /// </summary>
         gallonsUSPer100miles,
+        /*
         /// <summary>
         /// US Gallons/100 KM
         /// </summary>
-        gallonsUSPer100km,
+        //gallonsUSPer100km,
         /// <summary>
         /// UK Gallons/100 Miles
         /// </summary>
-        gallonsUKPer100miles,
+        //gallonsUKPer100miles,
+        */
         /// <summary>
         /// UK Gallons/100 KM
         /// </summary>
@@ -315,29 +276,8 @@ namespace OpenMobile.Framework.Math
         /// <param name="source"></param>
         /// <param name="result"></param>
         /// <returns></returns>
+        /// <exception cref="ArgumentException">Unknown Type</exception>
         public static double convertArea(double value, areaTypes source, areaTypes result)
-        {
-            throw new NotImplementedException();
-        }
-        /// <summary>
-        /// Converts the value in the source unit of measure to a value in the target unit of measure.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="source"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static double convertVolume(double value, volumeTypes source, volumeTypes result)
-        {
-            throw new NotImplementedException();
-        }
-        /// <summary>
-        /// Converts the value in the source unit of measure to a value in the target unit of measure.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="source"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static double convertFuelConsumption(double value, fuelConsumptionTypes source, fuelConsumptionTypes result)
         {
             throw new NotImplementedException();
         }
@@ -348,6 +288,112 @@ namespace OpenMobile.Framework.Math
         /// <param name="source"></param>
         /// <param name="target"></param>
         /// <returns></returns>
+        /// <exception cref="ArgumentException">Unknown Type</exception>
+        public static double convertVolume(double value, volumeTypes source, volumeTypes target)
+        {
+            if (source == target)
+                return value;
+            switch (source)
+            {
+                case volumeTypes.liters:
+                    break;
+                case volumeTypes.cubicCentimeters:
+                case volumeTypes.milliliters:
+                    value = value / 1000;
+                    break;
+                case volumeTypes.cubicInches:
+                    value = value * 0.016387064;
+                    break;
+                case volumeTypes.cubicMeters:
+                    value = value * 1000;
+                    break;
+                case volumeTypes.impGallons:
+                    value = value * 4.54609188;
+                    break;
+                case volumeTypes.usGallons:
+                    value = value * 3.78541178;
+                    break;
+            }
+            switch (target)
+            {
+                case volumeTypes.liters:
+                    return value;
+                case volumeTypes.cubicCentimeters:
+                case volumeTypes.milliliters:
+                    return value * 1000;
+                case volumeTypes.cubicInches:
+                    return value / 0.016387064;
+                case volumeTypes.cubicMeters:
+                    return value / 1000;
+                case volumeTypes.impGallons:
+                    return value / 4.54609188;
+                case volumeTypes.usGallons:
+                    return value / 3.78541178;
+            }
+            throw new ArgumentException("Unknown Type");
+        }
+        /// <summary>
+        /// Converts the value in the source unit of measure to a value in the target unit of measure.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">Unknown Type</exception>
+        public static double convertFuelConsumption(double value, fuelConsumptionTypes source, fuelConsumptionTypes target)
+        { //ToDo - Check this...I was a little tired when I wrote it [jd]
+            if (source == target)
+                return value;
+            switch (source)
+            {
+                case fuelConsumptionTypes.kmPerLiter:
+                    break;
+                case fuelConsumptionTypes.kmPerGallonUK:
+                    value = value * 0.219969157;
+                    break;
+                case fuelConsumptionTypes.milesPerGallonUS:
+                    value = value*0.425143707;
+                    break;
+                case fuelConsumptionTypes.milesPerLiter:
+                    value = value * 1.609344;
+                    break;
+                case fuelConsumptionTypes.litersPer100miles:
+                    value = 160.9344/value;
+                    break;
+                case fuelConsumptionTypes.gallonsUKPer100km:
+                    value = 21.9969157 / value;
+                    break;
+                case fuelConsumptionTypes.gallonsUSPer100miles:
+                    value = 42.5143707 / value;
+                    break;
+            }
+            switch (target)
+            {
+                case fuelConsumptionTypes.kmPerLiter:
+                    return value;
+                case fuelConsumptionTypes.kmPerGallonUK:
+                    return value / 0.219969157;
+                case fuelConsumptionTypes.milesPerGallonUS:
+                    return value / 0.425143707;
+                case fuelConsumptionTypes.milesPerLiter:
+                    return value / 1.609344;
+                case fuelConsumptionTypes.litersPer100miles:
+                    return 160.9344 * value;
+                case fuelConsumptionTypes.gallonsUKPer100km:
+                    return 21.9969157 * value;
+                case fuelConsumptionTypes.gallonsUSPer100miles:
+                    return 42.5143707 * value;
+            }
+            throw new ArgumentException("Unknown Type");
+        }
+        /// <summary>
+        /// Converts the value in the source unit of measure to a value in the target unit of measure.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">Unknown Type</exception>
         public static double convertSpeed(double value, speedTypes source, speedTypes target)
         {
             if (source == target)
@@ -389,11 +435,54 @@ namespace OpenMobile.Framework.Math
         /// </summary>
         /// <param name="value"></param>
         /// <param name="source"></param>
-        /// <param name="result"></param>
+        /// <param name="target"></param>
         /// <returns></returns>
-        public static double convertDistance(double value, distanceTypes source, distanceTypes result)
+        /// <exception cref="ArgumentException">Unknown Type</exception>
+        public static double convertDistance(double value, distanceTypes source, distanceTypes target)
         {
-            throw new NotImplementedException();
+            if (source == target)
+                return value;
+            switch (source)
+            {
+                case distanceTypes.meters:
+                    break;
+                case distanceTypes.centimeters:
+                    value = value / 100;
+                    break;
+                case distanceTypes.millimeters:
+                    value = value / 1000;
+                    break;
+                case distanceTypes.kilometers:
+                    value = value * 1000;
+                    break;
+                case distanceTypes.inches:
+                    value = value / 39.3700787;
+                    break;
+                case distanceTypes.feet:
+                    value = value / 3.2808399;
+                    break;
+                case distanceTypes.miles:
+                    value=value*1609.344;
+                    break;
+            }
+            switch (target)
+            {
+                case distanceTypes.meters:
+                    return value;
+                case distanceTypes.centimeters:
+                    return (value * 100);
+                case distanceTypes.millimeters:
+                    return (value * 1000);
+                case distanceTypes.kilometers:
+                    return (value / 1000);
+                case distanceTypes.inches:
+                    return (value * 39.3700787);
+                case distanceTypes.feet:
+                    return (value * 3.2808399);
+                case distanceTypes.miles:
+                    return (value / 1609.344);
+            }
+            throw new ArgumentException("Unknown Type");
         }
 
         /// <summary>

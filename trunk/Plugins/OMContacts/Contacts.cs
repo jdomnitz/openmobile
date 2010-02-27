@@ -1,10 +1,30 @@
-﻿using System;
-using OpenMobile.Data;
-using OpenMobile.Plugin;
-using OpenMobile.Framework;
-using OpenMobile.Controls;
-using OpenMobile;
+﻿/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System;
 using System.Drawing;
+using OpenMobile;
+using OpenMobile.Controls;
+using OpenMobile.Data;
+using OpenMobile.Framework;
+using OpenMobile.Plugin;
 
 namespace OMContacts
 {
@@ -31,33 +51,27 @@ namespace OMContacts
             Font f = new Font("Microsoft Sans Serif", 24F);
             OMLabel home = new OMLabel(342, 284, 500, 50);
             home.Font = f;
-            home.Text = "Home: ";
             home.TextAlignment = Alignment.CenterLeft;
             home.Name = "home";
             OMLabel cell1 = new OMLabel(356, 321, 500, 50);
             cell1.Font = f;
-            cell1.Text = "Cell1: ";
             cell1.TextAlignment = Alignment.CenterLeft;
             cell1.Name = "cell1";
             OMLabel cell2 = new OMLabel(357, 354, 500, 50);
             cell2.Font = f;
-            cell2.Text = "Cell2: ";
             cell2.TextAlignment = Alignment.CenterLeft;
             cell2.Name = "cell2";
             OMLabel work1 = new OMLabel(338, 392, 500, 50);
             work1.Font = f;
-            work1.Text = "Work1: ";
             work1.TextAlignment = Alignment.CenterLeft;
             work1.Name = "work1";
             OMLabel work2 = new OMLabel(339, 422, 500, 50);
             work2.Font = f;
-            work2.Text = "Work2: ";
             work2.TextAlignment = Alignment.CenterLeft;
             work2.Name = "work2";
             OMLabel email = new OMLabel(352, 455, 600, 50);
             email.Color = Color.Blue;
             email.Font = f;
-            email.Text = "Email: ";
             email.TextAlignment = Alignment.CenterLeft;
             email.Name = "email";
             OMLabel name = new OMLabel(463, 124, 500, 50);
@@ -66,13 +80,8 @@ namespace OMContacts
             name.Name = "name";
             OMLabel Address = new OMLabel(563, 204, 300, 80);
             Address.Name = "Address";
-            OMLabel birthday = new OMLabel();
+            OMLabel birthday = new OMLabel(463,163,500,40);
             birthday.Font = new Font("Microsoft Sans Serif", 21.75F);
-            birthday.Height = 40;
-            birthday.Width = 500;
-            birthday.Top = 163;
-            birthday.Left = 463;
-            birthday.Text = "Birthday: ";
             birthday.Name = "birthday";
             p.addControl(border);
             p.addControl(picture);
@@ -94,7 +103,16 @@ namespace OMContacts
             OMList l=((OMList)sender);
             OMPanel p = manager[screen, "contact"];
             ((OMImage)p["picture"]).Image = new imageItem(l[l.SelectedIndex].image);
-            ((OMLabel)p["name"]).Text = l[l.SelectedIndex].text;
+            ((OMLabel)p["name"]).Text = Collections.contacts[l.SelectedIndex].name;
+            ((OMLabel)p["cell1"]).Text = "Cell1: "+Collections.contacts[l.SelectedIndex].cell1;
+            ((OMLabel)p["cell2"]).Text = "Cell2: " + Collections.contacts[l.SelectedIndex].cell2;
+            ((OMLabel)p["work1"]).Text = "Work1: " + Collections.contacts[l.SelectedIndex].work1;
+            ((OMLabel)p["work2"]).Text = "Work2: " + Collections.contacts[l.SelectedIndex].work2;
+            ((OMLabel)p["home"]).Text = "Home: "+Collections.contacts[l.SelectedIndex].home;
+            ((OMLabel)p["email"]).Text = "Email: "+Collections.contacts[l.SelectedIndex].email;
+            ((OMLabel)p["Address"]).Text = Collections.contacts[l.SelectedIndex].Address;
+            ((OMLabel)p["birthday"]).Text = "Birthday: "+Collections.contacts[l.SelectedIndex].Birthday.ToShortDateString();
+
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"OMContacts", "contact");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
         }
@@ -112,7 +130,10 @@ namespace OMContacts
             using (OpenMobile.Data.Contacts con = new OpenMobile.Data.Contacts())
             {
                 con.beginRead();
-                contact c=con.readNext(false);
+                Collections.contacts.Clear();
+                OMList l = ((OMList)manager[screen][0]);
+                l.Clear();
+                contact c=con.readNext(true);
                 while (c.name!=null)
                 {
                     Image img;
@@ -120,8 +141,8 @@ namespace OMContacts
                         img=theHost.getSkinImage("questionMark").image;
                     else
                         img=Image.FromFile(c.imageURL);
-                    ((OMList)manager[screen][0]).Add(new OMListItem(c.name,img));
-                    c = con.readNext(false);
+                    l.Add(new OMListItem(c.name,img));
+                    c = con.readNext(true);
                 }
             }
         }

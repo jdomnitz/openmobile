@@ -1,10 +1,30 @@
-﻿using System;
+﻿/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System;
+using System.Drawing;
+using System.IO;
+using OpenMobile;
+using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
-using OpenMobile.Controls;
-using System.Drawing;
-using OpenMobile;
-using System.IO;
 
 namespace OMDir
 {
@@ -23,6 +43,8 @@ namespace OMDir
             }
             else
                 ((OMLabel)manager[screen][0]).Text = "Select a File";
+            if ((name != "Folder") && (name != ""))
+                loadPath(screen, name);
             return manager[screen];
         }
 
@@ -152,7 +174,8 @@ namespace OMDir
             string source="";
             if (l.Tag == null)
             {
-                source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
+                //source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
+                source = l[l.SelectedIndex].text;
                 switch (source)
                 {
                     case "Desktop":
@@ -167,6 +190,9 @@ namespace OMDir
                         return Environment.GetFolderPath(Environment.SpecialFolder.MyMusic).Replace("Music", "Videos");
                 }
             }
+            source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
+            if (l.Tag.ToString() == "")
+                l.Tag = null;
             return source;
         }
 
@@ -185,7 +211,29 @@ namespace OMDir
             l.Add(new OMListItem("Videos", folder));
             l.AddRange(Environment.GetLogicalDrives());
         }
-
+        private void loadPath(int screen,string path)
+        {
+            OMList l = (OMList)manager[screen][1];
+            OMList r = (OMList)manager[screen][2];
+            r.Tag = path;
+            l.Clear();
+            if (System.IO.Path.GetPathRoot(path) == path)
+            {
+                l.Tag = "";
+                loadRoot(l);
+                ((OMButton)manager[screen][3]).Width = 0;
+            }
+            else
+            {
+                l.Tag = Directory.GetParent(path).FullName;
+                DirectoryInfo fInfo = new DirectoryInfo(path);
+                foreach (DirectoryInfo s in fInfo.GetDirectories())
+                    if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                        l.Add(new OMListItem(s.Name, folder));
+            }
+            l.Select(l.indexOf(new DirectoryInfo(path).Name));
+            left_OnClick(l, screen); //refresh the right screen
+        }
         void right_OnClick(object sender, int screen)
         {
             OMList r = (OMList)manager[screen][2];

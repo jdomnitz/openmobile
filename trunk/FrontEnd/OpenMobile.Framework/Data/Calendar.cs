@@ -92,7 +92,7 @@ namespace OpenMobile.Data
         /// <returns>Was the call successful</returns>
         public bool beginRead(DateTime start)
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Application.StartupPath,"Data", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
             asyncCmd = asyncCon.CreateCommand();
             asyncCmd.CommandText = "SELECT * FROM Calendar";
@@ -139,7 +139,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool beginWrite()
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Application.StartupPath, "Data", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
             asyncCmd = asyncCon.CreateCommand();
             return true;

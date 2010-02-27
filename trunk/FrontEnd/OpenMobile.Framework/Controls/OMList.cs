@@ -53,7 +53,7 @@ namespace OpenMobile.Controls
         private Color selectedItemColor2 = Color.Gray;
         private Color background = Color.Transparent;
         private int listItemHeight=60;
-
+        private bool selectQueued = false;
         /// <summary>
         /// The background color of the list (Default: Transparent)
         /// </summary>
@@ -76,10 +76,16 @@ namespace OpenMobile.Controls
         public void Select(int index)
         {
             selectedIndex = index;
+            if (h == 0)
+            {
+                selectQueued = true;
+                return;
+            }
             if (!((start <= selectedIndex) && (selectedIndex <= start - (Height / h))))
             {
                 moved = -(selectedIndex * h);
             }
+            selectQueued = false;
             this.refreshMe(this.toRegion());
         }
 
@@ -505,6 +511,10 @@ namespace OpenMobile.Controls
                     if (background!=Color.Transparent)
                         g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp*background.A), background)), new Rectangle(Left+1,Top+1,Width-2,Height-2));
                     h = (int)(g.MeasureString("A", Font).Height + 0.5); //Round up
+                    if (selectQueued == true)
+                    {
+                        Select(selectedIndex);
+                    }
                     if (ListStyle == eListStyle.MultiList)
                         h = (int)(h*1.75);
                     int ofset = 0;

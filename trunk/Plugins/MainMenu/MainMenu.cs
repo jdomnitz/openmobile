@@ -31,6 +31,7 @@ using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
+using System.Diagnostics;
 
 //All High Level plugins should implement IHighLevel
 [InitialTransition(eGlobalTransition.SlideDown)]
@@ -42,6 +43,7 @@ public sealed class MainMenu : IHighLevel
 
         OMPanel setButton = new OMPanel();
         IPluginHost theHost;
+        OMPanel exit = new OMPanel();
 
         //Heres where the magic happens
         public eLoadStatus initialize(IPluginHost host)
@@ -168,6 +170,56 @@ public sealed class MainMenu : IHighLevel
             setButton.addControl(cancel);
             screens = new ScreenManager(theHost.ScreenCount);
             screens.loadPanel(mainPanel);
+            imageItem opt2 = theHost.getSkinImage("Full.Highlighted");
+            imageItem opt1 = theHost.getSkinImage("Full");
+            OMImage Image1 = new OMImage(275, 140, 400, 330);
+            Image1.Image = theHost.getSkinImage("MediaBorder");
+            Image1.Name = "Image1";
+            OMButton Quit = new OMButton();
+            Quit.Image = opt1;
+            Quit.FocusImage = opt2;
+            Quit.Height = 60;
+            Quit.Top = 171;
+            Quit.Left = 330;
+            Quit.Text = "Quit";
+            Quit.Name = "UI.Quit";
+            Quit.OnClick += new userInteraction(Quit_OnClick);
+            OMButton Sleep = new OMButton();
+            Sleep.Image = opt1;
+            Sleep.FocusImage = opt2;
+            Sleep.Height = 60;
+            Sleep.Top = 239;
+            Sleep.Left = 330;
+            Sleep.Text = "Sleep";
+            Sleep.Name = "UI.Sleep";
+            Sleep.OnClick += new userInteraction(Sleep_OnClick);
+            OMButton Hibernate = new OMButton();
+            Hibernate.Image = opt1;
+            Hibernate.FocusImage = opt2;
+            Hibernate.Height = 60;
+            Hibernate.Top = 308;
+            Hibernate.Left = 330;
+            Hibernate.Text = "Hibernate";
+            Hibernate.Name = "UI.Hibernate";
+            Hibernate.OnClick += new userInteraction(Hibernate_OnClick);
+            OMButton Shutdown = new OMButton();
+            Shutdown.Image = opt1;
+            Shutdown.FocusImage = opt2;
+            Shutdown.Height = 60;
+            Shutdown.Top = 377;
+            Shutdown.Left = 330;
+            Shutdown.Text = "Shutdown";
+            Shutdown.Name = "UI.Shutdown";
+            Shutdown.OnClick += new userInteraction(Shutdown_OnClick);
+            OMBasicShape visibleShape = new OMBasicShape(0, 0, 1000, 600);
+            visibleShape.Shape = shapes.Rectangle;
+            visibleShape.FillColor = Color.FromArgb(130, Color.Black);
+            exit.addControl(visibleShape);
+            exit.addControl(Image1);
+            exit.addControl(Quit);
+            exit.addControl(Sleep);
+            exit.addControl(Hibernate);
+            exit.addControl(Shutdown);
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -176,7 +228,9 @@ public sealed class MainMenu : IHighLevel
             switch(((OMButton)sender).Tag.ToString())
             {
                 case "Exit":
-                    theHost.execute(eFunction.closeProgram);
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"MainMenu", "Quit");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                    ((OMButton)sender).Transition = eButtonTransition.None;
                     break;
                 case "":
                     return;
@@ -188,7 +242,29 @@ public sealed class MainMenu : IHighLevel
                     break;
             }
         }
+        void Quit_OnClick(object sender, int screen)
+        {
+            theHost.execute(eFunction.closeProgram);
+        }
 
+        void Sleep_OnClick(object sender, int screen)
+        {
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
+            theHost.execute(eFunction.standby);
+        }
+
+        void Hibernate_OnClick(object sender, int screen)
+        {
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
+            theHost.execute(eFunction.hibernate);
+        }
+
+        void Shutdown_OnClick(object sender, int screen)
+        {
+            theHost.execute(eFunction.shutdown);
+        }
         void okButton_OnClick(object sender, int screen)
         {
             OMList theList=(OMList)setButton[screen];
@@ -255,6 +331,8 @@ public sealed class MainMenu : IHighLevel
         ScreenManager screens;
         public OMPanel loadPanel(string name,int screen)
         {
+            if (name == "Quit")
+                return exit;
             return screens[screen];
         }
 
@@ -273,7 +351,7 @@ public sealed class MainMenu : IHighLevel
             foreach (IBasePlugin b in (List<IBasePlugin>)o)
             {
                 if (hl.IsInstanceOfType(b))
-                    if ((b.pluginName != "UI") && (b.pluginName != "MainMenu")) //FS#7
+                    if ((b.pluginName != "UI") && (b.pluginName != "MainMenu") && (b.pluginName != "OMNotify")) //FS#7
                         list.Add(b.pluginName);
             }
             return setButton;

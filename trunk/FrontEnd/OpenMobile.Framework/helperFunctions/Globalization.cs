@@ -89,9 +89,9 @@ namespace OpenMobile.Framework
         {
             if (kph == isMetric())
                 if (kph == true)
-                    return speed + " kph";
+                    return speed + "kph";
                 else
-                    return speed + " mph";
+                    return speed + "mph";
             else if (kph == true)
                 return Calculation.convertSpeed(speed,speedTypes.kilometersPerHour,speedTypes.milesPerHour).ToString("0") + " mph";
             else

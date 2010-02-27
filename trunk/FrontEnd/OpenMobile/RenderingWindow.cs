@@ -54,6 +54,7 @@ namespace OpenMobile
         private eGlobalTransition currentTransition;
         public create invokeOnMain;
         private bool transitioning = false;
+        private bool keyboardActive;
         public bool fullscreen = false;
         // Start of code added by Borte
         /// <summary>
@@ -64,8 +65,6 @@ namespace OpenMobile
         /// Throw started (will be reset when throw starts) for thrown interface
         /// </summary>
         private bool ThrowStarted = false;
-        float initialHeight = 600F;
-        float initialWidth = 1000F;
         //***
         public int Screen
         {
@@ -134,7 +133,6 @@ namespace OpenMobile
         {
             set
             {
-                initialWidth = value;
                 base.Width = value + 16;
             }
             get
@@ -146,7 +144,6 @@ namespace OpenMobile
         {
             set
             {
-                initialHeight = value;
                 base.Height = value + 38;
             }
             get
@@ -154,7 +151,17 @@ namespace OpenMobile
                 return base.Height;
             }
         }
-
+        public new Size Size
+        {
+            set
+            {
+                base.Size = new Size(value.Width + 16, value.Height + 38);
+            }
+            get
+            {
+                return base.Size;
+            }
+        }
         // End of code added by Borte
         public void hideCursor()
         {
@@ -372,11 +379,19 @@ namespace OpenMobile
                 {
                     if ((lastClick.Mode == modeType.Highlighted) || (lastClick.Mode == modeType.Clicked))
                     {
-                        lastClick.Mode = modeType.Normal;
-                        //Recheck where the mouse is at
-                        UI_MouseMove(this, new MouseEventArgs(MouseButtons.None, 0, Cursor.Position.X, Cursor.Position.Y, 0));
                         rParam.transparency = 1;
                         rParam.transitionTop = 0;
+                        if (keyboardActive == true)
+                        {
+                            keyboardActive = false;
+                            lastClick.Mode = modeType.Highlighted;
+                        }
+                        else
+                        {
+                            lastClick.Mode = modeType.Normal;
+                            //Recheck where the mouse is at
+                            UI_MouseMove(this, new MouseEventArgs(MouseButtons.None, 0, Cursor.Position.X, Cursor.Position.Y, 0));
+                        }
                         Invalidate();
                     }
                 }
@@ -391,7 +406,7 @@ namespace OpenMobile
             }
             if (lastClick != null)
             {
-                if (lastClick.Mode == modeType.transitioningOut)
+                if (lastClick.Mode == modeType.transitioningOut) //<- Unnecessary?
                     lastClick.Mode = modeType.ClickedAndTransitioningOut;
                 if (lastClick.Transition == eButtonTransition.None)
                 {
@@ -619,7 +634,7 @@ namespace OpenMobile
             {
                 if (currentMode == modeType.Highlighted)
                 {
-                    if (typeof(OMButton) == highlighted.GetType())
+                    if (typeof(OMButton).IsInstanceOfType(highlighted))
                     {
                         if (lastClick != null)
                         {
@@ -665,7 +680,7 @@ namespace OpenMobile
         {
             if (highlighted != null)
             {
-                if ((currentMode == modeType.Highlighted) && (typeof(OMButton) == highlighted.GetType()))
+                if ((currentMode == modeType.Highlighted) && (typeof(OMButton).IsInstanceOfType(highlighted)))
                 {
                     if (lastClick != null)
                     {
@@ -782,6 +797,22 @@ namespace OpenMobile
                 else
                     tmrClosing.Enabled = true;
             }
+            else if (e.KeyCode == Keys.Return)
+            {
+                tmrLongClick.Enabled = false;
+
+                if (lastClick != null)
+                {
+                    keyboardActive = true;
+                    tmrClick.Enabled = true;
+                    new Thread(delegate() { lastClick.clickMe(screen); }).Start();
+                    if(lastClick.DownImage.image != null)
+                    {
+                        lastClick.Mode = modeType.Highlighted;
+                        UpdateThisControl(lastClick.toRegion());
+                    }
+                }
+            }
             if ((highlighted != null) && (typeof(IKey).IsInstanceOfType(highlighted) == true))
                 ((IKey)highlighted).KeyUp(screen, e, widthScale, heightScale);
         }
@@ -802,8 +833,8 @@ namespace OpenMobile
 
         private void UI_Resize(object sender, EventArgs e)
         {
-            heightScale = (this.ClientRectangle.Height / initialHeight);
-            widthScale = (this.ClientRectangle.Width / initialWidth);
+            heightScale = (this.ClientRectangle.Height / 600F);
+            widthScale = (this.ClientRectangle.Width / 1000F);
             if ((this.WindowState == FormWindowState.Maximized) && (fullscreen == false))
             {
                 fullscreen = true;
@@ -994,12 +1025,14 @@ namespace OpenMobile
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Return:
-                        if (highlighted.GetType() == typeof(OMButton))
+                        if (typeof(OMButton).IsInstanceOfType(highlighted))
                         {
                             lastClick = (OMButton)highlighted;
-                            lastClick.Mode = modeType.Clicked;
-                            tmrClick.Enabled = true;
-                            new Thread(delegate() { lastClick.clickMe(screen); }).Start();
+                            if (lastClick.Mode == modeType.transitioningOut)
+                                lastClick.Mode = modeType.ClickedAndTransitioningOut;
+                            else
+                                lastClick.Mode = modeType.Clicked;
+                            tmrLongClick.Enabled = true;
                         }
                         else if (typeof(IClickable).IsInstanceOfType(highlighted))
                         {

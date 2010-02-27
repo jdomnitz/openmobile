@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OpenMobile.Data {
+namespace OpenMobile.Framework.Data {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace OpenMobile.Data {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OpenMobile.Data.SQL", typeof(SQL).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OpenMobile.Framework.Data.SQL", typeof(SQL).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

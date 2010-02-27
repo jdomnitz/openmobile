@@ -25,6 +25,7 @@ using System.Text;
 using System.Windows.Forms;
 using OpenMobile;
 using OpenMobile.Framework;
+using System.Diagnostics;
 
 namespace OMHal
 {
@@ -61,11 +62,11 @@ namespace OMHal
         static int volume = 0;
         public static void checkVolumeChange()
         {
-            int newVolume = Specific.getVolume();
+            int newVolume = Specific.getVolume(0);
             if (volume == newVolume)
                 return;
             volume = newVolume;
-            raiseSystemEvent(eFunction.systemVolumeChanged, newVolume.ToString(), "", "");
+            raiseSystemEvent(eFunction.systemVolumeChanged, newVolume.ToString(), "0", "");
         }
 
         public static void raiseSystemEvent(eFunction eFunction, string arg, string arg2, string arg3)
@@ -86,8 +87,6 @@ namespace OMHal
         }
         void parse(string message)
         {
-            if (message == "45")
-                Environment.Exit(0);
             string[] parts=message.Split(new char[]{'|'});
             string arg1 = "", arg2 = "", arg3 = "";
             if (parts.Length > 3)
@@ -98,8 +97,24 @@ namespace OMHal
                 arg1 = parts[1];
             switch (parts[0])
             {
-                case "34":
-                    Specific.setVolume(int.Parse(arg1));
+                case "34": //Set Volume
+                    Specific.setVolume(int.Parse(arg1),0);
+                    break;
+                case "35": //Eject Disc
+                    Specific.eject();
+                    break;
+                case "45": //Close Program
+                    Environment.Exit(0);
+                    break;
+                case "46": //Shutdown
+                    ProcessStartInfo info = new ProcessStartInfo("shutdown", "/s /t 0");
+                    info.WindowStyle = ProcessWindowStyle.Hidden;
+                    Process.Start(info);
+                    break;
+                case "47": //Restart
+                    ProcessStartInfo info2 = new ProcessStartInfo("shutdown", "/r /t 0");
+                    info2.WindowStyle = ProcessWindowStyle.Hidden;
+                    Process.Start(info2);
                     break;
             }
         }

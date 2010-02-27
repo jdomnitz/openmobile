@@ -923,7 +923,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Returns the type of control
         /// </summary>
-        public static new string TypeName
+        public static string TypeName
         {
             get
             {

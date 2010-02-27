@@ -94,10 +94,10 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool beginRead()
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Application.StartupPath, "Data", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
             cmd = asyncCon.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Phonebook order by name";
+            cmd.CommandText = "SELECT * FROM Phonebook ORDER BY name COLLATE NOCASE";
             asyncReader = cmd.ExecuteReader();
             return true;
         }
@@ -107,7 +107,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool beginWrite()
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Application.StartupPath, "Data", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
             cmd = asyncCon.CreateCommand();
             return true;
@@ -132,6 +132,8 @@ namespace OpenMobile.Data
             ret.work1 = asyncReader["Work1"].ToString();
             ret.work2 = asyncReader["Work2"].ToString();
             ret.comments = asyncReader["Comments"].ToString();
+            ret.Address = asyncReader["Address"].ToString();
+            ret.Birthday = DateTime.Parse(asyncReader["Bday"].ToString());
             if (storeAlso == true)
                 Collections.contacts.Add(ret);
             return ret;
@@ -146,7 +148,7 @@ namespace OpenMobile.Data
             StringBuilder query = new StringBuilder("BEGIN;DELETE FROM Phonebook WHERE Name='");
             {
                 query.Append(c.name);
-                query.Append("';INSERT INTO Phonebook ('Cell1','Cell2','Email','Fax','Home','imageURL','Name','Work1','Work2','Comments')VALUES('");
+                query.Append("';INSERT INTO Phonebook ('Cell1','Cell2','Email','Fax','Home','imageURL','Name','Work1','Work2','Comments','Address','Bday')VALUES('");
                 query.Append(c.cell1);
                 query.Append("','");
                 query.Append(c.cell2);
@@ -165,7 +167,11 @@ namespace OpenMobile.Data
                 query.Append("','");
                 query.Append(c.work2);
                 query.Append("','");
-                query.Append(c.comments);
+                query.Append(General.escape(c.comments));
+                query.Append("','");
+                query.Append(General.escape(c.Address));
+                query.Append("','");
+                query.Append(General.escape(c.Birthday.ToString()));
                 query.Append("');COMMIT");
             }
             cmd.CommandText = query.ToString();
