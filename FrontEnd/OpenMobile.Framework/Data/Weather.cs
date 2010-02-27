@@ -232,6 +232,10 @@ namespace OpenMobile.Data
             /// Zip
             /// </summary>
             public string location;
+            /// <summary>
+            /// The name of the logo for the data source (often the data sources name)
+            /// </summary>
+            public string contrib;
         }
         /// <summary>
         /// Return weather for the given zip.  Use DateTime.MinValue for all days or specify the day
@@ -264,6 +268,7 @@ namespace OpenMobile.Data
                 w.location = location;
                 w.feelsLike = reader.GetFloat(reader.GetOrdinal("feelsLike"));
                 w.date =DateTime.Parse(reader["Date"].ToString());
+                w.contrib = reader["contrib"].ToString();
             }
             reader.Close();
             return w;
@@ -274,7 +279,7 @@ namespace OpenMobile.Data
         /// </summary>
         public Weather()
         {
-            con = new SQLiteConnection(@"Data Source=" + Path.Combine(Application.StartupPath, "Data", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             con.Open();
         }
         /// <summary>
@@ -290,7 +295,7 @@ namespace OpenMobile.Data
                 query.Append(General.escape(w.location));
                 query.Append("' AND Date='");
                 query.Append(w.date);
-                query.Append("';INSERT INTO Weather (Conditions, Date, dewPoint, feelsLike, highTemp, lowTemp, Temp, Humidity, UVIndex, windDirection, windSpeed, precip, Code)VALUES('");
+                query.Append("';INSERT INTO Weather (Conditions, Date, dewPoint, feelsLike, highTemp, lowTemp, Temp, Humidity, UVIndex, windDirection, windSpeed, precip, Code, contrib)VALUES('");
                 query.Append(w.conditions);
                 query.Append("','");
                 query.Append(w.date);
@@ -316,6 +321,8 @@ namespace OpenMobile.Data
                 query.Append(w.precipitationPercent);
                 query.Append("','");
                 query.Append(General.escape(w.location));
+                query.Append("','");
+                query.Append(General.escape(w.contrib));
                 query.Append("')");
                 cmd.CommandText = query.ToString();
                 cmd.ExecuteNonQuery();

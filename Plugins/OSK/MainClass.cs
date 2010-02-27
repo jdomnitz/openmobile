@@ -79,7 +79,7 @@ namespace OpenMobile
         }
         public float pluginVersion
         {
-            get { return 0.3F; }
+            get { return 0.5F; }
         }
 
         public string pluginDescription
@@ -165,8 +165,8 @@ namespace OpenMobile
                         switch (arg.KeyValue)
                         {
                             case 13:
-                                theHost.execute(eFunction.userInputReady, i.ToString(), "OSK", text.Text);
-                                break;
+                                //Ignore enter-could be any button //theHost.execute(eFunction.userInputReady, i.ToString(), "OSK", text.Text);
+                                return false;//break;
                             case 32:
                                 text.Text += " ";
                                 break;

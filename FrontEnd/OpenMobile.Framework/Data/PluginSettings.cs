@@ -38,7 +38,7 @@ namespace OpenMobile.Data
         /// </summary>
         public PluginSettings()
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Application.StartupPath, "Data", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
         }
         /// <summary>
@@ -46,8 +46,7 @@ namespace OpenMobile.Data
         /// </summary>
         public void createDB()
         {
-            var k = new ResourceManager("OpenMobile.Data.SQL", Assembly.GetExecutingAssembly());
-            SQLiteCommand cmd = new SQLiteCommand(k.GetString("OMData"), asyncCon);
+            SQLiteCommand cmd = new SQLiteCommand(OpenMobile.Framework.Data.SQL.OMData, asyncCon);
             cmd.ExecuteNonQuery();
         }
         /// <summary>

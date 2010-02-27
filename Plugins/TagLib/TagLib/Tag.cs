@@ -819,40 +819,6 @@ namespace TagLib {
 		}
 		
 		/// <summary>
-		///    Gets and sets the same value as <see cref="Performers"
-		///    />.
-		/// </summary>
-		/// <value>
-		///    The same value as <see cref="Performers" />.
-		/// </value>
-		/// <remarks>
-		///    This property exists to aleviate confusion. Use <see
-		///    cref="Performers" /> for track artists and <see
-		///    cref="AlbumArtists" /> for album artists.
-		/// </remarks>
-		[Obsolete("For album artists use AlbumArtists. For track artists, use Performers")]
-		public virtual string [] Artists {
-			get {return Performers;}
-			set {Performers = value;}
-		}
-		
-		/// <summary>
-		///    Gets the same value as <see cref="FirstPerformer" />.
-		/// </summary>
-		/// <value>
-		///    The same value as <see cref="FirstPerformer" />.
-		/// </value>
-		/// <remarks>
-		///    This property exists to aleviate confusion. Use <see
-		///    cref="FirstPerformer" /> for track artists and <see
-		///    cref="FirstAlbumArtist" /> for album artists.
-		/// </remarks>
-		[Obsolete("For album artists use FirstAlbumArtist. For track artists, use FirstPerformer")]
-		public string FirstArtist {
-			get {return FirstPerformer;}
-		}
-		
-		/// <summary>
 		///    Gets the first value contained in <see
 		///    cref="AlbumArtists" />.
 		/// </summary>
@@ -968,22 +934,6 @@ namespace TagLib {
 		/// </remarks>
 		public string FirstGenre {
 			get {return FirstInGroup(Genres);}
-		}
-		
-		/// <summary>
-		///    Gets the same value as <see cref="JoinedPerformers" />.
-		/// </summary>
-		/// <value>
-		///    The same value as <see cref="JoinedPerformers" />.
-		/// </value>
-		/// <remarks>
-		///    This property exists to aleviate confusion. Use <see
-		///    cref="JoinedPerformers" /> for track artists and <see
-		///    cref="JoinedAlbumArtists" /> for album artists.
-		/// </remarks>
-		[Obsolete("For album artists use JoinedAlbumArtists. For track artists, use JoinedPerformers")]
-		public string JoinedArtists {
-			get {return JoinedPerformers;}
 		}
 		
 		/// <summary>
@@ -1143,48 +1093,6 @@ namespace TagLib {
 		///    clear all values.
 		/// </remarks>
 		public abstract void Clear ();
-		
-		/// <summary>
-		///    Copies all standard values from one tag to another,
-		///    optionally overwriting existing values.
-		/// </summary>
-		/// <param name="source">
-		///    A <see cref="Tag" /> object containing the source tag to
-		///    copy the values from.
-		/// </param>
-		/// <param name="target">
-		///    A <see cref="Tag" /> object containing the target tag to
-		///    copy values to.
-		/// </param>
-		/// <param name="overwrite">
-		///    A <see cref="bool" /> specifying whether or not to copy
-		///    values over existing one.
-		/// </param>
-		/// <remarks>
-		///    <para>This method only copies the most basic values,
-		///    those contained in this class, between tags. To copy
-		///    format specific tags, or additional details, additional
-		///    implementations need to be applied. For example, copying
-		///    from one <see cref="TagLib.Id3v2.Tag" /> to another:
-		///    <c>foreach (TagLib.Id3v2.Frame frame in old_tag)
-		///    new_tag.AddFrame (frame);</c></para>
-		/// </remarks>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="source" /> or <paramref name="target" />
-		///    is <see langword="null" />.
-		/// </exception>
-		[Obsolete("Use Tag.CopyTo(Tag,bool)")]
-		public static void Duplicate (Tag source, Tag target,
-		                              bool overwrite)
-		{
-			if (source == null)
-				throw new ArgumentNullException ("source");
-			
-			if (target == null)
-				throw new ArgumentNullException ("target");
-			
-			source.CopyTo (target, overwrite);
-		}
 		
 		/// <summary>
 		///    Copies the values from the current instance to another

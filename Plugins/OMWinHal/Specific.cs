@@ -19,6 +19,8 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
+using System.Runtime.InteropServices;
+using System.Text;
 using OpenMobile;
 using OSSpecificLib.CoreAudioApi;
 
@@ -35,7 +37,7 @@ namespace OMHal
         /// Gets the system volume
         /// </summary>
         /// <returns>Int (Range 0-100)</returns>
-        public static int getVolume()
+        public static int getVolume(int instance)
         {
             if (os.Version.Major < 6)
             {
@@ -56,7 +58,7 @@ namespace OMHal
         /// Sets the system volume
         /// </summary>
         /// <param name="volume">Integer (Range: 0-100)</param>
-        public static void setVolume(int volume)
+        public static void setVolume(int volume,int instance)
         {
             if (os.Version.Major < 6)
             {
@@ -106,7 +108,7 @@ namespace OMHal
                 IntPtr tmp;
                 int result = XPVolume.mixerOpen(out tmp, 0, handle, IntPtr.Zero, CALLBACK_WINDOW);
                 if (XPVolume.IsMuted() == true)
-                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","","");
+                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","0","");
                 return (result == 0);
             }
             else
@@ -117,7 +119,7 @@ namespace OMHal
                     device = DevEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
                     device.AudioEndpointVolume.OnVolumeNotification += new AudioEndpointVolumeNotificationDelegate(AudioEndpointVolume_OnVolumeNotification);
                     if (device.AudioEndpointVolume.Mute == true)
-                        Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","","");
+                        Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","0","");
                 }
                 catch (Exception) { }
                 return (device!=null);
@@ -126,9 +128,9 @@ namespace OMHal
         static void AudioEndpointVolume_OnVolumeNotification(AudioVolumeNotificationData data)
         {
             if (data.Muted == false)
-                Form1.raiseSystemEvent(eFunction.systemVolumeChanged, ((int)(data.MasterVolume * 100)).ToString(),"","");
+                Form1.raiseSystemEvent(eFunction.systemVolumeChanged, ((int)(data.MasterVolume * 100)).ToString(),"0","");
             else
-                Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","","");
+                Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","0","");
         }
         /// <summary>
         /// Lists all audio devices present on the system
@@ -146,5 +148,14 @@ namespace OMHal
                 return device.AudioEndpointVolume.getDevices();
             }
         }
+
+        internal static void eject()
+        {
+            StringBuilder buf = new StringBuilder();
+            mciSendString("SET CDAudio door open", buf, 127, IntPtr.Zero);
+        }
+
+        [DllImport("winmm.dll")]
+        static extern Int32 mciSendString(string command, StringBuilder buffer, int bufferSize, IntPtr hwndCallback);
     }
 }

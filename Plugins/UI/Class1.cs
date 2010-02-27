@@ -110,7 +110,6 @@ namespace OpenMobile
             OMPanel p = new OMPanel();
             theHost = host;
             manager = new ScreenManager(host.ScreenCount);
-            theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
             blank.name = "EMPTY";
             tick.BeginInit();
             tick.EndInit();
@@ -243,6 +242,7 @@ namespace OpenMobile
             p.addControl(shape);
             p.addControl(caption);
             p.addControl(imgSpeak);
+
             p.BackgroundType = backgroundStyle.Gradiant;
             p.BackgroundColor1 = Color.FromArgb(0, 0, 4);
             p.BackgroundColor2 = Color.FromArgb(0, 0, 20);
@@ -364,17 +364,6 @@ namespace OpenMobile
         void slider_OnSliderMoved(OMSlider sender,int screen)
         {
             theHost.execute(eFunction.setPosition, theHost.instanceForScreen(screen).ToString(),sender.Value.ToString());
-        }
-
-        void theHost_OnStorageEvent(eMediaType type, string arg)
-        {
-            if (type != eMediaType.NotSet)
-            {
-                statusReset.Enabled = false;
-                statusReset.Enabled = true;
-                for (int i = 0; i < theHost.ScreenCount; i++)
-                    ((OMLabel)manager[i][6]).Text = "Drive Inserted: " + arg;
-            }
         }
 
         void rewindButton_OnClick(object sender, int screen)

@@ -26,9 +26,9 @@ using System.Threading;
 using System.Windows.Forms;
 using DirectShowLib;
 using OpenMobile;
+using OpenMobile.Data;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
-using OpenMobile.Data;
 
 namespace OMPlayer
 {
@@ -233,6 +233,16 @@ namespace OMPlayer
 
     public bool play(int instance, string url, eMediaType type)
     {
+        switch (type)
+        {
+            case eMediaType.BluetoothResource:
+            case eMediaType.BluRay:
+            case eMediaType.HDDVD:
+            case eMediaType.HTTPUrl:
+            case eMediaType.iPodiPhone:
+            case eMediaType.RTPUrl:
+                return false;
+        }
         try
         {
             checkInstance(instance);
@@ -427,6 +437,12 @@ namespace OMPlayer
             nowPlaying = TagReader.getInfo(url);
             if (nowPlaying.coverArt == null)
                 nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
+            if (nowPlaying.Length==0)
+            {
+                double dur;
+                mediaPosition.get_Duration(out dur);
+                nowPlaying.Length = (int)dur;
+            }
             OnMediaEvent(eFunction.Play, instance, url);
             if (t != null)
                 t.Abort();

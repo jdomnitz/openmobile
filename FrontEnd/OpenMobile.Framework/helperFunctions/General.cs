@@ -74,9 +74,9 @@ namespace OpenMobile.helperFunctions
                     return null;
                 }
                 if (settingsPanel == true)
-                    host.execute(eFunction.TransitionFromSettings,screen.ToString(),pluginname);
+                    host.execute(eFunction.TransitionFromSettings,screen.ToString(),pluginname,panelName);
                 else
-                    host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname);
+                    host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname,panelName);
                 host.execute(eFunction.ExecuteTransition,screen.ToString());
                 wait.WaitOne();
                 host.OnSystemEvent -= ev;
@@ -115,9 +115,9 @@ namespace OpenMobile.helperFunctions
                     return null;
                 }
                 if (settingsPanel == true)
-                    host.execute(eFunction.TransitionFromSettings, screen.ToString(), pluginname);
+                    host.execute(eFunction.TransitionFromSettings, screen.ToString(), pluginname,panelName);
                 else
-                    host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname);
+                    host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname,panelName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 wait.WaitOne();
                 host.OnSystemEvent -= ev;

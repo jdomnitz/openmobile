@@ -93,6 +93,8 @@ namespace OpenMobile
                     return eMediaType.Network;
                 if (source.StartsWith("smb:") == true)
                     return eMediaType.Network;
+                if (source.EndsWith(".cda") == true)
+                    return eMediaType.AudioCD;
                 return eMediaType.Local;
             }
             else
@@ -107,7 +109,7 @@ namespace OpenMobile
         }
         public bool setPlaylist(List<mediaInfo> source,int instance)
         {
-            currentPosition[instance] = 0;
+            currentPosition[instance] = -1;
             queued[instance].Clear();
             queued[instance].AddRange(source.GetRange(0, source.Count));
             return true;
@@ -152,7 +154,7 @@ namespace OpenMobile
             get
             {
                 if (datapath == null)
-                    datapath = Path.Combine(Application.StartupPath, "Data");
+                    datapath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),"openMobile");
                 return datapath;
             }
         }
@@ -391,7 +393,11 @@ namespace OpenMobile
                     }
                     return false;
                 case eFunction.shutdown:
-                    throw new NotImplementedException();
+                    hal.snd("46");
+                    return true;
+                case eFunction.restart:
+                    hal.snd("47");
+                    return true;
                 case eFunction.hibernate:
                     return Application.SetSuspendState(PowerState.Hibernate, false, false);
                 case eFunction.standby:
@@ -762,6 +768,11 @@ namespace OpenMobile
                         return true;
                     }
                     return false;
+                case eFunction.ejectDisc:
+                    if ((arg==null)||(arg==""))
+                        return false;
+                    hal.snd("35|" + arg);
+                    return true;
             }
             return false;
         }
@@ -962,6 +973,8 @@ namespace OpenMobile
                     if (int.TryParse(arg1, out ret) == true)
                     {
                         if (currentMediaPlayer[ret] == null)
+                            return false;
+                        if (arg2 == null)
                             return false;
                         return currentMediaPlayer[ret].play(ret, arg2, classifySource(arg2));
                     }

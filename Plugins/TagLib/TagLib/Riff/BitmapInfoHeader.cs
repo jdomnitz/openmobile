@@ -94,27 +94,6 @@ namespace TagLib.Riff
 		
 		
 #region Constructors
-		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="BitmapInfoHeader" /> by reading the raw structure
-		///    from the beginning of a ByteVector object.
-		/// </summary>
-		/// <param name="data">
-		///    A ByteVector object containing the raw
-		///    data structure.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="data" /> is <see langword="null" />.
-		/// </exception>
-		/// <exception cref="CorruptFileException">
-		///    <paramref name="data" /> contains less than 40 bytes.
-		/// </exception>
-		[Obsolete("Use BitmapInfoHeader(ByteVector,int)")]
-		public BitmapInfoHeader (ByteVector data) : this (data, 0)
-		{
-		}
-		
 		/// <summary>
 		///    Constructs and initializes a new instance of <see
 		///    cref="BitmapInfoHeader" /> by reading the raw structure

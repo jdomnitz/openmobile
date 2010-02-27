@@ -553,23 +553,6 @@ namespace TagLib.Flac {
 		///    cref="Metadata" /> using a collection of blocks.
 		/// </summary>
 		/// <param name="blocks">
-		///    A <see cref="T:System.Collections.Generic.List`1" /> object containing <see
-		///    cref="Block" /> objects to use in the new instance.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="blocks" /> is <see langword="null" />.
-		/// </exception>
-		[Obsolete("Use Metadata(IEnumerable<Block>)")]
-		public Metadata (List<Block> blocks)
-			: this (blocks as IEnumerable<Block>)
-		{
-		}
-		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="Metadata" /> using a collection of blocks.
-		/// </summary>
-		/// <param name="blocks">
 		///    A <see cref="T:System.Collections.Generic.IEnumerable`1" /> object enumerating <see
 		///    cref="Block" /> objects to use in the new instance.
 		/// </param>

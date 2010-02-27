@@ -289,6 +289,11 @@ namespace OpenMobile
             this.text = text;
             this.image = image;
         }
+        /// <summary>
+        /// Creates a new list item
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="subitm"></param>
         public OMListItem(string text, string subitm)
         {
             this.text = text;
@@ -511,7 +516,7 @@ namespace OpenMobile
         /// Transition between the previously specified panels
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
-        /// <para>Arg2: <i>(Optional)</i> <seealso cref="eGlobalTransition"/> Name</para>
+        /// <para>Arg2: <i>(Optional)</i> <seealso cref="eGlobalTransition"/> Transition Name(Default: Crossfade)</para>
         /// </summary>
         ExecuteTransition=7,
         /// <summary>
@@ -613,6 +618,7 @@ namespace OpenMobile
         /// Occurs whenever the system volume changes
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Volume [int -1(mute) to 100]</para>
+        /// <para>Arg2: Instance</para>
         /// </summary>
         systemVolumeChanged=22,
         /// <summary>
@@ -621,8 +627,6 @@ namespace OpenMobile
         /// <para>Arg1: Instance</para>
         /// </summary>
         playlistChanged=23,
-        //ToDo - Dont forget bluetooth
-
         //Data Provider
         /// <summary>
         /// Refresh a data providers data
@@ -689,24 +693,35 @@ namespace OpenMobile
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Volume [int -1(mute) to 100]</para>
         /// <para>Note: -2 May be used as unmute</para>
+        /// <para>Arg2: (Optional) Instance</para>
         /// </summary>
         setSystemVolume=34,
         /// <summary>
+        /// Ejects a CD/DVD/Blu-Ray disc
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Drive Path</para>
+        /// </summary>
+        ejectDisc=35,
+        /// <summary>
         /// Restart this application
         /// </summary>
-        restartProgram=44,
+        restartProgram=43,
         /// <summary>
         /// Close this program
         /// </summary>
-        closeProgram=45,
+        closeProgram=44,
         /// <summary>
         /// Hibernate the computer
         /// </summary>
-        hibernate=46,
+        hibernate=45,
         /// <summary>
         /// Shutdown the computer
         /// </summary>
-        shutdown=47,
+        shutdown=46,
+        /// <summary>
+        /// Restart the computer
+        /// </summary>
+        restart=47,
         /// <summary>
         /// Force the computer to enter low power mode
         /// </summary>
@@ -1067,17 +1082,17 @@ namespace OpenMobile
         /// </summary>
         OpenDrive 	=	13,
         /// <summary>
-        /// Reserved for future use
+        /// Digital Camera
         /// </summary>
-        Reserved	=	14,
+        Camera	=	14,
         /// <summary>
         /// Reserved for future use
         /// </summary>
-        Reserved2	=	15,
+        Reserved	=	15,
         /// <summary>
         /// Other
         /// </summary>
-        Other	=	16
+        Other	=	20
     }
     /// <summary>
     /// Textbox Options
@@ -1468,7 +1483,7 @@ namespace OpenMobile
         /// </summary>
         public string Genre;
         /// <summary>
-        /// Length in miliseconds
+        /// Length in seconds
         /// </summary>
         public int Length;
         /// <summary>
@@ -1678,9 +1693,12 @@ namespace OpenMobile
                 FileInfo f = new FileInfo(s);
                 listBox1.Items.Add(f.Name.Remove(f.Name.Length - 4));
             }
+            listBox1.Sorted = true;
             listBox1.Click += new EventHandler(comboBox1_DropDownClosed);
             listBox1.Height = 150;
             service.DropDownControl(listBox1);
+            if (listBox1.SelectedItem == null)
+                return new imageItem();
             return new imageItem(Image.FromFile(Path.Combine(Application.StartupPath, "Skins", listBox1.SelectedItem.ToString()) + ".png"), listBox1.SelectedItem.ToString());
         }
 

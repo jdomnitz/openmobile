@@ -130,21 +130,6 @@ namespace TagLib.Ogg
 		///    Repaginates the pages passed into the current instance to
 		///    handle changes made to the Xiph comment.
 		/// </summary>
-		/// <returns>
-		///    A Page[] containing the new page
-		///    collection.
-		/// </returns>
-		[Obsolete("Use Paginator.Paginate(out int)")]
-		public Page [] Paginate ()
-		{
-			int dummy;
-			return Paginate (out dummy);
-		}
-		
-		/// <summary>
-		///    Repaginates the pages passed into the current instance to
-		///    handle changes made to the Xiph comment.
-		/// </summary>
 		/// <param name="change">
 		///    A <see cref="int" /> value reference containing the
 		///    the difference between the number of pages returned and

@@ -453,34 +453,6 @@ namespace TagLib.Id3v2
         }
 
         /// <summary>
-        ///    Sets the text for a specified Text Information Frame.
-        /// </summary>
-        /// <param name="ident">
-        ///    A <see cref="ByteVector" /> object containing the
-        ///    identifier of the frame to set the data for.
-        /// </param>
-        /// <param name="text">
-        ///    A <see cref="StringCollection" /> object containing the
-        ///    text to set for the specified frame, or <see
-        ///    langword="null" /> to unset the value.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///    <paramref name="ident" /> is <see langword="null" />.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///    <paramref name="ident" /> is not exactly four bytes long.
-        /// </exception>
-        [Obsolete("Use SetTextFrame(ByteVector,String[])")]
-        public void SetTextFrame(ByteVector ident,
-                                  StringCollection text)
-        {
-            if (text == null || text.Count == 0)
-                RemoveFrames(ident);
-            else
-                SetTextFrame(ident, text.ToArray());
-        }
-
-        /// <summary>
         ///    Sets the numeric values for a specified Text Information
         ///    Frame.
         /// </summary>

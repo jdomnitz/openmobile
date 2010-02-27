@@ -88,25 +88,6 @@ namespace TagLib.Ape {
 		
 		#endregion
 		
-		
-		
-		#region Public Static Properties
-		
-		/// <summary>
-		///    Specifies the identifier used find an APEv2 tag in a
-		///    file.
-		/// </summary>
-		/// <value>
-		///    "<c>APETAGEX</c>"
-		/// </value>
-		[Obsolete("Use Footer.FileIdentifer")]
-		public static readonly ReadOnlyByteVector FileIdentifier =
-			Footer.FileIdentifier;
-		
-		#endregion
-		
-		
-		
 		#region Constructors
 		
 		/// <summary>

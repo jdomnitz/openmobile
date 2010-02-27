@@ -296,19 +296,6 @@ namespace TagLib.Mpeg4 {
 		}
 		
 		/// <summary>
-		///    Gets the offset of the box data from the position of the
-		///    header.
-		/// </summary>
-		/// <value>
-		///    A <see cref="long" /> value containing the offset of the
-		///    box data from the position of the header.
-		/// </value>
-		[Obsolete("Use HeaderSize")]
-		public long DataOffset {
-			get {return header_size;}
-		}
-		
-		/// <summary>
 		///    Gets the total size of the box described by the current
 		///    instance.
 		/// </summary>

@@ -45,12 +45,14 @@ namespace OpenMobile
             {
                 string[] folders = Directory.GetDirectories(path);
                 if (folders.Length == 0)
-                    if (Directory.GetFiles(path)[0].EndsWith(".cda"))
+                {
+                    if ((Directory.GetFiles(path).Length > 0) && (Directory.GetFiles(path)[0].EndsWith(".cda")))
                         return eMediaType.AudioCD;
+                }
                 else
                     foreach (string folder in folders)
                     {
-                        switch (folder.ToUpper())
+                        switch (folder.Substring(path.Length).ToUpper())
                         {
                             case "VIDEO_TS":
                                 return eMediaType.DVD;
@@ -60,6 +62,10 @@ namespace OpenMobile
                                 return eMediaType.iPodiPhone;
                             case "HVDVD_TS":
                                 return eMediaType.HDDVD;
+                            case "DCIM":
+                                if (folders.Length == 1)
+                                    return eMediaType.Camera;
+                                break;
                         }
                     }
                 if (File.Exists(Path.Combine(path, "OpenDrive.ini")))

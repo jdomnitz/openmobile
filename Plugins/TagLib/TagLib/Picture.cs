@@ -305,51 +305,6 @@ namespace TagLib {
 		#endregion
 		
 		
-		
-		#region Public Static Methods
-		
-		/// <summary>
-		///    Creates a new <see cref="Picture" />, populating it with
-		///    the contents of a file.
-		/// </summary>
-		/// <param name="filename">
-		///    A <see cref="string" /> object containing the path to a
-		///    file to read the picture from.
-		/// </param>
-		/// <returns>
-		///    A new <see cref="Picture" /> object containing the
-		///    contents of the file and with a mime-type guessed from
-		///    the file's contents.
-		/// </returns>
-		[Obsolete("Use Picture(string filename) constructor instead.")]
-		public static Picture CreateFromPath (string filename)
-		{
-			return new Picture (filename);
-		}
-		
-		/// <summary>
-		///    Creates a new <see cref="Picture" />, populating it with
-		///    the contents of a file.
-		/// </summary>
-		/// <param name="abstraction">
-		///    A <see cref="File.IFileAbstraction" /> object containing
-		///    the file abstraction to read the picture from.
-		/// </param>
-		/// <returns>
-		///    A new <see cref="Picture" /> object containing the
-		///    contents of the file and with a mime-type guessed from
-		///    the file's contents.
-		/// </returns>
-		[Obsolete("Use Picture(File.IFileAbstraction abstraction) constructor instead.")]
-		public static Picture CreateFromFile (File.IFileAbstraction abstraction)
-		{
-			return new Picture (abstraction);
-		}
-		
-		#endregion
-		
-		
-		
 		#region Public Properties
 		
 		/// <summary>
@@ -406,7 +361,6 @@ namespace TagLib {
 		}
 		
 		#endregion
-		
 		
 		
 		#region Private Methods

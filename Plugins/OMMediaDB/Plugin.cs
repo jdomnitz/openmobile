@@ -698,7 +698,7 @@ namespace OMMediaDB
                 con = new SQLiteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
-            SQLiteCommand cmd = new SQLiteCommand("BEGIN TRANSACTION;CREATE TABLE tblAlbum(ID INTEGER PRIMARY KEY,Album TEXT, Artist TEXT, Cover BLOB);CREATE TABLE tblSongs (AlbumNum INTEGER, Genre TEXT, Rating NUMERIC, Title TEXT, URL TEXT);CREATE TABLE Playlists (Name TEXT, URL TEXT);COMMIT;", con);
+            SQLiteCommand cmd = new SQLiteCommand("BEGIN TRANSACTION;CREATE TABLE tblAlbum(ID INTEGER PRIMARY KEY,Album TEXT, Artist TEXT, Cover BLOB);CREATE TABLE tblSongs (AlbumNum INTEGER, Device INTEGER, Genre TEXT, Rating NUMERIC, Title TEXT, URL TEXT);CREATE TABLE Playlists (Name TEXT, URL TEXT);COMMIT;", con);
             cmd.ExecuteNonQuery();
         }
         #endregion

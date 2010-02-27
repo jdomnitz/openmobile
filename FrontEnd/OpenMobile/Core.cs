@@ -27,7 +27,6 @@ using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using OpenMobile.Data;
-using OpenMobile.Framework;
 using OpenMobile.Plugin;
 
 namespace OpenMobile
