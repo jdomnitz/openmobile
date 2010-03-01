@@ -949,17 +949,15 @@ namespace OpenMobile
                     {
                         if (currentMediaPlayer[ret] != null)
                             return false;
-                        using (IAVPlayer player = (IAVPlayer)Core.pluginCollection.FindAll(i => typeof(IAVPlayer).IsInstanceOfType(i)).Find(i => i.pluginName == arg2))
-                        {
-                            if (player == null)
-                                return false;
-                            //Hook it if its not already hooked
-                            if (Array.Exists<IAVPlayer>(currentMediaPlayer, a => a == player) == false)
-                                player.OnMediaEvent += raiseMediaEvent;
-                            currentMediaPlayer[ret] = player;
-                            raiseSystemEvent(eFunction.loadAVPlayer, arg1, arg2, "");
-                            return true;
-                        }
+                        IAVPlayer player = (IAVPlayer)Core.pluginCollection.FindAll(i => typeof(IAVPlayer).IsInstanceOfType(i)).Find(i => i.pluginName == arg2);
+                        if (player == null)
+                            return false;
+                        //Hook it if its not already hooked
+                        if (Array.Exists<IAVPlayer>(currentMediaPlayer, a => a == player) == false)
+                            player.OnMediaEvent += raiseMediaEvent;
+                        currentMediaPlayer[ret] = player;
+                        raiseSystemEvent(eFunction.loadAVPlayer, arg1, arg2, "");
+                        return true;
                     }
                     return false;
                 case eFunction.loadTunedContent:

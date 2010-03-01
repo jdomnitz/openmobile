@@ -512,16 +512,28 @@ namespace OpenMobile
                 if (status == ePlayerStatus.Playing)
                 {
                     theHost.execute(eFunction.Pause, theHost.instanceForScreen(screen).ToString());
-                    ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("Play");
-                    ((OMButton)manager[screen][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                    for (int i = 0; i < theHost.ScreenCount; i++)
+                    {
+                        if (theHost.instanceForScreen(i) == theHost.instanceForScreen(screen))
+                        {
+                            ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
+                            ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                        }
+                    }
                 }
                 else
                 {
                     if ((status == ePlayerStatus.FastForwarding) || (status == ePlayerStatus.Rewinding))
                     {
                         theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(), "1");
-                        ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("Pause");
-                        ((OMButton)manager[screen][10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
+                        for (int i = 0; i < theHost.ScreenCount; i++)
+                        {
+                            if (theHost.instanceForScreen(i) == theHost.instanceForScreen(screen))
+                            {
+                                ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Pause");
+                                ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
+                            }
+                        }
                     }
                     else
                     {
@@ -577,8 +589,8 @@ namespace OpenMobile
                 {
                     if (theHost.instanceForScreen(i) == instance)
                     {
-                        ((OMButton)manager[instance][10]).Image = theHost.getSkinImage("Play");
-                        ((OMButton)manager[instance][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                        ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
+                        ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
                     }
                 }
             }

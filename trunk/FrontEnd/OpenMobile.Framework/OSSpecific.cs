@@ -178,7 +178,7 @@ namespace OpenMobile.Framework
             return (IsMono() ? "Mono v" : "Microsoft .Net v") + Environment.Version.ToString();
         }
         /// <summary>
-        /// Run a manged process using mono is necessary
+        /// Run a manged process using mono if necessary
         /// </summary>
         /// <param name="path"></param>
         /// <param name="param"></param>

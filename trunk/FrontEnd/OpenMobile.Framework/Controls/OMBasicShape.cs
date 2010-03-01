@@ -220,6 +220,9 @@ namespace OpenMobile.Controls
                 fillColor = value;
             }
         }
+        /// <summary>
+        /// The color of the border
+        /// </summary>
         public Color BorderColor
         {
             get
@@ -234,6 +237,9 @@ namespace OpenMobile.Controls
                 this.refreshMe(this.toRegion());
             }
         }
+        /// <summary>
+        /// The width in pixels of a border (0 for no border)
+        /// </summary>
         public float BorderSize
         {
             get
