@@ -83,6 +83,7 @@ namespace DPYWeather
                                     forcast.highTemp = float.Parse(node.Attributes[3].Value);
                                     forcast.conditions = parseCondition(node.Attributes[5].Value);
                                     forcast.location = updateLocation;
+                                    forcast.contrib = "Yahoo";
                                     lst.Add(forcast);
                                     break;
                                 }
@@ -91,6 +92,7 @@ namespace DPYWeather
                 }
             }
             ret.location = updateLocation;
+            ret.contrib = "Yahoo";
             ret.date = DateTime.Today;
             lst[0] = ret;
             return lst;
@@ -120,11 +122,11 @@ namespace DPYWeather
             switch (c)
             {
                 case "0":
-                    return OpenMobile.Data.Weather.weatherConditions.tornado;
+                    return OpenMobile.Data.Weather.weatherConditions.Tornado;
                 case "1":
-                    return OpenMobile.Data.Weather.weatherConditions.tropicalStorm;
+                    return OpenMobile.Data.Weather.weatherConditions.TropicalStorm;
                 case "2":
-                    return OpenMobile.Data.Weather.weatherConditions.hurricane;
+                    return OpenMobile.Data.Weather.weatherConditions.Hurricane;
                 case "3":
                     return OpenMobile.Data.Weather.weatherConditions.SevereTStorms;
                 case "4":
@@ -178,7 +180,7 @@ namespace DPYWeather
                     return OpenMobile.Data.Weather.weatherConditions.Cloudy;
                 case "23":
                 case "24":
-                    return OpenMobile.Data.Weather.weatherConditions.windy;
+                    return OpenMobile.Data.Weather.weatherConditions.Windy;
                 default:
                     return OpenMobile.Data.Weather.weatherConditions.NotSet;
             }
@@ -228,7 +230,7 @@ namespace DPYWeather
                 }
                 status = 1;
                 using (PluginSettings setting = new PluginSettings())
-                    setting.setSetting("DPYWeather.LastUpdate", DateTime.Now.ToString());
+                    setting.setSetting("Plugins.DPYWeather.LastUpdate", DateTime.Now.ToString());
             }
             catch (Exception) { status = -1; }
         }
@@ -241,7 +243,7 @@ namespace DPYWeather
                 using (PluginSettings setting = new PluginSettings())
                 {
                     DateTime lastUp = new DateTime();
-                    if (DateTime.TryParse(setting.getSetting("DPYWeather.LastUpdate"), out lastUp) == true)
+                    if (DateTime.TryParse(setting.getSetting("Plugins.DPYWeather.LastUpdate"), out lastUp) == true)
                     {
                         if ((DateTime.Now - lastUp) < TimeSpan.FromMinutes(30))
                             return false;

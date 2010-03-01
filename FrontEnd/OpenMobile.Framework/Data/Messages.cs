@@ -106,7 +106,7 @@ namespace OpenMobile.Data
         /// <returns>Number of Messages loaded</returns>
         public static int readMessages()
         {
-            SQLiteConnection con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            SQLiteConnection con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
             SQLiteCommand cmd = con.CreateCommand();
             cmd.CommandText = "SELECT * FROM Message";
             con.Open();

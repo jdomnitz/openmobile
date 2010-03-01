@@ -208,17 +208,35 @@ namespace OpenMobile.Controls
                 {
                     if (image.image == null)
                         return;
-                    image.image = (Image)image.image.Clone();
-                    image.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                    if (focusImage.image != null)
+                    if ((orientation == Angle.FlipHorizontal) || (value == Angle.FlipHorizontal))
                     {
-                        focusImage.image = (Image)focusImage.image.Clone();
-                        focusImage.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        image.image = (Image)image.image.Clone();
+                        image.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        if (focusImage.image != null)
+                        {
+                            focusImage.image = (Image)focusImage.image.Clone();
+                            focusImage.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        }
+                        if (downImage.image != null)
+                        {
+                            downImage.image = (Image)downImage.image.Clone();
+                            downImage.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        }
                     }
-                    if (downImage.image != null)
+                    else if ((orientation == Angle.FlipVertical) || (value == Angle.FlipVertical))
                     {
-                        downImage.image = (Image)downImage.image.Clone();
-                        downImage.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        image.image = (Image)image.image.Clone();
+                        image.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                        if (focusImage.image != null)
+                        {
+                            focusImage.image = (Image)focusImage.image.Clone();
+                            focusImage.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                        }
+                        if (downImage.image != null)
+                        {
+                            downImage.image = (Image)downImage.image.Clone();
+                            downImage.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                        }
                     }
                 }
                 orientation = value;

@@ -192,7 +192,7 @@ namespace OpenMobile.Data
         public static bool writeInfo()
         {
             personalInfo info = Collections.personalInfo;
-            SQLiteConnection con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Pooling=True;Max Pool Size=6;");
+            SQLiteConnection con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Pooling=True;Max Pool Size=6;FailIfMissing=True;");
             con.Open();
             SQLiteCommand cmd = con.CreateCommand();
             StringBuilder query = new StringBuilder("DELETE FROM Personal;INSERT INTO Personal ('connectedServicesID','emailAddress','emailPassword','emailUsername','googlePassword','googleUsername','otherPassword','popServer','smtpServer')VALUES('");

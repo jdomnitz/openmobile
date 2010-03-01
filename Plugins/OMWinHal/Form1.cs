@@ -75,7 +75,7 @@ namespace OMHal
             if (arg != "")
                 s += "|" + arg;
             if (arg2 != "")
-                s += "|" + arg3;
+                s += "|" + arg2;
             if (arg2 != "")
                 s += "|" + arg3;
             sendIt(s);

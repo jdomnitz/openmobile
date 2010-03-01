@@ -41,6 +41,12 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         bool loadContext(string name);
         /// <summary>
+        /// Unload the specified speech recognition context
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        bool unloadContext(string name);
+        /// <summary>
         /// Adds an item to a speech context
         /// </summary>
         /// <param name="contextName"></param>
@@ -68,6 +74,6 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Gets a list of all available input sources on the system.
         /// </summary>
-        string[] getMicrophones{get;}
+        string[] getMicrophones{ get; }
     }
 }

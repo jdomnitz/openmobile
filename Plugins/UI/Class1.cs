@@ -110,7 +110,7 @@ namespace OpenMobile
             OMPanel p = new OMPanel();
             theHost = host;
             manager = new ScreenManager(host.ScreenCount);
-            blank.name = "EMPTY";
+            //blank.name = "EMPTY";
             tick.BeginInit();
             tick.EndInit();
             tick.Elapsed += new ElapsedEventHandler(tick_Elapsed);
@@ -120,25 +120,25 @@ namespace OpenMobile
             statusReset.EndInit();
             statusReset.Elapsed += new ElapsedEventHandler(statusReset_Elapsed);
             OMLabel trackTitle = new OMLabel(240,3,390,28);
-            trackTitle.TextAlignment = Alignment.CenterLeft;
+            trackTitle.TextAlignment = Alignment.CenterLeftEllipsis;
             trackTitle.Format = textFormat.BoldShadow;
             OMLabel trackAlbum = new OMLabel(240,34,390,28);
-            trackAlbum.TextAlignment = Alignment.CenterLeft;
+            trackAlbum.TextAlignment = Alignment.CenterLeftEllipsis;
             trackAlbum.Format = textFormat.BoldShadow;
             OMLabel trackArtist = new OMLabel(240,64,390,28);
-            trackArtist.TextAlignment = Alignment.CenterLeft;
+            trackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
             trackArtist.Format = textFormat.DropShadow;
             OMImage cover = new OMImage(150,2,90,85);
             cover.Image = blank;
             OMButton mediaButton = new OMButton(9,533,160,70);
-            mediaButton.Image = theHost.getSkinImage("MediaButton");
+            mediaButton.Image = theHost.getSkinImage("MediaButton", true);
             mediaButton.Transition = eButtonTransition.None;
-            mediaButton.FocusImage = theHost.getSkinImage("MediaButtonFocus");
+            mediaButton.FocusImage = theHost.getSkinImage("MediaButtonFocus", true);
             mediaButton.Name = "UI.mediaButton";
             mediaButton.OnClick += new userInteraction(mediaButton_OnClick);
             OMButton Back = new OMButton(831,533,160,70);
-            Back.Image = theHost.getSkinImage("BackButton");
-            Back.FocusImage = theHost.getSkinImage("BackButtonFocus");
+            Back.Image = theHost.getSkinImage("BackButton", true);
+            Back.FocusImage = theHost.getSkinImage("BackButtonFocus", true);
             Back.OnClick += new userInteraction(Back_OnClick);
             Back.Transition = eButtonTransition.None;
             OMButton speech = new OMButton(631, 533, 160, 70);
@@ -148,8 +148,8 @@ namespace OpenMobile
             speech.Visible = false;
             speech.OnClick += new userInteraction(speech_OnClick);
             OMButton HomeButton = new OMButton(863,0,130,90);
-            HomeButton.Image = theHost.getSkinImage("HomeButton");
-            HomeButton.FocusImage = theHost.getSkinImage("HomeButtonFocus");
+            HomeButton.Image = theHost.getSkinImage("HomeButton",true);
+            HomeButton.FocusImage = theHost.getSkinImage("HomeButtonFocus", true);
             HomeButton.Name = "UI.HomeButton";
             HomeButton.OnClick += new userInteraction(HomeButton_OnClick);
             OMButton vol = new OMButton(6,0,130,90);
@@ -206,12 +206,10 @@ namespace OpenMobile
             elapsed.Font = new Font(FontFamily.GenericSansSerif,26F);
             //Speech
             OMImage imgSpeak = new OMImage(350, 200, 300, 300);
-            imgSpeak.Image = theHost.getSkinImage("Speech", false);
             imgSpeak.Name = "UI.imgSpeak";
             imgSpeak.Visible = false;
             OMLabel caption = new OMLabel(300, 150, 400, 50);
             caption.Font = new Font(FontFamily.GenericSerif, 48F);
-            caption.Text = "Speak Now";
             caption.Format = textFormat.BoldShadow;
             caption.Visible = false;
             caption.Name = "UI.caption";
@@ -260,6 +258,8 @@ namespace OpenMobile
         }
         private void showSpeech(int screen)
         {
+            ((OMImage)manager[screen][21]).Image = theHost.getSkinImage("Speech");
+            ((OMLabel)manager[screen][20]).Text = "Speak Now";
             manager[screen][21].Visible = true;
             manager[screen][20].Visible = true;
             manager[screen][19].Visible = true;
@@ -292,12 +292,19 @@ namespace OpenMobile
         {
             if (function == eFunction.backgroundOperationStatus)
             {
-                if ((arg2 == "Speech") && (arg1 == "Engine Ready!"))
-                {
-                    for (int i = 0; i < theHost.ScreenCount; i++)
-                        manager[i][1].Visible = true;
-                    return;
-                }
+                if (arg2 == "Speech")
+                    if (arg1 == "Engine Ready!")
+                    {
+                        for (int i = 0; i < theHost.ScreenCount; i++)
+                            manager[i][1].Visible = true;
+                        return;
+                    }
+                    else if (arg1 == "Processing...")
+                    {
+                        ((OMImage)manager[0][21]).Image = theHost.getSkinImage("Processing");
+                        ((OMLabel)manager[0][20]).Text = "Processing...";
+                        return;
+                    }
                 statusReset.Enabled = false;
                 statusReset.Enabled = true;
                 for (int i = 0; i < theHost.ScreenCount; i++)
@@ -309,6 +316,8 @@ namespace OpenMobile
                 {
                     for (int i = 0; i < theHost.ScreenCount; i++)
                     {
+                        if (arg2 != theHost.instanceForScreen(i).ToString())
+                            continue;
                         OMButton b = ((OMButton)manager[i][5]);
                         b.Image = theHost.getSkinImage("VolumeButtonMuted");
                         b.FocusImage = theHost.getSkinImage("VolumeButtonMutedFocus");
@@ -318,6 +327,8 @@ namespace OpenMobile
                 {
                     for (int i = 0; i < theHost.ScreenCount; i++)
                     {
+                        if (arg2 != theHost.instanceForScreen(i).ToString())
+                            continue;
                         OMButton b = ((OMButton)manager[i][5]);
                         b.Image = theHost.getSkinImage("VolumeButton");
                         b.FocusImage = theHost.getSkinImage("VolumeButtonFocus");

@@ -104,8 +104,18 @@
     <Reference Include="System.Windows.Forms">
       <Name>System.Windows.Forms</Name>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CDDB\CDDB.cs" />
+    <Compile Include="CDDB\freedb\CDEntry.cs" />
+    <Compile Include="CDDB\freedb\FreedbHelper.cs" />
+    <Compile Include="CDDB\freedb\QueryResult.cs" />
+    <Compile Include="CDDB\freedb\Site.cs" />
+    <Compile Include="CDDB\freedb\Track.cs" />
+    <Compile Include="CDDB\Ripper\CDDrive.cs" />
+    <Compile Include="CDDB\Ripper\CDDriveEvents.cs" />
+    <Compile Include="CDDB\Ripper\Win32Functions.cs" />
     <Compile Include="MainForm.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -243,6 +243,7 @@ namespace OpenMobile.Data
         /// <param name="location"></param>
         /// <param name="day"></param>
         /// <returns></returns>
+        /// <exception cref="ArgumentException">ArgumentException</exception>
         public weather readWeather(string location,DateTime day)
         {
             SQLiteCommand cmd = con.CreateCommand();
@@ -279,7 +280,7 @@ namespace OpenMobile.Data
         /// </summary>
         public Weather()
         {
-            con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
             con.Open();
         }
         /// <summary>

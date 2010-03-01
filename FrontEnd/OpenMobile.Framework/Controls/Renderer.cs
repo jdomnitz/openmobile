@@ -170,6 +170,8 @@ namespace OpenMobile
                     sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
                     if (((int)alignment & 100) == 100)
                         sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
+                    if (alignment == Alignment.CenterLeftEllipsis)
+                        sFormat.Trimming = StringTrimming.EllipsisWord;
                     GraphicsPath path = new GraphicsPath(FillMode.Winding);
                     path.AddString(text, font.FontFamily, (int)f, font.Size+6, new RectangleF(x, y, w, h), sFormat);
                     g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -185,6 +187,8 @@ namespace OpenMobile
                     sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
                     if (((int)alignment & 100) == 100)
                         sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
+                    if (alignment == Alignment.CenterLeftEllipsis)
+                        sFormat.Trimming = StringTrimming.EllipsisWord;
                     using (Font currentFont = new Font(font.FontFamily, font.Size + modifyFont, f))
                     {
                         for (int i = -3; i < 3; i++)
@@ -202,6 +206,8 @@ namespace OpenMobile
                     sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100)/ 10);
                     if (((int)alignment & 100) == 100)
                         sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
+                    if (alignment == Alignment.CenterLeftEllipsis)
+                        sFormat.Trimming = StringTrimming.EllipsisWord;
                     Font currentFont;
                     if (modifyFont > 0)
                         currentFont = new Font(font.FontFamily, font.Size + modifyFont, f);

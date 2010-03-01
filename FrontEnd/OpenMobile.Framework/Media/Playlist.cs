@@ -226,6 +226,11 @@ namespace OpenMobile.Media
                 ret.Add(new mediaInfo(source[i]));
             return ret;
         }
+        /// <summary>
+        /// Convert an array of strings to a Playlist
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public static List<mediaInfo> Convert(string[] source)
         {
             List<mediaInfo> ret = new List<mediaInfo>(source.Length);
