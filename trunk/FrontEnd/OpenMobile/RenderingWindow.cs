@@ -489,7 +489,10 @@ namespace OpenMobile
                             if (ThrowStart.Y != -1)
                             {
                                 if (Math.Abs(e.Y - ThrowStart.Y) > 3)
+                                {
                                     l.Thrown = (int)((e.Y - ThrowStart.Y) / heightScale);
+                                    tmrLongClick.Enabled = false;
+                                }
                                 l.moveMe((int)((e.Y - ThrowStart.Y) / heightScale));
                                 UpdateThisControl(l.toRegion());
                             }
@@ -962,8 +965,11 @@ namespace OpenMobile
                                 if ((p[i].Left + p[i].Width <= highlighted.Left) && (inBounds(p[i].toRegion(), this.DisplayRectangle) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
-                                        best = distance(highlighted.toRegion(), p[i].toRegion());
-                                        b = p[i];
+                                        if (notCovered(p[i],'l') == true)
+                                        {
+                                            best = distance(highlighted.toRegion(), p[i].toRegion());
+                                            b = p[i];
+                                        }
                                     }
                         if (b == null)
                             break;
@@ -979,8 +985,11 @@ namespace OpenMobile
                                 if ((p[i].Left >= highlighted.Left + highlighted.Width) && (inBounds(p[i].toRegion(), this.DisplayRectangle) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
-                                        best = distance(highlighted.toRegion(), p[i].toRegion());
-                                        b = p[i];
+                                        if (notCovered(p[i],'r') == true)
+                                        {
+                                            best = distance(highlighted.toRegion(), p[i].toRegion());
+                                            b = p[i];
+                                        }
                                     }
                         if (b == null)
                             break;
@@ -996,8 +1005,11 @@ namespace OpenMobile
                                 if ((p[i].Top + p[i].Height <= highlighted.Top) && (inBounds(p[i].toRegion(), this.DisplayRectangle) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
-                                        best = distance(highlighted.toRegion(), p[i].toRegion());
-                                        b = p[i];
+                                        if (notCovered(p[i],'u') == true)
+                                        {
+                                            best = distance(highlighted.toRegion(), p[i].toRegion());
+                                            b = p[i];
+                                        }
                                     }
                         if (b == null)
                             break;
@@ -1013,8 +1025,11 @@ namespace OpenMobile
                                 if ((p[i].Top >= highlighted.Top + highlighted.Height) && (inBounds(p[i].toRegion(), this.DisplayRectangle) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
-                                        best = distance(highlighted.toRegion(), p[i].toRegion());
-                                        b = p[i];
+                                        if (notCovered(p[i],'d') == true)
+                                        {
+                                            best = distance(highlighted.toRegion(), p[i].toRegion());
+                                            b = p[i];
+                                        }
                                     }
                         if (b == null)
                             break;
@@ -1041,6 +1056,53 @@ namespace OpenMobile
                         break;
                 }
             }
+        }
+
+        private bool notCovered(OMControl oMControl,char direction)
+        {
+            Point pnt=Point.Empty;
+            switch(direction)
+            {
+                case 'l':
+                    pnt=new Point(oMControl.Left+oMControl.Width,oMControl.Top+(oMControl.Height/2));
+                    break;
+                case 'r':
+                    pnt=new Point(oMControl.Left,oMControl.Top+(oMControl.Height/2));
+                    break;
+                case 'd':
+                    pnt=new Point(oMControl.Left+(oMControl.Width/2),oMControl.Top);
+                    break;
+                case 'u':
+                    pnt=new Point(oMControl.Left+(oMControl.Width/2),oMControl.Top+oMControl.Height);
+                    break;
+            }
+            for (int i = Core.theHost.RenderFirst - 1; i >= 0; i--)
+            {
+                if (p[i].Visible == false)
+                    continue;
+                if ((pnt.X >= p[i].Left) && (pnt.Y >= p[i].Top) && (pnt.X <= (p[i].Left + p[i].Width)) && (pnt.Y <= (p[i].Top + p[i].Height)))
+                {
+
+                    if (p[i] == oMControl)
+                        return true;
+                    else
+                        return false;
+                }
+            }
+            for (int i = p.controlCount - 1; i >= Core.theHost.RenderFirst; i--)
+            {
+                if (p[i].Visible == false)
+                    continue;
+                if ((pnt.X >= p[i].Left) && (pnt.Y >= p[i].Top) && (pnt.X <= (p[i].Left + p[i].Width)) && (pnt.Y <= (p[i].Top + p[i].Height)))
+                {
+
+                    if (p[i] == oMControl)
+                        return true;
+                    else
+                        return false;
+                }
+            }
+            return true;
         }
 
         private int distance(Rectangle r1, Rectangle r2)

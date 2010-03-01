@@ -50,7 +50,7 @@ namespace OMSettings
             menu.Color = Color.White;
             menu.HighlightColor = Color.White;
             menu.SelectedItemColor1 = Color.DarkBlue;
-            menu.Add(new OMListItem("General Settings", ""));
+            menu.Add(new OMListItem("General Settings", "User Interface and System Settings"));
             menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords"));
             menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers"));
             menu.Add(new OMListItem("Multi-Zone Settings", "Displays, Sound Cards and other zone specific settings"));
@@ -201,8 +201,8 @@ namespace OMSettings
             if (o!=null)
                 devices=new List<string>((string[])o);
             #endregion
-            #region data
-            OMPanel data = new OMPanel("data");
+            #region personal
+            OMPanel personal = new OMPanel("personal");
             OMButton Save2 = new OMButton(13, 136, 200, 110);
             Save2.Image = theHost.getSkinImage("Full");
             Save2.FocusImage = theHost.getSkinImage("Full.Highlighted");
@@ -229,28 +229,105 @@ namespace OMSettings
             pass.Flags = textboxFlags.Password;
             pass.OnClick += new userInteraction(user_OnClick);
             pass.TextAlignment = Alignment.CenterLeft;
-            data.addControl(Save2);
+            personal.addControl(Save2);
+            personal.addControl(Cancel);
+            personal.addControl(Heading);
+            personal.addControl(udesc);
+            personal.addControl(pdesc);
+            personal.addControl(user);
+            personal.addControl(pass);
+            manager.loadPanel(personal);
+            #endregion
+            #region general
+            OMPanel general = new OMPanel("general");
+            OMButton Save3 = new OMButton(13, 136, 200, 110);
+            Save3.Image = theHost.getSkinImage("Full");
+            Save3.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            Save3.Text = "Save";
+            Save3.Name = "Media.Save";
+            Save3.OnClick += new userInteraction(Save3_OnClick);
+            Save3.Transition = eButtonTransition.None;
+            OMLabel Heading2 = new OMLabel(300, 80, 600, 100);
+            Heading2.Font = new Font("Microsoft Sans Serif", 36F);
+            Heading2.Text = "General Settings";
+            Label.Name = "Label";
+            OMCheckbox cursor = new OMCheckbox(220, 180, 600, 50);
+            cursor.Text = "Hide mouse cursor";
+            cursor.Font = new Font("Microsoft Sans Serif", 24F);
+            cursor.OutlineColor = Color.Red;
+            general.addControl(Save3);
+            general.addControl(Cancel);
+            general.addControl(Heading2);
+            general.addControl(cursor);
+            manager.loadPanel(general);
+            #endregion
+            #region data
+            OMPanel data = new OMPanel("data");
+            OMButton Save4 = new OMButton(13, 136, 200, 110);
+            Save4.Image = theHost.getSkinImage("Full");
+            Save4.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            Save4.Text = "Save";
+            Save4.Name = "Media.Save";
+            Save4.OnClick += new userInteraction(Save4_OnClick);
+            Save4.Transition = eButtonTransition.None;
+            OMLabel Heading3 = new OMLabel(300, 80, 600, 100);
+            Heading3.Font = new Font("Microsoft Sans Serif", 36F);
+            Heading3.Text = "Data Provider Settings";
+            Label.Name = "Label";
+            OMLabel ldesc = new OMLabel(210, 180, 280, 50);
+            ldesc.Text = "Default Location:";
+            ldesc.Font = new Font("Microsoft Sans Serif", 24F);
+            OMTextBox location = new OMTextBox(525, 180, 450, 50);
+            location.Font = new Font("Microsoft Sans Serif", 28F);
+            location.TextAlignment = Alignment.CenterLeft;
+            location.OnClick += new userInteraction(location_OnClick);
+            data.addControl(Save4);
             data.addControl(Cancel);
-            data.addControl(Heading);
-            data.addControl(udesc);
-            data.addControl(pdesc);
-            data.addControl(user);
-            data.addControl(pass);
+            data.addControl(Heading3);
+            data.addControl(ldesc);
+            data.addControl(location);
             manager.loadPanel(data);
             #endregion
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
+        void location_OnClick(object sender, int screen)
+        {
+            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", false, "data");
+        }
+
+        void Save4_OnClick(object sender, int screen)
+        {
+            using (PluginSettings settings = new PluginSettings())
+                    settings.setSetting("Data.DefaultLocation", ((OMTextBox)manager[screen,"data"][4]).Text);
+            theHost.execute(eFunction.TransitionFromAny, screen.ToString());
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+        }
+
+        void Save3_OnClick(object sender, int screen)
+        {
+            using (PluginSettings settings = new PluginSettings())
+                if (((OMCheckbox)manager[screen, "general"][3]).Checked == true)
+                    settings.setSetting("UI.HideCursor", "True");
+                else
+                    settings.setSetting("UI.HideCursor", "False");
+            theHost.execute(eFunction.TransitionFromAny, screen.ToString());
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+        }
+
         void user_OnClick(object sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            ((OMTextBox)sender).Text=input.getText(screen, "OMSettings", false, "data");
+            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", false, "personal");
         }
 
         void Save2_OnClick(object sender, int screen)
         {
-            Personal.setPassword(Personal.ePassword.google,((OMTextBox)manager[screen,"data"][6]).Text,"GOOGLEPW");
-            Collections.personalInfo.googleUsername = ((OMTextBox)manager[screen, "data"][5]).Text;
+            Personal.setPassword(Personal.ePassword.google,((OMTextBox)manager[screen,"personal"][6]).Text,"GOOGLEPW");
+            Collections.personalInfo.googleUsername = ((OMTextBox)manager[screen, "personal"][5]).Text;
             if (Collections.personalInfo.googleUsername.EndsWith("@gmail.com") == false)
                 Collections.personalInfo.googleUsername += "@gmail.com";
             Personal.writeInfo();
@@ -323,11 +400,25 @@ namespace OMSettings
         {
             switch (sender.SelectedIndex)
             {
-                case 2:
+                case 0:
+                    using (PluginSettings s = new PluginSettings())
+                        ((OMCheckbox)manager[screen, "general"][3]).Checked = (s.getSetting("UI.HideCursor") == "True");
+                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "general");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+                    break;
+                case 1:
                     Personal.readInfo();
-                    ((OMTextBox)manager[screen, "data"][6]).Text=Personal.getPassword(Personal.ePassword.google, "GOOGLEPW");
-                    ((OMTextBox)manager[screen, "data"][5]).Text = Collections.personalInfo.googleUsername;
+                    ((OMTextBox)manager[screen, "personal"][6]).Text = Personal.getPassword(Personal.ePassword.google, "GOOGLEPW");
+                    ((OMTextBox)manager[screen, "personal"][5]).Text = Collections.personalInfo.googleUsername;
 
+                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "personal");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+                    break;
+                case 2:
+                    using (PluginSettings s = new PluginSettings())
+                        ((OMTextBox)manager[screen, "data"][4]).Text = s.getSetting("Data.DefaultLocation");
                     theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
                     theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "data");
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");

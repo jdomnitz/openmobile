@@ -168,20 +168,30 @@ namespace OpenMobile.Controls
             {
                 case shapes.Rectangle:
                     g.FillRectangle(new SolidBrush(fillColor), toRegion());
+                    if (borderSize > 0)
+                        g.DrawRectangle(new Pen(borderColor, borderSize), toRegion());
                     break;
                 case shapes.Triangle:
                     g.FillPolygon(new SolidBrush(fillColor),new Point[]{new Point(left,top+height),new Point(left+width,top+height),new Point(left+(width/2),top)});
+                    if (borderSize > 0)
+                        g.DrawPolygon(new Pen(borderColor, borderSize), new Point[] { new Point(left, top + height), new Point(left + width, top + height), new Point(left + (width / 2), top) });
                     break;
                 case shapes.Oval:
                     g.FillEllipse(new SolidBrush(fillColor), toRegion());
+                    if (borderSize > 0)
+                        g.DrawEllipse(new Pen(borderColor, borderSize), toRegion());
                     break;
                 case shapes.RoundedRectangle:
                     Renderer.FillRoundRectangle(g, new SolidBrush(fillColor), new RectangleF(this.left, this.top, this.width, this.height), 10F);
+                    if (borderSize > 0)
+                        Renderer.DrawRoundRectangle(g, new Pen(borderColor, borderSize), new RectangleF(this.left, this.top, this.width, this.height), 10F);
                     break;
             }
         }
         private shapes shape;
         private Color fillColor;
+        private float borderSize=0;
+        private Color borderColor;
         /// <summary>
         /// The shape to draw
         /// </summary>
@@ -208,6 +218,34 @@ namespace OpenMobile.Controls
             set
             {
                 fillColor = value;
+            }
+        }
+        public Color BorderColor
+        {
+            get
+            {
+                return borderColor;
+            }
+            set
+            {
+                if (borderColor == value)
+                    return;
+                borderColor = value;
+                this.refreshMe(this.toRegion());
+            }
+        }
+        public float BorderSize
+        {
+            get
+            {
+                return borderSize;
+            }
+            set
+            {
+                if (borderSize == value)
+                    return;
+                borderSize = value;
+                this.refreshMe(this.toRegion());
             }
         }
         /// <summary>

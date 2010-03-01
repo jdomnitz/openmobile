@@ -86,6 +86,7 @@ namespace DPGWeather
                     default:
                         continue;
                 }
+                ret.contrib = "Google";
                 ret.location = location;
                 lst.Add(ret);
             }
@@ -110,7 +111,7 @@ namespace DPGWeather
                     return Weather.weatherConditions.Cloudy;
                 case "Fog":
                 case "Haze":
-                    return Weather.weatherConditions.foggy;
+                    return Weather.weatherConditions.Foggy;
                 case "Light Rain":
                 case "Chance of Showers":
                 case "Rain":
@@ -133,7 +134,7 @@ namespace DPGWeather
                 case "Snow":
                     return Weather.weatherConditions.Snow;
                 case "Windy":
-                    return Weather.weatherConditions.windy;
+                    return Weather.weatherConditions.Windy;
                 case "Snow Showers":
                 case "Freezing Rain":
                     return Weather.weatherConditions.RainSnowMix;
@@ -150,28 +151,28 @@ namespace DPGWeather
             switch (arg[0])
             {
                 case "N":
-                    ret.windDirection = Weather.direction.North;
+                    ret.windDirection = Weather.direction.N;
                     break;
                 case "W":
-                    ret.windDirection = Weather.direction.West;
+                    ret.windDirection = Weather.direction.W;
                     break;
                 case "E":
-                    ret.windDirection = Weather.direction.East;
+                    ret.windDirection = Weather.direction.E;
                     break;
                 case "S":
-                    ret.windDirection = Weather.direction.South;
+                    ret.windDirection = Weather.direction.S;
                     break;
                 case "NW":
-                    ret.windDirection = Weather.direction.NorthWest;
+                    ret.windDirection = Weather.direction.NW;
                     break;
                 case "SW":
-                    ret.windDirection = Weather.direction.SouthWest;
+                    ret.windDirection = Weather.direction.SW;
                     break;
                 case "NE":
-                    ret.windDirection = Weather.direction.NorthEast;
+                    ret.windDirection = Weather.direction.NE;
                     break;
                 case "SE":
-                    ret.windDirection = Weather.direction.SouthEast;
+                    ret.windDirection = Weather.direction.SE;
                     break;
             }
             ret.windSpeed = int.Parse(arg[2]);

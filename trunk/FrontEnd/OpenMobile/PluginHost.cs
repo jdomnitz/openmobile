@@ -176,6 +176,8 @@ namespace OpenMobile
         }
         private OMPanel getPanelByName(string name,string panelName,int screen)
         {
+            if (name == "About")
+                return BuiltInComponents.AboutPanel();
             try
             {
                 return ((IHighLevel)getPluginByName(name)).loadPanel(panelName,screen);
@@ -647,6 +649,12 @@ namespace OpenMobile
                             currentPosition[ret]++;
                         if (currentPosition[ret] == queued[ret].Count)
                             currentPosition[ret] = 0;
+                        if (getPlayingMedia(ret).Location == queued[ret][currentPosition[ret]].Location)
+                        {
+                            currentPosition[ret]++;
+                            if (currentPosition[ret] == queued[ret].Count)
+                                currentPosition[ret] = 0;
+                        }
                         return execute(eFunction.Play, arg, queued[ret][currentPosition[ret]].Location);
                     }
                     return false;
@@ -748,14 +756,14 @@ namespace OpenMobile
                 case eFunction.disconnectFromInternet:
                     return Net.Connections.disconnect(this,arg);
                 case eFunction.systemVolumeChanged:
-                    raiseSystemEvent(eFunction.systemVolumeChanged, arg, "", "");
+                    raiseSystemEvent(eFunction.systemVolumeChanged, arg, "0", "");
                     return true;
                 case eFunction.setSystemVolume:
                     if (int.TryParse(arg, out ret) == true)
                     {
                         if ((ret < -2) || (ret > 100))
                             return false;
-                        hal.snd("34|"+ret.ToString());
+                        hal.snd("34|"+ret.ToString()+"|0");
                         return true;
                     }
                     return false;
@@ -772,6 +780,9 @@ namespace OpenMobile
                     if ((arg==null)||(arg==""))
                         return false;
                     hal.snd("35|" + arg);
+                    return true;
+                case eFunction.navigateToAddress:
+                    raiseSystemEvent(eFunction.navigateToAddress, arg, "", "");
                     return true;
             }
             return false;
@@ -1049,6 +1060,24 @@ namespace OpenMobile
                     if (int.TryParse(arg1, out ret) == true)
                     {
                         raiseSystemEvent(eFunction.gesture, arg1, arg2, history[ret, 0].pluginName);
+                    }
+                    return false;
+                case eFunction.systemVolumeChanged:
+                    if (int.TryParse(arg2, out ret) == true)
+                    {
+                        raiseSystemEvent(eFunction.systemVolumeChanged, arg1, arg2, "");
+                        return true;
+                    }
+                    return false;
+                case eFunction.setSystemVolume:
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        if ((ret < -2) || (ret > 100))
+                            return false;
+                        if (int.TryParse(arg2, out ret) == false)
+                            return false;
+                        hal.snd("34|" + ret.ToString() + "|"+arg2);
+                        return true;
                     }
                     return false;
             }
@@ -1337,7 +1366,7 @@ namespace OpenMobile
             {
                 try
                 {
-                    imageItem item = new imageItem(Image.FromFile(Path.Combine(skinpath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png")));
+                    imageItem item = new imageItem(Image.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png")));
                     item.name = imageName;
                     return item;
                 }

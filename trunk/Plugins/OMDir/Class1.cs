@@ -190,9 +190,12 @@ namespace OMDir
                         return Environment.GetFolderPath(Environment.SpecialFolder.MyMusic).Replace("Music", "Videos");
                 }
             }
-            source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
-            if (l.Tag.ToString() == "")
-                l.Tag = null;
+            else
+            {
+                source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
+                if (l.Tag.ToString() == "")
+                    l.Tag = null;
+            }
             return source;
         }
 

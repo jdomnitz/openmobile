@@ -238,7 +238,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (sliderPosition == value)
+                if ((sliderPosition == value)||(value < 0))
                     return;
                 sliderPosition = value;
                 refreshMe(this.toRegion());
@@ -282,13 +282,13 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return (int)((sliderPosition/(float)width)*(maximum+minimum));
+                return (int)((sliderPosition/(float)width)*(maximum))+minimum;
             }
             set
             {
                 if ((value >= minimum) && (value <= maximum))
                 {
-                    sliderPosition = (int)((value / (float)(minimum + maximum)) * width);
+                    sliderPosition = (int)(((value-minimum) / (float)maximum) * width);
                     refreshMe(this.toRegion());
                 }
             }
@@ -356,7 +356,7 @@ namespace OpenMobile.Controls
             try
             {
                 g.DrawImage(sliderBar.image, new Rectangle(left, top, width, height));
-                g.DrawImage(slider.image, new Rectangle(left + sliderPosition, (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight));
+                g.DrawImage(slider.image, new Rectangle(left + sliderPosition-(sliderHeight/2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight));
             }
             catch (Exception) { }
         }

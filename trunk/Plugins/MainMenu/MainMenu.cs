@@ -267,7 +267,7 @@ public sealed class MainMenu : IHighLevel
         }
         void okButton_OnClick(object sender, int screen)
         {
-            OMList theList=(OMList)setButton[screen];
+            OMList theList=(OMList)setButton[0];
             if (theList.SelectedIndex >= 0) //FS#3
             {
                 using (PluginSettings setting = new PluginSettings())

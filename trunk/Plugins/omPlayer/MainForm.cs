@@ -174,6 +174,7 @@ namespace OMPlayer
         theHost = host;
         player = new AVPlayer[theHost.InstanceCount];
         host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
+        host.OnPowerChange += new PowerEvent(host_OnPowerChange);
         using (PluginSettings setting = new PluginSettings())
         {
             if (setting.getSetting("Music.AutoResume") == "True")
@@ -196,6 +197,22 @@ namespace OMPlayer
             }
         }
         return eLoadStatus.LoadSuccessful;
+    }
+
+    void host_OnPowerChange(ePowerEvent type)
+    {
+        if (type == ePowerEvent.SleepOrHibernatePending)
+        {
+            for (int i = 0; i < player.Length; i++)
+                if (player[i] != null)
+                    player[i].suspended = true;
+        }
+        else if (type == ePowerEvent.SystemResumed)
+        {
+            for (int i = 0; i < player.Length; i++)
+                if (player[i] != null)
+                    player[i].suspended = false;
+        }
     }
 
     public bool pause(int instance)
@@ -392,6 +409,7 @@ namespace OMPlayer
         public double pos = -1.0;
         private IVideoWindow videoWindow = null;
         private Thread t;
+        public bool suspended = false;
 
         // Methods
         public AVPlayer(int instanceNum)
@@ -434,9 +452,19 @@ namespace OMPlayer
                     return false;
             }
             pos = 0;
-            nowPlaying = TagReader.getInfo(url);
-            if (nowPlaying.coverArt == null)
-                nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
+            if (url.EndsWith(".cda")==true)
+            {
+                nowPlaying = CDDB.getSongInfo(url);
+                if (nowPlaying == null)
+                    nowPlaying = new mediaInfo();
+                nowPlaying.coverArt = theHost.getSkinImage("Discs|AudioCD").image;
+            }
+            else
+            {
+                nowPlaying = TagReader.getInfo(url);
+                if (nowPlaying.coverArt == null)
+                    nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
+            }
             if (nowPlaying.Length==0)
             {
                 double dur;
@@ -444,8 +472,12 @@ namespace OMPlayer
                 nowPlaying.Length = (int)dur;
             }
             OnMediaEvent(eFunction.Play, instance, url);
-            if (t != null)
-                t.Abort();
+            if ((t != null)&&(t.ExecutionContext==null)) //No idea why this works but it seems to
+                try
+                {
+                    t.Abort(); //since we're no longer playing...stop looking for the end of the song
+                }
+                catch (Exception) { }
             t = new Thread(new ThreadStart(waitForStop));
             t.Name = instance.ToString();
             t.Start();
@@ -657,7 +689,7 @@ namespace OMPlayer
                     {
                         pos = getCurrentPos();
                     }
-                    if ((currentState != ePlayerStatus.Paused) && (pos == lastPosition))
+                    if ((currentState != ePlayerStatus.Paused) && (suspended==false) && (pos == lastPosition))
                     {
                         if ((currentState == ePlayerStatus.Stopped)||(currentState==ePlayerStatus.Ready))
                             return;

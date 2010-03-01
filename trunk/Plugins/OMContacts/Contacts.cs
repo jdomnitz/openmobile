@@ -80,9 +80,10 @@ namespace OMContacts
             name.Name = "name";
             OMLabel Address = new OMLabel(563, 204, 300, 80);
             Address.Name = "Address";
-            OMLabel birthday = new OMLabel(463,163,500,40);
+            OMLabel birthday = new OMLabel(550,163,400,40);
             birthday.Font = new Font("Microsoft Sans Serif", 21.75F);
             birthday.Name = "birthday";
+            birthday.TextAlignment = Alignment.CenterLeft;
             p.addControl(border);
             p.addControl(picture);
             p.addControl(home);
@@ -111,7 +112,10 @@ namespace OMContacts
             ((OMLabel)p["home"]).Text = "Home: "+Collections.contacts[l.SelectedIndex].home;
             ((OMLabel)p["email"]).Text = "Email: "+Collections.contacts[l.SelectedIndex].email;
             ((OMLabel)p["Address"]).Text = Collections.contacts[l.SelectedIndex].Address;
-            ((OMLabel)p["birthday"]).Text = "Birthday: "+Collections.contacts[l.SelectedIndex].Birthday.ToShortDateString();
+            if (Collections.contacts[l.SelectedIndex].Birthday == DateTime.MinValue)
+                ((OMLabel)p["birthday"]).Text = "Birthday: ";
+            else
+                ((OMLabel)p["birthday"]).Text = "Birthday: "+Collections.contacts[l.SelectedIndex].Birthday.ToShortDateString();
 
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"OMContacts", "contact");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");

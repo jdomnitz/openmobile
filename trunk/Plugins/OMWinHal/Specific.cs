@@ -31,7 +31,7 @@ namespace OMHal
     /// </summary>
     public static class Specific
     {
-        static MMDevice device;
+        static MMDevice[] device;
         private static OperatingSystem os = System.Environment.OSVersion;
         /// <summary>
         /// Gets the system volume
@@ -49,7 +49,7 @@ namespace OMHal
             else
             {
                 if (device != null)
-                    return (int)(device.AudioEndpointVolume.MasterVolumeLevelScalar * 100);
+                    return (int)(device[instance].AudioEndpointVolume.MasterVolumeLevelScalar * 100);
                 else
                     return -1;
             }
@@ -83,13 +83,13 @@ namespace OMHal
                 if (device != null)
                 {
                     if (volume == -1)
-                        device.AudioEndpointVolume.Mute = true;
+                        device[instance].AudioEndpointVolume.Mute = true;
                     else if(volume==-2)
-                        device.AudioEndpointVolume.Mute=false;
+                        device[instance].AudioEndpointVolume.Mute=false;
                     else
                     {
-                        device.AudioEndpointVolume.MasterVolumeLevelScalar = ((float)volume / 100.0f);
-                        device.AudioEndpointVolume.Mute = false;
+                        device[instance].AudioEndpointVolume.MasterVolumeLevelScalar = ((float)volume / 100.0f);
+                        device[instance].AudioEndpointVolume.Mute = false;
                     }
                 }
             }
@@ -116,10 +116,19 @@ namespace OMHal
                 try
                 {
                     MMDeviceEnumerator DevEnum = new MMDeviceEnumerator();
-                    device = DevEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
-                    device.AudioEndpointVolume.OnVolumeNotification += new AudioEndpointVolumeNotificationDelegate(AudioEndpointVolume_OnVolumeNotification);
-                    if (device.AudioEndpointVolume.Mute == true)
-                        Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","0","");
+                    MMDeviceCollection col= DevEnum.EnumerateAudioEndPoints(EDataFlow.eRender, EDeviceState.DEVICE_STATE_ACTIVE);
+                    if (col.Count == 0)
+                        return false;
+                    device = new MMDevice[col.Count + 1];
+                    device[0] = DevEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
+                    for (int i = 0; i < col.Count; i++)
+                    {
+                        device[i + 1] = col[col.Count-i-1];
+                        col[i].AudioEndpointVolume.OnVolumeNotification += new AudioEndpointVolumeNotificationDelegate(AudioEndpointVolume_OnVolumeNotification);
+                    }
+                    for(int i=0;i<device.Length;i++)
+                        if (device[i].AudioEndpointVolume.Mute == true)
+                            Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1",i.ToString(),"");
                 }
                 catch (Exception) { }
                 return (device!=null);
@@ -127,10 +136,15 @@ namespace OMHal
         }
         static void AudioEndpointVolume_OnVolumeNotification(AudioVolumeNotificationData data)
         {
-            if (data.Muted == false)
-                Form1.raiseSystemEvent(eFunction.systemVolumeChanged, ((int)(data.MasterVolume * 100)).ToString(),"0","");
-            else
-                Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","0","");
+            for (int i = 0; i < device.Length; i++)
+            {
+                if ((data.MasterVolume != device[i].AudioEndpointVolume.MasterVolumeLevelScalar)||(device[i].AudioEndpointVolume.Mute!=data.Muted))
+                    continue;
+                if (data.Muted == false)
+                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, ((int)(data.MasterVolume * 100)).ToString(), i.ToString(), "");
+                else
+                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1", i.ToString(), "");
+            }
         }
         /// <summary>
         /// Lists all audio devices present on the system
@@ -140,12 +154,12 @@ namespace OMHal
         {
             if (os.Version.Major < 6) //Xp
             {
-                //UNDONE - Implement on XP
+                //TODO - Implement on XP
                 return null;
             }
             else
             {
-                return device.AudioEndpointVolume.getDevices();
+                return device[0].AudioEndpointVolume.getDevices();
             }
         }
 

@@ -240,7 +240,11 @@ namespace OpenMobile
         /// <summary>
         /// Vertical
         /// </summary>
-        VerticalCentered=111
+        VerticalCentered=111,
+        /// <summary>
+        /// Center Left (Ellipsis)
+        /// </summary>
+        CenterLeftEllipsis=1010
         };
     /// <summary>
     /// The angle to rotate the control
@@ -253,7 +257,12 @@ namespace OpenMobile
         /// <summary>
         /// Flipped across the Y-axis
         /// </summary>
-        FlipHorizontal = 180 };
+        FlipHorizontal = 180,
+        /// <summary>
+        /// Flipped across the X-axis
+        /// </summary>
+        FlipVertical=90
+        };
     /// <summary>
     /// An item in an OMList
     /// </summary>
@@ -734,31 +743,37 @@ namespace OpenMobile
         /// </summary>
         loadSpeechContext=49,
         /// <summary>
+        /// Unload a speech recognition context
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Context Name</para>
+        /// </summary>
+        unloadSpeechContext = 50,
+        /// <summary>
         /// Adds an item to a speech recognition context
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Context Name</para>
         /// <para>Arg2: Recognition String</para>
         /// </summary>
-        addSpeechContext=50,
+        addSpeechContext=51,
         /// <summary>
         /// Listen for a speech command
         /// </summary>
-        listenForSpeech=51,
+        listenForSpeech=52,
         /// <summary>
         /// Stop listening for speech commands
         /// Also occurs as an event when speech recognition times out
         /// </summary>
-        stopListeningForSpeech=52,
+        stopListeningForSpeech=53,
         /// <summary>
         /// Speak the indicated text
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Text To Speak</para>
         /// </summary>
-        Speak=53,
+        Speak=54,
         /// <summary>
         /// Stop speaking and purge all queued speech from the buffer
         /// </summary>
-        StopSpeaking=54,
+        StopSpeaking=55,
         //Tuned Content
         /// <summary>
         /// Tune to the given statioin
