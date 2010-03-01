@@ -57,7 +57,7 @@ public sealed class MainMenu : IHighLevel
 
             //Lets load some settings
             PluginSettings settings = new PluginSettings();
-            if (settings.getSetting("MainMenu.MainMenu11.Display") == "")
+            if (settings.getSetting("MainMenu.MainMenu11.Plugin") == "")
                 createDefaultSettings(settings);
             //Main Menu Controls are named by adding the row and column number to the end
             OMButton MainMenu11 = new OMButton(25,116);
@@ -66,7 +66,7 @@ public sealed class MainMenu : IHighLevel
             MainMenu11.Name = "MainMenu.MainMenu11";
             MainMenu11.Mode = modeType.Highlighted;
             MainMenu11.OnLongClick += new userInteraction(OnLongClick);
-            MainMenu11.Tag = settings.getSetting("MainMenu.MainMenu11");
+            MainMenu11.Tag = settings.getSetting("MainMenu.MainMenu11.Plugin");
             MainMenu11.Text = settings.getSetting("MainMenu.MainMenu11.Display");
             MainMenu11.OnClick += new userInteraction(MainMenu_OnClick);
             OMButton MainMenu12 = new OMButton(353,116);
@@ -75,7 +75,7 @@ public sealed class MainMenu : IHighLevel
             MainMenu12.Name = "MainMenu.MainMenu12";
             MainMenu12.OnLongClick += new userInteraction(OnLongClick);
             MainMenu12.OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenu12.Tag = settings.getSetting("MainMenu.MainMenu12");
+            MainMenu12.Tag = settings.getSetting("MainMenu.MainMenu12.Plugin");
             MainMenu12.Text = settings.getSetting("MainMenu.MainMenu12.Display");
             OMButton MainMenu22 = new OMButton(353,260);
             MainMenu22.Image = mainMenu;
@@ -83,7 +83,7 @@ public sealed class MainMenu : IHighLevel
             MainMenu22.Name = "MainMenu.MainMenu22";
             MainMenu22.OnLongClick += new userInteraction(OnLongClick);
             MainMenu22.OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenu22.Tag = settings.getSetting("MainMenu.MainMenu22");
+            MainMenu22.Tag = settings.getSetting("MainMenu.MainMenu22.Plugin");
             MainMenu22.Text = settings.getSetting("MainMenu.MainMenu22.Display");
             OMButton MainMenu32 = new OMButton(353,400);
             MainMenu32.OnClick += new userInteraction(MainMenu_OnClick);
@@ -91,7 +91,7 @@ public sealed class MainMenu : IHighLevel
             MainMenu32.FocusImage = mainMenuFocus;
             MainMenu32.Name = "MainMenu.MainMenu32";
             MainMenu32.OnLongClick += new userInteraction(OnLongClick);
-            MainMenu32.Tag = settings.getSetting("MainMenu.MainMenu32");
+            MainMenu32.Tag = settings.getSetting("MainMenu.MainMenu32.Plugin");
             MainMenu32.Text = settings.getSetting("MainMenu.MainMenu32.Display");
             OMButton MainMenu21 = new OMButton(25,260);
             MainMenu21.Image = mainMenu;
@@ -99,7 +99,7 @@ public sealed class MainMenu : IHighLevel
             MainMenu21.Name = "MainMenu.MainMenu21";
             MainMenu21.OnClick += new userInteraction(MainMenu_OnClick);
             MainMenu21.OnLongClick += new userInteraction(OnLongClick);
-            MainMenu21.Tag = settings.getSetting("MainMenu.MainMenu21");
+            MainMenu21.Tag = settings.getSetting("MainMenu.MainMenu21.Plugin");
             MainMenu21.Text = settings.getSetting("MainMenu.MainMenu21.Display");
             OMButton MainMenu31 = new OMButton(25,400);
             MainMenu31.OnClick += new userInteraction(MainMenu_OnClick);
@@ -107,7 +107,7 @@ public sealed class MainMenu : IHighLevel
             MainMenu31.FocusImage = mainMenuFocus;
             MainMenu31.Name = "MainMenu.MainMenu31";
             MainMenu31.OnLongClick += new userInteraction(OnLongClick);
-            MainMenu31.Tag = settings.getSetting("MainMenu.MainMenu31");
+            MainMenu31.Tag = settings.getSetting("MainMenu.MainMenu31.Plugin");
             MainMenu31.Text = settings.getSetting("MainMenu.MainMenu31.Display");
             OMButton MainMenu13 = new OMButton(680,116);
             MainMenu13.OnClick += new userInteraction(MainMenu_OnClick);
@@ -115,7 +115,7 @@ public sealed class MainMenu : IHighLevel
             MainMenu13.FocusImage = mainMenuFocus;
             MainMenu13.Name = "MainMenu.MainMenu13";
             MainMenu13.OnLongClick += new userInteraction(OnLongClick);
-            MainMenu13.Tag = settings.getSetting("MainMenu.MainMenu13");
+            MainMenu13.Tag = settings.getSetting("MainMenu.MainMenu13.Plugin");
             MainMenu13.Text = settings.getSetting("MainMenu.MainMenu13.Display");
             OMButton MainMenu23 = new OMButton(680,260);
             MainMenu23.Image = mainMenu;
@@ -123,14 +123,14 @@ public sealed class MainMenu : IHighLevel
             MainMenu23.FocusImage = mainMenuFocus;
             MainMenu23.Name = "MainMenu.MainMenu23";
             MainMenu23.OnLongClick += new userInteraction(OnLongClick);
-            MainMenu23.Tag = settings.getSetting("MainMenu.MainMenu23");
+            MainMenu23.Tag = settings.getSetting("MainMenu.MainMenu23.Plugin");
             MainMenu23.Text = settings.getSetting("MainMenu.MainMenu23.Display");
             OMButton MainMenu33 = new OMButton(680,400);
             MainMenu33.Image = mainMenu;
             MainMenu33.OnClick += new userInteraction(MainMenu_OnClick);
             MainMenu33.FocusImage = mainMenuFocus;
             MainMenu33.Name = "MainMenu.MainMenu33";
-            MainMenu33.Tag = settings.getSetting("MainMenu.MainMenu33");
+            MainMenu33.Tag = settings.getSetting("MainMenu.MainMenu33.Plugin");
             MainMenu33.Text = settings.getSetting("MainMenu.MainMenu33.Display");
             MainMenu33.OnLongClick += new userInteraction(OnLongClick);
 
@@ -274,7 +274,7 @@ public sealed class MainMenu : IHighLevel
                 {
                     if (theList[theList.SelectedIndex].text == "Not Set")
                         theList[theList.SelectedIndex].text = "";
-                    setting.setSetting(currentlySetting, theList[theList.SelectedIndex].text);
+                    setting.setSetting(currentlySetting + ".Plugin", theList[theList.SelectedIndex].text);
                     ((OMButton)screens[screen][currentlySetting]).Tag = theList[theList.SelectedIndex].text;
                     setting.setSetting(currentlySetting + ".Display", getDisplayName(theList[theList.SelectedIndex].text));
                     ((OMButton)screens[screen][currentlySetting]).Text = getDisplayName(theList[theList.SelectedIndex].text);
@@ -300,16 +300,19 @@ public sealed class MainMenu : IHighLevel
         }
         private void createDefaultSettings(PluginSettings settings)
         {
-            settings.setSetting("MainMenu.MainMenu21", "Radio");
-            settings.setSetting("MainMenu.MainMenu12", "MainMenu");
-            settings.setSetting("MainMenu.MainMenu22", "Exit");
-            settings.setSetting("MainMenu.MainMenu11", "Media");
-            settings.setSetting("MainMenu.MainMenu13", "OBDII");
-            settings.setSetting("MainMenu.MainMenu21.Display", "Radio");
-            settings.setSetting("MainMenu.MainMenu12.Display", "Main Menu");
-            settings.setSetting("MainMenu.MainMenu22.Display", "Exit");
+            settings.setSetting("MainMenu.MainMenu11.Plugin", "Media");
+            settings.setSetting("MainMenu.MainMenu12.Plugin", "OMContacts");
+            settings.setSetting("MainMenu.MainMenu13.Plugin", "OMWeather");
+            settings.setSetting("MainMenu.MainMenu21.Plugin", "About");
+            settings.setSetting("MainMenu.MainMenu22.Plugin", "Exit");
+            settings.setSetting("MainMenu.MainMenu23.Plugin", "OMSettings");
+            
             settings.setSetting("MainMenu.MainMenu11.Display", "Media");
-            settings.setSetting("MainMenu.MainMenu13.Display", "OBDII");
+            settings.setSetting("MainMenu.MainMenu12.Display", "Contacts");
+            settings.setSetting("MainMenu.MainMenu13.Display", "Weather");
+            settings.setSetting("MainMenu.MainMenu21.Display", "About");
+            settings.setSetting("MainMenu.MainMenu22.Display", "Exit");
+            settings.setSetting("MainMenu.MainMenu23.Display", "Settings");
         }
 
         void cancel_OnClick(object sender, int screen)

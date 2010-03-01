@@ -324,7 +324,7 @@ namespace OpenMobile
         /// <summary>
         /// The image name in the skin folder
         /// </summary>
-        public String name;
+        public string name;
         /// <summary>
         /// Construct an image item from an image
         /// </summary>

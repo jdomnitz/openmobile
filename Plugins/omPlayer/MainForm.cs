@@ -305,17 +305,15 @@ namespace OMPlayer
             if ((percent >= 0) && (percent <= 100))
             {
                 player[instance].currentVolume = percent;
-                goto Label_0075;
+                return (player[instance].basicAudio.put_Volume((100 - player[instance].currentVolume) * -100) == 0);
             }
             if (percent == -1)
             {
                 player[instance].currentVolume = 0;
-                goto Label_0075;
+                return (player[instance].basicAudio.put_Volume((100 - player[instance].currentVolume) * -100) == 0);
             }
         }
         return false;
-    Label_0075:
-        return (player[instance].basicAudio.put_Volume((100 - player[instance].currentVolume) * -100) == 0);
     }
 
     public bool stop(int instance)
@@ -389,7 +387,7 @@ namespace OMPlayer
             return false;
         }
     }
-    public class AVPlayer
+    public sealed class AVPlayer
     {
         // Fields
         public IBasicAudio basicAudio = null;
