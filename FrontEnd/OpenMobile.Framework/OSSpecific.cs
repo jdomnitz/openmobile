@@ -25,6 +25,7 @@ using OpenMobile.Plugin;
 using System.Drawing;
 using System.Text;
 using System.Net;
+using System.IO;
 
 namespace OpenMobile.Framework
 {
@@ -47,6 +48,7 @@ namespace OpenMobile.Framework
         public static bool embedApplication(string name, int screen, IPluginHost host, Rectangle position)
         {
             theHost = host;
+            if (os.Platform==PlatformID.Win32NT)
             {
                 try
                 {
@@ -54,12 +56,18 @@ namespace OpenMobile.Framework
                     if (lastHandle == null)
                         lastHandle = new IntPtr[theHost.ScreenCount];
                     lastHandle[screen] = p[0].MainWindowHandle;
+                    object o;
+                    theHost.getData(eGetData.GetScaleFactors, "", screen.ToString(), out o);
+                    if (o == null)
+                        return false;
+                    PointF scale= (PointF)o;
+                    windowsEmbedder.SetWindowPos(p[0].MainWindowHandle, (IntPtr)0, (int)(position.X*scale.X), (int)(position.Y*scale.Y), (int)(position.Width*scale.X), (int)(position.Height*scale.Y), 0x20);
                     windowsEmbedder.SetParent(p[0].MainWindowHandle, theHost.UIHandle(screen));
-                    windowsEmbedder.SetWindowPos(p[0].MainWindowHandle, (IntPtr)0, position.X, position.Y, position.Width, position.Height, 0x20);
                     return true;
                 }
                 catch (Exception) { return false; }
             }
+            return false;
         }
         /// <summary>
         /// Un-embed an application from the UI
@@ -113,53 +121,77 @@ namespace OpenMobile.Framework
                     return "Unknown";
             }
         }
+        private static string osVersion;
         /// <summary>
         /// Returns the version of the operating system
         /// </summary>
         /// <returns></returns>
         public static string getOSVersion()
         {
+            if (osVersion != null)
+                return osVersion;
             if (os.Platform == PlatformID.Win32Windows)
             {
                 //This is a pre-NT version of Windows
                 switch (os.Version.Minor)
                 {
                     case 0:
-                        return "Windows 95";
+                        osVersion= "Windows 95";
+                        break;
                     case 10:
                         if (os.Version.Revision.ToString() == "2222A")
-                            return "Windows 98SE";
+                            osVersion = "Windows 98SE";
                         else
-                            return "Windows 98";
+                            osVersion = "Windows 98";
+                        break;
                     case 90:
-                        return "Windows Me";
+                        osVersion = "Windows Me";
+                        break;
                     default:
-                        return "Unknown";
+                        osVersion = "Unknown";
+                        break;
                 }
+                return osVersion;
             }
             else if (os.Platform == PlatformID.Win32NT)
             {
                 switch (os.Version.Major)
                 {
                     case 3:
-                        return "Windows NT 3.51";
+                        osVersion = "Windows NT 3.51";
+                        break;
                     case 4:
-                        return "Windows NT 4.0";
+                        osVersion = "Windows NT 4.0";
+                        break;
                     case 5:
                         if (os.Version.Minor == 0)
-                            return "Windows 2000";
+                            osVersion = "Windows 2000";
                         else
-                            return "Windows XP";
+                            osVersion = "Windows XP";
+                        break;
                     case 6:
                         if (os.Version.Minor == 0)
-                            return "Windows Vista";
+                            osVersion = "Windows Vista";
                         else
-                            return "Windows 7";
+                            osVersion = "Windows 7";
+                        break;
                     default:
                         break;
                 }
+                return osVersion;
             }
-            return getOS() + " " + os.Version.ToString();
+            else if (os.Platform == PlatformID.Unix)
+            {
+                ProcessStartInfo info = new ProcessStartInfo("lsb_release", "-d");
+                info.RedirectStandardOutput = true;
+                info.UseShellExecute = false;
+                Process p =Process.Start(info);
+                StreamReader reader = p.StandardOutput;
+                osVersion = reader.ReadLine().Replace("Description:", "").Trim();
+                return osVersion;
+            }
+            osVersion = getOS() + " " + os.Version.ToString();
+            return osVersion;
         }
         /// <summary>
         /// Is the program running on the Mono Framework
@@ -190,7 +222,7 @@ namespace OpenMobile.Framework
             try
             {
                 if (IsMono() == true)
-                    p = Process.Start("mono", (path + " " + param).Trim());
+                    p = Process.Start("mono", ('\"'+path + "\" " + param).Trim());
                 else
                     p = Process.Start(path, param);
                 if (wait == true)

@@ -54,10 +54,13 @@ namespace OMPlayer
 
     public void Dispose()
     {
-        for (int i = 0; i < player.Length; i++)
+        if (player != null)
         {
-            if (player[i] != null)
-                player[i].CloseClip();
+            for (int i = 0; i < player.Length; i++)
+            {
+                if (player[i] != null)
+                    player[i].CloseClip();
+            }
         }
         GC.SuppressFinalize(this);
     }
@@ -294,6 +297,9 @@ namespace OMPlayer
     public bool setPosition(int instance, float seconds)
     {
         checkInstance(instance);
+        if ((player[instance].currentState == ePlayerStatus.Stopped) || (player[instance].currentState == ePlayerStatus.Ready))
+            return false;
+        player[instance].pos = seconds;
         return (0 == player[instance].mediaPosition.put_CurrentPosition((double) seconds));
     }
 
@@ -494,7 +500,6 @@ namespace OMPlayer
                     {
                         currentState = ePlayerStatus.Ready;
                         mediaControl.Stop();
-                        mediaPosition.put_CurrentPosition((double)instance);
                     }
                     catch (AccessViolationException) { Thread.Sleep(50); if (Thread.CurrentThread.Name != "1") { Thread.CurrentThread.Name = "1"; goto retry; } return false; }
                     mediaControl = null;

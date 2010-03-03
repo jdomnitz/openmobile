@@ -258,7 +258,13 @@ namespace DPGWeather
         void host_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
         {
             if (function == eFunction.connectedToInternet)
-                refreshData("Towaco,NJ");
+            {
+                string loc;
+                using (PluginSettings settings = new PluginSettings())
+                    loc = settings.getSetting("Data.DefaultLocation");
+                if (loc != "")
+                    refreshData(loc);
+            }
         }
 
         public void Dispose()

@@ -93,9 +93,9 @@ namespace OpenMobile.Framework
                 else
                     return speed + "mph";
             else if (kph == true)
-                return Calculation.convertSpeed(speed,speedTypes.kilometersPerHour,speedTypes.milesPerHour).ToString("0") + " mph";
+                return Calculation.convertSpeed(speed,speedTypes.kilometersPerHour,speedTypes.milesPerHour).ToString("0") + "mph";
             else
-                return Calculation.convertSpeed(speed, speedTypes.milesPerHour, speedTypes.kilometersPerHour).ToString("0") + " kph";
+                return Calculation.convertSpeed(speed, speedTypes.milesPerHour, speedTypes.kilometersPerHour).ToString("0") + "kph";
         }
         /// <summary>
         /// Returns the local language

@@ -73,6 +73,13 @@ namespace OpenMobile
                 return screen;
             }
         }
+        public PointF ScaleFactors
+        {
+            get
+            {
+                return new PointF(widthScale, heightScale);
+            }
+        }
         OMControl highlighted
         {
             get
@@ -163,12 +170,22 @@ namespace OpenMobile
             }
         }
         // End of code added by Borte
+        private bool hidden;
         public void hideCursor()
         {
             if (this.InvokeRequired == true)
                 this.Invoke(hide);
             else
-                Cursor.Hide();
+                if (hidden == false)
+                {
+                    Cursor.Hide();
+                    hidden = true;
+                }
+                else
+                {
+                    Cursor.Show();
+                    hidden = false;
+                }
         }
 
         #region ControlManagement
@@ -454,13 +471,13 @@ namespace OpenMobile
                 if (e.Button == MouseButtons.Left)
                 {
                     OMSlider s = (OMSlider)highlighted;
-                    s.SliderPosition += ((int)(e.X / widthScale) - ThrowStart.X);
-                    ThrowStart.X = (int)(e.X / widthScale);
+                    s.SliderPosition += ((int)((e.X - ThrowStart.X) / widthScale));
+                    ThrowStart.X = e.X;
                     if ((s.SliderPosition + (s.SliderWidth / 2)) < 0)
                         s.SliderPosition = -(s.SliderWidth / 2);
                     if ((s.SliderPosition + (s.SliderWidth / 2)) > s.Width)
                         s.SliderPosition = s.Width - (s.SliderWidth / 2);
-                    s.sliderMoved(screen);
+                    new Thread(delegate() { s.sliderMoved(screen); }).Start();
                     UpdateThisControl(s.toRegion());
                     return;
                 }
@@ -716,7 +733,7 @@ namespace OpenMobile
                     if ((e.X > (s.Left + s.SliderPosition) * widthScale) && (e.X < (s.Left + s.SliderPosition + s.SliderWidth) * widthScale))
                         if ((e.Y > ((s.Top + (s.SliderBarHeight / 2)) - (s.Height / 2)) * heightScale) && (e.Y < ((s.Top + (s.SliderBarHeight / 2)) + (s.Height / 2)) * heightScale))
                         {
-                            ThrowStart.X = (int)(e.X / widthScale);
+                            ThrowStart.X = e.X;
                         }
                     // Start of code added by Borte 
                     // Added support of IMouse interface 

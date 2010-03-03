@@ -41,6 +41,8 @@ namespace Media
         public eLoadStatus initialize(IPluginHost host)
         {
             OMPanel p = new OMPanel();
+            if (host.InstanceCount == -1)
+                return eLoadStatus.LoadFailedRetryRequested;
             currentAlbums = new List<mediaInfo>[host.InstanceCount];
             currentSongs = new List<mediaInfo>[host.InstanceCount];
             kickDown = new bool[host.InstanceCount];
