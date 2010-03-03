@@ -54,6 +54,10 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Creates a new Basic Shape
         /// </summary>
+        public OMBasicShape() { }
+        /// <summary>
+        /// Creates a new Basic Shape
+        /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="w"></param>

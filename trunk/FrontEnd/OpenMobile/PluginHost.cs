@@ -772,7 +772,11 @@ namespace OpenMobile
                     {
                         if ((ret < 0) || (ret >= Core.RenderingWindows.Count))
                             return false;
-                        Core.RenderingWindows[ret].transitionOutEverything();
+                        lock (Core.RenderingWindows[ret])
+                        {
+                            Core.RenderingWindows[ret].transitionOutEverything();
+                        }
+                        raiseSystemEvent(eFunction.TransitionFromAny, arg, "", "");
                         return true;
                     }
                     return false;
@@ -1257,6 +1261,9 @@ namespace OpenMobile
                         Core.RenderingWindows[i].Invoke(Core.RenderingWindows[i].identify);
                 if (message=="Redraw")
                     Core.RenderingWindows[0].Invoke(Core.RenderingWindows[0].redraw);
+                if (message == "ToggleCursor")
+                    for (int i = 0; i < screenCount; i++)
+                        Core.RenderingWindows[i].hideCursor();
             }
             try
             {
@@ -1475,6 +1482,17 @@ namespace OpenMobile
                             else
                                 data = currentMediaPlayer[ret].getCurrentPosition(ret);
                         }
+                        else
+                            data = null;
+                    }
+                    else
+                        data = null;
+                    break;
+                case eGetData.GetScaleFactors:
+                    if (int.TryParse(param,out ret) == true)
+                    {
+                        if ((ret >= 0) && (ret < ScreenCount))
+                            data = Core.RenderingWindows[ret].ScaleFactors;
                         else
                             data = null;
                     }

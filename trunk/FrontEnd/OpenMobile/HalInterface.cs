@@ -60,8 +60,15 @@ namespace OpenMobile
             void recv(IAsyncResult res)
             {
                 IPEndPoint remote = new IPEndPoint(IPAddress.Any, 8549);
-                parse(ASCIIEncoding.ASCII.GetString(receive.EndReceive(res, ref remote)));
-                receive.BeginReceive(recv, null);
+                try
+                {
+                    parse(ASCIIEncoding.ASCII.GetString(receive.EndReceive(res, ref remote)));
+                }
+                catch (System.Net.Sockets.SocketException) { } //unknown xp bug on startup
+                finally
+                {
+                    receive.BeginReceive(recv, null);
+                }
             }
         }
     }

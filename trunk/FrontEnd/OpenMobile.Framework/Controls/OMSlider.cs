@@ -339,9 +339,8 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public override Rectangle toRegion()
         {
-            //ToDo - FIX:Slider is rendered past the selectable area
             if (sliderHeight>height)
-                return new Rectangle(Left - (sliderWidth / 2), Top - (sliderHeight / 2)+(height/2), Width + sliderWidth, sliderHeight);
+                return new Rectangle(Left - (sliderWidth / 2), Top - (sliderHeight / 2)+(height/2)-1, Width + sliderWidth, sliderHeight+2);
             else
                 return new Rectangle(Left, Top, Width, Height);
         }

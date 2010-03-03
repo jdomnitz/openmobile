@@ -1257,7 +1257,13 @@ namespace OpenMobile
         /// <summary>
         /// Returns a list of audio devices available on the system
         /// </summary>
-        GetAudioDevices=12
+        GetAudioDevices=12,
+        /// <summary>
+        /// Gets the height and width scale factors
+        /// <para>----------------------------------------------------</para>
+        /// <para>Param: Screen [int]</para>
+        /// </summary>
+        GetScaleFactors=13
     }
 
     /// <summary>

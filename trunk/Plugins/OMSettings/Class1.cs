@@ -281,11 +281,14 @@ namespace OMSettings
             location.Font = new Font("Microsoft Sans Serif", 28F);
             location.TextAlignment = Alignment.CenterLeft;
             location.OnClick += new userInteraction(location_OnClick);
+            OMLabel explanation = new OMLabel(525,230,450,30);
+            explanation.Text = "Postcode, city and state, etc.";
             data.addControl(Save4);
             data.addControl(Cancel);
             data.addControl(Heading3);
             data.addControl(ldesc);
             data.addControl(location);
+            data.addControl(explanation);
             manager.loadPanel(data);
             #endregion
             return OpenMobile.eLoadStatus.LoadSuccessful;
@@ -300,7 +303,12 @@ namespace OMSettings
         void Save4_OnClick(object sender, int screen)
         {
             using (PluginSettings settings = new PluginSettings())
-                    settings.setSetting("Data.DefaultLocation", ((OMTextBox)manager[screen,"data"][4]).Text);
+            {
+                settings.setSetting("Data.DefaultLocation", ((OMTextBox)manager[screen, "data"][4]).Text);
+                settings.setSetting("Plugins.DPYWeather.LastUpdate", DateTime.MinValue.ToString());
+                settings.setSetting("Plugins.DPGWeather.LastUpdate", DateTime.MinValue.ToString());
+                settings.setSetting("Plugins.DPWeather.LastUpdate", DateTime.MinValue.ToString());
+            }
             theHost.execute(eFunction.TransitionFromAny, screen.ToString());
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
@@ -309,10 +317,17 @@ namespace OMSettings
         void Save3_OnClick(object sender, int screen)
         {
             using (PluginSettings settings = new PluginSettings())
-                if (((OMCheckbox)manager[screen, "general"][3]).Checked == true)
+            {
+                OMCheckbox chk=((OMCheckbox)manager[screen, "general"][3]);
+                if ((settings.getSetting("UI.HideCursor") == "") && (chk.Checked == true))
+                    theHost.sendMessage("RenderingWindow", "OMSettings", "ToggleCursor");
+                if (((settings.getSetting("UI.HideCursor")=="True")&&(chk.Checked==false))||((settings.getSetting("UI.HideCursor")=="False")&&(chk.Checked==true)))
+                    theHost.sendMessage("RenderingWindow", "OMSettings", "ToggleCursor");
+                if (chk.Checked == true)
                     settings.setSetting("UI.HideCursor", "True");
                 else
                     settings.setSetting("UI.HideCursor", "False");
+            }
             theHost.execute(eFunction.TransitionFromAny, screen.ToString());
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
@@ -495,7 +510,8 @@ namespace OMSettings
 
         public void Dispose()
         {
-            manager.Dispose();
+            if (manager!=null)
+                manager.Dispose();
             GC.SuppressFinalize(this);
         }
     }

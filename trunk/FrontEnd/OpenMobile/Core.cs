@@ -228,7 +228,7 @@ namespace OpenMobile
                 {
                     status[i]= pluginCollection[i].initialize(theHost);
                 }
-                catch (Exception) { status[i] = eLoadStatus.LoadFailedUnloadRequested; }
+                catch (Exception e) { status[i] = eLoadStatus.LoadFailedUnloadRequested; }
             }
             for(int i=2;i<pluginCollection.Count;i++) //Give them all a second chance if they need it
                 try
