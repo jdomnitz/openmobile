@@ -154,7 +154,6 @@ namespace OpenMobile.Controls
             set
             {
                 downImage = value;
-
             }
         }
 

@@ -24,13 +24,14 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Threading;
 using System.Timers;
+using System.Windows.Forms;
 
 namespace OpenMobile.Controls
 {
     /// <summary>
     /// A listbox control
     /// </summary>
-    public class OMList:OMLabel,IClickable
+    public class OMList:OMLabel,IClickable,IHighlightable,IKey
     {
         /// <summary>
         /// Occurs when the list index changes
@@ -75,6 +76,8 @@ namespace OpenMobile.Controls
         /// <param name="index"></param>
         public void Select(int index)
         {
+            if ((index < 0) || (index >= items.Count))
+                return;
             selectedIndex = index;
             if (h == 0)
             {
@@ -132,7 +135,17 @@ namespace OpenMobile.Controls
             moved = 0;
             refreshMe(toRegion());
         }
-
+        /// <summary>
+        /// List Start
+        /// </summary>
+        [Browsable(false)]
+        public int Start
+        {
+            get
+            {
+                return start;
+            }
+        }
         /// <summary>
         /// Placeholder method
         /// </summary>
@@ -684,6 +697,35 @@ namespace OpenMobile.Controls
             {
                 if (OnLongClick != null)
                     OnLongClick(this,screen);
+            }
+
+            #endregion
+
+            #region IKey Members
+
+            public bool KeyDown(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
+            {
+                if (e.KeyCode == Keys.PageUp)
+                {
+                    Select(SelectedIndex-1);
+                    return true;
+                }
+                if (e.KeyCode == Keys.PageDown)
+                {
+                    Select(SelectedIndex+1);
+                    return true;
+                }
+                if ((e.KeyCode == Keys.Left) || (e.KeyCode == Keys.Right) || (e.KeyCode == Keys.Up) || (e.KeyCode == Keys.Down))
+                {
+                    selectedIndex = -1;
+                    this.refreshMe(this.toRegion());
+                }
+                return false;
+            }
+
+            public bool KeyUp(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
+            {
+                return false;
             }
 
             #endregion

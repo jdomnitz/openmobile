@@ -61,10 +61,9 @@ namespace Media
             Slider3.Name = "Media.Slider3";
             Slider3.Image = item;
             Slider3.OnClick += new userInteraction(Slider3_OnClick);
-            OMButton Slider1 = new OMButton(17,119,60,400);
+            OMImage Slider1 = new OMImage(17,119,60,400);
             Slider1.Name = "Media.Slider1";
             Slider1.Image = item;
-            Slider1.OnClick += new userInteraction(Slider1_OnClick);
             OMLabel artists = new OMLabel(30, 220, 30, 300);
             artists.Text = "Artists";
             artists.Font = new Font(FontFamily.GenericSansSerif, 26F);
@@ -435,10 +434,10 @@ namespace Media
                 slider2right(screen);
         }
 
-        void Slider1_OnClick(object sender, int screen)
-        {
-                slider1right(screen);
-        }
+        //void Slider1_OnClick(object sender, int screen)
+        //{
+        //        slider1right(screen);
+        //}
 
         void List3_SelectedIndexChanged(OMList sender,int screen)
         {

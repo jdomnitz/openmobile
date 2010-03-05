@@ -51,7 +51,12 @@ namespace OpenMobile.Framework
                 img = cache.Find(x => x.name == pluginName).image;
             else
                 img = new Bitmap(1000, 600);
-            Graphics g=Graphics.FromImage(img);
+            Graphics g;
+            try
+            {
+                g = Graphics.FromImage(img);
+            }
+            catch (System.InvalidOperationException) { return null; }
             g.Clear(Color.Transparent);
             renderingParams param=new renderingParams();
             for (int i = 0; i < p.controlCount;i++ )

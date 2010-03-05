@@ -152,11 +152,11 @@ namespace OpenMobile.Data
             switch (passType)
             {
                 case ePassword.email:
-                    return Encryption.AESDecrypt(Collections.personalInfo.emailPassword, appKey);
+                    return Encryption.AESDecrypt(Collections.personalInfo.emailPassword, appKey+Environment.UserName);
                 case ePassword.google:
-                    return Encryption.AESDecrypt(Collections.personalInfo.googlePassword, appKey);
+                    return Encryption.AESDecrypt(Collections.personalInfo.googlePassword, appKey + Environment.UserName);
                 case ePassword.reserved1:
-                    return Encryption.AESDecrypt(Collections.personalInfo.otherPassword, appKey);
+                    return Encryption.AESDecrypt(Collections.personalInfo.otherPassword, appKey + Environment.UserName);
                 default:
                     return "NotYetImplemented!";
             }
@@ -173,13 +173,13 @@ namespace OpenMobile.Data
             {
 
                 case ePassword.email:
-                    Collections.personalInfo.emailPassword= Encryption.AESEncrypt(password, appKey);
+                    Collections.personalInfo.emailPassword = Encryption.AESEncrypt(password, appKey + Environment.UserName);
                     return;
                 case ePassword.google:
-                    Collections.personalInfo.googlePassword= Encryption.AESEncrypt(password, appKey);
+                    Collections.personalInfo.googlePassword = Encryption.AESEncrypt(password, appKey + Environment.UserName);
                     return;
                 case ePassword.reserved1:
-                    Collections.personalInfo.otherPassword= Encryption.AESEncrypt(password, appKey);
+                    Collections.personalInfo.otherPassword = Encryption.AESEncrypt(password, appKey + Environment.UserName);
                     return;
                 default:
                     throw new NotImplementedException();

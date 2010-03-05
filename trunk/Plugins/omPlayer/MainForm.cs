@@ -38,7 +38,6 @@ namespace OMPlayer
     private static IntPtr hDrain = IntPtr.Zero;
     private AVPlayer[] player;
     private static IPluginHost theHost;
-    private const int WMGraphNotify = 0x40d;
 
     // Events
     public event MediaEvent OnMediaEvent;

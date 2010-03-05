@@ -63,6 +63,7 @@ namespace OpenMobile.Framework
                     PointF scale= (PointF)o;
                     windowsEmbedder.SetWindowPos(p[0].MainWindowHandle, (IntPtr)0, (int)(position.X*scale.X), (int)(position.Y*scale.Y), (int)(position.Width*scale.X), (int)(position.Height*scale.Y), 0x20);
                     windowsEmbedder.SetParent(p[0].MainWindowHandle, theHost.UIHandle(screen));
+                    //windowsEmbedder.SetFocus(p[0].MainWindowHandle);
                     return true;
                 }
                 catch (Exception) { return false; }
@@ -238,6 +239,9 @@ namespace OpenMobile.Framework
 
             [DllImport("user32.dll")]
             public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+            [DllImport("user32.dll")]
+            public static extern IntPtr SetFocus(IntPtr hWnd);
         }
     }
 }

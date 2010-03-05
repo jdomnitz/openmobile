@@ -77,7 +77,10 @@ namespace OpenMobile.helperFunctions
             CryptoStream cryptoStream = new CryptoStream(MemStream, Decryptor, CryptoStreamMode.Read);
             byte[] PlainTextBytes = new byte[CipherTextBytes.Length];
             int ByteCount=0;
-            ByteCount = cryptoStream.Read(PlainTextBytes, 0, PlainTextBytes.Length);
+            try
+            {
+                ByteCount = cryptoStream.Read(PlainTextBytes, 0, PlainTextBytes.Length);
+            }catch(CryptographicException){return "";}
             if (ByteCount == 0)
                 return "";
             MemStream.Close();
