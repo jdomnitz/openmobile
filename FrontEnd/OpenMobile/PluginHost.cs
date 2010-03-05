@@ -28,6 +28,7 @@ using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
 using OpenMobile.Framework;
+using System.Threading;
 
 namespace OpenMobile
 {
@@ -1434,9 +1435,22 @@ namespace OpenMobile
                     }
                     break;
                 case eGetData.GetVolume:
-                    //ToDo - re-implement
-                    //data=Framework.OSSpecific.getVolume();
-                    return;
+                    hal.snd("3|0");
+                    bool res = true;
+                    while (res == true)
+                    {
+                        Thread.Sleep(5);
+                        res = (hal.volume == null);
+                        if (res == false)
+                        {
+                            if (hal.volume[0] == "0")
+                            {
+                                data = hal.volume[1];
+                                hal.volume = null;
+                            }
+                        }
+                    }
+                    break;
                 case eGetData.GetFirmwareInfo:
                     IBasePlugin d = Core.pluginCollection.Find(p => p.pluginName == name);
                     if (d == null)

@@ -97,6 +97,13 @@ namespace OMHal
                 arg1 = parts[1];
             switch (parts[0])
             {
+                case "3": //GetData - System Volume
+                    int ret;
+                    if (int.TryParse(arg1,out ret)==true){
+                        if(ret>=0)
+                            sendIt("3|" + arg1+"|"+ Specific.getVolume(ret));
+                    }
+                    break;
                 case "34": //Set Volume
                     Specific.setVolume(int.Parse(arg1),0);
                     break;

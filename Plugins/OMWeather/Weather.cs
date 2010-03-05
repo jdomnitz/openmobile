@@ -48,6 +48,7 @@ namespace ControlDemo
             p = new OMPanel();
             widget = new OMPanel();
             theHost = host;
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             imageItem opt1 = theHost.getSkinImage("Weather|NotSet");
             Font f = new Font("Microsoft Sans Serif", 36F);
             OMLabel Title = new OMLabel();
@@ -147,18 +148,20 @@ namespace ControlDemo
             day4img.Top = 350;
             day4img.Left = 531;
             day4img.Name = "day4img";
+            Font f2 = new Font("Microsoft Sans Serif", 24F);
             OMLabel day2high = new OMLabel(72, 450, 200, 50);
             day2high.Color = Color.Red;
             day2high.OutlineColor = Color.White;
-            day2high.Font = new Font("Microsoft Sans Serif", 24F);
+            day2high.Font = f2;
             day2high.Text = "High: N/A";
             day2high.Format = textFormat.Glow;
             day2high.TextAlignment = Alignment.CenterLeft;
             day2high.Name = "day2high";
+            Font f3 = new Font("Microsoft Sans Serif", 26.25F);
             OMLabel day2low = new OMLabel(72, 490, 200, 50);
             day2low.Color = Color.Blue;
             day2low.OutlineColor = Color.White;
-            day2low.Font = new Font("Microsoft Sans Serif", 26.25F);
+            day2low.Font = f3;
             day2low.Text = "Low: N/A";
             day2low.Format = textFormat.Glow;
             day2low.TextAlignment = Alignment.CenterLeft;
@@ -166,7 +169,7 @@ namespace ControlDemo
             OMLabel day3high = new OMLabel(297, 450, 200, 50);
             day3high.Color = Color.Red;
             day3high.OutlineColor = Color.White;
-            day3high.Font = new Font("Microsoft Sans Serif", 24F);
+            day3high.Font = f2;
             day3high.Text = "High: N/A";
             day3high.Format = textFormat.Glow;
             day3high.TextAlignment = Alignment.CenterLeft;
@@ -174,7 +177,7 @@ namespace ControlDemo
             OMLabel day4high = new OMLabel(520, 450, 200, 50);
             day4high.Color = Color.Red;
             day4high.OutlineColor = Color.White;
-            day4high.Font = new Font("Microsoft Sans Serif", 24F);
+            day4high.Font = f2;
             day4high.Text = "High: N/A";
             day4high.Format = textFormat.Glow;
             day4high.TextAlignment = Alignment.CenterLeft;
@@ -182,7 +185,7 @@ namespace ControlDemo
             OMLabel day5high = new OMLabel(775, 450, 200, 50);
             day5high.Color = Color.Red;
             day5high.OutlineColor = Color.White;
-            day5high.Font = new Font("Microsoft Sans Serif", 24F);
+            day5high.Font = f2;
             day5high.Text = "High: N/A";
             day5high.Format = textFormat.Glow;
             day5high.TextAlignment = Alignment.CenterLeft;
@@ -190,7 +193,7 @@ namespace ControlDemo
             OMLabel day4low = new OMLabel(521, 490, 200, 50);
             day4low.Color = Color.Blue;
             day4low.OutlineColor = Color.White;
-            day4low.Font = new Font("Microsoft Sans Serif", 26.25F);
+            day4low.Font = f3;
             day4low.Text = "Low: N/A";
             day4low.Format = textFormat.Glow;
             day4low.TextAlignment = Alignment.CenterLeft;
@@ -198,7 +201,7 @@ namespace ControlDemo
             OMLabel day3low = new OMLabel(299, 490, 200, 50);
             day3low.Color = Color.Blue;
             day3low.OutlineColor = Color.White;
-            day3low.Font = new Font("Microsoft Sans Serif", 26.25F);
+            day3low.Font = f3;
             day3low.Text = "Low: N/A";
             day3low.Format = textFormat.Glow;
             day3low.TextAlignment = Alignment.CenterLeft;
@@ -211,6 +214,10 @@ namespace ControlDemo
             day5low.Format = textFormat.Glow;
             day5low.TextAlignment = Alignment.CenterLeft;
             day5low.Name = "day5low";
+            OMLabel provider = new OMLabel(300, 560, 120, 30);
+            provider.Text = "Provided by:";
+            provider.Font = new Font(FontFamily.GenericSansSerif, 12F);
+            OMImage attrib = new OMImage(420,550, 120, 50);
             p.addControl(Title);
             p.addControl(day1high);
             p.addControl(day1low);
@@ -235,8 +242,22 @@ namespace ControlDemo
             p.addControl(day3low);
             p.addControl(day4low);
             p.addControl(day5low);
+            p.addControl(provider);
+            p.addControl(attrib);
+            OMImage cache=new OMImage(0,0,1000,600);
+            widget.addControl(cache);
             OpenMobile.Threading.TaskManager.QueueTask(Weather.PurgeOld, priority.Low);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function==eFunction.TransitionToPanel)
+                if (arg2 == "OMWeather")
+                {
+                    refresh();
+                    ((OMImage)widget[0]).Image = new imageItem(Widget.generate("OMWeather", theHost));
+                }
         }
 
         public void refresh()
@@ -256,6 +277,7 @@ namespace ControlDemo
             ((OMLabel)p[5]).Text = "Humidity: "+data.humidity + '%';
             ((OMLabel)p[6]).Text = "Wind: "+Globalization.convertSpeedToLocal(data.windSpeed,true) + ' '+data.windDirection;
             ((OMLabel)p[7]).Text = "Feels Like: " + Globalization.convertToLocalTemp(data.feelsLike, true);
+            ((OMImage)p[25]).Image = theHost.getSkinImage("Providers|" + data.contrib, true);
             try
             {
                 data = provider.readWeather(loc, DateTime.Today.AddDays(1)); //Tomorrow
@@ -292,11 +314,10 @@ namespace ControlDemo
 
         public OMPanel loadPanel(string name, int screen)
         {
-            refresh();
             if (name == "Widget")
-                return widget;
-            else
                 return p;
+            else
+                return widget;
         }
 
         public OMPanel loadSettings(string name, int screen)

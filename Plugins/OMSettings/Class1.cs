@@ -42,7 +42,7 @@ namespace OMSettings
             OMPanel main = new OMPanel("Main");
             main.BackgroundColor1 = Color.Black;
             main.BackgroundType = backgroundStyle.SolidColor;
-            OMList menu = new OMList(10, 97, 980, 433);
+            OMList menu = new OMList(10, 100, 980, 433);
             menu.ListStyle = eListStyle.MultiList;
             menu.Background = Color.Silver;
             menu.ItemColor1 = Color.Black;
@@ -56,15 +56,18 @@ namespace OMSettings
             menu.Add(new OMListItem("Multi-Zone Settings", "Displays, Sound Cards and other zone specific settings"));
             menu.Add(new OMListItem("Hardware Settings", "Hardware devices like the Fusion Brain, OBDII readers and game pads"));
             menu.SelectedIndexChanged += new OMList.IndexChangedDelegate(menu_SelectedIndexChanged);
+            menu.OnClick += new userInteraction(menu_OnClick);
             main.addControl(menu);
             manager.loadPanel(main);
             #endregion
             #region multiZone
             OMPanel MultiZone = new OMPanel("MultiZone");
             imageItem opt1 = theHost.getSkinImage("Monitor");
+            imageItem opt4 = theHost.getSkinImage("Monitor.Highlighted");
             Font fnt = new Font("Microsoft Sans Serif", 99.75F);
             OMButton Button1 = new OMButton(47, 132, 200, 200);
             Button1.Image = opt1;
+            Button1.FocusImage = opt4;
             Button1.Name = "Button1";
             Button1.Font = fnt;
             Button1.Text = "1";
@@ -72,6 +75,7 @@ namespace OMSettings
             Button1.OnClick+=new userInteraction(Button_OnClick);
             OMButton Button2 = new OMButton(280, 132, 200, 200);
             Button2.Image = opt1;
+            Button2.FocusImage = opt4;
             Button2.Name = "Button2";
             Button2.Font = fnt;
             Button2.Text = "2";
@@ -79,6 +83,7 @@ namespace OMSettings
             Button2.OnClick += new userInteraction(Button_OnClick);
             OMButton Button3 = new OMButton(517, 132, 200, 200);
             Button3.Image = opt1;
+            Button3.FocusImage = opt4;
             Button3.Name = "Button3";
             Button3.Font = fnt;
             Button3.Text = "3";
@@ -86,6 +91,7 @@ namespace OMSettings
             Button3.OnClick += new userInteraction(Button_OnClick);
             OMButton Button4 = new OMButton(764, 132, 200, 200);
             Button4.Image = opt1;
+            Button4.FocusImage = opt4;
             Button4.Name = "Button4";
             Button4.Font = fnt;
             Button4.Text = "4";
@@ -93,6 +99,7 @@ namespace OMSettings
             Button4.OnClick += new userInteraction(Button_OnClick);
             OMButton Button5 = new OMButton(47, 335, 200, 200);
             Button5.Image = opt1;
+            Button5.FocusImage = opt4;
             Button5.Name = "Button5";
             Button5.Font = fnt;
             Button5.Text = "5";
@@ -100,6 +107,7 @@ namespace OMSettings
             Button5.OnClick += new userInteraction(Button_OnClick);
             OMButton Button6 = new OMButton(280, 335, 200, 200);
             Button6.Image = opt1;
+            Button6.FocusImage = opt4;
             Button6.Name = "Button6";
             Button6.Font = fnt;
             Button6.Text = "6";
@@ -107,6 +115,7 @@ namespace OMSettings
             Button6.OnClick += new userInteraction(Button_OnClick);
             OMButton Button7 = new OMButton(517, 335, 200, 200);
             Button7.Image = opt1;
+            Button7.FocusImage = opt4;
             Button7.Name = "Button7";
             Button7.Font = fnt;
             Button7.Text = "7";
@@ -114,6 +123,7 @@ namespace OMSettings
             Button7.OnClick += new userInteraction(Button_OnClick);
             OMButton Button8 = new OMButton(764, 335, 200, 200);
             Button8.Image = opt1;
+            Button8.FocusImage = opt4;
             Button8.Name = "Button8";
             Button8.Font = fnt;
             Button8.Text = "8";
@@ -292,6 +302,11 @@ namespace OMSettings
             manager.loadPanel(data);
             #endregion
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void menu_OnClick(object sender, int screen)
+        {
+            menu_SelectedIndexChanged((OMList)sender, screen);
         }
 
         void location_OnClick(object sender, int screen)

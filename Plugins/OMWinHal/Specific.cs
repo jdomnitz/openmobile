@@ -49,9 +49,11 @@ namespace OMHal
             else
             {
                 if (device != null)
-                    return (int)(device[instance].AudioEndpointVolume.MasterVolumeLevelScalar * 100);
-                else
-                    return -1;
+                {
+                    if (instance<device.Length)
+                        return (int)(device[instance].AudioEndpointVolume.MasterVolumeLevelScalar * 100);
+                }
+                return -1;
             }
         }
         /// <summary>

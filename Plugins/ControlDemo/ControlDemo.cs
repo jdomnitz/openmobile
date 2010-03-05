@@ -25,6 +25,7 @@ using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
+using System.Windows.Forms;
 
 namespace ControlDemo
 {
@@ -39,74 +40,39 @@ namespace ControlDemo
     public eLoadStatus initialize(IPluginHost host)
     {
         theHost = host;
-        OMAnimatedLabel prog = new OMAnimatedLabel();
-        prog.Top=400;
-        prog.Left=100;
-        prog.Width=250;
-        prog.Height=30;
-        prog.Text = "Im a sample string";
-        prog.ContiuousAnimation = eAnimation.GlowPulse;
-        prog.OutlineColor = Color.Red;
-        OMImage img = new OMImage(700,200,125,100);
-        img.Image = new imageItem(Widget.generate("Media", host));
-        OMProgress tb = new OMProgress(200, 100, 50, 100);
-        tb.Value = 60;
-        tb.Vertical = true;
-        OMCheckbox ch = new OMCheckbox();
-        ch.Left = 100;
-        ch.Top = 200;
-        ch.Width = 225;
-        ch.Height = 30;
-        ch.Text = "Im a checkbox";
-        OMButton embed = new OMButton(450, 100, 250, 40);
+        theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
+        OMImage img = new OMImage(0,0,1000,600);
+        img.Image = new imageItem(new Bitmap(Screen.PrimaryScreen.Bounds.Width,Screen.PrimaryScreen.Bounds.Height));
+        OMButton embed = new OMButton(350, 550, 250, 40);
         embed.Image = theHost.getSkinImage("Full");
         embed.Text = "Embed GMPC";
         embed.OnClick += new userInteraction(embed_OnClick);
-        OMList gauge = new OMList();
-        gauge.Left = 400;
-        gauge.Top = 300;
-        gauge.Width = 200;
-        gauge.Height = 200;
-        gauge.Name = "multi-list";
-        gauge.ListStyle = eListStyle.MultiList;
-        gauge.Background = Color.Silver;
-        gauge.ItemColor1 = Color.Black;
-        gauge.Color = Color.White;
-        gauge.HighlightColor = Color.White;
-        gauge.SelectedItemColor1 = Color.MidnightBlue;
-        gauge.Add(new OMListItem("Item 1","This is a test"));
-        gauge.Add(new OMListItem("Item 2","This is an even larger test!"));
-        OMSlider slider = new OMSlider();
-        slider.Left = 20;
-        slider.Height = 20;
-        slider.Width = 500;
-        slider.Top = 470;
-        slider.SliderBarHeight = 10;
-        slider.SliderWidth = 35;
-        slider.Slider = theHost.getSkinImage("Slider");
-        slider.SliderBar = theHost.getSkinImage("Slider.Bar");
-        p.addControl(ch);
         p.addControl(embed);
-        p.addControl(prog);
-        p.addControl(gauge);
-        p.addControl(slider);
-        p.addControl(tb);
         p.addControl(img);
         p.BackgroundColor1 = Color.FromArgb(180, Color.Red);
         p.BackgroundColor2 = Color.Transparent;
         p.BackgroundType = backgroundStyle.Gradiant;
         manager = new ScreenManager(theHost.ScreenCount);
         manager.loadPanel(p);
-        Timer t = new Timer(50);
-        t.Enabled = true;
-        t.Elapsed += new ElapsedEventHandler(t_Elapsed);
         return eLoadStatus.LoadSuccessful;
     }
 
-    void t_Elapsed(object sender, ElapsedEventArgs e)
+    void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
     {
-        Random r=new Random();
-        //((OMGauge)manager[0]["gauge"]).Value = r.Next(99);
+        if ((function == eFunction.TransitionFromAny) && embedded == true)
+            embed_OnClick(this, int.Parse(arg1));
+        if ((function == eFunction.TransitionToPanel) && (embedded == true))
+        {
+            if (arg2 == "ControlDemo")
+                return;
+            int i=int.Parse(arg1);
+            OMImage img=((OMImage)manager[i][1]);
+            Graphics g = Graphics.FromImage(img.Image.image);
+            Form f=(Form)Form.FromHandle(theHost.UIHandle(i));
+            g.CopyFromScreen(0,0,0,0, Screen.PrimaryScreen.Bounds.Size,CopyPixelOperation.SourceCopy);
+            g.Dispose();
+            embed_OnClick(this, int.Parse(arg1));
+        }
     }
     bool embedded = false;
     void embed_OnClick(object sender, int screen)
@@ -116,7 +82,7 @@ namespace ControlDemo
             embedded=!OpenMobile.Framework.OSSpecific.unEmbedApplication("Que",screen);
             return;
         }
-        embedded=OpenMobile.Framework.OSSpecific.embedApplication("Que", screen,theHost,new Rectangle(-50,-10, 400, 400));
+        embedded=OpenMobile.Framework.OSSpecific.embedApplication("Que", screen,theHost,new Rectangle(0,99, 1000, 501));
     }
     void b8_OnClick(object sender, int screen)
     {
@@ -126,6 +92,7 @@ namespace ControlDemo
     }
     public OMPanel loadPanel(string name,int screen)
     {
+        embed_OnClick(this, screen);
         return manager[screen];
     }
     public OMPanel loadSettings(string name,int screen)

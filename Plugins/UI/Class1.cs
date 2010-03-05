@@ -142,8 +142,8 @@ namespace OpenMobile
             Back.OnClick += new userInteraction(Back_OnClick);
             Back.Transition = eButtonTransition.None;
             OMButton speech = new OMButton(631, 533, 160, 70);
-            speech.Image = theHost.getSkinImage("Tab");
-            speech.Text = "Speak";
+            speech.Image = theHost.getSkinImage("Speak",true);
+            speech.FocusImage = theHost.getSkinImage("SpeakFocus", true);
             speech.Name = "UI.speech";
             speech.Visible = false;
             speech.OnClick += new userInteraction(speech_OnClick);
@@ -158,7 +158,7 @@ namespace OpenMobile
             vol.Name = "UI.vol";
             vol.Mode = modeType.Resizing;
             vol.Transition = eButtonTransition.None;
-            OMImage Image2 = new OMImage(0,0,1000,100);
+            OMImage Image2 = new OMImage(0,0,1000,99);
             Image2.Name = "UI.TopBar";
             Image2.Image = theHost.getSkinImage("topBar");
             OMImage mediaBar = new OMImage(0,620,1000,140);
@@ -550,7 +550,7 @@ namespace OpenMobile
                 timerForward = true;
                 moveMediaBar(screen);
             }
-            else
+            else if (manager[screen][2].Top == 533)
             {
                 timerForward = false;
                 moveMediaBar(screen);

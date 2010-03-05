@@ -100,6 +100,7 @@ namespace OpenMobile
         }
         public RenderingWindow(int s)
         {
+            Cursor.Position = this.Location;
             this.screen = s;
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
@@ -282,6 +283,8 @@ namespace OpenMobile
                 else
                     p.getControl(i).Mode = modeType.Normal;
             }
+            if (transType>eGlobalTransition.Crossfade)
+                 cleanupTransition();
             highlighted = null;
             if (lastClick != null)
                 lastClick.Mode = modeType.Normal;
@@ -668,7 +671,14 @@ namespace OpenMobile
                         }
                     }
                     if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
-                        new Thread(delegate() { ((IClickable)highlighted).doubleClickMe(screen); }).Start();
+                    {
+                        new Thread(delegate() {
+                            try { 
+                                (highlighted as IClickable).doubleClickMe(screen); 
+                            } catch (NullReferenceException) { } 
+                        }).Start();
+                        //NR can occur if highlighted changes between the if statement and the thread creation
+                    }
                 }
             }
         }
@@ -893,7 +903,7 @@ namespace OpenMobile
                     tick++;
                     if (tick == 6)
                     {
-                        cleanupTransition();
+                        transitioning = false;
                         return;
                     }
                     ofsetOut = new Point(0, -(Bounds.Height / 5) * tick);
@@ -904,7 +914,7 @@ namespace OpenMobile
                     tick++;
                     if (tick == 6)
                     {
-                        cleanupTransition();
+                        transitioning = false;
                         return;
                     }
                     ofsetOut = new Point(0, (Bounds.Height / 5) * tick);
@@ -915,7 +925,7 @@ namespace OpenMobile
                     tick++;
                     if (tick == 6)
                     {
-                        cleanupTransition();
+                        transitioning = false;
                         return;
                     }
                     ofsetOut = new Point(-(Bounds.Width / 5) * tick, 0);
@@ -926,7 +936,7 @@ namespace OpenMobile
                     tick++;
                     if (tick == 6)
                     {
-                        cleanupTransition();
+                        transitioning = false;
                         return;
                     }
                     ofsetOut = new Point((Bounds.Width / 5) * tick, 0);
@@ -940,7 +950,6 @@ namespace OpenMobile
             tick = 0;
             ofsetIn = new Point(0, 0);
             ofsetOut = new Point(0, 0);
-            transitioning = false;
         }
         public void UI_KeyDown(object sender, KeyEventArgs e)
         {
@@ -948,8 +957,8 @@ namespace OpenMobile
             {
                 if ((e.KeyCode == Keys.Left) || (e.KeyCode == Keys.Right) || (e.KeyCode == Keys.Up) || (e.KeyCode == Keys.Down))
                 {
-                    int top = 1000;
-                    int left = 1000;
+                    int top = 601;
+                    int left = 1001;
                     OMControl b = null;
                     for (int i = 0; i < p.controlCount; i++)
                         //Modified by Borte
@@ -964,6 +973,8 @@ namespace OpenMobile
                         return;
                     b.Mode = modeType.Highlighted;
                     highlighted = b;
+                    if (typeof(OMList).IsInstanceOfType(highlighted))
+                        ((OMList)highlighted).Select(((OMList)highlighted).Start);
                     UpdateThisControl(highlighted.toRegion());
                 }
             }
@@ -994,6 +1005,8 @@ namespace OpenMobile
                         highlighted.Mode = modeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
+                        if (typeof(OMList).IsInstanceOfType(highlighted))
+                            ((OMList)highlighted).Select(((OMList)highlighted).Start);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Right:
@@ -1014,6 +1027,8 @@ namespace OpenMobile
                         highlighted.Mode = modeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
+                        if (typeof(OMList).IsInstanceOfType(highlighted))
+                            ((OMList)highlighted).Select(((OMList)highlighted).Start);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Up:
@@ -1034,6 +1049,8 @@ namespace OpenMobile
                         highlighted.Mode = modeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
+                        if (typeof(OMList).IsInstanceOfType(highlighted))
+                            ((OMList)highlighted).Select(0);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Down:
@@ -1054,6 +1071,8 @@ namespace OpenMobile
                         highlighted.Mode = modeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
+                        if (typeof(OMList).IsInstanceOfType(highlighted))
+                            ((OMList)highlighted).Select(((OMList)highlighted).Start);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Return:

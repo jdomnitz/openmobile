@@ -51,6 +51,8 @@ namespace DPGWeather
                     }
                 }
                 status = 1;
+                using (PluginSettings setting = new PluginSettings())
+                    setting.setSetting("Plugins.DPGWeather.LastUpdate", DateTime.Now.ToString());
             }
             catch (Exception) { status = -1; }
         }
@@ -59,7 +61,7 @@ namespace DPGWeather
         {
             List<OpenMobile.Data.Weather.weather> lst = new List<OpenMobile.Data.Weather.weather>();
             XmlDocument reader = new XmlDocument();
-            reader.Load("http://www.google.com/ig/api?weather=" + location);
+            reader.Load("http://www.google.com/ig/api?weather=" + location+"&hl=en-gb");
             OpenMobile.Data.Weather.weather ret;
             foreach (XmlNode n in reader.SelectSingleNode("/xml_api_reply/weather").ChildNodes)
             {
@@ -68,10 +70,7 @@ namespace DPGWeather
                 {
                     case "current_conditions":
                         RegionInfo regionInfo = new RegionInfo(CultureInfo.CurrentCulture.LCID);
-                        if (regionInfo.IsMetric==true)
-                            ret.temp = float.Parse(n.ChildNodes[2].Attributes[0].Value);
-                        else
-                            ret.temp = float.Parse(n.ChildNodes[1].Attributes[0].Value);
+                        ret.temp = float.Parse(n.ChildNodes[2].Attributes[0].Value);
                         ret.humidity = int.Parse(n.ChildNodes[3].Attributes[0].Value.Replace("Humidity: ", "").Replace("%", ""));
                         parseWind(n.ChildNodes[5].Attributes[0].Value.Replace("Wind: ",""),ref ret);
                         ret.conditions = parseCondition(n.ChildNodes[0].Attributes[0].Value);
@@ -107,11 +106,19 @@ namespace DPGWeather
             {
                 case "Clear":
                     return Weather.weatherConditions.Clear;
+                case "Mostly Clear":
+                    return Weather.weatherConditions.MostlyClear;
                 case "Cloudy":
                     return Weather.weatherConditions.Cloudy;
                 case "Fog":
-                case "Haze":
                     return Weather.weatherConditions.Foggy;
+                case "Haze":
+                    return Weather.weatherConditions.Haze;
+                case "Dust":
+                    return Weather.weatherConditions.Dust;
+                case "Smoke":
+                    return Weather.weatherConditions.Smoke;
+                case "Drizzle":
                 case "Light Rain":
                 case "Chance of Showers":
                 case "Rain":
@@ -132,12 +139,18 @@ namespace DPGWeather
                 case "Mostly Sunny":
                     return Weather.weatherConditions.MostlySunny;
                 case "Snow":
+                case "Flurries":
                     return Weather.weatherConditions.Snow;
                 case "Windy":
                     return Weather.weatherConditions.Windy;
                 case "Snow Showers":
-                case "Freezing Rain":
+                case "Rain and Snow":
                     return Weather.weatherConditions.RainSnowMix;
+                case "Freezing Rain":
+                    return Weather.weatherConditions.FreezingRain;
+                case "Hail":
+                case "Sleet":
+                    return Weather.weatherConditions.Hail;
                 default:
                     return Weather.weatherConditions.NotSet;
             }
@@ -183,6 +196,15 @@ namespace DPGWeather
         {
             if (OpenMobile.Net.Network.IsAvailable == true)
             {
+                using (PluginSettings setting = new PluginSettings())
+                {
+                    DateTime lastUp = new DateTime();
+                    if (DateTime.TryParse(setting.getSetting("Plugins.DPGWeather.LastUpdate"), out lastUp) == true)
+                    {
+                        if ((DateTime.Now - lastUp) < TimeSpan.FromMinutes(30))
+                            return false;
+                    }
+                }
                 status = 0;
                 updateLocation = arg;
                 OpenMobile.Threading.TaskManager.QueueTask(processItems, OpenMobile.priority.MediumHigh);

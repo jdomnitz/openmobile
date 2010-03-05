@@ -29,7 +29,7 @@ namespace OpenMobile
         {
             System.Net.Sockets.UdpClient receive;
             System.Net.Sockets.UdpClient send;
-
+            public string[] volume = null;
             public HalInterface()
             {
                 OpenMobile.Framework.OSSpecific.runManagedProcess("OMHal.exe", "", false);
@@ -53,7 +53,12 @@ namespace OpenMobile
                 if (parts.Length>1)
                     arg1=parts[1];
                 if (i >= 0)
-                    Core.theHost.raiseSystemEvent((eFunction)Enum.Parse(typeof(eFunction), parts[0]), arg1, arg2, arg3);
+                {
+                    if (i == 3)
+                        volume = new string[]{arg1,arg2};
+                    else
+                        Core.theHost.raiseSystemEvent((eFunction)Enum.Parse(typeof(eFunction), parts[0]), arg1, arg2, arg3);
+                }
                 else if (i == -3)
                     Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1), arg2);
             }

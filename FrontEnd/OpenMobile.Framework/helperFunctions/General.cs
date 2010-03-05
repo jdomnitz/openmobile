@@ -262,7 +262,6 @@ namespace OpenMobile.helperFunctions
                 return "";
             return s.Replace("'", "''");
         }
-
         /// <summary>
         /// Returns a List of plugins matching the given type
         /// </summary>
@@ -285,7 +284,6 @@ namespace OpenMobile.helperFunctions
             }
             return ret;
         }
-
         /// <summary>
         /// Convert a string representation of an eFunction into an eFunction
         /// </summary>
