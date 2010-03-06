@@ -268,8 +268,13 @@ namespace ControlDemo
             if (loc == "")
                 return;
             OpenMobile.Data.Weather provider = new OpenMobile.Data.Weather();
-            OpenMobile.Data.Weather.weather data=provider.readWeather(loc, DateTime.Today);
-            ((OMLabel)p[0]).Text = "Currently in "+data.location;
+            OpenMobile.Data.Weather.weather data;
+            try
+            {
+                data = provider.readWeather(loc, DateTime.Today);
+            }
+            catch (ArgumentException) { return; }
+            ((OMLabel)p[0]).Text = "Currently in " + data.location;
             ((OMLabel)p[1]).Text = "High: "+Globalization.convertToLocalTemp(data.highTemp,true);
             ((OMLabel)p[2]).Text = "Low: " + Globalization.convertToLocalTemp(data.lowTemp, true);
             ((OMImage)p[3]).Image = theHost.getSkinImage("Weather|"+data.conditions.ToString());
