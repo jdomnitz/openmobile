@@ -155,7 +155,7 @@ namespace OpenMobile
             get
             {
                 if (datapath == null)
-                    datapath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),"openMobile");
+                    datapath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"openMobile");
                 return datapath;
             }
         }
@@ -413,6 +413,13 @@ namespace OpenMobile
                     for (int i = 0; i < screenCount; i++)
                         instance[i] = getInstance(i);
                     return true;
+                case eFunction.refreshData:
+                    bool result=true;
+                    foreach (IBasePlugin p in Core.pluginCollection.FindAll(i => typeof(IDataProvider).IsInstanceOfType(i)))
+                    {
+                        result = result & execute(eFunction.refreshData, p.pluginName);
+                    }
+                    return result;
             }
             return false;
         }

@@ -324,6 +324,7 @@ namespace OMSettings
                 settings.setSetting("Plugins.DPGWeather.LastUpdate", DateTime.MinValue.ToString());
                 settings.setSetting("Plugins.DPWeather.LastUpdate", DateTime.MinValue.ToString());
             }
+            theHost.execute(eFunction.refreshData);
             theHost.execute(eFunction.TransitionFromAny, screen.ToString());
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
