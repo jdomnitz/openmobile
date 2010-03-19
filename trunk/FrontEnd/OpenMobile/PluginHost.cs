@@ -86,8 +86,10 @@ namespace OpenMobile
                     return eMediaType.YouTube;
                 return eMediaType.HTTPUrl;
             }
-            if (source.ToLower().StartsWith("udp:") == true)
-                return eMediaType.RTPUrl;
+            if ((source.ToLower().StartsWith("udp:") == true) || (source.ToLower().StartsWith("rtsp:") == true))
+                return eMediaType.RTSPUrl;
+            if (source.ToLower().StartsWith("mms:") == true)
+                return eMediaType.MMSUrl;
             if (source.Contains(".") == true) //Check if its a file
             {
                 if (source.StartsWith(@"\\") == true)
@@ -468,6 +470,14 @@ namespace OpenMobile
             int ret;
             switch (function)
             {
+                case eFunction.promptDialNumber:
+                    raiseSystemEvent(eFunction.promptDialNumber, arg, "", "");
+                    return true;
+                case eFunction.showNavPanel:
+                    IBasePlugin z = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
+                    if (z == null)
+                        return false;
+                    return ((INavigation)z).switchTo(arg);
                 case eFunction.ExecuteTransition:
                     int ex;
                     if (int.TryParse(arg, out ex) == true)
@@ -794,6 +804,15 @@ namespace OpenMobile
                     hal.snd("35|" + arg);
                     return true;
                 case eFunction.navigateToAddress:
+                    if (arg.Length <= 1)
+                        return false;
+                    IBasePlugin y = Core.pluginCollection.Find(a => typeof(INavigation).IsInstanceOfType(a));
+                    if (y!=null)
+                    {
+                        Address adr;
+                        if (Address.TryParse(arg, out adr) == true)
+                            ((INavigation)y).navigateTo(adr);
+                    }
                     raiseSystemEvent(eFunction.navigateToAddress, arg, "", "");
                     return true;
             }
@@ -1415,11 +1434,17 @@ namespace OpenMobile
             data = null;
             switch (dataType)
             {
-                case eGetData.GetMediaDatabase:
-                    IBasePlugin z = Core.pluginCollection.Find(t => t.pluginName == name);
+                case eGetData.GetMap:
+                    IBasePlugin z = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
                     if (z == null)
                         return;
-                    data = ((IMediaDatabase)z).getNew();
+                    data = ((INavigation)z).getMap;
+                    return;
+                case eGetData.GetMediaDatabase:
+                    IBasePlugin y = Core.pluginCollection.Find(t => t.pluginName == name);
+                    if (y == null)
+                        return;
+                    data = ((IMediaDatabase)y).getNew();
                     break;
                 case eGetData.GetPlugins:
                     if (name == "")
@@ -1485,7 +1510,7 @@ namespace OpenMobile
                         data= ((IAVPlayer)Core.pluginCollection.Find(p => typeof(IAVPlayer).IsInstanceOfType(p) == true)).OutputDevices;
                     }
                     catch (Exception) { data = null; }
-                    break;
+                    return;
             }
         }
         public void getData(eGetData dataType, string name, string param, out object data)

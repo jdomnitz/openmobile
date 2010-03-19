@@ -211,6 +211,7 @@ public sealed class MainMenu : IHighLevel
             Shutdown.Text = "Shutdown";
             Shutdown.Name = "UI.Shutdown";
             Shutdown.OnClick += new userInteraction(Shutdown_OnClick);
+            Shutdown.OnLongClick += new userInteraction(Shutdown_OnLongClick);
             OMBasicShape visibleShape = new OMBasicShape(0, 0, 1000, 600);
             visibleShape.Shape = shapes.Rectangle;
             visibleShape.FillColor = Color.FromArgb(130, Color.Black);
@@ -221,6 +222,11 @@ public sealed class MainMenu : IHighLevel
             exit.addControl(Hibernate);
             exit.addControl(Shutdown);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void Shutdown_OnLongClick(object sender, int screen)
+        {
+            theHost.execute(eFunction.restart);
         }
 
         void MainMenu_OnClick(object sender, int screen)

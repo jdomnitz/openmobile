@@ -21,13 +21,14 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Threading;
 
 namespace OpenMobile.Controls
 {
     /// <summary>
     /// A slider bar control
     /// </summary>
-    public sealed class OMSlider:OMControl
+    public sealed class OMSlider:OMControl,IThrow
     {
         private int width;
         private int height;
@@ -227,24 +228,6 @@ namespace OpenMobile.Controls
             }
         }
         /// <summary>
-        /// FOR RENDERER USE ONLY!!  Do not adjust
-        /// </summary>
-        [Browsable(false)]
-        public int SliderPosition
-        {
-            get
-            {
-                return sliderPosition;
-            }
-            set
-            {
-                if ((sliderPosition == value)||(value < 0))
-                    return;
-                sliderPosition = value;
-                refreshMe(this.toRegion());
-            }
-        }
-        /// <summary>
         /// The minimum slider value
         /// </summary>
         [Category("Slider"),Description("The minimum slider value")]
@@ -359,5 +342,46 @@ namespace OpenMobile.Controls
             }
             catch (Exception) { }
         }
+
+        #region IThrow Members
+        /// <summary>
+        /// The slider has been thrown
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="TotalDistance"></param>
+        /// <param name="RelativeDistance"></param>
+        public void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
+        {
+            sliderPosition += RelativeDistance.X;
+            if (sliderPosition < 0)
+                sliderPosition = 0;
+            if ((sliderPosition + (sliderWidth / 2)) < 0)
+                sliderPosition = -(sliderWidth / 2);
+            if ((sliderPosition + (sliderWidth / 2)) > Width)
+                sliderPosition = Width - (SliderWidth / 2);
+            new Thread(delegate() { sliderMoved(screen); }).Start();
+            this.refreshMe(this.toRegion());
+        }
+        /// <summary>
+        /// The throw has started
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="StartLocation"></param>
+        /// <param name="Cancel"></param>
+        public void MouseThrowStart(int screen, Point StartLocation,ref bool Cancel)
+        {
+            
+        }
+        /// <summary>
+        /// The throw has ended
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="EndLocation"></param>
+        public void MouseThrowEnd(int screen, Point EndLocation)
+        {
+            
+        }
+
+        #endregion
     }
 }

@@ -206,6 +206,16 @@ namespace OpenMobile
                             pluginCollection.Add(availablePlugin);
                             return;
                         }
+                        //Next one
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.INavigation", true);
+
+                        //Make sure the interface we want to use actually exists
+                        if (typeInterface != null)
+                        {
+                            INavigation availablePlugin = (INavigation)Activator.CreateInstance(pluginType);
+                            pluginCollection.Add(availablePlugin);
+                            return;
+                        }
                     }
                 }
             }
@@ -228,7 +238,7 @@ namespace OpenMobile
                 {
                     status[i]= pluginCollection[i].initialize(theHost);
                 }
-                catch (Exception e) { status[i] = eLoadStatus.LoadFailedUnloadRequested; }
+                catch (Exception) { status[i] = eLoadStatus.LoadFailedUnloadRequested; }
             }
             for(int i=2;i<pluginCollection.Count;i++) //Give them all a second chance if they need it
                 try

@@ -25,6 +25,7 @@ using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
+using OpenMobile.Data;
 
 namespace OMDir
 {
@@ -136,6 +137,8 @@ namespace OMDir
             p.addControl(select);
             manager.loadPanel(p);
             type = new int[theHost.ScreenCount];
+            using (PluginSettings settings = new PluginSettings())
+                settings.setSetting("Default.DirectoryBrowser", "OMDir");
             return eLoadStatus.LoadSuccessful;
         }
 

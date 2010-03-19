@@ -80,6 +80,21 @@ namespace OpenMobile.Media
             throw new NotImplementedException();
         }
         /// <summary>
+        /// Returns a list of all available playlists in a directory
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <returns></returns>
+        public static List<string> listPlaylists(string directory)
+        {
+            List<string> ret=new List<string>();
+            string[] filter = new string[] { "*.m3u", "*.wpl", "*.pls", "*.asx", "*.wax", "*.wvx", "*.xspf" };
+            for (int i = 0; i < filter.Length; i++)
+                ret.AddRange(Directory.GetFiles(directory, filter[i]));
+            ret.Sort();
+            ret.TrimExcess();
+            return ret;
+        }
+        /// <summary>
         /// Retrieves a playlist
         /// </summary>
         /// <param name="location">The playlist location</param>

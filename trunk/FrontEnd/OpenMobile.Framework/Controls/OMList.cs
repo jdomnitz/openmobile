@@ -25,6 +25,7 @@ using System.Drawing.Drawing2D;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
+using System;
 
 namespace OpenMobile.Controls
 {
@@ -702,7 +703,14 @@ namespace OpenMobile.Controls
             #endregion
 
             #region IKey Members
-
+            /// <summary>
+            /// Occurs when a Key is pressed while the control is highlighted
+            /// </summary>
+            /// <param name="screen"></param>
+            /// <param name="e"></param>
+            /// <param name="WidthScale"></param>
+            /// <param name="HeightScale"></param>
+            /// <returns></returns>
             public bool KeyDown(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
             {
                 if (e.KeyCode == Keys.PageUp)
@@ -722,10 +730,43 @@ namespace OpenMobile.Controls
                 }
                 return false;
             }
-
+            /// <summary>
+            /// Occurs when a Key is pressed while the control is highlighted
+            /// </summary>
+            /// <param name="screen"></param>
+            /// <param name="e"></param>
+            /// <param name="WidthScale"></param>
+            /// <param name="HeightScale"></param>
+            /// <returns></returns>
             public bool KeyUp(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
             {
                 return false;
+            }
+            #endregion
+
+            #region IThrow Members
+
+            void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
+            {
+                Ticking = false;
+                thrown = 0;
+                if (Math.Abs(RelativeDistance.Y) > 3)
+                    thrown = RelativeDistance.Y;
+                moveMe(RelativeDistance.Y);
+                refreshMe(this.toRegion());
+            }
+
+            void MouseThrowStart(int screen, Point StartLocation, ref bool Cancel)
+            {
+                listThrown(StartLocation.Y, 1.0f, screen);
+                thrown = 0;
+                Ticking = true;
+                refreshMe(this.toRegion());
+            }
+
+            void MouseThrowEnd(int screen, Point EndLocation)
+            {
+                //
             }
 
             #endregion

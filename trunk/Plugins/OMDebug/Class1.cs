@@ -158,7 +158,8 @@ namespace OMDebug
 
         public void Dispose()
         {
-            writer.Dispose();
+            if (writer!=null)
+                writer.Dispose();
             GC.SuppressFinalize(this);
         }
 

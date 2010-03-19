@@ -312,7 +312,8 @@ namespace Media
                 return;
             loadSongs(currentAlbums[theHost.instanceForScreen(screen)][l.SelectedIndex].Artist, currentAlbums[theHost.instanceForScreen(screen)][l.SelectedIndex].Album, screen);
             theHost.setPlaylist(currentSongs[theHost.instanceForScreen(screen)],theHost.instanceForScreen(screen));
-            theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), "OMPlayer"); //More efficient then checking first
+            using(PluginSettings settings=new PluginSettings())
+                theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), settings.getSetting("Default.AVPlayer.Files")); //More efficient then checking first
             theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
         }
 
@@ -323,8 +324,6 @@ namespace Media
                 return;
             playSongs(l[l.SelectedIndex].text, screen);
             theHost.setPlaylist(currentSongs[theHost.instanceForScreen(screen)], theHost.instanceForScreen(screen));
-            //theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), "OMPlayer"); //More efficient then checking first
-            //theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
         }
         private void loadSongs(string artist, int screen)
         {
@@ -362,7 +361,8 @@ namespace Media
                 mediaInfo info = db.getNextMedia();
                 if (info != null)
                 {
-                    theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), "OMPlayer"); //More efficient then checking first
+                    using(PluginSettings settings=new PluginSettings())
+                        theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), settings.getSetting("Default.AVPlayer.Files")); //More efficient then checking first
                     theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), info.Location);
                 }
                 while (info != null)
@@ -380,7 +380,8 @@ namespace Media
                 return;
             if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location) == false)
             {
-                theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), "OMPlayer");
+                using(PluginSettings settings=new PluginSettings())
+                    theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), settings.getSetting("Default.AVPlayer.Files"));
                 theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location);
             }
         }

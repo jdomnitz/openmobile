@@ -38,6 +38,7 @@ namespace ControlDemo
         {
             theHost = host;
             theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             p = new OMPanel();
             OMImage Image1 = new OMImage(275, 115, 400, 400);
             Image1.Image = theHost.getSkinImage("MediaBorder");
@@ -58,6 +59,39 @@ namespace ControlDemo
             p.addControl(List3);
             p.addControl(icon);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.promptDialNumber)
+            {
+                List3.Clear();
+                lastPath = arg1;
+                ((OMLabel)p[1]).Text = formatNumber(arg1);
+                ((OMImage)p[3]).Image=theHost.getSkinImage("Discs|Phone",true);
+                imageItem itm = theHost.getSkinImage("Discs|Dial", true);
+                List3.Add(new OMListItem("Dial Number", itm.image));
+                itm = theHost.getSkinImage("Discs|Add", true);
+                List3.Add(new OMListItem("Add To Contacts", itm.image));
+                itm = theHost.getSkinImage("Discs|Close", true);
+                List3.Add(new OMListItem("Close", itm.image));
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                {
+                    theHost.execute(eFunction.TransitionToPanel, i.ToString(), "OMNotify", "notify");
+                    theHost.execute(eFunction.ExecuteTransition, i.ToString(), "SlideDown");
+                }
+            }
+        }
+
+        private string formatNumber(string arg1)
+        {
+            if (arg1.Contains("-") == true)
+                return arg1;
+            if (arg1.Length == 10)
+                return long.Parse(arg1).ToString("(###) ###-####");
+            else if (arg1.Length == 11)
+                return long.Parse(arg1).ToString("#-(###) ###-####");
+            return arg1;
         }
 
         void List3_SelectedIndexChanged(OMList sender, int screen)
@@ -85,6 +119,9 @@ namespace ControlDemo
                     theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMDir", lastPath);
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
                     break;
+                case "Dial Number":
+                    theHost.execute(eFunction.dialNumber, lastPath);
+                    break;
             }
             List3.SelectedIndex = -1;
         }
@@ -110,7 +147,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    break;
+                    return;
                 case eMediaType.DVD:
                     ((OMLabel)p[1]).Text = "DVD";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|DVD", true);
@@ -120,7 +157,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    break;
+                    return;
                 case eMediaType.HDDVD:
                     ((OMLabel)p[1]).Text = "HDDVD";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|HDDVD", true);
@@ -130,7 +167,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    break;
+                    return;
                 case eMediaType.BluRay:
                     ((OMLabel)p[1]).Text = "Blu-Ray";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|BluRay", true);
@@ -140,7 +177,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    break;
+                    return;
                 case eMediaType.Camera:
                     ((OMLabel)p[1]).Text = "Camera";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|Camera", true);
@@ -150,7 +187,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Copy Photos to Disk", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    break;
+                    return;
                 case eMediaType.LocalHardware:
                     ((OMLabel)p[1]).Text = "USB Drive";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|LocalHardware", true);
@@ -160,13 +197,13 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Copy Files to Disk", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    break;
+                    return;
                 case eMediaType.iPodiPhone:
                     ((OMLabel)p[1]).Text = "iPod/iPhone";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|iPodiPhone", true);
                     itm = theHost.getSkinImage("Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    break;
+                    return;
             }
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
