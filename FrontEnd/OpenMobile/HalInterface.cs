@@ -55,7 +55,11 @@ namespace OpenMobile
                 if (i >= 0)
                 {
                     if (i == 3)
-                        volume = new string[]{arg1,arg2};
+                        volume = new string[] { arg1, arg2 };
+                    else if (i == 200)
+                        Core.theHost.execute(eFunction.navigateToAddress, arg1);
+                    else if (i == 300)
+                        Core.theHost.raiseSystemEvent(eFunction.promptDialNumber, arg1,arg2,arg3);
                     else
                         Core.theHost.raiseSystemEvent((eFunction)Enum.Parse(typeof(eFunction), parts[0]), arg1, arg2, arg3);
                 }

@@ -342,9 +342,9 @@ namespace OpenMobile.Controls
         {
             this.name = Name;
         }
-
+        //Added by Borte
         /// <summary>
-        /// Moves the control to the back of the display order (Added by Borte)
+        /// Moves the control to the back of the display order
         /// </summary>
         /// <param name="name">Name of control</param>
         /// <returns>If successful</returns>
@@ -362,7 +362,7 @@ namespace OpenMobile.Controls
             return MoveControlToBack(control);
         }
         /// <summary>
-        /// Moves the control to the back of the display order (Added by Borte)
+        /// Moves the control to the back of the display order
         /// </summary>
         /// <param name="c">Control</param>
         /// <returns>If successful</returns>
@@ -372,7 +372,7 @@ namespace OpenMobile.Controls
             return MoveControlToBack(control);
         }
         /// <summary>
-        /// Moves the control to the back of the display order (Added by Borte)
+        /// Moves the control to the back of the display order
         /// </summary>
         /// <param name="control">Index of control</param>
         /// <returns>If successful</returns>
@@ -390,5 +390,53 @@ namespace OpenMobile.Controls
             }
             return false;
         }
+        /// <summary>
+        /// Moves the control to the front of the display order
+        /// </summary>
+        /// <param name="name">Name of control</param>
+        /// <returns>If successful</returns>
+        public bool MoveControlToFront(string name)
+        {
+            int control;
+            try
+            {
+                control = containedControls.FindIndex(c => c.Name == name);
+            }
+            catch (System.ArgumentNullException)
+            {
+                return false;
+            }
+            return MoveControlToFront(control);
+        }
+        /// <summary>
+        /// Moves the control to the front of the display order
+        /// </summary>
+        /// <param name="c">Control</param>
+        /// <returns>If successful</returns>
+        public bool MoveControlToFront(OMControl c)
+        {
+            int control = containedControls.IndexOf(c);
+            return MoveControlToFront(control);
+        }
+        /// <summary>
+        /// Moves the control to the front of the display order
+        /// </summary>
+        /// <param name="control">Index of control</param>
+        /// <returns>If successful</returns>
+        public bool MoveControlToFront(int control)
+        {
+            if ((control > 0) && (control <= containedControls.Count))
+            {
+                for (int i = control; i < containedControls.Count - 1; i++)
+                {
+                    OMControl tmp = containedControls[i + 1];
+                    containedControls[i + 1] = containedControls[i];
+                    containedControls[i] = tmp;
+                }
+                return true;
+            }
+            return false;
+        }
+        //***
     }
 }

@@ -123,42 +123,43 @@ namespace OMPlayer
         checkInstance(instance);
         return player[instance].currentVolume;
     }
-
-    private void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+    private void saveState()
     {
-        if (function == eFunction.closeProgram)
+        using (PluginSettings settings = new PluginSettings())
         {
-            using (PluginSettings settings = new PluginSettings())
+            for (int i = 0; i < theHost.ScreenCount; i++)
             {
-                for (int i = 0; i < theHost.ScreenCount; i++)
+                int k = theHost.instanceForScreen(i);
+                if ((player[k] != null) && (player[k].nowPlaying != null))
                 {
-                    int k = theHost.instanceForScreen(i);
-                    if ((player[k]!=null)&&(player[k].nowPlaying != null))
+                    if ((getPlayerStatus(k) == ePlayerStatus.Stopped) || (getPlayerStatus(k) == ePlayerStatus.Ready))
                     {
-                        if ((getPlayerStatus(k) == ePlayerStatus.Stopped) || (getPlayerStatus(k) == ePlayerStatus.Ready))
-                        {
-                            settings.setSetting("Music.Instance"+k.ToString()+".LastPlayingURL", "");
-                            continue;
-                        }
-                        settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", player[k].nowPlaying.Location);
-                        double position;
-                        if (player[k].mediaPosition != null)
-                        {
-                            player[k].mediaPosition.get_CurrentPosition(out position);
-                            settings.setSetting("Music.Instance"+k.ToString()+".LastPlayingPosition", position.ToString());
-                        }
-                        else
-                        {
-                            settings.setSetting("Music.Instance"+k.ToString()+".LastPlayingURL", "");
-                        }
+                        settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", "");
+                        continue;
+                    }
+                    settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", player[k].nowPlaying.Location);
+                    double position;
+                    if (player[k].mediaPosition != null)
+                    {
+                        player[k].mediaPosition.get_CurrentPosition(out position);
+                        settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingPosition", position.ToString());
                     }
                     else
                     {
                         settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", "");
                     }
                 }
+                else
+                {
+                    settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", "");
+                }
             }
-        }
+}
+    }
+    private void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+    {
+        if (function == eFunction.closeProgram)
+            saveState();
     }
 
     public bool incomingMessage(string message, string source)
@@ -179,6 +180,7 @@ namespace OMPlayer
         host.OnPowerChange += new PowerEvent(host_OnPowerChange);
         using (PluginSettings setting = new PluginSettings())
         {
+            setting.setSetting("Default.AVPlayer.Files", "OMPlayer");
             if (setting.getSetting("Music.AutoResume") == "True")
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
@@ -214,6 +216,10 @@ namespace OMPlayer
             for (int i = 0; i < player.Length; i++)
                 if (player[i] != null)
                     player[i].suspended = false;
+        }
+        else if (type == ePowerEvent.ShutdownPending)
+        {
+            saveState();
         }
     }
 
@@ -259,7 +265,8 @@ namespace OMPlayer
             case eMediaType.HDDVD:
             case eMediaType.HTTPUrl:
             case eMediaType.iPodiPhone:
-            case eMediaType.RTPUrl:
+            case eMediaType.RTSPUrl:
+            case eMediaType.MMSUrl:
                 return false;
         }
         try

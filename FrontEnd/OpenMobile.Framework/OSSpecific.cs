@@ -63,7 +63,7 @@ namespace OpenMobile.Framework
                     PointF scale= (PointF)o;
                     windowsEmbedder.SetWindowPos(p[0].MainWindowHandle, (IntPtr)0, (int)(position.X*scale.X), (int)(position.Y*scale.Y), (int)(position.Width*scale.X), (int)(position.Height*scale.Y), 0x20);
                     windowsEmbedder.SetParent(p[0].MainWindowHandle, theHost.UIHandle(screen));
-                    //windowsEmbedder.SetFocus(p[0].MainWindowHandle);
+                    windowsEmbedder.SetFocus(p[0].MainWindowHandle);
                     return true;
                 }
                 catch (Exception) { return false; }
@@ -78,8 +78,7 @@ namespace OpenMobile.Framework
         /// <returns>Returns true if the application was unembedded</returns>
         public static bool unEmbedApplication(string name, int screen)
         {
-            if (lastHandle == null)
-            return false;
+            if ((lastHandle != null)&&(os.Platform==PlatformID.Win32NT))
             {
                 try
                 {
@@ -89,6 +88,7 @@ namespace OpenMobile.Framework
                 }
                 catch (Exception) { return false; }
             }
+            return false;
         }
         /// <summary>
         /// Returns the name of the operating system

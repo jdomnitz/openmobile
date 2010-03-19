@@ -38,9 +38,12 @@ namespace OpenMobile.Controls
         void MouseThrow(int screen, System.Drawing.Point TotalDistance, System.Drawing.Point RelativeDistance);
 
         /// <summary>
-        /// Throw is started 
+        /// Throw is started
         /// </summary>
-        void MouseThrowStart(int screen, System.Drawing.Point StartLocation);
+        /// <param name="screen">Screen the event occured on</param>
+        /// <param name="StartLocation">The point that was clicked</param>
+        /// <param name="Cancel">If true cancels the throw operation</param>
+        void MouseThrowStart(int screen, System.Drawing.Point StartLocation, ref bool Cancel);
 
         /// <summary>
         /// Throw is ended

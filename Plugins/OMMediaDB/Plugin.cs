@@ -26,7 +26,6 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
 using OpenMobile;
 using OpenMobile.Data;
 using OpenMobile.helperFunctions;

@@ -19,6 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System.Drawing;
+using OpenMobile.Controls;
 namespace OpenMobile.Plugin
 {
     /// <summary>
@@ -39,17 +40,38 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Returns the closest address
         /// </summary>
-        string Location { get; }
+        Address Location { get; }
         /// <summary>
         /// Gets/Sets the destination
         /// </summary>
-        string Destination { get; set; }
+        Address Destination { get; set; }
         /// <summary>
         /// Detours from the current route by the given distance
         /// </summary>
         /// <param name="distance"></param>
         /// <returns></returns>
         bool Detour(int distance);
+        /// <summary>
+        /// Lists the available panels the Nav Screen can switch to
+        /// </summary>
+        string[] availablePanels { get; }
+        /// <summary>
+        /// Switches to the given panel name (Note: must match availablePanels)
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <returns></returns>
+        bool switchTo(string panel);
+        /// <summary>
+        /// Calculates a route to the given address and begins navigating
+        /// </summary>
+        /// <param name="destination"></param>
+        /// <returns></returns>
+        bool navigateTo(Address destination);
 
+        bool findPOI(string name);
+        /// <summary>
+        /// Gets the custom OMControl that draws the map
+        /// </summary>
+        OMControl getMap { get; }
     }
 }

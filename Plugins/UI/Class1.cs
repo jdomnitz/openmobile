@@ -141,7 +141,7 @@ namespace OpenMobile
             Back.FocusImage = theHost.getSkinImage("BackButtonFocus", true);
             Back.OnClick += new userInteraction(Back_OnClick);
             Back.Transition = eButtonTransition.None;
-            OMButton speech = new OMButton(631, 533, 160, 70);
+            OMButton speech = new OMButton(670, 533, 160, 70);
             speech.Image = theHost.getSkinImage("Speak",true);
             speech.FocusImage = theHost.getSkinImage("SpeakFocus", true);
             speech.Name = "UI.speech";
@@ -339,7 +339,7 @@ namespace OpenMobile
                 hideSpeech(0); //ToDo - Instance specific
             if (function == eFunction.gesture)
             {
-                if (arg3!="OSK")
+                if ((arg3!="OSK")&&(arg3!="ControlDemo"))
                     switch (arg2)
                     {
                         case "M":
@@ -350,6 +350,11 @@ namespace OpenMobile
                         case "H":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
                             theHost.execute(eFunction.TransitionToPanel, arg1, "MainMenu");
+                            theHost.execute(eFunction.ExecuteTransition, arg1);
+                            break;
+                        case "N":
+                            theHost.execute(eFunction.TransitionFromAny, arg1);
+                            theHost.execute(eFunction.TransitionToPanel, arg1, "OMNavigation");
                             theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
                         case " ":

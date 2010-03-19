@@ -855,7 +855,6 @@ namespace OpenMobile
         /// <para>Arg3: Plugin (The name of the plugin with the top most panel)</para>
         /// </summary>
         gesture=100,
-        //Navigation:
         /// <summary>
         /// Instructs the navigation engine to construct a route to the given address
         /// <para>---------------------------------------</para>
@@ -878,15 +877,26 @@ namespace OpenMobile
         /// Occurs when a turn is approaching (distince dependent on road type)
         /// </summary>
         turnApproaching=203,
-
-        //Bluetooth:
+        /// <summary>
+        /// Shows the requested nav page (plugin specific)
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Nav Page</para>
+        /// </summary>
+        showNavPanel=204,
         /// <summary>
         /// Dials the given number
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Phone Number (without seperators)</para>
         /// <para>Arg2: (Optional) Display Name</para>
         /// </summary>
-        dialNumber=300
+        dialNumber=300,
+        /// <summary>
+        /// Dials the given number
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Phone Number (without seperators)</para>
+        /// <para>Arg2: (Optional) Display Name</para>
+        /// </summary>
+        promptDialNumber=301
     }
     /// <summary>
     /// The status of a plugins initialization
@@ -1079,7 +1089,7 @@ namespace OpenMobile
         /// <summary>
         /// An RTP URL (Streaming media)
         /// </summary>
-        RTPUrl	=	9,
+        RTSPUrl	=	9,
         /// <summary>
         /// A YouTube video
         /// </summary>
@@ -1104,6 +1114,10 @@ namespace OpenMobile
         /// Reserved for future use
         /// </summary>
         Reserved	=	15,
+        /// <summary>
+        /// Multimedia Streaming Protocol
+        /// </summary>
+        MMSUrl=16,
         /// <summary>
         /// Other
         /// </summary>
@@ -1207,17 +1221,17 @@ namespace OpenMobile
         /// </summary>
         DataProviderStatus=1,
         /// <summary>
-        /// Get the position (in seconds) of the currently playing media
+        /// Get the position (in seconds) of the currently playing media [float]
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
         GetMediaPosition=2,
         /// <summary>
-        /// Gets the volume (0-100)
+        /// Gets the volume (0-100) [int]
         /// </summary>
         GetVolume=3,
         /// <summary>
-        /// Gets an array of availble networks
+        /// Gets an array of availble networks [string[]]
         /// </summary>
         GetAvailableNetworks=4,
         /// <summary>
@@ -1235,7 +1249,7 @@ namespace OpenMobile
         /// </summary>
         GetTunedContentInfo=7,
         /// <summary>
-        /// Gets the status of the currently loaded media player
+        /// Gets the status of the currently loaded media player [ePlayerStatus]
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
@@ -1245,7 +1259,7 @@ namespace OpenMobile
         /// </summary>
         GetMediaDatabase=9,
         /// <summary>
-        /// Returns the loaded plugin collection.
+        /// Returns the loaded plugin collection. [List(IBasePlugin)]
         /// </summary>
         GetPlugins=10,
         /// <summary>
@@ -1255,15 +1269,35 @@ namespace OpenMobile
         /// </summary>
         GetPlaybackSpeed=11,
         /// <summary>
-        /// Returns a list of audio devices available on the system
+        /// Returns a list of audio devices [string[]]available on the system
         /// </summary>
         GetAudioDevices=12,
         /// <summary>
-        /// Gets the height and width scale factors
+        /// Gets the height and width scale factors [Point]
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Screen [int]</para>
         /// </summary>
-        GetScaleFactors=13
+        GetScaleFactors=13,
+        /// <summary>
+        /// Returns the OMControl that draws a map
+        /// </summary>
+        GetMap=14,
+        /// <summary>
+        /// Returns a string[] listing available navigation panels
+        /// </summary>
+        GetAvailableNavPanels=15,
+        /// <summary>
+        /// Returns the current GPS position [Point].  May be 0,0 if no GPS signal is available.
+        /// </summary>
+        GetCurrentPosition=16,
+        /// <summary>
+        /// Returns the nearest Address [Address]
+        /// </summary>
+        GetNearestAddress=17,
+        /// <summary>
+        /// Returns the route destination [Address].  Will return null if no route calculated
+        /// </summary>
+        GetDestination=18
     }
 
     /// <summary>
@@ -1300,20 +1334,148 @@ namespace OpenMobile
         Unknown=0,
         /// <summary>
         /// Occurs when the GPS Fix changes
-        /// Arg: No GPS, No Signal, 2D Fix, 3D Fix
+        /// <para>---------------------------------------</para>
+        /// <para>Arg: No GPS, No Signal, 2D Fix, 3D Fix</para>
         /// </summary>
         GPSStatusChange=1,
         /// <summary>
         /// Route has changed
-        /// Arg: Navigation Started, Navigation Cancelled, Waypoint Added, Detouring
+        /// <para>---------------------------------------</para>
+        /// <para>Arg: Navigation Started, Navigation Cancelled, Waypoint Added, Detouring</para>
         /// </summary>
         RouteChanged=2,
         /// <summary>
         /// A turn is approaching...query the nextTurn parameter for more info
         /// </summary>
-        TurnApproaching=3
+        TurnApproaching=3,
+        /// <summary>
+        /// Occurs when the current town/city changes.  Useful for refreshing data for the new location
+        /// <para>---------------------------------------</para>
+        /// <para>Arg: City/Town Name</para>
+        /// </summary>
+        LocationChanged=4
     }
+    /// <summary>
+    /// Represents a Navigation Address
+    /// </summary>
+    public class Address:ICloneable
+    {
+        /// <summary>
+        /// The street portion of an address
+        /// </summary>
+        public string Street;
+        /// <summary>
+        /// The city portion of an address
+        /// </summary>
+        public string City;
+        /// <summary>
+        /// The state portion of an address
+        /// </summary>
+        public string State;
+        /// <summary>
+        /// The country portion of an address
+        /// </summary>
+        public string Country;
+        /// <summary>
+        /// The zip/postcode portion of an address
+        /// </summary>
+        public string Zip;
 
+        /// <summary>
+        /// Creates a new Address
+        /// </summary>
+        public Address()
+        {
+            Street="";
+            City="";
+            State="";
+            Country="";
+            Zip="";
+        }
+        /// <summary>
+        /// Creates a new Address from the given string
+        /// </summary>
+        /// <param name="address"></param>
+        public Address(string address)
+        {
+            Address ret;
+            if (TryParse(address, out ret) == true)
+            {
+                Street = ret.Street;
+                City = ret.City;
+                State = ret.State;
+            }
+            else
+            {
+                Street = "";
+                City = "";
+                State = "";
+            }
+            Country = "";
+            Zip = "";
+        }
+        /// <summary>
+        /// Creates a new Address
+        /// </summary>
+        /// <param name="street"></param>
+        /// <param name="city"></param>
+        /// <param name="state"></param>
+        public Address(string street, string city, string state)
+        {
+            Street = street;
+            City = city;
+            State = state;
+            Country = "";
+            Zip = "";
+        }
+        /// <summary>
+        /// Creates a new Address
+        /// </summary>
+        /// <param name="street"></param>
+        /// <param name="city"></param>
+        /// <param name="state"></param>
+        /// <param name="zip"></param>
+        /// <param name="country"></param>
+        public Address(string street, string city, string state,string zip,string country)
+        {
+            Street = street;
+            City = city;
+            State = state;
+            Country = country;
+            Zip = zip;
+        }
+        /// <summary>
+        /// Trys to parse a string into an Address
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static bool TryParse(string address, out Address result)
+        {
+            result = null;
+            string[] args = address.Split(new char[] { ',','\n' },StringSplitOptions.RemoveEmptyEntries);
+            if (args.Length != 3)
+                return false;
+            result = new Address(args[0], args[1].Trim(), args[2].Trim());
+            return true;
+        }
+        /// <summary>
+        /// Creates a copy of this Address
+        /// </summary>
+        /// <returns></returns>
+        public object Clone()
+        {
+            return new Address(String.Copy(Street), String.Copy(City), String.Copy(State), String.Copy(Zip), String.Copy(Country));
+        }
+        /// <summary>
+        /// Converts an Address to a string
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return Street+'\n'+City+", "+State;
+        }
+    }
     /// <summary>
     /// A/V Player statue
     /// </summary>
@@ -1816,5 +1978,9 @@ namespace OpenMobile
         /// A size modifier for button animations
         /// </summary>
         public int transitionTop = 0;
+        /// <summary>
+        /// The current rendering mode of the rendering window
+        /// </summary>
+        public modeType currentMode=modeType.Normal;
     }
 }

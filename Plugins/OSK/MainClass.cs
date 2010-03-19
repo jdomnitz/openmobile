@@ -35,6 +35,7 @@ namespace OpenMobile
         //Here we create the panel that we will load the controls onto (like a windows form)
         ScreenManager manager;
         ScreenManager symManager;
+        ScreenManager numManager;
         private bool caps = true;
 
         public OMPanel loadPanel(string name,int screen)
@@ -43,6 +44,8 @@ namespace OpenMobile
             //NOTE: if it has not yet finished initializing it will be null
             switch(name)
             {
+                case "NUMOSK":
+                    return numManager[screen];
                 case "SYM":
                     return symManager[screen];
                 default:
@@ -79,7 +82,7 @@ namespace OpenMobile
         }
         public float pluginVersion
         {
-            get { return 0.5F; }
+            get { return 0.6F; }
         }
 
         public string pluginDescription
@@ -112,6 +115,10 @@ namespace OpenMobile
             OMPanel symKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "SYM.xml"),host);
             if (symKeyboard == null)
                 return eLoadStatus.LoadFailedUnloadRequested;
+            numManager = new ScreenManager(theHost.ScreenCount);
+            OMPanel numKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "NUM.xml"), host);
+            if (numKeyboard == null)
+                return eLoadStatus.LoadFailedUnloadRequested;
             //Here we create a handle to hook the button presses
             userInteraction handler = new userInteraction(MainClass_OnClick);
             //Now we loop through each control and hook its event
@@ -119,14 +126,18 @@ namespace OpenMobile
                 if (regularKeyboard[i].GetType()==typeof(OMButton))
                     ((OMButton)regularKeyboard[i]).OnClick += handler;
             for (int i = 0; i < symKeyboard.controlCount; i++)
-                if (regularKeyboard[i].GetType() == typeof(OMButton))
+                if (symKeyboard[i].GetType() == typeof(OMButton))
                     ((OMButton)symKeyboard[i]).OnClick += handler;
+            for (int i = 0; i < numKeyboard.controlCount; i++)
+                if (numKeyboard[i].GetType() == typeof(OMButton))
+                    ((OMButton)numKeyboard[i]).OnClick += handler;
             //Here we hook the keyboard in case characters are typed
             theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             //And then load the panel into the screen manager
             manager.loadPanel(regularKeyboard);
             symManager.loadPanel(symKeyboard);
+            numManager.loadPanel(numKeyboard);
             //And when everything is all ready to go...we return true
             return eLoadStatus.LoadSuccessful;
         }
@@ -210,6 +221,8 @@ namespace OpenMobile
         void MainClass_OnClick(object sender, int screen)
         {
             OMTextBox text = (OMTextBox)manager[screen]["Text"];
+            if (text.containingScreen() != screen)
+                text = (OMTextBox)numManager[screen]["Text"];
             string Text=((OMButton)sender).Text;
             if ((Text == "OK") || (Text == "ok"))
             {

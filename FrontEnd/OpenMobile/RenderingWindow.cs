@@ -37,7 +37,6 @@ namespace OpenMobile
         private renderingParams rParam = new renderingParams();
         object painting = new object();
         private Point ThrowStart = new Point(-1, -1);
-        modeType currentMode = modeType.Normal;
         OMButton lastClick;
         public delegate IntPtr getVal();
         public delegate void displayMessage(string message);
@@ -469,23 +468,7 @@ namespace OpenMobile
             bool done = false; //We found something that was selected
             if (p.controlCount == 0)
                 return;
-            if ((ThrowStart.X != -1) && (typeof(OMSlider).IsInstanceOfType(highlighted) == true))
-            {
-                if (e.Button == MouseButtons.Left)
-                {
-                    OMSlider s = (OMSlider)highlighted;
-                    s.SliderPosition += ((int)((e.X - ThrowStart.X) / widthScale));
-                    ThrowStart.X = e.X;
-                    if ((s.SliderPosition + (s.SliderWidth / 2)) < 0)
-                        s.SliderPosition = -(s.SliderWidth / 2);
-                    if ((s.SliderPosition + (s.SliderWidth / 2)) > s.Width)
-                        s.SliderPosition = s.Width - (s.SliderWidth / 2);
-                    new Thread(delegate() { s.sliderMoved(screen); }).Start();
-                    UpdateThisControl(s.toRegion());
-                    return;
-                }
-            }
-            if (currentMode == modeType.Scrolling)
+            if (rParam.currentMode == modeType.Scrolling)
             {
                 if (e.Button == MouseButtons.Left)
                 {
@@ -498,7 +481,7 @@ namespace OpenMobile
                             Point ThrowTotalDistance = new Point((int)((e.X - ThrowStart.X + 0.5) / widthScale), (int)((e.Y - ThrowStart.Y + 0.5) / heightScale));
                             ThrowRelativeDistance.X = e.X - ThrowRelativeDistance.X;
                             ThrowRelativeDistance.Y = e.Y - ThrowRelativeDistance.Y;
-                            ((IThrow)highlighted).MouseThrow(screen, ThrowTotalDistance, new Point((int)(ThrowRelativeDistance.X + 0.5 / widthScale), (int)(ThrowRelativeDistance.Y + 0.5 / heightScale)));
+                            ((IThrow)highlighted).MouseThrow(screen, ThrowTotalDistance, new Point((int)(ThrowRelativeDistance.X / widthScale), (int)(ThrowRelativeDistance.Y / heightScale)));
                             ThrowRelativeDistance = e.Location;
                         }
                         else    // End of code added by Borte
@@ -530,7 +513,7 @@ namespace OpenMobile
                         if ((Math.Abs(e.X - ThrowStart.X) <= 5) && (Math.Abs(e.Y - ThrowStart.Y) <= 5))
                             return;
                         currentGesture = new List<Point>();
-                        currentMode = modeType.gesturing;
+                        rParam.currentMode = modeType.gesturing;
                     }
                     Graphics g = Graphics.FromHwnd(this.Handle);
                     g.FillEllipse(Brushes.Red, new Rectangle(e.X - 10, e.Y - 10, (int)(20*widthScale), (int)(20*heightScale)));
@@ -563,8 +546,10 @@ namespace OpenMobile
                             if (ThrowStarted)
                                 if (Math.Abs(e.X - ThrowStart.X) > 3 || (Math.Abs(e.Y - ThrowStart.Y) > 3))
                                 {
-                                    ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart);
-                                    currentMode = modeType.Scrolling;
+                                    bool cancel=false;
+                                    ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart,ref cancel);
+                                    if (cancel==false)
+                                        rParam.currentMode = modeType.Scrolling;
                                 }
 
                         if (done == false)
@@ -588,7 +573,7 @@ namespace OpenMobile
             {
                 if (b.Visible == true)
                 {
-                    currentMode = modeType.Highlighted;
+                    rParam.currentMode = modeType.Highlighted;
                     if ((b.Mode == modeType.Normal))
                     {
                         if (typeof(IHighlightable).IsInstanceOfType(b) == true)
@@ -612,7 +597,7 @@ namespace OpenMobile
         {
             if ((e.Button == MouseButtons.Left) && (highlighted != null))
             {
-                if (currentMode == modeType.Highlighted)
+                if (rParam.currentMode == modeType.Highlighted)
                 {
                     if (typeof(OMButton).IsInstanceOfType(highlighted))
                     {
@@ -624,7 +609,7 @@ namespace OpenMobile
                                 if (lastClick != null)
                                 {
                                     lastClick.Mode = modeType.Clicked;
-                                    tmrClick.Enabled = true; //ToDo - lastClick should be IClickable not OMButton
+                                    tmrClick.Enabled = true;
                                     new Thread(delegate() { lastClick.clickMe(screen); }).Start();
                                 }
                             }
@@ -655,7 +640,7 @@ namespace OpenMobile
             tmrLongClick.Enabled = false;
             if (highlighted != null)
             {
-                if (currentMode == modeType.Highlighted)
+                if (rParam.currentMode == modeType.Highlighted)
                 {
                     if (typeof(OMButton).IsInstanceOfType(highlighted))
                     {
@@ -696,7 +681,7 @@ namespace OpenMobile
         private void tmrLongClick_Tick(object sender, EventArgs e)
         {
             tmrLongClick.Enabled = false;
-            if (currentMode == modeType.gesturing)
+            if (rParam.currentMode == modeType.gesturing)
                 return;
             if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
                 try
@@ -710,7 +695,7 @@ namespace OpenMobile
         {
             if (highlighted != null)
             {
-                if ((currentMode == modeType.Highlighted) && (typeof(OMButton).IsInstanceOfType(highlighted)))
+                if ((rParam.currentMode == modeType.Highlighted) && (typeof(OMButton).IsInstanceOfType(highlighted)))
                 {
                     if (lastClick != null)
                     {
@@ -731,22 +716,10 @@ namespace OpenMobile
                     l.listThrown(e.Y, heightScale, screen);
                     l.Thrown = 0;
                     l.Ticking = true;
-                    currentMode = modeType.Scrolling;
+                    rParam.currentMode = modeType.Scrolling;
                     ThrowStart.Y = e.Y;
                     UpdateThisControl(l.toRegion());
-                    tmrLongClick.Enabled = true;
-                }
-                else if (typeof(OMSlider) == highlighted.GetType())
-                {
-                    OMSlider s = (OMSlider)highlighted;
-                    s.Mode = modeType.Scrolling;
-                    if ((e.X > (s.Left + s.SliderPosition) * widthScale) && (e.X < (s.Left + s.SliderPosition + s.SliderWidth) * widthScale))
-                        if ((e.Y > ((s.Top + (s.SliderBarHeight / 2)) - (s.Height / 2)) * heightScale) && (e.Y < ((s.Top + (s.SliderBarHeight / 2)) + (s.Height / 2)) * heightScale))
-                        {
-                            ThrowStart.X = e.X;
-                        }
-                    // Start of code added by Borte 
-                    // Added support of IMouse interface 
+                    tmrLongClick.Enabled = true; //*IMPORTANT
                 }
                 else if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
                     ((IMouse)highlighted).MouseDown(screen, e, widthScale, heightScale);
@@ -754,11 +727,11 @@ namespace OpenMobile
                 // Added support of IThrow interface 
                 if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                 {
-                    ThrowStarted = true;
-                    ThrowStart = e.Location;
                     ThrowRelativeDistance = ThrowStart;
-                    currentMode = modeType.Scrolling;
-                    ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart);
+                    rParam.currentMode = modeType.Scrolling;
+                    bool cancel = false;
+                    ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart,ref cancel);
+                    ThrowStarted = !cancel;
                 }
                 // End of code added by Borte
             } ThrowStart = e.Location;
@@ -779,16 +752,16 @@ namespace OpenMobile
                 if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
                     ((IMouse)highlighted).MouseUp(screen, e, widthScale, heightScale);
             }
-            if (currentMode == modeType.Scrolling)
+            if (rParam.currentMode == modeType.Scrolling)
             {
-                currentMode = modeType.Highlighted;
+                rParam.currentMode = modeType.Highlighted;
                 ThrowStart.Y = -1;
                 if ((highlighted != null) && (typeof(IThrow).IsInstanceOfType(highlighted) == true))
                     ((IThrow)highlighted).MouseThrowEnd(screen, e.Location);
                 else if ((highlighted != null) && ((OMList)highlighted).Thrown != 0)
                     ((OMList)highlighted).Ticking = true;
             }
-            else if (currentMode == modeType.gesturing)
+            else if (rParam.currentMode == modeType.gesturing)
             {
                 AlphaRecognizer rec = new AlphaRecognizer();
                 rec.Initialize();
@@ -796,7 +769,7 @@ namespace OpenMobile
                     rec.AddPoint(currentGesture[i], false);
                 Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
                 currentGesture = null;
-                currentMode = modeType.Highlighted;
+                rParam.currentMode = modeType.Highlighted;
                 UI_MouseMove(sender, new MouseEventArgs(MouseButtons.None, 0, e.X, e.Y, 0));
                 Invalidate();
             }
@@ -1148,9 +1121,9 @@ namespace OpenMobile
 
         private void UI_MouseLeave(object sender, EventArgs e)
         {
-            if (currentMode == modeType.Scrolling)
+            if (rParam.currentMode == modeType.Scrolling)
             {
-                currentMode = modeType.Highlighted;
+                rParam.currentMode = modeType.Highlighted;
                 ThrowStart.Y = -1;
                 if ((highlighted != null) && (typeof(OMList) == highlighted.GetType()) && ((OMList)highlighted).Thrown != 0)
                     ((OMList)highlighted).Ticking = true;
