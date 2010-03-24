@@ -67,7 +67,7 @@ namespace ControlDemo
             {
                 List3.Clear();
                 lastPath = arg1;
-                ((OMLabel)p[1]).Text = formatNumber(arg1);
+                ((OMLabel)p[1]).Text = OpenMobile.Framework.Globalization.formatPhoneNumber(arg1);
                 ((OMImage)p[3]).Image=theHost.getSkinImage("Discs|Phone",true);
                 imageItem itm = theHost.getSkinImage("Discs|Dial", true);
                 List3.Add(new OMListItem("Dial Number", itm.image));
@@ -83,17 +83,6 @@ namespace ControlDemo
             }
         }
 
-        private string formatNumber(string arg1)
-        {
-            if (arg1.Contains("-") == true)
-                return arg1;
-            if (arg1.Length == 10)
-                return long.Parse(arg1).ToString("(###) ###-####");
-            else if (arg1.Length == 11)
-                return long.Parse(arg1).ToString("#-(###) ###-####");
-            return arg1;
-        }
-
         void List3_SelectedIndexChanged(OMList sender, int screen)
         {
             if (List3.SelectedIndex < 0)
@@ -107,9 +96,12 @@ namespace ControlDemo
             {
                 case "Play CD":
                     string[] songs=Directory.GetFiles(lastPath);
-                    theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), "OMPlayer");
                     bool b=theHost.setPlaylist(Playlist.Convert(songs), theHost.instanceForScreen(screen));
                     b=theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
+                    break;
+                case "Play DVD":
+                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), lastPath);
+                    theHost.sendMessage("UI", "OMNotify", "ShowMediaControls" + screen.ToString());
                     break;
                 case "Eject":
                     theHost.execute(eFunction.ejectDisc, lastPath);

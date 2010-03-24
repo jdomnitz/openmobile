@@ -30,8 +30,6 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMMessageBox:OMLabel,IClickable
     {
-        private int top;
-        private int height;
         /// <summary>
         /// Button Clicked
         /// </summary>
@@ -56,42 +54,6 @@ namespace OpenMobile.Controls
         /// Fires the OnLongClick event
         /// </summary>
         public void longClickMe(int screen) { }
-        /// <summary>
-        /// Sets the top position of the control
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the top position of the control")]
-        public override int Top
-        {
-            get
-            {
-                return top;
-            }
-            set
-            {
-                if (top == value)
-                    return;
-                top = value;
-                this.refreshMe(Rectangle.Empty);
-            }
-        }
-        /// <summary>
-        /// The controls height in pixels
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the height of the control")]
-        public override int Height
-        {
-            get
-            {
-                return height;
-            }
-            set
-            {
-                if (height == value)
-                    return;
-                height = value;
-                refreshMe(Rectangle.Empty);
-            }
-        }
 
         /// <summary>
         /// Returns the type of control

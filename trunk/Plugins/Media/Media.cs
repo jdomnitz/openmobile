@@ -224,7 +224,7 @@ namespace Media
         }
         private List<string> dbPlugins;
 
-        void scrollRight_OnClick(object sender, int screen)
+        void scrollRight_OnClick(OMControl sender, int screen)
         {
             //Right
             if (dbPlugins == null)
@@ -236,7 +236,7 @@ namespace Media
             ((OMTextBox)settingsManager[screen][10]).Text=dbPlugins[i];
         }
 
-        void scrollLeft_OnClick(object sender, int screen)
+        void scrollLeft_OnClick(OMControl sender, int screen)
         {   //Left
             if (dbPlugins == null)
                 return;
@@ -248,7 +248,7 @@ namespace Media
                 ((OMTextBox)settingsManager[screen][10]).Text = dbPlugins[i];
         }
 
-        void Save_OnClick(object sender, int screen)
+        void Save_OnClick(OMControl sender, int screen)
         {
             using (OpenMobile.Data.PluginSettings set = new OpenMobile.Data.PluginSettings())
             {
@@ -275,20 +275,20 @@ namespace Media
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.SlideDown.ToString());
         }
 
-        void select_OnClick(object sender, int screen)
+        void select_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getFilePath OpenFolder= new OpenMobile.helperFunctions.General.getFilePath(theHost);
             ((OMTextBox)settingsManager[screen][3]).Text= OpenFolder.getFolder(screen,"Media",true);
         }
 
-        void Cancel_OnClick(object sender, int screen)
+        void Cancel_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromSettings, screen.ToString(),"Media");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Media");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.SlideDown.ToString());
         }
 
-        void bSettings_OnClick(object sender, int screen)
+        void bSettings_OnClick(OMControl sender, int screen)
         {
             using(PluginSettings settings=new PluginSettings())
             {
@@ -305,19 +305,17 @@ namespace Media
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.SlideUp.ToString());
         }
 
-        void List2_OnLongClick(object sender, int screen)
+        void List2_OnLongClick(OMControl sender, int screen)
         {
             OMList l = (OMList)sender;
             if (l.SelectedIndex < 0)
                 return;
             loadSongs(currentAlbums[theHost.instanceForScreen(screen)][l.SelectedIndex].Artist, currentAlbums[theHost.instanceForScreen(screen)][l.SelectedIndex].Album, screen);
             theHost.setPlaylist(currentSongs[theHost.instanceForScreen(screen)],theHost.instanceForScreen(screen));
-            using(PluginSettings settings=new PluginSettings())
-                theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), settings.getSetting("Default.AVPlayer.Files")); //More efficient then checking first
             theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
         }
 
-        void List3_OnLongClick(object sender, int screen)
+        void List3_OnLongClick(OMControl sender, int screen)
         {
             OMList l=(OMList)sender;
             if (l.SelectedIndex < 0)
@@ -361,8 +359,6 @@ namespace Media
                 mediaInfo info = db.getNextMedia();
                 if (info != null)
                 {
-                    using(PluginSettings settings=new PluginSettings())
-                        theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), settings.getSetting("Default.AVPlayer.Files")); //More efficient then checking first
                     theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), info.Location);
                 }
                 while (info != null)
@@ -374,24 +370,22 @@ namespace Media
             }
         }
 
-        void List1_OnClick(object sender, int screen)
+        void List1_OnClick(OMControl sender, int screen)
         {
             if (currentSongs[theHost.instanceForScreen(screen)].Count == 0)
                 return;
             if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location) == false)
             {
-                using(PluginSettings settings=new PluginSettings())
-                    theHost.execute(eFunction.loadAVPlayer, theHost.instanceForScreen(screen).ToString(), settings.getSetting("Default.AVPlayer.Files"));
                 theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location);
             }
         }
 
-        void List2_OnClick(object sender, int screen)
+        void List2_OnClick(OMControl sender, int screen)
         {
             slider2left(screen);
         }
 
-        void List3_OnClick(object sender, int screen)
+        void List3_OnClick(OMControl sender, int screen)
         {
             slider1left(screen);
         }
@@ -429,7 +423,7 @@ namespace Media
             }
         }
 
-        void Slider3_OnClick(object sender, int screen)
+        void Slider3_OnClick(OMControl sender, int screen)
         {
             if (slider2left(screen) == false) //performance hack - only the correct one will execute
                 slider2right(screen);
@@ -442,10 +436,11 @@ namespace Media
 
         void List3_SelectedIndexChanged(OMList sender,int screen)
         {
-            if (sender.SelectedIndex<0)
+            int index = sender.SelectedIndex; //store it first because it can actually change between the -1 check and the load function
+            if (index<0)
                 return;
-            loadAlbums(sender[sender.SelectedIndex].text,screen);
-            loadSongs(sender[sender.SelectedIndex].text, screen);
+            loadAlbums(sender[index].text,screen);
+            loadSongs(sender[index].text, screen);
         }
         private List<mediaInfo>[] currentSongs;
         private bool[] kickDown; //Kicks a thread out of processing songs if another is waiting
@@ -593,7 +588,7 @@ namespace Media
         } 
         #endregion
 
-        void Slider2_OnClick(object sender, int screen)
+        void Slider2_OnClick(OMControl sender, int screen)
         {
                 if (slider1left(screen)==false) //performance hack - only the correct one will execute
                     slider1right(screen);
@@ -614,7 +609,7 @@ namespace Media
                 theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
                 if (o == null)
                     return;
-                IMediaDatabase db = (IMediaDatabase)o;
+                using(IMediaDatabase db = (IMediaDatabase)o)
                 {
                     db.beginGetArtists(false);
                     mediaInfo info = db.getNextMedia();

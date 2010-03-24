@@ -98,6 +98,134 @@ namespace OpenMobile.Framework
                 return Calculation.convertSpeed(speed, speedTypes.milesPerHour, speedTypes.kilometersPerHour).ToString("0") + "kph";
         }
         /// <summary>
+        /// Removes any localized phone number formatting from the string so that it can be dialed
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        public static string removePhoneLocalization(string number)
+        {
+            string ret="";
+            for(int i=0;i<number.Length;i++)
+                switch (number[i])
+                {
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        ret += number[i];
+                        break;
+                    case '+':
+                        if (i == 0)
+                            ret += '+';
+                        break;
+                }
+            return ret;
+        }
+        /// <summary>
+        /// Formats a phone number into the local phone number format
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        public static string formatPhoneNumber(string number)
+        {
+            string ret = "";
+            bool prefix = false;
+            if (number[0] == '+')
+            {
+                number = number.Substring(1);
+                prefix = true;
+            }
+            switch (System.Globalization.RegionInfo.CurrentRegion.TwoLetterISORegionName)
+            {
+                case "US":
+                case "CA":
+                    if (number.Length == 7)
+                        return long.Parse(removePhoneLocalization(number)).ToString("###-####");
+                    else if (number.Length == 10)
+                        return long.Parse(removePhoneLocalization(number)).ToString("(###) ###-####");
+                    else if ((number.Length==11)||(number.Length==13))
+                        return long.Parse(removePhoneLocalization(number)).ToString("+### (###) ###-####");
+                    break;
+                case "MX":
+                    if (number.Length==10)
+                        if ((number.StartsWith("55"))||(number.StartsWith("33"))||(number.StartsWith("81")))
+                            return long.Parse(removePhoneLocalization(number)).ToString("(##) ####-####");
+                        else
+                            return long.Parse(removePhoneLocalization(number)).ToString("(###) ###-####");
+                    else
+                        return long.Parse(removePhoneLocalization(number)).ToString("+### (###) ###-####");
+                case "GB":
+                    if (number.Length==10)
+                        return long.Parse(removePhoneLocalization(number)).ToString("(#####) #####");
+                    else if (number.Length == 11)
+                        return long.Parse(removePhoneLocalization(number)).ToString("(#####) ######");
+                    break;
+                case "ES":
+                    if (number.Length==9)
+                        return long.Parse(removePhoneLocalization(number)).ToString("## ### ## ##");
+                    else if(number.Length==11)
+                        return long.Parse(removePhoneLocalization(number)).ToString("+## ## ### ####");
+                    break;
+                case "PL":
+                    if (number.Length >= 9)
+                    {
+                        ret= long.Parse(removePhoneLocalization(number)).ToString("## ## ### ## ##").Trim();
+                        if (prefix == true)
+                            return '+' + ret;
+                        else
+                            return ret;
+                    }
+                    break;
+                case "NO":
+                    if (number.StartsWith("4")||number.StartsWith("9"))
+                        return long.Parse(removePhoneLocalization(number)).ToString("### ## ###");
+                    else
+                        return long.Parse(removePhoneLocalization(number)).ToString("## ## ## ##");
+                case "FR":
+                    if (prefix==true)
+                        return '+'+long.Parse(removePhoneLocalization(number)).ToString("### ### ### ###");
+                    else
+                        return long.Parse(removePhoneLocalization(number)).ToString("0# ## ## ## ##");
+                case "RU":
+                    if (number.Length==5)
+                        return long.Parse(removePhoneLocalization(number)).ToString("#-##-##");
+                    else if(number.Length==6)
+                        return long.Parse(removePhoneLocalization(number)).ToString("##-##-##");
+                    else if(number.Length==7)
+                        return long.Parse(removePhoneLocalization(number)).ToString("###-##-##");
+                    else if(number.Length==10)
+                        return long.Parse(removePhoneLocalization(number)).ToString("###.###-##-##");
+                    else
+                        return long.Parse(removePhoneLocalization(number)).ToString("##.###.###-##-##");
+                case "IN":
+                    return long.Parse(removePhoneLocalization(number)).ToString("###-########");
+                case "CN":
+                    if (number.Length==11)
+                        return long.Parse(removePhoneLocalization(number)).ToString("###-####-####");
+                    else
+                        return long.Parse(removePhoneLocalization(number)).ToString("####-####");
+                case "AU":
+                    if (number.StartsWith("04"))
+                        return long.Parse(removePhoneLocalization(number)).ToString("#### ### ###");
+                    else
+                        return long.Parse(removePhoneLocalization(number)).ToString("(##) #### ####");
+                case "ZA":
+                case "CH":
+                    if ((number.Length == 9)||(number.Length == 10))
+                        return long.Parse(removePhoneLocalization(number)).ToString("### ### ####");
+                    break;
+            }
+            if (prefix == true)
+                return '+' + number;
+            return number;
+        }
+        /// <summary>
         /// Returns the local language
         /// </summary>
         /// <returns></returns>

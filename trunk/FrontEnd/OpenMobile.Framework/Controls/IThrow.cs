@@ -21,6 +21,7 @@
 
 // This interface is added by Borte
 
+using System.Drawing;
 namespace OpenMobile.Controls
 {
     /// <summary>
@@ -43,7 +44,8 @@ namespace OpenMobile.Controls
         /// <param name="screen">Screen the event occured on</param>
         /// <param name="StartLocation">The point that was clicked</param>
         /// <param name="Cancel">If true cancels the throw operation</param>
-        void MouseThrowStart(int screen, System.Drawing.Point StartLocation, ref bool Cancel);
+        /// <param name="scaleFactors"></param>
+        void MouseThrowStart(int screen, System.Drawing.Point StartLocation,PointF scaleFactors, ref bool Cancel);
 
         /// <summary>
         /// Throw is ended

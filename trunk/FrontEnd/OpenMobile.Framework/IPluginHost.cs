@@ -21,6 +21,7 @@
 using System;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Drawing;
 namespace OpenMobile.Plugin
 {
     /// <summary>
@@ -68,6 +69,20 @@ namespace OpenMobile.Plugin
     /// <param name="arg"></param>
     public delegate void WirelessEvent(eWirelessEvent type,string arg);
     /// <summary>
+    /// Represents the graphics capabilities of the current platform
+    /// </summary>
+    public enum eGraphicsLevel
+    {
+        /// <summary>
+        /// Full Graphics
+        /// </summary>
+        Standard=0,
+        /// <summary>
+        /// Minimal Graphics - aka no effects
+        /// </summary>
+        Minimal=1
+    }
+    /// <summary>
     /// The default plugin host interface
     /// </summary>
     public interface IPluginHost
@@ -106,6 +121,18 @@ namespace OpenMobile.Plugin
         /// For UI plugins only.  Sets the number of controls to render first
         /// </summary>
         Int32 RenderFirst { get; set; }
+        /// <summary>
+        /// If the vehicle is in motion returns true (returns false if unknown)
+        /// </summary>
+        bool VehicleInMotion { get; }
+        /// <summary>
+        /// Gets/Sets the location video should be played (based on the 1000x600 default scale)
+        /// </summary>
+        Rectangle VideoPosition { get; set; }
+        /// <summary>
+        /// Sets the graphics level the application and plugins should use (represents the computers video performance)
+        /// </summary>
+        eGraphicsLevel GraphicsLevel { get; set; }
         /// <summary>
         /// Execute the given function
         /// </summary>

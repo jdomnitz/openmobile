@@ -29,6 +29,7 @@ using OpenMobile;
 using OpenMobile.Data;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
+using System.Drawing;
 
 namespace OMPlayer
 {
@@ -38,6 +39,8 @@ namespace OMPlayer
     private static IntPtr hDrain = IntPtr.Zero;
     private AVPlayer[] player;
     private static IPluginHost theHost;
+    static int WM_Graph_Notify = 0x8001;
+    static int WM_LBUTTONUP = 0x0202;
 
     // Events
     public event MediaEvent OnMediaEvent;
@@ -50,7 +53,6 @@ namespace OMPlayer
             player[instance].OnMediaEvent+= new MediaEvent(forwardEvent);
         }
     }
-
     public void Dispose()
     {
         if (player != null)
@@ -160,6 +162,12 @@ namespace OMPlayer
     {
         if (function == eFunction.closeProgram)
             saveState();
+        if (function == eFunction.RenderingWindowResized)
+        {
+            int inst = theHost.instanceForScreen(int.Parse(arg1));
+            if (player[inst] != null)
+                player[inst].Resize(1, 1);
+        }
     }
 
     public bool incomingMessage(string message, string source)
@@ -171,7 +179,6 @@ namespace OMPlayer
     {
         throw new NotImplementedException();
     }
-
     public eLoadStatus initialize(IPluginHost host)
     {
         theHost = host;
@@ -202,7 +209,6 @@ namespace OMPlayer
         }
         return eLoadStatus.LoadSuccessful;
     }
-
     void host_OnPowerChange(ePowerEvent type)
     {
         if (type == ePowerEvent.SleepOrHibernatePending)
@@ -236,14 +242,20 @@ namespace OMPlayer
                 OnMediaEvent(eFunction.Play, instance, "");
             }
         }
-        else if (player[instance].mediaControl.Pause() >= 0)
-        {
-            player[instance].currentState = ePlayerStatus.Paused;
-            OnMediaEvent(eFunction.Pause, instance, "");
-        }
+        else
+            return (player[instance].mediaControl.Pause() == 0);
         return true;
     }
-
+    public bool SetVideoVisible(int instance, bool visible)
+    {
+        checkInstance(instance);
+        if (visible == false)
+            return (player[instance].videoWindow.put_Visible(OABool.False)==0);
+        else
+            if ((player[instance].currentState!=ePlayerStatus.Ready)&&(player[instance].currentState==ePlayerStatus.Stopped))
+                return (player[instance].videoWindow.put_Visible(OABool.True)==0);
+        return false;
+    }
     public bool play(int instance)
     {
         checkInstance(instance);
@@ -267,6 +279,7 @@ namespace OMPlayer
             case eMediaType.iPodiPhone:
             case eMediaType.RTSPUrl:
             case eMediaType.MMSUrl:
+            case eMediaType.DVD:
                 return false;
         }
         try
@@ -283,7 +296,8 @@ namespace OMPlayer
     public bool setPlaybackSpeed(int instance, float speed)
     {
         checkInstance(instance);
-        player[instance].SetRate((double) speed);
+        if (player[instance].SetRate((double)speed) != 0)
+            return false;
         if (player[instance].currentPlaybackRate > 1.0)
         {
             player[instance].currentState = ePlayerStatus.FastForwarding;
@@ -303,7 +317,9 @@ namespace OMPlayer
     public bool setPosition(int instance, float seconds)
     {
         checkInstance(instance);
-        if ((player[instance].currentState == ePlayerStatus.Stopped) || (player[instance].currentState == ePlayerStatus.Ready))
+        if ((player[instance].currentState == ePlayerStatus.Stopped) || (player[instance].currentState == ePlayerStatus.Ready) || (player[instance].currentState == ePlayerStatus.Error))
+            return false;
+        if ((player[instance].mediaControl == null) || (player[instance].mediaPosition == null))
             return false;
         player[instance].pos = seconds;
         return (0 == player[instance].mediaPosition.put_CurrentPosition((double) seconds));
@@ -417,16 +433,59 @@ namespace OMPlayer
         public mediaInfo nowPlaying = new mediaInfo();
         public MediaEvent OnMediaEvent;
         public double pos = -1.0;
-        private IVideoWindow videoWindow = null;
+        public IVideoWindow videoWindow = null;
         private Thread t;
         public bool suspended = false;
-
+        private MessageProc sink;
+        private bool fullscreen = false;
+        IntPtr drain = IntPtr.Zero;
         // Methods
         public AVPlayer(int instanceNum)
         {
             instance = instanceNum;
+            sink = new MessageProc();
+            sink.OnClick += new MessageProc.Click(clicked);
+            sink.OnEvent += new MessageProc.eventOccured(eventOccured);
+            drain = sink.Handle;
         }
 
+        void clicked()
+        {
+            fullscreen = !fullscreen;
+            Resize(1, 1);
+        }
+
+        public void eventOccured(int instance)
+        {
+            EventCode e;
+            IntPtr arg1;
+            IntPtr arg2;
+            FilterState fs;
+            mediaEventEx.GetEvent(out e, out arg1, out arg2, 0);
+            switch (e)
+            {
+                case EventCode.Complete:
+                    stop();
+                    OnMediaEvent(eFunction.nextMedia, instance, "");
+                    break;
+                case EventCode.DeviceLost:
+                case EventCode.ErrorAbort:
+                case EventCode.ErrorAbortEx:
+                case EventCode.ErrorStPlaying:
+                case EventCode.FileClosed:
+                case EventCode.StErrStopped:
+                    currentState = ePlayerStatus.Error;
+                    break;
+                case EventCode.Paused:
+                    if ((mediaControl!=null)&&(mediaControl.GetState(50,out fs)==0))
+                        if (fs == FilterState.Paused)
+                        {
+                            currentState = ePlayerStatus.Paused;
+                            OnMediaEvent(eFunction.Pause, instance, "");
+                        }
+                    break;
+            }
+        }
         private void CheckVisibility()
         {
             int hr = 0;
@@ -508,14 +567,20 @@ namespace OMPlayer
                         mediaControl.Stop();
                     }
                     catch (AccessViolationException) { Thread.Sleep(50); if (Thread.CurrentThread.Name != "1") { Thread.CurrentThread.Name = "1"; goto retry; } return false; }
-                    mediaControl = null;
-                    isAudioOnly = true;
-                    OnMediaEvent(eFunction.Stop, instance, "");
                 }
             }
+            currentState = ePlayerStatus.Stopped;
+            mediaControl = null;
+            if (isAudioOnly == false)
+            {
+                DsError.ThrowExceptionForHR(videoWindow.put_Visible(OABool.False));
+                DsError.ThrowExceptionForHR(videoWindow.put_Owner(IntPtr.Zero));
+            }
+            isAudioOnly = true;
+            nowPlaying = new mediaInfo();
+            OnMediaEvent(eFunction.Stop, instance, "");
             return true;
         }
-
         public void CloseClip()
         {
             int hr = 0;
@@ -593,17 +658,42 @@ namespace OMPlayer
         public double getCurrentPos()
         {
             double time;
-            lock (mediaPosition)
+            lock (this) //changed from mediaposition
             {
                 mediaPosition.get_CurrentPosition(out time);
             }
             return time;
         }
-
-        private int InitVideoWindow(int nMultiplier, int nDivider)
+        private int screen()
         {
-            Form f = (Form) Control.FromHandle(OMPlayer.theHost.UIHandle(instance));
-            return videoWindow.SetWindowPosition(0, 0, f.Width, f.Height);
+            for (int i = 0; i < theHost.ScreenCount; i++)
+            {
+                if (theHost.instanceForScreen(i) == instance)
+                    return i;
+            }
+            return 0;
+        }
+        public int Resize(int nMultiplier, int nDivider)
+        {
+            if (videoWindow == null)
+                return -1;
+            if (fullscreen == true)
+            {
+                Form f = (Form)Control.FromHandle(OMPlayer.theHost.UIHandle(screen()));
+                if (f.WindowState == FormWindowState.Maximized)
+                    return videoWindow.SetWindowPosition(0, 0, f.Width + 1, f.Height);
+                else
+                    return videoWindow.SetWindowPosition(0, 0, f.Width - 16, f.Height - 38);
+            }
+            else
+            {
+                object o;
+                theHost.getData(eGetData.GetScaleFactors, "", screen().ToString(), out o);
+                if (o == null)
+                    return -1;
+                PointF sf = (PointF)o;
+                return videoWindow.SetWindowPosition((int)(theHost.VideoPosition.Left * sf.X), (int)(theHost.VideoPosition.Top * sf.Y), (int)(theHost.VideoPosition.Width * sf.X), (int)(theHost.VideoPosition.Height * sf.Y));
+            }
         }
 
         public bool PlayMovieInWindow(string filename)
@@ -634,10 +724,12 @@ namespace OMPlayer
                 {
                     DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(instance)));
                     DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
-                    DsError.ThrowExceptionForHR(InitVideoWindow(1, 1));
+                    DsError.ThrowExceptionForHR(Resize(1, 1));
+                    DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(sink.Handle));
                 }
                 currentPlaybackRate = 1.0;
                 DsError.ThrowExceptionForHR(mediaControl.Run());
+                mediaEventEx.SetNotifyWindow(drain, WM_Graph_Notify, new IntPtr(instance));
             }
             currentState = ePlayerStatus.Playing;
             return true;
@@ -655,61 +747,39 @@ namespace OMPlayer
             return hr;
         }
 
-        private int ToggleFullScreen()
-        {
-            OABool lMode;
-            int hr = 0;
-            if (isAudioOnly || (videoWindow == null))
-            {
-                return 0;
-            }
-            DsError.ThrowExceptionForHR(videoWindow.get_FullScreenMode(out lMode));
-            if (lMode == OABool.False)
-            {
-                hr = videoWindow.get_MessageDrain(out hDrain);
-                DsError.ThrowExceptionForHR(hr);
-                DsError.ThrowExceptionForHR(hr);
-                lMode = OABool.True;
-                hr = videoWindow.put_FullScreenMode(lMode);
-                DsError.ThrowExceptionForHR(hr);
-            }
-            else
-            {
-                lMode = OABool.False;
-                DsError.ThrowExceptionForHR(videoWindow.put_FullScreenMode(lMode));
-                DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(OMPlayer.hDrain));
-                hr = videoWindow.SetWindowForeground(OABool.True);
-                DsError.ThrowExceptionForHR(hr);
-            }
-            return hr;
-        }
-
         private void waitForStop()
         {
             if (mediaControl != null)
             {
-                FilterState s;
-                mediaControl.GetState(0x3e8, out s);
-                for (double lastPosition = -1.0; (s == FilterState.Running) || (s == FilterState.Paused); lastPosition = pos)
+                while(true)
                 {
-                    Thread.Sleep(0x3e8);
-                    pos = lastPosition;
+                    Thread.Sleep(1000);
                     if (mediaPosition != null)
-                    {
                         pos = getCurrentPos();
-                    }
-                    if ((currentState != ePlayerStatus.Paused) && (suspended==false) && (pos == lastPosition))
-                    {
-                        if ((currentState == ePlayerStatus.Stopped)||(currentState==ePlayerStatus.Ready))
-                            return;
-                        currentState = ePlayerStatus.Stopped;
-                        OnMediaEvent(eFunction.Stop, instance, "");
-                        if (currentState != ePlayerStatus.Ready)
-                            OnMediaEvent(eFunction.nextMedia, instance, "");
-                        break;
-                    }
+                    else
+                        return;
                 }
             }
+        }
+    }
+
+    public sealed class MessageProc : Form
+    {
+        public delegate void eventOccured(int instance);
+        public new delegate void Click();
+        public new Click OnClick;
+        public eventOccured OnEvent;
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_Graph_Notify)
+                OnEvent((int)m.LParam);
+            else if (m.Msg == WM_LBUTTONUP)
+            {
+                OnClick();
+                return;
+            }
+            else
+                base.WndProc(ref m);
         }
     }
 }

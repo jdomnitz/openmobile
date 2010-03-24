@@ -281,6 +281,10 @@ namespace OpenMobile
         /// </summary>
         public string subItem;
         /// <summary>
+        /// An optional tag for the list item
+        /// </summary>
+        public object tag; //Added by Borte
+        /// <summary>
         /// Creates a new list item
         /// </summary>
         /// <param name="text"></param>
@@ -307,6 +311,28 @@ namespace OpenMobile
         {
             this.text = text;
             this.subItem=subitm;
+        }
+        /// <summary>
+        /// Creates a new list item
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="tag"></param>
+        public OMListItem(string text, object tag)//Added by Borte
+        {
+            this.text = text;
+            this.tag = tag;
+        }
+        /// <summary>
+        /// Creates a new list item
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="subitem"></param>
+        /// <param name="tag"></param>
+        public OMListItem(string text, string subitem, object tag)//Added by Borte
+        {
+            this.text = text;
+            this.subItem = subitem;
+            this.tag = tag;
         }
     }
     
@@ -712,6 +738,18 @@ namespace OpenMobile
         /// </summary>
         ejectDisc=35,
         /// <summary>
+        /// Hide the video rendering window
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Instance Number</para>
+        /// </summary>
+        hideVideoWindow=36,
+        /// <summary>
+        /// Show the video rendering window
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Instance Number</para>
+        /// </summary>
+        showVideoWindow=37,
+        /// <summary>
         /// Restart this application
         /// </summary>
         restartProgram=43,
@@ -774,6 +812,12 @@ namespace OpenMobile
         /// Stop speaking and purge all queued speech from the buffer
         /// </summary>
         StopSpeaking=55,
+        /// <summary>
+        /// Occurs when the rendering window is resized (useful for embedded forms and video windows)
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// </summary>
+        RenderingWindowResized=56,
         //Tuned Content
         /// <summary>
         /// Tune to the given statioin
@@ -847,6 +891,12 @@ namespace OpenMobile
         /// <para>Arg1: (Optional) Type (Plugin Specific)</para>
         /// </summary>
         settingsChanged=81,
+        /// <summary>
+        /// Used to manually change the current position in a playlist
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: The position [int]</para>
+        /// </summary>
+        setPlaylistPosition=82,
         /// <summary>
         /// A gesture has been recognized
         /// <para>---------------------------------------</para>
@@ -1287,15 +1337,15 @@ namespace OpenMobile
         /// </summary>
         GetAvailableNavPanels=15,
         /// <summary>
-        /// Returns the current GPS position [Point].  May be 0,0 if no GPS signal is available.
+        /// Returns the current GPS position [Position].  May be 0,0 if no GPS signal is available.
         /// </summary>
         GetCurrentPosition=16,
         /// <summary>
-        /// Returns the nearest Address [Address]
+        /// Returns the nearest Address [Location]
         /// </summary>
         GetNearestAddress=17,
         /// <summary>
-        /// Returns the route destination [Address].  Will return null if no route calculated
+        /// Returns the route destination [Location].  Will return null if no route calculated
         /// </summary>
         GetDestination=18
     }
@@ -1356,9 +1406,40 @@ namespace OpenMobile
         LocationChanged=4
     }
     /// <summary>
+    /// Represents a GPS Position
+    /// </summary>
+    public struct Position
+    {
+        /// <summary>
+        /// Longitude
+        /// </summary>
+        public double Longitude;
+        /// <summary>
+        /// Latitude
+        /// </summary>
+        public double Latitude;
+        /// <summary>
+        /// Altitude
+        /// </summary>
+        public double Altitude;
+        /// <summary>
+        /// Creates a new GPS Position
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
+        /// <param name="alt"></param>
+        public Position(double lat, double lon, double alt)
+        {
+            Longitude = lon;
+            Latitude = lat;
+            Altitude = alt;
+        }
+    }
+
+    /// <summary>
     /// Represents a Navigation Address
     /// </summary>
-    public class Address:ICloneable
+    public class Location:ICloneable
     {
         /// <summary>
         /// The street portion of an address
@@ -1380,11 +1461,18 @@ namespace OpenMobile
         /// The zip/postcode portion of an address
         /// </summary>
         public string Zip;
-
+        /// <summary>
+        /// Latitude
+        /// </summary>
+        public float Latitude;
+        /// <summary>
+        /// Longitude
+        /// </summary>
+        public float Longitude;
         /// <summary>
         /// Creates a new Address
         /// </summary>
-        public Address()
+        public Location()
         {
             Street="";
             City="";
@@ -1396,9 +1484,9 @@ namespace OpenMobile
         /// Creates a new Address from the given string
         /// </summary>
         /// <param name="address"></param>
-        public Address(string address)
+        public Location(string address)
         {
-            Address ret;
+            Location ret;
             if (TryParse(address, out ret) == true)
             {
                 Street = ret.Street;
@@ -1415,12 +1503,22 @@ namespace OpenMobile
             Zip = "";
         }
         /// <summary>
+        /// Creates a new Address for the given coordinates
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lng"></param>
+        public Location(float lat, float lng)
+        {
+            Longitude = lng;
+            Latitude = lat;
+        }
+        /// <summary>
         /// Creates a new Address
         /// </summary>
         /// <param name="street"></param>
         /// <param name="city"></param>
         /// <param name="state"></param>
-        public Address(string street, string city, string state)
+        public Location(string street, string city, string state)
         {
             Street = street;
             City = city;
@@ -1436,7 +1534,7 @@ namespace OpenMobile
         /// <param name="state"></param>
         /// <param name="zip"></param>
         /// <param name="country"></param>
-        public Address(string street, string city, string state,string zip,string country)
+        public Location(string street, string city, string state,string zip,string country)
         {
             Street = street;
             City = city;
@@ -1450,14 +1548,27 @@ namespace OpenMobile
         /// <param name="address"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static bool TryParse(string address, out Address result)
+        public static bool TryParse(string address, out Location result)
         {
             result = null;
             string[] args = address.Split(new char[] { ',','\n' },StringSplitOptions.RemoveEmptyEntries);
-            if (args.Length != 3)
-                return false;
-            result = new Address(args[0], args[1].Trim(), args[2].Trim());
-            return true;
+            if (args.Length == 3)
+            {
+                result = new Location(args[0], args[1].Trim(), args[2].Trim());
+                return true;
+            }
+            else if (args.Length == 2)
+            {
+                float val1;
+                float val2;
+                if (float.TryParse(args[0], out val1) == true)
+                    if (float.TryParse(args[1], out val2) == true)
+                    {
+                        result = new Location(val1, val2);
+                        return true;
+                    }
+            }
+            return false;
         }
         /// <summary>
         /// Creates a copy of this Address
@@ -1465,7 +1576,7 @@ namespace OpenMobile
         /// <returns></returns>
         public object Clone()
         {
-            return new Address(String.Copy(Street), String.Copy(City), String.Copy(State), String.Copy(Zip), String.Copy(Country));
+            return new Location(String.Copy(Street), String.Copy(City), String.Copy(State), String.Copy(Zip), String.Copy(Country));
         }
         /// <summary>
         /// Converts an Address to a string
@@ -1473,6 +1584,8 @@ namespace OpenMobile
         /// <returns></returns>
         public override string ToString()
         {
+            if ((Street == "") && (Latitude != 0))
+                return Latitude.ToString() + "," + Longitude.ToString();
             return Street+'\n'+City+", "+State;
         }
     }

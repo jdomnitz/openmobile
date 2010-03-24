@@ -34,10 +34,10 @@ namespace OpenMobile.Controls
     /// </summary>
     public abstract class OMControl : ICloneable
     {
-        private string name;
-        private modeType mode;
-        private bool visible = true;
-        private object tag;
+        protected string name;
+        protected modeType mode;
+        protected bool visible = true;
+        protected object tag;
 
         /// <summary>
         /// Forces the renderer to redraw this control
@@ -49,7 +49,7 @@ namespace OpenMobile.Controls
         /// </summary>
         protected void refreshMe(Rectangle region)
         {
-            if (UpdateThisControl != null)
+            if ((UpdateThisControl != null)&&(visible==true))
             {
                 UpdateThisControl(region);
             }
@@ -124,7 +124,8 @@ namespace OpenMobile.Controls
                 if (visible == value)
                     return;
                 visible = value;
-                refreshMe(this.toRegion());
+                if (UpdateThisControl != null)
+                    UpdateThisControl(this.toRegion());
             }
         }
 

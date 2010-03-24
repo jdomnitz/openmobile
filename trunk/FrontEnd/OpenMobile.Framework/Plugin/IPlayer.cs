@@ -54,5 +54,12 @@ namespace OpenMobile.Plugin
         /// If this plugin supports Advanced Interfaces (aka IEnhancedAVPlayer or IBufferedTunedContent)
         /// </summary>
         bool SupportsAdvancedFeatures { get; }
+        /// <summary>
+        /// Toggles the visibility of the video window
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="visible"></param>
+        /// <returns></returns>
+        bool SetVideoVisible(int instance,bool visible);
     }
 }

@@ -32,7 +32,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A listbox control
     /// </summary>
-    public class OMList:OMLabel,IClickable,IHighlightable,IKey
+    public class OMList:OMLabel,IClickable,IHighlightable,IKey, IList,IThrow
     {
         /// <summary>
         /// Occurs when the list index changes
@@ -44,18 +44,23 @@ namespace OpenMobile.Controls
         /// Occurs when the list index changes
         /// </summary>
         public event IndexChangedDelegate SelectedIndexChanged;
-        private int selectedIndex = -1;
-        private List<OMListItem> items;
+        protected int selectedIndex = -1;
+        protected List<OMListItem> items;
         System.Timers.Timer throwtmr;
-        private Color itemColor1 = Color.DarkSlateGray;
-        private Color itemColor2 = Color.Black;
-        private Color highlightColor = Color.Black;
-        private Color highlightColorOutline = Color.White;
-        private Color selectedItemColor1 = Color.Silver;
-        private Color selectedItemColor2 = Color.Gray;
-        private Color background = Color.Transparent;
-        private int listItemHeight=60;
-        private bool selectQueued = false;
+        protected Color itemColor1 = Color.DarkSlateGray;
+        protected Color itemColor2 = Color.Black;
+        protected Color highlightColor = Color.Black;
+        protected Color highlightColorOutline = Color.White;
+        protected Color selectedItemColor1 = Color.Silver;
+        protected Color selectedItemColor2 = Color.Gray;
+        protected Color background = Color.Transparent;
+        protected int listItemHeight=60;
+        protected bool selectQueued = false;
+        protected int h;
+        protected int moved;
+        protected int start;
+        protected int thrown;
+
         /// <summary>
         /// The background color of the list (Default: Transparent)
         /// </summary>
@@ -290,7 +295,7 @@ namespace OpenMobile.Controls
                 }
             }
             /// <summary>
-            /// Returns the given range of characters
+            /// Returns the given range of items
             /// </summary>
             /// <param name="index"></param>
             /// <param name="count"></param>
@@ -313,48 +318,7 @@ namespace OpenMobile.Controls
                         refreshMe(this.toRegion());
                 }
             }
-            int h;
-            int moved;
-            int start;
-            int thrown;
-            /// <summary>
-            /// For renderer use only
-            /// </summary>
-            [Browsable(false)]
-            public int Thrown
-            {
-                get
-                {
-                    return thrown;
-                }
-                set
-                {
-                    if (thrown == value)
-                        return;
-                    thrown = value;
-                    throwtmr.Enabled = (value!=0);
-                }
-            }
 
-            /// <summary>
-            /// For renderer use only
-            /// </summary>
-            [Browsable(false)]
-            public bool Ticking
-            {
-                set
-                {
-                    throwtmr.Enabled = value;
-                }
-            }
-            /// <summary>
-            /// For renderer use only
-            /// </summary>
-            /// <param name="amount"></param>
-            public void moveMe(int amount)
-            {
-                moved += amount;
-            }
             /// <summary>
             /// A listview control
             /// </summary>
@@ -389,16 +353,16 @@ namespace OpenMobile.Controls
             /// <param name="mouseY"></param>
             /// <param name="scale"></param>
             /// <param name="screen"></param>
-            public void listThrown(int mouseY,float scale,int screen)
+            protected virtual void listThrown(int mouseY,float scale,int screen)
             {
-                int value = (((int)(mouseY / scale) - Top - (moved % h)) / h) + start;
+                int value = (((int)(mouseY / scale) - top - (moved % h)) / h) + start;
+                if (value >= Count)
+                    return;
                 if (selectedIndex == value)
                 {
                     new Thread(delegate() { clickMe(screen); }).Start();
                     return;
                 }
-                if (value >= Count)
-                    return;
                 selectedIndex = value;
                 if (SelectedIndexChanged != null)
                     new Thread(delegate() { SelectedIndexChanged(this, screen); }).Start();
@@ -421,6 +385,7 @@ namespace OpenMobile.Controls
             /// <summary>
             /// Gets or Sets the list style
             /// </summary>
+            [Description("The rendering style of the list"), Category("List")]
             public eListStyle ListStyle
             {
                 get
@@ -568,7 +533,7 @@ namespace OpenMobile.Controls
                             break;
                             case eListStyle.TextList:
                             case eListStyle.ImageList:
-                                if (selectedIndex == i)
+                            if (selectedIndex == i)
                                     g.FillRectangle(new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % h)), new Size(this.Width, h)), Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), LinearGradientMode.Vertical), rect);
                                 else
                                     g.FillRectangle(new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % h)), new Size(this.Width, h)), Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), LinearGradientMode.Vertical), rect);
@@ -582,7 +547,7 @@ namespace OpenMobile.Controls
                             case eListStyle.DroidStyleText:
                                 imgSze = 6;
                                 g.SmoothingMode = SmoothingMode.AntiAlias;
-                                if (selectedIndex==i)
+                                if (selectedIndex == i)
                                     g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp*selectedItemColor1.A*0.6),selectedItemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
                                 else
                                     g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
@@ -746,27 +711,33 @@ namespace OpenMobile.Controls
 
             #region IThrow Members
 
-            void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
+            void IThrow.MouseThrowStart(int screen, Point StartLocation,PointF scaleFactors, ref bool Cancel)
             {
-                Ticking = false;
+                listThrown(StartLocation.Y, scaleFactors.Y, screen);
+                thrown = 0;
+                throwtmr.Enabled = true;
+                refreshMe(this.toRegion());
+            }
+
+            void IThrow.MouseThrowEnd(int screen, Point EndLocation)
+            {
+                if (thrown != 0)
+                    throwtmr.Enabled = true;
+            }
+
+            void IThrow.MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
+            {
+                throwtmr.Enabled = false;
                 thrown = 0;
                 if (Math.Abs(RelativeDistance.Y) > 3)
+                {
                     thrown = RelativeDistance.Y;
-                moveMe(RelativeDistance.Y);
-                refreshMe(this.toRegion());
-            }
-
-            void MouseThrowStart(int screen, Point StartLocation, ref bool Cancel)
-            {
-                listThrown(StartLocation.Y, 1.0f, screen);
-                thrown = 0;
-                Ticking = true;
-                refreshMe(this.toRegion());
-            }
-
-            void MouseThrowEnd(int screen, Point EndLocation)
-            {
-                //
+                    throwtmr.Enabled = true;
+                }
+                moved +=RelativeDistance.Y;
+                if (Math.Abs(TotalDistance.Y)>3)
+                    selectedIndex = -1;
+                refreshMe(toRegion());
             }
 
             #endregion

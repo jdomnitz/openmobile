@@ -265,10 +265,15 @@ namespace OMSettings
             cursor.Text = "Hide mouse cursor";
             cursor.Font = new Font("Microsoft Sans Serif", 24F);
             cursor.OutlineColor = Color.Red;
+            OMCheckbox minimal = new OMCheckbox(220, 250, 600, 50);
+            minimal.Text = "Enable Low Performance Graphics";
+            minimal.Font = cursor.Font;
+            minimal.OutlineColor = Color.Red;
             general.addControl(Save3);
             general.addControl(Cancel);
             general.addControl(Heading2);
             general.addControl(cursor);
+            general.addControl(minimal);
             manager.loadPanel(general);
             #endregion
             #region data
@@ -343,6 +348,17 @@ namespace OMSettings
                     settings.setSetting("UI.HideCursor", "True");
                 else
                     settings.setSetting("UI.HideCursor", "False");
+                chk = ((OMCheckbox)manager[screen, "general"][4]);
+                if (chk.Checked == true)
+                {
+                    theHost.GraphicsLevel = eGraphicsLevel.Minimal;
+                    settings.setSetting("UI.MinGraphics", "True");
+                }
+                else
+                {
+                    theHost.GraphicsLevel = eGraphicsLevel.Standard;
+                    settings.setSetting("UI.MinGraphics", "False");
+                }
             }
             theHost.execute(eFunction.TransitionFromAny, screen.ToString());
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
@@ -433,7 +449,10 @@ namespace OMSettings
             {
                 case 0:
                     using (PluginSettings s = new PluginSettings())
+                    {
                         ((OMCheckbox)manager[screen, "general"][3]).Checked = (s.getSetting("UI.HideCursor") == "True");
+                        ((OMCheckbox)manager[screen, "general"][4]).Checked = (s.getSetting("UI.MinGraphics") == "True");
+                    }
                     theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
                     theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "general");
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");

@@ -46,8 +46,8 @@ namespace OpenMobile.Controls
     {
         System.Timers.Timer t;
         private int currentLetter;
-        bool singleAnimation;
-        private Font effectFont;
+        protected bool singleAnimation;
+        protected Font effectFont;
         /// <summary>
         /// A label used for rendering various text effects
         /// </summary>
@@ -201,7 +201,6 @@ namespace OpenMobile.Controls
                 this.refreshMe(this.toRegion());
             }
         }
-        private Color outlineColor=Color.Black;
         /// <summary>
         /// Effect Specific Second Color
         /// </summary>

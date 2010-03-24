@@ -28,19 +28,19 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A slider bar control
     /// </summary>
-    public sealed class OMSlider:OMControl,IThrow
+    public class OMSlider:OMControl,IThrow
     {
-        private int width;
-        private int height;
-        private int top;
-        private int left;
-        private int sliderHeight=25;
-        private int sliderWidth;
-        private int sliderPosition=0;
-        private imageItem sliderBar;
-        private imageItem slider;
-        private int minimum=0;
-        private int maximum=100;
+        protected int width;
+        protected int height;
+        protected int top;
+        protected int left;
+        protected int sliderHeight=25;
+        protected int sliderWidth;
+        protected int sliderPosition = 0;
+        protected imageItem sliderBar;
+        protected imageItem slider;
+        protected int minimum = 0;
+        protected int maximum = 100;
         /// <summary>
         /// Create a new OMSlider
         /// </summary>
@@ -368,7 +368,8 @@ namespace OpenMobile.Controls
         /// <param name="screen"></param>
         /// <param name="StartLocation"></param>
         /// <param name="Cancel"></param>
-        public void MouseThrowStart(int screen, Point StartLocation,ref bool Cancel)
+        /// <param name="sf"></param>
+        public void MouseThrowStart(int screen, Point StartLocation,PointF sf, ref bool Cancel)
         {
             
         }

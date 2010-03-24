@@ -11,7 +11,7 @@ namespace OpenMobile.Controls
     /// <param name="sender"></param>
     /// <param name="screen"></param>
     /// <param name="mode"></param>
-    public delegate void ModeChange(object sender, int screen, modeType mode);
+    public delegate void ModeChange(OMButton sender, int screen, modeType mode);
     /// <summary>
     /// A clickable button control
     /// </summary>
@@ -40,7 +40,11 @@ namespace OpenMobile.Controls
         private int transparency = 100;
         private Angle orientation;
         private eButtonTransition transition = eButtonTransition.BoxOut;
-        private modeType mode;
+        
+        /// <summary>
+        /// Show the buttons area as an yellow overlay(debug usage only) - (Added by Borte)
+        /// </summary>
+        public bool ShowArea = false;
 
         /// <summary>
         /// The rendering mode of the control
@@ -346,6 +350,11 @@ namespace OpenMobile.Controls
                 {
                     g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, ia);
                 }
+                
+                // Debug function added by Borte
+                if (ShowArea)
+                    g.FillRectangle(new SolidBrush(Color.FromArgb(75, Color.Yellow)), this.toRegion());
+
                 Renderer.renderText(g, this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, tmp, 1, this.Color, this.OutlineColor);
                 cm = null;
             }
