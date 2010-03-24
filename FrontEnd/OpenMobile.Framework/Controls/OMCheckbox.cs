@@ -8,8 +8,8 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMCheckbox : OMLabel, IClickable, IHighlightable
     {
-        private bool isChecked;
-        private Color highlightColor=Color.Blue;
+        protected bool isChecked;
+        protected Color highlightColor=Color.Blue;
 
         /// <summary>
         /// The color the text should turn when the checkbox is highlighted

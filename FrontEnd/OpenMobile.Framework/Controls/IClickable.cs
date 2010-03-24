@@ -25,7 +25,7 @@ namespace OpenMobile.Controls
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="screen"></param>
-    public delegate void userInteraction(object sender,int screen);
+    public delegate void userInteraction(OMControl sender,int screen);
     /// <summary>
     /// Controls that support being clicked
     /// </summary>

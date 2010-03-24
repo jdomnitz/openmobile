@@ -30,17 +30,17 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMProgress:OMControl
     {
-        private int height;
-        private int width;
-        private int top;
-        private int left;
-        private int value=0;
-        private int minimum = 0;
-        private int maximum = 100;
-        private bool vertical;
-        private Color firstColor=Color.Red;
-        private Color secondColor=Color.DarkRed;
-        private Color backColor = Color.FromArgb(180, Color.White);
+        protected int height;
+        protected int width;
+        protected int top;
+        protected int left;
+        protected int value=0;
+        protected int minimum = 0;
+        protected int maximum = 100;
+        protected bool vertical;
+        protected Color firstColor=Color.Red;
+        protected Color secondColor=Color.DarkRed;
+        protected Color backColor = Color.FromArgb(180, Color.White);
 
         /// <summary>
         /// The background color of the progress bar

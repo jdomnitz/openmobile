@@ -201,8 +201,7 @@ namespace OpenMobile
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
                         {
-                            //ISpeech availablePlugin = (ISpeech)Activator.CreateInstance(pluginType);
-                            ISpeech availablePlugin = (ISpeech)Core.RenderingWindows[0].Invoke(RenderingWindows[0].invokeOnMain,new object[]{(object)pluginType});
+                            ISpeech availablePlugin = (ISpeech)Activator.CreateInstance(pluginType);
                             pluginCollection.Add(availablePlugin);
                             return;
                         }
@@ -272,7 +271,7 @@ namespace OpenMobile
                     settings.createDB();
                 if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
                 {
-                    RenderingWindows[0].Invoke(RenderingWindows[0].ShowMessage, new object[] { (object)"A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run." });
+                    System.Windows.Forms.MessageBox.Show("A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.");
                     Application.Exit();
                     return;
                 }
@@ -296,6 +295,7 @@ namespace OpenMobile
                     for (int i = 0; i < RenderingWindows.Count; i++)
                         RenderingWindows[i].hideCursor();
             pluginCollection.TrimExcess();
+            Application.Run();
         }
 
         [STAThread]

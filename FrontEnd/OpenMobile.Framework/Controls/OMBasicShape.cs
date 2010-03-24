@@ -50,7 +50,19 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMBasicShape:OMControl
     {
-        private int left, top, width, height;
+        // Start of code added by Borte
+        protected float cornerRadius = 10f;
+        /// <summary>
+        /// Sets the corner radius of a rounded rectangle (Added by Borte)
+        /// </summary>
+        public float CornerRadius
+        {
+            get { return cornerRadius; }
+            set { cornerRadius = value; }
+        }
+        // End of code added by Borte
+
+        protected int left, top, width, height;
         /// <summary>
         /// Creates a new Basic Shape
         /// </summary>
@@ -168,34 +180,50 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(System.Drawing.Graphics g, renderingParams e)
         {
+            // Start of code added by Borte
+            // Basic shape didn't respect the transition values while rendering
+            float tmp = 1;
+            if (this.Mode == modeType.transitioningIn)
+            {
+                tmp = e.globalTransitionIn;
+            }
+            if (this.Mode == modeType.transitioningOut)
+            {
+                tmp = e.globalTransitionOut;
+            }
+
+            SolidBrush Fill = new SolidBrush(Color.FromArgb((int)(tmp * fillColor.A), fillColor));
+            Pen BorderPen = new Pen(Color.FromArgb((int)(tmp * borderColor.A), borderColor), borderSize);
+            // End of code added by Borte
+
             switch (shape)
             {
                 case shapes.Rectangle:
-                    g.FillRectangle(new SolidBrush(fillColor), toRegion());
+                    g.FillRectangle(Fill, toRegion());
                     if (borderSize > 0)
-                        g.DrawRectangle(new Pen(borderColor, borderSize), toRegion());
+                        g.DrawRectangle(BorderPen, toRegion());
                     break;
                 case shapes.Triangle:
-                    g.FillPolygon(new SolidBrush(fillColor),new Point[]{new Point(left,top+height),new Point(left+width,top+height),new Point(left+(width/2),top)});
+                    g.FillPolygon(Fill, new Point[] { new Point(left, top + height), new Point(left + width, top + height), new Point(left + (width / 2), top) });
                     if (borderSize > 0)
-                        g.DrawPolygon(new Pen(borderColor, borderSize), new Point[] { new Point(left, top + height), new Point(left + width, top + height), new Point(left + (width / 2), top) });
+                        g.DrawPolygon(BorderPen, new Point[] { new Point(left, top + height), new Point(left + width, top + height), new Point(left + (width / 2), top) });
                     break;
                 case shapes.Oval:
-                    g.FillEllipse(new SolidBrush(fillColor), toRegion());
+                    g.FillEllipse(Fill, toRegion());
                     if (borderSize > 0)
-                        g.DrawEllipse(new Pen(borderColor, borderSize), toRegion());
+                        g.DrawEllipse(BorderPen, toRegion());
                     break;
                 case shapes.RoundedRectangle:
-                    Renderer.FillRoundRectangle(g, new SolidBrush(fillColor), new RectangleF(this.left, this.top, this.width, this.height), 10F);
+                    Renderer.FillRoundRectangle(g, Fill, new RectangleF(this.left, this.top, this.width, this.height), cornerRadius);
                     if (borderSize > 0)
-                        Renderer.DrawRoundRectangle(g, new Pen(borderColor, borderSize), new RectangleF(this.left, this.top, this.width, this.height), 10F);
+                        Renderer.DrawRoundRectangle(g, BorderPen, new RectangleF(this.left, this.top, this.width, this.height), cornerRadius);
                     break;
             }
         }
-        private shapes shape;
-        private Color fillColor;
-        private float borderSize=0;
-        private Color borderColor;
+        protected shapes shape;
+        protected Color fillColor;
+        protected float borderSize = 0;
+        protected Color borderColor;
         /// <summary>
         /// The shape to draw
         /// </summary>

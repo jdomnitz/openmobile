@@ -54,7 +54,7 @@ namespace OpenMobile.Framework
             {
                 lock (this)
                 {
-                    if ((index < 0) || (index >= screens))
+                    if ((index < 0) || (index >= screens)||(panels.Count==0))
                         throw new ArgumentOutOfRangeException();
                     if (panels[0] == null)
                     {
@@ -110,7 +110,8 @@ namespace OpenMobile.Framework
         /// </summary>
         public void Dispose()
         {
-            panels = null;
+            if (panels != null)
+                panels.Clear();
             GC.SuppressFinalize(this);
         }
 

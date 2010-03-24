@@ -67,6 +67,7 @@
     </Compile>
     <Compile Include="Controls\IHighlightable.cs" />
     <Compile Include="Controls\IKey.cs" />
+    <Compile Include="Controls\IList.cs" />
     <Compile Include="Controls\IMouse.cs" />
     <Compile Include="Controls\IThrow.cs" />
     <Compile Include="Controls\OMAnimatedLabel.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="helperFunctions\Encryption.cs" />
     <Compile Include="helperFunctions\General.cs" />
     <Compile Include="Math\Evaluator.cs" />
+    <Compile Include="Media\MediaLoader.cs" />
     <Compile Include="Net\Connections.cs" />
     <Compile Include="Net\Network.cs" />
     <Compile Include="Math\SunTimes.cs" />

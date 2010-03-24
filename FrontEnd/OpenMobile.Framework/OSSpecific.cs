@@ -34,8 +34,13 @@ namespace OpenMobile.Framework
     /// </summary>
     public static class OSSpecific
     {
+        struct embedInfo
+        {
+            public Rectangle position;
+            public IntPtr handle;
+        }
         static IPluginHost theHost;
-        static IntPtr[] lastHandle;
+        static embedInfo[] lastHandle;
         private static OperatingSystem os = System.Environment.OSVersion;
         /// <summary>
         /// Embed an application in the UI
@@ -47,28 +52,53 @@ namespace OpenMobile.Framework
         /// <returns>Returns true if the application was found and embedded.</returns>
         public static bool embedApplication(string name, int screen, IPluginHost host, Rectangle position)
         {
-            theHost = host;
+            if (theHost == null)
+            {
+                theHost = host;
+                theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
+            }
             if (os.Platform==PlatformID.Win32NT)
             {
                 try
                 {
                     Process[] p = Process.GetProcessesByName(name);
                     if (lastHandle == null)
-                        lastHandle = new IntPtr[theHost.ScreenCount];
-                    lastHandle[screen] = p[0].MainWindowHandle;
+                        lastHandle = new embedInfo[theHost.ScreenCount];
+                    lastHandle[screen].handle = p[0].MainWindowHandle;
+                    lastHandle[screen].position = position;
                     object o;
                     theHost.getData(eGetData.GetScaleFactors, "", screen.ToString(), out o);
                     if (o == null)
                         return false;
                     PointF scale= (PointF)o;
-                    windowsEmbedder.SetWindowPos(p[0].MainWindowHandle, (IntPtr)0, (int)(position.X*scale.X), (int)(position.Y*scale.Y), (int)(position.Width*scale.X), (int)(position.Height*scale.Y), 0x20);
-                    windowsEmbedder.SetParent(p[0].MainWindowHandle, theHost.UIHandle(screen));
-                    windowsEmbedder.SetFocus(p[0].MainWindowHandle);
+                    if (windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(position.X * scale.X), (int)(position.Y * scale.Y), (int)(position.Width * scale.X), (int)(position.Height * scale.Y), 0x20) == false)
+                        return false;
+                    if (windowsEmbedder.SetParent(lastHandle[screen].handle, theHost.UIHandle(screen)) == IntPtr.Zero)
+                        return false;
+                    windowsEmbedder.SetFocus(lastHandle[screen].handle);
                     return true;
                 }
                 catch (Exception) { return false; }
             }
             return false;
+        }
+
+        static void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.RenderingWindowResized)
+            {
+                if (os.Platform == PlatformID.Win32NT)
+                {
+                    int screen = int.Parse(arg1);
+                    object o;
+                    theHost.getData(eGetData.GetScaleFactors, "", arg1, out o);
+                    if (o == null)
+                        return;
+                    PointF scale = (PointF)o;
+                    if (lastHandle[screen].handle!=IntPtr.Zero)
+                        windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(lastHandle[screen].position.X * scale.X), (int)(lastHandle[screen].position.Y * scale.Y), (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y), 0x20);
+                }
+            }
         }
         /// <summary>
         /// Un-embed an application from the UI
@@ -82,9 +112,10 @@ namespace OpenMobile.Framework
             {
                 try
                 {
-                      windowsEmbedder.SetParent(lastHandle[screen], IntPtr.Zero);
-                      windowsEmbedder.SetWindowPos(lastHandle[screen], (IntPtr)0, 10, 10, 400, 300, 0x20);
-                      return true;
+                    windowsEmbedder.SetParent(lastHandle[screen].handle, IntPtr.Zero);
+                    windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, 10, 10, 400, 300, 0x20);
+                    lastHandle[screen].handle = IntPtr.Zero;  
+                    return true;
                 }
                 catch (Exception) { return false; }
             }

@@ -36,15 +36,15 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// The current GPS position
         /// </summary>
-        Point Position { get; }
+        Position Position { get; }
         /// <summary>
         /// Returns the closest address
         /// </summary>
-        Address Location { get; }
+        Location Location { get; }
         /// <summary>
         /// Gets/Sets the destination
         /// </summary>
-        Address Destination { get; set; }
+        Location Destination { get; set; }
         /// <summary>
         /// Detours from the current route by the given distance
         /// </summary>
@@ -66,8 +66,12 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="destination"></param>
         /// <returns></returns>
-        bool navigateTo(Address destination);
-
+        bool navigateTo(Location destination);
+        /// <summary>
+        /// Finds a nearby Point Of Interest with the given name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         bool findPOI(string name);
         /// <summary>
         /// Gets the custom OMControl that draws the map

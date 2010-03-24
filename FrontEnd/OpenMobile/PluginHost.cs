@@ -49,6 +49,9 @@ namespace OpenMobile
         private List<mediaInfo>[] queued;
         private int[] currentPosition;
         public HalInterface hal;
+        private bool vehicleInMotion = false;
+        private eGraphicsLevel level;
+        private Rectangle videoPosition;
 
         historyItem[,] history = new historyItem[screenCount, 5];
         #endregion
@@ -219,7 +222,37 @@ namespace OpenMobile
                 renderfirst = value;
             }
         }
-
+        public eGraphicsLevel GraphicsLevel
+        {
+            get
+            {
+                return level;
+            }
+            set
+            {
+                level = value;
+            }
+        }
+        public bool VehicleInMotion
+        {
+            get
+            {
+                return vehicleInMotion;
+            }
+        }
+        public Rectangle VideoPosition
+        {
+            get
+            {
+                if (videoPosition == null)
+                    videoPosition = new Rectangle();
+                return videoPosition;
+            }
+            set
+            {
+                videoPosition = value;
+            }
+        }
         public PluginHost()
         {
             queued = new List<mediaInfo>[8];
@@ -484,8 +517,16 @@ namespace OpenMobile
                     {
                         lock (Core.RenderingWindows[ex])
                         {
-                            Core.RenderingWindows[ex].executeTransition(eGlobalTransition.Crossfade);
-                            raiseSystemEvent(eFunction.ExecuteTransition, "Crossfade", "", "");
+                            if (level == eGraphicsLevel.Standard)
+                            {
+                                Core.RenderingWindows[ex].executeTransition(eGlobalTransition.Crossfade);
+                                raiseSystemEvent(eFunction.ExecuteTransition, arg,"Crossfade", "");
+                            }
+                            else
+                            {
+                                Core.RenderingWindows[ex].executeTransition(eGlobalTransition.None);
+                                raiseSystemEvent(eFunction.ExecuteTransition,arg, "None", "");
+                            }
                         }
                         return true;
                     }
@@ -610,6 +651,8 @@ namespace OpenMobile
                 case eFunction.unloadAVPlayer:
                     if (int.TryParse(arg,out ret)==true)
                     {
+                        if (currentMediaPlayer[ret] == null)
+                            return false;
                         try
                         {
                             if (currentMediaPlayer[ret].getPlayerStatus(ret) == ePlayerStatus.Playing)
@@ -637,6 +680,18 @@ namespace OpenMobile
                     if (currentMediaPlayer[ret] == null)
                         return false;
                     return currentMediaPlayer[ret].play(ret);
+                case eFunction.showVideoWindow:
+                    if (int.TryParse(arg, out ret) == false)
+                        return false;
+                    if (currentMediaPlayer[ret] == null)
+                        return false;
+                    return currentMediaPlayer[ret].SetVideoVisible(ret,true);
+                case eFunction.hideVideoWindow:
+                    if (int.TryParse(arg, out ret) == false)
+                        return false;
+                    if (currentMediaPlayer[ret] == null)
+                        return false;
+                    return currentMediaPlayer[ret].SetVideoVisible(ret, false);
                 case eFunction.Pause:
                     if (int.TryParse(arg, out ret) == false)
                         return false;
@@ -654,24 +709,28 @@ namespace OpenMobile
                     {
                         if (queued[ret].Count == 0)
                             return false;
-                        if ((random != null) && (random[ret] == true))
-                        {   int result;
-                            do
-                            {
-                                result = Framework.Math.Calculation.RandomNumber(0, queued[ret].Count);
-                            }
-                            while (currentPosition[ret] == result);
-                            currentPosition[ret] = result;
-                        }
-                        else
-                            currentPosition[ret]++;
-                        if (currentPosition[ret] == queued[ret].Count)
-                            currentPosition[ret] = 0;
-                        if (getPlayingMedia(ret).Location == queued[ret][currentPosition[ret]].Location)
+                        lock (currentPosition)
                         {
-                            currentPosition[ret]++;
+                            if ((random != null) && (random[ret] == true))
+                            {
+                                int result;
+                                do
+                                {
+                                    result = Framework.Math.Calculation.RandomNumber(0, queued[ret].Count);
+                                }
+                                while (currentPosition[ret] == result);
+                                currentPosition[ret] = result;
+                            }
+                            else
+                                currentPosition[ret]++;
                             if (currentPosition[ret] == queued[ret].Count)
                                 currentPosition[ret] = 0;
+                            if (getPlayingMedia(ret).Location == queued[ret][currentPosition[ret]].Location)
+                            {
+                                currentPosition[ret]++;
+                                if (currentPosition[ret] == queued[ret].Count)
+                                    currentPosition[ret] = 0;
+                            }
                         }
                         return execute(eFunction.Play, arg, queued[ret][currentPosition[ret]].Location);
                     }
@@ -681,9 +740,12 @@ namespace OpenMobile
                     {
                         if (queued[ret].Count == 0)
                             return false;
-                        currentPosition[ret]--;
-                        if (currentPosition[ret] == -1)
-                            currentPosition[ret] = queued[ret].Count - 1;
+                        lock (currentPosition)
+                        {
+                            currentPosition[ret]--;
+                            if (currentPosition[ret] <= -1)
+                                currentPosition[ret] = queued[ret].Count - 1;
+                        }
                         return execute(eFunction.Play, arg, queued[ret][currentPosition[ret]].Location);
                     }
                     return false;
@@ -809,8 +871,8 @@ namespace OpenMobile
                     IBasePlugin y = Core.pluginCollection.Find(a => typeof(INavigation).IsInstanceOfType(a));
                     if (y!=null)
                     {
-                        Address adr;
-                        if (Address.TryParse(arg, out adr) == true)
+                        Location adr;
+                        if (Location.TryParse(arg, out adr) == true)
                             ((INavigation)y).navigateTo(adr);
                     }
                     raiseSystemEvent(eFunction.navigateToAddress, arg, "", "");
@@ -934,7 +996,10 @@ namespace OpenMobile
                     eGlobalTransition effect;
                     try
                     {
-                        effect = (eGlobalTransition)Enum.Parse(typeof(eGlobalTransition), arg2);
+                        if (level == eGraphicsLevel.Minimal)
+                            effect = eGlobalTransition.None;
+                        else
+                            effect = (eGlobalTransition)Enum.Parse(typeof(eGlobalTransition), arg2);
                     }
                     catch (Exception)
                     {
@@ -947,7 +1012,7 @@ namespace OpenMobile
                         {
                             Core.RenderingWindows[ex].executeTransition(effect);
                         }
-                        raiseSystemEvent(eFunction.ExecuteTransition, arg1, arg2, "");
+                        raiseSystemEvent(eFunction.ExecuteTransition, arg1, effect.ToString(), "");
                         return true;
                     }
                     return false;
@@ -1009,14 +1074,31 @@ namespace OpenMobile
                         }
                     }
                     return false;
+                case eFunction.setPlaylistPosition:
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        int ret2;
+                        if (int.TryParse(arg2, out ret2) == true)
+                        {
+                            if (queued[ret].Count > ret2)
+                            {
+                                currentPosition[ret] = ret2;
+                                return true;
+                            }
+                        }
+                    } 
+                    return false;
                 case eFunction.Play:
                     if (int.TryParse(arg1, out ret) == true)
                     {
-                        if (currentMediaPlayer[ret] == null)
-                            return false;
                         if (arg2 == null)
                             return false;
-                        return currentMediaPlayer[ret].play(ret, arg2, classifySource(arg2));
+                        if (currentMediaPlayer[ret] == null)
+                            return findAlternatePlayer(ret, arg2, classifySource(arg2));
+                        if (currentMediaPlayer[ret].play(ret, arg2, classifySource(arg2)) == false)
+                            return findAlternatePlayer(ret, arg2, classifySource(arg2));
+                        else
+                            return true;
                     }
                     return false;
                 case eFunction.setPosition:
@@ -1110,6 +1192,27 @@ namespace OpenMobile
                     }
                     return false;
             }
+            return false;
+        }
+
+        private bool findAlternatePlayer(int ret, string arg2, eMediaType type)
+        {
+            IAVPlayer tmp = currentMediaPlayer[ret];
+            List<IBasePlugin> plugins=Core.pluginCollection.FindAll(p => typeof(IAVPlayer).IsInstanceOfType(p));
+            for (int i = 0; i < plugins.Count; i++)
+            {
+                if (plugins[i] != tmp)
+                {
+                    execute(eFunction.unloadAVPlayer, ret.ToString());
+                    execute(eFunction.loadAVPlayer, ret.ToString(), plugins[i].pluginName);
+                    if (currentMediaPlayer[ret].play(ret, arg2,type) == true)
+                        return true;
+                }
+            }
+            if (tmp==null)
+                execute(eFunction.unloadAVPlayer,ret.ToString());
+            else
+                execute(eFunction.loadAVPlayer, ret.ToString(), tmp.pluginName);
             return false;
         }
         public bool execute(eFunction function, string arg1, string arg2, string arg3)
@@ -1294,7 +1397,7 @@ namespace OpenMobile
             }
             try
             {
-                using (IBasePlugin plugin = Core.pluginCollection.Find(i => i.pluginName == to))
+                IBasePlugin plugin = Core.pluginCollection.Find(i => i.pluginName == to);
                 {
                     if (plugin == null)
                         return false;
@@ -1310,7 +1413,7 @@ namespace OpenMobile
         {
             try
             {
-                using (IBasePlugin plugin = Core.pluginCollection.Find(i => i.pluginName == to))
+                IBasePlugin plugin = Core.pluginCollection.Find(i => i.pluginName == to);
                 {
                     if (plugin == null)
                         return false;

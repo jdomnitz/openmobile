@@ -63,7 +63,18 @@ namespace OpenMobile
 
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            if (message.StartsWith("ShowMediaControls"))
+            {
+                int screen;
+                if (int.TryParse(message.Substring(17),out screen)==true)
+                    if (manager[screen][2].Top == 533)
+                    {
+                        timerForward = false;
+                        moveMediaBar(screen);
+                    }
+                return true;
+            }
+            return false;
         }
         public bool incomingMessage<T>(string message,string source, ref T data)
         {
@@ -248,10 +259,11 @@ namespace OpenMobile
             manager.loadPanel(p);
             theHost.OnMediaEvent += theHost_OnMediaEvent;
             theHost.OnSystemEvent += theHost_OnSystemEvent;
+            theHost.VideoPosition = new Rectangle(0, 100, 1000, 368);
             return eLoadStatus.LoadSuccessful;
         }
 
-        void speech_OnClick(object sender, int screen)
+        void speech_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.listenForSpeech);
             showSpeech(screen);
@@ -274,16 +286,16 @@ namespace OpenMobile
         void statusReset_Elapsed(object sender, ElapsedEventArgs e)
         {
             for(int i=0;i<theHost.ScreenCount;i++)
-                ((OMLabel)manager[i][6]).Text="";
+                ((OMLabel)manager[i][6]).Text=theHost.getPlayingMedia(theHost.instanceForScreen(i)).Name;
             statusReset.Enabled = false;
         }
 
-        void skipBackwardButton_OnClick(object sender, int screen)
+        void skipBackwardButton_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.previousMedia,theHost.instanceForScreen(screen).ToString());
         }
 
-        void skipForwardButton_OnClick(object sender, int screen)
+        void skipForwardButton_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.nextMedia,theHost.instanceForScreen(screen).ToString());
         }
@@ -339,7 +351,7 @@ namespace OpenMobile
                 hideSpeech(0); //ToDo - Instance specific
             if (function == eFunction.gesture)
             {
-                if ((arg3!="OSK")&&(arg3!="ControlDemo"))
+                if ((arg3!="OSK")&&(arg3!="OMNavigation"))
                     switch (arg2)
                     {
                         case "M":
@@ -370,7 +382,7 @@ namespace OpenMobile
             }
         }
 
-        void HomeButton_OnClick(object sender, int screen)
+        void HomeButton_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromAny,screen.ToString());
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"MainMenu");
@@ -382,7 +394,7 @@ namespace OpenMobile
             theHost.execute(eFunction.setPosition, theHost.instanceForScreen(screen).ToString(),sender.Value.ToString());
         }
 
-        void rewindButton_OnClick(object sender, int screen)
+        void rewindButton_OnClick(OMControl sender, int screen)
         {
             object o;
             theHost.getData(eGetData.GetPlaybackSpeed, "", theHost.instanceForScreen(screen).ToString(), out o);
@@ -431,7 +443,7 @@ namespace OpenMobile
             return (seconds / 60).ToString() + ":" + (seconds % 60).ToString("00");
         }
 
-        void fastForwardButton_OnClick(object sender, int screen)
+        void fastForwardButton_OnClick(OMControl sender, int screen)
         {
             object o;
             theHost.getData(eGetData.GetPlaybackSpeed, "", theHost.instanceForScreen(screen).ToString(), out o);
@@ -448,7 +460,7 @@ namespace OpenMobile
                 theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(), (2 * speed).ToString());
         }
 
-        void stopButton_OnClick(object sender, int screen)
+        void stopButton_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.Stop, theHost.instanceForScreen(screen).ToString());
         }
@@ -501,11 +513,12 @@ namespace OpenMobile
                         p[17].Top += 20;
                 }
                 timerIteration++;
-                Thread.Sleep(50);
+                if (theHost.GraphicsLevel==eGraphicsLevel.Standard)
+                    Thread.Sleep(50);
             }
         }
 
-        void playButton_OnClick(object sender, int screen)
+        void playButton_OnClick(OMControl sender, int screen)
         {
             object o=new object();
             theHost.getData(eGetData.GetMediaStatus, "", theHost.instanceForScreen(screen).ToString(), out o);
@@ -548,7 +561,7 @@ namespace OpenMobile
             }
         }
 
-        void mediaButton_OnClick(object sender, int screen)
+        void mediaButton_OnClick(OMControl sender, int screen)
         {
             if (manager[screen][2].Top == 397)
             {
@@ -562,7 +575,7 @@ namespace OpenMobile
             }
         }
 
-        void Back_OnClick(object sender, int screen)
+        void Back_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.goBack,screen.ToString());
         }

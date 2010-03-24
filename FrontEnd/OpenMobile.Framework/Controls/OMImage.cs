@@ -262,6 +262,9 @@ namespace OpenMobile.Controls
                     case DrawModes.Crop:
                         g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, GraphicsUnit.Pixel, at);
                         break;
+                    case DrawModes.CropLeft:
+                        g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, GraphicsUnit.Pixel, at);
+                        break;
                     case DrawModes.Scale:
                         g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, at);
                         break;
@@ -280,7 +283,11 @@ namespace OpenMobile.Controls
             /// <summary>
             /// Cut image to match control size (right and bottom side of image will be cut)
             /// </summary>
-            Crop
+            Crop,
+            /// <summary>
+            /// Cut image to match control size (Left and bottom side of image will be cut)
+            /// </summary>
+            CropLeft
         }
         private DrawModes drawmode = DrawModes.Scale;
         /// <summary>

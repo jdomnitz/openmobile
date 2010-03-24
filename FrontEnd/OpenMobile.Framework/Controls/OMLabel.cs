@@ -30,16 +30,17 @@ namespace OpenMobile.Controls
     [DefaultPropertyAttribute("Name")]
     public class OMLabel:OMControl
     {
-        private int height=100;
-        private int width=130;
-        private int top;
-        private int left;
-        private string text;
-        private textFormat textFormat=textFormat.Normal;
-        private Alignment textAlignment=Alignment.CenterCenter;
-        private Color color=Color.White;
-        private Font font = new Font(FontFamily.GenericSansSerif, 18F);
-        private Color outlineColor = Color.Black;
+        // Comment by Borte: access modefier changed to protected to allow more access when this control is inherited
+        protected int height=100;
+        protected int width = 130;
+        protected int top;
+        protected int left;
+        protected string text="";
+        protected textFormat textFormat = textFormat.Normal;
+        protected Alignment textAlignment = Alignment.CenterCenter;
+        protected Color color = Color.White;
+        protected Font font = new Font(FontFamily.GenericSansSerif, 18F);
+        protected Color outlineColor = Color.Black;
 
         /// <summary>
         /// Sets the color of the text
