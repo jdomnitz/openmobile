@@ -224,14 +224,14 @@ public sealed class MainMenu : IHighLevel
             return eLoadStatus.LoadSuccessful;
         }
 
-        void Shutdown_OnLongClick(object sender, int screen)
+        void Shutdown_OnLongClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.restart);
         }
 
-        void MainMenu_OnClick(object sender, int screen)
+        void MainMenu_OnClick(OMControl sender, int screen)
         {
-            switch(((OMButton)sender).Tag.ToString())
+            switch(sender.Tag.ToString())
             {
                 case "Exit":
                     theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"MainMenu", "Quit");
@@ -248,30 +248,30 @@ public sealed class MainMenu : IHighLevel
                     break;
             }
         }
-        void Quit_OnClick(object sender, int screen)
+        void Quit_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.closeProgram);
         }
 
-        void Sleep_OnClick(object sender, int screen)
+        void Sleep_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
             theHost.execute(eFunction.standby);
         }
 
-        void Hibernate_OnClick(object sender, int screen)
+        void Hibernate_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
             theHost.execute(eFunction.hibernate);
         }
 
-        void Shutdown_OnClick(object sender, int screen)
+        void Shutdown_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.shutdown);
         }
-        void okButton_OnClick(object sender, int screen)
+        void okButton_OnClick(OMControl sender, int screen)
         {
             OMList theList=(OMList)setButton[0];
             if (theList.SelectedIndex >= 0) //FS#3
@@ -281,7 +281,7 @@ public sealed class MainMenu : IHighLevel
                     if (theList[theList.SelectedIndex].text == "Not Set")
                         theList[theList.SelectedIndex].text = "";
                     setting.setSetting(currentlySetting + ".Plugin", theList[theList.SelectedIndex].text);
-                    ((OMButton)screens[screen][currentlySetting]).Tag = theList[theList.SelectedIndex].text;
+                    screens[screen][currentlySetting].Tag = theList[theList.SelectedIndex].text;
                     setting.setSetting(currentlySetting + ".Display", getDisplayName(theList[theList.SelectedIndex].text));
                     ((OMButton)screens[screen][currentlySetting]).Text = getDisplayName(theList[theList.SelectedIndex].text);
                 }
@@ -321,7 +321,7 @@ public sealed class MainMenu : IHighLevel
             settings.setSetting("MainMenu.MainMenu23.Display", "Settings");
         }
 
-        void cancel_OnClick(object sender, int screen)
+        void cancel_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromSettings,screen.ToString(),"MainMenu");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
@@ -329,9 +329,9 @@ public sealed class MainMenu : IHighLevel
         }
 
         string currentlySetting;
-        void OnLongClick(object sender, int screen)
+        void OnLongClick(OMControl sender, int screen)
         {
-            currentlySetting = ((OMButton)sender).Name;
+            currentlySetting = sender.Name;
             theHost.execute(eFunction.TransitionFromPanel,screen.ToString(), "MainMenu");
             theHost.execute(eFunction.TransitionToSettings,screen.ToString(), "MainMenu");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"None");

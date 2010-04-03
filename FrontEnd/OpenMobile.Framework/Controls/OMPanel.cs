@@ -304,7 +304,21 @@ namespace OpenMobile.Controls
                 tag = value;
             }
         }
-
+        private bool forgotten;
+        /// <summary>
+        /// If set to true, this panel is not stored in the history (and will be skipped by the GoBack function)
+        /// </summary>
+        public bool Forgotten
+        {
+            get
+            {
+                return forgotten;
+            }
+            set
+            {
+                forgotten = value;
+            }
+        }
         private string name;
         /// <summary>
         /// The name for this panel

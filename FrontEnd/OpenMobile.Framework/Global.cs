@@ -268,6 +268,19 @@ namespace OpenMobile
     /// </summary>
     public sealed class OMListItem
     {
+        public sealed class subItemFormat
+        {
+            /// <summary>
+            /// The text to display
+            /// </summary>
+            public textFormat textFormat = textFormat.Normal;
+            public Alignment textAlignment = Alignment.CenterLeft;
+            public Color color = Color.White;
+            public Color highlightColor = Color.White;
+            public Font font = new Font(FontFamily.GenericSansSerif, 18F);
+            public Color outlineColor = Color.Black;
+            public int Offset = 0;
+        }
         /// <summary>
         /// The text to display
         /// </summary>
@@ -280,6 +293,10 @@ namespace OpenMobile
         /// An optional subitem for the list
         /// </summary>
         public string subItem;
+        /// <summary>
+        /// An optional subitem format for the list
+        /// </summary>
+        public subItemFormat subitemFormat;
         /// <summary>
         /// An optional tag for the list item
         /// </summary>
@@ -333,6 +350,42 @@ namespace OpenMobile
             this.text = text;
             this.subItem = subitem;
             this.tag = tag;
+        }
+        /// <summary>
+        /// Creates a new list item
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="subitem"></param>
+        /// <param name="image"></param>
+        public OMListItem(string text, string subitem, Image image)//Added by Borte
+        {
+            this.text = text;
+            this.subItem = subitem;
+            this.image = image;
+        }
+        /// <summary>
+        /// Creates a new list item
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="subitm"></param>
+        public OMListItem(string text, string subitm, subItemFormat subitemFormat)
+        {
+            this.text = text;
+            this.subItem = subitm;
+            this.subitemFormat = subitemFormat;
+        }
+        /// <summary>
+        /// Creates a new list item
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="subitem"></param>
+        /// <param name="tag"></param>
+        public OMListItem(string text, string subitem, subItemFormat subitemFormat, object tag)//Added by Borte
+        {
+            this.text = text;
+            this.subItem = subitem;
+            this.tag = tag;
+            this.subitemFormat = subitemFormat;
         }
     }
     
@@ -477,7 +530,11 @@ namespace OpenMobile
         /// <summary>
         /// Panel A slides up and off the screen, Panel B slides up and onto the screen
         /// </summary>
-        SlideRight = 5
+        SlideRight = 5,
+        /// <summary>
+        /// Panel A fades out while Panel B fades in (twice as fast as a regular crossfade)
+        /// </summary>
+        CrossfadeFast=6
     }
 
     /// <summary>
@@ -508,29 +565,12 @@ namespace OpenMobile
         /// Unknown Function or Function Handled
         /// </summary>
         None=0,
-        //LoadPanel=1,
-        /// <summary>
-        /// Load a settings panel onto the UI
-        /// <para>---------------------------------------</para>
-        /// <para>Arg1: Screen Number</para>
-        /// <para>Arg2: (Optional) Plugin Name</para>
-        /// <para>Arg3: (Optional) Panel Name</para>
-        /// </summary>
-        LoadSettings=2,
         /// <summary>
         /// Unloads all loaded panels except the UI
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// </summary>
         TransitionFromAny=3,
-        /// <summary>
-        /// Unload a settings panel from the UI
-        /// <para>---------------------------------------</para>
-        /// <para>Arg1: Screen Number</para>
-        /// <para>Arg2: (Optional) Plugin Name</para>
-        /// <para>Arg3: (Optional) Panel Name</para>
-        /// </summary>
-        UnloadSettings=4,
         /// <summary>
         /// Load a panel and prepare to transition to it
         /// <para>---------------------------------------</para>
@@ -610,7 +650,7 @@ namespace OpenMobile
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: Volume [Int -1(mute) to 100]</para>
         /// </summary>
-        setPlayingVolume=15,
+        setPlayerVolume=15,
         /// <summary>
         /// Play the next media
         /// <para>---------------------------------------</para>
@@ -749,6 +789,18 @@ namespace OpenMobile
         /// <para>Arg1: Instance Number</para>
         /// </summary>
         showVideoWindow=37,
+        /// <summary>
+        /// Blocks the GoBack function from executing...useful for notifications
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// </summary>
+        blockGoBack=38,
+        /// <summary>
+        /// Unblocks the GoBack function from executing
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// </summary>
+        unblockGoBack=39,
         /// <summary>
         /// Restart this application
         /// </summary>
@@ -919,10 +971,10 @@ namespace OpenMobile
         /// <para>Arg2: (Optional) location to search from (default is current)</para>
         /// </summary>
         navigateToPOI=201,
-        /// <summary>
-        /// Occurs when the navigation engine calculates a route
-        /// </summary>
-        routeCalculated=202,
+        ///// <summary>
+        ///// Occurs when the navigation engine calculates a route
+        ///// </summary>
+        //routeCalculated=202,
         /// <summary>
         /// Occurs when a turn is approaching (distince dependent on road type)
         /// </summary>
@@ -1101,6 +1153,10 @@ namespace OpenMobile
     public enum eMediaType
     {
         /// <summary>
+        /// A device has been removed
+        /// </summary>
+        DeviceRemoved=-1,
+        /// <summary>
         /// Unknown Type/Not Set
         /// </summary>
         NotSet	=	0,
@@ -1233,7 +1289,7 @@ namespace OpenMobile
     /// <summary>
     /// Priority
     /// </summary>
-    public enum priority
+    public enum ePriority
     {
 
         /// <summary>
@@ -1279,7 +1335,7 @@ namespace OpenMobile
         /// <summary>
         /// Gets the volume (0-100) [int]
         /// </summary>
-        GetVolume=3,
+        GetSystemVolume=3,
         /// <summary>
         /// Gets an array of availble networks [string[]]
         /// </summary>

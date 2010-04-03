@@ -30,93 +30,94 @@ using System;
 
 namespace TagLib.Id3v2
 {
-	/// <summary>
-	///    This class is a filler until support for reading and writing the
-	///    ID3v2 extended header is implemented.
-	/// </summary>
-	public class ExtendedHeader : ICloneable
-	{
-		/// <summary>
-		///    Contains the size of the read header.
-		/// </summary>
-		private uint size;
-		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="ExtendedHeader"/> with no contents.
-		/// </summary>
-		public ExtendedHeader ()
-		{
-		}
-		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="ExtendedHeader" /> by reading the raw contents from
-		///    a ByteVector object.
-		/// </summary>
-		/// <param name="data">
-		///    A ByteVector object containing the raw
-		///    extended header structure.
-		/// </param>
-		/// <param name="version">
-		///    A <see cref="byte" /> value indicating the ID3v2 version.
-		/// </param>
-		public ExtendedHeader (ByteVector data, byte version)
-		{
-			Parse (data, version);
-		}
-		
-		/// <summary>
-		///    Gets the size of the data on disk in bytes.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> value containing the size of the
-		///    data on disk.
-		/// </value>
-		public uint Size {
-			get {return size;}
-		}
-		
-		/// <summary>
-		///    Populates the current instance with the contents of the
-		///    raw ID3v2 frame.
-		/// </summary>
-		/// <param name="data">
-		///    A ByteVector object containing the raw
-		///    extended header structure.
-		/// </param>
-		/// <param name="version">
-		///    A <see cref="byte" /> value indicating the ID3v2 version.
-		/// </param>
-		protected void Parse (ByteVector data, byte version)
-		{
-			if (data == null)
-				throw new ArgumentNullException ("data");
-			
-			size = SynchData.ToUInt (data.Mid (0, 4));
-		}
-		
-#region ICloneable
-		
-		/// <summary>
-		///    Creates a deep copy of the current instance.
-		/// </summary>
-		/// <returns>
-		///    A new <see cref="ExtendedHeader" /> object identical to
-		///    the current instance.
-		/// </returns>
-		public ExtendedHeader Clone ()
-		{
-			ExtendedHeader header = new ExtendedHeader ();
-			header.size = size;
-			return header;
-		}
-		
-		object ICloneable.Clone ()
-		{
-			return Clone ();
-		}
-		
-#endregion
-	}
+    /// <summary>
+    ///    This class is a filler until support for reading and writing the
+    ///    ID3v2 extended header is implemented.
+    /// </summary>
+    public class ExtendedHeader : ICloneable
+    {
+        /// <summary>
+        ///    Contains the size of the read header.
+        /// </summary>
+        private uint size;
+
+        /// <summary>
+        ///    Constructs and initializes a new instance of <see
+        ///    cref="ExtendedHeader"/> with no contents.
+        /// </summary>
+        public ExtendedHeader()
+        {
+        }
+
+        /// <summary>
+        ///    Constructs and initializes a new instance of <see
+        ///    cref="ExtendedHeader" /> by reading the raw contents from
+        ///    a <see cref="ByteVector" /> object.
+        /// </summary>
+        /// <param name="data">
+        ///    A <see cref="ByteVector" /> object containing the raw
+        ///    extended header structure.
+        /// </param>
+        /// <param name="version">
+        ///    A <see cref="byte" /> value indicating the ID3v2 version.
+        /// </param>
+        public ExtendedHeader(ByteVector data, byte version)
+        {
+            Parse(data, version);
+        }
+
+        /// <summary>
+        ///    Gets the size of the data on disk in bytes.
+        /// </summary>
+        /// <value>
+        ///    A <see cref="uint" /> value containing the size of the
+        ///    data on disk.
+        /// </value>
+        public uint Size
+        {
+            get { return size; }
+        }
+
+        /// <summary>
+        ///    Populates the current instance with the contents of the
+        ///    raw ID3v2 frame.
+        /// </summary>
+        /// <param name="data">
+        ///    A <see cref="ByteVector" /> object containing the raw
+        ///    extended header structure.
+        /// </param>
+        /// <param name="version">
+        ///    A <see cref="byte" /> value indicating the ID3v2 version.
+        /// </param>
+        protected void Parse(ByteVector data, byte version)
+        {
+            if (data == null)
+                throw new ArgumentNullException("data");
+
+            size = (version == 3 ? 4u : 0u) + SynchData.ToUInt(data.Mid(0, 4));
+        }
+
+        #region ICloneable
+
+        /// <summary>
+        ///    Creates a deep copy of the current instance.
+        /// </summary>
+        /// <returns>
+        ///    A new <see cref="ExtendedHeader" /> object identical to
+        ///    the current instance.
+        /// </returns>
+        public ExtendedHeader Clone()
+        {
+            ExtendedHeader header = new ExtendedHeader();
+            header.size = size;
+            return header;
+        }
+
+        object ICloneable.Clone()
+        {
+            return Clone();
+        }
+
+        #endregion
+    }
 }

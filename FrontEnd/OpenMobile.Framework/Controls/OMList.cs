@@ -32,7 +32,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A listbox control
     /// </summary>
-    public class OMList:OMLabel,IClickable,IHighlightable,IKey, IList,IThrow
+    public class OMList:OMLabel,IClickable,IHighlightable,IKey, IList,IThrow,IMouse
     {
         /// <summary>
         /// Occurs when the list index changes
@@ -224,10 +224,13 @@ namespace OpenMobile.Controls
                 lock (this)
                 {
                     OMListItem it = items.Find(i => i.text == item.text);
-                    if ((it == null) == false)
+                    if (it != null)
                     {
                         if (it.image == null)
+                        {
                             it.image = item.image;
+                            return false;
+                        }
                         else
                             return false;
                     }
@@ -346,6 +349,21 @@ namespace OpenMobile.Controls
                 throwtmr = new System.Timers.Timer(50);
                 throwtmr.Elapsed += new ElapsedEventHandler(throwtmr_Elapsed);
                 items = new List<OMListItem>();
+            }
+            private bool clickSelect;
+            /// <summary>
+            /// Click only fires on selected items
+            /// </summary>
+            public bool ClickToSelect
+            {
+                get
+                {
+                    return clickSelect;
+                }
+                set
+                {
+                    clickSelect = value;
+                }
             }
             /// <summary>
             /// UI Use Only
@@ -603,7 +621,7 @@ namespace OpenMobile.Controls
                                 Renderer.drawTransparentImage(g, items[i].image, (int)rect.Left + 10, (int)rect.Top+2, (int)rect.Height, (int)rect.Height-imgSze, tmp);
                         }
                     }
-                    g.Flush();
+                    g.Flush(FlushIntention.Sync);
                     g.Clip = r; //Reset the clip size for the rest of the controls
                 }
             }
@@ -643,6 +661,9 @@ namespace OpenMobile.Controls
             /// <param name="screen"></param>
             public void clickMe(int screen)
             {
+                if (clickSelect == true)
+                    if ((selectedIndex != lastSelected)||(mode==modeType.Scrolling))
+                        return;
                 if (OnClick != null)
                     OnClick(this, screen);
             }
@@ -676,7 +697,7 @@ namespace OpenMobile.Controls
             /// <param name="WidthScale"></param>
             /// <param name="HeightScale"></param>
             /// <returns></returns>
-            public bool KeyDown(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
+            public virtual bool KeyDown(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
             {
                 if (e.KeyCode == Keys.PageUp)
                 {
@@ -703,7 +724,7 @@ namespace OpenMobile.Controls
             /// <param name="WidthScale"></param>
             /// <param name="HeightScale"></param>
             /// <returns></returns>
-            public bool KeyUp(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
+            public virtual bool KeyUp(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
             {
                 return false;
             }
@@ -738,6 +759,38 @@ namespace OpenMobile.Controls
                 if (Math.Abs(TotalDistance.Y)>3)
                     selectedIndex = -1;
                 refreshMe(toRegion());
+            }
+
+            #endregion
+
+            #region IMouse Members
+
+            public void MouseMove(int screen, MouseEventArgs e, float WidthScale, float HeightScale)
+            {
+                //
+            }
+            private int lastSelected = -1;
+            public void MouseDown(int screen, MouseEventArgs e, float WidthScale, float HeightScale)
+            {
+                lastSelected = selectedIndex;
+                int value = (((int)(e.Y / HeightScale) - top - (moved % h)) / h) + start;
+                if (value >= Count)
+                    return;
+                if (selectedIndex == value)
+                    return;
+                selectedIndex = value;
+                if (clickSelect)
+                    mode = modeType.Scrolling;
+                if (SelectedIndexChanged != null)
+                    new Thread(delegate() { SelectedIndexChanged(this, screen); }).Start();
+                thrown = 0;
+                throwtmr.Enabled = true;
+                refreshMe(this.toRegion());
+            }
+
+            public void MouseUp(int screen, MouseEventArgs e, float WidthScale, float HeightScale)
+            {
+                //
             }
 
             #endregion

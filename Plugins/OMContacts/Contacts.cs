@@ -99,7 +99,7 @@ namespace OMContacts
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
-        void list_OnClick(object sender, int screen)
+        void list_OnClick(OMControl sender, int screen)
         {
             OMList l=((OMList)sender);
             OMPanel p = manager[screen, "contact"];

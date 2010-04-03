@@ -38,8 +38,8 @@ namespace OpenMobile.Threading
         struct taskItem
         {
             public Function function;
-            public priority Priority;
-            public taskItem(Function function, priority Priority)
+            public ePriority Priority;
+            public taskItem(Function function, ePriority Priority)
             {
                 this.function = function;
                 this.Priority = Priority;
@@ -53,7 +53,7 @@ namespace OpenMobile.Threading
         /// </summary>
         /// <param name="task"></param>
         /// <param name="taskPriority"></param>
-        public static void QueueTask(Function task,priority taskPriority)
+        public static void QueueTask(Function task,ePriority taskPriority)
         {
             tasks.Add(new taskItem(task, taskPriority));
             sync.Set();
@@ -74,15 +74,15 @@ namespace OpenMobile.Threading
         /// </summary>
         public static void Enable()
         {
-            priorities = (priority[])Enum.GetValues(typeof(priority));
+            priorities = (ePriority[])Enum.GetValues(typeof(ePriority));
             Array.Reverse(priorities);
             enabled.Set();
         }
-        static priority[] priorities;
+        static ePriority[] priorities;
         private static taskItem getNext()
         {
             taskItem ret;
-            foreach (priority p in priorities)
+            foreach (ePriority p in priorities)
             {
                 if (tasks.Exists(k => k.Priority == p) == true)
                 {

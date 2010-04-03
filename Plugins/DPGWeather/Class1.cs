@@ -207,7 +207,7 @@ namespace DPGWeather
                 }
                 status = 0;
                 updateLocation = arg;
-                OpenMobile.Threading.TaskManager.QueueTask(processItems, OpenMobile.priority.MediumHigh);
+                OpenMobile.Threading.TaskManager.QueueTask(processItems, OpenMobile.ePriority.MediumHigh);
                 return true;
             }
             else
@@ -274,7 +274,20 @@ namespace DPGWeather
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
+            host.OnPowerChange += new PowerEvent(host_OnPowerChange);
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void host_OnPowerChange(ePowerEvent type)
+        {
+            if (type == ePowerEvent.SystemResumed)
+            {
+                string loc;
+                using (PluginSettings settings = new PluginSettings())
+                    loc = settings.getSetting("Data.DefaultLocation");
+                if (loc != "")
+                    refreshData(loc);
+            }
         }
 
         void host_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)

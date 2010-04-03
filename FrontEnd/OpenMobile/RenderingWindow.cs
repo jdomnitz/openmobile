@@ -25,7 +25,6 @@ using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using OpenMobile.Controls;
-using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
@@ -94,14 +93,16 @@ namespace OpenMobile
         }
         public RenderingWindow(int s)
         {
-            Cursor.Position = this.Location;
+            if (this.fullscreen)
+                Cursor.Position = this.Location;
             this.screen = s;
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.UserPaint, true);
             //Code by Borte
             this.StartPosition = FormStartPosition.Manual;
-            this.Bounds = System.Windows.Forms.Screen.AllScreens[s].Bounds;
+            if (s <= System.Windows.Forms.Screen.AllScreens.Length - 1)
+                this.Bounds = System.Windows.Forms.Screen.AllScreens[s].Bounds;
             //**
             InitializeComponent();
             this.Text = "Open Mobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
@@ -365,7 +366,7 @@ namespace OpenMobile
                         break;
                     case backgroundStyle.Image:
                         if (backgroundQueue[i].BackgroundImage.image != null)
-                            pevent.Graphics.DrawImage(backgroundQueue[i].BackgroundImage.image, new Rectangle(new Point(pevent.ClipRectangle.X, (pevent.ClipRectangle.Y)), pevent.ClipRectangle.Size), pevent.ClipRectangle, GraphicsUnit.Pixel);
+                            pevent.Graphics.DrawImage(backgroundQueue[i].BackgroundImage.image, new Rectangle(0, 0, this.ClientSize.Width, this.ClientSize.Height), 0, 0, backgroundQueue[i].BackgroundImage.image.Width, backgroundQueue[i].BackgroundImage.image.Height, GraphicsUnit.Pixel);
                         break;
                 }
             }
@@ -476,7 +477,7 @@ namespace OpenMobile
             }
             else
             {
-                if (e.Button == MouseButtons.Left)
+                if ((e.Button == MouseButtons.Left) & (!ThrowStarted))
                 {
                     if (currentGesture == null)
                     {
@@ -512,8 +513,7 @@ namespace OpenMobile
                     {
                         if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
                             ((IMouse)highlighted).MouseMove(screen, e, widthScale, heightScale);
-                        // v why? v
-                        /*if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
+                        if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                             if (ThrowStarted)
                                 if (Math.Abs(e.X - ThrowStart.X) > 3 || (Math.Abs(e.Y - ThrowStart.Y) > 3))
                                 {
@@ -521,7 +521,7 @@ namespace OpenMobile
                                     ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart,new PointF(widthScale,heightScale), ref cancel);
                                     if (cancel==false)
                                         rParam.currentMode = modeType.Scrolling;
-                                }*/
+                                }
 
                         if (done == false)
                         {
@@ -681,11 +681,15 @@ namespace OpenMobile
                     tmrLongClick.Enabled = true;
                     UpdateThisControl(lastClick.toRegion());
                 }
-                else if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
+                else if (typeof(IClickable).IsInstanceOfType(highlighted) == true)  // Added by Borte to support long click for other controls than a button
+                {
+                    tmrLongClick.Enabled = true;
+                }
+                if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
                     ((IMouse)highlighted).MouseDown(screen, e, widthScale, heightScale);
 
                 // Added support of IThrow interface 
-                if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
+                /*if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                 {
                     ThrowRelativeDistance = e.Location;
                     rParam.currentMode = modeType.Scrolling;
@@ -693,9 +697,15 @@ namespace OpenMobile
                     ((IThrow)highlighted).MouseThrowStart(screen, e.Location,new PointF(widthScale,heightScale), ref cancel);
                     ThrowStarted = !cancel;
                     tmrLongClick.Enabled = true;
-                }
+                }*/
                 // End of code added by Borte
-            } ThrowStart = e.Location;
+                if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
+                {
+                    ThrowStarted = true;
+                    ThrowStart = e.Location;
+                    ThrowRelativeDistance = ThrowStart;
+                }
+            }
         }
 
         private void UI_MouseUp(object sender, MouseEventArgs e)
@@ -821,6 +831,17 @@ namespace OpenMobile
                     rParam.globalTransitionIn += 0.1F;
                     rParam.globalTransitionOut -= 0.1F;
                     if (rParam.globalTransitionOut < 0.1F)
+                    {
+                        transitioning = false;
+                        rParam.globalTransitionIn = 1;
+                        rParam.globalTransitionOut = 0;
+                        return;
+                    }
+                    break;
+                case eGlobalTransition.CrossfadeFast:
+                    rParam.globalTransitionIn += 0.2F;
+                    rParam.globalTransitionOut -= 0.2F;
+                    if (rParam.globalTransitionOut < 0.2F)
                     {
                         transitioning = false;
                         rParam.globalTransitionIn = 1;

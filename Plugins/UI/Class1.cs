@@ -78,7 +78,19 @@ namespace OpenMobile
         }
         public bool incomingMessage<T>(string message,string source, ref T data)
         {
-            throw new NotImplementedException();
+            if (message == "AddIcon")
+            {
+                IconManager.UIIcon icon = data as IconManager.UIIcon;
+                icons.AddIcon(icon);
+                return true;
+            }
+            if (message == "RemoveIcon")
+            {
+                IconManager.UIIcon icon = data as IconManager.UIIcon;
+                icons.RemoveIcon(icon);
+                return true;
+            }
+            return false;
         }
         public string displayName
         {
@@ -114,7 +126,7 @@ namespace OpenMobile
         #endregion
 
         #region IBasePlugin Members
-
+        IconManager icons = new IconManager();
         ScreenManager manager;
         public eLoadStatus initialize(IPluginHost host)
         {
@@ -228,6 +240,18 @@ namespace OpenMobile
             shape.Shape = shapes.Rectangle;
             shape.FillColor = Color.FromArgb(130, Color.Black);
             shape.Visible = false;
+            OMButton icon1 = new OMButton(778, 4, 80, 85);
+            icon1.Name = "UI.Icon1";
+            icon1.OnClick += new userInteraction(icon_OnClick);
+            OMButton icon2 = new OMButton(727, 1, 50, 90);
+            icon2.Name = "UI.Icon2";
+            icon2.OnClick += new userInteraction(icon_OnClick);
+            OMButton icon3 = new OMButton(676, 1, 50, 90);
+            icon3.Name = "UI.Icon3";
+            icon3.OnClick += new userInteraction(icon_OnClick);
+            OMButton icon4 = new OMButton(625, 1, 50, 90);
+            icon4.Name = "UI.Icon4";
+            icon4.OnClick += new userInteraction(icon_OnClick);
             //***
             p.addControl(Back);
             p.addControl(speech);
@@ -251,6 +275,11 @@ namespace OpenMobile
             p.addControl(shape);
             p.addControl(caption);
             p.addControl(imgSpeak);
+            p.addControl(icon1);
+            p.addControl(icon2);
+            p.addControl(icon3);
+            p.addControl(icon4);
+            icons.OnIconsChanged += new IconManager.IconsChanged(icons_OnIconsChanged);
 
             p.BackgroundType = backgroundStyle.Gradiant;
             p.BackgroundColor1 = Color.FromArgb(0, 0, 4);
@@ -259,8 +288,65 @@ namespace OpenMobile
             manager.loadPanel(p);
             theHost.OnMediaEvent += theHost_OnMediaEvent;
             theHost.OnSystemEvent += theHost_OnSystemEvent;
+            theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
             theHost.VideoPosition = new Rectangle(0, 100, 1000, 368);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void icon_OnClick(OMControl sender, int screen)
+        {
+            IconManager.UIIcon icon;
+            switch(sender.Name)
+            {
+                case "UI.Icon1":
+                    icon=icons.getIcon(1,true);
+                    if (icon.plugin == null)
+                        return;
+                    theHost.sendMessage(icon.plugin, "UI", "IconClicked", ref icon);
+                    break;
+                case "UI.Icon2":
+                    icon = icons.getIcon(1, false);
+                    if (icon.plugin == null)
+                        return;
+                    theHost.sendMessage(icon.plugin, "UI", "IconClicked", ref icon);
+                    break;
+                case "UI.Icon3":
+                    icon = icons.getIcon(2, false);
+                    if (icon.plugin == null)
+                        return;
+                    theHost.sendMessage(icon.plugin, "UI", "IconClicked", ref icon);
+                    break;
+                case "UI.Icon4":
+                    icon = icons.getIcon(3, false);
+                    if (icon.plugin == null)
+                        return;
+                    theHost.sendMessage(icon.plugin, "UI", "IconClicked", ref icon);
+                    break;
+            }
+        }
+
+        void theHost_OnPowerChange(ePowerEvent type)
+        {
+            if (type == ePowerEvent.SystemOnBattery)
+                icons.AddIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryCharged").image, ePriority.MediumLow, false));
+            if (type == ePowerEvent.BatteryLow)
+                icons.AddIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryWarning").image, ePriority.MediumLow, false));
+            if (type == ePowerEvent.BatteryCritical)
+                icons.AddIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryCritical").image, ePriority.MediumLow, false));
+            if (type == ePowerEvent.SystemPluggedIn)
+            {
+                icons.RemoveIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryCharged").image, ePriority.MediumLow, false));
+                icons.RemoveIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryWarning").image, ePriority.MediumLow, false));
+                icons.RemoveIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryCritical").image, ePriority.MediumLow, false));
+            }
+        }
+
+        void icons_OnIconsChanged()
+        {
+            ((OMButton)manager[0][22]).Image = new imageItem(icons.getIcon(1, true).image);
+            ((OMButton)manager[0][23]).Image = new imageItem(icons.getIcon(1, false).image);
+            ((OMButton)manager[0][24]).Image = new imageItem(icons.getIcon(2, false).image);
+            ((OMButton)manager[0][25]).Image = new imageItem(icons.getIcon(3, false).image);
         }
 
         void speech_OnClick(OMControl sender, int screen)
@@ -351,7 +437,7 @@ namespace OpenMobile
                 hideSpeech(0); //ToDo - Instance specific
             if (function == eFunction.gesture)
             {
-                if ((arg3!="OSK")&&(arg3!="OMNavigation"))
+                if ((arg3!="OSK")&&(arg3!="Navigation"))
                     switch (arg2)
                     {
                         case "M":
@@ -366,7 +452,7 @@ namespace OpenMobile
                             break;
                         case "N":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
-                            theHost.execute(eFunction.TransitionToPanel, arg1, "OMNavigation");
+                            theHost.execute(eFunction.TransitionToPanel, arg1, "Navigation");
                             theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
                         case " ":

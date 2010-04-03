@@ -240,11 +240,19 @@ namespace OMPlayer
             {
                 player[instance].currentState = ePlayerStatus.Playing;
                 OnMediaEvent(eFunction.Play, instance, "");
+                return true;
             }
         }
         else
-            return (player[instance].mediaControl.Pause() == 0);
-        return true;
+        {
+            if (player[instance].mediaControl.Pause() >= 0)
+            {
+                player[instance].currentState = ePlayerStatus.Paused;
+                OnMediaEvent(eFunction.Pause, instance, "");
+                return true;
+            }
+        }
+        return false;
     }
     public bool SetVideoVisible(int instance, bool visible)
     {
@@ -472,7 +480,7 @@ namespace OMPlayer
                 case EventCode.ErrorAbort:
                 case EventCode.ErrorAbortEx:
                 case EventCode.ErrorStPlaying:
-                case EventCode.FileClosed:
+                //case EventCode.FileClosed:
                 case EventCode.StErrStopped:
                     currentState = ePlayerStatus.Error;
                     break;
@@ -533,6 +541,8 @@ namespace OMPlayer
                 nowPlaying = TagReader.getInfo(url);
                 if (nowPlaying.coverArt == null)
                     nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
+                if (nowPlaying.coverArt == null)
+                    nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
             }
             if (nowPlaying.Length==0)
             {
@@ -642,10 +652,7 @@ namespace OMPlayer
                 {
                     try
                     {
-                        lock (this)
-                        {
-                            Marshal.ReleaseComObject(graphBuilder);
-                        }
+                        Marshal.ReleaseComObject(graphBuilder);
                     }
                     catch (Exception){}
                 }
@@ -718,6 +725,7 @@ namespace OMPlayer
                 videoWindow = graphBuilder as IVideoWindow;
                 basicVideo = graphBuilder as IBasicVideo;
                 basicAudio = graphBuilder as IBasicAudio;
+                basicAudio.put_Volume((100 - currentVolume) * -100);
                 CheckVisibility();
                 DsError.ThrowExceptionForHR(hr);
                 if (!isAudioOnly)

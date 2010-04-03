@@ -71,17 +71,17 @@ namespace Navigation
             return eLoadStatus.LoadSuccessful;
         }
 
-        void toolsButton_OnClick(object sender, int screen)
+        void toolsButton_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.showNavPanel, "Tools");
         }
 
-        void navButton_OnClick(object sender, int screen)
+        void navButton_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.showNavPanel, "NavBack");
         }
 
-        void setButton_OnClick(object sender, int screen)
+        void setButton_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.showNavPanel, "Settings");
         }
@@ -91,12 +91,12 @@ namespace Navigation
             if (function == eFunction.navigateToAddress)
             {
                 theHost.execute(eFunction.TransitionFromAny, "0");
-                theHost.execute(eFunction.TransitionToPanel, "0", "OMNavigation");
+                theHost.execute(eFunction.TransitionToPanel, "0", "Navigation");
                 theHost.execute(eFunction.ExecuteTransition, "0");
             }
             if (function == eFunction.gesture)
             {
-                if (arg3 == "OMNavigation")
+                if (arg3 == "Navigation")
                 {
                     if (arg2 == "")
                         return;
@@ -140,7 +140,7 @@ namespace Navigation
 
         public string pluginName
         {
-            get { return "OMNavigation"; }
+            get { return "Navigation"; }
         }
         public string displayName
         {

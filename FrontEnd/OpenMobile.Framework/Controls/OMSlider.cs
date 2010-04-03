@@ -186,7 +186,7 @@ namespace OpenMobile.Controls
                 if (sliderWidth == value)
                     return;
                 sliderWidth = value;
-                refreshMe(Rectangle.Empty);
+                refreshMe(this.toRegion());
             }
         }
         /// <summary>
@@ -204,7 +204,7 @@ namespace OpenMobile.Controls
                 if (height == value)
                     return;
                 height = value;
-                refreshMe(Rectangle.Empty);
+                refreshMe(this.toRegion());
             }
         }
         /// <summary>

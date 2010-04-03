@@ -453,6 +453,34 @@ namespace TagLib.Id3v2
         }
 
         /// <summary>
+        ///    Sets the text for a specified Text Information Frame.
+        /// </summary>
+        /// <param name="ident">
+        ///    A <see cref="ByteVector" /> object containing the
+        ///    identifier of the frame to set the data for.
+        /// </param>
+        /// <param name="text">
+        ///    A <see cref="StringCollection" /> object containing the
+        ///    text to set for the specified frame, or <see
+        ///    langword="null" /> to unset the value.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///    <paramref name="ident" /> is <see langword="null" />.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///    <paramref name="ident" /> is not exactly four bytes long.
+        /// </exception>
+        [Obsolete("Use SetTextFrame(ByteVector,String[])")]
+        public void SetTextFrame(ByteVector ident,
+                                  StringCollection text)
+        {
+            if (text == null || text.Count == 0)
+                RemoveFrames(ident);
+            else
+                SetTextFrame(ident, text.ToArray());
+        }
+
+        /// <summary>
         ///    Sets the numeric values for a specified Text Information
         ///    Frame.
         /// </summary>
@@ -538,6 +566,8 @@ namespace TagLib.Id3v2
 
             bool has_footer = (header.Flags &
                 HeaderFlags.FooterPresent) != 0;
+            bool unsynchAtFrameLevel = (header.Flags & HeaderFlags.Unsynchronisation) != 0 && Version >= 4;
+            bool unsynchAtTagLevel = (header.Flags & HeaderFlags.Unsynchronisation) != 0 && Version < 4;
 
             header.MajorVersion = has_footer ? (byte)4 : Version;
 
@@ -550,6 +580,9 @@ namespace TagLib.Id3v2
             // them to the tag_data.
             foreach (Frame frame in frame_list)
             {
+                if (unsynchAtFrameLevel)
+                    frame.Flags |= FrameFlags.Unsynchronisation;
+
                 if ((frame.Flags &
                     FrameFlags.TagAlterPreservation) != 0)
                     continue;
@@ -565,7 +598,7 @@ namespace TagLib.Id3v2
             }
 
             // Add unsyncronization bytes if necessary.
-            if ((header.Flags & HeaderFlags.Unsynchronisation) != 0)
+            if (unsynchAtTagLevel)
                 SynchData.UnsynchByteVector(tag_data);
 
             // Compute the amount of padding, and append that to
@@ -826,10 +859,10 @@ namespace TagLib.Id3v2
             if (data == null)
                 throw new ArgumentNullException("data");
 
-            // If the entire tag is marked as unsynchronized,
-            // resynchronize it.
-
-            if ((header.Flags & HeaderFlags.Unsynchronisation) != 0)
+            // If the entire tag is marked as unsynchronized, and this tag
+            // is version id3v2.3 or lower, resynchronize it.
+            bool fullTagUnsynch = (header.MajorVersion < 4) && ((header.Flags & HeaderFlags.Unsynchronisation) != 0);
+            if (fullTagUnsynch)
                 SynchData.ResynchByteVector(data);
 
             int frame_data_position = 0;
@@ -876,7 +909,7 @@ namespace TagLib.Id3v2
                     frame = FrameFactory.CreateFrame(data,
                         ref frame_data_position,
                         header.MajorVersion,
-                        (header.Flags & HeaderFlags.Unsynchronisation) != 0);
+                        fullTagUnsynch);
                 }
                 catch (NotImplementedException)
                 {

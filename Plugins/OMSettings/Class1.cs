@@ -309,18 +309,18 @@ namespace OMSettings
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
-        void menu_OnClick(object sender, int screen)
+        void menu_OnClick(OMControl sender, int screen)
         {
             menu_SelectedIndexChanged((OMList)sender, screen);
         }
 
-        void location_OnClick(object sender, int screen)
+        void location_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
             ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", false, "data");
         }
 
-        void Save4_OnClick(object sender, int screen)
+        void Save4_OnClick(OMControl sender, int screen)
         {
             using (PluginSettings settings = new PluginSettings())
             {
@@ -335,7 +335,7 @@ namespace OMSettings
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
         }
 
-        void Save3_OnClick(object sender, int screen)
+        void Save3_OnClick(OMControl sender, int screen)
         {
             using (PluginSettings settings = new PluginSettings())
             {
@@ -365,13 +365,13 @@ namespace OMSettings
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
         }
 
-        void user_OnClick(object sender, int screen)
+        void user_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
             ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", false, "personal");
         }
 
-        void Save2_OnClick(object sender, int screen)
+        void Save2_OnClick(OMControl sender, int screen)
         {
             Personal.setPassword(Personal.ePassword.google,((OMTextBox)manager[screen,"personal"][6]).Text,"GOOGLEPW");
             Collections.personalInfo.googleUsername = ((OMTextBox)manager[screen, "personal"][5]).Text;
@@ -383,19 +383,19 @@ namespace OMSettings
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
         }
 
-        void identify_OnClick(object sender, int screen)
+        void identify_OnClick(OMControl sender, int screen)
         {
             theHost.sendMessage("RenderingWindow", "OMSettings", "Identify");
         }
 
-        void Cancel_OnClick(object sender, int screen)
+        void Cancel_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromAny,screen.ToString());
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
         }
 
-        void Save_OnClick(object sender, int screen)
+        void Save_OnClick(OMControl sender, int screen)
         {
             string scr=((OMLabel)manager[screen, "zone"][6]).Text;
             using (PluginSettings settings = new PluginSettings())
@@ -406,7 +406,7 @@ namespace OMSettings
             theHost.execute(eFunction.settingsChanged);
         }
 
-        void right_OnClick(object sender, int screen)
+        void right_OnClick(OMControl sender, int screen)
         {
             if (devices == null)
                 return;
@@ -417,7 +417,7 @@ namespace OMSettings
             ((OMTextBox)manager[screen, "zone"][5]).Text = devices[pos + 1].Replace("  ", " ");
         }
         List<string> devices;
-        void left_OnClick(object sender, int screen)
+        void left_OnClick(OMControl sender, int screen)
         {
             if (devices == null)
                 return;
@@ -428,7 +428,7 @@ namespace OMSettings
             ((OMTextBox)manager[screen, "zone"][5]).Text = devices[pos - 1].Replace("  ", " ");
         }
 
-        void Button_OnClick(object sender, int screen)
+        void Button_OnClick(OMControl sender, int screen)
         {
             ((OMLabel)manager[screen, "zone"][6]).Text = "Zone " + ((OMButton)sender).Text;
             string s;

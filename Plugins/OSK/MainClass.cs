@@ -135,6 +135,9 @@ namespace OpenMobile
             theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             //And then load the panel into the screen manager
+            symKeyboard.Forgotten = true;
+            regularKeyboard.Forgotten = true;
+            numKeyboard.Forgotten = true;
             manager.loadPanel(regularKeyboard);
             symManager.loadPanel(symKeyboard);
             numManager.loadPanel(numKeyboard);
@@ -218,7 +221,7 @@ namespace OpenMobile
         }
 
         //Each time a button is pressed we add its character to the textbox
-        void MainClass_OnClick(object sender, int screen)
+        void MainClass_OnClick(OMControl sender, int screen)
         {
             OMTextBox text = (OMTextBox)manager[screen]["Text"];
             if (text.containingScreen() != screen)

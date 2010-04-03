@@ -34,7 +34,7 @@ namespace OpenMobile
     public static class Core
     {
         public static PluginHost theHost = new PluginHost();
-        public static List<RenderingWindow> RenderingWindows=new List<RenderingWindow>(theHost.ScreenCount);
+        public static List<RenderingWindow> RenderingWindows = null;
         public static List<IBasePlugin> pluginCollection = new List<IBasePlugin>();
         public static bool exitTransition = true;
         public static bool FullScreen = false;
@@ -301,6 +301,20 @@ namespace OpenMobile
         [STAThread]
         public static void Main()
         {
+            // Added by Borte to be able to set amount of screens with startup parameter
+            foreach (string arg in Environment.GetCommandLineArgs())
+            {
+                if (arg.ToLower().StartsWith("-screencount=") == true)
+                {
+                    try
+                    {
+                        theHost.ScreenCount = int.Parse(arg.Substring(13));
+                    }
+                    catch (ArgumentException) { break; }
+                }
+            }
+            // Initialize screens
+            RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
             for (int i = 0; i < RenderingWindows.Capacity; i++)
                 RenderingWindows.Add(new RenderingWindow(i));
             Thread rapidMenu=new Thread(new ThreadStart(Core.initialize));

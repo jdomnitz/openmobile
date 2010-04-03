@@ -19,13 +19,12 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
 using OpenMobile;
-using OpenMobile.Framework;
-using System.Diagnostics;
 
 namespace OMHal
 {

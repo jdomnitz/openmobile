@@ -39,9 +39,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite, Version=1.0.61.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
@@ -108,6 +105,7 @@
     <Compile Include="Data\Weather.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="helperFunctions\Globalization.cs" />
+    <Compile Include="IconManager.cs" />
     <Compile Include="Math\Calculation.cs" />
     <Compile Include="helperFunctions\Encryption.cs" />
     <Compile Include="helperFunctions\General.cs" />

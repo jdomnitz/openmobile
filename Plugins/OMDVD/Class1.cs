@@ -158,8 +158,15 @@ namespace OMDVD
                 }
             }
             else
-                return (player[instance].mediaControl.Pause() == 0);
-            return true;
+            {
+                if (player[instance].mediaControl.Pause() >= 0)
+                {
+                    player[instance].currentState = ePlayerStatus.Paused;
+                    OnMediaEvent(eFunction.Pause, instance, "");
+                    return true;
+                }
+            }
+            return false;
         }
         public bool SetVideoVisible(int instance, bool visible)
         {
@@ -533,10 +540,7 @@ namespace OMDVD
                     {
                         try
                         {
-                            lock (this)
-                            {
-                                Marshal.ReleaseComObject(graphBuilder);
-                            }
+                            Marshal.ReleaseComObject(graphBuilder);
                         }
                         catch (Exception) { }
                     }

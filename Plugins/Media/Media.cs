@@ -82,6 +82,7 @@ namespace Media
             List3.SelectedItemColor2 = Color.FromArgb(38, 37, 37);
             List3.Name = "Media.List3";
             List3.Font = f;
+            List3.ClickToSelect = true;
             List3.Add("Loading...");
             List3.SelectedIndexChanged += new OMList.IndexChangedDelegate(List3_SelectedIndexChanged);
             List3.OnClick += new userInteraction(List3_OnClick);
@@ -94,6 +95,7 @@ namespace Media
             List2.SelectedItemColor2 = Color.FromArgb(38, 37, 37);
             List2.Name = "Media.List2";
             List2.Font = f;
+            List2.ClickToSelect = true;
             List2.SelectedIndexChanged += new OMList.IndexChangedDelegate(List2_SelectedIndexChanged);
             List2.OnClick += new userInteraction(List2_OnClick);
             List2.OnLongClick += new userInteraction(List2_OnLongClick);
@@ -122,7 +124,7 @@ namespace Media
             p.addControl(bSettings);
             using (PluginSettings ps = new PluginSettings())
                 dbname = ps.getSetting("Default.MusicDatabase");
-            OpenMobile.Threading.TaskManager.QueueTask(loadList,priority.High);//<-Where the music gets loaded
+            OpenMobile.Threading.TaskManager.QueueTask(loadList,ePriority.High);//<-Where the music gets loaded
             p.DoubleClickable = false;
             manager.loadPanel(p);
             settingsManager=new ScreenManager(theHost.ScreenCount);
@@ -374,6 +376,8 @@ namespace Media
         {
             if (currentSongs[theHost.instanceForScreen(screen)].Count == 0)
                 return;
+            if (((OMList)sender).SelectedIndex == -1)
+                return;
             if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location) == false)
             {
                 theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location);
@@ -428,11 +432,6 @@ namespace Media
             if (slider2left(screen) == false) //performance hack - only the correct one will execute
                 slider2right(screen);
         }
-
-        //void Slider1_OnClick(object sender, int screen)
-        //{
-        //        slider1right(screen);
-        //}
 
         void List3_SelectedIndexChanged(OMList sender,int screen)
         {
