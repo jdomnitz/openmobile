@@ -102,7 +102,25 @@ namespace OpenMobile.Framework
                 panels.Add(collection);
             }
         }
-
+        //Added by Borte
+        /// <summary>
+        /// Unloads a panel for duplication
+        /// </summary>
+        /// <param name="name">Panel name</param>
+        public void unloadPanel(string name)
+        {//ToDo Re-add smart instance management
+            lock (this)
+            {
+                OMPanel[] p = panels.Find(x => x[0].Name == name);
+                if (p == null)
+                    return;
+                else
+                {
+                    // Unload panel from cache
+                    panels.Remove(p);
+                }
+            }
+        }
         #region IDisposable Members
 
         /// <summary>

@@ -22,7 +22,10 @@ using System;
 using System.Drawing;
 using System.IO;
 using TagLib;
-
+using System.Net;
+using System.Xml;
+using System.Threading;
+using OpenMobile.Net;
 namespace OpenMobile.Media
 {
     /// <summary>
@@ -61,7 +64,7 @@ namespace OpenMobile.Media
                 MemoryStream m = new MemoryStream(t.Pictures[0].Data.Data);
                 try
                 {
-                    if (m.Length > 0)
+                    if (m.Length > 4)
                         info.coverArt = Image.FromStream(m);
                 }
                 catch (ArgumentException) { }
@@ -83,6 +86,52 @@ namespace OpenMobile.Media
             string path = OpenMobile.Path.Combine(System.IO.Path.GetDirectoryName(url), "Folder.jpg");
             if (System.IO.File.Exists(path) == true)
                 return Image.FromFile(path);
+            return null;
+        }
+        private static string cacheArtist;
+        private static string cacheAlbum;
+        private static Image cacheArt;
+        /// <summary>
+        /// Retrieves metadata from LastFM
+        /// </summary>
+        /// <param name="artist"></param>
+        /// <param name="album"></param>
+        /// <returns></returns>
+        public static Image getLastFMImage(string artist, string album)
+        {
+            if (Net.Network.IsAvailable==false)
+                return null;
+            if ((artist==null)||(artist.Length==0))
+                return null;
+            if ((album==null)||(album.Length==0))
+                return null;
+            if ((artist == cacheArtist) && (album == cacheAlbum))
+                return cacheArt;
+            cacheAlbum = album;
+            cacheArtist = artist;
+            cacheArt = null;
+            Thread.Sleep(200); //prevent TOS violation
+            XmlDocument reader = new XmlDocument();
+            try
+            {
+                reader.Load("http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=280b54c321127c4647d05ead85cf5fdc&artist=" + Network.urlEncode(artist) + "&album=" + Network.urlEncode(album));
+            }
+            catch (WebException) { return null; }
+            catch (XmlException) { return null; }
+            XmlNodeList nodes = reader.DocumentElement.ChildNodes[0].ChildNodes;
+            foreach (XmlNode node in nodes)
+            {
+                if (node.Name == "image")
+                    if (node.Attributes[0].Value == "extralarge")
+                    {
+                        try
+                        {
+                            cacheArt = Net.Network.imageFromURL(node.InnerText);
+                        }
+                        catch (WebException) { }
+                        return cacheArt;
+                    }
+            }
             return null;
         }
     }

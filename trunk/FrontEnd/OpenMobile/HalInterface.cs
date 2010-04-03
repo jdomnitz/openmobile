@@ -19,9 +19,8 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Net;
+using System.Text;
 
 namespace OpenMobile
 {

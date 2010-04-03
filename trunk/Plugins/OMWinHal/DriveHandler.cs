@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Runtime.InteropServices;
-/*********************************************************************************
+﻿/*********************************************************************************
     This file is part of Open Mobile.
 
     Open Mobile is free software: you can redistribute it and/or modify
@@ -20,14 +18,16 @@ using System.Runtime.InteropServices;
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-using System.Windows.Forms;
 using OpenMobile;
-
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 namespace OMHal
 {
     static class DriveHandler
     {
         private const int DBT_DEVICEARRIVAL = 0x8000; // system detected a new device
+        private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
         private const int DBT_DEVTYP_VOLUME = 0x00000002; // drive type is logical volume
         private static string Drive;
 
@@ -49,6 +49,14 @@ namespace OMHal
                     Drive = DriveMaskToLetter(vol.dbcv_unitmask).ToString();
                     Drive += ":\\";
                     DeviceArrived(Drive);
+                }
+            if (m.WParam.ToInt32() == DBT_DEVICEREMOVECOMPLETE)
+                if (Marshal.ReadInt32(m.LParam, 4) == DBT_DEVTYP_VOLUME)
+                {
+                    DEV_BROADCAST_VOLUME vol = (DEV_BROADCAST_VOLUME)Marshal.PtrToStructure(m.LParam, typeof(DEV_BROADCAST_VOLUME)); ;
+                    Drive = DriveMaskToLetter(vol.dbcv_unitmask).ToString();
+                    Drive += ":\\";
+                    DeviceRemoved(Drive);
                 }
         }
 
@@ -78,6 +86,11 @@ namespace OMHal
             {
                 Form1.raiseStorageEvent(eMediaType.NotSet, drive);
             }
+        }
+        private static void DeviceRemoved(string drive)
+        {
+            DriveInfo info = new DriveInfo(drive);
+            Form1.raiseStorageEvent(eMediaType.DeviceRemoved, drive);
         }
     }
 }

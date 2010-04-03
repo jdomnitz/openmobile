@@ -248,7 +248,20 @@ namespace DPGContacts
         {
             dataPath = host.DataPath;
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
+            host.OnPowerChange += new PowerEvent(host_OnPowerChange);
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void host_OnPowerChange(ePowerEvent type)
+        {
+            if (type == ePowerEvent.SystemResumed)
+            {
+                string dat = "";
+                using (PluginSettings s = new PluginSettings())
+                    dat = s.getSetting("Plugins.DPGContacts.LastUpdate");
+                if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 60))
+                    refreshData();
+            }
         }
 
         void host_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)

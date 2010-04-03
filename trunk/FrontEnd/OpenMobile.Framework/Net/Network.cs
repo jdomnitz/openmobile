@@ -22,6 +22,7 @@ using System;
 using System.Net;
 using System.IO;
 using System.Drawing;
+using System.Text;
 
 namespace OpenMobile.Net
 {
@@ -54,6 +55,24 @@ namespace OpenMobile.Net
                 else
                     return false; //Return no if unsure
             }
+        }
+        const string allowed = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:.=_-$(){}~";
+        /// <summary>
+        /// URL Encode a string
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static string urlEncode(string source)
+        {
+            StringBuilder ret = new StringBuilder();
+            for (int i = 0; i < source.Length; i++)
+            {
+                if (allowed.Contains(source[i].ToString()) == true)
+                    ret.Append(source[i]);
+                else
+                    ret.Append("%" + Convert.ToInt32(source[i]).ToString("X2"));
+            }
+            return ret.ToString();
         }
 
         /// <summary>
@@ -123,11 +142,16 @@ namespace OpenMobile.Net
         /// </summary>
         /// <param name="URL"></param>
         /// <returns></returns>
+        /// <exception cref="WebException">WebException</exception>
         public static Image imageFromURL(string URL)
         {
+            if ((URL == null)||(URL==""))
+                return null;
             using (WebClient client = new WebClient())
-            using (MemoryStream stream = new MemoryStream(client.DownloadData(URL)))
-                return Image.FromStream(stream);
+            {
+                MemoryStream stream = new MemoryStream(client.DownloadData(URL));
+                return Image.FromStream(stream, false, true);
+            }
         }
         /// <summary>
         /// Internet Availability on a network connection
@@ -154,7 +178,7 @@ namespace OpenMobile.Net
         public static connectionStatus checkForInternet()
         {
             System.Net.WebRequest request = System.Net.HttpWebRequest.Create("http://www.google.com/");
-            request.Timeout = 500; //Timeout after 1/2 second
+            request.Timeout = 1000; //Timeout after 1/2 second
             request.Method = "HEAD";
             System.Net.WebResponse response;
             try

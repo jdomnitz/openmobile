@@ -55,7 +55,7 @@ namespace OMMediaDB
                     this.reader.Dispose();
                 }
                 catch (InvalidOperationException) { }
-            GC.SuppressFinalize(this);
+            //GC.SuppressFinalize(this);
         }
         public string databaseType
         {
@@ -64,7 +64,7 @@ namespace OMMediaDB
 
         public bool indexDirectory(string location, bool subdirectories)
         {
-            OpenMobile.Threading.TaskManager.QueueTask(delegate { makeItSo(location, subdirectories); }, priority.MediumLow);
+            OpenMobile.Threading.TaskManager.QueueTask(delegate { makeItSo(location, subdirectories); }, ePriority.MediumLow);
             return true;
         }
         public bool clearIndex()
@@ -75,12 +75,11 @@ namespace OMMediaDB
             {
                 if (bCon.State != ConnectionState.Open)
                     bCon.Open();
-                using (SQLiteCommand cmd = new SQLiteCommand("DELETE FROM Music", bCon))
+                using (SQLiteCommand cmd = new SQLiteCommand("DELETE FROM tblSongs; DELETE FROM tblAlbum", bCon))
                 {
-                    cmd.ExecuteNonQuery();
+                    return (cmd.ExecuteNonQuery() > 0);
                 }
             }
-            return false;
         }
         private void parseDirectory(string location, bool subdirectories)
         {
@@ -191,6 +190,7 @@ namespace OMMediaDB
             }
         }
         private string album;
+        private string artist;
         private bool hasCover;
         private long albumNum;
         private void processFile(string filepath)
@@ -211,7 +211,7 @@ namespace OMMediaDB
                     info.Album = "Unknown Album";
                 if ((info.Artist == null) || (info.Artist == ""))
                     info.Artist = "Unknown Artist";
-                if (info.Album == album)
+                if ((info.Album == album)&&(info.Artist==artist))
                 {
                     if ((hasCover == false) && (info.coverArt != null))
                         updateCover(info);
@@ -225,6 +225,8 @@ namespace OMMediaDB
                     {
                         if (info.coverArt == null)
                             info.coverArt = TagReader.getFolderImage(info.Location);
+                        if (info.coverArt == null)
+                            info.coverArt = TagReader.getLastFMImage(info.Artist, info.Album);
                         writeAlbum(info);
                         writeSong(info);
                     }
@@ -259,6 +261,7 @@ namespace OMMediaDB
                     return false;
                 albumNum = (long)id;
                 album = info.Album;
+                artist = info.Artist;
                 return true;
             }
         }
@@ -312,6 +315,7 @@ namespace OMMediaDB
                 albumNum=(long)command.ExecuteScalar();
             }
             album = info.Album;
+            artist = info.Artist;
         }
 
         private string correctArtist(string p)
@@ -347,7 +351,9 @@ namespace OMMediaDB
                 if (covers == false)
                     command.CommandText = "SELECT Distinct Artist FROM tblAlbum";
                 else
-                    command.CommandText = "SELECT Distinct Artist,Cover FROM tblAlbum";
+                    command.CommandText = "SELECT Distinct(Artist),Cover FROM tblAlbum";
+                    // Comment from Borte: This SQL query contains a bug since it returns multiple rows for one artist if the images are different
+                    //command.CommandText = "SELECT Distinct Artist,Cover FROM tblAlbum";
                 reader = command.ExecuteReader();
             }
             field = eMediaField.Artist;

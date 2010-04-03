@@ -58,6 +58,7 @@ namespace ControlDemo
             p.addControl(Label2);
             p.addControl(List3);
             p.addControl(icon);
+            p.Forgotten = true;
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -96,12 +97,12 @@ namespace ControlDemo
             {
                 case "Play CD":
                     string[] songs=Directory.GetFiles(lastPath);
-                    bool b=theHost.setPlaylist(Playlist.Convert(songs), theHost.instanceForScreen(screen));
-                    b=theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
+                    if (theHost.setPlaylist(Playlist.Convert(songs), theHost.instanceForScreen(screen)))
+                        theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
                     break;
                 case "Play DVD":
-                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), lastPath);
-                    theHost.sendMessage("UI", "OMNotify", "ShowMediaControls" + screen.ToString());
+                    if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), lastPath))
+                        theHost.sendMessage("UI", "OMNotify", "ShowMediaControls" + screen.ToString());
                     break;
                 case "Eject":
                     theHost.execute(eFunction.ejectDisc, lastPath);
@@ -124,6 +125,11 @@ namespace ControlDemo
             List3.Clear();
             switch (type)
             {
+                case eMediaType.DeviceRemoved:
+                    IconManager.UIIcon removeMe = new IconManager.UIIcon(theHost.getSkinImage("Discs|AudioCD").image, ePriority.MediumHigh, true, "OMNotify");
+                    removeMe.tag = lastPath;
+                    theHost.sendMessage("UI", "OMNotify", "RemoveIcon", ref removeMe);
+                    return;
                 case eMediaType.NotSet:
                     ((OMLabel)p[1]).Text = "Identifying . . .";
                     ((OMImage)p[3]).Image = new imageItem();
@@ -139,36 +145,48 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
+                    IconManager.UIIcon audiocd=new IconManager.UIIcon(theHost.getSkinImage("Discs|AudioCD").image, ePriority.MediumHigh, true,"OMNotify");
+                    audiocd.tag = lastPath;
+                    theHost.sendMessage("UI", "OMNotify", "AddIcon", ref audiocd);
                     return;
                 case eMediaType.DVD:
                     ((OMLabel)p[1]).Text = "DVD";
-                    ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|DVD", true);
+                    ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|DVD");
                     itm = theHost.getSkinImage("Discs|Play", true);
                     List3.Add(new OMListItem("Play DVD", itm.image));
                     itm = theHost.getSkinImage("Discs|Eject", true);
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
+                    IconManager.UIIcon dvd = new IconManager.UIIcon(theHost.getSkinImage("Discs|DVD").image, ePriority.MediumHigh, true, "OMNotify");
+                    dvd.tag = lastPath;
+                    theHost.sendMessage("UI", "OMNotify", "AddIcon", ref dvd);
                     return;
                 case eMediaType.HDDVD:
                     ((OMLabel)p[1]).Text = "HDDVD";
-                    ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|HDDVD", true);
+                    ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|HDDVD");
                     itm = theHost.getSkinImage("Discs|Play", true);
                     List3.Add(new OMListItem("Play HDDVD", itm.image));
                     itm = theHost.getSkinImage("Discs|Eject", true);
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
+                    IconManager.UIIcon hddvd = new IconManager.UIIcon(theHost.getSkinImage("Discs|HDDVD").image, ePriority.MediumHigh, true,"OMNotify");
+                    hddvd.tag = lastPath;
+                    theHost.sendMessage("UI", "OMNotify", "AddIcon", ref hddvd);
                     return;
                 case eMediaType.BluRay:
                     ((OMLabel)p[1]).Text = "Blu-Ray";
-                    ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|BluRay", true);
+                    ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|BluRay");
                     itm = theHost.getSkinImage("Discs|Play", true);
                     List3.Add(new OMListItem("Play Blu-Ray", itm.image));
                     itm = theHost.getSkinImage("Discs|Eject", true);
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
+                    IconManager.UIIcon bluray = new IconManager.UIIcon(theHost.getSkinImage("Discs|BluRay").image, ePriority.MediumHigh, true, "OMNotify");
+                    bluray.tag = lastPath;
+                    theHost.sendMessage("UI", "OMNotify", "AddIcon", ref bluray);
                     return;
                 case eMediaType.Camera:
                     ((OMLabel)p[1]).Text = "Camera";
@@ -252,7 +270,10 @@ namespace ControlDemo
         }
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            IconManager.UIIcon ui = data as IconManager.UIIcon;
+            theHost_OnStorageEvent(eMediaType.NotSet, ui.tag);
+            theHost_OnStorageEvent(eMediaType.AudioCD, ui.tag);
+            return true;
         }
         public void Dispose()
         {

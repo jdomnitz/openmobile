@@ -283,7 +283,7 @@ namespace OMDir
                 if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                     r.Add(new OMListItem(s.Name, folder));
             foreach (FileInfo s in info.GetFiles())
-                //if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                     r.Add(s.Name);
         }
 
@@ -291,8 +291,6 @@ namespace OMDir
         {
             if (manager!=null)
                 manager.Dispose();
-            manager = null;
-            theHost = null;
             GC.SuppressFinalize(this);
         }
     }

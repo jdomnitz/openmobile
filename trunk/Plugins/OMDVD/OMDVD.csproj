@@ -36,9 +36,6 @@
       <HintPath>..\OpenMobile\bin\Debug\Plugins\DirectShowLib-2005.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />

@@ -83,7 +83,7 @@ namespace OpenMobile.Data
             /// <summary>
             /// Task Importance
             /// </summary>
-            public priority Importance=priority.Normal;
+            public ePriority Importance=ePriority.Normal;
             /// <summary>
             /// Task Title
             /// </summary>
@@ -146,7 +146,7 @@ namespace OpenMobile.Data
             task ret = new task(ID);
             ret.Category = asyncReader.GetInt32(asyncReader.GetOrdinal("Category"));
             ret.Description = asyncReader["Description"].ToString();
-            ret.Importance = (priority)Enum.Parse(typeof(priority), asyncReader["Importance"].ToString());
+            ret.Importance = (ePriority)Enum.Parse(typeof(ePriority), asyncReader["Importance"].ToString());
             ret.State = (state)Enum.Parse(typeof(state), asyncReader["State"].ToString());
             ret.Title = asyncReader["Title"].ToString();
             return ret;

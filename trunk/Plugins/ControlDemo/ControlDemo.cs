@@ -36,18 +36,16 @@ namespace ControlDemo
     {
 
     #region IHighLevel Members
-    OMPanel p = new OMPanel();
     ScreenManager manager;
     IPluginHost theHost;
-    bool[] embedded;
     public eLoadStatus initialize(IPluginHost host)
     {
+        OMPanel p = new OMPanel();
         theHost = host;
         OMImage ss = new OMImage(0, 100, 1000, 500);
         p.addControl(ss);
         manager = new ScreenManager(theHost.ScreenCount);
         manager.loadPanel(p);
-        embedded = new bool[theHost.ScreenCount];
         return eLoadStatus.LoadSuccessful;
     }
 
