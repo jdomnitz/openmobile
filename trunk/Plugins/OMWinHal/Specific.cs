@@ -23,6 +23,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using OpenMobile;
 using OSSpecificLib.CoreAudioApi;
+using System.Management;
 
 namespace OMHal
 {
@@ -33,6 +34,9 @@ namespace OMHal
     {
         static MMDevice[] device;
         private static OperatingSystem os = System.Environment.OSVersion;
+        const int SC_MONITORPOWER = 0xF170;
+        const int WM_SYSCOMMAND = 0x0112;
+        private static bool monitorOn = true;
         /// <summary>
         /// Gets the system volume
         /// </summary>
@@ -170,7 +174,49 @@ namespace OMHal
             StringBuilder buf = new StringBuilder();
             mciSendString("SET CDAudio door open", buf, 127, IntPtr.Zero);
         }
+        internal static void SetBrightness(int value)
+        {
+            if ((!monitorOn) && (value != 0))
+            {
+                monitorOn = true;
+                SwitchOnMonitor();
+            }
+            if (value == 0)
+            {
+                monitorOn = false;
+                SwitchOffMonitor();
+                return;
+            }
+            if (value == 1) //round down
+                value = 0;
+            Set((byte)(value * 2.55));
+        }
 
+        private static void SwitchOffMonitor()
+        {
+            SendMessage(Form1.ActiveForm.Handle.ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+        }
+        private static void SwitchOnMonitor()
+        {
+            SendMessage(Form1.ActiveForm.Handle.ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+        }
+        private static void Set(byte targetBrightness)
+        {
+            ManagementScope scope = new ManagementScope(@"root\WMI");
+            SelectQuery query = new SelectQuery("WmiMonitorBrightnessMethods");
+            using(ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query))
+            using (ManagementObjectCollection objects = searcher.Get())
+            {
+                foreach (ManagementObject obj2 in objects)
+                {
+                    obj2.InvokeMethod("WmiSetBrightness", new object[] { uint.MaxValue, targetBrightness });
+                    break;
+                }
+            }
+        }
+
+        [DllImport("user32.dll")]
+        private static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
         [DllImport("winmm.dll")]
         static extern Int32 mciSendString(string command, StringBuilder buffer, int bufferSize, IntPtr hwndCallback);
     }

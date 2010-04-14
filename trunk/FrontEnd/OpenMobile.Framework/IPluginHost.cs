@@ -55,7 +55,7 @@ namespace OpenMobile.Plugin
     /// </summary>
     /// <param name="type"></param>
     /// <param name="arg"></param>
-    public delegate void StorageEvent(eMediaType type, string arg);
+    public delegate void StorageEvent(eMediaType type, bool justInserted, string arg);
     /// <summary>
     /// A navigation event
     /// </summary>
@@ -180,21 +180,6 @@ namespace OpenMobile.Plugin
         /// <param name="data"></param>
         /// <returns></returns>
         bool sendMessage<T>(string to, string from, string message, ref T data);
-        /// <summary>
-        /// Execute the function on all plugins of the given type
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="function"></param>
-        /// <returns></returns>
-        bool executeByType(Type type, eFunction function);
-        /// <summary>
-        /// Execute the function on all plugins of the given type
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="function"></param>
-        /// <param name="arg">Optional Argument</param>
-        /// <returns></returns>
-        bool executeByType(Type type, eFunction function, string arg);
         /// <summary>
         /// Execute the function on all plugins of the given type
         /// </summary>

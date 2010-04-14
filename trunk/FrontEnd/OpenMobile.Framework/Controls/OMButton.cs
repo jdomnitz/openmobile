@@ -125,9 +125,21 @@ namespace OpenMobile.Controls
                 if (image == value)
                     return;
                 image = value;
+                try
+                {
+                    if (ImageAnimator.CanAnimate(value.image) == true)
+                        ImageAnimator.Animate(value.image, new EventHandler(update));
+                }
+                catch (InvalidOperationException) { }
                 refreshMe(this.toRegion());
             }
         }
+
+        private void update(object sender, EventArgs e)
+        {
+            refreshMe(this.toRegion());
+        }
+
         /// <summary>
         /// Sets the effect when the button is clicked
         /// </summary>
@@ -348,7 +360,10 @@ namespace OpenMobile.Controls
                 }
                 else
                 {
-                    g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, ia);
+                    lock (image.image)
+                    {
+                        g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, ia);
+                    }
                 }
                 
                 // Debug function added by Borte

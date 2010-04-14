@@ -207,7 +207,7 @@ namespace DPGWeather
                 }
                 status = 0;
                 updateLocation = arg;
-                OpenMobile.Threading.TaskManager.QueueTask(processItems, OpenMobile.ePriority.MediumHigh);
+                OpenMobile.Threading.TaskManager.QueueTask(processItems, OpenMobile.ePriority.MediumHigh,"Sync Weather");
                 return true;
             }
             else

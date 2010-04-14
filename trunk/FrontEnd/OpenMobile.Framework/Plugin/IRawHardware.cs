@@ -32,7 +32,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
-        OMPanel loadSettings(string name, int screen);
+        Settings loadSettings();
         /// <summary>
         /// Convert the string name of the value you are trying to read or write to a PID
         /// </summary>

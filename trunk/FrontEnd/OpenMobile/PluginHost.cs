@@ -28,6 +28,7 @@ using Microsoft.Win32;
 using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
+using System.IO;
 
 namespace OpenMobile
 {
@@ -145,6 +146,7 @@ namespace OpenMobile
             catch (NullReferenceException) { return 0; }
             return Array.FindIndex(devs, p => p.Replace("  "," ") == str)+1;
         }
+
         public string SkinPath
         {
             get
@@ -172,10 +174,10 @@ namespace OpenMobile
                 return pluginpath;
             }
         }
-        private OMPanel getSettingsPanelByName(string name,int screen)
+        private Settings getSettingsByName(string name,int screen)
         {
             try{
-                return ((IHighLevel)getPluginByName(name)).loadSettings("",screen);
+                return ((IHighLevel)getPluginByName(name)).loadSettings();
             }
             catch (Exception) { return null; }
         }
@@ -189,11 +191,11 @@ namespace OpenMobile
             }
             catch (Exception) { return null; }
         }
-        private OMPanel getSettingsPanelByName(string name,string panelName,int screen)
+        private Settings getSettingsByName(string name,string panelName,int screen)
         {
             try
             {
-                return ((IHighLevel)getPluginByName(name)).loadSettings(panelName,screen);
+                return ((IHighLevel)getPluginByName(name)).loadSettings();
             }
             catch (Exception) { return null; }
         }
@@ -259,7 +261,7 @@ namespace OpenMobile
             currentTunedContent = new ITunedContent[8];
             currentPosition = new int[8];
             for (int i = 0; i < screenCount; i++)
-                history.Enqueue(i,false, "MainMenu",false);
+                history.Enqueue(i, "MainMenu","",false);
             for (int i = 0; i < 8; i++)
                 queued[i] = new List<mediaInfo>();
         }
@@ -275,7 +277,7 @@ namespace OpenMobile
                         if (ipAddress != i.ToString())
                         {
                             ipAddress = i.ToString();
-                            raiseSystemEvent(eFunction.connectedToInternet, ipAddress, "","");
+                            raiseSystemEvent(eFunction.networkConnectionsAvailable, ipAddress, "","");
                         }
             }
         }
@@ -286,19 +288,21 @@ namespace OpenMobile
             {
                 internetAccess = e.IsAvailable;
                 if (internetAccess == true)
-                    raiseSystemEvent(eFunction.networkConnectionsAvailable,"","","");
+                    if (OpenMobile.Net.Network.checkForInternet()==OpenMobile.Net.Network.connectionStatus.InternetAccess)
+                        raiseSystemEvent(eFunction.connectedToInternet,"","","");
                 else
                     raiseSystemEvent(eFunction.disconnectedFromInternet,"","","");
             }
         }
 
-        public void RaiseStorageEvent(eMediaType type, string arg)
+        public void RaiseStorageEvent(eMediaType type,bool justInserted, string arg)
         {
             try
             {
-                OnStorageEvent(type, arg);
+                if (OnStorageEvent!=null)
+                    OnStorageEvent(type,justInserted, arg);
                 if (type == eMediaType.NotSet)
-                    StorageAnalyzer.AnalyzeAsync(arg);
+                    StorageAnalyzer.AnalyzeAsync(arg,justInserted);
             }
             catch (Exception) { }
         }
@@ -326,7 +330,8 @@ namespace OpenMobile
             {
                 try
                 {
-                    OnPowerChange(ePowerEvent.SystemResumed);
+                    if (OnPowerChange != null)
+                        OnPowerChange(ePowerEvent.SystemResumed);
                 }
                 catch (Exception) { }
             }
@@ -334,7 +339,8 @@ namespace OpenMobile
             {
                 try
                 {
-                    OnPowerChange(ePowerEvent.SleepOrHibernatePending);
+                    if (OnPowerChange != null)
+                        OnPowerChange(ePowerEvent.SleepOrHibernatePending);
                 }
                 catch (Exception) { }
             }
@@ -366,16 +372,8 @@ namespace OpenMobile
                 {
                     try
                     {
-                        if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Charging)
-                        {
-                            if (OnPowerChange != null)
-                                OnPowerChange(ePowerEvent.SystemPluggedIn);
-                        }
-                        else if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.High)
-                        {
-                            if (OnPowerChange != null)
-                                OnPowerChange(ePowerEvent.SystemPluggedIn);
-                        }
+                        if (OnPowerChange != null)
+                            OnPowerChange(ePowerEvent.SystemPluggedIn);
                     }
                     catch (Exception) { }
                 }
@@ -412,11 +410,11 @@ namespace OpenMobile
             switch (function)
             {
                 case eFunction.closeProgram:
-                    lock (Core.RenderingWindows[0])
+                    //Don't lock this to prevent deadlock
                     {
                         RenderingWindow.closeRenderer();
-                        raiseSystemEvent(eFunction.closeProgram,"","","");
-                        if (hal!=null)
+                        raiseSystemEvent(eFunction.closeProgram, "", "", "");
+                        if (hal != null)
                             hal.snd("45");
                     }
                     return true;
@@ -474,22 +472,13 @@ namespace OpenMobile
         {
             public struct historyItem
             {
-                public bool settings;
                 public bool forgettable;
                 public string pluginName;
                 public string panelName;
-                public historyItem(bool settings, string pluginName, string panelName,bool forgetMe)
+                public historyItem(string pluginName, string panelName,bool forgetMe)
                 {
-                    this.settings = settings;
                     this.pluginName = pluginName;
                     this.panelName = panelName;
-                    this.forgettable = forgetMe;
-                }
-                public historyItem(bool settings, string pluginName,bool forgetMe)
-                {
-                    this.settings = settings;
-                    this.pluginName = pluginName;
-                    this.panelName = "";
                     this.forgettable = forgetMe;
                 }
             }
@@ -511,12 +500,8 @@ namespace OpenMobile
                 for (int i = 0; i < count; i++)
                     items[i] = new Stack<historyItem>(10);
             }
-            public void Enqueue(int screen, bool settings, string name, bool forgetMe)
-            {
-                Enqueue(screen, settings, name, "", forgetMe);
-            }
             
-            public void Enqueue(int screen, bool settings, string pluginName,string panelName, bool forgetMe)
+            public void Enqueue(int screen, string pluginName,string panelName, bool forgetMe)
             {
                 if (items[screen].Count == 10)
                 {
@@ -526,7 +511,7 @@ namespace OpenMobile
                         tmp.Push(items[screen].Pop());
                     }
                 }
-                items[screen].Push(new historyItem(settings, pluginName,panelName,forgetMe));
+                items[screen].Push(new historyItem(pluginName,panelName,forgetMe));
             }
             public historyItem Peek(int screen)
             {
@@ -572,51 +557,31 @@ namespace OpenMobile
         public bool execute(eFunction function,string arg)
         {
             int ret;
+            IBasePlugin plugin;
             switch (function)
             {
                 case eFunction.promptDialNumber:
                     raiseSystemEvent(eFunction.promptDialNumber, arg, "", "");
                     return true;
                 case eFunction.showNavPanel:
-                    IBasePlugin z = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
-                    if (z == null)
+                    plugin = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
+                    if (plugin == null)
                         return false;
-                    return ((INavigation)z).switchTo(arg);
+                    return ((INavigation)plugin).switchTo(arg);
                 case eFunction.navigateToPOI:
-                    IBasePlugin n = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
-                    if (n == null)
+                    plugin = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
+                    if (plugin == null)
                         return false;
-                    return ((INavigation)n).findPOI(arg);
+                    return ((INavigation)plugin).findPOI(arg);
                 case eFunction.ExecuteTransition:
                     return execute(eFunction.ExecuteTransition,arg,"Crossfade");
                 case eFunction.TransitionToPanel:
-                    int tp;
-                    if (int.TryParse(arg, out tp))
-                        return execute(eFunction.TransitionToPanel, arg, history.Peek(tp).pluginName, "");
+                    if (int.TryParse(arg, out ret))
+                        return execute(eFunction.TransitionToPanel, arg, history.Peek(ret).pluginName, "");
                     return false;
                 case eFunction.TransitionFromPanel:
-                    int tf;
-                    if (int.TryParse(arg, out tf))
-                    {
-                        OMPanel k;
-                        if (history.Peek(tf).settings==true)
-                            k = getSettingsPanelByName(history.Peek(tf).pluginName, tf);
-                        else
-                            k= getPanelByName(history.Peek(tf).pluginName, tf);
-                        if (k == null)
-                            return false;
-                        lock (Core.RenderingWindows[tf])
-                        {
-                            Core.RenderingWindows[tf].transitionOutPanel(k);
-                        }
-                        raiseSystemEvent(eFunction.TransitionFromPanel, arg, history.Peek(tf).pluginName, "");
-                        return true;
-                    }
-                    return false;
-                case eFunction.TransitionFromSettings:
-                    int tfs;
-                    if (int.TryParse(arg, out tfs) == true)
-                        return execute(eFunction.TransitionFromSettings, arg, history.Peek(tfs).pluginName, history.Peek(tfs).panelName);
+                    if (int.TryParse(arg, out ret))
+                        return execute(eFunction.TransitionFromPanel, arg, history.Peek(ret).pluginName, history.Peek(ret).panelName);
                     return false;
                 case eFunction.goBack:
                     return execute(eFunction.goBack, arg, "SlideRight");
@@ -780,29 +745,15 @@ namespace OpenMobile
                 case eFunction.resetDevice:
                     throw new NotImplementedException();
                 case eFunction.loadSpeechContext:
-                    string s;
-                    using (PluginSettings set = new PluginSettings())
-                        s = set.getSetting("Default.Speech");
-                    if ((s!=null)&&(s.Length > 0))
-                    {
-                        IBasePlugin b = Core.pluginCollection.Find(q => q.pluginName == s);
-                        if (b == null)
-                            return false;
-                        return ((ISpeech)b).loadContext(arg);
-                    }
-                    return false;
+                    plugin = Core.pluginCollection.Find(q => typeof(ISpeech).IsInstanceOfType(q));
+                    if (plugin == null)
+                        return false;
+                    return ((ISpeech)plugin).loadContext(arg);
                 case eFunction.Speak:
-                    string str;
-                    using (PluginSettings set = new PluginSettings())
-                        str = set.getSetting("Default.Speech");
-                    if ((str!=null)&&(str.Length > 0))
-                    {
-                        IBasePlugin b = Core.pluginCollection.Find(q => q.pluginName == str);
-                        if (b == null)
-                            return false;
-                        return ((ISpeech)b).speak(arg);
-                    }
-                    return false;
+                    plugin = Core.pluginCollection.Find(q => typeof(ISpeech).IsInstanceOfType(q));
+                    if (plugin == null)
+                        return false;
+                    return ((ISpeech)plugin).speak(arg);
                 case eFunction.connectToInternet:
                     return Net.Connections.connect(this,arg);
                 case eFunction.disconnectFromInternet:
@@ -811,14 +762,7 @@ namespace OpenMobile
                     raiseSystemEvent(eFunction.systemVolumeChanged, arg, "0", "");
                     return true;
                 case eFunction.setSystemVolume:
-                    if (int.TryParse(arg, out ret) == true)
-                    {
-                        if ((ret < -2) || (ret > 100))
-                            return false;
-                        hal.snd("34|"+ret.ToString()+"|0");
-                        return true;
-                    }
-                    return false;
+                    return execute(eFunction.setSystemVolume, arg, "0");
                 case eFunction.TransitionFromAny:
                     if (int.TryParse(arg, out ret) == true)
                     {
@@ -841,12 +785,12 @@ namespace OpenMobile
                 case eFunction.navigateToAddress:
                     if (arg.Length <= 1)
                         return false;
-                    IBasePlugin y = Core.pluginCollection.Find(a => typeof(INavigation).IsInstanceOfType(a));
-                    if (y!=null)
+                    plugin = Core.pluginCollection.Find(a => typeof(INavigation).IsInstanceOfType(a));
+                    if (plugin!=null)
                     {
                         Location adr;
-                        if (Location.TryParse(arg, out adr) == true)
-                            ((INavigation)y).navigateTo(adr);
+                        if (!((Location.TryParse(arg, out adr) == true)&&((INavigation)plugin).navigateTo(adr)))
+                            return false;
                     }
                     raiseSystemEvent(eFunction.navigateToAddress, arg, "", "");
                     return true;
@@ -876,87 +820,60 @@ namespace OpenMobile
                     return execute(eFunction.TransitionToPanel, arg1, arg2, "");
                 case eFunction.TransitionFromPanel:
                     return execute(eFunction.TransitionFromPanel, arg1, arg2, "");
-                case eFunction.TransitionToSettings:
-                    return execute(eFunction.TransitionToSettings, arg1, arg2, "");
-                case eFunction.TransitionFromSettings:
-                    return execute(eFunction.TransitionFromSettings, arg1, arg2, "");
                 case eFunction.ExecuteTransition:
                     eGlobalTransition effect;
-                    try
-                    {
+                    
                         if (level == eGraphicsLevel.Minimal)
                             effect = eGlobalTransition.None;
                         else
-                            effect = (eGlobalTransition)Enum.Parse(typeof(eGlobalTransition), arg2);
-                    }
-                    catch (Exception)
+                            try
+                            {
+                                effect = (eGlobalTransition)Enum.Parse(typeof(eGlobalTransition), arg2);
+                            }
+                            catch (Exception)
+                            {
+                                effect = eGlobalTransition.None;
+                            }
+                    if (int.TryParse(arg1, out ret) == true)
                     {
-                        effect = eGlobalTransition.None;
-                    }
-                    int ex;
-                    if (int.TryParse(arg1, out ex) == true)
-                    {
-                        lock (Core.RenderingWindows[ex])
+                        lock (Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[ex].executeTransition(effect);
+                            Core.RenderingWindows[ret].executeTransition(effect);
                         }
                         raiseSystemEvent(eFunction.ExecuteTransition, arg1, effect.ToString(), "");
                         return true;
                     }
                     return false;
                 case eFunction.goBack:
-                    int gb;
-                    if (int.TryParse(arg1, out gb) == true)
+                    if (int.TryParse(arg1, out ret) == true)
                     {
-                        if (history.getDisabled(gb) == true)
+                        if (history.getDisabled(ret) == true)
                         {
                             raiseSystemEvent(eFunction.goBack, arg1, "", "");
                             return false;
                         }
-                        if (history.DoublePeek(gb).pluginName == null)
+                        if (history.DoublePeek(ret).pluginName == null)
                             return false;
-                        if (history.Peek(gb).settings == true)
-                        {
-                            execute(eFunction.TransitionFromSettings, arg1, history.Peek(gb).pluginName, history.Peek(gb).panelName);
-                            raiseSystemEvent(eFunction.TransitionFromSettings, arg1, history.Peek(gb).pluginName, history.Peek(gb).panelName);
-                        }
-                        else
-                        {
-                            execute(eFunction.TransitionFromPanel, arg1, history.Peek(gb).pluginName, history.Peek(gb).panelName);
-                            raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.Peek(gb).pluginName, history.Peek(gb).panelName);
-                        }
-                        historyCollection.historyItem tmp = history.DoublePeek(gb);
+                        execute(eFunction.TransitionFromPanel, arg1, history.Peek(ret).pluginName, history.Peek(ret).panelName);
+                        raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.Peek(ret).pluginName, history.Peek(ret).panelName);
+                        historyCollection.historyItem tmp = history.DoublePeek(ret);
                         if (tmp.forgettable == true)
                         {
-                            history.Dequeue(gb);
-                            if ((tmp.pluginName == history.Peek(gb).pluginName) && (tmp.panelName == history.Peek(gb).panelName))
-                                history.Dequeue(gb);
+                            history.Dequeue(ret);
+                            if ((tmp.pluginName == history.Peek(ret).pluginName) && (tmp.panelName == history.Peek(ret).panelName))
+                                history.Dequeue(ret);
                             return execute(eFunction.goBack, arg1, arg2);
                         }
                         //This part is done manually to prevent adding it to the history
-                        if (history.DoublePeek(gb).settings == true)
+                        OMPanel k = getPanelByName(history.DoublePeek(ret).pluginName, history.DoublePeek(ret).panelName, ret);
+                        if (k == null)
+                            return false;
+                        lock (Core.RenderingWindows[ret])
                         {
-                            OMPanel k = getSettingsPanelByName(history.DoublePeek(gb).pluginName, history.DoublePeek(gb).panelName, gb);
-                            if (k == null)
-                                return false;
-                            lock (Core.RenderingWindows[gb])
-                            {
-                                Core.RenderingWindows[gb].transitionInPanel(k);
-                            }
-                            raiseSystemEvent(eFunction.TransitionToSettings, arg1, history.DoublePeek(gb).pluginName, history.DoublePeek(gb).panelName);
+                            Core.RenderingWindows[ret].transitionInPanel(k);
                         }
-                        else
-                        {
-                            OMPanel k = getPanelByName(history.DoublePeek(gb).pluginName, history.DoublePeek(gb).panelName, gb);
-                            if (k == null)
-                                return false;
-                            lock (Core.RenderingWindows[gb])
-                            {
-                                Core.RenderingWindows[gb].transitionInPanel(k);
-                            }
-                            raiseSystemEvent(eFunction.TransitionToPanel, arg1, history.DoublePeek(gb).pluginName, history.DoublePeek(gb).panelName);
-                        }
-                        history.Dequeue(gb);
+                        raiseSystemEvent(eFunction.TransitionToPanel, arg1, history.DoublePeek(ret).pluginName, history.DoublePeek(ret).panelName);
+                        history.Dequeue(ret);
                         execute(eFunction.ExecuteTransition, arg1,arg2);
                         return true;
                     }
@@ -1057,9 +974,7 @@ namespace OpenMobile
                         if (currentMediaPlayer[ret] == null)
                         {
                             if (currentTunedContent[ret] == null)
-                            {
                                 return false;
-                            }
                             raiseMediaEvent(eFunction.setPlayerVolume, ret, arg2);
                             return currentTunedContent[ret].setVolume(ret, int.Parse(arg2));
                         }
@@ -1097,6 +1012,7 @@ namespace OpenMobile
                     if (int.TryParse(arg1, out ret) == true)
                     {
                         raiseSystemEvent(eFunction.gesture, arg1, arg2, history.Peek(ret).pluginName);
+                        return true;
                     }
                     return false;
                 case eFunction.systemVolumeChanged:
@@ -1113,7 +1029,18 @@ namespace OpenMobile
                             return false;
                         if (int.TryParse(arg2, out ret) == false)
                             return false;
-                        hal.snd("34|" + ret.ToString() + "|"+arg2);
+                        hal.snd("34|" + arg1 + "|"+arg2);
+                        return true;
+                    }
+                    return false;
+                case eFunction.setMonitorBrightness:
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        if ((ret < 0) || (ret > screenCount))
+                            return false;
+                        if (int.TryParse(arg2, out ret) == false)
+                            return false;
+                        hal.snd("40|" + arg1 + "|" + arg2);
                         return true;
                     }
                     return false;
@@ -1143,64 +1070,37 @@ namespace OpenMobile
         }
         public bool execute(eFunction function, string arg1, string arg2, string arg3)
         {
+            OMPanel panel;
+            int ret;
             switch (function)
             {
                 case eFunction.refreshData:
                     return ((IDataProvider)getPluginByName(arg1)).refreshData(arg2,arg3);
-                case eFunction.TransitionToSettings:
-                    int ts;
-                    if (int.TryParse(arg1, out ts) == true)
-                    {
-                        OMPanel b = getSettingsPanelByName(arg2, arg3, ts);
-                        if (b == null)
-                            return false;
-                        lock (Core.RenderingWindows[ts])
-                        {
-                            Core.RenderingWindows[ts].transitionInPanel(b);
-                            raiseSystemEvent(eFunction.TransitionToSettings, arg1, arg2, arg3);
-                            history.Enqueue(ts,true, arg2, arg3,b.Forgotten);
-                        }
-                        return true;
-                    } 
-                    return false;
-                case eFunction.TransitionFromSettings:
-                    int tf;
-                    if (int.TryParse(arg1, out tf) == true)
-                    {
-                        lock (Core.RenderingWindows[tf])
-                        {
-                            Core.RenderingWindows[tf].transitionOutPanel(getSettingsPanelByName(arg2, arg3, tf));
-                        }
-                        raiseSystemEvent(eFunction.TransitionFromSettings, arg1, arg2, arg3);
-                        return true;
-                    }
-                    return false;
                 case eFunction.TransitionToPanel:
                     int tp;
-                    if (int.TryParse(arg1, out tp) == true)
+                    if (int.TryParse(arg1, out ret) == true)
                     {
-                        OMPanel q = getPanelByName(arg2, arg3, tp);
-                        if (q == null)
+                        panel = getPanelByName(arg2, arg3, ret);
+                        if (panel == null)
                             return false;
-                        lock (Core.RenderingWindows[tp])
+                        lock (Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[tp].transitionInPanel(q);
+                            Core.RenderingWindows[ret].transitionInPanel(panel);
                             raiseSystemEvent(eFunction.TransitionToPanel,arg1, arg2,arg3);
-                            history.Enqueue(tp,false, arg2, arg3,q.Forgotten);
+                            history.Enqueue(ret, arg2, arg3,panel.Forgotten);
                         }
                         return true;
                     }
                     return false;
                 case eFunction.TransitionFromPanel:
-                    int tfp;
-                    if (int.TryParse(arg1, out tfp) == true)
+                    if (int.TryParse(arg1, out ret) == true)
                     {
-                        OMPanel w = getPanelByName(arg2, arg3, tfp);
-                        if (w == null)
+                        panel = getPanelByName(arg2, arg3, ret);
+                        if (panel == null)
                             return false;
-                        lock(Core.RenderingWindows[tfp])
+                        lock(Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[tfp].transitionOutPanel(w);
+                            Core.RenderingWindows[ret].transitionOutPanel(panel);
                         }
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg1, arg2, arg3);
                         return true;
@@ -1212,39 +1112,7 @@ namespace OpenMobile
             }
             return false;
         }
-        
-        public bool executeByType(Type type,eFunction function)
-        {
-                bool result=false;
-                switch (function)
-                {
-                    case eFunction.refreshData:
-                    
-                        foreach (IBasePlugin p in Core.pluginCollection.FindAll(i => typeof(IDataProvider).IsInstanceOfType(i)))
-                        {
-                            result = result & execute(eFunction.refreshData, p.pluginName);
-                        }
-                        return result;
-                    default:
-                        return false;
-                }
-        }
-        public bool executeByType(Type type,eFunction function,string arg)
-        {
-                bool result=false;
-                switch (function)
-                {
-                    case eFunction.refreshData:
 
-                        foreach (IBasePlugin p in Core.pluginCollection.FindAll(i => typeof(IDataProvider).IsInstanceOfType(i)))
-                        {
-                            result = result & execute(eFunction.refreshData, p.pluginName,arg);
-                        }
-                        return result;
-                    default:
-                        return false;
-                }
-        }
         public bool executeByType(Type type, eFunction function, string arg1, string arg2)
         {
                 bool result=false;
@@ -1306,7 +1174,7 @@ namespace OpenMobile
         public void raiseSystemEvent(eFunction e,string arg1,string arg2,string arg3)
         {
             if (OnSystemEvent!=null)
-                OnSystemEvent(e,arg1,arg2,arg3);
+                OnSystemEvent(e, arg1, arg2, arg3);
         }
         private void raiseNavigationEvent(eNavigationEvent type,string arg)
         {
@@ -1315,7 +1183,7 @@ namespace OpenMobile
                 OnNavigationEvent(type, arg);
              }catch(Exception){}
         }
-        private void raiseWirelessEvent(eWirelessEvent type, string arg)
+        public void raiseWirelessEvent(eWirelessEvent type, string arg)
         {
             if (OnWirelessEvent != null)
                 OnWirelessEvent(type, arg);
@@ -1371,7 +1239,17 @@ namespace OpenMobile
                     }
                     catch (System.IO.FileNotFoundException)
                     {
-                        return new imageItem("MISSING");
+                        try
+                        {
+                            im.image = Image.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".gif"));
+                            im.name = imageName;
+                            imageCache.Add(im);
+                            return im;
+                        }
+                        catch (System.IO.FileNotFoundException)
+                        {
+                            return new imageItem("MISSING");
+                        }
                     }
                 }
             }
@@ -1412,20 +1290,21 @@ namespace OpenMobile
         }
         public void getData(eGetData dataType, string name, out object data)
         {
+            IBasePlugin plugin;
             data = null;
             switch (dataType)
             {
                 case eGetData.GetMap:
-                    IBasePlugin z = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
-                    if (z == null)
+                    plugin = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
+                    if (plugin == null)
                         return;
-                    data = ((INavigation)z).getMap;
+                    data = ((INavigation)plugin).getMap;
                     return;
                 case eGetData.GetMediaDatabase:
-                    IBasePlugin y = Core.pluginCollection.Find(t => t.pluginName == name);
-                    if (y == null)
+                    plugin = Core.pluginCollection.Find(t => t.pluginName == name);
+                    if (plugin == null)
                         return;
-                    data = ((IMediaDatabase)y).getNew();
+                    data = ((IMediaDatabase)plugin).getNew();
                     break;
                 case eGetData.GetPlugins:
                     if (name == "")
@@ -1439,12 +1318,12 @@ namespace OpenMobile
                         return;
                     }
                 case eGetData.DataProviderStatus:
-                    if (name.Length != 0)
+                    if (name != "")
                     {
-                        IBasePlugin b = Core.pluginCollection.Find(p => p.pluginName == name);
-                        if (b == null)
+                        plugin = Core.pluginCollection.Find(p => p.pluginName == name);
+                        if (plugin == null)
                             return;
-                        data=((IDataProvider)b).updaterStatus();
+                        data=((IDataProvider)plugin).updaterStatus();
                     }
                     break;
                 case eGetData.GetSystemVolume:
@@ -1465,20 +1344,20 @@ namespace OpenMobile
                     }
                     return;
                 case eGetData.GetFirmwareInfo:
-                    IBasePlugin d = Core.pluginCollection.Find(p => p.pluginName == name);
-                    if (d == null)
+                    plugin = Core.pluginCollection.Find(p => p.pluginName == name);
+                    if (plugin == null)
                         return;
-                    data = ((IRawHardware)d).firmwareVersion;
+                    data = ((IRawHardware)plugin).firmwareVersion;
                     return;
                 case eGetData.GetDeviceInfo:
-                    IBasePlugin e = Core.pluginCollection.Find(p => p.pluginName == name);
-                    if (e == null)
+                    plugin = Core.pluginCollection.Find(p => p.pluginName == name);
+                    if (plugin == null)
                         return;
-                    data = ((IRawHardware)e).deviceInfo;
+                    data = ((IRawHardware)plugin).deviceInfo;
                     return;
                 case eGetData.GetAvailableNetworks:
                     List<connectionInfo> cInf = new List<connectionInfo>();
-                    foreach (IBasePlugin g in Core.pluginCollection.FindAll(p => p.GetType() == typeof(INetwork)))
+                    foreach (IBasePlugin g in Core.pluginCollection.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))
                     {
                         foreach (connectionInfo c in ((INetwork)g).getAvailableNetworks())
                             cInf.Add(c);
@@ -1490,7 +1369,13 @@ namespace OpenMobile
                     {
                         data= ((IAVPlayer)Core.pluginCollection.Find(p => typeof(IAVPlayer).IsInstanceOfType(p) == true)).OutputDevices;
                     }
-                    catch (Exception) { data = null; }
+                    catch (Exception) {}
+                    return;
+                case eGetData.GetAvailableSkins:
+                    string[] ret=Directory.GetDirectories(Path.Combine(Application.StartupPath, "Skins"));
+                    for(int i=0;i<ret.Length;i++)
+                        ret[i]=ret[i].Replace(Path.Combine(Application.StartupPath, "Skins",""), "");
+                    data = ret;
                     return;
             }
         }
@@ -1498,18 +1383,16 @@ namespace OpenMobile
         {
             data = null;
             int ret;
+            IBasePlugin plugin;
             switch (dataType)
             {
                 case eGetData.GetMediaPosition:
                     if (int.TryParse(param, out ret) == true)
                     {
-                        if (name == "")
-                        {
-                            if (currentMediaPlayer[ret] == null)
-                                return;
-                            else
-                                data = currentMediaPlayer[ret].getCurrentPosition(ret);
-                        }
+                        if (currentMediaPlayer[ret] == null)
+                            return;
+                        else
+                            data = currentMediaPlayer[ret].getCurrentPosition(ret);
                     }
                     return;
                 case eGetData.GetScaleFactors:
@@ -1522,13 +1405,10 @@ namespace OpenMobile
                 case eGetData.GetPlaybackSpeed:
                     if (int.TryParse(param, out ret) == true)
                     {
-                        if (name == "")
-                        {
-                            if (currentMediaPlayer[ret] == null)
-                                return;
-                            else
-                                data = currentMediaPlayer[ret].getPlaybackSpeed(ret);
-                        }
+                        if (currentMediaPlayer[ret] == null)
+                            return;
+                        else
+                            data = currentMediaPlayer[ret].getPlaybackSpeed(ret);
                     }
                     return;
                 case eGetData.GetMediaStatus:
@@ -1546,47 +1426,44 @@ namespace OpenMobile
                         }
                         else
                         {
-                            IBasePlugin p = Core.pluginCollection.Find(s => s.pluginName == name);
-                            if (p == null)
+                            plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                            if (plugin == null)
                                 return;
-                            else if (typeof(IAVPlayer).IsInstanceOfType(p))
-                                data = ((IAVPlayer)p).getPlayerStatus(ret);
-                            else if (typeof(ITunedContent).IsInstanceOfType(p))
-                                data = ((ITunedContent)p).getStationInfo(ret);
+                            else if (typeof(IAVPlayer).IsInstanceOfType(plugin))
+                                data = ((IAVPlayer)plugin).getPlayerStatus(ret);
+                            else if (typeof(ITunedContent).IsInstanceOfType(plugin))
+                                data = ((ITunedContent)plugin).getStationInfo(ret);
                         }
                     }
                     return;
                 case eGetData.GetTunedContentInfo:
-                    int q;
-                    if (int.TryParse(param, out q) == true)
-                    {
-                        if (currentTunedContent[q] != null)
-                            data = currentTunedContent[q].getStationInfo(q);
-                    }
+                    if (int.TryParse(param, out ret) == true)
+                        if (currentTunedContent[ret] != null)
+                            data = currentTunedContent[ret].getStationInfo(ret);
                     return;
                 case eGetData.GetAvailableNavPanels:
-                    IBasePlugin n1 = Core.pluginCollection.Find(s => s.pluginName == name);
-                    if (n1 == null)
+                    plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                    if (plugin == null)
                         return;
-                    data = ((INavigation)n1).availablePanels;
+                    data = ((INavigation)plugin).availablePanels;
                     return;
                 case eGetData.GetCurrentPosition:
-                    IBasePlugin n2 = Core.pluginCollection.Find(s => s.pluginName == name);
-                    if (n2 == null)
+                    plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                    if (plugin == null)
                         return;
-                    data = ((INavigation)n2).Position;
+                    data = ((INavigation)plugin).Position;
                     return;
                 case eGetData.GetNearestAddress:
-                    IBasePlugin n3 = Core.pluginCollection.Find(s => s.pluginName == name);
-                    if (n3 == null)
+                    plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                    if (plugin == null)
                         return;
-                    data = ((INavigation)n3).Location;
+                    data = ((INavigation)plugin).Location;
                     return;
                 case eGetData.GetDestination:
-                    IBasePlugin n4 = Core.pluginCollection.Find(s => s.pluginName == name);
-                    if (n4 == null)
+                    plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                    if (plugin == null)
                         return;
-                    data = ((INavigation)n4).Destination;
+                    data = ((INavigation)plugin).Destination;
                     return;
             }
         }

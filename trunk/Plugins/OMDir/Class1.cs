@@ -40,16 +40,20 @@ namespace OMDir
         {
             if (name == "Folder")
             {
+                ((OMLabel)manager[screen][0]).Text = "Select a Folder";
                 type[screen] = 1;  //Type=0: Select File; Type=1: Select Folder; Multi-Select Files=2;
             }
             else
+            {
                 ((OMLabel)manager[screen][0]).Text = "Select a File";
+                type[screen] = 0;
+            }
             if ((name != "Folder") && (name != ""))
                 loadPath(screen, name);
             return manager[screen];
         }
 
-        public OpenMobile.Controls.OMPanel loadSettings(string name, int screen)
+        public Settings loadSettings()
         {
             throw new NotImplementedException();
         }
@@ -100,7 +104,6 @@ namespace OMDir
             OMPanel p = new OMPanel();
             manager = new ScreenManager(theHost.ScreenCount);
             OMLabel caption = new OMLabel(275, 100, 400, 60);
-            caption.Text = "Select a Folder";
             caption.OutlineColor = Color.FromArgb(120, Color.PowderBlue);
             caption.Font = new Font(FontFamily.GenericSansSerif, 36F);
             caption.Format = textFormat.Glow;
@@ -121,6 +124,7 @@ namespace OMDir
             right.ListStyle = eListStyle.DroidStyleImage;
             right.Background = Color.FromArgb(180,Color.LightGray);
             right.ItemColor1 = Color.FromArgb(0,0,16);
+            right.ClickToSelect = true;
             OMList left = new OMList(15, 150, 470, 375);
             left.Font = right.Font;
             left.OnClick+=new userInteraction(left_OnClick);
@@ -128,6 +132,7 @@ namespace OMDir
             left.ListStyle = eListStyle.DroidStyleImage;
             left.Background = right.Background;
             left.ItemColor1 = right.ItemColor1;
+            //left.ClickToSelect = true;
             folder = theHost.getSkinImage("Folder", true).image;
             loadRoot(left);
             p.addControl(caption);
@@ -262,12 +267,23 @@ namespace OMDir
             r.Clear();
             r.Tag = source;
             DirectoryInfo info =new DirectoryInfo(source);
-            foreach (DirectoryInfo s in info.GetDirectories())
-                if ((s.Attributes&FileAttributes.Hidden)!=FileAttributes.Hidden)
-                    r.Add(new OMListItem(s.Name,folder));
-            foreach (FileInfo s in info.GetFiles())
-                if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
-                    r.Add(s.Name);
+            try
+            {
+                foreach (DirectoryInfo s in info.GetDirectories())
+                    if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                        r.Add(new OMListItem(s.Name, folder));
+            }
+            catch (Exception) { }
+            try
+            {
+                if (type[screen] == 0)
+                {
+                    foreach (FileInfo s in info.GetFiles())
+                        if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                            r.Add(s.Name);
+                }
+            }
+            catch (Exception) { }
             ((OMButton)manager[screen][3]).Width = 150;
         }
 
@@ -279,12 +295,22 @@ namespace OMDir
             string source=translateLocal(l);
             r.Tag = source;
             DirectoryInfo info = new DirectoryInfo(source);
-            foreach (DirectoryInfo s in info.GetDirectories())
-                if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
-                    r.Add(new OMListItem(s.Name, folder));
-            foreach (FileInfo s in info.GetFiles())
-                if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
-                    r.Add(s.Name);
+            try
+            {
+                foreach (DirectoryInfo s in info.GetDirectories())
+                    if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                        r.Add(new OMListItem(s.Name, folder));
+            }catch(Exception){}
+            try
+            {
+                if (type[screen] == 0)
+                {
+                    foreach (FileInfo s in info.GetFiles())
+                        if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                            r.Add(s.Name);
+                }
+            }
+            catch (Exception) { }
         }
 
         public void Dispose()

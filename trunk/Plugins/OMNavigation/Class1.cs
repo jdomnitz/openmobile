@@ -121,7 +121,7 @@ namespace Navigation
         {
             return manager[screen];
         }
-        public OMPanel loadSettings(string name, int screen)
+        public Settings loadSettings()
         {
             throw new NotImplementedException();
         }

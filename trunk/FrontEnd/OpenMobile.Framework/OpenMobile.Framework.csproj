@@ -49,6 +49,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuiltInComponents.cs" />
     <Compile Include="Controls\Editing\CustomColor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -138,6 +139,7 @@
     <Compile Include="Serializer.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="TaskManager.cs" />
     <Compile Include="Widget.cs" />
   </ItemGroup>

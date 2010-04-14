@@ -25,6 +25,7 @@ using System.Timers;
 using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
+using System.Windows.Forms;
 
 namespace OpenMobile
 {
@@ -118,7 +119,7 @@ namespace OpenMobile
             return manager[screen];
         }
 
-        public OMPanel loadSettings(string name,int screen)
+        public Settings loadSettings()
         {
             throw new NotImplementedException();
         }
@@ -288,7 +289,6 @@ namespace OpenMobile
             manager.loadPanel(p);
             theHost.OnMediaEvent += theHost_OnMediaEvent;
             theHost.OnSystemEvent += theHost_OnSystemEvent;
-            theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
             theHost.VideoPosition = new Rectangle(0, 100, 1000, 368);
             return eLoadStatus.LoadSuccessful;
         }
@@ -322,22 +322,6 @@ namespace OpenMobile
                         return;
                     theHost.sendMessage(icon.plugin, "UI", "IconClicked", ref icon);
                     break;
-            }
-        }
-
-        void theHost_OnPowerChange(ePowerEvent type)
-        {
-            if (type == ePowerEvent.SystemOnBattery)
-                icons.AddIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryCharged").image, ePriority.MediumLow, false));
-            if (type == ePowerEvent.BatteryLow)
-                icons.AddIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryWarning").image, ePriority.MediumLow, false));
-            if (type == ePowerEvent.BatteryCritical)
-                icons.AddIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryCritical").image, ePriority.MediumLow, false));
-            if (type == ePowerEvent.SystemPluggedIn)
-            {
-                icons.RemoveIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryCharged").image, ePriority.MediumLow, false));
-                icons.RemoveIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryWarning").image, ePriority.MediumLow, false));
-                icons.RemoveIcon(new IconManager.UIIcon(theHost.getSkinImage("BatteryCritical").image, ePriority.MediumLow, false));
             }
         }
 
@@ -649,6 +633,7 @@ namespace OpenMobile
 
         void mediaButton_OnClick(OMControl sender, int screen)
         {
+            OpenMobile.Net.Connections.connect(theHost);
             if (manager[screen][2].Top == 397)
             {
                 timerForward = true;

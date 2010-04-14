@@ -119,7 +119,7 @@ namespace ControlDemo
             List3.SelectedIndex = -1;
         }
 
-        void theHost_OnStorageEvent(eMediaType type, string arg)
+        void theHost_OnStorageEvent(eMediaType type,bool justInserted, string arg)
         {
             lastPath = arg;
             List3.Clear();
@@ -215,6 +215,8 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Close", itm.image));
                     return;
             }
+            if (justInserted == false)
+                return;
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
                 theHost.execute(eFunction.TransitionToPanel, i.ToString(), "OMNotify", "notify");
@@ -231,7 +233,7 @@ namespace ControlDemo
             return null;
         }
 
-        public OMPanel loadSettings(string name, int screen)
+        public Settings loadSettings()
         {
             throw new NotImplementedException();
         }
@@ -271,8 +273,8 @@ namespace ControlDemo
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
             IconManager.UIIcon ui = data as IconManager.UIIcon;
-            theHost_OnStorageEvent(eMediaType.NotSet, ui.tag);
-            theHost_OnStorageEvent(eMediaType.AudioCD, ui.tag);
+            theHost_OnStorageEvent(eMediaType.NotSet,true, ui.tag);
+            theHost_OnStorageEvent(eMediaType.AudioCD,true, ui.tag);
             return true;
         }
         public void Dispose()

@@ -35,17 +35,19 @@ namespace OpenMobile.Threading
     public static class TaskManager
     {
         static EventWaitHandle sync = new EventWaitHandle(false, EventResetMode.AutoReset);
-        struct taskItem
+        public struct taskItem
         {
             public Function function;
             public ePriority Priority;
-            public taskItem(Function function, ePriority Priority)
+            public string TaskName;
+            public taskItem(Function function, ePriority Priority,string name)
             {
                 this.function = function;
                 this.Priority = Priority;
+                this.TaskName = name;
             }
         }
-        static List<taskItem> tasks = new List<taskItem>();
+        public static List<taskItem> Tasks = new List<taskItem>();
         static Thread taskThread;
         static EventWaitHandle enabled=new EventWaitHandle(false,EventResetMode.ManualReset);
         /// <summary>
@@ -53,11 +55,21 @@ namespace OpenMobile.Threading
         /// </summary>
         /// <param name="task"></param>
         /// <param name="taskPriority"></param>
-        public static void QueueTask(Function task,ePriority taskPriority)
+        public static void QueueTask(Function task, ePriority taskPriority)
         {
-            tasks.Add(new taskItem(task, taskPriority));
+            QueueTask(task, taskPriority, "Unknown Task");
+        }
+        /// <summary>
+        /// Add a BackgroundTask to the task list
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="taskPriority"></param>
+        /// <param name="taskName"></param>
+        public static void QueueTask(Function task,ePriority taskPriority,string taskName)
+        {
+            Tasks.Add(new taskItem(task, taskPriority,taskName));
             sync.Set();
-            lock(tasks)//No particular reason other then its a mutual object to provide thread safety
+            lock(Tasks)//No particular reason other then its a mutual object to provide thread safety
             {
                 if (taskThread == null)
                 {
@@ -84,10 +96,10 @@ namespace OpenMobile.Threading
             taskItem ret;
             foreach (ePriority p in priorities)
             {
-                if (tasks.Exists(k => k.Priority == p) == true)
+                if (Tasks.Exists(k => k.Priority == p) == true)
                 {
-                    ret = tasks.Find(k => k.Priority == p);
-                    tasks.Remove(ret);
+                    ret = Tasks.Find(k => k.Priority == p);
+                    Tasks.Remove(ret);
                     return ret;
                 }
             }
@@ -105,7 +117,7 @@ namespace OpenMobile.Threading
                     current.function.Invoke();
                 }
                 catch { }
-                if (tasks.Count>0)
+                if (Tasks.Count>0)
                     sync.Set();
             }
         }

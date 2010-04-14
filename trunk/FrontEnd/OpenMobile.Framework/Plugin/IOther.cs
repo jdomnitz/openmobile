@@ -32,6 +32,6 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
-        OMPanel loadSettings(string name, int screen);
+        Settings loadSettings();
     }
 }

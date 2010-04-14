@@ -244,7 +244,11 @@ namespace OpenMobile
         /// <summary>
         /// Center Left (Ellipsis)
         /// </summary>
-        CenterLeftEllipsis=1010
+        CenterLeftEllipsis=1010,
+        /// <summary>
+        /// Centered with Word Wrap
+        /// </summary>
+        WordWrap=10011
         };
     /// <summary>
     /// The angle to rotate the control
@@ -274,7 +278,7 @@ namespace OpenMobile
             /// The text to display
             /// </summary>
             public textFormat textFormat = textFormat.Normal;
-            public Alignment textAlignment = Alignment.CenterLeft;
+            public Alignment textAlignment = Alignment.BottomLeft;
             public Color color = Color.White;
             public Color highlightColor = Color.White;
             public Font font = new Font(FontFamily.GenericSansSerif, 18F);
@@ -328,6 +332,7 @@ namespace OpenMobile
         {
             this.text = text;
             this.subItem=subitm;
+            this.subitemFormat = new subItemFormat();
         }
         /// <summary>
         /// Creates a new list item
@@ -350,6 +355,7 @@ namespace OpenMobile
             this.text = text;
             this.subItem = subitem;
             this.tag = tag;
+            this.subitemFormat = new subItemFormat();
         }
         /// <summary>
         /// Creates a new list item
@@ -362,12 +368,14 @@ namespace OpenMobile
             this.text = text;
             this.subItem = subitem;
             this.image = image;
+            this.subitemFormat = new subItemFormat();
         }
         /// <summary>
         /// Creates a new list item
         /// </summary>
         /// <param name="text"></param>
         /// <param name="subitm"></param>
+        /// <param name="subitemFormat"></param>
         public OMListItem(string text, string subitm, subItemFormat subitemFormat)
         {
             this.text = text;
@@ -380,6 +388,7 @@ namespace OpenMobile
         /// <param name="text"></param>
         /// <param name="subitem"></param>
         /// <param name="tag"></param>
+        /// <param name="subitemFormat"></param>
         public OMListItem(string text, string subitem, subItemFormat subitemFormat, object tag)//Added by Borte
         {
             this.text = text;
@@ -586,7 +595,7 @@ namespace OpenMobile
         /// <para>Arg2: (Optional) Plugin Name</para>
         /// <para>Arg3: (Optional) Panel Name</para>
         /// </summary>
-        TransitionToSettings=6,
+        //TransitionToSettings=6,
         /// <summary>
         /// Transition between the previously specified panels
         /// <para>---------------------------------------</para>
@@ -609,7 +618,7 @@ namespace OpenMobile
         /// <para>Arg2: (Optional) Plugin Name</para>
         /// <para>Arg3: (Optional) Panel Name</para>
         /// </summary>
-        TransitionFromSettings = 9,
+        //TransitionFromSettings = 9,
         //Media Events
         /// <summary>
         /// Play the current media
@@ -801,6 +810,13 @@ namespace OpenMobile
         /// <para>Arg1: Screen Number</para>
         /// </summary>
         unblockGoBack=39,
+        /// <summary>
+        /// Sets the brightness of the given screen.
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// <para>Arg2: Brightness [1-100] [0=Monitor Off]</para>
+        /// </summary>
+        setMonitorBrightness=40,
         /// <summary>
         /// Restart this application
         /// </summary>
@@ -1079,20 +1095,32 @@ namespace OpenMobile
         /// </summary>
         WirelessNetworksAvailable=1,
         /// <summary>
-        /// A successful connection has been established to a wireless connection
+        /// Connecting to a wireless connection
+        /// <para>-------------------------------------------</para>
+        /// <para>Arg: Network Name</para>
         /// </summary>
-        ConnectedToWirelessNetwork=2,
+        ConnectingToWirelessNetwork=2,
+        /// <summary>
+        /// A successful connection has been established to a wireless connection
+        /// <para>-------------------------------------------</para>
+        /// <para>Arg: Network Name</para>
+        /// </summary>
+        ConnectedToWirelessNetwork=3,
         /// <summary>
         /// Wireless (wifi) signal strength has changed
         /// <para>-------------------------------------------</para>
         /// <para>Arg: Signal Value (0-100)</para>
         /// </summary>
-        WirelessSignalStrengthChanged=3,
+        WirelessSignalStrengthChanged=4,
         /// <summary>
         /// The network connection has been established but an internet connection
         /// requires Access Point credentials be entered in the web browser
         /// </summary>
-        WirelessNetworkRequiresLogin=4,
+        WirelessNetworkRequiresLogin=5,
+        /// <summary>
+        /// Disconnected from the wireless network
+        /// </summary>
+        DisconnectedFromWirelessNetwork=6,
         /// <summary>
         /// Bluetooth devices are detected and within the connection range
         /// </summary>
@@ -1403,7 +1431,11 @@ namespace OpenMobile
         /// <summary>
         /// Returns the route destination [Location].  Will return null if no route calculated
         /// </summary>
-        GetDestination=18
+        GetDestination=18,
+        /// <summary>
+        /// Returns a [string[]] containing all of the available skins
+        /// </summary>
+        GetAvailableSkins=19
     }
 
     /// <summary>
@@ -1424,9 +1456,17 @@ namespace OpenMobile
         /// </summary>
         public int potentialSpeed;
         /// <summary>
-        /// Retrieves the signal strength of the network connection. Strength should be represented as positive numbers where higher is stronger. Range is plugin specific (0-x). Returns -1 for not applicable.
+        /// Retrieves the signal strength of the network connection. Strength should be represented as positive numbers where higher is stronger. Range is plugin specific (0-x). Returns 0 for not applicable.
         /// </summary>
-        public int signalStrength;
+        public uint signalStrength;
+
+        public connectionInfo(string name, string id, int speed, uint signal)
+        {
+            NetworkName = name;
+            UID = id;
+            potentialSpeed = speed;
+            signalStrength = signal;
+        }
     }
 
     /// <summary>
@@ -1870,7 +1910,7 @@ namespace OpenMobile
         /// </summary>
         public string stationName;
         /// <summary>
-        /// Station Number
+        /// Station Number (aka frequency or channel)
         /// </summary>
         public string stationNumber;
         /// <summary>

@@ -55,15 +55,15 @@ namespace OpenMobile.helperFunctions
             /// <param name="pluginname"></param>
             /// <param name="settingsPanel"></param>
             /// <returns></returns>
-            public string getText(int screen, string pluginname, bool settingsPanel)
+            public string getText(int screen, string pluginname)
             {
-                return getText(screen, pluginname, settingsPanel, "");
+                return getText(screen, pluginname, "");
             }
             /// <summary>
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
-            public string getText(int screen,string pluginname,bool settingsPanel,string panelName)
+            public string getText(int screen,string pluginname,string panelName)
             {
                 SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
@@ -73,18 +73,12 @@ namespace OpenMobile.helperFunctions
                 {
                     return null;
                 }
-                if (settingsPanel == true)
-                    host.execute(eFunction.TransitionFromSettings,screen.ToString(),pluginname,panelName);
-                else
-                    host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname,panelName);
+                host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname,panelName);
                 host.execute(eFunction.ExecuteTransition,screen.ToString());
                 wait.WaitOne();
                 host.OnSystemEvent -= ev;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
-                if (settingsPanel == false)
-                    host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
-                else
-                    host.execute(eFunction.TransitionToSettings, screen.ToString(), pluginname, panelName);
+                host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
             }
@@ -95,16 +89,16 @@ namespace OpenMobile.helperFunctions
             /// <param name="pluginname"></param>
             /// <param name="settingsPanel"></param>
             /// <returns></returns>
-            public string getNumber(int screen, string pluginname, bool settingsPanel)
+            public string getNumber(int screen, string pluginname)
             {
-                return getNumber(screen, pluginname, settingsPanel, "");
+                return getNumber(screen, pluginname, "");
             }
 
             /// <summary>
             /// Loads the On Screen Keyboard and then returns the number entered
             /// </summary>
             /// <returns></returns>
-            public string getNumber(int screen, string pluginname, bool settingsPanel,string panelName)
+            public string getNumber(int screen, string pluginname, string panelName)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
@@ -114,18 +108,12 @@ namespace OpenMobile.helperFunctions
                 {
                     return null;
                 }
-                if (settingsPanel == true)
-                    host.execute(eFunction.TransitionFromSettings, screen.ToString(), pluginname,panelName);
-                else
-                    host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname,panelName);
+                host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname,panelName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 wait.WaitOne();
                 host.OnSystemEvent -= ev;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
-                if (settingsPanel == false)
-                    host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
-                else
-                    host.execute(eFunction.TransitionToSettings, screen.ToString(), pluginname, panelName);
+                host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
             }
@@ -167,7 +155,7 @@ namespace OpenMobile.helperFunctions
             /// Loads a file selection plugin
             /// </summary>
             /// <returns></returns>
-            public string getFile(int screen,string pluginName,bool settingsPanel)
+            public string getFile(int screen,string pluginName,string panelName)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
@@ -177,10 +165,7 @@ namespace OpenMobile.helperFunctions
                 {
                     return null;
                 }
-                if (settingsPanel == true)
-                    host.execute(eFunction.TransitionFromSettings, screen.ToString(), pluginName);
-                else
-                    host.execute(eFunction.TransitionFromPanel, screen.ToString(),pluginName);
+                host.execute(eFunction.TransitionFromPanel, screen.ToString(),pluginName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 wait.WaitOne();
                 host.OnSystemEvent -= ev;
@@ -192,9 +177,9 @@ namespace OpenMobile.helperFunctions
             /// </summary>
             /// <param name="screen"></param>
             /// <param name="pluginName"></param>
-            /// <param name="settingsPanel"></param>
+            /// <param name="panelName"></param>
             /// <returns></returns>
-            public string getFolder(int screen, string pluginName, bool settingsPanel)
+            public string getFolder(int screen, string pluginName,string panelName)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
@@ -204,10 +189,7 @@ namespace OpenMobile.helperFunctions
                 {
                     return null;
                 }
-                if (settingsPanel == true)
-                    host.execute(eFunction.TransitionFromSettings, screen.ToString(), pluginName);
-                else
-                    host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginName);
+                host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 wait.WaitOne();
                 host.OnSystemEvent -= ev;
