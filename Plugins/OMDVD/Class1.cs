@@ -401,7 +401,6 @@ namespace OMDVD
                         break;
                     case EventCode.DeviceLost:
                     case EventCode.ErrorAbort:
-                    case EventCode.ErrorAbortEx:
                     case EventCode.ErrorStPlaying:
                     case EventCode.FileClosed:
                     case EventCode.StErrStopped:
@@ -569,7 +568,7 @@ namespace OMDVD
                     if (f.WindowState == FormWindowState.Maximized)
                         return videoWindow.SetWindowPosition(0, 0, f.Width+1, f.Height);
                     else
-                        return videoWindow.SetWindowPosition(0, 0, f.Width - 16, f.Height - 38);
+                        return videoWindow.SetWindowPosition(0, 0, f.Width - (f.Width - f.ClientSize.Width), f.Height - (f.Height - f.ClientSize.Height));
                 }
                 else
                 {

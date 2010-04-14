@@ -58,14 +58,26 @@ namespace OpenMobile.Media
             info.Artist = t.JoinedAlbumArtists;
             if (info.Artist == "")
                 info.Artist = t.JoinedPerformers;
-            info.Artist.TrimEnd(new char[] { ',' });
+            if (info.Artist!=null)
+                info.Artist=info.Artist.TrimEnd(new char[] { ',' });
             if (t.Pictures.Length > 0)
             {
                 MemoryStream m = new MemoryStream(t.Pictures[0].Data.Data);
                 try
                 {
                     if (m.Length > 4)
+                    {
                         info.coverArt = Image.FromStream(m);
+                        if ((info.coverArt.Height > 600) || (info.coverArt.Width > 600))
+                        {
+                            Bitmap newimg = new Bitmap(600, (int)(600 * (info.coverArt.Height / (float)info.coverArt.Width)));
+                            Graphics g = Graphics.FromImage(newimg);
+                            GraphicsUnit unit = GraphicsUnit.Pixel;
+                            g.DrawImage(info.coverArt, newimg.GetBounds(ref unit));
+                            g.Dispose();
+                            info.coverArt = newimg;
+                        }
+                    }
                 }
                 catch (ArgumentException) { }
             }
@@ -85,7 +97,19 @@ namespace OpenMobile.Media
         {
             string path = OpenMobile.Path.Combine(System.IO.Path.GetDirectoryName(url), "Folder.jpg");
             if (System.IO.File.Exists(path) == true)
-                return Image.FromFile(path);
+            {
+                Image img = Image.FromFile(path);
+                if ((img.Height > 600) || (img.Width > 600))
+                {
+                    Bitmap newimg = new Bitmap(600, (int)(600 * (img.Height / (float)img.Width)));
+                    Graphics g = Graphics.FromImage(newimg);
+                    GraphicsUnit unit = GraphicsUnit.Pixel;
+                    g.DrawImage(img, newimg.GetBounds(ref unit));
+                    g.Dispose();
+                    return newimg;
+                }
+                return img;
+            }
             return null;
         }
         private static string cacheArtist;

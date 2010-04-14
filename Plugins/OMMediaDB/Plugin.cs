@@ -64,7 +64,7 @@ namespace OMMediaDB
 
         public bool indexDirectory(string location, bool subdirectories)
         {
-            OpenMobile.Threading.TaskManager.QueueTask(delegate { makeItSo(location, subdirectories); }, ePriority.MediumLow);
+            OpenMobile.Threading.TaskManager.QueueTask(delegate { makeItSo(location, subdirectories); }, ePriority.MediumLow,"Index Music Directory");
             return true;
         }
         public bool clearIndex()
@@ -83,6 +83,8 @@ namespace OMMediaDB
         }
         private void parseDirectory(string location, bool subdirectories)
         {
+            if ((location==null)||(location == ""))
+                return;
             string[] filter = new string[] { "*.mp3", "*.m4a", "*.aac", "*.aif", "*.wav", "*.m4p", "*.ogg", "*.wma" };
             for(int i=0;i<filter.Length;i++)
                 parse(location, subdirectories,filter[i]);

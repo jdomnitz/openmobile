@@ -33,107 +33,6 @@ namespace OpenMobile.Framework
     /// </summary>
     public static class Serializer
     {
-        private static void serialize(XmlTextWriter writer, object o, IPluginHost host)
-        {
-            Type t = o.GetType();
-            writer.WriteStartElement(t.Name);
-            foreach (PropertyInfo info in t.GetProperties())
-            {
-                try
-                {
-                    if (info.PropertyType == typeof(imageItem))
-                        writer.WriteElementString(info.Name, ((imageItem)info.GetValue(o, null)).name);
-                    else if (info.PropertyType == typeof(Font))
-                    {
-                        Font f = (Font)info.GetValue(o, null);
-                        writer.WriteElementString(info.Name, f.FontFamily.Name + ',' + f.Size.ToString() + ',' + f.Style);
-                    }
-                    else if (info.PropertyType == typeof(Color))
-                    {
-                        Color c = (Color)info.GetValue(o, null);
-                        if ((c.IsKnownColor == true) && (c.A == 255))
-                            writer.WriteElementString(info.Name, c.Name);
-                        else
-                            writer.WriteElementString(info.Name, c.A.ToString() + ',' + c.R.ToString() + ',' + c.G.ToString() + ',' + c.B.ToString());
-                    }
-                    else if (info.PropertyType == typeof(OMListItem))
-                        continue; //ToDo - Write out list items
-                    else
-                        writer.WriteElementString(info.Name, info.GetValue(o, null).ToString());
-                }
-                catch (NullReferenceException)
-                {
-                    writer.WriteElementString(info.Name, "##Null##");
-                }
-            }
-            writer.WriteEndElement();
-        }
-        /// <summary>
-        /// Convert a file stream to an object
-        /// </summary>
-        /// <param name="s">The stream</param>
-        /// <param name="host">The plugin host for image handling</param>
-        public static object deserialize(Stream s, IPluginHost host)
-        {
-            XmlTextReader reader = new XmlTextReader(s);
-            while (reader.NodeType != XmlNodeType.Element)
-                if (reader.Read() == false)
-                    return null;
-            if (reader.Name == "ControlCollection")
-                reader.Read();
-            Type t = Type.GetType("OpenMobile.Controls." + reader.Name);
-            object o = Activator.CreateInstance(t);
-            PropertyInfo info = t.GetProperty("TypeName");
-            while (reader.Read())
-            {
-                if ((reader.Depth == 2) && (reader.NodeType == XmlNodeType.Element))
-                {
-                    info = t.GetProperty(reader.Name);
-                }
-                else if ((reader.NodeType == XmlNodeType.Text) && (reader.Depth == 3))
-                {
-                    if (info.PropertyType.BaseType == typeof(Enum))
-                        info.SetValue(o, Enum.Parse(info.PropertyType, reader.Value), null);
-                    else if (info.PropertyType == typeof(int))
-                        info.SetValue(o, int.Parse(reader.Value), null);
-                    else if (info.PropertyType == typeof(float))
-                        info.SetValue(o, float.Parse(reader.Value), null);
-                    else if (info.PropertyType == typeof(double))
-                        info.SetValue(o, double.Parse(reader.Value), null);
-                    else
-                        try
-                        {
-                            if (reader.Value == "##Null##")
-                                info.SetValue(o, null, null);
-                            else
-                                info.SetValue(o, reader.Value, null);
-                        }
-                        catch (ArgumentException) { }
-                }
-                else if ((reader.NodeType == XmlNodeType.EndElement) && (reader.Depth == 1))
-                {
-                    return o;
-                }
-            }
-            return null;
-        }
-        /// <summary>
-        /// Convert a panel to a file stream
-        /// </summary>
-        /// <param name="s">The stream</param>
-        /// <param name="p">The OMPanel to serialize</param>
-        /// <param name="host">The plugin host for image handling</param>
-        public static void serializePanel(Stream s, OMPanel p, IPluginHost host)
-        {
-            XmlTextWriter writer = new XmlTextWriter(s, null);
-            writer.WriteStartElement("ControlCollection");
-            for (int i = 0; i < p.controlCount; i++)
-            {
-                serialize(writer, p.getControl(i), host);
-            }
-            writer.WriteEndElement();
-            writer.Close();
-        }
         /// <summary>
         /// Convert a filepath to an OMPanel
         /// </summary>
@@ -147,7 +46,6 @@ namespace OpenMobile.Framework
             f.Close();
             return p;
         }
-
         /// <summary>
         /// Convert a file stream to an OMPanel
         /// </summary>

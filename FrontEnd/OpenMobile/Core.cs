@@ -115,7 +115,7 @@ namespace OpenMobile
                     if (!pluginType.IsAbstract)  //Only look at non-abstract types
                     {
                         //Gets a type object of the interface we need the plugins to match
-                        Type typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IHighLevel", true);
+                        Type typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IHighLevel");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
@@ -126,7 +126,7 @@ namespace OpenMobile
                             return;
                         }
                         //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IAVPlayer", true);
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IAVPlayer");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
@@ -136,7 +136,7 @@ namespace OpenMobile
                             return;
                         }
                         //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IOther", true);
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IOther");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
@@ -146,7 +146,7 @@ namespace OpenMobile
                             return;
                         }
                         //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IRawHardware", true);
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IRawHardware");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
@@ -156,7 +156,7 @@ namespace OpenMobile
                             return;
                         }
                         //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IMediaDatabase", true);
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IMediaDatabase");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface !=null)
@@ -166,7 +166,7 @@ namespace OpenMobile
                             return;
                         }
                         //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.ITunedContent", true);
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.ITunedContent");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface !=null)
@@ -176,7 +176,7 @@ namespace OpenMobile
                             return;
                         }
                         //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IDataProvider", true);
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IDataProvider");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
@@ -186,17 +186,18 @@ namespace OpenMobile
                             return;
                         }
                         //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.INetwork", true);
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.INetwork");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
                         {
                             INetwork availablePlugin = (INetwork)Activator.CreateInstance(pluginType);
                             pluginCollection.Add(availablePlugin);
+                            availablePlugin.OnWirelessEvent += new WirelessEvent(theHost.raiseWirelessEvent);
                             return;
                         }
                         //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.ISpeech", true);
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.ISpeech");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
@@ -206,7 +207,7 @@ namespace OpenMobile
                             return;
                         }
                         //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.INavigation", true);
+                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.INavigation");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
@@ -252,7 +253,7 @@ namespace OpenMobile
                     try
                     {
                         pluginCollection[i].Dispose();
-                        theHost.execute(eFunction.backgroundOperationStatus, "PLUGIN CRASHED: " + pluginCollection[i].pluginName);
+                        theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName+" CRASHED!");
                     }
                     catch (Exception) { }
                     pluginCollection.RemoveAt(i);
@@ -277,6 +278,7 @@ namespace OpenMobile
                 }
             }
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             loadMainMenu();
             loadEmUp();
             theHost.hal = new HalInterface();
@@ -288,14 +290,36 @@ namespace OpenMobile
             SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(theHost.SystemEvents_PowerModeChanged);
             SystemEvents.SessionEnding += new SessionEndingEventHandler(theHost.SystemEvents_SessionEnding);
             SystemEvents.DisplaySettingsChanged+=new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);
-            if (Net.Network.IsAvailable==true)
+            if (OpenMobile.Net.Network.IsAvailable==true)
                 theHost.raiseSystemEvent(eFunction.connectedToInternet, "", "", "");
             using (PluginSettings settings = new PluginSettings())
                 if (settings.getSetting("UI.HideCursor") == "True")
                     for (int i = 0; i < RenderingWindows.Count; i++)
                         RenderingWindows[i].hideCursor();
+            if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
+                theHost.SystemEvents_PowerModeChanged(null, new PowerModeChangedEventArgs(PowerModes.StatusChange));
+            foreach (DriveInfo drive in DriveInfo.GetDrives())
+                if (drive.DriveType == DriveType.CDRom)
+                    if (drive.IsReady == true)
+                        theHost.RaiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
             pluginCollection.TrimExcess();
             Application.Run();
+        }
+
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Exception ex = (Exception)e.ExceptionObject;
+            string err;
+            err = ex.GetType().Name + "\r\n";
+            err += ("Exception Message: " + ex.Message);
+            err += ("\r\nFatal: " + e.IsTerminating.ToString());
+            err += ("\r\nSource: " + ex.Source);
+            err += ("\r\nStack Trace: \r\n" + ex.StackTrace);
+            err += ("\r\n");
+            theHost.hal.close();
+            ErrorReporting reporting=new ErrorReporting(err);
+            reporting.ShowDialog(RenderingWindows[0]);
+            theHost.execute(eFunction.restartProgram);
         }
 
         [STAThread]

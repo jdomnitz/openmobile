@@ -246,7 +246,7 @@ namespace ControlDemo
             p.addControl(attrib);
             OMImage cache=new OMImage(0,0,1000,600);
             widget.addControl(cache);
-            OpenMobile.Threading.TaskManager.QueueTask(Weather.PurgeOld, priority.Low);
+            OpenMobile.Threading.TaskManager.QueueTask(Weather.PurgeOld, ePriority.Low);
             return eLoadStatus.LoadSuccessful;
         }
 

@@ -34,13 +34,12 @@ namespace Media
     public sealed class Media : IHighLevel
     {
         ScreenManager manager;
-        ScreenManager settingsManager;
         IPluginHost theHost;
         string dbname = "";
 
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel p = new OMPanel();
+            OMPanel p = new OMPanel("");
             if (host.InstanceCount == -1)
                 return eLoadStatus.LoadFailedRetryRequested;
             currentAlbums = new List<mediaInfo>[host.InstanceCount];
@@ -61,7 +60,7 @@ namespace Media
             Slider3.Name = "Media.Slider3";
             Slider3.Image = item;
             Slider3.OnClick += new userInteraction(Slider3_OnClick);
-            OMImage Slider1 = new OMImage(17,119,60,400);
+            OMButton Slider1 = new OMButton(17,119,60,400);
             Slider1.Name = "Media.Slider1";
             Slider1.Image = item;
             OMLabel artists = new OMLabel(30, 220, 30, 300);
@@ -69,6 +68,7 @@ namespace Media
             artists.Font = new Font(FontFamily.GenericSansSerif, 26F);
             artists.Format = textFormat.BoldShadow;
             artists.Name = "Media.Artists";
+            artists.TextAlignment = Alignment.WordWrap;
             OMButton Slider2 = new OMButton(858,119,60,400);
             Slider2.Name = "Media.Slider2";
             Slider2.Image = item;
@@ -96,6 +96,7 @@ namespace Media
             List2.Name = "Media.List2";
             List2.Font = f;
             List2.ClickToSelect = true;
+            List2.ListItemHeight = 60;
             List2.SelectedIndexChanged += new OMList.IndexChangedDelegate(List2_SelectedIndexChanged);
             List2.OnClick += new userInteraction(List2_OnClick);
             List2.OnLongClick += new userInteraction(List2_OnLongClick);
@@ -105,6 +106,7 @@ namespace Media
             List1.ItemColor2 = Color.FromArgb(0, 0, 10);
             List1.SelectedItemColor1 = Color.FromArgb(192, 192, 192);
             List1.SelectedItemColor2 = Color.FromArgb(38, 37, 37);
+            List1.ListItemHeight = 60;
             List1.Name = "Media.List1";
             List1.Font = f;
             List1.OnClick += new userInteraction(List1_OnClick);
@@ -124,11 +126,10 @@ namespace Media
             p.addControl(bSettings);
             using (PluginSettings ps = new PluginSettings())
                 dbname = ps.getSetting("Default.MusicDatabase");
-            OpenMobile.Threading.TaskManager.QueueTask(loadList,ePriority.High);//<-Where the music gets loaded
+            OpenMobile.Threading.TaskManager.QueueTask(loadList,ePriority.High,"Load Artists");//<-Where the music gets loaded
             p.DoubleClickable = false;
             manager.loadPanel(p);
-            settingsManager=new ScreenManager(theHost.ScreenCount);
-            OMPanel settings = new OMPanel();
+            OMPanel settings = new OMPanel("Settings");
             imageItem opt2=theHost.getSkinImage("Full.Highlighted");
 		    imageItem opt1=theHost.getSkinImage("Full");
 		    OMLabel Title=new OMLabel(270,110,500,80);
@@ -177,26 +178,6 @@ namespace Media
             Cancel.OnClick += new userInteraction(Cancel_OnClick);
             imageItem opt4 = theHost.getSkinImage("Play.Highlighted");
             imageItem opt3 = theHost.getSkinImage("Play");
-            OMButton scrollRight = new OMButton(882, 364, 110, 80);
-            scrollRight.Image = opt3;
-            scrollRight.DownImage = opt4;
-            scrollRight.Name = "Media.scrollRight";
-            scrollRight.OnClick += new userInteraction(scrollRight_OnClick);
-            OMButton scrollLeft = new OMButton(353, 365, 110, 80);
-            scrollLeft.Image = opt3;
-            scrollLeft.DownImage = opt4;
-            scrollLeft.Name = "Media.scrollLeft";
-            scrollLeft.Orientation = Angle.FlipHorizontal;
-            scrollLeft.OnClick += new userInteraction(scrollLeft_OnClick);
-            OMTextBox dbSelection = new OMTextBox(471, 380, 400, 50);
-            dbSelection.Flags = textboxFlags.EllipsisEnd;
-            dbSelection.Text = "None";
-            dbSelection.Font = new Font("Microsoft Sans Serif", 32.25F);
-            dbSelection.Name = "Textbox3";
-            OMLabel dbTitle = new OMLabel(109,356,240,100);
-            dbTitle.Font = new Font("Microsoft Sans Serif", 32.25F, FontStyle.Bold);
-            dbTitle.Text = "Database:";
-            dbTitle.Name = "Media.dbTitle";
             settings.addControl(Title);
 		    settings.addControl(chkIndex);
 		    settings.addControl(pathCaption);
@@ -204,12 +185,8 @@ namespace Media
 		    settings.addControl(select);
 		    settings.addControl(Save);
 		    settings.addControl(Cancel);
-            settings.addControl(scrollRight);
-            settings.addControl(scrollLeft);
-            settings.addControl(dbTitle);
-            settings.addControl(dbSelection);
             settings.addControl(AutoStart);
-            settingsManager.loadPanel(settings);
+            manager.loadPanel(settings);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             return eLoadStatus.LoadSuccessful;
         }
@@ -224,42 +201,13 @@ namespace Media
                 }
             }
         }
-        private List<string> dbPlugins;
-
-        void scrollRight_OnClick(OMControl sender, int screen)
-        {
-            //Right
-            if (dbPlugins == null)
-                return;
-            int i = dbPlugins.FindIndex(w => w == ((OMTextBox)settingsManager[screen][10]).Text);
-            i++;
-            if (i == dbPlugins.Count)
-                return;
-            ((OMTextBox)settingsManager[screen][10]).Text=dbPlugins[i];
-        }
-
-        void scrollLeft_OnClick(OMControl sender, int screen)
-        {   //Left
-            if (dbPlugins == null)
-                return;
-            int i = dbPlugins.FindIndex(w => w == ((OMTextBox)settingsManager[screen][10]).Text);
-            i--;
-            if (i < 1)
-                ((OMTextBox)settingsManager[screen][10]).Text = "None";
-            else
-                ((OMTextBox)settingsManager[screen][10]).Text = dbPlugins[i];
-        }
 
         void Save_OnClick(OMControl sender, int screen)
         {
             using (OpenMobile.Data.PluginSettings set = new OpenMobile.Data.PluginSettings())
             {
-                set.setSetting("Music.Path", ((OMTextBox)settingsManager[screen][3]).Text);
-                dbname=((OMTextBox)settingsManager[screen][10]).Text;
-                if (dbname == "None")
-                    dbname = "";
-                set.setSetting("Default.MusicDatabase",dbname);
-                if ((set.getSetting("Music.AutoIndex") != "True") && (((OMCheckbox)settingsManager[screen][1]).Checked == true))
+                set.setSetting("Music.Path", ((OMTextBox)manager[screen,"Settings"][3]).Text);
+                if ((set.getSetting("Music.AutoIndex") != "True") && (((OMCheckbox)manager[screen, "Settings"][1]).Checked == true))
                 {
                     object o = new object();
                     theHost.getData(eGetData.GetMediaDatabase, dbname, out o);
@@ -269,10 +217,10 @@ namespace Media
                         db.indexDirectory(set.getSetting("Music.Path"), true);
                     }
                 }
-                set.setSetting("Music.AutoIndex", ((OMCheckbox)settingsManager[screen][1]).Checked.ToString());
-                set.setSetting("Music.AutoResume", ((OMCheckbox)settingsManager[screen][11]).Checked.ToString());
+                set.setSetting("Music.AutoIndex", ((OMCheckbox)manager[screen, "Settings"][1]).Checked.ToString());
+                set.setSetting("Music.AutoResume", ((OMCheckbox)manager[screen, "Settings"][7]).Checked.ToString());
             }
-            theHost.execute(eFunction.TransitionFromSettings, screen.ToString(), "Media");
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "Media","Settings");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Media");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.SlideDown.ToString());
         }
@@ -280,12 +228,12 @@ namespace Media
         void select_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getFilePath OpenFolder= new OpenMobile.helperFunctions.General.getFilePath(theHost);
-            ((OMTextBox)settingsManager[screen][3]).Text= OpenFolder.getFolder(screen,"Media",true);
+            ((OMTextBox)manager[screen, "Settings"][3]).Text = OpenFolder.getFolder(screen, "Media", "Settings");
         }
 
         void Cancel_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromSettings, screen.ToString(),"Media");
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(),"Media","Settings");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Media");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.SlideDown.ToString());
         }
@@ -294,16 +242,12 @@ namespace Media
         {
             using(PluginSettings settings=new PluginSettings())
             {
-                ((OMTextBox)settingsManager[screen][3]).Text=settings.getSetting("Music.Path");
-                ((OMCheckbox)settingsManager[screen][1]).Checked=(settings.getSetting("Music.AutoIndex")=="True");
-                ((OMCheckbox)settingsManager[screen][11]).Checked = (settings.getSetting("Music.AutoResume") == "True");
-                string txt=settings.getSetting("Default.MusicDatabase");
-                if (txt=="")
-                    txt="None";
-                ((OMTextBox)settingsManager[screen][10]).Text = txt;
+                ((OMTextBox)manager[screen, "Settings"][3]).Text = settings.getSetting("Music.Path");
+                ((OMCheckbox)manager[screen, "Settings"][1]).Checked = (settings.getSetting("Music.AutoIndex") == "True");
+                ((OMCheckbox)manager[screen, "Settings"][7]).Checked = (settings.getSetting("Music.AutoResume") == "True");
             }
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString());
-            theHost.execute(eFunction.TransitionToSettings, screen.ToString(), "Media");
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Media","Settings");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.SlideUp.ToString());
         }
 
@@ -378,10 +322,7 @@ namespace Media
                 return;
             if (((OMList)sender).SelectedIndex == -1)
                 return;
-            if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location) == false)
-            {
-                theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location);
-            }
+            theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), currentSongs[theHost.instanceForScreen(screen)][((OMList)sender).SelectedIndex].Location);
         }
 
         void List2_OnClick(OMControl sender, int screen)
@@ -597,7 +538,7 @@ namespace Media
         {
             if (manager == null)
                 return null;
-            return manager[screen];
+            return manager[screen,name];
         }
 
         private void loadList()
@@ -629,11 +570,17 @@ namespace Media
             }
         }
 
-        public OMPanel loadSettings(string name,int screen)
+        public Settings loadSettings()
         {
-            if (dbPlugins == null)
-                dbPlugins = General.getPluginsOfType(typeof(IMediaDatabase), theHost);
-            return settingsManager[screen];
+            Settings s = new Settings();
+            List<string> options=new List<string>();
+            options.Add("Enabled");
+            options.Add("Disabled");
+            List<string> values=new List<string>();
+            values.Add("True");
+            values.Add("False");
+            s.Add(new Setting(SettingTypes.MultiChoice, "IndexOnStartup", "", "Index New Music on Every Startup", options, values));
+            return s;
         }
 
         public string authorName
@@ -674,8 +621,8 @@ namespace Media
         }
         public void Dispose()
         {
-            manager.Dispose();
-            settingsManager.Dispose();
+            if (manager!=null)
+                manager.Dispose();
             GC.SuppressFinalize(this);
         }
     }

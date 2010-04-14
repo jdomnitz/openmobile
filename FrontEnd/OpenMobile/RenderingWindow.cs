@@ -115,18 +115,19 @@ namespace OpenMobile
             Graphics g = Graphics.FromHwnd(this.Handle);
             Renderer.renderText(g, 0, 0, this.Width, this.Height, (screen+1).ToString(), new Font(FontFamily.GenericSansSerif, 300F), textFormat.Outline, Alignment.CenterCenter, 1F,Color.White,Color.Black);
             Thread.Sleep(1000);
+            Refresh();
         }
         public void invokePaint()
         {
             Invalidate();
-            UI_MouseMove(null,new MouseEventArgs(MouseButtons.None,0,Cursor.Position.X,Cursor.Position.Y,0));
+            RenderingWindow_MouseMove(null,new MouseEventArgs(MouseButtons.None,0,Cursor.Position.X,Cursor.Position.Y,0));
         }
         //Code Added by Borte
         public new int Width
         {
             set
             {
-                base.Width = value + 16;
+                base.Width = value + (this.Width- ClientSize.Width);
             }
             get
             {
@@ -137,7 +138,7 @@ namespace OpenMobile
         {
             set
             {
-                base.Height = value + 38;
+                base.Height = value + (this.Height - ClientSize.Height);
             }
             get
             {
@@ -148,7 +149,7 @@ namespace OpenMobile
         {
             set
             {
-                base.Size = new Size(value.Width + 16, value.Height + 38);
+                base.Size = new Size(value.Width + (this.Width - ClientSize.Width), value.Height + (this.Height - ClientSize.Height));
             }
             get
             {
@@ -274,7 +275,7 @@ namespace OpenMobile
             if (lastClick != null)
                 lastClick.Mode = modeType.Normal;
             lastClick = null;
-            UI_MouseMove(null,new MouseEventArgs(MouseButtons.None,0,Cursor.Position.X,Cursor.Position.Y,0));
+            RenderingWindow_MouseMove(null,new MouseEventArgs(MouseButtons.None,0,Cursor.Position.X,Cursor.Position.Y,0));
             Invalidate();
         }
         #endregion
@@ -395,7 +396,7 @@ namespace OpenMobile
                         {
                             lastClick.Mode = modeType.Normal;
                             //Recheck where the mouse is at
-                            UI_MouseMove(this, new MouseEventArgs(MouseButtons.None, 0, Cursor.Position.X, Cursor.Position.Y, 0));
+                            RenderingWindow_MouseMove(this, new MouseEventArgs(MouseButtons.None, 0, Cursor.Position.X, Cursor.Position.Y, 0));
                         }
                         Invalidate();
                     }
@@ -449,7 +450,7 @@ namespace OpenMobile
         #endregion
         
         #region MouseHandlers
-        private void UI_MouseMove(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseMove(object sender, MouseEventArgs e)
         {
             bool done = false; //We found something that was selected
             if (p.controlCount == 0)
@@ -564,7 +565,7 @@ namespace OpenMobile
                 }
             }
         }
-        private void UI_MouseClick(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseClick(object sender, MouseEventArgs e)
         {
             if ((e.Button == MouseButtons.Left) && (highlighted != null))
             {
@@ -606,7 +607,7 @@ namespace OpenMobile
             }
         }
 
-        private void UI_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             tmrLongClick.Enabled = false;
             if (highlighted != null)
@@ -662,7 +663,7 @@ namespace OpenMobile
                 catch (Exception) { }
         }
 
-        private void UI_MouseDown(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseDown(object sender, MouseEventArgs e)
         {
             if (highlighted != null)
             {
@@ -702,13 +703,12 @@ namespace OpenMobile
                 if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                 {
                     ThrowStarted = true;
-                    ThrowStart = e.Location;
-                    ThrowRelativeDistance = ThrowStart;
+                    ThrowRelativeDistance = e.Location;
                 }
-            }
+            } ThrowStart = e.Location; //If we're not throwing something we're gesturing
         }
 
-        private void UI_MouseUp(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseUp(object sender, MouseEventArgs e)
         {
             tmrLongClick.Enabled = false;
             if ((lastClick != null) && (lastClick.DownImage.image != null))
@@ -738,7 +738,7 @@ namespace OpenMobile
                 Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
                 currentGesture = null;
                 rParam.currentMode = modeType.Highlighted;
-                UI_MouseMove(sender, new MouseEventArgs(MouseButtons.None, 0, e.X, e.Y, 0));
+                RenderingWindow_MouseMove(sender, new MouseEventArgs(MouseButtons.None, 0, e.X, e.Y, 0));
                 Invalidate();
             }
             ThrowStart.X = -1;
@@ -746,16 +746,16 @@ namespace OpenMobile
         }
         #endregion
         #region OtherUIEvents
-        private void UI_FormClosing(object sender, FormClosingEventArgs e)
+        private void RenderingWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (e.CloseReason == CloseReason.UserClosing)
+            if ((e.CloseReason == CloseReason.UserClosing)||(e.CloseReason==CloseReason.WindowsShutDown))
             {
                 Core.theHost.execute(eFunction.closeProgram);
                 e.Cancel = true;
             }
         }
 
-        public void UI_KeyUp(object sender, KeyEventArgs e)
+        public void RenderingWindow_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
             {
@@ -801,7 +801,7 @@ namespace OpenMobile
                 Core.RenderingWindows[i].closeMe();
         }
 
-        private void UI_Resize(object sender, EventArgs e)
+        private void RenderingWindow_Resize(object sender, EventArgs e)
         {
             heightScale = (this.ClientRectangle.Height / 600F);
             widthScale = (this.ClientRectangle.Width / 1000F);
@@ -902,7 +902,7 @@ namespace OpenMobile
             ofsetIn = new Point(0, 0);
             ofsetOut = new Point(0, 0);
         }
-        public void UI_KeyDown(object sender, KeyEventArgs e)
+        public void RenderingWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (highlighted == null)
             {
@@ -924,8 +924,9 @@ namespace OpenMobile
                         return;
                     b.Mode = modeType.Highlighted;
                     highlighted = b;
-                    if (typeof(IList).IsInstanceOfType(highlighted))
-                        ((IList)highlighted).Select(((IList)highlighted).Start);
+                    // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
+                    //if (typeof(IList).IsInstanceOfType(highlighted))
+                    //    ((IList)highlighted).Select(((IList)highlighted).Start);
                     UpdateThisControl(highlighted.toRegion());
                 }
             }
@@ -956,8 +957,9 @@ namespace OpenMobile
                         highlighted.Mode = modeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        if (typeof(IList).IsInstanceOfType(highlighted))
-                            ((IList)highlighted).Select(((IList)highlighted).Start);
+                        // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
+                        //if (typeof(IList).IsInstanceOfType(highlighted))
+                        //    ((IList)highlighted).Select(((IList)highlighted).Start);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Right:
@@ -978,8 +980,9 @@ namespace OpenMobile
                         highlighted.Mode = modeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        if (typeof(IList).IsInstanceOfType(highlighted))
-                            ((IList)highlighted).Select(((IList)highlighted).Start);
+                        // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
+                        //if (typeof(IList).IsInstanceOfType(highlighted))
+                        //    ((IList)highlighted).Select(((IList)highlighted).Start);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Up:
@@ -1000,8 +1003,9 @@ namespace OpenMobile
                         highlighted.Mode = modeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        if (typeof(IList).IsInstanceOfType(highlighted))
-                            ((IList)highlighted).Select(0);
+                        // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
+                        //if (typeof(IList).IsInstanceOfType(highlighted))
+                        //    ((IList)highlighted).Select(0);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Down:
@@ -1022,8 +1026,9 @@ namespace OpenMobile
                         highlighted.Mode = modeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        if (typeof(IList).IsInstanceOfType(highlighted))
-                            ((IList)highlighted).Select(((IList)highlighted).Start);
+                        // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
+                        //if (typeof(IList).IsInstanceOfType(highlighted))
+                        //    ((IList)highlighted).Select(((IList)highlighted).Start);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Return:
@@ -1097,7 +1102,7 @@ namespace OpenMobile
             return Math.Max(Math.Abs((r1.Left + r1.Width / 2) - (r2.Left + r2.Width / 2)) - (r1.Width + r2.Width) / 2, 0) + Math.Max(Math.Abs((r1.Top + r1.Height / 2) - (r2.Top + r2.Height / 2)) - (r1.Height + r2.Height) / 2, 0);
         }
 
-        private void UI_MouseLeave(object sender, EventArgs e)
+        private void RenderingWindow_MouseLeave(object sender, EventArgs e)
         {
             if (rParam.currentMode == modeType.Scrolling)
             {

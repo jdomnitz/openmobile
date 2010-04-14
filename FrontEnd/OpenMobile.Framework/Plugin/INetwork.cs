@@ -21,6 +21,13 @@
 
 namespace OpenMobile.Plugin
 {
+    public enum eConnectionStatus
+    {
+        Disconnected,
+        Connected,
+        Connecting,
+        Error
+    }
     /// <summary>
     /// Interface with dialup and wireless networks
     /// </summary>
@@ -51,6 +58,6 @@ namespace OpenMobile.Plugin
         /// Retrieves the status of the active connection (the last one the connect command was called on-otherwise returns 0).  After 5 seconds should default to 3.
         /// </summary>
         /// <returns>Returns 0 for not connected, returns 1 for connected, returns 2 for connecting, returns 3 for error.</returns>
-        int getConnectionStatus();
+        eConnectionStatus getConnectionStatus();
     }
 }

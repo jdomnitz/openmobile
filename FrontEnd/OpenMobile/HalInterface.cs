@@ -29,6 +29,7 @@ namespace OpenMobile
             System.Net.Sockets.UdpClient receive;
             System.Net.Sockets.UdpClient send;
             public string[] volume = null;
+            private bool isDisposed = false;
             public HalInterface()
             {
                 OpenMobile.Framework.OSSpecific.runManagedProcess("OMHal.exe", "", false);
@@ -63,10 +64,12 @@ namespace OpenMobile
                         Core.theHost.raiseSystemEvent((eFunction)Enum.Parse(typeof(eFunction), parts[0]), arg1, arg2, arg3);
                 }
                 else if (i == -3)
-                    Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1), arg2);
+                    Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1),true, arg2);
             }
             void recv(IAsyncResult res)
             {
+                if (isDisposed)
+                    return;
                 IPEndPoint remote = new IPEndPoint(IPAddress.Any, 8549);
                 try
                 {
@@ -77,6 +80,11 @@ namespace OpenMobile
                 {
                     receive.BeginReceive(recv, null);
                 }
+            }
+            internal void close()
+            {
+                isDisposed = true;
+                receive.Close();
             }
         }
     }

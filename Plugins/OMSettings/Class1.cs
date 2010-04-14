@@ -50,12 +50,14 @@ namespace OMSettings
             menu.Color = Color.White;
             menu.HighlightColor = Color.White;
             menu.SelectedItemColor1 = Color.DarkBlue;
-            menu.Add(new OMListItem("General Settings", "User Interface and System Settings"));
-            menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords"));
-            menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers"));
-            menu.Add(new OMListItem("Multi-Zone Settings", "Displays, Sound Cards and other zone specific settings"));
-            menu.Add(new OMListItem("Hardware Settings", "Hardware devices like the Fusion Brain, OBDII readers and game pads"));
-            menu.SelectedIndexChanged += new OMList.IndexChangedDelegate(menu_SelectedIndexChanged);
+            OMListItem.subItemFormat format=new OMListItem.subItemFormat();
+            format.color=Color.FromArgb(128,Color.White);
+            format.font = new Font(FontFamily.GenericSansSerif, 21F);
+            menu.Add(new OMListItem("General Settings", "User Interface and System Settings",format));
+            menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords", format));
+            menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers", format));
+            menu.Add(new OMListItem("Multi-Zone Settings", "Displays, Sound Cards and other zone specific settings", format));
+            menu.Add(new OMListItem("Hardware Settings", "Hardware devices like the Fusion Brain, OBDII readers and game pads", format));
             menu.OnClick += new userInteraction(menu_OnClick);
             main.addControl(menu);
             manager.loadPanel(main);
@@ -311,13 +313,46 @@ namespace OMSettings
 
         void menu_OnClick(OMControl sender, int screen)
         {
-            menu_SelectedIndexChanged((OMList)sender, screen);
+            switch (((OMList)sender).SelectedIndex)
+            {
+                case 0:
+                    using (PluginSettings s = new PluginSettings())
+                    {
+                        ((OMCheckbox)manager[screen, "general"][3]).Checked = (s.getSetting("UI.HideCursor") == "True");
+                        ((OMCheckbox)manager[screen, "general"][4]).Checked = (s.getSetting("UI.MinGraphics") == "True");
+                    }
+                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "general");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+                    break;
+                case 1:
+                    Personal.readInfo();
+                    ((OMTextBox)manager[screen, "personal"][6]).Text = Personal.getPassword(Personal.ePassword.google, "GOOGLEPW");
+                    ((OMTextBox)manager[screen, "personal"][5]).Text = Collections.personalInfo.googleUsername;
+
+                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "personal");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+                    break;
+                case 2:
+                    using (PluginSettings s = new PluginSettings())
+                        ((OMTextBox)manager[screen, "data"][4]).Text = s.getSetting("Data.DefaultLocation");
+                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "data");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+                    break;
+                case 3:
+                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "MultiZone");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+                    break;
+            }
         }
 
         void location_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", false, "data");
+            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "data");
         }
 
         void Save4_OnClick(OMControl sender, int screen)
@@ -330,9 +365,7 @@ namespace OMSettings
                 settings.setSetting("Plugins.DPWeather.LastUpdate", DateTime.MinValue.ToString());
             }
             theHost.execute(eFunction.refreshData);
-            theHost.execute(eFunction.TransitionFromAny, screen.ToString());
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+            theHost.execute(eFunction.goBack, screen.ToString());
         }
 
         void Save3_OnClick(OMControl sender, int screen)
@@ -360,15 +393,13 @@ namespace OMSettings
                     settings.setSetting("UI.MinGraphics", "False");
                 }
             }
-            theHost.execute(eFunction.TransitionFromAny, screen.ToString());
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+            theHost.execute(eFunction.goBack, screen.ToString());
         }
 
         void user_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", false, "personal");
+            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "personal");
         }
 
         void Save2_OnClick(OMControl sender, int screen)
@@ -378,9 +409,7 @@ namespace OMSettings
             if (Collections.personalInfo.googleUsername.EndsWith("@gmail.com") == false)
                 Collections.personalInfo.googleUsername += "@gmail.com";
             Personal.writeInfo();
-            theHost.execute(eFunction.TransitionFromAny, screen.ToString());
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+            theHost.execute(eFunction.goBack, screen.ToString());
         }
 
         void identify_OnClick(OMControl sender, int screen)
@@ -390,9 +419,7 @@ namespace OMSettings
 
         void Cancel_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromAny,screen.ToString());
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+            theHost.execute(eFunction.goBack, screen.ToString());
         }
 
         void Save_OnClick(OMControl sender, int screen)
@@ -400,9 +427,7 @@ namespace OMSettings
             string scr=((OMLabel)manager[screen, "zone"][6]).Text;
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting("Screen" + scr.Substring(5) + ".SoundCard", ((OMLabel)manager[screen, "zone"][5]).Text);
-            theHost.execute(eFunction.TransitionFromAny, screen.ToString());
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+            theHost.execute(eFunction.goBack, screen.ToString());
             theHost.execute(eFunction.settingsChanged);
         }
 
@@ -443,44 +468,6 @@ namespace OMSettings
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"None");
         }
 
-        void menu_SelectedIndexChanged(OMList sender, int screen)
-        {
-            switch (sender.SelectedIndex)
-            {
-                case 0:
-                    using (PluginSettings s = new PluginSettings())
-                    {
-                        ((OMCheckbox)manager[screen, "general"][3]).Checked = (s.getSetting("UI.HideCursor") == "True");
-                        ((OMCheckbox)manager[screen, "general"][4]).Checked = (s.getSetting("UI.MinGraphics") == "True");
-                    }
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "general");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
-                    break;
-                case 1:
-                    Personal.readInfo();
-                    ((OMTextBox)manager[screen, "personal"][6]).Text = Personal.getPassword(Personal.ePassword.google, "GOOGLEPW");
-                    ((OMTextBox)manager[screen, "personal"][5]).Text = Collections.personalInfo.googleUsername;
-
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "personal");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
-                    break;
-                case 2:
-                    using (PluginSettings s = new PluginSettings())
-                        ((OMTextBox)manager[screen, "data"][4]).Text = s.getSetting("Data.DefaultLocation");
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "data");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
-                    break;
-                case 3:
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "MultiZone");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
-                    break;
-            }
-        }
-
         public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)
         {
             switch (name)
@@ -494,7 +481,7 @@ namespace OMSettings
             }
         }
 
-        public OpenMobile.Controls.OMPanel loadSettings(string name, int screen)
+        public OpenMobile.Plugin.Settings loadSettings()
         {
             throw new NotImplementedException();
         }

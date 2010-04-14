@@ -29,27 +29,27 @@ namespace OpenMobile
             if (Core.theHost.raiseKeyPressEvent(keypressType.KeyUp, e) == true)
                 return; //If an app handles it first don't show the UI
             for (int i = 0; i < Core.RenderingWindows.Count;i++ )
-                Core.RenderingWindows[i].UI_KeyUp(sender, e);
+                Core.RenderingWindows[i].RenderingWindow_KeyUp(sender, e);
         }
         public static void SourceDown(object sender, KeyEventArgs e)
         {
             if (Core.theHost.raiseKeyPressEvent(keypressType.KeyDown,e)==true)
                 return; //If an app handles it first don't show the UI
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
-                Core.RenderingWindows[i].UI_KeyDown(sender, e);
+                Core.RenderingWindows[i].RenderingWindow_KeyDown(sender, e);
         }
         public static bool SendKeyUp(int instance, string Key)
         {
             if ((instance < 0) || (instance >= Core.RenderingWindows.Count))
                 return false;
-            Core.RenderingWindows[instance].UI_KeyUp(null, new KeyEventArgs(getKey(Key)));
+            Core.RenderingWindows[instance].RenderingWindow_KeyUp(null, new KeyEventArgs(getKey(Key)));
             return true;
         }
         public static bool SendKeyDown(int instance, string Key)
         {
             if ((instance < 0) || (instance >= Core.RenderingWindows.Count))
                 return false;
-            Core.RenderingWindows[instance].UI_KeyDown(null, new KeyEventArgs(getKey(Key)));
+            Core.RenderingWindows[instance].RenderingWindow_KeyDown(null, new KeyEventArgs(getKey(Key)));
             return true;
         }
         private static Keys getKey(string key)

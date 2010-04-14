@@ -109,6 +109,9 @@ namespace OMHal
                 case "35": //Eject Disc
                     Specific.eject();
                     break;
+                case "40": //Set Monitor Brightness
+                    Specific.SetBrightness(int.Parse(arg2));
+                    break;
                 case "45": //Close Program
                     Environment.Exit(0);
                     break;

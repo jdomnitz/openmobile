@@ -48,13 +48,13 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException">ArgumentOutOfRangeException</exception>
         /// <exception cref="PanelNotAvailableForThisScreenException">PanelNotAvailableForThisScreenException</exception>
-        public OMPanel this[int index]
+        public OMPanel this[int screen]
         {
             get
             {
                 lock (this)
                 {
-                    if ((index < 0) || (index >= screens)||(panels.Count==0))
+                    if ((screen < 0) || (screen >= screens)||(panels.Count==0))
                         throw new ArgumentOutOfRangeException();
                     if (panels[0] == null)
                     {
@@ -62,7 +62,7 @@ namespace OpenMobile.Framework
                         if (panels[0] == null)
                             throw new PanelNotAvailableForThisScreenException("Source Panel has not been defined!  Use load panel before trying to access panels!");
                     }
-                    return panels[0][index];
+                    return panels[0][screen];
                 }
             }
         }
@@ -72,7 +72,7 @@ namespace OpenMobile.Framework
         /// <param name="index"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public OMPanel this[int index, string name]
+        public OMPanel this[int screen, string name]
         {
             get
             {
@@ -82,7 +82,7 @@ namespace OpenMobile.Framework
                     if (p == null)
                         return null;
                     else
-                        return p[index];
+                        return p[screen];
                 }
             }
         }
@@ -102,16 +102,50 @@ namespace OpenMobile.Framework
                 panels.Add(collection);
             }
         }
+        /// <summary>
+        /// Loads a panel thats shared between all screens instead of being screen-independent
+        /// </summary>
+        /// <param name="source"></param>
+        public void loadSharedPanel(OMPanel source)
+        {
+            lock (this)
+            {
+                OMPanel[] collection = new OMPanel[screens];
+                for (int i = 0; i < screens; i++)
+                    collection[i] = source;
+                panels.Add(collection);
+            }
+        }
+        public void loadSharedPanel(OMPanel source,int screen)
+        {
+            lock (this)
+            {
+                OMPanel[] collection = new OMPanel[screens];
+                if ((screen < 0) || (screen >= screens))
+                    return;
+                collection[screen] = source;
+                panels.Add(collection);
+            }
+        }
         //Added by Borte
         /// <summary>
         /// Unloads a panel for duplication
         /// </summary>
         /// <param name="name">Panel name</param>
         public void unloadPanel(string name)
-        {//ToDo Re-add smart instance management
+        {
+            unloadPanel(name, 0);
+        }
+        /// <summary>
+        /// Unloads a panel only from a specific screen
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="screen"></param>
+        public void unloadPanel(string name,int screen)
+        {
             lock (this)
             {
-                OMPanel[] p = panels.Find(x => x[0].Name == name);
+                OMPanel[] p = panels.Find(x => x[screen].Name == name);
                 if (p == null)
                     return;
                 else
@@ -128,9 +162,7 @@ namespace OpenMobile.Framework
         /// </summary>
         public void Dispose()
         {
-            if (panels != null)
-                panels.Clear();
-            GC.SuppressFinalize(this);
+            //
         }
 
         #endregion

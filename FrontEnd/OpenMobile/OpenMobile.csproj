@@ -60,10 +60,16 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuiltInComponents.cs" />
     <Compile Include="Core.cs" />
+    <Compile Include="ErrorReporting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ErrorReporting.Designer.cs">
+      <DependentUpon>ErrorReporting.cs</DependentUpon>
+    </Compile>
     <Compile Include="GestureRecognizer.cs" />
     <Compile Include="HalInterface.cs" />
     <Compile Include="InputRouter.cs" />
@@ -78,6 +84,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ErrorReporting.resx">
+      <DependentUpon>ErrorReporting.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="RenderingWindow.resx">
       <DependentUpon>RenderingWindow.cs</DependentUpon>
       <SubType>Designer</SubType>

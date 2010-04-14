@@ -16,7 +16,7 @@ namespace OMDebug
         {
             throw new NotImplementedException();
         }
-        public OMPanel loadSettings(string name, int screen)
+        public Settings loadSettings()
         {
             throw new NotImplementedException();
         }
@@ -75,7 +75,7 @@ namespace OMDebug
         public eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
-            writer = new StreamWriter(OpenMobile.Path.Combine(theHost.PluginPath, "Debug.txt"), true);
+            writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
             writer.WriteLine("------------------Software-------------------");
             writer.WriteLine("OS: " + OpenMobile.Framework.OSSpecific.getOSVersion());
             writer.WriteLine("Framework: " + OpenMobile.Framework.OSSpecific.getFramework());
@@ -130,9 +130,9 @@ namespace OMDebug
             log(function.ToString() + "(" + arg1 + "," + arg2 + "," + arg3 + ")");
         }
 
-        void theHost_OnStorageEvent(OpenMobile.eMediaType type, string arg)
+        void theHost_OnStorageEvent(eMediaType type, bool justInserted, string arg)
         {
-            log("Storage Event("+type.ToString()+","+arg+")");
+            log("Storage Event("+type.ToString()+","+justInserted+","+arg+")");
         }
 
         void theHost_OnPowerChange(OpenMobile.ePowerEvent type)

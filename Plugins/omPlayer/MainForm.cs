@@ -123,7 +123,10 @@ namespace OMPlayer
     public int getVolume(int instance)
     {
         checkInstance(instance);
-        return player[instance].currentVolume;
+        if (player[instance].currentVolume<0)
+            return -1; //volume muted
+        else
+            return player[instance].currentVolume;
     }
     private void saveState()
     {
@@ -161,8 +164,11 @@ namespace OMPlayer
     private void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
     {
         if (function == eFunction.closeProgram)
+        {
             saveState();
-        if (function == eFunction.RenderingWindowResized)
+            fadeout();
+        }
+        else if (function == eFunction.RenderingWindowResized)
         {
             int inst = theHost.instanceForScreen(int.Parse(arg1));
             if (player[inst] != null)
@@ -194,7 +200,10 @@ namespace OMPlayer
                 {
                     int k = theHost.instanceForScreen(i);
                     host.execute(eFunction.loadAVPlayer, k.ToString(), "OMPlayer");
+                    checkInstance(k);
+                    player[k].currentVolume = 0;
                     play(k, setting.getSetting("Music.Instance"+k.ToString()+".LastPlayingURL"), eMediaType.Local);
+                    player[k].currentVolume = 100;
                     if (player[k].mediaPosition == null)
                         return eLoadStatus.LoadSuccessful;
                     double pos;
@@ -205,6 +214,7 @@ namespace OMPlayer
                         player[k].mediaPosition.put_CurrentPosition(pos);
                     }
                 }
+                fadeIn();
             }
         }
         return eLoadStatus.LoadSuccessful;
@@ -213,22 +223,39 @@ namespace OMPlayer
     {
         if (type == ePowerEvent.SleepOrHibernatePending)
         {
-            for (int i = 0; i < player.Length; i++)
-                if (player[i] != null)
-                    player[i].suspended = true;
+            fadeout();
         }
         else if (type == ePowerEvent.SystemResumed)
         {
-            for (int i = 0; i < player.Length; i++)
-                if (player[i] != null)
-                    player[i].suspended = false;
+            fadeIn();
         }
         else if (type == ePowerEvent.ShutdownPending)
         {
             saveState();
+            fadeout();
         }
     }
 
+    private void fadeout()
+    {
+        for (int k = 10; k >0; k--)
+            for (int i = 0; i < player.Length; i++)
+                if (player[i] != null)
+                {
+                    setVolume(i, (k * 10));
+                    Thread.Sleep(150);
+                }
+    }
+    private void fadeIn()
+    {
+        for (int k = 0; k < 10; k++)
+            for (int i = 0; i < player.Length; i++)
+                if (player[i] != null)
+                {
+                    setVolume(i, (k * 10));
+                    Thread.Sleep(150);
+                }
+    }
     public bool pause(int instance)
     {
         checkInstance(instance);
@@ -341,12 +368,15 @@ namespace OMPlayer
             if ((percent >= 0) && (percent <= 100))
             {
                 player[instance].currentVolume = percent;
-                return (player[instance].basicAudio.put_Volume((100 - player[instance].currentVolume) * -100) == 0);
+                if (percent == 0) //prevent log(0)
+                    return (player[instance].basicAudio.put_Volume(-10000) == 0);
+                return (player[instance].basicAudio.put_Volume((int)(2000 * Math.Log10(Math.Pow((percent / 100.0),2)))) == 0);
             }
             if (percent == -1)
             {
-                player[instance].currentVolume = 0;
-                return (player[instance].basicAudio.put_Volume((100 - player[instance].currentVolume) * -100) == 0);
+                if (player[instance].currentVolume>0)
+                    player[instance].currentVolume *= -1;
+                return (player[instance].basicAudio.put_Volume(-10000)==0);
             }
         }
         return false;
@@ -443,7 +473,6 @@ namespace OMPlayer
         public double pos = -1.0;
         public IVideoWindow videoWindow = null;
         private Thread t;
-        public bool suspended = false;
         private MessageProc sink;
         private bool fullscreen = false;
         IntPtr drain = IntPtr.Zero;
@@ -478,7 +507,6 @@ namespace OMPlayer
                     break;
                 case EventCode.DeviceLost:
                 case EventCode.ErrorAbort:
-                case EventCode.ErrorAbortEx:
                 case EventCode.ErrorStPlaying:
                 //case EventCode.FileClosed:
                 case EventCode.StErrStopped:
@@ -690,7 +718,7 @@ namespace OMPlayer
                 if (f.WindowState == FormWindowState.Maximized)
                     return videoWindow.SetWindowPosition(0, 0, f.Width + 1, f.Height);
                 else
-                    return videoWindow.SetWindowPosition(0, 0, f.Width - 16, f.Height - 38);
+                    return videoWindow.SetWindowPosition(0, 0, f.Width - (f.Width-f.ClientSize.Width), f.Height - (f.Height-f.ClientSize.Height));
             }
             else
             {

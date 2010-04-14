@@ -34,26 +34,14 @@ namespace OpenMobile
     {
         //Here we create the panel that we will load the controls onto (like a windows form)
         ScreenManager manager;
-        ScreenManager symManager;
-        ScreenManager numManager;
         private bool caps = true;
 
         public OMPanel loadPanel(string name,int screen)
         {
-            //When requested we supply the panel
-            //NOTE: if it has not yet finished initializing it will be null
-            switch(name)
-            {
-                case "NUMOSK":
-                    return numManager[screen];
-                case "SYM":
-                    return symManager[screen];
-                default:
-                    return manager[screen];
-            }
+            return manager[screen];
         }
 
-        public OMPanel loadSettings(string name,int screen)
+        public Settings loadSettings()
         {
             //Throwing a not implemented exception is ok for settings panels
             throw new NotImplementedException();
@@ -111,14 +99,15 @@ namespace OpenMobile
             OMPanel regularKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "OSK.xml"), host);
             if (regularKeyboard == null)
                 return eLoadStatus.LoadFailedUnloadRequested;
-            symManager = new ScreenManager(theHost.ScreenCount);
+            regularKeyboard.Name = "";
             OMPanel symKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "SYM.xml"),host);
             if (symKeyboard == null)
                 return eLoadStatus.LoadFailedUnloadRequested;
-            numManager = new ScreenManager(theHost.ScreenCount);
+            symKeyboard.Name = "SYM";
             OMPanel numKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "NUM.xml"), host);
             if (numKeyboard == null)
                 return eLoadStatus.LoadFailedUnloadRequested;
+            numKeyboard.Name = "NUMOSK";
             //Here we create a handle to hook the button presses
             userInteraction handler = new userInteraction(MainClass_OnClick);
             //Now we loop through each control and hook its event
@@ -139,8 +128,8 @@ namespace OpenMobile
             regularKeyboard.Forgotten = true;
             numKeyboard.Forgotten = true;
             manager.loadPanel(regularKeyboard);
-            symManager.loadPanel(symKeyboard);
-            numManager.loadPanel(numKeyboard);
+            manager.loadPanel(symKeyboard);
+            manager.loadPanel(numKeyboard);
             //And when everything is all ready to go...we return true
             return eLoadStatus.LoadSuccessful;
         }
@@ -225,7 +214,7 @@ namespace OpenMobile
         {
             OMTextBox text = (OMTextBox)manager[screen]["Text"];
             if (text.containingScreen() != screen)
-                text = (OMTextBox)numManager[screen]["Text"];
+                text = (OMTextBox)manager[screen,"NUMOSK"]["Text"];
             string Text=((OMButton)sender).Text;
             if ((Text == "OK") || (Text == "ok"))
             {
@@ -287,8 +276,6 @@ namespace OpenMobile
         //Dispose of any objects you created
         public void Dispose()
         {
-            if (symManager!=null)
-                symManager.Dispose();
             if (manager!=null)
                 manager.Dispose();
             GC.SuppressFinalize(this);

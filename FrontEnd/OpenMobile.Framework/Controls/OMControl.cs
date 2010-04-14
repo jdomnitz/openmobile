@@ -62,15 +62,18 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public int containingScreen()
         {
+            if (container != -1)
+                return container;
             if (UpdateThisControl != null)
             {
                 object UI = UpdateThisControl.GetInvocationList()[0].Target;
                 PropertyInfo info = UI.GetType().GetProperty("Screen");
-                return (int)info.GetValue(UI, null);
+                container = (int)info.GetValue(UI, null);
+                return container;
             }
             return -1;
         }
-
+        private int container = -1;
         /// <summary>
         /// If the control has been attached to a user interface (aka is currently loaded)
         /// </summary>

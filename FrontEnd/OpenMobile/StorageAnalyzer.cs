@@ -26,15 +26,16 @@ namespace OpenMobile
 {
     static class StorageAnalyzer
     {
-        public static void AnalyzeAsync(string path){
-            Thread t = new Thread(new ThreadStart(delegate{AnalyzeWorker(path);}));
+        public static void AnalyzeAsync(string path, bool justInserted)
+        {
+            Thread t = new Thread(new ThreadStart(delegate { AnalyzeWorker(path, justInserted); }));
             t.Priority = ThreadPriority.BelowNormal;
             t.Start();
         }
 
-        private static void AnalyzeWorker(string path)
+        private static void AnalyzeWorker(string path, bool justInserted)
         {
-            Core.theHost.RaiseStorageEvent(Analyze(path), path);
+            Core.theHost.RaiseStorageEvent(Analyze(path),justInserted, path);
         }
 
         public static eMediaType Analyze(string path)

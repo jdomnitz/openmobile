@@ -41,14 +41,12 @@ public sealed class MainMenu : IHighLevel
         #region IHighLevel Members
         //Here we create two panels, one for the main menu and one to assign button actions
 
-        OMPanel setButton = new OMPanel();
         IPluginHost theHost;
-        OMPanel exit = new OMPanel();
 
         //Heres where the magic happens
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel mainPanel = new OMPanel();
+            OMPanel mainPanel = new OMPanel("");
 
             //We save a reference to the plugin host for use later
             theHost = host;
@@ -113,25 +111,25 @@ public sealed class MainMenu : IHighLevel
             MainMenu13.OnClick += new userInteraction(MainMenu_OnClick);
             MainMenu13.Image = mainMenu;
             MainMenu13.FocusImage = mainMenuFocus;
-            MainMenu13.Name = "MainMenu.MainMenu13";
             MainMenu13.OnLongClick += new userInteraction(OnLongClick);
+            MainMenu13.Name = "MainMenu.MainMenu13";
             MainMenu13.Tag = settings.getSetting("MainMenu.MainMenu13.Plugin");
             MainMenu13.Text = settings.getSetting("MainMenu.MainMenu13.Display");
             OMButton MainMenu23 = new OMButton(680,260);
             MainMenu23.Image = mainMenu;
             MainMenu23.OnClick += new userInteraction(MainMenu_OnClick);
             MainMenu23.FocusImage = mainMenuFocus;
-            MainMenu23.Name = "MainMenu.MainMenu23";
             MainMenu23.OnLongClick += new userInteraction(OnLongClick);
             MainMenu23.Tag = settings.getSetting("MainMenu.MainMenu23.Plugin");
             MainMenu23.Text = settings.getSetting("MainMenu.MainMenu23.Display");
+            MainMenu23.Name = "MainMenu.MainMenu23";
             OMButton MainMenu33 = new OMButton(680,400);
             MainMenu33.Image = mainMenu;
             MainMenu33.OnClick += new userInteraction(MainMenu_OnClick);
             MainMenu33.FocusImage = mainMenuFocus;
-            MainMenu33.Name = "MainMenu.MainMenu33";
             MainMenu33.Tag = settings.getSetting("MainMenu.MainMenu33.Plugin");
             MainMenu33.Text = settings.getSetting("MainMenu.MainMenu33.Display");
+            MainMenu33.Name = "MainMenu.MainMenu33";
             MainMenu33.OnLongClick += new userInteraction(OnLongClick);
 
             settings.Dispose();
@@ -145,8 +143,13 @@ public sealed class MainMenu : IHighLevel
             mainPanel.addControl(MainMenu31);
             mainPanel.addControl(MainMenu32);
             mainPanel.addControl(MainMenu33);
-            
+            screens = new ScreenManager(theHost.ScreenCount);
+            screens.loadPanel(mainPanel);
+
             //We can do more then one panel too
+            OMPanel setButton = new OMPanel("Settings");
+            imageItem opt2 = theHost.getSkinImage("Full.Highlighted");
+            imageItem opt1 = theHost.getSkinImage("Full");
             OMList list = new OMList(235,150,450,295);
             list.Font = new Font(FontFamily.GenericSerif, 26F);
             list.ListStyle = eListStyle.RoundedTextList;
@@ -154,8 +157,8 @@ public sealed class MainMenu : IHighLevel
             title.Text = "Select the panel to assign to this button";
             title.Format = textFormat.BoldShadow;
             OMButton okButton = new OMButton(550, 460, 135, 50);
-            okButton.Image = theHost.getSkinImage("Full");
-            okButton.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            okButton.Image = opt1;
+            okButton.FocusImage = opt2;
             okButton.Text = "OK";
             okButton.OnClick += new userInteraction(okButton_OnClick);
             OMButton cancel = new OMButton(235, 460, 135, 50);
@@ -168,46 +171,32 @@ public sealed class MainMenu : IHighLevel
             setButton.addControl(title);
             setButton.addControl(okButton);
             setButton.addControl(cancel);
-            screens = new ScreenManager(theHost.ScreenCount);
-            screens.loadPanel(mainPanel);
-            imageItem opt2 = theHost.getSkinImage("Full.Highlighted");
-            imageItem opt1 = theHost.getSkinImage("Full");
+
+            OMPanel exit = new OMPanel("Quit");
             OMImage Image1 = new OMImage(275, 140, 400, 330);
             Image1.Image = theHost.getSkinImage("MediaBorder");
             Image1.Name = "Image1";
-            OMButton Quit = new OMButton();
+            OMButton Quit = new OMButton(330,171,300,60);
             Quit.Image = opt1;
             Quit.FocusImage = opt2;
-            Quit.Height = 60;
-            Quit.Top = 171;
-            Quit.Left = 330;
             Quit.Text = "Quit";
             Quit.Name = "UI.Quit";
             Quit.OnClick += new userInteraction(Quit_OnClick);
-            OMButton Sleep = new OMButton();
+            OMButton Sleep = new OMButton(330,239,300,60);
             Sleep.Image = opt1;
             Sleep.FocusImage = opt2;
-            Sleep.Height = 60;
-            Sleep.Top = 239;
-            Sleep.Left = 330;
             Sleep.Text = "Sleep";
             Sleep.Name = "UI.Sleep";
             Sleep.OnClick += new userInteraction(Sleep_OnClick);
-            OMButton Hibernate = new OMButton();
+            OMButton Hibernate = new OMButton(330,308,300,60);
             Hibernate.Image = opt1;
             Hibernate.FocusImage = opt2;
-            Hibernate.Height = 60;
-            Hibernate.Top = 308;
-            Hibernate.Left = 330;
             Hibernate.Text = "Hibernate";
             Hibernate.Name = "UI.Hibernate";
             Hibernate.OnClick += new userInteraction(Hibernate_OnClick);
-            OMButton Shutdown = new OMButton();
+            OMButton Shutdown = new OMButton(330,377,300,60);
             Shutdown.Image = opt1;
             Shutdown.FocusImage = opt2;
-            Shutdown.Height = 60;
-            Shutdown.Top = 377;
-            Shutdown.Left = 330;
             Shutdown.Text = "Shutdown";
             Shutdown.Name = "UI.Shutdown";
             Shutdown.OnClick += new userInteraction(Shutdown_OnClick);
@@ -221,6 +210,7 @@ public sealed class MainMenu : IHighLevel
             exit.addControl(Sleep);
             exit.addControl(Hibernate);
             exit.addControl(Shutdown);
+            screens.loadSharedPanel(exit);
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -273,7 +263,7 @@ public sealed class MainMenu : IHighLevel
         }
         void okButton_OnClick(OMControl sender, int screen)
         {
-            OMList theList=(OMList)setButton[0];
+            OMList theList=(OMList)screens[screen,"Settings"][0];
             if (theList.SelectedIndex >= 0) //FS#3
             {
                 using (PluginSettings setting = new PluginSettings())
@@ -286,7 +276,7 @@ public sealed class MainMenu : IHighLevel
                     ((OMButton)screens[screen][currentlySetting]).Text = getDisplayName(theList[theList.SelectedIndex].text);
                 }
             }
-            theHost.execute(eFunction.TransitionFromSettings,screen.ToString(),"MainMenu");
+            theHost.execute(eFunction.TransitionFromPanel,screen.ToString(),"MainMenu","Settings");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"MainMenu");
             theHost.execute(eFunction.ExecuteTransition,screen.ToString(),"None");
         }
@@ -306,24 +296,20 @@ public sealed class MainMenu : IHighLevel
         }
         private void createDefaultSettings(PluginSettings settings)
         {
-            settings.setSetting("MainMenu.MainMenu11.Plugin", "Media");
-            settings.setSetting("MainMenu.MainMenu12.Plugin", "OMContacts");
-            settings.setSetting("MainMenu.MainMenu13.Plugin", "OMWeather");
-            settings.setSetting("MainMenu.MainMenu21.Plugin", "About");
+            settings.setSetting("MainMenu.MainMenu11.Plugin", "Media");;
+            settings.setSetting("MainMenu.MainMenu12.Plugin", "About");
+            settings.setSetting("MainMenu.MainMenu13.Plugin", "OMSettings");
             settings.setSetting("MainMenu.MainMenu22.Plugin", "Exit");
-            settings.setSetting("MainMenu.MainMenu23.Plugin", "OMSettings");
             
             settings.setSetting("MainMenu.MainMenu11.Display", "Media");
-            settings.setSetting("MainMenu.MainMenu12.Display", "Contacts");
-            settings.setSetting("MainMenu.MainMenu13.Display", "Weather");
-            settings.setSetting("MainMenu.MainMenu21.Display", "About");
+            settings.setSetting("MainMenu.MainMenu12.Display", "About");
+            settings.setSetting("MainMenu.MainMenu13.Display", "Settings");
             settings.setSetting("MainMenu.MainMenu22.Display", "Exit");
-            settings.setSetting("MainMenu.MainMenu23.Display", "Settings");
         }
 
         void cancel_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromSettings,screen.ToString(),"MainMenu");
+            theHost.execute(eFunction.TransitionFromPanel,screen.ToString(),"MainMenu","Settings");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"None");
         }
@@ -333,37 +319,38 @@ public sealed class MainMenu : IHighLevel
         {
             currentlySetting = sender.Name;
             theHost.execute(eFunction.TransitionFromPanel,screen.ToString(), "MainMenu");
-            theHost.execute(eFunction.TransitionToSettings,screen.ToString(), "MainMenu");
+            theHost.execute(eFunction.TransitionToPanel,screen.ToString(), "MainMenu","Settings");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"None");
         }
 
         ScreenManager screens;
         public OMPanel loadPanel(string name,int screen)
         {
-            if (name == "Quit")
-                return exit;
-            return screens[screen];
+            if (name == "Settings")
+            {
+                object o;
+                theHost.getData(eGetData.GetPlugins, "", out o);
+                if (o == null)
+                    return null;
+                OMList list = ((OMList)screens[screen,"Settings"][0]);
+                list.Clear();
+                list.Add("Not Set");
+                list.Add("Exit");
+                list.Add("About");
+                Type hl = typeof(IHighLevel); //performance improvement
+                foreach (IBasePlugin b in (List<IBasePlugin>)o)
+                {
+                    if (hl.IsInstanceOfType(b))
+                        if ((b.pluginName != "UI") && (b.pluginName != "MainMenu") && (b.pluginName != "OMNotify")) //FS#7
+                            list.Add(b.pluginName);
+                }
+            }
+            return screens[screen,name];
         }
 
-        public OMPanel loadSettings(string name,int screen)
+        public Settings loadSettings()
         {
-            object o = new object();
-            theHost.getData(eGetData.GetPlugins, "", out o);
-            if (o == null)
-                return null;
-            OMList list = ((OMList)setButton[0]);
-            list.Clear();
-            list.Add("Not Set");
-            list.Add("Exit");
-            list.Add("About");
-            Type hl = typeof(IHighLevel); //performance improvement
-            foreach (IBasePlugin b in (List<IBasePlugin>)o)
-            {
-                if (hl.IsInstanceOfType(b))
-                    if ((b.pluginName != "UI") && (b.pluginName != "MainMenu") && (b.pluginName != "OMNotify")) //FS#7
-                        list.Add(b.pluginName);
-            }
-            return setButton;
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -411,8 +398,8 @@ public sealed class MainMenu : IHighLevel
 
         public void Dispose()
         {
-            screens.Dispose();
-            setButton = null;
+            if (screens!=null)
+                screens.Dispose();
             GC.SuppressFinalize(this);
         }
 

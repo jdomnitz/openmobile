@@ -178,7 +178,7 @@ namespace OpenMobile.Net
         public static connectionStatus checkForInternet()
         {
             System.Net.WebRequest request = System.Net.HttpWebRequest.Create("http://www.google.com/");
-            request.Timeout = 1000; //Timeout after 1/2 second
+            request.Timeout = 5000; //Timeout after 1/2 second
             request.Method = "HEAD";
             System.Net.WebResponse response;
             try
