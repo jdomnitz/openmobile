@@ -240,27 +240,6 @@ namespace TagLib.NonContainer {
 			return end_tag.Read ();
 		}
 		
-		/// <summary>
-		///    Writes the tags to the start and end of the file.
-		/// </summary>
-		/// <param name="start">
-		///    A <see cref="long" /> value reference which will be set
-		///    to contain the new seek position in the file at which the
-		///    tags at the start end. This also marks the seek position
-		///    at which the media begins.
-		/// </param>
-		/// <param name="end">
-		///    A <see cref="long" /> value reference which will be set
-		///    to contain the new seek position in the file at which the
-		///    tags at the end begin. This also marks the seek position
-		///    at which the media ends.
-		/// </param>
-		public void Write (out long start, out long end)
-		{
-			start = start_tag.Write ();
-			end = end_tag.Write ();
-		}
-		
 		#endregion
 	}
 }

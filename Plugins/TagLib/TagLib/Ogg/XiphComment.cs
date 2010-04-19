@@ -1005,7 +1005,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string MusicBrainzTrackId {
 			get {return GetFirstField ("MUSICBRAINZ_TRACKID");}
-			set {SetField ("MUSICBRAINZ_TRACKID", value);}
 		}
 
 		/// <summary>
@@ -1022,7 +1021,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string MusicBrainzDiscId {
 			get {return GetFirstField ("MUSICBRAINZ_DISCID");}
-			set {SetField ("MUSICBRAINZ_DISCID", value);}
 		}
 
 		/// <summary>
@@ -1039,7 +1037,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string MusicIpId {
 			get {return GetFirstField ("MUSICIP_PUID");}
-			set {SetField ("MUSICIP_PUID", value);}
 		}
 
 		/// <summary>
@@ -1056,7 +1053,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string AmazonId {
 			get {return GetFirstField ("ASIN");}
-			set {SetField ("ASIN", value);}
 		}
 
 		/// <summary>
@@ -1073,7 +1069,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string MusicBrainzReleaseStatus {
 			get {return GetFirstField ("MUSICBRAINZ_ALBUMSTATUS");}
-			set {SetField ("MUSICBRAINZ_ALBUMSTATUS", value);}
 		}
 
 		/// <summary>
@@ -1090,7 +1085,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string MusicBrainzReleaseType {
 			get {return GetFirstField ("MUSICBRAINZ_ALBUMTYPE");}
-			set {SetField ("MUSICBRAINZ_ALBUMTYPE", value);}
 		}
 
 		/// <summary>
@@ -1107,7 +1101,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string MusicBrainzReleaseCountry {
 			get {return GetFirstField ("RELEASECOUNTRY");}
-			set {SetField ("RELEASECOUNTRY", value);}
 		}
 
 		/// <summary>
@@ -1125,21 +1118,30 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override IPicture [] Pictures {
 			get {
-				string[] covers = GetField ("COVERART");
-				IPicture[] pictures = new Picture[covers.Length];
-				for (int ii = 0; ii < covers.Length; ii++) {
-					ByteVector data = new ByteVector (Convert.FromBase64String (covers[ii]));
-					pictures[ii] = new Picture (data);
+				string[] covers = GetField("METADATA_BLOCK_PICTURE");
+				if (covers.Length > 0)
+				{
+					// use the new Flac picture types
+					IPicture[] pictures = new Flac.Picture[covers.Length];
+					for (int ii = 0; ii < covers.Length; ii++)
+					{
+						ByteVector data = new ByteVector(Convert.FromBase64String(covers[ii]));
+						pictures[ii] = new Flac.Picture(data);
+					}
+					return pictures;
 				}
-				return pictures;
-			}
-			set {
-				string[] covers = new string[value.Length];
-				for (int ii = 0; ii < value.Length; ii++) {
-					IPicture old = value[ii];
-					covers[ii] = Convert.ToBase64String (old.Data.Data);
+				else
+				{
+					// try the old coverart
+					covers = GetField("COVERART");
+					IPicture[] pictures = new Picture[covers.Length];
+					for (int ii = 0; ii < covers.Length; ii++)
+					{
+						ByteVector data = new ByteVector(Convert.FromBase64String(covers[ii]));
+						pictures[ii] = new Flac.Picture(new Picture(data));
+					}
+					return pictures;
 				}
-				SetField ("COVERART", covers);
 			}
 		}
 

@@ -171,7 +171,7 @@ namespace DPGContacts
                 if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 60))
                 {
                     status = 0;
-                    OpenMobile.Threading.TaskManager.QueueTask(getContacts, OpenMobile.priority.Normal);
+                    OpenMobile.Threading.TaskManager.QueueTask(getContacts, OpenMobile.ePriority.Normal);
                     return true;
                 }
                 else

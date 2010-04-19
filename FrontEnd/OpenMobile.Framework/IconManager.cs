@@ -23,6 +23,9 @@ using System.Drawing;
 
 namespace OpenMobile
 {
+    /// <summary>
+    /// Manages Icon display in a UI
+    /// </summary>
     public sealed class IconManager
     {
         public delegate void IconsChanged();
@@ -61,13 +64,23 @@ namespace OpenMobile
             }
         }
         List<UIIcon> icons = new List<UIIcon>();
+        /// <summary>
+        /// Adds an icon to the collection
+        /// </summary>
+        /// <param name="icon"></param>
         public void AddIcon(UIIcon icon)
         {
+            if (icons.Count == 20)
+                return; //something is very wrong if we hit 20 icons
             icons.Add(icon);
             icons.Sort(new iconSort());
             if (OnIconsChanged != null)
                 OnIconsChanged();
         }
+        /// <summary>
+        /// Removes an icon from the collection
+        /// </summary>
+        /// <param name="icon"></param>
         public void RemoveIcon(UIIcon icon)
         {
             if (icons.Remove(icon))

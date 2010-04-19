@@ -21,11 +21,26 @@
 
 namespace OpenMobile.Plugin
 {
+    /// <summary>
+    /// Represents the status of the network connection
+    /// </summary>
     public enum eConnectionStatus
     {
+        /// <summary>
+        /// No connection is established
+        /// </summary>
         Disconnected,
+        /// <summary>
+        /// A connection has been established
+        /// </summary>
         Connected,
+        /// <summary>
+        /// A connection is in progress
+        /// </summary>
         Connecting,
+        /// <summary>
+        /// Connection failed/Error Occured/Hardware error/Hardware not available/Hardware not responding
+        /// </summary>
         Error
     }
     /// <summary>

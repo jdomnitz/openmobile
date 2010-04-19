@@ -135,7 +135,11 @@ namespace TagLib.Ogg
 			c = Codecs.Theora.FromPacket (packet);
 			if (c != null)
 				return c;
-			
+
+            c = Codecs.Spx.FromPacket(packet);
+            if (c != null)
+                return c;
+
 			throw new UnsupportedFormatException ("Unknown codec.");
 		}
 		
@@ -261,26 +265,6 @@ namespace TagLib.Ogg
 		/// </returns>
 		public abstract TimeSpan GetDuration (long firstGranularPosition,
 		                                      long lastGranularPosition);
-		
-		/// <summary>
-		///    Replaces the comment packet in a collection of packets
-		///    with the rendered version of a Xiph comment or inserts a
-		///    comment packet if the stream lacks one.
-		/// </summary>
-		/// <param name="packets">
-		///    A <see cref="ByteVectorCollection" /> object containing
-		///    a collection of packets.
-		/// </param>
-		/// <param name="comment">
-		///    A <see cref="XiphComment" /> object to store the rendered
-		///    version of in <paramref name="packets" />.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="packets" /> or <paramref name="comment"
-		///    /> is <see langword="null" />.
-		/// </exception>
-		public abstract void SetCommentPacket (ByteVectorCollection packets,
-		                                       XiphComment comment);
 		
 #endregion
 	}

@@ -38,7 +38,11 @@ namespace OpenMobile
 
         public OMPanel loadPanel(string name,int screen)
         {
-            return manager[screen];
+            if (System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock))
+                setUppercase(screen);
+            else
+                setLowercase(screen);
+            return manager[screen,name];
         }
 
         public Settings loadSettings()
@@ -164,12 +168,21 @@ namespace OpenMobile
                             text.Text += arg.KeyCode.ToString();
                         else
                             text.Text += arg.KeyCode.ToString().ToLower();
-                    else{
+                    else if ((arg.KeyValue > 47) && (arg.KeyValue < 59))
+                        text.Text += arg.KeyCode.ToString().Replace("D", "");
+                    else
+                    {
                         switch (arg.KeyValue)
                         {
                             case 13:
                                 //Ignore enter-could be any button //theHost.execute(eFunction.userInputReady, i.ToString(), "OSK", text.Text);
                                 return false;//break;
+                            case 20:
+                                if (System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock))
+                                    setUppercase(i);
+                                else
+                                    setLowercase(i);
+                                return false;
                             case 32:
                                 text.Text += " ";
                                 break;
@@ -240,32 +253,43 @@ namespace OpenMobile
             }
             else
             {
-                OMPanel regularKeyboard = manager[screen];
                 if ((Text == "CAPS") || (Text == "Caps"))
                 {
-                    for (int i = 0; i < regularKeyboard.controlCount; i++)
-                    {
-                        if (regularKeyboard[i].GetType() == typeof(OMButton))
-                        {
-                            ((OMButton)regularKeyboard[i]).Text = ((OMButton)regularKeyboard[i]).Text.ToLower();
-                            caps = false;
-                        }
-                    }
+                    setLowercase(screen);
                     return;
                 }
                 if (Text == "caps")
                 {
-                    for (int i = 0; i < regularKeyboard.controlCount; i++)
-                    {
-                        if (regularKeyboard[i].GetType() == typeof(OMButton))
-                        {
-                            ((OMButton)regularKeyboard[i]).Text = ((OMButton)regularKeyboard[i]).Text.ToUpper();
-                            caps = true;
-                        }
-                    }
+                    setUppercase(screen);
                     return;
                 }
                 text.Text += Text;
+            }
+        }
+
+        private void setLowercase(int screen)
+        {
+            OMPanel regularKeyboard = manager[screen];
+            for (int i = 0; i < regularKeyboard.controlCount; i++)
+            {
+                if (regularKeyboard[i].GetType() == typeof(OMButton))
+                {
+                    ((OMButton)regularKeyboard[i]).Text = ((OMButton)regularKeyboard[i]).Text.ToLower();
+                    caps = false;
+                }
+            }
+        }
+
+        private void setUppercase(int screen)
+        {
+            OMPanel regularKeyboard = manager[screen];
+            for (int i = 0; i < regularKeyboard.controlCount; i++)
+            {
+                if (regularKeyboard[i].GetType() == typeof(OMButton))
+                {
+                    ((OMButton)regularKeyboard[i]).Text = ((OMButton)regularKeyboard[i]).Text.ToUpper();
+                    caps = true;
+                }
             }
         }
 

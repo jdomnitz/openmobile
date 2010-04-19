@@ -35,11 +35,29 @@ namespace OpenMobile.Threading
     public static class TaskManager
     {
         static EventWaitHandle sync = new EventWaitHandle(false, EventResetMode.AutoReset);
+        /// <summary>
+        /// An object that represents a task to execute
+        /// </summary>
         public struct taskItem
         {
+            /// <summary>
+            /// The function to execute
+            /// </summary>
             public Function function;
+            /// <summary>
+            /// The priority of the task
+            /// </summary>
             public ePriority Priority;
+            /// <summary>
+            /// The name of the task
+            /// </summary>
             public string TaskName;
+            /// <summary>
+            /// Create a new task item
+            /// </summary>
+            /// <param name="function"></param>
+            /// <param name="Priority"></param>
+            /// <param name="name"></param>
             public taskItem(Function function, ePriority Priority,string name)
             {
                 this.function = function;
@@ -47,6 +65,9 @@ namespace OpenMobile.Threading
                 this.TaskName = name;
             }
         }
+        /// <summary>
+        /// Returns a list of currently queued tasks
+        /// </summary>
         public static List<taskItem> Tasks = new List<taskItem>();
         static Thread taskThread;
         static EventWaitHandle enabled=new EventWaitHandle(false,EventResetMode.ManualReset);

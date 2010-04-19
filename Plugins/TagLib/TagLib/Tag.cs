@@ -90,6 +90,16 @@ namespace TagLib {
 		/// </summary>
 		FlacMetadata = 0x00000200,
 		
+        /// <summary>
+		///    Audible Metadata Blocks Tag
+		/// </summary>
+		AudibleMetadata = 0x00000400,
+
+        /// <summary>
+        /// RMF Metadata
+        /// </summary>
+        RMFMetadata = 0x00000800,
+
 		/// <summary>
 		///    All tag types.
 		/// </summary>

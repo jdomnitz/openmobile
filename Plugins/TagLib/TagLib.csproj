@@ -32,6 +32,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -60,6 +62,8 @@
     <Compile Include="TagLib\Asf\StreamPropertiesObject.cs" />
     <Compile Include="TagLib\Asf\Tag.cs" />
     <Compile Include="TagLib\Asf\UnknownObject.cs" />
+    <Compile Include="TagLib\Audible\File.cs" />
+    <Compile Include="TagLib\Audible\Tag.cs" />
     <Compile Include="TagLib\ByteVector.cs" />
     <Compile Include="TagLib\ByteVectorList.cs" />
     <Compile Include="TagLib\CombinedTag.cs" />
@@ -139,6 +143,7 @@
     <Compile Include="TagLib\NonContainer\Tag.cs" />
     <Compile Include="TagLib\Ogg\Bitstream.cs" />
     <Compile Include="TagLib\Ogg\Codec.cs" />
+    <Compile Include="TagLib\Ogg\Codecs\Speex.cs" />
     <Compile Include="TagLib\Ogg\Codecs\Theora.cs" />
     <Compile Include="TagLib\Ogg\Codecs\Vorbis.cs" />
     <Compile Include="TagLib\Ogg\File.cs" />
@@ -160,6 +165,8 @@
     <Compile Include="TagLib\Riff\ListTag.cs" />
     <Compile Include="TagLib\Riff\MovieIdTag.cs" />
     <Compile Include="TagLib\Riff\WaveFormatEx.cs" />
+    <Compile Include="TagLib\Rmf\File.cs" />
+    <Compile Include="TagLib\Rmf\Tag.cs" />
     <Compile Include="TagLib\StringList.cs" />
     <Compile Include="TagLib\SupportedMimeType.cs" />
     <Compile Include="TagLib\Tag.cs" />

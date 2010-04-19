@@ -154,42 +154,6 @@ namespace TagLib.Ogg.Codecs
 						firstGranularPosition) /
 					(double) header.sample_rate);
 		}
-		
-		/// <summary>
-		///    Replaces the comment packet in a collection of packets
-		///    with the rendered version of a Xiph comment or inserts a
-		///    comment packet if the stream lacks one.
-		/// </summary>
-		/// <param name="packets">
-		///    A <see cref="ByteVectorCollection" /> object containing
-		///    a collection of packets.
-		/// </param>
-		/// <param name="comment">
-		///    A <see cref="XiphComment" /> object to store the rendered
-		///    version of in <paramref name="packets" />.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="packets" /> or <paramref name="comment"
-		///    /> is <see langword="null" />.
-		/// </exception>
-		public override void SetCommentPacket (ByteVectorCollection packets,
-		                                       XiphComment comment)
-		{
-			if (packets == null)
-				throw new ArgumentNullException ("packets");
-			
-			if (comment == null)
-				throw new ArgumentNullException ("comment");
-			
-			ByteVector data = new ByteVector ((byte) 0x03);
-			data.Add (id);
-			data.Add (comment.Render (true));
-			if (packets.Count > 1 && PacketType (packets [1]) == 0x03)
-				packets [1] = data;
-			else
-				packets.Insert (1, data);
-		}
-		
 #endregion
 		
 		

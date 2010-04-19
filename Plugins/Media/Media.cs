@@ -599,7 +599,7 @@ namespace Media
         }
         public string displayName
         {
-            get { return "Media"; }
+            get { return "Music"; }
         }
         public float pluginVersion
         {
@@ -608,7 +608,7 @@ namespace Media
 
         public string pluginDescription
         {
-            get { return "Plugin Description"; }
+            get { return "Music Player Skin"; }
         }
 
         public bool incomingMessage(string message, string source)

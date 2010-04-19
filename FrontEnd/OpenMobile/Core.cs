@@ -83,7 +83,7 @@ namespace OpenMobile
                 else
                     RenderingWindows[i].executeTransition(((InitialTransition)a[0]).Transition);
             }
-            var b = mmPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
+            object[] b = mmPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
             if (b.Length > 0)
                 exitTransition=((FinalTransition)b[0]).Transition;
         }

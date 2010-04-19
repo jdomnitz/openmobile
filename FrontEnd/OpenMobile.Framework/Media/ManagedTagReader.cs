@@ -45,21 +45,21 @@ namespace OpenMobile.Media
             {
                 f = TagLib.File.Create(filename);
             }
-            catch (UnsupportedFormatException)
+            catch (UnsupportedFormatException e)
             {
                 mediaInfo i = new mediaInfo(filename);
                 i.Name = Path.GetFileNameWithoutExtension(filename);
                 return i;
             }
-            catch (Exception) { return null; }
+            catch (Exception e) { return null; }
             Tag t = f.Tag;
             mediaInfo info = new mediaInfo();
             info.Album = t.Album;
             info.Artist = t.JoinedAlbumArtists;
-            if (info.Artist == "")
+            if (string.IsNullOrEmpty(info.Artist))
                 info.Artist = t.JoinedPerformers;
             if (info.Artist!=null)
-                info.Artist=info.Artist.TrimEnd(new char[] { ',' });
+                info.Artist=info.Artist.Trim().TrimEnd(new char[] { ',' });
             if (t.Pictures.Length > 0)
             {
                 MemoryStream m = new MemoryStream(t.Pictures[0].Data.Data);

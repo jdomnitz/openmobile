@@ -69,7 +69,9 @@ namespace TagLib {
 			typeof(TagLib.Mpeg.AudioFile),
 			typeof(TagLib.Ogg.File),
 			typeof(TagLib.Riff.File),
-			typeof(TagLib.WavPack.File)
+			typeof(TagLib.WavPack.File),
+            typeof(TagLib.Audible.File),
+            typeof(TagLib.Rmf.File)
 		};
 		
 		/// <summary>
