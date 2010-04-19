@@ -73,7 +73,7 @@ namespace OpenMobile.Framework
                 {
                     info = t.GetProperty(reader.Name);
                 }
-                else if ((reader.NodeType == XmlNodeType.Text) && (reader.Depth == 3))
+                else if ((reader.NodeType == XmlNodeType.Text) && (reader.Depth == 3)&&(info!=null))
                 {
                     if (info.CanWrite == true)
                     {

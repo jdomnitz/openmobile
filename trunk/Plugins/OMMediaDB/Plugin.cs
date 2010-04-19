@@ -85,7 +85,7 @@ namespace OMMediaDB
         {
             if ((location==null)||(location == ""))
                 return;
-            string[] filter = new string[] { "*.mp3", "*.m4a", "*.aac", "*.aif", "*.wav", "*.m4p", "*.ogg", "*.wma" };
+            string[] filter = new string[] { "*.mp3", "*.m4a", "*.mpc", "*.flac", "*.wv", "*.aac", "*.aif", "*.aiff", "*.asf","*.ape", "*.wav", "*.m4p", "*.ogg", "*.wma", "*.oga", "*.spx" };
             for(int i=0;i<filter.Length;i++)
                 parse(location, subdirectories,filter[i]);
         }

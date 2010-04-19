@@ -114,19 +114,6 @@ namespace TagLib.Ogg
 		}
 		
 		/// <summary>
-		///    Stores a Xiph comment in the codec-specific comment
-		///    packet.
-		/// </summary>
-		/// <param name="comment">
-		///    A <see cref="XiphComment" /> object to store in the
-		///    comment packet.
-		/// </param>
-		public void SetComment (XiphComment comment)
-		{
-			codec.SetCommentPacket (packets, comment);
-		}
-		
-		/// <summary>
 		///    Repaginates the pages passed into the current instance to
 		///    handle changes made to the Xiph comment.
 		/// </summary>

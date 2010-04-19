@@ -761,7 +761,7 @@ namespace OMPlayer
                     DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(instance)));
                     DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
                     DsError.ThrowExceptionForHR(Resize(1, 1));
-                    DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(sink.Handle));
+                    DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(drain));
                 }
                 currentPlaybackRate = 1.0;
                 DsError.ThrowExceptionForHR(mediaControl.Run());

@@ -605,6 +605,9 @@ namespace OpenMobile
                 case eFunction.unloadTunedContent:
                     if (int.TryParse(arg,out ret)==true)
                     {
+                        if (currentTunedContent[ret] == null)
+                            return false;
+                        currentTunedContent[ret].setPowerState(ret, false);
                         currentTunedContent[ret].OnMediaEvent -= raiseMediaEvent;
                         currentTunedContent[ret] = null;
                         raiseSystemEvent(eFunction.unloadTunedContent, arg, "", "");
@@ -721,29 +724,21 @@ namespace OpenMobile
                         return currentTunedContent[ret].stepForward(ret);
                     }
                     return false;
-                case eFunction.powerOnDevice:
-                    if (int.TryParse(arg, out ret) == true)
-                    {
-                        if (currentTunedContent[ret] == null)
-                            return false;
-                        return currentTunedContent[ret].setPowerState(ret, true);
-                    }
-                    return false;
-                case eFunction.powerOffDevice:
-                    if (int.TryParse(arg, out ret) == true)
-                    {
-                        if (currentTunedContent[ret] == null)
-                            return false;
-                        return currentTunedContent[ret].setPowerState(ret, false);
-                    }
-                    return false;
                 case eFunction.refreshData:
                     return ((IDataProvider)getPluginByName(arg)).refreshData();
                 case eFunction.backgroundOperationStatus:
                     raiseSystemEvent(eFunction.backgroundOperationStatus, arg,"","");
                     return true;
                 case eFunction.resetDevice:
-                    throw new NotImplementedException();
+                    plugin = Core.pluginCollection.Find(q => typeof(IRawHardware).IsInstanceOfType(q)&&(q.pluginName==arg));
+                    if (plugin == null)
+                        return false;
+                    try
+                    {
+                        ((IRawHardware)plugin).resetDevice();
+                    }
+                    catch (Exception) { return false; }
+                    return true;
                 case eFunction.loadSpeechContext:
                     plugin = Core.pluginCollection.Find(q => typeof(ISpeech).IsInstanceOfType(q));
                     if (plugin == null)
@@ -904,17 +899,16 @@ namespace OpenMobile
                     {
                         if (currentTunedContent[ret] != null)
                             return false;
-                        using (ITunedContent player = (ITunedContent)Core.pluginCollection.FindAll(i => i.GetType() == typeof(ITunedContent)).Find(i => i.pluginName == arg2))
-                        {
-                            if (player == null)
-                                return false;
-                            //Only hook it once
-                            if (Array.Exists<ITunedContent>(currentTunedContent, a => a == player) == false)
-                                player.OnMediaEvent += raiseMediaEvent;
-                            currentTunedContent[ret] = player;
-                            raiseSystemEvent(eFunction.loadTunedContent, arg1, arg2, "");
-                            return true;
-                        }
+                        ITunedContent player = (ITunedContent)Core.pluginCollection.FindAll(i => i.GetType() == typeof(ITunedContent)).Find(i => i.pluginName == arg2);
+                        if (player == null)
+                            return false;
+                        //Only hook it once
+                        if (Array.Exists<ITunedContent>(currentTunedContent, a => a == player) == false)
+                            player.OnMediaEvent += raiseMediaEvent;
+                        currentTunedContent[ret] = player;
+                        currentTunedContent[ret].setPowerState(ret, true);
+                        raiseSystemEvent(eFunction.loadTunedContent, arg1, arg2, "");
+                        return true;
                     }
                     return false;
                 case eFunction.setPlaylistPosition:
@@ -980,6 +974,7 @@ namespace OpenMobile
                         }
                         else
                         {
+                            raiseMediaEvent(eFunction.setPlayerVolume, ret, arg2);
                             try
                             {
                                 return currentMediaPlayer[ret].setVolume(ret, int.Parse(arg2));
@@ -992,9 +987,14 @@ namespace OpenMobile
                     
                     if (int.TryParse(arg1, out ret) == true)
                     {
-                        if (currentTunedContent[ret] == null)
+                        if (arg2 == null)
                             return false;
-                        return currentTunedContent[ret].tuneTo(ret, arg2);
+                        if (currentTunedContent[ret] == null)
+                            return findAlternateTuner(ret, arg2);
+                        if (currentTunedContent[ret].tuneTo(ret, arg2) == false)
+                            return findAlternateTuner(ret, arg2);
+                        else
+                            return true;
                     }
                     return false;
                 case eFunction.backgroundOperationStatus:
@@ -1048,8 +1048,33 @@ namespace OpenMobile
             return false;
         }
 
+        private bool findAlternateTuner(int ret, string arg2)
+        {
+            if (currentMediaPlayer[ret] != null)
+                execute(eFunction.unloadAVPlayer, ret.ToString());
+            ITunedContent tmp = currentTunedContent[ret];
+            List<IBasePlugin> plugins = Core.pluginCollection.FindAll(p => typeof(ITunedContent).IsInstanceOfType(p));
+            for (int i = 0; i < plugins.Count; i++)
+            {
+                if (plugins[i] != tmp)
+                {
+                    execute(eFunction.unloadTunedContent, ret.ToString());
+                    execute(eFunction.loadTunedContent, ret.ToString(), plugins[i].pluginName);
+                    if (currentTunedContent[ret].tuneTo(ret, arg2) == true)
+                        return true;
+                }
+            }
+            if (tmp == null)
+                execute(eFunction.unloadTunedContent, ret.ToString());
+            else
+                execute(eFunction.loadTunedContent, ret.ToString(), tmp.pluginName);
+            return false;
+        }
+
         private bool findAlternatePlayer(int ret, string arg2, eMediaType type)
         {
+            if (currentTunedContent[ret] != null)
+                execute(eFunction.unloadTunedContent, ret.ToString());
             IAVPlayer tmp = currentMediaPlayer[ret];
             List<IBasePlugin> plugins=Core.pluginCollection.FindAll(p => typeof(IAVPlayer).IsInstanceOfType(p));
             for (int i = 0; i < plugins.Count; i++)

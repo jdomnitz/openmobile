@@ -193,46 +193,6 @@ namespace TagLib.NonContainer {
 		
 		
 		
-		#region Public Methods
-		
-		/// <summary>
-		///    Saves the changes made in the current instance to the
-		///    file it represents.
-		/// </summary>
-		public override void Save ()
-		{
-			long start, end;
-			Mode = AccessMode.Write;
-			try {
-				tag.Write (out start, out end);
-				InvariantStartPosition = start;
-				InvariantEndPosition = end;
-				TagTypesOnDisk = TagTypes;
-			} finally {
-				Mode = AccessMode.Closed;
-			}
-		}
-		
-		/// <summary>
-		///    Removes a set of tag types from the current instance.
-		/// </summary>
-		/// <param name="types">
-		///    A bitwise combined <see cref="TagLib.TagTypes" /> value
-		///    containing tag types to be removed from the file.
-		/// </param>
-		/// <remarks>
-		///    In order to remove all tags from a file, pass <see
-		///    cref="TagTypes.AllTags" /> as <paramref name="types" />.
-		/// </remarks>
-		public override void RemoveTags (TagTypes types)
-		{
-			tag.RemoveTags (types);
-		}
-		
-		#endregion
-		
-		
-		
 		#region Protected Properties
 		
 		/// <summary>

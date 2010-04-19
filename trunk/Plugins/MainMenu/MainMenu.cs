@@ -301,7 +301,7 @@ public sealed class MainMenu : IHighLevel
             settings.setSetting("MainMenu.MainMenu13.Plugin", "OMSettings");
             settings.setSetting("MainMenu.MainMenu22.Plugin", "Exit");
             
-            settings.setSetting("MainMenu.MainMenu11.Display", "Media");
+            settings.setSetting("MainMenu.MainMenu11.Display", "Music");
             settings.setSetting("MainMenu.MainMenu12.Display", "About");
             settings.setSetting("MainMenu.MainMenu13.Display", "Settings");
             settings.setSetting("MainMenu.MainMenu22.Display", "Exit");

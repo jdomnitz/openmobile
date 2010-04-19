@@ -272,16 +272,34 @@ namespace OpenMobile
     /// </summary>
     public sealed class OMListItem
     {
+        /// <summary>
+        /// Format information for a list subitem
+        /// </summary>
         public sealed class subItemFormat
         {
             /// <summary>
-            /// The text to display
+            /// Text Formatting
             /// </summary>
             public textFormat textFormat = textFormat.Normal;
+            /// <summary>
+            /// The text alignment
+            /// </summary>
             public Alignment textAlignment = Alignment.BottomLeft;
+            /// <summary>
+            /// The ForeColor
+            /// </summary>
             public Color color = Color.White;
+            /// <summary>
+            /// The color when highlighted
+            /// </summary>
             public Color highlightColor = Color.White;
+            /// <summary>
+            /// The Text Font
+            /// </summary>
             public Font font = new Font(FontFamily.GenericSansSerif, 18F);
+            /// <summary>
+            /// The outline/secondary color
+            /// </summary>
             public Color outlineColor = Color.Black;
             public int Offset = 0;
         }
@@ -918,18 +936,6 @@ namespace OpenMobile
         /// <para>Arg1: Instance Number</para>
         /// </summary>
         stepBackward = 64,
-        /// <summary>
-        /// Power on a device (Tuned Content)
-        /// <para>---------------------------------------</para>
-        /// <para>Arg1: Instance Number</para>
-        /// </summary>
-        powerOnDevice=65,
-        /// <summary>
-        /// Power off a device (Tuned Content)
-        /// <para>---------------------------------------</para>
-        /// <para>Arg1: Instance Number</para>
-        /// </summary>
-        powerOffDevice=66,
         /// <summary>
         /// Sends a keypress to the target UI window
         /// Possible keys: Up, Down, Left, Right, Enter, ScrollUp, ScrollDown
@@ -1921,6 +1927,10 @@ namespace OpenMobile
         /// Channel is broadcast in HD
         /// </summary>
         public bool HD;
+        /// <summary>
+        /// Station Genre (Empty String if unknown)
+        /// </summary>
+        public string genre;
     }
 
     /// <summary>

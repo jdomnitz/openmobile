@@ -181,87 +181,6 @@ namespace TagLib.Flac {
 		#region Public Methods
 		
 		/// <summary>
-		///    Saves the changes made in the current instance to the
-		///    file it represents.
-		/// </summary>
-		public override void Save ()
-		{
-			Mode = AccessMode.Write;
-			try {
-				// Update the tags at the beginning of the file.
-				long metadata_start = StartTag.Write ();
-				long metadata_end;
-				
-				// Get all the blocks, but don't read the data for ones
-				// we're filling with stored data.
-				IList<Block> old_blocks = ReadBlocks (ref metadata_start,
-					out metadata_end, BlockMode.Blacklist,
-					BlockType.XiphComment, BlockType.Picture);
-				
-				// Create new vorbis comments is they don't exist.
-				GetTag (TagTypes.Xiph, true);
-				
-				// Create new blocks and add the basics.
-				List<Block> new_blocks = new List<Block> ();
-				new_blocks.Add (old_blocks [0]);
-				
-				// Add blocks we don't deal with from the file.
-				foreach (Block block in old_blocks)
-					if (block.Type != BlockType.StreamInfo &&
-						block.Type != BlockType.XiphComment &&
-						block.Type != BlockType.Picture &&
-						block.Type != BlockType.Padding)
-						new_blocks.Add (block);
-				
-				new_blocks.Add (new Block (BlockType.XiphComment,
-					(GetTag (TagTypes.Xiph, true) as
-						Ogg.XiphComment).Render (false)));
-				
-				foreach (IPicture picture in metadata.Pictures) {
-					if (picture == null)
-						continue;
-					
-					new_blocks.Add (new Block (BlockType.Picture,
-						new Picture (picture).Render ()));
-				}
-				
-				// Get the length of the blocks.
-				long length = 0;
-				foreach (Block block in new_blocks)
-					length += block.TotalSize;
-				
-				// Find the padding size to avoid trouble. If that fails
-				// make some.
-				long padding_size = metadata_end - metadata_start -
-					BlockHeader.Size - length;
-				if (padding_size < 0)
-					padding_size = 1024 * 4;
-				
-				// Add a padding block.
-				if (padding_size != 0)
-					new_blocks.Add (new Block (BlockType.Padding,
-						new ByteVector ((int) padding_size)));
-				
-				// Render the blocks.
-				ByteVector block_data = new ByteVector ();
-				for (int i = 0; i < new_blocks.Count; i ++)
-					block_data.Add (new_blocks [i].Render (
-						i == new_blocks.Count - 1));
-				
-				// Update the blocks.
-				Insert (block_data, metadata_start, metadata_end -
-					metadata_start);
-				
-				// Update the tags at the end of the file.
-				EndTag.Write ();
-				
-				TagTypesOnDisk = TagTypes;
-			} finally {
-				Mode = AccessMode.Closed;
-			}
-		}
-		
-		/// <summary>
 		///    Gets a tag of a specified type from the current instance,
 		///    optionally creating a new tag if possible.
 		/// </summary>
@@ -309,28 +228,6 @@ namespace TagLib.Flac {
 			default:
 				return null;
 			}
-		}
-		
-		/// <summary>
-		///    Removes a set of tag types from the current instance.
-		/// </summary>
-		/// <param name="types">
-		///    A bitwise combined <see cref="TagLib.TagTypes" /> value
-		///    containing tag types to be removed from the file.
-		/// </param>
-		/// <remarks>
-		///    In order to remove all tags from a file, pass <see
-		///    cref="TagTypes.AllTags" /> as <paramref name="types" />.
-		/// </remarks>
-		public override void RemoveTags (TagTypes types)
-		{
-			if ((types & TagTypes.Xiph) != 0)
-				metadata.RemoveComment ();
-			
-			if ((types & TagTypes.FlacMetadata) != 0)
-				metadata.Clear ();
-			
-			base.RemoveTags (types);
 		}
 		
 		#endregion

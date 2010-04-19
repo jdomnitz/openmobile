@@ -185,103 +185,6 @@ namespace TagLib.Mpeg4 {
 		
 		
 		#region Public Methods
-		
-		/// <summary>
-		///    Saves the changes made in the current instance to the
-		///    file it represents.
-		/// </summary>
-		public override void Save ()
-		{
-			if (udta_box == null)
-				udta_box = new IsoUserDataBox ();
-			
-			// Try to get into write mode.
-			Mode = File.AccessMode.Write;
-			try {
-				FileParser parser = new FileParser (this);
-				parser.ParseBoxHeaders ();
-				
-				InvariantStartPosition = parser.MdatStartPosition;
-				InvariantEndPosition = parser.MdatEndPosition;
-				
-				long size_change = 0;
-				long write_position = 0;
-				
-				ByteVector tag_data = udta_box.Render ();
-				
-				// If we don't have a "udta" box to overwrite...
-				if (parser.UdtaTree == null ||
-					parser.UdtaTree.Length == 0 ||
-					parser.UdtaTree [parser.UdtaTree.Length - 1
-					].BoxType != BoxType.Udta) {
-					
-					// Stick the box at the end of the moov box.
-					BoxHeader moov_header = parser.MoovTree [
-						parser.MoovTree.Length - 1];
-					size_change = tag_data.Count;
-					write_position = moov_header.Position +
-						moov_header.TotalBoxSize;
-					Insert (tag_data, write_position, 0);
-					
-					// Overwrite the parent box sizes.
-					for (int i = parser.MoovTree.Length - 1; i >= 0;
-						i --)
-						size_change = parser.MoovTree [i
-							].Overwrite (this, size_change);
-				} else {
-					// Overwrite the old box.
-					BoxHeader udta_header = parser.UdtaTree [
-						parser.UdtaTree.Length - 1];
-					size_change = tag_data.Count -
-						udta_header.TotalBoxSize;
-					write_position = udta_header.Position;
-					Insert (tag_data, write_position,
-						udta_header.TotalBoxSize);
-					
-					// Overwrite the parent box sizes.
-					for (int i = parser.UdtaTree.Length - 2; i >= 0;
-						i --)
-						size_change = parser.UdtaTree [i
-							].Overwrite (this, size_change);
-				}
-				
-				// If we've had a size change, we may need to adjust
-				// chunk offsets.
-				if (size_change != 0) {
-					// We may have moved the offset boxes, so we
-					// need to reread.
-					parser.ParseChunkOffsets ();
-					InvariantStartPosition = parser.MdatStartPosition;
-					InvariantEndPosition = parser.MdatEndPosition;
-					
-					foreach (Box box in parser.ChunkOffsetBoxes) {
-						IsoChunkLargeOffsetBox co64 = 
-							box as IsoChunkLargeOffsetBox;
-						
-						if (co64 != null) {
-							co64.Overwrite (this,
-								size_change,
-								write_position);
-							continue;
-						}
-						
-						IsoChunkOffsetBox stco = 
-							box as IsoChunkOffsetBox;
-						
-						if (stco != null) {
-							stco.Overwrite (this,
-								size_change,
-								write_position);
-							continue;
-						}
-					}
-				}
-				
-				TagTypesOnDisk = TagTypes;
-			} finally {
-				Mode = File.AccessMode.Closed;
-			}
-		}
 
 		/// <summary>
 		///    Gets a tag of a specified type from the current instance,
@@ -317,28 +220,6 @@ namespace TagLib.Mpeg4 {
 			}
 			
 			return null;
-		}
-		
-		/// <summary>
-		///    Removes a set of tag types from the current instance.
-		/// </summary>
-		/// <param name="types">
-		///    A bitwise combined <see cref="TagLib.TagTypes" /> value
-		///    containing tag types to be removed from the file.
-		/// </param>
-		/// <remarks>
-		///    In order to remove all tags from a file, pass <see
-		///    cref="TagTypes.AllTags" /> as <paramref name="types" />.
-		/// </remarks>
-		public override void RemoveTags (TagTypes types)
-		{
-			if ((types & TagTypes.Apple) != TagTypes.Apple ||
-				apple_tag == null)
-				return;
-			
-			apple_tag.DetachIlst ();
-			apple_tag = null;
-			tag.SetTags ();
 		}
 		
 		#endregion

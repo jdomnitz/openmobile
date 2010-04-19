@@ -23,15 +23,69 @@ using System;
 
 namespace OpenMobile.Plugin
 {
-    public enum SettingTypes { Text, Numeric, File, Folder, MultiChoice,Range }
+    /// <summary>
+    /// Represents the type of setting to be displayed/set
+    /// </summary>
+    public enum SettingTypes 
+    {
+        /// <summary>
+        /// Any type of string based setting
+        /// </summary>
+        Text,
+        /// <summary>
+        /// Any type of integer based setting
+        /// </summary>
+        Numeric,
+        /// <summary>
+        /// Any setting that requires a file path
+        /// </summary>
+        File,
+        /// <summary>
+        /// Any setting that requires a folder path
+        /// </summary>
+        Folder,
+        /// <summary>
+        /// Any setting which requires a user to select from a list of options
+        /// </summary>
+        MultiChoice,
+        /// <summary>
+        /// Any setting which requires a user to select from a range of values (ex: 1-100)
+        /// </summary>
+        Range
+    }
+
+    /// <summary>
+    /// Represents a Setting for a plugin
+    /// </summary>
     public sealed class Setting
     {
+        /// <summary>
+        /// The type of setting to be displayed/set
+        /// </summary>
         public SettingTypes Type = SettingTypes.Text;
+        /// <summary>
+        /// The name of the setting to be set
+        /// </summary>
         public string Name = "";
+        /// <summary>
+        /// A header/title for the setting
+        /// </summary>
         public string Header = "";
+        /// <summary>
+        /// A description for the setting
+        /// </summary>
         public string Description = "";
+        /// <summary>
+        /// The actual value to be displayed (default) or the value to be set
+        /// </summary>
         public string Value = null;
+        /// <summary>
+        /// Options for a MultiChoice setting
+        /// </summary>
         public List<string> Options = null;
+        /// <summary>
+        /// Possible value for a MultiChoice or range setting
+        /// </summary>
         public List<string> Values = null;
 
         /// <summary>
@@ -69,7 +123,12 @@ namespace OpenMobile.Plugin
             this.Options = Options;
             this.Values = Values;
         }
+        public static List<string> BooleanList = new List<string>(new string[] { "True", "False" });
     }
+    /// <summary>
+    /// A setting has changed
+    /// </summary>
+    /// <param name="setting"></param>
     public delegate void SettingChanged(Setting setting);
     public sealed class Settings:List<Setting>
     {

@@ -34,10 +34,10 @@ namespace OpenMobile.Controls
     /// </summary>
     public abstract class OMControl : ICloneable
     {
-        protected string name;
         protected modeType mode;
         protected bool visible = true;
         protected object tag;
+        protected string name;
 
         /// <summary>
         /// Forces the renderer to redraw this control
@@ -112,6 +112,7 @@ namespace OpenMobile.Controls
                 name = value;
             }
         }
+
         /// <summary>
         /// Should the control be displayed
         /// </summary>

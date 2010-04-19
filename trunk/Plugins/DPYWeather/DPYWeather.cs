@@ -32,7 +32,14 @@ namespace DPYWeather
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
+            host.OnPowerChange += new PowerEvent(host_OnPowerChange);
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void host_OnPowerChange(OpenMobile.ePowerEvent type)
+        {
+            if (type==OpenMobile.ePowerEvent.SystemResumed)
+                refreshData();
         }
 
         void host_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
@@ -63,7 +70,7 @@ namespace DPYWeather
                     case "yweather:wind":
                         ret.feelsLike = float.Parse(n.Attributes[0].Value);
                         ret.windDirection = getDirection(int.Parse(n.Attributes[1].Value));
-                        ret.windSpeed = float.Parse(n.Attributes[2].Value);
+                        ret.windSpeed = float.Parse(n.Attributes[2].Value,System.Globalization.CultureInfo.GetCultureInfo("en-us").NumberFormat);
                         break;
                     case "yweather:atmosphere":
                         ret.humidity = int.Parse(n.Attributes[0].Value);
@@ -239,7 +246,6 @@ namespace DPYWeather
         {
             if (OpenMobile.Net.Network.IsAvailable == true)
             {
-
                 using (PluginSettings setting = new PluginSettings())
                 {
                     DateTime lastUp = new DateTime();
@@ -251,7 +257,7 @@ namespace DPYWeather
                 }
                 status = 0;
                 updateLocation = arg;
-                OpenMobile.Threading.TaskManager.QueueTask(processItems,OpenMobile.priority.MediumHigh);
+                OpenMobile.Threading.TaskManager.QueueTask(processItems,OpenMobile.ePriority.MediumHigh,"Sync Weather");
                 return true;
             }
             else

@@ -174,40 +174,6 @@ namespace TagLib.Asf {
 		#region Public Methods
 		
 		/// <summary>
-		///    Saves the changes made in the current instance to the
-		///    file it represents.
-		/// </summary>
-		public override void Save ()
-		{
-			Mode = AccessMode.Write;
-			try {
-				HeaderObject header = new HeaderObject (this, 0);
-				
-				if (asf_tag == null) {
-					header.RemoveContentDescriptors ();
-					TagTypesOnDisk &= ~ TagTypes.Asf;
-				} else {
-					TagTypesOnDisk |= TagTypes.Asf;
-					header.AddUniqueObject (
-						asf_tag.ContentDescriptionObject);
-					header.AddUniqueObject (
-						asf_tag.ExtendedContentDescriptionObject);
-					header.Extension.AddUniqueObject (
-						asf_tag.MetadataLibraryObject);
-				}
-				
-				ByteVector output = header.Render ();
-				long diff = output.Count - (long) header.OriginalSize;
-				Insert (output, 0, (long) header.OriginalSize);
-				
-				InvariantStartPosition += diff;
-				InvariantEndPosition += diff;
-			} finally {
-				Mode = AccessMode.Closed;
-			}
-		}
-		
-		/// <summary>
 		///    Gets a tag of a specified type from the current instance,
 		///    optionally creating a new tag if possible.
 		/// </summary>
@@ -231,23 +197,6 @@ namespace TagLib.Asf {
 				return asf_tag;
 			
 			return null;
-		}
-		
-		/// <summary>
-		///    Removes a set of tag types from the current instance.
-		/// </summary>
-		/// <param name="types">
-		///    A bitwise combined <see cref="TagLib.TagTypes" /> value
-		///    containing tag types to be removed from the file.
-		/// </param>
-		/// <remarks>
-		///    In order to remove all tags from a file, pass <see
-		///    cref="TagTypes.AllTags" /> as <paramref name="types" />.
-		/// </remarks>
-		public override void RemoveTags (TagTypes types)
-		{
-			if ((types & TagTypes.Asf) == TagTypes.Asf)
-				asf_tag.Clear ();
 		}
 		
 		/// <summary>

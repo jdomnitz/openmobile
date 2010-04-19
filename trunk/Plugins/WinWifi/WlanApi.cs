@@ -273,10 +273,10 @@ namespace NativeWifi
 			public Wlan.WlanAvailableNetwork[] GetAvailableNetworkList(Wlan.WlanGetAvailableNetworkFlags flags)
 			{
 				IntPtr availNetListPtr;
-				Wlan.ThrowIfError(
-					Wlan.WlanGetAvailableNetworkList(client.clientHandle, info.interfaceGuid, flags, IntPtr.Zero, out availNetListPtr));
 				try
 				{
+                    Wlan.ThrowIfError(
+                    Wlan.WlanGetAvailableNetworkList(client.clientHandle, info.interfaceGuid, flags, IntPtr.Zero, out availNetListPtr));
 					return ConvertAvailableNetworkListPtr(availNetListPtr);
 				}
 				finally

@@ -156,23 +156,6 @@ namespace TagLib.NonContainer {
 		}
 		
 		/// <summary>
-		///    Writes the tags contained in the current instance to the
-		///    beginning of the file that created it, overwriting the
-		///    existing tags.
-		/// </summary>
-		/// <returns>
-		///    A <see cref="long" /> value indicating the seek position
-		///    in the file at which the written tags end. This also
-		///    marks the seek position at which the media begins.
-		/// </returns>
-		public long Write ()
-		{
-			ByteVector data = Render ();
-			file.Insert (data, 0, TotalSize);
-			return data.Count;
-		}
-		
-		/// <summary>
 		///    Removes a set of tag types from the current instance.
 		/// </summary>
 		/// <param name="types">

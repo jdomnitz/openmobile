@@ -19,33 +19,79 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using OpenMobile.Controls;
+using OpenMobile.Plugin;
+using OpenMobile.Data;
 
 namespace OpenMobile
 {
     public static class BuiltInComponents
     {
+        /// <summary>
+        /// The copyright information to be displayed on the about screen
+        /// </summary>
+        public static string AboutText
+        {
+            get
+            {
+                //WARNING: REMOVING ANY OF THE BELOW DESCRIPTION IS A VIOLATION OF THE LICENSE AGREEMENT
+                string Text = "OpenMobile is copyright the openMobile Foundation and its contributors\r\n\r\n";
+                Text += "This program in full or in part is protected under a clarified version of the GPLv3 license which can be found in the application directory.\r\n\r\n";
+                Text += "Contributors:\r\n";
+                Text += "Justin Domnitz (justchat_1) - Lead Developer\r\n";
+                Text += "UnusuallyGenius - Graphics Designer\r\n";
+                Text += "ws6vert - openOBD and Garmin Mobile PC Projects\r\n";
+                Text += "Borte - Developer\r\n";
+                Text += "malcom2073 - Developer\r\n";
+                Text += "\r\nSupporting Projects:\r\n";
+                Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, SQLite, Aqua Gauge and CoreAudio";
+                return Text;
+            }
+        }
         private static OMPanel about;
         public static OMPanel AboutPanel()
         {
-            //WARNING: REMOVING ANY OF THE BELOW DESCRIPTION IS A VIOLATION OF THE LICENSE AGREEMENT
             if (about == null)
             {
                 about = new OMPanel("About");
                 OMLabel description = new OMLabel(30, 40, 900, 550);
                 description.TextAlignment = Alignment.TopCenter;
-                description.Text = "OpenMobile is copyright the openMobile Foundation and its contributors\r\n\r\n";
-                description.Text += "This program in full or in part is protected under a clarified version of the GPLv3 license which can be found in the application directory.\r\n\r\n";
-                description.Text += "Contributors:\r\n";
-                description.Text += "Justin Domnitz (justchat_1) - Lead Developer\r\n";
-                description.Text += "UnusuallyGenius - Graphics Designer\r\n";
-                description.Text += "ws6vert - openOBD and Garmin Mobile PC Projects\r\n";
-                description.Text += "Borte - Developer\r\n";
-                description.Text += "Extide - Developer\r\n";
-                description.Text += "\r\nSupporting Projects:\r\n";
-                description.Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, SQLite, Aqua Gauge and CoreAudio";
+                description.Text = AboutText;
                 about.addControl(description);
             }
             return about;
+        }
+        /// <summary>
+        /// Returns the Non-Skin Specific Settings
+        /// </summary>
+        /// <returns></returns>
+        public static Settings GlobalSettings()
+        {
+            Settings gl = new Settings();
+            Setting cursor=new Setting(SettingTypes.MultiChoice,"UI.HideCursor","","Hide Mouse Cursor",Setting.BooleanList,Setting.BooleanList);
+            Setting graphics=new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", "", "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
+            using (PluginSettings settings = new PluginSettings())
+            {
+                cursor.Value= settings.getSetting("UI.HideCursor");
+                graphics.Value=settings.getSetting("UI.MinGraphics");
+            }
+            gl.Add(cursor);
+            gl.Add(graphics);
+            gl.OnSettingChanged+=new SettingChanged(SettingsChanged);
+            return gl;
+        }
+
+        static void SettingsChanged(Setting setting)
+        {
+            //ToDo
+        }
+        /// <summary>
+        /// Gets zone specific settings for the given instance
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        public static Settings getZoneSettings(int instance)
+        {
+            return new Settings(); //Not Yet Implemented
         }
     }
 }

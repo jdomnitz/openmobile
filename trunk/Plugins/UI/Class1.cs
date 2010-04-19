@@ -25,7 +25,6 @@ using System.Timers;
 using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
-using System.Windows.Forms;
 
 namespace OpenMobile
 {
@@ -633,7 +632,6 @@ namespace OpenMobile
 
         void mediaButton_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.Net.Connections.connect(theHost);
             if (manager[screen][2].Top == 397)
             {
                 timerForward = true;

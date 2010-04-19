@@ -327,39 +327,6 @@ namespace TagLib.Mpeg4 {
 		#region Public Methods
 		
 		/// <summary>
-		///    Overwrites the header on disk, updating it to include a
-		///    change in the size of the box.
-		/// </summary>
-		/// <param name="file">
-		///    A <see cref="TagLib.File" /> object containing the file
-		///    from which the box originates.
-		/// </param>
-		/// <param name="sizeChange">
-		///    A <see cref="long" /> value indicating the change in the
-		///    size of the box described by the current instance.
-		/// </param>
-		/// <returns>
-		///    The size change encountered by the box that parents the
-		///    box described the the current instance, equal to the
-		///    size change of the box plus any size change that should
-		///    happen in the header.
-		/// </returns>
-		public long Overwrite (TagLib.File file, long sizeChange)
-		{
-			if (file == null)
-				throw new ArgumentNullException ("file");
-			
-			if (!from_disk)
-				throw new InvalidOperationException (
-					"Cannot overwrite headers not on disk.");
-			
-			long old_header_size = HeaderSize;
-			DataSize += sizeChange;
-			file.Insert (Render (), position, old_header_size);
-			return sizeChange + HeaderSize - old_header_size;
-		}
-		
-		/// <summary>
 		///    Renders the header represented by the current instance.
 		/// </summary>
 		/// <returns>

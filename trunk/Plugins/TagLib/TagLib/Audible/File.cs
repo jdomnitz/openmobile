@@ -1,14 +1,13 @@
-//
+﻿//
 // File.cs:
 //
 // Author:
-//   Brian Nickel (brian.nickel@gmail.com)
+//   Guy Taylor (s0700260@sms.ed.ac.uk) (thebigguy.co.uk@gmail.com)
 //
 // Original Source:
-//   oggfile.cpp from TagLib
+//   Ogg/File.cs from TagLib-sharp
 //
-// Copyright (C) 2005-2007 Brian Nickel
-// Copyright (C) 2003 Scott Wheeler (Original Implementation)
+// Copyright (C) 2009 Guy Taylor (Original Implementation)
 //
 // This library is free software; you can redistribute it and/or modify
 // it  under the terms of the GNU Lesser General Public License version
@@ -24,52 +23,48 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
 // USA
 //
-
-using System.Collections.Generic;
 using System;
 
-namespace TagLib.Ogg
+namespace TagLib.Audible
 {
 	/// <summary>
 	///    This class extends <see cref="TagLib.File" /> to provide tagging
-	///    and properties support for Ogg files.
+	///    and properties support for Audible inc's aa file format.
 	/// </summary>
-	[SupportedMimeType("taglib/ogg", "ogg")]
-	[SupportedMimeType("taglib/oga", "oga")]
-	[SupportedMimeType("taglib/ogv", "ogv")]
-    [SupportedMimeType("taglib/spx", "spx")]
-	[SupportedMimeType("application/ogg")]
-	[SupportedMimeType("application/x-ogg")]
-	[SupportedMimeType("audio/vorbis")]
-	[SupportedMimeType("audio/x-vorbis")]
-	[SupportedMimeType("audio/x-vorbis+ogg")]
-    [SupportedMimeType("audio/speex")]
-    [SupportedMimeType("audio/x-speex")]
-	[SupportedMimeType("audio/ogg")]
-	[SupportedMimeType("audio/x-ogg")]
-	[SupportedMimeType("video/ogg")]
-	[SupportedMimeType("video/x-ogm+ogg")]
-	[SupportedMimeType("video/x-theora+ogg")]
-	[SupportedMimeType("video/x-theora")]
+	[SupportedMimeType("audio/x-audible")]
+	[SupportedMimeType("taglib/aa", "aa")]
 	public class File : TagLib.File
 	{
-#region Private Fields
+		
+		#region Private Fields
 		
 		/// <summary>
 		///   Contains the tags for the file.
 		/// </summary>
-		private GroupedComment tag;
+		private TagLib.Tag tag;
 		
 		/// <summary>
 		///    Contains the media properties.
 		/// </summary>
-		private Properties properties;
+		private Properties properties = new Properties();
 		
-#endregion
+		#endregion	
 		
+		#region Public Static Fields
 		
+		/// <summary>
+		///    The offset to the tag block.
+		/// </summary>
+		public const short TagBlockOffset = 0xBD;
 		
-#region Constructors
+		/// <summary>
+		///    The offset to the end of tag pointer.
+		/// </summary>
+		public const short OffsetToEndTagPointer = 0x38;
+
+		#endregion
+		
+		#region Constructors
 		
 		/// <summary>
 		///    Constructs and initializes a new instance of <see
@@ -116,7 +111,7 @@ namespace TagLib.Ogg
 		///    specified read style.
 		/// </summary>
 		/// <param name="abstraction">
-		///    A IFileAbstraction object to use when
+		///    A <see cref="IFileAbstraction" /> object to use when
 		///    reading from and writing to the file.
 		/// </param>
 		/// <param name="propertiesStyle">
@@ -128,17 +123,34 @@ namespace TagLib.Ogg
 		///    <paramref name="abstraction" /> is <see langword="null"
 		///    />.
 		/// </exception>
+		/// <exception cref="CorruptFileException">
+		///    The file is not the write length.
+		/// </exception>
 		public File (File.IFileAbstraction abstraction,
 		             ReadStyle propertiesStyle) : base (abstraction)
-		{
+		{			
+			
 			Mode = AccessMode.Read;
+			
 			try {
-				tag = new GroupedComment ();
-				Read (propertiesStyle);
-				TagTypesOnDisk = TagTypes;
+				// get the pointer to the end of the tag block
+				// and calculate the tag block length
+				Seek (OffsetToEndTagPointer);
+				int tagLen = ( (int) ReadBlock(4).ToUInt(true) ) - TagBlockOffset;
+				
+				// read the whole tag and send to Tag class
+				Seek (TagBlockOffset);
+				ByteVector bv = ReadBlock(tagLen);
+				
+				tag = new  TagLib.Audible.Tag( bv );
+				
 			} finally {
 				Mode = AccessMode.Closed;
 			}
+			
+			// ??
+			TagTypesOnDisk = TagTypes;
+			
 		}
 		
 		/// <summary>
@@ -147,7 +159,7 @@ namespace TagLib.Ogg
 		///    average read style.
 		/// </summary>
 		/// <param name="abstraction">
-		///    A IFileAbstraction object to use when
+		///    A <see cref="IFileAbstraction" /> object to use when
 		///    reading from and writing to the file.
 		/// </param>
 		/// <exception cref="ArgumentNullException">
@@ -159,11 +171,9 @@ namespace TagLib.Ogg
 		{
 		}
 		
-#endregion
+		#endregion
 		
-		
-		
-#region Public Methods
+		#region Public Methods
 		
 		/// <summary>
 		///    Gets a tag of a specified type from the current instance,
@@ -183,21 +193,19 @@ namespace TagLib.Ogg
 		///    matching tag was found and none was created, <see
 		///    langword="null" /> is returned.
 		/// </returns>
-		public override TagLib.Tag GetTag (TagLib.TagTypes type,
-		                                   bool create)
+		public override TagLib.Tag GetTag (TagTypes type, bool create)
 		{
-			if (type == TagLib.TagTypes.Xiph)
-				foreach (XiphComment comment in tag.Comments)
-					return comment;
+			if (type == TagTypes.AudibleMetadata)
+				return tag;
 			
 			return null;
+
 		}
-		
 #endregion
 		
 		
 		
-#region Public Properties
+		#region Public Properties
 		
 		/// <summary>
 		///    Gets a abstract representation of all tags stored in the
@@ -207,7 +215,7 @@ namespace TagLib.Ogg
 		///    A <see cref="TagLib.Tag" /> object representing all tags
 		///    stored in the current instance.
 		/// </value>
-		public override Tag Tag {
+		public override TagLib.Tag Tag {
 			get {return tag;}
 		}
 		
@@ -224,137 +232,7 @@ namespace TagLib.Ogg
 			get {return properties;}
 		}
 		
-#endregion
+		#endregion
 		
-		
-		
-#region Private Methods
-		
-		/// <summary>
-		///    Reads the file with a specified read style.
-		/// </summary>
-		/// <param name="propertiesStyle">
-		///    A <see cref="ReadStyle" /> value specifying at what level
-		///    of accuracy to read the media properties, or <see
-		///    cref="ReadStyle.None" /> to ignore the properties.
-		/// </param>
-		private void Read (ReadStyle propertiesStyle)
-		{
-			long end;
-			Dictionary<uint, Bitstream> streams = ReadStreams (null,
-				out end);
-			List<ICodec> codecs = new List<ICodec> ();
-			InvariantStartPosition = end;
-			InvariantEndPosition = Length;
-			
-			foreach (uint id in streams.Keys) {
-				tag.AddComment (id,
-					streams [id].Codec.CommentData);
-				codecs.Add (streams [id].Codec);
-			}
-			
-			if (propertiesStyle == ReadStyle.None)
-				return;
-			
-			PageHeader last_header = LastPageHeader;
-			
-			TimeSpan duration = streams [last_header
-				.StreamSerialNumber].GetDuration (
-					last_header.AbsoluteGranularPosition);
-			properties = new Properties (duration, codecs);
-		}
-		
-		/// <summary>
-		///    Reads the file until all streams have finished their
-		///    property and tagging data.
-		/// </summary>
-		/// <param name="pages">
-		///    A <see cref="T:System.Collections.Generic.List`1"/>
-		///    object to be filled with <see cref="Page" /> objects as
-		///    they are read, or <see langword="null"/> if the pages
-		///    are not to be stored.
-		/// </param>
-		/// <param name="end">
-		///    A <see cref="long" /> value reference to be updated to
-		///    the postion of the first page not read by the current
-		///    instance.
-		/// </param>
-		/// <returns>
-		///    A <see cref="T:System.Collections.Generic.Dictionary`2"
-		///    /> object containing stream serial numbers as the keys
-		///    <see cref="Bitstream" /> objects as the values.
-		/// </returns>
-		private Dictionary<uint, Bitstream> ReadStreams (List<Page> pages,
-		                                                 out long end)
-		{
-			Dictionary<uint, Bitstream> streams =
-				new Dictionary<uint, Bitstream> ();
-			List<Bitstream> active_streams = new List<Bitstream> ();
-			
-			long position = 0;
-			
-			do {
-				Bitstream stream = null;
-				Page page = new Page (this, position);
-				
-				if ((page.Header.Flags &
-					PageFlags.FirstPageOfStream) != 0) {
-					stream = new Bitstream (page);
-					streams.Add (page.Header
-						.StreamSerialNumber, stream);
-					active_streams.Add (stream);
-				}
-				
-				if (stream == null)
-					stream = streams [
-						page.Header.StreamSerialNumber];
-				
-				if (active_streams.Contains (stream)
-					&& stream.ReadPage (page))
-					active_streams.Remove (stream);
-				
-				if (pages != null)
-					pages.Add (page);
-				
-				position += page.Size;
-			} while (active_streams.Count > 0);
-			
-			end = position;
-			
-			return streams;
-		}
-		
-#endregion
-		
-		
-		
-#region Private Properties
-		
-		/// <summary>
-		///    Gets the last page header in the file.
-		/// </summary>
-		/// <value>
-		///    A <see cref="PageHeader" /> object containing the last
-		///    page header in the file.
-		/// </value>
-		/// <remarks>
-		///    The last page header is used to determine the last
-		///    absolute granular position of a stream so the duration
-		///    can be calculated.
-		/// </remarks>
-		private PageHeader LastPageHeader {
-			get {
-				long last_page_header_offset = RFind ("OggS");
-				
-				if (last_page_header_offset < 0)
-					throw new CorruptFileException (
-						"Could not find last header.");
-				
-				return new PageHeader (this,
-					last_page_header_offset);
-			}
-		}
-		
-#endregion
 	}
 }
