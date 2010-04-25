@@ -67,7 +67,11 @@ namespace TagLib {
 		/// <summary>
 		///    The string is to be UTF-16LE encoded.
 		/// </summary>
-		UTF16LE = 4
+		UTF16LE = 4,
+        /// <summary>
+        /// Ascii encoding
+        /// </summary>
+        ASCII=5
 	}
 	
 	/// <summary>
@@ -1831,26 +1835,6 @@ namespace TagLib {
 		}
 		
 		/// <summary>
-		///    Converts an string into a encoded data representation.
-		/// </summary>
-		/// <param name="text">
-		///    A <see cref="string"/> object containing the text to
-		///    convert.
-		/// </param>
-		/// <param name="length">
-		///    A <see cref="int"/> value specifying the number of
-		///    characters in <paramref name="text" /> to encoded.
-		/// </param>
-		/// <returns>
-		///    A <see cref="ByteVector"/> object containing the encoded
-		///    representation of <paramref name="text" />.
-		/// </returns>
-		public static ByteVector FromString(string text, int length)
-		{
-			return FromString(text, StringType.UTF8, length);
-		}
-		
-		/// <summary>
 		///    Creates a new instance of ByteVector by
 		///    reading in the contents of a specified file.
 		/// </summary>
@@ -1967,27 +1951,6 @@ namespace TagLib {
 				copyFirstChunk);
 			abstraction.CloseStream (stream);
 			return output;
-		}
-		
-		/// <summary>
-		///    Creates a new instance of ByteVector by
-		///    reading in the contents of a specified stream.
-		/// </summary>
-		/// <param name="stream">
-		///    A <see cref="System.IO.Stream"/> object containing
-		///    the stream to read.
-		/// </param>
-		/// <returns>
-		///    A <see cref="ByteVector"/> object containing the contents
-		///    of the specified stream.
-		/// </returns>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="stream" /> is <see langword="null" />.
-		/// </exception>
-		public static ByteVector FromStream (System.IO.Stream stream)
-		{
-			byte [] tmp_out;
-			return FromStream (stream, out tmp_out, false);
 		}
 		
 		/// <summary>
@@ -2133,6 +2096,9 @@ namespace TagLib {
 				
 			case StringType.UTF8:
 				return Encoding.UTF8;
+
+            case StringType.ASCII:
+                return Encoding.ASCII;
 				
 			case StringType.UTF16LE:
 				return Encoding.Unicode;
@@ -2371,16 +2337,6 @@ namespace TagLib {
 		}
 		
 		/// <summary>
-		///    Gets whether or not the current instance is synchronized.
-		/// </summary>
-		/// <value>
-		///    Always <see langword="false" />.
-		/// </value>
-		public bool IsSynchronized {
-			get {return false;}
-		}
-		
-		/// <summary>
 		///    Gets the object that can be used to synchronize the
 		///    current instance.
 		/// </summary>
@@ -2464,18 +2420,6 @@ namespace TagLib {
 		///    read-only; otherwise <see langword="false" />.
 		/// </value>
 		public virtual bool IsReadOnly {
-			get {return false;}
-		}
-		
-		/// <summary>
-		///    Gets whether or not the current instance has a fixed
-		///    size.
-		/// </summary>
-		/// <value>
-		///    <see langword="true" /> if the current instance has a
-		///    fixed size; otherwise <see langword="false" />.
-		/// </value>
-		public virtual bool IsFixedSize {
 			get {return false;}
 		}
 		

@@ -73,6 +73,10 @@ namespace WinDialup
                     info.Add(new connectionInfo(names[i].szEntryName,names[i].szEntryName,56,100));
             return info.ToArray();
         }
+        public void refresh()
+        {
+            //
+        }
         public bool connect(connectionInfo connection)
         {
             int con = 0;

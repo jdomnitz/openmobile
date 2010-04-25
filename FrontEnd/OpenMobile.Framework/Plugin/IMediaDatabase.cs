@@ -199,6 +199,8 @@ namespace OpenMobile.Plugin
         /// <param name="append"></param>
         /// <returns></returns>
         bool writePlaylist(List<string> URLs,string name,bool append);
+
+        List<string> listPlaylists();
         #endregion
 
     }

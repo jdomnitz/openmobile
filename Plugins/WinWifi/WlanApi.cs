@@ -254,6 +254,8 @@ namespace NativeWifi
 			/// <returns>An array of available network entries.</returns>
 			private Wlan.WlanAvailableNetwork[] ConvertAvailableNetworkListPtr(IntPtr availNetListPtr)
 			{
+                if (availNetListPtr == IntPtr.Zero)
+                    return new Wlan.WlanAvailableNetwork[0];
 				Wlan.WlanAvailableNetworkListHeader availNetListHeader = (Wlan.WlanAvailableNetworkListHeader)Marshal.PtrToStructure(availNetListPtr, typeof(Wlan.WlanAvailableNetworkListHeader));
 				long availNetListIt = availNetListPtr.ToInt64() + Marshal.SizeOf(typeof(Wlan.WlanAvailableNetworkListHeader));
 				Wlan.WlanAvailableNetwork[] availNets = new Wlan.WlanAvailableNetwork[availNetListHeader.numberOfItems];
@@ -273,10 +275,9 @@ namespace NativeWifi
 			public Wlan.WlanAvailableNetwork[] GetAvailableNetworkList(Wlan.WlanGetAvailableNetworkFlags flags)
 			{
 				IntPtr availNetListPtr;
+                Wlan.WlanGetAvailableNetworkList(client.clientHandle, info.interfaceGuid, flags, IntPtr.Zero, out availNetListPtr);
 				try
 				{
-                    Wlan.ThrowIfError(
-                    Wlan.WlanGetAvailableNetworkList(client.clientHandle, info.interfaceGuid, flags, IntPtr.Zero, out availNetListPtr));
 					return ConvertAvailableNetworkListPtr(availNetListPtr);
 				}
 				finally

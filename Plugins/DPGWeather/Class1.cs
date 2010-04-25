@@ -13,6 +13,19 @@ namespace DPGWeather
 
         #region IDataProvider Members
 
+        public DateTime lastUpdated
+        {
+            get
+            {
+                DateTime ret;
+                using(PluginSettings s=new PluginSettings())
+                    if (DateTime.TryParse(s.getSetting("Plugins.DPGWeather.LastUpdate"), out ret))
+                        return ret;
+                    else
+                        return DateTime.MinValue;
+            }
+        }
+
         public bool refreshData()
         {
             string loc;
@@ -198,12 +211,8 @@ namespace DPGWeather
             {
                 using (PluginSettings setting = new PluginSettings())
                 {
-                    DateTime lastUp = new DateTime();
-                    if (DateTime.TryParse(setting.getSetting("Plugins.DPGWeather.LastUpdate"), out lastUp) == true)
-                    {
-                        if ((DateTime.Now - lastUp) < TimeSpan.FromMinutes(30))
-                            return false;
-                    }
+                    if ((DateTime.Now - lastUpdated) < TimeSpan.FromMinutes(30))
+                        return false;
                 }
                 status = 0;
                 updateLocation = arg;

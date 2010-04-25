@@ -26,24 +26,21 @@
 using System;
 using System.Collections.Generic;
 
-namespace TagLib.Rmf
+namespace TagLib.Qt
 {
 
     /// <summary>
     ///    This class extends <see cref="Tag" /> to provide support for
-    ///    reading tags stored in the RMF Metadata format.
+    ///    reading tags stored in Quicktime files.
     /// </summary>
     public class Tag : TagLib.Tag
     {
 
 
         private string title;
-        private string author;
+        private string description;
         private string copyright;
         private string comment;
-        private string description;
-        private uint duration;
-        private uint bitrate;
 
         #region Constructors
 
@@ -113,6 +110,15 @@ namespace TagLib.Rmf
         #endregion
 
         #region Private Methods
+        string[] children = new string[] { "ftyp", "mvhd", "trak", "©cmt", "©cpy", "©des", "©nam" };
+
+        private string getName(byte[] b, uint p)
+        {
+            string ret = "";
+            for (int i = 0; i < 4; i++)
+                ret += (char)b[p + i];
+            return ret;
+        }
 
         /// <summary>
         ///    Populates the current instance by parsing the contents of
@@ -128,52 +134,31 @@ namespace TagLib.Rmf
         /// </exception>
         private void Parse(ByteVector data)
         {
-            uint chunkLength;
-            string chunkType;
-            ByteVector chunkData;
-            try
+            uint size = data.ToUInt();
+            string name = getName(data.Data,4);
+            if (name == "©cmt")
+                comment = data.ToString(StringType.UTF8, (int)12, (int)size - 12);
+            if (name == "©cpy")
             {
-                do
+               copyright=data.ToString(StringType.UTF8,(int) 12, (int)size - 12);
+            }
+            if (name == "©des")
+            {
+                description=data.ToString(StringType.UTF8,(int) 12, (int)size - 12);
+            }
+            if (name == "©nam")
+            {
+                title = data.ToString(StringType.UTF8, (int)12, (int)size - 12);
+            }
+            if (name != "mdat")
+                if (Array.Exists(children, t => t == name))
                 {
-                    chunkType = data.Mid(0, 4).ToString();
-                    chunkLength = data.Mid(4, 4).ToUInt();
-                    if (chunkType == "DATA")
-                        return; //End of the Header Data
-                    chunkData = data.Mid(8, (int)(chunkLength - 8));
-                    data.RemoveRange(0, (int)chunkLength);
-                    parseChunk(chunkType, chunkData);
-                } while (chunkType != "DATA");
-            }
-            catch (Exception)
-            {
-                throw new CorruptFileException();
-            }
-        }
-
-        private void parseChunk(string chunkType, ByteVector chunkData)
-        {
-            ushort len;
-            int start=2;
-            switch (chunkType)
-            {
-                case "PROP":
-                    bitrate = chunkData.Mid(6, 4).ToUInt();
-                    duration = chunkData.Mid(22, 4).ToUInt();
-                    break;
-                case "CONT":
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    title = chunkData.Mid(start+2, len).ToString();
-                    start = start + len + 2;
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    description = chunkData.Mid(start+2, len).ToString();
-                    start = start + len + 2;
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    copyright = chunkData.Mid(start+ 2, len).ToString();
-                    start = start + len + 2;
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    comment = chunkData.Mid(start + 2, len).ToString();
-                    break;
-            }
+                    Parse(data.Mid((int)size));
+                }
+                else
+                {
+                    Parse(data.Mid(8));
+                }
         }
         #endregion
 
@@ -187,7 +172,7 @@ namespace TagLib.Rmf
         /// </value>
         public override TagTypes TagTypes
         {
-            get { return TagTypes.RMFMetadata; }
+            get { return TagTypes.QuicktimeAtoms; }
         }
 
         /// <summary>
@@ -236,7 +221,7 @@ namespace TagLib.Rmf
         {
             get
             {
-                return  new string[] { description };
+                return new string[] { description };
             }
         }
 
@@ -249,8 +234,6 @@ namespace TagLib.Rmf
             description = null;
             copyright = null;
             comment = null;
-            bitrate = 0;
-            duration = 0;
         }
 
         #endregion

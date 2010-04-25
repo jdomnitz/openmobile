@@ -176,24 +176,6 @@ namespace TagLib.Aiff
 			GetTag(TagTypes.Id3v2, true);
 		}
 
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="File" /> for a specified file abstraction with an
-		///    average read style.
-		/// </summary>
-		/// <param name="abstraction">
-		///    A IFileAbstraction object to use when
-		///    reading from and writing to the file.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		///    <paramref name="abstraction" /> is <see langword="null"
-		///    />.
-		/// </exception>
-		public File(File.IFileAbstraction abstraction)
-			: this(abstraction, ReadStyle.Average)
-		{
-		}
-
 		#endregion
 
 		#region Public Properties

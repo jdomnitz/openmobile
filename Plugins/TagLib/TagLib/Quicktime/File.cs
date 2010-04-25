@@ -25,15 +25,14 @@
 //
 using System;
 
-namespace TagLib.Rmf
+namespace TagLib.Qt
 {
     /// <summary>
     ///    This class extends <see cref="TagLib.File" /> to provide tagging
     ///    and properties support for Audible inc's aa file format.
     /// </summary>
-    [SupportedMimeType("taglib/rmv", "rmv")]
-    [SupportedMimeType("taglib/rm", "rm")]
-    [SupportedMimeType("taglib/rma", "rma")]
+    [SupportedMimeType("taglib/mov", "mov")]
+    [SupportedMimeType("video/mov")]
     public class File : TagLib.File
     {
 
@@ -124,7 +123,7 @@ namespace TagLib.Rmf
             try
             {
                 // read the whole tag and send to Tag class
-                ByteVector bv = ReadBlock(1024);
+                ByteVector bv = ReadBlock(102400);
 
                 tag = new TagLib.Qt.Tag(bv);
 
@@ -181,7 +180,7 @@ namespace TagLib.Rmf
         /// </returns>
         public override TagLib.Tag GetTag(TagTypes type, bool create)
         {
-            if (type == TagTypes.Apple)
+            if (type == TagTypes.RMFMetadata)
                 return tag;
 
             return null;

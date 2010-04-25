@@ -159,28 +159,6 @@ namespace TagLib.NonContainer {
 		}
 		
 		/// <summary>
-		///    Removes a set of tag types from the current instance.
-		/// </summary>
-		/// <param name="types">
-		///    A bitwise combined <see cref="TagLib.TagTypes" /> value
-		///    containing tag types to be removed from the file.
-		/// </param>
-		/// <remarks>
-		///    In order to remove all tags from a file, pass <see
-		///    cref="TagTypes.AllTags" /> as <paramref name="types" />.
-		/// </remarks>
-		public void RemoveTags (TagTypes types)
-		{
-			for (int i = Tags.Length - 1; i >= 0; i --) {
-                var tag = Tags[i];
-                if (types == TagTypes.AllTags || (tag.TagTypes & types) == tag.TagTypes)
-                {
-                    RemoveTag(tag);
-                }
-			}
-		}
-		
-		/// <summary>
 		///    Adds a tag of a specified type to the current instance,
 		///    optionally copying values from an existing type.
 		/// </summary>

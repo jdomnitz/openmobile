@@ -51,7 +51,9 @@ namespace OpenMobile.Media
                 i.Name = Path.GetFileNameWithoutExtension(filename);
                 return i;
             }
-            catch (Exception e) { return null; }
+            catch (Exception e) {
+                return null;
+            }
             Tag t = f.Tag;
             mediaInfo info = new mediaInfo();
             info.Album = t.Album;

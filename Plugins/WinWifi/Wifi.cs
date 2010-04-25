@@ -41,6 +41,11 @@ namespace WinWifi
             return connections.ToArray();
         }
 
+        public void refresh()
+        {
+            client.Interfaces[0].Scan();
+        }
+
         public bool connect(OpenMobile.connectionInfo connection)
         {
             Wlan.WlanAvailableNetwork[] networks = client.Interfaces[0].GetAvailableNetworkList(Wlan.WlanGetAvailableNetworkFlags.IncludeAllAdhocProfiles);

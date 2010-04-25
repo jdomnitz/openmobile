@@ -43,6 +43,7 @@ namespace TagLib.Mpeg4 {
 		public static readonly ReadOnlyByteVector Alb  = AppleTag.FixId ("alb");
 		public static readonly ReadOnlyByteVector Art  = AppleTag.FixId ("ART");
 		public static readonly ReadOnlyByteVector Cmt  = AppleTag.FixId ("cmt");
+        public static readonly ReadOnlyByteVector Cpy = AppleTag.FixId("cpy");
 		public static readonly ReadOnlyByteVector Cond = "cond";
 		public static readonly ReadOnlyByteVector Covr = "covr";
 		public static readonly ReadOnlyByteVector Co64 = "co64";
@@ -50,6 +51,7 @@ namespace TagLib.Mpeg4 {
 		public static readonly ReadOnlyByteVector Cprt = "cprt";
 		public static readonly ReadOnlyByteVector Data = "data";
 		public static readonly ReadOnlyByteVector Day  = AppleTag.FixId ("day");
+        public static readonly ReadOnlyByteVector Des = AppleTag.FixId("des");
 		public static readonly ReadOnlyByteVector Disk = "disk";
 		public static readonly ReadOnlyByteVector Esds = "esds";
 		public static readonly ReadOnlyByteVector Ilst = "ilst";

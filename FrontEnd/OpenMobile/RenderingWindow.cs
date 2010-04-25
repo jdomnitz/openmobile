@@ -576,16 +576,12 @@ namespace OpenMobile
                         if (p.DoubleClickable == false)
                         {
                             tmrLongClick.Enabled = false;
-                            try
-                            {
                                 if (lastClick != null)
                                 {
                                     lastClick.Mode = modeType.Clicked;
                                     tmrClick.Enabled = true;
-                                    new Thread(delegate() { lastClick.clickMe(screen); }).Start();
+                                    SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
                                 }
-                            }
-                            catch (Exception) { }
                             return;
                         }
                         if ((tmrMouse.Enabled == false) || (lastClick != (OMButton)highlighted))
@@ -601,7 +597,7 @@ namespace OpenMobile
                     lastClick = null;
                     if (typeof(IClickable).IsInstanceOfType(highlighted) == true)
                     {
-                        new Thread(delegate() { ((IClickable)highlighted).clickMe(screen); }).Start();
+                        SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).clickMe(screen); });
                     }
                 }
             }
@@ -622,18 +618,19 @@ namespace OpenMobile
                             tmrClick.Enabled = true;
                             lastClick.Mode = modeType.Clicked;
                             if (p.DoubleClickable == true)
-                                new Thread(delegate() { lastClick.doubleClickMe(screen); lastClick.Mode = modeType.Highlighted; }).Start();
+                                SandboxedThread.Asynchronous(delegate() { lastClick.doubleClickMe(screen); lastClick.Mode = modeType.Highlighted; });
                             else
-                                new Thread(delegate() { lastClick.clickMe(screen); }).Start();
+                                SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
                         }
                     }
                     if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
                     {
-                        new Thread(delegate() {
-                            try { 
-                                (highlighted as IClickable).doubleClickMe(screen); 
-                            } catch (NullReferenceException) { } 
-                        }).Start();
+                        SandboxedThread.Asynchronous(delegate() { (highlighted as IClickable).doubleClickMe(screen); });
+                        //new Thread(delegate() {
+                        //    try { 
+                        //        (highlighted as IClickable).doubleClickMe(screen); 
+                        //    } catch (NullReferenceException) { } 
+                        //}).Start();
                         //NR can occur if highlighted changes between the if statement and the thread creation
                     }
                 }
@@ -645,7 +642,7 @@ namespace OpenMobile
             try
             {
                 tmrMouse.Enabled = false;
-                new Thread(delegate() { lastClick.clickMe(screen); }).Start();
+                SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
             }
             catch (Exception) { }
         }
@@ -658,7 +655,7 @@ namespace OpenMobile
             if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
                 try
                 {
-                    new Thread(delegate() { ((IClickable)highlighted).longClickMe(screen); }).Start();
+                    SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).longClickMe(screen); });
                 }
                 catch (Exception) { }
         }
@@ -775,7 +772,7 @@ namespace OpenMobile
                 {
                     keyboardActive = true;
                     tmrClick.Enabled = true;
-                    new Thread(delegate() { lastClick.clickMe(screen); }).Start();
+                    SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
                     if(lastClick.DownImage.image != null)
                     {
                         lastClick.Mode = modeType.Highlighted;
@@ -1043,7 +1040,7 @@ namespace OpenMobile
                         }
                         else if (typeof(IClickable).IsInstanceOfType(highlighted))
                         {
-                            new Thread(delegate() { ((IClickable)highlighted).clickMe(screen); }).Start();
+                            SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).clickMe(screen); });
                         }
                         break;
                 }

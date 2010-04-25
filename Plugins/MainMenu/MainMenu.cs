@@ -171,7 +171,8 @@ public sealed class MainMenu : IHighLevel
             setButton.addControl(title);
             setButton.addControl(okButton);
             setButton.addControl(cancel);
-
+            screens.loadPanel(setButton);
+            
             OMPanel exit = new OMPanel("Quit");
             OMImage Image1 = new OMImage(275, 140, 400, 330);
             Image1.Image = theHost.getSkinImage("MediaBorder");

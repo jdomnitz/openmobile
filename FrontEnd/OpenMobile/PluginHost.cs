@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Windows.Forms;
@@ -28,7 +29,7 @@ using Microsoft.Win32;
 using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
-using System.IO;
+using OpenMobile.Media;
 
 namespace OpenMobile
 {
@@ -67,18 +68,6 @@ namespace OpenMobile
             }
             return null;
         }
-        private OMPanel getPanelByName(string name,int screen)
-        {
-            try
-            {
-                return ((IHighLevel)getPluginByName(name)).loadPanel("",screen);
-            }
-            catch (Exception) {
-                if (name == "About")
-                    return BuiltInComponents.AboutPanel();
-                return null;
-            }
-        }
         private eMediaType classifySource(string source)
         {
             if (source.StartsWith("bluetooth") == true)
@@ -111,10 +100,15 @@ namespace OpenMobile
 
         public List<mediaInfo> getPlaylist(int instance)
         {
+            if ((instance < 0) || (instance >= 8))
+                return new List<mediaInfo>();
+            else
                 return queued[instance];
         }
         public bool setPlaylist(List<mediaInfo> source,int instance)
         {
+            if ((instance < 0) || (instance >= 8))
+                return false;
             currentPosition[instance] = -1;
             queued[instance].Clear();
             queued[instance].AddRange(source.GetRange(0, source.Count));
@@ -174,30 +168,19 @@ namespace OpenMobile
                 return pluginpath;
             }
         }
-        private Settings getSettingsByName(string name,int screen)
-        {
-            try{
-                return ((IHighLevel)getPluginByName(name)).loadSettings();
-            }
-            catch (Exception) { return null; }
-        }
         private OMPanel getPanelByName(string name,string panelName,int screen)
         {
             if (name == "About")
                 return BuiltInComponents.AboutPanel();
             try
             {
-                return ((IHighLevel)getPluginByName(name)).loadPanel(panelName,screen);
+                IBasePlugin plugin = getPluginByName(name);
+                if (plugin != null)
+                    return ((IHighLevel)plugin).loadPanel(panelName, screen);
+                else
+                    return null;
             }
-            catch (Exception) { return null; }
-        }
-        private Settings getSettingsByName(string name,string panelName,int screen)
-        {
-            try
-            {
-                return ((IHighLevel)getPluginByName(name)).loadSettings();
-            }
-            catch (Exception) { return null; }
+            catch (NotImplementedException) { return null; }
         }
         public IntPtr UIHandle(int screen)
         {
@@ -264,6 +247,7 @@ namespace OpenMobile
                 history.Enqueue(i, "MainMenu","",false);
             for (int i = 0; i < 8; i++)
                 queued[i] = new List<mediaInfo>();
+            SandboxedThread.Asynchronous(loadPlaylists);
         }
 
         public void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
@@ -413,9 +397,10 @@ namespace OpenMobile
                     //Don't lock this to prevent deadlock
                     {
                         RenderingWindow.closeRenderer();
-                        raiseSystemEvent(eFunction.closeProgram, "", "", "");
                         if (hal != null)
                             hal.snd("45");
+                        savePlaylists();
+                        raiseSystemEvent(eFunction.closeProgram, "", "", "");
                     }
                     return true;
                 case eFunction.restartProgram:
@@ -466,8 +451,19 @@ namespace OpenMobile
             }
             return false;
         }
-        
-        
+
+        private void savePlaylists()
+        {
+            for(int i=0;i<8;i++)
+                Playlist.writePlaylistToDB(this, "Current"+i.ToString(), getPlaylist(i));
+        }
+
+        private void loadPlaylists()
+        {
+            for(int i=0;i<8;i++)
+                setPlaylist(Playlist.readPlaylistFromDB(this, "Current"+i.ToString()), i);
+        }
+
         private class historyCollection
         {
             public struct historyItem
@@ -899,7 +895,7 @@ namespace OpenMobile
                     {
                         if (currentTunedContent[ret] != null)
                             return false;
-                        ITunedContent player = (ITunedContent)Core.pluginCollection.FindAll(i => i.GetType() == typeof(ITunedContent)).Find(i => i.pluginName == arg2);
+                        ITunedContent player = (ITunedContent)Core.pluginCollection.FindAll(i => typeof(ITunedContent).IsInstanceOfType(i)).Find(i => i.pluginName == arg2);
                         if (player == null)
                             return false;
                         //Only hook it once
@@ -914,6 +910,8 @@ namespace OpenMobile
                 case eFunction.setPlaylistPosition:
                     if (int.TryParse(arg1, out ret) == true)
                     {
+                        if ((ret<0)||(ret>=8))
+                            return false;
                         int ret2;
                         if (int.TryParse(arg2, out ret2) == true)
                         {
@@ -922,8 +920,11 @@ namespace OpenMobile
                                 currentPosition[ret] = ret2;
                                 return true;
                             }
+                            return false;
                         }
-                    } 
+                        currentPosition[ret]= queued[ret].FindIndex(p => p.Location == arg2);
+                        return true;
+                    }
                     return false;
                 case eFunction.Play:
                     if (int.TryParse(arg1, out ret) == true)
@@ -1031,6 +1032,14 @@ namespace OpenMobile
                             return false;
                         hal.snd("34|" + arg1 + "|"+arg2);
                         return true;
+                    }
+                    return false;
+                case eFunction.setBand:
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        if (currentTunedContent[ret] == null)
+                            return false;
+                        return currentTunedContent[ret].setBand(ret, (tunedContentBand)Enum.Parse(typeof(tunedContentBand), arg2, false));
                     }
                     return false;
                 case eFunction.setMonitorBrightness:
@@ -1462,9 +1471,24 @@ namespace OpenMobile
                     }
                     return;
                 case eGetData.GetTunedContentInfo:
-                    if (int.TryParse(param, out ret) == true)
-                        if (currentTunedContent[ret] != null)
-                            data = currentTunedContent[ret].getStationInfo(ret);
+                    {
+                        int q;
+                        if (int.TryParse(param, out q) == true)
+                        {
+                            if (currentTunedContent[q] != null)
+                                data = currentTunedContent[q].getStatus(q);
+                        }
+                    }
+                    return;
+                case eGetData.GetStationList:
+                    {
+                        int q;
+                        if (int.TryParse(param, out q) == true)
+                        {
+                            if (currentTunedContent[q] != null)
+                                data = currentTunedContent[q].getStationList(q);
+                        }
+                    }
                     return;
                 case eGetData.GetAvailableNavPanels:
                     plugin = Core.pluginCollection.Find(s => s.pluginName == name);

@@ -23,6 +23,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using OpenMobile.Net;
+using OpenMobile.Plugin;
+using System.Threading;
 
 namespace OpenMobile.Media
 {
@@ -50,7 +52,11 @@ namespace OpenMobile.Media
         /// <summary>
         /// XML Shareable Playlist Format
         /// </summary>
-        ASPF
+        ASPF,
+        /// <summary>
+        /// A PodCast
+        /// </summary>
+        PCAST
     }
     /// <summary>
     /// Provides functions for reading and writing playlists
@@ -79,6 +85,21 @@ namespace OpenMobile.Media
         {
             throw new NotImplementedException();
         }
+        public static bool writePlaylistToDB(IPluginHost theHost, string name, List<mediaInfo> playlist)
+        {
+            object o;
+            theHost.getData(eGetData.GetMediaDatabase, "OMMediaDB", out o);
+            if (o == null)
+                return false;
+            IMediaDatabase db = (IMediaDatabase)o;
+            return db.writePlaylist(playlist.ConvertAll<string>(convertMediaInfo),name,false);
+        }
+
+        private static string convertMediaInfo(mediaInfo info)
+        {
+            return info.Location;
+        }
+
         /// <summary>
         /// Returns a list of all available playlists in a directory
         /// </summary>
@@ -87,13 +108,38 @@ namespace OpenMobile.Media
         public static List<string> listPlaylists(string directory)
         {
             List<string> ret=new List<string>();
-            string[] filter = new string[] { "*.m3u", "*.wpl", "*.pls", "*.asx", "*.wax", "*.wvx", "*.xspf" };
+            string[] filter = new string[] { "*.m3u", "*.wpl", "*.pls", "*.asx", "*.wax", "*.wvx", "*.xspf","*.pcast" };
             for (int i = 0; i < filter.Length; i++)
                 ret.AddRange(Directory.GetFiles(directory, filter[i]));
             ret.Sort();
             ret.TrimExcess();
             return ret;
         }
+
+        public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name)
+        {
+            object o=null;
+            List<mediaInfo> playlist = new List<mediaInfo>();
+            for (int i = 0; ((i < 35)&&(o==null)); i++)
+            {
+                theHost.getData(eGetData.GetMediaDatabase, "OMMediaDB", out o);
+                if (i > 0)
+                    Thread.Sleep(200);
+            }
+            if (o == null)
+                return playlist;
+            IMediaDatabase db = (IMediaDatabase)o;
+            if (db.beginGetPlaylist(name) == false)
+                return playlist;
+            string url=db.getNextPlaylistItem();
+            while (url != null)
+            {
+                playlist.Add(new mediaInfo(url));
+                url = db.getNextPlaylistItem();
+            }
+            return playlist;
+        }
+
         /// <summary>
         /// Retrieves a playlist
         /// </summary>
@@ -117,10 +163,38 @@ namespace OpenMobile.Media
                     return readASX(location);
                 case "xspf":
                     return readASPF(location);
+                case "cast": //podcast (.pcast)
+                    return readPCAST(location);
             }
             return null;
         }
 
+        private static List<mediaInfo> readPCAST(string location)
+        {
+            List<mediaInfo> playlist = new List<mediaInfo>();
+            XmlDocument reader = new XmlDocument();
+            reader.XmlResolver = null;
+            reader.Schemas.XmlResolver = null;
+            reader.Load(location);
+            XmlNodeList nodes = reader.DocumentElement.SelectNodes("/pcast");
+            foreach (XmlNode channel in nodes[0].ChildNodes)
+            {
+                mediaInfo info = new mediaInfo();
+                foreach (XmlNode node in channel.ChildNodes)
+                {
+                    if (node.Name == "link")
+                        info.Location = node.Attributes["href"].Value;
+                    else if (node.Name == "title")
+                        info.Name = node.InnerText;
+                    else if (node.Name == "category")
+                        info.Genre = node.InnerText;
+                    else if (node.Name == "subtitle")
+                        info.Album = node.InnerText;
+                }
+                playlist.Add(info);
+            }
+            return playlist;
+        }
         private static List<mediaInfo> readASPF(string location)
         {
             List<mediaInfo> playlist = new List<mediaInfo>();

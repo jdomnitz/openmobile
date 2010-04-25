@@ -55,6 +55,7 @@ namespace OMPlayer
     }
     public void Dispose()
     {
+        fadeout();
         if (player != null)
         {
             for (int i = 0; i < player.Length; i++)
@@ -132,47 +133,38 @@ namespace OMPlayer
     {
         using (PluginSettings settings = new PluginSettings())
         {
-            for (int i = 0; i < theHost.ScreenCount; i++)
+            for (int i = 0; i < theHost.InstanceCount; i++)
             {
-                int k = theHost.instanceForScreen(i);
-                if ((player[k] != null) && (player[k].nowPlaying != null))
+                if ((player[i] != null) && (player[i].nowPlaying != null) && (player[i].mediaPosition != null))
                 {
-                    if ((getPlayerStatus(k) == ePlayerStatus.Stopped) || (getPlayerStatus(k) == ePlayerStatus.Ready))
+                    if ((getPlayerStatus(i) == ePlayerStatus.Stopped) || (getPlayerStatus(i) == ePlayerStatus.Ready))
                     {
-                        settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", "");
+                        settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingURL", "");
                         continue;
                     }
-                    settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", player[k].nowPlaying.Location);
+                    settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingURL", player[i].nowPlaying.Location);
                     double position;
-                    if (player[k].mediaPosition != null)
-                    {
-                        player[k].mediaPosition.get_CurrentPosition(out position);
-                        settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingPosition", position.ToString());
-                    }
-                    else
-                    {
-                        settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", "");
-                    }
+                    player[i].mediaPosition.get_CurrentPosition(out position);
+                    settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingPosition", position.ToString());
                 }
                 else
                 {
-                    settings.setSetting("Music.Instance" + k.ToString() + ".LastPlayingURL", "");
+                    settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingURL", "");
                 }
             }
-}
+        }
     }
     private void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
     {
         if (function == eFunction.closeProgram)
         {
             saveState();
-            fadeout();
         }
         else if (function == eFunction.RenderingWindowResized)
         {
             int inst = theHost.instanceForScreen(int.Parse(arg1));
             if (player[inst] != null)
-                player[inst].Resize(1, 1);
+                player[inst].Resize();
         }
     }
 
@@ -202,7 +194,9 @@ namespace OMPlayer
                     host.execute(eFunction.loadAVPlayer, k.ToString(), "OMPlayer");
                     checkInstance(k);
                     player[k].currentVolume = 0;
-                    play(k, setting.getSetting("Music.Instance"+k.ToString()+".LastPlayingURL"), eMediaType.Local);
+                    string lastUrl = setting.getSetting("Music.Instance" + k.ToString() + ".LastPlayingURL");
+                    play(k, lastUrl, eMediaType.Local);
+                    theHost.execute(eFunction.setPlaylistPosition, k.ToString(), lastUrl);
                     player[k].currentVolume = 100;
                     if (player[k].mediaPosition == null)
                         return eLoadStatus.LoadSuccessful;
@@ -229,10 +223,9 @@ namespace OMPlayer
         {
             fadeIn();
         }
-        else if (type == ePowerEvent.ShutdownPending)
+        else if (type == ePowerEvent.ShutdownPending)//unneccesssary?
         {
             saveState();
-            fadeout();
         }
     }
 
@@ -363,23 +356,7 @@ namespace OMPlayer
     public bool setVolume(int instance, int percent)
     {
         checkInstance(instance);
-        if ((player[instance].graphBuilder != null) && (player[instance].basicAudio != null))
-        {
-            if ((percent >= 0) && (percent <= 100))
-            {
-                player[instance].currentVolume = percent;
-                if (percent == 0) //prevent log(0)
-                    return (player[instance].basicAudio.put_Volume(-10000) == 0);
-                return (player[instance].basicAudio.put_Volume((int)(2000 * Math.Log10(Math.Pow((percent / 100.0),2)))) == 0);
-            }
-            if (percent == -1)
-            {
-                if (player[instance].currentVolume>0)
-                    player[instance].currentVolume *= -1;
-                return (player[instance].basicAudio.put_Volume(-10000)==0);
-            }
-        }
-        return false;
+        return player[instance].setVolume(percent);
     }
 
     public bool stop(int instance)
@@ -489,7 +466,7 @@ namespace OMPlayer
         void clicked()
         {
             fullscreen = !fullscreen;
-            Resize(1, 1);
+            Resize();
         }
 
         public void eventOccured(int instance)
@@ -567,6 +544,8 @@ namespace OMPlayer
             else
             {
                 nowPlaying = TagReader.getInfo(url);
+                if (nowPlaying == null)
+                    nowPlaying = new mediaInfo(url);
                 if (nowPlaying.coverArt == null)
                     nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
                 if (nowPlaying.coverArt == null)
@@ -641,41 +620,20 @@ namespace OMPlayer
             {
                 if (!isAudioOnly)
                 {
-                    DsError.ThrowExceptionForHR(videoWindow.put_Visible(OABool.False));
-                    DsError.ThrowExceptionForHR(videoWindow.put_Owner(IntPtr.Zero));
+                    videoWindow.put_Visible(OABool.False);
+                    videoWindow.put_Owner(IntPtr.Zero);
                 }
                 if (mediaEventEx != null)
                 {
-                    DsError.ThrowExceptionForHR(mediaEventEx.SetNotifyWindow(IntPtr.Zero, 0, IntPtr.Zero));
-                }
-                if (mediaEventEx != null)
-                {
+                    mediaEventEx.SetNotifyWindow(IntPtr.Zero, 0, IntPtr.Zero);
                     mediaEventEx = null;
                 }
-                if (mediaSeeking != null)
-                {
                     mediaSeeking = null;
-                }
-                if (mediaPosition != null)
-                {
                     mediaPosition = null;
-                }
-                if (mediaControl != null)
-                {
                     mediaControl = null;
-                }
-                if (basicAudio != null)
-                {
                     basicAudio = null;
-                }
-                if (basicVideo != null)
-                {
                     basicVideo = null;
-                }
-                if (videoWindow != null)
-                {
                     videoWindow = null;
-                }
                 if (graphBuilder != null)
                 {
                     try
@@ -708,7 +666,7 @@ namespace OMPlayer
             }
             return 0;
         }
-        public int Resize(int nMultiplier, int nDivider)
+        public int Resize()
         {
             if (videoWindow == null)
                 return -1;
@@ -753,14 +711,14 @@ namespace OMPlayer
                 videoWindow = graphBuilder as IVideoWindow;
                 basicVideo = graphBuilder as IBasicVideo;
                 basicAudio = graphBuilder as IBasicAudio;
-                basicAudio.put_Volume((100 - currentVolume) * -100);
+                setVolume(currentVolume);
                 CheckVisibility();
                 DsError.ThrowExceptionForHR(hr);
                 if (!isAudioOnly)
                 {
                     DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(instance)));
                     DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
-                    DsError.ThrowExceptionForHR(Resize(1, 1));
+                    DsError.ThrowExceptionForHR(Resize());
                     DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(drain));
                 }
                 currentPlaybackRate = 1.0;
@@ -782,7 +740,32 @@ namespace OMPlayer
             }
             return hr;
         }
-
+        public bool setVolume(int percent)
+        {
+            if ((graphBuilder != null) && (basicAudio != null))
+            {
+                if ((percent > 0) && (percent <= 100))
+                {
+                    currentVolume = percent;
+                    return (basicAudio.put_Volume((int)(2000 * Math.Log10(Math.Pow((percent / 100.0), 2)))) == 0);
+                }
+                else if ((percent == 0)||(percent==-1))
+                {
+                    if (percent == -1)
+                    {
+                        if (currentVolume > 0)
+                            currentVolume *= -1;
+                        else
+                        {
+                            currentVolume *= -1;
+                            return (basicAudio.put_Volume((int)(2000 * Math.Log10(Math.Pow((percent / 100.0), 2)))) == 0);
+                        }
+                    }
+                    return (basicAudio.put_Volume(-10000) == 0);
+                } 
+            }
+            return false;
+        }
         private void waitForStop()
         {
             if (mediaControl != null)

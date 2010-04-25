@@ -74,6 +74,7 @@
     <Compile Include="HalInterface.cs" />
     <Compile Include="InputRouter.cs" />
     <Compile Include="PluginHost.cs" />
+    <Compile Include="SandboxedThread.cs" />
     <Compile Include="StorageAnalyzer.cs" />
     <Compile Include="RenderingWindow.cs">
       <SubType>Form</SubType>
@@ -86,6 +87,7 @@
   <ItemGroup>
     <EmbeddedResource Include="ErrorReporting.resx">
       <DependentUpon>ErrorReporting.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="RenderingWindow.resx">
       <DependentUpon>RenderingWindow.cs</DependentUpon>

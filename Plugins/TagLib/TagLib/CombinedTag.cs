@@ -146,19 +146,6 @@ namespace TagLib {
 		}
 		
 		/// <summary>
-		///    Removes a specified tag from the collection in the
-		///    current instance.
-		/// </summary>
-		/// <param name="tag">
-		///    A <see cref="Tag" /> object to remove from the
-		///    collection.
-		/// </param>
-		protected void RemoveTag (Tag tag)
-		{
-			this.tags.Remove (tag);
-		}
-		
-		/// <summary>
 		///    Clears the tag collection in the current instance.
 		/// </summary>
 		protected void ClearTags ()

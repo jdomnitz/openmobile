@@ -90,11 +90,6 @@ namespace TagLib
             Read,
 
             /// <summary>
-            ///    Read and write operations can be performed.
-            /// </summary>
-            Write,
-
-            /// <summary>
             ///    The file is closed for both read and write
             ///    operations.
             /// </summary>
@@ -441,13 +436,11 @@ namespace TagLib
             get
             {
                 return (file_stream == null) ?
-                    AccessMode.Closed : (file_stream.CanWrite) ?
-                   AccessMode.Write : AccessMode.Read;
+                    AccessMode.Closed : AccessMode.Read;
             }
             set
             {
-                if (Mode == value || (Mode == AccessMode.Write
-                    && value == AccessMode.Read))
+                if (Mode == value)
                     return;
 
                 if (file_stream != null)
@@ -457,8 +450,6 @@ namespace TagLib
 
                 if (value == AccessMode.Read)
                     file_stream = file_abstraction.ReadStream;
-                else if (value == AccessMode.Write)
-                    file_stream = file_abstraction.WriteStream;
 
                 Mode = value;
             }
@@ -1272,30 +1263,6 @@ namespace TagLib
 
         #endregion
 
-
-
-        #region Protected Methods
-
-        /// <summary>
-        ///    Resized the current instance to a specified number of
-        ///    bytes.
-        /// </summary>
-        /// <param name="length">
-        ///    A <see cref="long" /> value specifying the number of
-        ///    bytes to resize the file to.
-        /// </param>
-        protected void Truncate(long length)
-        {
-            AccessMode old_mode = Mode;
-            Mode = AccessMode.Write;
-            file_stream.SetLength(length);
-            Mode = old_mode;
-        }
-
-        #endregion
-
-
-
         #region Classes
 
         /// <summary>
@@ -1366,25 +1333,6 @@ namespace TagLib
                         System.IO.FileMode.Open,
                         System.IO.FileAccess.Read,
                         System.IO.FileShare.Read);
-                }
-            }
-
-            /// <summary>
-            ///    Gets a new writable, seekable stream from the
-            ///    file represented by the current instance.
-            /// </summary>
-            /// <value>
-            ///    A new <see cref="System.IO.Stream" /> to be used
-            ///    when writing to the file represented by the
-            ///    current instance.
-            /// </value>
-            public System.IO.Stream WriteStream
-            {
-                get
-                {
-                    return System.IO.File.Open(Name,
-                        System.IO.FileMode.Open,
-                        System.IO.FileAccess.ReadWrite);
                 }
             }
 
@@ -1538,25 +1486,6 @@ namespace TagLib
             ///    implemented in a way to keep it open.
             /// </remarks>
             System.IO.Stream ReadStream { get; }
-
-            /// <summary>
-            ///    Gets a writable, seekable stream for the file
-            ///    referenced by the current instance.
-            /// </summary>
-            /// <value>
-            ///    A <see cref="System.IO.Stream" /> object to be
-            ///    used when writing to a file.
-            /// </value>
-            /// <remarks>
-            ///    This property is typically used when saving a
-            ///    file with <see cref="Save" />. Upon completion of
-            ///    the method, <see cref="CloseStream" /> will be
-            ///    called to close the stream. If the stream is to
-            ///    be reused after this point, <see
-            ///    cref="CloseStream" /> should be implemented in a
-            ///    way to keep it open.
-            /// </remarks>
-            System.IO.Stream WriteStream { get; }
 
             /// <summary>
             ///    Closes a stream originating from the current

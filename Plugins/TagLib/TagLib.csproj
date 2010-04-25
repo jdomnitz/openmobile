@@ -154,6 +154,8 @@
     <Compile Include="TagLib\Ogg\XiphComment.cs" />
     <Compile Include="TagLib\Picture.cs" />
     <Compile Include="TagLib\Properties.cs" />
+    <Compile Include="TagLib\Quicktime\File.cs" />
+    <Compile Include="TagLib\Quicktime\Tag.cs" />
     <Compile Include="TagLib\ReadOnlyByteVector.cs" />
     <Compile Include="TagLib\Riff\AviHeaderList.cs" />
     <Compile Include="TagLib\Riff\AviStream.cs" />

@@ -1,4 +1,5 @@
 ﻿
+using System;
 namespace OpenMobile.Plugin
 {
     /// <summary>
@@ -29,6 +30,10 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <returns></returns>
         int updaterStatus();
+        /// <summary>
+        /// When the data provider last updated its data
+        /// </summary>
+        DateTime lastUpdated{get;}
         /// <summary>
         /// Returns a string representing the type of data the plugin provides or the data source.
         /// </summary>

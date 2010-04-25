@@ -453,34 +453,6 @@ namespace TagLib.Id3v2
         }
 
         /// <summary>
-        ///    Sets the text for a specified Text Information Frame.
-        /// </summary>
-        /// <param name="ident">
-        ///    A <see cref="ByteVector" /> object containing the
-        ///    identifier of the frame to set the data for.
-        /// </param>
-        /// <param name="text">
-        ///    A <see cref="StringCollection" /> object containing the
-        ///    text to set for the specified frame, or <see
-        ///    langword="null" /> to unset the value.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///    <paramref name="ident" /> is <see langword="null" />.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///    <paramref name="ident" /> is not exactly four bytes long.
-        /// </exception>
-        [Obsolete("Use SetTextFrame(ByteVector,String[])")]
-        public void SetTextFrame(ByteVector ident,
-                                  StringCollection text)
-        {
-            if (text == null || text.Count == 0)
-                RemoveFrames(ident);
-            else
-                SetTextFrame(ident, text.ToArray());
-        }
-
-        /// <summary>
         ///    Sets the numeric values for a specified Text Information
         ///    Frame.
         /// </summary>
@@ -1146,31 +1118,6 @@ namespace TagLib.Id3v2
             //If the frame existed: frame.Identifier is a bytevector, get a string
             string result = frame == null ? null : frame.Identifier.ToString();
             return string.IsNullOrEmpty(result) ? null : result;
-        }
-
-        /// <summary>
-        /// Creates and/or sets the text for a UFID frame, referenced by owner
-        /// </summary>
-        /// <param name="owner">String containing the Owner field</param>
-        /// <param name="text">String containing the text to set for the frame</param>
-        private void SetUfidText(string owner, string text)
-        {
-
-            //Get a UFID frame, create if necessary
-            UniqueFileIdentifierFrame frame = UniqueFileIdentifierFrame.Get(
-                this, owner, true);
-
-            //If we have a real string, convert to ByteVector and apply to frame
-            if (!string.IsNullOrEmpty(text))
-            {
-                ByteVector identifier = ByteVector.FromString(text, StringType.UTF8);
-                frame.Identifier = identifier;
-            }
-            else
-            {
-                //String was null or empty, remove the frame to prevent empties
-                RemoveFrame(frame);
-            }
         }
 
         /// <summary>
@@ -1881,7 +1828,6 @@ namespace TagLib.Id3v2
         public override string MusicBrainzTrackId
         {
             get { return GetUfidText("http://musicbrainz.org"); }
-            set { SetUfidText("http://musicbrainz.org", value); }
         }
 
         /// <summary>
