@@ -719,6 +719,8 @@ namespace TagLib.Mpeg4 {
 		public override string Comment {
 			get {
 				string [] text = GetText (BoxType.Cmt);
+                if (text.Length == 0)
+                    text = GetText(BoxType.Des);
 				return text.Length == 0 ? null : text [0];
 			}
 			set {SetText (BoxType.Cmt, value);}
@@ -1077,12 +1079,13 @@ namespace TagLib.Mpeg4 {
 			get {
 				foreach (AppleDataBox box in DataBoxes(BoxType.Cprt))
 					return box.Text;
-				
+                foreach (AppleDataBox box in DataBoxes(BoxType.Cpy))
+                    return box.Text;
 				return null;
 			}
 			set {SetText(BoxType.Cprt, value);}
 		}
-		
+
 		/// <summary>
 		///    Gets and sets the sort names for the band or artist who
 		///    is credited in the creation of the entire album or

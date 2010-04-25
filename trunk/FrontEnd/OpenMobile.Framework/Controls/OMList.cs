@@ -64,6 +64,7 @@ namespace OpenMobile.Controls
         protected bool showSelectedItemOnlyOnFocus = false;
         protected int highlightedIndex = -1;
         protected bool selectFollowsHighlight;
+        protected eListStyle style;
 
         /// <summary>
         /// The background color of the list (Default: Transparent)
@@ -98,7 +99,7 @@ namespace OpenMobile.Controls
             if (!selectFollowsHighlight)    // this is already done in the highlight function if selectFollowsHighilight is true
                 highlightedIndex = selectedIndex;
 
-            // Trigg event
+            // Trigger event
             if (SelectedIndexChanged != null)
                 new Thread(delegate() { SelectedIndexChanged(this, screen); }).Start();
 
@@ -418,7 +419,6 @@ namespace OpenMobile.Controls
             moved += thrown;
             refreshMe(this.toRegion());
         }
-        private eListStyle style;
         /// <summary>
         /// Gets or Sets the list style
         /// </summary>

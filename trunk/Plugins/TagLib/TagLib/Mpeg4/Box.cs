@@ -462,7 +462,7 @@ namespace TagLib.Mpeg4 {
 				throw new ArgumentNullException ("file");
 			
 			List<Box> children = new List<Box> ();
-			
+
 			long position = DataPosition;
 			long end = position + DataSize;
 			

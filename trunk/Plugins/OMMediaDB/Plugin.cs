@@ -44,7 +44,6 @@ namespace OMMediaDB
 
         public void Dispose()
         {
-            this.toBeIndexed = null;
             if (this.con!=null)
                 this.con.Dispose();
             if (this.bCon != null)
@@ -81,20 +80,40 @@ namespace OMMediaDB
                 }
             }
         }
+        public List<string> listPlaylists()
+        {
+            if (con == null)
+                con = new SQLiteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+            if (con.State != ConnectionState.Open)
+                con.Open();
+            List<string> names = new List<string>();
+            lock (con)
+            {
+                SQLiteCommand command = con.CreateCommand();
+                command.CommandText = "SELECT DISTINCT name FROM Playlists";
+                reader = command.ExecuteReader();
+            }
+            while (reader.Read())
+                names.Add(reader[0].ToString());
+            reader.Close();
+            return names;
+        }
         private void parseDirectory(string location, bool subdirectories)
         {
             if ((location==null)||(location == ""))
                 return;
-            string[] filter = new string[] { "*.mp3", "*.m4a", "*.mpc", "*.flac", "*.wv", "*.aac", "*.aif", "*.aiff", "*.asf","*.ape", "*.wav", "*.m4p", "*.ogg", "*.wma", "*.oga", "*.spx" };
+            string[] filter = new string[] { "*.mp3", "*.m4a", "*.mpc", "*.flac", "*.wv", "*.aac", "*.aif", "*.aiff", "*.asf","*.ape", "*.wav", "*.m4p", "*.ogg", "*.wma", "*.oga", "*.spx","*.m4b","*.rma","*.mpp" };
             for(int i=0;i<filter.Length;i++)
                 parse(location, subdirectories,filter[i]);
         }
         public IMediaDatabase getNew()
         {
+            if (theHost == null)
+                return null;
             return new Plugin(theHost);
         }
         private void parse(string location, bool subdirectories,string filter)
-        {
+        { //TODO - Optimize this to use a filter array so directories dont need to be enumerated for each type
             foreach (string file in Directory.GetFiles(location, filter))
                 if (toBeIndexed!=null)
                     toBeIndexed.Add(file);
@@ -587,10 +606,12 @@ namespace OMMediaDB
 
         public bool beginGetPlaylist(string name)
         {
+            if (con == null)
+                con = new SQLiteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             SQLiteCommand command = con.CreateCommand();
-            command.CommandText = "SELECT URL FROM Playlist WHERE Name='" + General.escape(name) + "'";
+            command.CommandText = "SELECT URL FROM Playlists WHERE Name='" + General.escape(name) + "'";
             reader = command.ExecuteReader();
             return (reader != null);
         }

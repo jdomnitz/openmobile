@@ -511,18 +511,6 @@ namespace TagLib.Flac {
 		}
 		
 		/// <summary>
-		///    Removes all child Xiph Comments from the current
-		///    instance.
-		/// </summary>
-		public void RemoveComment ()
-		{
-			Ogg.XiphComment c;
-			
-			while ((c = GetComment (false, null)) != null)
-				RemoveTag (c);
-		}
-		
-		/// <summary>
 		///    Gets the tag types contained in the current instance.
 		/// </summary>
 		/// <value>

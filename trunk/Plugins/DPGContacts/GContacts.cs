@@ -165,10 +165,7 @@ namespace DPGContacts
         {
             if (OpenMobile.Net.Network.IsAvailable == true)
             {
-                string dat = "";
-                using (PluginSettings s = new PluginSettings())
-                    dat = s.getSetting("Plugins.DPGContacts.LastUpdate");
-                if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 60))
+                if ((DateTime.Now - lastUpdated).Minutes > 60)
                 {
                     status = 0;
                     OpenMobile.Threading.TaskManager.QueueTask(getContacts, OpenMobile.ePriority.Normal);
@@ -183,6 +180,19 @@ namespace DPGContacts
             {
                 status = -1;
                 return false;
+            }
+        }
+
+        public DateTime lastUpdated
+        {
+            get
+            {
+                DateTime ret;
+                using (PluginSettings s = new PluginSettings())
+                    if (DateTime.TryParse(s.getSetting("Plugins.DPGContacts.LastUpdate"), out ret))
+                        return ret;
+                    else
+                        return DateTime.MinValue;
             }
         }
 

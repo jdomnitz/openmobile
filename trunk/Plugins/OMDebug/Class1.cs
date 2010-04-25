@@ -51,7 +51,7 @@ namespace OMDebug
 
         public bool incomingMessage(string message, string source)
         {
-            log(source + " - " + message);
+            log("********"+source + "******\r\n" + message);
             return true;
         }
 
@@ -61,7 +61,6 @@ namespace OMDebug
             writer.WriteLine("-------------Exception " + ex.Message + "-----------------");
             log("Source: "+ex.Source);
             log("Stack Trace: " + ex.StackTrace);
-            log("Relevant Data: " + getData(ex.Data));
             writer.WriteLine("----------------------------------------------------------------");
         }
 

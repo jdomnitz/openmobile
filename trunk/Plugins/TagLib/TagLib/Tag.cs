@@ -98,7 +98,9 @@ namespace TagLib {
         /// <summary>
         /// RMF Metadata
         /// </summary>
-        RMFMetadata = 0x00000800,
+        RMFMetadata  = 0x00000800,
+
+        QuicktimeAtoms=0x00001000,
 
 		/// <summary>
 		///    All tag types.

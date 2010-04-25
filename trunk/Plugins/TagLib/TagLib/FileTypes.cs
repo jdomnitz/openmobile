@@ -71,6 +71,7 @@ namespace TagLib {
 			typeof(TagLib.Riff.File),
 			typeof(TagLib.WavPack.File),
             typeof(TagLib.Audible.File),
+            typeof(TagLib.Qt.File),
             typeof(TagLib.Rmf.File)
 		};
 		

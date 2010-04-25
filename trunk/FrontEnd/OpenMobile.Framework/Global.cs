@@ -953,6 +953,13 @@ namespace OpenMobile
         /// </summary>
         screenRemoved=69,
         /// <summary>
+        /// Set the Band of a Tuned Content plugin
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Instance Number</para>
+        /// <para>Arg2: tunedContentBand</para>
+        /// </summary>
+        setBand=70,
+        /// <summary>
         /// Go back to the previous panel
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
@@ -1441,7 +1448,101 @@ namespace OpenMobile
         /// <summary>
         /// Returns a [string[]] containing all of the available skins
         /// </summary>
-        GetAvailableSkins=19
+        GetAvailableSkins=19,
+        /// <summary>
+        /// Gets station list from the currently loaded tunedcontent plugin
+        /// <para>----------------------------------------------------</para>
+        /// <para>Param: Instance [int]</para>
+        /// </summary>
+        GetStationList = 20
+    }
+    /// <summary>
+    /// Information on Tuned Content
+    /// </summary>
+    public sealed class tunedContentInfo
+    {
+        /// <summary>
+        /// Current PowerState (True = powered on, false = powered off)
+        /// </summary>
+        public bool powerState;
+        /// <summary>
+        /// Current audio mode
+        /// </summary>
+        public int channels;
+        /// <summary>
+        /// Current band
+        /// </summary>
+        public tunedContentBand band;
+        /// <summary>
+        /// Status
+        /// </summary>
+        public eTunedContentStatus status;
+        /// <summary>
+        /// List of current available stations
+        /// </summary>
+        public string[] stationList;
+        /// <summary>
+        /// Info for currently tuned station
+        /// </summary>
+        public stationInfo station;
+    }
+    public enum eTunedContentStatus
+    {
+        /// <summary>
+        /// Unknown
+        /// </summary>
+        Unknown = 0,
+        /// <summary>
+        /// Scanning for a station
+        /// </summary>
+        Scanning = 1,
+        /// <summary>
+        /// Tuned to a station
+        /// </summary>
+        Tuned = 2,
+        /// <summary>
+        /// No service / no signal
+        /// </summary>
+        NoSignal = 3,
+        /// <summary>
+        /// An error has occured
+        /// </summary>
+        Error = 10,
+        /// <summary>
+        /// Other
+        /// </summary>
+        Other = 11
+    }
+
+    /// <summary>
+    /// Type of Tuned Content
+    /// </summary>
+    public enum tunedContentBand
+    {
+        /// <summary>
+        /// None or Unknown
+        /// </summary>
+        Unknown = 0,
+        /// <summary>
+        /// AM
+        /// </summary>
+        AM = 1,
+        /// <summary>
+        /// FM
+        /// </summary>
+        FM = 2,
+        /// <summary>
+        /// DAB 
+        /// </summary>
+        DAB = 3,
+        /// <summary>
+        /// HD Radio
+        /// </summary>
+        HD=4,
+        /// <summary>
+        /// Everything else: tv, satellite radio, internet radio, etc.
+        /// </summary>
+        Other=5
     }
 
     /// <summary>
@@ -1916,9 +2017,9 @@ namespace OpenMobile
         /// </summary>
         public string stationName;
         /// <summary>
-        /// Station Number (aka frequency or channel)
+        /// Station Number (aka frequency or channel or station)
         /// </summary>
-        public string stationNumber;
+        public string stationID;
         /// <summary>
         /// Value: 0(no signal) - 5(full signal)
         /// </summary>
@@ -1930,12 +2031,21 @@ namespace OpenMobile
         /// <summary>
         /// Station Genre (Empty String if unknown)
         /// </summary>
-        public string genre;
+        public string stationGenre;
+        /// <summary>
+        /// Number of Audio Channels
+        /// </summary>
+        int Channels;
+        /// <summary>
+        /// Bitrate (bits/second)
+        /// </summary>
+        int Bitrate;
     }
 
     /// <summary>
     /// Type of Tuned Content
     /// </summary>
+    [Flags]
     public enum tunedContentType
     {
         /// <summary>
@@ -1943,33 +2053,45 @@ namespace OpenMobile
         /// </summary>
         None=0,
         /// <summary>
-        /// AM/FM Radio - HD or Analog
+        /// AM Radio - Analog
         /// </summary>
-        AMFMRadio=1,
+        AMRadio=1,
         /// <summary>
-        /// Satellite Radio - XM or Sirius
+        /// FM Radio - Analog
         /// </summary>
-        SatelliteRadio=2,
+        FMRadio=2,
         /// <summary>
-        /// Over the air TV - ATSC
+        /// HD Radio
         /// </summary>
-        OTATV=3,
+        HDRadio=3,
+        /// <summary>
+        /// DAB Radio
+        /// </summary>
+        DABRadio=4,
+        /// <summary>
+        /// Satellite Radio - SiriusXM
+        /// </summary>
+        SatelliteRadio=5,
+        /// <summary>
+        /// Over the air TV - ATSC/DVB/ITSB
+        /// </summary>
+        OTATV=6,
         /// <summary>
         /// Cable TV
         /// </summary>
-        CableTV=4,
+        CableTV=7,
         /// <summary>
         /// Satellite TV
         /// </summary>
-        SatelliteTV=5,
-        /// <summary>
-        /// AM/FM Radio and Over The Air TV
-        /// </summary>
-        AMFMRadioAndOTATV=6,
+        SatelliteTV=8,
         /// <summary>
         /// Other
         /// </summary>
-        Other=10
+        Other=15,
+        /// <summary>
+        /// Other Radio - Digital
+        /// </summary>
+        OtherDigital=16
     }
     /// <summary>
     /// Provides proper naming of semi-transparent colors

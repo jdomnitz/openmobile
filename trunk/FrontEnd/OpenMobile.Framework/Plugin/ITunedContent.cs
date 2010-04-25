@@ -71,6 +71,19 @@ namespace OpenMobile.Plugin
         /// Returns a list of all stations/channels that can be tuned to
         /// </summary>
         /// <returns></returns>
-        string[] getStationList(int instance);
+        stationInfo[] getStationList(int instance);
+        /// <summary>
+        /// Set the band of the tuned content
+        /// </summary>
+        /// <param name="band">Band to activate</param>
+        /// <param name="instance"></param>
+        /// <returns>Returns true if successful.</returns>
+        bool setBand(int instance, tunedContentBand band);
+        /// <summary>
+        /// Get the status of the tuned content
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns>Returns the status of the tuned content.</returns>
+        tunedContentInfo getStatus(int instance);
     }
 }

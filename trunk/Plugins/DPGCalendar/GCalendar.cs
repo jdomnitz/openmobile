@@ -81,8 +81,7 @@ namespace DPGCalendar
             StreamReader readStream = new StreamReader(responseStream, Encoding.UTF8);
             string result = readStream.ReadToEnd();
             string lastModified;
-            using (PluginSettings s = new PluginSettings())
-                lastModified = s.getSetting("Plugins.DPGCalendar.LastUpdate");
+            lastModified = lastUpdated.ToUniversalTime().ToString("s");
             if (lastModified == "")
                 lastModified = DateTime.MinValue.Date.ToString("s");
             HttpWebRequest req2 = (HttpWebRequest)HttpWebRequest.Create("http://www.google.com/calendar/feeds/" + email + "/private/full?updated-min="+lastModified);
@@ -174,6 +173,19 @@ namespace DPGCalendar
             status = 1;
         }
 
+        public DateTime lastUpdated
+        {
+            get
+            {
+                DateTime ret;
+                using (PluginSettings s = new PluginSettings())
+                    if (DateTime.TryParse(s.getSetting("Plugins.DPGCalendar.LastUpdate"), out ret))
+                        return ret;
+                    else
+                        return DateTime.MinValue;
+            }
+        }
+
         private PointF parse(string p)
         {
             string[] part = p.Split(new char[] { ' ' });
@@ -189,9 +201,7 @@ namespace DPGCalendar
             if (OpenMobile.Net.Network.IsAvailable == true)
             {
                 string dat = "";
-                using (PluginSettings s = new PluginSettings())
-                    dat = s.getSetting("Plugins.DPGCalendar.LastUpdate");
-                if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 30))
+                if ((DateTime.Now - lastUpdated).Minutes > 30)
                 {
                     status = 0;
                     OpenMobile.Threading.TaskManager.QueueTask(getCal, OpenMobile.ePriority.MediumHigh);
@@ -280,11 +290,7 @@ namespace DPGCalendar
         {
             if (type == ePowerEvent.SystemResumed)
             {
-                string dat = "";
-                using (PluginSettings s = new PluginSettings())
-                    dat = s.getSetting("Plugins.DPGCalendar.LastUpdate");
-                if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 20))
-                    refreshData();
+                refreshData();
             }
         }
 
@@ -292,11 +298,7 @@ namespace DPGCalendar
         {
             if (function == eFunction.connectedToInternet)
             {
-                string dat = "";
-                using (PluginSettings s = new PluginSettings())
-                    dat = s.getSetting("Plugins.DPGCalendar.LastUpdate");
-                if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 20))
-                    refreshData();
+                refreshData();
             }
         }
 

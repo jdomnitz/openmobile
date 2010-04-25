@@ -38,14 +38,6 @@ namespace TagLib {
 		
 		/// <summary>
 		///    Constructs and initializes a new instance of <see
-		///    cref="ReadOnlyByteVector" /> with no contents.
-		/// </summary>
-		public ReadOnlyByteVector () : base ()
-		{
-		}
-		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
 		///    cref="ReadOnlyByteVector" /> of a specified length filled
 		///    with bytes of a specified value.
 		/// </summary>
@@ -89,27 +81,6 @@ namespace TagLib {
 		///    from.
 		/// </param>
 		public ReadOnlyByteVector (ByteVector vector) : base (vector)
-		{
-		}
-		
-		/// <summary>
-		///    Constructs and initializes a new instance of <see
-		///    cref="ReadOnlyByteVector" /> by copying a specified
-		///    number of bytes from an array.
-		/// </summary>
-		/// <param name="data">
-		///    A byte[] to copy values from.
-		/// </param>
-		/// <param name="length">
-		///    A <see cref="int" /> specifying the number of bytes to
-		///    copy.
-		/// </param>
-		/// <remarks>
-		///    <para>If copying the entire contents of an array, use
-		///    <see cref="ReadOnlyByteVector(byte[])" />.</para>
-		/// </remarks>
-		public ReadOnlyByteVector (byte [] data, int length)
-			: base (data, length)
 		{
 		}
 		
@@ -198,16 +169,6 @@ namespace TagLib {
 		///    Always <see langword="true" />.
 		/// </value>
 		public override bool IsReadOnly {
-			get {return true;}
-		}
-		
-		/// <summary>
-		///    Gets whether or not the current instance is fixed size.
-		/// </summary>
-		/// <value>
-		///    Always <see langword="true" />.
-		/// </value>
-		public override bool IsFixedSize {
 			get {return true;}
 		}
 		
