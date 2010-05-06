@@ -35,11 +35,11 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Scan forward for a channel with signal. Fires system event radioTuned when found.
         /// </summary>
-        void scanForward(int instance);
+        bool scanForward(int instance);
         /// <summary>
         /// Scan backward for a channel with signal. Fires system event radioTuned when found.
         /// </summary>
-        void scanReverse(int instance);
+        bool scanReverse(int instance);
         /// <summary>
         /// Steps forward one station/channel.
         /// </summary>
@@ -85,5 +85,9 @@ namespace OpenMobile.Plugin
         /// <param name="instance"></param>
         /// <returns>Returns the status of the tuned content.</returns>
         tunedContentInfo getStatus(int instance);
+        /// <summary>
+        /// Returns the current playback position if applicable otherwise -1
+        /// </summary>
+        int playbackPosition { get; }
     }
 }

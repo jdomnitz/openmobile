@@ -76,11 +76,7 @@ namespace DPGContacts
 
             StreamReader readStream = new StreamReader(responseStream, Encoding.UTF8);
             string result = readStream.ReadToEnd();
-            string lastModified;
-            using(PluginSettings s=new PluginSettings())
-                lastModified= s.getSetting("Plugins.DPGContacts.LastUpdate");
-            if (lastModified=="")
-                lastModified=DateTime.MinValue.Date.ToString("s");
+            string lastModified=lastUpdated.ToString("s");
             HttpWebRequest req2 = (HttpWebRequest)HttpWebRequest.Create("http://www.google.com/m8/feeds/contacts/" + email + "/full?max-results=10000&updated-min="+lastModified);
             req2.ContentType = "application/x-www-form-urlencoded";
             req2.Method = "GET";
@@ -165,7 +161,7 @@ namespace DPGContacts
         {
             if (OpenMobile.Net.Network.IsAvailable == true)
             {
-                if ((DateTime.Now - lastUpdated).Minutes > 60)
+                if ((DateTime.Now - lastUpdated).TotalMinutes > 60)
                 {
                     status = 0;
                     OpenMobile.Threading.TaskManager.QueueTask(getContacts, OpenMobile.ePriority.Normal);
@@ -173,6 +169,7 @@ namespace DPGContacts
                 }
                 else
                 {
+                    status = 1;
                     return false;
                 }
             }
@@ -266,11 +263,7 @@ namespace DPGContacts
         {
             if (type == ePowerEvent.SystemResumed)
             {
-                string dat = "";
-                using (PluginSettings s = new PluginSettings())
-                    dat = s.getSetting("Plugins.DPGContacts.LastUpdate");
-                if ((dat == "") || ((DateTime.Now - DateTime.Parse(dat)).Minutes > 60))
-                    refreshData();
+                refreshData();
             }
         }
 
@@ -278,11 +271,7 @@ namespace DPGContacts
         {
             if (function == eFunction.connectedToInternet)
             {
-                string dat = "";
-                using (PluginSettings s = new PluginSettings())
-                    dat=s.getSetting("Plugins.DPGContacts.LastUpdate");
-                if ((dat=="")||((DateTime.Now- DateTime.Parse(dat)).Minutes>60))
-                    refreshData();
+                refreshData();
             }
         }
 

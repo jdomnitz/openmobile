@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 using System.Windows.Forms;
 using OpenMobile.helperFunctions;
 using System.Resources;
@@ -32,13 +32,13 @@ namespace OpenMobile.Data
     /// </summary>
     public sealed class PluginSettings:IDisposable
     {
-        SQLiteConnection asyncCon;
+        SqliteConnection asyncCon;
         /// <summary>
         /// Stores and retrieves settings from the database
         /// </summary>
         public PluginSettings()
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
         }
         /// <summary>
@@ -46,7 +46,7 @@ namespace OpenMobile.Data
         /// </summary>
         public void createDB()
         {
-            SQLiteCommand cmd = new SQLiteCommand(OpenMobile.Framework.Data.SQL.OMData, asyncCon);
+            SqliteCommand cmd = new SqliteCommand(OpenMobile.Framework.Data.SQL.OMData, asyncCon);
             cmd.ExecuteNonQuery();
         }
         /// <summary>
@@ -58,7 +58,7 @@ namespace OpenMobile.Data
         {
             try
             {
-                using (SQLiteCommand cmd = asyncCon.CreateCommand())
+                using (SqliteCommand cmd = asyncCon.CreateCommand())
                 {
                     cmd.CommandText = "SELECT Value FROM PluginSettings WHERE Name='" + name + "'";
                     object result = cmd.ExecuteScalar();
@@ -80,11 +80,11 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool setSetting(string name, string value)
         {
-            using (SQLiteCommand cmd = asyncCon.CreateCommand())
+            using (SqliteCommand cmd = asyncCon.CreateCommand())
             {
                 cmd.CommandText = "UPDATE OR REPLACE PluginSettings SET Value='" + General.escape(value) + "' WHERE Name='" + General.escape(name) + "'";
                 int rowsAffected = cmd.ExecuteNonQuery();
-                if (rowsAffected == 0)//Row doesn't exist yet..has to be two queries since sqlite doesn't support IF statements
+                if (rowsAffected == 0)//Row doesn't exist yet..has to be two queries since Sqlite doesn't support IF statements
                 {
                     cmd.CommandText = "INSERT INTO PluginSettings (Name,Value)VALUES('" + General.escape(name) + "','" + General.escape(value) + "')";
                     rowsAffected = cmd.ExecuteNonQuery();

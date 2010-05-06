@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 using System.Text;
 using System.Windows.Forms;
 using OpenMobile.helperFunctions;
@@ -85,16 +85,16 @@ namespace OpenMobile.Data
     /// </summary>
     public sealed class Contacts:IDisposable
     {
-        private SQLiteConnection asyncCon;
-        private SQLiteCommand cmd;
-        private SQLiteDataReader asyncReader;
+        private SqliteConnection asyncCon;
+        private SqliteCommand cmd;
+        private SqliteDataReader asyncReader;
         /// <summary>
         /// Begin asynchronously reading contacts
         /// </summary>
         /// <returns></returns>
         public bool beginRead()
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
+            asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
             asyncCon.Open();
             cmd = asyncCon.CreateCommand();
             cmd.CommandText = "SELECT * FROM Phonebook ORDER BY name COLLATE NOCASE";
@@ -107,7 +107,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool beginWrite()
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
             cmd = asyncCon.CreateCommand();
             return true;

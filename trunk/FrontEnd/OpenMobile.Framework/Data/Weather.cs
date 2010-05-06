@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 using System.Text;
 using System.Windows.Forms;
 using OpenMobile.helperFunctions;
@@ -246,11 +246,11 @@ namespace OpenMobile.Data
         /// <exception cref="ArgumentException">ArgumentException</exception>
         public weather readWeather(string location,DateTime day)
         {
-            SQLiteCommand cmd = con.CreateCommand();
+            SqliteCommand cmd = con.CreateCommand();
             cmd.CommandText = "SELECT * FROM Weather WHERE Code='" + location + "'";
             if (day!=DateTime.MinValue)
                 cmd.CommandText+=" AND Date='"+day.ToString()+"'";
-            SQLiteDataReader reader = cmd.ExecuteReader();
+            SqliteDataReader reader = cmd.ExecuteReader();
             if (reader.Read() == false)
                 throw new ArgumentException();
             weather w = new weather();
@@ -274,13 +274,13 @@ namespace OpenMobile.Data
             reader.Close();
             return w;
         }
-        SQLiteConnection con;
+        SqliteConnection con;
         /// <summary>
         /// Provides access to the weather database
         /// </summary>
         public Weather()
         {
-            con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
+            con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
             con.Open();
         }
         /// <summary>
@@ -290,7 +290,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool writeWeather(weather w)
         {
-            SQLiteCommand cmd = con.CreateCommand();
+            SqliteCommand cmd = con.CreateCommand();
             StringBuilder query = new StringBuilder("DELETE FROM Weather WHERE Code='");
             {
                 query.Append(General.escape(w.location));
@@ -345,7 +345,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool purgeOld()
         {
-            SQLiteCommand cmd = con.CreateCommand();
+            SqliteCommand cmd = con.CreateCommand();
             cmd.CommandText = "DELETE FROM Weather WHERE Date<'" + DateTime.Today+"'";
             cmd.ExecuteNonQuery();
             return true;

@@ -42,6 +42,8 @@ namespace OpenMobile
                 setUppercase(screen);
             else
                 setLowercase(screen);
+            if (name == "")
+                name = "OSK";
             return manager[screen,name];
         }
 
@@ -103,7 +105,7 @@ namespace OpenMobile
             OMPanel regularKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "OSK.xml"), host);
             if (regularKeyboard == null)
                 return eLoadStatus.LoadFailedUnloadRequested;
-            regularKeyboard.Name = "";
+            regularKeyboard.Name = "OSK";
             OMPanel symKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "SYM.xml"),host);
             if (symKeyboard == null)
                 return eLoadStatus.LoadFailedUnloadRequested;

@@ -703,9 +703,6 @@ namespace OpenMobile.Controls
         /// <param name="screen"></param>
         public void longClickMe(int screen)
         {
-            if (clickSelect == true)
-                if ((selectedIndex != lastSelected) || (mode == modeType.Scrolling))
-                    return;
             if (OnLongClick != null)
                 OnLongClick(this, screen);
         }

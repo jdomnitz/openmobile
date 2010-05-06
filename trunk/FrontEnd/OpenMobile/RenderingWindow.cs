@@ -639,12 +639,8 @@ namespace OpenMobile
 
         private void tmrMouse_Tick(object sender, EventArgs e)
         {
-            try
-            {
-                tmrMouse.Enabled = false;
-                SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
-            }
-            catch (Exception) { }
+            tmrMouse.Enabled = false;
+            SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
         }
 
         private void tmrLongClick_Tick(object sender, EventArgs e)
@@ -653,11 +649,7 @@ namespace OpenMobile
             if (rParam.currentMode == modeType.gesturing)
                 return;
             if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
-                try
-                {
-                    SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).longClickMe(screen); });
-                }
-                catch (Exception) { }
+                SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).longClickMe(screen); });
         }
 
         private void RenderingWindow_MouseDown(object sender, MouseEventArgs e)

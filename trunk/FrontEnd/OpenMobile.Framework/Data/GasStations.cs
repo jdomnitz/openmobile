@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 using System.Windows.Forms;
 using System.Text;
 using OpenMobile.helperFunctions;
@@ -79,17 +79,17 @@ namespace OpenMobile.Data
         /// </summary>
         public void purgeOld()
         {
-            SQLiteConnection con = new SQLiteConnection(@"Data Source=" + Path.Combine(Application.StartupPath, "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
-            SQLiteCommand cmd = con.CreateCommand();
+            SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Application.StartupPath, "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            SqliteCommand cmd = con.CreateCommand();
             cmd.CommandText = "DELETE FROM gasRegions WHERE  StationID IN (SELECT GUID FROM gasStations WHERE dateAdded<date('now','-4 days'))";
             con.Open();
             cmd.ExecuteNonQuery();
             cmd.CommandText = "DELETE FROM gasStations WHERE dateAdded<date('now','-4 days')";
             cmd.ExecuteNonQuery();
         }
-         SQLiteConnection asyncCon;
-         SQLiteCommand asyncCmd;
-         SQLiteDataReader asyncReader;
+         SqliteConnection asyncCon;
+         SqliteCommand asyncCmd;
+         SqliteDataReader asyncReader;
 
         /// <summary>
         /// Begins an asynchronous connection to the Message database
@@ -100,7 +100,7 @@ namespace OpenMobile.Data
         {
             try{
                 if (asyncCon == null)
-                    asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
+                    asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
                 asyncCmd = asyncCon.CreateCommand();
                 asyncCmd.CommandText = "SELECT Zip,dateAdded,Location,Name,priceDiesel,priceRegular,pricePlus,pricePremium,priceUltimate FROM gasRegions JOIN gasStations ON StationID=GUID WHERE Zip=" + zipcode;
                 asyncCon.Open();
@@ -160,7 +160,7 @@ namespace OpenMobile.Data
             try
             {
                 if (asyncCon == null)
-                    asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+                    asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
                 asyncCon.Open();
                 return true;
             }

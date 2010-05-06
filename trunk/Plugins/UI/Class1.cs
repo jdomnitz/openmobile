@@ -361,12 +361,14 @@ namespace OpenMobile
 
         void skipBackwardButton_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.previousMedia,theHost.instanceForScreen(screen).ToString());
+            if (theHost.execute(eFunction.stepBackward,theHost.instanceForScreen(screen).ToString())==false)
+                theHost.execute(eFunction.previousMedia,theHost.instanceForScreen(screen).ToString());
         }
 
         void skipForwardButton_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.nextMedia,theHost.instanceForScreen(screen).ToString());
+            if (theHost.execute(eFunction.stepForward,theHost.instanceForScreen(screen).ToString())==false)
+                theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
         }
 
         void theHost_OnSystemEvent(eFunction function, string arg1, string arg2,string arg3)
@@ -465,6 +467,8 @@ namespace OpenMobile
 
         void rewindButton_OnClick(OMControl sender, int screen)
         {
+            if (theHost.execute(eFunction.scanBackward, theHost.instanceForScreen(screen).ToString()) == true)
+                return;
             object o;
             theHost.getData(eGetData.GetPlaybackSpeed, "", theHost.instanceForScreen(screen).ToString(), out o);
             if (o == null)
@@ -497,7 +501,7 @@ namespace OpenMobile
                 {
                     ((OMLabel)manager[j]["UI.Elapsed"]).Text = "";
                     ((OMSlider)manager[j]["UI.Slider"]).Value = 0;
-                }else if ((i < ((OMSlider)manager[0]["UI.Slider"]).Maximum) && (i >= 0))
+                }else if ((i < ((OMSlider)manager[j]["UI.Slider"]).Maximum) && (i >= 0))
                 {
                     if (((OMSlider)manager[j]["UI.Slider"]).Mode == modeType.Scrolling)
                         return;
@@ -514,6 +518,8 @@ namespace OpenMobile
 
         void fastForwardButton_OnClick(OMControl sender, int screen)
         {
+            if (theHost.execute(eFunction.scanForward, theHost.instanceForScreen(screen).ToString()) == true)
+                return;
             object o;
             theHost.getData(eGetData.GetPlaybackSpeed, "", theHost.instanceForScreen(screen).ToString(), out o);
             if (o==null)
@@ -532,6 +538,7 @@ namespace OpenMobile
         void stopButton_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.Stop, theHost.instanceForScreen(screen).ToString());
+            theHost.execute(eFunction.unloadTunedContent, theHost.instanceForScreen(screen).ToString());
         }
 
         int timerIteration = 0;
@@ -589,7 +596,7 @@ namespace OpenMobile
 
         void playButton_OnClick(OMControl sender, int screen)
         {
-            object o=new object();
+            object o = new object();
             theHost.getData(eGetData.GetMediaStatus, "", theHost.instanceForScreen(screen).ToString(), out o);
             if (o == null)
                 return;

@@ -34,7 +34,10 @@ namespace OpenMobile.Controls
         /// Button Clicked
         /// </summary>
         public event userInteraction OnClick;
-
+        protected Color backColor1=Color.Blue;
+        protected Color backColor2=Color.DarkBlue;
+        protected Color borderColor=Color.Black;
+        protected float borderWidth=3F;
         /// <summary>
         /// Fires the buttons OnClick event
         /// </summary>
@@ -45,6 +48,18 @@ namespace OpenMobile.Controls
                 OnClick(this, screen);
             }
             catch (Exception) { };//If no one has hooked the click event
+        }
+        private string title;
+        public string Title
+        {
+            set
+            {
+                title = value;
+            }
+            get 
+            {
+                return title; 
+            }
         }
         /// <summary>
         /// Fires the OnDoubleClick Event
@@ -66,6 +81,20 @@ namespace OpenMobile.Controls
             }
         }
 
+        public OMMessageBox()
+        {
+            textAlignment = Alignment.WordWrap;
+        }
+
+        public OMMessageBox(int left,int top,int width,int height)
+        {
+            Left = left;
+            Top = top;
+            Width = width;
+            Height = height;
+            textAlignment = Alignment.WordWrap;
+        }
+
         /// <summary>
         /// Draws the control
         /// </summary>
@@ -78,12 +107,13 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionIn;
             if (this.Mode == modeType.transitioningOut)
                 tmp = e.globalTransitionOut;
-            height= (int)g.MeasureString(this.Text, Font, this.Width).Height+1;
+            height= (int)g.MeasureString(this.Text, Font, this.Width-1).Height+1;
             float letterHeight = g.MeasureString("A", Font).Height+1;
             height += (int)letterHeight;
             Rectangle r = new Rectangle(this.Left, top, this.Width, height);
-            g.FillRectangle(new LinearGradientBrush(r,Color.FromArgb((int)(tmp*250), Color.Gray),Color.FromArgb((int)(tmp*250), Color.Black),LinearGradientMode.Vertical),r);
-            Renderer.renderText(g, this.Left, top, this.Width, (int)letterHeight, this.Name,this.Font, this.Format, this.TextAlignment, tmp,1,this.Color,this.OutlineColor);
+            Renderer.FillRoundRectangle(g, new LinearGradientBrush(r, Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), LinearGradientMode.Vertical), r,20F);
+            Renderer.DrawRoundRectangle(g, new Pen(borderColor, borderWidth), r, 20F);
+            Renderer.renderText(g, this.Left, top, this.Width, (int)letterHeight, title,this.Font, this.Format, this.TextAlignment, tmp,1,this.Color,this.OutlineColor);
             top += (int)letterHeight;
             height -= (int)letterHeight;
             base.Render(g, e);

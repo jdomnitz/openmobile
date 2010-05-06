@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 using OpenMobile.helperFunctions;
 using System.Windows.Forms;
 using System.Text;
@@ -80,11 +80,11 @@ namespace OpenMobile.Data
         /// <returns>If successful</returns>
         public static bool readInfo()
         {
-            SQLiteConnection con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Pooling=True;Max Pool Size=6;");
+            SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Pooling=True;Max Pool Size=6;");
             con.Open();
-            SQLiteCommand cmd = con.CreateCommand();
+            SqliteCommand cmd = con.CreateCommand();
             cmd.CommandText = "SELECT * FROM Personal";
-            SQLiteDataReader reader = cmd.ExecuteReader();
+            SqliteDataReader reader = cmd.ExecuteReader();
             if (reader.Read() == true)
             {
                 personalInfo info = new personalInfo();
@@ -192,9 +192,9 @@ namespace OpenMobile.Data
         public static bool writeInfo()
         {
             personalInfo info = Collections.personalInfo;
-            SQLiteConnection con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Pooling=True;Max Pool Size=6;FailIfMissing=True;");
+            SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Pooling=True;Max Pool Size=6;FailIfMissing=True;");
             con.Open();
-            SQLiteCommand cmd = con.CreateCommand();
+            SqliteCommand cmd = con.CreateCommand();
             StringBuilder query = new StringBuilder("DELETE FROM Personal;INSERT INTO Personal ('connectedServicesID','emailAddress','emailPassword','emailUsername','googlePassword','googleUsername','otherPassword','popServer','smtpServer')VALUES('");
             {
                 query.Append(info.connectedServices);

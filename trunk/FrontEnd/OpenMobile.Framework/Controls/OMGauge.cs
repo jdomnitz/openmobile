@@ -759,6 +759,7 @@ namespace OpenMobile.Controls
             {
                 if (controlHeight == value)
                     return;
+                requiresRedraw = true;
                 if (value >= controlHeight)
                 {
                     controlHeight = value;
@@ -787,6 +788,7 @@ namespace OpenMobile.Controls
             {
                 if (value == controlWidth)
                     return;
+                requiresRedraw = true;
                 if (value >= controlWidth)
                 {
                     controlWidth = value;
@@ -815,6 +817,7 @@ namespace OpenMobile.Controls
             {
                 if (controlTop == value)
                     return;
+                requiresRedraw = true;
                 int oldtop = controlTop;
                 controlTop = value;
                 refreshMe(new Rectangle(controlLeft, controlTop > oldtop ? oldtop : controlTop, controlWidth + 2, controlHeight + Math.Abs(oldtop - controlTop) + 2));
@@ -834,6 +837,7 @@ namespace OpenMobile.Controls
             {
                 if (controlLeft == value)
                     return;
+                requiresRedraw = true;
                 int oldleft = controlLeft;
                 controlLeft = value;
                 refreshMe(new Rectangle(controlLeft > oldleft ? oldleft : controlLeft, controlTop, controlWidth + Math.Abs(oldleft - controlLeft), controlHeight));
@@ -846,6 +850,8 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(System.Drawing.Graphics g, renderingParams e)
         {
+            if ((this.Width == 0) || (this.Height == 0))
+                return;
             //paint the gauge
             g.SmoothingMode = SmoothingMode.HighQuality;
             g.FillRectangle(new SolidBrush(Color.Transparent), new Rectangle(Left, Top, Width, Height));
@@ -856,19 +862,19 @@ namespace OpenMobile.Controls
                 bg.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 width = this.Width - x * 2;
                 height = this.Height - y * 2;
-                rectImg = new Rectangle(Left, Top, width, height);
+                rectImg = new Rectangle(0, 0, width, height);
 
                 //Draw background color
                 Brush backGroundBrush = new SolidBrush(Color.FromArgb(120, dialColor));
                 float gg = width / 60;
-                bg.FillEllipse(backGroundBrush, x, y, width, height);
+                bg.FillEllipse(backGroundBrush, 0, 0, width, height);
 
                 //Draw Rim
                 SolidBrush outlineBrush = new SolidBrush(Color.FromArgb(100, Color.SlateGray));
                 Pen outline = new Pen(outlineBrush, (float)(width * .03));
                 bg.DrawEllipse(outline, rectImg);
                 Pen darkRim = new Pen(Color.SlateGray);
-                bg.DrawEllipse(darkRim, x, y, width, height);
+                bg.DrawEllipse(darkRim, 0, 0, width, height);
 
                 //Draw Callibration
                 DrawCalibration(bg, rectImg, ((width) / 2) + x, ((height) / 2) + y);
@@ -877,12 +883,12 @@ namespace OpenMobile.Controls
                 Pen colorPen = new Pen(Color.FromArgb(190, Color.Gainsboro), this.Width / 40);
                 Pen blackPen = new Pen(Color.FromArgb(250, Color.Black), this.Width / 200);
                 int gap = (int)(this.Width * 0.03F);
-                Rectangle rectg = new Rectangle(rectImg.X + gap, rectImg.Y + gap, rectImg.Width - gap * 2, rectImg.Height - gap * 2);
+                Rectangle rectg = new Rectangle(gap, gap, rectImg.Width - gap * 2, rectImg.Height - gap * 2);
                 bg.DrawArc(colorPen, rectg, 135, 270);
 
                 //Draw Threshold
                 colorPen = new Pen(Color.FromArgb(200, Color.LawnGreen), this.Width / 50);
-                rectg = new Rectangle(rectImg.X + gap, rectImg.Y + gap, rectImg.Width - gap * 2, rectImg.Height - gap * 2);
+                rectg = new Rectangle(gap, gap, rectImg.Width - gap * 2, rectImg.Height - gap * 2);
                 float val = MaxValue - MinValue;
                 val = (100 * (this.recommendedValue - MinValue)) / val;
                 val = ((toAngle - fromAngle) * val) / 100;
@@ -893,18 +899,18 @@ namespace OpenMobile.Controls
                 if (stAngle + sweepAngle > 405) sweepAngle = 405 - stAngle;
                 bg.DrawArc(colorPen, rectg, stAngle, sweepAngle);
 
-                //Draw Digital Value
-                RectangleF digiRect = new RectangleF((float)this.Width / 2F - (float)this.width / 5F, (float)this.height / 1.2F, (float)this.width / 2.5F, (float)this.Height / 9F);
-                RectangleF digiFRect = new RectangleF(this.Width / 2 - this.width / 7, (int)(this.height / 1.18), this.width / 4, this.Height / 12);
-                bg.FillRectangle(new SolidBrush(Color.FromArgb(30, Color.Gray)), digiRect);
-                DisplayNumber(bg, this.currentValue, digiFRect);
-
                 SizeF textSize = bg.MeasureString(this.dialText, this.Font);
                 RectangleF digiFRectText = new RectangleF(this.Width / 2 - textSize.Width / 2, (int)(this.height / 1.5), textSize.Width, textSize.Height);
                 bg.DrawString(dialText, this.Font, new SolidBrush(this.ForeColor), digiFRectText);
                 requiresRedraw = false;
             }
-            g.DrawImage(backgroundImg, rectImg);
+            g.DrawImage(backgroundImg, this.toRegion());
+
+            //Draw Digital Value
+            RectangleF digiRect = new RectangleF(this.Left+(float)this.Width / 2F - (float)this.width / 5F,this.Top+ (float)this.height / 1.2F, (float)this.width / 2.5F, (float)this.Height / 9F);
+            RectangleF digiFRect = new RectangleF(this.Left+this.Width / 2 - this.width / 7,this.Top+ (int)(this.height / 1.18), this.width / 4, this.Height / 12);
+            g.FillRectangle(new SolidBrush(Color.FromArgb(30, Color.Gray)), digiRect);
+            DisplayNumber(g, this.currentValue, digiFRect);
 
             //Paint the needle
             g.SmoothingMode = SmoothingMode.AntiAlias;
