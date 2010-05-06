@@ -53,7 +53,7 @@ namespace OpenMobile
               os = webRequest.GetRequestStream();
               os.Write (bytes, 0, bytes.Length);         //Send it
            }
-           catch (WebException ex)
+           catch (WebException)
            {
                return null;
            }
@@ -73,11 +73,10 @@ namespace OpenMobile
               StreamReader sr = new StreamReader (webResponse.GetResponseStream());
               return sr.ReadToEnd ().Trim ();
            }
-           catch (WebException ex)
+           catch (WebException)
            {
                return null;
            }
-           return null;
         }
 
         private void textBox1_Enter(object sender, EventArgs e)

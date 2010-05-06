@@ -36,7 +36,7 @@ namespace DPGWeather
             return false;
         }
 
-        public static void processItems()
+        public void processItems()
         {
             status = 2;
             try
@@ -45,6 +45,7 @@ namespace DPGWeather
                 if (items.Count < 4)
                 {
                     status = -1;
+                    theHost.execute(eFunction.settingsChanged, "Weather");
                     return;
                 }
                 using (OpenMobile.Data.Weather w = new OpenMobile.Data.Weather())
@@ -66,6 +67,7 @@ namespace DPGWeather
                 status = 1;
                 using (PluginSettings setting = new PluginSettings())
                     setting.setSetting("Plugins.DPGWeather.LastUpdate", DateTime.Now.ToString());
+                theHost.execute(eFunction.settingsChanged, "Weather");
             }
             catch (Exception) { status = -1; }
         }
@@ -212,7 +214,10 @@ namespace DPGWeather
                 using (PluginSettings setting = new PluginSettings())
                 {
                     if ((DateTime.Now - lastUpdated) < TimeSpan.FromMinutes(30))
+                    {
+                        status = 1;
                         return false;
+                    }
                 }
                 status = 0;
                 updateLocation = arg;
@@ -279,9 +284,10 @@ namespace DPGWeather
         {
             throw new NotImplementedException();
         }
-
+        IPluginHost theHost;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
+            theHost = host;
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
             host.OnPowerChange += new PowerEvent(host_OnPowerChange);
             return OpenMobile.eLoadStatus.LoadSuccessful;

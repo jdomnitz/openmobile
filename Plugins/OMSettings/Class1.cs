@@ -37,6 +37,7 @@ namespace OMSettings
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
+            host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
             manager = new ScreenManager(host.ScreenCount);
             #region menu
             OMPanel main = new OMPanel("Main");
@@ -300,15 +301,54 @@ namespace OMSettings
             location.OnClick += new userInteraction(location_OnClick);
             OMLabel explanation = new OMLabel(525,230,450,30);
             explanation.Text = "Postcode, city and state, etc.";
+            OMList providers = new OMList(275, 280, 650, 240);
+            providers.ListStyle = eListStyle.MultiList;
+            providers.Background = Color.Transparent;
+            providers.ItemColor1 = Color.Transparent;
+            providers.SelectedItemColor1 = Color.Blue;
+            providers.HighlightColor = Color.White;
+            providers.ListItemOffset = 80;
             data.addControl(Save4);
             data.addControl(Cancel);
             data.addControl(Heading3);
             data.addControl(ldesc);
             data.addControl(location);
             data.addControl(explanation);
+            data.addControl(providers);
             manager.loadPanel(data);
             #endregion
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.settingsChanged)
+                loadProviders();
+        }
+
+        private void loadProviders()
+        {
+            object o;
+            theHost.getData(eGetData.GetPlugins, "", out o);
+            if (o == null)
+                return;
+            List<IBasePlugin> plugins = (List<IBasePlugin>)o;
+            plugins=plugins.FindAll(p => typeof(IDataProvider).IsInstanceOfType(p));
+            OMList list = (OMList)manager[0, "data"][6];
+            Image img = null;
+            list.Clear();
+            OMListItem.subItemFormat format = new OMListItem.subItemFormat();
+            format.color = Color.FromArgb(140, Color.White);
+            foreach (IDataProvider d in plugins)
+            {
+                if (d.updaterStatus() == 1)
+                    img = theHost.getSkinImage("Checkmark").image;
+                if (d.updaterStatus() == -1)
+                    img = theHost.getSkinImage("Error").image;
+                if (d.updaterStatus() == 0)
+                    img = theHost.getSkinImage("Waiting").image;
+                list.Add(new OMListItem(d.pluginDescription, d.lastUpdated.ToString(),img,format));   
+            }
         }
 
         void menu_OnClick(OMControl sender, int screen)
@@ -337,6 +377,7 @@ namespace OMSettings
                 case 2:
                     using (PluginSettings s = new PluginSettings())
                         ((OMTextBox)manager[screen, "data"][4]).Text = s.getSetting("Data.DefaultLocation");
+                    loadProviders();
                     theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
                     theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "data");
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
@@ -470,6 +511,8 @@ namespace OMSettings
 
         public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)
         {
+            if (manager == null)
+                return null;
             switch (name)
             {
                 case "":

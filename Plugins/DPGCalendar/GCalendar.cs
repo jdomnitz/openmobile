@@ -27,6 +27,8 @@ using System.Xml;
 using OpenMobile;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
+using System.Reflection;
+using System.Threading;
 
 namespace DPGCalendar
 {
@@ -37,6 +39,7 @@ namespace DPGCalendar
 
         void getCal()
         {
+            Thread.Sleep(5000);
             status = 2;
             System.Net.WebRequest req = System.Net.HttpWebRequest.Create("https://www.google.com/accounts/ClientLogin");
             req.ContentType = "application/x-www-form-urlencoded";
@@ -49,12 +52,14 @@ namespace DPGCalendar
             if (email == "")
             {
                 status = -1;
+                theHost.execute(eFunction.settingsChanged, "Calendar");
                 return;
             }
             pass = Personal.getPassword(Personal.ePassword.google, "GOOGLEPW");
             if (pass == "")
             {
                 status = -1;
+                theHost.execute(eFunction.settingsChanged, "Calendar");
                 return;
             }
 
@@ -76,6 +81,7 @@ namespace DPGCalendar
             catch (System.Net.WebException)
             {
                 status = -1;
+                theHost.execute(eFunction.settingsChanged, "Calendar");
                 return;
             }
             StreamReader readStream = new StreamReader(responseStream, Encoding.UTF8);
@@ -84,15 +90,26 @@ namespace DPGCalendar
             lastModified = lastUpdated.ToUniversalTime().ToString("s");
             if (lastModified == "")
                 lastModified = DateTime.MinValue.Date.ToString("s");
-            HttpWebRequest req2 = (HttpWebRequest)HttpWebRequest.Create("http://www.google.com/calendar/feeds/" + email + "/private/full?updated-min="+lastModified);
+            HttpWebRequest req2;
+            if (lastUpdated==DateTime.MinValue)
+                req2 = (HttpWebRequest)HttpWebRequest.Create("http://www.google.com/calendar/feeds/" + email + "/private/full");
+            else
+                req2 = (HttpWebRequest)HttpWebRequest.Create("http://www.google.com/calendar/feeds/" + email + "/private/full?updated-min=" + lastModified);
+
             req2.ContentType = "application/x-www-form-urlencoded";
             req2.Method = "GET";
             req2.Headers[HttpRequestHeader.Authorization] = "GoogleLogin " + result.Split('\n')[2].Replace("Auth=", "auth=");
-
             req2.AllowAutoRedirect = false;
-
-            response = req2.GetResponse();
-
+            try
+            {
+                response = req2.GetResponse();
+            }
+            catch (System.Net.WebException e)
+            {
+                status = -1;
+                theHost.execute(eFunction.settingsChanged, "Calendar");
+                return;
+            }
             req2 = (HttpWebRequest)HttpWebRequest.Create(response.Headers.Get("Location"));
             req2.ContentType = "application/x-www-form-urlencoded";
             req2.Method = "GET";
@@ -108,6 +125,7 @@ namespace DPGCalendar
             catch (System.Net.WebException)
             {
                 status = -1;
+                theHost.execute(eFunction.settingsChanged, "Calendar");
                 return;
             }
             XmlDocument reader = new XmlDocument();
@@ -171,6 +189,7 @@ namespace DPGCalendar
             using (PluginSettings s = new PluginSettings())
                 s.setSetting("Plugins.DPGCalendar.LastUpdate", DateTime.Now.ToUniversalTime().ToString("s"));
             status = 1;
+            theHost.execute(eFunction.settingsChanged, "Calendar");
         }
 
         public DateTime lastUpdated
@@ -194,14 +213,43 @@ namespace DPGCalendar
             return new PointF(float.Parse(part[0]), float.Parse(part[1]));
         }
 
+        public static bool SetAllowUnsafeHeaderParsing20()
+        {
+            //Get the assembly that contains the internal class
+            Assembly aNetAssembly = Assembly.GetAssembly(typeof(System.Net.Configuration.SettingsSection));
+            if (aNetAssembly != null)
+            {
+                //Use the assembly in order to get the internal type for the internal class
+                Type aSettingsType = aNetAssembly.GetType("System.Net.Configuration.SettingsSectionInternal");
+                if (aSettingsType != null)
+                {
+                    //Use the internal static property to get an instance of the internal settings class.
+                    //If the static instance isn't created allready the property will create it for us.
+                    object anInstance = aSettingsType.InvokeMember("Section",
+                      BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic, null, null, new object[] { });
+
+                    if (anInstance != null)
+                    {
+                        //Locate the private bool field that tells the framework is unsafe header parsing should be allowed or not
+                        FieldInfo aUseUnsafeHeaderParsing = aSettingsType.GetField("useUnsafeHeaderParsing", BindingFlags.NonPublic | BindingFlags.Instance);
+                        if (aUseUnsafeHeaderParsing != null)
+                        {
+                            aUseUnsafeHeaderParsing.SetValue(anInstance, true);
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         #region IDataProvider Members
 
         public bool refreshData()
         {
             if (OpenMobile.Net.Network.IsAvailable == true)
             {
-                string dat = "";
-                if ((DateTime.Now - lastUpdated).Minutes > 30)
+                if ((DateTime.Now - lastUpdated) > TimeSpan.FromMinutes(30))
                 {
                     status = 0;
                     OpenMobile.Threading.TaskManager.QueueTask(getCal, OpenMobile.ePriority.MediumHigh);
@@ -209,6 +257,7 @@ namespace DPGCalendar
                 }
                 else
                 {
+                    status = 1;
                     return false;
                 }
             }
@@ -277,12 +326,14 @@ namespace DPGCalendar
         {
             throw new NotImplementedException();
         }
-
+        IPluginHost theHost;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             dataPath = host.DataPath;
+            theHost = host;
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
             host.OnPowerChange += new PowerEvent(host_OnPowerChange);
+            bool b=SetAllowUnsafeHeaderParsing20();
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 

@@ -20,7 +20,7 @@
 *********************************************************************************/
 
 using System;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Text;
@@ -82,9 +82,9 @@ namespace OpenMobile.Data
             throw new NotImplementedException(); //ToDo
         }
 
-        private SQLiteConnection asyncCon;
-        private SQLiteCommand asyncCmd;
-        private SQLiteDataReader asyncReader;
+        private SqliteConnection asyncCon;
+        private SqliteCommand asyncCmd;
+        private SqliteDataReader asyncReader;
         /// <summary>
         /// Begins an asynchronous connection to the Message database
         /// </summary>
@@ -92,7 +92,7 @@ namespace OpenMobile.Data
         /// <returns>Was the call successful</returns>
         public bool beginRead(DateTime start)
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
+            asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
             asyncCon.Open();
             asyncCmd = asyncCon.CreateCommand();
             asyncCmd.CommandText = "SELECT * FROM Calendar";
@@ -139,7 +139,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool beginWrite()
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
             asyncCmd = asyncCon.CreateCommand();
             return true;

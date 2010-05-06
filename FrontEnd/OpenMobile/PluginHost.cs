@@ -480,7 +480,7 @@ namespace OpenMobile
             }
             bool[] disabled;
             Stack<historyItem>[] items;
-
+            historyItem[] currentItem;
             public void setDisabled(int screen, bool isDisabled)
             {
                 disabled[screen] = isDisabled;
@@ -492,6 +492,7 @@ namespace OpenMobile
             public historyCollection(int count)
             {
                 items = new Stack<historyItem>[count];
+                currentItem = new historyItem[count];
                 disabled=new bool[count];
                 for (int i = 0; i < count; i++)
                     items[i] = new Stack<historyItem>(10);
@@ -507,22 +508,23 @@ namespace OpenMobile
                         tmp.Push(items[screen].Pop());
                     }
                 }
-                items[screen].Push(new historyItem(pluginName,panelName,forgetMe));
+                if ((currentItem[screen].pluginName!=null)&&(currentItem[screen].forgettable==false))
+                    items[screen].Push(currentItem[screen]);
+                currentItem[screen] = new historyItem(pluginName, panelName, forgetMe);
+            }
+            public historyItem CurrentItem(int screen)
+            {
+                return currentItem[screen];
             }
             public historyItem Peek(int screen)
             {
                 return items[screen].Peek();
             }
-            public historyItem DoublePeek(int screen)
-            {
-                if (items[screen].Count <= 1)
-                    return new historyItem();
-                historyItem[] ret=new historyItem[1];
-                return items[screen].ToArray()[1];
-            }
             public historyItem Dequeue(int screen)
             {
-                return items[screen].Pop();
+                historyItem tmp = currentItem[screen];
+                currentItem[screen] = items[screen].Pop();
+                return tmp;
             }
         }
         public int ScreenCount
@@ -573,11 +575,11 @@ namespace OpenMobile
                     return execute(eFunction.ExecuteTransition,arg,"Crossfade");
                 case eFunction.TransitionToPanel:
                     if (int.TryParse(arg, out ret))
-                        return execute(eFunction.TransitionToPanel, arg, history.Peek(ret).pluginName, "");
+                        return execute(eFunction.TransitionToPanel, arg, history.CurrentItem(ret).pluginName, "");
                     return false;
                 case eFunction.TransitionFromPanel:
                     if (int.TryParse(arg, out ret))
-                        return execute(eFunction.TransitionFromPanel, arg, history.Peek(ret).pluginName, history.Peek(ret).panelName);
+                        return execute(eFunction.TransitionFromPanel, arg, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
                     return false;
                 case eFunction.goBack:
                     return execute(eFunction.goBack, arg, "SlideRight");
@@ -799,6 +801,9 @@ namespace OpenMobile
                         return true;
                     }
                     return false;
+                case eFunction.settingsChanged:
+                    raiseSystemEvent(eFunction.settingsChanged, arg, "", "");
+                    return true;
             }
             return false;
         }
@@ -843,27 +848,21 @@ namespace OpenMobile
                             raiseSystemEvent(eFunction.goBack, arg1, "", "");
                             return false;
                         }
-                        if (history.DoublePeek(ret).pluginName == null)
+                        if (history.Peek(ret).pluginName == null)
                             return false;
-                        execute(eFunction.TransitionFromPanel, arg1, history.Peek(ret).pluginName, history.Peek(ret).panelName);
-                        raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.Peek(ret).pluginName, history.Peek(ret).panelName);
-                        historyCollection.historyItem tmp = history.DoublePeek(ret);
-                        if (tmp.forgettable == true)
-                        {
+                        execute(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
+                        raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
+                        if (history.Peek(ret).Equals(history.CurrentItem(ret)))
                             history.Dequeue(ret);
-                            if ((tmp.pluginName == history.Peek(ret).pluginName) && (tmp.panelName == history.Peek(ret).panelName))
-                                history.Dequeue(ret);
-                            return execute(eFunction.goBack, arg1, arg2);
-                        }
                         //This part is done manually to prevent adding it to the history
-                        OMPanel k = getPanelByName(history.DoublePeek(ret).pluginName, history.DoublePeek(ret).panelName, ret);
+                        OMPanel k = getPanelByName(history.Peek(ret).pluginName, history.Peek(ret).panelName, ret);
                         if (k == null)
                             return false;
                         lock (Core.RenderingWindows[ret])
                         {
                             Core.RenderingWindows[ret].transitionInPanel(k);
                         }
-                        raiseSystemEvent(eFunction.TransitionToPanel, arg1, history.DoublePeek(ret).pluginName, history.DoublePeek(ret).panelName);
+                        raiseSystemEvent(eFunction.TransitionToPanel, arg1, history.Peek(ret).pluginName, history.Peek(ret).panelName);
                         history.Dequeue(ret);
                         execute(eFunction.ExecuteTransition, arg1,arg2);
                         return true;
@@ -879,6 +878,8 @@ namespace OpenMobile
                     {
                         if (currentMediaPlayer[ret] != null)
                             return false;
+                        if (currentTunedContent[ret] != null)
+                            execute(eFunction.unloadTunedContent, arg1);
                         IAVPlayer player = (IAVPlayer)Core.pluginCollection.FindAll(i => typeof(IAVPlayer).IsInstanceOfType(i)).Find(i => i.pluginName == arg2);
                         if (player == null)
                             return false;
@@ -895,6 +896,8 @@ namespace OpenMobile
                     {
                         if (currentTunedContent[ret] != null)
                             return false;
+                        if (currentMediaPlayer[ret] != null)
+                            execute(eFunction.unloadAVPlayer, arg1);
                         ITunedContent player = (ITunedContent)Core.pluginCollection.FindAll(i => typeof(ITunedContent).IsInstanceOfType(i)).Find(i => i.pluginName == arg2);
                         if (player == null)
                             return false;
@@ -902,7 +905,11 @@ namespace OpenMobile
                         if (Array.Exists<ITunedContent>(currentTunedContent, a => a == player) == false)
                             player.OnMediaEvent += raiseMediaEvent;
                         currentTunedContent[ret] = player;
-                        currentTunedContent[ret].setPowerState(ret, true);
+                        if (!currentTunedContent[ret].setPowerState(ret, true))
+                        {
+                            execute(eFunction.unloadTunedContent, arg1);
+                            return false;
+                        }
                         raiseSystemEvent(eFunction.loadTunedContent, arg1, arg2, "");
                         return true;
                     }
@@ -1012,7 +1019,7 @@ namespace OpenMobile
                 case eFunction.gesture:
                     if (int.TryParse(arg1, out ret) == true)
                     {
-                        raiseSystemEvent(eFunction.gesture, arg1, arg2, history.Peek(ret).pluginName);
+                        raiseSystemEvent(eFunction.gesture, arg1, arg2, history.CurrentItem(ret).pluginName);
                         return true;
                     }
                     return false;
@@ -1111,7 +1118,6 @@ namespace OpenMobile
                 case eFunction.refreshData:
                     return ((IDataProvider)getPluginByName(arg1)).refreshData(arg2,arg3);
                 case eFunction.TransitionToPanel:
-                    int tp;
                     if (int.TryParse(arg1, out ret) == true)
                     {
                         panel = getPanelByName(arg2, arg3, ret);
@@ -1424,7 +1430,10 @@ namespace OpenMobile
                     if (int.TryParse(param, out ret) == true)
                     {
                         if (currentMediaPlayer[ret] == null)
-                            return;
+                            if (currentTunedContent[ret] == null)
+                                return;
+                            else
+                                data= currentTunedContent[ret].playbackPosition;
                         else
                             data = currentMediaPlayer[ret].getCurrentPosition(ret);
                     }

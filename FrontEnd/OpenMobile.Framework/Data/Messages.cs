@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 using System.Text;
 using System.Windows.Forms;
 using OpenMobile.helperFunctions;
@@ -106,11 +106,11 @@ namespace OpenMobile.Data
         /// <returns>Number of Messages loaded</returns>
         public static int readMessages()
         {
-            SQLiteConnection con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
-            SQLiteCommand cmd = con.CreateCommand();
+            SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
+            SqliteCommand cmd = con.CreateCommand();
             cmd.CommandText = "SELECT * FROM Message";
             con.Open();
-            SQLiteDataReader reader = cmd.ExecuteReader();
+            SqliteDataReader reader = cmd.ExecuteReader();
             Collections.Messages.Clear();
             while (reader.Read())
             {
@@ -129,9 +129,9 @@ namespace OpenMobile.Data
             return Collections.Messages.Count;
         }
 
-        static SQLiteConnection asyncCon;
-        static SQLiteCommand asyncCmd;
-        static SQLiteDataReader asyncReader;
+        static SqliteConnection asyncCon;
+        static SqliteCommand asyncCmd;
+        static SqliteDataReader asyncReader;
 
         /// <summary>
         /// Begins an asynchronous connection to the Message database
@@ -140,7 +140,7 @@ namespace OpenMobile.Data
         public bool beginReadMessages()
         {
             try{
-                asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+                asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
                 asyncCmd = asyncCon.CreateCommand();
                 asyncCmd.CommandText = "SELECT * FROM Message";
                 asyncCon.Open();
@@ -160,7 +160,7 @@ namespace OpenMobile.Data
         {
             try
             {
-                asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+                asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
                 asyncCmd = asyncCon.CreateCommand();
                 asyncCmd.CommandText = "SELECT * FROM Message WHERE ID='"+guid+"'";
                 asyncCon.Open();
@@ -242,7 +242,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool beginWriteMessages()
         {
-            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
             asyncCmd = asyncCon.CreateCommand();
             return true;

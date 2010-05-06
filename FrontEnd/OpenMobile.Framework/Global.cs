@@ -414,6 +414,14 @@ namespace OpenMobile
             this.tag = tag;
             this.subitemFormat = subitemFormat;
         }
+
+        public OMListItem(string text, string subitem, Image img, subItemFormat subitemFormat)//Added by Borte
+        {
+            this.text = text;
+            this.subItem = subitem;
+            this.image = img;
+            this.subitemFormat = subitemFormat;
+        }
     }
     
     
@@ -1266,6 +1274,14 @@ namespace OpenMobile
         /// </summary>
         MMSUrl=16,
         /// <summary>
+        /// Radio
+        /// </summary>
+        Radio=17,
+        /// <summary>
+        /// Internet Radio
+        /// </summary>
+        InternetRadio=18,
+        /// <summary>
         /// Other
         /// </summary>
         Other	=	20
@@ -1480,11 +1496,11 @@ namespace OpenMobile
         /// <summary>
         /// List of current available stations
         /// </summary>
-        public string[] stationList;
+        public stationInfo[] stationList;
         /// <summary>
         /// Info for currently tuned station
         /// </summary>
-        public stationInfo station;
+        public stationInfo currentStation;
     }
     public enum eTunedContentStatus
     {
@@ -1988,11 +2004,15 @@ namespace OpenMobile
         /// <summary>
         /// Rating 0-5.  -1 for not set.
         /// </summary>
-        public int Rating;
+        public int Rating=-1;
         /// <summary>
         /// Optional - The cover art for the selected media
         /// </summary>
         public Image coverArt;
+        /// <summary>
+        /// Source Type
+        /// </summary>
+        public eMediaType Type;
         /// <summary>
         /// Create a new mediaInfo object
         /// </summary>
@@ -2040,6 +2060,12 @@ namespace OpenMobile
         /// Bitrate (bits/second)
         /// </summary>
         int Bitrate;
+        public stationInfo() { }
+        public stationInfo(string name, string id)
+        {
+            stationName = name;
+            stationID = id;
+        }
     }
 
     /// <summary>
@@ -2084,6 +2110,10 @@ namespace OpenMobile
         /// Satellite TV
         /// </summary>
         SatelliteTV=8,
+        /// <summary>
+        /// Internet Radio
+        /// </summary>
+        InternetRadio=9,
         /// <summary>
         /// Other
         /// </summary>

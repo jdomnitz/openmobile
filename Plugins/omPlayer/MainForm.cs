@@ -55,9 +55,9 @@ namespace OMPlayer
     }
     public void Dispose()
     {
-        fadeout();
         if (player != null)
         {
+            fadeout();
             for (int i = 0; i < player.Length; i++)
             {
                 if (player[i] != null)
@@ -540,10 +540,12 @@ namespace OMPlayer
                 if (nowPlaying == null)
                     nowPlaying = new mediaInfo();
                 nowPlaying.coverArt = theHost.getSkinImage("Discs|AudioCD").image;
+                nowPlaying.Type = eMediaType.AudioCD;
             }
             else
             {
                 nowPlaying = TagReader.getInfo(url);
+                nowPlaying.Type = eMediaType.Local;
                 if (nowPlaying == null)
                     nowPlaying = new mediaInfo(url);
                 if (nowPlaying.coverArt == null)

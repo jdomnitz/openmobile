@@ -43,7 +43,7 @@ namespace OpenMobile
                 Text += "Borte - Developer\r\n";
                 Text += "malcom2073 - Developer\r\n";
                 Text += "\r\nSupporting Projects:\r\n";
-                Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, SQLite, Aqua Gauge and CoreAudio";
+                Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, Sqlite, Aqua Gauge and CoreAudio";
                 return Text;
             }
         }
