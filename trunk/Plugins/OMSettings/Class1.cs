@@ -58,7 +58,7 @@ namespace OMSettings
             menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords", format));
             menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers", format));
             menu.Add(new OMListItem("Multi-Zone Settings", "Displays, Sound Cards and other zone specific settings", format));
-            menu.Add(new OMListItem("Hardware Settings", "Hardware devices like the Fusion Brain, OBDII readers and game pads", format));
+            menu.Add(new OMListItem("Plugin Settings", "Settings for all low level plugins", format));
             menu.OnClick += new userInteraction(menu_OnClick);
             main.addControl(menu);
             manager.loadPanel(main);
@@ -252,31 +252,8 @@ namespace OMSettings
             manager.loadPanel(personal);
             #endregion
             #region general
-            OMPanel general = new OMPanel("general");
-            OMButton Save3 = new OMButton(13, 136, 200, 110);
-            Save3.Image = theHost.getSkinImage("Full");
-            Save3.FocusImage = theHost.getSkinImage("Full.Highlighted");
-            Save3.Text = "Save";
-            Save3.Name = "Media.Save";
-            Save3.OnClick += new userInteraction(Save3_OnClick);
-            Save3.Transition = eButtonTransition.None;
-            OMLabel Heading2 = new OMLabel(300, 80, 600, 100);
-            Heading2.Font = new Font("Microsoft Sans Serif", 36F);
-            Heading2.Text = "General Settings";
-            Label.Name = "Label";
-            OMCheckbox cursor = new OMCheckbox(220, 180, 600, 50);
-            cursor.Text = "Hide mouse cursor";
-            cursor.Font = new Font("Microsoft Sans Serif", 24F);
-            cursor.OutlineColor = Color.Red;
-            OMCheckbox minimal = new OMCheckbox(220, 250, 600, 50);
-            minimal.Text = "Enable Low Performance Graphics";
-            minimal.Font = cursor.Font;
-            minimal.OutlineColor = Color.Red;
-            general.addControl(Save3);
-            general.addControl(Cancel);
-            general.addControl(Heading2);
-            general.addControl(cursor);
-            general.addControl(minimal);
+            LayoutManager generalLayout = new LayoutManager();
+            OMPanel general = generalLayout.layout(theHost, BuiltInComponents.GlobalSettings(host));
             manager.loadPanel(general);
             #endregion
             #region data
@@ -317,7 +294,47 @@ namespace OMSettings
             data.addControl(providers);
             manager.loadPanel(data);
             #endregion
+            #region Hardware
+            OMPanel hardware = new OMPanel("Hardware");
+            hardware.BackgroundColor1 = Color.Black;
+            hardware.BackgroundType = backgroundStyle.SolidColor;
+            OMList lsthardware = new OMList(10, 100, 980, 433);
+            lsthardware.ListStyle = eListStyle.MultiList;
+            lsthardware.Background = Color.Silver;
+            lsthardware.ItemColor1 = Color.Black;
+            lsthardware.Font = new Font(FontFamily.GenericSansSerif, 30F);
+            lsthardware.Color = Color.White;
+            lsthardware.HighlightColor = Color.White;
+            lsthardware.SelectedItemColor1 = Color.DarkBlue;
+            lsthardware.OnClick += new userInteraction(lsthardware_OnClick);
+            hardware.addControl(lsthardware);
+
+            List<IBasePlugin> plugins;
+            theHost.getData(eGetData.GetPlugins, "", out o);
+            plugins = (List < IBasePlugin >)o;
+            plugins=plugins.FindAll(p => typeof(IPlayer).IsInstanceOfType(p));
+            foreach (IBasePlugin b in plugins)
+            {
+                LayoutManager lm = new LayoutManager();
+                OMPanel panel = lm.layout(theHost, ((IPlayer)b).loadSettings());
+                if (panel != null)
+                {
+                    lsthardware.Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
+                    manager.loadPanel(panel);
+                }
+            }
+            manager.loadPanel(hardware);
+            #endregion
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void lsthardware_OnClick(OMControl sender, int screen)
+        {
+            OMList lst=(OMList)sender;
+            if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"OMSettings",lst.SelectedItem.text)==false)
+                return;
+            theHost.execute(eFunction.TransitionFromPanel,screen.ToString(),"OMSettings","Hardware");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"SlideLeft");
         }
 
         void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
@@ -356,13 +373,13 @@ namespace OMSettings
             switch (((OMList)sender).SelectedIndex)
             {
                 case 0:
-                    using (PluginSettings s = new PluginSettings())
-                    {
-                        ((OMCheckbox)manager[screen, "general"][3]).Checked = (s.getSetting("UI.HideCursor") == "True");
-                        ((OMCheckbox)manager[screen, "general"][4]).Checked = (s.getSetting("UI.MinGraphics") == "True");
-                    }
+                    //using (PluginSettings s = new PluginSettings())
+                    //{
+                    //    ((OMCheckbox)manager[screen, "general"][3]).Checked = (s.getSetting("UI.HideCursor") == "True");
+                    //    ((OMCheckbox)manager[screen, "general"][4]).Checked = (s.getSetting("UI.MinGraphics") == "True");
+                    //}
                     theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "general");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "General Settings");
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
                     break;
                 case 1:
@@ -387,6 +404,11 @@ namespace OMSettings
                     theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "MultiZone");
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
                     break;
+                case 4:
+                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "Hardware");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+                    break;
             }
         }
 
@@ -406,34 +428,6 @@ namespace OMSettings
                 settings.setSetting("Plugins.DPWeather.LastUpdate", DateTime.MinValue.ToString());
             }
             theHost.execute(eFunction.refreshData);
-            theHost.execute(eFunction.goBack, screen.ToString());
-        }
-
-        void Save3_OnClick(OMControl sender, int screen)
-        {
-            using (PluginSettings settings = new PluginSettings())
-            {
-                OMCheckbox chk=((OMCheckbox)manager[screen, "general"][3]);
-                if ((settings.getSetting("UI.HideCursor") == "") && (chk.Checked == true))
-                    theHost.sendMessage("RenderingWindow", "OMSettings", "ToggleCursor");
-                if (((settings.getSetting("UI.HideCursor")=="True")&&(chk.Checked==false))||((settings.getSetting("UI.HideCursor")=="False")&&(chk.Checked==true)))
-                    theHost.sendMessage("RenderingWindow", "OMSettings", "ToggleCursor");
-                if (chk.Checked == true)
-                    settings.setSetting("UI.HideCursor", "True");
-                else
-                    settings.setSetting("UI.HideCursor", "False");
-                chk = ((OMCheckbox)manager[screen, "general"][4]);
-                if (chk.Checked == true)
-                {
-                    theHost.GraphicsLevel = eGraphicsLevel.Minimal;
-                    settings.setSetting("UI.MinGraphics", "True");
-                }
-                else
-                {
-                    theHost.GraphicsLevel = eGraphicsLevel.Standard;
-                    settings.setSetting("UI.MinGraphics", "False");
-                }
-            }
             theHost.execute(eFunction.goBack, screen.ToString());
         }
 

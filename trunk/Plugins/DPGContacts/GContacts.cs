@@ -32,6 +32,10 @@ namespace DPGContacts
     public sealed class GContacts:IDataProvider
     {
         private static string dataPath;
+        public Settings loadSettings()
+        {
+            return null;
+        }
         void getContacts()
         {
             status = 2;

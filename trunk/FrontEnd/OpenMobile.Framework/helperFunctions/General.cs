@@ -53,7 +53,6 @@ namespace OpenMobile.helperFunctions
             /// </summary>
             /// <param name="screen"></param>
             /// <param name="pluginname"></param>
-            /// <param name="settingsPanel"></param>
             /// <returns></returns>
             public string getText(int screen, string pluginname)
             {
@@ -87,7 +86,6 @@ namespace OpenMobile.helperFunctions
             /// </summary>
             /// <param name="screen"></param>
             /// <param name="pluginname"></param>
-            /// <param name="settingsPanel"></param>
             /// <returns></returns>
             public string getNumber(int screen, string pluginname)
             {

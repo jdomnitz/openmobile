@@ -224,7 +224,8 @@ namespace OpenMobile.Controls
                     f.Trimming = StringTrimming.EllipsisCharacter;
                 else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
                     f.Trimming = StringTrimming.Word;
-                g.DrawString((this.flags&textboxFlags.Password)==textboxFlags.Password ? new String('*',text.Length): text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * Color.A), this.Color)), new RectangleF(this.Left, this.Top, this.Width + 5, this.Height),f);
+                if (text!=null)
+                    g.DrawString((this.flags&textboxFlags.Password)==textboxFlags.Password ? new String('*',text.Length): text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * Color.A), this.Color)), new RectangleF(this.Left, this.Top, this.Width + 5, this.Height),f);
             }
         }
     }

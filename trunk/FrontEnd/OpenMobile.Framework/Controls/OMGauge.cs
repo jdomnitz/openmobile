@@ -1,5 +1,4 @@
-﻿using System;
-//****************************************************************************************
+﻿//****************************************************************************************
 // Aqua Gauge Control - A Windows User Control.
 // Author  : Ambalavanar Thirugnanam
 // Date    : 24th August 2007
@@ -8,6 +7,7 @@
 // [Please do no remove this header when using this control in your application.]
 // Modified for use in OpenMobile 1/25/10
 //***************************************************************************************
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;

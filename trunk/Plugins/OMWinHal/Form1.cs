@@ -112,8 +112,11 @@ namespace OMHal
                 case "40": //Set Monitor Brightness
                     Specific.SetBrightness(int.Parse(arg2));
                     break;
-                case "45": //Close Program
+                case "44": //Close Program
                     Environment.Exit(0);
+                    break;
+                case "45":
+                    Application.SetSuspendState(PowerState.Hibernate, false, false);
                     break;
                 case "46": //Shutdown
                     ProcessStartInfo info = new ProcessStartInfo("shutdown", "/s /t 0");
@@ -124,6 +127,9 @@ namespace OMHal
                     ProcessStartInfo info2 = new ProcessStartInfo("shutdown", "/r /t 0");
                     info2.WindowStyle = ProcessWindowStyle.Hidden;
                     Process.Start(info2);
+                    break;
+                case "48":
+                    Application.SetSuspendState(PowerState.Suspend, false, false);
                     break;
             }
         }

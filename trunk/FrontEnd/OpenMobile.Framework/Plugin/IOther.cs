@@ -25,13 +25,5 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Plugins that do not fall under another plugin category
     /// </summary>
-    public interface IOther:IBasePlugin
-    {
-        /// <summary>
-        /// Returns the settings panel for the UI to load (if implemented)
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
-        Settings loadSettings();
-    }
+    public interface IOther:IBasePlugin{}
 }

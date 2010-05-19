@@ -64,6 +64,12 @@ namespace OpenMobile.Data
             /// Other Password
             /// </summary>
             internal string otherPassword;
+
+            internal string reserved2;
+
+            internal string reserved3;
+
+            internal string pandoraPassword;
             /// <summary>
             /// Pop Server
             /// </summary>
@@ -97,6 +103,15 @@ namespace OpenMobile.Data
                 info.otherPassword = reader["otherPassword"].ToString();
                 info.popServer = reader["popServer"].ToString();
                 info.smtpServer = reader["smtpServer"].ToString();
+                if (reader.GetOrdinal("reserved2") == -1)
+                {
+                    reader.Close();
+                    con.Close();
+                    return updateTable();
+                }
+                info.reserved2 = reader["reserved2"].ToString();
+                info.reserved3 = reader["reserved3"].ToString();
+                info.pandoraPassword = reader["pandoraPassword"].ToString();
                 Collections.personalInfo = info;
                 reader.Close();
                 con.Close();
@@ -108,6 +123,17 @@ namespace OpenMobile.Data
                 con.Close();
                 return false;
             }
+        }
+
+        private static bool updateTable()
+        {
+            SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Pooling=True;Max Pool Size=6;");
+            con.Open();
+            SqliteCommand cmd = new SqliteCommand(con);
+            cmd.CommandText = "BEGIN; ALTER TABLE Personal ADD COLUMN pandoraPassword TEXT;ALTER TABLE Personal ADD COLUMN reserved2 TEXT;ALTER TABLE Personal ADD COLUMN reserved3 TEXT; END;";
+            cmd.ExecuteNonQuery();
+            con.Close();
+            return readInfo();
         }
         /// <summary>
         /// Password to retrieve
@@ -137,7 +163,7 @@ namespace OpenMobile.Data
             /// <summary>
             /// Reserved
             /// </summary>
-            reserved4
+            Pandora
         };
         /// <summary>
         /// Retrieve a password from the encrypted database
@@ -157,6 +183,8 @@ namespace OpenMobile.Data
                     return Encryption.AESDecrypt(Collections.personalInfo.googlePassword, appKey + Environment.UserName);
                 case ePassword.reserved1:
                     return Encryption.AESDecrypt(Collections.personalInfo.otherPassword, appKey + Environment.UserName);
+                case ePassword.Pandora:
+                    return Encryption.AESDecrypt(Collections.personalInfo.pandoraPassword, appKey + Environment.UserName);
                 default:
                     return "NotYetImplemented!";
             }
@@ -181,6 +209,9 @@ namespace OpenMobile.Data
                 case ePassword.reserved1:
                     Collections.personalInfo.otherPassword = Encryption.AESEncrypt(password, appKey + Environment.UserName);
                     return;
+                case ePassword.Pandora:
+                    Collections.personalInfo.pandoraPassword = Encryption.AESEncrypt(password, appKey + Environment.UserName);
+                    return;
                 default:
                     throw new NotImplementedException();
             }
@@ -195,7 +226,7 @@ namespace OpenMobile.Data
             SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Pooling=True;Max Pool Size=6;FailIfMissing=True;");
             con.Open();
             SqliteCommand cmd = con.CreateCommand();
-            StringBuilder query = new StringBuilder("DELETE FROM Personal;INSERT INTO Personal ('connectedServicesID','emailAddress','emailPassword','emailUsername','googlePassword','googleUsername','otherPassword','popServer','smtpServer')VALUES('");
+            StringBuilder query = new StringBuilder("DELETE FROM Personal;INSERT INTO Personal ('connectedServicesID','emailAddress','emailPassword','emailUsername','googlePassword','googleUsername','otherPassword','reserved2','reserved3','pandoraPassword','popServer','smtpServer')VALUES('");
             {
                 query.Append(info.connectedServices);
                 query.Append("','");
@@ -210,6 +241,12 @@ namespace OpenMobile.Data
                 query.Append(info.googleUsername);
                 query.Append("','");
                 query.Append(info.otherPassword);
+                query.Append("','");
+                query.Append(info.reserved2);
+                query.Append("','");
+                query.Append(info.reserved3);
+                query.Append("','");
+                query.Append(info.pandoraPassword);
                 query.Append("','");
                 query.Append(info.popServer);
                 query.Append("','");

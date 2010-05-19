@@ -45,13 +45,13 @@ namespace OpenMobile.Media
             {
                 f = TagLib.File.Create(filename);
             }
-            catch (UnsupportedFormatException e)
+            catch (UnsupportedFormatException)
             {
                 mediaInfo i = new mediaInfo(filename);
                 i.Name = Path.GetFileNameWithoutExtension(filename);
                 return i;
             }
-            catch (Exception e) {
+            catch (Exception) {
                 return null;
             }
             Tag t = f.Tag;

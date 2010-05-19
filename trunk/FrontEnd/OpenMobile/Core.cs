@@ -28,6 +28,7 @@ using System.Windows.Forms;
 using Microsoft.Win32;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
+using OpenMobile.Framework;
 
 namespace OpenMobile
 {
@@ -296,8 +297,9 @@ namespace OpenMobile
                 if (settings.getSetting("UI.HideCursor") == "True")
                     for (int i = 0; i < RenderingWindows.Count; i++)
                         RenderingWindows[i].hideCursor();
-            if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
-                theHost.SystemEvents_PowerModeChanged(null, new PowerModeChangedEventArgs(PowerModes.StatusChange));
+            if (!OSSpecific.IsMono())
+                if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
+                    theHost.SystemEvents_PowerModeChanged(null, new PowerModeChangedEventArgs(PowerModes.StatusChange));
             foreach (DriveInfo drive in DriveInfo.GetDrives())
                 if (drive.DriveType == DriveType.CDRom)
                     if (drive.IsReady == true)

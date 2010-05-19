@@ -26,23 +26,18 @@
 using System;
 using System.Collections.Generic;
 
-namespace TagLib.Rmf
+namespace TagLib.XM
 {
 
     /// <summary>
     ///    This class extends <see cref="Tag" /> to provide support for
-    ///    reading tags stored in the RMF Metadata format.
+    ///    reading tags stored in XM files.
     /// </summary>
     public class Tag : TagLib.Tag
     {
 
 
         private string title;
-        private string copyright;
-        private string comment;
-        private string description;
-        private uint duration;
-        private uint bitrate;
 
         #region Constructors
 
@@ -106,74 +101,9 @@ namespace TagLib.Rmf
                 throw new ArgumentNullException("data");
 
             Clear();
-            Parse(data);
+            title=data.Mid(17, 20).ToString().Trim();
         }
 
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        ///    Populates the current instance by parsing the contents of
-        ///    a raw AudibleMetadata tag.
-        /// </summary>
-        /// <param name="data">
-        ///    	A <see cref="ByteVector" /> object containing the whole tag
-        /// 	object
-        /// </param>
-        /// <exception cref="CorruptFileException">
-        ///    <paramref name="data" /> is less than 128 bytes or does
-        ///    not start with <see cref="FileIdentifier" />.
-        /// </exception>
-        private void Parse(ByteVector data)
-        {
-            uint chunkLength;
-            string chunkType;
-            ByteVector chunkData;
-            try
-            {
-                do
-                {
-                    chunkType = data.Mid(0, 4).ToString();
-                    chunkLength = data.Mid(4, 4).ToUInt();
-                    if (chunkType == "DATA")
-                        return; //End of the Header Data
-                    chunkData = data.Mid(8, (int)(chunkLength - 8));
-                    data.RemoveRange(0, (int)chunkLength);
-                    parseChunk(chunkType, chunkData);
-                } while (chunkType != "DATA");
-            }
-            catch (Exception)
-            {
-                throw new CorruptFileException();
-            }
-        }
-
-        private void parseChunk(string chunkType, ByteVector chunkData)
-        {
-            ushort len;
-            int start=2;
-            switch (chunkType)
-            {
-                case "PROP":
-                    bitrate = chunkData.Mid(6, 4).ToUInt();
-                    duration = chunkData.Mid(22, 4).ToUInt();
-                    break;
-                case "CONT":
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    title = chunkData.Mid(start+2, len).ToString();
-                    start = start + len + 2;
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    description = chunkData.Mid(start+2, len).ToString();
-                    start = start + len + 2;
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    copyright = chunkData.Mid(start+ 2, len).ToString();
-                    start = start + len + 2;
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    comment = chunkData.Mid(start + 2, len).ToString();
-                    break;
-            }
-        }
         #endregion
 
         #region TagLib.Tag
@@ -186,7 +116,7 @@ namespace TagLib.Rmf
         /// </value>
         public override TagTypes TagTypes
         {
-            get { return TagTypes.RMFMetadata; }
+            get { return TagTypes.XMTags; }
         }
 
         /// <summary>
@@ -206,50 +136,12 @@ namespace TagLib.Rmf
             }
         }
 
-        public override string Comment
-        {
-            get
-            {
-                return comment;
-            }
-        }
-
-        public override string Copyright
-        {
-            get
-            {
-                return copyright;
-            }
-        }
-
-        /// <summary>
-        ///    Gets the album artist for the media described by the
-        ///    current instance.
-        /// </summary>
-        /// <value>
-        ///    	A <see cref="string[]" /> object containing a single 
-        /// 	artist described by the current instance or <see
-        ///    langword="null" /> if no value is present.
-        /// </value>
-        public override string[] AlbumArtists
-        {
-            get
-            {
-                return  new string[] { description };
-            }
-        }
-
         /// <summary>
         ///    Clears the values stored in the current instance.
         /// </summary>
         public override void Clear()
         {
             title = null;
-            description = null;
-            copyright = null;
-            comment = null;
-            bitrate = 0;
-            duration = 0;
         }
 
         #endregion

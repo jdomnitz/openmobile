@@ -28,6 +28,18 @@ namespace OpenMobile.Plugin
     public interface IBasePlugin:IDisposable
     {
         /// <summary>
+        /// Initialize controls and get everything ready
+        /// </summary>
+        /// <param name="host"></param>
+        /// <returns></returns>
+        eLoadStatus initialize(IPluginHost host);
+        /// <summary>
+        /// Returns the settings panel for the UI to load
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
+        Settings loadSettings();
+        /// <summary>
         /// Name of the plugin author
         /// </summary>
         string authorName{get;}
@@ -64,11 +76,5 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
         bool incomingMessage<T>(string message, string source,ref T data);
-        /// <summary>
-        /// Initialize controls and get everything ready
-        /// </summary>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        eLoadStatus initialize(IPluginHost host);
     }
 }

@@ -44,7 +44,24 @@ namespace OMPlayer
 
     // Events
     public event MediaEvent OnMediaEvent;
+    Settings settings;
+    public Settings loadSettings()
+    {
+        if (settings == null)
+        {
+            settings = new Settings("OMPlayer Settings");
+            using (PluginSettings s = new PluginSettings())
+                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", "", "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.AutoResume")));
+            settings.OnSettingChanged += new SettingChanged(changed);
+        }
+        return settings;
+    }
 
+    void changed(Setting s)
+    {
+        using (PluginSettings setting = new PluginSettings())
+            setting.setSetting(s.Name, s.Value);
+    }
     private void checkInstance(int instance)
     {
         if (player[instance] == null)
@@ -70,22 +87,16 @@ namespace OMPlayer
     public void forwardEvent(eFunction function, int instance, string arg)
     {
         if (OnMediaEvent != null)
-        {
             OnMediaEvent(function, instance, arg);
-        }
     }
 
     public float getCurrentPosition(int instance)
     {
         checkInstance(instance);
         if (player[instance].mediaPosition == null)
-        {
             return -1F;
-        }
         if ((player[instance].currentState == ePlayerStatus.Stopped) || (player[instance].currentState == ePlayerStatus.Ready))
-        {
-            return 0F;
-        }
+            return -1F;
         return (float) player[instance].pos;
     }
 
@@ -223,15 +234,11 @@ namespace OMPlayer
         {
             fadeIn();
         }
-        else if (type == ePowerEvent.ShutdownPending)//unneccesssary?
-        {
-            saveState();
-        }
     }
 
     private void fadeout()
     {
-        for (int k = 10; k >0; k--)
+        for (int k = 9; k >=0; k--)
             for (int i = 0; i < player.Length; i++)
                 if (player[i] != null)
                 {
@@ -241,7 +248,7 @@ namespace OMPlayer
     }
     private void fadeIn()
     {
-        for (int k = 0; k < 10; k++)
+        for (int k = 1; k < 10; k++)
             for (int i = 0; i < player.Length; i++)
                 if (player[i] != null)
                 {
@@ -594,6 +601,9 @@ namespace OMPlayer
             {
                 DsError.ThrowExceptionForHR(videoWindow.put_Visible(OABool.False));
                 DsError.ThrowExceptionForHR(videoWindow.put_Owner(IntPtr.Zero));
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                    if (theHost.instanceForScreen(i) == this.instance)
+                        theHost.sendMessage("UI", "OMPlayer", "HideMediaControls" + i.ToString());
             }
             isAudioOnly = true;
             nowPlaying = new mediaInfo();
@@ -722,6 +732,9 @@ namespace OMPlayer
                     DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
                     DsError.ThrowExceptionForHR(Resize());
                     DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(drain));
+                    for(int i=0;i<theHost.ScreenCount;i++)
+                        if (theHost.instanceForScreen(i)==this.instance)
+                            theHost.sendMessage("UI", "OMPlayer", "ShowMediaControls"+i.ToString());
                 }
                 currentPlaybackRate = 1.0;
                 DsError.ThrowExceptionForHR(mediaControl.Run());

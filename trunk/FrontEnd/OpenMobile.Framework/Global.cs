@@ -29,38 +29,6 @@ using System.Windows.Forms.Design;
 namespace OpenMobile
 {
     /// <summary>
-    /// Occurs when a panel is requested for a screen but does not exist
-    /// </summary>
-    [global::System.Serializable]
-    public class PanelNotAvailableForThisScreenException : Exception
-    {
-        /// <summary>
-        /// Occurs when a panel is requested for a screen but does not exist
-        /// </summary>
-        public PanelNotAvailableForThisScreenException() { }
-        /// <summary>
-        /// Occurs when a panel is requested for a screen but does not exist
-        /// </summary>
-        /// <param name="message"></param>
-        public PanelNotAvailableForThisScreenException(string message) : base(message) { }
-        /// <summary>
-        /// Occurs when a panel is requested for a screen but does not exist
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="inner"></param>
-        public PanelNotAvailableForThisScreenException(string message, Exception inner) : base(message, inner) { }
-        /// <summary>
-        /// Occurs when a panel is requested for a screen but does not exist
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
-        protected PanelNotAvailableForThisScreenException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
-    }
-
-    /// <summary>
     /// The rendering mode
     /// </summary>
     public enum modeType {
@@ -614,13 +582,6 @@ namespace OpenMobile
         /// <para>Arg3: (Optional) Panel Name</para>
         /// </summary>
         TransitionToPanel=5,
-        /// <summary>
-        /// Load a settings panel and prepare to transition to it
-        /// <para>---------------------------------------</para>
-        /// <para>Arg1: Screen Number</para>
-        /// <para>Arg2: (Optional) Plugin Name</para>
-        /// <para>Arg3: (Optional) Panel Name</para>
-        /// </summary>
         //TransitionToSettings=6,
         /// <summary>
         /// Transition between the previously specified panels
@@ -637,13 +598,6 @@ namespace OpenMobile
         /// <para>Arg3: (Optional) Panel Name</para>
         /// </summary>
         TransitionFromPanel=8,
-        /// <summary>
-        /// The settings panel to transition from
-        /// <para>---------------------------------------</para>
-        /// <para>Arg1: Screen Number</para>
-        /// <para>Arg2: (Optional) Plugin Name</para>
-        /// <para>Arg3: (Optional) Panel Name</para>
-        /// </summary>
         //TransitionFromSettings = 9,
         //Media Events
         /// <summary>
@@ -843,6 +797,10 @@ namespace OpenMobile
         /// <para>Arg2: Brightness [1-100] [0=Monitor Off]</para>
         /// </summary>
         setMonitorBrightness=40,
+        /// <summary>
+        /// Occurs when a TunedContent plugin updates its station list
+        /// </summary>
+        stationListUpdated=41,
         /// <summary>
         /// Restart this application
         /// </summary>
@@ -1556,9 +1514,17 @@ namespace OpenMobile
         /// </summary>
         HD=4,
         /// <summary>
-        /// Everything else: tv, satellite radio, internet radio, etc.
+        /// Satellite Radio
         /// </summary>
-        Other=5
+        SiriusXM=5,
+        /// <summary>
+        /// Over the air TV
+        /// </summary>
+        OTATV=6,
+        /// <summary>
+        /// Everything else
+        /// </summary>
+        Other=7
     }
 
     /// <summary>
@@ -2000,7 +1966,7 @@ namespace OpenMobile
         /// <summary>
         /// Length in seconds
         /// </summary>
-        public int Length;
+        public int Length=-1;
         /// <summary>
         /// Rating 0-5.  -1 for not set.
         /// </summary>
@@ -2055,11 +2021,11 @@ namespace OpenMobile
         /// <summary>
         /// Number of Audio Channels
         /// </summary>
-        int Channels;
+        public int Channels;
         /// <summary>
         /// Bitrate (bits/second)
         /// </summary>
-        int Bitrate;
+        public int Bitrate;
         public stationInfo() { }
         public stationInfo(string name, string id)
         {
@@ -2068,61 +2034,6 @@ namespace OpenMobile
         }
     }
 
-    /// <summary>
-    /// Type of Tuned Content
-    /// </summary>
-    [Flags]
-    public enum tunedContentType
-    {
-        /// <summary>
-        /// None or Unknown
-        /// </summary>
-        None=0,
-        /// <summary>
-        /// AM Radio - Analog
-        /// </summary>
-        AMRadio=1,
-        /// <summary>
-        /// FM Radio - Analog
-        /// </summary>
-        FMRadio=2,
-        /// <summary>
-        /// HD Radio
-        /// </summary>
-        HDRadio=3,
-        /// <summary>
-        /// DAB Radio
-        /// </summary>
-        DABRadio=4,
-        /// <summary>
-        /// Satellite Radio - SiriusXM
-        /// </summary>
-        SatelliteRadio=5,
-        /// <summary>
-        /// Over the air TV - ATSC/DVB/ITSB
-        /// </summary>
-        OTATV=6,
-        /// <summary>
-        /// Cable TV
-        /// </summary>
-        CableTV=7,
-        /// <summary>
-        /// Satellite TV
-        /// </summary>
-        SatelliteTV=8,
-        /// <summary>
-        /// Internet Radio
-        /// </summary>
-        InternetRadio=9,
-        /// <summary>
-        /// Other
-        /// </summary>
-        Other=15,
-        /// <summary>
-        /// Other Radio - Digital
-        /// </summary>
-        OtherDigital=16
-    }
     /// <summary>
     /// Provides proper naming of semi-transparent colors
     /// </summary>

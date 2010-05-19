@@ -8,6 +8,7 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMCheckbox : OMLabel, IClickable, IHighlightable
     {
+        public event userInteraction OnClick;
         protected bool isChecked;
         protected Color highlightColor=Color.Blue;
 
@@ -77,6 +78,8 @@ namespace OpenMobile.Controls
                 Checked = false;
             else
                 Checked = true;
+            if (OnClick != null)
+                OnClick(this, screen);
         }
         /// <summary>
         /// Fires the OnLongClick event

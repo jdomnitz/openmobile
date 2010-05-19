@@ -55,6 +55,7 @@ namespace OpenMobile.Plugin
     /// </summary>
     /// <param name="type"></param>
     /// <param name="arg"></param>
+    /// <param name="justInserted"></param>
     public delegate void StorageEvent(eMediaType type, bool justInserted, string arg);
     /// <summary>
     /// A navigation event
