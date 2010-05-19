@@ -28,12 +28,6 @@ namespace OpenMobile.Plugin
     public interface IRawHardware:IBasePlugin
     {
         /// <summary>
-        /// Returns the settings panel for the UI to load
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
-        Settings loadSettings();
-        /// <summary>
         /// Convert the string name of the value you are trying to read or write to a PID
         /// </summary>
         /// <param name="FunctionName"></param>

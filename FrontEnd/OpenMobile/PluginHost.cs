@@ -53,6 +53,7 @@ namespace OpenMobile
         private bool vehicleInMotion = false;
         private eGraphicsLevel level;
         private Rectangle videoPosition;
+        private bool suspending = false;
 
         historyCollection history = new historyCollection(screenCount);
         #endregion
@@ -228,8 +229,6 @@ namespace OpenMobile
         {
             get
             {
-                if (videoPosition == null)
-                    videoPosition = new Rectangle();
                 return videoPosition;
             }
             set
@@ -297,25 +296,24 @@ namespace OpenMobile
             if (e.Reason == SessionEndReasons.Logoff)
                 try
                 {
-                    OnPowerChange(ePowerEvent.LogoffPending);
+                    raisePowerEvent(ePowerEvent.LogoffPending);
                 }
                 catch (Exception) { }
             if (e.Reason == SessionEndReasons.SystemShutdown)
                 try
                 {
-                    OnPowerChange(ePowerEvent.ShutdownPending);
+                    raisePowerEvent(ePowerEvent.ShutdownPending);
                 }
                 catch (Exception) { }
         }
-
         public void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
             if (e.Mode == PowerModes.Resume)
             {
                 try
                 {
-                    if (OnPowerChange != null)
-                        OnPowerChange(ePowerEvent.SystemResumed);
+                    raisePowerEvent(ePowerEvent.SystemResumed);
+                    suspending = false;
                 }
                 catch (Exception) { }
             }
@@ -323,8 +321,8 @@ namespace OpenMobile
             {
                 try
                 {
-                    if (OnPowerChange != null)
-                        OnPowerChange(ePowerEvent.SleepOrHibernatePending);
+                    if (!suspending)
+                        raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
                 }
                 catch (Exception) { }
             }
@@ -336,18 +334,15 @@ namespace OpenMobile
                     {
                         if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Low)
                         {
-                            if (OnPowerChange != null)
-                                OnPowerChange(ePowerEvent.BatteryLow);
+                            raisePowerEvent(ePowerEvent.BatteryLow);
                         }
                         else if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Critical)
                         {
-                            if (OnPowerChange != null)
-                                OnPowerChange(ePowerEvent.BatteryCritical);
+                            raisePowerEvent(ePowerEvent.BatteryCritical);
                         }
                         else
                         {
-                            if (OnPowerChange != null)
-                                OnPowerChange(ePowerEvent.SystemOnBattery);
+                            raisePowerEvent(ePowerEvent.SystemOnBattery);
                         }
                     }
                     catch (Exception) { }
@@ -356,8 +351,7 @@ namespace OpenMobile
                 {
                     try
                     {
-                        if (OnPowerChange != null)
-                            OnPowerChange(ePowerEvent.SystemPluggedIn);
+                        raisePowerEvent(ePowerEvent.SystemPluggedIn);
                     }
                     catch (Exception) { }
                 }
@@ -365,7 +359,7 @@ namespace OpenMobile
                 {
                     try
                     {
-                        OnPowerChange(ePowerEvent.Unknown);
+                        raisePowerEvent(ePowerEvent.Unknown);
                     }
                     catch (Exception) { }
                 }
@@ -398,7 +392,7 @@ namespace OpenMobile
                     {
                         RenderingWindow.closeRenderer();
                         if (hal != null)
-                            hal.snd("45");
+                            hal.snd("44");
                         savePlaylists();
                         raiseSystemEvent(eFunction.closeProgram, "", "", "");
                     }
@@ -430,9 +424,15 @@ namespace OpenMobile
                     hal.snd("47");
                     return true;
                 case eFunction.hibernate:
-                    return Application.SetSuspendState(PowerState.Hibernate, false, false);
+                    hal.snd("45");
+                    suspending = true;
+                    raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
+                    return true;
                 case eFunction.standby:
-                    return Application.SetSuspendState(PowerState.Suspend, false, false);
+                    hal.snd("48");
+                    suspending = true;
+                    raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
+                    return true;
                 case eFunction.connectToInternet:
                     return Net.Connections.connect(this);
                 case eFunction.disconnectFromInternet:
@@ -1215,6 +1215,11 @@ namespace OpenMobile
         {
             if (OnSystemEvent!=null)
                 OnSystemEvent(e, arg1, arg2, arg3);
+        }
+        public void raisePowerEvent(ePowerEvent e)
+        {
+            if (OnPowerChange != null)
+                OnPowerChange(e);
         }
         private void raiseNavigationEvent(eNavigationEvent type,string arg)
         {

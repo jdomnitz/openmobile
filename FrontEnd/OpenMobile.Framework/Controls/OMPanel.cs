@@ -343,13 +343,13 @@ namespace OpenMobile.Controls
             containedControls.RemoveAll(c => c.Name == name);
         }
         /// <summary>
-        /// Create a new panel (Added by Borte)
+        /// Create a new panel
         /// </summary>
         public OMPanel()
         {
         }
         /// <summary>
-        /// Create a new panel with an given name (Added by Borte)
+        /// Create a new panel with an given name
         /// <param name="Name">Name of the panel</param>
         /// </summary>
         public OMPanel(string Name)

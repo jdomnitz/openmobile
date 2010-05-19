@@ -206,8 +206,8 @@ namespace TagLib.Asf {
 		///    A <see cref="TimeSpan" /> value containing the play
 		///    duration of the file described by the current instance.
 		/// </value>
-		public TimeSpan PlayDuration {
-			get {return new TimeSpan ((long)play_duration);}
+		public TimeSpan PlayDuration {//Somthings wrong here so let the player fill it in
+            get { return new TimeSpan(0); }//(long)play_duration);}
 		}
 		
 		/// <summary>

@@ -60,13 +60,15 @@ namespace OpenMobile
             }
             return about;
         }
+        static IPluginHost theHost;
         /// <summary>
         /// Returns the Non-Skin Specific Settings
         /// </summary>
         /// <returns></returns>
-        public static Settings GlobalSettings()
+        public static Settings GlobalSettings(IPluginHost host)
         {
-            Settings gl = new Settings();
+            theHost = host;
+            Settings gl = new Settings("General Settings");
             Setting cursor=new Setting(SettingTypes.MultiChoice,"UI.HideCursor","","Hide Mouse Cursor",Setting.BooleanList,Setting.BooleanList);
             Setting graphics=new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", "", "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
             using (PluginSettings settings = new PluginSettings())
@@ -82,7 +84,23 @@ namespace OpenMobile
 
         static void SettingsChanged(Setting setting)
         {
-            //ToDo
+            switch (setting.Name)
+            {
+                case "UI.HideCursor":
+                    using (PluginSettings s = new PluginSettings())
+                    {
+                        if (setting.Value != s.getSetting("UI.HideCursor"))
+                            theHost.sendMessage("RenderingWindow", "OMSettings", "ToggleCursor");
+                        s.setSetting("UI.HideCursor", setting.Value);
+                    }
+                    break;
+                case "UI.MinGraphics":
+                    if (setting.Value == "True")
+                        theHost.GraphicsLevel = eGraphicsLevel.Minimal;
+                    else
+                        theHost.GraphicsLevel = eGraphicsLevel.Standard;
+                break;
+            }
         }
         /// <summary>
         /// Gets zone specific settings for the given instance
@@ -91,7 +109,7 @@ namespace OpenMobile
         /// <returns></returns>
         public static Settings getZoneSettings(int instance)
         {
-            return new Settings(); //Not Yet Implemented
+            return new Settings("Zone "+(instance+1).ToString()+" Settings"); //Not Yet Implemented
         }
     }
 }

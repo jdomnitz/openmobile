@@ -44,6 +44,11 @@ namespace OMDVD
         // Events
         public event MediaEvent OnMediaEvent;
 
+        public Settings loadSettings()
+        {
+            return null;
+        }
+
         private void checkInstance(int instance)
         {
             if (player[instance] == null)

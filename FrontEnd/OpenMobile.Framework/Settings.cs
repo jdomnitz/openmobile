@@ -33,6 +33,10 @@ namespace OpenMobile.Plugin
         /// </summary>
         Text,
         /// <summary>
+        /// Same as text except uses a password char
+        /// </summary>
+        Password,
+        /// <summary>
         /// Any type of integer based setting
         /// </summary>
         Numeric,
@@ -105,6 +109,16 @@ namespace OpenMobile.Plugin
             this.Header = Header;
             this.Description = Description;
         }
+        public Setting(SettingTypes Type, string Name, string Header, string Description,string Value)
+        {
+            if ((Type == SettingTypes.MultiChoice) || (Type == SettingTypes.Range))
+                throw new ArgumentException("MutiChoice requires Options and Values");
+            this.Type = Type;
+            this.Name = Name;
+            this.Header = Header;
+            this.Description = Description;
+            this.Value = Value;
+        }
         /// <summary>
         /// Creates a new MultiChoice setting
         /// </summary>
@@ -123,6 +137,17 @@ namespace OpenMobile.Plugin
             this.Options = Options;
             this.Values = Values;
         }
+
+        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values,string DefaultValue)
+        {
+            this.Type = Type;
+            this.Name = Name;
+            this.Header = Header;
+            this.Description = Description;
+            this.Options = Options;
+            this.Values = Values;
+            this.Value = DefaultValue;
+        }
         public static List<string> BooleanList = new List<string>(new string[] { "True", "False" });
     }
     /// <summary>
@@ -140,5 +165,9 @@ namespace OpenMobile.Plugin
                 OnSettingChanged(setting);
         }
         public string Title = "Settings";
+        public Settings(string title)
+        {
+            Title = title;
+        }
     }
 }

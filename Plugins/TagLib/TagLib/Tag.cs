@@ -102,6 +102,8 @@ namespace TagLib {
 
         QuicktimeAtoms=0x00001000,
 
+        XMTags=0x00002000,
+
 		/// <summary>
 		///    All tag types.
 		/// </summary>

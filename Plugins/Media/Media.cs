@@ -143,7 +143,7 @@ namespace Media
 		    chkIndex.Font= new Font("Microsoft Sans Serif",31F);
 		    chkIndex.Text="Index new music on every startup";
 		    chkIndex.Name="Media.chkIndex";
-            OMCheckbox AutoStart = new OMCheckbox(225, 450, 800, 70);
+            OMCheckbox AutoStart = new OMCheckbox(225, 370, 800, 70);
             AutoStart.OutlineColor = chkIndex.OutlineColor;
             AutoStart.Font = chkIndex.Font;
             AutoStart.Name = "Media.AutoStart";
@@ -569,17 +569,17 @@ namespace Media
                 }
             }
         }
-
+        Settings s;
         public Settings loadSettings()
         {
-            Settings s = new Settings();
-            List<string> options=new List<string>();
-            options.Add("Enabled");
-            options.Add("Disabled");
-            List<string> values=new List<string>();
-            values.Add("True");
-            values.Add("False");
-            s.Add(new Setting(SettingTypes.MultiChoice, "IndexOnStartup", "", "Index New Music on Every Startup", options, values));
+            if (s == null)
+            {
+                s = new Settings("Media Settings");
+                List<string> options = new List<string>();
+                options.Add("Enabled");
+                options.Add("Disabled");
+                s.Add(new Setting(SettingTypes.MultiChoice, "IndexOnStartup", "", "Index New Music on Every Startup", options, Setting.BooleanList));
+            }
             return s;
         }
 

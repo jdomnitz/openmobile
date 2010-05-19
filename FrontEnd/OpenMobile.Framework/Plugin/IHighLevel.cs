@@ -34,12 +34,6 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         OMPanel loadPanel(string name,int screen);
         /// <summary>
-        /// Returns the settings panel for the UI to load
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException">System.NotImplementedException</exception>
-        Settings loadSettings();
-        /// <summary>
         /// The display name for the plugin
         /// </summary>
         string displayName { get; }
@@ -92,6 +86,28 @@ namespace OpenMobile.Plugin
             get
             {
                 return t;
+            }
+        }
+    }
+    public class SkinIcon : Attribute
+    {
+        string name;
+        /// <summary>
+        /// Enables/Disables the window closing transition
+        /// </summary>
+        /// <param name="imageName"></param>
+        public SkinIcon(string imageName)
+        {
+            name = imageName;
+        }
+        /// <summary>
+        /// Enables/Disables the window closing transition
+        /// </summary>
+        public string SkinImageName
+        {
+            get
+            {
+                return name;
             }
         }
     }

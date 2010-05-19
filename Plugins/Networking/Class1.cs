@@ -21,6 +21,8 @@
 using System;
 using OpenMobile;
 using OpenMobile.Plugin;
+using OpenMobile.Media;
+using System.IO;
 
 namespace Networking
 {

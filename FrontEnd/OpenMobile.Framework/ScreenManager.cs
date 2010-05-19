@@ -44,10 +44,10 @@ namespace OpenMobile.Framework
         /// <summary>
         /// Gets the panel for the given screen
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="screen"></param>
         /// <returns></returns>
-        /// <exception cref="ArgumentOutOfRangeException">ArgumentOutOfRangeException</exception>
-        /// <exception cref="PanelNotAvailableForThisScreenException">PanelNotAvailableForThisScreenException</exception>
+        /// <exception cref="IndexOutOfRangeException">IndexOutOfRangeException</exception>
+        /// <exception cref="InvalidOperationException">InvalidOperationException</exception>
         public OMPanel this[int screen]
         {
             get
@@ -55,12 +55,12 @@ namespace OpenMobile.Framework
                 lock (this)
                 {
                     if ((screen < 0) || (screen >= screens)||(panels.Count==0))
-                        throw new ArgumentOutOfRangeException();
+                        throw new IndexOutOfRangeException();
                     if (panels[0] == null)
                     {
                         Thread.Sleep(300);
                         if (panels[0] == null)
-                            throw new PanelNotAvailableForThisScreenException("Source Panel has not been defined!  Use load panel before trying to access panels!");
+                            throw new InvalidOperationException("Source Panel has not been defined!  Use load panel before trying to access panels!");
                     }
                     return panels[0][screen];
                 }
@@ -69,7 +69,7 @@ namespace OpenMobile.Framework
         /// <summary>
         /// Gets the requested panel for the given screen
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="screen"></param>
         /// <param name="name"></param>
         /// <returns></returns>
         public OMPanel this[int screen, string name]
@@ -94,6 +94,8 @@ namespace OpenMobile.Framework
         /// <param name="source"></param>
         public void loadPanel(OMPanel source)
         {//ToDo Re-add smart instance management
+            if (source == null)
+                return;
             lock (this)
             {
                 OMPanel[] collection = new OMPanel[screens];

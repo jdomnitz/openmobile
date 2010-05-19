@@ -175,6 +175,8 @@
     <Compile Include="TagLib\UnsupportedFormatException.cs" />
     <Compile Include="TagLib\WavPack\File.cs" />
     <Compile Include="TagLib\WavPack\StreamHeader.cs" />
+    <Compile Include="TagLib\XM\File.cs" />
+    <Compile Include="TagLib\XM\Tag.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

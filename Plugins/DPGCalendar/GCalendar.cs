@@ -39,7 +39,6 @@ namespace DPGCalendar
 
         void getCal()
         {
-            Thread.Sleep(5000);
             status = 2;
             System.Net.WebRequest req = System.Net.HttpWebRequest.Create("https://www.google.com/accounts/ClientLogin");
             req.ContentType = "application/x-www-form-urlencoded";
@@ -104,7 +103,7 @@ namespace DPGCalendar
             {
                 response = req2.GetResponse();
             }
-            catch (System.Net.WebException e)
+            catch (System.Net.WebException)
             {
                 status = -1;
                 theHost.execute(eFunction.settingsChanged, "Calendar");
@@ -244,6 +243,11 @@ namespace DPGCalendar
         }
 
         #region IDataProvider Members
+
+        public Settings loadSettings()
+        {
+            return null;
+        }
 
         public bool refreshData()
         {

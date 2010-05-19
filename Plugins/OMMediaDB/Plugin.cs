@@ -41,6 +41,15 @@ namespace OMMediaDB
         public SqliteConnection bCon;
         private List<string> toBeIndexed;
         private Queue<string> alreadyIndexed;
+        Settings s;
+        public Settings loadSettings()
+        {
+            if (s == null)
+            {
+                //TODO
+            }
+            return s;
+        }
 
         public void Dispose()
         {

@@ -59,7 +59,7 @@ namespace OpenMobile.Plugin
         /// Gets information on the Tuned Content's medium
         /// </summary>
         /// <returns></returns>
-        tunedContentType getContentType(int instance);
+        tunedContentBand[] getSupportedBands(int instance);
         /// <summary>
         /// When powerstate is true, power on the device. When powerState is false, power off the device.
         /// </summary>
