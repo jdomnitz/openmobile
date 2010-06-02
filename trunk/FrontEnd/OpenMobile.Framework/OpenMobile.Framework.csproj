@@ -163,7 +163,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TagLib\TagLib.csproj">
+    <ProjectReference Include="..\..\Plugins\TagLib\TagLib.csproj">
       <Project>{087D2157-E9B3-4CE1-8304-89B421328111}</Project>
       <Name>TagLib</Name>
     </ProjectReference>
