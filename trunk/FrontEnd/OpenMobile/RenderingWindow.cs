@@ -423,6 +423,7 @@ namespace OpenMobile
                     else
                         lastClick.Mode = modeType.Normal;
                     tmrClick.Enabled = false;
+                    lastClick = null;
                     return;
                 }
             }
@@ -576,12 +577,12 @@ namespace OpenMobile
                         if (p.DoubleClickable == false)
                         {
                             tmrLongClick.Enabled = false;
-                                if (lastClick != null)
-                                {
-                                    lastClick.Mode = modeType.Clicked;
-                                    tmrClick.Enabled = true;
-                                    SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
-                                }
+                            if (lastClick != null)
+                            {
+                                lastClick.Mode = modeType.Clicked;
+                                tmrClick.Enabled = true;
+                                SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
+                            }
                             return;
                         }
                         if ((tmrMouse.Enabled == false) || (lastClick != (OMButton)highlighted))
@@ -648,8 +649,12 @@ namespace OpenMobile
             tmrLongClick.Enabled = false;
             if (rParam.currentMode == modeType.gesturing)
                 return;
-            if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
+            if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted)))
+            {
                 SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).longClickMe(screen); });
+                highlighted.Mode = modeType.Highlighted;
+            }
+            lastClick = null;
         }
 
         private void RenderingWindow_MouseDown(object sender, MouseEventArgs e)
@@ -671,24 +676,12 @@ namespace OpenMobile
                     tmrLongClick.Enabled = true;
                     UpdateThisControl(lastClick.toRegion());
                 }
-                else if (typeof(IClickable).IsInstanceOfType(highlighted) == true)  // Added by Borte to support long click for other controls than a button
+                else if (typeof(IClickable).IsInstanceOfType(highlighted))  // Added by Borte to support long click for other controls than a button
                 {
                     tmrLongClick.Enabled = true;
                 }
-                if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
+                if (typeof(IMouse).IsInstanceOfType(highlighted))
                     ((IMouse)highlighted).MouseDown(screen, e, widthScale, heightScale);
-
-                // Added support of IThrow interface 
-                /*if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
-                {
-                    ThrowRelativeDistance = e.Location;
-                    rParam.currentMode = modeType.Scrolling;
-                    bool cancel = false;
-                    ((IThrow)highlighted).MouseThrowStart(screen, e.Location,new PointF(widthScale,heightScale), ref cancel);
-                    ThrowStarted = !cancel;
-                    tmrLongClick.Enabled = true;
-                }*/
-                // End of code added by Borte
                 if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                 {
                     ThrowStarted = true;
@@ -789,7 +782,10 @@ namespace OpenMobile
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
                 Core.RenderingWindows[i].closeMe();
         }
-
+        private void RenderingWindow_ResizeEnd(object sender, System.EventArgs e)
+        {
+            Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
+        }
         private void RenderingWindow_Resize(object sender, EventArgs e)
         {
             heightScale = (this.ClientRectangle.Height / 600F);
@@ -798,18 +794,18 @@ namespace OpenMobile
             {
                 fullscreen = true;
                 this.WindowState = FormWindowState.Normal;
-                //this.TopMost = true;
                 this.FormBorderStyle = FormBorderStyle.None;
                 this.WindowState = FormWindowState.Maximized;
                 fullscreen = false;
+                Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
             }
-            else if (fullscreen == false)
+            else if ((fullscreen == false)&&(FormBorderStyle!=FormBorderStyle.Sizable))
             {
                 this.FormBorderStyle = FormBorderStyle.Sizable;
                 fullscreen = false;
+                Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
             }
             Invalidate();
-            Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
         }
         #endregion
         private void transition_Tick()

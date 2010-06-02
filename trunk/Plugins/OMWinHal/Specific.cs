@@ -54,8 +54,13 @@ namespace OMHal
             {
                 if (device != null)
                 {
-                    if (instance<device.Length)
-                        return (int)(device[instance].AudioEndpointVolume.MasterVolumeLevelScalar * 100);
+                    if (instance < device.Length)
+                    {
+                        if (device[instance].AudioEndpointVolume.Mute == true)
+                            return -1;
+                        else
+                            return (int)(device[instance].AudioEndpointVolume.MasterVolumeLevelScalar * 100);
+                    }
                 }
                 return -1;
             }
@@ -115,6 +120,8 @@ namespace OMHal
                 int result = XPVolume.mixerOpen(out tmp, 0, handle, IntPtr.Zero, CALLBACK_WINDOW);
                 if (XPVolume.IsMuted() == true)
                     Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","0","");
+                else
+                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, XPVolume.GetVolume().ToString(), "0", "");
                 return (result == 0);
             }
             else
@@ -135,6 +142,8 @@ namespace OMHal
                     for(int i=0;i<device.Length;i++)
                         if (device[i].AudioEndpointVolume.Mute == true)
                             Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1",i.ToString(),"");
+                        else
+                            Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(i).ToString(), i.ToString(), "");
                 }
                 catch (Exception) { }
                 return (device!=null);

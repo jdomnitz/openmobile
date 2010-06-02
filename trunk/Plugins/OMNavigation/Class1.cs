@@ -135,7 +135,7 @@ namespace Navigation
 
         public string authorEmail
         {
-            get { return "admin@domnitzsolutions.com"; }
+            get { return "jdomnitz@gmail.com"; }
         }
 
         public string pluginName

@@ -26,6 +26,8 @@ using System.Net;
 using System.Xml;
 using System.Threading;
 using OpenMobile.Net;
+using OpenMobile.Plugin;
+using OpenMobile.Data;
 namespace OpenMobile.Media
 {
     /// <summary>
@@ -159,6 +161,22 @@ namespace OpenMobile.Media
                     }
             }
             return null;
+        }
+        public static Image getCoverFromDB(string artist, string album, IPluginHost pluginHost)
+        {
+            object o = new object();
+            using(PluginSettings s=new PluginSettings())
+            pluginHost.getData(eGetData.GetMediaDatabase, s.getSetting("Default.MusicDatabase"), out o);
+            if (o == null)
+                return null;
+            using (IMediaDatabase db = (IMediaDatabase)o)
+            {
+                db.beginGetSongsByAlbum(artist, album, true);
+                mediaInfo result = db.getNextMedia();
+                if (result == null)
+                    return null;
+                return result.coverArt;
+            }
         }
     }
 }

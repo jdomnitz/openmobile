@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{89D64B45-FA59-4738-BE6A-C38A4BE47D5F}</ProjectGuid>
+    <ProjectGuid>{932DE238-14C8-4D0E-840A-646E165D9947}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Radio</RootNamespace>
-    <AssemblyName>Radio</AssemblyName>
+    <RootNamespace>OMRadio</RootNamespace>
+    <AssemblyName>OMRadio</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

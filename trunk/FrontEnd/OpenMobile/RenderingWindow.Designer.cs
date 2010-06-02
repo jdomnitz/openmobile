@@ -92,10 +92,10 @@ namespace OpenMobile
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseMove);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceUp);
             this.KeyDown+=new System.Windows.Forms.KeyEventHandler(InputRouter.SourceDown);
+            this.ResizeEnd += new System.EventHandler(RenderingWindow_ResizeEnd);
             this.ResumeLayout(false);
 
         }
-
         #endregion
 
         private System.Windows.Forms.Timer tmrClosing;

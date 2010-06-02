@@ -43,7 +43,7 @@ namespace OpenMobile
 
         public string authorEmail
         {
-            get { return "admin@domnitzsolutions.com"; }
+            get { return "jdomnitz@gmail.com"; }
         }
 
         public string pluginName
@@ -181,6 +181,8 @@ namespace OpenMobile
             vol.Name = "UI.vol";
             vol.Mode = modeType.Resizing;
             vol.Transition = eButtonTransition.None;
+            vol.OnClick += new userInteraction(vol_OnClick);
+            vol.OnLongClick += new userInteraction(vol_OnLongClick);
             OMImage Image2 = new OMImage(0,0,1000,99);
             Image2.Name = "UI.TopBar";
             Image2.Image = theHost.getSkinImage("topBar");
@@ -252,6 +254,8 @@ namespace OpenMobile
             OMButton icon4 = new OMButton(625, 1, 50, 90);
             icon4.Name = "UI.Icon4";
             icon4.OnClick += new userInteraction(icon_OnClick);
+            VolumeBar volume = new VolumeBar(6, -510, 130, 510);
+            volume.OnSliderMoved += new userInteraction(volumeChange);
             //***
             p.addControl(Back);
             p.addControl(speech);
@@ -279,6 +283,7 @@ namespace OpenMobile
             p.addControl(icon2);
             p.addControl(icon3);
             p.addControl(icon4);
+            p.addControl(volume);
             icons.OnIconsChanged += new IconManager.IconsChanged(icons_OnIconsChanged);
 
             p.BackgroundType = backgroundStyle.Gradiant;
@@ -290,6 +295,69 @@ namespace OpenMobile
             theHost.OnSystemEvent += theHost_OnSystemEvent;
             theHost.VideoPosition = new Rectangle(0, 100, 1000, 368);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void vol_OnLongClick(OMControl sender, int screen)
+        {
+            object o;
+            theHost.getData(eGetData.GetSystemVolume, "", theHost.instanceForScreen(screen).ToString(), out o);
+            if (o == null)
+                return;
+            if (((int)o)==-1)
+                theHost.execute(eFunction.setSystemVolume,"-2",theHost.instanceForScreen(screen).ToString());
+            else
+                theHost.execute(eFunction.setSystemVolume,"-1",theHost.instanceForScreen(screen).ToString());
+        }
+        System.Timers.Timer volTmr;
+        int volScreen = -1;
+        void vol_OnClick(OMControl sender, int screen)
+        {
+            if (volTmr != null)
+                volTmr.Dispose();
+            if (sender.Top>0)
+            {
+                volTmr_Elapsed(null, null);
+                return;
+            }
+            volTmr = new System.Timers.Timer(3000);
+            volTmr.Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
+            volScreen = screen;
+            OMButton btn = (OMButton)manager[screen][5];
+            //btn.Image = theHost.getSkinImage("Volume.Mute");
+            //btn.FocusImage = theHost.getSkinImage("Volume.Mute.Focus");
+            for (int i = 0; i <= 10; i++)
+            {
+                manager[screen][26].Top =  (51 * i)-510;
+                btn.Top = (int)(51.1 * i);
+                Thread.Sleep(50);
+            }
+            volTmr.Enabled = true;
+        }
+
+        void volTmr_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            OMButton btn = (OMButton)manager[volScreen][5];
+            //btn.Image = theHost.getSkinImage("Volume");
+            //btn.FocusImage = theHost.getSkinImage("Volume.Focus");
+            for (int i = 0; i <= 10; i++)
+            {
+                manager[volScreen][26].Top = -(51 * i);
+                btn.Top = 511-(int)(51.1 * i);
+                Thread.Sleep(50);
+            }
+            volScreen = -1;
+            volTmr.Dispose();
+            volTmr = null;
+        }
+
+        void volumeChange(OMControl sender, int screen)
+        {
+            if (volTmr != null)
+            {
+                volTmr.Enabled = false;
+                volTmr.Enabled = true;
+            }
+            theHost.execute(eFunction.setSystemVolume, ((VolumeBar)sender).Value.ToString(), theHost.instanceForScreen(screen).ToString());
         }
 
         void icon_OnClick(OMControl sender, int screen)
@@ -393,7 +461,7 @@ namespace OpenMobile
                 for (int i = 0; i < theHost.ScreenCount; i++)
                     ((OMLabel)manager[i][6]).Text = arg1;
             }
-            if (function == eFunction.systemVolumeChanged)
+            else if (function == eFunction.systemVolumeChanged)
             {
                 if (arg1 == "-1")
                 {
@@ -415,6 +483,7 @@ namespace OpenMobile
                         OMButton b = ((OMButton)manager[i][5]);
                         b.Image = theHost.getSkinImage("VolumeButton");
                         b.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
+                        ((VolumeBar)manager[i][26]).Value = int.Parse(arg1);
                     }
                 }
             }
@@ -662,15 +731,31 @@ namespace OpenMobile
             {
                 mediaInfo info = theHost.getPlayingMedia(instance);
                 imageItem it = new imageItem(info.coverArt);
+                object o = new object();
+                tunedContentInfo TunedContentInfo = null;
+                theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
+                if (o != null)
+                    TunedContentInfo = (tunedContentInfo)o;
                 for(int i=0;i<theHost.ScreenCount;i++)
                 {
                     if (theHost.instanceForScreen(i) == instance)
                     {
                         OMPanel p = manager[i];
-                        ((OMLabel)p[6]).Text = info.Name;
-                        ((OMLabel)p[7]).Text = info.Artist;
-                        ((OMLabel)p[8]).Text = info.Album;
-                        ((OMImage)p[9]).Image = it;
+                        if ((info.Type == eMediaType.Radio) && (TunedContentInfo != null))
+                        {
+                            ((OMLabel)p[6]).Text = TunedContentInfo.currentStation.stationName;
+                            ((OMLabel)p[7]).Text = info.Name;
+                            ((OMLabel)p[8]).Text = "";
+                            if (info.coverArt == null)
+                                ((OMImage)p[9]).Image = theHost.getSkinImage("Radio");
+                        }
+                        else
+                        {
+                            ((OMLabel)p[6]).Text = info.Name;
+                            ((OMLabel)p[7]).Text = info.Artist;
+                            ((OMLabel)p[8]).Text = info.Album;
+                            ((OMImage)p[9]).Image = it;
+                        }
                         ((OMButton)p[10]).Image = theHost.getSkinImage("Pause");
                         ((OMButton)p[10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
                         ((OMSlider)p[17]).Maximum = info.Length;

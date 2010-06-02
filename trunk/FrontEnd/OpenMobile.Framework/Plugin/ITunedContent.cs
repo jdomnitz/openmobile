@@ -33,6 +33,10 @@ namespace OpenMobile.Plugin
         /// <returns>Return true if successful.</returns>
         bool tuneTo(int instance,string station);
         /// <summary>
+        /// Scan complete band for channels with signal.
+        /// </summary>
+        bool scanBand(int instance);
+        /// <summary>
         /// Scan forward for a channel with signal. Fires system event radioTuned when found.
         /// </summary>
         bool scanForward(int instance);

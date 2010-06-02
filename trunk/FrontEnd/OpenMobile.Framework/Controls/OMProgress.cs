@@ -95,10 +95,10 @@ namespace OpenMobile.Controls
         /// <param name="h">Height</param>
         public OMProgress(int x,int y,int w,int h)
         {
-            this.Top = y;
-            this.Left = x;
-            this.Width = w;
-            this.Height = h;
+            top = y;
+            left = x;
+            width = w;
+            height = h;
         }
         /// <summary>
         /// A number between the minimum and the maximum value
@@ -335,10 +335,9 @@ namespace OpenMobile.Controls
                 rec.Y = rec.Y+rec.Height - (int)(height * ((float)value / maximum));
                 rec.Height= (int)(height * ((float)value / maximum));
                 g.FillRectangle(new LinearGradientBrush(new Point(width / 2,0), new Point(width / 2,height), Color.FromArgb((int)(tmp * secondColor.A), secondColor),Color.FromArgb((int)(tmp * firstColor.A), firstColor)), rec);
-                rec.Y = height;
+                rec.Y = top;
                 rec.Height = height;
             }
-            
             g.DrawRectangle(new Pen(Color.FromArgb((int)(tmp * 255), Color.Black), 1.5F), rec);
         }
     }

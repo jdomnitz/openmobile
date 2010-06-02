@@ -945,6 +945,12 @@ namespace OpenMobile
         /// </summary>
         setPlaylistPosition=82,
         /// <summary>
+        /// Scan complete band (Tuned Content)
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Instance Number</para>
+        /// </summary>
+        scanBand = 83,
+        /// <summary>
         /// A gesture has been recognized
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen</para>
@@ -1428,7 +1434,13 @@ namespace OpenMobile
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetStationList = 20
+        GetStationList = 20,
+        /// <summary>
+        /// Gets a list of supported bands from the currently loaded tunedcontent plugin
+        /// <para>----------------------------------------------------</para>
+        /// <para>Param: Instance [int]</para>
+        /// </summary>
+        GetSupportedBands = 21
     }
     /// <summary>
     /// Information on Tuned Content

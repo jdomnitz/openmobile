@@ -486,9 +486,13 @@ namespace TagLib.Mpeg4 {
 					stsd_boxes.Add (BoxFactory.CreateBox (
 						file, header, handler));
 				} else if (type == BoxType.Hdlr) {
+                    IsoHandlerBox prevHandler = handler;
 					handler = BoxFactory.CreateBox (file,
 						header, handler) as
 							IsoHandlerBox;
+                    if (prevHandler != null && (handler.HandlerType != BoxType.Soun && handler.HandlerType != BoxType.Vide)) {
+						handler = prevHandler;
+					}
 				} else if (mvhd_box == null &&
 					type == BoxType.Mvhd) {
 					mvhd_box = BoxFactory.CreateBox (file,
