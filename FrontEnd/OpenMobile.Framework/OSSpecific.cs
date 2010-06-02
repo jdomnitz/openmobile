@@ -71,7 +71,7 @@ namespace OpenMobile.Framework
                     if (o == null)
                         return false;
                     PointF scale= (PointF)o;
-                    if (windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(position.X * scale.X), (int)(position.Y * scale.Y), (int)(position.Width * scale.X), (int)(position.Height * scale.Y), 0x20) == false)
+                    if (windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(position.X * scale.X+1.0), (int)(position.Y * scale.Y+1.0), (int)(position.Width * scale.X), (int)(position.Height * scale.Y), 0x20) == false)
                         return false;
                     if (windowsEmbedder.SetParent(lastHandle[screen].handle, theHost.UIHandle(screen)) == IntPtr.Zero)
                         return false;
@@ -96,7 +96,7 @@ namespace OpenMobile.Framework
                         return;
                     PointF scale = (PointF)o;
                     if (lastHandle[screen].handle!=IntPtr.Zero)
-                        windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(lastHandle[screen].position.X * scale.X), (int)(lastHandle[screen].position.Y * scale.Y), (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y), 0x20);
+                        windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(lastHandle[screen].position.X * scale.X+1.0), (int)(lastHandle[screen].position.Y * scale.Y+1.0), (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y), 0x20);
                 }
             }
         }

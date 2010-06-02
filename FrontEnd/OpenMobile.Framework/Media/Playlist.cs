@@ -25,6 +25,7 @@ using System.Xml;
 using OpenMobile.Net;
 using OpenMobile.Plugin;
 using System.Threading;
+using OpenMobile.Data;
 
 namespace OpenMobile.Media
 {
@@ -88,7 +89,8 @@ namespace OpenMobile.Media
         public static bool writePlaylistToDB(IPluginHost theHost, string name, List<mediaInfo> playlist)
         {
             object o;
-            theHost.getData(eGetData.GetMediaDatabase, "OMMediaDB", out o);
+            using (PluginSettings s = new PluginSettings())
+                theHost.getData(eGetData.GetMediaDatabase, s.getSetting("Default.MusicDatabase"), out o);
             if (o == null)
                 return false;
             IMediaDatabase db = (IMediaDatabase)o;
@@ -120,9 +122,12 @@ namespace OpenMobile.Media
         {
             object o=null;
             List<mediaInfo> playlist = new List<mediaInfo>();
+            string dbName="";
+            using (PluginSettings s = new PluginSettings())
+                dbName = s.getSetting("Default.MusicDatabase");
             for (int i = 0; ((i < 35)&&(o==null)); i++)
             {
-                theHost.getData(eGetData.GetMediaDatabase, "OMMediaDB", out o);
+                theHost.getData(eGetData.GetMediaDatabase, dbName, out o);
                 if (i > 0)
                     Thread.Sleep(200);
             }

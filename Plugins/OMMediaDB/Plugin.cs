@@ -46,11 +46,21 @@ namespace OMMediaDB
         {
             if (s == null)
             {
-                //TODO
+                s = new Settings("Media Database");
+                using (PluginSettings settings = new PluginSettings())
+                {
+                    s.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoIndex", "", "Index New Music on Every Startup", Setting.BooleanList, Setting.BooleanList, settings.getSetting("Music.AutoIndex")));
+                    s.Add(new Setting(SettingTypes.Folder, "Music.Path", "", "Music Path", settings.getSetting("Music.Path")));
+                    s.OnSettingChanged += new SettingChanged(changed);
+                }
             }
             return s;
         }
-
+        private void changed(Setting s)
+        {
+            using (PluginSettings settings = new PluginSettings())
+                settings.setSetting(s.Name, s.Value);
+        }
         public void Dispose()
         {
             if (this.con!=null)
@@ -177,7 +187,8 @@ namespace OMMediaDB
         private System.Threading.Timer tmr;
         private TimerCallback abc;
         private int lastCount;
-
+        private string lastURL;
+        private string currentURL="";
         private void def(object state)
         {
             if ((toBeIndexed == null)||(toBeIndexed.Count==0))
@@ -186,12 +197,15 @@ namespace OMMediaDB
                 theHost.execute(eFunction.backgroundOperationStatus, "Indexing Complete!");
                 return;
             }
-            theHost.execute(eFunction.backgroundOperationStatus, (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count)-lastCount) / 2).ToString() + " songs/sec)");
+            if (lastURL == currentURL)
+                theHost.execute(eFunction.backgroundOperationStatus, "FAILURE:" + System.IO.Path.GetFileName(currentURL));
+            else
+                theHost.execute(eFunction.backgroundOperationStatus, (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count)-lastCount) / 2).ToString() + " songs/sec)");
+            lastURL = currentURL;
             lastCount=(startCount-toBeIndexed.Count);
         }
         private void doWork()
         {
-            string s;
             while (true)
             {
                 if (toBeIndexed == null)
@@ -200,10 +214,10 @@ namespace OMMediaDB
                 {
                     if (toBeIndexed.Count == 0)
                         return;
-                    s = toBeIndexed[toBeIndexed.Count-1];
+                    currentURL = toBeIndexed[toBeIndexed.Count-1];
                     toBeIndexed.RemoveAt(toBeIndexed.Count - 1);
                 }
-                processFile(s);
+                processFile(currentURL);
             }
         }
 

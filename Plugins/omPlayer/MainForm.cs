@@ -51,7 +51,11 @@ namespace OMPlayer
         {
             settings = new Settings("OMPlayer Settings");
             using (PluginSettings s = new PluginSettings())
+            {
+                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.Crossfade", "", "Crossfade between songs", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.Crossfade")));
                 settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", "", "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.AutoResume")));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.PlayProtected", "", "Attempt to play protected files", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.PlayProtected")));
+            }
             settings.OnSettingChanged += new SettingChanged(changed);
         }
         return settings;
@@ -74,7 +78,8 @@ namespace OMPlayer
     {
         if (player != null)
         {
-            fadeout();
+            while (fading)
+                Thread.Sleep(100);
             for (int i = 0; i < player.Length; i++)
             {
                 if (player[i] != null)
@@ -86,6 +91,25 @@ namespace OMPlayer
 
     public void forwardEvent(eFunction function, int instance, string arg)
     {
+        if (function == eFunction.nextMedia)
+        {
+            using(PluginSettings s=new PluginSettings())
+                if (s.getSetting("Music.Crossfade") == "True")
+                {
+                    AVPlayer p = player[instance];
+                    player[instance] = null;
+                    if (OnMediaEvent != null)
+                        OnMediaEvent(function, instance, arg);
+                    for (int i = 10; i >= 0; i--)
+                    {
+                        player[instance].setVolume((10 - i) * 10);
+                        p.setVolume(i * 10);
+                        Thread.Sleep(300);
+                    }
+                    p.CloseClip();
+                    return;
+                }
+        }
         if (OnMediaEvent != null)
             OnMediaEvent(function, instance, arg);
     }
@@ -170,6 +194,7 @@ namespace OMPlayer
         if (function == eFunction.closeProgram)
         {
             saveState();
+            fadeout();
         }
         else if (function == eFunction.RenderingWindowResized)
         {
@@ -235,16 +260,18 @@ namespace OMPlayer
             fadeIn();
         }
     }
-
+    private bool fading = false;
     private void fadeout()
     {
-        for (int k = 9; k >=0; k--)
+        fading = true;
+        for (int k = 100; k >0; k-=10)
             for (int i = 0; i < player.Length; i++)
-                if (player[i] != null)
+                if ((player[i] != null)&&(player[i].currentVolume>k))
                 {
-                    setVolume(i, (k * 10));
+                    setVolume(i, k);
                     Thread.Sleep(150);
                 }
+        fading = false;
     }
     private void fadeIn()
     {
@@ -319,6 +346,12 @@ namespace OMPlayer
         }
         try
         {
+            if (url.EndsWith(".m4p"))
+            {
+                using (PluginSettings s = new PluginSettings())
+                    if (s.getSetting("Music.PlayProtected") != "True")
+                        return false;
+            }
             checkInstance(instance);
             return player[instance].play(url);
         }
@@ -486,8 +519,12 @@ namespace OMPlayer
             switch (e)
             {
                 case EventCode.Complete:
-                    stop();
-                    OnMediaEvent(eFunction.nextMedia, instance, "");
+                    using (PluginSettings s = new PluginSettings())
+                        if (s.getSetting("Music.Crossfade") != "True")
+                        {
+                            stop();
+                            OnMediaEvent(eFunction.nextMedia, instance, "");
+                        }
                     break;
                 case EventCode.DeviceLost:
                 case EventCode.ErrorAbort:
@@ -552,9 +589,11 @@ namespace OMPlayer
             else
             {
                 nowPlaying = TagReader.getInfo(url);
-                nowPlaying.Type = eMediaType.Local;
                 if (nowPlaying == null)
                     nowPlaying = new mediaInfo(url);
+                nowPlaying.Type = eMediaType.Local;
+                if (nowPlaying.coverArt == null)
+                    nowPlaying.coverArt = TagReader.getCoverFromDB(nowPlaying.Artist, nowPlaying.Album, theHost);
                 if (nowPlaying.coverArt == null)
                     nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
                 if (nowPlaying.coverArt == null)
@@ -567,15 +606,12 @@ namespace OMPlayer
                 nowPlaying.Length = (int)dur;
             }
             OnMediaEvent(eFunction.Play, instance, url);
-            if ((t != null)&&(t.ExecutionContext==null)) //No idea why this works but it seems to
-                try
-                {
-                    t.Abort(); //since we're no longer playing...stop looking for the end of the song
-                }
-                catch (Exception) { }
-            t = new Thread(new ThreadStart(waitForStop));
-            t.Name = instance.ToString();
-            t.Start();
+            if (t == null)
+            {
+                t = new Thread(new ThreadStart(waitForStop));
+                t.Name = instance.ToString();
+                t.Start();
+            }
             return true;
         }
         public bool stop()
@@ -621,8 +657,8 @@ namespace OMPlayer
                 }
                 catch (AccessViolationException){}
                 currentState = ePlayerStatus.Stopped;
-                isAudioOnly = true;
                 CloseInterfaces();
+                isAudioOnly = true;
                 currentState = ePlayerStatus.Ready;
             }
         }
@@ -713,9 +749,7 @@ namespace OMPlayer
                 hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance), null, "OutputDevice", out source);
                 hr = graphBuilder.RenderFile(filename, null);
                 if (hr != 0)
-                {
                     return false;
-                }
                 mediaControl = (IMediaControl) graphBuilder;
                 mediaEventEx = (IMediaEventEx) graphBuilder;
                 mediaSeeking = (IMediaSeeking) graphBuilder;
@@ -725,7 +759,6 @@ namespace OMPlayer
                 basicAudio = graphBuilder as IBasicAudio;
                 setVolume(currentVolume);
                 CheckVisibility();
-                DsError.ThrowExceptionForHR(hr);
                 if (!isAudioOnly)
                 {
                     DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(instance)));
@@ -737,7 +770,8 @@ namespace OMPlayer
                             theHost.sendMessage("UI", "OMPlayer", "ShowMediaControls"+i.ToString());
                 }
                 currentPlaybackRate = 1.0;
-                DsError.ThrowExceptionForHR(mediaControl.Run());
+                if (mediaControl.Run()<0)
+                    return false;
                 mediaEventEx.SetNotifyWindow(drain, WM_Graph_Notify, new IntPtr(instance));
             }
             currentState = ePlayerStatus.Playing;
@@ -789,7 +823,15 @@ namespace OMPlayer
                 {
                     Thread.Sleep(1000);
                     if (mediaPosition != null)
+                    {
                         pos = getCurrentPos();
+                        if ((int)pos == nowPlaying.Length - 3)
+                        {
+                            using (PluginSettings s = new PluginSettings())
+                                if (s.getSetting("Music.Crossfade") == "True")
+                                    OnMediaEvent(eFunction.nextMedia, instance, "");
+                        }
+                    }
                     else
                         return;
                 }

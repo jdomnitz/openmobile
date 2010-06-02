@@ -123,11 +123,13 @@ namespace OpenMobile.Controls
                 else
                     Renderer.renderText(g, this.Left + this.Height+5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, Alignment.CenterLeft, tmp,0, this.Color, this.OutlineColor);
                 
-                g.DrawRectangle(new Pen(defaultBrush, 4.0F), new Rectangle(this.Left, this.Top, this.Height, this.Height));
+                Renderer.DrawRoundRectangle(g,new Pen(defaultBrush, 4.0F), new Rectangle(this.Left, this.Top, this.Height, this.Height),5F);
                 if (this.isChecked == true)
                 {
-                    g.DrawLine(new Pen(defaultBrush, 4.0F), new Point(this.Left, this.Top), new Point((this.Left + this.Height), this.Top + this.Height));
-                    g.DrawLine(new Pen(defaultBrush, 4.0F), new Point(this.Left, this.Top + this.Height), new Point((this.Left + this.Height), this.Top));
+                    g.DrawLine(new Pen(defaultBrush, 5.0F), new Point(this.Left+5, this.Top+5), new Point(this.Left + this.Height-5, this.Top + this.Height-5));
+                    g.DrawLine(new Pen(defaultBrush, 5.0F), new Point(this.Left+5, this.Top + this.Height-5), new Point(this.Left + this.Height-5, this.Top+5));
+                    g.DrawLine(new Pen(defaultBrush, 3.0F), new Point(this.Left + 4, this.Top + 4), new Point(this.Left + this.Height - 4, this.Top + this.Height - 4));
+                    g.DrawLine(new Pen(defaultBrush, 3.0F), new Point(this.Left + 4, this.Top + this.Height - 4), new Point(this.Left + this.Height - 4, this.Top + 4));
                 }
             }
         }

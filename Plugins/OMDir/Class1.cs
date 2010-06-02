@@ -40,12 +40,12 @@ namespace OMDir
         {
             if (name == "Folder")
             {
-                ((OMLabel)manager[screen][0]).Text = "Select a Folder";
+                ((OMLabel)manager[screen][2]).Text = "Select a Folder";
                 type[screen] = 1;  //Type=0: Select File; Type=1: Select Folder; Multi-Select Files=2;
             }
             else
             {
-                ((OMLabel)manager[screen][0]).Text = "Select a File";
+                ((OMLabel)manager[screen][2]).Text = "Select a File";
                 type[screen] = 0;
             }
             if ((name != "Folder") && (name != ""))
@@ -103,9 +103,9 @@ namespace OMDir
             theHost = host;
             OMPanel p = new OMPanel();
             manager = new ScreenManager(theHost.ScreenCount);
-            OMLabel caption = new OMLabel(275, 100, 400, 60);
+            OMLabel caption = new OMLabel(275, 95, 400, 60);
             caption.OutlineColor = Color.FromArgb(120, Color.PowderBlue);
-            caption.Font = new Font(FontFamily.GenericSansSerif, 36F);
+            caption.Font = new Font(FontFamily.GenericSansSerif, 34F);
             caption.Format = textFormat.Glow;
             OMButton top = new OMButton(20, 105, 0, 50);
             top.Text = "Up One Level";
@@ -132,9 +132,19 @@ namespace OMDir
             left.ListStyle = eListStyle.DroidStyleImage;
             left.Background = right.Background;
             left.ItemColor1 = right.ItemColor1;
-            //left.ClickToSelect = true;
             folder = theHost.getSkinImage("Folder", true).image;
             loadRoot(left);
+            OMBasicShape border = new OMBasicShape(10, 146, 975, 383);
+            border.BorderColor = Color.Silver;
+            border.BorderSize = 4F;
+            border.CornerRadius = 10;
+            border.FillColor = right.ItemColor1;
+            border.Shape = shapes.RoundedRectangle;
+            OMBasicShape back = new OMBasicShape(0, 0, 1000, 600);
+            back.Shape = shapes.Rectangle;
+            back.FillColor = Color.Black;
+            p.addControl(back);
+            p.addControl(border);
             p.addControl(caption);
             p.addControl(left);
             p.addControl(right);
@@ -149,15 +159,15 @@ namespace OMDir
 
         void top_OnClick(object sender, int screen)
         {
-            OMList l=(OMList)manager[screen][1];
-            OMList r=(OMList)manager[screen][2];
+            OMList l=(OMList)manager[screen][3];
+            OMList r=(OMList)manager[screen][4];
             r.Tag = l.Tag;
             l.Clear();
             if (System.IO.Path.GetPathRoot(l.Tag.ToString()) == l.Tag.ToString())
             {
                 l.Tag = "";
                 loadRoot(l);
-                ((OMButton)manager[screen][3]).Width = 0;
+                ((OMButton)manager[screen][5]).Width = 0;
             }
             else
             {
@@ -173,7 +183,7 @@ namespace OMDir
 
         void select_OnClick(object sender, int screen)
         {
-            OMList l=(OMList)manager[screen][1];
+            OMList l=(OMList)manager[screen][3];
             theHost.execute(eFunction.userInputReady, screen.ToString(),"Dir", translateLocal(l));
         }
 
@@ -211,7 +221,7 @@ namespace OMDir
         {
             if (sender.SelectedIndex != -1)
                 if (type[screen] == 1)
-                    ((OMButton)manager[screen][4]).Width = 150;
+                    ((OMButton)manager[screen][6]).Width = 150;
         }
         private void loadRoot(OMList l)
         {
@@ -224,15 +234,15 @@ namespace OMDir
         }
         private void loadPath(int screen,string path)
         {
-            OMList l = (OMList)manager[screen][1];
-            OMList r = (OMList)manager[screen][2];
+            OMList l = (OMList)manager[screen][3];
+            OMList r = (OMList)manager[screen][4];
             r.Tag = path;
             l.Clear();
             if (System.IO.Path.GetPathRoot(path) == path)
             {
                 l.Tag = "";
                 loadRoot(l);
-                ((OMButton)manager[screen][3]).Width = 0;
+                ((OMButton)manager[screen][5]).Width = 0;
             }
             else
             {
@@ -247,8 +257,8 @@ namespace OMDir
         }
         void right_OnClick(object sender, int screen)
         {
-            OMList r = (OMList)manager[screen][2];
-            OMList l = ((OMList)manager[screen][1]);
+            OMList r = (OMList)manager[screen][4];
+            OMList l = ((OMList)manager[screen][3]);
             if (r.SelectedIndex==-1)
                 return;
             string source = OpenMobile.Path.Combine(r.Tag.ToString(), r[r.SelectedIndex].text);
@@ -284,13 +294,13 @@ namespace OMDir
                 }
             }
             catch (Exception) { }
-            ((OMButton)manager[screen][3]).Width = 150;
+            ((OMButton)manager[screen][5]).Width = 150;
         }
 
         void left_OnClick(object sender, int screen)
         {
-            OMList r = (OMList)manager[screen][2];
-            OMList l=((OMList)manager[screen][1]);
+            OMList r = (OMList)manager[screen][4];
+            OMList l=((OMList)manager[screen][3]);
             r.Clear();
             string source=translateLocal(l);
             r.Tag = source;

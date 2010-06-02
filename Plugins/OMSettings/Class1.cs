@@ -312,13 +312,19 @@ namespace OMSettings
             List<IBasePlugin> plugins;
             theHost.getData(eGetData.GetPlugins, "", out o);
             plugins = (List < IBasePlugin >)o;
-            plugins=plugins.FindAll(p => typeof(IPlayer).IsInstanceOfType(p));
+            //plugins=plugins.FindAll(p => typeof(IPlayer).IsInstanceOfType(p));
             foreach (IBasePlugin b in plugins)
             {
                 LayoutManager lm = new LayoutManager();
-                OMPanel panel = lm.layout(theHost, ((IPlayer)b).loadSettings());
+                OMPanel panel;
+                try
+                {
+                    panel = lm.layout(theHost, ((IBasePlugin)b).loadSettings());
+                }
+                catch (NotImplementedException) { continue; }
                 if (panel != null)
                 {
+                    panel.Name = b.pluginName + " Settings"; 
                     lsthardware.Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
                     manager.loadPanel(panel);
                 }

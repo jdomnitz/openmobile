@@ -209,6 +209,12 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         mediaInfo getPlayingMedia(int instance);
         /// <summary>
+        /// Gets information on the media playing next
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        mediaInfo getNextMedia(int instance);
+        /// <summary>
         /// Returns a list of the currently playing media
         /// </summary>
         List<mediaInfo> getPlaylist(int instance);

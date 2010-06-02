@@ -49,6 +49,7 @@ namespace OpenMobile
         private string ipAddress;
         private List<mediaInfo>[] queued;
         private int[] currentPosition;
+        private int[] nextPosition;
         public HalInterface hal;
         private bool vehicleInMotion = false;
         private eGraphicsLevel level;
@@ -99,6 +100,33 @@ namespace OpenMobile
             }
         }
 
+        private void generateNext(int instance)
+        {
+            lock (nextPosition)
+            {
+                if ((random != null) && (random[instance] == true))
+                {
+                    int result;
+                    do
+                    {
+                        result = Framework.Math.Calculation.RandomNumber(0, queued[instance].Count);
+                    }
+                    while (nextPosition[instance] == result);
+                    nextPosition[instance] = result;
+                }
+                else
+                    nextPosition[instance]=currentPosition[instance]+1;
+                if (nextPosition[instance] == queued[instance].Count)
+                    nextPosition[instance] = 0;
+                if (getPlayingMedia(instance).Location == queued[instance][nextPosition[instance]].Location)
+                {
+                    nextPosition[instance]++;
+                    if (nextPosition[instance] == queued[instance].Count)
+                        nextPosition[instance] = 0;
+                }
+            }
+        }
+
         public List<mediaInfo> getPlaylist(int instance)
         {
             if ((instance < 0) || (instance >= 8))
@@ -113,6 +141,8 @@ namespace OpenMobile
             currentPosition[instance] = -1;
             queued[instance].Clear();
             queued[instance].AddRange(source.GetRange(0, source.Count));
+            if (queued[instance].Count>0)
+                generateNext(instance);
             return true;
         }
         public int instanceForScreen(int screen)
@@ -242,6 +272,7 @@ namespace OpenMobile
             currentMediaPlayer = new IAVPlayer[8];
             currentTunedContent = new ITunedContent[8];
             currentPosition = new int[8];
+            nextPosition = new int[8];
             for (int i = 0; i < screenCount; i++)
                 history.Enqueue(i, "MainMenu","",false);
             for (int i = 0; i < 8; i++)
@@ -647,30 +678,10 @@ namespace OpenMobile
                     {
                         if (queued[ret].Count == 0)
                             return false;
-                        lock (currentPosition)
-                        {
-                            if ((random != null) && (random[ret] == true))
-                            {
-                                int result;
-                                do
-                                {
-                                    result = Framework.Math.Calculation.RandomNumber(0, queued[ret].Count);
-                                }
-                                while (currentPosition[ret] == result);
-                                currentPosition[ret] = result;
-                            }
-                            else
-                                currentPosition[ret]++;
-                            if (currentPosition[ret] == queued[ret].Count)
-                                currentPosition[ret] = 0;
-                            if (getPlayingMedia(ret).Location == queued[ret][currentPosition[ret]].Location)
-                            {
-                                currentPosition[ret]++;
-                                if (currentPosition[ret] == queued[ret].Count)
-                                    currentPosition[ret] = 0;
-                            }
-                        }
-                        return execute(eFunction.Play, arg, queued[ret][currentPosition[ret]].Location);
+                        currentPosition[ret] = nextPosition[ret];
+                        bool b = execute(eFunction.Play, arg, queued[ret][currentPosition[ret]].Location);
+                        generateNext(ret);
+                        return b;
                     }
                     return false;
                 case eFunction.previousMedia:
@@ -684,7 +695,9 @@ namespace OpenMobile
                             if (currentPosition[ret] <= -1)
                                 currentPosition[ret] = queued[ret].Count - 1;
                         }
-                        return execute(eFunction.Play, arg, queued[ret][currentPosition[ret]].Location);
+                        bool b = execute(eFunction.Play, arg, queued[ret][currentPosition[ret]].Location);
+                        generateNext(ret);
+                        return b;
                     }
                     return false;
                 case eFunction.scanBackward:
@@ -692,8 +705,7 @@ namespace OpenMobile
                     { 
                         if (currentTunedContent[ret] == null)
                             return false;
-                        currentTunedContent[ret].scanReverse(ret);
-                        return true;
+                        return currentTunedContent[ret].scanReverse(ret);
                     }
                     return false;
                 case eFunction.scanForward:
@@ -701,8 +713,15 @@ namespace OpenMobile
                     {
                         if (currentTunedContent[ret] == null)
                             return false;
-                        currentTunedContent[ret].scanForward(ret);
-                        return true;
+                        return currentTunedContent[ret].scanForward(ret);
+                    }
+                    return false;
+                case eFunction.scanBand:
+                    if (int.TryParse(arg, out ret) == true)
+                    {
+                        if (currentTunedContent[ret] == null)
+                            return false;
+                        return currentTunedContent[ret].scanBand(ret);
                     }
                     return false;
                 case eFunction.stepBackward:
@@ -925,11 +944,14 @@ namespace OpenMobile
                             if (queued[ret].Count > ret2)
                             {
                                 currentPosition[ret] = ret2;
+                                generateNext(ret);
                                 return true;
                             }
                             return false;
                         }
                         currentPosition[ret]= queued[ret].FindIndex(p => p.Location == arg2);
+                        if (queued[ret].Count>0)
+                            generateNext(ret);
                         return true;
                     }
                     return false;
@@ -1038,6 +1060,7 @@ namespace OpenMobile
                         if (int.TryParse(arg2, out ret) == false)
                             return false;
                         hal.snd("34|" + arg1 + "|"+arg2);
+                        raiseSystemEvent(eFunction.systemVolumeChanged, arg1, arg2, "");
                         return true;
                     }
                     return false;
@@ -1319,11 +1342,11 @@ namespace OpenMobile
                 random = new bool[screenCount];
             return random[screen];
         }
-        public void setRandom(int screen, bool set)
+        public void setRandom(int screen, bool value)
         {
             if (random == null)
                 random = new bool[screenCount];
-            random[screen]=set;
+            random[screen]=value;
         }
         public mediaInfo getPlayingMedia(int instance)
         {
@@ -1332,6 +1355,12 @@ namespace OpenMobile
             if (currentTunedContent[instance] != null)
                 return currentTunedContent[instance].getMediaInfo(instance);
             return new mediaInfo();
+        }
+        public mediaInfo getNextMedia(int instance)
+        {
+            if (currentMediaPlayer[instance] == null)
+                return new mediaInfo();
+            return queued[instance][nextPosition[instance]];
         }
         public void getData(eGetData dataType, string name, out object data)
         {
@@ -1372,21 +1401,7 @@ namespace OpenMobile
                     }
                     break;
                 case eGetData.GetSystemVolume:
-                    hal.snd("3|0");
-                    bool res = true;
-                    while (res == true)
-                    {
-                        Thread.Sleep(5);
-                        res = (hal.volume == null);
-                        if (res == false)
-                        {
-                            if (hal.volume[0] == "0")
-                            {
-                                data = hal.volume[1];
-                                hal.volume = null;
-                            }
-                        }
-                    }
+                    getData(eGetData.GetSystemVolume, name, "0", out data);
                     return;
                 case eGetData.GetFirmwareInfo:
                     plugin = Core.pluginCollection.Find(p => p.pluginName == name);
@@ -1441,6 +1456,23 @@ namespace OpenMobile
                                 data= currentTunedContent[ret].playbackPosition;
                         else
                             data = currentMediaPlayer[ret].getCurrentPosition(ret);
+                    }
+                    return;
+                case eGetData.GetSystemVolume:
+                    hal.snd("3|"+param);
+                    bool res = true;
+                    while (res == true)
+                    {
+                        Thread.Sleep(5);
+                        res = (hal.volume == null);
+                        if (res == false)
+                        {
+                            if (hal.volume[0] == param)
+                            {
+                                data = int.Parse(hal.volume[1]);
+                                hal.volume = null;
+                            }
+                        }
                     }
                     return;
                 case eGetData.GetScaleFactors:
@@ -1527,6 +1559,15 @@ namespace OpenMobile
                     if (plugin == null)
                         return;
                     data = ((INavigation)plugin).Destination;
+                    return;
+                case eGetData.GetSupportedBands:
+                    {
+                        if (int.TryParse(param, out ret) == true)
+                        {
+                            if (currentTunedContent[ret] != null)
+                                data = currentTunedContent[ret].getSupportedBands(ret);
+                        }
+                    }
                     return;
             }
         }

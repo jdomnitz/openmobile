@@ -26,7 +26,7 @@ namespace OMSettings
             OK.Name = "OMSettings.OK";
             OK.OnClick += new userInteraction(Save_OnClick);
             OK.Transition = eButtonTransition.None;
-            OMLabel Heading = new OMLabel(300, 80, 600, 100);
+            OMLabel Heading = new OMLabel(200, 80, 800, 100);
             Heading.Font = new Font("Microsoft Sans Serif", 36F);
             Heading.Text = s.Title;
             Heading.Name = "Label";
@@ -75,6 +75,40 @@ namespace OMSettings
                     ret.Add(text);
                     ofset += 60;
                     break;
+                case SettingTypes.Folder:
+                    OMLabel fdesc = new OMLabel(220, ofset, 200, 50);
+                    fdesc.Text = s.Description + ":";
+                    fdesc.Font = new Font("Microsoft Sans Serif", 24F);
+                    fdesc.Name = title;
+                    fdesc.Tag = s.Name;
+                    ret.Add(fdesc);
+                    OMTextBox folder = new OMTextBox(450, ofset, 500, 50);
+                    folder.Font = new Font("Microsoft Sans Serif", 28F);
+                    folder.TextAlignment = Alignment.CenterLeft;
+                    folder.OnClick += new userInteraction(folder_OnClick);
+                    folder.Name = title;
+                    folder.Text = s.Value;
+                    folder.Tag = s.Name;
+                    ret.Add(folder);
+                    ofset += 60;
+                    break;
+                case SettingTypes.File:
+                    OMLabel fldesc = new OMLabel(220, ofset, 200, 50);
+                    fldesc.Text = s.Description + ":";
+                    fldesc.Font = new Font("Microsoft Sans Serif", 24F);
+                    fldesc.Name = title;
+                    fldesc.Tag = s.Name;
+                    ret.Add(fldesc);
+                    OMTextBox file = new OMTextBox(450, ofset, 500, 50);
+                    file.Font = new Font("Microsoft Sans Serif", 28F);
+                    file.TextAlignment = Alignment.CenterLeft;
+                    file.OnClick += new userInteraction(file_OnClick);
+                    file.Name = title;
+                    file.Text = s.Value;
+                    file.Tag = s.Name;
+                    ret.Add(file);
+                    ofset += 60;
+                    break;
                 case SettingTypes.Password:
                     OMLabel pdesc = new OMLabel(220, ofset, 200, 50);
                     pdesc.Text = s.Description + ":";
@@ -93,8 +127,53 @@ namespace OMSettings
                     ret.Add(ptext);
                     ofset += 60;
                     break;
+                case SettingTypes.Range:
+                    OMLabel rdesc = new OMLabel(220, ofset, 200, 50);
+                    rdesc.Text = s.Description + ":";
+                    rdesc.Font = new Font("Microsoft Sans Serif", 24F);
+                    rdesc.Name = title;
+                    rdesc.Tag = s.Name;
+                    ret.Add(rdesc);
+                    if (s.Values.Count != 2)
+                        break;
+                    OMSlider range = new OMSlider(450, ofset+15, 500, 30,12,20);
+                    range.Slider = theHost.getSkinImage("Slider");
+                    range.SliderBar = theHost.getSkinImage("Slider.Bar");
+                    range.Minimum = int.Parse(s.Values[0]);
+                    range.Maximum = int.Parse(s.Values[1]);
+                    range.Value = int.Parse(s.Value);
+                    range.Tag = s.Name;
+                    range.OnSliderMoved += new OMSlider.slidermoved(range_OnSliderMoved);
+                    ret.Add(range);
+                    ofset += 60;
+                    break;
             }
             return ret;
+        }
+
+        void range_OnSliderMoved(OMSlider sender, int screen)
+        {
+            Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
+            s.Value = ((OMSlider)sender).Value.ToString();
+            collection.OnSettingChanged(s);
+        }
+
+        void file_OnClick(OMControl sender, int screen)
+        {
+            OpenMobile.helperFunctions.General.getFilePath path = new OpenMobile.helperFunctions.General.getFilePath(theHost);
+            ((OMTextBox)sender).Text = path.getFile(screen, "OMSettings", sender.Name);
+            Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
+            s.Value = ((OMTextBox)sender).Text;
+            collection.OnSettingChanged(s);
+        }
+
+        void folder_OnClick(OMControl sender, int screen)
+        {
+            OpenMobile.helperFunctions.General.getFilePath path = new OpenMobile.helperFunctions.General.getFilePath(theHost);
+            ((OMTextBox)sender).Text = path.getFolder(screen, "OMSettings", sender.Name);
+            Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
+            s.Value = ((OMTextBox)sender).Text;
+            collection.OnSettingChanged(s);
         }
 
         void cursor_OnClick(OMControl sender, int screen)

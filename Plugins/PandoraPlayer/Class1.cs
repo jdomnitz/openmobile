@@ -43,7 +43,10 @@ namespace PandoraPlayer
                 return true;
             }
         }
-
+        public bool scanBand(int instance)
+        {
+            return false; //Not Supported
+        }
         public bool scanForward(int instance)
         {
             if (client != null)
@@ -84,10 +87,13 @@ namespace PandoraPlayer
             stationInfo info=new stationInfo();
             info.HD=true;
             info.signal=5;
-            info.stationName= client.CurrentStation.Name;
-            info.stationID=client.CurrentStation.SID;
+            if (client.CurrentStation != null)
+            {
+                info.stationName = client.CurrentStation.Name;
+                info.stationID = client.CurrentStation.SID;
+            }
             info.Channels = 2;
-            info.Bitrate = 196000;
+            info.Bitrate = 196;
             return info;
         }
 
@@ -129,7 +135,13 @@ namespace PandoraPlayer
         private void initialize()
         {
             using (PluginSettings settings = new PluginSettings())
+            {
                 client.username = settings.getSetting("Pandora.Username");
+                int volume;
+                if (int.TryParse(settings.getSetting("Pandora.Volume"), out volume))
+                    setVolume(0, volume);
+
+            }
             Personal.readInfo();
             client.password = Personal.getPassword(Personal.ePassword.Pandora, "Pandora1");
             if ((client.password != "") && (client.username != ""))
@@ -295,14 +307,26 @@ namespace PandoraPlayer
         {
             theHost = host;
             theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.closeProgram)
+                fadeOut();
         }
         void changed(Setting s)
         {
+            if (s.Name == "Pandora.Volume")
+            {
+                this.setVolume(0, int.Parse(s.Value));
+                return;
+            }
             if (s.Name == "Pandora.Username")
                 using (PluginSettings setting = new PluginSettings())
                     setting.setSetting(s.Name, s.Value);
-            else
+            else if (s.Name == "Pandora.Password")
             {
                 Personal.readInfo();
                 Personal.setPassword(Personal.ePassword.Pandora, s.Value, "Pandora1");
@@ -320,6 +344,8 @@ namespace PandoraPlayer
                     settings.Add(new Setting(SettingTypes.Text, "Pandora.Username", "", "Username",setting.getSetting("Pandora.Username")));
                     Personal.readInfo();
                     settings.Add(new Setting(SettingTypes.Password, "Pandora.Password", "", "Password", Personal.getPassword(Personal.ePassword.Pandora,"Pandora1")));
+                    string volume=setting.getSetting("Pandora.Volume");
+                    settings.Add(new Setting(SettingTypes.Range,"Pandora.Volume","","Volume",null,new List<string>(new string[]{"0","100"}), (volume=="")?"100":volume));
                 }
                 settings.OnSettingChanged += new SettingChanged(changed);
             }
@@ -359,17 +385,19 @@ namespace PandoraPlayer
                 }
             }
         }
-
+        private bool fading = false;
         private void fadeOut()
         {
+            fading = true;
             if (client != null)
             {
-                for (int i = 10; i > 0; i--)
+                for (int i = getVolume(0)/10; i > 0; i--)
                 {
                     client.Volume = i * 10;
                     Thread.Sleep(150);
                 }
             }
+            fading = false;
         }
 
         #endregion
@@ -380,7 +408,10 @@ namespace PandoraPlayer
         {
             if (client != null)
             {
-                fadeOut();
+                while (fading)
+                    Thread.Sleep(100);
+                using (PluginSettings settings = new PluginSettings())
+                    settings.setSetting("Pandora.Volume", getVolume(0).ToString());
                 client.Dispose();
             }
         }
