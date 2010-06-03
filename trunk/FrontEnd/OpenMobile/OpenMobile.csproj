@@ -16,7 +16,7 @@
     <ManifestCertificateThumbprint>7F0D60C71A0F275E771EF96670EDBE99E29ACDB3</ManifestCertificateThumbprint>
     <ManifestKeyFile>OpenMobile_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetZone>Custom</TargetZone>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
