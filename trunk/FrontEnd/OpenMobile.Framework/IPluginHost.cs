@@ -215,6 +215,19 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         mediaInfo getNextMedia(int instance);
         /// <summary>
+        /// Returns true if random playback is enabled.  False otherwise.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        bool getRandom(int instance);
+        /// <summary>
+        /// Returns true if successful
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        bool setRandom(int instance, bool value);
+        /// <summary>
         /// Returns a list of the currently playing media
         /// </summary>
         List<mediaInfo> getPlaylist(int instance);

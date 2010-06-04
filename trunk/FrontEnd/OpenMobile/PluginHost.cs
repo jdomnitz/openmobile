@@ -1317,7 +1317,7 @@ namespace OpenMobile
                         }
                         catch (System.IO.FileNotFoundException)
                         {
-                            return new imageItem("MISSING");
+                            return imageItem.MISSING;
                         }
                     }
                 }
@@ -1337,17 +1337,27 @@ namespace OpenMobile
             }
         }
         private bool[] random;
-        public bool getRandom(int screen)
+        public bool getRandom(int instance)
         {
+            if (instanceCount == -1)
+                return false;
             if (random == null)
-                random = new bool[screenCount];
-            return random[screen];
+                random = new bool[instanceCount];
+            return random[instance];
         }
-        public void setRandom(int screen, bool value)
+        public bool setRandom(int instance, bool value)
         {
+            if (instanceCount == -1)
+                return false;
             if (random == null)
-                random = new bool[screenCount];
-            random[screen]=value;
+                random = new bool[instanceCount];
+            random[instance]=value;
+            if (value)
+                raiseMediaEvent(eFunction.RandomChanged, instance, "Enabled");
+            else
+                raiseMediaEvent(eFunction.RandomChanged, instance, "Disabled");
+            generateNext(instance);
+            return true;
         }
         public mediaInfo getPlayingMedia(int instance)
         {

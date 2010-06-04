@@ -141,7 +141,10 @@ namespace OMPlayer
     public mediaInfo getMediaInfo(int instance)
     {
         checkInstance(instance);
-        return player[instance].nowPlaying;
+        if (player[instance].currentState == ePlayerStatus.Stopped)
+            return new mediaInfo();
+        else
+            return player[instance].nowPlaying;
     }
 
     public float getPlaybackSpeed(int instance)
@@ -326,6 +329,11 @@ namespace OMPlayer
             player[instance].currentState = ePlayerStatus.Playing;
             OnMediaEvent(eFunction.Play, instance, "");
             return true;
+        }
+        else
+        {
+            if ((player[instance].nowPlaying.Location != null) && (player[instance].nowPlaying.Location != ""))
+                theHost.execute(eFunction.Play, instance.ToString(), player[instance].nowPlaying.Location);
         }
         return false;
     }
@@ -515,6 +523,8 @@ namespace OMPlayer
             IntPtr arg1;
             IntPtr arg2;
             FilterState fs;
+            if (mediaEventEx == null)
+                return;
             mediaEventEx.GetEvent(out e, out arg1, out arg2, 0);
             switch (e)
             {
@@ -574,7 +584,7 @@ namespace OMPlayer
         {
             lock (this)
             {
-                if (currentState == ePlayerStatus.Playing)
+                if ((currentState != ePlayerStatus.Stopped) && (currentState != ePlayerStatus.Ready))
                     stop();
                 if (PlayMovieInWindow(url) == false)
                     return false;
@@ -618,7 +628,7 @@ namespace OMPlayer
         }
         public bool stop()
         {
-            if ((currentState == ePlayerStatus.Paused) || (currentState == ePlayerStatus.Playing))
+            if ((currentState == ePlayerStatus.Paused) || (currentState == ePlayerStatus.Playing) || (currentState == ePlayerStatus.FastForwarding) || (currentState == ePlayerStatus.Rewinding))
             {
             retry:
                 lock (this)
@@ -644,7 +654,6 @@ namespace OMPlayer
                         theHost.sendMessage("UI", "OMPlayer", "HideMediaControls" + i.ToString());
             }
             isAudioOnly = true;
-            nowPlaying = new mediaInfo();
             OnMediaEvent(eFunction.Stop, instance, "");
             return true;
         }
@@ -746,6 +755,7 @@ namespace OMPlayer
                 return false;
             lock (this)
             {
+                currentState = ePlayerStatus.Transitioning;
                 graphBuilder = (IGraphBuilder) new FilterGraph();
                 IBaseFilter source = null;
                 hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance), null, "OutputDevice", out source);

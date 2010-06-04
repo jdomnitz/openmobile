@@ -133,7 +133,6 @@ namespace OpenMobile
             OMPanel p = new OMPanel();
             theHost = host;
             manager = new ScreenManager(host.ScreenCount);
-            //blank.name = "EMPTY";
             tick.BeginInit();
             tick.EndInit();
             tick.Elapsed += new ElapsedEventHandler(tick_Elapsed);
@@ -189,7 +188,7 @@ namespace OpenMobile
             OMImage mediaBar = new OMImage(0,620,1000,140);
             mediaBar.Image = theHost.getSkinImage("MediaBar", true);
             mediaBar.Transparency = 80;
-            OMSlider slider = new OMSlider(20,635,940,25,12,40);
+            OMSlider slider = new OMSlider(20,635,960,25,12,40);
             slider.Name = "UI.Slider";
             slider.Slider = theHost.getSkinImage("Slider");
             slider.SliderBar = theHost.getSkinImage("Slider.Bar");
@@ -224,11 +223,15 @@ namespace OpenMobile
             skipBackwardButton.DownImage = theHost.getSkinImage("SkipBackward.Highlighted", true);
             skipBackwardButton.OnClick += new userInteraction(skipBackwardButton_OnClick);
             skipBackwardButton.Transition = eButtonTransition.None;
-            OMLabel elapsed = new OMLabel(840,650,140,100);
+            OMLabel elapsed = new OMLabel(878,650,140,100);
             elapsed.Name = "UI.Elapsed";
             elapsed.OutlineColor = Color.Blue;
             elapsed.Format = eTextFormat.Glow;
             elapsed.Font = new Font(FontFamily.GenericSansSerif,26F);
+            OMButton random = new OMButton(840, 650, 55, 40);
+            random.Image = theHost.getSkinImage("random");
+            random.DownImage = theHost.getSkinImage("random.Highlighted");
+            random.OnClick += new userInteraction(random_OnClick);
             //Speech
             OMImage imgSpeak = new OMImage(350, 200, 300, 300);
             imgSpeak.Name = "UI.imgSpeak";
@@ -284,6 +287,7 @@ namespace OpenMobile
             p.addControl(icon3);
             p.addControl(icon4);
             p.addControl(volume);
+            p.addControl(random);
             icons.OnIconsChanged += new IconManager.IconsChanged(icons_OnIconsChanged);
 
             p.BackgroundType = backgroundStyle.Gradiant;
@@ -295,6 +299,11 @@ namespace OpenMobile
             theHost.OnSystemEvent += theHost_OnSystemEvent;
             theHost.VideoPosition = new Rectangle(0, 100, 1000, 368);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void random_OnClick(OMControl sender, int screen)
+        {
+            theHost.setRandom(theHost.instanceForScreen(screen), (sender.Tag == null));
         }
 
         void vol_OnLongClick(OMControl sender, int screen)
@@ -636,6 +645,7 @@ namespace OpenMobile
                             p[15].Top -= 20;
                             p[16].Top -= 20;
                             p[17].Top -= 20;
+                            p[27].Top -= 20;
                     }
                 }
                 else
@@ -656,6 +666,7 @@ namespace OpenMobile
                         p[15].Top += 20;
                         p[16].Top += 20;
                         p[17].Top += 20;
+                        p[27].Top += 20;
                 }
                 timerIteration++;
                 if (theHost.GraphicsLevel==eGraphicsLevel.Standard)
@@ -794,6 +805,28 @@ namespace OpenMobile
                         ((OMButton)p[10]).DownImage = theHost.getSkinImage("Play.Highlighted");
                         ((OMLabel)p["UI.Elapsed"]).Text = "";
                         ((OMSlider)p["UI.Slider"]).Value = 0;
+                    }
+                }
+            }
+            else if (function == eFunction.RandomChanged)
+            {
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                {
+                    if (theHost.instanceForScreen(i) == instance)
+                    {
+                        OMButton b = (OMButton)manager[i][27];
+                        if (arg == "Disabled")
+                        {
+                            b.Image = theHost.getSkinImage("random");
+                            b.DownImage = theHost.getSkinImage("random.Highlighted");
+                            b.Tag = null;
+                        }
+                        else
+                        {
+                            b.Image = theHost.getSkinImage("randomOn");
+                            b.DownImage = theHost.getSkinImage("randomOn.Highlighted");
+                            b.Tag = "Enabled";
+                        }
                     }
                 }
             }
