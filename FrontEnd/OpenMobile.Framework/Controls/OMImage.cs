@@ -242,11 +242,11 @@ namespace OpenMobile.Controls
             else
             {
                 float tmp = 1;
-                if (this.Mode == modeType.transitioningIn)
+                if (this.Mode == eModeType.transitioningIn)
                 {
                     tmp = e.globalTransitionIn;
                 }
-                if (this.Mode == modeType.transitioningOut)
+                if (this.Mode == eModeType.transitioningOut)
                 {
                     tmp = e.globalTransitionOut;
                 }

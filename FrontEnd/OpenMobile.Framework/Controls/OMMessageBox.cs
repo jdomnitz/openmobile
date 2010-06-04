@@ -103,9 +103,9 @@ namespace OpenMobile.Controls
         public override void Render(Graphics g,renderingParams e)
         {
             float tmp = 1;
-            if (this.Mode == modeType.transitioningIn)
+            if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
-            if (this.Mode == modeType.transitioningOut)
+            if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
             height= (int)g.MeasureString(this.Text, Font, this.Width-1).Height+1;
             float letterHeight = g.MeasureString("A", Font).Height+1;

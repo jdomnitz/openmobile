@@ -109,6 +109,14 @@ namespace OpenMobile.Plugin
             this.Header = Header;
             this.Description = Description;
         }
+        /// <summary>
+        /// Creates a new Text, Numeric, File or Folder Setting
+        /// </summary>
+        /// <param name="Type"></param>
+        /// <param name="Name"></param>
+        /// <param name="Header"></param>
+        /// <param name="Description"></param>
+        /// <param name="Value"></param>
         public Setting(SettingTypes Type, string Name, string Header, string Description,string Value)
         {
             if ((Type == SettingTypes.MultiChoice) || (Type == SettingTypes.Range))
@@ -120,7 +128,7 @@ namespace OpenMobile.Plugin
             this.Value = Value;
         }
         /// <summary>
-        /// Creates a new MultiChoice setting
+        /// Creates a new MultiChoice or Range setting
         /// </summary>
         /// <param name="Type"></param>
         /// <param name="Name"></param>
@@ -137,7 +145,16 @@ namespace OpenMobile.Plugin
             this.Options = Options;
             this.Values = Values;
         }
-
+        /// <summary>
+        /// Creates a new MultiChoice or Range setting
+        /// </summary>
+        /// <param name="Type"></param>
+        /// <param name="Name"></param>
+        /// <param name="Header"></param>
+        /// <param name="Description"></param>
+        /// <param name="Options"></param>
+        /// <param name="Values"></param>
+        /// <param name="DefaultValue"></param>
         public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values,string DefaultValue)
         {
             this.Type = Type;
@@ -148,6 +165,9 @@ namespace OpenMobile.Plugin
             this.Values = Values;
             this.Value = DefaultValue;
         }
+        /// <summary>
+        /// A List containing True and False
+        /// </summary>
         public static List<string> BooleanList = new List<string>(new string[] { "True", "False" });
     }
     /// <summary>
@@ -155,16 +175,32 @@ namespace OpenMobile.Plugin
     /// </summary>
     /// <param name="setting"></param>
     public delegate void SettingChanged(Setting setting);
+    /// <summary>
+    /// A collection of Settings
+    /// </summary>
     public sealed class Settings:List<Setting>
     {
+        /// <summary>
+        /// Occurs when a setting inside the collection is changed
+        /// </summary>
         public SettingChanged OnSettingChanged;
-
+        /// <summary>
+        /// Raises the OnSettingChanged event
+        /// </summary>
+        /// <param name="setting"></param>
         public void changeSetting(Setting setting)
         {
             if (OnSettingChanged != null)
                 OnSettingChanged(setting);
         }
+        /// <summary>
+        /// The title for this settings collection
+        /// </summary>
         public string Title = "Settings";
+        /// <summary>
+        /// Creates a new settings collection with the given title
+        /// </summary>
+        /// <param name="title"></param>
         public Settings(string title)
         {
             Title = title;

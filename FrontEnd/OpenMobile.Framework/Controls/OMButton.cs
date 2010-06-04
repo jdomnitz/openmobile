@@ -11,7 +11,7 @@ namespace OpenMobile.Controls
     /// <param name="sender"></param>
     /// <param name="screen"></param>
     /// <param name="mode"></param>
-    public delegate void ModeChange(OMButton sender, int screen, modeType mode);
+    public delegate void ModeChange(OMButton sender, int screen, eModeType mode);
     /// <summary>
     /// A clickable button control
     /// </summary>
@@ -38,7 +38,7 @@ namespace OpenMobile.Controls
         private imageItem image;
         private imageItem downImage;
         private int transparency = 100;
-        private Angle orientation;
+        private eAngle orientation;
         private eButtonTransition transition = eButtonTransition.BoxOut;
         
         /// <summary>
@@ -50,7 +50,7 @@ namespace OpenMobile.Controls
         /// The rendering mode of the control
         /// </summary>
         [Browsable(false)]
-        public override modeType Mode
+        public override eModeType Mode
         {
             get
             {
@@ -211,7 +211,7 @@ namespace OpenMobile.Controls
         /// Sets the rotation of the control
         /// </summary>
         [CategoryAttribute("Graphical"), DescriptionAttribute("Sets the rotation of the control")]
-        public Angle Orientation
+        public eAngle Orientation
         {
             get
             {
@@ -223,7 +223,7 @@ namespace OpenMobile.Controls
                 {
                     if (image.image == null)
                         return;
-                    if ((orientation == Angle.FlipHorizontal) || (value == Angle.FlipHorizontal))
+                    if ((orientation == eAngle.FlipHorizontal) || (value == eAngle.FlipHorizontal))
                     {
                         image.image = (Image)image.image.Clone();
                         image.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
@@ -238,7 +238,7 @@ namespace OpenMobile.Controls
                             downImage.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
                         }
                     }
-                    else if ((orientation == Angle.FlipVertical) || (value == Angle.FlipVertical))
+                    else if ((orientation == eAngle.FlipVertical) || (value == eAngle.FlipVertical))
                     {
                         image.image = (Image)image.image.Clone();
                         image.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
@@ -268,7 +268,7 @@ namespace OpenMobile.Controls
             this.Width = 300;
             this.Height = 120;
             this.TextAlignment = Alignment.CenterCenter;
-            this.Format = textFormat.Normal;
+            this.Format = eTextFormat.Normal;
         }
         /// <summary>
         /// Creates a new OMButton
@@ -282,7 +282,7 @@ namespace OpenMobile.Controls
             this.Width = 300;
             this.Height = 120;
             this.TextAlignment = Alignment.CenterCenter;
-            this.Format = textFormat.Normal;
+            this.Format = eTextFormat.Normal;
         }
         /// <summary>
         /// Initializes a button with a starting location and size
@@ -298,7 +298,7 @@ namespace OpenMobile.Controls
             this.Width = w;
             this.Height = h;
             this.TextAlignment = Alignment.CenterCenter;
-            this.Format = textFormat.Normal;
+            this.Format = eTextFormat.Normal;
         }
         /// <summary>
         /// Draws the control
@@ -314,12 +314,12 @@ namespace OpenMobile.Controls
                 ColorMatrix cm = new ColorMatrix();
                 float tmp = 1;
                 cm.Matrix00 = cm.Matrix33 = cm.Matrix11 = cm.Matrix22 = cm.Matrix44 = 1;
-                if (this.Mode == modeType.transitioningIn)
+                if (this.Mode == eModeType.transitioningIn)
                     tmp = e.globalTransitionIn;
-                if ((this.Mode == modeType.transitioningOut) || (this.Mode == modeType.ClickedAndTransitioningOut))
+                if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                     tmp = e.globalTransitionOut;
                 cm.Matrix33 = tmp;
-                if ((this.Mode == modeType.Highlighted) && (this.FocusImage.image != null))
+                if ((this.Mode == eModeType.Highlighted) && (this.FocusImage.image != null))
                 {
                     cm.Matrix33 *= ((float)transparency / 100);
                     ia.SetColorMatrix(cm);
@@ -329,7 +329,7 @@ namespace OpenMobile.Controls
                     cm = null;
                     return;
                 }
-                else if ((this.Mode == modeType.Clicked) || (this.Mode == modeType.ClickedAndTransitioningOut))
+                else if ((this.Mode == eModeType.Clicked) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                 {
                     if (focusImage.image != null)
                     {

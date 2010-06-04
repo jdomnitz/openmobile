@@ -97,9 +97,9 @@ namespace PandoraPlayer
             return info;
         }
 
-        public tunedContentBand[] getSupportedBands(int instance)
+        public eTunedContentBand[] getSupportedBands(int instance)
         {
-            return new tunedContentBand[]{tunedContentBand.Other};
+            return new eTunedContentBand[]{eTunedContentBand.Other};
         }
 
         public bool setPowerState(int instance, bool powerState)
@@ -207,7 +207,7 @@ namespace PandoraPlayer
             return lst.ToArray();
         }
 
-        public bool setBand(int instance, OpenMobile.tunedContentBand band)
+        public bool setBand(int instance, OpenMobile.eTunedContentBand band)
         {
             return false;
         }
@@ -215,7 +215,7 @@ namespace PandoraPlayer
         public tunedContentInfo getStatus(int instance)
         {
             tunedContentInfo info = new tunedContentInfo();
-            info.band = tunedContentBand.Other;
+            info.band = eTunedContentBand.Other;
             info.channels = 2;
             info.powerState = (client != null);
             info.currentStation = getStationInfo(instance);

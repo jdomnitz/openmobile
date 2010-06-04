@@ -28,7 +28,7 @@ using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
-    public sealed class UIPlugin:IHighLevel
+    public sealed class UI:IHighLevel
     {
         private IPluginHost theHost;
         private System.Timers.Timer tick = new System.Timers.Timer();
@@ -144,13 +144,13 @@ namespace OpenMobile
             statusReset.Elapsed += new ElapsedEventHandler(statusReset_Elapsed);
             OMLabel trackTitle = new OMLabel(240,3,390,28);
             trackTitle.TextAlignment = Alignment.CenterLeftEllipsis;
-            trackTitle.Format = textFormat.BoldShadow;
+            trackTitle.Format = eTextFormat.BoldShadow;
             OMLabel trackAlbum = new OMLabel(240,34,390,28);
             trackAlbum.TextAlignment = Alignment.CenterLeftEllipsis;
-            trackAlbum.Format = textFormat.BoldShadow;
+            trackAlbum.Format = eTextFormat.BoldShadow;
             OMLabel trackArtist = new OMLabel(240,64,390,28);
             trackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
-            trackArtist.Format = textFormat.DropShadow;
+            trackArtist.Format = eTextFormat.DropShadow;
             OMImage cover = new OMImage(150,2,90,85);
             cover.Image = blank;
             OMButton mediaButton = new OMButton(9,533,160,70);
@@ -179,7 +179,7 @@ namespace OpenMobile
             vol.Image = theHost.getSkinImage("VolumeButton");
             vol.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
             vol.Name = "UI.vol";
-            vol.Mode = modeType.Resizing;
+            vol.Mode = eModeType.Resizing;
             vol.Transition = eButtonTransition.None;
             vol.OnClick += new userInteraction(vol_OnClick);
             vol.OnLongClick += new userInteraction(vol_OnLongClick);
@@ -227,7 +227,7 @@ namespace OpenMobile
             OMLabel elapsed = new OMLabel(840,650,140,100);
             elapsed.Name = "UI.Elapsed";
             elapsed.OutlineColor = Color.Blue;
-            elapsed.Format = textFormat.Glow;
+            elapsed.Format = eTextFormat.Glow;
             elapsed.Font = new Font(FontFamily.GenericSansSerif,26F);
             //Speech
             OMImage imgSpeak = new OMImage(350, 200, 300, 300);
@@ -235,7 +235,7 @@ namespace OpenMobile
             imgSpeak.Visible = false;
             OMLabel caption = new OMLabel(300, 150, 400, 50);
             caption.Font = new Font(FontFamily.GenericSerif, 48F);
-            caption.Format = textFormat.BoldShadow;
+            caption.Format = eTextFormat.BoldShadow;
             caption.Visible = false;
             caption.Name = "UI.caption";
             OMBasicShape shape = new OMBasicShape(0, 0, 1000, 600);
@@ -572,7 +572,7 @@ namespace OpenMobile
                     ((OMSlider)manager[j]["UI.Slider"]).Value = 0;
                 }else if ((i < ((OMSlider)manager[j]["UI.Slider"]).Maximum) && (i >= 0))
                 {
-                    if (((OMSlider)manager[j]["UI.Slider"]).Mode == modeType.Scrolling)
+                    if (((OMSlider)manager[j]["UI.Slider"]).Mode == eModeType.Scrolling)
                         return;
                     ((OMSlider)manager[j]["UI.Slider"]).Value = i;
                     ((OMLabel)manager[j]["UI.Elapsed"]).Text = (formatTime(i) + " " + formatTime(((OMSlider)manager[j]["UI.Slider"]).Maximum));
@@ -666,6 +666,12 @@ namespace OpenMobile
         void playButton_OnClick(OMControl sender, int screen)
         {
             object o = new object();
+            /*theHost.getData(eGetData.GetStationList, "Pandora", "0", out o);
+            if (o == null)
+                return;
+            stationInfo[] stations = (stationInfo[])o;
+            theHost.execute(eFunction.tuneTo, "0", stations[1].stationID);
+            return;*/
             theHost.getData(eGetData.GetMediaStatus, "", theHost.instanceForScreen(screen).ToString(), out o);
             if (o == null)
                 return;

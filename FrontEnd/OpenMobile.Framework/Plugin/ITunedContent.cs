@@ -63,7 +63,7 @@ namespace OpenMobile.Plugin
         /// Gets information on the Tuned Content's medium
         /// </summary>
         /// <returns></returns>
-        tunedContentBand[] getSupportedBands(int instance);
+        eTunedContentBand[] getSupportedBands(int instance);
         /// <summary>
         /// When powerstate is true, power on the device. When powerState is false, power off the device.
         /// </summary>
@@ -82,7 +82,7 @@ namespace OpenMobile.Plugin
         /// <param name="band">Band to activate</param>
         /// <param name="instance"></param>
         /// <returns>Returns true if successful.</returns>
-        bool setBand(int instance, tunedContentBand band);
+        bool setBand(int instance, eTunedContentBand band);
         /// <summary>
         /// Get the status of the tuned content
         /// </summary>

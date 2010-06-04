@@ -156,14 +156,14 @@ namespace OpenMobile
         }
 
         //Add physical keyboard input to the textbox
-        bool theHost_OnKeyPress(keypressType type, System.Windows.Forms.KeyEventArgs arg)
+        bool theHost_OnKeyPress(eKeypressType type, System.Windows.Forms.KeyEventArgs arg)
         {
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
                 OMTextBox text = (OMTextBox)manager[i]["Text"];
                 if (text.hooked() == false)
                     continue;
-                if (type == keypressType.KeyUp)
+                if (type == eKeypressType.KeyUp)
                 {
                     if ((arg.KeyValue > 64) && (arg.KeyValue < 91))
                         if ((caps == true) || (arg.Shift == true))

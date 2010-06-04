@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace OpenMobile.Controls
 {
-    public class VolumeBar:OMProgress, IMouse,IThrow
+    internal class VolumeBar:OMProgress, IMouse,IThrow
     {
         public userInteraction OnSliderMoved;
 

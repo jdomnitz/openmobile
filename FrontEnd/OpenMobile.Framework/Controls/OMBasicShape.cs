@@ -183,11 +183,11 @@ namespace OpenMobile.Controls
             // Start of code added by Borte
             // Basic shape didn't respect the transition values while rendering
             float tmp = 1;
-            if (this.Mode == modeType.transitioningIn)
+            if (this.Mode == eModeType.transitioningIn)
             {
                 tmp = e.globalTransitionIn;
             }
-            if (this.Mode == modeType.transitioningOut)
+            if (this.Mode == eModeType.transitioningOut)
             {
                 tmp = e.globalTransitionOut;
             }

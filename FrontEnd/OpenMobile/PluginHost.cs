@@ -143,6 +143,7 @@ namespace OpenMobile
             queued[instance].AddRange(source.GetRange(0, source.Count));
             if (queued[instance].Count>0)
                 generateNext(instance);
+            SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, instance, ""); });
             return true;
         }
         public int instanceForScreen(int screen)
@@ -425,7 +426,7 @@ namespace OpenMobile
                         if (hal != null)
                             hal.snd("44");
                         savePlaylists();
-                        raiseSystemEvent(eFunction.closeProgram, "", "", "");
+                        SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, "", "", ""); });
                     }
                     return true;
                 case eFunction.restartProgram:
@@ -1028,7 +1029,7 @@ namespace OpenMobile
                     }
                     return false;
                 case eFunction.backgroundOperationStatus:
-                    raiseSystemEvent(eFunction.backgroundOperationStatus, arg1, arg2, "");
+                    SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.backgroundOperationStatus, arg1, arg2, ""); });
                     return true;
                 case eFunction.sendKeyPress:
                     if (int.TryParse(arg1, out ret) == true)
@@ -1041,7 +1042,7 @@ namespace OpenMobile
                 case eFunction.gesture:
                     if (int.TryParse(arg1, out ret) == true)
                     {
-                        raiseSystemEvent(eFunction.gesture, arg1, arg2, history.CurrentItem(ret).pluginName);
+                        SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.gesture, arg1, arg2, history.CurrentItem(ret).pluginName); });
                         return true;
                     }
                     return false;
@@ -1069,7 +1070,7 @@ namespace OpenMobile
                     {
                         if (currentTunedContent[ret] == null)
                             return false;
-                        return currentTunedContent[ret].setBand(ret, (tunedContentBand)Enum.Parse(typeof(tunedContentBand), arg2, false));
+                        return currentTunedContent[ret].setBand(ret, (eTunedContentBand)Enum.Parse(typeof(eTunedContentBand), arg2, false));
                     }
                     return false;
                 case eFunction.setMonitorBrightness:
@@ -1263,7 +1264,7 @@ namespace OpenMobile
             if (e == eFunction.nextMedia)
                 execute(eFunction.nextMedia, instance.ToString());
         }
-        public bool raiseKeyPressEvent(keypressType type,KeyEventArgs arg)
+        public bool raiseKeyPressEvent(eKeypressType type,KeyEventArgs arg)
         {
             try
             {

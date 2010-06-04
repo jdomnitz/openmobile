@@ -560,6 +560,8 @@ namespace OMPlayer
                     if (hr == -2147467262)
                     {
                         isAudioOnly = true;
+                        videoWindow = null;
+                        basicVideo = null;
                     }
                     else
                     {

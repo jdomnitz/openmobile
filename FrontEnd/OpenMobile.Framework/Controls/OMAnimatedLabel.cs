@@ -272,9 +272,9 @@ namespace OpenMobile.Controls
             t.Enabled = this.hooked();
             if (Text.Length == 0)
                 return;
-            if (this.Mode == modeType.transitioningIn)
+            if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
-            if (this.Mode == modeType.transitioningOut)
+            if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
             switch (animation)
             {

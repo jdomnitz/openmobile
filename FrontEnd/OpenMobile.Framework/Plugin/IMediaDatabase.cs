@@ -199,7 +199,10 @@ namespace OpenMobile.Plugin
         /// <param name="append"></param>
         /// <returns></returns>
         bool writePlaylist(List<string> URLs,string name,bool append);
-
+        /// <summary>
+        /// Returns a list of playlists available in the database
+        /// </summary>
+        /// <returns></returns>
         List<string> listPlaylists();
         #endregion
 

@@ -86,6 +86,13 @@ namespace OpenMobile.Media
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Writes a playlist to the database
+        /// </summary>
+        /// <param name="theHost"></param>
+        /// <param name="name"></param>
+        /// <param name="playlist"></param>
+        /// <returns></returns>
         public static bool writePlaylistToDB(IPluginHost theHost, string name, List<mediaInfo> playlist)
         {
             object o;
@@ -117,7 +124,12 @@ namespace OpenMobile.Media
             ret.TrimExcess();
             return ret;
         }
-
+        /// <summary>
+        /// Reads a playlist from the database
+        /// </summary>
+        /// <param name="theHost"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name)
         {
             object o=null;

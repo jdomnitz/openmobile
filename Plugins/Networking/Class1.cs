@@ -33,6 +33,8 @@ namespace Networking
 
         public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)
         {
+            //theHost.execute(eFunction.loadTunedContent, "0", "Pandora");
+            theHost.execute(eFunction.Play,"0",@"C:\Users\Public\Videos\Sample Videos\Wildlife.wmv");
             return null;
         }
 

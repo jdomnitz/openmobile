@@ -106,7 +106,7 @@ namespace OMDir
             OMLabel caption = new OMLabel(275, 95, 400, 60);
             caption.OutlineColor = Color.FromArgb(120, Color.PowderBlue);
             caption.Font = new Font(FontFamily.GenericSansSerif, 34F);
-            caption.Format = textFormat.Glow;
+            caption.Format = eTextFormat.Glow;
             OMButton top = new OMButton(20, 105, 0, 50);
             top.Text = "Up One Level";
             top.Image = theHost.getSkinImage("Full");

@@ -24,6 +24,9 @@ using OpenMobile.Data;
 
 namespace OpenMobile
 {
+    /// <summary>
+    /// Built in plugins
+    /// </summary>
     public static class BuiltInComponents
     {
         /// <summary>
@@ -48,6 +51,10 @@ namespace OpenMobile
             }
         }
         private static OMPanel about;
+        /// <summary>
+        /// Returns an About panel for display
+        /// </summary>
+        /// <returns></returns>
         public static OMPanel AboutPanel()
         {
             if (about == null)

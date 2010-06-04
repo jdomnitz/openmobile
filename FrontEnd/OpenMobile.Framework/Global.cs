@@ -31,7 +31,7 @@ namespace OpenMobile
     /// <summary>
     /// The rendering mode
     /// </summary>
-    public enum modeType {
+    public enum eModeType {
         /// <summary>
         /// Normal
         /// </summary>
@@ -80,7 +80,7 @@ namespace OpenMobile
     /// <summary>
     /// Text format arguments
     /// </summary>
-    public enum textFormat {
+    public enum eTextFormat {
         /// <summary>
         /// Normal
         /// </summary>
@@ -221,7 +221,7 @@ namespace OpenMobile
     /// <summary>
     /// The angle to rotate the control
     /// </summary>
-    public enum Angle {
+    public enum eAngle {
         /// <summary>
         /// Normal
         /// </summary>
@@ -248,7 +248,7 @@ namespace OpenMobile
             /// <summary>
             /// Text Formatting
             /// </summary>
-            public textFormat textFormat = textFormat.Normal;
+            public eTextFormat textFormat = eTextFormat.Normal;
             /// <summary>
             /// The text alignment
             /// </summary>
@@ -269,6 +269,9 @@ namespace OpenMobile
             /// The outline/secondary color
             /// </summary>
             public Color outlineColor = Color.Black;
+            /// <summary>
+            /// The horizontal ofset of the item's text
+            /// </summary>
             public int Offset = 0;
         }
         /// <summary>
@@ -382,7 +385,13 @@ namespace OpenMobile
             this.tag = tag;
             this.subitemFormat = subitemFormat;
         }
-
+        /// <summary>
+        /// Creates a new list item
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="subitem"></param>
+        /// <param name="img"></param>
+        /// <param name="subitemFormat"></param>
         public OMListItem(string text, string subitem, Image img, subItemFormat subitemFormat)//Added by Borte
         {
             this.text = text;
@@ -543,7 +552,7 @@ namespace OpenMobile
     /// <summary>
     /// The type of keyboard event that just occured
     /// </summary>
-    public enum keypressType
+    public enum eKeypressType
     {
         /// <summary>
         /// Unknown
@@ -1019,6 +1028,10 @@ namespace OpenMobile
         /// </summary>
         LoadFailedRetryRequested=2,
         /// <summary>
+        /// Load failed but this was not the result of a crash.  Plugin will be unloaded.
+        /// </summary>
+        LoadFailedGracefulUnloadRequested=3,
+        /// <summary>
         /// Load failed or an unknown error occured.  Plugin will be unloaded. (Occurs automatically if an uncaught error is thrown)
         /// </summary>
         LoadFailedUnloadRequested=10
@@ -1312,7 +1325,6 @@ namespace OpenMobile
     /// </summary>
     public enum ePriority
     {
-
         /// <summary>
         /// Low Priority
         /// </summary>
@@ -1458,7 +1470,7 @@ namespace OpenMobile
         /// <summary>
         /// Current band
         /// </summary>
-        public tunedContentBand band;
+        public eTunedContentBand band;
         /// <summary>
         /// Status
         /// </summary>
@@ -1472,6 +1484,9 @@ namespace OpenMobile
         /// </summary>
         public stationInfo currentStation;
     }
+    /// <summary>
+    /// The current status of the Tuned Content Plugin
+    /// </summary>
     public enum eTunedContentStatus
     {
         /// <summary>
@@ -1503,7 +1518,7 @@ namespace OpenMobile
     /// <summary>
     /// Type of Tuned Content
     /// </summary>
-    public enum tunedContentBand
+    public enum eTunedContentBand
     {
         /// <summary>
         /// None or Unknown
@@ -1560,7 +1575,13 @@ namespace OpenMobile
         /// Retrieves the signal strength of the network connection. Strength should be represented as positive numbers where higher is stronger. Range is plugin specific (0-x). Returns 0 for not applicable.
         /// </summary>
         public uint signalStrength;
-
+        /// <summary>
+        /// Creates a new connection info
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="id"></param>
+        /// <param name="speed"></param>
+        /// <param name="signal"></param>
         public connectionInfo(string name, string id, int speed, uint signal)
         {
             NetworkName = name;
@@ -2038,7 +2059,15 @@ namespace OpenMobile
         /// Bitrate (bits/second)
         /// </summary>
         public int Bitrate;
+        /// <summary>
+        /// Creates a new stationInfo
+        /// </summary>
         public stationInfo() { }
+        /// <summary>
+        /// Creates a new stationInfo
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="id"></param>
         public stationInfo(string name, string id)
         {
             stationName = name;
@@ -2275,6 +2304,6 @@ namespace OpenMobile
         /// <summary>
         /// The current rendering mode of the rendering window
         /// </summary>
-        public modeType currentMode=modeType.Normal;
+        public eModeType currentMode=eModeType.Normal;
     }
 }

@@ -134,4 +134,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PreBuildEvent>EnvironmentSetup.exe</PreBuildEvent>
+  </PropertyGroup>
 </Project>
