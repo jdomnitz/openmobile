@@ -81,8 +81,8 @@ namespace OpenMobile
             }
             set
             {
-                if ((varHighlighted != null) && (varHighlighted != value) && (varHighlighted.Mode == modeType.Highlighted))
-                    varHighlighted.Mode = modeType.Normal;
+                if ((varHighlighted != null) && (varHighlighted != value) && (varHighlighted.Mode == eModeType.Highlighted))
+                    varHighlighted.Mode = eModeType.Normal;
                 varHighlighted = value;
             }
         }
@@ -113,7 +113,7 @@ namespace OpenMobile
         private void paintIdentity()
         {
             Graphics g = Graphics.FromHwnd(this.Handle);
-            Renderer.renderText(g, 0, 0, this.Width, this.Height, (screen+1).ToString(), new Font(FontFamily.GenericSansSerif, 300F), textFormat.Outline, Alignment.CenterCenter, 1F,Color.White,Color.Black);
+            Renderer.renderText(g, 0, 0, this.Width, this.Height, (screen+1).ToString(), new Font(FontFamily.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, 1F,Color.White,Color.Black);
             Thread.Sleep(1000);
             Refresh();
         }
@@ -184,13 +184,13 @@ namespace OpenMobile
                 c = newP.getControl(i);
                 if (p.contains(c) == false)
                 {
-                    c.Mode = modeType.transitioningIn;
+                    c.Mode = eModeType.transitioningIn;
                     c.UpdateThisControl += UpdateThisControl;
                     p.addControl(c);
                 }
                 else
                 {
-                    c.Mode = modeType.transitionLock;
+                    c.Mode = eModeType.transitionLock;
                 }
             }
             p.DoubleClickable |= newP.DoubleClickable;
@@ -212,11 +212,11 @@ namespace OpenMobile
         public void transitionOutEverything()
         {
             if (highlighted != null)
-                highlighted.Mode = modeType.Normal;
+                highlighted.Mode = eModeType.Normal;
             highlighted = null;
             for (int i = Core.theHost.RenderFirst; i < p.controlCount; i++)
-                if (p.getControl(i).Mode != modeType.transitionLock)
-                    p[i].Mode = modeType.transitioningOut;
+                if (p.getControl(i).Mode != eModeType.transitionLock)
+                    p[i].Mode = eModeType.transitioningOut;
             for (int i = backgroundQueue.Count - 1; i > 0; i--)
                 backgroundQueue.RemoveAt(i);
             for (int i = 0; i < backgroundQueue.Count; i++)
@@ -227,11 +227,11 @@ namespace OpenMobile
         public void transitionOutPanel(OMPanel oldP)
         {
             if (highlighted != null)
-                highlighted.Mode = modeType.Normal;
+                highlighted.Mode = eModeType.Normal;
             highlighted = null;
             for (int i = 0; i < oldP.controlCount; i++)
-                if (oldP.getControl(i).Mode != modeType.transitionLock)
-                    oldP[i].Mode = modeType.transitioningOut;
+                if (oldP.getControl(i).Mode != eModeType.transitionLock)
+                    oldP[i].Mode = eModeType.transitioningOut;
             backgroundQueue.Remove(oldP);
             for (int i = 0; i < backgroundQueue.Count; i++)
                 p.DoubleClickable |= backgroundQueue[i].DoubleClickable;
@@ -260,20 +260,20 @@ namespace OpenMobile
             }
             for (int i = p.controlCount - 1; i >= 0; i--)
             {
-                if ((p.getControl(i).Mode == modeType.transitioningOut) || (p.getControl(i).Mode == modeType.ClickedAndTransitioningOut))
+                if ((p.getControl(i).Mode == eModeType.transitioningOut) || (p.getControl(i).Mode == eModeType.ClickedAndTransitioningOut))
                 {
                     p[i].UpdateThisControl -= UpdateThisControl;
-                    p[i].Mode = modeType.Normal;
+                    p[i].Mode = eModeType.Normal;
                     p.Remove(p.getControl(i));
                 }
                 else
-                    p.getControl(i).Mode = modeType.Normal;
+                    p.getControl(i).Mode = eModeType.Normal;
             }
             if (transType>eGlobalTransition.Crossfade)
                  cleanupTransition();
             highlighted = null;
             if (lastClick != null)
-                lastClick.Mode = modeType.Normal;
+                lastClick.Mode = eModeType.Normal;
             lastClick = null;
             RenderingWindow_MouseMove(null,new MouseEventArgs(MouseButtons.None,0,Cursor.Position.X,Cursor.Position.Y,0));
             Invalidate();
@@ -294,9 +294,9 @@ namespace OpenMobile
                 for (int i = Core.theHost.RenderFirst; i < p.controlCount; i++)
                     if (inBounds(p[i].toRegion(), e.ClipRectangle))
                     {
-                        if (p[i].Mode == modeType.transitioningIn)
+                        if (p[i].Mode == eModeType.transitioningIn)
                             modifyIn(g);
-                        else if ((p[i].Mode == modeType.transitioningOut) || (p[i].Mode == modeType.ClickedAndTransitioningOut))
+                        else if ((p[i].Mode == eModeType.transitioningOut) || (p[i].Mode == eModeType.ClickedAndTransitioningOut))
                             modifyOut(g);
                         else
                             modifyNeutral(g);
@@ -383,18 +383,18 @@ namespace OpenMobile
                 tmrClick.Enabled = false;
                 if (lastClick != null)
                 {
-                    if ((lastClick.Mode == modeType.Highlighted) || (lastClick.Mode == modeType.Clicked))
+                    if ((lastClick.Mode == eModeType.Highlighted) || (lastClick.Mode == eModeType.Clicked))
                     {
                         rParam.transparency = 1;
                         rParam.transitionTop = 0;
                         if (keyboardActive == true)
                         {
                             keyboardActive = false;
-                            lastClick.Mode = modeType.Highlighted;
+                            lastClick.Mode = eModeType.Highlighted;
                         }
                         else
                         {
-                            lastClick.Mode = modeType.Normal;
+                            lastClick.Mode = eModeType.Normal;
                             //Recheck where the mouse is at
                             RenderingWindow_MouseMove(this, new MouseEventArgs(MouseButtons.None, 0, Cursor.Position.X, Cursor.Position.Y, 0));
                         }
@@ -412,16 +412,16 @@ namespace OpenMobile
             }
             if (lastClick != null)
             {
-                if (lastClick.Mode == modeType.transitioningOut) //<- Unnecessary?
-                    lastClick.Mode = modeType.ClickedAndTransitioningOut;
+                if (lastClick.Mode == eModeType.transitioningOut) //<- Unnecessary?
+                    lastClick.Mode = eModeType.ClickedAndTransitioningOut;
                 if (lastClick.Transition == eButtonTransition.None)
                 {
                     rParam.transparency = 1;
                     rParam.transitionTop = 0;
-                    if (lastClick.Mode == modeType.ClickedAndTransitioningOut)
-                        lastClick.Mode = modeType.transitioningOut;
+                    if (lastClick.Mode == eModeType.ClickedAndTransitioningOut)
+                        lastClick.Mode = eModeType.transitioningOut;
                     else
-                        lastClick.Mode = modeType.Normal;
+                        lastClick.Mode = eModeType.Normal;
                     tmrClick.Enabled = false;
                     lastClick = null;
                     return;
@@ -456,7 +456,7 @@ namespace OpenMobile
             bool done = false; //We found something that was selected
             if (p.controlCount == 0)
                 return;
-            if (rParam.currentMode == modeType.Scrolling)
+            if (rParam.currentMode == eModeType.Scrolling)
             {
                 if (e.Button == MouseButtons.Left)
                 {
@@ -486,13 +486,13 @@ namespace OpenMobile
                         if ((Math.Abs(e.X - ThrowStart.X) <= 5) && (Math.Abs(e.Y - ThrowStart.Y) <= 5))
                             return;
                         currentGesture = new List<Point>();
-                        rParam.currentMode = modeType.gesturing;
+                        rParam.currentMode = eModeType.gesturing;
                     }
                     Graphics g = Graphics.FromHwnd(this.Handle);
                     g.FillEllipse(Brushes.Red, new Rectangle(e.X - 10, e.Y - 10, (int)(20*widthScale), (int)(20*heightScale)));
                     currentGesture.Add(e.Location);
                     if (lastClick != null)
-                        lastClick.Mode = modeType.Highlighted;
+                        lastClick.Mode = eModeType.Highlighted;
                 }
                 else
                 {
@@ -522,7 +522,7 @@ namespace OpenMobile
                                     bool cancel=false;
                                     ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart,new PointF(widthScale,heightScale), ref cancel);
                                     if (cancel==false)
-                                        rParam.currentMode = modeType.Scrolling;
+                                        rParam.currentMode = eModeType.Scrolling;
                                 }
 
                         if (done == false)
@@ -546,12 +546,12 @@ namespace OpenMobile
             {
                 if (b.Visible == true)
                 {
-                    rParam.currentMode = modeType.Highlighted;
-                    if ((b.Mode == modeType.Normal))
+                    rParam.currentMode = eModeType.Highlighted;
+                    if ((b.Mode == eModeType.Normal))
                     {
                         if (typeof(IHighlightable).IsInstanceOfType(b) == true)
                             UpdateThisControl(b.toRegion());
-                        b.Mode = modeType.Highlighted;
+                        b.Mode = eModeType.Highlighted;
                     }
                     Rectangle r = Rectangle.Empty;
                     if (highlighted != null)
@@ -570,7 +570,7 @@ namespace OpenMobile
         {
             if ((e.Button == MouseButtons.Left) && (highlighted != null))
             {
-                if (rParam.currentMode == modeType.Highlighted)
+                if (rParam.currentMode == eModeType.Highlighted)
                 {
                     if (typeof(OMButton).IsInstanceOfType(highlighted))
                     {
@@ -579,7 +579,7 @@ namespace OpenMobile
                             tmrLongClick.Enabled = false;
                             if (lastClick != null)
                             {
-                                lastClick.Mode = modeType.Clicked;
+                                lastClick.Mode = eModeType.Clicked;
                                 tmrClick.Enabled = true;
                                 SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
                             }
@@ -594,7 +594,7 @@ namespace OpenMobile
                         }
                     }
                     if (lastClick != null)
-                        lastClick.Mode = modeType.Normal;
+                        lastClick.Mode = eModeType.Normal;
                     lastClick = null;
                     if (typeof(IClickable).IsInstanceOfType(highlighted) == true)
                     {
@@ -609,7 +609,7 @@ namespace OpenMobile
             tmrLongClick.Enabled = false;
             if (highlighted != null)
             {
-                if (rParam.currentMode == modeType.Highlighted)
+                if (rParam.currentMode == eModeType.Highlighted)
                 {
                     if (typeof(OMButton).IsInstanceOfType(highlighted))
                     {
@@ -617,9 +617,9 @@ namespace OpenMobile
                         {
                             tmrMouse.Enabled = false;
                             tmrClick.Enabled = true;
-                            lastClick.Mode = modeType.Clicked;
+                            lastClick.Mode = eModeType.Clicked;
                             if (p.DoubleClickable == true)
-                                SandboxedThread.Asynchronous(delegate() { lastClick.doubleClickMe(screen); lastClick.Mode = modeType.Highlighted; });
+                                SandboxedThread.Asynchronous(delegate() { lastClick.doubleClickMe(screen); lastClick.Mode = eModeType.Highlighted; });
                             else
                                 SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
                         }
@@ -647,12 +647,12 @@ namespace OpenMobile
         private void tmrLongClick_Tick(object sender, EventArgs e)
         {
             tmrLongClick.Enabled = false;
-            if (rParam.currentMode == modeType.gesturing)
+            if (rParam.currentMode == eModeType.gesturing)
                 return;
             if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted)))
             {
                 SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).longClickMe(screen); });
-                highlighted.Mode = modeType.Highlighted;
+                highlighted.Mode = eModeType.Highlighted;
             }
             lastClick = null;
         }
@@ -661,18 +661,18 @@ namespace OpenMobile
         {
             if (highlighted != null)
             {
-                if ((rParam.currentMode == modeType.Highlighted) && (typeof(OMButton).IsInstanceOfType(highlighted)))
+                if ((rParam.currentMode == eModeType.Highlighted) && (typeof(OMButton).IsInstanceOfType(highlighted)))
                 {
                     if (lastClick != null)
                     {
-                        lastClick.Mode = modeType.Normal;
+                        lastClick.Mode = eModeType.Normal;
                         UpdateThisControl(lastClick.toRegion());
                     }
                     lastClick = (OMButton)highlighted;
-                    if (lastClick.Mode == modeType.transitioningOut)
-                        lastClick.Mode = modeType.ClickedAndTransitioningOut;
+                    if (lastClick.Mode == eModeType.transitioningOut)
+                        lastClick.Mode = eModeType.ClickedAndTransitioningOut;
                     else
-                        lastClick.Mode = modeType.Clicked;
+                        lastClick.Mode = eModeType.Clicked;
                     tmrLongClick.Enabled = true;
                     UpdateThisControl(lastClick.toRegion());
                 }
@@ -695,23 +695,23 @@ namespace OpenMobile
             tmrLongClick.Enabled = false;
             if ((lastClick != null) && (lastClick.DownImage.image != null))
             {
-                lastClick.Mode = modeType.Highlighted;
+                lastClick.Mode = eModeType.Highlighted;
                 UpdateThisControl(lastClick.toRegion());
             }
             if (highlighted != null)
             {
-                if ((highlighted.Mode != modeType.Clicked) && (highlighted.Mode != modeType.ClickedAndTransitioningOut))
-                    highlighted.Mode = modeType.Highlighted;
+                if ((highlighted.Mode != eModeType.Clicked) && (highlighted.Mode != eModeType.ClickedAndTransitioningOut))
+                    highlighted.Mode = eModeType.Highlighted;
                 if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
                     ((IMouse)highlighted).MouseUp(screen, e, widthScale, heightScale);
             }
-            if (rParam.currentMode == modeType.Scrolling)
+            if (rParam.currentMode == eModeType.Scrolling)
             {
-                rParam.currentMode = modeType.Highlighted;
+                rParam.currentMode = eModeType.Highlighted;
                 if ((highlighted != null) && (typeof(IThrow).IsInstanceOfType(highlighted) == true))
                     ((IThrow)highlighted).MouseThrowEnd(screen, e.Location);
             }
-            else if (rParam.currentMode == modeType.gesturing)
+            else if (rParam.currentMode == eModeType.gesturing)
             {
                 AlphaRecognizer rec = new AlphaRecognizer();
                 rec.Initialize();
@@ -719,7 +719,7 @@ namespace OpenMobile
                     rec.AddPoint(currentGesture[i], false);
                 Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
                 currentGesture = null;
-                rParam.currentMode = modeType.Highlighted;
+                rParam.currentMode = eModeType.Highlighted;
                 RenderingWindow_MouseMove(sender, new MouseEventArgs(MouseButtons.None, 0, e.X, e.Y, 0));
                 Invalidate();
             }
@@ -760,7 +760,7 @@ namespace OpenMobile
                     SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
                     if(lastClick.DownImage.image != null)
                     {
-                        lastClick.Mode = modeType.Highlighted;
+                        lastClick.Mode = eModeType.Highlighted;
                         UpdateThisControl(lastClick.toRegion());
                     }
                 }
@@ -907,7 +907,7 @@ namespace OpenMobile
                             }
                     if (b == null)
                         return;
-                    b.Mode = modeType.Highlighted;
+                    b.Mode = eModeType.Highlighted;
                     highlighted = b;
                     // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
                     //if (typeof(IList).IsInstanceOfType(highlighted))
@@ -938,8 +938,8 @@ namespace OpenMobile
                                     }
                         if (b == null)
                             break;
-                        b.Mode = modeType.Highlighted;
-                        highlighted.Mode = modeType.Normal;
+                        b.Mode = eModeType.Highlighted;
+                        highlighted.Mode = eModeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
                         // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
@@ -961,8 +961,8 @@ namespace OpenMobile
                                     }
                         if (b == null)
                             break;
-                        b.Mode = modeType.Highlighted;
-                        highlighted.Mode = modeType.Normal;
+                        b.Mode = eModeType.Highlighted;
+                        highlighted.Mode = eModeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
                         // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
@@ -984,8 +984,8 @@ namespace OpenMobile
                                     }
                         if (b == null)
                             break;
-                        b.Mode = modeType.Highlighted;
-                        highlighted.Mode = modeType.Normal;
+                        b.Mode = eModeType.Highlighted;
+                        highlighted.Mode = eModeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
                         // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
@@ -1007,8 +1007,8 @@ namespace OpenMobile
                                     }
                         if (b == null)
                             break;
-                        b.Mode = modeType.Highlighted;
-                        highlighted.Mode = modeType.Normal;
+                        b.Mode = eModeType.Highlighted;
+                        highlighted.Mode = eModeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
                         // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
@@ -1020,10 +1020,10 @@ namespace OpenMobile
                         if (typeof(OMButton).IsInstanceOfType(highlighted))
                         {
                             lastClick = (OMButton)highlighted;
-                            if (lastClick.Mode == modeType.transitioningOut)
-                                lastClick.Mode = modeType.ClickedAndTransitioningOut;
+                            if (lastClick.Mode == eModeType.transitioningOut)
+                                lastClick.Mode = eModeType.ClickedAndTransitioningOut;
                             else
-                                lastClick.Mode = modeType.Clicked;
+                                lastClick.Mode = eModeType.Clicked;
                             tmrLongClick.Enabled = true;
                         }
                         else if (typeof(IClickable).IsInstanceOfType(highlighted))
@@ -1089,9 +1089,9 @@ namespace OpenMobile
 
         private void RenderingWindow_MouseLeave(object sender, EventArgs e)
         {
-            if (rParam.currentMode == modeType.Scrolling)
+            if (rParam.currentMode == eModeType.Scrolling)
             {
-                rParam.currentMode = modeType.Highlighted;
+                rParam.currentMode = eModeType.Highlighted;
                 ThrowStart.Y = -1;
                 if ((highlighted != null) && typeof(IThrow).IsInstanceOfType(highlighted))
                     ((IThrow)highlighted).MouseThrowEnd(screen, Point.Empty);

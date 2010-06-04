@@ -116,7 +116,7 @@ namespace OpenMobile
         /// <param name="font"></param>
         /// <param name="alignment"></param>
         /// <param name="transparency"></param>
-        public static void renderText(Graphics g, int x, int y, int w, int h, string text, Font font, textFormat format, Alignment alignment,float transparency,Color color,Color secondColor)
+        public static void renderText(Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment,float transparency,Color color,Color secondColor)
         {
             int modifyFont;
             if (transparency <= 0.1)
@@ -145,24 +145,24 @@ namespace OpenMobile
         /// <param name="font"></param>
         /// <param name="color"></param>
         /// <param name="secondColor"></param>
-        public static void renderText(Graphics g, int x, int y, int w, int h, string text, Font font, textFormat format, Alignment alignment, float transparency,int modifyFont,Color color,Color secondColor)
+        public static void renderText(Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, float transparency,int modifyFont,Color color,Color secondColor)
         {
             if ((text==null)||(text == ""))
                 return;
             FontStyle f = FontStyle.Regular;
-            if ((format == textFormat.Bold) || (format == textFormat.BoldShadow))
+            if ((format == eTextFormat.Bold) || (format == eTextFormat.BoldShadow))
             {
                 f = FontStyle.Bold;
             }
-            if ((format == textFormat.Italic) || (format == textFormat.ItalicShadow))
+            if ((format == eTextFormat.Italic) || (format == eTextFormat.ItalicShadow))
             {
                 f = FontStyle.Italic;
             }
-            if ((format == textFormat.Underline) || (format == textFormat.UnderlineShadow))
+            if ((format == eTextFormat.Underline) || (format == eTextFormat.UnderlineShadow))
             {
                 f = FontStyle.Underline;
             }
-            if (format == textFormat.Outline)
+            if (format == eTextFormat.Outline)
             {
                 using (StringFormat sFormat = new StringFormat())
                 {
@@ -179,7 +179,7 @@ namespace OpenMobile
                     g.FillPath(new SolidBrush(Color.FromArgb((int)(transparency * color.A), color)), path);
                 }
             }
-            else if (format == textFormat.Glow)
+            else if (format == eTextFormat.Glow)
             {
                 using (StringFormat sFormat = new StringFormat())
                 {

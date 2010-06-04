@@ -112,13 +112,13 @@ namespace OpenMobile.Controls
         public override void Render(Graphics g,renderingParams e)
         {
             float tmp = 1;
-            if (this.Mode == modeType.transitioningIn)
+            if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
-            if (this.Mode == modeType.transitioningOut)
+            if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
             using (Brush defaultBrush = new SolidBrush(Color.FromArgb((int)tmp * 255, this.OutlineColor)))
             {
-                if (Mode==modeType.Highlighted)
+                if (Mode==eModeType.Highlighted)
                     Renderer.renderText(g, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, Alignment.CenterLeft, tmp, 0, highlightColor, this.OutlineColor);
                 else
                     Renderer.renderText(g, this.Left + this.Height+5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, Alignment.CenterLeft, tmp,0, this.Color, this.OutlineColor);

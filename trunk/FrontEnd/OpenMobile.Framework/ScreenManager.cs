@@ -118,6 +118,11 @@ namespace OpenMobile.Framework
                 panels.Add(collection);
             }
         }
+        /// <summary>
+        /// Loads a panel thats shared between all screens instead of being screen-independent
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="screen"></param>
         public void loadSharedPanel(OMPanel source,int screen)
         {
             lock (this)

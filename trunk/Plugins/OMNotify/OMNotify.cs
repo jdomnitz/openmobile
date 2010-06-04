@@ -44,7 +44,7 @@ namespace ControlDemo
             Image1.Image = theHost.getSkinImage("MediaBorder");
             Image1.Name = "Image1";
             OMLabel Label2 = new OMLabel(430, 150, 250, 40);
-            Label2.Format = textFormat.Bold;
+            Label2.Format = eTextFormat.Bold;
             Label2.Name = "Label2";
             Label2.TextAlignment = Alignment.CenterLeft;
             OMImage icon = new OMImage(350, 135, 60, 60);

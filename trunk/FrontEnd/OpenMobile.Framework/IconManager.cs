@@ -28,22 +28,62 @@ namespace OpenMobile
     /// </summary>
     public sealed class IconManager
     {
+        /// <summary>
+        /// Icons have changed
+        /// </summary>
         public delegate void IconsChanged();
+        /// <summary>
+        /// Occurs when icons are added/removed
+        /// </summary>
         public event IconsChanged OnIconsChanged;
+        /// <summary>
+        /// Represents an icon for the UI
+        /// </summary>
         public sealed class UIIcon
         {
+            /// <summary>
+            /// The icons image
+            /// </summary>
             public Image image;
+            /// <summary>
+            /// The icons priority
+            /// </summary>
             public ePriority priority;
+            /// <summary>
+            /// Full or half sized icon
+            /// </summary>
             public bool full;
+            /// <summary>
+            /// Parent plugin
+            /// </summary>
             public string plugin;
+            /// <summary>
+            /// Extra Info
+            /// </summary>
             public string tag;
+            /// <summary>
+            /// Create a new UI Icon
+            /// </summary>
             public UIIcon() { }
+            /// <summary>
+            /// Create a new UI Icon
+            /// </summary>
+            /// <param name="i"></param>
+            /// <param name="p"></param>
+            /// <param name="f"></param>
             public UIIcon(Image i,ePriority p,bool f)
             {
                 image=i;
                 priority=p;
                 full=f;
             }
+            /// <summary>
+            /// Create a new UI Icon
+            /// </summary>
+            /// <param name="i"></param>
+            /// <param name="p"></param>
+            /// <param name="f"></param>
+            /// <param name="plugin"></param>
             public UIIcon(Image i, ePriority p, bool f,string plugin)
             {
                 image = i;
@@ -51,6 +91,11 @@ namespace OpenMobile
                 full = f;
                 this.plugin = plugin;
             }
+            /// <summary>
+            /// The icons are equal
+            /// </summary>
+            /// <param name="obj"></param>
+            /// <returns></returns>
             public override bool Equals(object obj)
             {
                 UIIcon icn = (UIIcon)obj;
@@ -87,6 +132,12 @@ namespace OpenMobile
                 if (OnIconsChanged != null)
                     OnIconsChanged();
         }
+        /// <summary>
+        /// Retrieves an icon for the given position
+        /// </summary>
+        /// <param name="number"></param>
+        /// <param name="full"></param>
+        /// <returns></returns>
         public UIIcon getIcon(int number, bool full)
         {
             int num = 0;

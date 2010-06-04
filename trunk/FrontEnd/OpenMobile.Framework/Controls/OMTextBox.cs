@@ -152,9 +152,9 @@ namespace OpenMobile.Controls
         /// Text formatting arguments
         /// </summary>
         [Browsable(false)]
-        public override textFormat Format
+        public override eTextFormat Format
         {
-            get { return textFormat.Normal; }
+            get { return eTextFormat.Normal; }
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace OpenMobile.Controls
             this.Left = 25;
             this.Top = 25;
             this.TextAlignment = Alignment.CenterCenter;
-            this.Format = textFormat.Normal;
+            this.Format = eTextFormat.Normal;
             this.Color = Color.Black;
             this.OutlineColor = Color.Blue;
         }
@@ -185,7 +185,7 @@ namespace OpenMobile.Controls
             this.Left = x;
             this.Top = y;
             this.TextAlignment = Alignment.CenterCenter;
-            this.Format = textFormat.Normal;
+            this.Format = eTextFormat.Normal;
             this.Color = Color.Black;
             this.OutlineColor = Color.Blue;
         }
@@ -197,16 +197,16 @@ namespace OpenMobile.Controls
         public override void Render(Graphics g, renderingParams e)
         {
             float tmp = 1;
-            if (this.Mode == modeType.transitioningIn)
+            if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
-            if (this.Mode == modeType.transitioningOut)
+            if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
             Rectangle r = new Rectangle(this.Left, this.Top, this.Width, this.Height);
             
             Renderer.FillRoundRectangle(g,new SolidBrush(Color.FromArgb((int)(tmp * 255), background)), r,10F);
             Renderer.DrawRoundRectangle(g,new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 2F), r,10F);
             
-            if (this.Mode == modeType.Highlighted)
+            if (this.Mode == eModeType.Highlighted)
             {
                 Rectangle r2 = new Rectangle(r.Left + 1, r.Top + 1, r.Width - 2, r.Height - 2);
                 Renderer.DrawRoundRectangle(g,new Pen(Color.FromArgb((int)(40 * tmp), this.OutlineColor), 4F), r2,10F);

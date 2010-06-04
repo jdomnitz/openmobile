@@ -74,7 +74,7 @@ namespace OMSettings
             Button1.Name = "Button1";
             Button1.Font = fnt;
             Button1.Text = "1";
-            Button1.Format = textFormat.Outline;
+            Button1.Format = eTextFormat.Outline;
             Button1.OnClick+=new userInteraction(Button_OnClick);
             OMButton Button2 = new OMButton(280, 132, 200, 200);
             Button2.Image = opt1;
@@ -82,7 +82,7 @@ namespace OMSettings
             Button2.Name = "Button2";
             Button2.Font = fnt;
             Button2.Text = "2";
-            Button2.Format = textFormat.Outline;
+            Button2.Format = eTextFormat.Outline;
             Button2.OnClick += new userInteraction(Button_OnClick);
             OMButton Button3 = new OMButton(517, 132, 200, 200);
             Button3.Image = opt1;
@@ -90,7 +90,7 @@ namespace OMSettings
             Button3.Name = "Button3";
             Button3.Font = fnt;
             Button3.Text = "3";
-            Button3.Format = textFormat.Outline;
+            Button3.Format = eTextFormat.Outline;
             Button3.OnClick += new userInteraction(Button_OnClick);
             OMButton Button4 = new OMButton(764, 132, 200, 200);
             Button4.Image = opt1;
@@ -98,7 +98,7 @@ namespace OMSettings
             Button4.Name = "Button4";
             Button4.Font = fnt;
             Button4.Text = "4";
-            Button4.Format = textFormat.Outline;
+            Button4.Format = eTextFormat.Outline;
             Button4.OnClick += new userInteraction(Button_OnClick);
             OMButton Button5 = new OMButton(47, 335, 200, 200);
             Button5.Image = opt1;
@@ -106,7 +106,7 @@ namespace OMSettings
             Button5.Name = "Button5";
             Button5.Font = fnt;
             Button5.Text = "5";
-            Button5.Format = textFormat.Outline;
+            Button5.Format = eTextFormat.Outline;
             Button5.OnClick += new userInteraction(Button_OnClick);
             OMButton Button6 = new OMButton(280, 335, 200, 200);
             Button6.Image = opt1;
@@ -114,7 +114,7 @@ namespace OMSettings
             Button6.Name = "Button6";
             Button6.Font = fnt;
             Button6.Text = "6";
-            Button6.Format = textFormat.Outline;
+            Button6.Format = eTextFormat.Outline;
             Button6.OnClick += new userInteraction(Button_OnClick);
             OMButton Button7 = new OMButton(517, 335, 200, 200);
             Button7.Image = opt1;
@@ -122,7 +122,7 @@ namespace OMSettings
             Button7.Name = "Button7";
             Button7.Font = fnt;
             Button7.Text = "7";
-            Button7.Format = textFormat.Outline;
+            Button7.Format = eTextFormat.Outline;
             Button7.OnClick += new userInteraction(Button_OnClick);
             OMButton Button8 = new OMButton(764, 335, 200, 200);
             Button8.Image = opt1;
@@ -130,19 +130,19 @@ namespace OMSettings
             Button8.Name = "Button8";
             Button8.Font = fnt;
             Button8.Text = "8";
-            Button8.Format = textFormat.Outline;
+            Button8.Format = eTextFormat.Outline;
             Button8.OnClick += new userInteraction(Button_OnClick);
             OMButton identify = new OMButton(204,540,200,60);
             identify.Image = theHost.getSkinImage("Tab");
             identify.Font = new Font("Microsoft Sans Serif", 18F);
             identify.Text = "Identify";
-            identify.Format = textFormat.DropShadow;
+            identify.Format = eTextFormat.DropShadow;
             identify.Name = "Button3";
             identify.OnClick += new userInteraction(identify_OnClick);
             OMLabel title = new OMLabel(383,68,250,100);
             title.Font = new Font("Microsoft Sans Serif", 21.75F);
             title.Text = "Select a Screen";
-            title.Format = textFormat.BoldShadow;
+            title.Format = eTextFormat.BoldShadow;
             title.Name = "Label4";
             MultiZone.addControl(Button1);
             MultiZone.addControl(Button2);
@@ -184,7 +184,7 @@ namespace OMSettings
             OMButton left = new OMButton(255, 230, 120, 80);
             left.Image = opt3;
             left.FocusImage = opt2;
-            left.Orientation = Angle.FlipHorizontal;
+            left.Orientation = eAngle.FlipHorizontal;
             left.Name = "Button1";
             left.Transition = eButtonTransition.None;
             left.OnClick += new userInteraction(left_OnClick);
@@ -199,7 +199,7 @@ namespace OMSettings
             OMLabel caption = new OMLabel(0, 100, 1000, 60);
             caption.OutlineColor = Color.Green;
             caption.Font = new Font(FontFamily.GenericSansSerif, 36);
-            caption.Format = textFormat.Glow;
+            caption.Format = eTextFormat.Glow;
             caption.Name = "caption";
             zone.addControl(Save);
             zone.addControl(Cancel);

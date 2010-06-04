@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("OpenMobile.Framework")]
+[assembly: AssemblyTitle("WebBrowser")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("OpenMobile")]
-[assembly: AssemblyProduct("OpenMobile.Framework")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("WebBrowser")]
 [assembly: AssemblyCopyright("Copyright ©  2010")]
-[assembly: AssemblyTrademark("All code protected by GPLv3")]
+[assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b29dfa30-3c49-4df9-88df-03c034557ca8")]
+[assembly: Guid("f8775abe-2532-46ab-b37e-2436a9fb7ee2")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -33,4 +33,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("0.7.0.9")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

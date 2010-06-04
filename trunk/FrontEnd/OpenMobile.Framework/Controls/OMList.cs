@@ -477,12 +477,12 @@ namespace OpenMobile.Controls
             get { return highlightColorOutline; }
             set { highlightColorOutline = value; }
         }
-        textFormat highlightedItemFormat;
+        eTextFormat highlightedItemFormat;
         /// <summary>
         /// The highlighted item text format
         /// </summary>
         [Description("The highlighted item text format"), Category("Text")]
-        public textFormat HighlightedItemFormat
+        public eTextFormat HighlightedItemFormat
         {
             get { return highlightedItemFormat; }
             set { highlightedItemFormat = value; }
@@ -520,9 +520,9 @@ namespace OpenMobile.Controls
                 if (width == 0)
                     return;
                 float tmp = 1;
-                if (this.Mode == modeType.transitioningIn)
+                if (this.Mode == eModeType.transitioningIn)
                     tmp = e.globalTransitionIn;
-                else if ((this.Mode == modeType.transitioningOut) || (this.Mode == modeType.ClickedAndTransitioningOut))
+                else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                     tmp = e.globalTransitionOut;
                 Region r = g.Clip; //Save the drawing size
                 g.SetClip(this.toRegion()); //But only draw out control
@@ -625,7 +625,7 @@ namespace OpenMobile.Controls
                             }
                             else
                             {
-                                if ((selectedIndex == i) & ((mode == modeType.Highlighted) || (!showSelectedItemOnlyOnFocus)))
+                                if ((selectedIndex == i) & ((mode == eModeType.Highlighted) || (!showSelectedItemOnlyOnFocus)))
                                     Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, font, textFormat, textAlignment, tmp, 0, highlightColor, highlightColor);
                                 else
                                     Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, font, textFormat, textAlignment, tmp, 0, color, color);
@@ -678,7 +678,7 @@ namespace OpenMobile.Controls
         public void clickMe(int screen)
         {
             if (clickSelect == true)
-                if ((selectedIndex != lastSelected) || (mode == modeType.Scrolling))
+                if ((selectedIndex != lastSelected) || (mode == eModeType.Scrolling))
                     return;
             if (selectedIndex == -1)
                 return;
@@ -692,7 +692,7 @@ namespace OpenMobile.Controls
         public void doubleClickMe(int screen)
         {
             if (clickSelect == true)
-                if ((selectedIndex != lastSelected) || (mode == modeType.Scrolling))
+                if ((selectedIndex != lastSelected) || (mode == eModeType.Scrolling))
                     return;
             if (OnDoubleClick != null)
                 OnDoubleClick(this, screen);
@@ -866,7 +866,7 @@ namespace OpenMobile.Controls
             if (selectedIndex == lastSelected)
                 return;
             if (clickSelect)
-                mode = modeType.Scrolling;
+                mode = eModeType.Scrolling;
         }
 
         public virtual void MouseUp(int screen, MouseEventArgs e, float WidthScale, float HeightScale)

@@ -155,7 +155,7 @@ namespace OMSettings
         {
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.Value = ((OMSlider)sender).Value.ToString();
-            collection.OnSettingChanged(s);
+            collection.changeSetting(s);
         }
 
         void file_OnClick(OMControl sender, int screen)
@@ -164,7 +164,7 @@ namespace OMSettings
             ((OMTextBox)sender).Text = path.getFile(screen, "OMSettings", sender.Name);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.Value = ((OMTextBox)sender).Text;
-            collection.OnSettingChanged(s);
+            collection.changeSetting(s);
         }
 
         void folder_OnClick(OMControl sender, int screen)
@@ -173,14 +173,14 @@ namespace OMSettings
             ((OMTextBox)sender).Text = path.getFolder(screen, "OMSettings", sender.Name);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.Value = ((OMTextBox)sender).Text;
-            collection.OnSettingChanged(s);
+            collection.changeSetting(s);
         }
 
         void cursor_OnClick(OMControl sender, int screen)
         {
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.Value = ((OMCheckbox)sender).Checked.ToString();
-            collection.OnSettingChanged(s);
+            collection.changeSetting(s);
         }
 
         void text_OnClick(OMControl sender, int screen)
@@ -189,7 +189,7 @@ namespace OMSettings
             ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", sender.Name);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.Value = ((OMTextBox)sender).Text;
-            collection.OnSettingChanged(s);
+            collection.changeSetting(s);
         }
         void Save_OnClick(OMControl sender, int screen)
         {

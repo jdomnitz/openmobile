@@ -62,7 +62,7 @@ public sealed class MainMenu : IHighLevel
             MainMenu11.Image = mainMenu;
             MainMenu11.FocusImage = mainMenuFocus;
             MainMenu11.Name = "MainMenu.MainMenu11";
-            MainMenu11.Mode = modeType.Highlighted;
+            MainMenu11.Mode = eModeType.Highlighted;
             MainMenu11.OnLongClick += new userInteraction(OnLongClick);
             MainMenu11.Tag = settings.getSetting("MainMenu.MainMenu11.Plugin");
             MainMenu11.Text = settings.getSetting("MainMenu.MainMenu11.Display");
@@ -155,7 +155,7 @@ public sealed class MainMenu : IHighLevel
             list.ListStyle = eListStyle.RoundedTextList;
             OMLabel title = new OMLabel(208,120,500,25);
             title.Text = "Select the panel to assign to this button";
-            title.Format = textFormat.BoldShadow;
+            title.Format = eTextFormat.BoldShadow;
             OMButton okButton = new OMButton(550, 460, 135, 50);
             okButton.Image = opt1;
             okButton.FocusImage = opt2;

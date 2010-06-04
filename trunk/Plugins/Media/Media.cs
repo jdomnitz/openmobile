@@ -66,7 +66,7 @@ namespace Media
             OMLabel artists = new OMLabel(30, 220, 30, 300);
             artists.Text = "Artists";
             artists.Font = new Font(FontFamily.GenericSansSerif, 26F);
-            artists.Format = textFormat.BoldShadow;
+            artists.Format = eTextFormat.BoldShadow;
             artists.Name = "Media.Artists";
             artists.TextAlignment = Alignment.WordWrap;
             OMButton Slider2 = new OMButton(858,119,60,400);
@@ -135,7 +135,7 @@ namespace Media
 		    OMLabel Title=new OMLabel(270,110,500,80);
 		    Title.Font= new Font("Poor Richard",48F);
 		    Title.Text="Music Settings";
-		    Title.Format=textFormat.DropShadow;
+		    Title.Format=eTextFormat.DropShadow;
 		    Title.Name="Media.Title";
             Title.TextAlignment = Alignment.CenterCenter;
 		    OMCheckbox chkIndex=new OMCheckbox(225,195,800,70);

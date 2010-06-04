@@ -34,7 +34,7 @@ namespace OpenMobile.Controls
     /// </summary>
     public abstract class OMControl : ICloneable
     {
-        protected modeType mode;
+        protected eModeType mode;
         protected bool visible = true;
         protected object tag;
         protected string name;
@@ -86,7 +86,7 @@ namespace OpenMobile.Controls
         /// The rendering mode of the control
         /// </summary>
         [Browsable(false)]
-        public virtual modeType Mode
+        public virtual eModeType Mode
         {
             get
             {

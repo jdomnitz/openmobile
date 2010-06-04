@@ -89,11 +89,14 @@ namespace OpenMobile.Plugin
             }
         }
     }
+    /// <summary>
+    /// Defines an icon to use to represent this plugin
+    /// </summary>
     public class SkinIcon : Attribute
     {
         string name;
         /// <summary>
-        /// Enables/Disables the window closing transition
+        /// Defines an icon to use to represent this plugin
         /// </summary>
         /// <param name="imageName"></param>
         public SkinIcon(string imageName)
@@ -101,7 +104,7 @@ namespace OpenMobile.Plugin
             name = imageName;
         }
         /// <summary>
-        /// Enables/Disables the window closing transition
+        /// Defines an icon to use to represent this plugin
         /// </summary>
         public string SkinImageName
         {

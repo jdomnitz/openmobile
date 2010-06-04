@@ -38,8 +38,8 @@ namespace OpenMobile.Controls
         protected int minimum = 0;
         protected int maximum = 100;
         protected bool vertical;
-        protected Color firstColor=Color.Red;
-        protected Color secondColor=Color.DarkRed;
+        protected Color firstColor=Color.DarkRed;
+        protected Color secondColor=Color.Red;
         protected Color backColor = Color.FromArgb(180, Color.White);
 
         /// <summary>
@@ -318,23 +318,23 @@ namespace OpenMobile.Controls
         public override void Render(Graphics g,renderingParams e)
         {
             float tmp = 1;
-            if (Mode == modeType.transitioningIn)
+            if (Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
-            if (Mode == modeType.transitioningOut)
+            if (Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
             Rectangle rec = this.toRegion();
             g.FillRectangle(new SolidBrush(Color.FromArgb((int)(backColor.A * tmp), backColor)), rec);
             if (vertical == false)
             {
                 rec.Width = (int)(width * ((float)value / maximum));
-                g.FillRectangle(new LinearGradientBrush(new Point(5,height / 2), new Point(width, height / 2), Color.FromArgb((int)(tmp * firstColor.A), firstColor), Color.FromArgb((int)(tmp * secondColor.A), secondColor)), rec);
+                g.FillRectangle(new LinearGradientBrush(new Point(left,top+(height / 2)), new Point(left+width, top+(height / 2)), Color.FromArgb((int)(tmp * firstColor.A), firstColor), Color.FromArgb((int)(tmp * secondColor.A), secondColor)), rec);
                 rec.Width = width;
             }
             else
             {
                 rec.Y = rec.Y+rec.Height - (int)(height * ((float)value / maximum));
                 rec.Height= (int)(height * ((float)value / maximum));
-                g.FillRectangle(new LinearGradientBrush(new Point(width / 2,0), new Point(width / 2,height), Color.FromArgb((int)(tmp * secondColor.A), secondColor),Color.FromArgb((int)(tmp * firstColor.A), firstColor)), rec);
+                g.FillRectangle(new LinearGradientBrush(new Point(left+(width / 2),top), new Point(left+(width / 2),top+height), Color.FromArgb((int)(tmp * secondColor.A), secondColor),Color.FromArgb((int)(tmp * firstColor.A), firstColor)), rec);
                 rec.Y = top;
                 rec.Height = height;
             }

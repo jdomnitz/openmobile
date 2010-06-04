@@ -162,6 +162,13 @@ namespace OpenMobile.Media
             }
             return null;
         }
+        /// <summary>
+        /// Retrieves a cover from the database
+        /// </summary>
+        /// <param name="artist"></param>
+        /// <param name="album"></param>
+        /// <param name="pluginHost"></param>
+        /// <returns></returns>
         public static Image getCoverFromDB(string artist, string album, IPluginHost pluginHost)
         {
             object o = new object();
