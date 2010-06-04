@@ -735,6 +735,7 @@ namespace OMMediaDB
             {
                 if (settings.getSetting("Music.AutoIndex") == "True")
                     path = settings.getSetting("Music.Path");
+                settings.setSetting("Default.MusicDatabase", "OMMediaDB");
             }
             if ((path!=null)&&(path.Length>0))
                 indexDirectory(path, true);

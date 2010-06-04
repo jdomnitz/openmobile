@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMPlayer", "..\Plugins\omPl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSK", "..\Plugins\OSK\OSK.csproj", "{ED2CD8E9-1C0F-4CC7-B163-34F72093AF75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMSettings", "..\Plugins\OMSettings\OMSettings.csproj", "{DDF02877-DEAE-45EF-B126-38F31C529043}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMDir", "..\Plugins\OMDir\OMDir.csproj", "{D2A6A245-3C4E-4208-B436-BF6DD8E31789}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +71,14 @@ Global
 		{ED2CD8E9-1C0F-4CC7-B163-34F72093AF75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED2CD8E9-1C0F-4CC7-B163-34F72093AF75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED2CD8E9-1C0F-4CC7-B163-34F72093AF75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDF02877-DEAE-45EF-B126-38F31C529043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDF02877-DEAE-45EF-B126-38F31C529043}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDF02877-DEAE-45EF-B126-38F31C529043}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDF02877-DEAE-45EF-B126-38F31C529043}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2A6A245-3C4E-4208-B436-BF6DD8E31789}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2A6A245-3C4E-4208-B436-BF6DD8E31789}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2A6A245-3C4E-4208-B436-BF6DD8E31789}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2A6A245-3C4E-4208-B436-BF6DD8E31789}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
