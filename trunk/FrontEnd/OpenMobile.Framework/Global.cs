@@ -500,6 +500,10 @@ namespace OpenMobile
         {
             return image.GetHashCode();
         }
+        /// <summary>
+        /// Represents an image that the framework can't find
+        /// </summary>
+        public static imageItem MISSING = new imageItem("MISSING");
     }
     /// <summary>
     /// The button click transition
@@ -879,6 +883,14 @@ namespace OpenMobile
         /// <para>Arg1: Screen Number</para>
         /// </summary>
         RenderingWindowResized=56,
+        /// <summary>
+        /// Occurs when the rendering window is resized (useful for embedded forms and video windows)
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Instance Number</para>
+        /// <para>Arg2: "Enabled"/"Disabled"</para>
+        /// </summary>
+        RandomChanged=57,
+        //Open Spot
         //Tuned Content
         /// <summary>
         /// Tune to the given statioin
