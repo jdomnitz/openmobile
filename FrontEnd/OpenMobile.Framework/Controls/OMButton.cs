@@ -352,10 +352,13 @@ namespace OpenMobile.Controls
                 }
                 cm.Matrix33 *= ((float)transparency / 100);
                 ia.SetColorMatrix(cm);
-                if (image==imageItem.MISSING)
+                if (image.image == null)
                 {
-                    using (Pen p=new Pen(Color.White,4F))
-                        Renderer.DrawRoundRectangle(g,p,new RectangleF(left+2,top+2,width-4,height-4),8F);
+                    if (image == imageItem.MISSING)
+                    {
+                        using (Pen p = new Pen(Color.White, 4F))
+                            Renderer.DrawRoundRectangle(g, p, new RectangleF(left + 2, top + 2, width - 4, height - 4), 8F);
+                    }
                 }
                 else
                 {
