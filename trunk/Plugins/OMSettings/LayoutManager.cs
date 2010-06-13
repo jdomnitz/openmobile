@@ -1,9 +1,28 @@
-﻿using System;
+﻿/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System.Collections.Generic;
+using System.Drawing;
+using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Plugin;
-using OpenMobile;
-using System.Drawing;
-using System.Collections.Generic;
 
 namespace OMSettings
 {
@@ -56,6 +75,34 @@ namespace OMSettings
                             cursor.Checked = true;
                         ofset += 70;
                         ret.Add(cursor);
+                    }
+                    else if((s.Values.Count>=s.Options.Count)&&(s.Values.Count>0))
+                    {
+                        OMButton scrollRight = new OMButton(920, ofset, 70, 60);
+                        scrollRight.Image = theHost.getSkinImage("Play");
+                        scrollRight.DownImage = theHost.getSkinImage("Play.Highlighted");
+                        scrollRight.OnClick += new userInteraction(scrollRight_OnClick);
+                        scrollRight.Tag = s.Name;
+                        OMButton scrollLeft = new OMButton(370, ofset, 70, 60);
+                        scrollLeft.Image = scrollRight.Image;
+                        scrollLeft.DownImage = scrollRight.DownImage;
+                        scrollLeft.Orientation = eAngle.FlipHorizontal;
+                        scrollLeft.OnClick += new userInteraction(scrollLeft_OnClick);
+                        scrollLeft.Tag = s.Name;
+                        OMTextBox txtchoice = new OMTextBox(450, ofset+5, 460, 50);
+                        txtchoice.Flags = textboxFlags.EllipsisEnd;
+                        txtchoice.Text = s.Value;
+                        txtchoice.Font = new Font("Microsoft Sans Serif", 24F);
+                        txtchoice.Name = "txt"+s.Name;
+                        OMLabel mcTitle = new OMLabel(200, ofset, 170, 50);
+                        mcTitle.Font = new Font("Microsoft Sans Serif", 32.25F, FontStyle.Bold);
+                        mcTitle.Text = s.Header + ":";
+                        mcTitle.TextAlignment = Alignment.CenterRight;
+                        ofset += 65;
+                        ret.Add(mcTitle);
+                        ret.Add(txtchoice);
+                        ret.Add(scrollLeft);
+                        ret.Add(scrollRight);
                     }
                     break;
                 case SettingTypes.Text:
@@ -195,6 +242,27 @@ namespace OMSettings
         {
             theHost.execute(eFunction.goBack, screen.ToString());
         }
-
+        void scrollRight_OnClick(OMControl sender, int screen)
+        {
+            Setting setting=collection.Find(s => s.Name == sender.Tag.ToString());
+            OMTextBox tb = (OMTextBox)sender.Parent["txt" + setting.Name];
+            int index = setting.Options.FindIndex(s => s == tb.Text);
+            if (index >= setting.Options.Count - 1)
+                return;
+            tb.Text = setting.Options[index+1];
+            setting.Value = setting.Values[index+1];
+            collection.changeSetting(setting);
+        }
+        void scrollLeft_OnClick(OMControl sender, int screen)
+        {
+            Setting setting = collection.Find(s => s.Name == sender.Tag.ToString());
+            OMTextBox tb = (OMTextBox)sender.Parent["txt" + setting.Name];
+            int index = setting.Options.FindIndex(s => s == tb.Text);
+            if (index <= 0)
+                return;
+            tb.Text = setting.Options[index - 1];
+            setting.Value = setting.Values[index - 1];
+            collection.changeSetting(setting);
+        }
     }
 }

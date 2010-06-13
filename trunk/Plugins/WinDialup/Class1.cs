@@ -107,7 +107,10 @@ namespace WinDialup
         #endregion
 
         #region IBasePlugin Members
-
+        public Settings loadSettings()
+        {
+            throw new NotImplementedException();
+        }
         public string authorName
         {
             get { return "Justin Domnitz"; }

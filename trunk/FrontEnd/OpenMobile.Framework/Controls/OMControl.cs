@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-/*********************************************************************************
+﻿/*********************************************************************************
     This file is part of Open Mobile.
 
     Open Mobile is free software: you can redistribute it and/or modify
@@ -20,6 +18,8 @@ using System.ComponentModel;
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
+using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Reflection;
 namespace OpenMobile.Controls
@@ -72,6 +72,14 @@ namespace OpenMobile.Controls
                 return container;
             }
             return -1;
+        }
+        internal OMPanel parent;
+        public OMPanel Parent
+        {
+            get
+            {
+                return parent;
+            }
         }
         private int container = -1;
         /// <summary>
@@ -208,7 +216,7 @@ namespace OpenMobile.Controls
 
             foreach (PropertyInfo propInfo in type.GetProperties())
             {
-                if ((propInfo.CanWrite == true) && (propInfo.GetGetMethod() != null) && (propInfo.GetGetMethod().GetParameters().Length == 0))
+                if (propInfo.CanWrite && propInfo.CanRead && (propInfo.GetGetMethod().GetParameters().Length == 0))
                     try
                     {
                         propInfo.SetValue(returnData, propInfo.GetValue(this, null), null);

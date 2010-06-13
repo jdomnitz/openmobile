@@ -55,21 +55,21 @@ namespace ControlDemo
             Title.Font = new Font("Playbill", 48F);
             Title.Width = 1000;
             Title.Top = 83;
-            Title.Format = textFormat.DropShadow;
+            Title.Format = eTextFormat.DropShadow;
             Title.TextAlignment = Alignment.CenterRight;
             Title.Name = "Title";
             OMLabel day1high = new OMLabel(245, 213, 300, 50);
             day1high.Color = Color.Red;
             day1high.OutlineColor = Color.White;
             day1high.Font = f;
-            day1high.Format = textFormat.Glow;
+            day1high.Format = eTextFormat.Glow;
             day1high.Name = "day1high";
             day1high.TextAlignment = Alignment.CenterLeft;
             OMLabel day1low = new OMLabel(257, 267, 270, 50);
             day1low.Color = Color.Blue;
             day1low.OutlineColor = Color.White;
             day1low.Font = f;
-            day1low.Format = textFormat.Glow;
+            day1low.Format = eTextFormat.Glow;
             day1low.Name = "day1low";
             day1low.TextAlignment = Alignment.CenterLeft;
             OMImage day1img = new OMImage(-2, 100, 250, 250);
@@ -79,29 +79,29 @@ namespace ControlDemo
             now.Color = Color.SlateGray;
             now.OutlineColor = Color.White;
             now.Font = f;
-            now.Format = textFormat.Glow;
+            now.Format = eTextFormat.Glow;
             now.Name = "now";
             now.TextAlignment = Alignment.CenterLeft;
             OMLabel humidity = new OMLabel(545,184,550,100);
             humidity.Color = Color.DarkGoldenrod;
             humidity.OutlineColor = Color.White;
             humidity.Font = f;
-            humidity.Format = textFormat.Glow;
-            humidity.Mode = modeType.Highlighted;
+            humidity.Format = eTextFormat.Glow;
+            humidity.Mode = eModeType.Highlighted;
             humidity.Name = "humidity";
             humidity.TextAlignment = Alignment.CenterLeft;
             OMLabel wind = new OMLabel(625, 261, 420, 60);
             wind.Color = Color.DarkOrange;
             wind.OutlineColor = Color.White;
             wind.Font = f;
-            wind.Format = textFormat.Glow;
+            wind.Format = eTextFormat.Glow;
             wind.Name = "wind";
             wind.TextAlignment = Alignment.CenterLeft;
             OMLabel feelsLike = new OMLabel(515, 158, 550, 50);
             feelsLike.Color = Color.MediumSlateBlue;
             feelsLike.OutlineColor = Color.White;
             feelsLike.Font = f;
-            feelsLike.Format = textFormat.Glow;
+            feelsLike.Format = eTextFormat.Glow;
             feelsLike.Name = "feelsLike";
             feelsLike.TextAlignment = Alignment.CenterLeft;
             OMLabel day2 = new OMLabel();
@@ -114,7 +114,7 @@ namespace ControlDemo
             day3.Left = 295;
             day3.Width = 150;
             day3.Text = DateTime.Today.AddDays(2).DayOfWeek.ToString();
-            day3.Mode = modeType.Resizing;
+            day3.Mode = eModeType.Resizing;
             day3.Name = "day3";
             OMLabel day4 = new OMLabel();
             day4.Top = 285;
@@ -154,7 +154,7 @@ namespace ControlDemo
             day2high.OutlineColor = Color.White;
             day2high.Font = f2;
             day2high.Text = "High: N/A";
-            day2high.Format = textFormat.Glow;
+            day2high.Format = eTextFormat.Glow;
             day2high.TextAlignment = Alignment.CenterLeft;
             day2high.Name = "day2high";
             Font f3 = new Font("Microsoft Sans Serif", 26.25F);
@@ -163,7 +163,7 @@ namespace ControlDemo
             day2low.OutlineColor = Color.White;
             day2low.Font = f3;
             day2low.Text = "Low: N/A";
-            day2low.Format = textFormat.Glow;
+            day2low.Format = eTextFormat.Glow;
             day2low.TextAlignment = Alignment.CenterLeft;
             day2low.Name = "day2low";
             OMLabel day3high = new OMLabel(297, 450, 200, 50);
@@ -171,7 +171,7 @@ namespace ControlDemo
             day3high.OutlineColor = Color.White;
             day3high.Font = f2;
             day3high.Text = "High: N/A";
-            day3high.Format = textFormat.Glow;
+            day3high.Format = eTextFormat.Glow;
             day3high.TextAlignment = Alignment.CenterLeft;
             day3high.Name = "day3high";
             OMLabel day4high = new OMLabel(520, 450, 200, 50);
@@ -179,7 +179,7 @@ namespace ControlDemo
             day4high.OutlineColor = Color.White;
             day4high.Font = f2;
             day4high.Text = "High: N/A";
-            day4high.Format = textFormat.Glow;
+            day4high.Format = eTextFormat.Glow;
             day4high.TextAlignment = Alignment.CenterLeft;
             day4high.Name = "day4high";
             OMLabel day5high = new OMLabel(775, 450, 200, 50);
@@ -187,7 +187,7 @@ namespace ControlDemo
             day5high.OutlineColor = Color.White;
             day5high.Font = f2;
             day5high.Text = "High: N/A";
-            day5high.Format = textFormat.Glow;
+            day5high.Format = eTextFormat.Glow;
             day5high.TextAlignment = Alignment.CenterLeft;
             day5high.Name = "day5high";
             OMLabel day4low = new OMLabel(521, 490, 200, 50);
@@ -195,7 +195,7 @@ namespace ControlDemo
             day4low.OutlineColor = Color.White;
             day4low.Font = f3;
             day4low.Text = "Low: N/A";
-            day4low.Format = textFormat.Glow;
+            day4low.Format = eTextFormat.Glow;
             day4low.TextAlignment = Alignment.CenterLeft;
             day4low.Name = "day4low";
             OMLabel day3low = new OMLabel(299, 490, 200, 50);
@@ -203,7 +203,7 @@ namespace ControlDemo
             day3low.OutlineColor = Color.White;
             day3low.Font = f3;
             day3low.Text = "Low: N/A";
-            day3low.Format = textFormat.Glow;
+            day3low.Format = eTextFormat.Glow;
             day3low.TextAlignment = Alignment.CenterLeft;
             day3low.Name = "day3low";
             OMLabel day5low = new OMLabel(775,490,200,50);
@@ -211,7 +211,7 @@ namespace ControlDemo
             day5low.OutlineColor = Color.White;
             day5low.Font = new Font("Microsoft Sans Serif", 26.25F);
             day5low.Text = "Low: N/A";
-            day5low.Format = textFormat.Glow;
+            day5low.Format = eTextFormat.Glow;
             day5low.TextAlignment = Alignment.CenterLeft;
             day5low.Name = "day5low";
             OMLabel provider = new OMLabel(300, 560, 120, 30);
@@ -259,7 +259,10 @@ namespace ControlDemo
                     ((OMImage)widget[0]).Image = new imageItem(Widget.generate("OMWeather", theHost));
                 }
         }
-
+        public Settings loadSettings()
+        {
+            throw new NotImplementedException();
+        }
         public void refresh()
         {
             string loc;

@@ -76,7 +76,7 @@ namespace OMContacts
             email.Name = "email";
             OMLabel name = new OMLabel(463, 124, 500, 50);
             name.Font = new Font("Microsoft Sans Serif", 27.75F);
-            name.Format = textFormat.Outline;
+            name.Format = eTextFormat.Outline;
             name.Name = "name";
             OMLabel Address = new OMLabel(563, 204, 300, 80);
             Address.Name = "Address";
@@ -151,7 +151,7 @@ namespace OMContacts
             }
         }
 
-        public OpenMobile.Controls.OMPanel loadSettings(string name, int screen)
+        public Settings loadSettings()
         {
             throw new NotImplementedException();
         }
