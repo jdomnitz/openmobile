@@ -73,6 +73,7 @@ namespace OpenMobile.Controls
         /// <param name="control"></param>
         public void addControl(OMControl control)
         {
+            control.parent = this;
             containedControls.Add(control);
         }
         /// <summary>
@@ -81,6 +82,7 @@ namespace OpenMobile.Controls
         /// <param name="control"></param>
         public void insertControl(OMControl control)
         {
+            control.parent = this;
             containedControls.Insert(0,control);
         }
 

@@ -59,9 +59,12 @@ namespace OpenMobile.Controls
             set
             {
                 mode = value;
-                int screen = this.containingScreen();
-                if ((OnModeChange != null) && (screen >= 0) && (Visible))
-                    OnModeChange(this, screen, mode);
+                if (OnModeChange != null)
+                {
+                    int screen = this.containingScreen();
+                    if ((screen >= 0) && (Visible))
+                        OnModeChange(this, screen, mode);
+                }
             }
         }
 

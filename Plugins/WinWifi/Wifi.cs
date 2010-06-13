@@ -155,7 +155,10 @@ namespace WinWifi
         {
             throw new NotImplementedException();
         }
-
+        public Settings loadSettings()
+        {
+            throw new NotImplementedException();
+        }
         public void Dispose()
         {
             //throw new NotImplementedException();
