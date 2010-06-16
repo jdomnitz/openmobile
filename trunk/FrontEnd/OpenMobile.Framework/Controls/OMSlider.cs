@@ -265,13 +265,13 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return (int)((sliderPosition/(float)width)*(maximum))+minimum;
+                return (int)((((sliderPosition - (sliderWidth / 2))/ (float)(width - sliderWidth)) * (maximum)) + minimum);
             }
             set
             {
                 if ((value >= minimum) && (value <= maximum))
                 {
-                    sliderPosition = (int)(((value-minimum) / (float)maximum) * width);
+                    sliderPosition = (int)(((value - minimum) / (float)maximum) * (width - sliderWidth)) + (sliderWidth / 2);
                     refreshMe(this.toRegion());
                 }
             }
@@ -353,10 +353,8 @@ namespace OpenMobile.Controls
         public void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
         {
             sliderPosition += RelativeDistance.X;
-            if (sliderPosition < 0)
-                sliderPosition = 0;
-            if ((sliderPosition + (sliderWidth / 2)) < 0)
-                sliderPosition = -(sliderWidth / 2);
+            if ((sliderPosition - (sliderWidth / 2)) < 0)
+                sliderPosition = (sliderWidth / 2);
             if ((sliderPosition + (sliderWidth / 2)) > Width)
                 sliderPosition = Width - (SliderWidth / 2);
             new Thread(delegate() { sliderMoved(screen); }).Start();

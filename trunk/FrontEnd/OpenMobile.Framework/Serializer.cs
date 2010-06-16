@@ -25,6 +25,7 @@ using System.Reflection;
 using System.Xml;
 using OpenMobile.Controls;
 using OpenMobile.Plugin;
+using System.Collections.Generic;
 
 namespace OpenMobile.Framework
 {
@@ -39,10 +40,10 @@ namespace OpenMobile.Framework
         /// <param name="file">The File</param>
         /// <param name="host">The Plugin Host</param>
         /// <returns></returns>
-        public static OMPanel deserializePanel(string file,IPluginHost host)
+        public static OMPanel[] deserializePanel(string file,IPluginHost host)
         {
             FileStream f = File.OpenRead(file);
-            OMPanel p=deserializePanel(f, host);
+            OMPanel[] p=deserializePanel(f, host);
             f.Close();
             return p;
         }
@@ -51,13 +52,16 @@ namespace OpenMobile.Framework
         /// </summary>
         /// <param name="s">The stream</param>
         /// <param name="host">The plugin host for image handling</param>
-        public static OMPanel deserializePanel(Stream s, IPluginHost host)
+        public static OMPanel[] deserializePanel(Stream s, IPluginHost host)
         {
-            OMPanel p = new OMPanel();
+            List<OMPanel> panels = new List<OMPanel>();
+            OMPanel p=null;
             XmlTextReader reader = new XmlTextReader(s);
             while (reader.NodeType != XmlNodeType.Element)
                 reader.Read();
             if (reader.Name == "ControlCollection")
+                return null; //old
+            if (reader.Name == "PanelCollection")
                 reader.Read();
             Type t = Type.GetType("OpenMobile.Controls." + reader.Name);
             object o = Activator.CreateInstance(t);
@@ -116,10 +120,18 @@ namespace OpenMobile.Framework
                 }
                 else if ((reader.NodeType == XmlNodeType.EndElement) && (reader.Depth == 1))
                 {
-                    p.addControl((OMControl)o);
+                    if (t == typeof(OMPanel))
+                    {
+                        if (p != null)
+                            panels.Add(p);
+                        p = (OMPanel)o;
+                    }
+                    else
+                        p.addControl((OMControl)o);
                 }
             }
-            return p;
+            panels.Add(p);
+            return panels.ToArray();
         }
     }
 }

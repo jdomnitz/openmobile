@@ -108,7 +108,7 @@ namespace OpenMobile.Controls
             if (animation == eAnimation.Scroll)
             {
                 scrollPos++;
-                if (scrollPos + numChars - 2 > Text.Length){
+                if (scrollPos + numChars > Text.Length){
                     if (singleAnimation == true)
                         endSingleAnimation();
                      scrollPos = 0;
