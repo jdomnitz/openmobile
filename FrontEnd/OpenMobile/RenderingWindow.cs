@@ -211,8 +211,6 @@ namespace OpenMobile
         }
         public void transitionOutEverything()
         {
-            if (highlighted != null)
-                highlighted.Mode = eModeType.Normal;
             highlighted = null;
             for (int i = Core.theHost.RenderFirst; i < p.controlCount; i++)
                 if (p.getControl(i).Mode != eModeType.transitionLock)
@@ -269,8 +267,12 @@ namespace OpenMobile
                 else
                     p.getControl(i).Mode = eModeType.Normal;
             }
-            if (transType>eGlobalTransition.Crossfade)
-                 cleanupTransition();
+            if (transType > eGlobalTransition.Crossfade)
+            {
+                tick = 0;
+                ofsetIn = new Point(0, 0);
+                ofsetOut = new Point(0, 0);
+            }
             highlighted = null;
             if (lastClick != null)
                 lastClick.Mode = eModeType.Normal;
@@ -881,12 +883,6 @@ namespace OpenMobile
             }
             Invalidate();
         }
-        private void cleanupTransition()
-        {
-            tick = 0;
-            ofsetIn = new Point(0, 0);
-            ofsetOut = new Point(0, 0);
-        }
         public void RenderingWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (highlighted == null)
@@ -909,9 +905,6 @@ namespace OpenMobile
                         return;
                     b.Mode = eModeType.Highlighted;
                     highlighted = b;
-                    // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
-                    //if (typeof(IList).IsInstanceOfType(highlighted))
-                    //    ((IList)highlighted).Select(((IList)highlighted).Start);
                     UpdateThisControl(highlighted.toRegion());
                 }
             }
@@ -942,9 +935,6 @@ namespace OpenMobile
                         highlighted.Mode = eModeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
-                        //if (typeof(IList).IsInstanceOfType(highlighted))
-                        //    ((IList)highlighted).Select(((IList)highlighted).Start);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Right:
@@ -965,9 +955,6 @@ namespace OpenMobile
                         highlighted.Mode = eModeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
-                        //if (typeof(IList).IsInstanceOfType(highlighted))
-                        //    ((IList)highlighted).Select(((IList)highlighted).Start);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Up:
@@ -988,9 +975,6 @@ namespace OpenMobile
                         highlighted.Mode = eModeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
-                        //if (typeof(IList).IsInstanceOfType(highlighted))
-                        //    ((IList)highlighted).Select(0);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Down:
@@ -1011,9 +995,6 @@ namespace OpenMobile
                         highlighted.Mode = eModeType.Normal;
                         UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        // Comment from Borte: This should not be done here, this behavior is up to the control itself not the interface!
-                        //if (typeof(IList).IsInstanceOfType(highlighted))
-                        //    ((IList)highlighted).Select(((IList)highlighted).Start);
                         UpdateThisControl(highlighted.toRegion());
                         break;
                     case Keys.Return:

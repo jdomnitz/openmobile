@@ -30,7 +30,6 @@ namespace OMHal
 {
     public partial class Form1 : Form
     {
-        private const int MM_MIXM_CONTROL_CHANGE = 0x3D1;
         private const int WM_DEVICECHANGE = 0x0219;
         static UdpClient receive;
         static UdpClient send;
@@ -53,19 +52,8 @@ namespace OMHal
         {
             if (m.Msg == WM_DEVICECHANGE)
                 DriveHandler.WndProc(ref m);
-            else if (m.Msg == MM_MIXM_CONTROL_CHANGE)
-                checkVolumeChange();
             else
                 base.WndProc(ref m);
-        }
-        static int volume = 0;
-        public static void checkVolumeChange()
-        {
-            int newVolume = Specific.getVolume(0);
-            if (volume == newVolume)
-                return;
-            volume = newVolume;
-            raiseSystemEvent(eFunction.systemVolumeChanged, newVolume.ToString(), "0", "");
         }
 
         public static void raiseSystemEvent(eFunction eFunction, string arg, string arg2, string arg3)
@@ -86,6 +74,7 @@ namespace OMHal
         }
         void parse(string message)
         {
+            int ret;
             string[] parts=message.Split(new char[]{'|'});
             string arg1 = "", arg2 = "", arg3 = "";
             if (parts.Length > 3)
@@ -97,14 +86,17 @@ namespace OMHal
             switch (parts[0])
             {
                 case "3": //GetData - System Volume
-                    int ret;
-                    if (int.TryParse(arg1,out ret)==true){
+                    if (int.TryParse(arg1,out ret)){
                         if(ret>=0)
                             sendIt("3|" + arg1+"|"+ Specific.getVolume(ret));
                     }
                     break;
                 case "34": //Set Volume
-                    Specific.setVolume(int.Parse(arg1),0);
+                    if (int.TryParse(arg2, out ret))
+                    {
+                        if (ret >= 0)
+                            Specific.setVolume(int.Parse(arg1), ret);
+                    }
                     break;
                 case "35": //Eject Disc
                     Specific.eject();

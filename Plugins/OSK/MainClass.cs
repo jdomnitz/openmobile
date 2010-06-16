@@ -27,6 +27,7 @@ using System;
 using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
+using System.Windows.Forms;
 
 namespace OpenMobile
 {   //All High Level plugins should implement the IHighLevel interface
@@ -102,18 +103,15 @@ namespace OpenMobile
             theHost=host;
             manager = new ScreenManager(theHost.ScreenCount);
             //And loading up the controls.  In this example we load the controls using serialization.
-            OMPanel regularKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "OSK.xml"), host);
+            OMPanel regularKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "OSK.xml"), host)[0];
             if (regularKeyboard == null)
                 return eLoadStatus.LoadFailedUnloadRequested;
-            regularKeyboard.Name = "OSK";
-            OMPanel symKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "SYM.xml"),host);
+            OMPanel symKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "SYM.xml"),host)[0];
             if (symKeyboard == null)
                 return eLoadStatus.LoadFailedUnloadRequested;
-            symKeyboard.Name = "SYM";
-            OMPanel numKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "NUM.xml"), host);
+            OMPanel numKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "NUM.xml"), host)[0];
             if (numKeyboard == null)
                 return eLoadStatus.LoadFailedUnloadRequested;
-            numKeyboard.Name = "NUMOSK";
             //Here we create a handle to hook the button presses
             userInteraction handler = new userInteraction(MainClass_OnClick);
             //Now we loop through each control and hook its event
@@ -130,9 +128,6 @@ namespace OpenMobile
             theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             //And then load the panel into the screen manager
-            symKeyboard.Forgotten = true;
-            regularKeyboard.Forgotten = true;
-            numKeyboard.Forgotten = true;
             manager.loadPanel(regularKeyboard);
             manager.loadPanel(symKeyboard);
             manager.loadPanel(numKeyboard);
@@ -171,7 +166,46 @@ namespace OpenMobile
                         else
                             text.Text += arg.KeyCode.ToString().ToLower();
                     else if ((arg.KeyValue > 47) && (arg.KeyValue < 59))
-                        text.Text += arg.KeyCode.ToString().Replace("D", "");
+                    {
+                        if (arg.Shift == true)
+                        {
+                            switch ((Keys)Enum.Parse(typeof(Keys),arg.KeyValue.ToString()))
+                            {
+                                case Keys.D1:
+                                    text.Text += "!";
+                                    break;
+                                case Keys.D2:
+                                    text.Text += "@";
+                                    break;
+                                case Keys.D3:
+                                    text.Text += "#";
+                                    break;
+                                case Keys.D4:
+                                    text.Text += "$";
+                                    break;
+                                case Keys.D5:
+                                    text.Text += "%";
+                                    break;
+                                case Keys.D6:
+                                    text.Text += "^";
+                                    break;
+                                case Keys.D7:
+                                    text.Text += "&";
+                                    break;
+                                case Keys.D8:
+                                    text.Text += "*";
+                                    break;
+                                case Keys.D9:
+                                    text.Text += "(";
+                                    break;
+                                case Keys.D0:
+                                    text.Text += ")";
+                                    break;
+                            }
+                        }
+                        else
+                            text.Text += arg.KeyCode.ToString().Replace("D", "");
+                    }
                     else
                     {
                         switch (arg.KeyValue)

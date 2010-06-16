@@ -42,18 +42,45 @@ namespace ControlDemo
     {
         OMPanel p = new OMPanel();
         theHost = host;
-        OMImage ss = new OMImage(0, 100, 1000, 500);
-        p.addControl(ss);
+        OMAnimatedLabel label1 = new OMAnimatedLabel(50, 100, 200, 30);
+        label1.Text = "This is an example of scrolling text how well does it work";
+        label1.ContiuousAnimation = eAnimation.BounceScroll;
+        OMAnimatedLabel label2 = new OMAnimatedLabel(50, 200, 200, 30);
+        label2.Text = label1.Text;
+        label2.ContiuousAnimation = eAnimation.Scroll;
+        OMAnimatedLabel label3 = new OMAnimatedLabel(50, 250, 200, 30);
+        label3.Text = label2.Text;
+        label3.ContiuousAnimation = eAnimation.UnveilRight;
+        OMAnimatedLabel label4 = new OMAnimatedLabel(50, 300, 200, 30);
+        label4.Text = label2.Text;
+        label4.ContiuousAnimation = eAnimation.UnveilLeft;
+        OMAnimatedLabel label5 = new OMAnimatedLabel(50, 350, 200, 30);
+        label5.Text = label2.Text;
+        OMButton button = new OMButton(50, 400, 100, 50);
+        button.Text = "Single";
+        button.Image = imageItem.MISSING;
+        button.OnClick += new userInteraction(button_OnClick);
+        p.addControl(label1);
+        p.addControl(label2);
+        p.addControl(label3);
+        p.addControl(label4);
+        p.addControl(label5);
+        p.addControl(button);
         manager = new ScreenManager(theHost.ScreenCount);
         manager.loadPanel(p);
         return eLoadStatus.LoadSuccessful;
+    }
+
+    void button_OnClick(OMControl sender, int screen)
+    {
+        ((OMAnimatedLabel)manager[screen][4]).animateNow(eAnimation.UnveilRight);
     }
 
     public OMPanel loadPanel(string name,int screen)
     {
         return manager[screen];
     }
-    public OMPanel loadSettings(string name,int screen)
+    public Settings loadSettings()
     {
         throw new NotImplementedException();
     }

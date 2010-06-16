@@ -76,28 +76,40 @@ namespace OMSettings
                         ofset += 70;
                         ret.Add(cursor);
                     }
-                    else if((s.Values.Count>=s.Options.Count)&&(s.Values.Count>0))
+                    else if((s.Values.Count>=s.Options.Count)&&(s.Options.Count>0))
                     {
                         OMButton scrollRight = new OMButton(920, ofset, 70, 60);
                         scrollRight.Image = theHost.getSkinImage("Play");
                         scrollRight.DownImage = theHost.getSkinImage("Play.Highlighted");
                         scrollRight.OnClick += new userInteraction(scrollRight_OnClick);
                         scrollRight.Tag = s.Name;
+                        scrollRight.Transition = eButtonTransition.None;
                         OMButton scrollLeft = new OMButton(370, ofset, 70, 60);
                         scrollLeft.Image = scrollRight.Image;
                         scrollLeft.DownImage = scrollRight.DownImage;
                         scrollLeft.Orientation = eAngle.FlipHorizontal;
                         scrollLeft.OnClick += new userInteraction(scrollLeft_OnClick);
                         scrollLeft.Tag = s.Name;
+                        scrollLeft.Transition = eButtonTransition.None;
                         OMTextBox txtchoice = new OMTextBox(450, ofset+5, 460, 50);
                         txtchoice.Flags = textboxFlags.EllipsisEnd;
-                        txtchoice.Text = s.Value;
+                        int index = s.Values.FindIndex(def => def == s.Value);
+                        if (index != -1)
+                            txtchoice.Text = s.Options[index];
                         txtchoice.Font = new Font("Microsoft Sans Serif", 24F);
                         txtchoice.Name = "txt"+s.Name;
                         OMLabel mcTitle = new OMLabel(200, ofset, 170, 50);
                         mcTitle.Font = new Font("Microsoft Sans Serif", 32.25F, FontStyle.Bold);
                         mcTitle.Text = s.Header + ":";
                         mcTitle.TextAlignment = Alignment.CenterRight;
+                        if ((s.Description != null) && (s.Description.Length > 0))
+                        {
+                            OMLabel mcDescription = new OMLabel(450, ofset+55, 460, 30);
+                            mcDescription.Font = new Font("Microsoft Sans Serif", 20);
+                            mcDescription.Text = s.Description;
+                            ret.Add(mcDescription);
+                            ofset += 30;
+                        }
                         ofset += 65;
                         ret.Add(mcTitle);
                         ret.Add(txtchoice);
@@ -176,22 +188,40 @@ namespace OMSettings
                     break;
                 case SettingTypes.Range:
                     OMLabel rdesc = new OMLabel(220, ofset, 200, 50);
-                    rdesc.Text = s.Description + ":";
+                    rdesc.Text = s.Header + ":";
                     rdesc.Font = new Font("Microsoft Sans Serif", 24F);
                     rdesc.Name = title;
                     rdesc.Tag = s.Name;
-                    ret.Add(rdesc);
+                    rdesc.TextAlignment = Alignment.CenterRight;
                     if (s.Values.Count != 2)
                         break;
                     OMSlider range = new OMSlider(450, ofset+15, 500, 30,12,20);
                     range.Slider = theHost.getSkinImage("Slider");
                     range.SliderBar = theHost.getSkinImage("Slider.Bar");
-                    range.Minimum = int.Parse(s.Values[0]);
-                    range.Maximum = int.Parse(s.Values[1]);
-                    range.Value = int.Parse(s.Value);
+                    int val;
+                    if (!int.TryParse(s.Values[0], out val))
+                        break;
+                    range.Minimum = val;
+                    if (!int.TryParse(s.Values[1], out val))
+                        break;
+                    range.Maximum = val;
+                    if (!int.TryParse(s.Value, out val))
+                        break;
+                    range.Value = val;
                     range.Tag = s.Name;
                     range.OnSliderMoved += new OMSlider.slidermoved(range_OnSliderMoved);
+                    if ((s.Description != null) && (s.Description.Length > 0))
+                    {
+                        OMLabel rDescription = new OMLabel(450, ofset + 35, 500, 30);
+                        rDescription.Font = new Font("Microsoft Sans Serif", 20);
+                        rDescription.Tag= s.Description;
+                        rDescription.Text = s.Description.Replace("%value%", s.Value);
+                        rDescription.Name = "dsc" + s.Name;
+                        ret.Add(rDescription);
+                        ofset += 30;
+                    }
                     ret.Add(range);
+                    ret.Add(rdesc);
                     ofset += 60;
                     break;
             }
@@ -202,6 +232,8 @@ namespace OMSettings
         {
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.Value = ((OMSlider)sender).Value.ToString();
+            OMLabel lbl = (OMLabel)sender.Parent["dsc" + s.Name];
+            lbl.Text = lbl.Tag.ToString().Replace("%value%", s.Value);
             collection.changeSetting(s);
         }
 

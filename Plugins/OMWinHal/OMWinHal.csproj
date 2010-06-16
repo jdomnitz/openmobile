@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -91,7 +92,18 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="XPVolume.cs" />
+    <Compile Include="XP Audio\AudioMixer\CallbackWindow.cs" />
+    <Compile Include="XP Audio\AudioMixer\Mixer.cs" />
+    <Compile Include="XP Audio\AudioMixer\MixerControl.cs" />
+    <Compile Include="XP Audio\AudioMixer\MixerControls.cs" />
+    <Compile Include="XP Audio\AudioMixer\MixerDetail.cs" />
+    <Compile Include="XP Audio\AudioMixer\MixerDetails.cs" />
+    <Compile Include="XP Audio\AudioMixer\MixerException.cs" />
+    <Compile Include="XP Audio\AudioMixer\MixerLine.cs" />
+    <Compile Include="XP Audio\AudioMixer\MixerLines.cs" />
+    <Compile Include="XP Audio\AudioMixer\MixerNative.cs" />
+    <Compile Include="XP Audio\AudioMixer\Mixers.cs" />
+    <Compile Include="XP Audio\WaveNative.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">

@@ -24,6 +24,7 @@ using System.Text;
 using OpenMobile;
 using OSSpecificLib.CoreAudioApi;
 using System.Management;
+using WaveLib.AudioMixer;
 
 namespace OMHal
 {
@@ -33,6 +34,8 @@ namespace OMHal
     public static class Specific
     {
         static MMDevice[] device;
+        static WaveLib.AudioMixer.Mixers m;
+        static int[] lastVolume;
         private static OperatingSystem os = System.Environment.OSVersion;
         const int SC_MONITORPOWER = 0xF170;
         const int WM_SYSCOMMAND = 0x0112;
@@ -45,10 +48,20 @@ namespace OMHal
         {
             if (os.Version.Major < 6)
             {
-                uint volume = XPVolume.GetVolume();
-                if (XPVolume.IsMuted() == true)
-                    return -1; //Mute
-                return (int)volume;
+                if (instance > m.Playback.Devices.Count)
+                    return -1;
+                if (instance == 0)
+                    m.Playback.DeviceId = m.Playback.DeviceIdDefault;
+                else
+                    m.Playback.DeviceId = m.Playback.Devices[instance - 1].DeviceId;
+                MixerLine l = m.Playback.Lines.GetMixerFirstLineByComponentType(WaveLib.AudioMixer.MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
+                lastVolume[instance] = l.Volume;
+                if (l.Mute == true)
+                {
+                    lastVolume[instance] = -1;
+                    return lastVolume[instance];
+                }
+                return (int)Math.Round(((double)l.Volume/l.VolumeMax)*100.0);
             }
             else
             {
@@ -73,26 +86,28 @@ namespace OMHal
         {
             if (os.Version.Major < 6)
             {
+                if (instance > m.Playback.Devices.Count)
+                    return;
+                if (instance == 0)
+                    m.Playback.DeviceId = m.Playback.DeviceIdDefault;
+                else
+                    m.Playback.DeviceId = m.Playback.Devices[instance-1].DeviceId;
+                MixerLine l=m.Playback.Lines.GetMixerFirstLineByComponentType(WaveLib.AudioMixer.MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
                 if (volume == -1)
+                    l.Mute = true;
+                else
                 {
-                    XPVolume.SetMute(true);
+                    l.Mute = false;
+                    if (volume >= 0)
+                        l.Volume = (int)((volume / 100.0) * l.VolumeMax);
                 }
-                else if (volume == -2)
-                {
-                    XPVolume.SetMute(false);
-                }
-                XPVolume.MixerInfo mi = XPVolume.GetMixerControls();
-                mi.muteCtl = 0;
-                uint vol;
-                vol = (uint)((volume - 1) * (ushort.MaxValue) / 100);
-                vol = (vol & (vol << 16));
-                XPVolume.SetVolume(mi);
-                XPVolume.waveOutSetVolume(IntPtr.Zero, vol);
             }
             else
             {
                 if (device != null)
                 {
+                    if (instance >= device.Length)
+                        return;
                     if (volume == -1)
                         device[instance].AudioEndpointVolume.Mute = true;
                     else if(volume==-2)
@@ -105,24 +120,15 @@ namespace OMHal
                 }
             }
         }
-        /// <summary>
-        /// Creates a callback for volume change notifications
-        /// </summary>
-        /// <param name="handle"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
+
         public static bool hookVolume(IntPtr handle)
         {
             if (os.Version.Major < 6) //Xp
             {
-                uint CALLBACK_WINDOW = 0x00010000;
-                IntPtr tmp;
-                int result = XPVolume.mixerOpen(out tmp, 0, handle, IntPtr.Zero, CALLBACK_WINDOW);
-                if (XPVolume.IsMuted() == true)
-                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1","0","");
-                else
-                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, XPVolume.GetVolume().ToString(), "0", "");
-                return (result == 0);
+                m = new WaveLib.AudioMixer.Mixers();
+                lastVolume = new int[m.Devices.Count + 1];
+                m.Playback.MixerLineChanged += new Mixer.MixerLineChangeHandler(Playback_MixerLineChanged);
+                return true;
             }
             else
             {
@@ -149,6 +155,17 @@ namespace OMHal
                 return (device!=null);
             }
         }
+
+        static void Playback_MixerLineChanged(Mixer mixer, MixerLine line)
+        {
+            if (lastVolume[mixer.DeviceId+1] == line.Volume)
+                return;
+            if (line.Mute && (lastVolume[mixer.DeviceId+1] == -1))
+                return;
+            Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(mixer.DeviceId+1).ToString(), (mixer.DeviceId+1).ToString(), "");
+            if (mixer.DeviceIdDefault==mixer.DeviceId)
+                Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(mixer.DeviceId + 1).ToString(), "0", "");
+        }
         static void AudioEndpointVolume_OnVolumeNotification(AudioVolumeNotificationData data)
         {
             for (int i = 0; i < device.Length; i++)
@@ -159,22 +176,6 @@ namespace OMHal
                     Form1.raiseSystemEvent(eFunction.systemVolumeChanged, ((int)(data.MasterVolume * 100)).ToString(), i.ToString(), "");
                 else
                     Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1", i.ToString(), "");
-            }
-        }
-        /// <summary>
-        /// Lists all audio devices present on the system
-        /// </summary>
-        /// <returns></returns>
-        public static string[] getAudioDevices()
-        {
-            if (os.Version.Major < 6) //Xp
-            {
-                //TODO - Implement on XP
-                return null;
-            }
-            else
-            {
-                return device[0].AudioEndpointVolume.getDevices();
             }
         }
 

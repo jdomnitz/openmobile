@@ -569,18 +569,10 @@ namespace Media
                 }
             }
         }
-        Settings s;
+
         public Settings loadSettings()
         {
-            if (s == null)
-            {
-                s = new Settings("Media Settings");
-                List<string> options = new List<string>();
-                options.Add("Enabled");
-                options.Add("Disabled");
-                s.Add(new Setting(SettingTypes.MultiChoice, "IndexOnStartup", "", "Index New Music on Every Startup", options, Setting.BooleanList));
-            }
-            return s;
+            return null;
         }
 
         public string authorName

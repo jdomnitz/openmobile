@@ -98,6 +98,7 @@ namespace OMPlayer
                 {
                     AVPlayer p = player[instance];
                     player[instance] = null;
+                    p.instance = -1;
                     if (OnMediaEvent != null)
                         OnMediaEvent(function, instance, arg);
                     for (int i = 10; i >= 0; i--)
@@ -487,7 +488,7 @@ namespace OMPlayer
         public ePlayerStatus currentState = ePlayerStatus.Ready;
         public int currentVolume = 100;
         public IGraphBuilder graphBuilder = null;
-        private int instance = -1;
+        public int instance = -1;
         public bool isAudioOnly = false;
         public IMediaControl mediaControl = null;
         private IMediaEventEx mediaEventEx = null;
@@ -654,7 +655,8 @@ namespace OMPlayer
                         theHost.sendMessage("UI", "OMPlayer", "HideMediaControls" + i.ToString());
             }
             isAudioOnly = true;
-            OnMediaEvent(eFunction.Stop, instance, "");
+            if (instance!=-1)
+                OnMediaEvent(eFunction.Stop, instance, "");
             return true;
         }
         public void CloseClip()

@@ -50,9 +50,9 @@ namespace TagLib.Mpeg4 {
 		private IsoMovieHeaderBox mvhd_box;
 		
 		/// <summary>
-		///    Contains the ISO user data box.
+		///    Contains the ISO user data boxes.
 		/// </summary>
-		private IsoUserDataBox udta_box;
+        private List<IsoUserDataBox> udta_boxes = new List<IsoUserDataBox>();
 		
 		/// <summary>
 		///    Contains the box headers from the top of the file to the
@@ -153,8 +153,8 @@ namespace TagLib.Mpeg4 {
 		///    cref="ParseTag()" /> and <see
 		///    cref="ParseTagAndProperties()" />.
 		/// </remarks>
-		public IsoUserDataBox UserDataBox {
-			get {return udta_box;}
+		public IsoUserDataBox [] UserDataBoxes {
+			get {return udta_boxes.ToArray ();}
 		}
 		
 		/// <summary>
@@ -321,7 +321,7 @@ namespace TagLib.Mpeg4 {
 		public void ParseTag ()
 		{
 			ResetFields ();
-			ParseTag (first_header.TotalBoxSize, file.Length);
+            ParseTag(first_header.TotalBoxSize, file.Length, null);
 		}
 		
 		/// <summary>
@@ -331,8 +331,8 @@ namespace TagLib.Mpeg4 {
 		public void ParseTagAndProperties ()
 		{
 			ResetFields ();
-			ParseTagAndProperties (first_header.TotalBoxSize,
-				file.Length, null);
+            ParseTagAndProperties(first_header.TotalBoxSize,
+                file.Length, null, null);
 		}
 		
 		/// <summary>
@@ -418,7 +418,7 @@ namespace TagLib.Mpeg4 {
 		///    A <see cref="long" /> value specifying the seek position
 		///    at which to stop reading.
 		/// </param>
-		private void ParseTag (long start, long end)
+		private void ParseTag (long start, long end,List<BoxHeader> parents)
 		{
 			BoxHeader header;
 			
@@ -426,17 +426,26 @@ namespace TagLib.Mpeg4 {
 				position += header.TotalBoxSize) {
 				header = new BoxHeader (file, position);
 				
-				if (header.BoxType == BoxType.Moov ||
-					header.BoxType == BoxType.Mdia ||
+				if (header.BoxType == BoxType.Moov) {
+					ParseTag (header.HeaderSize + position,
+						header.TotalBoxSize + position,
+						AddParent (parents, header));
+				} else if (header.BoxType == BoxType.Mdia ||
 					header.BoxType == BoxType.Minf ||
 					header.BoxType == BoxType.Stbl ||
 					header.BoxType == BoxType.Trak) {
 					ParseTag (header.HeaderSize + position,
-						header.TotalBoxSize + position);
-				} else if (udta_box == null &&
-					header.BoxType == BoxType.Udta) {
-					udta_box = BoxFactory.CreateBox (file,
+						header.TotalBoxSize + position,
+					    AddParent (parents, header));
+				} else if (header.BoxType == BoxType.Udta) {
+					IsoUserDataBox udtaBox = BoxFactory.CreateBox (file,
 					header) as IsoUserDataBox;
+                    // Since we can have multiple udta boxes, save the parent for each one
+                    List < BoxHeader > new_parents = AddParent(
+                    parents, header);
+                    udtaBox.ParentTree = new_parents.ToArray();
+                    
+                    udta_boxes.Add(udtaBox);
 				} else if (header.BoxType == BoxType.Mdat) {
 					mdat_start = position;
 					mdat_end = position + header.TotalBoxSize;
@@ -464,7 +473,7 @@ namespace TagLib.Mpeg4 {
 		///    range being searched.
 		/// </param>
 		private void ParseTagAndProperties (long start, long end,
-		                                    IsoHandlerBox handler)
+                                            IsoHandlerBox handler, List<BoxHeader> parents)
 		{
 			BoxHeader header;
 			
@@ -473,15 +482,19 @@ namespace TagLib.Mpeg4 {
 				header = new BoxHeader (file, position);
 				ByteVector type = header.BoxType;
 				
-				if (type == BoxType.Moov ||
-					type == BoxType.Mdia ||
+				if (type == BoxType.Moov) {
+					ParseTagAndProperties (header.HeaderSize + position,
+					header.TotalBoxSize + position,
+					handler, 
+					AddParent (parents, header));
+				} else if (type == BoxType.Mdia ||
 					type == BoxType.Minf ||
 					type == BoxType.Stbl ||
 					type == BoxType.Trak) {
 					ParseTagAndProperties (
 						header.HeaderSize + position,
 						header.TotalBoxSize + position,
-						handler);
+                        handler,AddParent(parents, header));
 				} else if (type == BoxType.Stsd) {
 					stsd_boxes.Add (BoxFactory.CreateBox (
 						file, header, handler));
@@ -498,11 +511,16 @@ namespace TagLib.Mpeg4 {
 					mvhd_box = BoxFactory.CreateBox (file,
 						header, handler) as
 							IsoMovieHeaderBox;
-				} else if (udta_box == null &&
-					type == BoxType.Udta) {
-					udta_box = BoxFactory.CreateBox (file,
+				} else if (type == BoxType.Udta) {
+					IsoUserDataBox udtaBox = BoxFactory.CreateBox (file,
 						header, handler) as
 							IsoUserDataBox;
+                    // Since we can have multiple udta boxes, save the parent for each one
+                    List < BoxHeader > new_parents = AddParent(
+                    parents, header);
+                    udtaBox.ParentTree = new_parents.ToArray();
+                    
+                    udta_boxes.Add(udtaBox);
 				} else if (type == BoxType.Mdat) {
 					mdat_start = position;
 					mdat_end = position + header.TotalBoxSize;
@@ -565,7 +583,7 @@ namespace TagLib.Mpeg4 {
 		private void ResetFields ()
 		{
 			mvhd_box = null;
-			udta_box = null;
+            udta_boxes.Clear();
 			moov_tree = null;
 			udta_tree = null;
 			stco_boxes.Clear ();

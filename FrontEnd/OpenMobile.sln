@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMDir", "..\Plugins\OMDir\O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Radio", "..\Plugins\Radio\Radio.csproj", "{932DE238-14C8-4D0E-840A-646E165D9947}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlDemo", "..\Plugins\ControlDemo\ControlDemo.csproj", "{CF16AA25-58E4-40A1-9137-40CF48FB38EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{932DE238-14C8-4D0E-840A-646E165D9947}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{932DE238-14C8-4D0E-840A-646E165D9947}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{932DE238-14C8-4D0E-840A-646E165D9947}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF16AA25-58E4-40A1-9137-40CF48FB38EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF16AA25-58E4-40A1-9137-40CF48FB38EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF16AA25-58E4-40A1-9137-40CF48FB38EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF16AA25-58E4-40A1-9137-40CF48FB38EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
