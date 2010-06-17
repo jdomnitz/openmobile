@@ -771,9 +771,9 @@ namespace OpenMobile
                     return Net.Connections.connect(this,arg);
                 case eFunction.disconnectFromInternet:
                     return Net.Connections.disconnect(this,arg);
-                case eFunction.systemVolumeChanged:
-                    raiseSystemEvent(eFunction.systemVolumeChanged, arg, "0", "");
-                    return true;
+                //case eFunction.systemVolumeChanged:
+                //    raiseSystemEvent(eFunction.systemVolumeChanged, arg, "0", "");
+                //    return true;
                 case eFunction.setSystemVolume:
                     return execute(eFunction.setSystemVolume, arg, "0");
                 case eFunction.TransitionFromAny:
@@ -1046,19 +1046,22 @@ namespace OpenMobile
                         return true;
                     }
                     return false;
+                    /* Does anything use this?
                 case eFunction.systemVolumeChanged:
                     if (int.TryParse(arg2, out ret) == true)
                     {
                         raiseSystemEvent(eFunction.systemVolumeChanged, arg1, arg2, "");
                         return true;
                     }
-                    return false;
+                    return false;*/
                 case eFunction.setSystemVolume:
                     if (int.TryParse(arg1, out ret) == true)
                     {
                         if ((ret < -2) || (ret > 100))
                             return false;
                         if (int.TryParse(arg2, out ret) == false)
+                            return false;
+                        if ((ret < 0) || (ret >= instanceCount))
                             return false;
                         hal.snd("34|" + arg1 + "|"+arg2);
                         raiseSystemEvent(eFunction.systemVolumeChanged, arg1, arg2, "");
@@ -1076,11 +1079,22 @@ namespace OpenMobile
                 case eFunction.setMonitorBrightness:
                     if (int.TryParse(arg1, out ret) == true)
                     {
-                        if ((ret < 0) || (ret > screenCount))
+                        if ((ret < 0) || (ret >= screenCount))
                             return false;
                         if (int.TryParse(arg2, out ret) == false)
                             return false;
                         hal.snd("40|" + arg1 + "|" + arg2);
+                        return true;
+                    }
+                    return false;
+                case eFunction.setSystemBalance:
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        if ((ret < 0) || (ret >= instanceCount))
+                            return false;
+                        if (int.TryParse(arg2, out ret) == false)
+                            return false;
+                        hal.snd("42|" + arg1 + "|" + arg2);
                         return true;
                     }
                     return false;

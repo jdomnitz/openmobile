@@ -19,14 +19,12 @@
      misrepresented as being the original source code.
   3. This notice may not be removed or altered from any source distribution.
 */
-
 using System;
 using System.Runtime.InteropServices;
 using OSSpecificLib.CoreAudioApi.Interfaces;
 
 namespace OSSpecificLib.CoreAudioApi
 {
-
     class AudioEndpointVolume : IDisposable
     {
         private IAudioEndpointVolume _AudioEndPointVolume;
@@ -44,7 +42,27 @@ namespace OSSpecificLib.CoreAudioApi
                 s[i] = c[i].Properties[1].Value.ToString() + " (" + c[i].Properties[2].Value.ToString()+")";
             return s;
         }
-
+        public void setBalance(int value)
+        {
+            int channels;
+            _AudioEndPointVolume.GetChannelCount(out channels);
+            if (channels < 2)
+                return;
+            double left = (value / 100.0);
+            double right = 1.0 - left;
+            float lvol;
+            float rvol;
+            _AudioEndPointVolume.GetChannelVolumeLevelScalar(0, out lvol);
+            _AudioEndPointVolume.GetChannelVolumeLevelScalar(1, out rvol);
+            float vol=lvol+rvol;
+            _AudioEndPointVolume.SetChannelVolumeLevelScalar(0, (float)(vol * left), Guid.Empty);
+            _AudioEndPointVolume.SetChannelVolumeLevelScalar(1, (float)(vol * right), Guid.Empty);
+            if (channels >= 4)
+            {
+                _AudioEndPointVolume.SetChannelVolumeLevelScalar(2, (float)(vol * left), Guid.Empty);
+                _AudioEndPointVolume.SetChannelVolumeLevelScalar(3, (float)(vol * right), Guid.Empty);
+            }
+        }
         AudioEndPointVolumeVolumeRange VolumeRange
         {
             get

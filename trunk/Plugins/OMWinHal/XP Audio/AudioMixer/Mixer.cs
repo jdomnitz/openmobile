@@ -207,8 +207,11 @@ namespace WaveLib.AudioMixer
 					
 					int iNumDevs = MixerNative.mixerGetNumDevs();
 
-					for (int i=0; i<iNumDevs; i++)
+                    for (int j = iNumDevs; j >= 0; j--)
 					{
+                        int i = j;
+                        if (i == iNumDevs)
+                            i = DeviceIdDefault;
 						// Get info about the next device 
 						errorCode = (MMErrors) MixerNative.mixerGetDevCaps(i, ref wic, Marshal.SizeOf(wic));
 						if (errorCode != MMErrors.MMSYSERR_NOERROR)

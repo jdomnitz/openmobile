@@ -25,6 +25,7 @@ using OpenMobile;
 using OSSpecificLib.CoreAudioApi;
 using System.Management;
 using WaveLib.AudioMixer;
+using System.Windows.Forms;
 
 namespace OMHal
 {
@@ -48,15 +49,22 @@ namespace OMHal
         {
             if (os.Version.Major < 6)
             {
-                if (instance > m.Playback.Devices.Count)
+                if ((m==null)||(instance >= m.Playback.Devices.Count))
                     return -1;
-                if (instance == 0)
-                    m.Playback.DeviceId = m.Playback.DeviceIdDefault;
-                else
-                    m.Playback.DeviceId = m.Playback.Devices[instance - 1].DeviceId;
-                MixerLine l = m.Playback.Lines.GetMixerFirstLineByComponentType(WaveLib.AudioMixer.MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
+                try
+                {
+                    m.Playback.DeviceId = m.Playback.Devices[instance].DeviceId;
+                }
+                catch (MixerException)
+                {
+                    MessageBox.Show("Unable To Open Mixer(G): " + m.Playback.Devices[instance].MixerName + " (" + instance + ")");
+                    return -1;
+                }
+                MixerLine l = m.Playback.Lines.GetMixerFirstLineByComponentType(MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
+                if ((l==null)||(l.ContainsVolume==false))
+                    return -1;
                 lastVolume[instance] = l.Volume;
-                if (l.Mute == true)
+                if ((l.ContainsMute)&&(l.Mute == true))
                 {
                     lastVolume[instance] = -1;
                     return lastVolume[instance];
@@ -86,18 +94,29 @@ namespace OMHal
         {
             if (os.Version.Major < 6)
             {
-                if (instance > m.Playback.Devices.Count)
+                if ((m==null)||(instance >= m.Playback.Devices.Count))
                     return;
-                if (instance == 0)
-                    m.Playback.DeviceId = m.Playback.DeviceIdDefault;
-                else
-                    m.Playback.DeviceId = m.Playback.Devices[instance-1].DeviceId;
-                MixerLine l=m.Playback.Lines.GetMixerFirstLineByComponentType(WaveLib.AudioMixer.MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
+                try
+                {
+                    m.Playback.DeviceId = m.Playback.Devices[instance].DeviceId;
+                }
+                catch (MixerException)
+                {
+                    MessageBox.Show("Unable To Open Mixer(S): " + m.Playback.Devices[instance].MixerName + " (" + instance + ")");
+                    return;
+                }
+                MixerLine l=m.Playback.Lines.GetMixerFirstLineByComponentType(MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
+                if ((l == null)||(l.ContainsVolume==false))
+                    return;
                 if (volume == -1)
-                    l.Mute = true;
+                    if (l.ContainsMute==true)
+                        l.Mute = true;
+                    else
+                        l.Volume = l.VolumeMin;
                 else
                 {
-                    l.Mute = false;
+                    if (l.ContainsMute == true)
+                        l.Mute = false;
                     if (volume >= 0)
                         l.Volume = (int)((volume / 100.0) * l.VolumeMax);
                 }
@@ -120,14 +139,58 @@ namespace OMHal
                 }
             }
         }
-
+        public static void setBalance(int instance,int balance)//Left=0
+        {
+            if (os.Version.Major < 6) //Xp
+            {
+                if (instance > m.Playback.Devices.Count)
+                    return;
+                if (instance == 0)
+                    m.Playback.DeviceId = m.Playback.DeviceIdDefault;
+                else
+                    m.Playback.DeviceId = m.Playback.Devices[instance - 1].DeviceId;
+                double volume;
+                MixerLine l = m.Playback.Lines.GetMixerFirstLineByComponentType(WaveLib.AudioMixer.MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
+                l.Channel = Channel.Left;
+                volume = ((double)l.Volume / l.VolumeMax);
+                l.Channel = Channel.Right;
+                volume += ((double)l.Volume / l.VolumeMax);
+                l.Volume = (int)(((100-balance) / 100.0) * volume * l.VolumeMax);
+                l.Channel = Channel.Left;
+                l.Volume = (int)((balance / 100.0) * volume * l.VolumeMax);
+                if (l.Channels >= 4)
+                {
+                    l.Channel = Channel.Channel_3;
+                    volume = ((double)l.Volume / l.VolumeMax);
+                    l.Channel = Channel.Channel_4;
+                    volume += ((double)l.Volume / l.VolumeMax);
+                    l.Volume = (int)(((100 - balance) / 100.0) * volume * l.VolumeMax);
+                    l.Channel = Channel.Channel_3;
+                    l.Volume = (int)((balance / 100.0) * volume * l.VolumeMax);
+                }
+            }
+            else
+            {
+                if (device != null)
+                {
+                    if (instance >= device.Length)
+                        return;
+                    device[instance].AudioEndpointVolume.setBalance(balance);
+                }
+            }
+        }
         public static bool hookVolume(IntPtr handle)
         {
             if (os.Version.Major < 6) //Xp
             {
                 m = new WaveLib.AudioMixer.Mixers();
-                lastVolume = new int[m.Devices.Count + 1];
+                lastVolume = new int[m.Playback.Devices.Count];
                 m.Playback.MixerLineChanged += new Mixer.MixerLineChangeHandler(Playback_MixerLineChanged);
+                for (int i = 0; i < m.Playback.Devices.Count; i++)
+                {
+                    m.Playback.DeviceId = m.Playback.Devices[i].DeviceId;
+                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(i).ToString(), i.ToString(), "");
+                }
                 return true;
             }
             else
@@ -146,10 +209,7 @@ namespace OMHal
                         col[i].AudioEndpointVolume.OnVolumeNotification += new AudioEndpointVolumeNotificationDelegate(AudioEndpointVolume_OnVolumeNotification);
                     }
                     for(int i=0;i<device.Length;i++)
-                        if (device[i].AudioEndpointVolume.Mute == true)
-                            Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1",i.ToString(),"");
-                        else
-                            Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(i).ToString(), i.ToString(), "");
+                        Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(i).ToString(), i.ToString(), "");
                 }
                 catch (Exception) { }
                 return (device!=null);
@@ -158,13 +218,13 @@ namespace OMHal
 
         static void Playback_MixerLineChanged(Mixer mixer, MixerLine line)
         {
-            if (lastVolume[mixer.DeviceId+1] == line.Volume)
+            if (lastVolume[mixer.DeviceId] == line.Volume)
                 return;
-            if (line.Mute && (lastVolume[mixer.DeviceId+1] == -1))
+            if (line.Mute && (lastVolume[mixer.DeviceId] == -1))
                 return;
-            Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(mixer.DeviceId+1).ToString(), (mixer.DeviceId+1).ToString(), "");
+            Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(mixer.DeviceId).ToString(), (mixer.DeviceId).ToString(), "");
             if (mixer.DeviceIdDefault==mixer.DeviceId)
-                Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(mixer.DeviceId + 1).ToString(), "0", "");
+                Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(mixer.DeviceId).ToString(), "0", "");
         }
         static void AudioEndpointVolume_OnVolumeNotification(AudioVolumeNotificationData data)
         {
