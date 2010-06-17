@@ -88,14 +88,28 @@ namespace OMHal
                 case "3": //GetData - System Volume
                     if (int.TryParse(arg1,out ret)){
                         if(ret>=0)
-                            sendIt("3|" + arg1+"|"+ Specific.getVolume(ret));
+                            try
+                            {
+                                sendIt("3|" + arg1 + "|" + Specific.getVolume(ret));
+                            }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show("GERROR: " + e.Message + "\nStack Trace:\n" + e.StackTrace);
+                            }
                     }
                     break;
                 case "34": //Set Volume
                     if (int.TryParse(arg2, out ret))
                     {
                         if (ret >= 0)
-                            Specific.setVolume(int.Parse(arg1), ret);
+                            try
+                            {
+                                Specific.setVolume(int.Parse(arg1), ret);
+                            }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show("SERROR: " + e.Message + "\nStack Trace:\n" + e.StackTrace);
+                            }
                     }
                     break;
                 case "35": //Eject Disc
@@ -103,6 +117,13 @@ namespace OMHal
                     break;
                 case "40": //Set Monitor Brightness
                     Specific.SetBrightness(int.Parse(arg2));
+                    break;
+                case "42":
+                    if (int.TryParse(arg2, out ret))
+                    {
+                        if (ret >= 0)
+                            Specific.setBalance(int.Parse(arg1), ret);
+                    }
                     break;
                 case "44": //Close Program
                     Environment.Exit(0);

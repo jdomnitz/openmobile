@@ -815,6 +815,13 @@ namespace OpenMobile
         /// </summary>
         stationListUpdated=41,
         /// <summary>
+        /// Sets the system volume balance
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Instance Number</para>
+        /// <para>Arg2: Balance [0-100] [0=Left,50=Even]</para>
+        /// </summary>
+        setSystemBalance=42,
+        /// <summary>
         /// Restart this application
         /// </summary>
         restartProgram=43,
@@ -1015,7 +1022,7 @@ namespace OpenMobile
         /// </summary>
         dialNumber=300,
         /// <summary>
-        /// Dials the given number
+        /// Prompts the user to dial the given number
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Phone Number (without seperators)</para>
         /// <para>Arg2: (Optional) Display Name</para>
