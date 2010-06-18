@@ -94,7 +94,7 @@ namespace OMHal
                             }
                             catch (Exception e)
                             {
-                                MessageBox.Show("GERROR: " + e.Message + "\nStack Trace:\n" + e.StackTrace);
+                                //MessageBox.Show("GERROR: " + e.Message + "\nStack Trace:\n" + e.StackTrace);
                             }
                     }
                     break;
@@ -108,7 +108,7 @@ namespace OMHal
                             }
                             catch (Exception e)
                             {
-                                MessageBox.Show("SERROR: " + e.Message + "\nStack Trace:\n" + e.StackTrace);
+                                //MessageBox.Show("SERROR: " + e.Message + "\nStack Trace:\n" + e.StackTrace);
                             }
                     }
                     break;
@@ -122,7 +122,11 @@ namespace OMHal
                     if (int.TryParse(arg2, out ret))
                     {
                         if (ret >= 0)
-                            Specific.setBalance(int.Parse(arg1), ret);
+                            try
+                            {
+                                Specific.setBalance(int.Parse(arg1), ret);
+                            }
+                            catch (Exception) { }
                     }
                     break;
                 case "44": //Close Program

@@ -51,25 +51,27 @@ namespace OMHal
             {
                 if ((m==null)||(instance >= m.Playback.Devices.Count))
                     return -1;
-                try
+                lock (m)
                 {
-                    m.Playback.DeviceId = m.Playback.Devices[instance].DeviceId;
+                    try
+                    {
+                        m.Playback.DeviceId = m.Playback.Devices[instance].DeviceId;
+                    }
+                    catch (MixerException)
+                    {
+                        return 0;
+                    }
+                    MixerLine l = m.Playback.Lines.GetMixerFirstLineByComponentType(MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
+                    if ((l == null) || (l.ContainsVolume == false))
+                        return -1;
+                    lastVolume[instance] = l.Volume;
+                    if ((l.ContainsMute) && (l.Mute == true))
+                    {
+                        lastVolume[instance] = -1;
+                        return lastVolume[instance];
+                    }
+                    return (int)Math.Round(((double)l.Volume / l.VolumeMax) * 100.0);
                 }
-                catch (MixerException)
-                {
-                    MessageBox.Show("Unable To Open Mixer(G): " + m.Playback.Devices[instance].MixerName + " (" + instance + ")");
-                    return -1;
-                }
-                MixerLine l = m.Playback.Lines.GetMixerFirstLineByComponentType(MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
-                if ((l==null)||(l.ContainsVolume==false))
-                    return -1;
-                lastVolume[instance] = l.Volume;
-                if ((l.ContainsMute)&&(l.Mute == true))
-                {
-                    lastVolume[instance] = -1;
-                    return lastVolume[instance];
-                }
-                return (int)Math.Round(((double)l.Volume/l.VolumeMax)*100.0);
             }
             else
             {
@@ -96,29 +98,31 @@ namespace OMHal
             {
                 if ((m==null)||(instance >= m.Playback.Devices.Count))
                     return;
-                try
+                lock (m)
                 {
-                    m.Playback.DeviceId = m.Playback.Devices[instance].DeviceId;
-                }
-                catch (MixerException)
-                {
-                    MessageBox.Show("Unable To Open Mixer(S): " + m.Playback.Devices[instance].MixerName + " (" + instance + ")");
-                    return;
-                }
-                MixerLine l=m.Playback.Lines.GetMixerFirstLineByComponentType(MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
-                if ((l == null)||(l.ContainsVolume==false))
-                    return;
-                if (volume == -1)
-                    if (l.ContainsMute==true)
-                        l.Mute = true;
+                    try
+                    {
+                        m.Playback.DeviceId = m.Playback.Devices[instance].DeviceId;
+                    }
+                    catch (MixerException)
+                    {
+                        return;
+                    }
+                    MixerLine l = m.Playback.Lines.GetMixerFirstLineByComponentType(MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
+                    if ((l == null) || (l.ContainsVolume == false))
+                        return;
+                    if (volume == -1)
+                        if (l.ContainsMute == true)
+                            l.Mute = true;
+                        else
+                            l.Volume = l.VolumeMin;
                     else
-                        l.Volume = l.VolumeMin;
-                else
-                {
-                    if (l.ContainsMute == true)
-                        l.Mute = false;
-                    if (volume >= 0)
-                        l.Volume = (int)((volume / 100.0) * l.VolumeMax);
+                    {
+                        if (l.ContainsMute == true)
+                            l.Mute = false;
+                        if (volume >= 0)
+                            l.Volume = (int)((volume / 100.0) * l.VolumeMax);
+                    }
                 }
             }
             else

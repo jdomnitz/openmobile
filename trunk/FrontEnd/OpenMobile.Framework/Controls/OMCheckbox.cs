@@ -74,10 +74,7 @@ namespace OpenMobile.Controls
         /// </summary>
         public void clickMe(int screen)
         {
-            if (Checked == true)
-                Checked = false;
-            else
-                Checked = true;
+            Checked = !Checked;
             if (OnClick != null)
                 OnClick(this, screen);
         }
