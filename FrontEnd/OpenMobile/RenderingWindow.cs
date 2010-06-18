@@ -726,6 +726,7 @@ namespace OpenMobile
                 Invalidate();
             }
             ThrowStart.X = -1;
+            ThrowStart.Y = -1;
             ThrowStarted = false;
         }
         #endregion

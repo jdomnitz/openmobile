@@ -287,7 +287,7 @@ namespace OpenMobile
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete,"","","");
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(theHost.NetworkChange_NetworkAvailabilityChanged);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
-            OpenMobile.Threading.TaskManager.Enable(); //Start executing background tasks
+            OpenMobile.Threading.TaskManager.Enable(Core.theHost); //Start executing background tasks
             SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(theHost.SystemEvents_PowerModeChanged);
             SystemEvents.SessionEnding += new SessionEndingEventHandler(theHost.SystemEvents_SessionEnding);
             SystemEvents.DisplaySettingsChanged+=new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);

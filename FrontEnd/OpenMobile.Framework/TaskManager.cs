@@ -35,6 +35,7 @@ namespace OpenMobile.Threading
     public static class TaskManager
     {
         static EventWaitHandle sync = new EventWaitHandle(false, EventResetMode.AutoReset);
+        private static OpenMobile.Plugin.IPluginHost theHost;
         /// <summary>
         /// An object that represents a task to execute
         /// </summary>
@@ -105,8 +106,9 @@ namespace OpenMobile.Threading
         /// <summary>
         /// Enables the Task Manager (called automatically after plugins have been loaded)
         /// </summary>
-        public static void Enable()
+        public static void Enable(OpenMobile.Plugin.IPluginHost host)
         {
+            theHost = host;
             priorities = (ePriority[])Enum.GetValues(typeof(ePriority));
             Array.Reverse(priorities);
             enabled.Set();
@@ -124,7 +126,7 @@ namespace OpenMobile.Threading
                     return ret;
                 }
             }
-            throw new InvalidOperationException("Task Scheduler unable to prioritize");
+            throw new InvalidOperationException();
         }
         static void executeTask()
         {
@@ -132,12 +134,20 @@ namespace OpenMobile.Threading
             {
                 enabled.WaitOne();
                 sync.WaitOne();
+                taskItem current = getNext();
                 try
                 {
-                    taskItem current = getNext();
+                    if (theHost != null)
+                        theHost.sendMessage("OMDebug", "TaskManager", "Task Started: " + current.TaskName);
                     current.function.Invoke();
+                    if (theHost != null)
+                        theHost.sendMessage("OMDebug", "TaskManager", "Task Ended: " + current.TaskName);
                 }
-                catch { }
+                catch
+                {
+                    if (theHost!=null)
+                        theHost.sendMessage("OMDebug","TaskManager","Task Died: "+current.TaskName);
+                }
                 if (Tasks.Count>0)
                     sync.Set();
             }
