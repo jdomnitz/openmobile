@@ -183,7 +183,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Occurs when a setting inside the collection is changed
         /// </summary>
-        public SettingChanged OnSettingChanged;
+        public event SettingChanged OnSettingChanged;
         /// <summary>
         /// Raises the OnSettingChanged event
         /// </summary>

@@ -94,7 +94,7 @@
   <ItemGroup>
     <Reference Include="DirectShowLib-2005, Version=2.0.0.0, Culture=neutral, PublicKeyToken=67e7b740cdfc2d3f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\DirectShowLib-2005.dll</HintPath>
+      <HintPath>..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\OMPlayer\DirectShowLib-2005.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>

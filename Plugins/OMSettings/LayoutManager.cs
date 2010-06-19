@@ -98,13 +98,13 @@ namespace OMSettings
                             txtchoice.Text = s.Options[index];
                         txtchoice.Font = new Font("Microsoft Sans Serif", 24F);
                         txtchoice.Name = "txt"+s.Name;
-                        OMLabel mcTitle = new OMLabel(200, ofset, 170, 50);
+                        OMLabel mcTitle = new OMLabel(195, ofset, 175, 50);
                         mcTitle.Font = new Font("Microsoft Sans Serif", 32.25F, FontStyle.Bold);
                         mcTitle.Text = s.Header + ":";
                         mcTitle.TextAlignment = Alignment.CenterRight;
                         if ((s.Description != null) && (s.Description.Length > 0))
                         {
-                            OMLabel mcDescription = new OMLabel(450, ofset+55, 460, 30);
+                            OMLabel mcDescription = new OMLabel(450, ofset+57, 460, 30);
                             mcDescription.Font = new Font("Microsoft Sans Serif", 20);
                             mcDescription.Text = s.Description;
                             ret.Add(mcDescription);
@@ -123,6 +123,7 @@ namespace OMSettings
                     tdesc.Font = new Font("Microsoft Sans Serif", 24F);
                     tdesc.Name = title;
                     tdesc.Tag = s.Name;
+                    tdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(tdesc);
                     OMTextBox text = new OMTextBox(450, ofset, 500, 50);
                     text.Font = new Font("Microsoft Sans Serif", 28F);
@@ -140,6 +141,7 @@ namespace OMSettings
                     fdesc.Font = new Font("Microsoft Sans Serif", 24F);
                     fdesc.Name = title;
                     fdesc.Tag = s.Name;
+                    fdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(fdesc);
                     OMTextBox folder = new OMTextBox(450, ofset, 500, 50);
                     folder.Font = new Font("Microsoft Sans Serif", 28F);
@@ -157,6 +159,7 @@ namespace OMSettings
                     fldesc.Font = new Font("Microsoft Sans Serif", 24F);
                     fldesc.Name = title;
                     fldesc.Tag = s.Name;
+                    fldesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(fldesc);
                     OMTextBox file = new OMTextBox(450, ofset, 500, 50);
                     file.Font = new Font("Microsoft Sans Serif", 28F);
@@ -174,6 +177,7 @@ namespace OMSettings
                     pdesc.Font = new Font("Microsoft Sans Serif", 24F);
                     pdesc.Name = title;
                     pdesc.Tag = s.Name;
+                    pdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(pdesc);
                     OMTextBox ptext = new OMTextBox(450, ofset, 500, 50);
                     ptext.Font = new Font("Microsoft Sans Serif", 28F);
@@ -233,7 +237,8 @@ namespace OMSettings
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.Value = ((OMSlider)sender).Value.ToString();
             OMLabel lbl = (OMLabel)sender.Parent["dsc" + s.Name];
-            lbl.Text = lbl.Tag.ToString().Replace("%value%", s.Value);
+            if (lbl!=null)
+                lbl.Text = lbl.Tag.ToString().Replace("%value%", s.Value);
             collection.changeSetting(s);
         }
 

@@ -27,6 +27,8 @@ namespace OpenMobile.Plugin
     /// </summary>
     public interface IRawHardware:IBasePlugin
     {
+
+
         /// <summary>
         /// Convert the string name of the value you are trying to read or write to a PID
         /// </summary>

@@ -285,12 +285,19 @@ namespace OMSettings
             providers.SelectedItemColor1 = Color.Blue;
             providers.HighlightColor = Color.White;
             providers.ListItemOffset = 80;
+            OMBasicShape backdrop = new OMBasicShape(270, 275, 660, 250);
+            backdrop.Shape = shapes.RoundedRectangle;
+            backdrop.BorderColor = Color.WhiteSmoke;
+            backdrop.FillColor = Color.Black;
+            backdrop.CornerRadius = 10;
+            backdrop.BorderSize = 2;
             data.addControl(Save4);
             data.addControl(Cancel);
             data.addControl(Heading3);
             data.addControl(ldesc);
             data.addControl(location);
             data.addControl(explanation);
+            data.addControl(backdrop);
             data.addControl(providers);
             manager.loadPanel(data);
             #endregion
@@ -357,7 +364,7 @@ namespace OMSettings
                 return;
             List<IBasePlugin> plugins = (List<IBasePlugin>)o;
             plugins=plugins.FindAll(p => typeof(IDataProvider).IsInstanceOfType(p));
-            OMList list = (OMList)manager[0, "data"][6];
+            OMList list = (OMList)manager[0, "data"][7];
             Image img = null;
             list.Clear();
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();

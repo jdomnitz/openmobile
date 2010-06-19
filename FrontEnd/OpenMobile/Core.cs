@@ -239,7 +239,7 @@ namespace OpenMobile
                 {
                     status[i]= pluginCollection[i].initialize(theHost);
                 }
-                catch (Exception) { status[i] = eLoadStatus.LoadFailedUnloadRequested; }
+                catch (Exception e) { status[i] = eLoadStatus.LoadFailedUnloadRequested; theHost.sendMessage("OMDebug","Plugin Manager",spewException(e)); }
             }
             for(int i=2;i<pluginCollection.Count;i++) //Give them all a second chance if they need it
                 try
@@ -311,19 +311,21 @@ namespace OpenMobile
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
-            string err;
-            err = ex.GetType().Name + "\r\n";
-            err += ("Exception Message: " + ex.Message);
-            err += ("\r\nFatal: " + e.IsTerminating.ToString());
-            err += ("\r\nSource: " + ex.Source);
-            err += ("\r\nStack Trace: \r\n" + ex.StackTrace);
-            err += ("\r\n");
             theHost.hal.close();
-            ErrorReporting reporting=new ErrorReporting(err);
+            ErrorReporting reporting=new ErrorReporting(spewException(ex));
             reporting.ShowDialog(RenderingWindows[0]);
             theHost.execute(eFunction.restartProgram);
         }
-
+        private static string spewException(Exception e)
+        {
+            string err;
+            err = e.GetType().Name + "\r\n";
+            err += ("Exception Message: " + e.Message);
+            err += ("\r\nSource: " + e.Source);
+            err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+            err += ("\r\n");
+            return err;
+        }
         [STAThread]
         public static void Main()
         {

@@ -55,6 +55,19 @@ namespace OpenMobile.Controls
             this.noOfSubDivisions = 3;                   
             this.requiresRedraw = true;
         }
+        /// <summary>
+        /// A gauge control for openMobile
+        /// </summary>
+        public OMGauge(int X, int Y, int W, int H)
+        {
+            x = 5+X;
+            y = 5+Y;
+            width = W - 10;
+            height = H - 10;
+            this.noOfDivisions = 10;
+            this.noOfSubDivisions = 3;
+            this.requiresRedraw = true;
+        }
 
         #region Public Properties
         /// <summary>
@@ -140,6 +153,20 @@ namespace OpenMobile.Controls
                 }
             }
         }
+        private int bufferSize = 0;
+        public int BufferSize
+        {
+            get
+            {
+                return bufferSize;
+            }
+            set
+            {
+                if ((buffer==null)||(buffer.Length!=value))
+                    buffer=new float[value];
+                bufferSize = value;
+            }
+        }
 
         /// <summary>
         /// Value where the pointer will point to.
@@ -153,10 +180,28 @@ namespace OpenMobile.Controls
             {
                 if (value >= minValue && value <= maxValue)
                 {
-                    currentValue = value;
+                    if (BufferSize > 0)
+                        currentValue=addToBuffer(value);
+                    else
+                        currentValue = value;
                     refreshMe(this.toRegion());
                 }
             }
+        }
+        private float[] buffer;
+        private int bufPos = 0;
+        private float addToBuffer(float value)
+        {
+            if (bufPos >= bufferSize)
+                bufPos = 0;
+            buffer[bufPos] = value;
+            bufPos++;
+            if (bufPos >= bufferSize)
+                bufPos = 0;
+            double ret = 0;
+            for (int i = 0; i < bufferSize; i++)
+                ret += buffer[i];
+            return (int)(ret / bufferSize);
         }
 
         /// <summary>
