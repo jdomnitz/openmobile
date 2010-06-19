@@ -38,6 +38,9 @@ namespace PandoraPlayer
             {
                 if (client == null)
                     return false;
+                if (station.StartsWith("Pandora:") == false)
+                    return false;
+                station = station.Substring(8);
                 client.ChangeStation(station);
                 client.GetPlaylist();
                 return true;
@@ -90,7 +93,7 @@ namespace PandoraPlayer
             if (client.CurrentStation != null)
             {
                 info.stationName = client.CurrentStation.Name;
-                info.stationID = client.CurrentStation.SID;
+                info.stationID = "Pandora:"+client.CurrentStation.SID;
             }
             info.Channels = 2;
             info.Bitrate = 196;
@@ -203,7 +206,7 @@ namespace PandoraPlayer
             if (client == null)
                 return lst.ToArray();
             foreach (KeyValuePair<string,Station> s in client.Stations)
-                lst.Add(new stationInfo(s.Value.Name, s.Value.SID));
+                lst.Add(new stationInfo(s.Value.Name, "Pandora:" + s.Value.SID));
             return lst.ToArray();
         }
 
@@ -345,7 +348,7 @@ namespace PandoraPlayer
                     Personal.readInfo();
                     settings.Add(new Setting(SettingTypes.Password, "Pandora.Password", "", "Password", Personal.getPassword(Personal.ePassword.Pandora,"Pandora1")));
                     string volume=setting.getSetting("Pandora.Volume");
-                    settings.Add(new Setting(SettingTypes.Range,"Pandora.Volume","","Volume",null,new List<string>(new string[]{"0","100"}), (volume=="")?"100":volume));
+                    settings.Add(new Setting(SettingTypes.Range,"Pandora.Volume","Volume","Currently at %value%%",null,new List<string>(new string[]{"0","100"}), (volume=="")?"100":volume));
                 }
                 settings.OnSettingChanged += new SettingChanged(changed);
             }
@@ -389,6 +392,8 @@ namespace PandoraPlayer
         private void fadeOut()
         {
             fading = true;
+            using (PluginSettings settings = new PluginSettings())
+                settings.setSetting("Pandora.Volume", getVolume(0).ToString());
             if (client != null)
             {
                 for (int i = getVolume(0)/10; i > 0; i--)
@@ -410,8 +415,6 @@ namespace PandoraPlayer
             {
                 while (fading)
                     Thread.Sleep(100);
-                using (PluginSettings settings = new PluginSettings())
-                    settings.setSetting("Pandora.Volume", getVolume(0).ToString());
                 client.Dispose();
             }
         }

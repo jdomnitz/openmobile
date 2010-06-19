@@ -837,9 +837,18 @@ namespace OMRadio
             {
                 // Update station list data
                 OMList List = (OMList)manager[i]["List_RadioStations"];
-                List.Clear();
-
                 stationInfo[] Stations;
+                if ((List.Count == info.stationList.Length) && (StationListSource == StationListSources.Live))
+                {
+                    Stations=info.stationList;
+                    for (int j = 0; j < Stations.Length;j++)
+                    {
+                        List[j].text = Stations[j].stationName;
+                        List[j].tag = Stations[j].stationID;
+                    }
+                    return;
+                }
+                List.Clear();
                 if (StationListSource == StationListSources.Live)
                     Stations = info.stationList;
                 else

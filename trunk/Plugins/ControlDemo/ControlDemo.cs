@@ -56,8 +56,14 @@ namespace ControlDemo
         label4.ContiuousAnimation = eAnimation.UnveilLeft;
         OMAnimatedLabel label5 = new OMAnimatedLabel(50, 350, 200, 30);
         label5.Text = label2.Text;
-        OMButton button = new OMButton(50, 400, 100, 50);
-        button.Text = "Single";
+        OMGauge gauge = new OMGauge();
+        gauge.Left = 300;
+        gauge.Top = 200;
+        gauge.Width = 300;
+        gauge.Height = 300;
+        gauge.MaxValue = 20;
+        OMButton button = new OMButton(50, 400, 200, 50);
+        button.Text = "Toggle Buffer";
         button.Image = imageItem.MISSING;
         button.OnClick += new userInteraction(button_OnClick);
         p.addControl(label1);
@@ -66,14 +72,28 @@ namespace ControlDemo
         p.addControl(label4);
         p.addControl(label5);
         p.addControl(button);
+        p.addControl(gauge);
+        System.Timers.Timer t = new System.Timers.Timer(100);
+        t.Elapsed += new ElapsedEventHandler(t_Elapsed);
+        t.Enabled = true;
         manager = new ScreenManager(theHost.ScreenCount);
         manager.loadPanel(p);
         return eLoadStatus.LoadSuccessful;
     }
 
+    void t_Elapsed(object sender, ElapsedEventArgs e)
+    {
+        ((OMGauge)manager[0][6]).Value = OpenMobile.Framework.Math.Calculation.RandomNumber(0, 20);
+    }
+
     void button_OnClick(OMControl sender, int screen)
     {
-        ((OMAnimatedLabel)manager[screen][4]).animateNow(eAnimation.UnveilRight);
+        //((OMAnimatedLabel)manager[screen][4]).animateNow(eAnimation.UnveilRight);
+        OMGauge g = ((OMGauge)manager[screen][6]);
+        if (g.BufferSize == 5)
+            g.BufferSize = 0;
+        else
+            g.BufferSize = 5;
     }
 
     public OMPanel loadPanel(string name,int screen)

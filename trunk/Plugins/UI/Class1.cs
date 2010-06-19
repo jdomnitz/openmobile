@@ -141,13 +141,13 @@ namespace OpenMobile
             statusReset.BeginInit();
             statusReset.EndInit();
             statusReset.Elapsed += new ElapsedEventHandler(statusReset_Elapsed);
-            OMLabel trackTitle = new OMLabel(240,3,390,28);
+            OMLabel trackTitle = new OMLabel(240,3,490,28);
             trackTitle.TextAlignment = Alignment.CenterLeftEllipsis;
             trackTitle.Format = eTextFormat.BoldShadow;
-            OMLabel trackAlbum = new OMLabel(240,34,390,28);
+            OMLabel trackAlbum = new OMLabel(240,34,490,28);
             trackAlbum.TextAlignment = Alignment.CenterLeftEllipsis;
             trackAlbum.Format = eTextFormat.BoldShadow;
-            OMLabel trackArtist = new OMLabel(240,64,390,28);
+            OMLabel trackArtist = new OMLabel(240,64,490,28);
             trackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
             trackArtist.Format = eTextFormat.DropShadow;
             OMImage cover = new OMImage(150,2,90,85);
@@ -762,9 +762,11 @@ namespace OpenMobile
                         {
                             ((OMLabel)p[6]).Text = TunedContentInfo.currentStation.stationName;
                             ((OMLabel)p[7]).Text = info.Name;
-                            ((OMLabel)p[8]).Text = "";
+                            ((OMLabel)p[8]).Text = info.Artist;
                             if (info.coverArt == null)
                                 ((OMImage)p[9]).Image = theHost.getSkinImage("Radio");
+                            else
+                                ((OMImage)p[9]).Image = new imageItem(info.coverArt);
                         }
                         else
                         {
