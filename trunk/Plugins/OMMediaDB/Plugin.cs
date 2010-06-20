@@ -706,7 +706,7 @@ namespace OMMediaDB
 
         public string pluginDescription
         {
-            get { return "The default Media Database (Sqlite)"; }
+            get { return "The Default Media Database (Sqlite)"; }
         }
 
         public bool incomingMessage(string message, string source)

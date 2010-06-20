@@ -912,7 +912,7 @@ namespace OpenMobile
             else
             {
                 if (typeof(IKey).IsInstanceOfType(highlighted) == true)
-                    if (((IKey)highlighted).KeyDown(screen, e, widthScale, heightScale) == true)
+                    if (((IKey)highlighted).KeyDown(screen, e, widthScale, heightScale))
                         return;
                 int best = 1000;
                 OMControl b = null;

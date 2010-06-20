@@ -197,11 +197,9 @@ namespace XMRadio
             }
             else if (type == ePowerEvent.SystemResumed)
             {
-                suspending = false;
+                queuePowerOn = true;
                 if (!radio.IsOpen)
                     radio.Open();
-                if (router != null)
-                    router.Resume(); //Fades everything back in
             }
         }
 
@@ -268,8 +266,14 @@ namespace XMRadio
             radio.SetAutoMessages(autoMessage);
             if (radio.LastTunnedChannel != 0)
                 radio.TuneToChannel(radio.LastTunnedChannel);
+            if (suspending)
+            {
+                suspending = false;
+                if (router != null)
+                    router.Resume(); //Fades everything back in
+            }
             radio.StartFetch();
-            radio.AutoSearch = false; //We know the port from now on
+            //radio.AutoSearch = false; //We know the port from now on
         }
         void radio_XMEventChannelData(ref XM.ChannelDataStructure ChannelData)
         {
@@ -293,7 +297,9 @@ namespace XMRadio
             nowPlaying.Genre = ChannelData.LongGenreName;
             nowPlaying.Name = ChannelData.Title;
             nowPlaying.TrackNumber = ChannelData.ChannelNumber;
-            nowPlaying.coverArt = theHost.getSkinImage("siriusxm").image;
+            nowPlaying.coverArt = theHost.getSkinImage("XM|" + ChannelData.ChannelNumber.ToString(), true).image;
+            if (nowPlaying.coverArt==null)
+                nowPlaying.coverArt = theHost.getSkinImage("siriusxm").image;
             nowPlaying.Artist = ChannelData.Artist;
             foreach (int i in router.ActiveInstances)
                 raiseMediaEvent(eFunction.Play, i, "");
