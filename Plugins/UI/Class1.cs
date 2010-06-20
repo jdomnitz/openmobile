@@ -328,12 +328,10 @@ namespace OpenMobile
                 volTmr_Elapsed(null, null);
                 return;
             }
-            volTmr = new System.Timers.Timer(3000);
+            volTmr = new System.Timers.Timer(2500);
             volTmr.Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
             volScreen = screen;
             OMButton btn = (OMButton)manager[screen][5];
-            //btn.Image = theHost.getSkinImage("Volume.Mute");
-            //btn.FocusImage = theHost.getSkinImage("Volume.Mute.Focus");
             for (int i = 0; i <= 10; i++)
             {
                 manager[screen][26].Top =  (51 * i)-510;
@@ -763,17 +761,28 @@ namespace OpenMobile
                             ((OMLabel)p[6]).Text = TunedContentInfo.currentStation.stationName;
                             ((OMLabel)p[7]).Text = info.Name;
                             ((OMLabel)p[8]).Text = info.Artist;
+                            OMImage cover = ((OMImage)p[9]);
                             if (info.coverArt == null)
-                                ((OMImage)p[9]).Image = theHost.getSkinImage("Radio");
+                                cover.Image = theHost.getSkinImage("Radio");
                             else
-                                ((OMImage)p[9]).Image = new imageItem(info.coverArt);
+                                cover.Image = new imageItem(info.coverArt);
+                            if (cover.Height<cover.Width){
+                                cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
+                                cover.Top = 2 + (85-cover.Height)/2;
+                            }
                         }
                         else
                         {
                             ((OMLabel)p[6]).Text = info.Name;
                             ((OMLabel)p[7]).Text = info.Artist;
                             ((OMLabel)p[8]).Text = info.Album;
-                            ((OMImage)p[9]).Image = it;
+                            OMImage cover = ((OMImage)p[9]);
+                            cover.Image = it;
+                            if (cover.Height < cover.Width)
+                            {
+                                cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
+                                cover.Top = 2 + (85 - cover.Height) / 2;
+                            }
                         }
                         ((OMButton)p[10]).Image = theHost.getSkinImage("Pause");
                         ((OMButton)p[10]).DownImage = theHost.getSkinImage("Pause.Highlighted");

@@ -30,7 +30,7 @@ namespace OMSettings
     {
         IPluginHost theHost;
         OpenMobile.Plugin.Settings collection;
-        int ofset = 180;
+        int ofset = 165;
         internal OMPanel layout(IPluginHost host, OpenMobile.Plugin.Settings s)
         {
             if (s == null)

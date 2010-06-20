@@ -91,6 +91,10 @@ namespace OpenMobile.Controls
                 index = -1;
             Select(index, true, this.containingScreen());
         }
+        void raiseSelect(object state)
+        {
+            SelectedIndexChanged(this, (int)state);
+        }
         public void Select(int index, bool moveToSelectedItem, int screen)
         {
             if ((index < -1) || (index >= items.Count))
@@ -101,7 +105,8 @@ namespace OpenMobile.Controls
 
             // Trigger event
             if (SelectedIndexChanged != null)
-                new Thread(delegate() { SelectedIndexChanged(this, screen); }).Start();
+                ThreadPool.QueueUserWorkItem(new WaitCallback(raiseSelect),screen);
+            //   ^ This still isn't ideal...we really should not be queuing all those tasks..only the one when scrolling finishes
 
             if ((listHeight == 0) && (index != -1))
             {

@@ -357,8 +357,12 @@ namespace OpenMobile.Controls
                 sliderPosition = (sliderWidth / 2);
             if ((sliderPosition + (sliderWidth / 2)) > Width)
                 sliderPosition = Width - (SliderWidth / 2);
-            new Thread(delegate() { sliderMoved(screen); }).Start();
+            ThreadPool.QueueUserWorkItem(new WaitCallback(raiseSliderEvent),screen);
             this.refreshMe(this.toRegion());
+        }
+        void raiseSliderEvent(object state)
+        {
+            sliderMoved((int)state);
         }
         /// <summary>
         /// The throw has started
