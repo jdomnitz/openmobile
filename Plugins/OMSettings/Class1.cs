@@ -319,7 +319,6 @@ namespace OMSettings
             List<IBasePlugin> plugins;
             theHost.getData(eGetData.GetPlugins, "", out o);
             plugins = (List < IBasePlugin >)o;
-            //plugins=plugins.FindAll(p => typeof(IPlayer).IsInstanceOfType(p));
             foreach (IBasePlugin b in plugins)
             {
                 LayoutManager lm = new LayoutManager();
@@ -386,11 +385,6 @@ namespace OMSettings
             switch (((OMList)sender).SelectedIndex)
             {
                 case 0:
-                    //using (PluginSettings s = new PluginSettings())
-                    //{
-                    //    ((OMCheckbox)manager[screen, "general"][3]).Checked = (s.getSetting("UI.HideCursor") == "True");
-                    //    ((OMCheckbox)manager[screen, "general"][4]).Checked = (s.getSetting("UI.MinGraphics") == "True");
-                    //}
                     theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
                     theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "General Settings");
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
@@ -423,6 +417,7 @@ namespace OMSettings
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
                     break;
             }
+            ((OMList)sender).Select(-1);
         }
 
         void location_OnClick(OMControl sender, int screen)

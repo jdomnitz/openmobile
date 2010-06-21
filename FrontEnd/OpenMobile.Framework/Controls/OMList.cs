@@ -737,7 +737,7 @@ namespace OpenMobile.Controls
             }
             if ((e.KeyCode == Keys.Left) || (e.KeyCode == Keys.Right) || (e.KeyCode == Keys.Up) || (e.KeyCode == Keys.Down))
             {
-                Select(-1, false, screen); //TODO-Comment this out?
+                Select(-1, false, screen);
             }
             return false;
         }

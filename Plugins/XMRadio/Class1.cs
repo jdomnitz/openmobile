@@ -238,6 +238,8 @@ namespace XMRadio
             for(int i=0;i<stations.Length;i++)
                 if (stations[i]!=null)
                     stations[i].signal = signal;
+            foreach (int i in router.ActiveInstances)
+                raiseMediaEvent(eFunction.tunerDataUpdated, i, "");
         }
         void radio_XMEventErrorRadioNotFound()
         {

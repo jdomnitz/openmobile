@@ -100,7 +100,7 @@ namespace OMSettings
                         txtchoice.Name = "txt"+s.Name;
                         OMLabel mcTitle = new OMLabel(195, ofset, 175, 50);
                         mcTitle.Font = new Font("Microsoft Sans Serif", 32.25F, FontStyle.Bold);
-                        mcTitle.Text = s.Header + ":";
+                        mcTitle.Text = s.Header + ((s.Header!=null)?":":"");
                         mcTitle.TextAlignment = Alignment.CenterRight;
                         if ((s.Description != null) && (s.Description.Length > 0))
                         {
