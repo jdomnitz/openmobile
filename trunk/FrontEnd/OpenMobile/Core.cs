@@ -305,6 +305,7 @@ namespace OpenMobile
                     if (drive.IsReady == true)
                         theHost.RaiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
             pluginCollection.TrimExcess();
+            ThreadPool.SetMaxThreads(50, 500);
             Application.Run();
         }
 

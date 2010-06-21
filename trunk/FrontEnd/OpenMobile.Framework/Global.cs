@@ -891,12 +891,16 @@ namespace OpenMobile
         /// </summary>
         RenderingWindowResized=56,
         /// <summary>
-        /// Occurs when the rendering window is resized (useful for embedded forms and video windows)
+        /// Occurs when the play order is changed to/from Random
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: "Enabled"/"Disabled"</para>
         /// </summary>
         RandomChanged=57,
+        /// <summary>
+        /// Occurs when siganl strength, status, # of channels, etc changes
+        /// </summary>
+        tunerDataUpdated=58,
         //Open Spot
         //Tuned Content
         /// <summary>
@@ -1524,6 +1528,10 @@ namespace OpenMobile
         /// No service / no signal
         /// </summary>
         NoSignal = 3,
+        /// <summary>
+        /// Powering Up/Initializing
+        /// </summary>
+        Initializing=4,
         /// <summary>
         /// An error has occured
         /// </summary>

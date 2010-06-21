@@ -21,6 +21,7 @@
 using System;
 using System.Threading;
 using OpenMobile.Plugin;
+using System.Diagnostics;
 
 namespace OpenMobile
 {
@@ -40,7 +41,9 @@ namespace OpenMobile
                     }
                     catch (Exception e)
                     {
-                        Core.theHost.sendMessage("OMDebug", e.Source, e.GetType().ToString()+"("+ e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********");
+                        string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
+                        Core.theHost.sendMessage("OMDebug", e.Source, message);
+                        Debug.Print(message);
                         IBasePlugin sample = Core.pluginCollection.Find(p => p.pluginName == e.Source);
                         if (sample != null)
                         {

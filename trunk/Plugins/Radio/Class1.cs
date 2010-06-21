@@ -692,7 +692,7 @@ namespace OMRadio
 
         void theHost_OnMediaEvent(eFunction function, int instance, string arg)
         {
-            if (function == eFunction.Play)
+            if ((function == eFunction.Play)||(function==eFunction.tunerDataUpdated))
             {
                 UpdateStationInfo(instance);
             }

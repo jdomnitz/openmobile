@@ -100,6 +100,7 @@ namespace ControlDemo
     {
         return manager[screen];
     }
+    Settings settings;
     public Settings loadSettings()
     {
         throw new NotImplementedException();
