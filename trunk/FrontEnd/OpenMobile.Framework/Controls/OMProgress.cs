@@ -295,7 +295,6 @@ namespace OpenMobile.Controls
             {
                 if (left == value)
                     return;
-
                 int oldleft = left;
                 left = value;
                 refreshMe(new Rectangle(left > oldleft ? oldleft : left, top, width + Math.Abs(oldleft - left), height));

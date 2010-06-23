@@ -1276,7 +1276,8 @@ namespace OpenMobile
             if (OnMediaEvent!=null)
                 OnMediaEvent(e, instance,arg);
             if (e == eFunction.nextMedia)
-                execute(eFunction.nextMedia, instance.ToString());
+                if (!execute(eFunction.nextMedia, instance.ToString()))
+                        raiseMediaEvent(eFunction.Stop, instance, "");
         }
         public bool raiseKeyPressEvent(eKeypressType type,KeyEventArgs arg)
         {

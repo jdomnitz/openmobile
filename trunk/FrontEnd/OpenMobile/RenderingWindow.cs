@@ -542,8 +542,10 @@ namespace OpenMobile
             //Note potential drawing error with updated rectangle
             OMControl b = (OMControl)p.getControl(i);
             if (b == null)
-                Thread.Sleep(5);
+                Thread.Sleep(10);
             b = (OMControl)p.getControl(i);
+            if (b == null)
+                return; //failsafe - occurs when loading UI on very slow computers
             if ((e.X > (b.Left * widthScale)) && (e.Y > (b.Top * heightScale)) && (e.X < ((b.Left + b.Width) * widthScale)) && (e.Y < ((b.Top + b.Height) * heightScale)))
             {
                 if (b.Visible == true)

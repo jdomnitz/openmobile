@@ -236,7 +236,7 @@ namespace OpenMobile.Controls
         {
             if (image.image == null)
             {
-                if (image.name=="MISSING")
+                if (image==imageItem.MISSING)
                     g.FillRectangle(Brushes.Black, left, top, width, height);
             }
             else
@@ -255,19 +255,21 @@ namespace OpenMobile.Controls
                 cm.Matrix00 = cm.Matrix11 = cm.Matrix22 = cm.Matrix44 = 1;
                 cm.Matrix33 = tmp * (transparency / 100F);
                 at.SetColorMatrix(cm);
-
-                // Start of code added by Borte
-                switch (drawmode)
+                lock (image.image)
                 {
-                    case DrawModes.Crop:
-                        g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, GraphicsUnit.Pixel, at);
-                        break;
-                    case DrawModes.CropLeft:
-                        g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, GraphicsUnit.Pixel, at);
-                        break;
-                    case DrawModes.Scale:
-                        g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, at);
-                        break;
+                    // Start of code added by Borte
+                    switch (drawmode)
+                    {
+                        case DrawModes.Crop:
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, GraphicsUnit.Pixel, at);
+                            break;
+                        case DrawModes.CropLeft:
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, GraphicsUnit.Pixel, at);
+                            break;
+                        case DrawModes.Scale:
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, at);
+                            break;
+                    }
                 }
             }
         }

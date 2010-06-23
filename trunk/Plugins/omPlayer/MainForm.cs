@@ -394,12 +394,7 @@ namespace OMPlayer
     public bool setPosition(int instance, float seconds)
     {
         checkInstance(instance);
-        if ((player[instance].currentState == ePlayerStatus.Stopped) || (player[instance].currentState == ePlayerStatus.Ready) || (player[instance].currentState == ePlayerStatus.Error))
-            return false;
-        if ((player[instance].mediaControl == null) || (player[instance].mediaPosition == null))
-            return false;
-        player[instance].pos = seconds;
-        return (0 == player[instance].mediaPosition.put_CurrentPosition((double) seconds));
+        return player[instance].setPosition(seconds);
     }
 
     public bool setVolume(int instance, int percent)
@@ -411,7 +406,12 @@ namespace OMPlayer
     public bool stop(int instance)
     {
         checkInstance(instance);
-        return player[instance].stop();
+        if (player[instance].stop())
+        {
+            OnMediaEvent(eFunction.Stop, instance, "");
+            return true;
+        }
+        return false;
     }
 
     // Properties
@@ -502,6 +502,10 @@ namespace OMPlayer
         private MessageProc sink;
         private bool fullscreen = false;
         IntPtr drain = IntPtr.Zero;
+        private delegate bool PositionCallback(float seconds);
+        private delegate bool StopCallback();
+        private event PositionCallback OnSetPosition;
+        private event StopCallback OnStop;
         // Methods
         public AVPlayer(int instanceNum)
         {
@@ -509,6 +513,8 @@ namespace OMPlayer
             sink = new MessageProc();
             sink.OnClick += new MessageProc.Click(clicked);
             sink.OnEvent += new MessageProc.eventOccured(eventOccured);
+            OnSetPosition += new PositionCallback(setPosition);
+            OnStop+=new StopCallback(stop);
             drain = sink.Handle;
         }
 
@@ -631,8 +637,10 @@ namespace OMPlayer
         {
             if ((currentState == ePlayerStatus.Paused) || (currentState == ePlayerStatus.Playing) || (currentState == ePlayerStatus.FastForwarding) || (currentState == ePlayerStatus.Rewinding))
             {
+                if (sink.InvokeRequired)
+                    return (bool)sink.Invoke(OnStop);
             retry:
-                lock (this)
+                //lock (this)
                 {
                     if ((mediaControl == null) || (mediaSeeking == null))
                         return false;
@@ -641,11 +649,13 @@ namespace OMPlayer
                         currentState = ePlayerStatus.Ready;
                         mediaControl.Stop();
                     }
-                    catch (AccessViolationException) { Thread.Sleep(50); if (Thread.CurrentThread.Name != "1") { Thread.CurrentThread.Name = "1"; goto retry; } return false; }
+                    catch (AccessViolationException) {
+                        Thread.Sleep(50); if (Thread.CurrentThread.Name != "1") { Thread.CurrentThread.Name = "1"; goto retry; } return false; }
                 }
             }
             currentState = ePlayerStatus.Stopped;
             mediaControl = null;
+            basicAudio = null;
             if (isAudioOnly == false)
             {
                 DsError.ThrowExceptionForHR(videoWindow.put_Visible(OABool.False));
@@ -655,8 +665,6 @@ namespace OMPlayer
                         theHost.sendMessage("UI", "OMPlayer", "HideMediaControls" + i.ToString());
             }
             isAudioOnly = true;
-            if (instance!=-1)
-                OnMediaEvent(eFunction.Stop, instance, "");
             return true;
         }
         public void CloseClip()
@@ -712,10 +720,7 @@ namespace OMPlayer
         public double getCurrentPos()
         {
             double time;
-            lock (this) //changed from mediaposition
-            {
-                mediaPosition.get_CurrentPosition(out time);
-            }
+            mediaPosition.get_CurrentPosition(out time);
             return time;
         }
         private int screen()
@@ -850,6 +855,18 @@ namespace OMPlayer
                         return;
                 }
             }
+        }
+
+        internal bool setPosition(float seconds)
+        {
+            if ((currentState == ePlayerStatus.Stopped) || (currentState == ePlayerStatus.Ready) || (currentState == ePlayerStatus.Error))
+                return false;
+            if ((mediaControl == null) || (mediaPosition == null))
+                return false;
+            pos = seconds;
+            if (sink.InvokeRequired)
+                return (bool)sink.Invoke(OnSetPosition,new object[]{seconds});
+            return (0 == mediaPosition.put_CurrentPosition((double)seconds));
         }
     }
 
