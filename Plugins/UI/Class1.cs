@@ -141,13 +141,15 @@ namespace OpenMobile
             statusReset.BeginInit();
             statusReset.EndInit();
             statusReset.Elapsed += new ElapsedEventHandler(statusReset_Elapsed);
-            OMLabel trackTitle = new OMLabel(240,3,490,28);
-            trackTitle.TextAlignment = Alignment.CenterLeftEllipsis;
+            OMAnimatedLabel trackTitle = new OMAnimatedLabel(240,3,490,28);
+            trackTitle.TextAlignment = Alignment.CenterLeft;
             trackTitle.Format = eTextFormat.BoldShadow;
-            OMLabel trackAlbum = new OMLabel(240,34,490,28);
+            trackTitle.ContiuousAnimation = eAnimation.Scroll;
+            trackTitle.TickSpeed = 250;
+            OMAnimatedLabel trackAlbum = new OMAnimatedLabel(240, 34, 490, 28);
             trackAlbum.TextAlignment = Alignment.CenterLeftEllipsis;
             trackAlbum.Format = eTextFormat.BoldShadow;
-            OMLabel trackArtist = new OMLabel(240,64,490,28);
+            OMAnimatedLabel trackArtist = new OMAnimatedLabel(240, 64, 490, 28);
             trackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
             trackArtist.Format = eTextFormat.DropShadow;
             OMImage cover = new OMImage(150,2,90,85);
@@ -675,12 +677,6 @@ namespace OpenMobile
         void playButton_OnClick(OMControl sender, int screen)
         {
             object o = new object();
-            /*theHost.getData(eGetData.GetStationList, "Pandora", "0", out o);
-            if (o == null)
-                return;
-            stationInfo[] stations = (stationInfo[])o;
-            theHost.execute(eFunction.tuneTo, "0", stations[1].stationID);
-            return;*/
             theHost.getData(eGetData.GetMediaStatus, "", theHost.instanceForScreen(screen).ToString(), out o);
             if (o == null)
                 return;
@@ -756,11 +752,17 @@ namespace OpenMobile
                     if (theHost.instanceForScreen(i) == instance)
                     {
                         OMPanel p = manager[i];
+                        OMAnimatedLabel title = ((OMAnimatedLabel)p[6]);
+                        OMAnimatedLabel artist = ((OMAnimatedLabel)p[7]);
+                        OMAnimatedLabel album = ((OMAnimatedLabel)p[8]);
                         if ((info.Type == eMediaType.Radio) && (TunedContentInfo != null))
                         {
-                            ((OMLabel)p[6]).Text = TunedContentInfo.currentStation.stationName;
-                            ((OMLabel)p[7]).Text = info.Name;
-                            ((OMLabel)p[8]).Text = info.Artist;
+                            if (title.Text!=TunedContentInfo.currentStation.stationName)
+                                title.Transition(eAnimation.UnveilRight,TunedContentInfo.currentStation.stationName,50);
+                            if (artist.Text!=info.Name)
+                                artist.Transition(eAnimation.UnveilRight,info.Artist,50);
+                            if (album.Text != info.Album)
+                                album.Transition(eAnimation.UnveilRight, info.Album,50);
                             OMImage cover = ((OMImage)p[9]);
                             if (info.coverArt == null)
                                 cover.Image = theHost.getSkinImage("Radio");
@@ -773,9 +775,12 @@ namespace OpenMobile
                         }
                         else
                         {
-                            ((OMLabel)p[6]).Text = info.Name;
-                            ((OMLabel)p[7]).Text = info.Artist;
-                            ((OMLabel)p[8]).Text = info.Album;
+                            if (title.Text != info.Name)
+                                title.Transition(eAnimation.UnveilRight, info.Name,50);
+                            if (artist.Text != info.Name)
+                                artist.Transition(eAnimation.UnveilRight, info.Artist,50);
+                            if (album.Text != info.Album)
+                                album.Transition(eAnimation.UnveilRight, info.Album,50);
                             OMImage cover = ((OMImage)p[9]);
                             cover.Image = it;
                             if (cover.Height < cover.Width)

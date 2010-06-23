@@ -101,14 +101,31 @@ namespace OpenMobile.Controls
         }
 
         private bool directionReverse;
+        private double oldTick;
         void t_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (this.hooked()==false)
                 t.Enabled = false;
+            if (tempTransition != eAnimation.None)
+            {
+                if (tempTransition == eAnimation.UnveilRight)
+                {
+                    veilRight -= 20;
+                    if (veilRight < 0)
+                    {
+                        veilRight = 0;
+                        t.Interval =oldTick;
+                        tempTransition = eAnimation.None;
+                    }
+                    this.refreshMe(this.toRegion());
+                    return;
+                }
+            }
             if (animation == eAnimation.Scroll)
             {
                 scrollPos++;
-                if (scrollPos + numChars > Text.Length){
+                if ((scrollPos * avgChar)+width > (Text.Length*avgChar))
+                {
                     if (singleAnimation == true)
                         endSingleAnimation();
                      scrollPos = 0;
@@ -120,12 +137,12 @@ namespace OpenMobile.Controls
                     scrollPos--;
                  else
                     scrollPos++;
-                if (scrollPos + numChars > Text.Length)
+                if ((scrollPos * avgChar) + width > (Text.Length * avgChar))
                 {
-                    scrollPos = Text.Length - numChars - 1;
+                    scrollPos = text.Length-(int)(width/avgChar);
                     directionReverse = true;
                 }
-                if (scrollPos == -1)
+                if (scrollPos < 0)
                 {
                     if (singleAnimation == true)
                         endSingleAnimation();
@@ -146,8 +163,8 @@ namespace OpenMobile.Controls
             }
             else if (animation == eAnimation.UnveilLeft)
             {
-                veilLeft-=5;
-                if (veilLeft<=0){
+                veilLeft-=10;
+                if (veilLeft<0){
                     if (singleAnimation==true)
                         endSingleAnimation();
                     veilLeft=Width;
@@ -155,8 +172,8 @@ namespace OpenMobile.Controls
             }
             else if(animation == eAnimation.UnveilRight)
             {
-                veilRight=veilRight- 5;
-                if (veilRight<=0){
+                veilRight-= 10;
+                if (veilRight<0){
                     if (singleAnimation==true)
                         endSingleAnimation();
                     veilRight=Width;
@@ -246,9 +263,25 @@ namespace OpenMobile.Controls
             animation = effect;
             refreshMe(this.toRegion());
         }
-
+        /// <summary>
+        /// Renders the specified effect for a single iteration
+        /// </summary>
+        /// <param name="effect"></param>
+        /// <param name="text"></param>
+        public void Transition(eAnimation effect, string newText,int tick)
+        {
+            oldText = text;
+            text = newText;
+            veilRight = Width;
+            tempTransition = effect;
+            oldTick = t.Interval;
+            t.Interval = tick;
+            t.Enabled = true;
+        }
+        string oldText = null;
+        eAnimation tempTransition;
         int scrollPos = 0;
-        int numChars = 1;
+        float avgChar = 1;
         int veilRight = 0;
         int veilLeft = 0;
         /// <summary>
@@ -268,6 +301,12 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void  Render(System.Drawing.Graphics g,renderingParams e)
         {
+            if (tempTransition == eAnimation.None)
+                draw(g, e, this.animation);
+            else
+                draw(g, e, this.tempTransition);
+        }
+        private void draw(Graphics g,renderingParams e,eAnimation animation){
             float tmp = 1;
             t.Enabled = this.hooked();
             if (Text.Length == 0)
@@ -283,30 +322,27 @@ namespace OpenMobile.Controls
                 case eAnimation.None:
                 case eAnimation.UnveilLeft:
                 case eAnimation.UnveilRight:
-                    string text;
                     if ((animation == eAnimation.Scroll) || (animation == eAnimation.BounceScroll))
+                        avgChar = (g.MeasureString(Text, this.Font).Width / Text.Length);
+
+                    RectangleF old = g.ClipBounds;
+                    if ((animation==eAnimation.None)||(animation == eAnimation.UnveilRight) || (animation == eAnimation.UnveilLeft))
                     {
-                        int width = (g.MeasureString(Text, this.Font).ToSize().Width + 1) / Text.Length;
-                        numChars = (this.Width / width);//(Text.Length * width) / this.Width;
-                        if (numChars >= this.Text.Length)
+                        g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
+                        StringFormat format = new StringFormat(StringFormatFlags.NoWrap);
+                        Renderer.renderText(g, left, top, width, height, text, font, textFormat, textAlignment, 1F, 0, color, outlineColor);
+                        if (tempTransition != eAnimation.None)
                         {
-                            animation = eAnimation.None;
-                            text = this.Text;
-                        }
-                        else
-                        {
-                            text = Text.Substring(scrollPos, numChars);
+                            g.SetClip(new Rectangle(left+(width-veilRight), top, veilRight, height));
+                            Renderer.renderText(g, left, top, width, height, oldText, font, textFormat, textAlignment, 1F, 0, color, outlineColor);
                         }
                     }
                     else
                     {
-                        text = this.Text;
+                        g.SetClip(new Rectangle(left,top,width,height));
+                        Renderer.renderText(g,left - (int)(scrollPos * avgChar), top, (int)(text.Length * (avgChar+1)), height,text,font,textFormat,textAlignment,1F,0,color,outlineColor);
                     }
-                    if ((animation==eAnimation.UnveilRight)||(animation==eAnimation.UnveilLeft)){
-                        StringFormat format=new StringFormat(StringFormatFlags.NoWrap);
-                        g.DrawString(text, Font, new SolidBrush(Color.FromArgb((int)(tmp * 255), Color)), new RectangleF(Left + veilLeft, Top, Width - veilRight + 1 - veilLeft, Height), format);
-                    }else
-                        g.DrawString(text, Font, new SolidBrush(Color.FromArgb((int)(tmp * 255), Color)), new RectangleF(Left, Top, Width, Height));
+                    g.SetClip(old);
                     return;
                 case eAnimation.GlowPulse:
                 case eAnimation.Pulse:

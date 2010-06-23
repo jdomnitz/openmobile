@@ -48,14 +48,16 @@ namespace ControlDemo
         OMAnimatedLabel label2 = new OMAnimatedLabel(50, 200, 200, 30);
         label2.Text = label1.Text;
         label2.ContiuousAnimation = eAnimation.Scroll;
+        label2.Format = eTextFormat.Glow;
+        label2.OutlineColor = Color.Blue;
         OMAnimatedLabel label3 = new OMAnimatedLabel(50, 250, 200, 30);
-        label3.Text = label2.Text;
+        label3.Text = "Unveil Me Right";
         label3.ContiuousAnimation = eAnimation.UnveilRight;
         OMAnimatedLabel label4 = new OMAnimatedLabel(50, 300, 200, 30);
-        label4.Text = label2.Text;
+        label4.Text = "Unveil Me Left";
         label4.ContiuousAnimation = eAnimation.UnveilLeft;
         OMAnimatedLabel label5 = new OMAnimatedLabel(50, 350, 200, 30);
-        label5.Text = label2.Text;
+        label5.Text = "This is the starting text";
         OMGauge gauge = new OMGauge();
         gauge.Left = 300;
         gauge.Top = 200;
@@ -66,10 +68,10 @@ namespace ControlDemo
         button.Text = "Toggle Buffer";
         button.Image = imageItem.MISSING;
         button.OnClick += new userInteraction(button_OnClick);
-        p.addControl(label1);
-        p.addControl(label2);
-        p.addControl(label3);
-        p.addControl(label4);
+        //p.addControl(label1);
+        //p.addControl(label2);
+        //p.addControl(label3);
+        //p.addControl(label4);
         p.addControl(label5);
         p.addControl(button);
         p.addControl(gauge);
@@ -83,12 +85,13 @@ namespace ControlDemo
 
     void t_Elapsed(object sender, ElapsedEventArgs e)
     {
-        ((OMGauge)manager[0][6]).Value = OpenMobile.Framework.Math.Calculation.RandomNumber(0, 20);
+        ((OMGauge)manager[0][2]).Value = OpenMobile.Framework.Math.Calculation.RandomNumber(0, 20);
     }
 
     void button_OnClick(OMControl sender, int screen)
     {
-        //((OMAnimatedLabel)manager[screen][4]).animateNow(eAnimation.UnveilRight);
+        ((OMAnimatedLabel)manager[screen][0]).Transition(eAnimation.UnveilRight,"New Text",50);
+        return;
         OMGauge g = ((OMGauge)manager[screen][6]);
         if (g.BufferSize == 5)
             g.BufferSize = 0;

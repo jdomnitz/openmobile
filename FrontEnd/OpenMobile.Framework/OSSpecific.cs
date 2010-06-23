@@ -138,17 +138,14 @@ namespace OpenMobile.Framework
                         return "Mac OSX";
                     else
                         return "Linux/Unix";
-                //case PlatformID.MacOSX:
-                //    return "MacOS";
-                //case PlatformID.Xbox:
-                //    return "Xbox";
-                // ^ Not Supported by Mono ^
                 case PlatformID.WinCE:
                     return "WinCE";
                 default:
-                    if ((int)os.Platform == 128)
+                    if ((int)os.Platform == 128) //Not Supported by .Net
                         return "Unix";
-                    if ((int)os.Platform == 6)
+                    if ((int)os.Platform == 5) //Not Supported by Mono
+                        return "Xbox";
+                    if ((int)os.Platform == 6) //Not Supported by Mono
                         return "Mac";
                     return "Unknown";
             }
@@ -257,7 +254,7 @@ namespace OpenMobile.Framework
                     p = Process.Start("mono", ('\"'+path + "\" " + param).Trim());
                 else
                     p = Process.Start(path, param);
-                if (wait == true)
+                if (wait)
                     p.WaitForExit();
                 return true;
             }
