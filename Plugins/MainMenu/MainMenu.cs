@@ -174,34 +174,57 @@ public sealed class MainMenu : IHighLevel
             screens.loadPanel(setButton);
             
             OMPanel exit = new OMPanel("Quit");
-            OMImage Image1 = new OMImage(275, 140, 400, 330);
+            OMImage Image1 = new OMImage(220, 120, 560, 400);
             Image1.Image = theHost.getSkinImage("MediaBorder");
             Image1.Name = "Image1";
-            OMButton Quit = new OMButton(330,171,300,60);
+            OMButton Quit = new OMButton(245,150,250,80);
             Quit.Image = opt1;
             Quit.FocusImage = opt2;
             Quit.Text = "Quit";
             Quit.Name = "UI.Quit";
             Quit.OnClick += new userInteraction(Quit_OnClick);
-            OMButton Sleep = new OMButton(330,239,300,60);
+            OMButton Sleep = new OMButton(245,234,250,80);
             Sleep.Image = opt1;
             Sleep.FocusImage = opt2;
             Sleep.Text = "Sleep";
             Sleep.Name = "UI.Sleep";
             Sleep.OnClick += new userInteraction(Sleep_OnClick);
-            OMButton Hibernate = new OMButton(330,308,300,60);
+            OMButton Hibernate = new OMButton(245,318,250,80);
             Hibernate.Image = opt1;
             Hibernate.FocusImage = opt2;
             Hibernate.Text = "Hibernate";
             Hibernate.Name = "UI.Hibernate";
             Hibernate.OnClick += new userInteraction(Hibernate_OnClick);
-            OMButton Shutdown = new OMButton(330,377,300,60);
+            OMButton Shutdown = new OMButton(245,400,250,80);
             Shutdown.Image = opt1;
             Shutdown.FocusImage = opt2;
             Shutdown.Text = "Shutdown";
             Shutdown.Name = "UI.Shutdown";
             Shutdown.OnClick += new userInteraction(Shutdown_OnClick);
-            Shutdown.OnLongClick += new userInteraction(Shutdown_OnLongClick);
+            OMButton Restart = new OMButton(505, 150, 250, 80);
+            Restart.Image = opt1;
+            Restart.FocusImage = opt2;
+            Restart.Text = "Restart";
+            Restart.Name = "UI.Restart";
+            Restart.OnClick += new userInteraction(Restart_OnClick);
+            OMButton Reload = new OMButton(505, 234, 250, 80);
+            Reload.Image = opt1;
+            Reload.FocusImage = opt2;
+            Reload.Text = "Reload";
+            Reload.Name = "UI.Reload";
+            Reload.OnClick += new userInteraction(Reload_OnClick);
+            OMButton Screen = new OMButton(505, 318, 250, 80);
+            Screen.Image = opt1;
+            Screen.FocusImage = opt2;
+            Screen.Text = "Screen Off";
+            Screen.Name = "UI.Screen";
+            Screen.OnClick += new userInteraction(Screen_OnClick);
+            OMButton Cancel = new OMButton(505, 400, 250, 80);
+            Cancel.Image = opt1;
+            Cancel.FocusImage = opt2;
+            Cancel.Text = "Cancel";
+            Cancel.Name = "UI.Cancel";
+            Cancel.OnClick += new userInteraction(Cancel_OnClick);
             OMBasicShape visibleShape = new OMBasicShape(0, 0, 1000, 600);
             visibleShape.Shape = shapes.Rectangle;
             visibleShape.FillColor = Color.FromArgb(130, Color.Black);
@@ -211,15 +234,33 @@ public sealed class MainMenu : IHighLevel
             exit.addControl(Sleep);
             exit.addControl(Hibernate);
             exit.addControl(Shutdown);
+            exit.addControl(Reload);
+            exit.addControl(Restart);
+            exit.addControl(Screen);
+            exit.addControl(Cancel);
             screens.loadSharedPanel(exit);
             return eLoadStatus.LoadSuccessful;
         }
 
-        void Shutdown_OnLongClick(OMControl sender, int screen)
+        void Restart_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.restart);
         }
-
+        void Reload_OnClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.restartProgram);
+        }
+        void Screen_OnClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
+            theHost.execute(eFunction.setMonitorBrightness, screen.ToString(), "0");
+        }
+        void Cancel_OnClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
+        }
         void MainMenu_OnClick(OMControl sender, int screen)
         {
             switch(sender.Tag.ToString())

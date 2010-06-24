@@ -41,18 +41,29 @@ namespace OpenMobile
                     }
                     catch (Exception e)
                     {
-                        string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
-                        Core.theHost.sendMessage("OMDebug", e.Source, message);
-                        Debug.Print(message);
-                        IBasePlugin sample = Core.pluginCollection.Find(p => p.pluginName == e.Source);
-                        if (sample != null)
-                        {
-                            Core.pluginCollection.Remove(sample);
-                            Core.theHost.raiseSystemEvent(eFunction.backgroundOperationStatus, sample.pluginName + " CRASHED!", "ERROR", "");
-                            sample.Dispose();
-                        }
+                        handle(e);
                     }
                 }).Start();
+        }
+
+        public static void handle(Exception e)
+        {
+            string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
+            Core.theHost.sendMessage("OMDebug", e.Source, message);
+            Debug.Print(message);
+            int index = Core.pluginCollection.FindIndex(p => p.pluginName == e.Source);
+            IBasePlugin sample=null;
+            if (index>-1)
+                sample = Core.pluginCollection[index];
+            if (sample != null)
+            {
+                if (Core.status != null)
+                    Core.pluginCollection[index] = null;
+                else
+                    Core.pluginCollection.Remove(sample);
+                Core.theHost.raiseSystemEvent(eFunction.backgroundOperationStatus, sample.pluginName + " CRASHED!", "ERROR", "");
+                sample.Dispose();
+            }
         }
     }
 }

@@ -104,8 +104,11 @@ namespace OpenMobile.Controls
         private double oldTick;
         void t_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (this.hooked()==false)
+            if ((this.hooked() == false) || (text == null))
+            {
                 t.Enabled = false;
+                return;
+            }
             if (tempTransition != eAnimation.None)
             {
                 if (tempTransition == eAnimation.UnveilRight)
@@ -309,7 +312,7 @@ namespace OpenMobile.Controls
         private void draw(Graphics g,renderingParams e,eAnimation animation){
             float tmp = 1;
             t.Enabled = this.hooked();
-            if (Text.Length == 0)
+            if ((text==null)||(text.Length == 0))
                 return;
             if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;

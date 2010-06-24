@@ -49,7 +49,10 @@ namespace OMDir
                 type[screen] = 0;
             }
             if ((name != "Folder") && (name != ""))
-                loadPath(screen, name);
+            {
+                if (Directory.Exists(name))
+                    loadPath(screen, name);
+            }
             return manager[screen];
         }
 

@@ -29,6 +29,7 @@ using Microsoft.Win32;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
 using OpenMobile.Framework;
+using System.Diagnostics;
 
 namespace OpenMobile
 {
@@ -226,7 +227,7 @@ namespace OpenMobile
         {
             return Assembly.LoadFrom(Path.Combine(theHost.PluginPath, args.Name + ".dll"));
         }
-        private static eLoadStatus[] status;
+        public static eLoadStatus[] status;
         /// <summary>
         /// Initialize each of the plugins in the plugin's array (pluginCollection)
         /// </summary>
@@ -239,7 +240,13 @@ namespace OpenMobile
                 {
                     status[i]= pluginCollection[i].initialize(theHost);
                 }
-                catch (Exception e) { status[i] = eLoadStatus.LoadFailedUnloadRequested; theHost.sendMessage("OMDebug","Plugin Manager",spewException(e)); }
+                catch (Exception e)
+                {
+                    status[i] = eLoadStatus.LoadFailedUnloadRequested;
+                    string ex = spewException(e);
+                    theHost.sendMessage("OMDebug","Plugin Manager",ex);
+                    Debug.Print(ex);
+                }
             }
             for(int i=2;i<pluginCollection.Count;i++) //Give them all a second chance if they need it
                 try
@@ -247,7 +254,13 @@ namespace OpenMobile
                     if (status[i]==eLoadStatus.LoadFailedRetryRequested)
                         status[i] = pluginCollection[i].initialize(theHost);
                 }
-                catch (Exception) { status[i] = eLoadStatus.LoadFailedUnloadRequested; }
+                catch (Exception e)
+                { 
+                    status[i] = eLoadStatus.LoadFailedUnloadRequested;
+                    string ex = spewException(e);
+                    theHost.sendMessage("OMDebug", "Plugin Manager", ex);
+                    Debug.Print(ex);
+                }
             for(int i=2;i<pluginCollection.Count;i++) //and then two strikes their out...kill anything that still can't initialize
                 if ((status[i]==eLoadStatus.LoadFailedRetryRequested)||(status[i]==eLoadStatus.LoadFailedUnloadRequested))
                 {
@@ -257,8 +270,10 @@ namespace OpenMobile
                         theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName+" CRASHED!");
                     }
                     catch (Exception) { }
-                    pluginCollection.RemoveAt(i);
+                    pluginCollection[i]=null;
                 }
+            status=null;
+            pluginCollection.RemoveAll(p => p == null);
         }
 
         private static void initialize()
@@ -312,7 +327,8 @@ namespace OpenMobile
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
-            theHost.hal.close();
+            if (theHost.hal!=null)
+                theHost.hal.close();
             ErrorReporting reporting=new ErrorReporting(spewException(ex));
             reporting.ShowDialog(RenderingWindows[0]);
             theHost.execute(eFunction.restartProgram);
@@ -378,7 +394,8 @@ namespace OpenMobile
                 RenderingWindows[i].Show();
             Application.Run(RenderingWindows[0]);
             foreach (IBasePlugin p in pluginCollection)
-                p.Dispose();
+                if (p!=null)
+                    p.Dispose();
             Environment.Exit(0); //Force
         }
     }

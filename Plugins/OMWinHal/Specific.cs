@@ -265,14 +265,15 @@ namespace OMHal
                 value = 0;
             Set((byte)(value * 2.55));
         }
-
+        public delegate IntPtr getHandle();
+        public static event getHandle OnHandleRequested;
         private static void SwitchOffMonitor()
         {
-            SendMessage(Form1.ActiveForm.Handle.ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, 2);
         }
         private static void SwitchOnMonitor()
         {
-            SendMessage(Form1.ActiveForm.Handle.ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+            SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, -1);
         }
         private static void Set(byte targetBrightness)
         {
@@ -288,7 +289,6 @@ namespace OMHal
                 }
             }
         }
-
         [DllImport("user32.dll")]
         private static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
         [DllImport("winmm.dll")]
