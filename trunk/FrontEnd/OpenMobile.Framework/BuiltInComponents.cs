@@ -37,7 +37,7 @@ namespace OpenMobile
             get
             {
                 //WARNING: REMOVING ANY OF THE BELOW DESCRIPTION IS A VIOLATION OF THE LICENSE AGREEMENT
-                string Text = "OpenMobile is copyright the openMobile Foundation and its contributors\r\n\r\n";
+                string Text = "OpenMobile is copyright the openMobile Foundation and its contributors.\r\n\r\n";
                 Text += "This program in full or in part is protected under a clarified version of the GPLv3 license which can be found in the application directory.\r\n\r\n";
                 Text += "Contributors:\r\n";
                 Text += "Justin Domnitz (justchat_1) - Lead Developer\r\n";
@@ -45,6 +45,7 @@ namespace OpenMobile
                 Text += "ws6vert - openOBD and Garmin Mobile PC Projects\r\n";
                 Text += "Borte - Developer\r\n";
                 Text += "malcom2073 - Developer\r\n";
+                Text += "jheizer - Developer\r\n";
                 Text += "\r\nSupporting Projects:\r\n";
                 Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, Sqlite, Aqua Gauge and CoreAudio";
                 return Text;
@@ -60,8 +61,8 @@ namespace OpenMobile
             if (about == null)
             {
                 about = new OMPanel("About");
-                OMLabel description = new OMLabel(30, 40, 900, 550);
-                description.TextAlignment = Alignment.TopCenter;
+                OMLabel description = new OMLabel(30, 55, 900, 550);
+                description.TextAlignment = Alignment.WordWrap|Alignment.TopCenter;
                 description.Text = AboutText;
                 about.addControl(description);
             }

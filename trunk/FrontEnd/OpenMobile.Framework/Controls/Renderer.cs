@@ -215,7 +215,7 @@ namespace OpenMobile
                         currentFont = new Font(font, f);
                     using (SolidBrush defaultBrush = new SolidBrush(Color.FromArgb((int)(color.A* transparency), color)))
                     {
-                        if (alignment!=Alignment.WordWrap)
+                        if ((alignment&Alignment.WordWrap)!=Alignment.WordWrap)
                             sFormat.FormatFlags = StringFormatFlags.NoWrap; // Added by Borte to block automatic wrapping of text (should this be a parameter that can be controled from the outside?)
                         if (((int)format % 2) == 1)
                             g.DrawString(text, currentFont, new SolidBrush(Color.FromArgb((int)(transparency * 255), secondColor)), new RectangleF(x + 1, y + 2, w, h), sFormat);

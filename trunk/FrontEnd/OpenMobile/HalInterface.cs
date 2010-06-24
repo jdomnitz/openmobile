@@ -59,12 +59,14 @@ namespace OpenMobile
                     else if (i == 200)
                         Core.theHost.execute(eFunction.navigateToAddress, arg1);
                     else if (i == 300)
-                        Core.theHost.raiseSystemEvent(eFunction.promptDialNumber, arg1,arg2,arg3);
+                        Core.theHost.raiseSystemEvent(eFunction.promptDialNumber, arg1, arg2, arg3);
                     else
                         Core.theHost.raiseSystemEvent((eFunction)Enum.Parse(typeof(eFunction), parts[0]), arg1, arg2, arg3);
                 }
+                else if (i == -1)
+                    Core.theHost.sendMessage(arg1, "OMHal", arg2);
                 else if (i == -3)
-                    Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1),true, arg2);
+                    Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1), true, arg2);
             }
             void recv(IAsyncResult res)
             {

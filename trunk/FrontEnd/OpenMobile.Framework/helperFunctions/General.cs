@@ -148,18 +148,28 @@ namespace OpenMobile.helperFunctions
             {
                 host = theHost;
             }
-
+            /// <summary>
+            /// Loads a file selection plugin
+            /// </summary>
+            /// <param name="screen"></param>
+            /// <param name="pluginName"></param>
+            /// <param name="panelName"></param>
+            /// <returns></returns>
+            public string getFile(int screen, string pluginName, string panelName)
+            {
+                return getFile(screen, pluginName, panelName, "");
+            }
             /// <summary>
             /// Loads a file selection plugin
             /// </summary>
             /// <returns></returns>
-            public string getFile(int screen,string pluginName,string panelName)
+            public string getFile(int screen,string pluginName,string panelName,string startPath)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
                 wait.Reset();
                 this.screen = screen;
-                if (host.execute(eFunction.TransitionToPanel, screen.ToString(), "OMDir","File") == false)
+                if (host.execute(eFunction.TransitionToPanel, screen.ToString(), "OMDir",startPath) == false)
                 {
                     return null;
                 }

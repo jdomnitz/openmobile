@@ -36,7 +36,6 @@ namespace OMPlayer
     public sealed class OMPlayer : IAVPlayer, IDisposable
 {
     // Fields
-    private static IntPtr hDrain = IntPtr.Zero;
     private AVPlayer[] player;
     private static IPluginHost theHost;
     static int WM_Graph_Notify = 0x8001;
@@ -68,11 +67,16 @@ namespace OMPlayer
     }
     private void checkInstance(int instance)
     {
-        if (player[instance] == null)
+        lock (player)
         {
-            player[instance] = new AVPlayer(instance);
-            player[instance].OnMediaEvent+= new MediaEvent(forwardEvent);
+            if (player[instance] == null)
+                sink.Invoke(OnPlayerRequested, new object[] { instance });
         }
+    }
+    private void createInstance(int instance)
+    {
+        player[instance] = new AVPlayer(instance);
+        player[instance].OnMediaEvent += forwardEvent;
     }
     public void Dispose()
     {
@@ -85,10 +89,12 @@ namespace OMPlayer
                 if (player[i] != null)
                     player[i].CloseClip();
             }
+            if (oldPlayer != null)
+                oldPlayer.CloseClip();
         }
         GC.SuppressFinalize(this);
     }
-
+    AVPlayer oldPlayer;
     public void forwardEvent(eFunction function, int instance, string arg)
     {
         if (function == eFunction.nextMedia)
@@ -96,25 +102,34 @@ namespace OMPlayer
             using(PluginSettings s=new PluginSettings())
                 if (s.getSetting("Music.Crossfade") == "True")
                 {
-                    AVPlayer p = player[instance];
-                    player[instance] = null;
-                    p.instance = -1;
+                    lock (player)
+                    {
+                        AVPlayer tmp = oldPlayer;
+                        oldPlayer = player[instance];
+                        player[instance] = tmp;
+                    }
+                    if (player[instance] != null)
+                    {
+                        player[instance].instance = instance;
+                        player[instance].OnMediaEvent += forwardEvent;
+                    }
+                    oldPlayer.instance = -1;
                     if (OnMediaEvent != null)
                         OnMediaEvent(function, instance, arg);
                     for (int i = 10; i >= 0; i--)
                     {
-                        player[instance].setVolume((10 - i) * 10);
-                        p.setVolume(i * 10);
+                        if (player[instance]!=null)
+                            player[instance].setVolume((10 - i) * 10);
+                        oldPlayer.setVolume(i * 10);
                         Thread.Sleep(300);
                     }
-                    p.CloseClip();
+                    oldPlayer.OnMediaEvent -= forwardEvent;
                     return;
                 }
         }
         if (OnMediaEvent != null)
             OnMediaEvent(function, instance, arg);
     }
-
     public float getCurrentPosition(int instance)
     {
         checkInstance(instance);
@@ -217,12 +232,18 @@ namespace OMPlayer
     {
         throw new NotImplementedException();
     }
+    MessageProc sink;
+    private delegate void CreateNewPlayer(int instance);
+    private event CreateNewPlayer OnPlayerRequested;
     public eLoadStatus initialize(IPluginHost host)
     {
         theHost = host;
+        sink = new MessageProc();
+        IntPtr tmp= sink.Handle;
         player = new AVPlayer[theHost.InstanceCount];
         host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
         host.OnPowerChange += new PowerEvent(host_OnPowerChange);
+        OnPlayerRequested += new CreateNewPlayer(createInstance);
         using (PluginSettings setting = new PluginSettings())
         {
             setting.setSetting("Default.AVPlayer.Files", "OMPlayer");
@@ -441,7 +462,7 @@ namespace OMPlayer
             {
                 if (d[i].Name.Contains("DirectSound"))
                 {
-                    lst.Add(d[i].Name.Replace("DirectSound", "").Replace(":", ""));
+                    lst.Add(d[i].Name.Replace("DirectSound", "").Replace(":", "").Replace("  ", " "));
                 }
             }
             return lst.ToArray();
@@ -504,18 +525,38 @@ namespace OMPlayer
         IntPtr drain = IntPtr.Zero;
         private delegate bool PositionCallback(float seconds);
         private delegate bool StopCallback();
+        private delegate bool PlayCallback(string filename);
+        private delegate void GetPositionCallback();
         private event PositionCallback OnSetPosition;
         private event StopCallback OnStop;
+        private event PlayCallback OnPlay;
+        private event GetPositionCallback OnGetPosition;
         // Methods
         public AVPlayer(int instanceNum)
         {
             instance = instanceNum;
             sink = new MessageProc();
+            drain = sink.Handle;
             sink.OnClick += new MessageProc.Click(clicked);
             sink.OnEvent += new MessageProc.eventOccured(eventOccured);
-            OnSetPosition += new PositionCallback(setPosition);
+            OnSetPosition += new PositionCallback(AVPlayer_OnSetPosition);
             OnStop+=new StopCallback(stop);
-            drain = sink.Handle;
+            OnPlay+=new PlayCallback(PlayMovieInWindow);
+            OnGetPosition+=new GetPositionCallback(getCurrentPos);
+        }
+
+        bool AVPlayer_OnSetPosition(float seconds)
+        {
+            int hr = -1;
+            lock (mediaControl)
+            {
+                mediaControl.Pause();
+                double s = seconds;
+                hr = mediaPosition.put_CurrentPosition(s);
+                if (currentState == ePlayerStatus.Playing)
+                    mediaControl.Run();
+            }
+            return (hr==0);
         }
 
         void clicked()
@@ -538,10 +579,8 @@ namespace OMPlayer
                 case EventCode.Complete:
                     using (PluginSettings s = new PluginSettings())
                         if (s.getSetting("Music.Crossfade") != "True")
-                        {
-                            stop();
                             OnMediaEvent(eFunction.nextMedia, instance, "");
-                        }
+                    stop();
                     break;
                 case EventCode.DeviceLost:
                 case EventCode.ErrorAbort:
@@ -593,7 +632,8 @@ namespace OMPlayer
             {
                 if ((currentState != ePlayerStatus.Stopped) && (currentState != ePlayerStatus.Ready))
                     stop();
-                if (PlayMovieInWindow(url) == false)
+                object o = sink.Invoke(OnPlay, new object[] { url });
+                if ((bool)o == false)
                     return false;
             }
             pos = 0;
@@ -638,20 +678,20 @@ namespace OMPlayer
             if ((currentState == ePlayerStatus.Paused) || (currentState == ePlayerStatus.Playing) || (currentState == ePlayerStatus.FastForwarding) || (currentState == ePlayerStatus.Rewinding))
             {
                 if (sink.InvokeRequired)
-                    return (bool)sink.Invoke(OnStop);
-            retry:
-                //lock (this)
                 {
-                    if ((mediaControl == null) || (mediaSeeking == null))
+                    object ret = sink.Invoke(OnStop);
+                    if (ret == null)
                         return false;
-                    try
-                    {
-                        currentState = ePlayerStatus.Ready;
-                        mediaControl.Stop();
-                    }
-                    catch (AccessViolationException) {
-                        Thread.Sleep(50); if (Thread.CurrentThread.Name != "1") { Thread.CurrentThread.Name = "1"; goto retry; } return false; }
+                    return (bool)ret;
                 }
+                if ((mediaControl == null) || (mediaSeeking == null))
+                    return false;
+                try
+                {
+                    currentState = ePlayerStatus.Ready;
+                    mediaControl.Stop();
+                }
+                catch (AccessViolationException) { return false; }
             }
             currentState = ePlayerStatus.Stopped;
             mediaControl = null;
@@ -672,11 +712,7 @@ namespace OMPlayer
             int hr = 0;
             if (mediaControl != null)
             {
-                try
-                {
-                    hr = mediaControl.Stop();
-                }
-                catch (AccessViolationException){}
+                stop();
                 currentState = ePlayerStatus.Stopped;
                 CloseInterfaces();
                 isAudioOnly = true;
@@ -717,11 +753,11 @@ namespace OMPlayer
             {
             }
         }
-        public double getCurrentPos()
+        public void getCurrentPos()
         {
             double time;
             mediaPosition.get_CurrentPosition(out time);
-            return time;
+            pos= time;
         }
         private int screen()
         {
@@ -760,43 +796,39 @@ namespace OMPlayer
             int hr = 0;
             if (filename == string.Empty)
                 return false;
-            lock (this)
+            currentState = ePlayerStatus.Transitioning;
+            graphBuilder = (IGraphBuilder) new FilterGraph();
+            IBaseFilter source = null;
+            hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance), null, "OutputDevice", out source);
+            hr = graphBuilder.RenderFile(filename, null);
+            if (hr != 0)
+                return false;
+            mediaControl = (IMediaControl) graphBuilder;
+            mediaEventEx = (IMediaEventEx) graphBuilder;
+            mediaSeeking = (IMediaSeeking) graphBuilder;
+            mediaPosition = (IMediaPosition) graphBuilder;
+            videoWindow = graphBuilder as IVideoWindow;
+            basicVideo = graphBuilder as IBasicVideo;
+            basicAudio = graphBuilder as IBasicAudio;
+            setVolume(currentVolume);
+            CheckVisibility();
+            if (!isAudioOnly)
             {
-                currentState = ePlayerStatus.Transitioning;
-                graphBuilder = (IGraphBuilder) new FilterGraph();
-                IBaseFilter source = null;
-                hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance), null, "OutputDevice", out source);
-                hr = graphBuilder.RenderFile(filename, null);
-                if (hr != 0)
-                    return false;
-                mediaControl = (IMediaControl) graphBuilder;
-                mediaEventEx = (IMediaEventEx) graphBuilder;
-                mediaSeeking = (IMediaSeeking) graphBuilder;
-                mediaPosition = (IMediaPosition) graphBuilder;
-                videoWindow = graphBuilder as IVideoWindow;
-                basicVideo = graphBuilder as IBasicVideo;
-                basicAudio = graphBuilder as IBasicAudio;
-                setVolume(currentVolume);
-                CheckVisibility();
-                if (!isAudioOnly)
-                {
-                    DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(instance)));
-                    DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
-                    DsError.ThrowExceptionForHR(Resize());
-                    DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(drain));
-                    for(int i=0;i<theHost.ScreenCount;i++)
-                        if (theHost.instanceForScreen(i)==this.instance)
-                            theHost.sendMessage("UI", "OMPlayer", "ShowMediaControls"+i.ToString());
-                }
-                currentPlaybackRate = 1.0;
-                if (mediaControl.Run()<0)
-                    return false;
-                mediaEventEx.SetNotifyWindow(drain, WM_Graph_Notify, new IntPtr(instance));
+                DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(instance)));
+                DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
+                DsError.ThrowExceptionForHR(Resize());
+                DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(drain));
+                for(int i=0;i<theHost.ScreenCount;i++)
+                    if (theHost.instanceForScreen(i)==this.instance)
+                        theHost.sendMessage("UI", "OMPlayer", "ShowMediaControls"+i.ToString());
             }
+            currentPlaybackRate = 1.0;
+            if (mediaControl.Run()<0)
+                return false;
+            mediaEventEx.SetNotifyWindow(drain, WM_Graph_Notify, new IntPtr(instance));
             currentState = ePlayerStatus.Playing;
             return true;
         }
-
         public int SetRate(double rate)
         {
             int hr = 0;
@@ -843,7 +875,7 @@ namespace OMPlayer
                     Thread.Sleep(1000);
                     if (mediaPosition != null)
                     {
-                        pos = getCurrentPos();
+                        sink.Invoke(OnGetPosition);
                         if ((int)pos == nowPlaying.Length - 3)
                         {
                             using (PluginSettings s = new PluginSettings())
@@ -851,10 +883,9 @@ namespace OMPlayer
                                     OnMediaEvent(eFunction.nextMedia, instance, "");
                         }
                     }
-                    else
-                        return;
                 }
             }
+            t = null;
         }
 
         internal bool setPosition(float seconds)
@@ -864,9 +895,7 @@ namespace OMPlayer
             if ((mediaControl == null) || (mediaPosition == null))
                 return false;
             pos = seconds;
-            if (sink.InvokeRequired)
-                return (bool)sink.Invoke(OnSetPosition,new object[]{seconds});
-            return (0 == mediaPosition.put_CurrentPosition((double)seconds));
+            return (bool)sink.Invoke(OnSetPosition, new object[] { seconds });
         }
     }
 

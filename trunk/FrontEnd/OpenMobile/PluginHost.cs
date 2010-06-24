@@ -104,7 +104,7 @@ namespace OpenMobile
         {
             lock (nextPosition)
             {
-                if ((random != null) && (random[instance] == true))
+                if ((random != null) && (random[instance] == true) && (queued[instance].Count>1))
                 {
                     int result;
                     do
@@ -486,14 +486,28 @@ namespace OpenMobile
 
         private void savePlaylists()
         {
-            for(int i=0;i<8;i++)
-                Playlist.writePlaylistToDB(this, "Current"+i.ToString(), getPlaylist(i));
+            using (PluginSettings s = new PluginSettings())
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    Playlist.writePlaylistToDB(this, "Current" + i.ToString(), getPlaylist(i));
+                    s.setSetting("Media.Instance" + i.ToString() + ".Random", getRandom(i).ToString());
+                }
+            }
         }
 
         private void loadPlaylists()
         {
-            for(int i=0;i<8;i++)
-                setPlaylist(Playlist.readPlaylistFromDB(this, "Current"+i.ToString()), i);
+            using (PluginSettings s = new PluginSettings())
+            {
+                bool res;
+                for(int i=0;i<8;i++)
+                {
+                    setPlaylist(Playlist.readPlaylistFromDB(this, "Current"+i.ToString()), i);
+                    if (bool.TryParse(s.getSetting("Media.Instance" + i.ToString() + ".Random"), out res))
+                        setRandom(i, res);
+                }
+            }
         }
 
         private class historyCollection
@@ -1218,6 +1232,12 @@ namespace OpenMobile
                 if (message == "ToggleCursor")
                     for (int i = 0; i < screenCount; i++)
                         Core.RenderingWindows[i].hideCursor();
+                return true;
+            }
+            else if (to == "OMHal")
+            {
+                hal.snd("-1|" + from + "|" + message);
+                return true;
             }
             try
             {
@@ -1235,6 +1255,10 @@ namespace OpenMobile
         }
         public bool sendMessage<T>(string to, string from, string message,ref T data)
         {
+            if (to == "SandboxedThread")
+            {
+                SandboxedThread.handle(data as Exception);
+            }
             try
             {
                 IBasePlugin plugin = Core.pluginCollection.Find(i => i.pluginName == to);
@@ -1356,6 +1380,8 @@ namespace OpenMobile
         {
             if (instanceCount == -1)
                 return false;
+            if ((instance < 0) || (instance >= instanceCount))
+                return false;
             if (random == null)
                 random = new bool[instanceCount];
             return random[instance];
@@ -1363,6 +1389,8 @@ namespace OpenMobile
         public bool setRandom(int instance, bool value)
         {
             if (instanceCount == -1)
+                return false;
+            if ((instance < 0) || (instance >= instanceCount))
                 return false;
             if (random == null)
                 random = new bool[instanceCount];

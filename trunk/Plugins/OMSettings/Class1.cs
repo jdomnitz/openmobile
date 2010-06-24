@@ -319,21 +319,32 @@ namespace OMSettings
             List<IBasePlugin> plugins;
             theHost.getData(eGetData.GetPlugins, "", out o);
             plugins = (List < IBasePlugin >)o;
+            List<Exception> problems = new List<Exception>();
             foreach (IBasePlugin b in plugins)
             {
                 LayoutManager lm = new LayoutManager();
                 OMPanel panel;
                 try
                 {
-                    panel = lm.layout(theHost, ((IBasePlugin)b).loadSettings());
+                    panel = lm.layout(theHost, b.loadSettings());
                 }
                 catch (NotImplementedException) { continue; }
+                catch (Exception e)
+                {
+                    problems.Add(e);
+                    continue;
+                }
                 if (panel != null)
                 {
                     panel.Name = b.pluginName + " Settings"; 
                     lsthardware.Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
                     manager.loadPanel(panel);
                 }
+            }
+            foreach (Exception e in problems)
+            {
+                Exception ex = e;
+                theHost.sendMessage("SandboxedThread", "OMSettings", "", ref ex);
             }
             manager.loadPanel(hardware);
             #endregion
@@ -508,7 +519,7 @@ namespace OMSettings
                 ((OMLabel)manager[screen, "zone"][5]).Text = "Default Device";
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings", "MultiZone");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "zone");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"None");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"SlideLeft");
         }
 
         public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)

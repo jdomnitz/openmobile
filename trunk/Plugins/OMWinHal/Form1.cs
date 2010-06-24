@@ -36,6 +36,7 @@ namespace OMHal
         public Form1()
         {
             InitializeComponent();
+            Specific.OnHandleRequested += new Specific.getHandle(Form1_OnHandleRequested);
             try
             {
                 receive = new UdpClient(8549);
@@ -47,6 +48,11 @@ namespace OMHal
             Specific.hookVolume(this.Handle);
             receive.BeginReceive(recv, null);
             this.Visible = false;
+        }
+
+        IntPtr Form1_OnHandleRequested()
+        {
+            return this.Handle;
         }
         protected override void WndProc(ref Message m)
         {
