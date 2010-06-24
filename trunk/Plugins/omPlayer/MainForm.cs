@@ -756,8 +756,11 @@ namespace OMPlayer
         public void getCurrentPos()
         {
             double time;
-            mediaPosition.get_CurrentPosition(out time);
-            pos= time;
+            if (mediaPosition != null)
+            {
+                mediaPosition.get_CurrentPosition(out time);
+                pos = time;
+            }
         }
         private int screen()
         {
