@@ -865,6 +865,8 @@ namespace OMRadio
             if (o == null)
                 return;
             tunedContentInfo info = (tunedContentInfo)o;
+            if ((info.currentStation == null) || (info.stationList == null))
+                return;
 
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
