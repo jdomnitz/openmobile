@@ -98,7 +98,7 @@ namespace OMHal
                             {
                                 sendIt("3|" + arg1 + "|" + Specific.getVolume(ret));
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
                                 //MessageBox.Show("GERROR: " + e.Message + "\nStack Trace:\n" + e.StackTrace);
                             }
@@ -112,7 +112,7 @@ namespace OMHal
                             {
                                 Specific.setVolume(int.Parse(arg1), ret);
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
                                 //MessageBox.Show("SERROR: " + e.Message + "\nStack Trace:\n" + e.StackTrace);
                             }

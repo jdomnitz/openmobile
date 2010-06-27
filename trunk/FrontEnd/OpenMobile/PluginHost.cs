@@ -1512,6 +1512,18 @@ namespace OpenMobile
                             data = currentMediaPlayer[ret].getCurrentPosition(ret);
                     }
                     return;
+                case eGetData.GetPlayerVolume:
+                    if (int.TryParse(param, out ret) == true)
+                    {
+                        if (currentMediaPlayer[ret] == null)
+                            if (currentTunedContent[ret] == null)
+                                return;
+                            else
+                                data = currentTunedContent[ret].getVolume(ret);
+                        else
+                            data = currentMediaPlayer[ret].getVolume(ret);
+                    }
+                    return;
                 case eGetData.GetSystemVolume:
                     hal.snd("3|"+param);
                     bool res = true;

@@ -508,6 +508,11 @@ namespace OpenMobile
                             theHost.execute(eFunction.TransitionToPanel, arg1, "Media");
                             theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
+                        case "R":
+                            theHost.execute(eFunction.TransitionFromAny, arg1);
+                            theHost.execute(eFunction.TransitionToPanel, arg1, "Radio");
+                            theHost.execute(eFunction.ExecuteTransition, arg1);
+                            break;
                         case "H":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
                             theHost.execute(eFunction.TransitionToPanel, arg1, "MainMenu");
@@ -760,7 +765,7 @@ namespace OpenMobile
                             if (title.Text!=TunedContentInfo.currentStation.stationName)
                                 title.Transition(eAnimation.UnveilRight,TunedContentInfo.currentStation.stationName,50);
                             if (artist.Text!=info.Name)
-                                artist.Transition(eAnimation.UnveilRight,info.Artist,50);
+                                artist.Transition(eAnimation.UnveilRight,info.Name,50);
                             if (album.Text != info.Album)
                                 album.Transition(eAnimation.UnveilRight, info.Album,50);
                             OMImage cover = ((OMImage)p[9]);

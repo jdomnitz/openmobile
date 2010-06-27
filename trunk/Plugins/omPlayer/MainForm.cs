@@ -41,6 +41,8 @@ namespace OMPlayer
     static int WM_Graph_Notify = 0x8001;
     static int WM_LBUTTONUP = 0x0202;
 
+    static int crossfade = 0;
+
     // Events
     public event MediaEvent OnMediaEvent;
     Settings settings;
@@ -51,9 +53,11 @@ namespace OMPlayer
             settings = new Settings("OMPlayer Settings");
             using (PluginSettings s = new PluginSettings())
             {
-                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.Crossfade", "", "Crossfade between songs", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.Crossfade")));
                 settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", "", "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.AutoResume")));
                 settings.Add(new Setting(SettingTypes.MultiChoice, "Music.PlayProtected", "", "Attempt to play protected files", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.PlayProtected")));
+                List<string> crossfadeo = new List<string>(new string[] { "None", "1 Second", "2 Seconds", "3 Seconds", "4 Seconds", "5 Seconds" });
+                List<string> crossfadev = new List<string>(new string[] { "", "1000", "2000", "3000", "4000", "5000" });
+                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.CrossfadeDuration", "Crossfade", "Crossfade between songs",crossfadeo,crossfadev, s.getSetting("Music.CrossfadeDuration")));
             }
             settings.OnSettingChanged += new SettingChanged(changed);
         }
@@ -62,6 +66,11 @@ namespace OMPlayer
 
     void changed(Setting s)
     {
+        if (s.Name == "Music.CrossfadeDuration")
+        {
+            if (s.Value != "")
+                crossfade = int.Parse(s.Value);
+        }
         using (PluginSettings setting = new PluginSettings())
             setting.setSetting(s.Name, s.Value);
     }
@@ -99,33 +108,32 @@ namespace OMPlayer
     {
         if (function == eFunction.nextMedia)
         {
-            using(PluginSettings s=new PluginSettings())
-                if (s.getSetting("Music.Crossfade") == "True")
+            if (crossfade > 0)
+            {
+                lock (player)
                 {
-                    lock (player)
-                    {
-                        AVPlayer tmp = oldPlayer;
-                        oldPlayer = player[instance];
-                        player[instance] = tmp;
-                    }
-                    if (player[instance] != null)
-                    {
-                        player[instance].instance = instance;
-                        player[instance].OnMediaEvent += forwardEvent;
-                    }
-                    oldPlayer.instance = -1;
-                    if (OnMediaEvent != null)
-                        OnMediaEvent(function, instance, arg);
-                    for (int i = 10; i >= 0; i--)
-                    {
-                        if (player[instance]!=null)
-                            player[instance].setVolume((10 - i) * 10);
-                        oldPlayer.setVolume(i * 10);
-                        Thread.Sleep(300);
-                    }
-                    oldPlayer.OnMediaEvent -= forwardEvent;
-                    return;
+                    AVPlayer tmp = oldPlayer;
+                    oldPlayer = player[instance];
+                    player[instance] = tmp;
                 }
+                if (player[instance] != null)
+                {
+                    player[instance].instance = instance;
+                    player[instance].OnMediaEvent += forwardEvent;
+                }
+                oldPlayer.instance = -1;
+                if (OnMediaEvent != null)
+                    OnMediaEvent(function, instance, arg);
+                for (int i = 10; i >= 0; i--)
+                {
+                    if (player[instance] != null)
+                        player[instance].setVolume((10 - i) * 10);
+                    oldPlayer.setVolume(i * 10);
+                    Thread.Sleep(crossfade/10);
+                }
+                oldPlayer.OnMediaEvent -= forwardEvent;
+                return;
+            }
         }
         if (OnMediaEvent != null)
             OnMediaEvent(function, instance, arg);
@@ -247,6 +255,9 @@ namespace OMPlayer
         using (PluginSettings setting = new PluginSettings())
         {
             setting.setSetting("Default.AVPlayer.Files", "OMPlayer");
+            string cf = setting.getSetting("Music.CrossfadeDuration");
+            if (cf != "")
+                crossfade = int.Parse(cf);
             if (setting.getSetting("Music.AutoResume") == "True")
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
@@ -577,8 +588,7 @@ namespace OMPlayer
             switch (e)
             {
                 case EventCode.Complete:
-                    using (PluginSettings s = new PluginSettings())
-                        if (s.getSetting("Music.Crossfade") != "True")
+                    if (crossfade==0)
                             OnMediaEvent(eFunction.nextMedia, instance, "");
                     stop();
                     break;
@@ -709,7 +719,6 @@ namespace OMPlayer
         }
         public void CloseClip()
         {
-            int hr = 0;
             if (mediaControl != null)
             {
                 stop();
@@ -879,11 +888,9 @@ namespace OMPlayer
                     if (mediaPosition != null)
                     {
                         sink.Invoke(OnGetPosition);
-                        if ((int)pos == nowPlaying.Length - 3)
+                        if ((crossfade>0)&&((int)pos == nowPlaying.Length - (crossfade/1000)))
                         {
-                            using (PluginSettings s = new PluginSettings())
-                                if (s.getSetting("Music.Crossfade") == "True")
-                                    OnMediaEvent(eFunction.nextMedia, instance, "");
+                            OnMediaEvent(eFunction.nextMedia, instance, "");
                         }
                     }
                 }
