@@ -98,7 +98,7 @@ namespace OMSettings
                             txtchoice.Text = s.Options[index];
                         txtchoice.Font = new Font("Microsoft Sans Serif", 24F);
                         txtchoice.Name = "txt"+s.Name;
-                        OMLabel mcTitle = new OMLabel(195, ofset, 175, 50);
+                        OMLabel mcTitle = new OMLabel(100, ofset, 270, 50);
                         mcTitle.Font = new Font("Microsoft Sans Serif", 32.25F, FontStyle.Bold);
                         mcTitle.Text = s.Header + ((s.Header!=null)?":":"");
                         mcTitle.TextAlignment = Alignment.CenterRight;

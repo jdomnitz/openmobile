@@ -121,9 +121,7 @@ namespace OMMediaDB
         {
             if ((location==null)||(location == ""))
                 return;
-            string[] filter = new string[] { "*.mp3", "*.m4a", "*.mpc", "*.flac", "*.wv", "*.aac", "*.aif", "*.aiff", "*.asf","*.ape", "*.wav", "*.m4p", "*.ogg", "*.wma", "*.oga", "*.spx","*.m4b","*.rma","*.mpp" };
-            for(int i=0;i<filter.Length;i++)
-                parse(location, subdirectories,filter[i]);
+            parse(location, subdirectories);
         }
         public IMediaDatabase getNew()
         {
@@ -131,14 +129,16 @@ namespace OMMediaDB
                 return null;
             return new Plugin(theHost);
         }
-        private void parse(string location, bool subdirectories,string filter)
-        { //TODO - Optimize this to use a filter array so directories dont need to be enumerated for each type
-            foreach (string file in Directory.GetFiles(location, filter))
-                if (toBeIndexed!=null)
-                    toBeIndexed.Add(file);
+        private void parse(string location, bool subdirectories)
+        {
+            string[] filters = new string[] { "*.mp3", "*.m4a", "*.mpc", "*.flac", "*.wv", "*.aac", "*.aif", "*.aiff", "*.asf","*.ape", "*.wav", "*.m4p", "*.ogg", "*.wma", "*.oga", "*.spx","*.m4b","*.rma","*.mpp" };
+            foreach(string filter in filters)
+                foreach (string file in Directory.GetFiles(location, filter))
+                    if (toBeIndexed!=null)
+                        toBeIndexed.Add(file);
             if (subdirectories == true)
                 foreach (string folder in Directory.GetDirectories(location))
-                    parse(folder, true,filter);
+                    parse(folder, true);
         }
 
         private int startCount;

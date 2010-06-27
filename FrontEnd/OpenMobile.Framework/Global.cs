@@ -1475,7 +1475,13 @@ namespace OpenMobile
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetSupportedBands = 21
+        GetSupportedBands = 21,
+        /// <summary>
+        /// Gets the volume from a tuner or av player [0-100]
+        /// <para>----------------------------------------------------</para>
+        /// <para>Param: Instance [int]</para>
+        /// </summary>
+        GetPlayerVolume=22
     }
     /// <summary>
     /// Information on Tuned Content
@@ -1532,6 +1538,10 @@ namespace OpenMobile
         /// Powering Up/Initializing
         /// </summary>
         Initializing=4,
+        /// <summary>
+        /// Powered Off
+        /// </summary>
+        PoweredOff=5,
         /// <summary>
         /// An error has occured
         /// </summary>
