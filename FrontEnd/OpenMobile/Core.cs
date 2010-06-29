@@ -309,9 +309,13 @@ namespace OpenMobile
             if (OpenMobile.Net.Network.IsAvailable==true)
                 theHost.raiseSystemEvent(eFunction.connectedToInternet, "", "", "");
             using (PluginSettings settings = new PluginSettings())
+            {
                 if (settings.getSetting("UI.HideCursor") == "True")
                     for (int i = 0; i < RenderingWindows.Count; i++)
                         RenderingWindows[i].hideCursor();
+                if (settings.getSetting("UI.MinGraphics") == "True")
+                    theHost.GraphicsLevel = eGraphicsLevel.Minimal;
+            }
             if (!OSSpecific.IsMono())
                 if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
                     theHost.SystemEvents_PowerModeChanged(null, new PowerModeChangedEventArgs(PowerModes.StatusChange));

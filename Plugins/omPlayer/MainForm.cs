@@ -888,7 +888,7 @@ namespace OMPlayer
                     if (mediaPosition != null)
                     {
                         sink.Invoke(OnGetPosition);
-                        if ((crossfade>0)&&((int)pos == nowPlaying.Length - (crossfade/1000)))
+                        if ((crossfade>0)&&(isAudioOnly)&&((int)pos == nowPlaying.Length - (crossfade/1000)))
                         {
                             OnMediaEvent(eFunction.nextMedia, instance, "");
                         }

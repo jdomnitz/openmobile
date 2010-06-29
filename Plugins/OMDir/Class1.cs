@@ -110,17 +110,19 @@ namespace OMDir
             caption.OutlineColor = Color.FromArgb(120, Color.PowderBlue);
             caption.Font = new Font(FontFamily.GenericSansSerif, 34F);
             caption.Format = eTextFormat.Glow;
-            OMButton top = new OMButton(20, 105, 0, 50);
+            OMButton top = new OMButton(795, 101, 180, 40);
             top.Text = "Up One Level";
             top.Image = theHost.getSkinImage("Full");
             top.FocusImage = theHost.getSkinImage("Full.Highlighted");
             top.OnClick += new userInteraction(top_OnClick);
             top.Transition = eButtonTransition.None;
-            OMButton select = new OMButton(140, 105,0, 50);
+            top.Visible = false;
+            OMButton select = new OMButton(20, 101, 230, 40);
             select.Text = "Select this Folder";
             select.Image = top.Image;
             select.FocusImage = top.FocusImage;
             select.OnClick += new userInteraction(select_OnClick);
+            select.Visible = false;
             OMList right = new OMList(510, 150, 470, 375);
             right.Font = new Font(FontFamily.GenericSansSerif, 28F);
             right.OnClick += new userInteraction(right_OnClick);
@@ -170,7 +172,7 @@ namespace OMDir
             {
                 l.Tag = "";
                 loadRoot(l);
-                ((OMButton)manager[screen][5]).Width = 0;
+                ((OMButton)manager[screen][5]).Visible = false;
             }
             else
             {
@@ -224,7 +226,7 @@ namespace OMDir
         {
             if (sender.SelectedIndex != -1)
                 if (type[screen] == 1)
-                    ((OMButton)manager[screen][6]).Width = 150;
+                    ((OMButton)manager[screen][6]).Visible = true;
         }
         private void loadRoot(OMList l)
         {
@@ -245,7 +247,7 @@ namespace OMDir
             {
                 l.Tag = "";
                 loadRoot(l);
-                ((OMButton)manager[screen][5]).Width = 0;
+                ((OMButton)manager[screen][5]).Visible=false;
             }
             else
             {
@@ -297,7 +299,7 @@ namespace OMDir
                 }
             }
             catch (Exception) { }
-            ((OMButton)manager[screen][5]).Width = 150;
+            ((OMButton)manager[screen][5]).Visible=true;
         }
 
         void left_OnClick(object sender, int screen)

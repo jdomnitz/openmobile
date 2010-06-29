@@ -29,6 +29,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Radio", "..\Plugins\Radio\R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlDemo", "..\Plugins\ControlDemo\ControlDemo.csproj", "{CF16AA25-58E4-40A1-9137-40CF48FB38EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Video", "..\Plugins\Video\Video.csproj", "{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoraPlayer", "..\Plugins\PandoraPlayer\PandoraPlayer.csproj", "{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +95,14 @@ Global
 		{CF16AA25-58E4-40A1-9137-40CF48FB38EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF16AA25-58E4-40A1-9137-40CF48FB38EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF16AA25-58E4-40A1-9137-40CF48FB38EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

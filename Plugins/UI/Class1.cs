@@ -74,6 +74,17 @@ namespace OpenMobile
                     }
                 return true;
             }
+            else if (message.StartsWith("HideMediaControls"))
+            {
+                int screen;
+                if (int.TryParse(message.Substring(17), out screen) == true)
+                    if (manager[screen][2].Top == 397)
+                    {
+                        timerForward = true;
+                        moveMediaBar(screen);
+                    }
+                return true;
+            }
             return false;
         }
         public bool incomingMessage<T>(string message,string source, ref T data)
@@ -147,8 +158,9 @@ namespace OpenMobile
             trackTitle.ContiuousAnimation = eAnimation.Scroll;
             trackTitle.TickSpeed = 250;
             OMAnimatedLabel trackAlbum = new OMAnimatedLabel(240, 34, 490, 28);
-            trackAlbum.TextAlignment = Alignment.CenterLeftEllipsis;
+            trackAlbum.TextAlignment = Alignment.CenterLeft;
             trackAlbum.Format = eTextFormat.BoldShadow;
+            trackAlbum.ContiuousAnimation = eAnimation.Scroll;
             OMAnimatedLabel trackArtist = new OMAnimatedLabel(240, 64, 490, 28);
             trackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
             trackArtist.Format = eTextFormat.DropShadow;
@@ -788,7 +800,7 @@ namespace OpenMobile
                                 album.Transition(eAnimation.UnveilRight, info.Album,50);
                             OMImage cover = ((OMImage)p[9]);
                             cover.Image = it;
-                            if (cover.Height < cover.Width)
+                            if ((cover.Image.image!=null)&&(cover.Height < cover.Width))
                             {
                                 cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
                                 cover.Top = 2 + (85 - cover.Height) / 2;

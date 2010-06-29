@@ -25,6 +25,7 @@ using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using OpenMobile.Controls;
+using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
@@ -445,7 +446,7 @@ namespace OpenMobile
                 Application.Exit();
                 return;
             }
-            if (this.Opacity > 0.1)
+            if ((this.Opacity > 0.1)&&(Core.theHost.GraphicsLevel==eGraphicsLevel.Standard))
                 this.Opacity -= 0.04;
             else
                 Application.Exit();
@@ -630,13 +631,10 @@ namespace OpenMobile
                     }
                     if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
                     {
-                        SandboxedThread.Asynchronous(delegate() { (highlighted as IClickable).doubleClickMe(screen); });
-                        //new Thread(delegate() {
-                        //    try { 
-                        //        (highlighted as IClickable).doubleClickMe(screen); 
-                        //    } catch (NullReferenceException) { } 
-                        //}).Start();
-                        //NR can occur if highlighted changes between the if statement and the thread creation
+                        if (p.DoubleClickable == true)
+                            SandboxedThread.Asynchronous(delegate() { (highlighted as IClickable).doubleClickMe(screen); });
+                        else
+                            SandboxedThread.Asynchronous(delegate() { (highlighted as IClickable).clickMe(screen); });
                     }
                 }
             }
