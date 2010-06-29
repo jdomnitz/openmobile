@@ -82,7 +82,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// The actual value to be displayed (default) or the value to be set
         /// </summary>
-        public string Value = null;
+        public string[] DefaultValue = new string[1];
         /// <summary>
         /// Options for a MultiChoice setting
         /// </summary>
@@ -91,6 +91,20 @@ namespace OpenMobile.Plugin
         /// Possible value for a MultiChoice or range setting
         /// </summary>
         public List<string> Values = null;
+
+        public string Value
+        {
+            get
+            {
+                if ((DefaultValue == null) || (DefaultValue.Length == 0))
+                    return null;
+                return DefaultValue[0];
+            }
+            set
+            {
+                DefaultValue = new string[] { value };
+            }
+        }
 
         /// <summary>
         /// Creates a new Text, Numeric, File or Folder Setting
@@ -155,7 +169,7 @@ namespace OpenMobile.Plugin
         /// <param name="Options"></param>
         /// <param name="Values"></param>
         /// <param name="DefaultValue"></param>
-        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values,string DefaultValue)
+        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values,string defaultValue)
         {
             this.Type = Type;
             this.Name = Name;
@@ -163,7 +177,27 @@ namespace OpenMobile.Plugin
             this.Description = Description;
             this.Options = Options;
             this.Values = Values;
-            this.Value = DefaultValue;
+            this.Value = defaultValue;
+        }
+        /// <summary>
+        /// Creates a new MultiChoice or Range setting
+        /// </summary>
+        /// <param name="Type"></param>
+        /// <param name="Name"></param>
+        /// <param name="Header"></param>
+        /// <param name="Description"></param>
+        /// <param name="Options"></param>
+        /// <param name="Values"></param>
+        /// <param name="DefaultValue"></param>
+        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values, string[] defaultValue)
+        {
+            this.Type = Type;
+            this.Name = Name;
+            this.Header = Header;
+            this.Description = Description;
+            this.Options = Options;
+            this.Values = Values;
+            this.DefaultValue = defaultValue;
         }
         /// <summary>
         /// A List containing True and False

@@ -92,22 +92,22 @@ namespace OpenMobile
 
         static void SettingsChanged(Setting setting)
         {
-            switch (setting.Name)
+            using (PluginSettings s = new PluginSettings())
             {
-                case "UI.HideCursor":
-                    using (PluginSettings s = new PluginSettings())
-                    {
+                switch (setting.Name)
+                {
+                    case "UI.HideCursor":
                         if (setting.Value != s.getSetting("UI.HideCursor"))
                             theHost.sendMessage("RenderingWindow", "OMSettings", "ToggleCursor");
-                        s.setSetting("UI.HideCursor", setting.Value);
-                    }
-                    break;
-                case "UI.MinGraphics":
-                    if (setting.Value == "True")
-                        theHost.GraphicsLevel = eGraphicsLevel.Minimal;
-                    else
-                        theHost.GraphicsLevel = eGraphicsLevel.Standard;
-                break;
+                        break;
+                    case "UI.MinGraphics":
+                        if (setting.Value == "True")
+                            theHost.GraphicsLevel = eGraphicsLevel.Minimal;
+                        else
+                            theHost.GraphicsLevel = eGraphicsLevel.Standard;
+                        break;
+                }
+                s.setSetting(setting.Name, setting.Value);
             }
         }
         /// <summary>

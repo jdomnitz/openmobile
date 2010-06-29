@@ -24,8 +24,8 @@ using System.Drawing;
 using System.Threading;
 using Client;
 using OpenMobile;
-using OpenMobile.Plugin;
 using OpenMobile.Data;
+using OpenMobile.Plugin;
 
 namespace PandoraPlayer
 {
@@ -111,11 +111,13 @@ namespace PandoraPlayer
             {
                 if (client == null)
                 {
+                    int vol = getVolume(instance);
                     client = new PClient(false);
                     client.LoggedIn += new StringEventHandler(client_LoggedIn);
                     client.StationChanged += new StringEventHandler(client_StationChanged);
                     client.SongPlayed += new SongEventHandler(client_SongPlayed);
                     client.StationsAvailable += new StringEventHandler(client_StationsAvailable);
+                    client.Volume = vol;
                     initialize();
                 }
             }
@@ -138,13 +140,7 @@ namespace PandoraPlayer
         private void initialize()
         {
             using (PluginSettings settings = new PluginSettings())
-            {
                 client.username = settings.getSetting("Pandora.Username");
-                int volume;
-                if (int.TryParse(settings.getSetting("Pandora.Volume"), out volume))
-                    setVolume(0, volume);
-
-            }
             Personal.readInfo();
             client.password = Personal.getPassword(Personal.ePassword.Pandora, "Pandora1");
             if ((client.password != "") && (client.username != ""))
@@ -231,6 +227,8 @@ namespace PandoraPlayer
 
         public bool setVolume(int instance, int percent)
         {
+            if (settings.Count == 3)
+                settings[2].Value = percent.ToString();
             if (client == null)
                 return false;
             client.Volume = percent;
@@ -240,7 +238,10 @@ namespace PandoraPlayer
         public int getVolume(int instance)
         {
             if (client == null)
-                return 0;
+                if (settings[2].Value == "")
+                    return 100;
+                else
+                    return int.Parse(settings[2].Value);
             return client.Volume;
         }
         mediaInfo currentSong=new mediaInfo();
@@ -379,13 +380,15 @@ namespace PandoraPlayer
 
         private void fadeIn()
         {
+            int vol=getVolume(0);
             if (client != null)
             {
-                for (int i = 0; i <10; i++)
+                for (int i = 0; i <vol/10; i++)
                 {
                     client.Volume = i * 10;
                     Thread.Sleep(150);
                 }
+                client.Volume = vol;
             }
         }
         private bool fading = false;

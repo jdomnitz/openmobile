@@ -68,7 +68,7 @@ namespace OMRadio
                 if (!SourceSelected)
                 {
                     string Source = setting.getSetting("Radio.DefaultTunedContentSource");
-                    if (Source != "None")
+                    if ((Source != "None")&&(Source!=""))
                     {
                         object o = new object();
                         theHost.getData(eGetData.GetTunedContentInfo, "", theHost.instanceForScreen(screen).ToString(), out o);

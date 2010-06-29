@@ -270,7 +270,8 @@ namespace OpenMobile.Controls
         /// Renders the specified effect for a single iteration
         /// </summary>
         /// <param name="effect"></param>
-        /// <param name="text"></param>
+        /// <param name="newText"></param>
+        /// <param name="tick"></param>
         public void Transition(eAnimation effect, string newText,int tick)
         {
             oldText = text;
