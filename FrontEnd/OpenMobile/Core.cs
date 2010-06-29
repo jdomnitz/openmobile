@@ -397,6 +397,7 @@ namespace OpenMobile
             for (int i = 1; i < theHost.ScreenCount; i++)
                 RenderingWindows[i].Show();
             Application.Run(RenderingWindows[0]);
+            RenderingWindows[0] = null;
             foreach (IBasePlugin p in pluginCollection)
                 if (p!=null)
                     p.Dispose();

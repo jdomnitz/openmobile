@@ -152,7 +152,7 @@ namespace OpenMobile
             statusReset.BeginInit();
             statusReset.EndInit();
             statusReset.Elapsed += new ElapsedEventHandler(statusReset_Elapsed);
-            OMAnimatedLabel trackTitle = new OMAnimatedLabel(240,3,490,28);
+            OMAnimatedLabel trackTitle = new OMAnimatedLabel(240,3,390,28);
             trackTitle.TextAlignment = Alignment.CenterLeft;
             trackTitle.Format = eTextFormat.BoldShadow;
             trackTitle.ContiuousAnimation = eAnimation.Scroll;
@@ -161,9 +161,12 @@ namespace OpenMobile
             trackAlbum.TextAlignment = Alignment.CenterLeft;
             trackAlbum.Format = eTextFormat.BoldShadow;
             trackAlbum.ContiuousAnimation = eAnimation.Scroll;
+            trackAlbum.TickSpeed = 250;
             OMAnimatedLabel trackArtist = new OMAnimatedLabel(240, 64, 490, 28);
             trackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
             trackArtist.Format = eTextFormat.DropShadow;
+            trackArtist.ContiuousAnimation = eAnimation.Scroll;
+            trackArtist.TickSpeed = 250;
             OMImage cover = new OMImage(150,2,90,85);
             cover.Image = blank;
             OMButton mediaButton = new OMButton(9,533,160,70);
