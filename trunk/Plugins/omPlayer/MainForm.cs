@@ -197,7 +197,7 @@ namespace OMPlayer
         {
             for (int i = 0; i < theHost.InstanceCount; i++)
             {
-                if ((player[i] != null) && (player[i].nowPlaying != null) && (player[i].mediaPosition != null))
+                if ((player!=null)&&(player[i] != null) && (player[i].nowPlaying != null) && (player[i].mediaPosition != null))
                 {
                     if ((getPlayerStatus(i) == ePlayerStatus.Stopped) || (getPlayerStatus(i) == ePlayerStatus.Ready))
                     {
@@ -205,9 +205,7 @@ namespace OMPlayer
                         continue;
                     }
                     settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingURL", player[i].nowPlaying.Location);
-                    double position;
-                    player[i].mediaPosition.get_CurrentPosition(out position);
-                    settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingPosition", position.ToString());
+                    settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingPosition", player[i].pos.ToString());
                 }
                 else
                 {

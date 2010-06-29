@@ -59,7 +59,7 @@ namespace OpenMobile
             {
                 if (Core.status != null)
                     Core.pluginCollection[index] = null;
-                else
+                else if (Core.RenderingWindows[0]!=null)
                     Core.pluginCollection.Remove(sample);
                 Core.theHost.raiseSystemEvent(eFunction.backgroundOperationStatus, sample.pluginName + " CRASHED!", "ERROR", "");
                 sample.Dispose();

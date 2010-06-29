@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Timers;
+using System.Threading;
 
 namespace OpenMobile.Controls
 {
@@ -44,7 +45,7 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMAnimatedLabel:OMLabel
     {
-        System.Timers.Timer t;
+        HomemadeTimer t;
         private int currentLetter;
         protected bool singleAnimation;
         protected Font effectFont;
@@ -87,9 +88,7 @@ namespace OpenMobile.Controls
         private void init()
         {
             effectFont = Font;
-            t = new System.Timers.Timer();
-            t.BeginInit();
-            t.EndInit();
+            t = new HomemadeTimer();
             t.Interval = 150;
             t.Elapsed += new ElapsedEventHandler(t_Elapsed);
         }
@@ -97,7 +96,7 @@ namespace OpenMobile.Controls
         {
             singleAnimation = false;
             t.Enabled = false;
-            animation = eAnimation.None;
+            currentAnimation = eAnimation.None;
         }
 
         private bool directionReverse;
@@ -118,29 +117,33 @@ namespace OpenMobile.Controls
                     {
                         veilRight = 0;
                         t.Interval =oldTick;
+                        oldTick = 0;
                         tempTransition = eAnimation.None;
                     }
                     this.refreshMe(this.toRegion());
                     return;
                 }
             }
-            if (animation == eAnimation.Scroll)
+            if (currentAnimation == eAnimation.Scroll)
             {
                 scrollPos++;
-                if ((scrollPos * avgChar)+width > (Text.Length*avgChar))
+                if ((scrollPos * avgChar)+width > (Text.Length*(avgChar+0.5)))
                 {
+                    Thread.Sleep(500);
                     if (singleAnimation == true)
                         endSingleAnimation();
                      scrollPos = 0;
+                     this.refreshMe(this.toRegion());
+                    Thread.Sleep(500); 
                 }
             }
-            else if (animation == eAnimation.BounceScroll)
+            else if (currentAnimation == eAnimation.BounceScroll)
             {
                 if (directionReverse==true)
                     scrollPos--;
                  else
                     scrollPos++;
-                if ((scrollPos * avgChar) + width > (Text.Length * avgChar))
+                if ((scrollPos * avgChar) + width > (Text.Length * (avgChar + 0.5)))
                 {
                     scrollPos = text.Length-(int)(width/avgChar);
                     directionReverse = true;
@@ -154,7 +157,7 @@ namespace OpenMobile.Controls
                 }
 
             }
-            else if ((animation == eAnimation.Pulse) || (animation == eAnimation.GlowPulse))
+            else if ((currentAnimation == eAnimation.Pulse) || (currentAnimation == eAnimation.GlowPulse))
             {
                 currentLetter++;
                 if (currentLetter >= Text.Length)
@@ -164,7 +167,7 @@ namespace OpenMobile.Controls
                     currentLetter = 0;
                 }
             }
-            else if (animation == eAnimation.UnveilLeft)
+            else if (currentAnimation == eAnimation.UnveilLeft)
             {
                 veilLeft-=10;
                 if (veilLeft<0){
@@ -173,7 +176,7 @@ namespace OpenMobile.Controls
                     veilLeft=Width;
                 }
             }
-            else if(animation == eAnimation.UnveilRight)
+            else if(currentAnimation == eAnimation.UnveilRight)
             {
                 veilRight-= 10;
                 if (veilRight<0){
@@ -182,7 +185,7 @@ namespace OpenMobile.Controls
                     veilRight=Width;
                 }
             }
-            if (animation!=eAnimation.None)
+            if (currentAnimation!=eAnimation.None)
                 this.refreshMe(this.toRegion());
         }
 
@@ -202,6 +205,7 @@ namespace OpenMobile.Controls
             }
         }
 
+        private eAnimation currentAnimation;
         private eAnimation animation;
         /// <summary>
         /// The effect to loop continuously
@@ -215,12 +219,26 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (animation == value)
-                    return;
                 animation = value;
+                if (currentAnimation == value)
+                    return;
+                currentAnimation = value;
                 this.refreshMe(this.toRegion());
             }
         }
+        public override string Text
+        {
+            get
+            {
+                return base.Text;
+            }
+            set
+            {
+                currentAnimation = animation;
+                base.Text = value;
+            }
+        }
+
         /// <summary>
         /// Effect Specific Second Color
         /// </summary>
@@ -263,7 +281,7 @@ namespace OpenMobile.Controls
         public void animateNow(eAnimation effect)
         {
             singleAnimation = true;
-            animation = effect;
+            currentAnimation = effect;
             refreshMe(this.toRegion());
         }
         /// <summary>
@@ -278,7 +296,9 @@ namespace OpenMobile.Controls
             text = newText;
             veilRight = Width;
             tempTransition = effect;
-            oldTick = t.Interval;
+            currentAnimation = animation;
+            if (oldTick==0)
+                oldTick = t.Interval;
             t.Interval = tick;
             t.Enabled = true;
         }
@@ -306,7 +326,7 @@ namespace OpenMobile.Controls
         public override void  Render(System.Drawing.Graphics g,renderingParams e)
         {
             if (tempTransition == eAnimation.None)
-                draw(g, e, this.animation);
+                draw(g, e, this.currentAnimation);
             else
                 draw(g, e, this.tempTransition);
         }
@@ -343,6 +363,11 @@ namespace OpenMobile.Controls
                     }
                     else
                     {
+                        if (avgChar * text.Length < width)
+                        {
+                            currentAnimation = eAnimation.None;
+                            scrollPos = 0;
+                        }
                         g.SetClip(new Rectangle(left,top,width,height));
                         Renderer.renderText(g,left - (int)(scrollPos * avgChar), top, (int)(text.Length * (avgChar+1)), height,text,font,textFormat,textAlignment,1F,0,color,outlineColor);
                     }
@@ -378,6 +403,7 @@ namespace OpenMobile.Controls
         {
             if (text == "")
                 return 0;
+            int newWidth=(int)graphics.MeasureString(text, font).Width;
             System.Drawing.StringFormat format = new System.Drawing.StringFormat();
             format.FormatFlags = StringFormatFlags.MeasureTrailingSpaces;
             System.Drawing.RectangleF rect = new System.Drawing.RectangleF(0, 0,
@@ -395,4 +421,53 @@ namespace OpenMobile.Controls
             return (int)(rect.Right - (Font.Size / 4.5));
         }
     }
+
+    public sealed class HomemadeTimer:IDisposable
+    {
+        public event ElapsedEventHandler Elapsed;
+        public double Interval;
+        private bool disposed;
+        private bool enabled;
+        private EventWaitHandle handle;
+        private Thread loop;
+        public HomemadeTimer()
+        {
+            handle = new EventWaitHandle(false, EventResetMode.ManualReset);
+            loop = new Thread(delegate() { DoWork(); });
+            loop.Start();
+        }
+        public bool Enabled
+        {
+            set
+            {
+                if (value != enabled)
+                {
+                    if (value == false)
+                        handle.Reset();
+                    else
+                        handle.Set();
+                }
+                enabled = value;
+            }
+            get
+            {
+                return enabled;
+            }
+        }
+        private void DoWork()
+        {
+            while (!disposed)
+            {
+                handle.WaitOne();
+                if (Elapsed != null)
+                    Elapsed.Invoke(this,null);
+                Thread.Sleep((int)Interval);
+            }
+        }
+        public void Dispose()
+        {
+            disposed = true;
+        }
+    }
+
 }
