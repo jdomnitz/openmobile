@@ -32,6 +32,7 @@ namespace PandoraPlayer
     public class Pandora:ITunedContent
     {
         PClient client;
+        int instance=0;
         public bool tuneTo(int instance, string station)
         {
             lock (this)
@@ -111,6 +112,7 @@ namespace PandoraPlayer
             {
                 if (client == null)
                 {
+                    this.instance = instance;
                     int vol = getVolume(instance);
                     client = new PClient(false);
                     client.LoggedIn += new StringEventHandler(client_LoggedIn);
@@ -128,7 +130,7 @@ namespace PandoraPlayer
                     client.Dispose();
                 currentSong = new mediaInfo();
                 client = null;
-                raiseMediaEvent(eFunction.Stop, 0, "");
+                raiseMediaEvent(eFunction.Stop, "");
                 return true;
             }
             return false;
@@ -136,7 +138,7 @@ namespace PandoraPlayer
 
         void client_StationsAvailable(object o, StringEventArgs e)
         {
-            raiseMediaEvent(eFunction.stationListUpdated, 0, "");
+            raiseMediaEvent(eFunction.stationListUpdated, "");
         }
 
         private void initialize()
@@ -166,13 +168,20 @@ namespace PandoraPlayer
                 if (e.Song.AArtUrl != null)
                 {
                     currentSong.coverArt = OpenMobile.Net.Network.imageFromURL(e.Song.AArtUrl);
-                    Graphics g = Graphics.FromImage(currentSong.coverArt);
-                    imageItem p = theHost.getSkinImage("Pandora");
-                    if (p != null)
+                    if (currentSong.coverArt != null)
                     {
-                        g.DrawImage(theHost.getSkinImage("Pandora").image, new Rectangle(currentSong.coverArt.Width - 30, currentSong.coverArt.Height - 30, 30, 30));
+                        Graphics g = Graphics.FromImage(currentSong.coverArt);
+                        imageItem p = theHost.getSkinImage("Pandora");
+                        if (p != null)
+                        {
+                            g.DrawImage(theHost.getSkinImage("Pandora").image, new Rectangle(currentSong.coverArt.Width - 30, currentSong.coverArt.Height - 30, 30, 30));
+                        }
+                        g.Dispose();
                     }
-                    g.Dispose();
+                    else
+                    {
+                        currentSong.coverArt = theHost.getSkinImage("Pandora").image;
+                    }
                 }
                 else
                 {
@@ -185,17 +194,17 @@ namespace PandoraPlayer
                 currentSong.Type = eMediaType.InternetRadio;
                 if (client!=null)
                     currentSong.Length = client.PlaybackLength;
-                raiseMediaEvent(eFunction.Play, 0, "");
+                raiseMediaEvent(eFunction.Play, "");
             }
         }
-        private void raiseMediaEvent(eFunction function, int instance, string arg)
+        private void raiseMediaEvent(eFunction function, string arg)
         {
             if (OnMediaEvent!=null)
                 OnMediaEvent(function, instance, arg);
         }
         void client_StationChanged(object o, StringEventArgs e)
         {
-            raiseMediaEvent(eFunction.tuneTo, 0, e.Value);
+            raiseMediaEvent(eFunction.tuneTo, e.Value);
         }
 
         public stationInfo[] getStationList(int instance)

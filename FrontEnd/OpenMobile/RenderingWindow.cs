@@ -654,7 +654,8 @@ namespace OpenMobile
             if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted)))
             {
                 SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).longClickMe(screen); });
-                highlighted.Mode = eModeType.Highlighted;
+                if (highlighted!=null)
+                    highlighted.Mode = eModeType.Highlighted;
             }
             lastClick = null;
         }

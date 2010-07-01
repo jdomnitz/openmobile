@@ -552,6 +552,7 @@ namespace NativeWifi
 		[Flags]
 		public enum WlanConnectionFlags
 		{
+            None = 0x00000000,
 			/// <summary>
 			/// Connect to the destination network even if the destination is a hidden network. A hidden network does not broadcast its SSID. Do not use this flag if the destination network is an ad-hoc network.
 			/// <para>If the profile specified by <see cref="WlanConnectionParameters.profile"/> is not <c>null</c>, then this flag is ignored and the nonBroadcast profile element determines whether to connect to a hidden network.</para>
@@ -1362,11 +1363,11 @@ namespace NativeWifi
 			/// <summary>
 			/// Specifies an IEEE 802.11 Open System authentication algorithm.
 			/// </summary>
-			IEEE80211_Open = 1,
+			Open_Network = 1,
 			/// <summary>
 			/// Specifies an 802.11 Shared Key authentication algorithm that requires the use of a pre-shared Wired Equivalent Privacy (WEP) key for the 802.11 authentication.
 			/// </summary>
-			IEEE80211_SharedKey = 2,
+			Shared_Key_Network = 2,
 			/// <summary>
 			/// Specifies a Wi-Fi Protected Access (WPA) algorithm. IEEE 802.1X port authentication is performed by the supplicant, authenticator, and authentication server. Cipher keys are dynamically derived through the authentication process.
 			/// <para>This algorithm is valid only for BSS types of <see cref="Dot11BssType.Infrastructure"/>.</para>

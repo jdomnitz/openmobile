@@ -717,13 +717,13 @@ namespace OpenMobile
         /// <summary>
         /// Connect to the internet
         /// <para>-----------------------------</para>
-        /// <para>Arg1: (Optional) Network Name</para>
+        /// <para>Arg1: (Optional) Network UID</para>
         /// </summary>
         connectToInternet=25,
         /// <summary>
         /// Disconnect from the internet
         /// <para>-----------------------------</para>
-        /// <para>Arg1: (Optional) Network Name</para>
+        /// <para>Arg1: (Optional) Network UID</para>
         /// </summary>
         disconnectFromInternet=26,
         /// <summary>
@@ -1613,18 +1613,25 @@ namespace OpenMobile
         /// </summary>
         public uint signalStrength;
         /// <summary>
+        /// The connection is currently connected
+        /// </summary>
+        public bool IsConnected;
+
+        public string ConnectionType="";
+        /// <summary>
         /// Creates a new connection info
         /// </summary>
         /// <param name="name"></param>
         /// <param name="id"></param>
         /// <param name="speed"></param>
         /// <param name="signal"></param>
-        public connectionInfo(string name, string id, int speed, uint signal)
+        public connectionInfo(string name, string id, int speed, uint signal,string type)
         {
             NetworkName = name;
             UID = id;
             potentialSpeed = speed;
             signalStrength = signal;
+            ConnectionType = type;
         }
     }
 

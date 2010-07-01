@@ -23,6 +23,10 @@ using OpenMobile;
 using OpenMobile.Plugin;
 using OpenMobile.Media;
 using System.IO;
+using OpenMobile.Controls;
+using System.Drawing;
+using OpenMobile.Framework;
+using System.Collections.Generic;
 
 namespace Networking
 {
@@ -33,22 +37,105 @@ namespace Networking
 
         public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)
         {
-            //theHost.execute(eFunction.loadTunedContent, "0", "Pandora");
-            theHost.execute(eFunction.Play,"0",@"C:\Users\Public\Videos\Sample Videos\Wildlife.wmv");
-            return null;
+            if (manager == null)
+                return null;
+            return manager[screen];
         }
 
         public Settings loadSettings()
         {
             throw new NotImplementedException();
         }
-        
+        ScreenManager manager;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
+            manager = new ScreenManager(theHost.ScreenCount);
             host.OnWirelessEvent += new WirelessEvent(host_OnWirelessEvent);
+            OMPanel p = new OMPanel();
+            OMBasicShape border=new OMBasicShape(20,110,620,410);
+            border.CornerRadius=15F;
+            border.Shape=shapes.RoundedRectangle;
+            border.BorderSize = 4F;
+            border.BorderColor=Color.Silver;
+            border.FillColor=Color.Black;
+            OMBasicShape border2 = new OMBasicShape(660, 110, 320, 410);
+            border2.CornerRadius = 15F;
+            border2.Shape = shapes.RoundedRectangle;
+            border2.BorderSize = 4F;
+            border2.BorderColor = Color.Silver;
+            border2.FillColor = Color.Black;
+            OMList networks = new OMList(21, 120, 618, 390);
+            networks.ListStyle = eListStyle.MultiList;
+            networks.Font = new Font(FontFamily.GenericSansSerif, 30F);
+            networks.OnLongClick += new userInteraction(networks_OnLongClick);
+            networks.OnClick += new userInteraction(networks_OnClick);
+            networks.ItemColor1 = Color.Transparent;
+            networks.SelectedItemColor1 = Color.Blue;
+            networks.HighlightColor = Color.White;
+            OMImage signalStrength = new OMImage(670, 120, 75, 75);
+            OMLabel networkName = new OMLabel(745, 120, 200, 50);
+            networkName.Format = eTextFormat.BoldShadow;
+            OMLabel networkType = new OMLabel(660, 190, 320, 50);
+            p.addControl(border);
+            p.addControl(networks);
+            p.addControl(border2);
+            p.addControl(signalStrength);
+            p.addControl(networkName);
+            p.addControl(networkType);
+            manager.loadPanel(p);
+            OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.MediumLow, "Refresh Networks");
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
+
+        void networks_OnClick(OMControl sender, int screen)
+        {
+            OMList list=(OMList)sender;
+            connectionInfo info = networks.Find(p => p.UID == list.SelectedItem.tag.ToString());
+            ((OMImage)manager[screen][3]).Image = new imageItem(list.SelectedItem.image);
+            ((OMLabel)manager[screen][4]).Text = info.NetworkName;
+            ((OMLabel)manager[screen][5]).Text = info.ConnectionType.Replace('_',' ');
+        }
+
+        void networks_OnLongClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.connectToInternet, ((OMList)sender).SelectedItem.tag.ToString());
+        }
+        static List<connectionInfo> networks;
+        private void UpdateList()
+        {
+            object o;
+            theHost.getData(eGetData.GetAvailableNetworks, "", out o);
+            if (o==null)
+                return;
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                ((OMList)manager[i][1]).Clear();
+            networks=(List<connectionInfo>)o;
+            foreach(connectionInfo c in networks)
+            {
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                    ((OMList)manager[i][1]).Add(getListItem(c));
+            }
+        }
+
+        private OMListItem getListItem(connectionInfo c)
+        {
+            Image icon;
+            if (c.signalStrength>=75)
+                icon = theHost.getSkinImage("Wifi3").image;
+            else if (c.signalStrength >= 50)
+                icon = theHost.getSkinImage("Wifi2").image;
+            else if (c.signalStrength >= 25)
+                icon = theHost.getSkinImage("Wifi1").image;
+            else
+                icon = theHost.getSkinImage("Wifi0").image;
+            OMListItem.subItemFormat format = new OMListItem.subItemFormat();
+            format.color = Color.FromArgb(100, Color.White);
+            OMListItem ret= new OMListItem(c.NetworkName, c.ConnectionType.Replace('_',' '),icon,format);
+            ret.tag = c.UID;
+            return ret;
+        }
+
         IconManager.UIIcon icon;
         void host_OnWirelessEvent(OpenMobile.eWirelessEvent type, string arg)
         {
@@ -58,6 +145,7 @@ namespace Networking
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
                     icon=new IconManager.UIIcon(theHost.getSkinImage("WifiNew").image,ePriority.Normal,false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
+                    OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.Normal, "Refresh Networks");
                     return;
                 case eWirelessEvent.ConnectingToWirelessNetwork:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
@@ -79,6 +167,7 @@ namespace Networking
                     return;
                 case eWirelessEvent.DisconnectedFromWirelessNetwork:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
+                    OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.Normal, "Refresh Networks");
                     return;
             }
         }
@@ -126,9 +215,9 @@ namespace Networking
         {
             if (message == "IconClicked")
             {
-                IconManager.UIIcon icon = data as IconManager.UIIcon;
-                if (icon.image == theHost.getSkinImage("WifiNew").image)
-                    theHost.execute(eFunction.connectToInternet);
+                theHost.execute(eFunction.TransitionFromAny, source.Substring(2));
+                theHost.execute(eFunction.TransitionToPanel, source.Substring(2), "Networking");
+                theHost.execute(eFunction.ExecuteTransition, source.Substring(2), "None");
                 return true;
             }
             return false;

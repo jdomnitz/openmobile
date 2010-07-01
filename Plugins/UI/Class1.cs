@@ -393,25 +393,25 @@ namespace OpenMobile
                     icon=icons.getIcon(1,true);
                     if (icon.plugin == null)
                         return;
-                    theHost.sendMessage(icon.plugin, "UI", "IconClicked", ref icon);
+                    theHost.sendMessage(icon.plugin, "UI"+screen.ToString(), "IconClicked", ref icon);
                     break;
                 case "UI.Icon2":
                     icon = icons.getIcon(1, false);
                     if (icon.plugin == null)
                         return;
-                    theHost.sendMessage(icon.plugin, "UI", "IconClicked", ref icon);
+                    theHost.sendMessage(icon.plugin, "UI" + screen.ToString(), "IconClicked", ref icon);
                     break;
                 case "UI.Icon3":
                     icon = icons.getIcon(2, false);
                     if (icon.plugin == null)
                         return;
-                    theHost.sendMessage(icon.plugin, "UI", "IconClicked", ref icon);
+                    theHost.sendMessage(icon.plugin, "UI" + screen.ToString(), "IconClicked", ref icon);
                     break;
                 case "UI.Icon4":
                     icon = icons.getIcon(3, false);
                     if (icon.plugin == null)
                         return;
-                    theHost.sendMessage(icon.plugin, "UI", "IconClicked", ref icon);
+                    theHost.sendMessage(icon.plugin, "UI" + screen.ToString(), "IconClicked", ref icon);
                     break;
             }
         }
