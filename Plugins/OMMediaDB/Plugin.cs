@@ -193,7 +193,8 @@ namespace OMMediaDB
         {
             if ((toBeIndexed == null)||(toBeIndexed.Count==0))
             {
-                tmr.Dispose();
+                if (tmr!=null)
+                    tmr.Dispose();
                 theHost.execute(eFunction.backgroundOperationStatus, "Indexing Complete!");
                 return;
             }

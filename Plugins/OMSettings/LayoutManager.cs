@@ -49,11 +49,11 @@ namespace OMSettings
             Heading.Font = new Font("Microsoft Sans Serif", 36F);
             Heading.Text = s.Title;
             Heading.Name = "Label";
-            ret.addControl(OK);
-            ret.addControl(Heading);
             foreach (Setting setting in s)
                 foreach (OMControl c in generate(setting,s.Title))
                     ret.addControl(c);
+            ret.addControl(OK); //Always on top
+            ret.addControl(Heading);
             return ret;
         }
         List<OMControl> generate(Setting s,string title)

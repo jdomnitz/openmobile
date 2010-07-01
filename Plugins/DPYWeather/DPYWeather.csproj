@@ -49,7 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\OpenMobile\OpenMobile.Framework\OpenMobile.Framework.csproj">
+    <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">
       <Project>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</Project>
       <Name>OpenMobile.Framework</Name>
     </ProjectReference>

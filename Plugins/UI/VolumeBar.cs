@@ -58,7 +58,7 @@ namespace OpenMobile.Controls
 
         public void MouseDown(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale)
         {
-            this.Value = (int)(((top+height-(e.Y * HeightScale)) / height)*(maximum-minimum))+minimum;
+            this.Value = (int)(((top+height-(e.Y / HeightScale)) / height)*(maximum-minimum))+minimum;
             raiseSliderMoved(screen);
         }
 

@@ -119,6 +119,8 @@ namespace Navigation
 
         public OMPanel loadPanel(string name, int screen)
         {
+            if (manager == null)
+                return null;
             return manager[screen];
         }
         public Settings loadSettings()

@@ -102,6 +102,15 @@ namespace OpenMobile
                 }catch(Exception)
                 {}
             }
+            foreach (string file in Directory.GetFiles(theHost.SkinPath, "*.dll"))
+            {
+                try
+                {
+                    loadAndCheck(file);
+                }
+                catch (Exception)
+                { }
+            }
         }
         private static void loadAndCheck(string file)
         {
@@ -225,7 +234,11 @@ namespace OpenMobile
 
         static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            return Assembly.LoadFrom(Path.Combine(theHost.PluginPath, args.Name + ".dll"));
+            string loc = Path.Combine(theHost.PluginPath, args.Name + ".dll");
+            if (File.Exists(loc))
+                return Assembly.LoadFrom(loc);
+            else
+                return Assembly.LoadFrom(Path.Combine(theHost.SkinPath, args.Name + ".dll"));
         }
         public static eLoadStatus[] status;
         /// <summary>
@@ -335,7 +348,8 @@ namespace OpenMobile
                 theHost.hal.close();
             ErrorReporting reporting=new ErrorReporting(spewException(ex));
             reporting.ShowDialog(RenderingWindows[0]);
-            theHost.execute(eFunction.restartProgram);
+            if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>0) //Prevent Loops
+                theHost.execute(eFunction.restartProgram);
         }
         private static string spewException(Exception e)
         {

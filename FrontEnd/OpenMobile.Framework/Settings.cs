@@ -91,7 +91,9 @@ namespace OpenMobile.Plugin
         /// Possible value for a MultiChoice or range setting
         /// </summary>
         public List<string> Values = null;
-
+        /// <summary>
+        /// The actual value to be displayed (default) or the value to be set
+        /// </summary>
         public string Value
         {
             get
@@ -168,7 +170,7 @@ namespace OpenMobile.Plugin
         /// <param name="Description"></param>
         /// <param name="Options"></param>
         /// <param name="Values"></param>
-        /// <param name="DefaultValue"></param>
+        /// <param name="defaultValue"></param>
         public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values,string defaultValue)
         {
             this.Type = Type;
@@ -188,7 +190,7 @@ namespace OpenMobile.Plugin
         /// <param name="Description"></param>
         /// <param name="Options"></param>
         /// <param name="Values"></param>
-        /// <param name="DefaultValue"></param>
+        /// <param name="defaultValue"></param>
         public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values, string[] defaultValue)
         {
             this.Type = Type;

@@ -147,6 +147,7 @@ namespace OpenMobile.Controls
                 {
                     scrollPos = text.Length-(int)(width/avgChar);
                     directionReverse = true;
+                    Thread.Sleep(500);
                 }
                 if (scrollPos < 0)
                 {
@@ -154,6 +155,7 @@ namespace OpenMobile.Controls
                         endSingleAnimation();
                     scrollPos = 0;
                     directionReverse = false;
+                    Thread.Sleep(500);
                 }
 
             }
