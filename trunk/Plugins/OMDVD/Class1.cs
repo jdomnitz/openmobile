@@ -423,7 +423,7 @@ namespace OMDVD
                     case EventCode.DeviceLost:
                     case EventCode.ErrorAbort:
                     case EventCode.ErrorStPlaying:
-                    case EventCode.FileClosed:
+                    //case EventCode.FileClosed:
                     case EventCode.StErrStopped:
                         currentState = ePlayerStatus.Error;
                         break;

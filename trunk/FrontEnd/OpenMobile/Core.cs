@@ -275,7 +275,7 @@ namespace OpenMobile
                     Debug.Print(ex);
                 }
             for(int i=2;i<pluginCollection.Count;i++) //and then two strikes their out...kill anything that still can't initialize
-                if ((status[i]==eLoadStatus.LoadFailedRetryRequested)||(status[i]==eLoadStatus.LoadFailedUnloadRequested))
+                if ((status[i] == eLoadStatus.LoadFailedRetryRequested) || (status[i] == eLoadStatus.LoadFailedUnloadRequested) || (status[i] == eLoadStatus.LoadFailedGracefulUnloadRequested))
                 {
                     try
                     {
@@ -412,9 +412,9 @@ namespace OpenMobile
                 RenderingWindows[i].Show();
             Application.Run(RenderingWindows[0]);
             RenderingWindows[0] = null;
-            foreach (IBasePlugin p in pluginCollection)
-                if (p!=null)
-                    p.Dispose();
+            for (int i = 0; i < pluginCollection.Count;i++ )
+                if (pluginCollection[i] != null)
+                    pluginCollection[i].Dispose();
             Environment.Exit(0); //Force
         }
     }

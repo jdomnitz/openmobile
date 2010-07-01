@@ -666,7 +666,7 @@ namespace OMPlayer
                 if (nowPlaying.coverArt == null)
                     nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
             }
-            if (nowPlaying.Length==0)
+            if (nowPlaying.Length<=0)
             {
                 double dur;
                 mediaPosition.get_Duration(out dur);
@@ -824,7 +824,7 @@ namespace OMPlayer
             CheckVisibility();
             if (!isAudioOnly)
             {
-                DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(instance)));
+                DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(getFirstScreen(instance))));
                 DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
                 DsError.ThrowExceptionForHR(Resize());
                 DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(drain));
@@ -838,6 +838,14 @@ namespace OMPlayer
             mediaEventEx.SetNotifyWindow(drain, WM_Graph_Notify, new IntPtr(instance));
             currentState = ePlayerStatus.Playing;
             return true;
+        }
+
+        private int getFirstScreen(int instance)
+        {
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                if (theHost.instanceForScreen(i) == instance)
+                    return i;
+            return 0;
         }
         public int SetRate(double rate)
         {
@@ -902,8 +910,12 @@ namespace OMPlayer
                 return false;
             if ((mediaControl == null) || (mediaPosition == null))
                 return false;
+            double old=pos;
             pos = seconds;
-            return (bool)sink.Invoke(OnSetPosition, new object[] { seconds });
+            bool success=(bool)sink.Invoke(OnSetPosition, new object[] { seconds });
+            if (!success)
+                pos=old;
+            return success;
         }
     }
 

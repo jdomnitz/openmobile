@@ -534,7 +534,7 @@ namespace OpenMobile.Controls
                 if (background != Color.Transparent)
                     g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * background.A), background)), new Rectangle(Left + 1, Top + 1, Width - 2, Height - 2));
                 int minListHeight = (int)(g.MeasureString("A", Font).Height + 0.5); //Round up
-                if ((style == eListStyle.MultiList) && (items.Count > 0))
+                if ((style == eListStyle.MultiList) && (items.Count > 0)&&(items[0].subitemFormat!=null))
                     minListHeight += (int)(g.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
                 if (listHeight < minListHeight)
                     listHeight = minListHeight;

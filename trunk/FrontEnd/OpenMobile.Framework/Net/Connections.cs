@@ -29,7 +29,7 @@ namespace OpenMobile.Net
     /// </summary>
     public static class Connections
     {
-        private static string lastNetworkName="";
+        private static string lastNetworkID="";
         /// <summary>
         /// Connects to a network
         /// </summary>
@@ -58,9 +58,9 @@ namespace OpenMobile.Net
         /// Connects to a network
         /// </summary>
         /// <param name="host"></param>
-        /// <param name="connectionName"></param>
+        /// <param name="connectionID"></param>
         /// <returns></returns>
-        public static bool connect(IPluginHost host,string connectionName)
+        public static bool connect(IPluginHost host,string connectionID)
         {
             object o = new object();
             host.getData(eGetData.GetPlugins, "", out o);
@@ -68,10 +68,10 @@ namespace OpenMobile.Net
             connectionInfo info;
             foreach (IBasePlugin b in l.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))
             {
-                info = Array.Find<connectionInfo>(((INetwork)b).getAvailableNetworks(), p => p.NetworkName == connectionName);
+                info = Array.Find<connectionInfo>(((INetwork)b).getAvailableNetworks(), p => p.UID == connectionID);
                 if (info != null)
                 {
-                    lastNetworkName = connectionName;
+                    lastNetworkID = connectionID;
                     return ((INetwork)b).connect(info);
                 }
             }
@@ -85,16 +85,16 @@ namespace OpenMobile.Net
         /// <returns></returns>
         public static bool disconnect(IPluginHost host)
         {
-            return disconnect(host, lastNetworkName);
+            return disconnect(host, lastNetworkID);
         }
 
         /// <summary>
         /// Disconnects from the given network
         /// </summary>
         /// <param name="host"></param>
-        /// <param name="connectionName"></param>
+        /// <param name="connectionID"></param>
         /// <returns></returns>
-        public static bool disconnect(IPluginHost host, string connectionName)
+        public static bool disconnect(IPluginHost host, string connectionID)
         {
             object o = new object();
             host.getData(eGetData.GetPlugins, "", out o);
@@ -102,7 +102,7 @@ namespace OpenMobile.Net
             connectionInfo info;
             foreach (IBasePlugin b in l.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))
             {
-                info = Array.Find<connectionInfo>(((INetwork)b).getAvailableNetworks(), p => p.NetworkName == connectionName);
+                info = Array.Find<connectionInfo>(((INetwork)b).getAvailableNetworks(), p => p.UID == connectionID);
                 if (info != null)
                     return ((INetwork)b).disconnect(info);
             }

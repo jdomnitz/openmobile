@@ -39,6 +39,7 @@ namespace OMContacts
             OMList list = new OMList(275, 105, 700, 420);
             list.ListStyle = eListStyle.TransparentImageList;
             list.OnClick += new userInteraction(list_OnClick);
+            list.ListItemHeight = 80;
             OMPanel main = new OMPanel("main");
             main.addControl(list);
             manager.loadPanel(main);

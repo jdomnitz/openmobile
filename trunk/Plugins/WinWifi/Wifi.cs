@@ -23,6 +23,8 @@ using System.Collections.Generic;
 using NativeWifi;
 using OpenMobile;
 using OpenMobile.Plugin;
+using System.Text;
+using System.Xml;
 
 namespace WinWifi
 {
@@ -36,8 +38,12 @@ namespace WinWifi
             Wlan.WlanAvailableNetwork[] networks=client.Interfaces[0].GetAvailableNetworkList(Wlan.WlanGetAvailableNetworkFlags.IncludeAllAdhocProfiles);
             List<connectionInfo> connections=new List<connectionInfo>();
             for (int i = 0; i < networks.Length; i++)
-                if (networks[i].networkConnectable==true)
-                    connections.Add(new connectionInfo(networks[i].profileName,networks[i].GetHashCode().ToString(), 11000, networks[i].wlanSignalQuality));
+                if (networks[i].networkConnectable == true)
+                {
+                    connections.Add(new connectionInfo(System.Text.ASCIIEncoding.ASCII.GetString(networks[i].dot11Ssid.SSID, 0, (int)networks[i].dot11Ssid.SSIDLength), networks[i].GetHashCode().ToString(), 11000, networks[i].wlanSignalQuality, networks[i].dot11DefaultAuthAlgorithm.ToString()));
+                    if ((client.Interfaces[0].InterfaceState==Wlan.WlanInterfaceState.Connected)&&(client.Interfaces[0].CurrentConnection.wlanAssociationAttributes.dot11Ssid.SSID == networks[i].dot11Ssid.SSID))
+                        connections[connections.Count - 1].IsConnected = true;
+                }
             return connections.ToArray();
         }
 
@@ -49,14 +55,59 @@ namespace WinWifi
         public bool connect(OpenMobile.connectionInfo connection)
         {
             Wlan.WlanAvailableNetwork[] networks = client.Interfaces[0].GetAvailableNetworkList(Wlan.WlanGetAvailableNetworkFlags.IncludeAllAdhocProfiles);
-            Wlan.WlanAvailableNetwork network = Array.Find(networks, p => p.profileName == connection.NetworkName);
+            Wlan.WlanAvailableNetwork network = Array.Find(networks, p => p.GetHashCode().ToString() == connection.UID);
             try
             {
-                return client.Interfaces[0].ConnectSynchronously(Wlan.WlanConnectionMode.Profile, network.dot11BssType, network.profileName, 500);
+                if (network.profileName == "")
+                {
+                    if (network.dot11DefaultAuthAlgorithm == Wlan.Dot11AuthAlgorithm.Open_Network)
+                        return connectToOpen(network);
+                    else
+                        return false;
+                }
+                else
+                    return client.Interfaces[0].ConnectSynchronously(Wlan.WlanConnectionMode.Profile, network.dot11BssType, network.profileName, 500);
             }
             catch (Exception) { return false; }
         }
+        private bool connectToOpen(NativeWifi.Wlan.WlanAvailableNetwork info)
+        {
+            StringBuilder xmlProfileString = new StringBuilder(100);
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.NewLineOnAttributes = true;
+            string networkName = System.Text.ASCIIEncoding.ASCII.GetString(info.dot11Ssid.SSID, 0, (int)info.dot11Ssid.SSIDLength);
+            XmlWriter writer = XmlWriter.Create(xmlProfileString, settings);
+            writer.WriteStartElement("WLANProfile", @"http://www.microsoft.com/networking/WLAN/profile/v1");
+            writer.WriteElementString("name", networkName);
+            writer.WriteStartElement("SSIDConfig");
+            writer.WriteStartElement("SSID");
+            writer.WriteElementString("hex", toHex(info.dot11Ssid.SSID, info.dot11Ssid.SSIDLength) );
+            writer.WriteElementString("name", networkName);
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+            writer.WriteElementString("connectionType", "ESS");
+            writer.WriteStartElement("MSM");
+            writer.WriteStartElement("security");
+            writer.WriteStartElement("authEncryption");
+            writer.WriteElementString("authentication", "open");
+            writer.WriteElementString("encryption", "none");
+            writer.WriteElementString("useOneX", "false");
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+            writer.Close();
+            client.Interfaces[0].SetProfile(Wlan.WlanProfileFlags.AllUser, xmlProfileString.ToString(), true);
+            return client.Interfaces[0].ConnectSynchronously(Wlan.WlanConnectionMode.Profile, Wlan.Dot11BssType.Any, networkName,500);
+        }
 
+        private string toHex(byte[] p, uint length)
+        {
+            string ret = "";
+            for (int i = 0; i < length; i++)
+                ret += p[i].ToString("x2").ToUpper();
+            return ret;
+        }
         public bool disconnect(OpenMobile.connectionInfo connection)
         {
             try
@@ -87,7 +138,7 @@ namespace WinWifi
         {
             client = new WlanClient();
             if (client.Interfaces.Length == 0)
-                return eLoadStatus.LoadFailedUnloadRequested;
+                return eLoadStatus.LoadFailedGracefulUnloadRequested;
             client.Interfaces[0].WlanConnectionNotification += new WlanClient.WlanInterface.WlanConnectionNotificationEventHandler(Wifi_WlanConnectionNotification);
             client.Interfaces[0].WlanNotification += new WlanClient.WlanInterface.WlanNotificationEventHandler(Wifi_WlanNotification);
             return OpenMobile.eLoadStatus.LoadSuccessful;
