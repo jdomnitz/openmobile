@@ -90,9 +90,7 @@ namespace ControlDemo
 
     void button_OnClick(OMControl sender, int screen)
     {
-        ((OMAnimatedLabel)manager[screen][0]).Transition(eAnimation.UnveilRight,"New Text",50);
-        return;
-        OMGauge g = ((OMGauge)manager[screen][6]);
+        OMGauge g = ((OMGauge)manager[screen][2]);
         if (g.BufferSize == 5)
             g.BufferSize = 0;
         else
@@ -103,7 +101,6 @@ namespace ControlDemo
     {
         return manager[screen];
     }
-    Settings settings;
     public Settings loadSettings()
     {
         throw new NotImplementedException();

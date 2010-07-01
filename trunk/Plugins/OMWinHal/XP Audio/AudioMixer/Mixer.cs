@@ -278,8 +278,7 @@ namespace WaveLib.AudioMixer
 			mUserLines.Clear();
 
 			MIXERLINE			mxl  = new MIXERLINE();
-			MIXERLINECONTROLS   mlc  = new MIXERLINECONTROLS();
-			MIXERCONTROL        mc   = new MIXERCONTROL();
+
 			uint dwDestination;
 			unchecked
 			{

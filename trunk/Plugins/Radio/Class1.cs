@@ -180,14 +180,17 @@ namespace OMRadio
             if (theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), Source))
                 UpdateStationList(theHost.instanceForScreen(screen));
             else
-                for (int i = 0; i < theHost.ScreenCount; i++)
-                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "Auto load failed!";
+                if (theHost.getPlayingMedia(theHost.instanceForScreen(screen)).Type==eMediaType.Radio)
+                    UpdateStationList(theHost.instanceForScreen(screen));
+                else
+                    for (int i = 0; i < theHost.ScreenCount; i++)
+                        ((OMLabel)manager[i]["Radio_StationName"]).Text = "Auto load failed!";
 
         }
 
         public Settings loadSettings()
         {
-            if (settings == null)
+            if ((settings == null)&&(theHost!=null))
             {
                 settings = new Settings("Radio settings");
                 using (PluginSettings setting = new PluginSettings())

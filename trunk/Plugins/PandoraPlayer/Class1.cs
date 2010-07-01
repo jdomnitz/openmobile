@@ -119,6 +119,7 @@ namespace PandoraPlayer
                     client.StationsAvailable += new StringEventHandler(client_StationsAvailable);
                     client.Volume = vol;
                     initialize();
+                    return true;
                 }
             }
             else
@@ -128,8 +129,9 @@ namespace PandoraPlayer
                 currentSong = new mediaInfo();
                 client = null;
                 raiseMediaEvent(eFunction.Stop, 0, "");
+                return true;
             }
-            return true;
+            return false;
         }
 
         void client_StationsAvailable(object o, StringEventArgs e)

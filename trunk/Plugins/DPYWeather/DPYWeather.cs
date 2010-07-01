@@ -35,7 +35,22 @@ namespace DPYWeather
             host.OnPowerChange += new PowerEvent(host_OnPowerChange);
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
-
+        public Settings loadSettings()
+        {
+            return null;
+        }
+        public DateTime lastUpdated
+        {
+            get
+            {
+                DateTime ret;
+                using(PluginSettings s=new PluginSettings())
+                    if (DateTime.TryParse(s.getSetting("Plugins.DPYWeather.LastUpdate"), out ret))
+                        return ret;
+                    else
+                        return DateTime.MinValue;
+            }
+        }
         void host_OnPowerChange(OpenMobile.ePowerEvent type)
         {
             if (type==OpenMobile.ePowerEvent.SystemResumed)
@@ -246,14 +261,10 @@ namespace DPYWeather
         {
             if (OpenMobile.Net.Network.IsAvailable == true)
             {
-                using (PluginSettings setting = new PluginSettings())
+                if ((DateTime.Now - lastUpdated) < TimeSpan.FromMinutes(30))
                 {
-                    DateTime lastUp = new DateTime();
-                    if (DateTime.TryParse(setting.getSetting("Plugins.DPYWeather.LastUpdate"), out lastUp) == true)
-                    {
-                        if ((DateTime.Now - lastUp) < TimeSpan.FromMinutes(30))
-                            return false;
-                    }
+                    status = 1;
+                    return false;
                 }
                 status = 0;
                 updateLocation = arg;
@@ -311,7 +322,7 @@ namespace DPYWeather
 
         public string pluginDescription
         {
-            get { return "Provides weather for a given location"; }
+            get { return "Yahoo Weather Data Provider"; }
         }
 
         public string pluginName

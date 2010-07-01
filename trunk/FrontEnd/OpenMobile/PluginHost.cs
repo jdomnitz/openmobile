@@ -118,7 +118,7 @@ namespace OpenMobile
                     nextPosition[instance] = currentPosition[instance] + 1;
                 if (nextPosition[instance] == queued[instance].Count)
                     nextPosition[instance] = 0;
-                if (getPlayingMedia(instance).Location == queued[instance][nextPosition[instance]].Location)
+                if ((queued[instance].Count>nextPosition[instance])&& (getPlayingMedia(instance).Location == queued[instance][nextPosition[instance]].Location))
                 {
                     nextPosition[instance]++;
                     if (nextPosition[instance] == queued[instance].Count)

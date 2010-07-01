@@ -314,12 +314,26 @@ namespace OMSettings
             lsthardware.HighlightColor = Color.White;
             lsthardware.SelectedItemColor1 = Color.DarkBlue;
             lsthardware.OnClick += new userInteraction(lsthardware_OnClick);
+            lsthardware.Add("Loading . . .");
             hardware.addControl(lsthardware);
+            manager.loadPanel(hardware);
+            #endregion
+            return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
 
+        private void loadPluginSettings()
+        {
             List<IBasePlugin> plugins;
+            object o;
             theHost.getData(eGetData.GetPlugins, "", out o);
-            plugins = (List < IBasePlugin >)o;
+            if (o == null)
+                return;
+            plugins = (List<IBasePlugin>)o;
             List<Exception> problems = new List<Exception>();
+            OMListItem.subItemFormat format = new OMListItem.subItemFormat();
+            format.color = Color.FromArgb(140, Color.White);
+            OMList lsthardware = (OMList)manager[0, "Hardware"][0];
+            lsthardware.Clear();
             foreach (IBasePlugin b in plugins)
             {
                 LayoutManager lm = new LayoutManager();
@@ -336,7 +350,7 @@ namespace OMSettings
                 }
                 if (panel != null)
                 {
-                    panel.Name = b.pluginName + " Settings"; 
+                    panel.Name = b.pluginName + " Settings";
                     lsthardware.Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
                     manager.loadPanel(panel);
                 }
@@ -346,14 +360,13 @@ namespace OMSettings
                 Exception ex = e;
                 theHost.sendMessage("SandboxedThread", "OMSettings", "", ref ex);
             }
-            manager.loadPanel(hardware);
-            #endregion
-            return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
         void lsthardware_OnClick(OMControl sender, int screen)
         {
             OMList lst=(OMList)sender;
+            if (lst.SelectedItem.text == "Loading . . .")
+                return;
             if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"OMSettings",lst.SelectedItem.text)==false)
                 return;
             theHost.execute(eFunction.TransitionFromPanel,screen.ToString(),"OMSettings","Hardware");
@@ -364,6 +377,8 @@ namespace OMSettings
         {
             if (function == eFunction.settingsChanged)
                 loadProviders();
+            if (function==eFunction.pluginLoadingComplete)
+                OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(loadPluginSettings), ePriority.Normal);
         }
 
         private void loadProviders()
