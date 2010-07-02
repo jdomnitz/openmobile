@@ -13,6 +13,7 @@ Public Class ExternalNav
     Private m_Screen As Integer = 0
     Private m_Embedded As Boolean = False
     Private m_Exe As String = ""
+    Private m_Delay As Integer = 8
     Private m_WindowName As String
     Private m_Process As Process
 
@@ -70,7 +71,7 @@ Public Class ExternalNav
     Private Sub LoadNavApp()
         m_Process = Process.Start(m_Exe)
         'Give it some time to load before moving it
-        System.Threading.Thread.Sleep(8000)
+        System.Threading.Thread.Sleep(m_Delay * 1000)
         SetWindowPos(m_Process.MainWindowHandle, 0, -10000, -10000, 1000, 430, &H20)
 
         'Remove the border
@@ -86,6 +87,10 @@ Public Class ExternalNav
 
             m_Settings = New Settings("External GPS")
             m_Settings.Add(New Setting(SettingTypes.File, "ExternalNav.Exe", "EXE", "App EXE", m_Exe))
+            Dim Range As New Generic.List(Of String)
+            Range.Add("1")
+            Range.Add("20")
+            m_Settings.Add(New Setting(SettingTypes.Range, "ExternalNav.Delay", "Delay", "App Start Up Delay (1-20 Seconds)", Nothing, Range, m_Delay))
            
             AddHandler m_Settings.OnSettingChanged, AddressOf Changed
         End If
@@ -99,18 +104,20 @@ Public Class ExternalNav
     End Sub
 
     Private Sub LoadNavSettings()
-        Dim Settings As New OpenMobile.Data.PluginSettings
-        If String.IsNullOrEmpty(Settings.getSetting("ExternalNav.Exe")) Then
-            CreateSettings()
-        End If
-        m_Exe = Settings.getSetting("ExternalNav.Exe")
-        Settings.Dispose()
+        Using Settings As New OpenMobile.Data.PluginSettings
+            If String.IsNullOrEmpty(Settings.getSetting("ExternalNav.Exe")) Then
+                CreateSettings()
+            End If
+            m_Exe = Settings.getSetting("ExternalNav.Exe")
+            m_Delay = Settings.getSetting("ExternalNav.Delay")
+        End Using
     End Sub
 
     Private Sub CreateSettings()
-        Dim Settings As New OpenMobile.Data.PluginSettings
-        Settings.setSetting("ExternalNav.Exe", "")
-        Settings.Dispose()
+        Using Settings As New OpenMobile.Data.PluginSettings
+            Settings.setSetting("ExternalNav.Exe", "")
+            Settings.setSetting("ExternalNav.Delay", "8")
+        End Using
     End Sub
 
     Public ReadOnly Property authorEmail() As String Implements OpenMobile.Plugin.IBasePlugin.authorEmail
