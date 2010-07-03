@@ -168,7 +168,7 @@ namespace DPGContacts
                 if ((DateTime.Now - lastUpdated).TotalMinutes > 60)
                 {
                     status = 0;
-                    OpenMobile.Threading.TaskManager.QueueTask(getContacts, OpenMobile.ePriority.Normal);
+                    OpenMobile.Threading.TaskManager.QueueTask(getContacts, OpenMobile.ePriority.Normal,"Sync Google Contacts");
                     return true;
                 }
                 else

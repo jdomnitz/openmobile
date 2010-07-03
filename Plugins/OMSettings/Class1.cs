@@ -378,7 +378,7 @@ namespace OMSettings
             if (function == eFunction.settingsChanged)
                 loadProviders();
             if (function==eFunction.pluginLoadingComplete)
-                OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(loadPluginSettings), ePriority.Normal);
+                OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(loadPluginSettings), ePriority.Normal,"Load Plugin Settings");
         }
 
         private void loadProviders()

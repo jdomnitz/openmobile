@@ -675,13 +675,10 @@ namespace OMRadio
                         {
                             for (int i = 0; i < theHost.ScreenCount; i++)
                                 ((OMLabel)manager[i]["Radio_StationName"]).Text = "Loading " + SelectedItemTag;
-                            if (theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag))
-                            {
-                                UpdateStationList(theHost.instanceForScreen(screen));
-                            }
-                            else
-                                for (int i = 0; i < theHost.ScreenCount; i++)
-                                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "Load failed!";
+                            theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag);
+                            UpdateStationList(theHost.instanceForScreen(screen));
+                            for (int i = 0; i < theHost.ScreenCount; i++)
+                                ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
                         }
                     }
                     break;
@@ -860,13 +857,16 @@ namespace OMRadio
         }
         private void UpdateStationList(int instance)
         {
-            for (int i = 0; i < theHost.ScreenCount; i++)
-                ((OMLabel)manager[i]["Label_StationListSource"]).Text = "Source: " + StationListSource.ToString();
-
             object o = new object();
             theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
             if (o == null)
+            {
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "Load failed!";
                 return;
+            }
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                ((OMLabel)manager[i]["Label_StationListSource"]).Text = "Source: " + StationListSource.ToString();
             tunedContentInfo info = (tunedContentInfo)o;
             if ((info.currentStation == null) || (info.stationList == null))
                 return;

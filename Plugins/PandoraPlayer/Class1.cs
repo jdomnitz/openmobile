@@ -26,6 +26,7 @@ using Client;
 using OpenMobile;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
+using System.Diagnostics;
 
 namespace PandoraPlayer
 {
@@ -41,9 +42,12 @@ namespace PandoraPlayer
                     return false;
                 if (station.StartsWith("Pandora:") == false)
                     return false;
+                if (tuning == true)
+                    return false;
                 station = station.Substring(8);
+                tuning = true;
                 client.ChangeStation(station);
-                client.GetPlaylist();
+                bool b=client.GetPlaylist();
                 return true;
             }
         }
@@ -70,13 +74,19 @@ namespace PandoraPlayer
             }
             return false;
         }
-
+        DateTime lastSkip=DateTime.MinValue;
         public bool stepForward(int instance)
         {
             if (client != null)
             {
-                client.SkipSong();
-                return true;
+                lock (this)
+                {
+                    if ((DateTime.Now - lastSkip).TotalSeconds < 10)
+                        return false; //Skipping too fast
+                    lastSkip = DateTime.Now;
+                    client.SkipSong();
+                    return true;
+                }
             }
             return false;
         }
@@ -108,6 +118,7 @@ namespace PandoraPlayer
 
         public bool setPowerState(int instance, bool powerState)
         {
+            tuning = false;
             if (powerState == true)
             {
                 if (client == null)
@@ -119,6 +130,7 @@ namespace PandoraPlayer
                     client.StationChanged += new StringEventHandler(client_StationChanged);
                     client.SongPlayed += new SongEventHandler(client_SongPlayed);
                     client.StationsAvailable += new StringEventHandler(client_StationsAvailable);
+                    client.Error += new StringEventHandler(client_Error);
                     client.Volume = vol;
                     initialize();
                     return true;
@@ -134,6 +146,13 @@ namespace PandoraPlayer
                 return true;
             }
             return false;
+        }
+
+        void client_Error(object o, StringEventArgs e)
+        {
+            if (theHost != null)
+                theHost.sendMessage("OMDebug", "Pandora", e.Value);
+            Debug.Print(e.Value);
         }
 
         void client_StationsAvailable(object o, StringEventArgs e)
@@ -155,15 +174,17 @@ namespace PandoraPlayer
         {
             lock (this)
             {
-                if (!loggedIn)
-                    client.GetStations();
+                if ((client!=null)&&(!loggedIn))
+                    client.startFetch();
+                loggedIn = true;
             }
         }
-
+        bool tuning=false;
         void client_SongPlayed(object o, SongEventArgs e)
         {
             lock (this)
             {
+                tuning = false;
                 currentSong = new mediaInfo();
                 if (e.Song.AArtUrl != null)
                 {
@@ -427,8 +448,12 @@ namespace PandoraPlayer
         {
             if (client != null)
             {
-                while (fading)
+                int kill = 0;
+                while ((fading)&&(kill<16))
+                {
+                    kill++;
                     Thread.Sleep(100);
+                }
                 client.Dispose();
             }
         }

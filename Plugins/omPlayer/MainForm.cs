@@ -91,8 +91,12 @@ namespace OMPlayer
     {
         if (player != null)
         {
-            while (fading)
+            int k = 0;
+            while ((fading) && (k < 16))
+            {
+                k++;
                 Thread.Sleep(100);
+            }
             for (int i = 0; i < player.Length; i++)
             {
                 if (player[i] != null)
