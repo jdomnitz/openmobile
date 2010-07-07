@@ -278,7 +278,7 @@ namespace PandoraPlayer
         public int getVolume(int instance)
         {
             if (client == null)
-                if (settings[2].Value == "")
+                if ((settings==null)||(settings.Count<3)||(settings[2].Value == ""))
                     return 100;
                 else
                     return int.Parse(settings[2].Value);
