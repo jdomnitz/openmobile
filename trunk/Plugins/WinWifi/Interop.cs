@@ -1229,6 +1229,10 @@ namespace NativeWifi
 			/// Specifies an extended rate PHY (ERP). 802.11g devices can use ERP.
 			/// </summary>
 			ERP = 6,
+            /// <summary>
+            /// Specifies a high-throughput (HT) 802.11n PHY. Each 802.11n PHY, whether dual-band or not, is specified as this PHY type.
+            /// </summary>
+            HT=7,
 			/// <summary>
 			/// Specifies the start of the range that is used to define PHY types that are developed by an independent hardware vendor (IHV).
 			/// </summary>

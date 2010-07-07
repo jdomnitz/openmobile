@@ -162,7 +162,7 @@ namespace OpenMobile
         /// <summary>
         /// A custom text list style with subitem support
         /// </summary>
-        MultiList=8
+        MultiList=9
     }
 
     /// <summary>

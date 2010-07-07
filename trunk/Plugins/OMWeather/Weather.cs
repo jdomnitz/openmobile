@@ -58,14 +58,14 @@ namespace ControlDemo
             Title.Format = eTextFormat.DropShadow;
             Title.TextAlignment = Alignment.CenterRight;
             Title.Name = "Title";
-            OMLabel day1high = new OMLabel(245, 213, 300, 50);
+            OMLabel day1high = new OMLabel(235, 213, 310, 50);
             day1high.Color = Color.Red;
             day1high.OutlineColor = Color.White;
             day1high.Font = f;
             day1high.Format = eTextFormat.Glow;
             day1high.Name = "day1high";
             day1high.TextAlignment = Alignment.CenterLeft;
-            OMLabel day1low = new OMLabel(257, 267, 270, 50);
+            OMLabel day1low = new OMLabel(247, 267, 310, 50);
             day1low.Color = Color.Blue;
             day1low.OutlineColor = Color.White;
             day1low.Font = f;
@@ -75,7 +75,7 @@ namespace ControlDemo
             OMImage day1img = new OMImage(-2, 100, 250, 250);
             day1img.Image = opt1;
             day1img.Name = "day1img";
-            OMLabel now = new OMLabel(250,133,270,100);
+            OMLabel now = new OMLabel(240,133,310,100);
             now.Color = Color.SlateGray;
             now.OutlineColor = Color.White;
             now.Font = f;
@@ -322,10 +322,10 @@ namespace ControlDemo
 
         public OMPanel loadPanel(string name, int screen)
         {
-            if (name == "Widget")
-                return p;
-            else
+            if (name != "Widget")
                 return widget;
+            else
+                return p;
         }
 
         public OMPanel loadSettings(string name, int screen)
