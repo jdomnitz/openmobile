@@ -73,7 +73,16 @@ namespace OpenMobile.Controls
         /// <param name="control"></param>
         public void addControl(OMControl control)
         {
-            control.parent = this;
+            addControl(control, true);
+        }
+        /// <summary>
+        /// Adds a control to the container
+        /// </summary>
+        /// <param name="control"></param>
+        public void addControl(OMControl control, bool changeParent)
+        {
+            if (changeParent)
+                control.parent = this;
             containedControls.Add(control);
         }
         /// <summary>
@@ -157,6 +166,7 @@ namespace OpenMobile.Controls
             for (int i=0;i<containedControls.Count;i++)
             {
                 two.addControl((OMControl)this.containedControls[i].Clone());
+                two[two.controlCount - 1].parent = two;
             }
             // Start of code added by borte     
             if (this.tag is System.ICloneable)

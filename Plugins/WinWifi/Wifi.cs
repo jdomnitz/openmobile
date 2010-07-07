@@ -40,11 +40,76 @@ namespace WinWifi
             for (int i = 0; i < networks.Length; i++)
                 if (networks[i].networkConnectable == true)
                 {
-                    connections.Add(new connectionInfo(System.Text.ASCIIEncoding.ASCII.GetString(networks[i].dot11Ssid.SSID, 0, (int)networks[i].dot11Ssid.SSIDLength), networks[i].GetHashCode().ToString(), 11000, networks[i].wlanSignalQuality, networks[i].dot11DefaultAuthAlgorithm.ToString()));
+                    connections.Add(new connectionInfo(System.Text.ASCIIEncoding.ASCII.GetString(networks[i].dot11Ssid.SSID, 0, (int)networks[i].dot11Ssid.SSIDLength), networks[i].GetHashCode().ToString(), getSpeed(networks[i].Dot11PhyTypes), networks[i].wlanSignalQuality, getRadio(networks[i].Dot11PhyTypes[0])+" ("+ getSecurity(networks[i])+")"));
                     if ((client.Interfaces[0].InterfaceState==Wlan.WlanInterfaceState.Connected)&&(client.Interfaces[0].CurrentConnection.wlanAssociationAttributes.dot11Ssid.SSID == networks[i].dot11Ssid.SSID))
                         connections[connections.Count - 1].IsConnected = true;
                 }
             return connections.ToArray();
+        }
+
+        private int getSpeed(Wlan.Dot11PhyType[] dot11PhyType)
+        {
+            if (dot11PhyType.Length == 0)
+                return 11000;
+            switch (dot11PhyType[0])
+            {
+                case Wlan.Dot11PhyType.HRDSSS:
+                    return 11000;
+                case Wlan.Dot11PhyType.HT:
+                    return 130000;
+                case Wlan.Dot11PhyType.ERP:
+                    return 54000;
+                case Wlan.Dot11PhyType.OFDM:
+                    return 54000;
+            }
+            return 1000; //Unknown
+        }
+
+        private string getRadio(Wlan.Dot11PhyType dot11PhyType)
+        {
+            switch (dot11PhyType)
+            {
+                case Wlan.Dot11PhyType.OFDM:
+                    return "802.11a";
+                case Wlan.Dot11PhyType.ERP:
+                    return "802.11g";
+                case Wlan.Dot11PhyType.HT:
+                    return "802.11n";
+                case Wlan.Dot11PhyType.HRDSSS:
+                    return "802.11b";
+                case Wlan.Dot11PhyType.IrBaseband:
+                    return "IR";
+            }
+            return "Unknown Type (" + dot11PhyType.ToString() + ")";
+        }
+
+        private string getSecurity(Wlan.WlanAvailableNetwork an)
+        {
+            switch (an.dot11DefaultAuthAlgorithm)
+            {
+                case Wlan.Dot11AuthAlgorithm.WPA:
+                    return "WPA";
+                case Wlan.Dot11AuthAlgorithm.WPA_PSK:
+                    return "WPA-PSK";
+                case Wlan.Dot11AuthAlgorithm.RSNA:
+                    return "WPA2";
+                case Wlan.Dot11AuthAlgorithm.RSNA_PSK:
+                    return "WPA2-PSK";
+                case Wlan.Dot11AuthAlgorithm.Open_Network:
+                    switch (an.dot11DefaultCipherAlgorithm)
+                    {
+                        case Wlan.Dot11CipherAlgorithm.None:
+                            return "Open Network";
+                        case Wlan.Dot11CipherAlgorithm.WEP:
+                        case Wlan.Dot11CipherAlgorithm.WEP104:
+                        case Wlan.Dot11CipherAlgorithm.WEP40:
+                            return "WEP";
+                    }
+                    break;
+                case Wlan.Dot11AuthAlgorithm.Shared_Key_Network:
+                    return "WEP-PSK";
+            }
+            return "Unknown Security ("+an.dot11DefaultAuthAlgorithm.ToString()+", "+an.dot11DefaultCipherAlgorithm.ToString()+")";
         }
 
         public void refresh()

@@ -676,9 +676,9 @@ namespace OMRadio
                             for (int i = 0; i < theHost.ScreenCount; i++)
                                 ((OMLabel)manager[i]["Radio_StationName"]).Text = "Loading " + SelectedItemTag;
                             theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag);
-                            UpdateStationList(theHost.instanceForScreen(screen));
-                            for (int i = 0; i < theHost.ScreenCount; i++)
-                                ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
+                            if (UpdateStationList(theHost.instanceForScreen(screen)))
+                                for (int i = 0; i < theHost.ScreenCount; i++)
+                                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
                         }
                     }
                     break;
@@ -855,7 +855,7 @@ namespace OMRadio
 
             }
         }
-        private void UpdateStationList(int instance)
+        private bool UpdateStationList(int instance)
         {
             object o = new object();
             theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
@@ -863,13 +863,13 @@ namespace OMRadio
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
                     ((OMLabel)manager[i]["Radio_StationName"]).Text = "Load failed!";
-                return;
+                return false;
             }
             for (int i = 0; i < theHost.ScreenCount; i++)
                 ((OMLabel)manager[i]["Label_StationListSource"]).Text = "Source: " + StationListSource.ToString();
             tunedContentInfo info = (tunedContentInfo)o;
             if ((info.currentStation == null) || (info.stationList == null))
-                return;
+                return false;
 
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
@@ -884,7 +884,7 @@ namespace OMRadio
                         List[j].text = Stations[j].stationName;
                         List[j].tag = Stations[j].stationID;
                     }
-                    return;
+                    return true;
                 }
                 List.Clear();
                 if (StationListSource == StationListSources.Live)
@@ -898,6 +898,7 @@ namespace OMRadio
                 foreach (stationInfo station in Stations)
                     List.Add(new OMListItem(station.stationName, (object)station.stationID));
             }
+            return true;
         }
 
         private void Message(int Screen, string Msg, int Time)

@@ -52,7 +52,7 @@ namespace Networking
             theHost = host;
             manager = new ScreenManager(theHost.ScreenCount);
             host.OnWirelessEvent += new WirelessEvent(host_OnWirelessEvent);
-            OMPanel p = new OMPanel();
+            OMPanel p = new OMPanel("");
             OMBasicShape border=new OMBasicShape(20,110,620,410);
             border.CornerRadius=15F;
             border.Shape=shapes.RoundedRectangle;
@@ -65,8 +65,13 @@ namespace Networking
             border2.BorderSize = 4F;
             border2.BorderColor = Color.Silver;
             border2.FillColor = Color.Black;
-            OMList networks = new OMList(21, 120, 618, 390);
+            OMButton connect = new OMButton(680, 300, 280, 50);
+            connect.Text = "Connect";
+            connect.Image = imageItem.MISSING;
+            connect.OnClick += new userInteraction(connect_OnClick);
+            OMList networks = new OMList(22, 121, 616, 390);
             networks.ListStyle = eListStyle.MultiList;
+            networks.ListItemHeight = 80;
             networks.Font = new Font(FontFamily.GenericSansSerif, 30F);
             networks.OnLongClick += new userInteraction(networks_OnLongClick);
             networks.OnClick += new userInteraction(networks_OnClick);
@@ -83,9 +88,19 @@ namespace Networking
             p.addControl(signalStrength);
             p.addControl(networkName);
             p.addControl(networkType);
+            p.addControl(connect);
             manager.loadPanel(p);
             OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.MediumLow, "Refresh Networks");
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void connect_OnClick(OMControl sender, int screen)
+        {
+            OMList list = (OMList)sender.Parent[1];
+            if (list.SelectedItem != null)
+            {
+                theHost.execute(eFunction.connectToInternet, list.SelectedItem.tag.ToString());
+            }
         }
 
         void networks_OnClick(OMControl sender, int screen)
@@ -93,7 +108,7 @@ namespace Networking
             OMList list=(OMList)sender;
             connectionInfo info = networks.Find(p => p.UID == list.SelectedItem.tag.ToString());
             ((OMImage)manager[screen][3]).Image = new imageItem(list.SelectedItem.image);
-            ((OMLabel)manager[screen][4]).Text = info.NetworkName;
+            ((OMLabel)manager[screen][4]).Text = list.SelectedItem.text;
             ((OMLabel)manager[screen][5]).Text = info.ConnectionType.Replace('_',' ');
         }
 
@@ -131,7 +146,10 @@ namespace Networking
                 icon = theHost.getSkinImage("Wifi0").image;
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(100, Color.White);
-            OMListItem ret= new OMListItem(c.NetworkName, c.ConnectionType.Replace('_',' '),icon,format);
+            string name = c.NetworkName;
+            if (name == "")
+                name = "Other Network";
+            OMListItem ret= new OMListItem(name, c.ConnectionType.Replace('_',' '),icon,format);
             ret.tag = c.UID;
             return ret;
         }

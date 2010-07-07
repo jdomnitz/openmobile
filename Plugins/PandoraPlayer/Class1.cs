@@ -74,21 +74,29 @@ namespace PandoraPlayer
             }
             return false;
         }
-        DateTime lastSkip=DateTime.MinValue;
+        List<DateTime> skips = new List<DateTime>();
         public bool stepForward(int instance)
         {
             if (client != null)
             {
                 lock (this)
                 {
-                    if ((DateTime.Now - lastSkip).TotalSeconds < 10)
-                        return false; //Skipping too fast
-                    lastSkip = DateTime.Now;
+                    if (!checkSkip())
+                        return true; //lie
                     client.SkipSong();
                     return true;
                 }
             }
             return false;
+        }
+
+        private bool checkSkip()
+        {
+            skips.RemoveAll(p => p.AddHours(1) < DateTime.Now);
+            if (skips.Count >= 6)
+                return false;
+            skips.Add(DateTime.Now);
+            return true;
         }
 
         public bool stepBackward(int instance)
@@ -328,9 +336,18 @@ namespace PandoraPlayer
             get { return "Pandora Player"; }
         }
 
+        bool paused;
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            if (message == "PlayPause")
+                if (client != null)
+                {
+                    client.PlayPause();
+                    paused = !paused;
+                }
+            if (!paused)
+                raiseMediaEvent(eFunction.Play, instance.ToString());
+            return paused;
         }
 
         public bool incomingMessage<T>(string message, string source, ref T data)

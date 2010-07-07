@@ -639,7 +639,7 @@ namespace OpenMobile.Controls
                         if (listViewItemOffset == 0)
                             continue;
                         if ((items.Count > i) && (items[i].image != null)) //rare thread collision
-                            Renderer.drawTransparentImage(g, items[i].image, (int)rect.Left + 10, (int)rect.Top + 2, (int)rect.Height, (int)rect.Height - imgSze, tmp);
+                            Renderer.drawTransparentImage(g, items[i].image, (int)rect.Left + 5, (int)rect.Top + 2, (int)rect.Height-5, (int)rect.Height - imgSze, tmp);
                     }
                 }
                 g.Flush(FlushIntention.Sync);

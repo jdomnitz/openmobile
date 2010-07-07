@@ -127,11 +127,9 @@ namespace OpenMobile.Net
             try
             {
                 using (WebClient client = new WebClient())
-                using (Stream result = client.OpenRead(url))
-                using (StreamReader reader = new StreamReader(result))
-                    return reader.ReadToEnd();
+                    return client.DownloadString(url);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return null;
             }

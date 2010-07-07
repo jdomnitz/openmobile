@@ -51,6 +51,7 @@ namespace OpenMobile
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RenderingWindow));
             this.tmrClosing = new System.Windows.Forms.Timer(this.components);
             this.tmrClick = new System.Windows.Forms.Timer(this.components);
             this.tmrMouse = new System.Windows.Forms.Timer(this.components);
@@ -81,6 +82,7 @@ namespace OpenMobile
             // 
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(1000, 600);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "RenderingWindow";
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseUp);
             this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseDoubleClick);
@@ -91,7 +93,7 @@ namespace OpenMobile
             this.Resize += new System.EventHandler(this.RenderingWindow_Resize);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseMove);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceUp);
-            this.KeyDown+=new System.Windows.Forms.KeyEventHandler(InputRouter.SourceDown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceDown);
             this.ResizeEnd += new System.EventHandler(RenderingWindow_ResizeEnd);
             this.ResumeLayout(false);
 

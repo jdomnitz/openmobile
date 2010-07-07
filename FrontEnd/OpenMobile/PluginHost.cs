@@ -693,7 +693,11 @@ namespace OpenMobile
                     if (int.TryParse(arg, out ret) == false)
                         return false;
                     if (currentMediaPlayer[ret] == null)
+                    {
+                        if (currentTunedContent[ret] != null)
+                            return sendMessage(currentTunedContent[ret].pluginName, "PluginHost", "PlayPause"); //TODO: IExtendedTuner
                         return false;
+                    }
                     return currentMediaPlayer[ret].pause(ret);
                 case eFunction.Stop:
                     if (int.TryParse(arg, out ret) == false)

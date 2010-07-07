@@ -702,7 +702,7 @@ namespace OpenMobile
                 return;
             if (o.GetType() == typeof(ePlayerStatus))
             {
-                ePlayerStatus status=(ePlayerStatus)o;
+                ePlayerStatus status = (ePlayerStatus)o;
                 if (status == ePlayerStatus.Playing)
                 {
                     theHost.execute(eFunction.Pause, theHost.instanceForScreen(screen).ToString());
@@ -732,6 +732,20 @@ namespace OpenMobile
                     else
                     {
                         theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString());
+                    }
+                }
+            }
+            else if(o.GetType()==typeof(stationInfo))
+            {
+                if (theHost.execute(eFunction.Pause, theHost.instanceForScreen(screen).ToString()))
+                {
+                    for (int i = 0; i < theHost.ScreenCount; i++)
+                    {
+                        if (theHost.instanceForScreen(i) == theHost.instanceForScreen(screen))
+                        {
+                            ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
+                            ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                        }
                     }
                 }
             }

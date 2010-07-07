@@ -340,9 +340,12 @@ namespace OpenMobile
             ThreadPool.SetMaxThreads(50, 500);
             Application.Run();
         }
-
+        static bool ErroredOut;
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            if (ErroredOut) //Prevent multiple bugs
+                return;
+            ErroredOut = true;
             Exception ex = (Exception)e.ExceptionObject;
             if (theHost.hal!=null)
                 theHost.hal.close();

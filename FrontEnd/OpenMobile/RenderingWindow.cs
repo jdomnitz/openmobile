@@ -187,7 +187,7 @@ namespace OpenMobile
                 {
                     c.UpdateThisControl += UpdateThisControl;
                     c.Mode = eModeType.transitioningIn;
-                    p.addControl(c);
+                    p.addControl(c,false);
                 }
                 else
                 {
