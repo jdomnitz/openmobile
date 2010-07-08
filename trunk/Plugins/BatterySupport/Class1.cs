@@ -25,15 +25,32 @@ using System.Windows.Forms;
 using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Plugin;
+using OpenMobile.Data;
 
 namespace BatterySupport
 {
     public sealed class BatterySupport:IHighLevel
     {
         Thread batteryWatcher;
+        Settings batSettings;
+        String OnBatteryAction = "Nothing";
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            if (batSettings == null)
+            {
+                batSettings = new Settings("Battery");
+                System.Collections.Generic.List<String> Options = new System.Collections.Generic.List<String> { "Nothing", "Suspend", "Hibernate" };
+                batSettings.Add(new Setting(SettingTypes.MultiChoice, "BatterySupport.OnBatteryAction", "Action", "Action On Power Unplugged", Options, Options, OnBatteryAction));
+                batSettings.OnSettingChanged += new SettingChanged(Changed);
+            }
+            return batSettings;
+        }
+
+        void Changed(Setting setting)
+        {
+            using (PluginSettings s = new PluginSettings())
+                s.setSetting(setting.Name, setting.Value);
+            OnBatteryAction = setting.Value;
         }
 
         public string authorName
@@ -69,9 +86,16 @@ namespace BatterySupport
         {
             theHost = host;
             theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
+
+            using (PluginSettings s = new PluginSettings())
+                OnBatteryAction = s.getSetting("BatterySupport.OnBatteryAction");
+            if (string.IsNullOrEmpty(OnBatteryAction))
+                OnBatteryAction="Nothing";
+
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
-        
+
+        bool previouslyPluggedIn = true;
         imageItem batteryImage;
         void theHost_OnPowerChange(ePowerEvent type)
         {
@@ -114,6 +138,24 @@ namespace BatterySupport
                     batteryWatcher = null;
                 }
             }
+
+            // Added Action on Power Unplugged
+            if (OnBatteryAction != "Nothing")
+            {
+                if (type == ePowerEvent.SystemPluggedIn || type == ePowerEvent.SystemResumed)
+                {
+                    previouslyPluggedIn = true;
+                }
+                else if(previouslyPluggedIn == true && type != ePowerEvent.SleepOrHibernatePending)
+                {
+                    previouslyPluggedIn = false;
+                    if (OnBatteryAction == "Hibernate")
+                        theHost.execute(eFunction.hibernate);
+                    else if (OnBatteryAction == "Suspend")
+                        theHost.execute(eFunction.standby);
+                }
+            }
+
         }
         private void startWatching()
         {
