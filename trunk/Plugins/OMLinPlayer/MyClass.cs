@@ -40,7 +40,8 @@ namespace OMLinPlayer
 		{
 			if (player!=null)
 			{
-				loop.Quit();
+				if (loop!=null)
+					loop.Quit();
 				if (player.SetState(State.Null)==StateChangeReturn.Success)
 				{
 					nowPlaying = new mediaInfo();
@@ -71,7 +72,7 @@ namespace OMLinPlayer
 		MainLoop loop;
 		public bool play (int instance, string url, OpenMobile.eMediaType type)
 		{
-			theHost.execute(eFunction.backgroundOperationStatus,url);
+			stop(instance);
 			loop=new MainLoop();
 			if (player==null)
 			{
@@ -80,7 +81,7 @@ namespace OMLinPlayer
 			}
 			if (player==null)
 				return false;
-			player.SetState(State.Null);
+			player.SetState(State.Ready);
 			player.Uri="file://"+url;
 			player.SetState(State.Playing);
 			nowPlaying=OpenMobile.Media.TagReader.getInfo(url);
@@ -140,31 +141,32 @@ namespace OMLinPlayer
 		
 		private bool BusCb (Bus bus, Message message)
 		{
-			switch (message.Type) {
-			case MessageType.Eos:
-				stop(0);
-				OnMediaEvent(eFunction.nextMedia,0,"");
-				break;
+			switch (message.Type)
+			{
+				case MessageType.Eos:
+					stop(0);
+					OnMediaEvent(eFunction.nextMedia,0,"");
+					break;
 			}
 			return true;
 		}
 
 		public Settings loadSettings ()
 		{
-			throw new System.NotImplementedException ();
+			return null;
 		}
 
 
 		public bool incomingMessage (string message, string source)
 		{
-			throw new System.NotImplementedException ();
+			return false;
 		}
 
 
 		
 		public bool incomingMessage<T> (string message, string source, ref T data)
 		{
-			throw new System.NotImplementedException ();
+			return false;
 		}
 
 

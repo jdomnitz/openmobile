@@ -30,17 +30,19 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="OpenMobile.Framework, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="System">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\OpenMobile.Framework\bin\Debug\OpenMobile.Framework.dll</HintPath>
     </Reference>
     <Reference Include="gstreamer-sharp, Version=0.9.2.0, Culture=neutral, PublicKeyToken=4956b48baf980190">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Projects\playbin\playbin\bin\Debug\gstreamer-sharp.dll</HintPath>
     </Reference>
     <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
-      <Package>glib-sharp-2.0</Package>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="OpenMobile.Framework, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\OM 0.7 RC1\OpenMobile.Framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
