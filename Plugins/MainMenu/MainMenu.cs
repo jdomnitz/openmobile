@@ -148,6 +148,7 @@ public sealed class MainMenu : IHighLevel
 
             //We can do more then one panel too
             OMPanel setButton = new OMPanel("Settings");
+            setButton.Forgotten = true;
             imageItem opt2 = theHost.getSkinImage("Full.Highlighted");
             imageItem opt1 = theHost.getSkinImage("Full");
             OMList list = new OMList(235,150,450,295);
@@ -174,6 +175,7 @@ public sealed class MainMenu : IHighLevel
             screens.loadPanel(setButton);
             
             OMPanel exit = new OMPanel("Quit");
+            exit.Forgotten = true;
             OMImage Image1 = new OMImage(220, 120, 560, 400);
             Image1.Image = theHost.getSkinImage("MediaBorder");
             Image1.Name = "Image1";

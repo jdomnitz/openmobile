@@ -26,6 +26,8 @@ using System.Drawing;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Collections.Generic;
+using Microsoft.Win32;
 
 namespace OpenMobile.Framework
 {
@@ -236,7 +238,25 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         public static string getFramework()
         {
-            return (IsMono() ? "Mono v" : "Microsoft .Net v") + Environment.Version.ToString();
+            if (IsMono())
+                return "Mono v" + Environment.Version.ToString();
+            else
+                return getNetFramework();
+        }
+
+        private static string getNetFramework()
+        {
+            RegistryKey componentsKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Net Framework Setup\NDP\");
+            string[] lst = componentsKey.GetSubKeyNames();
+            object SP=componentsKey.OpenSubKey(lst[lst.Length - 1]).GetValue("SP");
+            string servicePack="";
+            if (SP != null)
+                servicePack = SP.ToString();
+            if ((servicePack=="")||(servicePack == "0"))
+                servicePack = "";
+            else
+                servicePack = " SP" + servicePack;
+            return "Microsoft .Net "+lst[lst.Length - 1]+servicePack;
         }
         /// <summary>
         /// Run a manged process using mono if necessary

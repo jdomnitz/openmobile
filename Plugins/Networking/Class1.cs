@@ -99,7 +99,10 @@ namespace Networking
             OMList list = (OMList)sender.Parent[1];
             if (list.SelectedItem != null)
             {
-                theHost.execute(eFunction.connectToInternet, list.SelectedItem.tag.ToString());
+                if (((OMButton)sender).Text=="Connect")
+                    theHost.execute(eFunction.connectToInternet, list.SelectedItem.tag.ToString());
+                else
+                    theHost.execute(eFunction.disconnectFromInternet, list.SelectedItem.tag.ToString());
             }
         }
 
@@ -110,6 +113,10 @@ namespace Networking
             ((OMImage)manager[screen][3]).Image = new imageItem(list.SelectedItem.image);
             ((OMLabel)manager[screen][4]).Text = list.SelectedItem.text;
             ((OMLabel)manager[screen][5]).Text = info.ConnectionType.Replace('_',' ');
+            if (info.IsConnected)
+                ((OMButton)manager[screen][6]).Text = "Disconnect";
+            else
+                ((OMButton)manager[screen][6]).Text = "Connect";
         }
 
         void networks_OnLongClick(OMControl sender, int screen)

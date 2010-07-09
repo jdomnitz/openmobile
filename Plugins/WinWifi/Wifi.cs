@@ -125,7 +125,7 @@ namespace WinWifi
             {
                 if (network.profileName == "")
                 {
-                    if (network.dot11DefaultAuthAlgorithm == Wlan.Dot11AuthAlgorithm.Open_Network)
+                    if (!network.securityEnabled)
                         return connectToOpen(network);
                     else
                         return false;
@@ -201,9 +201,16 @@ namespace WinWifi
 
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
-            client = new WlanClient();
+            try
+            {
+                client = new WlanClient();
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                return eLoadStatus.LoadFailedGracefulUnloadRequested; //No Wifi Service Available
+            }
             if (client.Interfaces.Length == 0)
-                return eLoadStatus.LoadFailedGracefulUnloadRequested;
+                return eLoadStatus.LoadFailedGracefulUnloadRequested; //No Wifi Adapters Present
             client.Interfaces[0].WlanConnectionNotification += new WlanClient.WlanInterface.WlanConnectionNotificationEventHandler(Wifi_WlanConnectionNotification);
             client.Interfaces[0].WlanNotification += new WlanClient.WlanInterface.WlanNotificationEventHandler(Wifi_WlanNotification);
             return OpenMobile.eLoadStatus.LoadSuccessful;
@@ -273,11 +280,11 @@ namespace WinWifi
         }
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
         public void Dispose()
         {
-            //throw new NotImplementedException();
+            //
         }
         #endregion
     }

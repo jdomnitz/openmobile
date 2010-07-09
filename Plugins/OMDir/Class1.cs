@@ -166,6 +166,8 @@ namespace OMDir
         {
             OMList l=(OMList)manager[screen][3];
             OMList r=(OMList)manager[screen][4];
+            if (l.Tag == null)
+                return;
             r.Tag = l.Tag;
             l.Clear();
             if (System.IO.Path.GetPathRoot(l.Tag.ToString()) == l.Tag.ToString())

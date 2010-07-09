@@ -486,7 +486,7 @@ namespace OpenMobile
                 {
                     if (currentGesture == null)
                     {
-                        if ((Math.Abs(e.X - ThrowStart.X) <= 5) && (Math.Abs(e.Y - ThrowStart.Y) <= 5))
+                        if ((Math.Abs(e.X - ThrowStart.X) <= 10) && (Math.Abs(e.Y - ThrowStart.Y) <= 10))
                             return;
                         currentGesture = new List<Point>();
                         rParam.currentMode = eModeType.gesturing;
@@ -629,7 +629,7 @@ namespace OpenMobile
                                 SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
                         }
                     }
-                    if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
+                    else if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
                     {
                         if (p.DoubleClickable == true)
                             SandboxedThread.Asynchronous(delegate() { (highlighted as IClickable).doubleClickMe(screen); });

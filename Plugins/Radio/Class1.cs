@@ -718,6 +718,8 @@ namespace OMRadio
         void List_RadioStations_OnClick(OMControl sender, int screen)
         {
             OMList List = (OMList)sender;
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                ((OMLabel)manager[i]["Radio_StationName"]).Text = "Tuning . . .";
             if (List.SelectedItem.tag != null)
                 theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), (string)List.SelectedItem.tag);
         }
