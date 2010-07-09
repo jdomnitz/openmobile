@@ -655,7 +655,7 @@ namespace OpenMobile
                         catch (Exception) { }
                         currentMediaPlayer[ret].OnMediaEvent -= raiseMediaEvent;
                         currentMediaPlayer[ret] = null;
-                        raiseSystemEvent(eFunction.unloadAVPlayer, arg, "", "");
+                        raiseMediaEvent(eFunction.unloadAVPlayer, ret, "");
                         return true;
                     }
                     return false;
@@ -667,7 +667,7 @@ namespace OpenMobile
                         currentTunedContent[ret].setPowerState(ret, false);
                         currentTunedContent[ret].OnMediaEvent -= raiseMediaEvent;
                         currentTunedContent[ret] = null;
-                        raiseSystemEvent(eFunction.unloadTunedContent, arg, "", "");
+                        raiseMediaEvent(eFunction.unloadTunedContent, ret, "");
                         return true;
                     }
                     return false;
@@ -938,7 +938,7 @@ namespace OpenMobile
                         if (Array.Exists<IAVPlayer>(currentMediaPlayer, a => a == player) == false)
                             player.OnMediaEvent += raiseMediaEvent;
                         currentMediaPlayer[ret] = player;
-                        raiseSystemEvent(eFunction.loadAVPlayer, arg1, arg2, "");
+                        raiseMediaEvent(eFunction.loadAVPlayer, ret, arg2);
                         return true;
                     }
                     return false;
@@ -961,7 +961,7 @@ namespace OpenMobile
                             execute(eFunction.unloadTunedContent, arg1);
                             return false;
                         }
-                        raiseSystemEvent(eFunction.loadTunedContent, arg1, arg2, "");
+                        raiseMediaEvent(eFunction.loadTunedContent, ret, arg2);
                         return true;
                     }
                     return false;
@@ -1145,7 +1145,7 @@ namespace OpenMobile
                 {
                     execute(eFunction.unloadTunedContent, ret.ToString());
                     execute(eFunction.loadTunedContent, ret.ToString(), plugins[i].pluginName);
-                    if (currentTunedContent[ret].tuneTo(ret, arg2) == true)
+                    if ((currentTunedContent[ret]!=null)&&(currentTunedContent[ret].tuneTo(ret, arg2) == true))
                         return true;
                 }
             }

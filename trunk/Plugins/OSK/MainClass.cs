@@ -77,7 +77,7 @@ namespace OpenMobile
         }
         public float pluginVersion
         {
-            get { return 0.6F; }
+            get { return 0.7F; }
         }
 
         public string pluginDescription

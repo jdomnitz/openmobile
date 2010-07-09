@@ -44,10 +44,16 @@ namespace PandoraPlayer
                     return false;
                 if (tuning == true)
                     return false;
-                station = station.Substring(8);
                 tuning = true;
-                client.ChangeStation(station);
-                bool b=client.GetPlaylist();
+                new Thread(delegate()
+                {
+                    for (int i = 0; i < 100; i++)
+                        if ((!loggedIn) || (client.Stations.Count == 0))
+                            Thread.Sleep(50);
+                    station = station.Substring(8);
+                    client.ChangeStation(station);
+                    client.GetPlaylist();
+                }).Start();
                 return true;
             }
         }
@@ -134,6 +140,7 @@ namespace PandoraPlayer
                     this.instance = instance;
                     int vol = getVolume(instance);
                     client = new PClient(false);
+                    loggedIn=false;
                     client.LoggedIn += new StringEventHandler(client_LoggedIn);
                     client.StationChanged += new StringEventHandler(client_StationChanged);
                     client.SongPlayed += new SongEventHandler(client_SongPlayed);
@@ -148,6 +155,7 @@ namespace PandoraPlayer
             {
                 if (client != null)
                     client.Dispose();
+                loggedIn = false;
                 currentSong = new mediaInfo();
                 client = null;
                 raiseMediaEvent(eFunction.Stop, "");

@@ -280,7 +280,8 @@ namespace OpenMobile
                     try
                     {
                         pluginCollection[i].Dispose();
-                        theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName+" CRASHED!");
+                        if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
+                            theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName+" CRASHED!");
                     }
                     catch (Exception) { }
                     pluginCollection[i]=null;
@@ -349,7 +350,9 @@ namespace OpenMobile
             Exception ex = (Exception)e.ExceptionObject;
             if (theHost.hal!=null)
                 theHost.hal.close();
-            ErrorReporting reporting=new ErrorReporting(spewException(ex));
+            string strEx = spewException(ex);
+            Clipboard.SetText(strEx);
+            ErrorReporting reporting=new ErrorReporting(strEx);
             reporting.ShowDialog(RenderingWindows[0]);
             if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>0) //Prevent Loops
                 theHost.execute(eFunction.restartProgram);

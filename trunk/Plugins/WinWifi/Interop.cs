@@ -312,6 +312,11 @@ namespace NativeWifi
 			/// Reserved for future use. Must be set to NULL.
 			/// </summary>
 			uint reserved;
+
+            public override int GetHashCode()
+            {
+                return this.profileName.GetHashCode()+this.numberOfBssids.GetHashCode()+this.dot11Ssid.GetHashCode();
+            }
 		}
 
 		[DllImport("wlanapi.dll")]
