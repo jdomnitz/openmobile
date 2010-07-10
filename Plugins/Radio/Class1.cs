@@ -674,11 +674,11 @@ namespace OMRadio
                         {
                             for (int i = 0; i < theHost.ScreenCount; i++)
                                 ((OMLabel)manager[i]["Radio_StationName"]).Text = "Loading " + SelectedItemTag;
-                            
-                            if (theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag))
-                                if (UpdateStationList(theHost.instanceForScreen(screen)))
-                                    for (int i = 0; i < theHost.ScreenCount; i++)
-                                        ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
+
+                            theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag);
+                            if (UpdateStationList(theHost.instanceForScreen(screen)))
+                                for (int i = 0; i < theHost.ScreenCount; i++)
+                                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
                         }
                     }
                     break;
@@ -873,7 +873,7 @@ namespace OMRadio
             if ((info.currentStation == null) || (info.stationList == null))
                 return false;
 
-            lock (info)
+            lock (this)
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
                 {
