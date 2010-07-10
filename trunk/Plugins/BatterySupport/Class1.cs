@@ -39,7 +39,7 @@ namespace BatterySupport
             if (batSettings == null)
             {
                 batSettings = new Settings("Battery");
-                System.Collections.Generic.List<String> Options = new System.Collections.Generic.List<String> { "Nothing", "Suspend", "Hibernate" };
+                System.Collections.Generic.List<String> Options = new System.Collections.Generic.List<String> { "Nothing", "Suspend", "Hibernate", "Shutdown"};
                 batSettings.Add(new Setting(SettingTypes.MultiChoice, "BatterySupport.OnBatteryAction", "Action", "Action On Power Unplugged", Options, Options, OnBatteryAction));
                 batSettings.OnSettingChanged += new SettingChanged(Changed);
             }
@@ -153,6 +153,8 @@ namespace BatterySupport
                         theHost.execute(eFunction.hibernate);
                     else if (OnBatteryAction == "Suspend")
                         theHost.execute(eFunction.standby);
+                    else if (OnBatteryAction == "Shutdown")
+                        theHost.execute(eFunction.shutdown);
                 }
             }
 

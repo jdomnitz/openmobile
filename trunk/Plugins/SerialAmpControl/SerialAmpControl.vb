@@ -26,8 +26,10 @@ Imports System.IO.Ports
 Public Class SerialAmpControl
     Implements OpenMobile.Plugin.IOther
 
+    Private WithEvents m_Host As IPluginHost
     Private m_Port As SerialPort
     Private m_ComPort As String
+    Private m_Line As String = "DTR"
     Private WithEvents m_Settings As Settings
 
     Public Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean Implements OpenMobile.Plugin.IBasePlugin.incomingMessage
@@ -40,11 +42,37 @@ Public Class SerialAmpControl
 
     Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements OpenMobile.Plugin.IBasePlugin.initialize
         If Not m_ComPort = "-1" Then
+            m_Host = host
             m_Port = New SerialPort(m_ComPort)
-            m_Port.Open()
-            m_Port.DtrEnable = True
+            TurnOn()
         End If
     End Function
+
+    Private Sub TurnOn()
+        If Not m_Port Is Nothing Then
+            If Not m_Port.IsOpen Then
+                m_Port.Open()
+            End If
+
+            If m_Line = "DTR" Then
+                m_Port.DtrEnable = True
+            Else
+                m_Port.RtsEnable = True
+            End If
+        End If
+    End Sub
+
+    Private Sub TurnOff()
+        If Not m_Port Is Nothing Then
+            If m_Port.IsOpen Then
+                If m_Line = "DTR" Then
+                    m_Port.DtrEnable = False
+                Else
+                    m_Port.RtsEnable = False
+                End If
+            End If
+        End If
+    End Sub
 
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
 
@@ -55,8 +83,12 @@ Public Class SerialAmpControl
 
             Dim COMOptions As New Generic.List(Of String)
             COMOptions.AddRange(System.IO.Ports.SerialPort.GetPortNames)
-
             m_Settings.Add(New Setting(SettingTypes.MultiChoice, "SerialAmpControl.ComPort", "COM", "Com Port", COMOptions, COMOptions, m_ComPort.ToString))
+
+            Dim LineOptions As New Generic.List(Of String)
+            LineOptions.Add("DTR")
+            LineOptions.Add("RTS")
+            m_Settings.Add(New Setting(SettingTypes.MultiChoice, "SerialAmpControl.Line", "Line", "Line to Trigger", LineOptions, LineOptions, m_Line))
 
             AddHandler m_Settings.OnSettingChanged, AddressOf Changed
         End If
@@ -76,13 +108,24 @@ Public Class SerialAmpControl
             SetDefaultSettings()
         End If
         m_ComPort = Settings.getSetting("SerialAmpControl.ComPort")
+        m_Line = Settings.getSetting("SerialAmpControl.Line")
         Settings.Dispose()
     End Sub
 
     Private Sub SetDefaultSettings()
         Dim Settings As New OpenMobile.Data.PluginSettings
         Settings.setSetting("SerialAmpControl.ComPort", "-1")
+        Settings.setSetting("SerialAmpControl.Line", "DTR")
         Settings.Dispose()
+    End Sub
+
+    Private Sub m_Host_OnPowerChange(ByVal type As OpenMobile.ePowerEvent) Handles m_Host.OnPowerChange
+        Select Case type
+            Case Is = ePowerEvent.SystemResumed
+                TurnOn()
+            Case Is = ePowerEvent.SleepOrHibernatePending, ePowerEvent.ShutdownPending, ePowerEvent.LogoffPending
+                TurnOff()
+        End Select
     End Sub
 
     Public ReadOnly Property authorEmail() As String Implements OpenMobile.Plugin.IBasePlugin.authorEmail
@@ -144,4 +187,5 @@ Public Class SerialAmpControl
     End Sub
 #End Region
 
+  
 End Class

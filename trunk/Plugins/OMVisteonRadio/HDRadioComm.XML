@@ -1,0 +1,504 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HDRadioComm</name>
+    </assembly>
+    <members>
+        <member name="T:HDRadioComm.NoParamsEvent">
+            <summary>Use to receive a no prameter Event.</summary>
+            <example>
+            	<para>(Designer Generated Code)</para>
+            	<para><font color="blue" size="2">this</font><font size="2">.</font><font color="#010001" size="2">HDRadio1</font><font size="2">.</font><font color="#010001" size="2">HDRadioEventHWPoweredOn</font>
+            		<font size="2">+=</font>
+            		<font color="blue" size="2">new</font>
+            		<font color="#010001" size="2">HDRadioComm</font><font size="2">.</font><font color="#2B91AF" size="2">HDRadio</font><font size="2">.</font><font color="#2B91AF" size="2">NoParamsEvent</font><font size="2">(</font><font color="blue" size="2">this</font><font size="2">.</font><font color="#010001" size="2">HDRadio1_HDRadioEventHWPoweredOn</font><font size="2">);</font></para>
+            </example>
+        </member>
+        <member name="T:HDRadioComm.BoolParamsEvent">
+            <example>
+            (Designer Generated Code)
+            </example>
+            <summary>Use to receive a Boolean Event.</summary>
+        </member>
+        <member name="T:HDRadioComm.IntParamsEvent">
+            <summary>Use to receive a integer Event.</summary>
+            <example>
+            	<para><font size="2"><font color="blue"><font color="black">(Designer Generated
+                Code)</font></font></font></para>
+            	<para>
+            		<font size="2"><font color="blue">this</font>.<font color="#010001">HDRadio1</font>.<font color="#010001">
+                HDRadioEventHDSubChannelCount</font>+=<font color="blue">new</font><font color="#010001">
+                HDRadioComm</font>.<font color="#2B91AF">HDRadio</font>.<font color="#2B91AF">IntParamsEvent</font>(<font color="blue">
+                this</font>.<font color="#010001">HDRadio1_HDRadioEventHDSubChannelCount</font>);</font></para>
+            </example>
+        </member>
+        <member name="T:HDRadioComm.StringParamsEvent">
+            <summary>Use to receive a string Event.</summary>
+            <example>
+            	<para>(Designer Generated Code)</para>
+            	<para><font color="blue" size="2">this</font><font size="2">.</font><font color="#010001" size="2">HDRadio1</font><font size="2">.</font><font color="#010001" size="2">HDRadioEventHDTitle</font>
+            		<font size="2">+=</font>
+            		<font color="blue" size="2">new</font>
+            		<font color="#010001" size="2">HDRadioComm</font><font size="2">.</font><font color="#2B91AF" size="2">HDRadio</font><font size="2">.</font><font color="#2B91AF" size="2">StringParamsEvent</font><font size="2">(</font><font color="blue" size="2">this</font><font size="2">.</font><font color="#010001" size="2">HDRadio1_HDRadioEventHDTitle</font><font size="2">);</font></para>
+            </example>
+        </member>
+        <member name="T:HDRadioComm.HDRadio">
+            <summary>Class to control DEI DMHD-1000</summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.#ctor">
+            <summary>Class Constructor</summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.ConvertToFormatedChannel(System.Int32,HDRadioComm.HDRadio.HDRadioBands)">
+            <summary>Converts int frequency and type HDRadioBands into a formated string.</summary>
+            <returns>Example: 103.9 FM</returns>
+            <param name="freq">Example: 1039 (103.9)</param>
+            <param name="band">Example: HDRadioBands.FM</param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.ConvertFromFormattedChannel(System.String,System.Int32@,HDRadioComm.HDRadio.HDRadioBands@)">
+            <summary>Converts a formatted string to int frequency and type HDRadioBands.</summary>
+            <returns>true if successful</returns>
+            <param name="channel">Example: "103.9 FM"</param>
+            <param name="frequency">Example: OUT int 1039</param>
+            <param name="band">Example: OUT HDRadioBands.FM</param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.Open">
+            <summary>
+            Opens Comport, and tests for actual Tuner being connected
+            Triggers Event types HDRadioEventSysPortOpened, HDRadioEventSysErrorRadioNotFound, HDRadioEventCommError
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.Close">
+            <summary>
+            Closes Comport
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.PowerOn">
+            <summary>Powers on and intializes the tuner, PoweredOn event will fire.</summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.PowerOff">
+            <summary>Power off the tuner, RadioPoweredOff event will fire.</summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.SetVolume(System.Int32)">
+            <summary>Sets Volume of tuner (preamp)</summary>
+            <param name="Volume">0 - 90</param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.TuneToFormatedChannel(System.String)">
+            <summary>Tune to a string formatted channel</summary>
+            <returns>true if conversion of formatted channel string is valid.</returns>
+            <param name="channel">
+            	<para>Example: "103.9 FM"</para>
+            	<para>Example: "1060 AM"</para>
+            </param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.TuneToChannel(System.Int32,HDRadioComm.HDRadio.HDRadioBands)">
+            <summary>Changes the tuner to the specified channel.</summary>
+            <param name="ChannelNumber"></param>
+            <param name="Band"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.TuneUp">
+            <summary>
+            Changes the tuner to one channel higher, wraps around to channel one if needed
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.TuneDown">
+            <summary>Changes the tuner to one channel lower, wraps around to highest channel if needed.</summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.SeekUp(HDRadioComm.HDRadio.HDRadioSeekType)">
+            <summary>Seek UP to the next found channel. Wraps around if needed.</summary>
+            <param name="seekType">Example: HDRadioSeekType.HD will seek out only HD channels.</param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.SeekDown(HDRadioComm.HDRadio.HDRadioSeekType)">
+            <summary>Seek Down to the next found channel. Wraps around if needed.</summary>
+            <param name="seekType">Example: HDRadioSeekType.ALL will seek out all channels.</param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.HDSubChannelSelect(System.Int32)">
+            <summary>
+            	<para>Select HD Sub Channel.</para>
+            	<para><font color="#010001" size="2">HDSubChannelCount has to be &gt;
+                0</font></para>
+            </summary>
+            <param name="subChannel">1 - <font color="#010001" size="2">HDSubChannelCount</font></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.MuteOn">
+            <summary>Turns on audio mute.</summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.MuteOff">
+            <summary>Turns off audio mute.</summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.GetSignalStrength">
+            <summary>
+            	<para>Request signal levels from tuner, result will be an event.</para>
+            	<para><font color="#010001" size="2">HDRadioEventTunerSignalStrength for non HD
+                Channel</font></para>
+            	<para><font color="#010001" size="2">HDRadioEventHDSignalStrength for HD
+                Channels</font></para>
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.InjectCommand(System.String)">
+            <summary>Allows direct insertion of commands to the command queue in hex string  format.</summary>
+            <param name="CommandStringHex">Example: </param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.toHex(System.Int32,System.Int32)">
+            <summary>
+            Convert an integer to a Hexadecimal number
+            </summary>
+            <param name="Number">The number to convert</param>
+            <param name="Length">How many nybbles to display</param>
+            <returns></returns>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.toHex(System.Int32)">
+            <summary>
+            Convert an integer to a two byte Hexadecimal number
+            </summary>
+            <param name="Number">The number to convert</param>
+            <returns></returns>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.hexStringToCharacterString(System.String)">
+            <summary>
+            Convert a Hex string into an ASCII character string that is usable by the serial port
+            </summary>
+            <param name="HexString">A string of hex characters to convert to ASCII characters</param>
+            <returns></returns>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.commandQueueTimer_Elapsed(System.Object,System.Timers.ElapsedEventArgs)">
+            <summary>
+            Raised when the command queue timer times out.  This throttles the sending of commands.
+            </summary>
+            <param name="o"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.addToCommandQueue(HDRadioComm.HDRadio.HDRadioMessages,HDRadioComm.HDRadio.HDRadioMessageType,System.Int32[])">
+            <summary>
+            Add a command to the command queue
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.addHexStringToCommandQueue(System.String)">
+            <summary>
+            Add generic hex string to queue
+            </summary>
+            <param name="CommandHex"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.checkAndSendNextCommand">
+            <summary>
+            Send the commands in the command queue, if there are any
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.bumpQueue">
+            <summary>
+            Advance queue item
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.sendCommandToDevice(System.String)">
+            <summary>
+            Send command message to serial port, ascii hex string
+            </summary>
+            <param name="CommandStringHex"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.getBufferString(System.String@,System.Int32)">
+            <summary>
+            Returns the specified number (Length) of characters from the front of BufferString and then removes them from that string.
+            </summary>
+            <param name="BufferString">The string to read and modify</param>
+            <param name="Length">How many characters to return</param>
+            <returns></returns>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.getBufferChar(System.String@)">
+            <summary>
+            Returns the first character of the supplied string as a byte
+            </summary>
+            <param name="BufferString">The string to read and modify</param>
+            <returns></returns>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.GetInt16(System.Collections.Generic.List{System.Byte},System.Int32)">
+            <summary>
+            Returns int from position in bytelist
+            </summary>
+            <param name="bytelist"></param>
+            <param name="position"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.bytesToString(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            convert bytes in byte[] to string
+            </summary>
+            <param name="bytes"></param>
+            <param name="position"></param>
+            <param name="count"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.OnRxChar(System.Object,System.IO.Ports.SerialDataReceivedEventArgs)">
+            <summary>
+            Received byte from serial port
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.checkForCompleteCommand">
+            <summary>
+            Make sure the last command sent to the radio was completed
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.parseCommand(System.Collections.Generic.List{System.Byte})">
+            <summary>
+            process command message from tuner
+            </summary>
+            <param name="fullCommand"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.RaiseStringEvent(HDRadioComm.StringParamsEvent,System.String)">
+            <summary>
+            Event helper - Raise String Event
+            </summary>
+            <param name="spEvent"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.RaiseBoolEvent(HDRadioComm.BoolParamsEvent,System.Boolean)">
+            <summary>
+            Event helper - Raise Boolean Event
+            </summary>
+            <param name="spEvent"></param>
+            <param name="state"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.RaiseIntEvent(HDRadioComm.IntParamsEvent,System.Int32)">
+            <summary>
+            Event helper - Raise Integer Event
+            </summary>
+            <param name="spEvent"></param>
+            <param name="state"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.RaiseNoParamsEvent(HDRadioComm.NoParamsEvent)">
+            <summary>
+            Event helper - Raise No Parameters Event
+            </summary>
+            <param name="spEvent"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.RaiseCommErrorEvent(System.String)">
+            <summary>
+            Send Communications error out
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.Reset">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.initializeHDRadio">
+            <summary>
+            Initalize tuner
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.findRadio(System.Object)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:HDRadioComm.HDRadio.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:HDRadioComm.HDRadio.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventSysDebugMessage">
+            <summary>
+            Raised when Debug string needs to be printed.
+            </summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventCommError">
+            <summary>
+            Raised when there is communications error, Comport is automaticly closed.
+            </summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventSysPortOpened">
+            <summary>
+            Raised when Com Port is opened succesfully.
+            </summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventSysErrorRadioNotFound">
+            <summary>
+            Raised when tuner cant be found on a comport.
+            </summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHWPoweredOn">
+            <summary>
+            Raised when tuner is powered On.
+            </summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHWPoweredOff">
+            <summary>
+            Raised when tuner is powered OFF.
+            </summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHWMute">
+            <summary>
+            Raised when the tuner MUTE changes.
+            </summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventTunerSignalStrength">
+            <summary>Raised when signal strength changes (NON HD)</summary>
+            <remarks>Still up in the air about range, see demo!</remarks>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventTunerTuned">
+            <summary>Raised when tuning is complete.</summary>
+            <remarks>string is in Formatted channel, Example: "103.9 FM"</remarks>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventTunerSeeking">
+            <summary>Raised when seeking.</summary>
+            <remarks>String is in Formatted channel, Example: "103.9 FM"</remarks>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHDActive">
+            <summary>Raised when channel is HD is enabled.</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHDStreamLock">
+            <summary>Raised when HD stream is locked (Digital).</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHDSignalStrength">
+            <summary>Raised when HD Signal Strength changes.</summary>
+            <remarks>Range 0x00 - 0x0F</remarks>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHDSubChannel">
+            <summary>Raised when a HD Sub Channel is Selected.</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHDSubChannelCount">
+            <summary>Raised when HD Sub Channel Count is known or changes.</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHDArtist">
+            <remarks>
+            	<para>String will be prefixed with SUB CHANNEL ID</para>
+            	<para>Example: "1|Artist"</para>
+            </remarks>
+            <summary>Raised when HD Playing Artist is known or changed.</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHDTitle">
+            <summary>Raised when HD Playing Title is known or changed.</summary>
+            <remarks>
+            	<para>String will be prefixed with SUB CHANNEL ID</para>
+            	<para>Example: "1|Title"</para>
+            </remarks>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHDCallSign">
+            <summary>Raised when HD Station Call Sign is known or changed.</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventHDStationName">
+            <summary>Raised when HD Station Name is known or changed.</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventRDSEnble">
+            <summary>Raised when RDS is enabled.</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventRDSGenre">
+            <summary>Raised when RDS Genre data is known or changed.</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventRDSProgramService">
+            <summary>
+            	<para>Raised when RDS Program Service is known or changed.</para>
+            	<para>(Station Call letters)</para>
+            </summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventRDSRadioText">
+            <summary>Raised when RDS Radio Text has changed.</summary>
+        </member>
+        <member name="E:HDRadioComm.HDRadio.HDRadioEventAudioVolume">
+            <summary>Raised when volume is changed. (0 - 90) / (0x00 - 0x50)</summary>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.GetComports">
+            <summary>Returns the comports available.</summary>
+            <value>String Array of comport names, Example: "COM1"</value>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.DebugMode">
+            <summary>Enables debugging Events.</summary>
+            <value>true = on, false = off</value>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.IsMuted">
+            <summary>Gets if the tuner is currently muted.</summary>
+            <returns>true = Tuner is muted, false = Tuner is NOT Muted</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.AutoSearch">
+            <summary>Enable or disable the automaic searching for the tuner on all the available Comports.</summary>
+            <value>true = on, false = off</value>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.ComPort">
+            <summary>Set/Gets Comport number to open, used when AutoSearch property is false.</summary>
+            <value>Comport number (1-65535).</value>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.IsOpen">
+            <summary>Gets status of Comport.</summary>
+            <returns>true = Port is Open, false = Port is Closed.</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.IsPowered">
+            <summary>Gets tuner power status.</summary>
+            <returns>true = tuner is on, false = tuner is off</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.PowerState">
+            <summary>Gets tuner power state.</summary>
+            <returns>PowerStatus</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.IsHDActive">
+            <summary>Gets HDRadio HD status.</summary>
+            <returns>true = HD is Active, false = HD is not Active</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.HDSubChannelCount">
+            <summary>Gets the number of HD Subchannels</summary>
+            <returns>count, -1 if tuner off</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.CurrentBand">
+            <summary>Gets currently tuned Band.</summary>
+            <returns>channel number, -1 if tuner power is off</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.CurrentFrequency">
+            <summary>Gets currently tuned frequency.</summary>
+            /// <returns>frequency or -1 if tuner power is off</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.PreviousChannel">
+            <summary>Gets the previous tuned frequency and band in formatted string.</summary>
+            <returns>Channel "102.1 FM"</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.CurrentFormattedChannel">
+            <summary>Gets currently tuned frequency and band in formatted string.</summary>
+            <returns>Channel "102.1 FM"</returns>
+        </member>
+        <member name="P:HDRadioComm.HDRadio.HDTunerInfo">
+            <value>String Array of the Hardware information...</value>
+            <summary>Gets the Hardware information.</summary>
+        </member>
+        <member name="T:HDRadioComm.HDRadio.HDRadioSeekType">
+            <summary>Used in the <strong>SeekUp</strong> and <strong>SeekDown</strong> methods</summary>
+            <example>
+            	<para>SeekUp(HDRadioSeekType.HD)</para>
+            	<para>SeekDown(HDRadioSeekType.ALL)</para>
+            </example>
+        </member>
+        <member name="T:HDRadioComm.HDRadio.HDRadioBands">
+            <summary>Used for specifiing radio band.</summary>
+        </member>
+        <member name="F:HDRadioComm.HDRadio.HDRadioBands.AM">
+            <summary>AM Radio</summary>
+        </member>
+        <member name="F:HDRadioComm.HDRadio.HDRadioBands.FM">
+            <summary>FM Radio</summary>
+        </member>
+        <member name="T:HDRadioComm.HDRadio.PowerStatus">
+            <summary>Used for getting powerstatus</summary>
+        </member>
+        <member name="T:HDRadioComm.HDRadio.HDRadioData">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:HDRadioComm.HDRadio.HDRadioMessages">
+            <summary>
+            
+            </summary>
+        </member>
+    </members>
+</doc>
