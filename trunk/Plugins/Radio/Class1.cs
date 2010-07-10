@@ -185,7 +185,6 @@ namespace OMRadio
                 else
                     for (int i = 0; i < theHost.ScreenCount; i++)
                         ((OMLabel)manager[i]["Radio_StationName"]).Text = "Auto load failed!";
-
         }
 
         public Settings loadSettings()
@@ -675,10 +674,11 @@ namespace OMRadio
                         {
                             for (int i = 0; i < theHost.ScreenCount; i++)
                                 ((OMLabel)manager[i]["Radio_StationName"]).Text = "Loading " + SelectedItemTag;
-                            theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag);
-                            if (UpdateStationList(theHost.instanceForScreen(screen)))
-                                for (int i = 0; i < theHost.ScreenCount; i++)
-                                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
+                            
+                            if (theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag))
+                                if (UpdateStationList(theHost.instanceForScreen(screen)))
+                                    for (int i = 0; i < theHost.ScreenCount; i++)
+                                        ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
                         }
                     }
                     break;
@@ -873,32 +873,35 @@ namespace OMRadio
             if ((info.currentStation == null) || (info.stationList == null))
                 return false;
 
-            for (int i = 0; i < theHost.ScreenCount; i++)
+            lock (info)
             {
-                // Update station list data
-                OMList List = (OMList)manager[i]["List_RadioStations"];
-                stationInfo[] Stations;
-                if ((List.Count == info.stationList.Length) && (StationListSource == StationListSources.Live))
+                for (int i = 0; i < theHost.ScreenCount; i++)
                 {
-                    Stations=info.stationList;
-                    for (int j = 0; j < Stations.Length;j++)
+                    // Update station list data
+                    OMList List = (OMList)manager[i]["List_RadioStations"];
+                    stationInfo[] Stations;
+                    if ((List.Count == info.stationList.Length) && (StationListSource == StationListSources.Live))
                     {
-                        List[j].text = Stations[j].stationName;
-                        List[j].tag = Stations[j].stationID;
+                        Stations = info.stationList;
+                        for (int j = 0; j < Stations.Length; j++)
+                        {
+                            List[j].text = Stations[j].stationName;
+                            List[j].tag = Stations[j].stationID;
+                        }
+                        return true;
                     }
-                    return true;
-                }
-                List.Clear();
-                if (StationListSource == StationListSources.Live)
-                    Stations = info.stationList;
-                else
-                {
-                    LoadPresets(instance);
-                    Stations = Presets.ToArray();
-                }
+                    List.Clear();
+                    if (StationListSource == StationListSources.Live)
+                        Stations = info.stationList;
+                    else
+                    {
+                        LoadPresets(instance);
+                        Stations = Presets.ToArray();
+                    }
 
-                foreach (stationInfo station in Stations)
-                    List.Add(new OMListItem(station.stationName, (object)station.stationID));
+                    foreach (stationInfo station in Stations)
+                        List.Add(new OMListItem(station.stationName, (object)station.stationID));
+                }
             }
             return true;
         }
