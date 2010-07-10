@@ -774,7 +774,15 @@ namespace OpenMobile
                     }
                     return false;
                 case eFunction.refreshData:
-                    return ((IDataProvider)getPluginByName(arg)).refreshData();
+                    plugin = getPluginByName(arg);
+                    if (plugin == null)
+                        return false;
+                    if (typeof(IDataProvider).IsInstanceOfType(plugin))
+                        return ((IDataProvider)plugin).refreshData();
+                    else if (typeof(INetwork).IsInstanceOfType(plugin))
+                        return ((INetwork)plugin).refresh();
+                    else
+                        return false;
                 case eFunction.backgroundOperationStatus:
                     raiseSystemEvent(eFunction.backgroundOperationStatus, arg, "", "");
                     return true;
@@ -1077,14 +1085,8 @@ namespace OpenMobile
                         return true;
                     }
                     return false;
-                /* Does anything use this?
-            case eFunction.systemVolumeChanged:
-                if (int.TryParse(arg2, out ret) == true)
-                {
-                    raiseSystemEvent(eFunction.systemVolumeChanged, arg1, arg2, "");
-                    return true;
-                }
-                return false;*/
+                case eFunction.connectToInternet:
+                    return Net.Connections.connect(this, arg1,arg2);
                 case eFunction.setSystemVolume:
                     if (int.TryParse(arg1, out ret) == true)
                     {

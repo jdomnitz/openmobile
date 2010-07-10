@@ -72,7 +72,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Refreshes the available connections
         /// </summary>
-        void refresh();
+        bool refresh();
         /// <summary>
         /// Retrieves the status of the active connection (the last one the connect command was called on-otherwise returns 0).  After 5 seconds should default to 3.
         /// </summary>

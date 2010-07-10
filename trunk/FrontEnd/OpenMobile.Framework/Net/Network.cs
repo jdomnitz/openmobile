@@ -129,7 +129,7 @@ namespace OpenMobile.Net
                 using (WebClient client = new WebClient())
                     return client.DownloadString(url);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }
@@ -145,11 +145,16 @@ namespace OpenMobile.Net
         {
             if ((URL == null)||(URL==""))
                 return null;
-            using (WebClient client = new WebClient())
+            try
             {
-                MemoryStream stream = new MemoryStream(client.DownloadData(URL));
-                return Image.FromStream(stream, false, true);
+                using (WebClient client = new WebClient())
+                {
+                    MemoryStream stream = new MemoryStream(client.DownloadData(URL));
+                    return Image.FromStream(stream, false, true);
+                }
             }
+            catch (WebException) { return null; }
+            catch (NotSupportedException) { return null; }
         }
         /// <summary>
         /// Internet Availability on a network connection

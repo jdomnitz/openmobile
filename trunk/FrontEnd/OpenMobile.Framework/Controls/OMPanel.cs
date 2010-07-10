@@ -66,7 +66,11 @@ namespace OpenMobile.Controls
                 c = value;
             }
         }
-
+        public void addRange(OMPanel source)
+        {
+            foreach (OMControl c in source.containedControls)
+                addControl(c);
+        }
         /// <summary>
         /// Adds a control to the container
         /// </summary>
