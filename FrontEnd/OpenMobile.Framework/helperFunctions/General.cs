@@ -64,20 +64,24 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string getText(int screen,string pluginname,string panelName)
             {
+                return getText(screen, pluginname, new string[] { panelName });
+            }
+            public string getText(int screen,string pluginname,string[] panelNames)
+            {
                 SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
                 this.screen = screen;
                 wait.Reset();
-                if (host.execute(eFunction.TransitionToPanel, screen.ToString(),"OSK","OSK") == false)
-                {
-                    return null;
-                }
-                host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname,panelName);
+                bool error = false;
+                host.execute(eFunction.TransitionFromAny, screen.ToString());
+                error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "OSK");
                 host.execute(eFunction.ExecuteTransition,screen.ToString());
-                wait.WaitOne();
+                if (!error)
+                    wait.WaitOne();
                 host.OnSystemEvent -= ev;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
-                host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
+                foreach(string panelName in panelNames)
+                    host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
             }

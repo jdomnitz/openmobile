@@ -62,6 +62,17 @@ namespace OpenMobile.Net
         /// <returns></returns>
         public static bool connect(IPluginHost host,string connectionID)
         {
+            return connect(host, connectionID, null);
+        }
+        /// <summary>
+        /// Connects to a network
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="connectionID"></param>
+        /// <param name="credentials"></param>
+        /// <returns></returns>
+        public static bool connect(IPluginHost host,string connectionID,string credentials)
+        {
             object o = new object();
             host.getData(eGetData.GetPlugins, "", out o);
             List<IBasePlugin> l = (List<IBasePlugin>)o;
@@ -69,6 +80,7 @@ namespace OpenMobile.Net
             foreach (IBasePlugin b in l.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))
             {
                 info = Array.Find<connectionInfo>(((INetwork)b).getAvailableNetworks(), p => p.UID == connectionID);
+                info.Credentials = credentials;
                 if (info != null)
                 {
                     lastNetworkID = connectionID;

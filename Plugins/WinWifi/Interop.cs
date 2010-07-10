@@ -315,7 +315,7 @@ namespace NativeWifi
 
             public override int GetHashCode()
             {
-                return this.profileName.GetHashCode()+this.numberOfBssids.GetHashCode()+this.dot11Ssid.GetHashCode();
+                return this.dot11DefaultAuthAlgorithm.GetHashCode()+this.dot11DefaultCipherAlgorithm.GetHashCode()+(int)this.numberOfBssids+(this.dot11Ssid.GetHashCode()/2);
             }
 		}
 
@@ -1192,7 +1192,24 @@ namespace NativeWifi
 			/// </summary>
 			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
 			public byte[] SSID;
-		}
+
+            public override int GetHashCode()
+            {
+                int ret=0;
+                for (int i = 0; i < SSIDLength; i++)
+                    ret += (SSID[i].GetHashCode()*(i+1));
+                return ret;
+            }
+
+            public override bool Equals(object obj)
+            {
+                Dot11Ssid two=(Dot11Ssid)obj;
+                for (int i = 0; i < SSIDLength; i++)
+                    if (SSID[i] != two.SSID[i])
+                        return false;
+                return true;
+            }
+        }
 
 		/// <summary>
 		/// Defines an 802.11 PHY and media type.

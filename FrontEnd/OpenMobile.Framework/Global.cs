@@ -504,6 +504,10 @@ namespace OpenMobile
         /// Represents an image that the framework can't find
         /// </summary>
         public static imageItem MISSING = new imageItem("MISSING");
+        /// <summary>
+        /// Represents an empty image item
+        /// </summary>
+        public static imageItem NONE = new imageItem();
     }
     /// <summary>
     /// The button click transition
@@ -1616,7 +1620,17 @@ namespace OpenMobile
         /// The connection is currently connected
         /// </summary>
         public bool IsConnected;
-
+        /// <summary>
+        /// If true, credentials must be set before connecting
+        /// </summary>
+        public bool requiresPassword;
+        /// <summary>
+        /// Username/Password or just Password
+        /// </summary>
+        public string Credentials;
+        /// <summary>
+        /// Plugin Specific (describes the connection)
+        /// </summary>
         public string ConnectionType="";
         /// <summary>
         /// Creates a new connection info
@@ -1625,13 +1639,18 @@ namespace OpenMobile
         /// <param name="id"></param>
         /// <param name="speed"></param>
         /// <param name="signal"></param>
-        public connectionInfo(string name, string id, int speed, uint signal,string type)
+        public connectionInfo(string name, string id, int speed, uint signal,string type,bool passwordRequired)
         {
             NetworkName = name;
             UID = id;
             potentialSpeed = speed;
             signalStrength = signal;
             ConnectionType = type;
+            requiresPassword = passwordRequired;
+        }
+        public override bool Equals(object obj)
+        {
+            return (((connectionInfo)obj).UID == this.UID);
         }
     }
 

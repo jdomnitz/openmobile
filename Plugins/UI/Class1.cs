@@ -282,12 +282,12 @@ namespace OpenMobile
             p.addControl(mediaButton);
             p.addControl(mediaBar);
             p.addControl(Image2);
-            p.addControl(vol);
+            p.addControl(random); //5
             p.addControl(trackTitle);
             p.addControl(trackAlbum);
             p.addControl(trackArtist);
             p.addControl(cover);
-            p.addControl(playButton);
+            p.addControl(playButton); //10
             p.addControl(stopButton);
             p.addControl(rewindButton);
             p.addControl(skipBackwardButton);
@@ -297,14 +297,14 @@ namespace OpenMobile
             p.addControl(slider);
             p.addControl(HomeButton);
             p.addControl(shape);
-            p.addControl(caption);
+            p.addControl(caption); //20
             p.addControl(imgSpeak);
             p.addControl(icon1);
             p.addControl(icon2);
             p.addControl(icon3);
             p.addControl(icon4);
             p.addControl(volume);
-            p.addControl(random);
+            p.addControl(vol); //27
             icons.OnIconsChanged += new IconManager.IconsChanged(icons_OnIconsChanged);
 
             p.BackgroundType = backgroundStyle.Gradiant;
@@ -348,7 +348,7 @@ namespace OpenMobile
             volTmr = new System.Timers.Timer(2500);
             volTmr.Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
             volScreen = screen;
-            OMButton btn = (OMButton)manager[screen][5];
+            OMButton btn = (OMButton)manager[screen][27];
             for (int i = 0; i <= 10; i++)
             {
                 manager[screen][26].Top =  (51 * i)-510;
@@ -360,9 +360,7 @@ namespace OpenMobile
 
         void volTmr_Elapsed(object sender, ElapsedEventArgs e)
         {
-            OMButton btn = (OMButton)manager[volScreen][5];
-            //btn.Image = theHost.getSkinImage("Volume");
-            //btn.FocusImage = theHost.getSkinImage("Volume.Focus");
+            OMButton btn = (OMButton)manager[volScreen][27];
             for (int i = 0; i <= 10; i++)
             {
                 manager[volScreen][26].Top = -(51 * i);
@@ -493,7 +491,7 @@ namespace OpenMobile
                     {
                         if (arg2 != theHost.instanceForScreen(i).ToString())
                             continue;
-                        OMButton b = ((OMButton)manager[i][5]);
+                        OMButton b = ((OMButton)manager[i][27]);
                         b.Image = theHost.getSkinImage("VolumeButtonMuted");
                         b.FocusImage = theHost.getSkinImage("VolumeButtonMutedFocus");
                     }
@@ -504,7 +502,7 @@ namespace OpenMobile
                     {
                         if (arg2 != theHost.instanceForScreen(i).ToString())
                             continue;
-                        OMButton b = ((OMButton)manager[i][5]);
+                        OMButton b = ((OMButton)manager[i][27]);
                         b.Image = theHost.getSkinImage("VolumeButton");
                         b.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
                         ((VolumeBar)manager[i][26]).Value = int.Parse(arg1);
@@ -539,13 +537,13 @@ namespace OpenMobile
                             theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
                         case " ":
-                            theHost.execute(eFunction.nextMedia,theHost.instanceForScreen(int.Parse(arg1)).ToString());
+                            skipForwardButton_OnClick(null, int.Parse(arg1));
                             break;
                         case "I":
                             playButton_OnClick(null, int.Parse(arg1));
                             break;
                         case "back":
-                            theHost.execute(eFunction.previousMedia, theHost.instanceForScreen(int.Parse(arg1)).ToString());
+                            skipBackwardButton_OnClick(null, int.Parse(arg1));
                             break;
                     }
             }
@@ -665,7 +663,7 @@ namespace OpenMobile
                             p[15].Top -= 20;
                             p[16].Top -= 20;
                             p[17].Top -= 20;
-                            p[27].Top -= 20;
+                            p[5].Top -= 20;
                     }
                 }
                 else
@@ -686,7 +684,7 @@ namespace OpenMobile
                         p[15].Top += 20;
                         p[16].Top += 20;
                         p[17].Top += 20;
-                        p[27].Top += 20;
+                        p[5].Top += 20;
                 }
                 timerIteration++;
                 if (theHost.GraphicsLevel==eGraphicsLevel.Standard)
@@ -864,7 +862,7 @@ namespace OpenMobile
                 {
                     if (theHost.instanceForScreen(i) == instance)
                     {
-                        OMButton b = (OMButton)manager[i][27];
+                        OMButton b = (OMButton)manager[i][5];
                         if (arg == "Disabled")
                         {
                             b.Image = theHost.getSkinImage("random");

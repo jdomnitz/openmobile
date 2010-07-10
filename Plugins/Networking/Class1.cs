@@ -39,7 +39,7 @@ namespace Networking
         {
             if (manager == null)
                 return null;
-            return manager[screen];
+            return manager[screen,name];
         }
 
         public Settings loadSettings()
@@ -66,7 +66,7 @@ namespace Networking
             border2.BorderColor = Color.Silver;
             border2.FillColor = Color.Black;
             OMButton connect = new OMButton(680, 300, 280, 50);
-            connect.Text = "Connect";
+            connect.Text = "Scan";
             connect.Image = imageItem.MISSING;
             connect.OnClick += new userInteraction(connect_OnClick);
             OMList networks = new OMList(22, 121, 616, 390);
@@ -82,6 +82,27 @@ namespace Networking
             OMLabel networkName = new OMLabel(745, 120, 200, 50);
             networkName.Format = eTextFormat.BoldShadow;
             OMLabel networkType = new OMLabel(660, 190, 320, 50);
+            OMBasicShape background = new OMBasicShape(0, 0, 1000, 600);
+            background.FillColor = Color.FromArgb(140, Color.Black);
+            OMBasicShape password = new OMBasicShape(300, 200, 400, 175);
+            password.FillColor = Color.Black;
+            password.CornerRadius = 10F;
+            password.BorderSize = 4F;
+            password.BorderColor = Color.Red;
+            password.Shape = shapes.RoundedRectangle;
+            OMLabel caption = new OMLabel(300, 200, 400, 50);
+            caption.Text = "Enter a Password To Connect";
+            caption.Color = Color.White;
+            caption.Font = new Font(FontFamily.GenericSansSerif, 20F);
+            caption.OutlineColor = Color.Red;
+            caption.Format = eTextFormat.Glow;
+            OMTextBox textbox = new OMTextBox(310, 250, 380, 50);
+            textbox.OutlineColor = Color.Red;
+            textbox.OnClick += new userInteraction(textbox_OnClick);
+            OMButton login = new OMButton(310, 310, 380, 50);
+            login.Text = "Login";
+            login.OnClick += new userInteraction(login_OnClick);
+            login.Image = imageItem.MISSING;
             p.addControl(border);
             p.addControl(networks);
             p.addControl(border2);
@@ -89,9 +110,37 @@ namespace Networking
             p.addControl(networkName);
             p.addControl(networkType);
             p.addControl(connect);
+            OMPanel prompt = new OMPanel("Prompt");
+            prompt.Forgotten = true;
+            prompt.addControl(background);
+            prompt.addControl(password);
+            prompt.addControl(caption);
+            prompt.addControl(textbox);
+            prompt.addControl(login);
             manager.loadPanel(p);
+            manager.loadPanel(prompt);
             OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.MediumLow, "Refresh Networks");
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void login_OnClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "Networking", "Prompt");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
+            OMList list = (OMList)manager[screen][1];
+            if (list.SelectedItem == null)
+                return;
+            connectionInfo info = networks.Find(p => p.UID == list.SelectedItem.tag.ToString());
+            if (info == null)
+                return;
+            OMTextBox tb = (OMTextBox)sender.Parent[3];
+            theHost.execute(eFunction.connectToInternet, list.SelectedItem.tag.ToString(), tb.Text);
+        }
+
+        void textbox_OnClick(OMControl sender, int screen)
+        {
+            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+            ((OMTextBox)sender).Text= input.getText(screen, "Networking",new string[]{"","Prompt"});
         }
 
         void connect_OnClick(OMControl sender, int screen)
@@ -99,10 +148,32 @@ namespace Networking
             OMList list = (OMList)sender.Parent[1];
             if (list.SelectedItem != null)
             {
-                if (((OMButton)sender).Text=="Connect")
-                    theHost.execute(eFunction.connectToInternet, list.SelectedItem.tag.ToString());
-                else
-                    theHost.execute(eFunction.disconnectFromInternet, list.SelectedItem.tag.ToString());
+                switch (((OMButton)sender).Text)
+                {
+                    case "Connect":
+                        connectionInfo info = networks.Find(p => p.UID == list.SelectedItem.tag.ToString());
+                        if (info==null)
+                            return;
+                        if (info.requiresPassword)
+                        {
+                            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Networking", "Prompt");
+                            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                        }
+                        else
+                            theHost.execute(eFunction.connectToInternet, list.SelectedItem.tag.ToString());
+                        return;
+                    case "Disconnect":
+                        theHost.execute(eFunction.disconnectFromInternet, list.SelectedItem.tag.ToString());
+                        return;
+                    case "Scan":
+                        theHost.execute(eFunction.refreshData, "WinWifi"); //TODO: Make this generic
+                        return;
+                }
+            }
+            else
+            {
+                if (((OMButton)sender).Text=="Scan")
+                    theHost.execute(eFunction.refreshData, "WinWifi");
             }
         }
 
@@ -112,7 +183,7 @@ namespace Networking
             connectionInfo info = networks.Find(p => p.UID == list.SelectedItem.tag.ToString());
             ((OMImage)manager[screen][3]).Image = new imageItem(list.SelectedItem.image);
             ((OMLabel)manager[screen][4]).Text = list.SelectedItem.text;
-            ((OMLabel)manager[screen][5]).Text = info.ConnectionType.Replace('_',' ');
+            ((OMLabel)manager[screen][5]).Text = info.ConnectionType;
             if (info.IsConnected)
                 ((OMButton)manager[screen][6]).Text = "Disconnect";
             else
@@ -136,7 +207,28 @@ namespace Networking
             foreach(connectionInfo c in networks)
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
-                    ((OMList)manager[i][1]).Add(getListItem(c));
+                {
+                    OMList list=((OMList)manager[i][1]);
+                    list.Add(getListItem(c));
+                    if ((((OMLabel)manager[i][4]).Text == c.NetworkName) && (((OMLabel)manager[i][5]).Text == c.ConnectionType))
+                    {
+                        list.SelectedIndex = list.Count - 1;
+                        if (c.IsConnected)
+                            ((OMButton)manager[i][6]).Text = "Disconnect";
+                        else
+                            ((OMButton)manager[i][6]).Text = "Connect";
+                    }
+                }
+            }
+            for (int i = 0; i < theHost.ScreenCount; i++)
+            {
+                if (((OMList)manager[i][1]).SelectedIndex == -1)
+                {
+                    ((OMImage)manager[i][3]).Image = imageItem.NONE;
+                    ((OMLabel)manager[i][4]).Text = "";
+                    ((OMLabel)manager[i][5]).Text = "";
+                    ((OMButton)manager[i][6]).Text = "Scan";
+                }
             }
         }
 
@@ -176,6 +268,9 @@ namespace Networking
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
                     icon = new IconManager.UIIcon(theHost.getSkinImage("WifiConnecting").image, ePriority.Normal, false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
+                    return;
+                case eWirelessEvent.ConnectedToWirelessNetwork:
+                    OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.Normal, "Refresh Networks");
                     return;
                 case eWirelessEvent.WirelessSignalStrengthChanged:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);

@@ -76,7 +76,7 @@ namespace XMRadio
         {
             if (radio == null)
                 return new stationInfo();
-            if (stations[radio.CurrentTunedChannel] == null)
+            if ((stations==null)||(stations[radio.CurrentTunedChannel] == null))
                 return new stationInfo();
             return stations[radio.CurrentTunedChannel];
         }
