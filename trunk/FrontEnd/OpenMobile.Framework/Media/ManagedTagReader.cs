@@ -85,9 +85,10 @@ namespace OpenMobile.Media
                 }
                 catch (ArgumentException) { }
             }
-            info.Genre = t.Genres.ToString();
+            info.Genre = t.FirstGenre;
             info.Location = filename;
             info.Name = t.Title;
+            info.Lyrics = t.Lyrics;
             info.Length=(int)f.Properties.Duration.TotalSeconds;
             info.TrackNumber = (int)t.Track;
             return info;
@@ -140,6 +141,10 @@ namespace OpenMobile.Media
             cacheArt = null;
             Thread.Sleep(200); //prevent TOS violation
             XmlDocument reader = new XmlDocument();
+            if (album == "Unknown Album")
+                return null;
+            if (artist == "Unknown Artist")
+                return null;
             try
             {
                 reader.Load("http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=280b54c321127c4647d05ead85cf5fdc&artist=" + Network.urlEncode(artist) + "&album=" + Network.urlEncode(album));
@@ -178,7 +183,7 @@ namespace OpenMobile.Media
                 return null;
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetSongsByAlbum(artist, album, true);
+                db.beginGetSongsByAlbum(artist, album, true,eMediaField.Title);
                 mediaInfo result = db.getNextMedia();
                 if (result == null)
                     return null;

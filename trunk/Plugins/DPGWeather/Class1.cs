@@ -200,28 +200,28 @@ namespace DPGWeather
             switch (arg[0])
             {
                 case "N":
-                    ret.windDirection = Weather.direction.N;
+                    ret.windDirection = eDirection.N;
                     break;
                 case "W":
-                    ret.windDirection = Weather.direction.W;
+                    ret.windDirection = eDirection.W;
                     break;
                 case "E":
-                    ret.windDirection = Weather.direction.E;
+                    ret.windDirection = eDirection.E;
                     break;
                 case "S":
-                    ret.windDirection = Weather.direction.S;
+                    ret.windDirection = eDirection.S;
                     break;
                 case "NW":
-                    ret.windDirection = Weather.direction.NW;
+                    ret.windDirection = eDirection.NW;
                     break;
                 case "SW":
-                    ret.windDirection = Weather.direction.SW;
+                    ret.windDirection = eDirection.SW;
                     break;
                 case "NE":
-                    ret.windDirection = Weather.direction.NE;
+                    ret.windDirection = eDirection.NE;
                     break;
                 case "SE":
-                    ret.windDirection = Weather.direction.SE;
+                    ret.windDirection = eDirection.SE;
                     break;
             }
             ret.windSpeed = int.Parse(arg[2]);

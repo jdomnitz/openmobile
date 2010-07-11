@@ -624,9 +624,9 @@ namespace OpenMobile
                             tmrClick.Enabled = true;
                             lastClick.Mode = eModeType.Clicked;
                             if (p.DoubleClickable == true)
-                                SandboxedThread.Asynchronous(delegate() { lastClick.doubleClickMe(screen); lastClick.Mode = eModeType.Highlighted; });
+                                SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.doubleClickMe(screen); lastClick.Mode = eModeType.Highlighted; });
                             else
-                                SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
+                                SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.clickMe(screen); });
                         }
                     }
                     else if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))

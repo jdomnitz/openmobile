@@ -27,52 +27,52 @@ using OpenMobile.helperFunctions;
 namespace OpenMobile.Data
 {
     /// <summary>
+    /// The cardnal directions
+    /// </summary>
+    public enum eDirection
+    {
+        /// <summary>
+        /// Default Enum Value
+        /// </summary>
+        NotSet = 0,
+        /// <summary>
+        /// North
+        /// </summary>
+        N,
+        /// <summary>
+        /// West
+        /// </summary>
+        W,
+        /// <summary>
+        /// East
+        /// </summary>
+        E,
+        /// <summary>
+        /// South
+        /// </summary>
+        S,
+        /// <summary>
+        /// North-West
+        /// </summary>
+        NW,
+        /// <summary>
+        /// North-East
+        /// </summary>
+        NE,
+        /// <summary>
+        /// South-West
+        /// </summary>
+        SW,
+        /// <summary>
+        /// South-East
+        /// </summary>
+        SE
+    }
+    /// <summary>
     /// Weather data
     /// </summary>
     public sealed class Weather:IDisposable
     {
-        /// <summary>
-        /// The cardnal directions
-        /// </summary>
-        public enum direction
-        {
-            /// <summary>
-            /// Default Enum Value
-            /// </summary>
-            NotSet=0,
-            /// <summary>
-            /// North
-            /// </summary>
-            N,
-            /// <summary>
-            /// West
-            /// </summary>
-            W,
-            /// <summary>
-            /// East
-            /// </summary>
-            E,
-            /// <summary>
-            /// South
-            /// </summary>
-            S,
-            /// <summary>
-            /// North-West
-            /// </summary>
-            NW,
-            /// <summary>
-            /// North-East
-            /// </summary>
-            NE,
-            /// <summary>
-            /// South-West
-            /// </summary>
-            SW,
-            /// <summary>
-            /// South-East
-            /// </summary>
-            SE
-        }
         /// <summary>
         /// Weather Conditions
         /// </summary>
@@ -219,7 +219,7 @@ namespace OpenMobile.Data
             /// <summary>
             /// Wind Direction
             /// </summary>
-            public direction windDirection;
+            public eDirection windDirection;
             /// <summary>
             /// Wind Speed
             /// </summary>
@@ -263,7 +263,7 @@ namespace OpenMobile.Data
                 w.dewPoint = reader.GetFloat(reader.GetOrdinal("dewPoint"));
                 w.humidity = reader.GetInt32(reader.GetOrdinal("Humidity"));
                 w.UVIndex = reader.GetInt32(reader.GetOrdinal("UVIndex"));
-                w.windDirection = (direction)Enum.Parse(typeof(direction), reader.GetString(reader.GetOrdinal("windDirection")));
+                w.windDirection = (eDirection)Enum.Parse(typeof(eDirection), reader.GetString(reader.GetOrdinal("windDirection")));
                 w.windSpeed = reader.GetFloat(reader.GetOrdinal("windSpeed"));
                 w.precipitationPercent=reader.GetInt32(reader.GetOrdinal("precip"));
                 w.location = location;

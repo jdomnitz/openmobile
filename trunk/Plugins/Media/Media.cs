@@ -278,7 +278,7 @@ namespace Media
                 kickDown[screen] = false;
                 theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
                 IMediaDatabase db = (IMediaDatabase)o;
-                db.beginGetSongsByArtist(artist, true);
+                db.beginGetSongsByArtist(artist, true,eMediaField.Title);
                 currentSongs[theHost.instanceForScreen(screen)].Clear();
                 mediaInfo info = db.getNextMedia();
                 OMList l = ((OMList)manager[screen]["Media.List1"]);
@@ -300,7 +300,7 @@ namespace Media
             {
                 theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
                 IMediaDatabase db = (IMediaDatabase)o;
-                db.beginGetSongsByArtist(artist, false);
+                db.beginGetSongsByArtist(artist, false,eMediaField.Title);
                 currentSongs[theHost.instanceForScreen(screen)].Clear();
                 mediaInfo info = db.getNextMedia();
                 if (info != null)
@@ -353,7 +353,7 @@ namespace Media
                 if (o == null)
                     return;
                 IMediaDatabase db = (IMediaDatabase)o;
-                db.beginGetSongsByAlbum(artist, album, true);
+                db.beginGetSongsByAlbum(artist, album, true,eMediaField.Title);
                 OMList l = ((OMList)manager[screen]["Media.List1"]);
                 l.Clear();
                 currentSongs[theHost.instanceForScreen(screen)].Clear();

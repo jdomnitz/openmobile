@@ -120,10 +120,6 @@ namespace TagLib.Id3v2
 		///    A <see cref="Frame" /> object read from the data, or <see
 		///    langword="null" /> if none is found.
 		/// </returns>
-		/// <exception cref="System.NotImplementedException">
-		///    The frame contained in the raw data could not be
-		///    converted to ID3v2 or uses encryption or compression.
-		/// </exception>
 		public static Frame CreateFrame (ByteVector data,
 		                                 ref int offset, byte version, bool alreadyUnsynched)
 		{
@@ -134,9 +130,9 @@ namespace TagLib.Id3v2
 			
 			offset += (int) (header.FrameSize + FrameHeader.Size (
 				version));
-			
-			if (header.FrameId == null)
-				throw new System.NotImplementedException ();
+
+            if (header.FrameId == null)
+                return new EmptyFrame();//throw new System.NotImplementedException ();
 			
 			foreach (byte b in header.FrameId) {
 				char c = (char) b;
@@ -158,12 +154,12 @@ namespace TagLib.Id3v2
 				return new UnknownFrame (data, position, header,
 					version);
 			}
-			
-			if ((header.Flags & FrameFlags.Compression) != 0)
-				throw new System.NotImplementedException ();
+
+            if ((header.Flags & FrameFlags.Compression) != 0)
+                return new EmptyFrame();//throw new System.NotImplementedException ();
 			
 			if ((header.Flags & FrameFlags.Encryption) != 0)
-				throw new System.NotImplementedException ();
+                return new EmptyFrame();//throw new System.NotImplementedException();
 			
 			foreach (FrameCreator creator in frame_creators) {
 				Frame frame = creator (data, position, header,

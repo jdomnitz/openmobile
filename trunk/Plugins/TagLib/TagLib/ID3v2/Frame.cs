@@ -89,7 +89,8 @@ namespace TagLib.Id3v2 {
 			
 			header = new FrameHeader (data, version);
 		}
-		
+        [Obsolete]
+        protected Frame() { }
 		/// <summary>
 		///    Constructs and initializes a new instance of <see
 		///    cref="Frame" /> with a specified header.

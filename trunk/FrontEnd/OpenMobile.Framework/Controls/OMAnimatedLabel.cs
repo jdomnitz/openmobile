@@ -108,83 +108,88 @@ namespace OpenMobile.Controls
                 t.Enabled = false;
                 return;
             }
-            if (tempTransition != eAnimation.None)
-            {
-                if (tempTransition == eAnimation.UnveilRight)
+            lock (this)
                 {
-                    veilRight -= 20;
+                if (tempTransition != eAnimation.None)
+                {
+                    if (tempTransition == eAnimation.UnveilRight)
+                    {
+                        veilRight -= 20;
+                        if (veilRight < 0)
+                        {
+                            veilRight = 0;
+                            t.Interval = oldTick;
+                            oldTick = 0;
+                            tempTransition = eAnimation.None;
+                        }
+                        this.refreshMe(this.toRegion());
+                        return;
+                    }
+                }
+                if (currentAnimation == eAnimation.Scroll)
+                {
+                    scrollPos++;
+                    if ((scrollPos * avgChar) + width > (Text.Length * (avgChar + 0.5)))
+                    {
+                        Thread.Sleep(500);
+                        if (singleAnimation == true)
+                            endSingleAnimation();
+                        scrollPos = 0;
+                        this.refreshMe(this.toRegion());
+                        Thread.Sleep(500);
+                    }
+                }
+                else if (currentAnimation == eAnimation.BounceScroll)
+                {
+                    if (directionReverse == true)
+                        scrollPos--;
+                    else
+                        scrollPos++;
+                    if ((scrollPos * avgChar) + width > (Text.Length * (avgChar + 0.5)))
+                    {
+                        scrollPos = text.Length - (int)(width / avgChar);
+                        directionReverse = true;
+                        Thread.Sleep(500);
+                    }
+                    if (scrollPos < 0)
+                    {
+                        if (singleAnimation == true)
+                            endSingleAnimation();
+                        scrollPos = 0;
+                        directionReverse = false;
+                        Thread.Sleep(500);
+                    }
+
+                }
+                else if ((currentAnimation == eAnimation.Pulse) || (currentAnimation == eAnimation.GlowPulse))
+                {
+                    currentLetter++;
+                    if (currentLetter >= Text.Length)
+                    {
+                        if (singleAnimation == true)
+                            endSingleAnimation();
+                        currentLetter = 0;
+                    }
+                }
+                else if (currentAnimation == eAnimation.UnveilLeft)
+                {
+                    veilLeft -= 10;
+                    if (veilLeft < 0)
+                    {
+                        if (singleAnimation == true)
+                            endSingleAnimation();
+                        veilLeft = Width;
+                    }
+                }
+                else if (currentAnimation == eAnimation.UnveilRight)
+                {
+                    veilRight -= 10;
                     if (veilRight < 0)
                     {
-                        veilRight = 0;
-                        t.Interval =oldTick;
-                        oldTick = 0;
-                        tempTransition = eAnimation.None;
+                        if (singleAnimation == true)
+                            endSingleAnimation();
+                        veilRight = Width;
                     }
-                    this.refreshMe(this.toRegion());
-                    return;
-                }
-            }
-            if (currentAnimation == eAnimation.Scroll)
-            {
-                scrollPos++;
-                if ((scrollPos * avgChar)+width > (Text.Length*(avgChar+0.5)))
-                {
-                    Thread.Sleep(500);
-                    if (singleAnimation == true)
-                        endSingleAnimation();
-                     scrollPos = 0;
-                     this.refreshMe(this.toRegion());
-                    Thread.Sleep(500); 
-                }
-            }
-            else if (currentAnimation == eAnimation.BounceScroll)
-            {
-                if (directionReverse==true)
-                    scrollPos--;
-                 else
-                    scrollPos++;
-                if ((scrollPos * avgChar) + width > (Text.Length * (avgChar + 0.5)))
-                {
-                    scrollPos = text.Length-(int)(width/avgChar);
-                    directionReverse = true;
-                    Thread.Sleep(500);
-                }
-                if (scrollPos < 0)
-                {
-                    if (singleAnimation == true)
-                        endSingleAnimation();
-                    scrollPos = 0;
-                    directionReverse = false;
-                    Thread.Sleep(500);
-                }
-
-            }
-            else if ((currentAnimation == eAnimation.Pulse) || (currentAnimation == eAnimation.GlowPulse))
-            {
-                currentLetter++;
-                if (currentLetter >= Text.Length)
-                {
-                    if (singleAnimation == true)
-                        endSingleAnimation();
-                    currentLetter = 0;
-                }
-            }
-            else if (currentAnimation == eAnimation.UnveilLeft)
-            {
-                veilLeft-=10;
-                if (veilLeft<0){
-                    if (singleAnimation==true)
-                        endSingleAnimation();
-                    veilLeft=Width;
-                }
-            }
-            else if(currentAnimation == eAnimation.UnveilRight)
-            {
-                veilRight-= 10;
-                if (veilRight<0){
-                    if (singleAnimation==true)
-                        endSingleAnimation();
-                    veilRight=Width;
                 }
             }
             if (currentAnimation!=eAnimation.None)
@@ -236,8 +241,11 @@ namespace OpenMobile.Controls
             }
             set
             {
-                currentAnimation = animation;
-                base.Text = value;
+                lock (this)
+                {
+                    currentAnimation = animation;
+                    base.text = value;
+                }
             }
         }
 

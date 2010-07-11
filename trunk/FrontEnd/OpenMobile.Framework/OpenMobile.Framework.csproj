@@ -102,6 +102,7 @@
       <DependentUpon>SQL.resx</DependentUpon>
     </Compile>
     <Compile Include="Data\Tasks.cs" />
+    <Compile Include="Data\Traffic.cs" />
     <Compile Include="Data\Vehicle.cs" />
     <Compile Include="Data\Weather.cs" />
     <Compile Include="Global.cs" />

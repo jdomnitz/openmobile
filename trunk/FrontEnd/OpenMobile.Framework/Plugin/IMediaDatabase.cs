@@ -38,7 +38,11 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Genre
         /// </summary>
-        Genre
+        Genre,
+        /// <summary>
+        /// Track
+        /// </summary>
+        Track
     }
     /// <summary>
     /// Provides a media information (tag) database
@@ -74,28 +78,28 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="covers"></param>
         /// <returns></returns>
-        bool beginGetSongs(bool covers);
+        bool beginGetSongs(bool covers,eMediaField sortBy);
         /// <summary>
         /// List songs by artist
         /// </summary>
         /// <param name="artist"></param>
         /// <param name="covers"></param>
         /// <returns></returns>
-        bool beginGetSongsByArtist(string artist, bool covers);
+        bool beginGetSongsByArtist(string artist, bool covers, eMediaField sortBy);
         /// <summary>
         /// List songs that are in the given Genre
         /// </summary>
         /// <param name="genre"></param>
         /// <param name="covers"></param>
         /// <returns></returns>
-        bool beginGetSongsByGenre(string genre, bool covers);
+        bool beginGetSongsByGenre(string genre, bool covers, eMediaField sortBy);
         /// <summary>
         /// List songs that have the given rating
         /// </summary>
         /// <param name="genre"></param>
         /// <param name="covers"></param>
         /// <returns></returns>
-        bool beginGetSongsByRating(string genre, bool covers);
+        bool beginGetSongsByRating(string genre, bool covers, eMediaField sortBy);
         /// <summary>
         /// Get songs that match the given artist and album
         /// </summary>
@@ -103,20 +107,25 @@ namespace OpenMobile.Plugin
         /// <param name="album"></param>
         /// <param name="covers"></param>
         /// <returns></returns>
-        bool beginGetSongsByAlbum(string artist, string album, bool covers);
+        bool beginGetSongsByAlbum(string artist, string album, bool covers, eMediaField sortBy);
         /// <summary>
         /// List songs that contain the given lyrics
         /// </summary>
         /// <param name="phrase"></param>
         /// <param name="covers"></param>
         /// <returns></returns>
-        bool beginGetSongsByLyrics(string phrase, bool covers);
+        bool beginGetSongsByLyrics(string phrase, bool covers, eMediaField sortBy);
         /// <summary>
         /// List available Genres
         /// </summary>
         /// <returns></returns>
         bool beginGetGenres();
-
+        /// <summary>
+        /// Sets the rating for the given media
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        bool setRating(mediaInfo info);
         /// <summary>
         /// Returns the next record in an asynchronous query
         /// </summary>
