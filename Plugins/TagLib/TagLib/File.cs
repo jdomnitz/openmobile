@@ -1031,33 +1031,6 @@ namespace TagLib
 
         /// <summary>
         ///    Creates a new instance of a <see cref="File" /> subclass
-        ///    for a specified file abstraction, guessing the mime-type
-        ///    from the file's extension and using the average read
-        ///    style.
-        /// </summary>
-        /// <param name="abstraction">
-        ///    A <see cref="IFileAbstraction" /> object to use when
-        ///    reading to and writing from the current instance.
-        /// </param>
-        /// <returns>
-        ///    A new instance of <see cref="File" /> as read from the
-        ///    specified abstraction.
-        /// </returns>
-        /// <exception cref="CorruptFileException">
-        ///    The file could not be read due to corruption.
-        /// </exception>
-        /// <exception cref="UnsupportedFormatException">
-        ///    The file could not be read because the mime-type could
-        ///    not be resolved or the library does not support an
-        ///    internal feature of the file crucial to its reading.
-        /// </exception>
-        public static File Create(IFileAbstraction abstraction)
-        {
-            return Create(abstraction, null, ReadStyle.Average);
-        }
-
-        /// <summary>
-        ///    Creates a new instance of a <see cref="File" /> subclass
         ///    for a specified path and read style, guessing the
         ///    mime-type from the file's extension.
         /// </summary>

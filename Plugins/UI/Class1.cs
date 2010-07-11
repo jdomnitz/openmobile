@@ -339,7 +339,12 @@ namespace OpenMobile
         void vol_OnClick(OMControl sender, int screen)
         {
             if (volTmr != null)
-                volTmr.Dispose();
+            {
+                System.Timers.Timer tmp = volTmr;
+                volTmr = null;
+                tmp.Dispose();
+            }
+            volScreen = screen;
             if (sender.Top>0)
             {
                 volTmr_Elapsed(null, null);
@@ -347,7 +352,6 @@ namespace OpenMobile
             }
             volTmr = new System.Timers.Timer(2500);
             volTmr.Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
-            volScreen = screen;
             OMButton btn = (OMButton)manager[screen][27];
             for (int i = 0; i <= 10; i++)
             {
@@ -355,21 +359,32 @@ namespace OpenMobile
                 btn.Top = (int)(51.1 * i);
                 Thread.Sleep(50);
             }
-            volTmr.Enabled = true;
+            if (volTmr!=null)
+                volTmr.Enabled = true;
         }
 
         void volTmr_Elapsed(object sender, ElapsedEventArgs e)
         {
-            OMButton btn = (OMButton)manager[volScreen][27];
-            for (int i = 0; i <= 10; i++)
+            if (volScreen >= 0)
             {
-                manager[volScreen][26].Top = -(51 * i);
-                btn.Top = 511-(int)(51.1 * i);
-                Thread.Sleep(50);
+                OMButton btn = (OMButton)manager[volScreen][27];
+                for (int i = 0; i <= 10; i++)
+                {
+                    if (volScreen >= 0)
+                    {
+                        manager[volScreen][26].Top = -(51 * i);
+                        btn.Top = 511 - (int)(51.1 * i);
+                        Thread.Sleep(50);
+                    }
+                }
             }
             volScreen = -1;
-            volTmr.Dispose();
-            volTmr = null;
+            if (volTmr != null)
+            {
+                System.Timers.Timer tmp = volTmr;
+                volTmr = null;
+                tmp.Dispose();
+            }
         }
 
         void volumeChange(OMControl sender, int screen)

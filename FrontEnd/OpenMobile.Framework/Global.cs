@@ -1723,6 +1723,10 @@ namespace OpenMobile
     public class Location:ICloneable
     {
         /// <summary>
+        /// The name of the location
+        /// </summary>
+        public string Name;
+        /// <summary>
         /// The street portion of an address
         /// </summary>
         public string Street;
@@ -1755,6 +1759,7 @@ namespace OpenMobile
         /// </summary>
         public Location()
         {
+            Name="";
             Street="";
             City="";
             State="";
@@ -2059,6 +2064,10 @@ namespace OpenMobile
         /// Media Genre
         /// </summary>
         public string Genre;
+        /// <summary>
+        /// Lyrics
+        /// </summary>
+        public string Lyrics;
         /// <summary>
         /// Length in seconds
         /// </summary>

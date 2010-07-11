@@ -39,7 +39,7 @@ namespace WinDialup
         public connectionInfo[] getAvailableNetworks()
         {
             RASCONN lprasConn = new RASCONN();
-
+            
             lprasConn.dwSize = Marshal.SizeOf(typeof(RASCONN));
             lprasConn.hrasconn = IntPtr.Zero;
 
@@ -57,7 +57,7 @@ namespace WinDialup
             else
                 m_connected = false;
 
-            int lpNames = 1;
+            int lpNames = 10;
             int entryNameSize = Marshal.SizeOf(typeof(RasEntryName));
             int lpSize = lpNames * entryNameSize;
             RasEntryName[] names = new RasEntryName[lpNames];
@@ -70,12 +70,12 @@ namespace WinDialup
             List<connectionInfo> info = new List<connectionInfo>();
             if (lpNames > 0)
                 for (int i = 0; i < lpNames; i++)
-                    info.Add(new connectionInfo(names[i].szEntryName,names[i].szEntryName,56,100));
+                    info.Add(new connectionInfo(names[i].szEntryName,names[i].szEntryName,56,0,"Dial-Up Connection",false));
             return info.ToArray();
         }
-        public void refresh()
+        public bool refresh()
         {
-            //
+            return false;
         }
         public bool connect(connectionInfo connection)
         {

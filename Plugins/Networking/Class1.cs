@@ -119,7 +119,7 @@ namespace Networking
             prompt.addControl(login);
             manager.loadPanel(p);
             manager.loadPanel(prompt);
-            OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.MediumLow, "Refresh Networks");
+            OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.Normal, "Refresh Networks");
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
@@ -167,13 +167,17 @@ namespace Networking
                         return;
                     case "Scan":
                         theHost.execute(eFunction.refreshData, "WinWifi"); //TODO: Make this generic
+                        UpdateList();
                         return;
                 }
             }
             else
             {
-                if (((OMButton)sender).Text=="Scan")
+                if (((OMButton)sender).Text == "Scan")
+                {
                     theHost.execute(eFunction.refreshData, "WinWifi");
+                    UpdateList();
+                }
             }
         }
 
@@ -241,8 +245,10 @@ namespace Networking
                 icon = theHost.getSkinImage("Wifi2").image;
             else if (c.signalStrength >= 25)
                 icon = theHost.getSkinImage("Wifi1").image;
-            else
+            else if(c.signalStrength>0)
                 icon = theHost.getSkinImage("Wifi0").image;
+            else
+                icon = theHost.getSkinImage("Fixed").image;
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(100, Color.White);
             string name = c.NetworkName;

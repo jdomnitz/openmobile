@@ -109,7 +109,7 @@ namespace OpenMobile.Media
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetSongsByArtist(artist, true);
+                db.beginGetSongsByArtist(artist, true,eMediaField.Title);
                 list.Clear();
                 mediaInfo info = db.getNextMedia();
                 list.Clear();
@@ -143,7 +143,7 @@ namespace OpenMobile.Media
                 return false;
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetSongsByAlbum(artist, album, true);
+                db.beginGetSongsByAlbum(artist, album, true,eMediaField.Title);
                 list.Clear();
                 mediaInfo info = db.getNextMedia();
                 while (info != null)

@@ -86,6 +86,7 @@
     <Compile Include="TagLib\ID3v2\FrameHeader.cs" />
     <Compile Include="TagLib\ID3v2\Frames\AttachedPictureFrame.cs" />
     <Compile Include="TagLib\ID3v2\Frames\CommentsFrame.cs" />
+    <Compile Include="TagLib\ID3v2\Frames\EmptyFrame.cs" />
     <Compile Include="TagLib\ID3v2\Frames\GeneralEncapsulatedObjectFrame.cs" />
     <Compile Include="TagLib\ID3v2\Frames\MusicCdIdentifierFrame.cs" />
     <Compile Include="TagLib\ID3v2\Frames\PlayCountFrame.cs" />

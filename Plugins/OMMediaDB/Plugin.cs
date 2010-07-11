@@ -88,7 +88,7 @@ namespace OMMediaDB
         public bool clearIndex()
         {
             if (bCon == null)
-                bCon = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0");
+                bCon = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0");
             lock (bCon)
             {
                 if (bCon.State != ConnectionState.Open)
@@ -102,7 +102,7 @@ namespace OMMediaDB
         public List<string> listPlaylists()
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             List<string> names = new List<string>();
@@ -168,7 +168,7 @@ namespace OMMediaDB
         private void getURLList()
         {
             if (bCon == null)
-                bCon = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0");
+                bCon = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0");
             lock (bCon)
             {
                 if (bCon.State != ConnectionState.Open)
@@ -243,7 +243,7 @@ namespace OMMediaDB
             if (bCon == null)
                 lock (this)
                 {
-                    bCon = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0");
+                    bCon = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0");
                 }
             lock (bCon)
             {
@@ -317,13 +317,21 @@ namespace OMMediaDB
             {
                 if ((info.Location == null) || (info.Location == ""))
                     return;
-                StringBuilder s = new StringBuilder("INSERT INTO tblSongs(Title,URL,AlbumNum)VALUES('");
+                StringBuilder s = new StringBuilder("BEGIN;INSERT INTO tblSongs(Title,URL,AlbumNum,Track,Rating,Genre,Lyrics)VALUES('");
                 s.Append(General.escape(info.Name));
                 s.Append("','");
                 s.Append(General.escape(info.Location));
                 s.Append("','");
                 s.Append(albumNum.ToString());
-                s.Append("')");
+                s.Append("','");
+                s.Append(info.TrackNumber.ToString());
+                s.Append("','");
+                s.Append(info.Rating.ToString());
+                s.Append("','");
+                s.Append(General.escape(info.Genre));
+                s.Append("','");
+                s.Append(General.escape(info.Lyrics));
+                s.Append("');COMMIT");
                 command.CommandText = s.ToString();
                 command.ExecuteNonQuery();
             }
@@ -384,10 +392,10 @@ namespace OMMediaDB
         private eMediaField field;
         public bool beginGetArtists(bool covers)
         {
-            if (File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMMedia")) == false)
+            if (File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2")) == false)
                 createDB();
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             lock (con)
             {
                 if (con.State != ConnectionState.Open)
@@ -408,7 +416,7 @@ namespace OMMediaDB
         public bool beginGetAlbums(bool covers)
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             lock (con)
@@ -427,7 +435,7 @@ namespace OMMediaDB
         public bool beginGetAlbums(string artist, bool covers)
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             lock (con)
@@ -443,10 +451,10 @@ namespace OMMediaDB
             rCover = covers;
             return (reader != null);
         }
-        public bool beginGetSongs(bool covers)
+        public bool beginGetSongs(bool covers, eMediaField sortBy)
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             lock (con)
@@ -462,61 +470,100 @@ namespace OMMediaDB
             rCover = covers;
             return (reader != null);
         }
-        public bool beginGetSongsByArtist(string artist, bool covers) 
+        public bool beginGetSongsByArtist(string artist, bool covers, eMediaField sortBy) 
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
+            string order = "";
+            switch (sortBy)
+            {
+                case eMediaField.Title:
+                    order = " ORDER BY title";
+                    break;
+                case eMediaField.Track:
+                    order = "ORDER BY track";
+                    break;
+                case eMediaField.Rating:
+                    order = "ORDER BY rating";
+                    break;
+            }
             lock (con)
             {
                 SqliteCommand command = con.CreateCommand();
                 if (covers == false)
-                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Artist='" + General.escape(artist) + "' ORDER BY title";
+                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Artist='" + General.escape(artist) + "'"+order;
                 else
-                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Artist='" + General.escape(artist) + "' ORDER BY title";
+                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Artist='" + General.escape(artist) + "'"+order;
                 reader = command.ExecuteReader();
             }
             field = eMediaField.Title;
             rCover = covers;
             return (reader != null);
         }
-        public bool beginGetSongsByGenre(string genre, bool covers)
+        public bool beginGetSongsByGenre(string genre, bool covers, eMediaField sortBy)
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
+            string order = "";
+            switch (sortBy)
+            {
+                case eMediaField.Title:
+                    order = " ORDER BY title";
+                    break;
+                case eMediaField.Track:
+                    order = "ORDER BY track";
+                    break;
+                case eMediaField.Rating:
+                    order = "ORDER BY rating";
+                    break;
+            }
             SqliteCommand command = con.CreateCommand();
             if (covers == false)
-                command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Genre='" + General.escape(genre) + "' ORDER BY title";
+                command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Genre='" + General.escape(genre) + "'"+order;
             else
-                command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Genre='" + General.escape(genre) + "' ORDER BY title";
+                command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Genre='" + General.escape(genre) + "'"+order;
             reader = command.ExecuteReader();
             field = eMediaField.Title;
             rCover = covers;
             return (reader != null);
         }
-        public bool beginGetSongsByRating(string rating, bool covers)
+        public bool beginGetSongsByRating(string rating, bool covers, eMediaField sortBy)
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
+            string order = "";
+            switch (sortBy)
+            {
+                case eMediaField.Title:
+                    order = " ORDER BY title";
+                    break;
+                case eMediaField.Track:
+                    order = "ORDER BY track";
+                    break;
+                case eMediaField.Rating:
+                    order = "ORDER BY rating";
+                    break;
+            }
             SqliteCommand command = con.CreateCommand();
             if (covers == false)
-                command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Rating='" + General.escape(rating) + "' ORDER BY title";
+                command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Rating='" + General.escape(rating) + "'"+order;
             else
-                command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Rating='" + General.escape(rating) + "' ORDER BY title";
+                command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Rating='" + General.escape(rating) + "'"+order;
             reader = command.ExecuteReader();
             field = eMediaField.Title;
             rCover = covers;
             return (reader != null);
         }
-        public bool beginGetSongsByAlbum(string artist, string album, bool covers)
+        public bool beginGetSongsByAlbum(string artist, string album, bool covers, eMediaField sortBy)
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             lock (con)
@@ -532,17 +579,30 @@ namespace OMMediaDB
             rCover = covers;
             return (reader != null);
         }
-        public bool beginGetSongsByLyrics(string phrase, bool covers)
+        public bool beginGetSongsByLyrics(string phrase, bool covers, eMediaField sortBy)
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             SqliteCommand command = con.CreateCommand();
+            string order = "";
+            switch (sortBy)
+            {
+                case eMediaField.Title:
+                    order = " ORDER BY title";
+                    break;
+                case eMediaField.Track:
+                    order = "ORDER BY track";
+                    break;
+                case eMediaField.Rating:
+                    order = "ORDER BY rating";
+                    break;
+            }
             if (covers == false)
-                command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Lyrics LIKE '%" + General.escape(phrase) + "%' ORDER BY title";
+                command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Lyrics LIKE '%" + General.escape(phrase) + "%'"+order;
             else
-                command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Lyrics LIKE '%" + General.escape(phrase) + "%' ORDER BY title";
+                command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Lyrics LIKE '%" + General.escape(phrase) + "%'"+order;
             reader = command.ExecuteReader();
             field = eMediaField.Title;
             rCover = covers;
@@ -551,7 +611,7 @@ namespace OMMediaDB
         public bool beginGetGenres()
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             SqliteCommand command = con.CreateCommand();
@@ -560,7 +620,11 @@ namespace OMMediaDB
             field = eMediaField.Genre;
             return (reader != null);
         }
+        public bool setRating(mediaInfo info)
+        {
 
+            throw new NotImplementedException();
+        }
         public mediaInfo getNextMedia()
         {
             try
@@ -631,7 +695,7 @@ namespace OMMediaDB
         public bool beginGetPlaylist(string name)
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             SqliteCommand command = con.CreateCommand();
@@ -662,7 +726,7 @@ namespace OMMediaDB
                 query.Append("END;");
             }
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
             lock (con)
@@ -740,7 +804,7 @@ namespace OMMediaDB
             }
             if ((path!=null)&&(path.Length>0))
                 indexDirectory(path, true);
-            if (File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMMedia")) == false)
+            if (File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2")) == false)
                 createDB();
             return eLoadStatus.LoadSuccessful;
         }
@@ -748,10 +812,10 @@ namespace OMMediaDB
         private void createDB()
         {
             if (con == null)
-                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia") + ";Pooling=false;synchronous=0;");
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
-            SqliteCommand cmd = new SqliteCommand("BEGIN TRANSACTION;CREATE TABLE tblAlbum(ID INTEGER PRIMARY KEY,Album TEXT, Artist TEXT, Cover BLOB);CREATE TABLE tblSongs (AlbumNum INTEGER, Device INTEGER, Genre TEXT, Rating NUMERIC, Title TEXT, URL TEXT);CREATE TABLE Playlists (Name TEXT, URL TEXT);COMMIT;", con);
+            SqliteCommand cmd = new SqliteCommand("BEGIN TRANSACTION;CREATE TABLE tblAlbum(ID INTEGER PRIMARY KEY,Album TEXT, Artist TEXT, Cover BLOB);CREATE TABLE tblSongs (AlbumNum INTEGER, Device INTEGER, Genre TEXT, Rating NUMERIC, Title TEXT, Track INTEGER, URL TEXT, Lyrics TEXT);CREATE TABLE Playlists (Name TEXT, URL TEXT);COMMIT;", con);
             cmd.ExecuteNonQuery();
         }
         #endregion
