@@ -28,26 +28,33 @@ Public Class RadioComm
         Try
             m_Host = host
 
-            LoadRadioSettings()
-
-            m_Audio = New AudioRouter.AudioManager(m_SourceDevice)
-            m_Audio.FadeIn = m_Fade
-            m_Audio.FadeOut = m_Fade
-
-            If m_ComPort > 0 Then
-                m_Radio.AutoSearch = False
-                m_Radio.ComPort = m_ComPort
-            Else
-                m_Radio.AutoSearch = True
-            End If
-
-            m_Radio.Open()
+            Dim Thrd As New System.Threading.Thread(AddressOf BackgroundLoad)
+            Thrd.Start()
 
             Return eLoadStatus.LoadSuccessful
         Catch ex As Exception
             m_Host.sendMessage("OMDebug", ex.Source, ex.ToString)
         End Try
     End Function
+
+    Private Sub BackgroundLoad()
+        LoadRadioSettings()
+
+        m_Audio = New AudioRouter.AudioManager(m_SourceDevice)
+        m_Audio.FadeIn = m_Fade
+        m_Audio.FadeOut = m_Fade
+
+        If m_ComPort > 0 Then
+            m_Radio.AutoSearch = False
+            m_Radio.ComPort = m_ComPort
+        Else
+            m_Radio.AutoSearch = True
+        End If
+
+        m_Radio.Open()
+
+
+    End Sub
 
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
 
@@ -254,6 +261,8 @@ Public Class RadioComm
                     Band = HDRadio.HDRadioBands.FM
                 ElseIf Chan(0) = "AM" Then
                     Band = HDRadio.HDRadioBands.AM
+                Else
+                    Return False
                 End If
 
                 Freq = CInt(Chan(1) / 100)
@@ -269,10 +278,11 @@ Public Class RadioComm
                     End If
                 End If
 
+                Return True
             End If
         End If
 
-        Return True
+        Return False
     End Function
 
     Public Function stepBackward(ByVal instance As Integer) As Boolean Implements OpenMobile.Plugin.ITunedContent.stepBackward
@@ -386,9 +396,11 @@ Public Class RadioComm
             m_CurrentMedia.Artist = " "
             m_CurrentMedia.Album = " "
 
-            RaiseMediaEvent(eFunction.Play, "")
             RaiseMediaEvent(eFunction.tunerDataUpdated, "")
-            RaiseMediaEvent(eFunction.stationListUpdated, "")
+
+            If m_StationList.Count = getStatus(m_CurrentInstance).stationList.Count Then
+                RaiseMediaEvent(eFunction.stationListUpdated, "")
+            End If
 
             Using St As New OpenMobile.Data.PluginSettings
                 St.setSetting("OMVisteonRadio.LastPlaying" & m_CurrentInstance.ToString, m_Radio.CurrentBand.ToString & ":" & m_Radio.CurrentFrequency * 100)
