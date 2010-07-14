@@ -159,6 +159,7 @@ namespace DPGContacts
             using (PluginSettings s = new PluginSettings())
                 s.setSetting("Plugins.DPGContacts.LastUpdate", DateTime.Now.ToString("s"));
             status = 1;
+            theHost.execute(eFunction.dataUpdated, "DPGContacts");
         }
 
         public bool refreshData()
@@ -174,12 +175,14 @@ namespace DPGContacts
                 else
                 {
                     status = 1;
+                    theHost.execute(eFunction.dataUpdated, "DPGContacts");
                     return false;
                 }
             }
             else
             {
                 status = -1;
+                theHost.execute(eFunction.dataUpdated, "DPGContacts");
                 return false;
             }
         }
@@ -254,9 +257,10 @@ namespace DPGContacts
         {
             throw new NotImplementedException();
         }
-
+        IPluginHost theHost;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
+            theHost = host;
             dataPath = host.DataPath;
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
             host.OnPowerChange += new PowerEvent(host_OnPowerChange);

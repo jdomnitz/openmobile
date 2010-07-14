@@ -338,16 +338,17 @@ namespace OpenMobile
         int volScreen = -1;
         void vol_OnClick(OMControl sender, int screen)
         {
-            if (volTmr != null)
-            {
-                System.Timers.Timer tmp = volTmr;
-                volTmr = null;
-                tmp.Dispose();
-            }
+            //if (volTmr != null)
+            //{
+            //    System.Timers.Timer tmp = volTmr;
+            //    volTmr = null;
+            //    tmp.Dispose();
+            //}
             volScreen = screen;
             if (sender.Top>0)
             {
-                volTmr_Elapsed(null, null);
+                if (sender.Top==511) //TODO: Disable when moving
+                    volTmr_Elapsed(null, null);
                 return;
             }
             volTmr = new System.Timers.Timer(2500);
@@ -394,7 +395,8 @@ namespace OpenMobile
                 volTmr.Enabled = false;
                 volTmr.Enabled = true;
             }
-            theHost.execute(eFunction.setSystemVolume, ((VolumeBar)sender).Value.ToString(), theHost.instanceForScreen(screen).ToString());
+            if (sender.Top==0)
+                theHost.execute(eFunction.setSystemVolume, ((VolumeBar)sender).Value.ToString(), theHost.instanceForScreen(screen).ToString());
         }
 
         void icon_OnClick(OMControl sender, int screen)

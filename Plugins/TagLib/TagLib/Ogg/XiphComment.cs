@@ -52,12 +52,6 @@ namespace TagLib.Ogg
 		/// </summary>
 		private string vendor_id;
 		
-		/// <summary>
-		///    Contains the field identifier to use for <see
-		///    cref="Comment" />.
-		/// </summary>
-		private string comment_field = "DESCRIPTION";
-		
 #endregion
 		
 		
@@ -461,25 +455,6 @@ namespace TagLib.Ogg
 			get {return GetFirstField ("TITLE");}
 			set {SetField ("TITLE", value);}
 		}
-		
-		/// <summary>
-		///    Gets and sets the sort names for the Track Title of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort name of 
-		///    the Track Title of the media described by the current
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "TITLESORT"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string TitleSort {
-			get {return GetFirstField ("TITLESORT");}
-			set {SetField ("TITLESORT", value);}
-		}
 
 		/// <summary>
 		///    Gets and sets the performers or artists who performed in
@@ -497,25 +472,6 @@ namespace TagLib.Ogg
 		public override string [] Performers {
 			get {return GetField ("ARTIST");}
 			set {SetField ("ARTIST", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names of the performers or artists
-		///    who performed in the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names for
-		///    the performers or artists who performed in the media
-		///    described by the current instance, or an empty array if
-		///    no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "ARTISTSORT" field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string [] PerformersSort {
-			get {return GetField ("ARTISTSORT");}
-			set {SetField ("ARTISTSORT", value);}
 		}
 		
 		/// <summary>
@@ -552,29 +508,6 @@ namespace TagLib.Ogg
 		}
 		
 		/// <summary>
-		///    Gets and sets the sort names for the band or artist who
-		///    is credited in the creation of the entire album or
-		///    collection containing the media described by the
-		///    current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names
-		///    for the band or artist who is credited in the creation
-		///    of the entire album or collection containing the media
-		///    described by the current instance or an empty array if
-		///    no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "ALBUMARTISTSORT"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string [] AlbumArtistsSort {
-			get {return GetField ("ALBUMARTISTSORT");}
-			set {SetField ("ALBUMARTISTSORT", value);}
-		}
-		
-		/// <summary>
 		///    Gets and sets the composers of the media represented by
 		///    the current instance.
 		/// </summary>
@@ -589,25 +522,6 @@ namespace TagLib.Ogg
 		public override string [] Composers {
 			get {return GetField ("COMPOSER");}
 			set {SetField ("COMPOSER", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names for the composers of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names
-		///    for the composer of the media described by the current
-		///    instance or an empty array if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "COMPOSERSORT"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string [] ComposersSort {
-			get {return GetField ("COMPOSERSORT");}
-			set {SetField ("COMPOSERSORT", value);}
 		}
 
 		/// <summary>
@@ -625,51 +539,6 @@ namespace TagLib.Ogg
 		public override string Album {
 			get {return GetFirstField ("ALBUM");}
 			set {SetField ("ALBUM", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names for the Album Title of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort name of 
-		///    the Album Title of the media described by the current
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "ALBUMSORT"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string AlbumSort {
-			get {return GetFirstField ("ALBUMSORT");}
-			set {SetField ("ALBUMSORT", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets a user comment on the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing user comments
-		///    on the media represented by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "COMMENT" or
-		///    "DESCRIPTION" field, preferring "DESCRIPTION" but using
-		///    "COMMENT" if that is the field used by the comment.
-		/// </remarks>
-		public override string Comment {
-			get {
-				string value = GetFirstField (comment_field);
-				if (value != null || comment_field == "COMMENT")
-					return value;
-				
-				comment_field = "COMMENT";
-				return GetFirstField (comment_field);
-			}
-			set {SetField (comment_field, value);}
 		}
 		
 		/// <summary>
@@ -741,111 +610,8 @@ namespace TagLib.Ogg
 				return 0;
 			}
 			set {
-				SetField ("TRACKTOTAL", TrackCount);
 				SetField ("TRACKNUMBER", value);
 			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of tracks in the album
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of tracks in
-		///    the album containing the media represented by the current
-		///    instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "TRACKTOTAL" field
-		///    but is capable of reading from "TRACKNUMBER" if the total
-		///    is stored in {track}/{count} format.
-		/// </remarks>
-		public override uint TrackCount {
-			get {
-				string text;
-				string [] values;
-				uint value;
-				
-				if ((text = GetFirstField ("TRACKTOTAL")) !=
-					null && uint.TryParse (text, out value))
-					return value;
-				
-				if ((text = GetFirstField ("TRACKNUMBER")) !=
-					null && (values = text.Split ('/'))
-					.Length > 1 && uint.TryParse (
-						values [1], out value))
-					return value;
-				
-				return 0;
-			}
-			set {SetField ("TRACKTOTAL", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of the disc containing the media
-		///    represented by the current instance in the boxed set.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of the disc
-		///    containing the media represented by the current instance
-		///    in the boxed set.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "DISCNUMBER"
-		///    field.
-		/// </remarks>
-		public override uint Disc {
-			get {
-				string text = GetFirstField ("DISCNUMBER");
-				string [] values;
-				uint value;
-				
-				if (text != null && (values = text.Split ('/'))
-					.Length > 0 && uint.TryParse (
-						values [0], out value))
-					return value;
-				
-				return 0;
-			}
-			set {
-				SetField ("DISCTOTAL", DiscCount);
-				SetField ("DISCNUMBER", value);
-			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of discs in the boxed set
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of discs in
-		///    the boxed set containing the media represented by the
-		///    current instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "DISCTOTAL" field
-		///    but is capable of reading from "DISCNUMBER" if the total
-		///    is stored in {disc}/{count} format.
-		/// </remarks>
-		public override uint DiscCount {
-			get {
-				string text;
-				string [] values;
-				uint value;
-
-				if ((text = GetFirstField ("DISCTOTAL")) != null
-					&& uint.TryParse (text, out value))
-					return value;
-				
-				if ((text = GetFirstField ("DISCNUMBER")) !=
-					null && (values = text.Split ('/'))
-					.Length > 1 && uint.TryParse (
-						values [1], out value))
-					return value;
-				
-				return 0;
-			}
-			set {SetField ("DISCTOTAL", value);}
 		}
 		
 		/// <summary>
@@ -866,47 +632,6 @@ namespace TagLib.Ogg
 		}
 		
 		/// <summary>
-		///    Gets and sets the grouping on the album which the media
-		///    in the current instance belongs to.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the grouping on
-		///    the album which the media in the current instance belongs
-		///    to or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "GROUPING" field.
-		/// </remarks>
-		public override string Grouping {
-			get {return GetFirstField ("GROUPING");}
-			set {SetField ("GROUPING", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of beats per minute in the audio
-		///    of the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of beats per
-		///    minute in the audio of the media represented by the
-		///    current instance, or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "TEMPO" field.
-		/// </remarks>
-		public override uint BeatsPerMinute {
-			get {
-				string text = GetFirstField ("TEMPO");
-				double value;
-				return (text != null &&
-					double.TryParse (text, out value) &&
-					value > 0) ? (uint) Math.Round (value) :
-					0;
-			}
-			set {SetField ("TEMPO", value);}
-		}
-		
-		/// <summary>
 		///    Gets and sets the conductor or director of the media
 		///    represented by the current instance.
 		/// </summary>
@@ -921,23 +646,6 @@ namespace TagLib.Ogg
 		public override string Conductor {
 			get {return GetFirstField ("CONDUCTOR");}
 			set {SetField ("CONDUCTOR", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the copyright information for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the copyright
-		///    information for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "COPYRIGHT" field.
-		/// </remarks>
-		public override string Copyright {
-			get {return GetFirstField ("COPYRIGHT");}
-			set {SetField ("COPYRIGHT", value);}
 		}
 		
 		/// <summary>
@@ -972,23 +680,6 @@ namespace TagLib.Ogg
 		public override string MusicBrainzReleaseId {
 			get {return GetFirstField ("MUSICBRAINZ_ALBUMID");}
 			set {SetField ("MUSICBRAINZ_ALBUMID", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Artist ID for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the MusicBrainz
-		///    ReleaseArtistID for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MUSICBRAINZ_ALBUMARTISTID" field.
-		/// </remarks>
-		public override string MusicBrainzReleaseArtistId {
-			get {return GetFirstField ("MUSICBRAINZ_ALBUMARTISTID");}
-			set {SetField ("MUSICBRAINZ_ALBUMARTISTID", value);}
 		}
 
 		/// <summary>
@@ -1053,54 +744,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string AmazonId {
 			get {return GetFirstField ("ASIN");}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Status for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the MusicBrainz
-		///    ReleaseStatus for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MUSICBRAINZ_ALBUMSTATUS" field.
-		/// </remarks>
-		public override string MusicBrainzReleaseStatus {
-			get {return GetFirstField ("MUSICBRAINZ_ALBUMSTATUS");}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Type for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the MusicBrainz
-		///    ReleaseType for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MUSICBRAINZ_ALBUMTYPE" field.
-		/// </remarks>
-		public override string MusicBrainzReleaseType {
-			get {return GetFirstField ("MUSICBRAINZ_ALBUMTYPE");}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Country for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the MusicBrainz
-		///    ReleaseCountry for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "RELEASECOUNTRY" field.
-		/// </remarks>
-		public override string MusicBrainzReleaseCountry {
-			get {return GetFirstField ("RELEASECOUNTRY");}
 		}
 
 		/// <summary>

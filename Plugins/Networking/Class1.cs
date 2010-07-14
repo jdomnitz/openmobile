@@ -154,14 +154,19 @@ namespace Networking
                         connectionInfo info = networks.Find(p => p.UID == list.SelectedItem.tag.ToString());
                         if (info==null)
                             return;
-                        if (info.requiresPassword)
+                        switch(info.requiresPassword)
                         {
-                            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Networking", "Prompt");
-                            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                            case ePassType.UserPass: //TODO
+                            case ePassType.UserPassDomain:
+                            case ePassType.SharedKey:
+                                theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Networking", "Prompt");
+                                theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                                return;
+                            case ePassType.None:
+                                theHost.execute(eFunction.connectToInternet, list.SelectedItem.tag.ToString());
+                                return;
                         }
-                        else
-                            theHost.execute(eFunction.connectToInternet, list.SelectedItem.tag.ToString());
-                        return;
+                        break;
                     case "Disconnect":
                         theHost.execute(eFunction.disconnectFromInternet, list.SelectedItem.tag.ToString());
                         return;
@@ -196,8 +201,9 @@ namespace Networking
 
         void networks_OnLongClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.connectToInternet, ((OMList)sender).SelectedItem.tag.ToString());
+            connect_OnClick(sender.Parent[6], screen);
         }
+
         static List<connectionInfo> networks;
         private void UpdateList()
         {
@@ -252,7 +258,7 @@ namespace Networking
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(100, Color.White);
             string name = c.NetworkName;
-            if (name == "")
+            if (string.IsNullOrEmpty(name))
                 name = "Other Network";
             OMListItem ret= new OMListItem(name, c.ConnectionType.Replace('_',' '),icon,format);
             ret.tag = c.UID;

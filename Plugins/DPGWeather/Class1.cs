@@ -65,7 +65,7 @@ namespace DPGWeather
                 if (items.Count < 4)
                 {
                     status = -1;
-                    theHost.execute(eFunction.settingsChanged, "Weather");
+                    theHost.execute(eFunction.dataUpdated, "DPGWeather");
                     return;
                 }
                 using (OpenMobile.Data.Weather w = new OpenMobile.Data.Weather())
@@ -87,10 +87,13 @@ namespace DPGWeather
                 status = 1;
                 using (PluginSettings setting = new PluginSettings())
                     setting.setSetting("Plugins.DPGWeather.LastUpdate", DateTime.Now.ToString());
-                theHost.execute(eFunction.settingsChanged, "Weather");
+                theHost.execute(eFunction.dataUpdated, "DPGWeather");
             }
-            catch (Exception e) {
-                status = -1; }
+            catch (Exception)
+            {
+                status = -1;
+                theHost.execute(eFunction.dataUpdated, "DPGWeather");
+            }
         }
 
         static List<OpenMobile.Data.Weather.weather> getItems(string location)
@@ -248,6 +251,7 @@ namespace DPGWeather
             else
             {
                 status = -1;
+                theHost.execute(eFunction.dataUpdated, "DPGContacts");
                 return false;
             }
         }
@@ -292,7 +296,7 @@ namespace DPGWeather
 
         public float pluginVersion
         {
-            get { return 0.1F; }
+            get { return 0.7F; }
         }
 
         public string pluginDescription
@@ -302,12 +306,12 @@ namespace DPGWeather
 
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            return false;
         }
         IPluginHost theHost;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)

@@ -160,23 +160,6 @@ namespace TagLib {
 		}
 		
 		/// <summary>
-		///    Gets and sets the sort name for the title of the media 
-		///    described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the sort name for
-		///    the title of the media described by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    Possibly used to sort compilations, or episodic content.
-		/// </remarks>
-		public virtual string TitleSort {
-			get {return null;}
-			set {}
-		}
-		
-		/// <summary>
 		///    Gets and sets the performers or artists who performed in
 		///    the media described by the current instance.
 		/// </summary>
@@ -200,28 +183,6 @@ namespace TagLib {
 		///    choice they may make.</para>
 		/// </remarks>
 		public virtual string [] Performers {
-			get {return new string [] {};}
-			set {}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names of the performers or artists
-		///    who performed in the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names for
-		///    the performers or artists who performed in the media
-		///    described by the current instance, or an empty array if
-		///    no value is present. 
-		/// </value>
-		/// <remarks>
-		///    <para>This is used to provide more control over how tracks
-		///    are sorted. Typical uses are to skip common prefixes or
-		///    sort by last name. For example, "The Beatles" might be
-		///    sorted as "Beatles, The".
-		///    </para>
-		/// </remarks>
-		public virtual string [] PerformersSort {
 			get {return new string [] {};}
 			set {}
 		}
@@ -257,38 +218,6 @@ namespace TagLib {
 		}
 		
 		/// <summary>
-		///    Gets and sets the sort names for the band or artist who
-		///    is credited in the creation of the entire album or
-		///    collection containing the media described by the
-		///    current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names
-		///    for the band or artist who is credited in the creation
-		///    of the entire album or collection containing the media
-		///    described by the current instance or an empty array if
-		///    no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field is typically optional but aids in the
-		///    sorting of compilations or albums with multiple artists.
-		///    For example, if an album has several artists, sorting by
-		///    artist will split up the album and sorting by album will
-		///    split up albums by the same artist. Having a single album
-		///    artist for an entire album will solve this
-		///    problem.</para>
-		///    <para>As this value is to be used as a sorting key, it
-		///    should be used with less variation than <see
-		///    cref="Performers" />. Where performers can be broken into
-		///    muliple artist it is best to stick with a single band
-		///    name. For example, "Beatles, The".</para>
-		/// </remarks>
-		public virtual string [] AlbumArtistsSort {
-			get {return new string [] {};}
-			set {}
-		}
-		
-		/// <summary>
 		///    Gets and sets the composers of the media represented by
 		///    the current instance.
 		/// </summary>
@@ -303,30 +232,6 @@ namespace TagLib {
 		///    media.</para>
 		/// </remarks>
 		public virtual string [] Composers {
-			get {return new string [] {};}
-			set {}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names for the composers of the 
-		///    media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names
-		///    for the composers of the media represented by the 
-		///    current instance or an empty array if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field is typically optional but aids in the
-		///    sorting of compilations or albums with multiple Composers.
-		///    </para>
-		///    <para>As this value is to be used as a sorting key, it
-		///    should be used with less variation than <see
-		///    cref="Composers" />. Where performers can be broken into
-		///    muliple artist it is best to stick with a single composer.
-		///    For example, "McCartney, Paul".</para>
-		/// </remarks>
-		public virtual string [] ComposersSort {
 			get {return new string [] {};}
 			set {}
 		}
@@ -351,50 +256,6 @@ namespace TagLib {
 		///    boxed set of movies).</para>
 		/// </remarks>
 		public virtual string Album {
-			get {return null;}
-			set {}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names for the Album Title of the 
-		///    media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names
-		///    for the Album Title of the media represented by the 
-		///    current instance or an empty array if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field is typically optional but aids in the
-		///    sorting of compilations or albums with Similar Titles.
-		///    </para>
-		/// </remarks>
-		public virtual string AlbumSort {
-			get {return null;}
-			set {}
-		}
-		
-		/// <summary>
-		///    Gets and sets a user comment on the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing user comments
-		///    on the media represented by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field should be used to store user notes and
-		///    comments. There is no constraint on what text can be
-		///    stored here, but it should not contain program
-		///    information.</para>
-		///    <para>Because this field contains notes that the user
-		///    might think of while listening to the media, it may be
-		///    useful for an application to make this field easily
-		///    accessible, perhaps even including it in the main
-		///    interface.</para>
-		/// </remarks>
-		public virtual string Comment {
 			get {return null;}
 			set {}
 		}
@@ -464,65 +325,6 @@ namespace TagLib {
 		}
 		
 		/// <summary>
-		///    Gets and sets the number of tracks in the album
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of tracks in
-		///    the album containing the media represented by the current
-		///    instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    <para>If non-zero, this value should be at least equal to
-		///    <see cref="Track" />. If <see cref="Track" /> is zero,
-		///    this value should also be zero.</para>
-		/// </remarks>
-		public virtual uint TrackCount {
-			get {return 0;}
-			set {}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of the disc containing the media
-		///    represented by the current instance in the boxed set.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of the disc
-		///    containing the media represented by the current instance
-		///    in the boxed set.
-		/// </value>
-		/// <remarks>
-		///    <para>This value should be the same as is number that
-		///    appears on the disc. For example, if the disc is the
-		///    first of three, the value should be <c>1</c>. It should
-		///    be no more than <see cref="DiscCount" /> if <see
-		///    cref="DiscCount" /> is non-zero.</para>
-		/// </remarks>
-		public virtual uint Disc {
-			get {return 0;}
-			set {}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of discs in the boxed set
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of discs in
-		///    the boxed set containing the media represented by the
-		///    current instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    <para>If non-zero, this value should be at least equal to
-		///    <see cref="Disc" />. If <see cref="Disc" /> is zero,
-		///    this value should also be zero.</para>
-		/// </remarks>
-		public virtual uint DiscCount {
-			get {return 0;}
-			set {}
-		}
-		
-		/// <summary>
 		///    Gets and sets the lyrics or script of the media
 		///    represented by the current instance.
 		/// </summary>
@@ -545,45 +347,6 @@ namespace TagLib {
 		}
 		
 		/// <summary>
-		///    Gets and sets the grouping on the album which the media
-		///    in the current instance belongs to.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the grouping on
-		///    the album which the media in the current instance belongs
-		///    to or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field contains a non-physical grouping to
-		///    which the track belongs. In classical music, this could
-		///    be a movement. It could also be parts of a series like
-		///    "Introduction", "Closing Remarks", etc.</para>
-		/// </remarks>
-		public virtual string Grouping {
-			get {return null;}
-			set {}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of beats per minute in the audio
-		///    of the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of beats per
-		///    minute in the audio of the media represented by the
-		///    current instance, or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    <para>This field is useful for DJ's who are trying to
-		///    match songs. It should be calculated from the audio or
-		///    pulled from a database.</para>
-		/// </remarks>
-		public virtual uint BeatsPerMinute {
-			get {return 0;}
-			set {}
-		}
-		
-		/// <summary>
 		///    Gets and sets the conductor or director of the media
 		///    represented by the current instance.
 		/// </summary>
@@ -597,29 +360,6 @@ namespace TagLib {
 		///    music and movies.</para>
 		/// </remarks>
 		public virtual string Conductor {
-			get {return null;}
-			set {}
-		}
-		
-		/// <summary>
-		///    Gets and sets the copyright information for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the copyright
-		///    information for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field should be used for storing copyright
-		///    information. It may be useful to show this information
-		///    somewhere in the program while the media is
-		///    playing.</para>
-		///    <para>Players should not support editing this field, but
-		///    media creation tools should definitely allow
-		///    modification.</para>
-		/// </remarks>
-		public virtual string Copyright {
 			get {return null;}
 			set {}
 		}
@@ -656,24 +396,6 @@ namespace TagLib {
 		///    to uniquely identify a particular Release to which this track belongs.</para>
 		/// </remarks>
 		public virtual string MusicBrainzReleaseId {
-			get { return null; }
-			set {}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Artist ID of the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz ReleaseArtistID of the
-		///    media represented by the current instance or an empty
-		///    array if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field represents the MusicBrainz Release ArtistID, and is used
-		///    to uniquely identify a particular Album Artist credited with the Album.</para>
-		/// </remarks>
-		public virtual string MusicBrainzReleaseArtistId {
 			get { return null; }
 			set {}
 		}
@@ -752,67 +474,6 @@ namespace TagLib {
 		}
 
 		/// <summary>
-		///    Gets and sets the MusicBrainz Release Status of the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz ReleaseStatus of the
-		///    media represented by the current instance or an empty
-		///    array if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field represents the MusicBrainz ReleaseStatus, and is used
-		///    to describes how 'official' a Release is.  Common Status are: Official, Promotion,
-		///    Bootleg, Pseudo-release.</para>
-		/// </remarks>
-		public virtual string MusicBrainzReleaseStatus {
-			get { return null; }
-			set {}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Type of the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz ReleaseType of the
-		///    media represented by the current instance or an empty
-		///    array if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field represents the MusicBrainz ReleaseType, that describes
-		///    what kind of release a Release is..  Common Status are: Single, Album,
-		///    EP, Compilation, Soundtrack, SpokenWord, Interview, Audiobook, Live, Remix,
-		///    and Other.  Careful thought must be given when using this field to decide if
-		///    a particular track "Is a Compilation".</para>
-		/// </remarks>
-		public virtual string MusicBrainzReleaseType {
-			get { return null; }
-			set {}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Country of the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz ReleaseCountry of the
-		///    media represented by the current instance or an empty
-		///    array if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>This field represents the MusicBrainz ReleaseCountry, that describes
-		///    the country in which an album was released.  Note that the ReleaseCountry 
-		///    of an album is not necessarily the country in which it was produced. The 
-		///    label itself will typically be more relevant. eg, a release on "Foo Records UK" 
-		///    that has "Made in Austria" printed on it, will likely be a UK release.</para>
-		/// </remarks>
-		public virtual string MusicBrainzReleaseCountry {
-			get { return null; }
-			set {}
-		}
-
-		/// <summary>
 		///    Gets and sets a collection of pictures associated with
 		///    the media represented by the current instance.
 		/// </summary>
@@ -851,23 +512,6 @@ namespace TagLib {
 		
 		/// <summary>
 		///    Gets the first value contained in <see
-		///    cref="AlbumArtistsSort" />.
-		/// </summary>
-		/// <value>
-		///    The first <see cref="string" /> object in <see
-		///    cref="AlbumArtistsSort" />, or <see langword="null" /> is it
-		///    contains no values.
-		/// </value>
-		/// <remarks>
-		///    This property is provided for convenience. Use <see
-		///    cref="AlbumArtistsSort" /> to set the value.
-		/// </remarks>
-		public string FirstAlbumArtistSort {
-			get {return FirstInGroup(AlbumArtistsSort);}
-		}
-		
-		/// <summary>
-		///    Gets the first value contained in <see
 		///    cref="Performers" />.
 		/// </summary>
 		/// <value>
@@ -881,40 +525,6 @@ namespace TagLib {
 		/// </remarks>
 		public string FirstPerformer {
 			get {return FirstInGroup(Performers);}
-		}
-
-		/// <summary>
-		///    Gets the first value contained in <see
-		///    cref="PerformersSort" />.
-		/// </summary>
-		/// <value>
-		///    The first <see cref="string" /> object in <see
-		///    cref="PerformersSort" />, or <see langword="null" /> is it
-		///    contains no values.
-		/// </value>
-		/// <remarks>
-		///    This property is provided for convenience. Use <see
-		///    cref="PerformersSort" /> to set the value.
-		/// </remarks>
-		public string FirstPerformerSort {
-			get {return FirstInGroup(PerformersSort);}
-		}
-		
-		/// <summary>
-		///    Gets the first value contained in <see
-		///    cref="ComposersSort" />.
-		/// </summary>
-		/// <value>
-		///    The first <see cref="string" /> object in <see
-		///    cref="ComposersSort" />, or <see langword="null" /> is it
-		///    contains no values.
-		/// </value>
-		/// <remarks>
-		///    This property is provided for convenience. Use <see
-		///    cref="ComposersSort" /> to set the value.
-		/// </remarks>
-		public string FirstComposerSort {
-			get {return FirstInGroup(ComposersSort);}
 		}
 		
 		/// <summary>
@@ -980,22 +590,6 @@ namespace TagLib {
 		/// </remarks>
 		public string JoinedPerformers {
 			get {return JoinGroup(Performers);}
-		}
-		
-		/// <summary>
-		///    Gets a semicolon separated string containing the values
-		///    in <see cref="PerformersSort" />.
-		/// </summary>
-		/// <value>
-		///    A semicolon separated <see cref="string" /> object
-		///    containing the values in <see cref="PerformersSort" />.
-		/// </value>
-		/// <remarks>
-		///    This property is provided for convenience. Use <see
-		///    cref="PerformersSort" /> to set the value.
-		/// </remarks>
-		public string JoinedPerformersSort {
-			get {return JoinGroup(PerformersSort);}
 		}
 		
 		/// <summary>
@@ -1081,21 +675,14 @@ namespace TagLib {
 		public virtual bool IsEmpty {
 			get {
 				return IsNullOrLikeEmpty (Title) &&
-				IsNullOrLikeEmpty (Grouping) &&
 				IsNullOrLikeEmpty (AlbumArtists) &&
 				IsNullOrLikeEmpty (Performers) &&
 				IsNullOrLikeEmpty (Composers) &&
 				IsNullOrLikeEmpty (Conductor) &&
-				IsNullOrLikeEmpty (Copyright) &&
 				IsNullOrLikeEmpty (Album) &&
-				IsNullOrLikeEmpty (Comment) &&
 				IsNullOrLikeEmpty (Genres) &&
 				Year == 0 &&
-				BeatsPerMinute == 0 &&
-				Track == 0 &&
-				TrackCount == 0 &&
-				Disc == 0 &&
-				DiscCount == 0;
+				Track == 0;
 			}
 		}
 		
@@ -1152,9 +739,6 @@ namespace TagLib {
 			if (overwrite || IsNullOrLikeEmpty (target.Album))
 				target.Album = Album;
 			
-			if (overwrite || IsNullOrLikeEmpty (target.Comment))
-				target.Comment = Comment;
-			
 			if (overwrite || IsNullOrLikeEmpty (target.Genres))
 				target.Genres = Genres;
 			
@@ -1164,26 +748,8 @@ namespace TagLib {
 			if (overwrite || target.Track == 0)
 				target.Track = Track;
 			
-			if (overwrite || target.TrackCount == 0)
-				target.TrackCount = TrackCount;
-			
-			if (overwrite || target.Disc == 0)
-				target.Disc = Disc;
-			
-			if (overwrite || target.DiscCount == 0)
-				target.DiscCount = DiscCount;
-			
-			if (overwrite || target.BeatsPerMinute == 0)
-				target.BeatsPerMinute = BeatsPerMinute;
-			
-			if (overwrite || IsNullOrLikeEmpty (target.Grouping))
-				target.Grouping = Grouping;
-			
 			if (overwrite || IsNullOrLikeEmpty (target.Conductor))
 				target.Conductor = Conductor;
-			
-			if (overwrite || IsNullOrLikeEmpty (target.Copyright))
-				target.Copyright = Copyright;
 		}
 		
 		/// <summary>

@@ -142,14 +142,10 @@ namespace OMHal
                     Application.SetSuspendState(PowerState.Hibernate, false, false);
                     break;
                 case "46": //Shutdown
-                    ProcessStartInfo info = new ProcessStartInfo("shutdown", "/s /t 0");
-                    info.WindowStyle = ProcessWindowStyle.Hidden;
-                    Process.Start(info);
+                    Specific.Shutdown(false);
                     break;
                 case "47": //Restart
-                    ProcessStartInfo info2 = new ProcessStartInfo("shutdown", "/r /t 0");
-                    info2.WindowStyle = ProcessWindowStyle.Hidden;
-                    Process.Start(info2);
+                    Specific.Shutdown(true);
                     break;
                 case "48":
                     Application.SetSuspendState(PowerState.Suspend, false, false);

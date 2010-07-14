@@ -538,29 +538,6 @@ namespace TagLib.Asf {
 		}
 		
 		/// <summary>
-		///    Gets and sets the sort names for the Track Title of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort name of 
-		///    the Track Title of the media described by the current
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "WM/TitleSortOrder"
-		///    field.
-		///    http://msdn.microsoft.com/en-us/library/aa386866(VS.85).aspx
-		/// </remarks>
-		public override string TitleSort {
-			get {
-				return GetDescriptorString ("WM/TitleSortOrder");
-			}
-			set {
-				SetDescriptorString (value, "WM/TitleSortOrder");
-			}
-		}
-		
-		/// <summary>
 		///    Gets and sets the performers or artists who performed in
 		///    the media described by the current instance.
 		/// </summary>
@@ -577,29 +554,6 @@ namespace TagLib.Asf {
 		public override string [] Performers {
 			get {return SplitAndClean (description.Author);}
 			set {description.Author = string.Join ("; ", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names of the performers or artists
-		///    who performed in the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names for
-		///    the performers or artists who performed in the media
-		///    described by the current instance, or an empty array if
-		///    no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "WM/ArtistSortOrder" field.
-		///    http://msdn.microsoft.com/en-us/library/aa386866(VS.85).aspx
-		/// </remarks>
-		public override string [] PerformersSort {
-			get {
-				return GetDescriptorStrings ("WM/ArtistSortOrder");
-			}
-			set {
-				SetDescriptorStrings (value, "WM/ArtistSortOrder");
-			}
 		}
 		
 		/// <summary>
@@ -625,33 +579,6 @@ namespace TagLib.Asf {
 			set {
 				SetDescriptorStrings (value, "WM/AlbumArtist",
 					"AlbumArtist");
-			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names for the band or artist who
-		///    is credited in the creation of the entire album or
-		///    collection containing the media described by the
-		///    current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names
-		///    for the band or artist who is credited in the creation
-		///    of the entire album or collection containing the media
-		///    described by the current instance or an empty array if
-		///    no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "WM/AlbumArtistSortOrder"
-		///    field.
-		///    http://msdn.microsoft.com/en-us/library/aa386866(VS.85).aspx
-		/// </remarks>
-		public override string [] AlbumArtistsSort {
-			get {
-				return GetDescriptorStrings ("WM/AlbumArtistSortOrder");
-			}
-			set {
-				SetDescriptorStrings (value, "WM/AlbumArtistSortOrder");
 			}
 		}
 		
@@ -701,47 +628,6 @@ namespace TagLib.Asf {
 				SetDescriptorString (value, "WM/AlbumTitle",
 					"Album");
 			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names for the Album Title of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort name of 
-		///    the Album Title of the media described by the current
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "WM/AlbumSortOrder"
-		///    field.
-		///    http://msdn.microsoft.com/en-us/library/aa386866(VS.85).aspx
-		/// </remarks>
-		public override string AlbumSort {
-			get {
-				return GetDescriptorString ("WM/AlbumSortOrder");
-			}
-			set {
-				SetDescriptorString (value, "WM/AlbumSortOrder");
-			}
-		}
-		
-		/// <summary>
-		///    Gets and sets a user comment on the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing user comments
-		///    on the media represented by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the description stored
-		///    in the ASF Content Description Object.
-		/// </remarks>
-		public override string Comment {
-			get {return description.Description;}
-			set {description.Description = value;}
 		}
 		
 		/// <summary>
@@ -867,146 +753,6 @@ namespace TagLib.Asf {
 		}
 		
 		/// <summary>
-		///    Gets and sets the number of tracks in the album
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of tracks in
-		///    the album containing the media represented by the current
-		///    instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "TrackTotal"
-		///    Content Descriptor.
-		/// </remarks>
-		public override uint TrackCount {
-			get {
-				foreach (ContentDescriptor desc in
-					GetDescriptors ("TrackTotal")) {
-						uint value = desc.ToDWord ();
-						if (value != 0)
-							return value;
-				}
-				
-				return 0;
-			}
-			set {
-				if (value == 0)
-					RemoveDescriptors ("TrackTotal");
-				else
-					SetDescriptors ("TrackTotal",
-						new ContentDescriptor (
-							"TrackTotal", value));
-			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of the disc containing the media
-		///    represented by the current instance in the boxed set.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of the disc
-		///    containing the media represented by the current instance
-		///    in the boxed set.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "WM/PartOfSet"
-		///    Content Descriptor.
-		/// </remarks>
-		public override uint Disc {
-			get {
-				string text = GetDescriptorString (
-					"WM/PartOfSet");
-				
-				if (text == null)
-					return 0;
-				
-				string [] texts = text.Split ('/');
-				uint value;
-				
-				if (texts.Length < 1)
-					return 0;
-				
-				return uint.TryParse (texts [0],
-					NumberStyles.Integer,
-					CultureInfo.InvariantCulture,
-					out value) ? value : 0;
-			}
-			set {
-				uint count = DiscCount;
-				if (value == 0 && count == 0) {
-					RemoveDescriptors ("WM/PartOfSet");
-					return;
-				}
-				
-				if (count != 0) {
-					SetDescriptorString (string.Format (
-						CultureInfo.InvariantCulture,
-						"{0}/{1}", value, count),
-						"WM/PartOfSet");
-					return;
-				}
-				
-				SetDescriptorString (value.ToString (
-					CultureInfo.InvariantCulture),
-					"WM/PartOfSet");
-			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of discs in the boxed set
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of discs in
-		///    the boxed set containing the media represented by the
-		///    current instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "WM/PartOfSet"
-		///    Content Descriptor.
-		/// </remarks>
-		public override uint DiscCount {
-			get {
-				string text = GetDescriptorString (
-					"WM/PartOfSet");
-				
-				if (text == null)
-					return 0;
-				
-				string [] texts = text.Split ('/');
-				uint value;
-				
-				if (texts.Length < 2)
-					return 0;
-				
-				return uint.TryParse (texts [1],
-					NumberStyles.Integer,
-					CultureInfo.InvariantCulture,
-					out value) ? value : 0;
-			}
-			set {
-				uint disc = Disc;
-				if (disc == 0 && value == 0) {
-					RemoveDescriptors ("WM/PartOfSet");
-					return;
-				}
-				
-				if (value != 0) {
-					SetDescriptorString (string.Format (
-						CultureInfo.InvariantCulture,
-						"{0}/{1}", disc, value),
-						"WM/PartOfSet");
-					return;
-				}
-				
-				SetDescriptorString (disc.ToString (
-					CultureInfo.InvariantCulture),
-					"WM/PartOfSet");
-			}
-		}
-		
-		/// <summary>
 		///    Gets and sets the lyrics or script of the media
 		///    represented by the current instance.
 		/// </summary>
@@ -1025,66 +771,6 @@ namespace TagLib.Asf {
 		}
 		
 		/// <summary>
-		///    Gets and sets the grouping on the album which the media
-		///    in the current instance belongs to.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the grouping on
-		///    the album which the media in the current instance belongs
-		///    to or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the
-		///    "WM/ContentGroupDescription" Content Descriptor.
-		/// </remarks>
-		public override string Grouping {
-			get {
-				return GetDescriptorString (
-					"WM/ContentGroupDescription");
-			}
-			set {
-				SetDescriptorString (value,
-					"WM/ContentGroupDescription");
-			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of beats per minute in the audio
-		///    of the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of beats per
-		///    minute in the audio of the media represented by the
-		///    current instance, or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the
-		///    "WM/BeatsPerMinute" Content Descriptor.
-		/// </remarks>
-		public override uint BeatsPerMinute {
-			get {
-				foreach (ContentDescriptor desc in
-					GetDescriptors ("WM/BeatsPerMinute")) {
-						uint value = desc.ToDWord ();
-						if (value != 0)
-							return value;
-				}
-				
-				return 0;
-			}
-			set {
-				if (value == 0) {
-					RemoveDescriptors ("WM/BeatsPerMinute");
-					return;
-				}
-				
-				SetDescriptors ("WM/BeatsPerMinute",
-					new ContentDescriptor (
-						"WM/BeatsPerMinute", value));
-			}
-		}
-		
-		/// <summary>
 		///    Gets and sets the conductor or director of the media
 		///    represented by the current instance.
 		/// </summary>
@@ -1100,24 +786,6 @@ namespace TagLib.Asf {
 		public override string Conductor {
 			get {return GetDescriptorString ("WM/Conductor");}
 			set {SetDescriptorString (value, "WM/Conductor");}
-		}
-		
-		/// <summary>
-		///    Gets and sets the copyright information for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the copyright
-		///    information for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the copyright stored
-		///    in the ASF Content Description Object.
-		/// </remarks>
-		public override string Copyright {
-			get {return description.Copyright;}
-			set {description.Copyright = value;}
 		}
 		
 		/// <summary>
@@ -1156,25 +824,6 @@ namespace TagLib.Asf {
 		public override string MusicBrainzReleaseId {
 			get {return GetDescriptorString ("MusicBrainz/Album Id");}
 			set {SetDescriptorString (value, "MusicBrainz/Album Id");}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Artist ID of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz 
-		///    ReleaseArtistID for the media described by the current
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MusicBrainz/Album Artist Id"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseArtistId {
-			get {return GetDescriptorString ("MusicBrainz/Album Artist Id");}
-			set {SetDescriptorString (value, "MusicBrainz/Album Artist Id");}
 		}
 
 		/// <summary>
@@ -1251,63 +900,6 @@ namespace TagLib.Asf {
 		//    get { return null; }
 		//    set {}
 		//}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Status of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz 
-		///    ReleaseStatus for the media described by the current
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MusicBrainz/Album Status"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseStatus {
-			get {return GetDescriptorString ("MusicBrainz/Album Status");}
-			set {SetDescriptorString (value, "MusicBrainz/Album Status");}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Type of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz 
-		///    ReleaseType for the media described by the current
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MusicBrainz/Album Type"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseType {
-			get {return GetDescriptorString ("MusicBrainz/Album Type");}
-			set {SetDescriptorString (value, "MusicBrainz/Album Type");}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Country of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz 
-		///    ReleaseCountry for the media described by the current
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MusicBrainz/Album Release Country"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseCountry {
-			get {return GetDescriptorString ("MusicBrainz/Album Release Country");}
-			set {SetDescriptorString (value, "MusicBrainz/Album Release Country");}
-		}
 
 		/// <summary>
 		///    Gets and sets a collection of pictures associated with

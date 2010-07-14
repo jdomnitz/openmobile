@@ -45,6 +45,11 @@ namespace OpenMobile
                 setLowercase(screen);
             if (name == "")
                 name = "OSK";
+            if ((name != "OSK") && (name != "NUM") && (name != "SYM"))
+            {
+                ((OMTextBox)manager[screen, "OSK"]["Text"]).Text = name;
+                name = "OSK";
+            }
             return manager[screen,name];
         }
 
@@ -227,7 +232,10 @@ namespace OpenMobile
                                     text.Text = text.Text.Remove(text.Text.Length - 1);
                                 break;
                             case 190:
-                                text.Text += '.';
+                                if(arg.Shift==true)
+                                    text.Text += '>';
+                                else
+                                    text.Text += '.';
                                 break;
                             case 186:
                                 if (arg.Shift == true)
@@ -235,8 +243,23 @@ namespace OpenMobile
                                 else
                                     text.Text += ';';
                                 break;
+                            case 187:
+                                if (arg.Shift == true)
+                                    text.Text += '+';
+                                else
+                                    text.Text += '=';
+                                break;
                             case 188:
-                                text.Text += ',';
+                                if (arg.Shift == true)
+                                    text.Text += '<';
+                                else
+                                    text.Text += ',';
+                                break;
+                            case 189:
+                                if (arg.Shift == true)
+                                    text.Text += '_';
+                                else
+                                    text.Text += '-';
                                 break;
                             case 191:
                                 if (arg.Shift == true)

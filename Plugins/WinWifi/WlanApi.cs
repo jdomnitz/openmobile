@@ -483,6 +483,14 @@ namespace NativeWifi
                 return reasonCode;
             }
 
+            public Wlan.WlanReasonCode SetPEAPXML(string profileName,string username,string password)
+            {
+                string XMLUserData = string.Format(WinWifi.Resource1.String1, username, password);
+                Wlan.ThrowIfError(
+                    Wlan.WlanSetProfileEapXmlUserData(client.clientHandle, info.interfaceGuid, profileName, 0, XMLUserData, IntPtr.Zero));
+                return Wlan.WlanReasonCode.Success;
+            }
+
             /// <summary>
             /// Gets the profile's XML specification.
             /// </summary>

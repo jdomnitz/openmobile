@@ -367,7 +367,7 @@ namespace OMPlayer
         }
         else
         {
-            if ((player[instance].nowPlaying.Location != null) && (player[instance].nowPlaying.Location != ""))
+            if (!string.IsNullOrEmpty(player[instance].nowPlaying.Location))
                 theHost.execute(eFunction.Play, instance.ToString(), player[instance].nowPlaying.Location);
         }
         return false;
@@ -591,8 +591,9 @@ namespace OMPlayer
             {
                 case EventCode.Complete:
                     if (crossfade==0)
-                            OnMediaEvent(eFunction.nextMedia, instance, "");
-                    stop();
+                        OnMediaEvent(eFunction.nextMedia, instance, "");
+                    else
+                        stop();
                     break;
                 case EventCode.DeviceLost:
                 case EventCode.ErrorAbort:
@@ -892,7 +893,7 @@ namespace OMPlayer
         {
             if (mediaControl != null)
             {
-                while(true)
+                while(instance>=0)
                 {
                     Thread.Sleep(1000);
                     if (mediaPosition != null)

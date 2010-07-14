@@ -38,8 +38,6 @@ namespace TagLib.Rmf
 
 
         private string title;
-        private string copyright;
-        private string comment;
         private string description;
         private uint duration;
         private uint bitrate;
@@ -165,12 +163,12 @@ namespace TagLib.Rmf
                     start = start + len + 2;
                     len = chunkData.Mid(start, 2).ToUShort();
                     description = chunkData.Mid(start+2, len).ToString();
-                    start = start + len + 2;
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    copyright = chunkData.Mid(start+ 2, len).ToString();
-                    start = start + len + 2;
-                    len = chunkData.Mid(start, 2).ToUShort();
-                    comment = chunkData.Mid(start + 2, len).ToString();
+                    //start = start + len + 2;
+                    //len = chunkData.Mid(start, 2).ToUShort();
+                    //copyright = chunkData.Mid(start+ 2, len).ToString();
+                    //start = start + len + 2;
+                    //len = chunkData.Mid(start, 2).ToUShort();
+                    //comment = chunkData.Mid(start + 2, len).ToString();
                     break;
             }
         }
@@ -206,22 +204,6 @@ namespace TagLib.Rmf
             }
         }
 
-        public override string Comment
-        {
-            get
-            {
-                return comment;
-            }
-        }
-
-        public override string Copyright
-        {
-            get
-            {
-                return copyright;
-            }
-        }
-
         /// <summary>
         ///    Gets the album artist for the media described by the
         ///    current instance.
@@ -246,8 +228,6 @@ namespace TagLib.Rmf
         {
             title = null;
             description = null;
-            copyright = null;
-            comment = null;
             bitrate = 0;
             duration = 0;
         }
