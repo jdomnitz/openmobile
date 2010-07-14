@@ -586,6 +586,12 @@ namespace OpenMobile
         /// </summary>
         None=0,
         /// <summary>
+        /// A data provider has completed an update
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: (Optional) Provider Name</para>
+        /// </summary>
+        dataUpdated=2,
+        /// <summary>
         /// Unloads all loaded panels except the UI
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
@@ -1623,7 +1629,7 @@ namespace OpenMobile
         /// <summary>
         /// If true, credentials must be set before connecting
         /// </summary>
-        public bool requiresPassword;
+        public ePassType requiresPassword;
         /// <summary>
         /// Username/Password or just Password
         /// </summary>
@@ -1639,7 +1645,7 @@ namespace OpenMobile
         /// <param name="id"></param>
         /// <param name="speed"></param>
         /// <param name="signal"></param>
-        public connectionInfo(string name, string id, int speed, uint signal,string type,bool passwordRequired)
+        public connectionInfo(string name, string id, int speed, uint signal,string type,ePassType passwordRequired)
         {
             NetworkName = name;
             UID = id;
@@ -1652,6 +1658,28 @@ namespace OpenMobile
         {
             return (((connectionInfo)obj).UID == this.UID);
         }
+    }
+    /// <summary>
+    /// Password Type
+    /// </summary>
+    public enum ePassType
+    {
+        /// <summary>
+        /// None
+        /// </summary>
+        None=0,
+        /// <summary>
+        /// Single string shared key
+        /// </summary>
+        SharedKey=1,
+        /// <summary>
+        /// Username and Password
+        /// </summary>
+        UserPass=2,
+        /// <summary>
+        /// Username, Password and Domain
+        /// </summary>
+        UserPassDomain=3
     }
 
     /// <summary>

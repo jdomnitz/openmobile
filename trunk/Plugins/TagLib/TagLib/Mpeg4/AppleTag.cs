@@ -705,28 +705,6 @@ namespace TagLib.Mpeg4 {
 		}
 		
 		/// <summary>
-		///    Gets and sets a user comment on the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing user comments
-		///    on the media represented by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "@cmt" data box.
-		/// </remarks>
-		public override string Comment {
-			get {
-				string [] text = GetText (BoxType.Cmt);
-                if (text.Length == 0)
-                    text = GetText(BoxType.Des);
-				return text.Length == 0 ? null : text [0];
-			}
-			set {SetText (BoxType.Cmt, value);}
-		}
-		
-		/// <summary>
 		///    Gets and sets the genres of the media represented by the
 		///    current instance.
 		/// </summary>
@@ -832,7 +810,7 @@ namespace TagLib.Mpeg4 {
 				return 0;
 			}
 			set {
-				uint count = TrackCount;
+				uint count = 1;
 				if (value == 0 && count == 0) {
 					ClearData (BoxType.Trkn);
 					return;
@@ -844,121 +822,6 @@ namespace TagLib.Mpeg4 {
 				v.Add (ByteVector.FromUShort (0));
 				
 				SetData (BoxType.Trkn, v, (int)
-					AppleDataBox.FlagType.ContainsData);
-			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of tracks in the album
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of tracks in
-		///    the album containing the media represented by the current
-		///    instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "trkn" data box.
-		/// </remarks>
-		public override uint TrackCount {
-			get {
-				foreach (AppleDataBox box in DataBoxes (BoxType.Trkn))
-					if (box.Flags == (int)
-						AppleDataBox.FlagType.ContainsData &&
-						box.Data.Count >= 6)
-						return box.Data.Mid (4, 2).ToUShort ();
-				
-				return 0;
-			}
-			set {
-				uint track = Track;
-				if (value == 0 && track == 0) {
-					ClearData (BoxType.Trkn);
-					return;
-				}
-				
-				ByteVector v = ByteVector.FromUShort (0);
-				v.Add (ByteVector.FromUShort ((ushort) track));
-				v.Add (ByteVector.FromUShort ((ushort) value));
-				v.Add (ByteVector.FromUShort (0));
-				SetData (BoxType.Trkn, v, (int)
-					AppleDataBox.FlagType.ContainsData);
-			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of the disc containing the media
-		///    represented by the current instance in the boxed set.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of the disc
-		///    containing the media represented by the current instance
-		///    in the boxed set.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "disk" data box.
-		/// </remarks>
-		public override uint Disc {
-			get {
-				foreach (AppleDataBox box in DataBoxes (BoxType.Disk))
-					if (box.Flags == (int)
-						AppleDataBox.FlagType.ContainsData &&
-						box.Data.Count >= 4)
-						return box.Data.Mid (2, 2).ToUShort ();
-				
-				return 0;
-			}
-			set {
-				uint count = DiscCount;
-				if (value == 0 && count == 0) {
-					ClearData (BoxType.Disk);
-					return;
-				}
-				
-				ByteVector v = ByteVector.FromUShort (0);
-				v.Add (ByteVector.FromUShort ((ushort) value));
-				v.Add (ByteVector.FromUShort ((ushort) count));
-				v.Add (ByteVector.FromUShort (0));
-				
-				SetData (BoxType.Disk, v, (int)
-					AppleDataBox.FlagType.ContainsData);
-			}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of discs in the boxed set
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of discs in
-		///    the boxed set containing the media represented by the
-		///    current instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "disk" data box.
-		/// </remarks>
-		public override uint DiscCount {
-			get {
-				foreach (AppleDataBox box in DataBoxes (BoxType.Disk))
-					if (box.Flags == (int)
-						AppleDataBox.FlagType.ContainsData &&
-						box.Data.Count >= 6)
-						return box.Data.Mid (4, 2).ToUShort ();
-				
-				return 0;
-			}
-			set {
-				uint disc = Disc;
-				if (value == 0 && disc == 0) {
-					ClearData (BoxType.Disk);
-					return;
-				}
-				
-				ByteVector v = ByteVector.FromUShort (0);
-				v.Add (ByteVector.FromUShort ((ushort) disc));
-				v.Add (ByteVector.FromUShort ((ushort) value));
-				v.Add (ByteVector.FromUShort (0));
-				SetData (BoxType.Disk, v, (int)
 					AppleDataBox.FlagType.ContainsData);
 			}
 		}
@@ -987,61 +850,6 @@ namespace TagLib.Mpeg4 {
 		}
 		
 		/// <summary>
-		///    Gets and sets the grouping on the album which the media
-		///    in the current instance belongs to.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the grouping on
-		///    the album which the media in the current instance belongs
-		///    to or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "@grp" data box.
-		/// </remarks>
-		public override string Grouping {
-			get {
-				foreach (AppleDataBox box in DataBoxes(BoxType.Grp))
-					return box.Text;
-				
-				return null;
-			}
-			set {SetText(BoxType.Grp, value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of beats per minute in the audio
-		///    of the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of beats per
-		///    minute in the audio of the media represented by the
-		///    current instance, or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "tmpo" data box.
-		/// </remarks>
-		public override uint BeatsPerMinute {
-			get {
-				foreach (AppleDataBox box in DataBoxes (BoxType.Tmpo))
-					if (box.Flags == (uint)
-						AppleDataBox.FlagType.ForTempo)
-						return box.Data.ToUInt ();
-				
-				return 0;
-			}
-			set {
-				if (value == 0) {
-					ClearData (BoxType.Tmpo);
-					return;
-				}
-				
-				SetData (BoxType.Tmpo,
-					ByteVector.FromUShort ((ushort)value),
-					(uint) AppleDataBox.FlagType.ForTempo);
-			}
-		}
-		
-		/// <summary>
 		///    Gets and sets the conductor or director of the media
 		///    represented by the current instance.
 		/// </summary>
@@ -1061,136 +869,6 @@ namespace TagLib.Mpeg4 {
 				return null;
 			}
 			set {SetText(BoxType.Cond, value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the copyright information for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the copyright
-		///    information for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "cprt" data box.
-		/// </remarks>
-		public override string Copyright {
-			get {
-				foreach (AppleDataBox box in DataBoxes(BoxType.Cprt))
-					return box.Text;
-                foreach (AppleDataBox box in DataBoxes(BoxType.Cpy))
-                    return box.Text;
-				return null;
-			}
-			set {SetText(BoxType.Cprt, value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the sort names for the band or artist who
-		///    is credited in the creation of the entire album or
-		///    collection containing the media described by the
-		///    current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names
-		///    for the band or artist who is credited in the creation
-		///    of the entire album or collection containing the media
-		///    described by the current instance or an empty array if
-		///    no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "soaa"
-		///    Box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		///    http://code.google.com/p/mp4v2/wiki/iTunesMetadata
-		/// </remarks>
-		public override string [] AlbumArtistsSort {
-			get {return GetText (BoxType.Soaa);}
-			set {SetText (BoxType.Soaa, value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names of the performers or artists
-		///    who performed in the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names for
-		///    the performers or artists who performed in the media
-		///    described by the current instance, or an empty array if
-		///    no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "soar" box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		///    http://code.google.com/p/mp4v2/wiki/iTunesMetadata
-		/// </remarks>
-		public override string[] PerformersSort {
-			get {return GetText (BoxType.Soar);}
-			set {SetText (BoxType.Soar, value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names of the Composer credited
-		///    in the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names for
-		///    the Composers in the media described by the current instance,
-		///    or an empty array if no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "soar" box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		///    http://code.google.com/p/mp4v2/wiki/iTunesMetadata
-		/// </remarks>
-		public override string[] ComposersSort {
-			get {return GetText (BoxType.Soco);}
-			set {SetText (BoxType.Soco, value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names of the Album Title of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort names for
-		///    the Album Title in the media described by the current
-		///    instance, or null if no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "soal" box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		///    http://code.google.com/p/mp4v2/wiki/iTunesMetadata
-		/// </remarks>
-		public override string AlbumSort {
-			get {
-				string [] text = GetText (BoxType.Soal);
-				return text.Length == 0 ? null : text [0];
-			}
-			set {SetText (BoxType.Soal, value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names of the Track Title in the
-		///    media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort names for
-		///    the Track Title in the media described by the current 
-		///    instance, or null if no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "sonm" box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		///    http://code.google.com/p/mp4v2/wiki/iTunesMetadata
-		/// </remarks>
-		public override string TitleSort {
-			get {
-				string [] text = GetText (BoxType.Sonm);
-				return text.Length == 0 ? null : text [0];
-			}
-			set {SetText (BoxType.Sonm, value);}
 		}
 
 		/// <summary>
@@ -1225,23 +903,6 @@ namespace TagLib.Mpeg4 {
 		public override string MusicBrainzReleaseId {
 			get {return GetDashBox("com.apple.iTunes","MusicBrainz Album Id");}
 			set {SetDashBox("com.apple.iTunes", "MusicBrainz Album Id",value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz ReleaseArtistID
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz
-		///    ReleaseArtistID for the media described by the current 
-		///    instance, or null if no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "dash"/"----" box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseArtistId {
-			get {return GetDashBox("com.apple.iTunes","MusicBrainz Album Artist Id");}
-			set {SetDashBox("com.apple.iTunes", "MusicBrainz Album Artist Id",value);}
 		}
 
 		/// <summary>
@@ -1310,57 +971,6 @@ namespace TagLib.Mpeg4 {
 		public override string AmazonId {
 			get {return GetDashBox("com.apple.iTunes","ASIN");}
 			set {SetDashBox("com.apple.iTunes", "ASIN",value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz ReleaseStatus
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz
-		///    ReleaseStatus for the media described by the current 
-		///    instance, or null if no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "dash"/"----" box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseStatus {
-			get {return GetDashBox("com.apple.iTunes","MusicBrainz Album Status");}
-			set {SetDashBox("com.apple.iTunes", "MusicBrainz Album Status",value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz ReleaseType
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz
-		///    ReleaseType for the media described by the current 
-		///    instance, or null if no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "dash"/"----" box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseType {
-			get {return GetDashBox("com.apple.iTunes","MusicBrainz Album Type");}
-			set {SetDashBox("com.apple.iTunes", "MusicBrainz Album Type",value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Country
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz
-		///    ReleaseCountry for the media described by the current 
-		///    instance, or null if no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "dash"/"----" box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseCountry {
-			get {return GetDashBox("com.apple.iTunes","MusicBrainz Album Release Country");}
-			set {SetDashBox("com.apple.iTunes", "MusicBrainz Album Release Country",value);}
 		}
 
 		/// <summary>

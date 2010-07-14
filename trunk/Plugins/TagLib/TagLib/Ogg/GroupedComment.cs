@@ -191,40 +191,6 @@ namespace TagLib.Ogg
 		}
 		
 		/// <summary>
-		///    Gets and sets the sort names for the individual track title of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort name
-		///    for the track title of the media described by the current 
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-empty value is
-		///    returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.TitleSort" />
-		public override string TitleSort {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string value = tag.TitleSort;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return null;
-			}
-			set {if (tags.Count > 0) tags [0].TitleSort = value;}
-		}
-		
-		/// <summary>
 		///    Gets and sets the performers or artists who performed in
 		///    the media described by the current instance.
 		/// </summary>
@@ -257,41 +223,6 @@ namespace TagLib.Ogg
 				return new string[] { };
 			}
 			set { if (tags.Count > 0) tags[0].Performers = value; }
-		}
-
-		/// <summary>
-		///    Gets and sets the sort names of the performers or artists
-		///    who performed in the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names for
-		///    the performers or artists who performed in the media
-		///    described by the current instance, or an empty array if
-		///    no value is present. 
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-empty value is
-		///    returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.PerformersSort" />
-		public override string [] PerformersSort {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string[] value = tag.PerformersSort;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return new string[] { };
-			}
-			set {if (tags.Count > 0) tags [0].PerformersSort = value;}
 		}
 		
 		/// <summary>
@@ -329,45 +260,6 @@ namespace TagLib.Ogg
 			}
 			set { if (tags.Count > 0) tags[0].AlbumArtists = value; }
 		}
-
-		/// <summary>
-		///    Gets and sets the sort names for the band or artist who
-		///    is credited in the creation of the entire album or
-		///    collection containing the media described by the
-		///    current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names
-		///    for the band or artist who is credited in the creation
-		///    of the entire album or collection containing the media
-		///    described by the current instance or an empty array if
-		///    no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-empty value is
-		///    returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.AlbumArtistsSort" />
-		public override string[] AlbumArtistsSort {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string[] value = tag.AlbumArtistsSort;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return new string[] { };
-			}
-			
-			set {if (tags.Count > 0) tags [0].AlbumArtistsSort = value;}
-		}
 		
 		/// <summary>
 		///    Gets and sets the composers of the media represented by
@@ -404,40 +296,6 @@ namespace TagLib.Ogg
 		}
 		
 		/// <summary>
-		///    Gets and sets the sort names for the composer of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A string[] containing the sort names
-		///    for the composer of the media described by the current
-		///    instance or an empty array if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-empty value is
-		///    returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.ComposersSort" />
-		public override string [] ComposersSort {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string[] value = tag.ComposersSort;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return new string[] { };
-			}
-			set {if (tags.Count > 0) tags [0].ComposersSort = value;}
-		}
-		
-		/// <summary>
 		///    Gets and sets the album of the media represented by the
 		///    current instance.
 		/// </summary>
@@ -469,74 +327,6 @@ namespace TagLib.Ogg
 				return null;
 			}
 			set { if (tags.Count > 0) tags[0].Album = value; }
-		}
-		
-		/// <summary>
-		///    Gets and sets the sort names for the album title of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort names
-		///    for the album title of the media described by the
-		///    current instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-empty value is
-		///    returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.AlbumSort" />
-		public override string AlbumSort {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string value = tag.AlbumSort;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return null;
-			}
-			set {if (tags.Count > 0) tags [0].AlbumSort = value;}
-		}
-		
-		/// <summary>
-		///    Gets and sets a user comment on the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing user comments
-		///    on the media represented by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-<see
-		///    langword="null" /> value is returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.Comment" />
-		public override string Comment {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string value = tag.Comment;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return null;
-			}
-			set { if (tags.Count > 0) tags[0].Comment = value; }
 		}
 		
 		/// <summary>
@@ -630,90 +420,6 @@ namespace TagLib.Ogg
 		}
 		
 		/// <summary>
-		///    Gets and sets the number of tracks in the album
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of tracks in
-		///    the album containing the media represented by the current
-		///    instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-zero value is
-		///    returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.TrackCount" />
-		public override uint TrackCount {
-			get {
-				foreach (XiphComment tag in tags)
-					if (tag != null && tag.TrackCount != 0)
-						return tag.TrackCount;
-				
-				return 0;
-			}
-			set { if (tags.Count > 0) tags[0].TrackCount = value; }
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of the disc containing the media
-		///    represented by the current instance in the boxed set.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of the disc
-		///    containing the media represented by the current instance
-		///    in the boxed set.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-zero value is
-		///    returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.Disc" />
-		public override uint Disc {
-			get {
-				foreach (XiphComment tag in tags)
-					if (tag != null && tag.Disc != 0)
-						return tag.Disc;
-				
-				return 0;
-			}
-			set { if (tags.Count > 0) tags[0].Disc = value; }
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of discs in the boxed set
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of discs in
-		///    the boxed set containing the media represented by the
-		///    current instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-zero value is
-		///    returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.DiscCount" />
-		public override uint DiscCount {
-			get {
-				foreach (XiphComment tag in tags)
-					if (tag != null && tag.DiscCount != 0)
-						return tag.DiscCount;
-				
-				return 0;
-			}
-			set { if (tags.Count > 0) tags[0].DiscCount = value; }
-		}
-		
-		/// <summary>
 		///    Gets and sets the lyrics or script of the media
 		///    represented by the current instance.
 		/// </summary>
@@ -745,69 +451,6 @@ namespace TagLib.Ogg
 				return null;
 			}
 			set { if (tags.Count > 0) tags[0].Lyrics = value; }
-		}
-		
-		/// <summary>
-		///    Gets and sets the grouping on the album which the media
-		///    in the current instance belongs to.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the grouping on
-		///    the album which the media in the current instance belongs
-		///    to or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-<see
-		///    langword="null" /> value is returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.Grouping" />
-		public override string Grouping {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string value = tag.Grouping;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return null;
-			}
-			set { if (tags.Count > 0) tags[0].Grouping = value; }
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of beats per minute in the audio
-		///    of the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of beats per
-		///    minute in the audio of the media represented by the
-		///    current instance, or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-zero value is
-		///    returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.BeatsPerMinute" />
-		public override uint BeatsPerMinute {
-			get {
-				foreach (XiphComment tag in tags)
-					if (tag != null && tag.BeatsPerMinute != 0)
-						return tag.BeatsPerMinute;
-				
-				return 0;
-				}
-			
-			set { if (tags.Count > 0) tags[0].BeatsPerMinute = value; }
 		}
 
 		/// <summary>
@@ -842,40 +485,6 @@ namespace TagLib.Ogg
 				return null;
 			}
 			set { if (tags.Count > 0) tags[0].Conductor = value; }
-		}
-		
-		/// <summary>
-		///    Gets and sets the copyright information for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the copyright
-		///    information for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are
-		///    looped through in order and the first non-<see
-		///    langword="null" /> value is returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.Copyright" />
-		public override string Copyright {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string value = tag.Copyright;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return null;
-			}
-			set { if (tags.Count > 0) tags[0].Copyright = value; }
 		}
 		
 		/// <summary>
@@ -942,39 +551,6 @@ namespace TagLib.Ogg
 				return null;
 			}
 			set {if (tags.Count > 0) tags [0].MusicBrainzReleaseId = value;}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Artist ID.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz
-		///    ReleaseArtistID for the media described by the 
-		///    current instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are looped
-		///    through in order and the first non-<see langword="null" />
-		///    and non-empty value is returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.MusicBrainzReleaseArtistId" />
-		public override string MusicBrainzReleaseArtistId {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string value = tag.MusicBrainzReleaseArtistId;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return null;
-			}
-			set {if (tags.Count > 0) tags [0].MusicBrainzReleaseArtistId = value;}
 		}
 
 		/// <summary>
@@ -1107,105 +683,6 @@ namespace TagLib.Ogg
 				return null;
 			}
 			set {if (tags.Count > 0) tags [0].AmazonId = value;}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Status.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz
-		///    Release Status for the media described by the 
-		///    current instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are looped
-		///    through in order and the first non-<see langword="null" />
-		///    and non-empty value is returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.MusicBrainzReleaseStatus" />
-		public override string MusicBrainzReleaseStatus {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string value = tag.MusicBrainzReleaseStatus;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return null;
-			}
-			set {if (tags.Count > 0) tags [0].MusicBrainzReleaseStatus = value;}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Type.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz
-		///    Release Type for the media described by the 
-		///    current instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are looped
-		///    through in order and the first non-<see langword="null" />
-		///    and non-empty value is returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.MusicBrainzReleaseType" />
-		public override string MusicBrainzReleaseType {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string value = tag.MusicBrainzReleaseType;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return null;
-			}
-			set {if (tags.Count > 0) tags [0].MusicBrainzReleaseType = value;}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Country.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz
-		///    Release Country for the media described by the 
-		///    current instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    <para>When getting the value, the child comments are looped
-		///    through in order and the first non-<see langword="null" />
-		///    and non-empty value is returned.</para>
-		///    <para>When setting the value, it is stored in the first
-		///    comment.</para>
-		/// </remarks>
-		/// <seealso cref="Tag.MusicBrainzReleaseCountry" />
-		public override string MusicBrainzReleaseCountry {
-			get {
-				foreach (XiphComment tag in tags) {
-					if (tag == null)
-						continue;
-					
-					string value = tag.MusicBrainzReleaseCountry;
-					
-					if (value != null && value.Length > 0)
-						return value;
-				}
-				
-				return null;
-			}
-			set {if (tags.Count > 0) tags [0].MusicBrainzReleaseCountry = value;}
 		}
 
 		/// <summary>

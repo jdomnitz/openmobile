@@ -40,7 +40,7 @@ namespace WinWifi
             for (int i = 0; i < networks.Length; i++)
                 if (networks[i].networkConnectable == true)
                 {
-                    connectionInfo info = new connectionInfo(System.Text.ASCIIEncoding.ASCII.GetString(networks[i].dot11Ssid.SSID, 0, (int)networks[i].dot11Ssid.SSIDLength), networks[i].GetHashCode().ToString(), getSpeed(networks[i].Dot11PhyTypes), networks[i].wlanSignalQuality, getType(networks[i]) + " (" + getSecurity(networks[i]) + ")", (networks[i].securityEnabled && string.IsNullOrEmpty(networks[i].profileName)));
+                    connectionInfo info = new connectionInfo(System.Text.ASCIIEncoding.ASCII.GetString(networks[i].dot11Ssid.SSID, 0, (int)networks[i].dot11Ssid.SSIDLength), networks[i].GetHashCode().ToString(), getSpeed(networks[i].Dot11PhyTypes), networks[i].wlanSignalQuality, getType(networks[i]) + " (" + getSecurity(networks[i]) + ")", getPass(networks[i]));
                     if (!connections.Contains(info))
                         connections.Add(info);
                     if (client.Interfaces[0].InterfaceState==Wlan.WlanInterfaceState.Connected)
@@ -48,6 +48,19 @@ namespace WinWifi
                             connections[connections.Count - 1].IsConnected = true;
                 }
             return connections.ToArray();
+        }
+
+        private ePassType getPass(Wlan.WlanAvailableNetwork wlanAvailableNetwork)
+        {
+            if (wlanAvailableNetwork.securityEnabled && string.IsNullOrEmpty(wlanAvailableNetwork.profileName))
+            {
+                if ((wlanAvailableNetwork.dot11DefaultAuthAlgorithm == Wlan.Dot11AuthAlgorithm.WPA) || (wlanAvailableNetwork.dot11DefaultAuthAlgorithm == Wlan.Dot11AuthAlgorithm.RSNA))
+                    return ePassType.UserPass;
+                else
+                    return ePassType.SharedKey;
+            }
+            else
+                return ePassType.None;
         }
 
         private int getSpeed(Wlan.Dot11PhyType[] dot11PhyType)
@@ -73,26 +86,28 @@ namespace WinWifi
             if (network.Dot11PhyTypes.Length == 0)
                 return "Unknown Device";
             if (network.dot11BssType==Wlan.Dot11BssType.Infrastructure)
-                return getRadio(network.Dot11PhyTypes[0]);
+                return getRadio(network.Dot11PhyTypes);
             else
-                return "Ad-Hoc " + getRadio(network.Dot11PhyTypes[0]);
+                return "Ad-Hoc " + getRadio(network.Dot11PhyTypes);
         }
-        private string getRadio(Wlan.Dot11PhyType dot11PhyType)
+        private string getRadio(Wlan.Dot11PhyType[] dot11PhyTypes)
         {
-            switch (dot11PhyType)
-            {
-                case Wlan.Dot11PhyType.OFDM:
-                    return "802.11a";
-                case Wlan.Dot11PhyType.ERP:
-                    return "802.11g";
-                case Wlan.Dot11PhyType.HT:
-                    return "802.11n";
-                case Wlan.Dot11PhyType.HRDSSS:
-                    return "802.11b";
-                case Wlan.Dot11PhyType.IrBaseband:
+            if (dot11PhyTypes.Length == 1)
+                if (dot11PhyTypes[0]==Wlan.Dot11PhyType.IrBaseband)
                     return "IR";
-            }
-            return "Unknown Type (" + dot11PhyType.ToString() + ")";
+            string ret = "802.11";
+            if (Array.Exists(dot11PhyTypes,t=>t== Wlan.Dot11PhyType.OFDM))
+                ret+= "a";
+            else if (Array.Exists(dot11PhyTypes,t=>t==Wlan.Dot11PhyType.HRDSSS))
+                ret += "b";
+            else if (Array.Exists(dot11PhyTypes,t=>t==Wlan.Dot11PhyType.ERP))
+                ret+= "g";
+            else if (Array.Exists(dot11PhyTypes,t=>t==Wlan.Dot11PhyType.HT))
+                ret += "n";
+            if (ret == "802.11")
+                return "Unknown Type (" + dot11PhyTypes[0].ToString() + ")";
+            else
+                return ret;
         }
 
         private string getSecurity(Wlan.WlanAvailableNetwork an)
@@ -100,11 +115,11 @@ namespace WinWifi
             switch (an.dot11DefaultAuthAlgorithm)
             {
                 case Wlan.Dot11AuthAlgorithm.WPA:
-                    return "WPA";
+                    return "WPA-Enterprise";
                 case Wlan.Dot11AuthAlgorithm.WPA_PSK:
                     return "WPA-PSK";
                 case Wlan.Dot11AuthAlgorithm.RSNA:
-                    return "WPA2";
+                    return "WPA2-Enterprise";
                 case Wlan.Dot11AuthAlgorithm.RSNA_PSK:
                     return "WPA2-PSK";
                 case Wlan.Dot11AuthAlgorithm.Open_Network:
@@ -137,28 +152,34 @@ namespace WinWifi
             try
             {
                 if (network.profileName == "")
-                    return connectToNew(network,connection.Credentials);
+                    return connectToNew(network,connection.Credentials,connection.NetworkName);
                 else
                     return client.Interfaces[0].ConnectSynchronously(Wlan.WlanConnectionMode.Profile, network.dot11BssType, network.profileName, 500);
             }
             catch (Exception) { return false; }
         }
 
-        private bool connectToNew(Wlan.WlanAvailableNetwork info,string Password)
+        private bool connectToNew(Wlan.WlanAvailableNetwork info,string Password,string givenName)
         {
             StringBuilder xmlProfileString = new StringBuilder(100);
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.NewLineOnAttributes = true;
             string networkName = System.Text.ASCIIEncoding.ASCII.GetString(info.dot11Ssid.SSID, 0, (int)info.dot11Ssid.SSIDLength);
+            if (info.dot11BssType==Wlan.Dot11BssType.Independent)
+            {
+                networkName+="-adhoc";
+                givenName+="-adhoc";
+            }
             XmlWriter writer = XmlWriter.Create(xmlProfileString, settings);
             writer.WriteStartElement("WLANProfile", @"http://www.microsoft.com/networking/WLAN/profile/v1");
             writer.WriteElementString("name", networkName);
             writer.WriteStartElement("SSIDConfig");
             writer.WriteStartElement("SSID");
-            writer.WriteElementString("hex", toHex(info.dot11Ssid.SSID, info.dot11Ssid.SSIDLength));
             writer.WriteElementString("name", networkName);
             writer.WriteEndElement();
+            if (networkName!=givenName)
+                writer.WriteElementString("nonBroadcast", "true");
             writer.WriteEndElement();
             if (info.dot11BssType==Wlan.Dot11BssType.Infrastructure)
                 writer.WriteElementString("connectionType", "ESS");
@@ -172,13 +193,13 @@ namespace WinWifi
                 case Wlan.Dot11AuthAlgorithm.Open_Network:
                     writer.WriteElementString("authentication", "open");
                     break;
-                case Wlan.Dot11AuthAlgorithm.WPA:
+                case Wlan.Dot11AuthAlgorithm.WPA: //probably doesn't work yet
                     writer.WriteElementString("authentication", "WPA");
                     break;
                 case Wlan.Dot11AuthAlgorithm.WPA_PSK:
                     writer.WriteElementString("authentication", "WPAPSK");
                     break;
-                case Wlan.Dot11AuthAlgorithm.RSNA:
+                case Wlan.Dot11AuthAlgorithm.RSNA: //probably doesn't work yet
                     writer.WriteElementString("authentication", "WPA2");
                     break;
                 case Wlan.Dot11AuthAlgorithm.RSNA_PSK:
@@ -205,36 +226,85 @@ namespace WinWifi
                     writer.WriteElementString("encryption", "WEP");
                     break;
             }
-            writer.WriteElementString("useOneX", "false");
-            writer.WriteEndElement();
-            if (info.dot11DefaultCipherAlgorithm != Wlan.Dot11CipherAlgorithm.None)
+            switch (info.dot11DefaultAuthAlgorithm)
             {
-                writer.WriteStartElement("sharedKey");
-                switch (info.dot11DefaultCipherAlgorithm)
-                {
-                    case Wlan.Dot11CipherAlgorithm.TKIP:
-                    case Wlan.Dot11CipherAlgorithm.CCMP: //AES
-                        writer.WriteElementString("keyType", "passPhrase");
-                        break;
-                    case Wlan.Dot11CipherAlgorithm.WEP:
-                    case Wlan.Dot11CipherAlgorithm.WEP104:
-                    case Wlan.Dot11CipherAlgorithm.WEP40:
-                        writer.WriteElementString("keyType", "networkKey");
-                        break;
-                }
-                writer.WriteElementString("protected", "false");
-                if (Password == null)
-                    Password = "";
-                writer.WriteElementString("keyMaterial", Password);
-                writer.WriteEndElement();
+                case Wlan.Dot11AuthAlgorithm.RSNA:
+                case Wlan.Dot11AuthAlgorithm.WPA:
+                    writer.WriteElementString("useOneX", "true");
+                    writer.WriteEndElement();
+                    writeEAP(ref writer, Password);
+                    break;
+                case Wlan.Dot11AuthAlgorithm.Open_Network:
+                    writer.WriteElementString("useOneX", "false");
+                    writer.WriteEndElement();
+                    break;
+                default:
+                    writer.WriteElementString("useOneX", "false");
+                    writer.WriteEndElement();
+                    writer.WriteStartElement("sharedKey");
+                    switch (info.dot11DefaultCipherAlgorithm)
+                    {
+                        case Wlan.Dot11CipherAlgorithm.TKIP:
+                        case Wlan.Dot11CipherAlgorithm.CCMP: //AES
+                            writer.WriteElementString("keyType", "passPhrase");
+                            break;
+                        default:
+                            writer.WriteElementString("keyType", "networkKey");
+                            break;
+                    }
+                    writer.WriteElementString("protected", "false");
+                    if (Password == null)
+                        Password = "";
+                    writer.WriteElementString("keyMaterial", Password);
+                    writer.WriteEndElement();
+                    break;
             }
             writer.WriteEndElement();
             writer.WriteEndElement();
             writer.Close();
             client.Interfaces[0].SetProfile(Wlan.WlanProfileFlags.AllUser, xmlProfileString.ToString(), true);
+            if ((info.dot11DefaultAuthAlgorithm == Wlan.Dot11AuthAlgorithm.RSNA) || (info.dot11DefaultAuthAlgorithm == Wlan.Dot11AuthAlgorithm.WPA))
+            {
+                string[] args = Password.Split(new char[] { ':' }, 2);
+                if (args.Length < 2)
+                    return false;
+                client.Interfaces[0].SetPEAPXML(networkName, args[0], args[1]); 
+            }
             return client.Interfaces[0].ConnectSynchronously(Wlan.WlanConnectionMode.Profile, Wlan.Dot11BssType.Any, networkName, 500);
         }
 
+        private void writeEAP(ref XmlWriter writer,string Password)
+        {
+            writer.WriteStartElement("OneX", "http://www.microsoft.com/networking/OneX/v1");
+            writer.WriteElementString("authMode", "machineOrUser");
+            writer.WriteStartElement("EAPConfig");
+            writer.WriteStartElement("EapHostConfig", "http://www.microsoft.com/provisioning/EapHostConfig");
+                writer.WriteStartElement("EapMethod");
+                        writer.WriteElementString("Type", "http://www.microsoft.com/provisioning/EapCommon","25");
+                        writer.WriteElementString("AuthorId", "http://www.microsoft.com/provisioning/EapCommon","0");
+                    writer.WriteEndElement();
+                    writer.WriteStartElement("Config", "http://www.microsoft.com/provisioning/EapHostConfig");
+                    writer.WriteStartElement("Eap", "http://www.microsoft.com/provisioning/BaseEapConnectionPropertiesV1");
+                            writer.WriteElementString("Type", "25");
+                            writer.WriteStartElement("EapType", "http://www.microsoft.com/provisioning/MsPeapConnectionPropertiesV1");
+                                writer.WriteElementString("FastReconnect", "true");
+                                writer.WriteElementString("InnerEapOptional", "0");
+                                writer.WriteStartElement("Eap", "http://www.microsoft.com/provisioning/BaseEapConnectionPropertiesV1");
+                                    writer.WriteElementString("Type", "26");
+                                    writer.WriteStartElement("EapType", "http://www.microsoft.com/provisioning/MsChapV2ConnectionPropertiesV1");
+                                        writer.WriteElementString("UseWinLogonCredentials", "false");
+                                    writer.WriteEndElement();
+                                writer.WriteEndElement();
+                                writer.WriteElementString("EnableQuarantineChecks", "false");
+                                writer.WriteElementString("RequireCryptoBinding","false");
+                                writer.WriteElementString("PeapExtensions", null);
+                            writer.WriteEndElement();
+                        writer.WriteEndElement();
+                    writer.WriteEndElement();
+                writer.WriteEndElement();
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+        }
         private string toHex(byte[] p, uint length)
         {
             string ret = "";

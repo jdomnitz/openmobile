@@ -29,8 +29,10 @@ namespace DPYWeather
     public class Weather:IDataProvider
     {
         #region IDataProvider Members
+        IPluginHost theHost;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
+            theHost = host;
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
             host.OnPowerChange += new PowerEvent(host_OnPowerChange);
             return OpenMobile.eLoadStatus.LoadSuccessful;
@@ -119,25 +121,25 @@ namespace DPYWeather
             lst[0] = ret;
             return lst;
         }
-        private static OpenMobile.Data.Weather.direction getDirection(int p)
+        private static OpenMobile.Data.eDirection getDirection(int p)
         {
             if (p < 23)
-                return OpenMobile.Data.Weather.direction.N;
+                return OpenMobile.Data.eDirection.N;
             if (p < 68)
-                return OpenMobile.Data.Weather.direction.NE;
+                return OpenMobile.Data.eDirection.NE;
             if (p < 113)
-                return OpenMobile.Data.Weather.direction.E;
+                return OpenMobile.Data.eDirection.E;
             if (p < 158)
-                return OpenMobile.Data.Weather.direction.SE;
+                return OpenMobile.Data.eDirection.SE;
             if (p < 203)
-                return OpenMobile.Data.Weather.direction.S;
+                return OpenMobile.Data.eDirection.S;
             if (p < 248)
-                return OpenMobile.Data.Weather.direction.SW;
+                return OpenMobile.Data.eDirection.SW;
             if (p < 293)
-                return OpenMobile.Data.Weather.direction.W;
+                return OpenMobile.Data.eDirection.W;
             if (p < 338)
-                return OpenMobile.Data.Weather.direction.NW;
-            return OpenMobile.Data.Weather.direction.N;
+                return OpenMobile.Data.eDirection.NW;
+            return OpenMobile.Data.eDirection.N;
         }
         private static OpenMobile.Data.Weather.weatherConditions parseCondition(string c)
         {

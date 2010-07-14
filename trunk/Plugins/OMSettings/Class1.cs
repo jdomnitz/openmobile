@@ -301,21 +301,21 @@ namespace OMSettings
             data.addControl(providers);
             manager.loadPanel(data);
             #endregion
-            #region Hardware
-            OMPanel hardware = new OMPanel("Hardware");
+            #region Plugins
+            OMPanel hardware = new OMPanel("Plugins");
             hardware.BackgroundColor1 = Color.Black;
             hardware.BackgroundType = backgroundStyle.SolidColor;
-            OMList lsthardware = new OMList(10, 100, 980, 433);
-            lsthardware.ListStyle = eListStyle.MultiList;
-            lsthardware.Background = Color.Silver;
-            lsthardware.ItemColor1 = Color.Black;
-            lsthardware.Font = new Font(FontFamily.GenericSansSerif, 30F);
-            lsthardware.Color = Color.White;
-            lsthardware.HighlightColor = Color.White;
-            lsthardware.SelectedItemColor1 = Color.DarkBlue;
-            lsthardware.OnClick += new userInteraction(lsthardware_OnClick);
-            lsthardware.Add("Loading . . .");
-            hardware.addControl(lsthardware);
+            OMList lstplugins = new OMList(10, 100, 980, 433);
+            lstplugins.ListStyle = eListStyle.MultiList;
+            lstplugins.Background = Color.Silver;
+            lstplugins.ItemColor1 = Color.Black;
+            lstplugins.Font = new Font(FontFamily.GenericSansSerif, 30F);
+            lstplugins.Color = Color.White;
+            lstplugins.HighlightColor = Color.White;
+            lstplugins.SelectedItemColor1 = Color.DarkBlue;
+            lstplugins.OnClick += new userInteraction(lstplugins_OnClick);
+            lstplugins.Add(new OMListItem("Loading . . .","",format));
+            hardware.addControl(lstplugins);
             manager.loadPanel(hardware);
             #endregion
             return OpenMobile.eLoadStatus.LoadSuccessful;
@@ -332,8 +332,8 @@ namespace OMSettings
             List<Exception> problems = new List<Exception>();
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(140, Color.White);
-            OMList lsthardware = (OMList)manager[0, "Hardware"][0];
-            lsthardware.Clear();
+            OMList lstplugins = (OMList)manager[0, "Plugins"][0];
+            lstplugins.Clear();
             foreach (IBasePlugin b in plugins)
             {
                 LayoutManager lm = new LayoutManager();
@@ -351,7 +351,7 @@ namespace OMSettings
                 if (panel != null)
                 {
                     panel.Name = b.pluginName + " Settings";
-                    lsthardware.Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
+                    lstplugins.Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
                     manager.loadPanel(panel);
                 }
             }
@@ -362,20 +362,20 @@ namespace OMSettings
             }
         }
 
-        void lsthardware_OnClick(OMControl sender, int screen)
+        void lstplugins_OnClick(OMControl sender, int screen)
         {
             OMList lst=(OMList)sender;
             if (lst.SelectedItem.text == "Loading . . .")
                 return;
             if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"OMSettings",lst.SelectedItem.text)==false)
                 return;
-            theHost.execute(eFunction.TransitionFromPanel,screen.ToString(),"OMSettings","Hardware");
+            theHost.execute(eFunction.TransitionFromPanel,screen.ToString(),"OMSettings","Plugins");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"SlideLeft");
         }
 
         void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
         {
-            if (function == eFunction.settingsChanged)
+            if (function == eFunction.dataUpdated)
                 loadProviders();
             if (function==eFunction.pluginLoadingComplete)
                 OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(loadPluginSettings), ePriority.Normal,"Load Plugin Settings");
@@ -439,7 +439,7 @@ namespace OMSettings
                     break;
                 case 4:
                     theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "Hardware");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "Plugins");
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
                     break;
             }
@@ -449,7 +449,7 @@ namespace OMSettings
         void location_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "data");
+            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "data",((OMTextBox)sender).Text);
         }
 
         void Save4_OnClick(OMControl sender, int screen)
@@ -468,7 +468,7 @@ namespace OMSettings
         void user_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "personal");
+            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "personal",((OMTextBox)sender).Text);
         }
 
         void Save2_OnClick(OMControl sender, int screen)

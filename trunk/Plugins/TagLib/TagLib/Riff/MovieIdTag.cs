@@ -160,29 +160,6 @@ namespace TagLib.Riff {
 		}
 		
 		/// <summary>
-		///    Gets and sets a user comment on the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing user comments
-		///    on the media represented by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "COMM" item.
-		/// </remarks>
-		public override string Comment {
-			get {
-				foreach (string s in GetValuesAsStrings ("COMM"))
-					if (!string.IsNullOrEmpty (s))
-						return s;
-				
-				return null;
-			}
-			set {SetValue ("COMM", value);}
-		}
-		
-		/// <summary>
 		///    Gets and sets the genres of the media represented by the
 		///    current instance.
 		/// </summary>
@@ -214,23 +191,6 @@ namespace TagLib.Riff {
 		public override uint Track {
 			get {return GetValueAsUInt ("PRT1");}
 			set {SetValue ("PRT1", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of tracks in the album
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of tracks in
-		///    the album containing the media represented by the current
-		///    instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "PRT2" item.
-		/// </remarks>
-		public override uint TrackCount {
-			get {return GetValueAsUInt ("PRT2");}
-			set {SetValue ("PRT2", value);}
 		}
 #endregion
 	}

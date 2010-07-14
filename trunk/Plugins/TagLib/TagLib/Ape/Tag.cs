@@ -811,23 +811,6 @@ namespace TagLib.Ape {
 		}
 
 		/// <summary>
-		///    Gets and sets the sort names of the Title of the
-		///    media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort names for
-		///    the Title of the media described by the current instance,
-		///    or null if no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "TitleSort" item.
-		/// </remarks>
-		public override string TitleSort {
-			get { return GetItemAsString ("TitleSort"); }
-			set { SetValue ("TitleSort", value); }
-		}
-
-		/// <summary>
 		///    Gets and sets the performers or artists who performed in
 		///    the media described by the current instance.
 		/// </summary>
@@ -843,25 +826,6 @@ namespace TagLib.Ape {
 		public override string [] Performers {
 			get {return GetItemAsStrings ("Artist");}
 			set {SetValue ("Artist", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the sort names of the performers or artists
-		///    who performed in the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> array containing the sort names for
-		///    the performers or artists who performed in the media
-		///    described by the current instance, or an empty array if
-		///    no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "ArtistSort" field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string[] PerformersSort {
-			get { return GetItemAsStrings ("ArtistSort"); }
-			set { SetValue ("ArtistSort", value); }
 		}
 
 		/// <summary>
@@ -895,29 +859,6 @@ namespace TagLib.Ape {
 		}
 
 		/// <summary>
-		///    Gets and sets the sort names for the band or artist who
-		///    is credited in the creation of the entire album or
-		///    collection containing the media described by the
-		///    current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> array containing the sort names
-		///    for the band or artist who is credited in the creation
-		///    of the entire album or collection containing the media
-		///    described by the current instance or an empty array if
-		///    no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "AlbumArtistSort"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string[] AlbumArtistsSort {
-			get { return GetItemAsStrings ("AlbumArtistSort"); }
-			set { SetValue ("AlbumArtistSort", value); }
-		}
-
-		/// <summary>
 		///    Gets and sets the composers of the media represented by
 		///    the current instance.
 		/// </summary>
@@ -935,25 +876,6 @@ namespace TagLib.Ape {
 		}
 
 		/// <summary>
-		///    Gets and sets the sort names for the composers of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> array containing the sort names
-		///    for the composer of the media described by the current
-		///    instance or an empty array if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "ComposerSort"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string[] ComposersSort {
-			get { return GetItemAsStrings ("ComposerSort"); }
-			set { SetValue ("ComposerSort", value); }
-		}
-
-		/// <summary>
 		///    Gets and sets the album of the media represented by the
 		///    current instance.
 		/// </summary>
@@ -968,42 +890,6 @@ namespace TagLib.Ape {
 		public override string Album {
 			get {return GetItemAsString ("Album");}
 			set {SetValue ("Album", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the sort names for the Album Title of
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the sort name of 
-		///    the Album Title of the media described by the current
-		///    instance or null if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "AlbumSort"
-		///    field.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string AlbumSort {
-			get { return GetItemAsString ("AlbumSort"); }
-			set { SetValue ("AlbumSort", value); }
-		}
-
-		/// <summary>
-		///    Gets and sets a user comment on the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing user comments
-		///    on the media represented by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "Comment" item.
-		/// </remarks>
-		public override string Comment {
-			get {return GetItemAsString ("Comment");}
-			set {SetValue ("Comment", value);}
 		}
 		
 		/// <summary>
@@ -1068,58 +954,7 @@ namespace TagLib.Ape {
 		/// </remarks>
 		public override uint Track {
 			get {return GetItemAsUInt32 ("Track", 0);}
-			set {SetValue ("Track", value, TrackCount);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of tracks in the album
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of tracks in
-		///    the album containing the media represented by the current
-		///    instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "Track" item.
-		/// </remarks>
-		public override uint TrackCount {
-			get {return GetItemAsUInt32 ("Track", 1);}
-			set {SetValue ("Track", Track, value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of the disc containing the media
-		///    represented by the current instance in the boxed set.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of the disc
-		///    containing the media represented by the current instance
-		///    in the boxed set.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "Disc" item.
-		/// </remarks>
-		public override uint Disc {
-			get {return GetItemAsUInt32 ("Disc", 0);}
-			set {SetValue ("Disc", value, DiscCount);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of discs in the boxed set
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of discs in
-		///    the boxed set containing the media represented by the
-		///    current instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "Disc" item.
-		/// </remarks>
-		public override uint DiscCount {
-			get {return GetItemAsUInt32 ("Disc", 1);}
-			set {SetValue ("Disc", Disc, value);}
+			set {SetValue ("Track", value, 1);}
 		}
 		
 		/// <summary>
@@ -1140,52 +975,6 @@ namespace TagLib.Ape {
 		}
 		
 		/// <summary>
-		///    Gets and sets the grouping on the album which the media
-		///    in the current instance belongs to.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the grouping on
-		///    the album which the media in the current instance belongs
-		///    to or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "Grouping" item.
-		/// </remarks>
-		public override string Grouping {
-			get {return GetItemAsString ("Grouping");}
-			set {SetValue ("Grouping", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the number of beats per minute in the audio
-		///    of the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of beats per
-		///    minute in the audio of the media represented by the
-		///    current instance, or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "BPM" item.
-		/// </remarks>
-		public override uint BeatsPerMinute {
-			get {
-				string text = GetItemAsString ("BPM");
-				
-				if (text == null)
-					return 0;
-				
-				double value;
-				
-				if (double.TryParse (text, out value))
-					return (uint) Math.Round (value);
-				
-				return 0;
-			}
-			set {SetValue ("BPM", value, 0);}
-		}
-		
-		/// <summary>
 		///    Gets and sets the conductor or director of the media
 		///    represented by the current instance.
 		/// </summary>
@@ -1200,23 +989,6 @@ namespace TagLib.Ape {
 		public override string Conductor {
 			get {return GetItemAsString ("Conductor");}
 			set {SetValue ("Conductor", value);}
-		}
-		
-		/// <summary>
-		///    Gets and sets the copyright information for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the copyright
-		///    information for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "Copyright" item.
-		/// </remarks>
-		public override string Copyright {
-			get {return GetItemAsString ("Copyright");}
-			set {SetValue ("Copyright", value);}
 		}
 
 		/// <summary>
@@ -1253,24 +1025,6 @@ namespace TagLib.Ape {
 		public override string MusicBrainzReleaseId {
 			get {return GetItemAsString ("MUSICBRAINZ_ALBUMID");}
 			set {SetValue ("MUSICBRAINZ_ALBUMID", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Artist ID of the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the MusicBrainz
-		///    ReleaseArtistID for the media represented by the current instance
-		///    or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MUSICBRAINZ_ALBUMARTISTID" item.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseArtistId {
-			get {return GetItemAsString ("MUSICBRAINZ_ALBUMARTISTID");}
-			set {SetValue ("MUSICBRAINZ_ALBUMARTISTID", value);}
 		}
 
 		/// <summary>
@@ -1343,60 +1097,6 @@ namespace TagLib.Ape {
 		public override string AmazonId {
 			get {return GetItemAsString ("ASIN");}
 			set {SetValue ("ASIN", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Status of the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the MusicBrainz
-		///    ReleaseStatus for the media represented by the current instance
-		///    or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MUSICBRAINZ_ALBUMSTATUS" item.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseStatus {
-			get {return GetItemAsString ("MUSICBRAINZ_ALBUMSTATUS");}
-			set {SetValue ("MUSICBRAINZ_ALBUMSTATUS", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz Release Type of the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the MusicBrainz
-		///    ReleaseType for the media represented by the current instance
-		///    or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "MUSICBRAINZ_ALBUMTYPE" item.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseType {
-			get {return GetItemAsString ("MUSICBRAINZ_ALBUMTYPE");}
-			set {SetValue ("MUSICBRAINZ_ALBUMTYPE", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the MusicBrainz ReleaseCountry of the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the MusicBrainz
-		///    ReleaseCountry for the media represented by the current instance
-		///    or <see langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "RELEASECOUNTRY" item.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzReleaseCountry {
-			get {return GetItemAsString ("RELEASECOUNTRY");}
-			set {SetValue ("RELEASECOUNTRY", value);}
 		}
 
 		/// <summary>

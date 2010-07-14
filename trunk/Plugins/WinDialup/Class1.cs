@@ -70,7 +70,7 @@ namespace WinDialup
             List<connectionInfo> info = new List<connectionInfo>();
             if (lpNames > 0)
                 for (int i = 0; i < lpNames; i++)
-                    info.Add(new connectionInfo(names[i].szEntryName,names[i].szEntryName,56,0,"Dial-Up Connection",false));
+                    info.Add(new connectionInfo(names[i].szEntryName,names[i].szEntryName,56,0,"Dial-Up Connection",ePassType.None));
             return info.ToArray();
         }
         public bool refresh()

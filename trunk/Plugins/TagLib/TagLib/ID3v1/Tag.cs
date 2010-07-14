@@ -381,31 +381,6 @@ namespace TagLib.Id3v1
 		}
 		
 		/// <summary>
-		///    Gets and sets a user comment on the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing user comments
-		///    on the media represented by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    When stored on disk, only the first 28 bytes of the
-		///    Latin-1 encoded value will be stored. This may result in
-		///    lost data.
-		/// </remarks>
-		public override string Comment {
-			get {
-				return string.IsNullOrEmpty (comment) ?
-					null : comment;
-			}
-			set {
-				comment = value != null ?
-					value.Trim () : String.Empty;
-			}
-		}
-		
-		/// <summary>
 		///    Gets and sets the genres of the media represented by the
 		///    current instance.
 		/// </summary>

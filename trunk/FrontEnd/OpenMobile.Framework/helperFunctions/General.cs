@@ -66,7 +66,15 @@ namespace OpenMobile.helperFunctions
             {
                 return getText(screen, pluginname, new string[] { panelName });
             }
+            public string getText(int screen, string pluginname, string panelName, string defaultValue)
+            {
+                return getText(screen, pluginname, new string[]{panelName}, defaultValue);
+            }
             public string getText(int screen,string pluginname,string[] panelNames)
+            {
+                return getText(screen, pluginname, panelNames,"OSK");
+            }
+            public string getText(int screen,string pluginname,string[] panelNames,string defaultValue)
             {
                 SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
@@ -74,7 +82,7 @@ namespace OpenMobile.helperFunctions
                 wait.Reset();
                 bool error = false;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
-                error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "OSK");
+                error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", defaultValue);
                 host.execute(eFunction.ExecuteTransition,screen.ToString());
                 if (!error)
                     wait.WaitOne();
@@ -169,6 +177,8 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string getFile(int screen,string pluginName,string panelName,string startPath)
             {
+                if (host == null)
+                    return null;
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
                 wait.Reset();
@@ -193,6 +203,8 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string getFolder(int screen, string pluginName,string panelName)
             {
+                if (host == null)
+                    return null;
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
                 wait.Reset();

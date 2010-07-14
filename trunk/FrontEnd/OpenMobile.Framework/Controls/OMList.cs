@@ -617,15 +617,18 @@ namespace OpenMobile.Controls
                         {
                             if (ListStyle == eListStyle.MultiList)
                             {
-                                if (selectedIndex == i)
+                                if (items[i].subitemFormat != null)
                                 {
-                                    Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, tmp, 0, highlightColor, highlightColor);
-                                    Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, tmp, 0, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
-                                }
-                                else
-                                {
-                                    Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, tmp, 0, Color, Color);
-                                    Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, tmp, 0, items[i].subitemFormat.color, items[i].subitemFormat.color);
+                                    if (selectedIndex == i)
+                                    {
+                                        Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, tmp, 0, highlightColor, highlightColor);
+                                        Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, tmp, 0, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
+                                    }
+                                    else
+                                    {
+                                        Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, tmp, 0, Color, Color);
+                                        Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, tmp, 0, items[i].subitemFormat.color, items[i].subitemFormat.color);
+                                    }
                                 }
                             }
                             else

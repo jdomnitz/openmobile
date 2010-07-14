@@ -192,22 +192,6 @@ namespace TagLib.Qt
             }
         }
 
-        public override string Comment
-        {
-            get
-            {
-                return comment;
-            }
-        }
-
-        public override string Copyright
-        {
-            get
-            {
-                return copyright;
-            }
-        }
-
         /// <summary>
         ///    Gets the album artist for the media described by the
         ///    current instance.

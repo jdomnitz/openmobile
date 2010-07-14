@@ -186,13 +186,15 @@ namespace TagLib.Id3v2
 			
 			// Unique File Identifier (frames 4.1)
 			if (header.FrameId == FrameType.UFID)
-				return new UniqueFileIdentifierFrame (data,
-					position, header, version);
+                return new EmptyFrame();
+				//return new UniqueFileIdentifierFrame (data,
+				//	position, header, version);
 			
 			// Music CD Identifier (frames 4.5)
-			if (header.FrameId == FrameType.MCDI)
-				return new MusicCdIdentifierFrame (data,
-					position, header, version);
+            if (header.FrameId == FrameType.MCDI)
+                return new EmptyFrame();
+				//return new MusicCdIdentifierFrame (data,
+				//	position, header, version);
 			
 			// Unsynchronized Lyrics (frames 4.8)
 			if (header.FrameId == FrameType.USLT)
@@ -206,13 +208,15 @@ namespace TagLib.Id3v2
 			
 			// Comments (frames 4.10)
 			if (header.FrameId == FrameType.COMM)
-				return new CommentsFrame (data, position,
-					header, version);
+                return new EmptyFrame();
+				//return new CommentsFrame (data, position,
+				//	header, version);
 			
 			// Relative Volume Adjustment (frames 4.11)
-			if (header.FrameId == FrameType.RVA2)
-				return new RelativeVolumeFrame (data, position,
-					header, version);
+            if (header.FrameId == FrameType.RVA2)
+                return new EmptyFrame();
+				//return new RelativeVolumeFrame (data, position,
+				//	header, version);
 			
 			// Attached Picture (frames 4.14)
 			if (header.FrameId == FrameType.APIC)
@@ -225,24 +229,28 @@ namespace TagLib.Id3v2
 					position, header, version);
 			
 			// Play Count (frames 4.16)
-			if(header.FrameId == FrameType.PCNT)
-				return new PlayCountFrame (data, position,
-					header, version);
+            if (header.FrameId == FrameType.PCNT)
+                return new EmptyFrame();
+				//return new PlayCountFrame (data, position,
+				//	header, version);
 			
 			// Play Count (frames 4.17)
 			if(header.FrameId == FrameType.POPM)
-				return new PopularimeterFrame (data, position,
-					header, version);
+                return new EmptyFrame();
+				//return new PopularimeterFrame (data, position,
+				//	header, version);
 			
 			// Terms of Use (frames 4.22)
-			if(header.FrameId == FrameType.USER)
-				return new TermsOfUseFrame (data, position,
-					header, version);
+            if (header.FrameId == FrameType.USER)
+                return new EmptyFrame();
+				//return new TermsOfUseFrame (data, position,
+				//	header, version);
 			
 			// Private (frames 4.27)
-			if (header.FrameId == FrameType.PRIV)
-				return new PrivateFrame (data, position, header,
-					version);
+            if (header.FrameId == FrameType.PRIV)
+                return new EmptyFrame();
+				//return new PrivateFrame (data, position, header,
+				//	version);
 			
 			return new UnknownFrame (data, position, header,
 				version);

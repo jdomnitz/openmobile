@@ -196,29 +196,6 @@ namespace TagLib.Riff
 		}
 
 		/// <summary>
-		///    Gets and sets a user comment on the media represented by
-		///    the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing user comments
-		///    on the media represented by the current instance or <see
-		///    langword="null" /> if no value is present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "ICMT" item.
-		/// </remarks>
-		public override string Comment {
-			get {
-				foreach (string s in GetValuesAsStrings ("ICMT"))
-					if (!string.IsNullOrEmpty (s))
-						return s;
-				
-				return null;
-			}
-			set {SetValue ("ICMT", value);}
-		}
-
-		/// <summary>
 		///    Gets and sets the genres of the media represented by the
 		///    current instance.
 		/// </summary>
@@ -267,46 +244,6 @@ namespace TagLib.Riff
 		public override uint Track {
 			get {return GetValueAsUInt ("IPRT");}
 			set {SetValue ("IPRT", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the number of tracks in the album
-		///    containing the media represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="uint" /> containing the number of tracks in
-		///    the album containing the media represented by the current
-		///    instance or zero if not specified.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "IFRM" item.
-		/// </remarks>
-		public override uint TrackCount {
-			get {return GetValueAsUInt ("IFRM");}
-			set {SetValue ("IFRM", value);}
-		}
-
-		/// <summary>
-		///    Gets and sets the copyright information for the media
-		///    represented by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> object containing the copyright
-		///    information for the media represented by the current
-		///    instance or <see langword="null" /> if no value present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "ICOP" item.
-		/// </remarks>
-		public override string Copyright {
-			get {
-				foreach (string s in GetValuesAsStrings ("ICOP"))
-					if (!string.IsNullOrEmpty (s))
-						return s;
-				
-				return null;
-			}
-			set {SetValue ("ICOP", value);}
 		}
 #endregion
 	}

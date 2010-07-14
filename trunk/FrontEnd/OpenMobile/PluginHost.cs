@@ -497,7 +497,7 @@ namespace OpenMobile
             return false;
         }
 
-        private void savePlaylists()
+        internal void savePlaylists()
         {
             using (PluginSettings s = new PluginSettings())
             {
@@ -584,6 +584,10 @@ namespace OpenMobile
                 historyItem tmp = currentItem[screen];
                 currentItem[screen] = items[screen].Pop();
                 return tmp;
+            }
+            public int Count(int screen)
+            {
+                return items[screen].Count;
             }
         }
         public int ScreenCount
@@ -783,6 +787,9 @@ namespace OpenMobile
                         return ((INetwork)plugin).refresh();
                     else
                         return false;
+                case eFunction.dataUpdated:
+                    raiseSystemEvent(eFunction.dataUpdated, arg, "", "");
+                    return true;
                 case eFunction.backgroundOperationStatus:
                     raiseSystemEvent(eFunction.backgroundOperationStatus, arg, "", "");
                     return true;
@@ -911,7 +918,7 @@ namespace OpenMobile
                             return false;
                         execute(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
-                        if (history.Peek(ret).Equals(history.CurrentItem(ret)))
+                        while((history.Count(ret)>0)&&(history.Peek(ret).Equals(history.CurrentItem(ret))))
                             history.Dequeue(ret);
                         //This part is done manually to prevent adding it to the history
                         OMPanel k = getPanelByName(history.Peek(ret).pluginName, history.Peek(ret).panelName, ret);

@@ -586,7 +586,7 @@ namespace OpenMobile
                             {
                                 lastClick.Mode = eModeType.Clicked;
                                 tmrClick.Enabled = true;
-                                SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
+                                SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.clickMe(screen); });
                             }
                             return;
                         }
@@ -603,7 +603,7 @@ namespace OpenMobile
                     lastClick = null;
                     if (typeof(IClickable).IsInstanceOfType(highlighted) == true)
                     {
-                        SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).clickMe(screen); });
+                        SandboxedThread.Asynchronous(delegate() { if (highlighted != null) ((IClickable)highlighted).clickMe(screen); });
                     }
                 }
             }
@@ -736,8 +736,23 @@ namespace OpenMobile
         {
             if ((e.CloseReason == CloseReason.UserClosing)||(e.CloseReason==CloseReason.WindowsShutDown))
             {
-                Core.theHost.execute(eFunction.closeProgram);
-                e.Cancel = true;
+                if (e.CloseReason == CloseReason.UserClosing)
+                {
+                    Core.theHost.execute(eFunction.closeProgram);
+                    e.Cancel = true;
+                }
+                else
+                {
+                    RenderingWindow.closeRenderer();
+                    try
+                    {
+                        if (Core.theHost.hal != null)
+                            Core.theHost.hal.snd("44");
+                        Core.theHost.savePlaylists();
+                        Core.theHost.raiseSystemEvent(eFunction.closeProgram, "", "", "");
+                    }
+                    catch (Exception) { }
+                }
             }
         }
 

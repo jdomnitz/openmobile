@@ -75,11 +75,15 @@ namespace OpenMobile.Net
         {
             object o = new object();
             host.getData(eGetData.GetPlugins, "", out o);
+            if (o == null)
+                return false;
             List<IBasePlugin> l = (List<IBasePlugin>)o;
             connectionInfo info;
             foreach (IBasePlugin b in l.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))
             {
                 info = Array.Find<connectionInfo>(((INetwork)b).getAvailableNetworks(), p => p.UID == connectionID);
+                if (info == null)
+                    continue;
                 info.Credentials = credentials;
                 if (info != null)
                 {

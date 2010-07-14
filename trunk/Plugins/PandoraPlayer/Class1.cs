@@ -48,7 +48,7 @@ namespace PandoraPlayer
                 new Thread(delegate()
                 {
                     for (int i = 0; i < 100; i++)
-                        if ((!loggedIn) || (client.Stations.Count == 0))
+                        if ((!loggedIn) || (stationsAvailable))
                             Thread.Sleep(50);
                     station = station.Substring(8);
                     client.ChangeStation(station);
@@ -140,7 +140,7 @@ namespace PandoraPlayer
                     this.instance = instance;
                     int vol = getVolume(instance);
                     client = new PClient(false);
-                    loggedIn=false;
+                    stationsAvailable=loggedIn=false;
                     client.LoggedIn += new StringEventHandler(client_LoggedIn);
                     client.StationChanged += new StringEventHandler(client_StationChanged);
                     client.SongPlayed += new SongEventHandler(client_SongPlayed);
@@ -170,9 +170,10 @@ namespace PandoraPlayer
                 theHost.sendMessage("OMDebug", "Pandora", e.Value);
             Debug.Print(e.Value);
         }
-
+        bool stationsAvailable;
         void client_StationsAvailable(object o, StringEventArgs e)
         {
+            stationsAvailable = true;
             raiseMediaEvent(eFunction.stationListUpdated, "");
         }
 

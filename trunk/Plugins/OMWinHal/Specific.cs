@@ -289,6 +289,23 @@ namespace OMHal
                 }
             }
         }
+
+        public static void Shutdown(bool restart)
+        {
+            ManagementBaseObject mboShutdown = null;
+            ManagementClass mcWin32 = new ManagementClass("Win32_OperatingSystem");
+            mcWin32.Get();
+            mcWin32.Scope.Options.EnablePrivileges = true;
+            ManagementBaseObject mboShutdownParams = mcWin32.GetMethodParameters("Win32Shutdown");
+            if (restart)
+                mboShutdownParams["Flags"] = "18";
+            else
+                mboShutdownParams["Flags"] = "17";
+            mboShutdownParams["Reserved"] = "0";
+            foreach (ManagementObject manObj in mcWin32.GetInstances())
+                mboShutdown = manObj.InvokeMethod("Win32Shutdown", mboShutdownParams, null);
+        }
+
         [DllImport("user32.dll")]
         private static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
         [DllImport("winmm.dll")]
