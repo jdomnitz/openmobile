@@ -914,11 +914,11 @@ namespace OpenMobile
                             raiseSystemEvent(eFunction.goBack, arg1, "", "");
                             return false;
                         }
-                        if (history.Peek(ret).pluginName == null)
+                        if ((history.Count(ret)==0)||(history.Peek(ret).pluginName == null))
                             return false;
                         execute(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
-                        while((history.Count(ret)>0)&&(history.Peek(ret).Equals(history.CurrentItem(ret))))
+                        while((history.Count(ret)>1)&&(history.Peek(ret).Equals(history.CurrentItem(ret))))
                             history.Dequeue(ret);
                         //This part is done manually to prevent adding it to the history
                         OMPanel k = getPanelByName(history.Peek(ret).pluginName, history.Peek(ret).panelName, ret);
