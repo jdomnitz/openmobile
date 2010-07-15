@@ -8,7 +8,7 @@ namespace OMLinHal
 		public static void Main (string[] args)
 		{
 			NDesk.DBus.BusG.Init();
-			//Application.Init ();
+			Application.Init ();
 			MainWindow win = new MainWindow ();
 			win.Opacity=0;
 			win.Show ();
