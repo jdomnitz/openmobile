@@ -352,5 +352,15 @@ namespace DPGWeather
         }
 
         #endregion
+
+        #region IBasePlugin Members
+
+
+        public Settings loadSettings()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

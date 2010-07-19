@@ -20,6 +20,7 @@
 *********************************************************************************/
 using System;
 using System.Drawing;
+using OpenMobile.Drawing;
 using System.Timers;
 using System.Threading;
 using OpenMobile;

@@ -28,6 +28,8 @@ using System.Threading;
 using OpenMobile.Net;
 using OpenMobile.Plugin;
 using OpenMobile.Data;
+using OpenMobile.Drawing;
+
 namespace OpenMobile.Media
 {
     /// <summary>
@@ -71,13 +73,13 @@ namespace OpenMobile.Media
                 {
                     if (m.Length > 4)
                     {
-                        info.coverArt = Image.FromStream(m);
-                        if ((info.coverArt.Height > 600) || (info.coverArt.Width > 600))
+                        info.coverArt = OImage.FromStream(m);
+                        if ((info.coverArt.Height() > 600) || (info.coverArt.Width() > 600))
                         {
-                            Bitmap newimg = new Bitmap(600, (int)(600 * (info.coverArt.Height / (float)info.coverArt.Width)));
-                            Graphics g = Graphics.FromImage(newimg);
+                            OImage newimg = new OImage(new Bitmap(600, (int)(600 * (info.coverArt.Height() / (float)info.coverArt.Width()))));
+                            System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newimg.image);
                             GraphicsUnit unit = GraphicsUnit.Pixel;
-                            g.DrawImage(info.coverArt, newimg.GetBounds(ref unit));
+                            g.DrawImage(info.coverArt.image, newimg.image.GetBounds(ref unit));
                             g.Dispose();
                             info.coverArt = newimg;
                         }
@@ -98,18 +100,18 @@ namespace OpenMobile.Media
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static Image getFolderImage(string url)
+        public static OImage getFolderImage(string url)
         {
             string path = OpenMobile.Path.Combine(System.IO.Path.GetDirectoryName(url), "Folder.jpg");
             if (System.IO.File.Exists(path) == true)
             {
-                Image img = Image.FromFile(path);
-                if ((img.Height > 600) || (img.Width > 600))
+                OImage img = OImage.FromFile(path);
+                if ((img.Height() > 600) || (img.Width() > 600))
                 {
-                    Bitmap newimg = new Bitmap(600, (int)(600 * (img.Height / (float)img.Width)));
-                    Graphics g = Graphics.FromImage(newimg);
+                    OImage newimg = new OImage(new Bitmap(600, (int)(600 * (img.Height() / (float)img.Width()))));
+                    System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newimg.image);
                     GraphicsUnit unit = GraphicsUnit.Pixel;
-                    g.DrawImage(img, newimg.GetBounds(ref unit));
+                    g.DrawImage(img.image, newimg.image.GetBounds(ref unit));
                     g.Dispose();
                     return newimg;
                 }
@@ -119,14 +121,14 @@ namespace OpenMobile.Media
         }
         private static string cacheArtist;
         private static string cacheAlbum;
-        private static Image cacheArt;
+        private static OImage cacheArt;
         /// <summary>
         /// Retrieves metadata from LastFM
         /// </summary>
         /// <param name="artist"></param>
         /// <param name="album"></param>
         /// <returns></returns>
-        public static Image getLastFMImage(string artist, string album)
+        public static OImage getLastFMImage(string artist, string album)
         {
             if (Net.Network.IsAvailable==false)
                 return null;
@@ -174,7 +176,7 @@ namespace OpenMobile.Media
         /// <param name="album"></param>
         /// <param name="pluginHost"></param>
         /// <returns></returns>
-        public static Image getCoverFromDB(string artist, string album, IPluginHost pluginHost)
+        public static OImage getCoverFromDB(string artist, string album, IPluginHost pluginHost)
         {
             object o = new object();
             using(PluginSettings s=new PluginSettings())

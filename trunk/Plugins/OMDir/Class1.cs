@@ -19,6 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
+using OpenMobile.Drawing;
 using System.Drawing;
 using System.IO;
 using OpenMobile;
@@ -34,7 +35,7 @@ namespace OMDir
         ScreenManager manager;
         IPluginHost theHost;
         int[] type;
-        Image folder;
+        OImage folder;
 
         public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)
         {

@@ -178,7 +178,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g"></param>
         /// <param name="e"></param>
-        public override void Render(System.Drawing.Graphics g, renderingParams e)
+        public override void Render(Drawing.Graphics g, renderingParams e)
         {
             // Start of code added by Borte
             // Basic shape didn't respect the transition values while rendering

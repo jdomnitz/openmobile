@@ -48,6 +48,10 @@
       <Project>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</Project>
       <Name>OpenMobile.Framework</Name>
     </ProjectReference>
+    <ProjectReference Include="..\OpenMobile.Drawing\OpenMobile.Drawing.csproj">
+      <Project>{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}</Project>
+      <Name>OpenMobile.Drawing</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

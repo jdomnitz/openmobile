@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Data;
 using Mono.Data.Sqlite;
 using System.Drawing;
+using OpenMobile.Drawing;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -667,7 +668,7 @@ namespace OMMediaDB
                     if (vl.GetType() != typeof(DBNull))
                     {
                         MemoryStream m = new MemoryStream((byte[])vl);
-                        i.coverArt = Image.FromStream(m);
+                        i.coverArt = OImage.FromStream(m);
                     }
                 }
             return i;

@@ -30,6 +30,7 @@ using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
 using OpenMobile.Media;
+using OpenMobile.Drawing;
 
 namespace OpenMobile
 {
@@ -1367,7 +1368,7 @@ namespace OpenMobile
                 {
                     try
                     {
-                        im.image = Image.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png"));
+                        im.image = OImage.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png"));
                         im.name = imageName;
                         imageCache.Add(im);
                         return im;
@@ -1376,7 +1377,7 @@ namespace OpenMobile
                     {
                         try
                         {
-                            im.image = Image.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".gif"));
+                            im.image = OImage.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".gif"));
                             im.name = imageName;
                             imageCache.Add(im);
                             return im;
@@ -1392,7 +1393,7 @@ namespace OpenMobile
             {
                 try
                 {
-                    imageItem item = new imageItem(Image.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png")));
+                    imageItem item = new imageItem(OImage.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png")));
                     item.name = imageName;
                     return item;
                 }

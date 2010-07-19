@@ -29,6 +29,7 @@ using OpenMobile;
 using OpenMobile.Data;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
+using OpenMobile.Drawing;
 using System.Drawing;
 
 namespace OMPlayer

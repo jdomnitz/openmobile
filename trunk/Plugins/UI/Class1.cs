@@ -20,6 +20,7 @@
 *********************************************************************************/
 using System;
 using System.Drawing;
+using OpenMobile.Drawing;
 using System.Threading;
 using System.Timers;
 using OpenMobile.Controls;
@@ -818,7 +819,7 @@ namespace OpenMobile
                             else
                                 cover.Image = new imageItem(info.coverArt);
                             if (cover.Height<cover.Width){
-                                cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
+                                cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height() / cover.Image.image.Width()));
                                 cover.Top = 2 + (85-cover.Height)/2;
                             }
                         }
@@ -834,8 +835,8 @@ namespace OpenMobile
                             cover.Image = it;
                             if ((cover.Image.image!=null)&&(cover.Height < cover.Width))
                             {
-                                cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
-                                cover.Top = 2 + (85 - cover.Height) / 2;
+                                cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height() / cover.Image.image.Width()));
+                                cover.Top = 2 + (85 - cover.Image.image.Height()) / 2;
                             }
                         }
                         ((OMButton)p[10]).Image = theHost.getSkinImage("Pause");
