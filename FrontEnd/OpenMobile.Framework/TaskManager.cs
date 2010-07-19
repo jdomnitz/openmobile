@@ -77,6 +77,7 @@ namespace OpenMobile.Threading
         /// </summary>
         /// <param name="task"></param>
         /// <param name="taskPriority"></param>
+        [Obsolete("All Tasks should provide a task name")]
         public static void QueueTask(Function task, ePriority taskPriority)
         {
             QueueTask(task, taskPriority, "Unknown Task");
