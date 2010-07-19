@@ -72,7 +72,7 @@ namespace TagLib {
 		///    The picture is of the album or disc itself.
 		/// </summary>
 		Media = 0x06,
-		// Image from the album itself
+		// OImage from the album itself
 		
 		/// <summary>
 		///    The picture is of the lead artist or soloist.

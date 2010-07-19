@@ -164,6 +164,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Plugins\OpenMobile.Drawing\OpenMobile.Drawing.csproj">
+      <Project>{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}</Project>
+      <Name>OpenMobile.Drawing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Plugins\TagLib\TagLib.csproj">
       <Project>{087D2157-E9B3-4CE1-8304-89B421328111}</Project>
       <Name>TagLib</Name>

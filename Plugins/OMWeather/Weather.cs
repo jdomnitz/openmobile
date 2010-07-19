@@ -374,5 +374,15 @@ namespace ControlDemo
             p = null;
             widget = null;
         }
+
+        #region IBasePlugin Members
+
+
+        public Settings loadSettings()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

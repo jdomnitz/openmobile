@@ -21,6 +21,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using OpenMobile.Drawing;
 using System.Drawing.Design;
 using System.IO;
 using System.Windows.Forms;
@@ -281,7 +282,7 @@ namespace OpenMobile
         /// <summary>
         /// The icon
         /// </summary>
-        public Image image;
+        public OImage image;
         /// <summary>
         /// An optional subitem for the list
         /// </summary>
@@ -307,7 +308,7 @@ namespace OpenMobile
         /// </summary>
         /// <param name="text"></param>
         /// <param name="image"></param>
-        public OMListItem(string text,Image image)
+        public OMListItem(string text,OImage image)
         {
             this.text = text;
             this.image = image;
@@ -352,7 +353,7 @@ namespace OpenMobile
         /// <param name="text"></param>
         /// <param name="subitem"></param>
         /// <param name="image"></param>
-        public OMListItem(string text, string subitem, Image image)//Added by Borte
+        public OMListItem(string text, string subitem, OImage image)//Added by Borte
         {
             this.text = text;
             this.subItem = subitem;
@@ -392,7 +393,7 @@ namespace OpenMobile
         /// <param name="subitem"></param>
         /// <param name="img"></param>
         /// <param name="subitemFormat"></param>
-        public OMListItem(string text, string subitem, Image img, subItemFormat subitemFormat)//Added by Borte
+        public OMListItem(string text, string subitem, OImage img, subItemFormat subitemFormat)//Added by Borte
         {
             this.text = text;
             this.subItem = subitem;
@@ -411,7 +412,7 @@ namespace OpenMobile
         /// <summary>
         /// The image
         /// </summary>
-        public Image image;
+        public OImage image;
         /// <summary>
         /// The image name in the skin folder
         /// </summary>
@@ -420,7 +421,7 @@ namespace OpenMobile
         /// Construct an image item from an image
         /// </summary>
         /// <param name="i"></param>
-        public imageItem(Image i)
+        public imageItem(OImage i)
         {
             this.name = "Unknown";
             this.image = i;
@@ -439,7 +440,7 @@ namespace OpenMobile
         /// </summary>
         /// <param name="i"></param>
         /// <param name="Name"></param>
-        public imageItem(Image i, string Name)
+        public imageItem(OImage i, string Name)
         {
             this.name = Name;
             this.image = i;
@@ -2107,7 +2108,7 @@ namespace OpenMobile
         /// <summary>
         /// Optional - The cover art for the selected media
         /// </summary>
-        public Image coverArt;
+        public OImage coverArt;
         /// <summary>
         /// Source Type
         /// </summary>
@@ -2305,7 +2306,7 @@ namespace OpenMobile
             service.DropDownControl(listBox1);
             if (listBox1.SelectedItem == null)
                 return new imageItem();
-            return new imageItem(Image.FromFile(Path.Combine(Application.StartupPath, "Skins", listBox1.SelectedItem.ToString()) + ".png"), listBox1.SelectedItem.ToString());
+            return new imageItem(OImage.FromFile(Path.Combine(Application.StartupPath, "Skins", listBox1.SelectedItem.ToString()) + ".png"), listBox1.SelectedItem.ToString());
         }
 
         void comboBox1_DropDownClosed(object sender, EventArgs e)

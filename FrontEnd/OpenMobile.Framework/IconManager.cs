@@ -20,6 +20,7 @@
 *********************************************************************************/
 using System.Collections.Generic;
 using System.Drawing;
+using OpenMobile.Drawing;
 
 namespace OpenMobile
 {
@@ -44,7 +45,7 @@ namespace OpenMobile
             /// <summary>
             /// The icons image
             /// </summary>
-            public Image image;
+            public OImage image;
             /// <summary>
             /// The icons priority
             /// </summary>
@@ -71,7 +72,7 @@ namespace OpenMobile
             /// <param name="i"></param>
             /// <param name="p"></param>
             /// <param name="f"></param>
-            public UIIcon(Image i,ePriority p,bool f)
+            public UIIcon(OImage i,ePriority p,bool f)
             {
                 image=i;
                 priority=p;
@@ -84,7 +85,7 @@ namespace OpenMobile
             /// <param name="p"></param>
             /// <param name="f"></param>
             /// <param name="plugin"></param>
-            public UIIcon(Image i, ePriority p, bool f,string plugin)
+            public UIIcon(OImage i, ePriority p, bool f,string plugin)
             {
                 image = i;
                 priority = p;

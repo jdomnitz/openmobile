@@ -37,9 +37,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networking", "..\Plugins\Ne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinWifi", "..\Plugins\WinWifi\WinWifi.csproj", "{2CD462A0-5AE7-475A-8C52-6B2415089ACE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoraPlayer", "..\Plugins\PandoraPlayer\PandoraPlayer.csproj", "{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMDebug", "..\Plugins\OMDebug\OMDebug.csproj", "{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Drawing", "..\Plugins\OpenMobile.Drawing\OpenMobile.Drawing.csproj", "{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,14 +119,14 @@ Global
 		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A184E0EB-C509-4FA5-B2B3-A6CFE6265276}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

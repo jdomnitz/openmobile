@@ -20,6 +20,7 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using OpenMobile.Drawing;
 using System.Drawing;
 using OpenMobile;
 using OpenMobile.Controls;
@@ -390,7 +391,7 @@ namespace OMSettings
             List<IBasePlugin> plugins = (List<IBasePlugin>)o;
             plugins=plugins.FindAll(p => typeof(IDataProvider).IsInstanceOfType(p));
             OMList list = (OMList)manager[0, "data"][7];
-            Image img = null;
+            OImage img = null;
             list.Clear();
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(140, Color.White);

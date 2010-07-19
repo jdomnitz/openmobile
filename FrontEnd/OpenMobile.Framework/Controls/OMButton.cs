@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using OpenMobile.Drawing;
+using OpenMobile;
 
 namespace OpenMobile.Controls
 {
@@ -130,8 +132,8 @@ namespace OpenMobile.Controls
                 image = value;
                 try
                 {
-                    if (ImageAnimator.CanAnimate(value.image) == true)
-                        ImageAnimator.Animate(value.image, new EventHandler(update));
+                    if (ImageAnimator.CanAnimate(value.image.image) == true)
+                        ImageAnimator.Animate(value.image.image, new EventHandler(update));
                 }
                 catch (InvalidOperationException) { }
                 refreshMe(this.toRegion());
@@ -228,31 +230,31 @@ namespace OpenMobile.Controls
                         return;
                     if ((orientation == eAngle.FlipHorizontal) || (value == eAngle.FlipHorizontal))
                     {
-                        image.image = (Image)image.image.Clone();
+                        image.image = (OImage)image.image.Clone();
                         image.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
                         if (focusImage.image != null)
                         {
-                            focusImage.image = (Image)focusImage.image.Clone();
+                            focusImage.image = (OImage)focusImage.image.Clone();
                             focusImage.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
                         }
                         if (downImage.image != null)
                         {
-                            downImage.image = (Image)downImage.image.Clone();
+                            downImage.image = (OImage)downImage.image.Clone();
                             downImage.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
                         }
                     }
                     else if ((orientation == eAngle.FlipVertical) || (value == eAngle.FlipVertical))
                     {
-                        image.image = (Image)image.image.Clone();
+                        image.image = (OImage)image.image.Clone();
                         image.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
                         if (focusImage.image != null)
                         {
-                            focusImage.image = (Image)focusImage.image.Clone();
+                            focusImage.image = (OImage)focusImage.image.Clone();
                             focusImage.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
                         }
                         if (downImage.image != null)
                         {
-                            downImage.image = (Image)downImage.image.Clone();
+                            downImage.image = (OImage)downImage.image.Clone();
                             downImage.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
                         }
                     }
@@ -308,7 +310,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Graphics g, renderingParams e)
+        public override void Render(Drawing.Graphics g, renderingParams e)
         {
             if (Width == 0)
                 return;
@@ -326,7 +328,7 @@ namespace OpenMobile.Controls
                 {
                     cm.Matrix33 *= ((float)transparency / 100);
                     ia.SetColorMatrix(cm);
-                    g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, ia);
+                    g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, focusImage.image.Width(), focusImage.image.Height(), GraphicsUnit.Pixel, ia);
                     if (this.Text != null)
                         Renderer.renderText(g, this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, tmp, 1, this.Color, this.OutlineColor);
                     cm = null;
@@ -338,7 +340,7 @@ namespace OpenMobile.Controls
                     {
                         cm.Matrix33 *= e.transparency * ((float)transparency / 100);
                         ia.SetColorMatrix(cm);
-                        g.DrawImage(focusImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, ia);
+                        g.DrawImage(focusImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, focusImage.image.Width(), focusImage.image.Height(), GraphicsUnit.Pixel, ia);
                         Renderer.renderText(g, this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5), this.Text, this.Font, this.Format, this.TextAlignment, e.transparency, this.Color, this.OutlineColor);
                         cm = null;
                         return;
@@ -347,7 +349,7 @@ namespace OpenMobile.Controls
                     {
                         cm.Matrix33 *= e.transparency * ((float)transparency / 100);
                         ia.SetColorMatrix(cm);
-                        g.DrawImage(downImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, downImage.image.Width, downImage.image.Height, GraphicsUnit.Pixel, ia);
+                        g.DrawImage(downImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, downImage.image.Width(), downImage.image.Height(), GraphicsUnit.Pixel, ia);
                         Renderer.renderText(g, this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5), this.Text, this.Font, this.Format, this.TextAlignment, e.transparency, this.Color, this.OutlineColor);
                         cm = null;
                         return;
@@ -367,7 +369,7 @@ namespace OpenMobile.Controls
                 {
                     lock (image.image)
                     {
-                        g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, ia);
+                        g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width(), image.image.Height(), GraphicsUnit.Pixel, ia);
                     }
                 }
                 

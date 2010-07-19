@@ -24,6 +24,7 @@ using OpenMobile.Plugin;
 using OpenMobile.Media;
 using System.IO;
 using OpenMobile.Controls;
+using OpenMobile.Drawing;
 using System.Drawing;
 using OpenMobile.Framework;
 using System.Collections.Generic;
@@ -244,7 +245,7 @@ namespace Networking
 
         private OMListItem getListItem(connectionInfo c)
         {
-            Image icon;
+            OImage icon;
             if (c.signalStrength>=75)
                 icon = theHost.getSkinImage("Wifi3").image;
             else if (c.signalStrength >= 50)

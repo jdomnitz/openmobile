@@ -203,5 +203,15 @@ namespace OMContacts
         {
             //
         }
+
+        #region IBasePlugin Members
+
+
+        public Settings loadSettings()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

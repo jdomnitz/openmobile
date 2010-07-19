@@ -26,6 +26,8 @@ using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
 using System;
+using OpenMobile.Drawing;
+using OpenMobile;
 
 namespace OpenMobile.Controls
 {
@@ -518,7 +520,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Graphics g, renderingParams e)
+        public override void Render(Drawing.Graphics g, renderingParams e)
         {
             lock (g)
             {

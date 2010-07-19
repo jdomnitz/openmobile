@@ -25,6 +25,7 @@ Created by: Justin Domnitz
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using OpenMobile.Drawing;
 using System.Drawing;
 using OpenMobile;
 using OpenMobile.Controls;

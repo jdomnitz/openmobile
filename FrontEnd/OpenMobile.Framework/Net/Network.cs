@@ -23,6 +23,7 @@ using System.Net;
 using System.IO;
 using System.Drawing;
 using System.Text;
+using OpenMobile.Drawing;
 
 namespace OpenMobile.Net
 {
@@ -141,7 +142,7 @@ namespace OpenMobile.Net
         /// <param name="URL"></param>
         /// <returns></returns>
         /// <exception cref="WebException">WebException</exception>
-        public static Image imageFromURL(string URL)
+        public static OImage imageFromURL(string URL)
         {
             if ((URL == null)||(URL==""))
                 return null;
@@ -150,7 +151,7 @@ namespace OpenMobile.Net
                 using (WebClient client = new WebClient())
                 {
                     MemoryStream stream = new MemoryStream(client.DownloadData(URL));
-                    return Image.FromStream(stream, false, true);
+                    return OImage.FromStream(stream, false, true);
                 }
             }
             catch (WebException) { return null; }

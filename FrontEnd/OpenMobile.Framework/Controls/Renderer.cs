@@ -22,6 +22,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using OpenMobile.Drawing;
 
 namespace OpenMobile
 {
@@ -40,7 +41,7 @@ namespace OpenMobile
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <param name="transparency"></param>
-        public static void drawTransparentImage(Graphics g, Image i, int left, int top, int width, int height, float transparency)
+        public static void drawTransparentImage(Drawing.Graphics g, OImage i, int left, int top, int width, int height, float transparency)
         {
             ColorMatrix cm = new ColorMatrix();
             {
@@ -49,7 +50,7 @@ namespace OpenMobile
                 using (ImageAttributes ia = new ImageAttributes())
                 {
                     ia.SetColorMatrix(cm);
-                    g.DrawImage(i, new Rectangle(left, top, width, height), 0, 0, i.Width, i.Height, GraphicsUnit.Pixel, ia);
+                    g.DrawImage(i, new Rectangle(left, top, width, height), 0, 0, i.Width(), i.Height(), GraphicsUnit.Pixel, ia);
                 }
             }
         }
@@ -60,7 +61,7 @@ namespace OpenMobile
         /// <param name="brush"></param>
         /// <param name="rect"></param>
         /// <param name="radius"></param>
-        public static void FillRoundRectangle(Graphics g, Brush brush, RectangleF rect, float radius)
+        public static void FillRoundRectangle(Drawing.Graphics g, Brush brush, RectangleF rect, float radius)
         {
             using(GraphicsPath gP = new GraphicsPath())
             {
@@ -83,7 +84,7 @@ namespace OpenMobile
         /// <param name="p"></param>
         /// <param name="rect"></param>
         /// <param name="radius"></param>
-        public static void DrawRoundRectangle(Graphics g, Pen p, RectangleF rect, float radius)
+        public static void DrawRoundRectangle(Drawing.Graphics g, Pen p, RectangleF rect, float radius)
         {
             using (GraphicsPath gP = new GraphicsPath())
             {
@@ -116,7 +117,7 @@ namespace OpenMobile
         /// <param name="font"></param>
         /// <param name="alignment"></param>
         /// <param name="transparency"></param>
-        public static void renderText(Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment,float transparency,Color color,Color secondColor)
+        public static void renderText(Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment,float transparency,Color color,Color secondColor)
         {
             int modifyFont;
             if (transparency <= 0.1)
@@ -145,7 +146,7 @@ namespace OpenMobile
         /// <param name="font"></param>
         /// <param name="color"></param>
         /// <param name="secondColor"></param>
-        public static void renderText(Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, float transparency,int modifyFont,Color color,Color secondColor)
+        public static void renderText(Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, float transparency,int modifyFont,Color color,Color secondColor)
         {
             if ((text==null)||(text == ""))
                 return;

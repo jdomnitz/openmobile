@@ -22,6 +22,9 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Reflection;
+using OpenMobile.Drawing;
+using OpenMobile;
+
 namespace OpenMobile.Controls
 {
     /// <summary>
@@ -197,7 +200,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The User Interfaces graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public abstract void Render(Graphics g, renderingParams e);
+        public abstract void Render(Drawing.Graphics g, renderingParams e);
 
         /// <summary>
         /// Returns the region occupied by the control

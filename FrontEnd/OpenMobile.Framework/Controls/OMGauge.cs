@@ -11,6 +11,8 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using OpenMobile.Drawing;
+using OpenMobile;
 
 namespace OpenMobile.Controls
 {
@@ -35,7 +37,7 @@ namespace OpenMobile.Controls
         float fromAngle = 135F;
         float toAngle = 405F;
         private bool requiresRedraw;
-        private Image backgroundImg;
+        private OImage backgroundImg;
         private Rectangle rectImg;
         private int controlHeight;
         private int controlWidth;
@@ -356,13 +358,13 @@ namespace OpenMobile.Controls
         /// <param name="gr"></param>
         /// <param name="cx"></param>
         /// <param name="cy"></param>
-        private void DrawPointer(Graphics gr, int cx, int cy)
+        private void DrawPointer(Drawing.Graphics gr, int cx, int cy)
         {
             float radius = this.Width / 2 - (this.Width * .12F);
             float val = MaxValue - MinValue;
 
-            Image img = new Bitmap(this.Width, this.Height);
-            Graphics g = Graphics.FromImage(img);
+            Bitmap img = new Bitmap(this.Width, this.Height);
+            System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(img);
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             val = (100 * (this.currentValue - MinValue)) / val;
@@ -414,14 +416,14 @@ namespace OpenMobile.Controls
 
             DrawGloss(g);
 
-            gr.DrawImage(img, Left, Top);
+            gr.DrawImage(new OImage(img), Left, Top);
         }
 
         /// <summary>
         /// Draws the glossiness.
         /// </summary>
         /// <param name="g"></param>
-        private void DrawGloss(Graphics g)
+        private void DrawGloss(System.Drawing.Graphics g)
         {
             RectangleF glossRect = new RectangleF(
                x + (float)(width * 0.10),
@@ -456,7 +458,7 @@ namespace OpenMobile.Controls
         /// <param name="rect"></param>
         /// <param name="cX"></param>
         /// <param name="cY"></param>
-        private void DrawCenterPoint(Graphics g, Rectangle rect, int cX, int cY)
+        private void DrawCenterPoint(System.Drawing.Graphics g, Rectangle rect, int cX, int cY)
         {
             float shift = Width / 5;
             RectangleF rectangle = new RectangleF(cX - (shift / 2), cY - (shift / 2), shift, shift);
@@ -476,7 +478,7 @@ namespace OpenMobile.Controls
         /// <param name="rect"></param>
         /// <param name="cX"></param>
         /// <param name="cY"></param>
-        private void DrawCalibration(Graphics g, Rectangle rect, int cX, int cY)
+        private void DrawCalibration(System.Drawing.Graphics g, Rectangle rect, int cX, int cY)
         {
             int noOfParts = this.noOfDivisions + 1;
             int noOfIntermediates = this.noOfSubDivisions;
@@ -546,7 +548,7 @@ namespace OpenMobile.Controls
         /// <param name="g"></param>
         /// <param name="number"></param>
         /// <param name="drect"></param>
-        private void DisplayNumber(Graphics g, float number, RectangleF drect)
+        private void DisplayNumber(Drawing.Graphics g, float number, RectangleF drect)
         {
             try
             {
@@ -597,7 +599,7 @@ namespace OpenMobile.Controls
         /// <param name="position"></param>
         /// <param name="dp"></param>
         /// <param name="height"></param>
-        private void DrawDigit(Graphics g, int number, PointF position, bool dp, float height)
+        private void DrawDigit(Drawing.Graphics g, int number, PointF position, bool dp, float height)
         {
             float width;
             width = 10F * height / 13;
@@ -893,7 +895,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g"></param>
         /// <param name="e"></param>
-        public override void Render(System.Drawing.Graphics g, renderingParams e)
+        public override void Render(Drawing.Graphics g, renderingParams e)
         {
             if ((this.Width == 0) || (this.Height == 0))
                 return;
@@ -902,8 +904,8 @@ namespace OpenMobile.Controls
             g.FillRectangle(new SolidBrush(Color.Transparent), new Rectangle(Left, Top, Width, Height));
             if (backgroundImg == null || requiresRedraw)
             {
-                backgroundImg = new Bitmap(this.Width, this.Height);
-                Graphics bg = Graphics.FromImage(backgroundImg);
+                backgroundImg = new OImage(new Bitmap(this.Width, this.Height));
+                System.Drawing.Graphics bg = System.Drawing.Graphics.FromImage(backgroundImg.image);
                 bg.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 width = this.Width - x * 2;
                 height = this.Height - y * 2;
@@ -922,7 +924,7 @@ namespace OpenMobile.Controls
                 bg.DrawEllipse(darkRim, 0, 0, width, height);
 
                 //Draw Callibration
-                DrawCalibration(bg, rectImg, ((width) / 2) + x, ((height) / 2) + y);
+                DrawCalibration(bg, rectImg, (int)((width) / 2) + x, (int)((height) / 2) + y);
 
                 //Draw Colored Rim
                 Pen colorPen = new Pen(Color.FromArgb(190, Color.Gainsboro), this.Width / 40);

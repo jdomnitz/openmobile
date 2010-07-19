@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using OpenMobile.Controls;
 using OpenMobile.Plugin;
+using OpenMobile.Drawing;
 
 namespace OpenMobile.Framework
 {
@@ -37,7 +38,7 @@ namespace OpenMobile.Framework
         /// <param name="pluginName"></param>
         /// <param name="host"></param>
         /// <returns></returns>
-        public static Image generate(string pluginName, IPluginHost host)
+        public static OImage generate(string pluginName, IPluginHost host)
         {
             if (cache==null)
                 cache=new List<imageItem>();
@@ -46,22 +47,22 @@ namespace OpenMobile.Framework
             OMPanel p = ((IHighLevel)b).loadPanel("Widget", 0);
             if (p == null)
                 return null;
-            Image img;
+            OImage img;
             if (cache.Exists(x => x.name == pluginName) == true)
                 img = cache.Find(x => x.name == pluginName).image;
             else
-                img = new Bitmap(1000, 600);
-            Graphics g;
+                img = new OImage(new Bitmap(1000, 600));
+            System.Drawing.Graphics g;
             try
             {
-                g = Graphics.FromImage(img);
+                g = System.Drawing.Graphics.FromImage(img.image);
             }
             catch (System.InvalidOperationException) { return null; }
             g.Clear(Color.Transparent);
             renderingParams param=new renderingParams();
             for (int i = 0; i < p.controlCount;i++ )
             {
-                p[i].Render(g, param);
+                p[i].Render(OpenMobile.Drawing.Graphics.FromGraphics(g), param);
             }
             g.Dispose();
             cache.Add(new imageItem(img, pluginName));
