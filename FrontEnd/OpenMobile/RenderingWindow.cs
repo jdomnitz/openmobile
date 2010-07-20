@@ -822,7 +822,7 @@ namespace OpenMobile
         {
             heightScale = (this.ClientRectangle.Height / 600F);
             widthScale = (this.ClientRectangle.Width / 1000F);
-            if ((this.WindowState == WindowState.Fullscreen) && (fullscreen == false))
+            if (((this.WindowState == WindowState.Fullscreen)||(this.WindowState == WindowState.Maximized)) && (fullscreen == false))
             {
                 fullscreen = true;
                 this.WindowState = WindowState.Normal;

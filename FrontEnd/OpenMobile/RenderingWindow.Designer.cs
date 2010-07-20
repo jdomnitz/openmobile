@@ -81,7 +81,8 @@ namespace OpenMobile
             this.Mouse.ButtonDown += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseDown);
             this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
             this.Closing += new EventHandler<System.ComponentModel.CancelEventArgs>(this.RenderingWindow_FormClosing);
-            this.Resize += new System.EventHandler<System.EventArgs>(this.RenderingWindow_Resize);
+            this.WindowStateChanged += new System.EventHandler<System.EventArgs>(this.RenderingWindow_Resize); //TODO - Separate function
+            this.Resize+=new EventHandler<EventArgs>(this.RenderingWindow_Resize);
             this.Mouse.Move += new EventHandler<OpenMobile.Input.MouseMoveEventArgs>(this.RenderingWindow_MouseMove);
             this.Keyboard.KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
             this.Keyboard.KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
