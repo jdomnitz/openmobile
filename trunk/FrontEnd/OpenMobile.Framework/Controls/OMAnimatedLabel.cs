@@ -362,7 +362,7 @@ namespace OpenMobile.Controls
                     if ((animation == eAnimation.Scroll) || (animation == eAnimation.BounceScroll))
                         avgChar = (g.MeasureString(Text, this.Font).Width / Text.Length);
 
-                    RectangleF old = g.ClipBounds;
+                    Rectangle old = g.Clip;
                     if ((animation==eAnimation.None)||(animation == eAnimation.UnveilRight) || (animation == eAnimation.UnveilLeft))
                     {
                         g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
@@ -424,13 +424,9 @@ namespace OpenMobile.Controls
             System.Drawing.CharacterRange[] ranges = 
                                        { new System.Drawing.CharacterRange(0, 
                                                                text.Length) };
-            System.Drawing.Region[] regions = new System.Drawing.Region[1];
-
             format.SetMeasurableCharacterRanges(ranges);
 
-            regions = graphics.MeasureCharacterRanges(text, font, rect, format);
-            //rect = regions[0].GetBounds(graphics.Raw());
-            //TODO - Reimplement
+            rect = graphics.MeasureCharacterRanges(text, font, rect, format);
             return (int)(rect.Right - (Font.Size / 4.5));
         }
     }

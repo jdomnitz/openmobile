@@ -74,7 +74,6 @@ namespace OpenMobile
             // 
             // RenderingWindow
             // 
-            //TODO - Fix everything not implemented
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Mouse.ButtonUp += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseUp);
             //this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseDoubleClick);

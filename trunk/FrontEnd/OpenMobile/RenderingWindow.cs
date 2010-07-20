@@ -102,7 +102,7 @@ namespace OpenMobile
                 Cursor.Position = this.Location;
             this.screen = s;
             //Code by Borte
-            //TODO V Implement that
+            //TODO Verify thats not necessary anymore
             //this.StartPosition = FormStartPosition.Manual;
             if (s <= System.Windows.Forms.Screen.AllScreens.Length - 1)
                 this.Bounds = System.Windows.Forms.Screen.AllScreens[s].Bounds;
@@ -116,7 +116,7 @@ namespace OpenMobile
         private void paintIdentity()
         {
             //TODO - FIX ME
-           // OpenMobile.Graphics.Graphics g = OpenMobile.Graphics.Graphics.FromHwnd(this.Handle);
+            //OpenMobile.Graphics.Graphics g = OpenMobile.Graphics.Graphics.FromHwnd(this.Handle);
             //Renderer.renderText(g, 0, 0, this.Width, this.Height, (screen+1).ToString(), new Font(FontFamily.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, 1F,Color.White,Color.Black);
             //Thread.Sleep(1000);
             //Refresh();
