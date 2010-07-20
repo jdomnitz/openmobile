@@ -11,7 +11,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using OpenMobile;
 
 namespace OpenMobile.Controls
@@ -358,7 +358,7 @@ namespace OpenMobile.Controls
         /// <param name="gr"></param>
         /// <param name="cx"></param>
         /// <param name="cy"></param>
-        private void DrawPointer(Drawing.Graphics gr, int cx, int cy)
+        private void DrawPointer(Graphics.Graphics gr, int cx, int cy)
         {
             float radius = this.Width / 2 - (this.Width * .12F);
             float val = MaxValue - MinValue;
@@ -416,7 +416,7 @@ namespace OpenMobile.Controls
 
             DrawGloss(g);
 
-            gr.DrawImage(new OImage(img), Left, Top);
+            gr.DrawImage(new OImage(img), Left, Top,width,height); //TODO - Verify correct drawing
         }
 
         /// <summary>
@@ -548,7 +548,7 @@ namespace OpenMobile.Controls
         /// <param name="g"></param>
         /// <param name="number"></param>
         /// <param name="drect"></param>
-        private void DisplayNumber(Drawing.Graphics g, float number, RectangleF drect)
+        private void DisplayNumber(Graphics.Graphics g, float number, RectangleF drect)
         {
             try
             {
@@ -599,7 +599,7 @@ namespace OpenMobile.Controls
         /// <param name="position"></param>
         /// <param name="dp"></param>
         /// <param name="height"></param>
-        private void DrawDigit(Drawing.Graphics g, int number, PointF position, bool dp, float height)
+        private void DrawDigit(Graphics.Graphics g, int number, PointF position, bool dp, float height)
         {
             float width;
             width = 10F * height / 13;
@@ -895,12 +895,11 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g"></param>
         /// <param name="e"></param>
-        public override void Render(Drawing.Graphics g, renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             if ((this.Width == 0) || (this.Height == 0))
                 return;
             //paint the gauge
-            g.SmoothingMode = SmoothingMode.HighQuality;
             g.FillRectangle(new SolidBrush(Color.Transparent), new Rectangle(Left, Top, Width, Height));
             if (backgroundImg == null || requiresRedraw)
             {
@@ -960,7 +959,6 @@ namespace OpenMobile.Controls
             DisplayNumber(g, this.currentValue, digiFRect);
 
             //Paint the needle
-            g.SmoothingMode = SmoothingMode.AntiAlias;
             width = this.Width - x * 2;
             height = this.Height - y * 2;
             DrawPointer(g, ((width) / 2) + x, ((height) / 2) + y);

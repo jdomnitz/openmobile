@@ -77,7 +77,6 @@
     <Compile Include="SandboxedThread.cs" />
     <Compile Include="StorageAnalyzer.cs" />
     <Compile Include="RenderingWindow.cs">
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="RenderingWindow.Designer.cs">
       <DependentUpon>RenderingWindow.cs</DependentUpon>
@@ -117,9 +116,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Plugins\OpenMobile.Drawing\OpenMobile.Drawing.csproj">
-      <Project>{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}</Project>
-      <Name>OpenMobile.Drawing</Name>
+    <ProjectReference Include="..\..\..\Sub-Projects\HardwareAcceleration\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
+      <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
+      <Name>OpenMobile.Graphics</Name>
     </ProjectReference>
     <ProjectReference Include="..\OpenMobile.Framework\OpenMobile.Framework.csproj">
       <Project>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</Project>

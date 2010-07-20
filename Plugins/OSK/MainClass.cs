@@ -130,7 +130,8 @@ namespace OpenMobile
                 if (numKeyboard[i].GetType() == typeof(OMButton))
                     ((OMButton)numKeyboard[i]).OnClick += handler;
             //Here we hook the keyboard in case characters are typed
-            theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
+            //TODO - FIX ME
+            //theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             //And then load the panel into the screen manager
             manager.loadPanel(regularKeyboard);
@@ -156,9 +157,11 @@ namespace OpenMobile
         }
 
         //Add physical keyboard input to the textbox
-        bool theHost_OnKeyPress(eKeypressType type, System.Windows.Forms.KeyEventArgs arg)
+        bool theHost_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
         {
-            for (int i = 0; i < theHost.ScreenCount; i++)
+            //TODO - Re-implement
+           
+            /* for (int i = 0; i < theHost.ScreenCount; i++)
             {
                 OMTextBox text = (OMTextBox)manager[i]["Text"];
                 if (text.hooked() == false)
@@ -277,7 +280,7 @@ namespace OpenMobile
                     }
                     return true;
                 }
-            }
+            }*/
             return false;
         }
 

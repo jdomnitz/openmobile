@@ -60,7 +60,7 @@ namespace OpenMobile.Controls
                 radius = (this.Width-5) / 2;
             else
                 radius = (this.Height-5) / 2;
-            Graphics g = e.Graphics;
+            System.Drawing.Graphics g = e.Graphics;
             int R=255;
             int G=0;
             int B=0;
@@ -102,7 +102,7 @@ namespace OpenMobile.Controls
                 drawPoint(g, R, G, B, i);
             }
         }
-        private void drawPoint(Graphics g, int R, int G, int B,int i)
+        private void drawPoint(System.Drawing.Graphics g, int R, int G, int B,int i)
         {
                 g.DrawLine(new Pen(Color.FromArgb(R, G, B),2F), origin, CalcPoint2(i));
         }
@@ -126,7 +126,7 @@ namespace OpenMobile.Controls
         private void CustomColor_MouseDown(object sender, MouseEventArgs e)
         {
             Bitmap b=new Bitmap(this.Width,this.Height);
-            this.OnPaint(new PaintEventArgs(Graphics.FromImage(b),this.Bounds));
+            this.OnPaint(new PaintEventArgs(System.Drawing.Graphics.FromImage(b), this.Bounds));
             Color c=b.GetPixel(e.X,e.Y);
             if (SelectedColorChanged!=null)
                 SelectedColorChanged(c);

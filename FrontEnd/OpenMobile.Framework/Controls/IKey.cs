@@ -32,12 +32,12 @@ namespace OpenMobile.Controls
         /// KeyDown when the control has focus
         /// Return true if you don't want the ui to handle the keypress, otherwise return false
         /// </summary>
-        bool KeyDown(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale);
+        bool KeyDown(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale);
 
         /// <summary>
         /// KeyUp when the control has focus
         /// Return true if you don't want the ui to handle the keypress, otherwise return false
         /// </summary>
-        bool KeyUp(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale);
+        bool KeyUp(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale);
     }
 }

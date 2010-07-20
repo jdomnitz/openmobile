@@ -23,7 +23,7 @@ using System.Net;
 using System.IO;
 using System.Drawing;
 using System.Text;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.Net
 {

@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging ;
 
-namespace OpenMobile.Drawing
+namespace OpenMobile.Graphics
 {
     public class Graphics
     {

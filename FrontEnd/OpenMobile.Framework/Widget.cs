@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using OpenMobile.Controls;
 using OpenMobile.Plugin;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.Framework
 {
@@ -62,7 +62,8 @@ namespace OpenMobile.Framework
             renderingParams param=new renderingParams();
             for (int i = 0; i < p.controlCount;i++ )
             {
-                p[i].Render(OpenMobile.Drawing.Graphics.FromGraphics(g), param);
+                //p[i].Render(g, param);
+                //TODO - Fix this
             }
             g.Dispose();
             cache.Add(new imageItem(img, pluginName));

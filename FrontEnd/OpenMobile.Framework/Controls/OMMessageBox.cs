@@ -22,7 +22,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using OpenMobile;
 
 namespace OpenMobile.Controls
@@ -102,7 +102,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Drawing.Graphics g,renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             float tmp = 1;
             if (this.Mode == eModeType.transitioningIn)
@@ -113,8 +113,8 @@ namespace OpenMobile.Controls
             float letterHeight = g.MeasureString("A", Font).Height+1;
             height += (int)letterHeight;
             Rectangle r = new Rectangle(this.Left, top, this.Width, height);
-            Renderer.FillRoundRectangle(g, new LinearGradientBrush(r, Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), LinearGradientMode.Vertical), r,20F);
-            Renderer.DrawRoundRectangle(g, new Pen(borderColor, borderWidth), r, 20F);
+            g.FillRoundRectangle(new LinearGradientBrush(r, Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), LinearGradientMode.Vertical), r,20);
+            g.DrawRoundRectangle(new Pen(borderColor, borderWidth), r, 20);
             Renderer.renderText(g, this.Left, top, this.Width, (int)letterHeight, title,this.Font, this.Format, this.TextAlignment, tmp,1,this.Color,this.OutlineColor);
             top += (int)letterHeight;
             height -= (int)letterHeight;

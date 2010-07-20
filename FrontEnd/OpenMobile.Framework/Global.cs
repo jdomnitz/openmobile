@@ -21,7 +21,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using System.Drawing.Design;
 using System.IO;
 using System.Windows.Forms;

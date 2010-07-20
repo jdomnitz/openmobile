@@ -30,7 +30,7 @@ using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
 using OpenMobile.Media;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 
 namespace OpenMobile
 {
@@ -230,13 +230,15 @@ namespace OpenMobile
         {
             if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return (IntPtr)(-1); //Out of bounds
-            if (Core.RenderingWindows[screen].InvokeRequired == true)
-            {
-                RenderingWindow.getVal val = new RenderingWindow.getVal(Core.RenderingWindows[screen].getHandle);
-                return (IntPtr)Core.RenderingWindows[screen].Invoke(val);
-            }
-            else
-                return Core.RenderingWindows[screen].Handle;
+            return IntPtr.Zero;
+            //TODO - FIX ME
+            //if (Core.RenderingWindows[screen].InvokeRequired == true)
+            //{
+            //    RenderingWindow.getVal val = new RenderingWindow.getVal(Core.RenderingWindows[screen].getHandle);
+            //    return (IntPtr)Core.RenderingWindows[screen].Invoke(val);
+            //}
+            //else
+            //    return Core.RenderingWindows[screen].Handle;
         }
 
         public Int32 RenderFirst
@@ -1251,11 +1253,12 @@ namespace OpenMobile
         {
             if (to == "RenderingWindow")
             {
-                if (message == "Identify")
-                    for (int i = 0; i < screenCount; i++)
-                        Core.RenderingWindows[i].Invoke(Core.RenderingWindows[i].identify);
-                if (message == "Redraw")
-                    Core.RenderingWindows[0].Invoke(Core.RenderingWindows[0].redraw);
+                //TODO - FIX ME
+                //if (message == "Identify")
+                //    for (int i = 0; i < screenCount; i++)
+                //        Core.RenderingWindows[i].Invoke(Core.RenderingWindows[i].identify);
+                //if (message == "Redraw")
+                //    Core.RenderingWindows[0].Invoke(Core.RenderingWindows[0].redraw);
                 if (message == "ToggleCursor")
                     for (int i = 0; i < screenCount; i++)
                         Core.RenderingWindows[i].hideCursor();
@@ -1331,7 +1334,7 @@ namespace OpenMobile
                 if (!execute(eFunction.nextMedia, instance.ToString()))
                     raiseMediaEvent(eFunction.Stop, instance, "");
         }
-        public bool raiseKeyPressEvent(eKeypressType type, KeyEventArgs arg)
+        public bool raiseKeyPressEvent(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
         {
             try
             {

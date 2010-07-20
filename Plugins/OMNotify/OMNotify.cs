@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using System.Drawing;
 using System.IO;
 using OpenMobile;
@@ -54,6 +54,7 @@ namespace ControlDemo
             List3.ListStyle = eListStyle.DroidStyleImage;
             List3.ItemColor1 = Color.Black;
             List3.Name = "List3";
+            List3.ListItemHeight = 70;
             List3.SelectedIndexChanged += new OMList.IndexChangedDelegate(List3_SelectedIndexChanged);
             p.addControl(Image1);
             p.addControl(Label2);

@@ -28,7 +28,7 @@ using System.Threading;
 using OpenMobile.Net;
 using OpenMobile.Plugin;
 using OpenMobile.Data;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.Media
 {
@@ -74,9 +74,9 @@ namespace OpenMobile.Media
                     if (m.Length > 4)
                     {
                         info.coverArt = OImage.FromStream(m);
-                        if ((info.coverArt.Height() > 600) || (info.coverArt.Width() > 600))
+                        if ((info.coverArt.Height > 600) || (info.coverArt.Width > 600))
                         {
-                            OImage newimg = new OImage(new Bitmap(600, (int)(600 * (info.coverArt.Height() / (float)info.coverArt.Width()))));
+                            OImage newimg = new OImage(new Bitmap(600, (int)(600 * (info.coverArt.Height / (float)info.coverArt.Width))));
                             System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newimg.image);
                             GraphicsUnit unit = GraphicsUnit.Pixel;
                             g.DrawImage(info.coverArt.image, newimg.image.GetBounds(ref unit));
@@ -106,9 +106,9 @@ namespace OpenMobile.Media
             if (System.IO.File.Exists(path) == true)
             {
                 OImage img = OImage.FromFile(path);
-                if ((img.Height() > 600) || (img.Width() > 600))
+                if ((img.Height > 600) || (img.Width > 600))
                 {
-                    OImage newimg = new OImage(new Bitmap(600, (int)(600 * (img.Height() / (float)img.Width()))));
+                    OImage newimg = new OImage(new Bitmap(600, (int)(600 * (img.Height / (float)img.Width))));
                     System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newimg.image);
                     GraphicsUnit unit = GraphicsUnit.Pixel;
                     g.DrawImage(img.image, newimg.image.GetBounds(ref unit));

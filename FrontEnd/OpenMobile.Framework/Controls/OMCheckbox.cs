@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 using System.ComponentModel;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using OpenMobile;
 
 namespace OpenMobile.Controls
@@ -108,7 +108,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Drawing.Graphics g,renderingParams e)
+        public override void Render(Graphics.Graphics g,renderingParams e)
         {
             float tmp = 1;
             if (this.Mode == eModeType.transitioningIn)
@@ -122,7 +122,7 @@ namespace OpenMobile.Controls
                 else
                     Renderer.renderText(g, this.Left + this.Height+5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, Alignment.CenterLeft, tmp,0, this.Color, this.OutlineColor);
                 
-                Renderer.DrawRoundRectangle(g,new Pen(defaultBrush, 4.0F), new Rectangle(this.Left, this.Top, this.Height, this.Height),5F);
+                g.DrawRoundRectangle(new Pen(defaultBrush, 4.0F), new Rectangle(this.Left, this.Top, this.Height, this.Height),5);
                 if (this.isChecked == true)
                 {
                     g.DrawLine(new Pen(defaultBrush, 5.0F), new Point(this.Left+5, this.Top+5), new Point(this.Left + this.Height-5, this.Top + this.Height-5));

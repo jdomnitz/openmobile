@@ -22,7 +22,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 
 namespace OpenMobile
 {
@@ -41,7 +41,7 @@ namespace OpenMobile
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <param name="transparency"></param>
-        public static void drawTransparentImage(Drawing.Graphics g, OImage i, int left, int top, int width, int height, float transparency)
+        public static void drawTransparentImage(Graphics.Graphics g, OImage i, int left, int top, int width, int height, float transparency)
         {
             ColorMatrix cm = new ColorMatrix();
             {
@@ -50,56 +50,8 @@ namespace OpenMobile
                 using (ImageAttributes ia = new ImageAttributes())
                 {
                     ia.SetColorMatrix(cm);
-                    g.DrawImage(i, new Rectangle(left, top, width, height), 0, 0, i.Width(), i.Height(), GraphicsUnit.Pixel, ia);
+                    g.DrawImage(i, new Rectangle(left, top, width, height), 0, 0, i.Width, i.Height, GraphicsUnit.Pixel, ia);
                 }
-            }
-        }
-        /// <summary>
-        /// Draws a rectangle with rounded corners
-        /// </summary>
-        /// <param name="g"></param>
-        /// <param name="brush"></param>
-        /// <param name="rect"></param>
-        /// <param name="radius"></param>
-        public static void FillRoundRectangle(Drawing.Graphics g, Brush brush, RectangleF rect, float radius)
-        {
-            using(GraphicsPath gP = new GraphicsPath())
-            {
-                gP.AddLine(rect.Left + radius, rect.Top, rect.Left + rect.Width - (radius * 2), rect.Top);
-                gP.AddArc(rect.Left + rect.Width - (radius * 2), rect.Top, radius * 2, radius * 2, 270, 90);
-                gP.AddLine(rect.Left + rect.Width, rect.Top + radius, rect.Left + rect.Width, rect.Top + rect.Height - (radius * 2));
-                gP.AddArc(rect.Left + rect.Width - (radius * 2), rect.Top + rect.Height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
-                gP.AddLine(rect.Left + rect.Width - (radius * 2), rect.Top + rect.Height, rect.Left + radius, rect.Top + rect.Height);
-                gP.AddArc(rect.Left, rect.Top + rect.Height - (radius * 2), radius * 2, radius * 2, 90, 90);
-                gP.AddLine(rect.Left, rect.Top + rect.Height - (radius * 2), rect.Left, rect.Top + radius);
-                gP.AddArc(rect.Left, rect.Top, radius * 2, radius * 2, 180, 90);
-                gP.CloseFigure();
-                g.FillPath(brush, gP);
-            }
-        }
-        /// <summary>
-        /// Draw a rounded rectangle using the given pen and edge radius
-        /// </summary>
-        /// <param name="g"></param>
-        /// <param name="p"></param>
-        /// <param name="rect"></param>
-        /// <param name="radius"></param>
-        public static void DrawRoundRectangle(Drawing.Graphics g, Pen p, RectangleF rect, float radius)
-        {
-            using (GraphicsPath gP = new GraphicsPath())
-            {
-                gP.AddLine(rect.Left + radius, rect.Top, rect.Left + rect.Width - (radius * 2), rect.Top);
-                gP.AddArc(rect.Left + rect.Width - (radius * 2), rect.Top, radius * 2, radius * 2, 270, 90);
-                gP.AddLine(rect.Left + rect.Width, rect.Top + radius, rect.Left + rect.Width, rect.Top + rect.Height - (radius * 2));
-                gP.AddArc(rect.Left + rect.Width - (radius * 2), rect.Top + rect.Height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
-                gP.AddLine(rect.Left + rect.Width - (radius * 2), rect.Top + rect.Height, rect.Left + radius, rect.Top + rect.Height);
-                gP.AddArc(rect.Left, rect.Top + rect.Height - (radius * 2), radius * 2, radius * 2, 90, 90);
-                gP.AddLine(rect.Left, rect.Top + rect.Height - (radius * 2), rect.Left, rect.Top + radius);
-                gP.AddArc(rect.Left, rect.Top, radius * 2, radius * 2, 180, 90);
-                gP.CloseFigure();
-                g.SmoothingMode = SmoothingMode.AntiAlias;
-                g.DrawPath(p,gP);
-                g.SmoothingMode = SmoothingMode.Default;
             }
         }
         /// <summary>
@@ -117,7 +69,7 @@ namespace OpenMobile
         /// <param name="font"></param>
         /// <param name="alignment"></param>
         /// <param name="transparency"></param>
-        public static void renderText(Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment,float transparency,Color color,Color secondColor)
+        public static void renderText(Graphics.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, float transparency, Color color, Color secondColor)
         {
             int modifyFont;
             if (transparency <= 0.1)
@@ -146,7 +98,7 @@ namespace OpenMobile
         /// <param name="font"></param>
         /// <param name="color"></param>
         /// <param name="secondColor"></param>
-        public static void renderText(Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, float transparency,int modifyFont,Color color,Color secondColor)
+        public static void renderText(Graphics.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, float transparency, int modifyFont, Color color, Color secondColor)
         {
             if ((text==null)||(text == ""))
                 return;
@@ -175,7 +127,6 @@ namespace OpenMobile
                         sFormat.Trimming = StringTrimming.EllipsisWord;
                     GraphicsPath path = new GraphicsPath(FillMode.Winding);
                     path.AddString(text, font.FontFamily, (int)f, font.Size+6, new RectangleF(x, y, w, h), sFormat);
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.DrawPath(new Pen(new SolidBrush(Color.FromArgb((int)(transparency * secondColor.A), secondColor)), 3), path);
                     g.FillPath(new SolidBrush(Color.FromArgb((int)(transparency * color.A), color)), path);
                 }

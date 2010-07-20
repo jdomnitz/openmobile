@@ -20,12 +20,12 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
-using OpenMobile.Drawing;
 using System.Drawing;
 using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Framework;
+using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 
 namespace OMSettings
@@ -476,7 +476,7 @@ namespace OMSettings
         {
             Personal.setPassword(Personal.ePassword.google,((OMTextBox)manager[screen,"personal"][6]).Text,"GOOGLEPW");
             Collections.personalInfo.googleUsername = ((OMTextBox)manager[screen, "personal"][5]).Text;
-            if (Collections.personalInfo.googleUsername.EndsWith("@gmail.com") == false)
+            if ((Collections.personalInfo.googleUsername!=null)&&(Collections.personalInfo.googleUsername.EndsWith("@gmail.com") == false))
                 Collections.personalInfo.googleUsername += "@gmail.com";
             Personal.writeInfo();
             theHost.execute(eFunction.goBack, screen.ToString());

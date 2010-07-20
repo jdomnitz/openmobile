@@ -19,19 +19,20 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System.Windows.Forms;
+using OpenMobile.Input;
 
 namespace OpenMobile
 {
     public static class InputRouter
     {
-        public static void SourceUp(object sender, KeyEventArgs e)
+        public static void SourceUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             if (Core.theHost.raiseKeyPressEvent(eKeypressType.KeyUp, e) == true)
                 return; //If an app handles it first don't show the UI
             for (int i = 0; i < Core.RenderingWindows.Count;i++ )
                 Core.RenderingWindows[i].RenderingWindow_KeyUp(sender, e);
         }
-        public static void SourceDown(object sender, KeyEventArgs e)
+        public static void SourceDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             if (Core.theHost.raiseKeyPressEvent(eKeypressType.KeyDown,e)==true)
                 return; //If an app handles it first don't show the UI
@@ -42,37 +43,37 @@ namespace OpenMobile
         {
             if ((instance < 0) || (instance >= Core.RenderingWindows.Count))
                 return false;
-            Core.RenderingWindows[instance].RenderingWindow_KeyUp(null, new KeyEventArgs(getKey(Key)));
+            Core.RenderingWindows[instance].RenderingWindow_KeyUp(null, new KeyboardKeyEventArgs(getKey(Key)));
             return true;
         }
         public static bool SendKeyDown(int instance, string Key)
         {
             if ((instance < 0) || (instance >= Core.RenderingWindows.Count))
                 return false;
-            Core.RenderingWindows[instance].RenderingWindow_KeyDown(null, new KeyEventArgs(getKey(Key)));
+            Core.RenderingWindows[instance].RenderingWindow_KeyDown(null, new KeyboardKeyEventArgs(getKey(Key)));
             return true;
         }
-        private static Keys getKey(string key)
+        private static Key getKey(string key)
         {
             switch (key.ToLower())
             {
                 case "up":
-                    return Keys.Up;
+                    return Key.Up;
                 case "down":
-                    return Keys.Down;
+                    return Key.Down;
                 case "left":
-                    return Keys.Left;
+                    return Key.Left;
                 case "right":
-                    return Keys.Right;
+                    return Key.Right;
                 case "enter":
                 case "return":
-                    return Keys.Return;
+                    return Key.Enter;//TODO - Verify Key
                 case "scrollup":
-                    return Keys.PageUp;
+                    return Key.PageUp;
                 case "scrolldown":
-                    return Keys.PageDown;
+                    return Key.PageDown;
             }
-            return Keys.None;
+            return Key.Unknown;
         }
     }
 }

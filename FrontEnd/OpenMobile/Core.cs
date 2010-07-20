@@ -353,7 +353,8 @@ namespace OpenMobile
             string strEx = spewException(ex);
             Clipboard.SetText(strEx);
             ErrorReporting reporting=new ErrorReporting(strEx);
-            reporting.ShowDialog(RenderingWindows[0]);
+            //TODO - FIX ME
+            //reporting.ShowDialog(RenderingWindows[0]);
             if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>0) //Prevent Loops
                 theHost.execute(eFunction.restartProgram);
         }
@@ -396,9 +397,8 @@ namespace OpenMobile
                     for (int i = 0; i < RenderingWindows.Count; i++)
                     {
                         RenderingWindows[i].fullscreen = true;
-                        RenderingWindows[i].FormBorderStyle = FormBorderStyle.None;
-                        RenderingWindows[i].TopMost = true;
-                        RenderingWindows[i].WindowState = FormWindowState.Maximized;
+                        RenderingWindows[i].WindowBorder = WindowBorder.Hidden;
+                        RenderingWindows[i].WindowState = WindowState.Fullscreen;
                     }
                 }
                 if (Environment.GetCommandLineArgs()[1].ToLower().StartsWith("-size=")==true)
@@ -414,9 +414,10 @@ namespace OpenMobile
                     }
                 }
             }
-            for (int i = 1; i < theHost.ScreenCount; i++)
-                RenderingWindows[i].Show();
-            Application.Run(RenderingWindows[0]);
+            //for (int i = 1; i < theHost.ScreenCount; i++)
+            //    RenderingWindows[i].Show();
+            //Application.Run(RenderingWindows[0]);
+            RenderingWindows[0].Run();
             RenderingWindows[0] = null;
             for (int i = 0; i < pluginCollection.Count;i++ )
                 if (pluginCollection[i] != null)
