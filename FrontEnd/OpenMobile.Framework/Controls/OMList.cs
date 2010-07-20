@@ -102,6 +102,10 @@ namespace OpenMobile.Controls
         {
             if ((index < -1) || (index >= items.Count))
                 return;
+            if ((selectedIndex >= 0)&&(selectedIndex<items.Count))
+                items[selectedIndex].subitemTex = items[selectedIndex].textTex = null;
+            if (index>=0)
+                items[index].textTex = items[index].subitemTex = null;
             selectedIndex = index;
             if (!selectFollowsHighlight)    // this is already done in the highlight function if selectFollowsHighilight is true
                 highlightedIndex = selectedIndex;
@@ -441,7 +445,7 @@ namespace OpenMobile.Controls
             {
                 style = value;
                 if (style == eListStyle.MultiList)
-                    textAlignment = Alignment.TopLeft;
+                    textAlignment = OpenMobile.Graphics.Alignment.TopLeft;
             }
         }
         /// <summary>
@@ -485,12 +489,12 @@ namespace OpenMobile.Controls
             get { return highlightColorOutline; }
             set { highlightColorOutline = value; }
         }
-        eTextFormat highlightedItemFormat;
+        OpenMobile.Graphics.eTextFormat highlightedItemFormat;
         /// <summary>
         /// The highlighted item text format
         /// </summary>
         [Description("The highlighted item text format"), Category("Text")]
-        public eTextFormat HighlightedItemFormat
+        public OpenMobile.Graphics.eTextFormat HighlightedItemFormat
         {
             get { return highlightedItemFormat; }
             set { highlightedItemFormat = value; }
@@ -618,28 +622,40 @@ namespace OpenMobile.Controls
                                 {
                                     if (selectedIndex == i)
                                     {
-                                        Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, tmp, 0, highlightColor, highlightColor);
-                                        Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, tmp, 0, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
+                                        if (items[i].textTex == null)
+                                            items[i].textTex = g.GenerateTextTexture(0, 0, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, highlightColor, highlightColor);
+                                        g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
+                                        if (items[i].subitemTex == null)
+                                            items[i].subitemTex = g.GenerateTextTexture((int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
+                                        g.DrawImage(items[i].subitemTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
                                     }
                                     else
                                     {
-                                        Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, tmp, 0, Color, Color);
-                                        Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, tmp, 0, items[i].subitemFormat.color, items[i].subitemFormat.color);
+                                        if (items[i].textTex == null)
+                                            items[i].textTex = g.GenerateTextTexture(0, 0, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, color, color);
+                                        g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
+                                        if (items[i].subitemTex == null)
+                                            items[i].subitemTex = g.GenerateTextTexture((int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.color, items[i].subitemFormat.color);
+                                        g.DrawImage(items[i].subitemTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
                                     }
                                 }
                             }
                             else
                             {
-                                if ((selectedIndex == i) & ((mode == eModeType.Highlighted) || (!showSelectedItemOnlyOnFocus)))
-                                    Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, font, textFormat, textAlignment, tmp, 0, highlightColor, highlightColor);
-                                else
-                                    Renderer.renderText(g, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, font, textFormat, textAlignment, tmp, 0, color, color);
+                                if (items[i].textTex == null)
+                                {
+                                    if ((selectedIndex == i) & ((mode == eModeType.Highlighted) || (!showSelectedItemOnlyOnFocus)))
+                                        items[i].textTex = g.GenerateTextTexture(0, 0, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
+                                    else
+                                        items[i].textTex = g.GenerateTextTexture(0, 0, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, font, textFormat, textAlignment, color, color);
+                                }
+                                g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
                             }
                         }
                         if (listViewItemOffset == 0)
                             continue;
                         if ((items.Count > i) && (items[i].image != null)) //rare thread collision
-                            Renderer.drawTransparentImage(g, items[i].image, (int)rect.Left + 5, (int)rect.Top + 2, (int)rect.Height-5, (int)rect.Height - imgSze, tmp);
+                            g.DrawImage(items[i].image, (int)rect.Left + 5, (int)rect.Top + 2, (int)rect.Height-5, (int)rect.Height - imgSze, tmp);
                     }
                 }
                 g.Clip = r; //Reset the clip size for the rest of the controls
@@ -775,7 +791,11 @@ namespace OpenMobile.Controls
                 thrown = RelativeDistance.Y;
             moved += RelativeDistance.Y;
             if (Math.Abs(TotalDistance.Y) > 3)
+            {
+                if (selectedIndex >= 0)
+                    items[selectedIndex].textTex = items[selectedIndex].subitemTex = null;
                 selectedIndex = -1;
+            }
             refreshMe(toRegion());
         }
 
@@ -853,7 +873,6 @@ namespace OpenMobile.Controls
             // Only trigg if this is actually a new item
             if (index == highlightedIndex)
                 return;
-
             highlightedIndex = index;
             if (selectFollowsHighlight)
                 selectedIndex = highlightedIndex;

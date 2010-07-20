@@ -79,51 +79,6 @@ namespace OpenMobile
         gesturing=10
     };
     /// <summary>
-    /// Text format arguments
-    /// </summary>
-    public enum eTextFormat {
-        /// <summary>
-        /// Normal
-        /// </summary>
-        Normal = 0,
-        /// <summary>
-        /// Drop Shadow
-        /// </summary>
-        DropShadow = 1,
-        /// <summary>
-        /// Bold
-        /// </summary>
-        Bold = 2,
-        /// <summary>
-        /// Italic
-        /// </summary>
-        Italic = 4,
-        /// <summary>
-        /// Underlined
-        /// </summary>
-        Underline = 6,
-        /// <summary>
-        /// Bold and Drop Shadow
-        /// </summary>
-        BoldShadow = 3,
-        /// <summary>
-        /// Italic and Drop Shadow
-        /// </summary>
-        ItalicShadow = 5,
-        /// <summary>
-        /// Underlined and Drop Shadow
-        /// </summary>
-        UnderlineShadow = 7,
-        /// <summary>
-        /// Outlined
-        /// </summary>
-        Outline = 8,
-        /// <summary>
-        /// Glowing Text
-        /// </summary>
-        Glow=9
-    };
-    /// <summary>
     /// The style list to render
     /// </summary>
     public enum eListStyle
@@ -165,60 +120,6 @@ namespace OpenMobile
         /// </summary>
         MultiList=9
     }
-
-    /// <summary>
-    /// Alignment arguments
-    /// </summary>
-    public enum Alignment { 
-        /// <summary>
-        /// Top Left
-        /// </summary>
-        TopLeft = 0,
-        /// <summary>
-        /// Top Center
-        /// </summary>
-        TopCenter = 1,
-        /// <summary>
-        /// Top Right
-        /// </summary>
-        TopRight = 2,
-        /// <summary>
-        /// Center Left
-        /// </summary>
-        CenterLeft = 10,
-        /// <summary>
-        /// Center Center
-        /// </summary>
-        CenterCenter = 11,
-        /// <summary>
-        /// Center Right
-        /// </summary>
-        CenterRight = 12,
-        /// <summary>
-        /// Buttom Left
-        /// </summary>
-        BottomLeft = 20,
-        /// <summary>
-        /// Bottom Center
-        /// </summary>
-        BottomCenter = 21,
-        /// <summary>
-        /// Bottom Right
-        /// </summary>
-        BottomRight = 22,
-        /// <summary>
-        /// Vertical
-        /// </summary>
-        VerticalCentered=111,
-        /// <summary>
-        /// Center Left (Ellipsis)
-        /// </summary>
-        CenterLeftEllipsis=1010,
-        /// <summary>
-        /// Centered with Word Wrap
-        /// </summary>
-        WordWrap=10011
-        };
     /// <summary>
     /// The angle to rotate the control
     /// </summary>
@@ -249,11 +150,11 @@ namespace OpenMobile
             /// <summary>
             /// Text Formatting
             /// </summary>
-            public eTextFormat textFormat = eTextFormat.Normal;
+            public OpenMobile.Graphics.eTextFormat textFormat = OpenMobile.Graphics.eTextFormat.Normal;
             /// <summary>
             /// The text alignment
             /// </summary>
-            public Alignment textAlignment = Alignment.BottomLeft;
+            public OpenMobile.Graphics.Alignment textAlignment = OpenMobile.Graphics.Alignment.BottomLeft;
             /// <summary>
             /// The ForeColor
             /// </summary>
@@ -280,6 +181,10 @@ namespace OpenMobile
         /// </summary>
         public string text;
         /// <summary>
+        /// Text texture
+        /// </summary>
+        internal OImage textTex;
+        /// <summary>
         /// The icon
         /// </summary>
         public OImage image;
@@ -287,6 +192,10 @@ namespace OpenMobile
         /// An optional subitem for the list
         /// </summary>
         public string subItem;
+        /// <summary>
+        /// sub item texture
+        /// </summary>
+        internal OImage subitemTex;
         /// <summary>
         /// An optional subitem format for the list
         /// </summary>

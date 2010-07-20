@@ -51,26 +51,22 @@ namespace OpenMobile
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RenderingWindow));
-            this.tmrClick = new System.Windows.Forms.Timer(this.components);
-            this.tmrMouse = new System.Windows.Forms.Timer(this.components);
-            this.tmrLongClick = new System.Windows.Forms.Timer(this.components);
+            this.tmrClick = new System.Timers.Timer(20);
+            this.tmrMouse = new System.Timers.Timer(200);
+            this.tmrLongClick =new System.Timers.Timer(500);
             // 
             // tmrClick
             // 
-            this.tmrClick.Interval = 20;
-            this.tmrClick.Tick += new System.EventHandler(this.tmrClick_Tick);
+            this.tmrClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrClick_Tick);
             // 
             // tmrMouse
             // 
-            this.tmrMouse.Interval = 200;
-            this.tmrMouse.Tick += new System.EventHandler(this.tmrMouse_Tick);
+            this.tmrMouse.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrMouse_Tick);
             // 
             // tmrLongClick
             // 
-            this.tmrLongClick.Interval = 500;
-            this.tmrLongClick.Tick += new System.EventHandler(this.tmrLongClick_Tick);
+            this.tmrLongClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrLongClick_Tick);
             // 
             // RenderingWindow
             // 
@@ -90,8 +86,8 @@ namespace OpenMobile
 
         }
         #endregion
-        private System.Windows.Forms.Timer tmrClick;
-        private System.Windows.Forms.Timer tmrMouse;
-        private System.Windows.Forms.Timer tmrLongClick;
+        private System.Timers.Timer tmrClick;
+        private System.Timers.Timer tmrMouse;
+        private System.Timers.Timer tmrLongClick;
     }
 }

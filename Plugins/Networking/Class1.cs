@@ -28,7 +28,6 @@ using OpenMobile.Graphics;
 using System.Drawing;
 using OpenMobile.Framework;
 using System.Collections.Generic;
-
 namespace Networking
 {
     public sealed class Class1:IHighLevel
@@ -81,7 +80,7 @@ namespace Networking
             networks.HighlightColor = Color.White;
             OMImage signalStrength = new OMImage(670, 120, 75, 75);
             OMLabel networkName = new OMLabel(745, 120, 200, 50);
-            networkName.Format = eTextFormat.BoldShadow;
+            networkName.Format = OpenMobile.Graphics.eTextFormat.BoldShadow;
             OMLabel networkType = new OMLabel(660, 190, 320, 50);
             OMBasicShape background = new OMBasicShape(0, 0, 1000, 600);
             background.FillColor = Color.FromArgb(140, Color.Black);

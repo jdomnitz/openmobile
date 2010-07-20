@@ -103,6 +103,7 @@ namespace OpenMobile.Controls
                 return "Checkbox";
             }
         }
+        private bool genHighlight;
         /// <summary>
         /// Draws the control
         /// </summary>
@@ -117,11 +118,15 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionOut;
             using (Brush defaultBrush = new SolidBrush(Color.FromArgb((int)tmp * 255, this.OutlineColor)))
             {
-                if (Mode==eModeType.Highlighted)
-                    Renderer.renderText(g, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, Alignment.CenterLeft, tmp, 0, highlightColor, this.OutlineColor);
-                else
-                    Renderer.renderText(g, this.Left + this.Height+5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, Alignment.CenterLeft, tmp,0, this.Color, this.OutlineColor);
-                
+                if ((textTexture == null) || (genHighlight != (Mode == eModeType.Highlighted)))
+                {
+                    if (Mode == eModeType.Highlighted)
+                        textTexture= g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, highlightColor, this.OutlineColor);
+                    else
+                        textTexture=g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, this.Color, this.OutlineColor);
+                    genHighlight = (Mode == eModeType.Highlighted);
+                }
+                g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height);
                 g.DrawRoundRectangle(new Pen(defaultBrush, 4.0F), new Rectangle(this.Left, this.Top, this.Height, this.Height),5);
                 if (this.isChecked == true)
                 {
