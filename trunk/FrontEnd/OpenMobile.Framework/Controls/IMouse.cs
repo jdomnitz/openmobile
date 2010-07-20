@@ -36,11 +36,11 @@ namespace OpenMobile.Controls
         /// <summary>
         /// MouseDown event for this control
         /// </summary>
-        void MouseDown(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale);
+        void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale);
 
         /// <summary>
         /// MouseUp event for this control
         /// </summary>
-        void MouseUp(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale);
+        void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale);
     }
 }

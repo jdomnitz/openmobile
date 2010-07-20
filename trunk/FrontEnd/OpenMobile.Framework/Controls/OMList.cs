@@ -863,7 +863,7 @@ namespace OpenMobile.Controls
                 new Thread(delegate() { HighlightedIndexChanged(this, this.containingScreen()); }).Start();
         }
         private int lastSelected = -1;
-        public virtual void MouseDown(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale)
+        public virtual void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             lastSelected = selectedIndex;
             Select(highlightedIndex, false, screen);
@@ -873,7 +873,7 @@ namespace OpenMobile.Controls
                 mode = eModeType.Scrolling;
         }
 
-        public virtual void MouseUp(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale)
+        public virtual void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             //
         }
