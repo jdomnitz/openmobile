@@ -84,7 +84,7 @@ namespace OpenMobile
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Mouse.ButtonUp += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseUp);
             //this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseDoubleClick);
-            //this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseClick);
+            this.Mouse.MouseClick += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseClick);
             this.Mouse.ButtonDown += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseDown);
             this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
             //this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RenderingWindow_FormClosing);
