@@ -597,15 +597,15 @@ namespace OpenMobile.Controls
                         case eListStyle.DroidStyleText:
                             imgSze = 6;
                             if (selectedIndex == i)
-                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * selectedItemColor1.A * 0.6), selectedItemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
+                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * selectedItemColor1.A * 0.6), selectedItemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 2));
                             else
-                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
+                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 2));
                             break;
                         case eListStyle.MultiList:
                             if (selectedIndex == i)
-                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 1));
+                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 1));
                             else
-                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 1));
+                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 1));
                             break;
                     }
                     if ((i < items.Count) && (i >= 0))

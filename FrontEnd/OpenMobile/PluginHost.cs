@@ -230,15 +230,13 @@ namespace OpenMobile
         {
             if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return (IntPtr)(-1); //Out of bounds
-            return IntPtr.Zero;
-            //TODO - FIX ME
             //if (Core.RenderingWindows[screen].InvokeRequired == true)
             //{
             //    RenderingWindow.getVal val = new RenderingWindow.getVal(Core.RenderingWindows[screen].getHandle);
             //    return (IntPtr)Core.RenderingWindows[screen].Invoke(val);
             //}
             //else
-            //    return Core.RenderingWindows[screen].Handle;
+                return Core.RenderingWindows[screen].WindowHandle;
         }
 
         public Int32 RenderFirst

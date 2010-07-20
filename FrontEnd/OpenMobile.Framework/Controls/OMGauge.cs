@@ -719,11 +719,11 @@ namespace OpenMobile.Controls
             //Draw decimal point
             if (dp)
             {
-                g.FillEllipse(fillPen.Brush, new RectangleF(
-                    position.X + GetX(10F, width),
-                    position.Y + GetY(12F, height),
-                    width / 7,
-                    width / 7));
+                g.FillEllipse(fillPen.Brush, new Rectangle(
+                    (int)(position.X + GetX(10F, width)),(int)(
+                    position.Y + GetY(12F, height)),
+                    (int)(width / 7),
+                    (int)(width / 7)));
             }
         }
 
@@ -953,7 +953,7 @@ namespace OpenMobile.Controls
             g.DrawImage(backgroundImg, this.toRegion());
 
             //Draw Digital Value
-            RectangleF digiRect = new RectangleF(this.Left+(float)this.Width / 2F - (float)this.width / 5F,this.Top+ (float)this.height / 1.2F, (float)this.width / 2.5F, (float)this.Height / 9F);
+            Rectangle digiRect = new Rectangle((int)(this.Left+(float)this.Width / 2F - (float)this.width / 5F),(int)(this.Top+ (float)this.height / 1.2F), (int)((float)this.width / 2.5F),(int)((float)this.Height / 9F));
             RectangleF digiFRect = new RectangleF(this.Left+this.Width / 2 - this.width / 7,this.Top+ (int)(this.height / 1.18), this.width / 4, this.Height / 12);
             g.FillRectangle(new SolidBrush(Color.FromArgb(30, Color.Gray)), digiRect);
             DisplayNumber(g, this.currentValue, digiFRect);
