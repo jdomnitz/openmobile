@@ -272,8 +272,8 @@ namespace OpenMobile.Controls
             this.Left = 20;
             this.Width = 300;
             this.Height = 120;
-            this.TextAlignment = Alignment.CenterCenter;
-            this.Format = eTextFormat.Normal;
+            this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
+            this.Format = OpenMobile.Graphics.eTextFormat.Normal;
         }
         /// <summary>
         /// Creates a new OMButton
@@ -286,8 +286,8 @@ namespace OpenMobile.Controls
             this.Left = x;
             this.Width = 300;
             this.Height = 120;
-            this.TextAlignment = Alignment.CenterCenter;
-            this.Format = eTextFormat.Normal;
+            this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
+            this.Format = OpenMobile.Graphics.eTextFormat.Normal;
         }
         /// <summary>
         /// Initializes a button with a starting location and size
@@ -302,8 +302,8 @@ namespace OpenMobile.Controls
             this.Left = x;
             this.Width = w;
             this.Height = h;
-            this.TextAlignment = Alignment.CenterCenter;
-            this.Format = eTextFormat.Normal;
+            this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
+            this.Format = OpenMobile.Graphics.eTextFormat.Normal;
         }
         /// <summary>
         /// Draws the control
@@ -316,47 +316,41 @@ namespace OpenMobile.Controls
                 return;
             using (ImageAttributes ia = new ImageAttributes())
             {
-                ColorMatrix cm = new ColorMatrix();
+                float alpha = 1;
                 float tmp = 1;
-                cm.Matrix00 = cm.Matrix33 = cm.Matrix11 = cm.Matrix22 = cm.Matrix44 = 1;
                 if (this.Mode == eModeType.transitioningIn)
                     tmp = e.globalTransitionIn;
                 if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                     tmp = e.globalTransitionOut;
-                cm.Matrix33 = tmp;
+                alpha = tmp;
+                alpha *= ((float)transparency / 100);
                 if ((this.Mode == eModeType.Highlighted) && (this.FocusImage.image != null))
                 {
-                    cm.Matrix33 *= ((float)transparency / 100);
-                    ia.SetColorMatrix(cm);
-                    g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, ia);
-                    if (this.Text != null)
-                        Renderer.renderText(g, this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, tmp, 1, this.Color, this.OutlineColor);
-                    cm = null;
+                    g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, alpha);
+                    if (textTexture == null)
+                        textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+                    g.DrawImage(textTexture, left - e.transitionTop, top - e.transitionTop, width + (int)(e.transitionTop * 2.5), height + (int)(e.transitionTop * 2.5), tmp);
                     return;
                 }
                 else if ((this.Mode == eModeType.Clicked) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                 {
                     if (focusImage.image != null)
                     {
-                        cm.Matrix33 *= e.transparency * ((float)transparency / 100);
-                        ia.SetColorMatrix(cm);
-                        g.DrawImage(focusImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, ia);
-                        Renderer.renderText(g, this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5), this.Text, this.Font, this.Format, this.TextAlignment, e.transparency, this.Color, this.OutlineColor);
-                        cm = null;
+                        g.DrawImage(focusImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, alpha);
+                        if (textTexture == null)
+                            textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+                        g.DrawImage(textTexture, left - e.transitionTop, top - e.transitionTop, width + (int)(e.transitionTop * 2.5), height + (int)(e.transitionTop * 2.5), tmp);
                         return;
                     }
                     else if (downImage.image != null)
                     {
-                        cm.Matrix33 *= e.transparency * ((float)transparency / 100);
-                        ia.SetColorMatrix(cm);
-                        g.DrawImage(downImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, downImage.image.Width, downImage.image.Height, GraphicsUnit.Pixel, ia);
-                        Renderer.renderText(g, this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5), this.Text, this.Font, this.Format, this.TextAlignment, e.transparency, this.Color, this.OutlineColor);
-                        cm = null;
+                        g.DrawImage(downImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, downImage.image.Width, downImage.image.Height, GraphicsUnit.Pixel, alpha);
+                        if (textTexture==null)
+                            textTexture=g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+                        g.DrawImage(textTexture, left - e.transitionTop, top - e.transitionTop, width + (int)(e.transitionTop * 2.5), height + (int)(e.transitionTop * 2.5), tmp);
                         return;
                     }
                 }
-                cm.Matrix33 *= ((float)transparency / 100);
-                ia.SetColorMatrix(cm);
                 if (image.image == null)
                 {
                     if (image == imageItem.MISSING)
@@ -369,16 +363,16 @@ namespace OpenMobile.Controls
                 {
                     lock (image.image)
                     {
-                        g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, ia);
+                        g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, alpha);
                     }
                 }
                 
                 // Debug function added by Borte
                 if (ShowArea)
                     g.FillRectangle(new SolidBrush(Color.FromArgb(75, Color.Yellow)), this.toRegion());
-
-                Renderer.renderText(g, this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, tmp, 1, this.Color, this.OutlineColor);
-                cm = null;
+                if (textTexture==null)
+                    textTexture=g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+                g.DrawImage(textTexture, left, top, width, height, tmp);
             }
         }
     }

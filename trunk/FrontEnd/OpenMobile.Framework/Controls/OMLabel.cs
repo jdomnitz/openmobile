@@ -38,8 +38,8 @@ namespace OpenMobile.Controls
         protected int top;
         protected int left;
         protected string text="";
-        protected eTextFormat textFormat = eTextFormat.Normal;
-        protected Alignment textAlignment = Alignment.CenterCenter;
+        protected OpenMobile.Graphics.eTextFormat textFormat = OpenMobile.Graphics.eTextFormat.Normal;
+        protected OpenMobile.Graphics.Alignment textAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
         protected Color color = Color.White;
         protected Font font = new Font(FontFamily.GenericSansSerif, 18F);
         protected Color outlineColor = Color.Black;
@@ -227,6 +227,7 @@ namespace OpenMobile.Controls
                 refreshMe(new Rectangle(left>oldleft?oldleft:left, top, width+Math.Abs(oldleft-left), height));
             }
         }
+        protected OImage textTexture;
         /// <summary>
         /// The text displayed in the label
         /// </summary>
@@ -242,6 +243,7 @@ namespace OpenMobile.Controls
                 if (text == value)
                     return;
                 text = value;
+                textTexture = null;
                 refreshMe(this.toRegion());
             }
         }
@@ -249,7 +251,7 @@ namespace OpenMobile.Controls
         /// Sets the format of the displayed text
         /// </summary>
         [CategoryAttribute("Text"), DescriptionAttribute("Sets the format of the displayed text")]
-        public virtual eTextFormat Format
+        public virtual OpenMobile.Graphics.eTextFormat Format
         {
             get
             {
@@ -260,6 +262,7 @@ namespace OpenMobile.Controls
                 if (textFormat == value)
                     return;
                 textFormat = value;
+                textTexture = null;
                 refreshMe(this.toRegion());
             }
         }
@@ -267,7 +270,7 @@ namespace OpenMobile.Controls
         /// Sets the alignment of the displayed text
         /// </summary>
         [CategoryAttribute("Text"), DescriptionAttribute("Sets the alignment of the displayed text")]
-        public virtual Alignment TextAlignment
+        public virtual OpenMobile.Graphics.Alignment TextAlignment
         {
             get
             {
@@ -276,6 +279,7 @@ namespace OpenMobile.Controls
             set
             {
                 textAlignment = value;
+                textTexture = null;
             }
         }
         /// <summary>
@@ -303,7 +307,9 @@ namespace OpenMobile.Controls
             {
                 tmp = e.globalTransitionOut;
             }
-            Renderer.renderText(g, left, top, width, height, text, font, textFormat, textAlignment, tmp, 1, color, outlineColor);
+            if (textTexture==null)
+                textTexture=g.GenerateTextTexture(left, top, width, height, text, font, textFormat, textAlignment, color, outlineColor);
+            g.DrawImage(textTexture, left, top, width, height);
         }
     }
 }

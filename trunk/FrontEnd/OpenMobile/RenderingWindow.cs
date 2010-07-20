@@ -20,15 +20,15 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
-using OpenMobile.Graphics;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using OpenMobile.Controls;
-using OpenMobile.Plugin;
+using OpenMobile.Graphics;
 using OpenMobile.Input;
-using System.ComponentModel;
+using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
@@ -115,11 +115,12 @@ namespace OpenMobile
         }
         private void paintIdentity()
         {
-            //TODO - FIX ME
-            //OpenMobile.Graphics.Graphics g = OpenMobile.Graphics.Graphics.FromHwnd(this.Handle);
-            //Renderer.renderText(g, 0, 0, this.Width, this.Height, (screen+1).ToString(), new Font(FontFamily.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, 1F,Color.White,Color.Black);
-            //Thread.Sleep(1000);
-            //Refresh();
+            using (OImage identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(FontFamily.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black))
+            {
+                g.DrawImage(identity, 0, 0, 1000, 600);
+                Thread.Sleep(1000);
+                Invalidate();
+            }
         }
         public void invokePaint()
         {
@@ -129,7 +130,8 @@ namespace OpenMobile
 
         private void Invalidate()
         {
-            //TODO
+            //g.ResetClip();
+            //OnRenderFrame(new FrameEventArgs());
         }
         //Code Added by Borte
         public new int Width
@@ -212,16 +214,15 @@ namespace OpenMobile
             if (region == Rectangle.Empty)
                 Invalidate();
             else
-            {
-                region.Location = new Point((int)(region.Left * widthScale), (int)(region.Top * heightScale));
-                region.Size = new Size((int)(region.Width * widthScale), (int)(region.Height * heightScale));
                 Invalidate(region);
-            }
         }
 
         private void Invalidate(Rectangle region)
         {
             //TODO
+            //g.SetClip(region);
+            //OnUpdateFrame(new FrameEventArgs());
+            //g.ResetClip();
         }
         public void transitionOutEverything()
         {
@@ -300,7 +301,7 @@ namespace OpenMobile
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            g.Clear(Color.DarkBlue);
+            OnPaintBackground();
             OnPaint();
             g.Finish();
             SwapBuffers();
@@ -359,7 +360,7 @@ namespace OpenMobile
               (bounds.Y < (control.Y + control.Height) * heightScale));
         }
 
-        protected void OnPaintBackground(PaintEventArgs pevent)
+        protected void OnPaintBackground()
         {
             //ToDo-Background transitions
             int i;
@@ -376,20 +377,19 @@ namespace OpenMobile
                 return;
             for (; i < backgroundQueue.Count; i++)
             {
-                //switch (backgroundQueue[i].BackgroundType)
-                //{
-                //    case backgroundStyle.Gradiant:
-                //        pevent.Graphics.FillRectangle(new System.Drawing.Drawing2D.LinearGradientBrush(pevent.Graphics.RenderingOrigin, new Point(this.Width, this.Height), backgroundQueue[i].BackgroundColor1, backgroundQueue[i].BackgroundColor2), pevent.ClipRectangle.X, pevent.ClipRectangle.Y, pevent.ClipRectangle.Width, pevent.ClipRectangle.Height);
-                //        break;
-                //    case backgroundStyle.SolidColor:
-                //        pevent.Graphics.FillRectangle(new SolidBrush(backgroundQueue[i].BackgroundColor1), pevent.ClipRectangle.X, pevent.ClipRectangle.Y, pevent.ClipRectangle.Width, pevent.ClipRectangle.Height);
-                //        break;
-                //    case backgroundStyle.Image:
-                //        if (backgroundQueue[i].BackgroundImage.image != null)
-                //            pevent.Graphics.DrawImage(backgroundQueue[i].BackgroundImage.image , new Rectangle(0, 0, this.ClientSize.Width, this.ClientSize.Height), 0, 0, backgroundQueue[i].BackgroundImage.image.Width, backgroundQueue[i].BackgroundImage.image.Height, GraphicsUnit.Pixel);
-                        
-                //        break;
-                //}
+                switch (backgroundQueue[i].BackgroundType)
+                {
+                    case backgroundStyle.Gradiant:
+                        g.FillRectangle(new System.Drawing.Drawing2D.LinearGradientBrush(new Point(), new Point(1000, 600), backgroundQueue[i].BackgroundColor1, backgroundQueue[i].BackgroundColor2), 0,0,1000,600);
+                        break;
+                    case backgroundStyle.SolidColor:
+                        g.Clear(backgroundQueue[i].BackgroundColor1);
+                        break;
+                    case backgroundStyle.Image:
+                        if (backgroundQueue[i].BackgroundImage.image != null)
+                            g.DrawImage(backgroundQueue[i].BackgroundImage.image , new Rectangle(0, 0, 1000,600), 0, 0, backgroundQueue[i].BackgroundImage.image.Width, backgroundQueue[i].BackgroundImage.image.Height, GraphicsUnit.Pixel);
+                        break;
+                }
             }
         }
 

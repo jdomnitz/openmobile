@@ -52,11 +52,15 @@ namespace OpenMobile.Controls
             catch (Exception) { };//If no one has hooked the click event
         }
         private string title;
+        protected OImage textTexture;
         public string Title
         {
             set
             {
+                if (title == value)
+                    return;
                 title = value;
+                textTexture = null;
             }
             get 
             {
@@ -85,7 +89,7 @@ namespace OpenMobile.Controls
 
         public OMMessageBox()
         {
-            textAlignment = Alignment.WordWrap;
+            textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
         }
 
         public OMMessageBox(int left,int top,int width,int height)
@@ -94,7 +98,7 @@ namespace OpenMobile.Controls
             Top = top;
             Width = width;
             Height = height;
-            textAlignment = Alignment.WordWrap;
+            textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
         }
 
         /// <summary>
@@ -115,11 +119,13 @@ namespace OpenMobile.Controls
             Rectangle r = new Rectangle(this.Left, top, this.Width, height);
             g.FillRoundRectangle(new LinearGradientBrush(r, Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), LinearGradientMode.Vertical), r,20);
             g.DrawRoundRectangle(new Pen(borderColor, borderWidth), r, 20);
-            Renderer.renderText(g, this.Left, top, this.Width, (int)letterHeight, title,this.Font, this.Format, this.TextAlignment, tmp,1,this.Color,this.OutlineColor);
+            if (textTexture==null)
+                g.GenerateTextTexture(this.Left, top, this.Width, (int)letterHeight, title,this.Font, this.Format, this.TextAlignment, this.Color,this.OutlineColor);
+            g.DrawImage(textTexture, left, top, width, height,tmp);
             top += (int)letterHeight;
             height -= (int)letterHeight;
             base.Render(g, e);
-            //Renderer.renderLabel(g,this);  //ToDo-Fix this
+            //Renderer.renderLabel(g,this);  //ToDo-Fix this (pre-hardware acceleration merge)
             top -= (int)letterHeight;
         }
     }

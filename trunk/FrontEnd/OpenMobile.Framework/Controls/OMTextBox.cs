@@ -131,6 +131,7 @@ namespace OpenMobile.Controls
                     if (IsAlphabetic(value) == false)
                         return;
                 }
+                textTexture = null;
                 text = value;
                 this.refreshMe(this.toRegion());
                 try
@@ -141,7 +142,7 @@ namespace OpenMobile.Controls
                 catch (Exception) { };
             }
         }
-
+        private OImage textTexture;
         private bool IsAlphabetic(string strToCheck)
         {
             foreach (int chr in strToCheck)
@@ -154,9 +155,9 @@ namespace OpenMobile.Controls
         /// Text formatting arguments
         /// </summary>
         [Browsable(false)]
-        public override eTextFormat Format
+        public override OpenMobile.Graphics.eTextFormat Format
         {
-            get { return eTextFormat.Normal; }
+            get { return OpenMobile.Graphics.eTextFormat.Normal; }
         }
 
         /// <summary>
@@ -168,8 +169,8 @@ namespace OpenMobile.Controls
             this.Width = 100;
             this.Left = 25;
             this.Top = 25;
-            this.TextAlignment = Alignment.CenterCenter;
-            this.Format = eTextFormat.Normal;
+            this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
+            this.Format = OpenMobile.Graphics.eTextFormat.Normal;
             this.Color = Color.Black;
             this.OutlineColor = Color.Blue;
         }
@@ -186,8 +187,8 @@ namespace OpenMobile.Controls
             this.Width = w;
             this.Left = x;
             this.Top = y;
-            this.TextAlignment = Alignment.CenterCenter;
-            this.Format = eTextFormat.Normal;
+            this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
+            this.Format = OpenMobile.Graphics.eTextFormat.Normal;
             this.Color = Color.Black;
             this.OutlineColor = Color.Blue;
         }
@@ -218,16 +219,23 @@ namespace OpenMobile.Controls
             }
             using (StringFormat f = new StringFormat(StringFormatFlags.NoWrap))
             {
-                f.Alignment=StringAlignment.Center;
-                f.LineAlignment=StringAlignment.Center;
+                f.Alignment = StringAlignment.Center;
+                f.LineAlignment = StringAlignment.Center;
                 if ((flags & textboxFlags.EllipsisCenter) == textboxFlags.EllipsisCenter)
                     f.Trimming = StringTrimming.EllipsisPath;
                 else if ((flags & textboxFlags.EllipsisEnd) == textboxFlags.EllipsisEnd)
                     f.Trimming = StringTrimming.EllipsisCharacter;
                 else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
                     f.Trimming = StringTrimming.Word;
-                if (text!=null)
-                    g.DrawString((this.flags&textboxFlags.Password)==textboxFlags.Password ? new String('*',text.Length): text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * Color.A), this.Color)), new RectangleF(this.Left, this.Top, this.Width + 5, this.Height),f);
+                if (text != null)
+                {
+                    Rectangle rect = new Rectangle(this.Left, this.Top, this.Width + 5, this.Height);
+                    {
+                        if (textTexture == null)
+                            textTexture = g.GenerateStringTexture((this.flags & textboxFlags.Password) == textboxFlags.Password ? new String('*', text.Length) : text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * Color.A), this.Color)), new RectangleF(this.Left, this.Top, this.Width + 5, this.Height), f);
+                        g.DrawImage(textTexture, rect);
+                    }
+                }
             }
         }
     }

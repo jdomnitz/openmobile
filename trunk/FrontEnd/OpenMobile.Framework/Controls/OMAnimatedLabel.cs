@@ -367,11 +367,13 @@ namespace OpenMobile.Controls
                     {
                         g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
                         StringFormat format = new StringFormat(StringFormatFlags.NoWrap);
-                        Renderer.renderText(g, left, top, width, height, text, font, textFormat, textAlignment, 1F, 0, color, outlineColor);
+                        //TODO
+                        //Renderer.renderText(g, left, top, width, height, text, font, textFormat, textAlignment, 1F, 0, color, outlineColor);
                         if (tempTransition != eAnimation.None)
                         {
                             g.SetClip(new Rectangle(left+(width-veilRight), top, veilRight, height));
-                            Renderer.renderText(g, left, top, width, height, oldText, font, textFormat, textAlignment, 1F, 0, color, outlineColor);
+                            //TODO
+                            //Renderer.renderText(g, left, top, width, height, oldText, font, textFormat, textAlignment, 1F, 0, color, outlineColor);
                         }
                     }
                     else
@@ -382,7 +384,8 @@ namespace OpenMobile.Controls
                             scrollPos = 0;
                         }
                         g.SetClip(new Rectangle(left,top,width,height));
-                        Renderer.renderText(g,left - (int)(scrollPos * avgChar), top, (int)(text.Length * (avgChar+1)), height,text,font,textFormat,textAlignment,1F,0,color,outlineColor);
+                        //TODO
+                        //Renderer.renderText(g,left - (int)(scrollPos * avgChar), top, (int)(text.Length * (avgChar+1)), height,text,font,textFormat,textAlignment,1F,0,color,outlineColor);
                     }
                     g.SetClip(old);
                     return;

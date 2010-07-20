@@ -252,24 +252,20 @@ namespace OpenMobile.Controls
                 {
                     tmp = e.globalTransitionOut;
                 }
-                ImageAttributes at = new ImageAttributes();
-                ColorMatrix cm = new ColorMatrix();
-                cm.Matrix00 = cm.Matrix11 = cm.Matrix22 = cm.Matrix44 = 1;
-                cm.Matrix33 = tmp * (transparency / 100F);
-                at.SetColorMatrix(cm);
+                float alpha = tmp * (transparency / 100F);
                 lock (image.image)
                 {
                     // Start of code added by Borte
                     switch (drawmode)
                     {
                         case DrawModes.Crop:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, GraphicsUnit.Pixel, at);
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, GraphicsUnit.Pixel, alpha);
                             break;
                         case DrawModes.CropLeft:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, GraphicsUnit.Pixel, at);
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, GraphicsUnit.Pixel, alpha);
                             break;
                         case DrawModes.Scale:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, at);
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, alpha);
                             break;
                     }
                 }
