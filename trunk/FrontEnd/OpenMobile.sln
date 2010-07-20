@@ -39,7 +39,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinWifi", "..\Plugins\WinWi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMDebug", "..\Plugins\OMDebug\OMDebug.csproj", "{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Drawing", "..\Plugins\OpenMobile.Drawing\OpenMobile.Drawing.csproj", "{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMSpeech", "..\..\..\..\StreetTalkDll\StreetTalkDll\OMSpeech.csproj", "{AAF5891C-E058-4EB1-8D35-BC708447585C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Graphics", "..\..\Sub-Projects\HardwareAcceleration\OpenMobile.Graphics\OpenMobile.Graphics.csproj", "{E1727C23-C7FD-4FBA-B09F-7160B5947F85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -123,10 +125,14 @@ Global
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAF5891C-E058-4EB1-8D35-BC708447585C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAF5891C-E058-4EB1-8D35-BC708447585C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAF5891C-E058-4EB1-8D35-BC708447585C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAF5891C-E058-4EB1-8D35-BC708447585C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

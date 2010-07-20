@@ -20,6 +20,7 @@
 *********************************************************************************/
 //this.KeyUp += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceUp);
 //this.KeyDown+=new System.Windows.Forms.KeyEventHandler(InputRouter.SourceDown);
+using System;
 namespace OpenMobile
 {
     partial class RenderingWindow
@@ -56,7 +57,6 @@ namespace OpenMobile
             this.tmrClick = new System.Windows.Forms.Timer(this.components);
             this.tmrMouse = new System.Windows.Forms.Timer(this.components);
             this.tmrLongClick = new System.Windows.Forms.Timer(this.components);
-            this.SuspendLayout();
             // 
             // tmrClosing
             // 
@@ -80,22 +80,19 @@ namespace OpenMobile
             // 
             // RenderingWindow
             // 
-            this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.ClientSize = new System.Drawing.Size(1000, 600);
+            //TODO - Fix everything not implemented
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "RenderingWindow";
-            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseUp);
-            this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseDoubleClick);
-            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseClick);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseDown);
-            this.MouseLeave += new System.EventHandler(this.RenderingWindow_MouseLeave);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RenderingWindow_FormClosing);
-            this.Resize += new System.EventHandler(this.RenderingWindow_Resize);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseMove);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceUp);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceDown);
-            this.ResizeEnd += new System.EventHandler(RenderingWindow_ResizeEnd);
-            this.ResumeLayout(false);
+            this.Mouse.ButtonUp += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseUp);
+            //this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseDoubleClick);
+            //this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseClick);
+            this.Mouse.ButtonDown += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseDown);
+            this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
+            //this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RenderingWindow_FormClosing);
+            this.Resize += new System.EventHandler<System.EventArgs>(this.RenderingWindow_Resize);
+            this.Mouse.Move += new EventHandler<OpenMobile.Input.MouseMoveEventArgs>(this.RenderingWindow_MouseMove);
+            this.Keyboard.KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
+            this.Keyboard.KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
+            //this.ResizeEnd += new System.EventHandler(RenderingWindow_ResizeEnd);
 
         }
         #endregion

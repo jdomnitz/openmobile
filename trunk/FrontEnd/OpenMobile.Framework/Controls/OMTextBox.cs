@@ -21,7 +21,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using OpenMobile;
 
 namespace OpenMobile.Controls
@@ -196,7 +196,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Drawing.Graphics g, renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             float tmp = 1;
             if (this.Mode == eModeType.transitioningIn)
@@ -205,16 +205,16 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionOut;
             Rectangle r = new Rectangle(this.Left, this.Top, this.Width, this.Height);
             
-            Renderer.FillRoundRectangle(g,new SolidBrush(Color.FromArgb((int)(tmp * 255), background)), r,10F);
-            Renderer.DrawRoundRectangle(g,new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 2F), r,10F);
+            g.FillRoundRectangle(new SolidBrush(Color.FromArgb((int)(tmp * 255), background)), r,10);
+            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 2F), r,10);
             
             if (this.Mode == eModeType.Highlighted)
             {
                 Rectangle r2 = new Rectangle(r.Left + 1, r.Top + 1, r.Width - 2, r.Height - 2);
-                Renderer.DrawRoundRectangle(g,new Pen(Color.FromArgb((int)(40 * tmp), this.OutlineColor), 4F), r2,10F);
-                Renderer.DrawRoundRectangle(g, new Pen(Color.FromArgb((int)(75 * tmp), this.OutlineColor), 3F), r2, 10F);
-                Renderer.DrawRoundRectangle(g, new Pen(Color.FromArgb((int)(120 * tmp), this.OutlineColor), 2F), r2, 10F);
-                Renderer.DrawRoundRectangle(g, new Pen(Color.FromArgb((int)(200 * tmp), this.OutlineColor), 1F), r2, 10F);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(40 * tmp), this.OutlineColor), 4F), r2,10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * tmp), this.OutlineColor), 3F), r2, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * tmp), this.OutlineColor), 2F), r2, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(200 * tmp), this.OutlineColor), 1F), r2, 10);
             }
             using (StringFormat f = new StringFormat(StringFormatFlags.NoWrap))
             {

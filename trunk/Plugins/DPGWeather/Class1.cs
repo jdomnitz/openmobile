@@ -109,7 +109,7 @@ namespace DPGWeather
                 {
                     case "current_conditions":
                         RegionInfo regionInfo = new RegionInfo(CultureInfo.CurrentCulture.LCID);
-                        ret.temp = float.Parse(n.ChildNodes[2].Attributes[0].Value);
+                        ret.feelsLike = ret.temp = float.Parse(n.ChildNodes[2].Attributes[0].Value);
                         ret.humidity = int.Parse(n.ChildNodes[3].Attributes[0].Value.Replace("Humidity: ", "").Replace("%", ""));
                         parseWind(n.ChildNodes[5].Attributes[0].Value.Replace("Wind: ",""),ref ret);
                         ret.conditions = parseCondition(n.ChildNodes[0].Attributes[0].Value);

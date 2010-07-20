@@ -26,8 +26,9 @@ using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
 using System;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using OpenMobile;
+using OpenMobile.Input;
 
 namespace OpenMobile.Controls
 {
@@ -520,7 +521,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Drawing.Graphics g, renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             lock (g)
             {
@@ -531,7 +532,7 @@ namespace OpenMobile.Controls
                     tmp = e.globalTransitionIn;
                 else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                     tmp = e.globalTransitionOut;
-                Region r = g.Clip; //Save the drawing size
+                Rectangle r = g.Clip; //Save the drawing size
                 g.SetClip(this.toRegion()); //But only draw out control
                 if (background != Color.Transparent)
                     g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * background.A), background)), new Rectangle(Left + 1, Top + 1, Width - 2, Height - 2));
@@ -570,17 +571,15 @@ namespace OpenMobile.Controls
                 {
                     if (width == 0) //Failsafe -> 1/100 chance that the width changes during rendering
                         return;
-                    RectangleF rect = new RectangleF(new PointF(Left, Top + (moved % listHeight) + ((i - listStart) * listHeight)), new SizeF(this.Width, listHeight));
+                    Rectangle rect = new Rectangle(new Point(Left, Top + (moved % listHeight) + ((i - listStart) * listHeight)), new Size(this.Width, listHeight));
                     switch (style)
                     {
                         case eListStyle.RoundedImageList:
                         case eListStyle.RoundedTextList:
-                            g.SmoothingMode = SmoothingMode.AntiAlias;
                             if (selectedIndex == i)
-                                Renderer.FillRoundRectangle(g, new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % listHeight)), new Size(this.Width, listHeight)), Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), LinearGradientMode.Vertical), rect, 10F);
+                                g.FillRoundRectangle(new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % listHeight)), new Size(this.Width, listHeight)), Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), LinearGradientMode.Vertical), rect, 10);
                             else
-                                Renderer.FillRoundRectangle(g, new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % listHeight)), new Size(this.Width, listHeight)), Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), LinearGradientMode.Vertical), rect, 10F);
-                            g.SmoothingMode = SmoothingMode.Default;
+                                g.FillRoundRectangle(new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % listHeight)), new Size(this.Width, listHeight)), Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), LinearGradientMode.Vertical), rect, 10);
                             break;
                         case eListStyle.TextList:
                         case eListStyle.ImageList:
@@ -597,20 +596,16 @@ namespace OpenMobile.Controls
                         case eListStyle.DroidStyleImage:
                         case eListStyle.DroidStyleText:
                             imgSze = 6;
-                            g.SmoothingMode = SmoothingMode.AntiAlias;
                             if (selectedIndex == i)
                                 g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * selectedItemColor1.A * 0.6), selectedItemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
                             else
                                 g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 2));
-                            g.SmoothingMode = SmoothingMode.Default;
                             break;
                         case eListStyle.MultiList:
-                            g.SmoothingMode = SmoothingMode.AntiAlias;
                             if (selectedIndex == i)
                                 g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 1));
                             else
                                 g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new RectangleF(rect.Left, rect.Top, rect.Width, rect.Height - 1));
-                            g.SmoothingMode = SmoothingMode.Default;
                             break;
                     }
                     if ((i < items.Count) && (i >= 0))
@@ -647,7 +642,6 @@ namespace OpenMobile.Controls
                             Renderer.drawTransparentImage(g, items[i].image, (int)rect.Left + 5, (int)rect.Top + 2, (int)rect.Height-5, (int)rect.Height - imgSze, tmp);
                     }
                 }
-                g.Flush(FlushIntention.Sync);
                 g.Clip = r; //Reset the clip size for the rest of the controls
             }
         }
@@ -728,19 +722,19 @@ namespace OpenMobile.Controls
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
         /// <returns></returns>
-        public virtual bool KeyDown(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
+        public virtual bool KeyDown(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
         {
-            if (e.KeyCode == Keys.PageUp)
+            if (e.Key == Key.PageUp)
             {
                 Select(SelectedIndex - 1, true, screen);
                 return true;
             }
-            if (e.KeyCode == Keys.PageDown)
+            if (e.Key == Key.PageDown)
             {
                 Select(SelectedIndex + 1, true, screen);
                 return true;
             }
-            if ((e.KeyCode == Keys.Left) || (e.KeyCode == Keys.Right) || (e.KeyCode == Keys.Up) || (e.KeyCode == Keys.Down))
+            if ((e.Key == Key.Left) || (e.Key == Key.Right) || (e.Key == Key.Up) || (e.Key == Key.Down))
             {
                 Select(-1, false, screen);
             }
@@ -754,7 +748,7 @@ namespace OpenMobile.Controls
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
         /// <returns></returns>
-        public virtual bool KeyUp(int screen, System.Windows.Forms.KeyEventArgs e, float WidthScale, float HeightScale)
+        public virtual bool KeyUp(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
         {
             return false;
         }
@@ -789,7 +783,7 @@ namespace OpenMobile.Controls
 
         #region IMouse Members
 
-        public virtual void MouseMove(int screen, MouseEventArgs e, float WidthScale, float HeightScale)
+        public virtual void MouseMove(int screen, MouseMoveEventArgs e, float WidthScale, float HeightScale)
         {
             if (listHeight > 0) //<-Just in case
                 Highlight((((int)(e.Y / HeightScale) - top - (moved % listHeight)) / listHeight) + listStart);
@@ -869,7 +863,7 @@ namespace OpenMobile.Controls
                 new Thread(delegate() { HighlightedIndexChanged(this, this.containingScreen()); }).Start();
         }
         private int lastSelected = -1;
-        public virtual void MouseDown(int screen, MouseEventArgs e, float WidthScale, float HeightScale)
+        public virtual void MouseDown(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale)
         {
             lastSelected = selectedIndex;
             Select(highlightedIndex, false, screen);
@@ -879,7 +873,7 @@ namespace OpenMobile.Controls
                 mode = eModeType.Scrolling;
         }
 
-        public virtual void MouseUp(int screen, MouseEventArgs e, float WidthScale, float HeightScale)
+        public virtual void MouseUp(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale)
         {
             //
         }

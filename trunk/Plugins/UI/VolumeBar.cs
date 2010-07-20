@@ -50,19 +50,20 @@ namespace OpenMobile.Controls
             this.vertical = true;
         }
 
-        public void MouseMove(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale)
+        public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale)
         {
-            if (e.Button == MouseButtons.Left)
-                MouseDown(screen, e, WidthScale, HeightScale);
+            //TODO - Implement when button works
+            //if (e.Button == MouseButtons.Left)
+            //    MouseDown(screen, e, WidthScale, HeightScale);
         }
 
-        public void MouseDown(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale)
+        public void MouseDown(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale)
         {
             this.Value = (int)(((top+height-(e.Y / HeightScale)) / height)*(maximum-minimum))+minimum;
             raiseSliderMoved(screen);
         }
 
-        public void MouseUp(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale)
+        public void MouseUp(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale)
         {
             //
         }

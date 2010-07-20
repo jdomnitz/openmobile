@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using System.Drawing;
 using System.Timers;
 using System.Threading;

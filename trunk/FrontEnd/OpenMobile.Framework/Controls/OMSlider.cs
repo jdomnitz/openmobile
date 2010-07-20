@@ -22,7 +22,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Threading;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using OpenMobile;
 
 namespace OpenMobile.Controls
@@ -335,7 +335,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Drawing.Graphics g,renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             try
             {

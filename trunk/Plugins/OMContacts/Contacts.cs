@@ -124,6 +124,8 @@ namespace OMContacts
 
         public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)
         {
+            if (manager == null)
+                return null;
             if (name == "contact")
                 return manager[screen, "contact"];
             refreshList(screen);

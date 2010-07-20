@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-namespace OpenMobile.Drawing
+namespace OpenMobile.Graphics
 {
    
     public class OImage:IDisposable

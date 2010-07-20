@@ -21,16 +21,17 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using OpenMobile.Controls;
 using OpenMobile.Plugin;
+using OpenMobile.Input;
 
 namespace OpenMobile
 {
-    public partial class RenderingWindow : Form
+    public partial class RenderingWindow : GameWindow
     {
         private OMPanel p = new OMPanel();
         OMControl varHighlighted;
@@ -91,38 +92,44 @@ namespace OpenMobile
 
         public IntPtr getHandle()
         {
-            return this.Handle;
+            //TODO - Implement this in openTK
+            return IntPtr.Zero;//this.Handle;
         }
+        Graphics.Graphics g= new OpenMobile.Graphics.Graphics();
         public RenderingWindow(int s)
         {
             if (this.fullscreen)
                 Cursor.Position = this.Location;
             this.screen = s;
-            this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            this.SetStyle(ControlStyles.UserPaint, true);
             //Code by Borte
-            this.StartPosition = FormStartPosition.Manual;
+            //TODO V Implement that
+            //this.StartPosition = FormStartPosition.Manual;
             if (s <= System.Windows.Forms.Screen.AllScreens.Length - 1)
                 this.Bounds = System.Windows.Forms.Screen.AllScreens[s].Bounds;
             //**
             InitializeComponent();
-            this.Text = "Open Mobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
+            this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
             hide += new voiddel(hideCursor);
             identify += new voiddel(paintIdentity);
             redraw += new voiddel(invokePaint);
         }
         private void paintIdentity()
         {
-            Drawing.Graphics g = Drawing.Graphics.FromHwnd(this.Handle);
-            Renderer.renderText(g, 0, 0, this.Width, this.Height, (screen+1).ToString(), new Font(FontFamily.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, 1F,Color.White,Color.Black);
-            Thread.Sleep(1000);
-            Refresh();
+            //TODO - FIX ME
+           // OpenMobile.Graphics.Graphics g = OpenMobile.Graphics.Graphics.FromHwnd(this.Handle);
+            //Renderer.renderText(g, 0, 0, this.Width, this.Height, (screen+1).ToString(), new Font(FontFamily.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, 1F,Color.White,Color.Black);
+            //Thread.Sleep(1000);
+            //Refresh();
         }
         public void invokePaint()
         {
             Invalidate();
-            RenderingWindow_MouseMove(null,new MouseEventArgs(MouseButtons.None,0,Cursor.Position.X,Cursor.Position.Y,0));
+            RenderingWindow_MouseMove(null,new OpenMobile.Input.MouseMoveEventArgs(Cursor.Position.X,Cursor.Position.Y,0,0));
+        }
+
+        private void Invalidate()
+        {
+            //TODO
         }
         //Code Added by Borte
         public new int Width
@@ -162,9 +169,9 @@ namespace OpenMobile
         
         public void hideCursor()
         {
-            if (this.InvokeRequired == true)
-                this.Invoke(hide);
-            else
+            //if (this.InvokeRequired == true)
+            //    this.Invoke(hide);
+            //else
                 if (hidden == false)
                 {
                     Cursor.Hide();
@@ -210,6 +217,11 @@ namespace OpenMobile
                 region.Size = new Size((int)(region.Width * widthScale), (int)(region.Height * heightScale));
                 Invalidate(region);
             }
+        }
+
+        private void Invalidate(Rectangle region)
+        {
+            //TODO
         }
         public void transitionOutEverything()
         {
@@ -279,62 +291,65 @@ namespace OpenMobile
             if (lastClick != null)
                 lastClick.Mode = eModeType.Normal;
             lastClick = null;
-            RenderingWindow_MouseMove(null,new MouseEventArgs(MouseButtons.None,0,Cursor.Position.X,Cursor.Position.Y,0));
+            RenderingWindow_MouseMove(null,new OpenMobile.Input.MouseMoveEventArgs(Cursor.Position.X,Cursor.Position.Y,0,0));
             Invalidate();
         }
         #endregion
 
         #region Overrides
-        protected override void OnPaint(PaintEventArgs e)
+
+        protected override void OnRenderFrame(FrameEventArgs e)
+        {
+            g.Clear(Color.Blue);
+            OnPaint();
+            g.Finish();
+            SwapBuffers();
+            base.OnRenderFrame(e);
+        }
+        protected override void OnResize(EventArgs e)
+        {
+            g.Resize(Width, Height);
+            base.OnResize(e);
+        }
+        protected void OnPaint()
         {
             if (p.controlCount == 0)
                 return;
             lock (painting)
             {
-                Drawing.Graphics g = Drawing.Graphics.FromGraphics( e.Graphics);
-                g.ScaleTransform(widthScale, heightScale);
-                ImageAnimator.UpdateFrames();
                 //Render everything under the UI
                 for (int i = Core.theHost.RenderFirst; i < p.controlCount; i++)
-                    if (inBounds(p[i].toRegion(), e.ClipRectangle))
-                    {
-                        if (p[i].Mode == eModeType.transitioningIn)
-                            modifyIn(g);
-                        else if ((p[i].Mode == eModeType.transitioningOut) || (p[i].Mode == eModeType.ClickedAndTransitioningOut))
-                            modifyOut(g);
-                        else
-                            modifyNeutral(g);
+                    if (inBounds(p[i].toRegion(), g.Clip))
                         if (p[i].Visible)
                             p[i].Render(g, rParam);
-                    }
-                modifyNeutral(g);
                 //Render the UI
                 for (int i = 0; i < Core.theHost.RenderFirst; i++)
-                    if (inBounds(p[i].toRegion(), e.ClipRectangle))
+                    if (inBounds(p[i].toRegion(), g.Clip))
                         if (p[i].Visible)
                             p[i].Render(g, rParam);
-                g = null;
             }
         }
 
-        private void modifyNeutral(Drawing.Graphics g)
+        private void modifyNeutral(OpenMobile.Graphics.Graphics g)
         {
             g.ResetTransform();
             g.ScaleTransform(widthScale, heightScale);
         }
-        private void modifyOut(Drawing.Graphics g)
+        private void modifyOut(OpenMobile.Graphics.Graphics g)
         {
+            //TODO
             //out=-
             g.ResetTransform();
             g.ScaleTransform(widthScale, heightScale);
-            g.TranslateTransform(ofsetOut.X - g.Transform.OffsetX, ofsetOut.Y - g.Transform.OffsetY);
+            //g.TranslateTransform(ofsetOut.X - g.Transform.OffsetX, ofsetOut.Y - g.Transform.OffsetY);
         }
-        private void modifyIn(Drawing.Graphics g)
+        private void modifyIn(OpenMobile.Graphics.Graphics g)
         {
+            //TODO
             //in=+
             g.ResetTransform();
             g.ScaleTransform(widthScale, heightScale);
-            g.TranslateTransform(ofsetIn.X - g.Transform.OffsetX, ofsetIn.Y - g.Transform.OffsetY);
+            //g.TranslateTransform(ofsetIn.X - g.Transform.OffsetX, ofsetIn.Y - g.Transform.OffsetY);
         }
         private bool inBounds(Rectangle control, Rectangle bounds)
         {
@@ -344,7 +359,7 @@ namespace OpenMobile
               (bounds.Y < (control.Y + control.Height) * heightScale));
         }
 
-        protected override void OnPaintBackground(PaintEventArgs pevent)
+        protected void OnPaintBackground(PaintEventArgs pevent)
         {
             //ToDo-Background transitions
             int i;
@@ -401,7 +416,7 @@ namespace OpenMobile
                         {
                             lastClick.Mode = eModeType.Normal;
                             //Recheck where the mouse is at
-                            RenderingWindow_MouseMove(this, new MouseEventArgs(MouseButtons.None, 0, Cursor.Position.X, Cursor.Position.Y, 0));
+                            RenderingWindow_MouseMove(this, new OpenMobile.Input.MouseMoveEventArgs(Cursor.Position.X, Cursor.Position.Y, 0,0));
                         }
                         Invalidate();
                     }
@@ -448,22 +463,23 @@ namespace OpenMobile
                 Application.Exit();
                 return;
             }
-            if ((this.Opacity > 0.1)&&(Core.theHost.GraphicsLevel==eGraphicsLevel.Standard))
-                this.Opacity -= 0.04;
-            else
+            //TODO - Re-Implement
+            //if ((this.Opacity > 0.1)&&(Core.theHost.GraphicsLevel==eGraphicsLevel.Standard))
+            //    this.Opacity -= 0.04;
+            //else
                 Application.Exit();
         }
         #endregion
         
         #region MouseHandlers
-        private void RenderingWindow_MouseMove(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
         {
             bool done = false; //We found something that was selected
             if (p.controlCount == 0)
                 return;
             if (rParam.currentMode == eModeType.Scrolling)
             {
-                if (e.Button == MouseButtons.Left)
+                if (this.Mouse[MouseButton.Left])
                 {
                     if (highlighted != null)
                     {
@@ -484,7 +500,7 @@ namespace OpenMobile
             }
             else
             {
-                if ((e.Button == MouseButtons.Left) & (!ThrowStarted))
+                if ((this.Mouse[MouseButton.Left]) & (!ThrowStarted))
                 {
                     if (currentGesture == null)
                     {
@@ -493,7 +509,6 @@ namespace OpenMobile
                         currentGesture = new List<Point>();
                         rParam.currentMode = eModeType.gesturing;
                     }
-                    Drawing.Graphics g = Drawing.Graphics.FromHwnd(this.Handle);
                     g.FillEllipse(Brushes.Red, new Rectangle(e.X - 10, e.Y - 10, (int)(20*widthScale), (int)(20*heightScale)));
                     currentGesture.Add(e.Location);
                     if (lastClick != null)
@@ -540,7 +555,7 @@ namespace OpenMobile
                 }
             }
         }
-        private void checkControl(int i, ref bool done, ref MouseEventArgs e)
+        private void checkControl(int i, ref bool done, ref OpenMobile.Input.MouseMoveEventArgs e)
         {
             //Note potential drawing error with updated rectangle
             OMControl b = (OMControl)p.getControl(i);
@@ -573,9 +588,9 @@ namespace OpenMobile
                 }
             }
         }
-        private void RenderingWindow_MouseClick(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseClick(object sender, OpenMobile.Input.MouseEventArgs e)
         {
-            if ((e.Button == MouseButtons.Left) && (highlighted != null))
+            if ((this.Mouse[MouseButton.Left]) && (highlighted != null))
             {
                 if (rParam.currentMode == eModeType.Highlighted)
                 {
@@ -611,7 +626,7 @@ namespace OpenMobile
             }
         }
 
-        private void RenderingWindow_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseDoubleClick(object sender, OpenMobile.Input.MouseEventArgs e)
         {
             tmrLongClick.Enabled = false;
             if (highlighted != null)
@@ -662,7 +677,7 @@ namespace OpenMobile
             lastClick = null;
         }
 
-        private void RenderingWindow_MouseDown(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseDown(object sender, OpenMobile.Input.MouseEventArgs e)
         {
             if (highlighted != null)
             {
@@ -690,12 +705,12 @@ namespace OpenMobile
                 if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                 {
                     ThrowStarted = true;
-                    ThrowRelativeDistance = e.Location;
+                    ThrowRelativeDistance = new Point(e.X,e.Y);
                 }
             } ThrowStart = e.Location; //If we're not throwing something we're gesturing
         }
 
-        private void RenderingWindow_MouseUp(object sender, MouseEventArgs e)
+        private void RenderingWindow_MouseUp(object sender, OpenMobile.Input.MouseEventArgs e)
         {
             tmrLongClick.Enabled = false;
             if ((lastClick != null) && (lastClick.DownImage.image != null))
@@ -725,7 +740,7 @@ namespace OpenMobile
                 Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
                 currentGesture = null;
                 rParam.currentMode = eModeType.Highlighted;
-                RenderingWindow_MouseMove(sender, new MouseEventArgs(MouseButtons.None, 0, e.X, e.Y, 0));
+                RenderingWindow_MouseMove(sender, new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0,0));
                 Invalidate();
             }
             ThrowStart.X = -1;
@@ -734,6 +749,11 @@ namespace OpenMobile
         }
         #endregion
         #region OtherUIEvents
+        protected override void OnLoad(EventArgs e)
+        {
+            g.Initialize();
+            base.OnLoad(e);
+        }
         private void RenderingWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             if ((e.CloseReason == CloseReason.UserClosing)||(e.CloseReason==CloseReason.WindowsShutDown))
@@ -758,19 +778,19 @@ namespace OpenMobile
             }
         }
 
-        public void RenderingWindow_KeyUp(object sender, KeyEventArgs e)
+        public void RenderingWindow_KeyUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Escape)
+            if (e.Key == Key.Escape)
             {
-                if (this.WindowState == FormWindowState.Maximized)
+                if (this.WindowState == WindowState.Fullscreen)
                 {   //Escape full screen
                     fullscreen = false;
-                    this.WindowState = FormWindowState.Normal;
+                    this.WindowState = WindowState.Normal;
                 }
                 else
                     tmrClosing.Enabled = true;
             }
-            else if (e.KeyCode == Keys.Return)
+            else if (e.Key == Key.Enter) //TODO - Verify correct key
             {
                 tmrLongClick.Enabled = false;
 
@@ -792,9 +812,9 @@ namespace OpenMobile
 
         public void closeMe()
         {
-            if (this.InvokeRequired == true)
-                this.Invoke(new MethodInvoker(delegate() { closeMe(); }));
-            else
+            //if (this.InvokeRequired == true)
+            //    this.Invoke(new MethodInvoker(delegate() { closeMe(); }));
+            //else
                 this.tmrClosing.Enabled = true;
         }
 
@@ -811,18 +831,18 @@ namespace OpenMobile
         {
             heightScale = (this.ClientRectangle.Height / 600F);
             widthScale = (this.ClientRectangle.Width / 1000F);
-            if ((this.WindowState == FormWindowState.Maximized) && (fullscreen == false))
+            if ((this.WindowState == WindowState.Fullscreen) && (fullscreen == false))
             {
                 fullscreen = true;
-                this.WindowState = FormWindowState.Normal;
-                this.FormBorderStyle = FormBorderStyle.None;
-                this.WindowState = FormWindowState.Maximized;
+                this.WindowState = WindowState.Normal;
+                this.WindowState = WindowState.Fullscreen;
+                this.WindowBorder = WindowBorder.Hidden;
                 fullscreen = false;
                 Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
             }
-            else if ((fullscreen == false)&&(FormBorderStyle!=FormBorderStyle.Sizable))
+            else if ((fullscreen == false)&&(WindowBorder!=WindowBorder.Resizable))
             {
-                this.FormBorderStyle = FormBorderStyle.Sizable;
+                this.WindowBorder = WindowBorder.Resizable;
                 fullscreen = false;
                 Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
             }
@@ -902,11 +922,11 @@ namespace OpenMobile
             }
             Invalidate();
         }
-        public void RenderingWindow_KeyDown(object sender, KeyEventArgs e)
+        public void RenderingWindow_KeyDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             if (highlighted == null)
             {
-                if ((e.KeyCode == Keys.Left) || (e.KeyCode == Keys.Right) || (e.KeyCode == Keys.Up) || (e.KeyCode == Keys.Down))
+                if ((e.Key == Key.Left) || (e.Key == Key.Right) || (e.Key == Key.Up) || (e.Key == Key.Down))
                 {
                     int top = 601;
                     int left = 1001;
@@ -914,7 +934,7 @@ namespace OpenMobile
                     for (int i = 0; i < p.controlCount; i++)
                         //Modified by Borte
                         if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                            if ((p[i].Left < left) && (p[i].Top < top) && (inBounds(p[i].toRegion(), this.DisplayRectangle) == true))
+                            if ((p[i].Left < left) && (p[i].Top < top) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
                             {
                                 b = p[i];
                                 top = b.Top;
@@ -934,12 +954,12 @@ namespace OpenMobile
                         return;
                 int best = 1000;
                 OMControl b = null;
-                switch (e.KeyCode)
+                switch (e.Key)
                 {
-                    case Keys.Left:
+                    case Key.Left:
                         for (int i = 0; i < p.controlCount; i++)
                             if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                                if ((p[i].Left + p[i].Width <= highlighted.Left) && (inBounds(p[i].toRegion(), this.DisplayRectangle) == true))
+                                if ((p[i].Left + p[i].Width <= highlighted.Left) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
                                         if (notCovered(p[i],'l') == true)
@@ -956,10 +976,10 @@ namespace OpenMobile
                         highlighted = b;
                         UpdateThisControl(highlighted.toRegion());
                         break;
-                    case Keys.Right:
+                    case Key.Right:
                         for (int i = 0; i < p.controlCount; i++)
                             if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                                if ((p[i].Left >= highlighted.Left + highlighted.Width) && (inBounds(p[i].toRegion(), this.DisplayRectangle) == true))
+                                if ((p[i].Left >= highlighted.Left + highlighted.Width) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
                                         if (notCovered(p[i],'r') == true)
@@ -976,10 +996,10 @@ namespace OpenMobile
                         highlighted = b;
                         UpdateThisControl(highlighted.toRegion());
                         break;
-                    case Keys.Up:
+                    case Key.Up:
                         for (int i = 0; i < p.controlCount; i++)
                             if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                                if ((p[i].Top + p[i].Height <= highlighted.Top) && (inBounds(p[i].toRegion(), this.DisplayRectangle) == true))
+                                if ((p[i].Top + p[i].Height <= highlighted.Top) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
                                         if (notCovered(p[i],'u') == true)
@@ -996,10 +1016,10 @@ namespace OpenMobile
                         highlighted = b;
                         UpdateThisControl(highlighted.toRegion());
                         break;
-                    case Keys.Down:
+                    case Key.Down:
                         for (int i = 0; i < p.controlCount; i++)
                             if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                                if ((p[i].Top >= highlighted.Top + highlighted.Height) && (inBounds(p[i].toRegion(), this.DisplayRectangle) == true))
+                                if ((p[i].Top >= highlighted.Top + highlighted.Height) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
                                         if (notCovered(p[i],'d') == true)
@@ -1016,7 +1036,7 @@ namespace OpenMobile
                         highlighted = b;
                         UpdateThisControl(highlighted.toRegion());
                         break;
-                    case Keys.Return:
+                    case Key.Enter://TODO - Verify correct key
                         if (typeof(OMButton).IsInstanceOfType(highlighted))
                         {
                             lastClick = (OMButton)highlighted;

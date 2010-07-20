@@ -69,7 +69,7 @@ namespace OpenMobile.Framework.Controls
         /// <param name="e"></param>
         protected override void OnPaint(PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
+            System.Drawing.Graphics g = e.Graphics;
             g.DrawRectangle(Pens.Black, new Rectangle(this.Location, new Size(this.Width - 10, this.Height)));
             for (int i = 0; i <= this.Height; i++)
             {

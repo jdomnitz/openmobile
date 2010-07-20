@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Data;
 using Mono.Data.Sqlite;
 using System.Drawing;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using System.IO;
 using System.Text;
 using System.Threading;

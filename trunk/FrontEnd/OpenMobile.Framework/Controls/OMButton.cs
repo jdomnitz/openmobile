@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using OpenMobile;
 
 namespace OpenMobile.Controls
@@ -310,7 +310,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Drawing.Graphics g, renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             if (Width == 0)
                 return;
@@ -328,7 +328,7 @@ namespace OpenMobile.Controls
                 {
                     cm.Matrix33 *= ((float)transparency / 100);
                     ia.SetColorMatrix(cm);
-                    g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, focusImage.image.Width(), focusImage.image.Height(), GraphicsUnit.Pixel, ia);
+                    g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, ia);
                     if (this.Text != null)
                         Renderer.renderText(g, this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, tmp, 1, this.Color, this.OutlineColor);
                     cm = null;
@@ -340,7 +340,7 @@ namespace OpenMobile.Controls
                     {
                         cm.Matrix33 *= e.transparency * ((float)transparency / 100);
                         ia.SetColorMatrix(cm);
-                        g.DrawImage(focusImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, focusImage.image.Width(), focusImage.image.Height(), GraphicsUnit.Pixel, ia);
+                        g.DrawImage(focusImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, ia);
                         Renderer.renderText(g, this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5), this.Text, this.Font, this.Format, this.TextAlignment, e.transparency, this.Color, this.OutlineColor);
                         cm = null;
                         return;
@@ -349,7 +349,7 @@ namespace OpenMobile.Controls
                     {
                         cm.Matrix33 *= e.transparency * ((float)transparency / 100);
                         ia.SetColorMatrix(cm);
-                        g.DrawImage(downImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, downImage.image.Width(), downImage.image.Height(), GraphicsUnit.Pixel, ia);
+                        g.DrawImage(downImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, downImage.image.Width, downImage.image.Height, GraphicsUnit.Pixel, ia);
                         Renderer.renderText(g, this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5), this.Text, this.Font, this.Format, this.TextAlignment, e.transparency, this.Color, this.OutlineColor);
                         cm = null;
                         return;
@@ -362,14 +362,14 @@ namespace OpenMobile.Controls
                     if (image == imageItem.MISSING)
                     {
                         using (Pen p = new Pen(Color.White, 4F))
-                            Renderer.DrawRoundRectangle(g, p, new RectangleF(left + 2, top + 2, width - 4, height - 4), 8F);
+                            g.DrawRoundRectangle(p, new Rectangle(left + 2, top + 2, width - 4, height - 4), 8);
                     }
                 }
                 else
                 {
                     lock (image.image)
                     {
-                        g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width(), image.image.Height(), GraphicsUnit.Pixel, ia);
+                        g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, ia);
                     }
                 }
                 

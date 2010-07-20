@@ -31,16 +31,16 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Mouse moved over the control
         /// </summary>
-        void MouseMove(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale);
+        void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale);
 
         /// <summary>
         /// MouseDown event for this control
         /// </summary>
-        void MouseDown(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale);
+        void MouseDown(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale);
 
         /// <summary>
         /// MouseUp event for this control
         /// </summary>
-        void MouseUp(int screen, System.Windows.Forms.MouseEventArgs e, float WidthScale, float HeightScale);
+        void MouseUp(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale);
     }
 }

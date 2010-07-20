@@ -22,7 +22,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using OpenMobile;
 
 namespace OpenMobile.Controls
@@ -234,7 +234,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Drawing.Graphics g, renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             if (image.image == null)
             {
@@ -266,10 +266,10 @@ namespace OpenMobile.Controls
                             g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, GraphicsUnit.Pixel, at);
                             break;
                         case DrawModes.CropLeft:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width() - width, image.image.Height() - height, width, height, GraphicsUnit.Pixel, at);
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, GraphicsUnit.Pixel, at);
                             break;
                         case DrawModes.Scale:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, image.image.Width(), image.image.Height(), GraphicsUnit.Pixel, at);
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, at);
                             break;
                     }
                 }

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Timers;
 using System.Threading;
-using OpenMobile.Drawing;
+using OpenMobile.Graphics;
 using OpenMobile;
 
 namespace OpenMobile.Controls
@@ -335,14 +335,14 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void  Render(Drawing.Graphics g,renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             if (tempTransition == eAnimation.None)
                 draw(g, e, this.currentAnimation);
             else
                 draw(g, e, this.tempTransition);
         }
-        private void draw(Drawing.Graphics g, renderingParams e, eAnimation animation)
+        private void draw(Graphics.Graphics g, renderingParams e, eAnimation animation)
         {
             float tmp = 1;
             t.Enabled = this.hooked();
@@ -411,7 +411,7 @@ namespace OpenMobile.Controls
             }
         }
 
-        private int MeasureDisplayStringWidth(Drawing.Graphics graphics, string text,
+        private int MeasureDisplayStringWidth(Graphics.Graphics graphics, string text,
                                             Font font)
         {
             if (text == "")
@@ -429,8 +429,8 @@ namespace OpenMobile.Controls
             format.SetMeasurableCharacterRanges(ranges);
 
             regions = graphics.MeasureCharacterRanges(text, font, rect, format);
-            rect = regions[0].GetBounds(graphics.Raw());
-            
+            //rect = regions[0].GetBounds(graphics.Raw());
+            //TODO - Reimplement
             return (int)(rect.Right - (Font.Size / 4.5));
         }
     }

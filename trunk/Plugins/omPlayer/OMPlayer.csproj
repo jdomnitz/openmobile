@@ -42,6 +42,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\</OutputPath>
@@ -94,10 +95,13 @@
   <ItemGroup>
     <Reference Include="DirectShowLib-2005, Version=2.0.0.0, Culture=neutral, PublicKeyToken=67e7b740cdfc2d3f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\OMPlayer\DirectShowLib-2005.dll</HintPath>
+      <HintPath>..\..\FrontEnd\OpenMobile\bin\Release\Plugins\DirectShowLib-2005.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -136,13 +140,13 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Sub-Projects\HardwareAcceleration\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
+      <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
+      <Name>OpenMobile.Graphics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">
       <Project>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</Project>
       <Name>OpenMobile.Framework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OpenMobile.Drawing\OpenMobile.Drawing.csproj">
-      <Project>{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}</Project>
-      <Name>OpenMobile.Drawing</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

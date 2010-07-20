@@ -42,13 +42,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Sub-Projects\HardwareAcceleration\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
+      <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
+      <Name>OpenMobile.Graphics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">
       <Project>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</Project>
       <Name>OpenMobile.Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OpenMobile.Drawing\OpenMobile.Drawing.csproj">
-      <Project>{CBB7EBBA-CEBE-4CBD-87B3-DD78F05C02BA}</Project>
-      <Name>OpenMobile.Drawing</Name>
+    <ProjectReference Include="..\..\FrontEnd\OpenMobile\OpenMobile.csproj">
+      <Project>{2B8C8EB5-EBA3-4FAA-8AA7-7421F8FDDAC8}</Project>
+      <Name>OpenMobile</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

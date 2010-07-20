@@ -51,11 +51,11 @@ namespace OpenMobile.Controls
     public class OMBasicShape:OMControl
     {
         // Start of code added by Borte
-        protected float cornerRadius = 10f;
+        protected int cornerRadius = 10;
         /// <summary>
         /// Sets the corner radius of a rounded rectangle (Added by Borte)
         /// </summary>
-        public float CornerRadius
+        public int CornerRadius
         {
             get { return cornerRadius; }
             set { cornerRadius = value; }
@@ -178,7 +178,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g"></param>
         /// <param name="e"></param>
-        public override void Render(Drawing.Graphics g, renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             // Start of code added by Borte
             // Basic shape didn't respect the transition values while rendering
@@ -214,9 +214,9 @@ namespace OpenMobile.Controls
                         g.DrawEllipse(BorderPen, toRegion());
                     break;
                 case shapes.RoundedRectangle:
-                    Renderer.FillRoundRectangle(g, Fill, new RectangleF(this.left, this.top, this.width, this.height), cornerRadius);
+                    g.FillRoundRectangle(Fill, new Rectangle(this.left, this.top, this.width, this.height), cornerRadius);
                     if (borderSize > 0)
-                        Renderer.DrawRoundRectangle(g, BorderPen, new RectangleF(this.left, this.top, this.width, this.height), cornerRadius);
+                        g.DrawRoundRectangle(BorderPen, new Rectangle(this.left, this.top, this.width, this.height), cornerRadius);
                     break;
             }
         }

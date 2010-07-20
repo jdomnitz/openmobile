@@ -76,7 +76,7 @@ namespace OpenMobile.Controls
 
         private void listBox1_DrawItem(object sender, DrawItemEventArgs e)
         {
-            Graphics g = e.Graphics;
+            System.Drawing.Graphics g = e.Graphics;
             Rectangle r = e.Bounds;
             if (listBox1.SelectedIndex==e.Index)
             {
@@ -190,7 +190,7 @@ namespace OpenMobile.Controls
 
         private void tabPage3_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
+            System.Drawing.Graphics g = e.Graphics;
             g.FillRectangle(Brushes.Black, new Rectangle(5, 5, 78, 25));
             g.FillRectangle(Brushes.White, new Rectangle(83, 5, 78, 25));
             g.DrawString("Foreground Text",new Font(FontFamily.GenericSerif,14F),new SolidBrush(selectedColor),new PointF(5,5));
