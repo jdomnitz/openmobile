@@ -353,8 +353,7 @@ namespace OpenMobile
             string strEx = spewException(ex);
             Clipboard.SetText(strEx);
             ErrorReporting reporting=new ErrorReporting(strEx);
-            //TODO - FIX ME
-            //reporting.ShowDialog(RenderingWindows[0]);
+            reporting.ShowDialog(Form.FromHandle(RenderingWindows[0].getHandle()));
             if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>0) //Prevent Loops
                 theHost.execute(eFunction.restartProgram);
         }
@@ -417,7 +416,7 @@ namespace OpenMobile
             //for (int i = 1; i < theHost.ScreenCount; i++)
             //    RenderingWindows[i].Show();
             //Application.Run(RenderingWindows[0]);
-            RenderingWindows[0].Run();
+            RenderingWindows[0].Run(1);
             RenderingWindows[0] = null;
             for (int i = 0; i < pluginCollection.Count;i++ )
                 if (pluginCollection[i] != null)

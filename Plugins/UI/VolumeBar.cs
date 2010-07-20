@@ -21,6 +21,7 @@
 using System;
 using OpenMobile.Controls;
 using System.Windows.Forms;
+using OpenMobile.Input;
 
 namespace OpenMobile.Controls
 {
@@ -52,18 +53,20 @@ namespace OpenMobile.Controls
 
         public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale)
         {
-            //TODO - Implement when button works
-            //if (e.Button == MouseButtons.Left)
-            //    MouseDown(screen, e, WidthScale, HeightScale);
+            if (e.Buttons == MouseButton.Left)
+            {
+                this.Value = (int)(((top + height - (e.Y / HeightScale)) / height) * (maximum - minimum)) + minimum;
+                raiseSliderMoved(screen);
+            }
         }
 
-        public void MouseDown(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale)
+        public void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             this.Value = (int)(((top+height-(e.Y / HeightScale)) / height)*(maximum-minimum))+minimum;
             raiseSliderMoved(screen);
         }
 
-        public void MouseUp(int screen, OpenMobile.Input.MouseEventArgs e, float WidthScale, float HeightScale)
+        public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             //
         }
