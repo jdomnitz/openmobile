@@ -232,6 +232,7 @@ namespace OpenMobile.Controls
                 if (currentAnimation == value)
                     return;
                 currentAnimation = value;
+                textTexture = null;
                 this.refreshMe(this.toRegion());
             }
         }
@@ -247,6 +248,7 @@ namespace OpenMobile.Controls
                 {
                     currentAnimation = animation;
                     base.text = value;
+                    textTexture = null;
                 }
             }
         }
@@ -283,6 +285,7 @@ namespace OpenMobile.Controls
                 if (effectFont == value)
                     return;
                 effectFont = value;
+                textTexture = null;
                 refreshMe(this.toRegion());
             }
         }
@@ -293,6 +296,7 @@ namespace OpenMobile.Controls
         public void animateNow(eAnimation effect)
         {
             singleAnimation = true;
+            textTexture = null;
             currentAnimation = effect;
             refreshMe(this.toRegion());
         }
@@ -365,15 +369,19 @@ namespace OpenMobile.Controls
                     Rectangle old = g.Clip;
                     if ((animation==eAnimation.None)||(animation == eAnimation.UnveilRight) || (animation == eAnimation.UnveilLeft))
                     {
-                        g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
+                        //TODO - Re-enable when clip is fixed
+                        //g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
                         StringFormat format = new StringFormat(StringFormatFlags.NoWrap);
-                        //TODO
-                        //Renderer.renderText(g, left, top, width, height, text, font, textFormat, textAlignment, 1F, 0, color, outlineColor);
+                        if (textTexture==null)
+                            textTexture=g.GenerateTextTexture(left, top, width, height, text, font, textFormat, textAlignment, color, outlineColor);
+                        g.DrawImage(textTexture, left, top, width, height, tmp);
                         if (tempTransition != eAnimation.None)
                         {
-                            g.SetClip(new Rectangle(left+(width-veilRight), top, veilRight, height));
-                            //TODO
-                            //Renderer.renderText(g, left, top, width, height, oldText, font, textFormat, textAlignment, 1F, 0, color, outlineColor);
+                            //TODO - Re-enable when clip is fixed
+                            //g.SetClip(new Rectangle(left+(width-veilRight), top, veilRight, height));
+                            if (textTexture==null)
+                                textTexture=g.GenerateTextTexture(left, top, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
+                            g.DrawImage(textTexture, left, top, width, height, tmp);
                         }
                     }
                     else
@@ -384,8 +392,9 @@ namespace OpenMobile.Controls
                             scrollPos = 0;
                         }
                         g.SetClip(new Rectangle(left,top,width,height));
-                        //TODO
-                        //Renderer.renderText(g,left - (int)(scrollPos * avgChar), top, (int)(text.Length * (avgChar+1)), height,text,font,textFormat,textAlignment,1F,0,color,outlineColor);
+                        if (textTexture==null)
+                            g.GenerateTextTexture(0,0, (int)(text.Length * (avgChar+1)), height,text,font,textFormat,textAlignment,color,outlineColor);
+                        g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, (int)(text.Length * (avgChar + 1)), height, tmp);
                     }
                     g.SetClip(old);
                     return;

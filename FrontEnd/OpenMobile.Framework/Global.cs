@@ -1555,6 +1555,8 @@ namespace OpenMobile
         /// <param name="id"></param>
         /// <param name="speed"></param>
         /// <param name="signal"></param>
+        /// <param name="passwordRequired"></param>
+        /// <param name="type"></param>
         public connectionInfo(string name, string id, int speed, uint signal,string type,ePassType passwordRequired)
         {
             NetworkName = name;

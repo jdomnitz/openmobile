@@ -142,7 +142,6 @@ namespace OpenMobile.Controls
                 catch (Exception) { };
             }
         }
-        private OImage textTexture;
         private bool IsAlphabetic(string strToCheck)
         {
             foreach (int chr in strToCheck)
