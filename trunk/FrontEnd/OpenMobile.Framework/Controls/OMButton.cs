@@ -130,12 +130,6 @@ namespace OpenMobile.Controls
                 if (image == value)
                     return;
                 image = value;
-                try
-                {
-                    if (ImageAnimator.CanAnimate(value.image.image) == true)
-                        ImageAnimator.Animate(value.image.image, new EventHandler(update));
-                }
-                catch (InvalidOperationException) { }
                 refreshMe(this.toRegion());
             }
         }

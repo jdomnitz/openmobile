@@ -28,6 +28,7 @@ using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using System.Windows.Forms;
+using OpenMobile.Input;
 
 namespace OpenMobile
 {   //All High Level plugins should implement the IHighLevel interface
@@ -130,8 +131,7 @@ namespace OpenMobile
                 if (numKeyboard[i].GetType() == typeof(OMButton))
                     ((OMButton)numKeyboard[i]).OnClick += handler;
             //Here we hook the keyboard in case characters are typed
-            //TODO - FIX ME
-            //theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
+            theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             //And then load the panel into the screen manager
             manager.loadPanel(regularKeyboard);
@@ -158,119 +158,117 @@ namespace OpenMobile
 
         //Add physical keyboard input to the textbox
         bool theHost_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
-        {
-            //TODO - Re-implement
-           
-            /* for (int i = 0; i < theHost.ScreenCount; i++)
+        {  
+            for (int i = 0; i < theHost.ScreenCount; i++)
             {
                 OMTextBox text = (OMTextBox)manager[i]["Text"];
                 if (text.hooked() == false)
                     continue;
                 if (type == eKeypressType.KeyUp)
                 {
-                    if ((arg.KeyValue > 64) && (arg.KeyValue < 91))
+                    if ((arg.KeyCode > 82) && (arg.KeyCode < 109))
                         if ((caps == true) || (arg.Shift == true))
-                            text.Text += arg.KeyCode.ToString();
+                            text.Text += arg.Key.ToString();
                         else
-                            text.Text += arg.KeyCode.ToString().ToLower();
-                    else if ((arg.KeyValue > 47) && (arg.KeyValue < 59))
+                            text.Text += arg.Key.ToString().ToLower();
+                    else if ((arg.KeyCode >= 109) && (arg.KeyCode < 120))
                     {
                         if (arg.Shift == true)
                         {
-                            switch ((Keys)Enum.Parse(typeof(Keys),arg.KeyValue.ToString()))
+                            switch ((Key)Enum.Parse(typeof(Key),arg.Key.ToString()))
                             {
-                                case Keys.D1:
+                                case Key.Number1:
                                     text.Text += "!";
                                     break;
-                                case Keys.D2:
+                                case Key.Number2:
                                     text.Text += "@";
                                     break;
-                                case Keys.D3:
+                                case Key.Number3:
                                     text.Text += "#";
                                     break;
-                                case Keys.D4:
+                                case Key.Number4:
                                     text.Text += "$";
                                     break;
-                                case Keys.D5:
+                                case Key.Number5:
                                     text.Text += "%";
                                     break;
-                                case Keys.D6:
+                                case Key.Number6:
                                     text.Text += "^";
                                     break;
-                                case Keys.D7:
+                                case Key.Number7:
                                     text.Text += "&";
                                     break;
-                                case Keys.D8:
+                                case Key.Number8:
                                     text.Text += "*";
                                     break;
-                                case Keys.D9:
+                                case Key.Number9:
                                     text.Text += "(";
                                     break;
-                                case Keys.D0:
+                                case Key.Number0:
                                     text.Text += ")";
                                     break;
                             }
                         }
                         else
-                            text.Text += arg.KeyCode.ToString().Replace("D", "");
+                            text.Text += arg.Key.ToString().Replace("Number", "");
                     }
                     else
                     {
-                        switch (arg.KeyValue)
+                        switch (arg.KeyCode)
                         {
-                            case 13:
+                            case 49:
                                 //Ignore enter-could be any button //theHost.execute(eFunction.userInputReady, i.ToString(), "OSK", text.Text);
                                 return false;//break;
-                            case 20:
+                            case 60:
                                 if (System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock))
                                     setUppercase(i);
                                 else
                                     setLowercase(i);
                                 return false;
-                            case 32:
+                            case 51:
                                 text.Text += " ";
                                 break;
-                            case 8:
+                            case 53:
                                 if (text.Text.Length > 0)
                                     text.Text = text.Text.Remove(text.Text.Length - 1);
                                 break;
-                            case 190:
+                            case 127:
                                 if(arg.Shift==true)
                                     text.Text += '>';
                                 else
                                     text.Text += '.';
                                 break;
-                            case 186:
+                            case 124:
                                 if (arg.Shift == true)
                                     text.Text += ':';
                                 else
                                     text.Text += ';';
                                 break;
-                            case 187:
+                            case 121:
                                 if (arg.Shift == true)
                                     text.Text += '+';
                                 else
                                     text.Text += '=';
                                 break;
-                            case 188:
+                            case 126:
                                 if (arg.Shift == true)
                                     text.Text += '<';
                                 else
                                     text.Text += ',';
                                 break;
-                            case 189:
+                            case 120:
                                 if (arg.Shift == true)
                                     text.Text += '_';
                                 else
                                     text.Text += '-';
                                 break;
-                            case 191:
+                            case 128:
                                 if (arg.Shift == true)
                                     text.Text += '?';
                                 else
                                     text.Text += '/';
                                 break;
-                            case 220:
+                            case 129:
                                 if (arg.Shift == false)
                                     text.Text += '\\';
                                 break;
@@ -280,7 +278,7 @@ namespace OpenMobile
                     }
                     return true;
                 }
-            }*/
+            }
             return false;
         }
 

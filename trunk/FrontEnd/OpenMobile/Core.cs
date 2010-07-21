@@ -413,11 +413,11 @@ namespace OpenMobile
                     }
                 }
             }
-            //for (int i = 1; i < theHost.ScreenCount; i++)
-            //    RenderingWindows[i].Show();
-            //Application.Run(RenderingWindows[0]);
+            //TODO
+            //for (int i = 1; RenderingWindows.Count; i++)
+            //    RenderingWindows[i].RunAsync(1);
             RenderingWindows[0].Run(1);
-            RenderingWindows[0] = null;
+            RenderingWindows[0].Dispose();
             for (int i = 0; i < pluginCollection.Count;i++ )
                 if (pluginCollection[i] != null)
                     pluginCollection[i].Dispose();

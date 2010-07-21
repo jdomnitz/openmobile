@@ -52,7 +52,6 @@ namespace OpenMobile.Controls
             catch (Exception) { };//If no one has hooked the click event
         }
         private string title;
-        protected OImage textTexture;
         public string Title
         {
             set
