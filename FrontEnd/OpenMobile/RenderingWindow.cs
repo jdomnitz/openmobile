@@ -187,12 +187,12 @@ namespace OpenMobile
             else
                 if (hidden == false)
                 {
-                    Mouse.HideCursor();
+                    Mouse.HideCursor(WindowInfo);
                     hidden = true;
                 }
                 else
                 {
-                    Mouse.ShowCursor();
+                    Mouse.ShowCursor(WindowInfo);
                     hidden = false;
                 }
         }
@@ -230,7 +230,7 @@ namespace OpenMobile
 
         private void Invalidate(Rectangle region)
         {
-            //TODO
+            //Unneeded - And causes problems with the double buffer
             //g.SetClip(region);
             //OnUpdateFrame(new FrameEventArgs());
             //g.ResetClip();
@@ -314,9 +314,17 @@ namespace OpenMobile
         {
             OnPaintBackground();
             OnPaint();
+            if ((currentGesture!=null)&&(currentGesture.Count > 0))
+                RenderGesture();
             g.Finish();
             SwapBuffers();
             base.OnRenderFrame(e);
+        }
+
+        private void RenderGesture()
+        {
+            foreach(Point p in currentGesture)
+                g.FillEllipse(Brushes.Red, new Rectangle((int)((p.X - 10)/widthScale),(int)((p.Y - 10)/heightScale), 20, 20));
         }
         protected override void OnResize(EventArgs e)
         {
@@ -401,7 +409,7 @@ namespace OpenMobile
                         break;
                     case backgroundStyle.Image:
                         if (backgroundQueue[i].BackgroundImage.image != null)
-                            g.DrawImage(backgroundQueue[i].BackgroundImage.image , new Rectangle(0, 0, 1000,600), 0, 0, backgroundQueue[i].BackgroundImage.image.Width, backgroundQueue[i].BackgroundImage.image.Height, GraphicsUnit.Pixel);
+                            g.DrawImage(backgroundQueue[i].BackgroundImage.image , new Rectangle(0, 0, 1000,600), 0, 0, backgroundQueue[i].BackgroundImage.image.Width, backgroundQueue[i].BackgroundImage.image.Height);
                         break;
                 }
             }
@@ -477,9 +485,9 @@ namespace OpenMobile
                 this.Exit();
                 return;
             }
-            while (this.Opacity > 0)
+            while (this.Opacity >= 0)
             {
-                if ((this.Opacity > 0.1) && (Core.theHost.GraphicsLevel == eGraphicsLevel.Standard))
+                if ((this.Opacity > 0) && (Core.theHost.GraphicsLevel == eGraphicsLevel.Standard))
                     this.Opacity -= 0.04F;
                 else
                 {
@@ -530,7 +538,6 @@ namespace OpenMobile
                         currentGesture = new List<Point>();
                         rParam.currentMode = eModeType.gesturing;
                     }
-                    g.FillEllipse(Brushes.Red, new Rectangle(e.X - 10, e.Y - 10, (int)(20*widthScale), (int)(20*heightScale)));
                     currentGesture.Add(e.Location);
                     if (lastClick != null)
                         lastClick.Mode = eModeType.Highlighted;
@@ -780,18 +787,15 @@ namespace OpenMobile
         }
         private void RenderingWindow_FormClosing(object sender,CancelEventArgs e)
         {
-            //RenderingWindow.closeRenderer();
+            try
+            {
+                Core.theHost.execute(eFunction.closeProgram);
+            }
+            catch (Exception) { }
         }
         void RenderingWindow_Closed(object sender, EventArgs e)
         {
-            try
-            {
-                if (Core.theHost.hal != null)
-                    Core.theHost.hal.snd("44");
-                Core.theHost.savePlaylists();
-                Core.theHost.raiseSystemEvent(eFunction.closeProgram, "", "", "");
-            }
-            catch (Exception) { }
+            //
         }
         public void RenderingWindow_KeyUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
@@ -805,7 +809,7 @@ namespace OpenMobile
                 else
                     Core.theHost.execute(eFunction.closeProgram);
             }
-            else if (e.Key == Key.Enter) //TODO - Verify correct key
+            else if (e.Key == Key.Enter)
             {
                 tmrLongClick.Enabled = false;
 
@@ -890,8 +894,8 @@ namespace OpenMobile
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(0, -(Bounds.Height / 5) * tick);
-                    ofsetIn = new Point(0, Bounds.Height - ((Bounds.Height / 5) * tick));
+                    ofsetOut = new Point(0, -(120 * tick));
+                    ofsetIn = new Point(0, 600 - (120 * tick));
                     break;
                 case eGlobalTransition.SlideDown:
                     rParam.globalTransitionIn = 1;
@@ -901,8 +905,8 @@ namespace OpenMobile
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(0, (Bounds.Height / 5) * tick);
-                    ofsetIn = new Point(0, ((Bounds.Height / 5) * tick) - Height);
+                    ofsetOut = new Point(0, (120 * tick));
+                    ofsetIn = new Point(0, (120 * tick) - 600);
                     break;
                 case eGlobalTransition.SlideLeft:
                     rParam.globalTransitionIn = 1;
@@ -912,8 +916,8 @@ namespace OpenMobile
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(-(Bounds.Width / 5) * tick, 0);
-                    ofsetIn = new Point(Bounds.Width - ((Bounds.Width / 5) * tick), 0);
+                    ofsetOut = new Point(-200 * tick, 0);
+                    ofsetIn = new Point(1000 - (200 * tick), 0);
                     break;
                 case eGlobalTransition.SlideRight:
                     rParam.globalTransitionIn = 1;
@@ -923,8 +927,8 @@ namespace OpenMobile
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point((Bounds.Width / 5) * tick, 0);
-                    ofsetIn = new Point(((Bounds.Width / 5) * tick) - Width, 0);
+                    ofsetOut = new Point(200 * tick, 0);
+                    ofsetIn = new Point((200 * tick) - 1000, 0);
                     break;
             }
             Invalidate();
@@ -1043,7 +1047,7 @@ namespace OpenMobile
                         highlighted = b;
                         UpdateThisControl(highlighted.toRegion());
                         break;
-                    case Key.Enter://TODO - Verify correct key
+                    case Key.Enter:
                         if (typeof(OMButton).IsInstanceOfType(highlighted))
                         {
                             lastClick = (OMButton)highlighted;

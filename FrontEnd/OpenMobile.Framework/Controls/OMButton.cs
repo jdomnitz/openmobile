@@ -320,7 +320,7 @@ namespace OpenMobile.Controls
                 alpha *= ((float)transparency / 100);
                 if ((this.Mode == eModeType.Highlighted) && (this.FocusImage.image != null))
                 {
-                    g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, alpha);
+                    g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), alpha);
                     if (textTexture == null)
                         textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                     g.DrawImage(textTexture, left - e.transitionTop, top - e.transitionTop, width + (int)(e.transitionTop * 2.5), height + (int)(e.transitionTop * 2.5), tmp);
@@ -330,7 +330,7 @@ namespace OpenMobile.Controls
                 {
                     if (focusImage.image != null)
                     {
-                        g.DrawImage(focusImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, focusImage.image.Width, focusImage.image.Height, GraphicsUnit.Pixel, alpha);
+                        g.DrawImage(focusImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), alpha);
                         if (textTexture == null)
                             textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                         g.DrawImage(textTexture, left - e.transitionTop, top - e.transitionTop, width + (int)(e.transitionTop * 2.5), height + (int)(e.transitionTop * 2.5), tmp);
@@ -338,7 +338,7 @@ namespace OpenMobile.Controls
                     }
                     else if (downImage.image != null)
                     {
-                        g.DrawImage(downImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), 0, 0, downImage.image.Width, downImage.image.Height, GraphicsUnit.Pixel, alpha);
+                        g.DrawImage(downImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), alpha);
                         if (textTexture==null)
                             textTexture=g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                         g.DrawImage(textTexture, left - e.transitionTop, top - e.transitionTop, width + (int)(e.transitionTop * 2.5), height + (int)(e.transitionTop * 2.5), tmp);
@@ -355,10 +355,7 @@ namespace OpenMobile.Controls
                 }
                 else
                 {
-                    lock (image.image)
-                    {
-                        g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), 0, 0, image.image.Width, image.image.Height, GraphicsUnit.Pixel, alpha);
-                    }
+                    g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), alpha);
                 }
                 
                 // Debug function added by Borte

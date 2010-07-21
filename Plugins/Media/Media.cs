@@ -420,16 +420,18 @@ namespace Media
             if (b.Left == 858)
             {
                 OMControl l = p["Media.List3"];
-                OMControl l2 = p["Media.List2"];
-
+                OMList l2 = (OMList)p["Media.List2"];
+                l2.Visible = true;
                 for (int i = 858; i > 70; i -= 87)
                 {
                     b.Left = i;
                     l.Width = i - 77;
+                    l2.TargetWidth = 775;
                     l2.Width = 775 - l.Width;
                     l2.Left = i + 60;
                     Thread.Sleep(25);
                 }
+                l.Visible = false;
                 return true;
             }
             return false;
@@ -445,6 +447,7 @@ namespace Media
                 OMControl l3 = p["Media.List3"];
                 OMControl l2 = p["Media.List2"];
                 OMControl l1 = p["Media.List1"];
+                l3.Visible = true;
                 for (int i = b2.Left; i < 859; i += 87)
                 {
                     b2.Left = i;
@@ -463,6 +466,10 @@ namespace Media
                     l2.Left = i + 60;
                     Thread.Sleep(25);
                 }
+                if (both)
+                    l1.Visible = false;
+                else
+                    l2.Visible = false;
                 return true;
             }
             return false;
@@ -477,7 +484,8 @@ namespace Media
                 OMControl b2 = p["Media.Slider2"];
                 bool both = (b2.Left == 858);
                 OMControl l = p["Media.List2"];
-                OMControl l2 = p["Media.List1"];
+                OMList l2 = (OMList)p["Media.List1"];
+                l2.Visible = true;
                 for (int i = 920; i > 70; i -= 87)
                 {
                     b.Left = i;
@@ -485,6 +493,7 @@ namespace Media
                     {
                         l.Width = i - 137;
                     }
+                    l2.TargetWidth = 775;
                     l2.Width = 775 - l.Width;
                     l2.Left = i + 60;
                     if (both)
@@ -503,6 +512,7 @@ namespace Media
                     }
                     Thread.Sleep(25);
                 }
+                l.Visible = false;
                 return true;
             }
             return false;
@@ -515,6 +525,7 @@ namespace Media
             {
                 OMControl l2 = p["Media.List2"];
                 OMControl l = p["Media.List1"];
+                l2.Visible = true;
                 for (int i = b3.Left; i < 921; i += 87)
                 {
                     b3.Left = i;
@@ -523,6 +534,7 @@ namespace Media
                     l.Left = i + 60;
                     Thread.Sleep(25);
                 }
+                l.Visible = false;
                 return true;
             }
             return false;

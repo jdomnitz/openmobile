@@ -172,6 +172,7 @@ namespace OpenMobile.Controls
                             endSingleAnimation();
                         currentLetter = 0;
                     }
+                    currentLetterTex = null;
                 }
                 else if (currentAnimation == eAnimation.UnveilLeft)
                 {
@@ -247,6 +248,7 @@ namespace OpenMobile.Controls
                 lock (this)
                 {
                     currentAnimation = animation;
+                    charTex = new OImage[value.Length];
                     base.text = value;
                     textTexture = null;
                 }
@@ -324,6 +326,8 @@ namespace OpenMobile.Controls
         float avgChar = 1;
         int veilRight = 0;
         int veilLeft = 0;
+        OImage[] charTex;
+        OImage currentLetterTex;
         /// <summary>
         /// The type of control
         /// </summary>
@@ -406,18 +410,23 @@ namespace OpenMobile.Controls
                         if (currentLetter != i)
                         {
                             x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, i), Font);
-                            g.DrawString(Text[i].ToString(), this.Font, new SolidBrush(Color.FromArgb((int)(tmp * 255), this.Color)), new Point(x2, this.Top));
+                            if (charTex[i]==null)
+                                charTex[i]=g.GenerateStringTexture(Text[i].ToString(), this.Font, new SolidBrush(Color.FromArgb((int)(tmp * 255), this.Color)), new RectangleF(x2, this.Top,30,30),StringFormat.GenericDefault);
+                            g.DrawImage(charTex[i], x2, this.Top, 30, 30,tmp);
                         }
                     }
                     x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, currentLetter), Font);
                     if (animation == eAnimation.Pulse)
-                        g.DrawString(Text[currentLetter].ToString(), effectFont, new SolidBrush(Color.FromArgb((int)(tmp * 255), this.OutlineColor)), new Point(x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2));
+                    {
+                        if (currentLetterTex==null)
+                            currentLetterTex = g.GenerateStringTexture(Text[currentLetter].ToString(), effectFont, new SolidBrush(Color.FromArgb((int)(tmp * 255), this.OutlineColor)), new RectangleF(0, 0, 30, 30), StringFormat.GenericDefault);
+                        g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30,tmp);
+                    }
                     else
                     {
-                        for (int x = -3; x < 3; x++)
-                            for (int j = -3; j < 3; j++)
-                                g.DrawString(Text[currentLetter].ToString(), effectFont, new SolidBrush(Color.FromArgb((int)(tmp * 255) / (3 * (Math.Abs(x) + Math.Abs(j) + 1)), this.OutlineColor)), new Point(x2 + x, Top + j));
-                        g.DrawString(Text[currentLetter].ToString(), effectFont, new SolidBrush(Color.FromArgb((int)(tmp * 255), this.Color)), new Point(x2, this.Top));
+                        if (currentLetterTex == null)
+                            currentLetterTex = g.GenerateTextTexture(0,0, 30, 30, Text[currentLetter].ToString(), effectFont, Format, Alignment.CenterCenter, color, outlineColor);
+                        g.DrawImage(currentLetterTex, x2, this.Top, 30, 30, tmp);
                     }
                     return;
             }
