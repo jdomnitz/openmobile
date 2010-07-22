@@ -164,7 +164,7 @@ namespace OpenMobile
             /// <summary>
             /// The Text Font
             /// </summary>
-            public Font font = new Font(System.Drawing.FontFamily.GenericSansSerif, 18F);
+            public Font font = new Font(Font.GenericSansSerif, 18F);
             /// <summary>
             /// The outline/secondary color
             /// </summary>

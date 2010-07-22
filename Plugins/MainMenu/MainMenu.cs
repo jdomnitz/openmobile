@@ -152,7 +152,7 @@ public sealed class MainMenu : IHighLevel
             imageItem opt2 = theHost.getSkinImage("Full.Highlighted");
             imageItem opt1 = theHost.getSkinImage("Full");
             OMList list = new OMList(235,150,450,295);
-            list.Font = new Font(System.Drawing.FontFamily.GenericSerif, 26F);
+            list.Font = new Font(Font.GenericSansSerif, 26F);
             list.ListStyle = eListStyle.RoundedTextList;
             OMLabel title = new OMLabel(208,120,500,25);
             title.Text = "Select the panel to assign to this button";

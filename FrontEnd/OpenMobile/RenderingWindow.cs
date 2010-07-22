@@ -113,7 +113,7 @@ namespace OpenMobile
                 this.Invoke(identify);
             else
             {
-                using (OImage identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(System.Drawing.FontFamily.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black))
+                using (OImage identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(Font.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black))
                 {
                     g.DrawImage(identity, 0, 0, 1000, 600);
                     Thread.Sleep(1000);

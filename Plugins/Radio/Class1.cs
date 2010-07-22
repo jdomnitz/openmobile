@@ -99,7 +99,7 @@ namespace OMRadio
                         List<IBasePlugin> lst = (List<IBasePlugin>)o;
                         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
                         format.color = Color.FromArgb(128, Color.White);
-                        format.font = new Font(System.Drawing.FontFamily.GenericSansSerif, 21F);
+                        format.font = new Font(Font.GenericSansSerif, 21F);
                         if (lst != null)
                         {
                             lst = lst.FindAll(p => typeof(ITunedContent).IsInstanceOfType(p));
@@ -124,7 +124,7 @@ namespace OMRadio
                         eTunedContentBand[] lst = (eTunedContentBand[])o;
                         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
                         format.color = Color.FromArgb(128, Color.White);
-                        format.font = new Font(System.Drawing.FontFamily.GenericSansSerif, 21F);
+                        format.font = new Font(Font.GenericSansSerif, 21F);
                         if (lst != null)
                         {
                             foreach (eTunedContentBand b in lst)
@@ -143,7 +143,7 @@ namespace OMRadio
                         List_Source.Clear();
                         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
                         format.color = Color.FromArgb(128, Color.White);
-                        format.font = new Font(System.Drawing.FontFamily.GenericSansSerif, 21F);
+                        format.font = new Font(Font.GenericSansSerif, 21F);
                         List_Source.Add(new OMListItem("Live channels", "Channels reported by the plugin", format, "live"));
                         List_Source.Add(new OMListItem("Presets", "Previously saved channels", format, "preset"));
                     }
@@ -332,7 +332,7 @@ namespace OMRadio
             OMLabel Radio_StationName = new OMLabel(Shape_StationInfoBorder.Left + 10, Shape_StationInfoBorder.Top + 5, Shape_StationInfoBorder.Width - 20 , 40);
             Radio_StationName.Name = "Radio_StationName";
             Radio_StationName.TextAlignment = Alignment.CenterLeft;
-            Radio_StationName.Font = new Font("Microsoft Sans Serif", 24F);
+            Radio_StationName.Font = new Font(Font.GenericSansSerif, 24F);
             Radio_StationName.Format = eTextFormat.Bold;
             Radio_StationName.Text = "Select source...";
             panelMain.addControl(Radio_StationName);
@@ -346,7 +346,7 @@ namespace OMRadio
             OMLabel Radio_StationText = new OMLabel(Radio_StationName.Left + 10, Radio_StationName.Top + Radio_StationName.Height, Radio_StationName.Width - 10, 30);
             Radio_StationText.Name = "Radio_StationText";
             Radio_StationText.TextAlignment = Alignment.CenterLeft;
-            Radio_StationText.Font = new Font("Microsoft Sans Serif", 14F);
+            Radio_StationText.Font = new Font(Font.GenericSansSerif, 14F);
             Radio_StationText.Format = eTextFormat.Normal;
             Radio_StationText.Text = "";
             panelMain.addControl(Radio_StationText);
@@ -354,14 +354,14 @@ namespace OMRadio
             OMLabel Radio_StationGenre = new OMLabel(Shape_StationInfoBorder.Left + 20, (Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height) - 25, 200, 20);
             Radio_StationGenre.Name = "Radio_StationGenre";
             Radio_StationGenre.TextAlignment = Alignment.CenterLeft;
-            Radio_StationGenre.Font = new Font("Microsoft Sans Serif", 12F);
+            Radio_StationGenre.Font = new Font(Font.GenericSansSerif, 12F);
             Radio_StationGenre.Format = eTextFormat.Normal;
             Radio_StationGenre.Text = "";
             panelMain.addControl(Radio_StationGenre);
 
             OMLabel Radio_StationBitRate = new OMLabel(Shape_StationInfoBorder.Left + Shape_StationInfoBorder.Width - 580, (Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height) - 25, 80, 20);
             Radio_StationBitRate.TextAlignment = Alignment.CenterCenter;
-            Radio_StationBitRate.Font = new Font("Microsoft Sans Serif", 12F);
+            Radio_StationBitRate.Font = new Font(Font.GenericSansSerif, 12F);
             Radio_StationBitRate.Format = eTextFormat.Normal;
             Radio_StationBitRate.Name = "Radio_StationBitRate";
             Radio_StationBitRate.Text = "";
@@ -418,7 +418,7 @@ namespace OMRadio
             OMLabel Label_StationListHeader = new OMLabel(Shape_ChannelListBorder.Left + 5, Shape_ChannelListBorder.Top, Shape_ChannelListBorder.Width - 10, 30);
             Label_StationListHeader.Name = "Label_StationListHeader";
             Label_StationListHeader.TextAlignment = Alignment.CenterLeft;
-            Label_StationListHeader.Font = new Font("Microsoft Sans Serif", 14F);
+            Label_StationListHeader.Font = new Font(Font.GenericSansSerif, 14F);
             Label_StationListHeader.Format = eTextFormat.Bold;
             Label_StationListHeader.Text = "Station list:";
             panelMain.addControl(Label_StationListHeader);
@@ -426,7 +426,7 @@ namespace OMRadio
             OMLabel Label_StationListSource = new OMLabel(Shape_ChannelListBorder.Left + Shape_ChannelListBorder .Width - 205, Shape_ChannelListBorder.Top, 200, 30);
             Label_StationListSource.Name = "Label_StationListSource";
             Label_StationListSource.TextAlignment = Alignment.CenterRight;
-            Label_StationListSource.Font = new Font("Microsoft Sans Serif", 14F);
+            Label_StationListSource.Font = new Font(Font.GenericSansSerif, 14F);
             Label_StationListSource.Format = eTextFormat.Normal;
             Label_StationListSource.Text = "Source: " + StationListSource.ToString();
             panelMain.addControl(Label_StationListSource);
@@ -438,7 +438,7 @@ namespace OMRadio
             List_RadioStations.SelectedItemColor1 = Color.FromArgb(192, 192, 192);
             List_RadioStations.SelectedItemColor2 = Color.FromArgb(38, 37, 37);
             List_RadioStations.Name = "List_RadioStations";
-            List_RadioStations.Font = new Font("Microsoft Sans Serif", 24F);
+            List_RadioStations.Font = new Font(Font.GenericSansSerif, 24F);
             List_RadioStations.Add("No channels available");
             List_RadioStations.TextAlignment = Alignment.CenterLeft;
             List_RadioStations.OnClick += new userInteraction(List_RadioStations_OnClick);
@@ -500,13 +500,13 @@ namespace OMRadio
             ListView_List.ListStyle = eListStyle.MultiList;
             ListView_List.Background = Color.Silver;
             ListView_List.ItemColor1 = Color.Black;
-            ListView_List.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 30F);
+            ListView_List.Font = new Font(Font.GenericSansSerif, 30F);
             ListView_List.Color = Color.White;
             ListView_List.HighlightColor = Color.White;
             ListView_List.SelectedItemColor1 = Color.DarkBlue;
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(128, Color.White);
-            format.font = new Font(System.Drawing.FontFamily.GenericSansSerif, 21F);
+            format.font = new Font(Font.GenericSansSerif, 21F);
             ListView_List.Add(new OMListItem("No source available!", "", format));
             ListView_List.OnClick += new userInteraction(ListView_List_OnClick);
             panelListView.addControl(ListView_List);

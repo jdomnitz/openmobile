@@ -48,7 +48,7 @@ namespace ControlDemo
             theHost = host;
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             imageItem opt1 = theHost.getSkinImage("Weather|NotSet");
-            Font f = new Font("Microsoft Sans Serif", 36F);
+            Font f = new Font(Font.GenericSansSerif, 36F);
             OMLabel Title = new OMLabel();
             Title.Font = new Font("Playbill", 48F);
             Title.Width = 1000;
@@ -146,7 +146,7 @@ namespace ControlDemo
             day4img.Top = 350;
             day4img.Left = 531;
             day4img.Name = "day4img";
-            Font f2 = new Font("Microsoft Sans Serif", 24F);
+            Font f2 = new Font(Font.GenericSansSerif, 24F);
             OMLabel day2high = new OMLabel(72, 450, 200, 50);
             day2high.Color = Color.Red;
             day2high.OutlineColor = Color.White;
@@ -155,7 +155,7 @@ namespace ControlDemo
             day2high.Format = eTextFormat.Glow;
             day2high.TextAlignment = Alignment.CenterLeft;
             day2high.Name = "day2high";
-            Font f3 = new Font("Microsoft Sans Serif", 26.25F);
+            Font f3 = new Font(Font.GenericSansSerif, 26.25F);
             OMLabel day2low = new OMLabel(72, 490, 200, 50);
             day2low.Color = Color.Blue;
             day2low.OutlineColor = Color.White;
@@ -207,14 +207,14 @@ namespace ControlDemo
             OMLabel day5low = new OMLabel(775,490,200,50);
             day5low.Color = Color.Blue;
             day5low.OutlineColor = Color.White;
-            day5low.Font = new Font("Microsoft Sans Serif", 26.25F);
+            day5low.Font = new Font(Font.GenericSansSerif, 26.25F);
             day5low.Text = "Low: N/A";
             day5low.Format = eTextFormat.Glow;
             day5low.TextAlignment = Alignment.CenterLeft;
             day5low.Name = "day5low";
             OMLabel provider = new OMLabel(300, 560, 120, 30);
             provider.Text = "Provided by:";
-            provider.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 12F);
+            provider.Font = new Font(Font.GenericSansSerif, 12F);
             OMImage attrib = new OMImage(420,550, 120, 50);
             p.addControl(Title);
             p.addControl(day1high);

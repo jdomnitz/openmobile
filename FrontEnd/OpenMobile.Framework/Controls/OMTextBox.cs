@@ -213,7 +213,6 @@ namespace OpenMobile.Controls
                 g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(40 * tmp), this.OutlineColor), 4F), r2,10);
                 g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * tmp), this.OutlineColor), 3F), r2, 10);
                 g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * tmp), this.OutlineColor), 2F), r2, 10);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(200 * tmp), this.OutlineColor), 1F), r2, 10);
             }
             using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
             {
