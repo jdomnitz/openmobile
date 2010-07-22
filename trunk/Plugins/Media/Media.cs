@@ -21,7 +21,6 @@
 using System;
 using System.Collections.Generic;
 using OpenMobile.Graphics;
-using System.Drawing;
 using System.Threading;
 using OpenMobile;
 using OpenMobile.Controls;
@@ -66,7 +65,7 @@ namespace Media
             Slider1.Image = item;
             OMLabel artists = new OMLabel(30, 220, 30, 300);
             artists.Text = "Artists";
-            artists.Font = new Font(FontFamily.GenericSansSerif, 26F);
+            artists.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 26F);
             artists.Format = eTextFormat.BoldShadow;
             artists.Name = "Media.Artists";
             artists.TextAlignment = Alignment.WordWrap;

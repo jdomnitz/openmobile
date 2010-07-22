@@ -21,7 +21,6 @@
 using System;
 using Mono.Data.Sqlite;
 using System.Text;
-using System.Windows.Forms;
 using OpenMobile.helperFunctions;
 
 namespace OpenMobile.Data

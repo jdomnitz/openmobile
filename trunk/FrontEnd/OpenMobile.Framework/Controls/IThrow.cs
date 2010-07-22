@@ -21,7 +21,7 @@
 
 // This interface is added by Borte
 
-using System.Drawing;
+using OpenMobile.Graphics;
 namespace OpenMobile.Controls
 {
     /// <summary>
@@ -36,7 +36,7 @@ namespace OpenMobile.Controls
         /// <param name="screen">Screen the event occured on</param>
         /// <param name="TotalDistance">Distance mouse has been moved from throw start location</param>
         /// <param name="RelativeDistance">Relative distance mouse has been moved from throw start location</param>
-        void MouseThrow(int screen, System.Drawing.Point TotalDistance, System.Drawing.Point RelativeDistance);
+        void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance);
 
         /// <summary>
         /// Throw is started
@@ -45,11 +45,11 @@ namespace OpenMobile.Controls
         /// <param name="StartLocation">The point that was clicked</param>
         /// <param name="Cancel">If true cancels the throw operation</param>
         /// <param name="scaleFactors"></param>
-        void MouseThrowStart(int screen, System.Drawing.Point StartLocation,PointF scaleFactors, ref bool Cancel);
+        void MouseThrowStart(int screen, Point StartLocation,PointF scaleFactors, ref bool Cancel);
 
         /// <summary>
         /// Throw is ended
         /// </summary>
-        void MouseThrowEnd(int screen, System.Drawing.Point EndLocation);
+        void MouseThrowEnd(int screen, Point EndLocation);
     }
 }

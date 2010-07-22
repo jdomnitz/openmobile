@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using Mono.Data.Sqlite;
-using System.Windows.Forms;
 using OpenMobile.helperFunctions;
 using System.Resources;
 using System.Reflection;

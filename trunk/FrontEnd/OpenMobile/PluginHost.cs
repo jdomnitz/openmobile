@@ -20,17 +20,16 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Threading;
-using System.Windows.Forms;
 using Microsoft.Win32;
 using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
 using OpenMobile.Media;
 using OpenMobile.Graphics;
+using System.Diagnostics;
 
 namespace OpenMobile
 {
@@ -40,7 +39,7 @@ namespace OpenMobile
         private IAVPlayer[] currentMediaPlayer;
         private ITunedContent[] currentTunedContent;
         private int renderfirst;
-        private static int screenCount = Screen.AllScreens.Length;
+        private static int screenCount = DisplayDevice.AvailableDisplays.Count;
         private int instanceCount = -1;
         private int[] instance;
         private string skinpath;
@@ -56,7 +55,6 @@ namespace OpenMobile
         private eGraphicsLevel level;
         private Rectangle videoPosition;
         private bool suspending = false;
-
         historyCollection history = new historyCollection(screenCount);
         #endregion
 
@@ -352,78 +350,18 @@ namespace OpenMobile
                 }
                 catch (Exception) { }
         }
-        public void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
-        {
-            if (e.Mode == PowerModes.Resume)
-            {
-                try
-                {
-                    raisePowerEvent(ePowerEvent.SystemResumed);
-                    suspending = false;
-                }
-                catch (Exception) { }
-            }
-            else if (e.Mode == PowerModes.Suspend)
-            {
-                try
-                {
-                    if (!suspending)
-                        raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
-                }
-                catch (Exception) { }
-            }
-            else
-            {
-                if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
-                {
-                    try
-                    {
-                        if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Low)
-                        {
-                            raisePowerEvent(ePowerEvent.BatteryLow);
-                        }
-                        else if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Critical)
-                        {
-                            raisePowerEvent(ePowerEvent.BatteryCritical);
-                        }
-                        else
-                        {
-                            raisePowerEvent(ePowerEvent.SystemOnBattery);
-                        }
-                    }
-                    catch (Exception) { }
-                }
-                else if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Online)
-                {
-                    try
-                    {
-                        raisePowerEvent(ePowerEvent.SystemPluggedIn);
-                    }
-                    catch (Exception) { }
-                }
-                else
-                {
-                    try
-                    {
-                        raisePowerEvent(ePowerEvent.Unknown);
-                    }
-                    catch (Exception) { }
-                }
-
-            }
-        }
         public void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
         {
-            if (screenCount != Screen.AllScreens.Length)
+            if (screenCount != DisplayDevice.AvailableDisplays.Count)
             {
-                if (screenCount < Screen.AllScreens.Length)
+                if (screenCount < DisplayDevice.AvailableDisplays.Count)
                 {
                     raiseSystemEvent(eFunction.screenAdded, "", "", "");
                     execute(eFunction.restartProgram);
                 }
                 else
                 {
-                    screenCount = Screen.AllScreens.Length;
+                    screenCount = DisplayDevice.AvailableDisplays.Count;
                     raiseSystemEvent(eFunction.screenRemoved, "", "", "");
                 }
             }
@@ -447,7 +385,8 @@ namespace OpenMobile
                     savePlaylists();
                     raiseSystemEvent(eFunction.closeProgram, "", "", "");
                     hal.close();
-                    Application.Restart();
+                    Process.Start(Process.GetCurrentProcess().StartInfo);
+                    Environment.Exit(0);
                     return true;
                 case eFunction.stopListeningForSpeech:
                     raiseSystemEvent(eFunction.stopListeningForSpeech, "", "", "");
@@ -473,12 +412,10 @@ namespace OpenMobile
                     return true;
                 case eFunction.hibernate:
                     hal.snd("45");
-                    suspending = true;
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
                     return true;
                 case eFunction.standby:
                     hal.snd("48");
-                    suspending = true;
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
                     return true;
                 case eFunction.connectToInternet:
@@ -1310,6 +1247,14 @@ namespace OpenMobile
         }
         public void raisePowerEvent(ePowerEvent e)
         {
+            if (e == ePowerEvent.SleepOrHibernatePending)
+            {
+                if (suspending)
+                    return; //Already going
+                suspending = true;
+            }
+            else if (e == ePowerEvent.SystemResumed)
+                suspending = false;
             if (OnPowerChange != null)
                 OnPowerChange(e);
         }

@@ -25,7 +25,6 @@ using OpenMobile.Media;
 using System.IO;
 using OpenMobile.Controls;
 using OpenMobile.Graphics;
-using System.Drawing;
 using OpenMobile.Framework;
 using System.Collections.Generic;
 namespace Networking
@@ -72,7 +71,7 @@ namespace Networking
             OMList networks = new OMList(22, 121, 616, 390);
             networks.ListStyle = eListStyle.MultiList;
             networks.ListItemHeight = 80;
-            networks.Font = new Font(FontFamily.GenericSansSerif, 30F);
+            networks.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 30F);
             networks.OnLongClick += new userInteraction(networks_OnLongClick);
             networks.OnClick += new userInteraction(networks_OnClick);
             networks.ItemColor1 = Color.Transparent;
@@ -93,7 +92,7 @@ namespace Networking
             OMLabel caption = new OMLabel(300, 200, 400, 50);
             caption.Text = "Enter a Password To Connect";
             caption.Color = Color.White;
-            caption.Font = new Font(FontFamily.GenericSansSerif, 20F);
+            caption.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 20F);
             caption.OutlineColor = Color.Red;
             caption.Format = eTextFormat.Glow;
             OMTextBox textbox = new OMTextBox(310, 250, 380, 50);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Drawing.Imaging;
 using OpenMobile.Graphics;
 using OpenMobile;
@@ -225,31 +224,31 @@ namespace OpenMobile.Controls
                     if ((orientation == eAngle.FlipHorizontal) || (value == eAngle.FlipHorizontal))
                     {
                         image.image = (OImage)image.image.Clone();
-                        image.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        image.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipX);
                         if (focusImage.image != null)
                         {
                             focusImage.image = (OImage)focusImage.image.Clone();
-                            focusImage.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                            focusImage.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipX);
                         }
                         if (downImage.image != null)
                         {
                             downImage.image = (OImage)downImage.image.Clone();
-                            downImage.image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                            downImage.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipX);
                         }
                     }
                     else if ((orientation == eAngle.FlipVertical) || (value == eAngle.FlipVertical))
                     {
                         image.image = (OImage)image.image.Clone();
-                        image.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                        image.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);
                         if (focusImage.image != null)
                         {
                             focusImage.image = (OImage)focusImage.image.Clone();
-                            focusImage.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                            focusImage.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);
                         }
                         if (downImage.image != null)
                         {
                             downImage.image = (OImage)downImage.image.Clone();
-                            downImage.image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                            downImage.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);
                         }
                     }
                 }
@@ -306,10 +305,9 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
+            int transitionTop = e.transitionTop;
             if (Width == 0)
                 return;
-            using (ImageAttributes ia = new ImageAttributes())
-            {
                 float alpha = 1;
                 float tmp = 1;
                 if (this.Mode == eModeType.transitioningIn)
@@ -323,25 +321,25 @@ namespace OpenMobile.Controls
                     g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), alpha);
                     if (textTexture == null)
                         textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-                    g.DrawImage(textTexture, left - e.transitionTop, top - e.transitionTop, width + (int)(e.transitionTop * 2.5), height + (int)(e.transitionTop * 2.5), tmp);
+                    g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), tmp);
                     return;
                 }
                 else if ((this.Mode == eModeType.Clicked) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                 {
                     if (focusImage.image != null)
                     {
-                        g.DrawImage(focusImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), alpha);
+                        g.DrawImage(focusImage.image, new Rectangle(this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5)), alpha);
                         if (textTexture == null)
                             textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-                        g.DrawImage(textTexture, left - e.transitionTop, top - e.transitionTop, width + (int)(e.transitionTop * 2.5), height + (int)(e.transitionTop * 2.5), tmp);
+                        g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), tmp);
                         return;
                     }
                     else if (downImage.image != null)
                     {
-                        g.DrawImage(downImage.image, new Rectangle(this.Left - e.transitionTop, this.Top - e.transitionTop, this.Width + (int)(e.transitionTop * 2.5), this.Height + (int)(e.transitionTop * 2.5)), alpha);
+                        g.DrawImage(downImage.image, new Rectangle(this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5)), alpha);
                         if (textTexture==null)
                             textTexture=g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-                        g.DrawImage(textTexture, left - e.transitionTop, top - e.transitionTop, width + (int)(e.transitionTop * 2.5), height + (int)(e.transitionTop * 2.5), tmp);
+                        g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), tmp);
                         return;
                     }
                 }
@@ -360,11 +358,10 @@ namespace OpenMobile.Controls
                 
                 // Debug function added by Borte
                 if (ShowArea)
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(75, Color.Yellow)), this.toRegion());
+                    g.FillRectangle(new Brush(Color.FromArgb(75, Color.Yellow)), this.toRegion());
                 if (textTexture==null)
                     textTexture=g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                 g.DrawImage(textTexture, left, top, width, height, tmp);
             }
-        }
     }
 }

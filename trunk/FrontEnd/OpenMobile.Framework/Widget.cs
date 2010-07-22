@@ -23,6 +23,7 @@ using System.Drawing;
 using OpenMobile.Controls;
 using OpenMobile.Plugin;
 using OpenMobile.Graphics;
+using System;
 
 namespace OpenMobile.Framework
 {
@@ -38,6 +39,7 @@ namespace OpenMobile.Framework
         /// <param name="pluginName"></param>
         /// <param name="host"></param>
         /// <returns></returns>
+        [Obsolete("BROKEN-Render Actual Controls")]
         public static OImage generate(string pluginName, IPluginHost host)
         {
             if (cache==null)
@@ -58,7 +60,7 @@ namespace OpenMobile.Framework
                 g = System.Drawing.Graphics.FromImage(img.image);
             }
             catch (System.InvalidOperationException) { return null; }
-            g.Clear(Color.Transparent);
+            //g.Clear(Color.Transparent);
             renderingParams param=new renderingParams();
             for (int i = 0; i < p.controlCount;i++ )
             {

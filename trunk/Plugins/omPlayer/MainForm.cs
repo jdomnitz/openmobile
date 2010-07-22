@@ -23,14 +23,13 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
-using System.Windows.Forms;
 using DirectShowLib;
 using OpenMobile;
 using OpenMobile.Data;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
 using OpenMobile.Graphics;
-using System.Drawing;
+using System.Windows.Forms;
 
 namespace OMPlayer
 {

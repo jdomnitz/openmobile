@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Timers;
 using System.Threading;
 using OpenMobile.Graphics;
@@ -378,7 +377,7 @@ namespace OpenMobile.Controls
                     if ((animation==eAnimation.None)||(animation == eAnimation.UnveilRight) || (animation == eAnimation.UnveilLeft))
                     {
                         g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
-                        StringFormat format = new StringFormat(StringFormatFlags.NoWrap);
+                        System.Drawing.StringFormat format = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap);
                         if (textTexture==null)
                             textTexture=g.GenerateTextTexture(0,0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
                         g.DrawImage(textTexture, left, top, width, height, tmp);
@@ -413,7 +412,7 @@ namespace OpenMobile.Controls
                         {
                             x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, i), Font);
                             if (charTex[i]==null)
-                                charTex[i]=g.GenerateStringTexture(Text[i].ToString(), this.Font, new SolidBrush(Color.FromArgb((int)(tmp * 255), this.Color)), new RectangleF(x2, this.Top,30,30),StringFormat.GenericDefault);
+                                charTex[i]=g.GenerateStringTexture(Text[i].ToString(), this.Font, new Brush(Color.FromArgb((int)(tmp * 255), this.Color)), new Rectangle(x2, this.Top,30,30),System.Drawing.StringFormat.GenericDefault);
                             g.DrawImage(charTex[i], x2, this.Top, 30, 30,tmp);
                         }
                     }
@@ -421,7 +420,7 @@ namespace OpenMobile.Controls
                     if (animation == eAnimation.Pulse)
                     {
                         if (currentLetterTex==null)
-                            currentLetterTex = g.GenerateStringTexture(Text[currentLetter].ToString(), effectFont, new SolidBrush(Color.FromArgb((int)(tmp * 255), this.OutlineColor)), new RectangleF(0, 0, 30, 30), StringFormat.GenericDefault);
+                            currentLetterTex = g.GenerateStringTexture(Text[currentLetter].ToString(), effectFont, new Brush(Color.FromArgb((int)(tmp * 255), this.OutlineColor)), new Rectangle(0, 0, 30, 30), System.Drawing.StringFormat.GenericDefault);
                         g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30,tmp);
                     }
                     else
@@ -441,9 +440,8 @@ namespace OpenMobile.Controls
                 return 0;
             int newWidth=(int)graphics.MeasureString(text, font).Width;
             System.Drawing.StringFormat format = new System.Drawing.StringFormat();
-            format.FormatFlags = StringFormatFlags.MeasureTrailingSpaces;
-            System.Drawing.RectangleF rect = new System.Drawing.RectangleF(0, 0,
-                                                                          1000, 1000);
+            format.FormatFlags = System.Drawing.StringFormatFlags.MeasureTrailingSpaces;
+            Rectangle rect = new Rectangle(0, 0,1000, 1000);
             System.Drawing.CharacterRange[] ranges = 
                                        { new System.Drawing.CharacterRange(0, 
                                                                text.Length) };

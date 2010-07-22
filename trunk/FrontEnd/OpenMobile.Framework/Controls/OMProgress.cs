@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using OpenMobile.Graphics;
 using OpenMobile;
@@ -324,18 +323,18 @@ namespace OpenMobile.Controls
             if (Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
             Rectangle rec = this.toRegion();
-            g.FillRectangle(new SolidBrush(Color.FromArgb((int)(backColor.A * tmp), backColor)), rec);
+            g.FillRectangle(new Brush(Color.FromArgb((int)(backColor.A * tmp), backColor)), rec);
             if (vertical == false)
             {
                 rec.Width = (int)(width * ((float)value / maximum));
-                g.FillRectangle(new LinearGradientBrush(new Point(left,top+(height / 2)), new Point(left+width, top+(height / 2)), Color.FromArgb((int)(tmp * firstColor.A), firstColor), Color.FromArgb((int)(tmp * secondColor.A), secondColor)), rec);
+                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * firstColor.A), firstColor), Color.FromArgb((int)(tmp * secondColor.A), secondColor),Gradient.Horizontal), rec);
                 rec.Width = width;
             }
             else
             {
                 rec.Y = rec.Y+rec.Height - (int)(height * ((float)value / maximum));
                 rec.Height= (int)(height * ((float)value / maximum));
-                g.FillRectangle(new LinearGradientBrush(new Point(left+(width / 2),top), new Point(left+(width / 2),top+height), Color.FromArgb((int)(tmp * secondColor.A), secondColor),Color.FromArgb((int)(tmp * firstColor.A), firstColor)), rec);
+                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * secondColor.A), secondColor),Color.FromArgb((int)(tmp * firstColor.A), firstColor),Gradient.Vertical), rec);
                 rec.Y = top;
                 rec.Height = height;
             }

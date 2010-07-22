@@ -27,7 +27,6 @@ using System;
 using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
-using System.Windows.Forms;
 using OpenMobile.Input;
 
 namespace OpenMobile

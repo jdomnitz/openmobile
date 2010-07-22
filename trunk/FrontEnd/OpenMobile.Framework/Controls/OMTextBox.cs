@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using OpenMobile.Graphics;
 using OpenMobile;
 
@@ -205,7 +204,7 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionOut;
             Rectangle r = new Rectangle(this.Left, this.Top, this.Width, this.Height);
             
-            g.FillRoundRectangle(new SolidBrush(Color.FromArgb((int)(tmp * 255), background)), r,10);
+            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 255), background)), r,10);
             g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 2F), r,10);
             
             if (this.Mode == eModeType.Highlighted)
@@ -216,22 +215,22 @@ namespace OpenMobile.Controls
                 g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * tmp), this.OutlineColor), 2F), r2, 10);
                 g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(200 * tmp), this.OutlineColor), 1F), r2, 10);
             }
-            using (StringFormat f = new StringFormat(StringFormatFlags.NoWrap))
+            using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
             {
-                f.Alignment = StringAlignment.Center;
-                f.LineAlignment = StringAlignment.Center;
+                f.Alignment = System.Drawing.StringAlignment.Center;
+                f.LineAlignment = System.Drawing.StringAlignment.Center;
                 if ((flags & textboxFlags.EllipsisCenter) == textboxFlags.EllipsisCenter)
-                    f.Trimming = StringTrimming.EllipsisPath;
+                    f.Trimming = System.Drawing.StringTrimming.EllipsisPath;
                 else if ((flags & textboxFlags.EllipsisEnd) == textboxFlags.EllipsisEnd)
-                    f.Trimming = StringTrimming.EllipsisCharacter;
+                    f.Trimming = System.Drawing.StringTrimming.EllipsisCharacter;
                 else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
-                    f.Trimming = StringTrimming.Word;
+                    f.Trimming = System.Drawing.StringTrimming.Word;
                 if (text != null)
                 {
                     Rectangle rect = new Rectangle(this.Left, this.Top, this.Width + 5, this.Height);
                     {
                         if (textTexture == null)
-                            textTexture = g.GenerateStringTexture((this.flags & textboxFlags.Password) == textboxFlags.Password ? new String('*', text.Length) : text, this.Font, new SolidBrush(Color.FromArgb((int)(tmp * Color.A), this.Color)), new RectangleF(this.Left, this.Top, this.Width + 5, this.Height), f);
+                            textTexture = g.GenerateStringTexture((this.flags & textboxFlags.Password) == textboxFlags.Password ? new String('*', text.Length) : text, this.Font, new Brush(Color.FromArgb((int)(tmp * Color.A), this.Color)), new Rectangle(this.Left, this.Top, this.Width + 5, this.Height), f);
                         g.DrawImage(textTexture, rect);
                     }
                 }

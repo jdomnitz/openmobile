@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using OpenMobile.Graphics;
 using OpenMobile;
 
@@ -116,7 +115,7 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionIn;
             if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
-            using (Brush defaultBrush = new SolidBrush(Color.FromArgb((int)tmp * 255, this.OutlineColor)))
+            using (Brush defaultBrush = new Brush(Color.FromArgb((int)tmp * 255, this.OutlineColor)))
             {
                 if ((textTexture == null) || (genHighlight != (Mode == eModeType.Highlighted)))
                 {

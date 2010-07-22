@@ -4,7 +4,7 @@
 // Licensing Unknown
 //**********************************************************************************
 using System;
-using System.Drawing;
+using OpenMobile.Graphics;
 
 namespace OpenMobile
 {

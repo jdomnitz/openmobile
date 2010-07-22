@@ -19,11 +19,10 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.ComponentModel;
-using System.Drawing;
 using System.Reflection;
 using OpenMobile.Graphics;
 using OpenMobile;
+using System.ComponentModel;
 
 namespace OpenMobile.Controls
 {

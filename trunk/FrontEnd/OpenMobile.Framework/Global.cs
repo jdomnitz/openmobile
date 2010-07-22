@@ -20,11 +20,9 @@
 *********************************************************************************/
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using OpenMobile.Graphics;
 using System.Drawing.Design;
 using System.IO;
-using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
 namespace OpenMobile
@@ -166,7 +164,7 @@ namespace OpenMobile
             /// <summary>
             /// The Text Font
             /// </summary>
-            public Font font = new Font(FontFamily.GenericSansSerif, 18F);
+            public Font font = new Font(System.Drawing.FontFamily.GenericSansSerif, 18F);
             /// <summary>
             /// The outline/secondary color
             /// </summary>
@@ -430,7 +428,12 @@ namespace OpenMobile
         /// <summary>
         /// Box Out Effect
         /// </summary>
-        BoxOut = 1 };
+        BoxOut = 1,
+        /// <summary>
+        /// Move forward into the screen
+        /// </summary>
+        IntoScreen=2
+        };
 
     /// <summary>
     /// The type of transition between panels
@@ -2125,8 +2128,8 @@ namespace OpenMobile
         public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
         {
             Color c = (Color)value;
-            if (c.IsNamedColor)
-                return c.Name;
+            //if (c.IsNamedColor)
+            //    return c.Name;
             if (c.IsEmpty == true)
                 return "Empty";
             Color nc = findColorName(c);
@@ -2139,11 +2142,13 @@ namespace OpenMobile
         }
         private Color findColorName(Color match)
         {
-            foreach (object o in Enum.GetValues(typeof(KnownColor)))
+            //TODO-FIX
+            /*
+            foreach (object o in Enum.GetValues(typeof(System.Drawing.KnownColor)))
             {
-                Color c=Color.FromKnownColor((KnownColor)o);
-                if (c.IsSystemColor == true)
-                    continue;
+                Color c=Color.FromKnownColor((System.Drawing.KnownColor)o);
+                //if (c.IsSystemColor == true)
+                //    continue;
                 if (c.Name == "Transparent")
                     continue;
                 if (c.R != match.R)
@@ -2154,11 +2159,11 @@ namespace OpenMobile
                     continue;
                 return c;
             }
-            foreach (object o in Enum.GetValues(typeof(KnownColor)))
+            foreach (object o in Enum.GetValues(typeof(System.Drawing.KnownColor)))
             {
-                Color c = Color.FromKnownColor((KnownColor)o);
-                if (c.IsSystemColor == false)
-                    continue;
+                Color c = Color.FromKnownColor((System.Drawing.KnownColor)o);
+                //if (c.IsSystemColor == false)
+                //    continue;
                 if (c.R != match.R)
                     continue;
                 if (c.B != match.B)
@@ -2166,7 +2171,7 @@ namespace OpenMobile
                 if (c.G != match.G)
                     continue;
                 return c;
-            }
+            }*/
             return Color.Empty;
         }
     }
@@ -2231,7 +2236,7 @@ namespace OpenMobile
     public sealed class transparentColor : System.Drawing.Design.UITypeEditor
     {
         private System.Windows.Forms.Design.IWindowsFormsEditorService service;
-        private Color selectedColor=Color.Empty;
+        private System.Drawing.Color selectedColor=System.Drawing.Color.Empty;
         /// <summary>
         /// The style of editor
         /// </summary>
@@ -2253,22 +2258,23 @@ namespace OpenMobile
             service= (System.Windows.Forms.Design.IWindowsFormsEditorService) provider.GetService(typeof(System.Windows.Forms.Design.IWindowsFormsEditorService));
             OpenMobile.Controls.TransparentColorPicker picker;
             if (value == null)
-                picker = new OpenMobile.Controls.TransparentColorPicker(Color.Firebrick);
+                picker = new OpenMobile.Controls.TransparentColorPicker(System.Drawing.Color.FromArgb(Color.Firebrick.R,Color.Firebrick.G,Color.Firebrick.B));
             else
             {
-                picker = new OpenMobile.Controls.TransparentColorPicker((Color)value);
+                Color val = (Color)value;
+                picker = new OpenMobile.Controls.TransparentColorPicker(System.Drawing.Color.FromArgb(val.R,val.G,val.B));
             }
-            selectedColor = Color.Empty;
+            selectedColor = System.Drawing.Color.Empty;
             picker.SelectedColorChanged += new OpenMobile.Controls.TransparentColorPicker.ColorChanged(picker_SelectedColorChanged);
             service.DropDownControl(picker);
-            if (selectedColor != Color.Empty)
+            if (selectedColor != System.Drawing.Color.Empty)
                 value = (object)selectedColor;
             else
                 value = (object)picker.ForeColor;
             return value;
         }
 
-        void picker_SelectedColorChanged(Color c)
+        void picker_SelectedColorChanged(System.Drawing.Color c)
         {
             selectedColor = c;
             service.CloseDropDown();
@@ -2288,8 +2294,8 @@ namespace OpenMobile
         /// <param name="e"></param>
         public override void PaintValue(PaintValueEventArgs e)
         {
-            Color c = (Color)e.Value;
-            e.Graphics.FillRectangle(new SolidBrush(c), e.Bounds);
+            System.Drawing.Color c = (System.Drawing.Color)e.Value;
+            e.Graphics.FillRectangle(new System.Drawing.SolidBrush(c), e.Bounds);
         }
     }
     /// <summary>
