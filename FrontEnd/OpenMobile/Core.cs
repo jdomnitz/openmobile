@@ -322,6 +322,7 @@ namespace OpenMobile
                         theHost.RaiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
             pluginCollection.TrimExcess();
             ThreadPool.SetMaxThreads(50, 500);
+            System.Windows.Forms.Application.Run();
         }
         static bool ErroredOut;
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
