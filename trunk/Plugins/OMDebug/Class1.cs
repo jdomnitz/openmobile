@@ -80,12 +80,12 @@ namespace OMDebug
             writer.WriteLine("OS: " + OpenMobile.Framework.OSSpecific.getOSVersion());
             writer.WriteLine("Framework: " + OpenMobile.Framework.OSSpecific.getFramework());
             writer.WriteLine("Open Mobile: v" + System.Windows.Forms.Application.ProductVersion);
-            writer.WriteLine("Open GL v."+Graphics.Version);
+            //writer.WriteLine("Open GL v."+Graphics.Version);
             writer.WriteLine("------------------Hardware-------------------");
             writer.WriteLine("Processors: " + Environment.ProcessorCount);
             writer.WriteLine("Architecture: x" + ((IntPtr.Size == 4) ? "86" : "64"));
             writer.WriteLine("Screens: " + Screen.AllScreens.Length.ToString());
-            writer.WriteLine("Graphics Card: " + Graphics.GraphicsEngine);
+            //writer.WriteLine("Graphics Card: " + Graphics.GraphicsEngine);
             writer.WriteLine("----------------Inital Assemblies-------------");
             time = Environment.TickCount;
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
