@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using OpenMobile.Graphics;
-using System.Drawing;
 using System.Timers;
 using System.Threading;
 using OpenMobile;
@@ -100,7 +99,7 @@ namespace OMRadio
                         List<IBasePlugin> lst = (List<IBasePlugin>)o;
                         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
                         format.color = Color.FromArgb(128, Color.White);
-                        format.font = new Font(FontFamily.GenericSansSerif, 21F);
+                        format.font = new Font(System.Drawing.FontFamily.GenericSansSerif, 21F);
                         if (lst != null)
                         {
                             lst = lst.FindAll(p => typeof(ITunedContent).IsInstanceOfType(p));
@@ -125,7 +124,7 @@ namespace OMRadio
                         eTunedContentBand[] lst = (eTunedContentBand[])o;
                         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
                         format.color = Color.FromArgb(128, Color.White);
-                        format.font = new Font(FontFamily.GenericSansSerif, 21F);
+                        format.font = new Font(System.Drawing.FontFamily.GenericSansSerif, 21F);
                         if (lst != null)
                         {
                             foreach (eTunedContentBand b in lst)
@@ -144,7 +143,7 @@ namespace OMRadio
                         List_Source.Clear();
                         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
                         format.color = Color.FromArgb(128, Color.White);
-                        format.font = new Font(FontFamily.GenericSansSerif, 21F);
+                        format.font = new Font(System.Drawing.FontFamily.GenericSansSerif, 21F);
                         List_Source.Add(new OMListItem("Live channels", "Channels reported by the plugin", format, "live"));
                         List_Source.Add(new OMListItem("Presets", "Previously saved channels", format, "preset"));
                     }
@@ -501,13 +500,13 @@ namespace OMRadio
             ListView_List.ListStyle = eListStyle.MultiList;
             ListView_List.Background = Color.Silver;
             ListView_List.ItemColor1 = Color.Black;
-            ListView_List.Font = new Font(FontFamily.GenericSansSerif, 30F);
+            ListView_List.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 30F);
             ListView_List.Color = Color.White;
             ListView_List.HighlightColor = Color.White;
             ListView_List.SelectedItemColor1 = Color.DarkBlue;
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(128, Color.White);
-            format.font = new Font(FontFamily.GenericSansSerif, 21F);
+            format.font = new Font(System.Drawing.FontFamily.GenericSansSerif, 21F);
             ListView_List.Add(new OMListItem("No source available!", "", format));
             ListView_List.OnClick += new userInteraction(ListView_List_OnClick);
             panelListView.addControl(ListView_List);

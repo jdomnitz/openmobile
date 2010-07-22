@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Drawing.Imaging;
 using OpenMobile.Graphics;
 using OpenMobile;
@@ -98,12 +97,6 @@ namespace OpenMobile.Controls
                 if (image.image != value.image)
                 {
                     image = value;
-                    try
-                    {
-                        if (ImageAnimator.CanAnimate(value.image.image) == true)
-                            ImageAnimator.Animate(value.image.image, new EventHandler(update));
-                    }
-                    catch (InvalidOperationException) { }
                     refreshMe(this.toRegion());
                 }
             }
@@ -239,7 +232,7 @@ namespace OpenMobile.Controls
             if (image.image == null)
             {
                 if (image==imageItem.MISSING)
-                    g.FillRectangle(Brushes.Black, left, top, width, height);
+                    g.FillRectangle(new Brush(Color.Black), left, top, width, height);
             }
             else
             {

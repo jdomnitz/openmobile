@@ -20,11 +20,9 @@
 *********************************************************************************/
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Threading;
 using System.Timers;
-using System.Windows.Forms;
 using System;
 using OpenMobile.Graphics;
 using OpenMobile;
@@ -550,7 +548,7 @@ namespace OpenMobile.Controls
                 Rectangle r = g.Clip; //Save the drawing size
                 g.SetClip(this.toRegion()); //But only draw out control
                 if (background != Color.Transparent)
-                    g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * background.A), background)), new Rectangle(Left + 1, Top + 1, Width - 2, Height - 2));
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)), new Rectangle(Left + 1, Top + 1, Width - 2, Height - 2));
                 int minListHeight = (int)(g.MeasureString("A", Font).Height + 0.5); //Round up
                 if ((style == eListStyle.MultiList) && (items.Count > 0)&&(items[0].subitemFormat!=null))
                     minListHeight += (int)(g.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
@@ -592,40 +590,40 @@ namespace OpenMobile.Controls
                         case eListStyle.RoundedImageList:
                         case eListStyle.RoundedTextList:
                             if (selectedIndex == i)
-                                g.FillRoundRectangle(new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % listHeight)), new Size(this.Width, listHeight)), Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), LinearGradientMode.Vertical), rect, 10);
+                                g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), Gradient.Vertical), rect, 10);
                             else
-                                g.FillRoundRectangle(new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % listHeight)), new Size(this.Width, listHeight)), Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), LinearGradientMode.Vertical), rect, 10);
+                                g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), Gradient.Vertical), rect, 10);
                             break;
                         case eListStyle.TextList:
                         case eListStyle.ImageList:
                             if (selectedIndex == i)
-                                g.FillRectangle(new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % listHeight)), new Size(this.Width, listHeight)), Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), LinearGradientMode.Vertical), rect);
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), Gradient.Vertical), rect);
                             else
-                                g.FillRectangle(new LinearGradientBrush(new Rectangle(new Point(Left, Top + (moved % listHeight)), new Size(this.Width, listHeight)), Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), LinearGradientMode.Vertical), rect);
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), Gradient.Vertical), rect);
                             break;
                         case eListStyle.TransparentImageList:
                         case eListStyle.TransparentTextList:
                             if (selectedIndex == i)
-                                g.FillRectangle(new SolidBrush(selectedItemColor1), rect);
+                                g.FillRectangle(new Brush(selectedItemColor1), rect);
                             break;
                         case eListStyle.DroidStyleImage:
                         case eListStyle.DroidStyleText:
                             imgSze = 6;
                             if (selectedIndex == i)
-                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * selectedItemColor1.A * 0.6), selectedItemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 2));
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A * 0.6), selectedItemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 2));
                             else
-                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 2));
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 2));
                             break;
                         case eListStyle.MultiList:
                             if (selectedIndex == i)
-                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 1));
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 1));
                             else
-                                g.FillRectangle(new SolidBrush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 1));
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 1));
                             break;
                     }
                     if ((i < items.Count) && (i >= 0))
                     {
-                        using (StringFormat f = new StringFormat(StringFormatFlags.NoWrap))
+                        using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
                         {
                             if (ListStyle == eListStyle.MultiList)
                             {

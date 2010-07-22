@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System.Collections.Generic;
 using OpenMobile.Graphics;
-using System.Drawing;
 using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Plugin;
@@ -100,7 +99,7 @@ namespace OMSettings
                         txtchoice.Font = new Font("Microsoft Sans Serif", 24F);
                         txtchoice.Name = "txt"+s.Name;
                         OMLabel mcTitle = new OMLabel(100, ofset, 270, 50);
-                        mcTitle.Font = new Font("Microsoft Sans Serif", 32.25F, FontStyle.Bold);
+                        mcTitle.Font = new Font("Microsoft Sans Serif", 32.25F, System.Drawing.FontStyle.Bold);
                         mcTitle.Text = s.Header + ((s.Header!=null)?":":"");
                         mcTitle.TextAlignment = Alignment.CenterRight;
                         if ((s.Description != null) && (s.Description.Length > 0))

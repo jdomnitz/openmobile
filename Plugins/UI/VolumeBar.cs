@@ -20,8 +20,8 @@
 *********************************************************************************/
 using System;
 using OpenMobile.Controls;
-using System.Windows.Forms;
 using OpenMobile.Input;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.Controls
 {
@@ -73,17 +73,17 @@ namespace OpenMobile.Controls
 
         #region IThrow Members
         //Implemented to prevent gestures
-        public void MouseThrow(int screen, System.Drawing.Point TotalDistance, System.Drawing.Point RelativeDistance)
+        public void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
         {
             //
         }
 
-        public void MouseThrowStart(int screen, System.Drawing.Point StartLocation, System.Drawing.PointF scaleFactors, ref bool Cancel)
+        public void MouseThrowStart(int screen, Point StartLocation, PointF scaleFactors, ref bool Cancel)
         {
             Cancel = true;
         }
 
-        public void MouseThrowEnd(int screen, System.Drawing.Point EndLocation)
+        public void MouseThrowEnd(int screen, Point EndLocation)
         {
             //
         }

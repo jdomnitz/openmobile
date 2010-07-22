@@ -21,10 +21,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Reflection;
 using System.Threading;
-using System.Windows.Forms;
 using OpenMobile.Controls;
 using OpenMobile.Graphics;
 using OpenMobile.Input;
@@ -99,10 +97,10 @@ namespace OpenMobile
         public RenderingWindow(int s)
         {
             if (this.fullscreen)
-                Cursor.Position = this.Location;
+                Mouse.Location = this.Location;
             this.screen = s;
-            if (s <= System.Windows.Forms.Screen.AllScreens.Length - 1)
-                this.Bounds=new Rectangle(System.Windows.Forms.Screen.AllScreens[s].Bounds.Location,new Size(720,450));
+            if (s <= DisplayDevice.AvailableDisplays.Count - 1)
+                this.Bounds=new Rectangle(DisplayDevice.AvailableDisplays[s].Bounds.Location,new Size(720,450));
             InitializeComponent();
             this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
             hide += new voiddel(hideCursor);
@@ -115,7 +113,7 @@ namespace OpenMobile
                 this.Invoke(identify);
             else
             {
-                using (OImage identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(FontFamily.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black))
+                using (OImage identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(System.Drawing.FontFamily.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black))
                 {
                     g.DrawImage(identity, 0, 0, 1000, 600);
                     Thread.Sleep(1000);
@@ -324,7 +322,7 @@ namespace OpenMobile
         private void RenderGesture()
         {
             foreach(Point p in currentGesture)
-                g.FillEllipse(Brushes.Red, new Rectangle((int)((p.X - 10)/widthScale),(int)((p.Y - 10)/heightScale), 20, 20));
+                g.FillEllipse(new Brush(Color.Red), new Rectangle((int)((p.X - 10)/widthScale),(int)((p.Y - 10)/heightScale), 20, 20));
         }
         protected override void OnResize(EventArgs e)
         {
@@ -402,7 +400,7 @@ namespace OpenMobile
                 switch (backgroundQueue[i].BackgroundType)
                 {
                     case backgroundStyle.Gradiant:
-                        g.FillRectangle(new System.Drawing.Drawing2D.LinearGradientBrush(new Point(), new Point(1000, 600), backgroundQueue[i].BackgroundColor1, backgroundQueue[i].BackgroundColor2), 0,0,1000,600);
+                        g.FillRectangle(new Brush(backgroundQueue[i].BackgroundColor1, backgroundQueue[i].BackgroundColor2,Gradient.Vertical), 0,0,1000,600);
                         break;
                     case backgroundStyle.SolidColor:
                         g.Clear(backgroundQueue[i].BackgroundColor1);

@@ -25,6 +25,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
 using OpenMobile;
+using Microsoft.Win32;
 
 namespace OMHal
 {
@@ -46,6 +47,9 @@ namespace OMHal
             }
             send = new UdpClient("127.0.0.1", 8550);
             Specific.hookVolume(this.Handle);
+            if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
+                raisePowerEvent(ePowerEvent.SystemOnBattery);
+            SystemEvents.PowerModeChanged+=new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
             receive.BeginReceive(recv, null);
             this.Visible = false;
         }
@@ -162,6 +166,70 @@ namespace OMHal
         public static void raiseStorageEvent(eMediaType MediaType, string drive)
         {
             sendIt("-3|" + MediaType + "|" + drive);
+        }
+
+        public void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            if (e.Mode == PowerModes.Resume)
+            {
+                try
+                {
+                    raisePowerEvent(ePowerEvent.SystemResumed);
+                }
+                catch (Exception) { }
+            }
+            else if (e.Mode == PowerModes.Suspend)
+            {
+                try
+                {
+                    raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
+                }
+                catch (Exception) { }
+            }
+            else
+            {
+                if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
+                {
+                    try
+                    {
+                        if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Low)
+                        {
+                            raisePowerEvent(ePowerEvent.BatteryLow);
+                        }
+                        else if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Critical)
+                        {
+                            raisePowerEvent(ePowerEvent.BatteryCritical);
+                        }
+                        else
+                        {
+                            raisePowerEvent(ePowerEvent.SystemOnBattery);
+                        }
+                    }
+                    catch (Exception) { }
+                }
+                else if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Online)
+                {
+                    try
+                    {
+                        raisePowerEvent(ePowerEvent.SystemPluggedIn);
+                    }
+                    catch (Exception) { }
+                }
+                else
+                {
+                    try
+                    {
+                        raisePowerEvent(ePowerEvent.Unknown);
+                    }
+                    catch (Exception) { }
+                }
+
+            }
+        }
+
+        private void raisePowerEvent(ePowerEvent ePowerEvent)
+        {
+            sendIt("-2|" + ePowerEvent.ToString());
         }
     }
 }

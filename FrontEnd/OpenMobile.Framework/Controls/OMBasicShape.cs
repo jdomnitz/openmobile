@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System.ComponentModel;
-using System.Drawing;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.Controls
 {
@@ -192,7 +192,7 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionOut;
             }
 
-            SolidBrush Fill = new SolidBrush(Color.FromArgb((int)(tmp * fillColor.A), fillColor));
+            Brush Fill = new Brush(Color.FromArgb((int)(tmp * fillColor.A), fillColor));
             Pen BorderPen = new Pen(Color.FromArgb((int)(tmp * borderColor.A), borderColor), borderSize);
             // End of code added by Borte
 

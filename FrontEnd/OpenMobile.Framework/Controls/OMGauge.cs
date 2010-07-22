@@ -9,7 +9,6 @@
 //***************************************************************************************
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using OpenMobile.Graphics;
 using OpenMobile;
@@ -298,7 +297,7 @@ namespace OpenMobile.Controls
                 refreshMe(this.toRegion());
             }
         }
-        Font font=new Font(FontFamily.GenericSansSerif,13F);
+        Font font=new Font(System.Drawing.FontFamily.GenericSansSerif,13F);
         /// <summary>
         /// The gauge font
         /// </summary>
@@ -360,10 +359,11 @@ namespace OpenMobile.Controls
         /// <param name="cy"></param>
         private void DrawPointer(Graphics.Graphics gr, int cx, int cy)
         {
+            /*
             float radius = this.Width / 2 - (this.Width * .12F);
             float val = MaxValue - MinValue;
 
-            Bitmap img = new Bitmap(this.Width, this.Height);
+            System.Drawing.Bitmap img = new System.Drawing.Bitmap(this.Width, this.Height);
             System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(img);
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
@@ -393,7 +393,7 @@ namespace OpenMobile.Controls
             pts[3].X = (float)(cx + (this.Width * .09F) * Math.Cos(angle));
             pts[3].Y = (float)(cy + (this.Width * .09F) * Math.Sin(angle));
 
-            Brush pointer = new SolidBrush(Color.Black);
+            Brush pointer = new Brush(Color.Black);
             g.FillPolygon(pointer, pts);
 
             PointF[] shinePts = new PointF[3];
@@ -417,7 +417,9 @@ namespace OpenMobile.Controls
             DrawGloss(g);
 
             gr.DrawImage(new OImage(img), Left, Top,width,height); //TODO - Verify correct drawing
-        }
+        
+             */
+         }
 
         /// <summary>
         /// Draws the glossiness.
@@ -425,7 +427,8 @@ namespace OpenMobile.Controls
         /// <param name="g"></param>
         private void DrawGloss(System.Drawing.Graphics g)
         {
-            RectangleF glossRect = new RectangleF(
+            /*
+            Rectangle glossRect = new Rectangle(
                x + (float)(width * 0.10),
                y + (float)(height * 0.07),
                (float)(width * 0.80),
@@ -438,7 +441,7 @@ namespace OpenMobile.Controls
             g.FillEllipse(gradientBrush, glossRect);
 
             //TODO: Gradient from bottom
-            glossRect = new RectangleF(
+            glossRect = new Rectangle(
                x + (float)(width * 0.25),
                y + (float)(height * 0.77),
                (float)(width * 0.50),
@@ -448,7 +451,7 @@ namespace OpenMobile.Controls
                 new LinearGradientBrush(glossRect,
                 Color.Transparent, Color.FromArgb(gloss, this.BackColor),
                 LinearGradientMode.Vertical);
-            g.FillEllipse(gradientBrush, glossRect);
+            g.FillEllipse(gradientBrush, glossRect);*/
         }
 
         /// <summary>
@@ -459,7 +462,7 @@ namespace OpenMobile.Controls
         /// <param name="cX"></param>
         /// <param name="cY"></param>
         private void DrawCenterPoint(System.Drawing.Graphics g, Rectangle rect, int cX, int cY)
-        {
+        {/*
             float shift = Width / 5;
             RectangleF rectangle = new RectangleF(cX - (shift / 2), cY - (shift / 2), shift, shift);
             LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Black, Color.FromArgb(100, this.dialColor), LinearGradientMode.Vertical);
@@ -468,7 +471,7 @@ namespace OpenMobile.Controls
             shift = Width / 7;
             rectangle = new RectangleF(cX - (shift / 2), cY - (shift / 2), shift, shift);
             brush = new LinearGradientBrush(rect, Color.SlateGray, Color.Black, LinearGradientMode.ForwardDiagonal);
-            g.FillEllipse(brush, rectangle);
+            g.FillEllipse(brush, rectangle);*/
         }
 
         /// <summary>
@@ -479,7 +482,7 @@ namespace OpenMobile.Controls
         /// <param name="cX"></param>
         /// <param name="cY"></param>
         private void DrawCalibration(System.Drawing.Graphics g, Rectangle rect, int cX, int cY)
-        {
+        {/*
             int noOfParts = this.noOfDivisions + 1;
             int noOfIntermediates = this.noOfSubDivisions;
             float currentAngle = GetRadian(fromAngle);
@@ -505,13 +508,13 @@ namespace OpenMobile.Controls
                 g.DrawLine(thickPen, x, y, x1, y1);
 
                 //Draw Strings
-                StringFormat format = new StringFormat();
+                System.Drawing.StringFormat format = new System.Drawing.StringFormat();
                 tx = (float)(cX + (radius - Width / 10) * Math.Cos(currentAngle));
                 ty = (float)(cY - shift + (radius - Width / 10) * Math.Sin(currentAngle));
-                Brush stringPen = new SolidBrush(this.ForeColor);
-                StringFormat strFormat = new StringFormat(StringFormatFlags.NoClip);
-                strFormat.Alignment = StringAlignment.Center;
-                Font f = new Font(this.Font.FontFamily, (float)(this.Width / 23), this.Font.Style);
+                Brush stringPen = new Brush(this.ForeColor);
+                System.Drawing.StringFormat strFormat = new System.Drawing.StringFormat(StringFormatFlags.NoClip);
+                strFormat.Alignment = System.Drawing.StringAlignment.Center;
+                Font f = new Font(this.Font.Family, (float)(this.Width / 23), this.Font.Style);
                 g.DrawString(rulerValue.ToString() + "", f, stringPen, new PointF(tx, ty), strFormat);
                 rulerValue += (float)((MaxValue - MinValue) / (noOfParts - 1));
                 rulerValue = (float)Math.Round(rulerValue, 2);
@@ -529,7 +532,7 @@ namespace OpenMobile.Controls
                     y1 = (float)(cY + (radius - Width / 50) * Math.Sin(currentAngle));
                     g.DrawLine(thinPen, x, y, x1, y1);
                 }
-            }
+            }*/
         }
 
         /// <summary>
@@ -548,7 +551,7 @@ namespace OpenMobile.Controls
         /// <param name="g"></param>
         /// <param name="number"></param>
         /// <param name="drect"></param>
-        private void DisplayNumber(Graphics.Graphics g, float number, RectangleF drect)
+        private void DisplayNumber(Graphics.Graphics g, float number, Rectangle drect)
         {
             try
             {
@@ -572,11 +575,11 @@ namespace OpenMobile.Controls
                     {
                         if (c == '-')
                         {
-                            DrawDigit(g, -1, new PointF(drect.X + shift, drect.Y), drawDPS, drect.Height);
+                            DrawDigit(g, -1, new Point(drect.X + shift, drect.Y), drawDPS, drect.Height);
                         }
                         else
                         {
-                            DrawDigit(g, Int16.Parse(c.ToString()), new PointF(drect.X + shift, drect.Y), drawDPS, drect.Height);
+                            DrawDigit(g, Int16.Parse(c.ToString()), new Point(drect.X + shift, drect.Y), drawDPS, drect.Height);
                         }
                         shift += 15 * this.width / 250;
                     }
@@ -599,7 +602,7 @@ namespace OpenMobile.Controls
         /// <param name="position"></param>
         /// <param name="dp"></param>
         /// <param name="height"></param>
-        private void DrawDigit(Graphics.Graphics g, int number, PointF position, bool dp, float height)
+        private void DrawDigit(Graphics.Graphics g, int number, Point position, bool dp, float height)
         {
             float width;
             width = 10F * height / 13;
@@ -609,55 +612,55 @@ namespace OpenMobile.Controls
 
             #region Form Polygon Points
             //Segment A
-            PointF[] segmentA = new PointF[5];
-            segmentA[0] = segmentA[4] = new PointF(position.X + GetX(2.8F, width), position.Y + GetY(1F, height));
-            segmentA[1] = new PointF(position.X + GetX(10, width), position.Y + GetY(1F, height));
-            segmentA[2] = new PointF(position.X + GetX(8.8F, width), position.Y + GetY(2F, height));
-            segmentA[3] = new PointF(position.X + GetX(3.8F, width), position.Y + GetY(2F, height));
+            Point[] segmentA = new Point[5];
+            segmentA[0] = segmentA[4] = new Point(position.X + GetX(2.8F, width), position.Y + GetY(1F, height));
+            segmentA[1] = new Point(position.X + GetX(10, width), position.Y + GetY(1F, height));
+            segmentA[2] = new Point(position.X + GetX(8.8F, width), position.Y + GetY(2F, height));
+            segmentA[3] = new Point(position.X + GetX(3.8F, width), position.Y + GetY(2F, height));
 
             //Segment B
-            PointF[] segmentB = new PointF[5];
-            segmentB[0] = segmentB[4] = new PointF(position.X + GetX(10, width), position.Y + GetY(1.4F, height));
-            segmentB[1] = new PointF(position.X + GetX(9.3F, width), position.Y + GetY(6.8F, height));
-            segmentB[2] = new PointF(position.X + GetX(8.4F, width), position.Y + GetY(6.4F, height));
-            segmentB[3] = new PointF(position.X + GetX(9F, width), position.Y + GetY(2.2F, height));
+            Point[] segmentB = new Point[5];
+            segmentB[0] = segmentB[4] = new Point(position.X + GetX(10, width), position.Y + GetY(1.4F, height));
+            segmentB[1] = new Point(position.X + GetX(9.3F, width), position.Y + GetY(6.8F, height));
+            segmentB[2] = new Point(position.X + GetX(8.4F, width), position.Y + GetY(6.4F, height));
+            segmentB[3] = new Point(position.X + GetX(9F, width), position.Y + GetY(2.2F, height));
 
             //Segment C
-            PointF[] segmentC = new PointF[5];
-            segmentC[0] = segmentC[4] = new PointF(position.X + GetX(9.2F, width), position.Y + GetY(7.2F, height));
-            segmentC[1] = new PointF(position.X + GetX(8.7F, width), position.Y + GetY(12.7F, height));
-            segmentC[2] = new PointF(position.X + GetX(7.6F, width), position.Y + GetY(11.9F, height));
-            segmentC[3] = new PointF(position.X + GetX(8.2F, width), position.Y + GetY(7.7F, height));
+            Point[] segmentC = new Point[5];
+            segmentC[0] = segmentC[4] = new Point(position.X + GetX(9.2F, width), position.Y + GetY(7.2F, height));
+            segmentC[1] = new Point(position.X + GetX(8.7F, width), position.Y + GetY(12.7F, height));
+            segmentC[2] = new Point(position.X + GetX(7.6F, width), position.Y + GetY(11.9F, height));
+            segmentC[3] = new Point(position.X + GetX(8.2F, width), position.Y + GetY(7.7F, height));
 
             //Segment D
-            PointF[] segmentD = new PointF[5];
-            segmentD[0] = segmentD[4] = new PointF(position.X + GetX(7.4F, width), position.Y + GetY(12.1F, height));
-            segmentD[1] = new PointF(position.X + GetX(8.4F, width), position.Y + GetY(13F, height));
-            segmentD[2] = new PointF(position.X + GetX(1.3F, width), position.Y + GetY(13F, height));
-            segmentD[3] = new PointF(position.X + GetX(2.2F, width), position.Y + GetY(12.1F, height));
+            Point[] segmentD = new Point[5];
+            segmentD[0] = segmentD[4] = new Point(position.X + GetX(7.4F, width), position.Y + GetY(12.1F, height));
+            segmentD[1] = new Point(position.X + GetX(8.4F, width), position.Y + GetY(13F, height));
+            segmentD[2] = new Point(position.X + GetX(1.3F, width), position.Y + GetY(13F, height));
+            segmentD[3] = new Point(position.X + GetX(2.2F, width), position.Y + GetY(12.1F, height));
 
             //Segment E
-            PointF[] segmentE = new PointF[5];
-            segmentE[0] = segmentE[4] = new PointF(position.X + GetX(2.2F, width), position.Y + GetY(11.8F, height));
-            segmentE[1] = new PointF(position.X + GetX(1F, width), position.Y + GetY(12.7F, height));
-            segmentE[2] = new PointF(position.X + GetX(1.7F, width), position.Y + GetY(7.2F, height));
-            segmentE[3] = new PointF(position.X + GetX(2.8F, width), position.Y + GetY(7.7F, height));
+            Point[] segmentE = new Point[5];
+            segmentE[0] = segmentE[4] = new Point(position.X + GetX(2.2F, width), position.Y + GetY(11.8F, height));
+            segmentE[1] = new Point(position.X + GetX(1F, width), position.Y + GetY(12.7F, height));
+            segmentE[2] = new Point(position.X + GetX(1.7F, width), position.Y + GetY(7.2F, height));
+            segmentE[3] = new Point(position.X + GetX(2.8F, width), position.Y + GetY(7.7F, height));
 
             //Segment F
-            PointF[] segmentF = new PointF[5];
-            segmentF[0] = segmentF[4] = new PointF(position.X + GetX(3F, width), position.Y + GetY(6.4F, height));
-            segmentF[1] = new PointF(position.X + GetX(1.8F, width), position.Y + GetY(6.8F, height));
-            segmentF[2] = new PointF(position.X + GetX(2.6F, width), position.Y + GetY(1.3F, height));
-            segmentF[3] = new PointF(position.X + GetX(3.6F, width), position.Y + GetY(2.2F, height));
+            Point[] segmentF = new Point[5];
+            segmentF[0] = segmentF[4] = new Point(position.X + GetX(3F, width), position.Y + GetY(6.4F, height));
+            segmentF[1] = new Point(position.X + GetX(1.8F, width), position.Y + GetY(6.8F, height));
+            segmentF[2] = new Point(position.X + GetX(2.6F, width), position.Y + GetY(1.3F, height));
+            segmentF[3] = new Point(position.X + GetX(3.6F, width), position.Y + GetY(2.2F, height));
 
             //Segment G
-            PointF[] segmentG = new PointF[7];
-            segmentG[0] = segmentG[6] = new PointF(position.X + GetX(2F, width), position.Y + GetY(7F, height));
-            segmentG[1] = new PointF(position.X + GetX(3.1F, width), position.Y + GetY(6.5F, height));
-            segmentG[2] = new PointF(position.X + GetX(8.3F, width), position.Y + GetY(6.5F, height));
-            segmentG[3] = new PointF(position.X + GetX(9F, width), position.Y + GetY(7F, height));
-            segmentG[4] = new PointF(position.X + GetX(8.2F, width), position.Y + GetY(7.5F, height));
-            segmentG[5] = new PointF(position.X + GetX(2.9F, width), position.Y + GetY(7.5F, height));
+            Point[] segmentG = new Point[7];
+            segmentG[0] = segmentG[6] = new Point(position.X + GetX(2F, width), position.Y + GetY(7F, height));
+            segmentG[1] = new Point(position.X + GetX(3.1F, width), position.Y + GetY(6.5F, height));
+            segmentG[2] = new Point(position.X + GetX(8.3F, width), position.Y + GetY(6.5F, height));
+            segmentG[3] = new Point(position.X + GetX(9F, width), position.Y + GetY(7F, height));
+            segmentG[4] = new Point(position.X + GetX(8.2F, width), position.Y + GetY(7.5F, height));
+            segmentG[5] = new Point(position.X + GetX(2.9F, width), position.Y + GetY(7.5F, height));
 
             //Segment DP
             #endregion
@@ -897,13 +900,15 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
+            //TODO - FIX
+            /*
             if ((this.Width == 0) || (this.Height == 0))
                 return;
             //paint the gauge
-            g.FillRectangle(new SolidBrush(Color.Transparent), new Rectangle(Left, Top, Width, Height));
+            g.FillRectangle(new Brush(Color.Transparent), new Rectangle(Left, Top, Width, Height));
             if (backgroundImg == null || requiresRedraw)
             {
-                backgroundImg = new OImage(new Bitmap(this.Width, this.Height));
+                backgroundImg = new OImage(new System.Drawing.Bitmap(this.Width, this.Height));
                 System.Drawing.Graphics bg = System.Drawing.Graphics.FromImage(backgroundImg.image);
                 bg.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 width = this.Width - x * 2;
@@ -911,12 +916,12 @@ namespace OpenMobile.Controls
                 rectImg = new Rectangle(0, 0, width, height);
 
                 //Draw background color
-                Brush backGroundBrush = new SolidBrush(Color.FromArgb(120, dialColor));
+                Brush backGroundBrush = new Brush(Color.FromArgb(120, dialColor));
                 float gg = width / 60;
                 bg.FillEllipse(backGroundBrush, 0, 0, width, height);
 
                 //Draw Rim
-                SolidBrush outlineBrush = new SolidBrush(Color.FromArgb(100, Color.SlateGray));
+                Brush outlineBrush = new Brush(Color.FromArgb(100, Color.SlateGray));
                 Pen outline = new Pen(outlineBrush, (float)(width * .03));
                 bg.DrawEllipse(outline, rectImg);
                 Pen darkRim = new Pen(Color.SlateGray);
@@ -945,8 +950,8 @@ namespace OpenMobile.Controls
                 if (stAngle + sweepAngle > 405) sweepAngle = 405 - stAngle;
                 bg.DrawArc(colorPen, rectg, stAngle, sweepAngle);
 
-                SizeF textSize = bg.MeasureString(this.dialText, this.Font);
-                RectangleF digiFRectText = new RectangleF(this.Width / 2 - textSize.Width / 2, (int)(this.height / 1.5), textSize.Width, textSize.Height);
+                Size textSize = bg.MeasureString(this.dialText, this.Font);
+                Rectangle digiFRectText = new Rectangle(this.Width / 2 - textSize.Width / 2, (int)(this.height / 1.5), textSize.Width, textSize.Height);
                 bg.DrawString(dialText, this.Font, new SolidBrush(this.ForeColor), digiFRectText);
                 requiresRedraw = false;
             }
@@ -954,20 +959,21 @@ namespace OpenMobile.Controls
 
             //Draw Digital Value
             Rectangle digiRect = new Rectangle((int)(this.Left+(float)this.Width / 2F - (float)this.width / 5F),(int)(this.Top+ (float)this.height / 1.2F), (int)((float)this.width / 2.5F),(int)((float)this.Height / 9F));
-            RectangleF digiFRect = new RectangleF(this.Left+this.Width / 2 - this.width / 7,this.Top+ (int)(this.height / 1.18), this.width / 4, this.Height / 12);
-            g.FillRectangle(new SolidBrush(Color.FromArgb(30, Color.Gray)), digiRect);
+            Rectangle digiFRect = new Rectangle(this.Left+this.Width / 2 - this.width / 7,this.Top+ (int)(this.height / 1.18), this.width / 4, this.Height / 12);
+            g.FillRectangle(new Brush(Color.FromArgb(30, Color.Gray)), digiRect);
             DisplayNumber(g, this.currentValue, digiFRect);
 
             //Paint the needle
             width = this.Width - x * 2;
             height = this.Height - y * 2;
             DrawPointer(g, ((width) / 2) + x, ((height) / 2) + y);
+             */
         }
         /// <summary>
         /// Returns the area covered by the gauge control
         /// </summary>
         /// <returns></returns>
-        public override System.Drawing.Rectangle toRegion()
+        public override Rectangle toRegion()
         {
             return new Rectangle(controlLeft, controlTop, controlWidth, controlHeight);
         }

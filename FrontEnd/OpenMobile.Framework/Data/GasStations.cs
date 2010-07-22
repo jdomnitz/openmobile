@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using Mono.Data.Sqlite;
-using System.Windows.Forms;
 using System.Text;
 using OpenMobile.helperFunctions;
 
@@ -79,7 +78,7 @@ namespace OpenMobile.Data
         /// </summary>
         public void purgeOld()
         {
-            SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Application.StartupPath, "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             SqliteCommand cmd = con.CreateCommand();
             cmd.CommandText = "DELETE FROM gasRegions WHERE  StationID IN (SELECT GUID FROM gasStations WHERE dateAdded<date('now','-4 days'))";
             con.Open();

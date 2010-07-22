@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Data;
@@ -48,13 +47,13 @@ namespace OMSettings
             menu.ListStyle = eListStyle.MultiList;
             menu.Background = Color.Silver;
             menu.ItemColor1 = Color.Black;
-            menu.Font = new Font(FontFamily.GenericSansSerif, 30F);
+            menu.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 30F);
             menu.Color = Color.White;
             menu.HighlightColor = Color.White;
             menu.SelectedItemColor1 = Color.DarkBlue;
             OMListItem.subItemFormat format=new OMListItem.subItemFormat();
             format.color=Color.FromArgb(128,Color.White);
-            format.font = new Font(FontFamily.GenericSansSerif, 21F);
+            format.font = new Font(System.Drawing.FontFamily.GenericSansSerif, 21F);
             menu.Add(new OMListItem("General Settings", "User Interface and System Settings",format));
             menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords", format));
             menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers", format));
@@ -199,7 +198,7 @@ namespace OMSettings
             Textbox3.Name = "Textbox3";
             OMLabel caption = new OMLabel(0, 100, 1000, 60);
             caption.OutlineColor = Color.Green;
-            caption.Font = new Font(FontFamily.GenericSansSerif, 36);
+            caption.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 36);
             caption.Format = eTextFormat.Glow;
             caption.Name = "caption";
             zone.addControl(Save);
@@ -310,7 +309,7 @@ namespace OMSettings
             lstplugins.ListStyle = eListStyle.MultiList;
             lstplugins.Background = Color.Silver;
             lstplugins.ItemColor1 = Color.Black;
-            lstplugins.Font = new Font(FontFamily.GenericSansSerif, 30F);
+            lstplugins.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 30F);
             lstplugins.Color = Color.White;
             lstplugins.HighlightColor = Color.White;
             lstplugins.SelectedItemColor1 = Color.DarkBlue;

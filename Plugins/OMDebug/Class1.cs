@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Windows.Forms;
 using OpenMobile;
 using OpenMobile.Controls;
+using OpenMobile.Graphics;
 
 namespace OMDebug
 {
@@ -78,11 +79,13 @@ namespace OMDebug
             writer.WriteLine("------------------Software-------------------");
             writer.WriteLine("OS: " + OpenMobile.Framework.OSSpecific.getOSVersion());
             writer.WriteLine("Framework: " + OpenMobile.Framework.OSSpecific.getFramework());
-            writer.WriteLine("Open Mobile: v" + Application.ProductVersion);
+            writer.WriteLine("Open Mobile: v" + System.Windows.Forms.Application.ProductVersion);
+            writer.WriteLine("Open GL v."+Graphics.Version);
             writer.WriteLine("------------------Hardware-------------------");
             writer.WriteLine("Processors: " + Environment.ProcessorCount);
             writer.WriteLine("Architecture: x" + ((IntPtr.Size == 4) ? "86" : "64"));
             writer.WriteLine("Screens: " + Screen.AllScreens.Length.ToString());
+            writer.WriteLine("Graphics Card: " + Graphics.GraphicsEngine);
             writer.WriteLine("----------------Inital Assemblies-------------");
             time = Environment.TickCount;
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
@@ -90,8 +93,8 @@ namespace OMDebug
             writer.WriteLine("---------------------------------------------");
             AppDomain.CurrentDomain.AssemblyLoad += new AssemblyLoadEventHandler(CurrentDomain_AssemblyLoad);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-            Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
-            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            System.Windows.Forms.Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
+            System.Windows.Forms.Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             theHost.OnMediaEvent += new MediaEvent(theHost_OnMediaEvent);
             theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
             theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
@@ -126,6 +129,8 @@ namespace OMDebug
 
         void theHost_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
         {
+            if ((function == eFunction.userInputReady) || (function == eFunction.gesture))
+                return; //Protect Users Privacy - Potentially contain password info
             log(function.ToString() + "(" + arg1 + "," + arg2 + "," + arg3 + ")");
         }
 

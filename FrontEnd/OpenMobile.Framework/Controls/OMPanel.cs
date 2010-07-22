@@ -20,7 +20,7 @@
 *********************************************************************************/
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.Controls
 {

@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using OpenMobile.Graphics;
-using System.Drawing;
 using System.IO;
 using OpenMobile;
 using OpenMobile.Controls;

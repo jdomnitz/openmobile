@@ -24,12 +24,12 @@ using System.IO;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Threading;
-using System.Windows.Forms;
 using Microsoft.Win32;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
 using OpenMobile.Framework;
 using System.Diagnostics;
+using OpenMobile.Graphics;
 
 namespace OpenMobile
 {
@@ -304,7 +304,6 @@ namespace OpenMobile
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(theHost.NetworkChange_NetworkAvailabilityChanged);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
             OpenMobile.Threading.TaskManager.Enable(Core.theHost); //Start executing background tasks
-            SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(theHost.SystemEvents_PowerModeChanged);
             SystemEvents.SessionEnding += new SessionEndingEventHandler(theHost.SystemEvents_SessionEnding);
             SystemEvents.DisplaySettingsChanged+=new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);
             if (OpenMobile.Net.Network.IsAvailable==true)
@@ -317,16 +316,12 @@ namespace OpenMobile
                 if (settings.getSetting("UI.MinGraphics") == "True")
                     theHost.GraphicsLevel = eGraphicsLevel.Minimal;
             }
-            if (!OSSpecific.IsMono())
-                if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
-                    theHost.SystemEvents_PowerModeChanged(null, new PowerModeChangedEventArgs(PowerModes.StatusChange));
             foreach (DriveInfo drive in DriveInfo.GetDrives())
                 if (drive.DriveType == DriveType.CDRom)
                     if (drive.IsReady == true)
                         theHost.RaiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
             pluginCollection.TrimExcess();
             ThreadPool.SetMaxThreads(50, 500);
-            Application.Run();
         }
         static bool ErroredOut;
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -338,9 +333,8 @@ namespace OpenMobile
             if (theHost.hal!=null)
                 theHost.hal.close();
             string strEx = spewException(ex);
-            Clipboard.SetText(strEx);
             ErrorReporting reporting=new ErrorReporting(strEx);
-            reporting.ShowDialog(Form.FromHandle(RenderingWindows[0].getHandle()));
+            reporting.ShowDialog(System.Windows.Forms.Form.FromHandle(RenderingWindows[0].getHandle()));
             if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>0) //Prevent Loops
                 theHost.execute(eFunction.restartProgram);
         }
@@ -370,6 +364,7 @@ namespace OpenMobile
                 }
             }
             // Initialize screens
+            //DisplayDevice.AvailableDisplays.Count;
             RenderingWindows = new List<RenderingWindow>(1); //TODO - Multi-screen
             for (int i = 0; i < RenderingWindows.Capacity; i++)
                 RenderingWindows.Add(new RenderingWindow(i));
@@ -382,7 +377,7 @@ namespace OpenMobile
                 if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
                 {
                     System.Windows.Forms.MessageBox.Show("A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.");
-                    Application.Exit();
+                    Environment.Exit(0);
                     return;
                 }
             }
@@ -408,7 +403,7 @@ namespace OpenMobile
                     {
                         try
                         {
-                            RenderingWindows[i].Size = new System.Drawing.Size(int.Parse(part[0]), int.Parse(part[1]));
+                            RenderingWindows[i].Size = new Size(int.Parse(part[0]), int.Parse(part[1]));
                         }
                         catch (ArgumentException) { break; }
                     }

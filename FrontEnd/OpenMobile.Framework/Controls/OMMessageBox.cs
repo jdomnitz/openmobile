@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using OpenMobile.Graphics;
 using OpenMobile;
@@ -116,7 +115,7 @@ namespace OpenMobile.Controls
             float letterHeight = g.MeasureString("A", Font).Height+1;
             height += (int)letterHeight;
             Rectangle r = new Rectangle(this.Left, top, this.Width, height);
-            g.FillRoundRectangle(new LinearGradientBrush(r, Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), LinearGradientMode.Vertical), r,20);
+            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), Gradient.Vertical), r,20);
             g.DrawRoundRectangle(new Pen(borderColor, borderWidth), r, 20);
             if (textTexture==null)
                 g.GenerateTextTexture(this.Left, top, this.Width, (int)letterHeight, title,this.Font, this.Format, this.TextAlignment, this.Color,this.OutlineColor);
