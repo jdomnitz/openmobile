@@ -290,9 +290,11 @@ namespace OpenMobile
                 history.Enqueue(i, "MainMenu", "", false);
             for (int i = 0; i < 8; i++)
                 queued[i] = new List<mediaInfo>();
+        }
+        public void load()
+        {
             SandboxedThread.Asynchronous(loadPlaylists);
         }
-
         public void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
         {
             foreach (System.Net.IPAddress i in System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName()))

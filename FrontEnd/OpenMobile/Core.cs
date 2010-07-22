@@ -294,19 +294,6 @@ namespace OpenMobile
         {
             //Uncomment these to time the startup
             //DateTime start = DateTime.Now;
-            if (Directory.Exists(theHost.DataPath) == false)
-                Directory.CreateDirectory(theHost.DataPath);
-            if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
-            {
-                using (PluginSettings settings = new PluginSettings())
-                    settings.createDB();
-                if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
-                {
-                    System.Windows.Forms.MessageBox.Show("A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.");
-                    Application.Exit();
-                    return;
-                }
-            }
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             loadMainMenu();
@@ -383,9 +370,23 @@ namespace OpenMobile
                 }
             }
             // Initialize screens
-            RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
+            RenderingWindows = new List<RenderingWindow>(1); //TODO - Multi-screen
             for (int i = 0; i < RenderingWindows.Capacity; i++)
                 RenderingWindows.Add(new RenderingWindow(i));
+            if (Directory.Exists(theHost.DataPath) == false)
+                Directory.CreateDirectory(theHost.DataPath);
+            if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
+            {
+                using (PluginSettings settings = new PluginSettings())
+                    settings.createDB();
+                if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
+                {
+                    System.Windows.Forms.MessageBox.Show("A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.");
+                    Application.Exit();
+                    return;
+                }
+            }
+            theHost.load();
             Thread rapidMenu=new Thread(new ThreadStart(Core.initialize));
             rapidMenu.Start();
             if (Environment.GetCommandLineArgs().Length > 1)
