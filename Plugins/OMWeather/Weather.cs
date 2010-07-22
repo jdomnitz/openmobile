@@ -28,6 +28,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using OpenMobile.Data;
+using OpenMobile.Graphics;
 
 [assembly: AssemblyTitle("OMWeather")]
 [assembly: AssemblyDescription("Weather plugin for openMobile")]
@@ -375,14 +376,6 @@ namespace ControlDemo
             widget = null;
         }
 
-        #region IBasePlugin Members
-
-
-        public Settings loadSettings()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
+      
     }
 }

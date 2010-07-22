@@ -41,6 +41,7 @@ Public Class SerialAmpControl
     End Function
 
     Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements OpenMobile.Plugin.IBasePlugin.initialize
+        LoadPortSettings()
         If Not m_ComPort = "-1" Then
             m_Host = host
             m_Port = New SerialPort(m_ComPort)
@@ -77,7 +78,7 @@ Public Class SerialAmpControl
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
 
         If m_Settings Is Nothing Then
-            LoadRadioSettings()
+            LoadPortSettings()
 
             m_Settings = New Settings("Serial Amp Control")
 
@@ -102,7 +103,7 @@ Public Class SerialAmpControl
         End Using
     End Sub
 
-    Private Sub LoadRadioSettings()
+    Private Sub LoadPortSettings()
         Dim Settings As New OpenMobile.Data.PluginSettings
         If String.IsNullOrEmpty(Settings.getSetting("SerialAmpControl.ComPort")) Then
             SetDefaultSettings()
