@@ -108,7 +108,7 @@ namespace OMDir
             manager = new ScreenManager(theHost.ScreenCount);
             OMLabel caption = new OMLabel(275, 95, 400, 60);
             caption.OutlineColor = Color.FromArgb(120, Color.PowderBlue);
-            caption.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 34F);
+            caption.Font = new Font(Font.GenericSansSerif, 34F);
             caption.Format = eTextFormat.Glow;
             OMButton top = new OMButton(795, 101, 180, 40);
             top.Text = "Up One Level";
@@ -124,7 +124,7 @@ namespace OMDir
             select.OnClick += new userInteraction(select_OnClick);
             select.Visible = false;
             OMList right = new OMList(510, 150, 470, 375);
-            right.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 28F);
+            right.Font = new Font(Font.GenericSansSerif, 28F);
             right.OnClick += new userInteraction(right_OnClick);
             right.ListStyle = eListStyle.DroidStyleImage;
             right.Background = Color.FromArgb(180,Color.LightGray);

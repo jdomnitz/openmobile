@@ -40,7 +40,7 @@ namespace OpenMobile.Controls
         protected OpenMobile.Graphics.eTextFormat textFormat = OpenMobile.Graphics.eTextFormat.Normal;
         protected OpenMobile.Graphics.Alignment textAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
         protected Color color = Color.White;
-        protected Font font = new Font(System.Drawing.FontFamily.GenericSansSerif, 18F);
+        protected Font font = new Font(Font.GenericSansSerif, 18F);
         protected Color outlineColor = Color.Black;
 
         /// <summary>

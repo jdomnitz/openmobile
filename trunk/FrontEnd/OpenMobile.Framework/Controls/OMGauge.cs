@@ -297,7 +297,7 @@ namespace OpenMobile.Controls
                 refreshMe(this.toRegion());
             }
         }
-        Font font=new Font(System.Drawing.FontFamily.GenericSansSerif,13F);
+        Font font=new Font(Font.GenericSansSerif,13F);
         /// <summary>
         /// The gauge font
         /// </summary>

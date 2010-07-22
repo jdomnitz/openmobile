@@ -244,7 +244,7 @@ namespace OpenMobile
             elapsed.Name = "UI.Elapsed";
             elapsed.OutlineColor = Color.Blue;
             elapsed.Format = eTextFormat.Glow;
-            elapsed.Font = new Font(System.Drawing.FontFamily.GenericSansSerif,26F);
+            elapsed.Font = new Font(Font.GenericSansSerif,26F);
             OMButton random = new OMButton(840, 650, 55, 40);
             random.Image = theHost.getSkinImage("random");
             random.DownImage = theHost.getSkinImage("random.Highlighted");
@@ -254,7 +254,7 @@ namespace OpenMobile
             imgSpeak.Name = "UI.imgSpeak";
             imgSpeak.Visible = false;
             OMLabel caption = new OMLabel(300, 150, 400, 50);
-            caption.Font = new Font(System.Drawing.FontFamily.GenericSerif, 48F);
+            caption.Font = new Font(Font.GenericSerif, 48F);
             caption.Format = eTextFormat.BoldShadow;
             caption.Visible = false;
             caption.Name = "UI.caption";
