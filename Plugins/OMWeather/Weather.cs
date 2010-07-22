@@ -20,15 +20,12 @@
 *********************************************************************************/
 using OpenMobile;
 using OpenMobile.Controls;
-using OpenMobile.Plugin;
+using OpenMobile.Data;
 using OpenMobile.Framework;
+using OpenMobile.Graphics;
+using OpenMobile.Plugin;
 using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Drawing;
-using OpenMobile.Data;
-using OpenMobile.Graphics;
 
 [assembly: AssemblyTitle("OMWeather")]
 [assembly: AssemblyDescription("Weather plugin for openMobile")]
@@ -217,7 +214,7 @@ namespace ControlDemo
             day5low.Name = "day5low";
             OMLabel provider = new OMLabel(300, 560, 120, 30);
             provider.Text = "Provided by:";
-            provider.Font = new Font(FontFamily.GenericSansSerif, 12F);
+            provider.Font = new Font(System.Drawing.FontFamily.GenericSansSerif, 12F);
             OMImage attrib = new OMImage(420,550, 120, 50);
             p.addControl(Title);
             p.addControl(day1high);
@@ -323,10 +320,7 @@ namespace ControlDemo
 
         public OMPanel loadPanel(string name, int screen)
         {
-            if (name != "Widget")
-                return widget;
-            else
-                return p;
+            return p;
         }
 
         public OMPanel loadSettings(string name, int screen)
@@ -375,7 +369,5 @@ namespace ControlDemo
             p = null;
             widget = null;
         }
-
-      
     }
 }
