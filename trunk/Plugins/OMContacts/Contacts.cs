@@ -25,6 +25,7 @@ using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
+using OpenMobile.Graphics;
 
 namespace OMContacts
 {
@@ -143,11 +144,11 @@ namespace OMContacts
                 contact c=con.readNext(true);
                 while (c.name!=null)
                 {
-                    Image img;
+                    OImage img;
                     if (c.imageURL=="")
                         img=theHost.getSkinImage("questionMark").image;
                     else
-                        img=Image.FromFile(c.imageURL);
+                        img=OImage.FromFile(c.imageURL);
                     l.Add(new OMListItem(c.name,img));
                     c = con.readNext(true);
                 }
@@ -206,14 +207,5 @@ namespace OMContacts
             //
         }
 
-        #region IBasePlugin Members
-
-
-        public Settings loadSettings()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
     }
 }
