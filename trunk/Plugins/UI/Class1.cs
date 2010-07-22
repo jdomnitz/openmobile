@@ -706,7 +706,7 @@ namespace OpenMobile
                 }
                 timerIteration++;
                 if (theHost.GraphicsLevel==eGraphicsLevel.Standard)
-                    Thread.Sleep(50);
+                    Thread.Sleep(40);
             }
         }
 
@@ -836,7 +836,7 @@ namespace OpenMobile
                             if ((cover.Image.image!=null)&&(cover.Height < cover.Width))
                             {
                                 cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
-                                cover.Top = 2 + (85 - cover.Image.image.Height) / 2;
+                                cover.Top = 2 + (85 - cover.Height) / 2;
                             }
                         }
                         ((OMButton)p[10]).Image = theHost.getSkinImage("Pause");

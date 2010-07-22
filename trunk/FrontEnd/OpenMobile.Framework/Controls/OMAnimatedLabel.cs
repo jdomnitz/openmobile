@@ -245,6 +245,8 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (value == null)
+                    value = ""; 
                 lock (this)
                 {
                     currentAnimation = animation;
@@ -314,6 +316,7 @@ namespace OpenMobile.Controls
             text = newText;
             veilRight = Width;
             tempTransition = effect;
+            textTexture = oldTexture = null;
             currentAnimation = animation;
             if (oldTick==0)
                 oldTick = t.Interval;
@@ -321,6 +324,7 @@ namespace OpenMobile.Controls
             t.Enabled = true;
         }
         string oldText = null;
+        OImage oldTexture;
         eAnimation tempTransition;
         int scrollPos = 0;
         float avgChar = 1;
@@ -373,19 +377,17 @@ namespace OpenMobile.Controls
                     Rectangle old = g.Clip;
                     if ((animation==eAnimation.None)||(animation == eAnimation.UnveilRight) || (animation == eAnimation.UnveilLeft))
                     {
-                        //TODO - Re-enable when clip is fixed
-                        //g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
+                        g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
                         StringFormat format = new StringFormat(StringFormatFlags.NoWrap);
                         if (textTexture==null)
-                            textTexture=g.GenerateTextTexture(left, top, width, height, text, font, textFormat, textAlignment, color, outlineColor);
+                            textTexture=g.GenerateTextTexture(0,0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
                         g.DrawImage(textTexture, left, top, width, height, tmp);
                         if (tempTransition != eAnimation.None)
                         {
-                            //TODO - Re-enable when clip is fixed
-                            //g.SetClip(new Rectangle(left+(width-veilRight), top, veilRight, height));
-                            if (textTexture==null)
-                                textTexture=g.GenerateTextTexture(left, top, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
-                            g.DrawImage(textTexture, left, top, width, height, tmp);
+                            g.SetClip(new Rectangle(left+(width-veilRight), top, veilRight, height));
+                            if (oldTexture==null)
+                                oldTexture=g.GenerateTextTexture(0,0, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
+                            g.DrawImage(oldTexture, left, top, width, height, tmp);
                         }
                     }
                     else
