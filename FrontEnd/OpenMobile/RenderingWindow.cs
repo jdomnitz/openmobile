@@ -780,7 +780,7 @@ namespace OpenMobile
         #region OtherUIEvents
         protected override void OnLoad(EventArgs e)
         {
-            g.Initialize();
+            g.Initialize(screen);
             base.OnLoad(e);
         }
         private void RenderingWindow_FormClosing(object sender,CancelEventArgs e)
