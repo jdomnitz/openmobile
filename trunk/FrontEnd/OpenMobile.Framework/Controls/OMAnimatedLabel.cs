@@ -315,8 +315,8 @@ namespace OpenMobile.Controls
             text = newText;
             veilRight = Width;
             tempTransition = effect;
-            textTexture = oldTexture = null;
             currentAnimation = animation;
+            textTexture = oldTexture = null;
             if (oldTick==0)
                 oldTick = t.Interval;
             t.Interval = tick;
@@ -397,9 +397,9 @@ namespace OpenMobile.Controls
                             scrollPos = 0;
                         }
                         g.SetClip(new Rectangle(left,top,width,height));
-                        if (textTexture==null)
-                            g.GenerateTextTexture(0,0, (int)(text.Length * (avgChar+1)), height,text,font,textFormat,textAlignment,color,outlineColor);
-                        g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, (int)(text.Length * (avgChar + 1)), height, tmp);
+                        if (textTexture == null)
+                            textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
+                        g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, width, height, tmp); 
                     }
                     g.SetClip(old);
                     return;
