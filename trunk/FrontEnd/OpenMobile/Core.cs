@@ -78,6 +78,7 @@ namespace OpenMobile
             for (int i = 0; i <RenderingWindows.Count; i++)
             {
                 RenderingWindows[i].transitionInPanel(availablePlugin.loadPanel("", i));
+                RenderingWindows[i].executeTransition(eGlobalTransition.None);
                 RenderingWindows[i].transitionInPanel(mmPlugin.loadPanel("", i));
                 theHost.raiseSystemEvent(eFunction.TransitionToPanel, i.ToString(), "MainMenu", "");
                 if (a.Length==0)

@@ -126,7 +126,9 @@ namespace OpenMobile
 
         public OMPanel loadPanel(string name,int screen)
         {
-            return manager[screen];
+            if (name == "")
+                theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"UI", "background");
+            return manager[screen,name];
         }
 
         public Settings loadSettings()
@@ -141,7 +143,7 @@ namespace OpenMobile
         ScreenManager manager;
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel p = new OMPanel();
+            OMPanel p = new OMPanel("");
             theHost = host;
             manager = new ScreenManager(host.ScreenCount);
             tick.BeginInit();
@@ -306,12 +308,14 @@ namespace OpenMobile
             p.addControl(volume);
             p.addControl(vol); //27
             icons.OnIconsChanged += new IconManager.IconsChanged(icons_OnIconsChanged);
-
-            p.BackgroundType = backgroundStyle.Gradiant;
-            p.BackgroundColor1 = Color.FromArgb(0, 0, 4);
-            p.BackgroundColor2 = Color.FromArgb(0, 0, 20);
+            p.Priority = ePriority.High;
             theHost.RenderFirst = p.controlCount;
             manager.loadPanel(p);
+            OMPanel background = new OMPanel("background");
+            background.BackgroundType = backgroundStyle.Gradiant;
+            background.BackgroundColor1 = Color.FromArgb(0, 0, 4);
+            background.BackgroundColor2 = Color.FromArgb(0, 0, 20);
+            manager.loadPanel(background);
             theHost.OnMediaEvent += theHost_OnMediaEvent;
             theHost.OnSystemEvent += theHost_OnSystemEvent;
             theHost.VideoPosition = new Rectangle(0, 100, 1000, 368);
