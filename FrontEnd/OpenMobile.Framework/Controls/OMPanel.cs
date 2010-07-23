@@ -150,7 +150,32 @@ namespace OpenMobile.Controls
         {
             return containedControls.Find(p => p.Name == name);
         }
-
+        public eModeType Mode = eModeType.Normal;
+        public void Render(Graphics.Graphics g, renderingParams e)
+        {
+            float tmp = 1F;
+            if (Mode == eModeType.transitioningIn)
+                tmp = e.globalTransitionIn;
+            else if (Mode == eModeType.transitioningOut)
+                tmp = e.globalTransitionOut;
+            switch (BackgroundType)
+            {
+                case backgroundStyle.Gradiant:
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp*BackgroundColor1.A),BackgroundColor1), Color.FromArgb((int)(tmp*BackgroundColor2.A),BackgroundColor2), Gradient.Vertical), 0, 0, 1000, 600);
+                    break;
+                case backgroundStyle.SolidColor:
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp*BackgroundColor1.A), BackgroundColor1)),0,0,1000,600);
+                    break;
+                case backgroundStyle.Image:
+                    if (BackgroundImage.image != null)
+                        g.DrawImage(BackgroundImage.image, new Rectangle(0, 0, 1000, 600), 0, 0, BackgroundImage.image.Width, BackgroundImage.image.Height,tmp);
+                    break;
+            }
+            for (int i = 0; i < containedControls.Count; i++)
+                if (containedControls[i].Visible)
+                    containedControls[i].Render(g, e);
+        }
+        public ePriority Priority;
         /// <summary>
         /// Removes the given control from this panel
         /// </summary>

@@ -213,7 +213,7 @@ namespace OpenMobile
                     c.Mode = eModeType.transitionLock;
                 }
             }
-            p.DoubleClickable |= newP.DoubleClickable;
+            newP.Mode = eModeType.transitioningIn;
             backgroundQueue.Add(newP);
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;
@@ -239,8 +239,8 @@ namespace OpenMobile
             for (int i = Core.theHost.RenderFirst; i < p.controlCount; i++)
                 if (p.getControl(i).Mode != eModeType.transitionLock)
                     p[i].Mode = eModeType.transitioningOut;
-            for (int i = backgroundQueue.Count - 1; i > 0; i--)
-                backgroundQueue.RemoveAt(i);
+            for (int i = backgroundQueue.Count - 1; i > 1; i--)
+                backgroundQueue[i].Mode = eModeType.transitioningOut;
             for (int i = 0; i < backgroundQueue.Count; i++)
                 p.DoubleClickable |= backgroundQueue[i].DoubleClickable;
             rParam.globalTransitionIn = 0;
@@ -254,7 +254,7 @@ namespace OpenMobile
             for (int i = 0; i < oldP.controlCount; i++)
                 if (oldP.getControl(i).Mode != eModeType.transitionLock)
                     oldP[i].Mode = eModeType.transitioningOut;
-            backgroundQueue.Remove(oldP);
+            oldP.Mode = eModeType.transitioningOut;
             for (int i = 0; i < backgroundQueue.Count; i++)
                 p.DoubleClickable |= backgroundQueue[i].DoubleClickable;
             rParam.globalTransitionIn = 0;
@@ -291,6 +291,9 @@ namespace OpenMobile
                 else
                     p.getControl(i).Mode = eModeType.Normal;
             }
+            backgroundQueue.RemoveAll(q => q.Mode == eModeType.transitioningOut);
+            for (int i = 0; i < backgroundQueue.Count; i++)
+                backgroundQueue[i].Mode = eModeType.Normal;
             if (transType > eGlobalTransition.Crossfade)
             {
                 tick = 0;
@@ -310,7 +313,6 @@ namespace OpenMobile
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            OnPaintBackground();
             OnPaint();
             if ((currentGesture!=null)&&(currentGesture.Count > 0))
                 RenderGesture();
@@ -336,24 +338,19 @@ namespace OpenMobile
             lock (painting)
             {
                 //Render everything under the UI
-                for (int i = Core.theHost.RenderFirst; i < p.controlCount; i++)
-                    if (inBounds(p[i].toRegion(), g.Clip))
+                foreach(ePriority priority in Enum.GetValues(typeof(ePriority)))
+                {
+                    foreach (OMPanel panel in backgroundQueue.FindAll(q => q.Priority == priority))
                     {
-                        if (p[i].Mode == eModeType.transitioningIn)
+                        if (panel.Mode == eModeType.transitioningIn)
                             modifyIn(g);
-                        else if ((p[i].Mode == eModeType.transitioningOut) || (p[i].Mode == eModeType.ClickedAndTransitioningOut))
+                        else if (panel.Mode == eModeType.transitioningOut)
                             modifyOut(g);
                         else
                             modifyNeutral(g);
-                        if (p[i].Visible)
-                            p[i].Render(g, rParam);
+                        panel.Render(g, rParam);
                     }
-                modifyNeutral(g);
-                //Render the UI
-                for (int i = 0; i < Core.theHost.RenderFirst; i++)
-                    if (inBounds(p[i].toRegion(), g.Clip))
-                        if (p[i].Visible)
-                            p[i].Render(g, rParam);
+                }
             }
         }
 
@@ -379,38 +376,6 @@ namespace OpenMobile
               (bounds.X < (control.X + control.Width)) &&
               (control.Y < (bounds.Y + bounds.Height)) &&
               (bounds.Y < control.Y + control.Height));
-        }
-
-        protected void OnPaintBackground()
-        {
-            int i;
-            for (i = backgroundQueue.Count - 1; i >= 0; i--)
-            {
-                if (backgroundQueue[i].BackgroundType == backgroundStyle.Image)
-                    break;
-                if (backgroundQueue[i].BackgroundType == backgroundStyle.None)
-                    continue;
-                if (backgroundQueue[i].BackgroundColor1.A > 250)
-                    break;
-            }
-            if (i == -1)
-                return;
-            for (; i < backgroundQueue.Count; i++)
-            {
-                switch (backgroundQueue[i].BackgroundType)
-                {
-                    case backgroundStyle.Gradiant:
-                        g.FillRectangle(new Brush(backgroundQueue[i].BackgroundColor1, backgroundQueue[i].BackgroundColor2,Gradient.Vertical), 0,0,1000,600);
-                        break;
-                    case backgroundStyle.SolidColor:
-                        g.Clear(backgroundQueue[i].BackgroundColor1);
-                        break;
-                    case backgroundStyle.Image:
-                        if (backgroundQueue[i].BackgroundImage.image != null)
-                            g.DrawImage(backgroundQueue[i].BackgroundImage.image , new Rectangle(0, 0, 1000,600), 0, 0, backgroundQueue[i].BackgroundImage.image.Width, backgroundQueue[i].BackgroundImage.image.Height);
-                        break;
-                }
-            }
         }
 
         #endregion
@@ -666,7 +631,7 @@ namespace OpenMobile
                             tmrMouse.Enabled = false;
                             tmrClick.Enabled = true;
                             lastClick.Mode = eModeType.Clicked;
-                            if (p.DoubleClickable == true)
+                            if (lastClick.Parent.DoubleClickable == true)
                                 SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.doubleClickMe(screen); lastClick.Mode = eModeType.Highlighted; });
                             else
                                 SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.clickMe(screen); });

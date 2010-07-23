@@ -227,10 +227,8 @@ public sealed class MainMenu : IHighLevel
             Cancel.Text = "Cancel";
             Cancel.Name = "UI.Cancel";
             Cancel.OnClick += new userInteraction(Cancel_OnClick);
-            OMBasicShape visibleShape = new OMBasicShape(0, 0, 1000, 600);
-            visibleShape.Shape = shapes.Rectangle;
-            visibleShape.FillColor = Color.FromArgb(130, Color.Black);
-            exit.addControl(visibleShape);
+            exit.BackgroundType = backgroundStyle.SolidColor;
+            exit.BackgroundColor1 = Color.FromArgb(130, Color.Black);
             exit.addControl(Image1);
             exit.addControl(Quit);
             exit.addControl(Sleep);
@@ -240,6 +238,7 @@ public sealed class MainMenu : IHighLevel
             exit.addControl(Restart);
             exit.addControl(Screen);
             exit.addControl(Cancel);
+            exit.Priority = ePriority.Urgent;
             screens.loadSharedPanel(exit);
             return eLoadStatus.LoadSuccessful;
         }
