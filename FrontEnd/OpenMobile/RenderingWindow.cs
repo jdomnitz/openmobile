@@ -107,18 +107,18 @@ namespace OpenMobile
             identify += new voiddel(paintIdentity);
             redraw += new voiddel(invokePaint);
         }
+        bool Identify = false;
         private void paintIdentity()
         {
             if (this.InvokeRequired)
                 this.Invoke(identify);
             else
             {
-                using (OImage identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(Font.GenericSansSerif, 300F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black))
-                {
-                    g.DrawImage(identity, 0, 0, 1000, 600);
-                    Thread.Sleep(1000);
-                    Invalidate();
-                }
+                Identify = true;
+                Invalidate();
+                Thread.Sleep(1500);
+                Identify = false;
+                Invalidate();
             }
         }
         public void invokePaint()
@@ -214,7 +214,8 @@ namespace OpenMobile
                 }
             }
             newP.Mode = eModeType.transitioningIn;
-            backgroundQueue.Add(newP);
+            if (!backgroundQueue.Contains(newP))
+                backgroundQueue.Add(newP);
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;
         }
@@ -241,8 +242,6 @@ namespace OpenMobile
                     p[i].Mode = eModeType.transitioningOut;
             for (int i = backgroundQueue.Count - 1; i > 1; i--)
                 backgroundQueue[i].Mode = eModeType.transitioningOut;
-            for (int i = 0; i < backgroundQueue.Count; i++)
-                p.DoubleClickable |= backgroundQueue[i].DoubleClickable;
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;
         }
@@ -310,12 +309,18 @@ namespace OpenMobile
         #endregion
 
         #region Overrides
-
+        OImage identity;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             OnPaint();
             if ((currentGesture!=null)&&(currentGesture.Count > 0))
                 RenderGesture();
+            if (Identify)
+            {
+                if (identity == null)
+                    identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
+                g.DrawImage(identity,0,0,1000,600);
+            }
             g.Finish();
             SwapBuffers();
             base.OnRenderFrame(e);
