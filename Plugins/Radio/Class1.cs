@@ -438,7 +438,7 @@ namespace OMRadio
             List_RadioStations.SelectedItemColor1 = Color.FromArgb(192, 192, 192);
             List_RadioStations.SelectedItemColor2 = Color.FromArgb(38, 37, 37);
             List_RadioStations.Name = "List_RadioStations";
-            List_RadioStations.Font = new Font(Font.GenericSansSerif, 24F);
+            List_RadioStations.Font = new Font(Font.GenericSansSerif, 30F);
             List_RadioStations.Add("No channels available");
             List_RadioStations.TextAlignment = Alignment.CenterLeft;
             List_RadioStations.OnClick += new userInteraction(List_RadioStations_OnClick);

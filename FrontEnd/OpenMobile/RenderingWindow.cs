@@ -501,7 +501,7 @@ namespace OpenMobile
                 {
                     if (currentGesture == null)
                     {
-                        if ((Math.Abs(e.X - ThrowStart.X) <= 10) && (Math.Abs(e.Y - ThrowStart.Y) <= 10))
+                        if ((Math.Abs(e.X - ThrowStart.X) <= (int)(20*widthScale)) && (Math.Abs(e.Y - ThrowStart.Y) <= (int)(20*heightScale)))
                             return;
                         currentGesture = new List<Point>();
                         rParam.currentMode = eModeType.gesturing;

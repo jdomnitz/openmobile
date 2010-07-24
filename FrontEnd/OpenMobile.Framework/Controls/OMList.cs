@@ -651,7 +651,7 @@ namespace OpenMobile.Controls
                             }
                             else
                             {
-                                if (items[i].textTex == null)
+                                if ((i<items.Count)&&(items[i].textTex == null))
                                 {
                                     if (targetWidth == 0)
                                         targetWidth = width;
