@@ -45,7 +45,7 @@ namespace OpenMobile
                 setLowercase(screen);
             if (name == "")
                 name = "OSK";
-            if ((name != "OSK") && (name != "NUM") && (name != "SYM"))
+            if ((name != "OSK") && (name != "NUMOSK") && (name != "SYM"))
             {
                 ((OMTextBox)manager[screen, "OSK"]["Text"]).Text = name;
                 name = "OSK";
@@ -129,6 +129,8 @@ namespace OpenMobile
             for (int i = 0; i < numKeyboard.controlCount; i++)
                 if (numKeyboard[i].GetType() == typeof(OMButton))
                     ((OMButton)numKeyboard[i]).OnClick += handler;
+                else
+                    ((OMTextBox)numKeyboard[i]).Flags = textboxFlags.NumericOnly;
             //Here we hook the keyboard in case characters are typed
             theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
@@ -161,6 +163,8 @@ namespace OpenMobile
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
                 OMTextBox text = (OMTextBox)manager[i]["Text"];
+                if (!text.hooked())
+                    text = (OMTextBox)manager[i, "NUMOSK"]["Text"];
                 if (text.hooked() == false)
                     continue;
                 if (type == eKeypressType.KeyUp)

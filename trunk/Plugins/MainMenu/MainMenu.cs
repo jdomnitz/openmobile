@@ -154,6 +154,7 @@ public sealed class MainMenu : IHighLevel
             OMList list = new OMList(235,150,450,295);
             list.Font = new Font(Font.GenericSansSerif, 26F);
             list.ListStyle = eListStyle.RoundedTextList;
+            list.Scrollbars = true;
             OMLabel title = new OMLabel(208,120,500,25);
             title.Text = "Select the panel to assign to this button";
             title.Format = eTextFormat.BoldShadow;
@@ -185,6 +186,7 @@ public sealed class MainMenu : IHighLevel
             Quit.Text = "Quit";
             Quit.Name = "UI.Quit";
             Quit.OnClick += new userInteraction(Quit_OnClick);
+            Quit.OnLongClick += new userInteraction(Quit_OnLongClick);
             OMButton Sleep = new OMButton(245,234,250,80);
             Sleep.Image = opt1;
             Sleep.FocusImage = opt2;
@@ -241,6 +243,13 @@ public sealed class MainMenu : IHighLevel
             exit.Priority = ePriority.Urgent;
             screens.loadSharedPanel(exit);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void Quit_OnLongClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
+            theHost.execute(eFunction.minimize,screen.ToString());
         }
 
         void Restart_OnClick(OMControl sender, int screen)

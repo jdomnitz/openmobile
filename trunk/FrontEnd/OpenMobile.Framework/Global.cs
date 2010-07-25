@@ -824,7 +824,10 @@ namespace OpenMobile
         /// Occurs when siganl strength, status, # of channels, etc changes
         /// </summary>
         tunerDataUpdated=58,
-        //Open Spot
+        /// <summary>
+        /// Minimize the rendering window
+        /// </summary>
+        minimize=59,
         //Tuned Content
         /// <summary>
         /// Tune to the given statioin

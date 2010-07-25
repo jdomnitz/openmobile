@@ -385,7 +385,7 @@ namespace OpenMobile
                     savePlaylists();
                     raiseSystemEvent(eFunction.closeProgram, "", "", "");
                     hal.close();
-                    Process.Start(Process.GetCurrentProcess().StartInfo);
+                    System.Windows.Forms.Application.Restart();
                     Environment.Exit(0);
                     return true;
                 case eFunction.stopListeningForSpeech:
@@ -757,9 +757,6 @@ namespace OpenMobile
                     return Net.Connections.connect(this, arg);
                 case eFunction.disconnectFromInternet:
                     return Net.Connections.disconnect(this, arg);
-                //case eFunction.systemVolumeChanged:
-                //    raiseSystemEvent(eFunction.systemVolumeChanged, arg, "0", "");
-                //    return true;
                 case eFunction.setSystemVolume:
                     return execute(eFunction.setSystemVolume, arg, "0");
                 case eFunction.TransitionFromAny:
@@ -810,6 +807,13 @@ namespace OpenMobile
                 case eFunction.settingsChanged:
                     raiseSystemEvent(eFunction.settingsChanged, arg, "", "");
                     return true;
+                case eFunction.minimize:
+                    if (int.TryParse(arg, out ret))
+                    {
+                        Core.RenderingWindows[ret].WindowState = WindowState.Minimized;
+                        return true;
+                    }
+                    return false;
             }
             return false;
         }
