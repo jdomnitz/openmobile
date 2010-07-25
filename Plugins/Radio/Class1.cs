@@ -317,6 +317,14 @@ namespace OMRadio
             Button_ChannelListSource.Text = "List\nsource";
             panelMain.addControl(Button_ChannelListSource);
 
+            OMButton Button_TuneTo = new OMButton(10, Button_ChannelListSource.Top + Button_ChannelListSource.Height + 10, 150, 70);
+            Button_TuneTo.Name = "Button_TuneTo";
+            Button_TuneTo.Image = theHost.getSkinImage("Full");
+            Button_TuneTo.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            Button_TuneTo.OnClick += new userInteraction(Button_TuneTo_OnClick);
+            Button_TuneTo.Transition = eButtonTransition.None;
+            Button_TuneTo.Text = "Direct\nTune";
+            panelMain.addControl(Button_TuneTo);
             #endregion
 
             #region RadioInfo field
@@ -589,6 +597,14 @@ namespace OMRadio
             manager.loadPanel(panelListView);
             manager.loadPanel(panelMessageBox);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void Button_TuneTo_OnClick(OMControl sender, int screen)
+        {
+            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+            string newStation=input.getNumber(screen, "Radio");
+            //TODO - Actually get and use the proper band
+            theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), "FM:" + newStation);
         }
 
         void Button_No_OnClick(OMControl sender, int screen)

@@ -79,11 +79,8 @@ namespace OpenMobile.Controls
         /// </summary>
         public void clickMe(int screen)
         {
-            try
-            {
+            if (OnClick!=null)
                 OnClick(this, screen);
-            }
-            catch (Exception) { };//If no one has hooked the click event
         }
         /// <summary>
         /// Fires the OnDoubleClick Event
@@ -122,7 +119,7 @@ namespace OpenMobile.Controls
                 if ((flags&textboxFlags.NumericOnly)==textboxFlags.NumericOnly)
                 {
                     double tmp;
-                    if (double.TryParse(value,out tmp)==false)
+                    if ((value!="")&&(double.TryParse(value,out tmp)==false))
                         return;
                 }
                 if ((flags&textboxFlags.AlphabeticalOnly)==textboxFlags.AlphabeticalOnly)

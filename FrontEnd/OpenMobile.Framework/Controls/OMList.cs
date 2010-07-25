@@ -529,6 +529,12 @@ namespace OpenMobile.Controls
             get { return selectedItemColor2; }
             set { selectedItemColor2 = value; }
         }
+        private bool scrollbars;
+        public bool Scrollbars
+        {
+            get { return scrollbars; }
+            set { scrollbars = value; }
+        }
         /// <summary>
         /// Draws the control
         /// </summary>
@@ -549,12 +555,12 @@ namespace OpenMobile.Controls
                 g.SetClip(this.toRegion()); //But only draw out control
                 if (background != Color.Transparent)
                     g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)), new Rectangle(Left + 1, Top + 1, Width - 2, Height - 2));
+                
                 int minListHeight = (int)(g.MeasureString("A", Font).Height + 0.5); //Round up
                 if ((style == eListStyle.MultiList) && (items.Count > 0)&&(items[0].subitemFormat!=null))
                     minListHeight += (int)(g.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
                 if (listHeight < minListHeight)
                     listHeight = minListHeight;
-
                 if (selectQueued == true)
                     Select(selectedIndex);
 
@@ -671,6 +677,13 @@ namespace OpenMobile.Controls
                     }
                 }
                 g.Clip = r; //Reset the clip size for the rest of the controls
+                if ((scrollbars)&&(count<items.Count))
+                {
+                    int nheight = (int)(height * ((float)(height / listHeight) / items.Count));
+                    //TODO - Actually calculate ntop correctly
+                    int ntop = Top - (int)((moved*((float)items.Count-count+1)/items.Count));
+                    g.FillRoundRectangle(new Brush(color), new Rectangle(left + width - 2, ntop, 4, nheight), 3);
+                }
             }
         }
 
@@ -896,6 +909,7 @@ namespace OpenMobile.Controls
         private int lastSelected = -1;
         public virtual void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
+            throwtmr.Enabled = false;
             lastSelected = selectedIndex;
             Select(highlightedIndex, false, screen);
             if (selectedIndex == lastSelected)
