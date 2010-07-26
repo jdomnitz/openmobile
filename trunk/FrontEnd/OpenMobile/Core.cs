@@ -338,7 +338,7 @@ namespace OpenMobile
             string strEx = spewException(ex);
             ErrorReporting reporting=new ErrorReporting(strEx);
             reporting.ShowDialog(System.Windows.Forms.Form.FromHandle(RenderingWindows[0].getHandle()));
-            if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>0) //Prevent Loops
+            if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>1) //Prevent Loops
                 theHost.execute(eFunction.restartProgram);
         }
         private static string spewException(Exception e)
@@ -367,8 +367,7 @@ namespace OpenMobile
                 }
             }
             // Initialize screens
-            //DisplayDevice.AvailableDisplays.Count;
-            RenderingWindows = new List<RenderingWindow>(1); //TODO - Multi-screen
+            RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
             for (int i = 0; i < RenderingWindows.Capacity; i++)
                 RenderingWindows.Add(new RenderingWindow(i));
             if (Directory.Exists(theHost.DataPath) == false)
@@ -412,9 +411,8 @@ namespace OpenMobile
                     }
                 }
             }
-            //TODO
-            //for (int i = 1; RenderingWindows.Count; i++)
-            //    RenderingWindows[i].RunAsync(1);
+            for (int i = 1; i<RenderingWindows.Count; i++)
+                RenderingWindows[i].RunAsync(1);
             RenderingWindows[0].Run(1);
             RenderingWindows[0].Dispose();
             for (int i = 0; i < pluginCollection.Count;i++ )
