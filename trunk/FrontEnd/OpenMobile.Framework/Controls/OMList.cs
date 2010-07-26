@@ -682,7 +682,7 @@ namespace OpenMobile.Controls
                     int nheight = (int)(height * ((float)(height / listHeight) / items.Count));
                     //TODO - Actually calculate ntop correctly
                     int ntop = Top - (int)((moved*((float)items.Count-count+1)/items.Count));
-                    g.FillRoundRectangle(new Brush(color), new Rectangle(left + width - 2, ntop, 4, nheight), 3);
+                    g.FillRoundRectangle(new Brush(color), new Rectangle(left + width - 3, ntop, 6, nheight), 3);
                 }
             }
         }
