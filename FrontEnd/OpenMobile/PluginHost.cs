@@ -1324,7 +1324,7 @@ namespace OpenMobile
                         imageCache.Add(im);
                         return im;
                     }
-                    catch (System.IO.FileNotFoundException)
+                    catch (System.ArgumentException)
                     {
                         try
                         {
@@ -1333,7 +1333,7 @@ namespace OpenMobile
                             imageCache.Add(im);
                             return im;
                         }
-                        catch (System.IO.FileNotFoundException)
+                        catch (System.ArgumentException)
                         {
                             return imageItem.MISSING;
                         }

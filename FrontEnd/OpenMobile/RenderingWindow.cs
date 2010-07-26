@@ -159,6 +159,7 @@ namespace OpenMobile
                 this.invokePaint();
             else
             {
+                MakeCurrent();
                 g.ResetClip();
                 OnRenderFrame(new FrameEventArgs());
             }
@@ -234,7 +235,10 @@ namespace OpenMobile
                     c.Mode = eModeType.transitionLock;
                 }
             }
-            newP.Mode = eModeType.transitioningIn;
+            if (newP.Mode == eModeType.transitioningOut)
+                newP.Mode = eModeType.Normal;
+            else
+                newP.Mode = eModeType.transitioningIn;
             if (!backgroundQueue.Contains(newP))
                 backgroundQueue.Add(newP);
             rParam.globalTransitionIn = 0;
@@ -262,7 +266,10 @@ namespace OpenMobile
                 if (p.getControl(i).Mode != eModeType.transitionLock)
                     p[i].Mode = eModeType.transitioningOut;
             for (int i = backgroundQueue.Count - 1; i > 1; i--)
-                backgroundQueue[i].Mode = eModeType.transitioningOut;
+                if (backgroundQueue[i].Mode == eModeType.transitioningIn)
+                    backgroundQueue[i].Mode = eModeType.Normal;
+                else
+                    backgroundQueue[i].Mode = eModeType.transitioningOut;
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;
         }
@@ -274,9 +281,10 @@ namespace OpenMobile
             for (int i = 0; i < oldP.controlCount; i++)
                 if (oldP.getControl(i).Mode != eModeType.transitionLock)
                     oldP[i].Mode = eModeType.transitioningOut;
-            oldP.Mode = eModeType.transitioningOut;
-            for (int i = 0; i < backgroundQueue.Count; i++)
-                p.DoubleClickable |= backgroundQueue[i].DoubleClickable;
+            if (oldP.Mode == eModeType.transitioningIn)
+                oldP.Mode = eModeType.Normal;
+            else
+                oldP.Mode = eModeType.transitioningOut;
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;
         }

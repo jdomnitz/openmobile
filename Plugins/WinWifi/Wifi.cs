@@ -98,11 +98,11 @@ namespace WinWifi
             string ret = "802.11";
             if (Array.Exists(dot11PhyTypes,t=>t== Wlan.Dot11PhyType.OFDM))
                 ret+= "a";
-            else if (Array.Exists(dot11PhyTypes,t=>t==Wlan.Dot11PhyType.HRDSSS))
+            if (Array.Exists(dot11PhyTypes,t=>t==Wlan.Dot11PhyType.HRDSSS))
                 ret += "b";
-            else if (Array.Exists(dot11PhyTypes,t=>t==Wlan.Dot11PhyType.ERP))
+            if (Array.Exists(dot11PhyTypes,t=>t==Wlan.Dot11PhyType.ERP))
                 ret+= "g";
-            else if (Array.Exists(dot11PhyTypes,t=>t==Wlan.Dot11PhyType.HT))
+            if (Array.Exists(dot11PhyTypes,t=>t==Wlan.Dot11PhyType.HT))
                 ret += "n";
             if (ret == "802.11")
                 return "Unknown Type (" + dot11PhyTypes[0].ToString() + ")";
