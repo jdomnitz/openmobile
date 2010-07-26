@@ -89,18 +89,39 @@ namespace OpenMobile
             }
         }
 
+        public void RunAsync(double updateRate)
+        {
+            Thread t = new Thread(delegate()
+            {
+                NativeInitialize();
+                InitializeRendering();
+                this.Run(updateRate,0.0);
+            });
+            t.TrySetApartmentState(ApartmentState.STA);
+            t.Start();
+        }
+        public void Run(double updateRate)
+        {
+            NativeInitialize();
+            InitializeRendering();
+            Run(updateRate, 0.0);
+        }
         public IntPtr getHandle()
         {
             return this.WindowHandle;
         }
-        Graphics.Graphics g= new OpenMobile.Graphics.Graphics();
+        Graphics.Graphics g;
         public RenderingWindow(int s)
+        {
+            g = new OpenMobile.Graphics.Graphics(s);
+            this.screen = s;
+        }
+        public void InitializeRendering()
         {
             if (this.fullscreen)
                 Mouse.Location = this.Location;
-            this.screen = s;
-            if (s <= DisplayDevice.AvailableDisplays.Count - 1)
-                this.Bounds=new Rectangle(DisplayDevice.AvailableDisplays[s].Bounds.Location,new Size(720,450));
+            if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
+                this.Bounds=new Rectangle(DisplayDevice.AvailableDisplays[screen].Bounds.Location,new Size(720,450));
             InitializeComponent();
             this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
             hide += new voiddel(hideCursor);
@@ -271,6 +292,8 @@ namespace OpenMobile
                     Thread.Sleep(50);
                 }
             }
+            if (tmrMouse == null)
+                return;
             lock (painting)
             {
                 tmrMouse.Enabled = tmrClick.Enabled = false;
@@ -333,6 +356,7 @@ namespace OpenMobile
         }
         protected override void OnResize(EventArgs e)
         {
+            MakeCurrent();
             g.Resize(Width, Height);
             base.OnResize(e);
         }
