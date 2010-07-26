@@ -789,15 +789,12 @@ namespace OMPlayer
                 return -1;
             if (fullscreen == true)
             {
-                //TODO - FIX
-                /*
-                OpenMobile.NativeWindow f = (Form)Control.FromHandle(OMPlayer.theHost.UIHandle(screen()));
-                if (f.WindowState == FormWindowState.Maximized)
-                    return videoWindow.SetWindowPosition(0, 0, f.Width + 1, f.Height);
+                OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
+                OpenMobile.Platform.Windows.Functions.GetWindowInfo(OMPlayer.theHost.UIHandle(screen()),ref info);
+                if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
+                    return videoWindow.SetWindowPosition(0, 0, info.Window.Width - (info.Window.Width-info.Client.Width), info.Window.Height - (info.Window.Height-info.Client.Height));
                 else
-                    return videoWindow.SetWindowPosition(0, 0, f.Width - (f.Width-f.ClientSize.Width), f.Height - (f.Height-f.ClientSize.Height));
-                */
-                return 1;
+                    return videoWindow.SetWindowPosition(0, 0, info.Window.Width + 1, info.Window.Height);
             }
             else
             {

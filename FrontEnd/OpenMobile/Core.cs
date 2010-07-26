@@ -252,7 +252,8 @@ namespace OpenMobile
             {
                 try
                 {
-                    status[i]= pluginCollection[i].initialize(theHost);
+                    if (pluginCollection[i]!=null)
+                        status[i]= pluginCollection[i].initialize(theHost);
                 }
                 catch (Exception e)
                 {
