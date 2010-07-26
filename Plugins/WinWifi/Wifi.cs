@@ -141,8 +141,15 @@ namespace WinWifi
 
         public bool refresh()
         {
-            client.Interfaces[0].Scan();
-            return true;
+            try
+            {
+                client.Interfaces[0].Scan();
+                return true;
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                return false; //Adapter can't scan (powered off, broken, etc.)
+            }
         }
 
         public bool connect(OpenMobile.connectionInfo connection)

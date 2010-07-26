@@ -257,7 +257,7 @@ namespace Networking
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(100, Color.White);
             string name = c.NetworkName;
-            if (string.IsNullOrEmpty(name))
+            if ((string.IsNullOrEmpty(name))||(name=="\0"))
                 name = "Other Network";
             OMListItem ret= new OMListItem(name, c.ConnectionType.Replace('_',' '),icon,format);
             ret.tag = c.UID;
