@@ -661,11 +661,12 @@ namespace OpenMobile.Controls
                                 {
                                     if (targetWidth == 0)
                                         targetWidth = width;
-                                    //TODO - Target Height
+                                    if (targetHeight == 0)
+                                        targetHeight = listHeight;
                                     if ((selectedIndex == i) & ((mode == eModeType.Highlighted) || (!showSelectedItemOnlyOnFocus)))
-                                        items[i].textTex = g.GenerateTextTexture(0, 0, (int)(targetWidth - listViewItemOffset), (int)rect.Height, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
+                                        items[i].textTex = g.GenerateTextTexture(0, 0, (int)(targetWidth - listViewItemOffset), (int)targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
                                     else
-                                        items[i].textTex = g.GenerateTextTexture(0, 0, (int)(targetWidth - listViewItemOffset), (int)rect.Height, items[i].text, font, textFormat, textAlignment, color, color);
+                                        items[i].textTex = g.GenerateTextTexture(0, 0, (int)(targetWidth - listViewItemOffset), (int)targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
                                 }
                                 g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
                             }

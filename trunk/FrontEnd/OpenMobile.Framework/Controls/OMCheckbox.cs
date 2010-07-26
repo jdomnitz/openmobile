@@ -126,13 +126,13 @@ namespace OpenMobile.Controls
                     genHighlight = (Mode == eModeType.Highlighted);
                 }
                 g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height);
-                g.DrawRoundRectangle(new Pen(defaultBrush, 4.0F), new Rectangle(this.Left, this.Top, this.Height, this.Height),5);
+                g.DrawRoundRectangle(new Pen(defaultBrush, 3.0F), new Rectangle(this.Left, this.Top, this.Height, this.Height),5);
                 if (this.isChecked == true)
                 {
-                    g.DrawLine(new Pen(defaultBrush, 5.0F), new Point(this.Left+5, this.Top+5), new Point(this.Left + this.Height-5, this.Top + this.Height-5));
-                    g.DrawLine(new Pen(defaultBrush, 5.0F), new Point(this.Left+5, this.Top + this.Height-5), new Point(this.Left + this.Height-5, this.Top+5));
-                    g.DrawLine(new Pen(defaultBrush, 3.0F), new Point(this.Left + 4, this.Top + 4), new Point(this.Left + this.Height - 4, this.Top + this.Height - 4));
-                    g.DrawLine(new Pen(defaultBrush, 3.0F), new Point(this.Left + 4, this.Top + this.Height - 4), new Point(this.Left + this.Height - 4, this.Top + 4));
+                    g.DrawLine(new Pen(defaultBrush, 4.0F), new Point(this.Left+6, this.Top+6), new Point(this.Left + this.Height-6, this.Top + this.Height-6));
+                    g.DrawLine(new Pen(defaultBrush, 4.0F), new Point(this.Left+6, this.Top + this.Height-6), new Point(this.Left + this.Height-6, this.Top+6));
+                    g.DrawLine(new Pen(defaultBrush, 2.0F), new Point(this.Left + 5, this.Top + 5), new Point(this.Left + this.Height - 5, this.Top + this.Height - 5));
+                    g.DrawLine(new Pen(defaultBrush, 2.0F), new Point(this.Left + 5, this.Top + this.Height - 5), new Point(this.Left + this.Height - 5, this.Top + 5));
                 }
             }
         }
