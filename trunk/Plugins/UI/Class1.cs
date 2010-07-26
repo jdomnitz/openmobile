@@ -316,6 +316,7 @@ namespace OpenMobile
             background.BackgroundColor1 = Color.FromArgb(0, 0, 4);
             background.BackgroundColor2 = Color.FromArgb(0, 0, 20);
             background.Priority = ePriority.Low;
+            background.Forgotten = true;
             manager.loadPanel(background);
             theHost.OnMediaEvent += theHost_OnMediaEvent;
             theHost.OnSystemEvent += theHost_OnSystemEvent;
