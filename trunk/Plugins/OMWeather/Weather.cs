@@ -50,7 +50,7 @@ namespace ControlDemo
             imageItem opt1 = theHost.getSkinImage("Weather|NotSet");
             Font f = new Font(Font.GenericSansSerif, 36F);
             OMLabel Title = new OMLabel();
-            Title.Font = new Font("Playbill", 48F);
+            Title.Font = new Font(Font.Impact, 36F);
             Title.Width = 1000;
             Title.Top = 83;
             Title.Format = eTextFormat.DropShadow;

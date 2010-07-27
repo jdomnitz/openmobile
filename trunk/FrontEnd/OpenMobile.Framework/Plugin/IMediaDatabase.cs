@@ -77,6 +77,7 @@ namespace OpenMobile.Plugin
         /// List all songs (Added by Borte)
         /// </summary>
         /// <param name="covers"></param>
+        /// <param name="sortBy"></param>
         /// <returns></returns>
         bool beginGetSongs(bool covers,eMediaField sortBy);
         /// <summary>
@@ -84,6 +85,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="artist"></param>
         /// <param name="covers"></param>
+        /// <param name="sortBy"></param>
         /// <returns></returns>
         bool beginGetSongsByArtist(string artist, bool covers, eMediaField sortBy);
         /// <summary>
@@ -91,6 +93,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="genre"></param>
         /// <param name="covers"></param>
+        /// <param name="sortBy"></param>
         /// <returns></returns>
         bool beginGetSongsByGenre(string genre, bool covers, eMediaField sortBy);
         /// <summary>
@@ -98,6 +101,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="genre"></param>
         /// <param name="covers"></param>
+        /// <param name="sortBy"></param>
         /// <returns></returns>
         bool beginGetSongsByRating(string genre, bool covers, eMediaField sortBy);
         /// <summary>
@@ -106,6 +110,7 @@ namespace OpenMobile.Plugin
         /// <param name="artist"></param>
         /// <param name="album"></param>
         /// <param name="covers"></param>
+        /// <param name="sortBy"></param>
         /// <returns></returns>
         bool beginGetSongsByAlbum(string artist, string album, bool covers, eMediaField sortBy);
         /// <summary>
@@ -113,6 +118,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="phrase"></param>
         /// <param name="covers"></param>
+        /// <param name="sortBy"></param>
         /// <returns></returns>
         bool beginGetSongsByLyrics(string phrase, bool covers, eMediaField sortBy);
         /// <summary>

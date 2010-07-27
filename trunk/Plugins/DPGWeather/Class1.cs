@@ -352,6 +352,5 @@ namespace DPGWeather
         }
 
         #endregion
-
     }
 }

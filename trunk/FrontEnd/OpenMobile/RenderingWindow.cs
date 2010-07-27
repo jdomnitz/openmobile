@@ -290,6 +290,8 @@ namespace OpenMobile
         }
         public void executeTransition(eGlobalTransition transType)
         {
+            while (!this.Visible)
+                Thread.Sleep(10);
             if (transType != eGlobalTransition.None)
             {
                 currentTransition = transType;
@@ -300,11 +302,9 @@ namespace OpenMobile
                     Thread.Sleep(50);
                 }
             }
-            if (tmrMouse == null)
-                return;
             lock (painting)
             {
-                tmrMouse.Enabled = tmrClick.Enabled = false;
+                tmrClick.Enabled = false;
                 rParam.transparency = 1;
                 rParam.transitionTop = 0;
                 rParam.globalTransitionIn = 1;
@@ -321,7 +321,10 @@ namespace OpenMobile
                 else
                     p.getControl(i).Mode = eModeType.Normal;
             }
-            backgroundQueue.RemoveAll(q => q.Mode == eModeType.transitioningOut);
+            foreach (OMPanel panel in backgroundQueue)
+                if (panel.Mode == eModeType.transitioningOut)
+                    panel.Mode = eModeType.Highlighted;
+            backgroundQueue.RemoveAll(q => q.Mode == eModeType.Highlighted);
             for (int i = 0; i < backgroundQueue.Count; i++)
                 backgroundQueue[i].Mode = eModeType.Normal;
             if (transType > eGlobalTransition.Crossfade)
@@ -624,24 +627,14 @@ namespace OpenMobile
                 {
                     if (typeof(OMButton).IsInstanceOfType(highlighted))
                     {
-                        if (p.DoubleClickable == false)
+                        tmrLongClick.Enabled = false;
+                        if (lastClick != null)
                         {
-                            tmrLongClick.Enabled = false;
-                            if (lastClick != null)
-                            {
-                                lastClick.Mode = eModeType.Clicked;
-                                tmrClick.Enabled = true;
-                                SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.clickMe(screen); });
-                            }
-                            return;
+                            lastClick.Mode = eModeType.Clicked;
+                            tmrClick.Enabled = true;
+                            SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.clickMe(screen); });
                         }
-                        if ((tmrMouse.Enabled == false) || (lastClick != (OMButton)highlighted))
-                        {
-                            tmrMouse.Enabled = false; //faster to just do it then check if we need to
-                            lastClick = (OMButton)highlighted;
-                            tmrMouse.Enabled = true;
-                            return;
-                        }
+                        return;
                     }
                     if (lastClick != null)
                         lastClick.Mode = eModeType.Normal;
@@ -665,21 +658,14 @@ namespace OpenMobile
                     {
                         if (lastClick != null)
                         {
-                            tmrMouse.Enabled = false;
                             tmrClick.Enabled = true;
                             lastClick.Mode = eModeType.Clicked;
-                            if (lastClick.Parent.DoubleClickable == true)
-                                SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.doubleClickMe(screen); lastClick.Mode = eModeType.Highlighted; });
-                            else
-                                SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.clickMe(screen); });
+                            SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.clickMe(screen); });
                         }
                     }
                     else if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
                     {
-                        if (p.DoubleClickable == true)
-                            SandboxedThread.Asynchronous(delegate() { (highlighted as IClickable).doubleClickMe(screen); });
-                        else
-                            SandboxedThread.Asynchronous(delegate() { (highlighted as IClickable).clickMe(screen); });
+                        SandboxedThread.Asynchronous(delegate() { (highlighted as IClickable).clickMe(screen); });
                     }
                 }
             }
@@ -687,7 +673,6 @@ namespace OpenMobile
 
         private void tmrMouse_Tick(object sender, EventArgs e)
         {
-            tmrMouse.Enabled = false;
             SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
         }
 

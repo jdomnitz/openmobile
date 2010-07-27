@@ -35,16 +35,11 @@ namespace OpenMobile
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RenderingWindow));
             this.tmrClick = new System.Timers.Timer(20);
-            this.tmrMouse = new System.Timers.Timer(200);
             this.tmrLongClick =new System.Timers.Timer(500);
             // 
             // tmrClick
             // 
             this.tmrClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrClick_Tick);
-            // 
-            // tmrMouse
-            // 
-            this.tmrMouse.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrMouse_Tick);
             // 
             // tmrLongClick
             // 
@@ -69,7 +64,6 @@ namespace OpenMobile
         }
         #endregion
         private System.Timers.Timer tmrClick;
-        private System.Timers.Timer tmrMouse;
         private System.Timers.Timer tmrLongClick;
     }
 }

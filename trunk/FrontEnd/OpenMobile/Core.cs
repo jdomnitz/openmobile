@@ -75,16 +75,19 @@ namespace OpenMobile
             pluginCollection.Add(mmPlugin);
             mmPlugin.initialize(theHost);
             var a=mmPlugin.GetType().GetCustomAttributes(typeof(InitialTransition),false);
-            for (int i = 0; i <RenderingWindows.Count; i++)
+            new Thread(() =>
             {
-                RenderingWindows[i].transitionInPanel(availablePlugin.loadPanel("", i));
-                RenderingWindows[i].executeTransition(eGlobalTransition.None);
-                theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", "");
-                if (a.Length==0)
+                for (int i = 0; i < RenderingWindows.Count; i++)
+                {
+                    RenderingWindows[i].transitionInPanel(availablePlugin.loadPanel("", i));
                     RenderingWindows[i].executeTransition(eGlobalTransition.None);
-                else
-                    RenderingWindows[i].executeTransition(((InitialTransition)a[0]).Transition);
-            }
+                    theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", "");
+                    if (a.Length == 0)
+                        RenderingWindows[i].executeTransition(eGlobalTransition.None);
+                    else
+                        RenderingWindows[i].executeTransition(((InitialTransition)a[0]).Transition);
+                }
+            }).Start();
             object[] b = mmPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
             if (b.Length > 0)
                 exitTransition=((FinalTransition)b[0]).Transition;
