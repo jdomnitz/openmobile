@@ -259,7 +259,7 @@ namespace ControlDemo
         }
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
         public void refresh()
         {

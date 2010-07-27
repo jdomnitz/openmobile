@@ -279,6 +279,7 @@ namespace OpenMobile.Framework.Math
         /// <exception cref="ArgumentException">Unknown Type</exception>
         public static double convertArea(double value, areaTypes source, areaTypes result)
         {
+            //TODO
             throw new NotImplementedException();
         }
         /// <summary>

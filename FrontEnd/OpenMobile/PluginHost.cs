@@ -228,13 +228,7 @@ namespace OpenMobile
         {
             if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return (IntPtr)(-1); //Out of bounds
-            //if (Core.RenderingWindows[screen].InvokeRequired == true)
-            //{
-            //    RenderingWindow.getVal val = new RenderingWindow.getVal(Core.RenderingWindows[screen].getHandle);
-            //    return (IntPtr)Core.RenderingWindows[screen].Invoke(val);
-            //}
-            //else
-                return Core.RenderingWindows[screen].WindowHandle;
+            return Core.RenderingWindows[screen].WindowHandle;
         }
 
         public Int32 RenderFirst
@@ -382,10 +376,21 @@ namespace OpenMobile
                     }
                     return true;
                 case eFunction.restartProgram:
-                    savePlaylists();
-                    raiseSystemEvent(eFunction.closeProgram, "", "", "");
-                    hal.close();
-                    System.Windows.Forms.Application.Restart();
+                    try
+                    {
+                        savePlaylists();
+                        raiseSystemEvent(eFunction.closeProgram, "", "", "");
+                        hal.close();
+                    }
+                    catch (Exception) { }
+                    try
+                    {
+                        ProcessStartInfo info = Process.GetCurrentProcess().StartInfo;
+                        info.FileName = Process.GetCurrentProcess().Modules[0].FileName;
+                        Core.RenderingWindows[0].Exit();
+                        Process.Start(info);
+                    }
+                    catch (Exception) { }
                     Environment.Exit(0);
                     return true;
                 case eFunction.stopListeningForSpeech:

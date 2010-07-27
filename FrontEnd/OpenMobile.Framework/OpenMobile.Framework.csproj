@@ -45,24 +45,11 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuiltInComponents.cs" />
-    <Compile Include="Controls\Editing\CustomColor.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Editing\CustomColor.Designer.cs">
-      <DependentUpon>CustomColor.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controls\IClickable.cs" />
-    <Compile Include="Controls\Editing\LuminositySlider.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Editing\LuminositySlider.Designer.cs">
-      <DependentUpon>LuminositySlider.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controls\IHighlightable.cs" />
     <Compile Include="Controls\IKey.cs" />
     <Compile Include="Controls\IList.cs" />
@@ -82,12 +69,6 @@
     <Compile Include="Controls\OMProgress.cs" />
     <Compile Include="Controls\OMSlider.cs" />
     <Compile Include="Controls\OMTextBox.cs" />
-    <Compile Include="Controls\Editing\TransparentColorPicker.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Editing\TransparentColorPicker.Designer.cs">
-      <DependentUpon>TransparentColorPicker.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controls\Renderer.cs" />
     <Compile Include="Data\Calendar.cs" />
     <Compile Include="Data\Collections.cs" />
@@ -106,12 +87,6 @@
     <Compile Include="Data\Traffic.cs" />
     <Compile Include="Data\Vehicle.cs" />
     <Compile Include="Data\Weather.cs" />
-    <Compile Include="ErrorReporting.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ErrorReporting.Designer.cs">
-      <DependentUpon>ErrorReporting.cs</DependentUpon>
-    </Compile>
     <Compile Include="Global.cs" />
     <Compile Include="helperFunctions\Globalization.cs" />
     <Compile Include="IconManager.cs" />
@@ -151,25 +126,9 @@
     <Compile Include="Widget.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Controls\Editing\CustomColor.resx">
-      <DependentUpon>CustomColor.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Editing\LuminositySlider.resx">
-      <DependentUpon>LuminositySlider.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Editing\TransparentColorPicker.resx">
-      <DependentUpon>TransparentColorPicker.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Data\SQL.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SQL.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ErrorReporting.resx">
-      <DependentUpon>ErrorReporting.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

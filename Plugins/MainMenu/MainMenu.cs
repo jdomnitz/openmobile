@@ -402,7 +402,7 @@ public sealed class MainMenu : IHighLevel
 
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         #endregion

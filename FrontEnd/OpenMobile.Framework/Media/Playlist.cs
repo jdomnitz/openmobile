@@ -73,6 +73,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool writePlaylist(string location, ePlaylistType type, List<string> playlist)
         {
+            //TODO
             throw new NotImplementedException();
         }
         /// <summary>
@@ -84,6 +85,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool writePlaylist(string location, ePlaylistType type, List<mediaInfo> playlist)
         {
+            //TODO
             throw new NotImplementedException();
         }
         /// <summary>

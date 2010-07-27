@@ -39,7 +39,7 @@ namespace OpenMobile
 
         public OMPanel loadPanel(string name,int screen)
         {
-            if (System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock))
+            if (Console.CapsLock)
                 setUppercase(screen);
             else
                 setLowercase(screen);
@@ -55,8 +55,7 @@ namespace OpenMobile
 
         public Settings loadSettings()
         {
-            //Throwing a not implemented exception is ok for settings panels
-            throw new NotImplementedException();
+            return null;
         }
 
         #region IBasePlugin Members
@@ -223,7 +222,7 @@ namespace OpenMobile
                                 //Ignore enter-could be any button //theHost.execute(eFunction.userInputReady, i.ToString(), "OSK", text.Text);
                                 return false;//break;
                             case 60:
-                                if (System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock))
+                                if (Console.CapsLock)
                                     setUppercase(i);
                                 else
                                     setLowercase(i);

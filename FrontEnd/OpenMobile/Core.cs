@@ -326,7 +326,7 @@ namespace OpenMobile
                         theHost.RaiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
             pluginCollection.TrimExcess();
             ThreadPool.SetMaxThreads(50, 500);
-            System.Windows.Forms.Application.Run();
+            Application.Run();
         }
         static bool ErroredOut;
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -338,8 +338,8 @@ namespace OpenMobile
             if (theHost.hal!=null)
                 theHost.hal.close();
             string strEx = spewException(ex);
-            ErrorReporting reporting=new ErrorReporting(strEx);
-            reporting.ShowDialog(System.Windows.Forms.Form.FromHandle(RenderingWindows[0].getHandle()));
+            //ErrorReporting reporting=new ErrorReporting(strEx);
+            //reporting.ShowDialog(System.Windows.Forms.Form.FromHandle(RenderingWindows[0].getHandle()));
             if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>1) //Prevent Loops
                 theHost.execute(eFunction.restartProgram);
         }
@@ -380,7 +380,7 @@ namespace OpenMobile
                     settings.createDB();
                 if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
                 {
-                    System.Windows.Forms.MessageBox.Show("A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.");
+                    //System.Windows.Forms.MessageBox.Show("A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.");
                     Environment.Exit(0);
                     return;
                 }

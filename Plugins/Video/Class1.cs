@@ -34,7 +34,8 @@ namespace Video
         {
             General.getFilePath path = new General.getFilePath(theHost);
             string url=path.getFile(screen, "MainMenu", "");
-            theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), url);
+            if (url!=null)
+                theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), url);
             return null;
         }
 

@@ -460,7 +460,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The first background color of a non-selected item
         /// </summary>
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         [Description("The second background color of a non-selected item"), Category("List")]
         public Color ItemColor1
         {
@@ -471,7 +470,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The second background color of a non-selected item
         /// </summary>
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         [Description("The second background color of a non-selected item"), Category("List")]
         public Color ItemColor2
         {
@@ -481,7 +479,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The Text Color for highlighted items
         /// </summary>
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         [Description("The Text Color for highlighted items"), Category("Text")]
         public Color HighlightColor
         {
@@ -492,7 +489,6 @@ namespace OpenMobile.Controls
         /// The Text Outline/Effect Color for highlighted items
         /// </summary>
         [Description("The Text Outline/Effect Color for highlighted items"), Category("Text")]
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         public Color HighlightedOutlineColor
         {
             get { return highlightColorOutline; }
@@ -511,7 +507,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The first background color of selected items
         /// </summary>
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         [Description("The first background color of selected items"), Category("List")]
         public Color SelectedItemColor1
         {
@@ -523,7 +518,6 @@ namespace OpenMobile.Controls
         /// The second background color of selected items
         /// </summary>
         [Description("The second background color of selected items"), Category("List")]
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         public Color SelectedItemColor2
         {
             get { return selectedItemColor2; }

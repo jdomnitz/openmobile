@@ -554,7 +554,7 @@ namespace OMSettings
 
         public OpenMobile.Plugin.Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public string displayName
