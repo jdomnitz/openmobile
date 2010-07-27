@@ -127,7 +127,6 @@ namespace Media
             using (PluginSettings ps = new PluginSettings())
                 dbname = ps.getSetting("Default.MusicDatabase");
             OpenMobile.Threading.TaskManager.QueueTask(loadList,ePriority.High,"Load Artists");//<-Where the music gets loaded
-            p.DoubleClickable = false;
             manager.loadPanel(p);
             OMPanel settings = new OMPanel("Settings");
             imageItem opt2=theHost.getSkinImage("Full.Highlighted");

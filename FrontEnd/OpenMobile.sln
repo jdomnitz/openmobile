@@ -47,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Video", "..\Plugins\Video\V
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMWeather", "..\Plugins\OMWeather\OMWeather.csproj", "{BED3CC71-3403-40F3-AF2F-FC830FE3B38E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPGWeather", "..\Plugins\DPGWeather\DPGWeather.csproj", "{645DC5B8-026F-4D2F-B96D-24A71C87854F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,10 @@ Global
 		{BED3CC71-3403-40F3-AF2F-FC830FE3B38E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BED3CC71-3403-40F3-AF2F-FC830FE3B38E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BED3CC71-3403-40F3-AF2F-FC830FE3B38E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{645DC5B8-026F-4D2F-B96D-24A71C87854F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{645DC5B8-026F-4D2F-B96D-24A71C87854F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{645DC5B8-026F-4D2F-B96D-24A71C87854F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{645DC5B8-026F-4D2F-B96D-24A71C87854F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -21,6 +21,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using OpenMobile.Graphics;
+using System;
 
 namespace OpenMobile.Controls
 {
@@ -83,6 +84,7 @@ namespace OpenMobile.Controls
         /// Adds a control to the container
         /// </summary>
         /// <param name="control"></param>
+        /// <param name="changeParent"></param>
         public void addControl(OMControl control, bool changeParent)
         {
             if (changeParent)
@@ -318,6 +320,7 @@ namespace OpenMobile.Controls
         /// Can controls on this panel be double clicked (setting to false increases responsiveness)
         /// </summary>
         [Category("Panel")]
+        [Obsolete]
         public bool DoubleClickable
         {
             get

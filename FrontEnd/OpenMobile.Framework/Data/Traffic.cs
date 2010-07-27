@@ -26,27 +26,85 @@ using OpenMobile.helperFunctions;
 
 namespace OpenMobile.Data
 {
+    /// <summary>
+    /// Type of Traffic event
+    /// </summary>
     public enum eTrafficType
     {
+        /// <summary>
+        /// Unknown
+        /// </summary>
         Unknown=0,
+        /// <summary>
+        /// Construction
+        /// </summary>
         Construction=1,
+        /// <summary>
+        /// Accident
+        /// </summary>
         Accident=2,
+        /// <summary>
+        /// Lane Closure
+        /// </summary>
         LaneClosure=3,
+        /// <summary>
+        /// Road Closure
+        /// </summary>
         RoadClosure=4,
+        /// <summary>
+        /// Traffic/Congestion
+        /// </summary>
         Traffic=5,
+        /// <summary>
+        /// Local Event
+        /// </summary>
         Event=6,
+        /// <summary>
+        /// Other
+        /// </summary>
         Other=10
     }
+    /// <summary>
+    /// A traffic incident
+    /// </summary>
     public struct TrafficItem
     {
+        /// <summary>
+        /// When incident begins
+        /// </summary>
         public DateTime Start;
+        /// <summary>
+        /// When incident ends
+        /// </summary>
         public DateTime End;
+        /// <summary>
+        /// Incident Name
+        /// </summary>
         public string Title;
+        /// <summary>
+        /// Incident Description
+        /// </summary>
         public string Description;
+        /// <summary>
+        /// Type of Incident
+        /// </summary>
         public eTrafficType Type;
+        /// <summary>
+        /// Severity of Incident
+        /// </summary>
         public int severity;
+        /// <summary>
+        /// Road Direction Effected
+        /// </summary>
         public eDirection Direction;
+        /// <summary>
+        /// Location of Incident
+        /// </summary>
         public Location Location;
+        /// <summary>
+        /// Create a new Traffic Item
+        /// </summary>
+        /// <param name="location"></param>
         public TrafficItem(string location)
         {
             Location = new Location();
