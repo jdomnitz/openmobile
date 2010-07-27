@@ -43,7 +43,7 @@ namespace Networking
 
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
         ScreenManager manager;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)

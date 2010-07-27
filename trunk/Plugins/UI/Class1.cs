@@ -133,7 +133,7 @@ namespace OpenMobile
 
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         #endregion

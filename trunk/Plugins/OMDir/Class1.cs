@@ -58,7 +58,7 @@ namespace OMDir
 
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
         #region Attributes
         public string displayName

@@ -248,7 +248,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The panels background color
         /// </summary>
-        [Editor(typeof(OpenMobile.transparentColor),typeof(System.Drawing.Design.UITypeEditor)),TypeConverter(typeof(OpenMobile.ColorConvertor))]
         [Category("Panel")]
         public Color BackgroundColor1
         {
@@ -266,7 +265,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The second color in a background gradiant
         /// </summary>
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         [Category("Panel")]
         public Color BackgroundColor2
         {

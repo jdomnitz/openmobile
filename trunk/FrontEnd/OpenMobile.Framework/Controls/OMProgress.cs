@@ -46,7 +46,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The background color of the progress bar
         /// </summary>
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         [Category("Progress Bar"), Description("The background color of the progress bar")]
         public Color BackgroundColor
         {
@@ -159,7 +158,6 @@ namespace OpenMobile.Controls
         /// Represents the first of two colors for the progress bars gradient
         /// </summary>
         [Category("Progress Bar"),Description("Represents the first of two colors for the progress bar's gradient or the color of a solid background.")]
-        [Editor(typeof(OpenMobile.transparentColor),typeof(System.Drawing.Design.UITypeEditor)),TypeConverter(typeof(OpenMobile.ColorConvertor))]
         public Color FirstColor
         {
             get
@@ -179,7 +177,6 @@ namespace OpenMobile.Controls
         /// Represents the second of two colors for the progress bars gradient
         /// </summary>
         [Category("Progress Bar"), Description("Represents the second of two colors for the progress bar's gradient.")]
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         public Color SecondColor
         {
             get

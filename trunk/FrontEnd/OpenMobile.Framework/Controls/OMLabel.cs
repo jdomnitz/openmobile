@@ -46,7 +46,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the color of the text
         /// </summary>
-        [Editor(typeof(OpenMobile.transparentColor),typeof(System.Drawing.Design.UITypeEditor)),TypeConverter(typeof(OpenMobile.ColorConvertor))]
         [CategoryAttribute("Text"), DescriptionAttribute("Sets the color of the text")]
         public Color Color
         {
@@ -93,7 +92,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the Glow or Outline color of the text
         /// </summary>
-        [Editor(typeof(OpenMobile.transparentColor), typeof(System.Drawing.Design.UITypeEditor)), TypeConverter(typeof(OpenMobile.ColorConvertor))]
         [CategoryAttribute("Text"), DescriptionAttribute("Sets the Glow or Outline color of the text")]
         public virtual Color OutlineColor
         {

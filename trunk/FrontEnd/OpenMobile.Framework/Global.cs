@@ -23,7 +23,6 @@ using System.ComponentModel;
 using OpenMobile.Graphics;
 using System.Drawing.Design;
 using System.IO;
-using System.Windows.Forms.Design;
 
 namespace OpenMobile
 {
@@ -296,7 +295,6 @@ namespace OpenMobile
     /// <summary>
     /// An Open Mobile representation of an image
     /// </summary>
-    [Editor(typeof(OMImageEditor),typeof(UITypeEditor))]
     public struct imageItem
     {
         /// <summary>
@@ -2159,129 +2157,6 @@ namespace OpenMobile
                 return c;
             }*/
             return Color.Empty;
-        }
-    }
-    /// <summary>
-    /// Provides an OMImageItem editor
-    /// </summary>
-    public sealed class OMImageEditor : UITypeEditor
-    {
-        IWindowsFormsEditorService service;
-        /// <summary>
-        /// Editor style
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public override UITypeEditorEditStyle GetEditStyle(System.ComponentModel.ITypeDescriptorContext context)
-        {
-            return UITypeEditorEditStyle.DropDown;
-        }
-        /// <summary>
-        /// Edit an imageItem
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="provider"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public override object EditValue(System.ComponentModel.ITypeDescriptorContext context, IServiceProvider provider, object value)
-        {
-            service = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
-            System.Windows.Forms.ListBox listBox1 = new System.Windows.Forms.ListBox();
-            foreach (string s in Directory.GetFiles(Path.Combine(Application.StartupPath, "Skins"), "*.png", SearchOption.TopDirectoryOnly))
-            {
-                FileInfo f = new FileInfo(s);
-                listBox1.Items.Add(f.Name.Remove(f.Name.Length - 4));
-            }
-            foreach (string s in Directory.GetFiles(Path.Combine(Application.StartupPath, "Skins"), "*.gif", SearchOption.TopDirectoryOnly))
-            {
-                FileInfo f = new FileInfo(s);
-                listBox1.Items.Add(f.Name.Remove(f.Name.Length - 4)); 
-            }
-            foreach (string s in Directory.GetFiles(Path.Combine(Application.StartupPath, "Skins"), "*.jpg", SearchOption.TopDirectoryOnly))
-            {
-                FileInfo f = new FileInfo(s);
-                listBox1.Items.Add(f.Name.Remove(f.Name.Length - 4));
-            }
-            listBox1.Sorted = true;
-            listBox1.Click += new EventHandler(comboBox1_DropDownClosed);
-            listBox1.Height = 150;
-            service.DropDownControl(listBox1);
-            if (listBox1.SelectedItem == null)
-                return new imageItem();
-            return new imageItem(OImage.FromFile(Path.Combine(Application.StartupPath, "Skins", listBox1.SelectedItem.ToString()) + ".png"), listBox1.SelectedItem.ToString());
-        }
-
-        void comboBox1_DropDownClosed(object sender, EventArgs e)
-        {
-            service.CloseDropDown();
-        }
-    }
-    /// <summary>
-    /// Provides a color editor with transparency
-    /// </summary>
-    public sealed class transparentColor : System.Drawing.Design.UITypeEditor
-    {
-        private System.Windows.Forms.Design.IWindowsFormsEditorService service;
-        private System.Drawing.Color selectedColor=System.Drawing.Color.Empty;
-        /// <summary>
-        /// The style of editor
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public override System.Drawing.Design.UITypeEditorEditStyle GetEditStyle(System.ComponentModel.ITypeDescriptorContext context)
-        {
-            return UITypeEditorEditStyle.DropDown;
-        }
-        /// <summary>
-        /// Presents an editor dialog for the given value
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="provider"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public override object EditValue(System.ComponentModel.ITypeDescriptorContext context, IServiceProvider provider, object value)
-        {
-            service= (System.Windows.Forms.Design.IWindowsFormsEditorService) provider.GetService(typeof(System.Windows.Forms.Design.IWindowsFormsEditorService));
-            OpenMobile.Controls.TransparentColorPicker picker;
-            if (value == null)
-                picker = new OpenMobile.Controls.TransparentColorPicker(System.Drawing.Color.FromArgb(Color.Firebrick.R,Color.Firebrick.G,Color.Firebrick.B));
-            else
-            {
-                Color val = (Color)value;
-                picker = new OpenMobile.Controls.TransparentColorPicker(System.Drawing.Color.FromArgb(val.R,val.G,val.B));
-            }
-            selectedColor = System.Drawing.Color.Empty;
-            picker.SelectedColorChanged += new OpenMobile.Controls.TransparentColorPicker.ColorChanged(picker_SelectedColorChanged);
-            service.DropDownControl(picker);
-            if (selectedColor != System.Drawing.Color.Empty)
-                value = (object)selectedColor;
-            else
-                value = (object)picker.ForeColor;
-            return value;
-        }
-
-        void picker_SelectedColorChanged(System.Drawing.Color c)
-        {
-            selectedColor = c;
-            service.CloseDropDown();
-        }
-        /// <summary>
-        /// Can provide a color representation of itself
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public override bool GetPaintValueSupported(System.ComponentModel.ITypeDescriptorContext context)
-        {
-            return true;
-        }
-        /// <summary>
-        /// Paints the color in the preview square
-        /// </summary>
-        /// <param name="e"></param>
-        public override void PaintValue(PaintValueEventArgs e)
-        {
-            System.Drawing.Color c = (System.Drawing.Color)e.Value;
-            e.Graphics.FillRectangle(new System.Drawing.SolidBrush(c), e.Bounds);
         }
     }
     /// <summary>
