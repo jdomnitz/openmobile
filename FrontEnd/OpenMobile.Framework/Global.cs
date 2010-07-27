@@ -119,23 +119,6 @@ namespace OpenMobile
         MultiList=9
     }
     /// <summary>
-    /// The angle to rotate the control
-    /// </summary>
-    public enum eAngle {
-        /// <summary>
-        /// Normal
-        /// </summary>
-        Normal = 0,
-        /// <summary>
-        /// Flipped across the Y-axis
-        /// </summary>
-        FlipHorizontal = 180,
-        /// <summary>
-        /// Flipped across the X-axis
-        /// </summary>
-        FlipVertical=90
-        };
-    /// <summary>
     /// An item in an OMList
     /// </summary>
     public sealed class OMListItem

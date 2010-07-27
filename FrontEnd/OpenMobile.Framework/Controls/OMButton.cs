@@ -41,7 +41,7 @@ namespace OpenMobile.Controls
         private int transparency = 100;
         private eAngle orientation;
         private eButtonTransition transition = eButtonTransition.BoxOut;
-        
+
         /// <summary>
         /// Show the buttons area as an yellow overlay(debug usage only) - (Added by Borte)
         /// </summary>
@@ -217,41 +217,6 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (orientation != value)
-                {
-                    if (image.image == null)
-                        return;
-                    if ((orientation == eAngle.FlipHorizontal) || (value == eAngle.FlipHorizontal))
-                    {
-                        image.image = (OImage)image.image.Clone();
-                        image.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipX);
-                        if (focusImage.image != null)
-                        {
-                            focusImage.image = (OImage)focusImage.image.Clone();
-                            focusImage.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipX);
-                        }
-                        if (downImage.image != null)
-                        {
-                            downImage.image = (OImage)downImage.image.Clone();
-                            downImage.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipX);
-                        }
-                    }
-                    else if ((orientation == eAngle.FlipVertical) || (value == eAngle.FlipVertical))
-                    {
-                        image.image = (OImage)image.image.Clone();
-                        image.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);
-                        if (focusImage.image != null)
-                        {
-                            focusImage.image = (OImage)focusImage.image.Clone();
-                            focusImage.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);
-                        }
-                        if (downImage.image != null)
-                        {
-                            downImage.image = (OImage)downImage.image.Clone();
-                            downImage.image.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);
-                        }
-                    }
-                }
                 orientation = value;
             }
         }
@@ -308,60 +273,60 @@ namespace OpenMobile.Controls
             int transitionTop = e.transitionTop;
             if (Width == 0)
                 return;
-                float alpha = 1;
-                float tmp = 1;
-                if (this.Mode == eModeType.transitioningIn)
-                    tmp = e.globalTransitionIn;
-                if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
-                    tmp = e.globalTransitionOut;
-                alpha = tmp;
-                alpha *= ((float)transparency / 100);
-                if ((this.Mode == eModeType.Highlighted) && (this.FocusImage.image != null))
+            float alpha = 1;
+            float tmp = 1;
+            if (this.Mode == eModeType.transitioningIn)
+                tmp = e.globalTransitionIn;
+            if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
+                tmp = e.globalTransitionOut;
+            alpha = tmp;
+            alpha *= ((float)transparency / 100);
+            if ((this.Mode == eModeType.Highlighted) && (this.FocusImage.image != null))
+            {
+                g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), alpha,orientation);
+                if (textTexture == null)
+                    textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+                g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), tmp);
+                return;
+            }
+            else if ((this.Mode == eModeType.Clicked) || (this.Mode == eModeType.ClickedAndTransitioningOut))
+            {
+                if (focusImage.image != null)
                 {
-                    g.DrawImage(focusImage.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), alpha);
+                    g.DrawImage(focusImage.image, new Rectangle(this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5)), alpha,orientation);
                     if (textTexture == null)
                         textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                     g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), tmp);
                     return;
                 }
-                else if ((this.Mode == eModeType.Clicked) || (this.Mode == eModeType.ClickedAndTransitioningOut))
+                else if (downImage.image != null)
                 {
-                    if (focusImage.image != null)
-                    {
-                        g.DrawImage(focusImage.image, new Rectangle(this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5)), alpha);
-                        if (textTexture == null)
-                            textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-                        g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), tmp);
-                        return;
-                    }
-                    else if (downImage.image != null)
-                    {
-                        g.DrawImage(downImage.image, new Rectangle(this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5)), alpha);
-                        if (textTexture==null)
-                            textTexture=g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-                        g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), tmp);
-                        return;
-                    }
+                    g.DrawImage(downImage.image, new Rectangle(this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5)), alpha,orientation);
+                    if (textTexture == null)
+                        textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+                    g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), tmp);
+                    return;
                 }
-                if (image.image == null)
-                {
-                    if (image == imageItem.MISSING)
-                    {
-                        using (Pen p = new Pen(Color.White, 4F))
-                            g.DrawRoundRectangle(p, new Rectangle(left + 2, top + 2, width - 4, height - 4), 8);
-                    }
-                }
-                else
-                {
-                    g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), alpha);
-                }
-                
-                // Debug function added by Borte
-                if (ShowArea)
-                    g.FillRectangle(new Brush(Color.FromArgb(75, Color.Yellow)), this.toRegion());
-                if (textTexture==null)
-                    textTexture=g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-                g.DrawImage(textTexture, left, top, width, height, tmp);
             }
+            if (image.image == null)
+            {
+                if (image == imageItem.MISSING)
+                {
+                    using (Pen p = new Pen(Color.White, 4F))
+                        g.DrawRoundRectangle(p, new Rectangle(left + 2, top + 2, width - 4, height - 4), 8);
+                }
+            }
+            else
+            {
+                g.DrawImage(image.image, new Rectangle(this.Left, this.Top, this.Width, this.Height), alpha,orientation);
+            }
+
+            // Debug function added by Borte
+            if (ShowArea)
+                g.FillRectangle(new Brush(Color.FromArgb(75, Color.Yellow)), this.toRegion());
+            if (textTexture == null)
+                textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+            g.DrawImage(textTexture, left, top, width, height, tmp);
+        }
     }
 }
