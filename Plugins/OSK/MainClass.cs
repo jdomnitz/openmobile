@@ -35,7 +35,7 @@ namespace OpenMobile
     {
         //Here we create the panel that we will load the controls onto (like a windows form)
         ScreenManager manager;
-        private bool caps = true;
+        private bool caps = false;
 
         public OMPanel loadPanel(string name,int screen)
         {
@@ -99,7 +99,6 @@ namespace OpenMobile
         }
         //This is where the magic happens
         private IPluginHost theHost;
-        
         //When initialize is called we need to get everything ready
         public eLoadStatus initialize(IPluginHost host)
         {
@@ -166,6 +165,11 @@ namespace OpenMobile
                     text = (OMTextBox)manager[i, "NUMOSK"]["Text"];
                 if (text.hooked() == false)
                     continue;
+                if (arg.CapsLock!=caps)
+                    if (arg.CapsLock)
+                        setUppercase(i);
+                    else
+                        setLowercase(i);
                 if (type == eKeypressType.KeyUp)
                 {
                     if ((arg.KeyCode > 82) && (arg.KeyCode < 109))
@@ -222,10 +226,6 @@ namespace OpenMobile
                                 //Ignore enter-could be any button //theHost.execute(eFunction.userInputReady, i.ToString(), "OSK", text.Text);
                                 return false;//break;
                             case 60:
-                                if (Console.CapsLock)
-                                    setUppercase(i);
-                                else
-                                    setLowercase(i);
                                 return false;
                             case 51:
                                 text.Text += " ";
