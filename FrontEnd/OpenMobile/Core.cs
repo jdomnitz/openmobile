@@ -416,7 +416,8 @@ namespace OpenMobile
             for (int i = 1; i<RenderingWindows.Count; i++)
                 RenderingWindows[i].RunAsync(1);
             RenderingWindows[0].Run(1);
-            RenderingWindows[0].Dispose();
+            for (int i = 0; i < RenderingWindows.Count; i++)
+                RenderingWindows[i].Dispose();
             for (int i = 0; i < pluginCollection.Count;i++ )
                 if (pluginCollection[i] != null)
                     pluginCollection[i].Dispose();

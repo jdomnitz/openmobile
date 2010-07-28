@@ -19,100 +19,49 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 
-using OpenMobile.Controls;
+using System;
+using System.Collections.Generic;
 namespace OpenMobile.Plugin
 {
+    [Flags]
+    public enum eSensorType
+    {
+        Unknown=0,
+        Input=1,
+        Output=2,
+        Other=4,
+        All=0xFF
+    }
+    public struct Sensor
+    {
+        public string Name;
+        public int PID;
+        public eSensorType Type;
+    }
     /// <summary>
     /// Interface with I/O devices and other raw hardware
     /// </summary>
     public interface IRawHardware:IBasePlugin
     {
-
-
         /// <summary>
-        /// Convert the string name of the value you are trying to read or write to a PID
+        /// List available sensors of the given type
         /// </summary>
-        /// <param name="FunctionName"></param>
-        /// <returns>The PID</returns>
-        int getPID(string FunctionName);
-        /// <summary>
-        /// Get the value of the given PID. Return null if incorrect type of PID.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <returns></returns>
-        int getIntValue(int PID);
-        /// <summary>
-        /// Get the value of the given PID. Return null if incorrect type of PID.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <returns></returns>
-        float getFloatValue(int PID);
-        /// <summary>
-        /// Get the value of the given PID. Return null if incorrect type of PID.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <returns></returns>
-        string getStringValue(int PID);
-        /// <summary>
-        /// Get the value of the given PID. Return null if incorrect type of PID.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <returns></returns>
-        byte getByteValue(int PID);
-        /// <summary>
-        /// Get the value of the given PID. Return null if incorrect type of PID.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <returns></returns>
-        bool getBoolValue(int PID);
-        /// <summary>
-        /// Set the value of the given PID to the given value. Returns true if succeeded.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        bool setValue(int PID, string value);
-        /// <summary>
-        /// Set the value of the given PID to the given value. Returns true if succeeded.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        bool setValue(int PID, float value);
-        /// <summary>
-        /// Set the value of the given PID to the given value. Returns true if succeeded.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        bool setValue(int PID, int value);
-        /// <summary>
-        /// Set the value of the given PID to the given value. Returns true if succeeded.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        bool setValue(int PID, byte value);
-        /// <summary>
-        /// Set the value of the given PID to the given value. Returns true if succeeded.
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        bool setValue(int PID, bool value);
-        /// <summary>
-        /// Classify's a PID as a certain type of value. Returns true if successful.
-        /// </summary>
-        /// <param name="PID"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        bool setPIDType(int PID, string type);
+        List<Sensor> getAvailableSensors(eSensorType type);
         /// <summary>
-        /// Returns the PID type for the specified PID. Plugin specific
+        /// Set a sensor value (for output devices)
+        /// </summary>
+        /// <param name="PID"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        bool setValue(int PID, double value);
+        /// <summary>
+        /// Get a sensor value
         /// </summary>
         /// <param name="PID"></param>
         /// <returns></returns>
-        string getPIDType(int PID);
+        double getValue(int PID);
         /// <summary>
         /// Reset the hardware device.
         /// </summary>
