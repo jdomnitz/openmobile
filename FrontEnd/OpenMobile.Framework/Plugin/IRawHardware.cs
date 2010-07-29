@@ -41,8 +41,27 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Interface with I/O devices and other raw hardware
     /// </summary>
-    public interface IRawHardware:IBasePlugin
+    public abstract class IRawHardware:IBasePlugin
     {
+        private static int lastMask;
+        private static int generateMask()
+        {
+            lastMask++;
+            return lastMask;
+        }
+        private static bool CheckPID(ref int PID, int mask)
+        {
+            if ((PID / 100000) == mask)
+            {
+                PID = PID % (mask * 100000);
+                return true;
+            }
+            return false;
+        }
+        private static int ApplyMask(int PID, int mask)
+        {
+            return (mask * 100000) + PID;
+        }
         /// <summary>
         /// List available sensors of the given type
         /// </summary>
