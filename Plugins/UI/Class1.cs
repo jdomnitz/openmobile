@@ -711,7 +711,7 @@ namespace OpenMobile
                 }
                 timerIteration++;
                 if (theHost.GraphicsLevel==eGraphicsLevel.Standard)
-                    Thread.Sleep(40);
+                    Thread.Sleep(30);
             }
         }
 
