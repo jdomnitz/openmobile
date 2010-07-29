@@ -299,7 +299,7 @@ namespace OpenMobile
                 while (transitioning == true)
                 {
                     transition_Tick();
-                    Thread.Sleep(50);
+                    Thread.Sleep(40);
                 }
             }
             lock (painting)
