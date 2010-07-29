@@ -67,33 +67,43 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        List<Sensor> getAvailableSensors(eSensorType type);
+        public abstract List<Sensor> getAvailableSensors(eSensorType type);
         /// <summary>
         /// Set a sensor value (for output devices)
         /// </summary>
         /// <param name="PID"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        bool setValue(int PID, double value);
+        public abstract bool setValue(int PID, double value);
         /// <summary>
         /// Get a sensor value
         /// </summary>
         /// <param name="PID"></param>
         /// <returns></returns>
-        double getValue(int PID);
+        public abstract double getValue(int PID);
         /// <summary>
         /// Reset the hardware device.
         /// </summary>
-        void resetDevice();
+        public abstract void resetDevice();
         /// <summary>
         /// Plugin specific (vehicle information, hardware name, etc.)
         /// </summary>
         /// <returns></returns>
-        string deviceInfo{get;}
+        public abstract string deviceInfo { get; }
         /// <summary>
         /// Firmware version of currently connected hardware
         /// </summary>
         /// <returns></returns>
-        string firmwareVersion{get;}
+        public abstract string firmwareVersion { get; }
+        public abstract eLoadStatus initialize(IPluginHost host);
+        public abstract Settings loadSettings();
+        public abstract string authorName { get; }
+        public abstract string authorEmail { get; }
+        public abstract string pluginName{get;}
+        public abstract float pluginVersion{get;}
+        public abstract string pluginDescription{get;}
+        public abstract bool incomingMessage(string message, string source);
+        public abstract bool incomingMessage<T>(string message, string source, ref T data);
+        public abstract void Dispose();
     }
 }
