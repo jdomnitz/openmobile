@@ -29,18 +29,18 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A progress bar control
     /// </summary>
-    public class OMProgress:OMControl
+    public class OMProgress : OMControl
     {
         protected int height;
         protected int width;
         protected int top;
         protected int left;
-        protected int value=0;
+        protected int value = 0;
         protected int minimum = 0;
         protected int maximum = 100;
         protected bool vertical;
-        protected Color firstColor=Color.DarkRed;
-        protected Color secondColor=Color.Red;
+        protected Color firstColor = Color.DarkRed;
+        protected Color secondColor = Color.Red;
         protected Color backColor = Color.FromArgb(180, Color.White);
 
         /// <summary>
@@ -55,10 +55,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (backColor == value)
-                    return;
                 backColor = value;
-                refreshMe(this.toRegion());
             }
         }
         /// <summary>
@@ -93,7 +90,7 @@ namespace OpenMobile.Controls
         /// <param name="y">Top</param>
         /// <param name="w">Width</param>
         /// <param name="h">Height</param>
-        public OMProgress(int x,int y,int w,int h)
+        public OMProgress(int x, int y, int w, int h)
         {
             top = y;
             left = x;
@@ -103,7 +100,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// A number between the minimum and the maximum value
         /// </summary>
-        [Category("Progress Bar"),Description("An integer between the minimum and maximum value")]
+        [Category("Progress Bar"), Description("An integer between the minimum and maximum value")]
         public int Value
         {
             get
@@ -113,17 +110,13 @@ namespace OpenMobile.Controls
             set
             {
                 if ((value >= this.minimum) && (value <= this.maximum))
-                    if (this.value!=value)
-                    {
-                        this.value = value;
-                        refreshMe(this.toRegion());
-                    }
+                    this.value = value;
             }
         }
         /// <summary>
         /// The value at which the progress bar displays 100%
         /// </summary>
-        [Category("Progress Bar"),Description("The value at which the progress bar displays 100%")]
+        [Category("Progress Bar"), Description("The value at which the progress bar displays 100%")]
         public int Maximum
         {
             get
@@ -142,7 +135,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The value at which the progress bar displays 0%
         /// </summary>
-        [Category("Progress Bar"),Description("The value at which the progress bar displays 0%")]
+        [Category("Progress Bar"), Description("The value at which the progress bar displays 0%")]
         public int Minimum
         {
             get
@@ -157,7 +150,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Represents the first of two colors for the progress bars gradient
         /// </summary>
-        [Category("Progress Bar"),Description("Represents the first of two colors for the progress bar's gradient or the color of a solid background.")]
+        [Category("Progress Bar"), Description("Represents the first of two colors for the progress bar's gradient or the color of a solid background.")]
         public Color FirstColor
         {
             get
@@ -166,10 +159,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (firstColor == value)
-                    return;
                 firstColor = value;
-                refreshMe(this.toRegion());
             }
         }
 
@@ -185,10 +175,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (secondColor == value)
-                    return;
                 secondColor = value;
-                refreshMe(this.toRegion());
             }
         }
 
@@ -206,7 +193,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The height of the control in pixels
         /// </summary>
-        [Category("General"),Description("The height of the control in pixels")]
+        [Category("General"), Description("The height of the control in pixels")]
         public override int Height
         {
             get
@@ -215,26 +202,14 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (height == value)
-                    return;
-                if (value >= height)
-                {
-                    height = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r = this.toRegion();
-                    height = value;
-                    refreshMe(r);
-                }
+                height = value;
             }
         }
 
         /// <summary>
         /// The width of the control in pixels
         /// </summary>
-        [Category("General"),Description("The width of the control in pixels")]
+        [Category("General"), Description("The width of the control in pixels")]
         public override int Width
         {
             get
@@ -243,26 +218,14 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (value == width)
-                    return;
-                if (value >= width)
-                {
-                    width = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r = this.toRegion();
-                    width = value;
-                    refreshMe(r);
-                }
+                width = value;
             }
         }
 
         /// <summary>
         /// The distance between the top edge of the control and the top edge of the user interface
         /// </summary>
-        [Category("General"),Description("The distance between the top edge of the control and the top edge of the user interface")]
+        [Category("General"), Description("The distance between the top edge of the control and the top edge of the user interface")]
         public override int Top
         {
             get
@@ -271,18 +234,14 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (top == value)
-                    return;
-                int oldtop = top;
                 top = value;
-                refreshMe(new Rectangle(left, top > oldtop ? oldtop : top, width + 2, height + Math.Abs(oldtop - top) + 2));
             }
         }
 
         /// <summary>
         /// The distance between the left edge of the control and the left edge of the user interface
         /// </summary>
-        [Category("General"),Description("The distance between the left edge of the control and the left edge of the user interface")]
+        [Category("General"), Description("The distance between the left edge of the control and the left edge of the user interface")]
         public override int Left
         {
             get
@@ -291,11 +250,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (left == value)
-                    return;
-                int oldleft = left;
                 left = value;
-                refreshMe(new Rectangle(left > oldleft ? oldleft : left, top, width + Math.Abs(oldleft - left), height));
             }
         }
         /// <summary>
@@ -324,14 +279,14 @@ namespace OpenMobile.Controls
             if (vertical == false)
             {
                 rec.Width = (int)(width * ((float)value / maximum));
-                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * firstColor.A), firstColor), Color.FromArgb((int)(tmp * secondColor.A), secondColor),Gradient.Horizontal), rec);
+                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * firstColor.A), firstColor), Color.FromArgb((int)(tmp * secondColor.A), secondColor), Gradient.Horizontal), rec);
                 rec.Width = width;
             }
             else
             {
-                rec.Y = rec.Y+rec.Height - (int)(height * ((float)value / maximum));
-                rec.Height= (int)(height * ((float)value / maximum));
-                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * secondColor.A), secondColor),Color.FromArgb((int)(tmp * firstColor.A), firstColor),Gradient.Vertical), rec);
+                rec.Y = rec.Y + rec.Height - (int)(height * ((float)value / maximum));
+                rec.Height = (int)(height * ((float)value / maximum));
+                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * secondColor.A), secondColor), Color.FromArgb((int)(tmp * firstColor.A), firstColor), Gradient.Vertical), rec);
                 rec.Y = top;
                 rec.Height = height;
             }

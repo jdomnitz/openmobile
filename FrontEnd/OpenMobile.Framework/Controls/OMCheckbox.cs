@@ -41,11 +41,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (isChecked != value)
-                {
-                    isChecked = value;
-                    this.refreshMe(this.toRegion());
-                }
+                isChecked = value;
             }
         }
         /// <summary>
@@ -125,7 +121,7 @@ namespace OpenMobile.Controls
                         textTexture=g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, this.Color, this.OutlineColor);
                     genHighlight = (Mode == eModeType.Highlighted);
                 }
-                g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height);
+                g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height,tmp);
                 g.DrawRoundRectangle(new Pen(defaultBrush, 3.0F), new Rectangle(this.Left, this.Top, this.Height, this.Height),5);
                 if (this.isChecked == true)
                 {

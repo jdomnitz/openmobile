@@ -34,36 +34,36 @@ namespace OpenMobile.Controls
         /// <summary>
         /// No Animation
         /// </summary>
-        None=0,
+        None = 0,
         /// <summary>
         /// Scolling left to right and then restarting
         /// </summary>
-        Scroll=1,
+        Scroll = 1,
         /// <summary>
         /// Scrolling left to right and then going right to left
         /// </summary>
-        BounceScroll=2,
+        BounceScroll = 2,
         /// <summary>
         /// A single character turning outline color and effect font...scrolling left to right
         /// </summary>
-        Pulse=3,
+        Pulse = 3,
         /// <summary>
         /// A single character glowing outline color...scrolling left to right
         /// </summary>
-        GlowPulse=4,
+        GlowPulse = 4,
         /// <summary>
         /// Text is unveiled starting from the far left and working right
         /// </summary>
-        UnveilRight=5,
+        UnveilRight = 5,
         /// <summary>
         /// Text is unveiled starting from the far right and working left
         /// </summary>
-        UnveilLeft=6
+        UnveilLeft = 6
     }
     /// <summary>
     /// A label used for rendering various text effects
     /// </summary>
-    public class OMAnimatedLabel:OMLabel
+    public class OMAnimatedLabel : OMLabel
     {
         HomemadeTimer t;
         private int currentLetter;
@@ -99,7 +99,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public override object Clone()
         {
-            OMAnimatedLabel l=(OMAnimatedLabel)this.MemberwiseClone();
+            OMAnimatedLabel l = (OMAnimatedLabel)this.MemberwiseClone();
             l.init();
             l.TickSpeed = this.TickSpeed;
             return l;
@@ -129,7 +129,7 @@ namespace OpenMobile.Controls
                 return;
             }
             lock (this)
-                {
+            {
                 if (tempTransition != eAnimation.None)
                 {
                     if (tempTransition == eAnimation.UnveilRight)
@@ -142,7 +142,6 @@ namespace OpenMobile.Controls
                             oldTick = 0;
                             tempTransition = eAnimation.None;
                         }
-                        this.refreshMe(this.toRegion());
                         return;
                     }
                 }
@@ -155,7 +154,6 @@ namespace OpenMobile.Controls
                         if (singleAnimation == true)
                             endSingleAnimation();
                         scrollPos = 0;
-                        this.refreshMe(this.toRegion());
                         Thread.Sleep(500);
                     }
                 }
@@ -213,14 +211,12 @@ namespace OpenMobile.Controls
                     }
                 }
             }
-            if (currentAnimation!=eAnimation.None)
-                this.refreshMe(this.toRegion());
         }
 
         /// <summary>
         /// The speed of the effect (step speed in ms)
         /// </summary>
-        [Category("Animation"),Description("The speed of the effect (step speed in ms)")]
+        [Category("Animation"), Description("The speed of the effect (step speed in ms)")]
         public int TickSpeed
         {
             get
@@ -238,7 +234,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The effect to loop continuously
         /// </summary>
-        [Category("Animation"),Description("The effect to loop continuously")]
+        [Category("Animation"), Description("The effect to loop continuously")]
         public eAnimation ContiuousAnimation
         {
             get
@@ -252,7 +248,6 @@ namespace OpenMobile.Controls
                     return;
                 currentAnimation = value;
                 textTexture = null;
-                this.refreshMe(this.toRegion());
             }
         }
         public override string Text
@@ -264,7 +259,7 @@ namespace OpenMobile.Controls
             set
             {
                 if (value == null)
-                    value = ""; 
+                    value = "";
                 lock (this)
                 {
                     currentAnimation = animation;
@@ -278,7 +273,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Effect Specific Second Color
         /// </summary>
-        [DisplayName("Effect Color"),Description("Effect Specific Second Color")]
+        [DisplayName("Effect Color"), Description("Effect Specific Second Color")]
         public override Color OutlineColor
         {
             get
@@ -294,7 +289,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Effect specific-second font
         /// </summary>
-        [Description("Effect specific-second font"),Category("Text")]
+        [Description("Effect specific-second font"), Category("Text")]
         public Font EffectFont
         {
             get
@@ -307,7 +302,6 @@ namespace OpenMobile.Controls
                     return;
                 effectFont = value;
                 textTexture = null;
-                refreshMe(this.toRegion());
             }
         }
         /// <summary>
@@ -319,7 +313,6 @@ namespace OpenMobile.Controls
             singleAnimation = true;
             textTexture = null;
             currentAnimation = effect;
-            refreshMe(this.toRegion());
         }
         /// <summary>
         /// Renders the specified effect for a single iteration
@@ -327,7 +320,7 @@ namespace OpenMobile.Controls
         /// <param name="effect"></param>
         /// <param name="newText"></param>
         /// <param name="tick"></param>
-        public void Transition(eAnimation effect, string newText,int tick)
+        public void Transition(eAnimation effect, string newText, int tick)
         {
             oldText = text;
             text = newText;
@@ -335,7 +328,7 @@ namespace OpenMobile.Controls
             tempTransition = effect;
             currentAnimation = animation;
             textTexture = oldTexture = null;
-            if (oldTick==0)
+            if (oldTick == 0)
                 oldTick = t.Interval;
             t.Interval = tick;
             t.Enabled = true;
@@ -375,7 +368,7 @@ namespace OpenMobile.Controls
         {
             float tmp = 1;
             t.Enabled = this.hooked();
-            if ((text==null)||(text.Length == 0))
+            if ((text == null) || (text.Length == 0))
                 return;
             if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
@@ -392,18 +385,18 @@ namespace OpenMobile.Controls
                         avgChar = (g.MeasureString(Text, this.Font).Width / Text.Length);
 
                     Rectangle old = g.Clip;
-                    if ((animation==eAnimation.None)||(animation == eAnimation.UnveilRight) || (animation == eAnimation.UnveilLeft))
+                    if ((animation == eAnimation.None) || (animation == eAnimation.UnveilRight) || (animation == eAnimation.UnveilLeft))
                     {
                         g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
                         System.Drawing.StringFormat format = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap);
-                        if (textTexture==null)
-                            textTexture=g.GenerateTextTexture(0,0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
+                        if (textTexture == null)
+                            textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
                         g.DrawImage(textTexture, left, top, width, height, tmp);
                         if (tempTransition != eAnimation.None)
                         {
-                            g.SetClip(new Rectangle(left+(width-veilRight), top, veilRight, height));
-                            if (oldTexture==null)
-                                oldTexture=g.GenerateTextTexture(0,0, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
+                            g.SetClip(new Rectangle(left + (width - veilRight), top, veilRight, height));
+                            if (oldTexture == null)
+                                oldTexture = g.GenerateTextTexture(0, 0, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
                             g.DrawImage(oldTexture, left, top, width, height, tmp);
                         }
                     }
@@ -414,10 +407,10 @@ namespace OpenMobile.Controls
                             currentAnimation = eAnimation.None;
                             scrollPos = 0;
                         }
-                        g.SetClip(new Rectangle(left,top,width,height));
+                        g.SetClip(new Rectangle(left, top, width, height));
                         if (textTexture == null)
                             textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
-                        g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, width, height, tmp); 
+                        g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, width, height, tmp);
                     }
                     g.SetClip(old);
                     return;
@@ -429,22 +422,22 @@ namespace OpenMobile.Controls
                         if (currentLetter != i)
                         {
                             x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, i), Font);
-                            if (charTex[i]==null)
-                                charTex[i]=g.GenerateStringTexture(Text[i].ToString(), this.Font, new Brush(Color.FromArgb((int)(tmp * 255), this.Color)), new Rectangle(x2, this.Top,30,30),System.Drawing.StringFormat.GenericDefault);
-                            g.DrawImage(charTex[i], x2, this.Top, 30, 30,tmp);
+                            if (charTex[i] == null)
+                                charTex[i] = g.GenerateStringTexture(Text[i].ToString(), this.Font, new Brush(Color.FromArgb((int)(tmp * 255), this.Color)), new Rectangle(x2, this.Top, 30, 30), System.Drawing.StringFormat.GenericDefault);
+                            g.DrawImage(charTex[i], x2, this.Top, 30, 30, tmp);
                         }
                     }
                     x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, currentLetter), Font);
                     if (animation == eAnimation.Pulse)
                     {
-                        if (currentLetterTex==null)
+                        if (currentLetterTex == null)
                             currentLetterTex = g.GenerateStringTexture(Text[currentLetter].ToString(), effectFont, new Brush(Color.FromArgb((int)(tmp * 255), this.OutlineColor)), new Rectangle(0, 0, 30, 30), System.Drawing.StringFormat.GenericDefault);
-                        g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30,tmp);
+                        g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30, tmp);
                     }
                     else
                     {
                         if (currentLetterTex == null)
-                            currentLetterTex = g.GenerateTextTexture(0,0, 30, 30, Text[currentLetter].ToString(), effectFont, Format, Alignment.CenterCenter, color, outlineColor);
+                            currentLetterTex = g.GenerateTextTexture(0, 0, 30, 30, Text[currentLetter].ToString(), effectFont, Format, Alignment.CenterCenter, color, outlineColor);
                         g.DrawImage(currentLetterTex, x2, this.Top, 30, 30, tmp);
                     }
                     return;
@@ -456,10 +449,10 @@ namespace OpenMobile.Controls
         {
             if (text == "")
                 return 0;
-            int newWidth=(int)graphics.MeasureString(text, font).Width;
+            int newWidth = (int)graphics.MeasureString(text, font).Width;
             System.Drawing.StringFormat format = new System.Drawing.StringFormat();
             format.FormatFlags = System.Drawing.StringFormatFlags.MeasureTrailingSpaces;
-            Rectangle rect = new Rectangle(0, 0,1000, 1000);
+            Rectangle rect = new Rectangle(0, 0, 1000, 1000);
             System.Drawing.CharacterRange[] ranges = 
                                        { new System.Drawing.CharacterRange(0, 
                                                                text.Length) };
@@ -470,7 +463,7 @@ namespace OpenMobile.Controls
         }
     }
 
-    public sealed class HomemadeTimer:IDisposable
+    public sealed class HomemadeTimer : IDisposable
     {
         public event ElapsedEventHandler Elapsed;
         public double Interval;
@@ -508,7 +501,7 @@ namespace OpenMobile.Controls
             {
                 handle.WaitOne();
                 if (Elapsed != null)
-                    Elapsed.Invoke(this,null);
+                    Elapsed.Invoke(this, null);
                 Thread.Sleep((int)Interval);
             }
         }

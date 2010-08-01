@@ -395,7 +395,6 @@ namespace OpenMobile
                     FullScreen = true;
                     for (int i = 0; i < RenderingWindows.Count; i++)
                     {
-                        RenderingWindows[i].fullscreen = true;
                         RenderingWindows[i].WindowBorder = WindowBorder.Hidden;
                         RenderingWindows[i].WindowState = WindowState.Fullscreen;
                     }

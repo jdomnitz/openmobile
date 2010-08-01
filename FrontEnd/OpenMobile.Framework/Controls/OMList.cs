@@ -126,7 +126,6 @@ namespace OpenMobile.Controls
                 }
             }
             selectQueued = false;
-            this.refreshMe(this.toRegion());
         }
 
         /// <summary>
@@ -298,8 +297,6 @@ namespace OpenMobile.Controls
                 else
                 {
                     items.Add(item);
-                    if (this.Width != 0)
-                        refreshMe(this.toRegion());
                 }
                 return true;
             }
@@ -311,8 +308,6 @@ namespace OpenMobile.Controls
         public void AddRange(List<OMListItem> source)
         {
             items.AddRange(source);
-            if (this.Width != 0)
-                refreshMe(this.toRegion());
         }
         /// <summary>
         /// Returns the index of the given string
@@ -331,8 +326,6 @@ namespace OpenMobile.Controls
         {
             for (int i = 0; i < source.Count; i++)
                 items.Add(new OMListItem(source[i]));
-            if (this.Width != 0)
-                refreshMe(this.toRegion());
         }
         /// <summary>
         /// Add a group of list items
@@ -342,8 +335,6 @@ namespace OpenMobile.Controls
         {
             for (int i = 0; i < source.Length; i++)
                 items.Add(new OMListItem(source[i]));
-            if (this.Width != 0)
-                refreshMe(this.toRegion());
         }
         /// <summary>
         /// Add an item to the list
@@ -354,8 +345,6 @@ namespace OpenMobile.Controls
             lock (this)
             {
                 items.Add(item);
-                if (this.Width != 0)
-                    refreshMe(this.toRegion());
             }
         }
         /// <summary>
@@ -378,8 +367,6 @@ namespace OpenMobile.Controls
             lock (this)
             {
                 items.Add(new OMListItem(item));
-                if ((this.Width != 0) && (this.Count < 10))
-                    refreshMe(this.toRegion());
             }
         }
 
@@ -438,7 +425,6 @@ namespace OpenMobile.Controls
             else
                 thrown += 1;
             moved += thrown;
-            refreshMe(this.toRegion());
         }
         /// <summary>
         /// Gets or Sets the list style
@@ -816,7 +802,6 @@ namespace OpenMobile.Controls
                     items[selectedIndex].textTex = items[selectedIndex].subitemTex = null;
                 selectedIndex = -1;
             }
-            refreshMe(toRegion());
         }
 
         #endregion

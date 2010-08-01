@@ -55,10 +55,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (color == value)
-                    return;
                 color = value;
-                refreshMe(this.toRegion());
             }
         }
         /// <summary>
@@ -144,19 +141,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (height == value)
-                    return;
-                if (value >= height)
-                {
-                    height = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r=this.toRegion();
-                    height = value;
-                    refreshMe(r);
-                }
+                height = value;
             }
         }
         /// <summary>
@@ -171,19 +156,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (value == width)
-                    return;
-                if (value >= width)
-                {
-                    width = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r = this.toRegion();
-                    width = value;
-                    refreshMe(r);
-                }
+                width = value;
             }
         }
         /// <summary>
@@ -198,11 +171,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (top == value)
-                    return;
-                int oldtop=top;
                 top = value;
-                refreshMe(new Rectangle(left,top>oldtop?oldtop:top,width+2,height+Math.Abs(oldtop-top)+2));
             }
         }
         /// <summary>
@@ -217,11 +186,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (left == value)
-                    return;
-                int oldleft = left;
                 left = value;
-                refreshMe(new Rectangle(left>oldleft?oldleft:left, top, width+Math.Abs(oldleft-left), height));
             }
         }
         protected OImage textTexture;
@@ -240,8 +205,11 @@ namespace OpenMobile.Controls
                 if (text == value)
                     return;
                 text = value;
-                textTexture = null;
-                refreshMe(this.toRegion());
+                if (textTexture != null)
+                {
+                    textTexture = null;
+                }
+                
             }
         }
         /// <summary>
@@ -260,7 +228,6 @@ namespace OpenMobile.Controls
                     return;
                 textFormat = value;
                 textTexture = null;
-                refreshMe(this.toRegion());
             }
         }
         /// <summary>
@@ -300,13 +267,13 @@ namespace OpenMobile.Controls
             {
                 tmp = e.globalTransitionIn;
             }
-            if (this.Mode == eModeType.transitioningOut)
+            else if (this.Mode == eModeType.transitioningOut)
             {
                 tmp = e.globalTransitionOut;
             }
             if (textTexture==null)
                 textTexture=g.GenerateTextTexture(left, top, width, height, text, font, textFormat, textAlignment, color, outlineColor);
-            g.DrawImage(textTexture, left, top, width, height);
+            g.DrawImage(textTexture, left, top, width, height,tmp);
         }
     }
 }

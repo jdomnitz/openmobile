@@ -144,16 +144,8 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (image == value)
-                    return;
                 image = value;
-                refreshMe(this.toRegion());
             }
-        }
-
-        private void update(object sender, EventArgs e)
-        {
-            refreshMe(this.toRegion());
         }
 
         /// <summary>
@@ -201,8 +193,6 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (value != transparency)
-                    refreshMe(this.toRegion());
                 transparency = value;
             }
         }

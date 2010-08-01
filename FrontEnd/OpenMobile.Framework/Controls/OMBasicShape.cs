@@ -93,19 +93,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (height == value)
-                    return;
-                if (value >= height)
-                {
-                    height = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r = this.toRegion();
-                    height = value;
-                    refreshMe(r);
-                }
+                height = value;
             }
         }
         /// <summary>
@@ -120,19 +108,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (value == width)
-                    return;
-                if (value >= width)
-                {
-                    width = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r = this.toRegion();
-                    width = value;
-                    refreshMe(r);
-                }
+                width = value;
             }
         }
         /// <summary>
@@ -147,11 +123,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (top == value)
-                    return;
-                int oldtop = top;
                 top = value;
-                refreshMe(new Rectangle(left, top > oldtop ? oldtop : top, width + 2, height + System.Math.Abs(oldtop - top) + 2));
             }
         }
         /// <summary>
@@ -166,11 +138,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (left == value)
-                    return;
-                int oldleft = left;
                 left = value;
-                refreshMe(new Rectangle(left > oldleft ? oldleft : left, top, width + System.Math.Abs(oldleft - left), height));
             }
         }
         /// <summary>
@@ -263,10 +231,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (borderColor == value)
-                    return;
                 borderColor = value;
-                this.refreshMe(this.toRegion());
             }
         }
         /// <summary>
@@ -280,10 +245,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (borderSize == value)
-                    return;
                 borderSize = value;
-                this.refreshMe(this.toRegion());
             }
         }
         /// <summary>
