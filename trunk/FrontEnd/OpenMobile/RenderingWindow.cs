@@ -52,7 +52,6 @@ namespace OpenMobile
         private eGlobalTransition currentTransition;
         private bool transitioning = false;
         private bool keyboardActive;
-        public bool fullscreen = false;
         private List<Point> currentGesture;
         // Throw started (will be reset when throw starts) for thrown interface
         private bool ThrowStarted = false;
@@ -118,7 +117,7 @@ namespace OpenMobile
         }
         public void InitializeRendering()
         {
-            if (this.fullscreen)
+            if (this.WindowState==WindowState.Fullscreen)
                 Mouse.Location = this.Location;
             if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
                 this.Bounds=new Rectangle(DisplayDevice.AvailableDisplays[screen].Bounds.Location,new Size(720,450));
@@ -205,15 +204,15 @@ namespace OpenMobile
             if (this.InvokeRequired == true)
                 this.Invoke(hide);
             else
-                if (hidden == false)
-                {
-                    Mouse.HideCursor(WindowInfo);
-                    hidden = true;
-                }
-                else
+                if (hidden)
                 {
                     Mouse.ShowCursor(WindowInfo);
                     hidden = false;
+                }
+                else
+                {
+                    Mouse.HideCursor(WindowInfo);
+                    hidden = true;
                 }
         }
 
@@ -248,8 +247,8 @@ namespace OpenMobile
         {
             if (region == Rectangle.Empty)
                 Invalidate();
-            else
-                Invalidate(region);
+            //else
+            //    Invalidate(region);
         }
 
         private void Invalidate(Rectangle region)
@@ -299,7 +298,7 @@ namespace OpenMobile
                 while (transitioning == true)
                 {
                     transition_Tick();
-                    Thread.Sleep(40);
+                    Thread.Sleep(25);
                 }
             }
             lock (painting)
@@ -348,12 +347,16 @@ namespace OpenMobile
         {
             OnPaint();
             if ((currentGesture!=null)&&(currentGesture.Count > 0))
-                RenderGesture();
+                lock(painting)
+                    RenderGesture();
             if (Identify)
             {
-                if (identity == null)
-                    identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
-                g.DrawImage(identity,0,0,1000,600);
+                lock (painting)
+                {
+                    if (identity == null)
+                        identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
+                    g.DrawImage(identity, 0, 0, 1000, 600);
+                }
             }
             g.Finish();
             SwapBuffers();
@@ -373,8 +376,6 @@ namespace OpenMobile
         }
         protected void OnPaint()
         {
-            if (p.controlCount == 0)
-                return;
             lock (painting)
             {
                 //Render everything under the UI
@@ -477,8 +478,8 @@ namespace OpenMobile
                 rParam.transparency = rParam.transparency - 0.15F;
                 rParam.transitionTop += 7;
             }
-            if (lastClick != null)
-                UpdateThisControl(new Rectangle(lastClick.Left - rParam.transitionTop, lastClick.Top - rParam.transitionTop, lastClick.Width + (int)(rParam.transitionTop * 2.5), lastClick.Height + (int)(rParam.transitionTop * 2.5)));
+            //if (lastClick != null)
+            //    UpdateThisControl(new Rectangle(lastClick.Left - rParam.transitionTop, lastClick.Top - rParam.transitionTop, lastClick.Width + (int)(rParam.transitionTop * 2.5), lastClick.Height + (int)(rParam.transitionTop * 2.5)));
         }
 
         private void tmrClosing_Tick(object sender, EventArgs e)
@@ -578,8 +579,8 @@ namespace OpenMobile
 
                         if (done == false)
                         {
-                            if (typeof(IHighlightable).IsInstanceOfType(highlighted) == true)
-                                UpdateThisControl(highlighted.toRegion());
+                            //if (typeof(IHighlightable).IsInstanceOfType(highlighted) == true)
+                            //    UpdateThisControl(highlighted.toRegion());
                             highlighted = null;
                         }
                     }
@@ -602,8 +603,8 @@ namespace OpenMobile
                     rParam.currentMode = eModeType.Highlighted;
                     if ((b.Mode == eModeType.Normal))
                     {
-                        if (typeof(IHighlightable).IsInstanceOfType(b) == true)
-                            UpdateThisControl(b.toRegion());
+                        //if (typeof(IHighlightable).IsInstanceOfType(b) == true)
+                        //    UpdateThisControl(b.toRegion());
                         b.Mode = eModeType.Highlighted;
                     }
                     Rectangle r = Rectangle.Empty;
@@ -614,8 +615,8 @@ namespace OpenMobile
                     }
                     highlighted = b;
                     done = true;
-                    if (r != Rectangle.Empty)
-                        UpdateThisControl(r);
+                    //if (r != Rectangle.Empty)
+                    //    UpdateThisControl(r);
                 }
             }
         }
@@ -699,7 +700,7 @@ namespace OpenMobile
                     if (lastClick != null)
                     {
                         lastClick.Mode = eModeType.Normal;
-                        UpdateThisControl(lastClick.toRegion());
+                        //UpdateThisControl(lastClick.toRegion());
                     }
                     lastClick = (OMButton)highlighted;
                     if (lastClick.Mode == eModeType.transitioningOut)
@@ -707,7 +708,7 @@ namespace OpenMobile
                     else
                         lastClick.Mode = eModeType.Clicked;
                     tmrLongClick.Enabled = true;
-                    UpdateThisControl(lastClick.toRegion());
+                    //UpdateThisControl(lastClick.toRegion());
                 }
                 else if (typeof(IClickable).IsInstanceOfType(highlighted))  // Added by Borte to support long click for other controls than a button
                 {
@@ -729,7 +730,7 @@ namespace OpenMobile
             if ((lastClick != null) && (lastClick.DownImage.image != null))
             {
                 lastClick.Mode = eModeType.Highlighted;
-                UpdateThisControl(lastClick.toRegion());
+                //UpdateThisControl(lastClick.toRegion());
             }
             if (highlighted != null)
             {
@@ -768,6 +769,8 @@ namespace OpenMobile
         protected override void OnLoad(EventArgs e)
         {
             g.Initialize(screen);
+            g.Clear(Color.Black);
+            SwapBuffers();
             base.OnLoad(e);
         }
         private void RenderingWindow_FormClosing(object sender,CancelEventArgs e)
@@ -787,10 +790,7 @@ namespace OpenMobile
             if (e.Key == Key.Escape)
             {
                 if (this.WindowState == WindowState.Fullscreen)
-                {   //Escape full screen
-                    fullscreen = false;
                     this.WindowState = WindowState.Normal;
-                }
                 else
                     Core.theHost.execute(eFunction.closeProgram);
             }
@@ -806,7 +806,7 @@ namespace OpenMobile
                     if(lastClick.DownImage.image != null)
                     {
                         lastClick.Mode = eModeType.Highlighted;
-                        UpdateThisControl(lastClick.toRegion());
+                        //UpdateThisControl(lastClick.toRegion());
                     }
                 }
             }
@@ -824,23 +824,17 @@ namespace OpenMobile
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
                 Core.RenderingWindows[i].closeMe();
         }
+        protected override void OnWindowStateChanged(EventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+                this.WindowState = WindowState.Fullscreen;
+            base.OnWindowStateChanged(e);
+        }
+
         private void RenderingWindow_Resize(object sender, EventArgs e)
         {
             heightScale = (this.ClientRectangle.Height / 600F);
             widthScale = (this.ClientRectangle.Width / 1000F);
-            if (((this.WindowState == WindowState.Fullscreen)||(this.WindowState == WindowState.Maximized)) && (fullscreen == false))
-            {
-                fullscreen = true;
-                this.WindowState = WindowState.Normal;
-                this.WindowState = WindowState.Fullscreen;
-                this.WindowBorder = WindowBorder.Hidden;
-                fullscreen = false;
-            }
-            else if ((fullscreen == false)&&(WindowBorder!=WindowBorder.Resizable))
-            {
-                this.WindowBorder = WindowBorder.Resizable;
-                fullscreen = false;
-            }
             Invalidate();
             Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
         }
@@ -850,8 +844,8 @@ namespace OpenMobile
             switch (currentTransition)
             {
                 case eGlobalTransition.Crossfade:
-                    rParam.globalTransitionIn += 0.1F;
-                    rParam.globalTransitionOut -= 0.1F;
+                    rParam.globalTransitionIn += 0.075F;
+                    rParam.globalTransitionOut -= 0.075F;
                     if (rParam.globalTransitionOut < 0.1F)
                     {
                         transitioning = false;
@@ -861,9 +855,9 @@ namespace OpenMobile
                     }
                     break;
                 case eGlobalTransition.CrossfadeFast:
-                    rParam.globalTransitionIn += 0.2F;
-                    rParam.globalTransitionOut -= 0.2F;
-                    if (rParam.globalTransitionOut < 0.2F)
+                    rParam.globalTransitionIn += 0.15F;
+                    rParam.globalTransitionOut -= 0.15F;
+                    if (rParam.globalTransitionOut < 0.1F)
                     {
                         transitioning = false;
                         rParam.globalTransitionIn = 1;
@@ -874,46 +868,46 @@ namespace OpenMobile
                 case eGlobalTransition.SlideUp:
                     rParam.globalTransitionIn = 1;
                     tick++;
-                    if (tick == 6)
+                    if (tick == 9)
                     {
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(0, -(120 * tick));
-                    ofsetIn = new Point(0, 600 - (120 * tick));
+                    ofsetOut = new Point(0, -(75 * tick));
+                    ofsetIn = new Point(0, 600 - (75 * tick));
                     break;
                 case eGlobalTransition.SlideDown:
                     rParam.globalTransitionIn = 1;
                     tick++;
-                    if (tick == 6)
+                    if (tick == 9)
                     {
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(0, (120 * tick));
-                    ofsetIn = new Point(0, (120 * tick) - 600);
+                    ofsetOut = new Point(0, (75 * tick));
+                    ofsetIn = new Point(0, (75 * tick) - 600);
                     break;
                 case eGlobalTransition.SlideLeft:
                     rParam.globalTransitionIn = 1;
                     tick++;
-                    if (tick == 6)
+                    if (tick == 9)
                     {
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(-200 * tick, 0);
-                    ofsetIn = new Point(1000 - (200 * tick), 0);
+                    ofsetOut = new Point(-125 * tick, 0);
+                    ofsetIn = new Point(1000 - (125 * tick), 0);
                     break;
                 case eGlobalTransition.SlideRight:
                     rParam.globalTransitionIn = 1;
                     tick++;
-                    if (tick == 6)
+                    if (tick == 9)
                     {
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(200 * tick, 0);
-                    ofsetIn = new Point((200 * tick) - 1000, 0);
+                    ofsetOut = new Point(125 * tick, 0);
+                    ofsetIn = new Point((125 * tick) - 1000, 0);
                     break;
             }
             Invalidate();
@@ -940,7 +934,7 @@ namespace OpenMobile
                         return;
                     b.Mode = eModeType.Highlighted;
                     highlighted = b;
-                    UpdateThisControl(highlighted.toRegion());
+                    //UpdateThisControl(highlighted.toRegion());
                 }
             }
             else
@@ -968,9 +962,9 @@ namespace OpenMobile
                             break;
                         b.Mode = eModeType.Highlighted;
                         highlighted.Mode = eModeType.Normal;
-                        UpdateThisControl(highlighted.toRegion());
+                        //UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        UpdateThisControl(highlighted.toRegion());
+                        //UpdateThisControl(highlighted.toRegion());
                         break;
                     case Key.Right:
                         for (int i = 0; i < p.controlCount; i++)
@@ -988,9 +982,9 @@ namespace OpenMobile
                             break;
                         b.Mode = eModeType.Highlighted;
                         highlighted.Mode = eModeType.Normal;
-                        UpdateThisControl(highlighted.toRegion());
+                        //UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        UpdateThisControl(highlighted.toRegion());
+                        //UpdateThisControl(highlighted.toRegion());
                         break;
                     case Key.Up:
                         for (int i = 0; i < p.controlCount; i++)
@@ -1008,9 +1002,9 @@ namespace OpenMobile
                             break;
                         b.Mode = eModeType.Highlighted;
                         highlighted.Mode = eModeType.Normal;
-                        UpdateThisControl(highlighted.toRegion());
+                        //UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        UpdateThisControl(highlighted.toRegion());
+                        //UpdateThisControl(highlighted.toRegion());
                         break;
                     case Key.Down:
                         for (int i = 0; i < p.controlCount; i++)
@@ -1028,9 +1022,9 @@ namespace OpenMobile
                             break;
                         b.Mode = eModeType.Highlighted;
                         highlighted.Mode = eModeType.Normal;
-                        UpdateThisControl(highlighted.toRegion());
+                        //UpdateThisControl(highlighted.toRegion());
                         highlighted = b;
-                        UpdateThisControl(highlighted.toRegion());
+                        //UpdateThisControl(highlighted.toRegion());
                         break;
                     case Key.Enter:
                         if (typeof(OMButton).IsInstanceOfType(highlighted))

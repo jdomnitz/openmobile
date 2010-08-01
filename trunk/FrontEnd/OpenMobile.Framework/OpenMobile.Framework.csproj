@@ -133,13 +133,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Sub-Projects\HardwareAcceleration\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
-      <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
-      <Name>OpenMobile.Graphics</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Plugins\TagLib\TagLib.csproj">
       <Project>{087D2157-E9B3-4CE1-8304-89B421328111}</Project>
       <Name>TagLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
+      <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
+      <Name>OpenMobile.Graphics</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

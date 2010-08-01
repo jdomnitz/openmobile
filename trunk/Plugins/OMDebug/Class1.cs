@@ -1,11 +1,12 @@
 ﻿using System;
-using OpenMobile.Plugin;
 using System.IO;
 using System.Reflection;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 using OpenMobile;
-using OpenMobile.Controls;
 using OpenMobile.Graphics;
+using OpenMobile.Plugin;
+using System.Diagnostics;
+using System.Threading;
 
 namespace OMDebug
 {
@@ -76,32 +77,35 @@ namespace OMDebug
         {
             theHost = host;
             writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            new Thread(() => writeHeader()).Start();
+            return eLoadStatus.LoadSuccessful;
+        }
+        private void writeHeader()
+        {
+            while (Graphics.Version == null)
+                Thread.Sleep(10);
             writer.WriteLine("------------------Software-------------------");
             writer.WriteLine("OS: " + OpenMobile.Framework.OSSpecific.getOSVersion());
             writer.WriteLine("Framework: " + OpenMobile.Framework.OSSpecific.getFramework());
-            writer.WriteLine("Open Mobile: v" + System.Windows.Forms.Application.ProductVersion);
-            //writer.WriteLine("Open GL v."+Graphics.Version);
+            writer.WriteLine("Open Mobile: v" + Process.GetCurrentProcess().Modules[0].FileVersionInfo.FileVersion);
+            writer.WriteLine("Open GL v." + Graphics.Version);
             writer.WriteLine("------------------Hardware-------------------");
             writer.WriteLine("Processors: " + Environment.ProcessorCount);
             writer.WriteLine("Architecture: x" + ((IntPtr.Size == 4) ? "86" : "64"));
-            writer.WriteLine("Screens: " + Screen.AllScreens.Length.ToString());
-            //writer.WriteLine("Graphics Card: " + Graphics.GraphicsEngine);
+            writer.WriteLine("Screens: " + DisplayDevice.AvailableDisplays.Count.ToString());
+            writer.WriteLine("Graphics Card: " + Graphics.GraphicsEngine);
             writer.WriteLine("----------------Inital Assemblies-------------");
             time = Environment.TickCount;
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
                 log("LOADED (" + a.GetName() + ")");
             writer.WriteLine("---------------------------------------------");
             AppDomain.CurrentDomain.AssemblyLoad += new AssemblyLoadEventHandler(CurrentDomain_AssemblyLoad);
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-            System.Windows.Forms.Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
-            System.Windows.Forms.Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             theHost.OnMediaEvent += new MediaEvent(theHost_OnMediaEvent);
             theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
             theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
-            return eLoadStatus.LoadSuccessful;
         }
-
         void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;

@@ -448,7 +448,11 @@ namespace OpenMobile
         /// <summary>
         /// Panel A fades out while Panel B fades in (twice as fast as a regular crossfade)
         /// </summary>
-        CrossfadeFast=6
+        CrossfadeFast=6,
+        /// <summary>
+        /// Cube Right
+        /// </summary>
+        CubeRight=7
     }
 
     /// <summary>

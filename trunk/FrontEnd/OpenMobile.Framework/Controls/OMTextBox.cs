@@ -129,7 +129,6 @@ namespace OpenMobile.Controls
                 }
                 textTexture = null;
                 text = value;
-                this.refreshMe(this.toRegion());
                 try
                 {
                     if (OnTextChange!=null)

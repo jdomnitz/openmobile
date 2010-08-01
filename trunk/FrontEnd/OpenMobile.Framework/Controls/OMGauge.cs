@@ -18,7 +18,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A gauge control for openMobile
     /// </summary>
-    public class OMGauge:OMControl
+    public class OMGauge : OMControl
     {
         #region Private Attributes
         private float minValue;
@@ -53,7 +53,7 @@ namespace OpenMobile.Controls
             width = this.Width - 10;
             height = this.Height - 10;
             this.noOfDivisions = 10;
-            this.noOfSubDivisions = 3;                   
+            this.noOfSubDivisions = 3;
             this.requiresRedraw = true;
         }
         /// <summary>
@@ -61,8 +61,8 @@ namespace OpenMobile.Controls
         /// </summary>
         public OMGauge(int X, int Y, int W, int H)
         {
-            x = 5+X;
-            y = 5+Y;
+            x = 5 + X;
+            y = 5 + Y;
             width = W - 10;
             height = H - 10;
             this.noOfDivisions = 10;
@@ -89,7 +89,6 @@ namespace OpenMobile.Controls
                     if (recommendedValue < minValue)
                         recommendedValue = minValue;
                     requiresRedraw = true;
-                    refreshMe(this.toRegion());
                 }
             }
         }
@@ -112,7 +111,6 @@ namespace OpenMobile.Controls
                     if (recommendedValue > maxValue)
                         recommendedValue = maxValue;
                     requiresRedraw = true;
-                    refreshMe(this.toRegion());
                 }
             }
         }
@@ -131,7 +129,6 @@ namespace OpenMobile.Controls
                 {
                     threshold = value;
                     requiresRedraw = true;
-                    refreshMe(this.toRegion());
                 }
             }
         }
@@ -146,11 +143,10 @@ namespace OpenMobile.Controls
             get { return recommendedValue; }
             set
             {
-                if (value > minValue && value < maxValue) 
+                if (value > minValue && value < maxValue)
                 {
                     recommendedValue = value;
                     requiresRedraw = true;
-                    refreshMe(this.toRegion());
                 }
             }
         }
@@ -163,8 +159,8 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if ((buffer==null)||(buffer.Length!=value))
-                    buffer=new float[value];
+                if ((buffer == null) || (buffer.Length != value))
+                    buffer = new float[value];
                 bufferSize = value;
             }
         }
@@ -182,10 +178,9 @@ namespace OpenMobile.Controls
                 if (value >= minValue && value <= maxValue)
                 {
                     if (BufferSize > 0)
-                        currentValue=addToBuffer(value);
+                        currentValue = addToBuffer(value);
                     else
                         currentValue = value;
-                    refreshMe(this.toRegion());
                 }
             }
         }
@@ -216,7 +211,6 @@ namespace OpenMobile.Controls
             {
                 dialColor = value;
                 requiresRedraw = true;
-                refreshMe(this.toRegion());
             }
         }
 
@@ -234,12 +228,11 @@ namespace OpenMobile.Controls
             set
             {
                 float val = value;
-                if(val > 100) 
+                if (val > 100)
                     value = 100;
-                if(val < 0)
+                if (val < 0)
                     value = 0;
                 glossinessAlpha = (value * 220) / 100;
-                refreshMe(this.toRegion());
             }
         }
 
@@ -257,7 +250,6 @@ namespace OpenMobile.Controls
                 {
                     this.noOfDivisions = value;
                     requiresRedraw = true;
-                    refreshMe(this.toRegion());
                 }
             }
         }
@@ -276,7 +268,6 @@ namespace OpenMobile.Controls
             {
                 backColor = value;
                 requiresRedraw = true;
-                refreshMe(this.toRegion());
             }
         }
 
@@ -294,10 +285,9 @@ namespace OpenMobile.Controls
             {
                 foreColor = value;
                 requiresRedraw = true;
-                refreshMe(this.toRegion());
             }
         }
-        Font font=new Font(Font.GenericSansSerif,13F);
+        Font font = new Font(Font.GenericSansSerif, 13F);
         /// <summary>
         /// The gauge font
         /// </summary>
@@ -311,7 +301,6 @@ namespace OpenMobile.Controls
             {
                 font = value;
                 requiresRedraw = true;
-                refreshMe(this.toRegion());
             }
         }
 
@@ -329,7 +318,6 @@ namespace OpenMobile.Controls
                 {
                     this.noOfSubDivisions = value;
                     requiresRedraw = true;
-                    refreshMe(this.toRegion());
                 }
             }
         }
@@ -345,7 +333,6 @@ namespace OpenMobile.Controls
             {
                 this.dialText = value;
                 requiresRedraw = true;
-                refreshMe(this.toRegion());
             }
         }
         #endregion
@@ -419,7 +406,7 @@ namespace OpenMobile.Controls
             gr.DrawImage(new OImage(img), Left, Top,width,height); //TODO - Verify correct drawing
         
              */
-         }
+        }
 
         /// <summary>
         /// Draws the glossiness.
@@ -723,7 +710,7 @@ namespace OpenMobile.Controls
             if (dp)
             {
                 g.FillEllipse(fillPen.Brush, new Rectangle(
-                    (int)(position.X + GetX(10F, width)),(int)(
+                    (int)(position.X + GetX(10F, width)), (int)(
                     position.Y + GetY(12F, height)),
                     (int)(width / 7),
                     (int)(width / 7)));
@@ -810,17 +797,7 @@ namespace OpenMobile.Controls
                 if (controlHeight == value)
                     return;
                 requiresRedraw = true;
-                if (value >= controlHeight)
-                {
-                    controlHeight = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r = this.toRegion();
-                    controlHeight = value;
-                    refreshMe(r);
-                }
+                controlHeight = value;
             }
         }
 
@@ -839,17 +816,7 @@ namespace OpenMobile.Controls
                 if (value == controlWidth)
                     return;
                 requiresRedraw = true;
-                if (value >= controlWidth)
-                {
-                    controlWidth = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r = this.toRegion();
-                    controlWidth = value;
-                    refreshMe(r);
-                }
+                controlWidth = value;
             }
         }
 
@@ -868,9 +835,7 @@ namespace OpenMobile.Controls
                 if (controlTop == value)
                     return;
                 requiresRedraw = true;
-                int oldtop = controlTop;
                 controlTop = value;
-                refreshMe(new Rectangle(controlLeft, controlTop > oldtop ? oldtop : controlTop, controlWidth + 2, controlHeight + Math.Abs(oldtop - controlTop) + 2));
             }
         }
         /// <summary>
@@ -888,9 +853,7 @@ namespace OpenMobile.Controls
                 if (controlLeft == value)
                     return;
                 requiresRedraw = true;
-                int oldleft = controlLeft;
                 controlLeft = value;
-                refreshMe(new Rectangle(controlLeft > oldleft ? oldleft : controlLeft, controlTop, controlWidth + Math.Abs(oldleft - controlLeft), controlHeight));
             }
         }
         /// <summary>

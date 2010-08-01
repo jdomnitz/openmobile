@@ -51,10 +51,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (transparency == value)
-                    return;
                 transparency = value;
-                refreshMe(this.toRegion());
             }
         }
 
@@ -94,17 +91,8 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (image.image != value.image)
-                {
-                    image = value;
-                    refreshMe(this.toRegion());
-                }
+                image = value;
             }
-        }
-
-        private void update(object sender, EventArgs e)
-        {
-            this.refreshMe(this.toRegion());
         }
 
         /// <summary>
@@ -129,20 +117,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (height == value)
-                    return;
-                if (value >= height)
-                {
-                    height = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-
-                    Rectangle r = this.toRegion();
-                    height = value;
-                    refreshMe(r);
-                }
+                height = value;
             }
         }
         /// <summary>
@@ -157,19 +132,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (value == width)
-                    return;
-                if (value >= width)
-                {
-                    width = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r = this.toRegion();
-                    width = value;
-                    refreshMe(r);
-                }
+                width = value;
             }
         }
 
@@ -185,11 +148,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (top == value)
-                    return;
-                int oldtop = top;
                 top = value;
-                refreshMe(new Rectangle(left, top > oldtop ? oldtop : top, width, height + Math.Abs(oldtop - top)));
             }
         }
 
@@ -205,12 +164,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (left == value)
-                    return;
-
-                int oldleft = left;
                 left = value;
-                refreshMe(new Rectangle(left > oldleft ? oldleft : left, top, width + Math.Abs(oldleft - left), height));
             }
         }
         /// <summary>
@@ -296,10 +250,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (drawmode == value)
-                    return;
                 drawmode = value;
-                refreshMe(this.toRegion());
             }
         }
         // End of code added by Borte

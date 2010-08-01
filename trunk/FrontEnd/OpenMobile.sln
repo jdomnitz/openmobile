@@ -39,15 +39,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinWifi", "..\Plugins\WinWi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMDebug", "..\Plugins\OMDebug\OMDebug.csproj", "{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMSpeech", "..\..\..\..\StreetTalkDll\StreetTalkDll\OMSpeech.csproj", "{AAF5891C-E058-4EB1-8D35-BC708447585C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Graphics", "..\..\Sub-Projects\HardwareAcceleration\OpenMobile.Graphics\OpenMobile.Graphics.csproj", "{E1727C23-C7FD-4FBA-B09F-7160B5947F85}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Video", "..\Plugins\Video\Video.csproj", "{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMWeather", "..\Plugins\OMWeather\OMWeather.csproj", "{BED3CC71-3403-40F3-AF2F-FC830FE3B38E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPGWeather", "..\Plugins\DPGWeather\DPGWeather.csproj", "{645DC5B8-026F-4D2F-B96D-24A71C87854F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Graphics", "OpenMobile.Graphics\OpenMobile.Graphics.csproj", "{E1727C23-C7FD-4FBA-B09F-7160B5947F85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,14 +129,6 @@ Global
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AAF5891C-E058-4EB1-8D35-BC708447585C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AAF5891C-E058-4EB1-8D35-BC708447585C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AAF5891C-E058-4EB1-8D35-BC708447585C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AAF5891C-E058-4EB1-8D35-BC708447585C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -151,6 +141,10 @@ Global
 		{645DC5B8-026F-4D2F-B96D-24A71C87854F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{645DC5B8-026F-4D2F-B96D-24A71C87854F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{645DC5B8-026F-4D2F-B96D-24A71C87854F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

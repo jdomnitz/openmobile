@@ -110,20 +110,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (height == value)
-                    return;
-                if (value >= height)
-                {
-                    height = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-
-                    Rectangle r = this.toRegion();
-                    height = value;
-                    refreshMe(r);
-                }
+                height = value;
             }
         }
         /// <summary>
@@ -138,19 +125,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (value == width)
-                    return;
-                if (value >= width)
-                {
-                    width = value;
-                    refreshMe(this.toRegion());
-                }
-                else
-                {
-                    Rectangle r = this.toRegion();
-                    width = value;
-                    refreshMe(r);
-                }
+                width = value;
             }
         }
         /// <summary>
@@ -165,11 +140,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (top == value)
-                    return;
-                int oldtop = top;
                 top = value;
-                refreshMe(new Rectangle(left, top > oldtop ? oldtop : top, width, height + Math.Abs(oldtop - top)));
             }
         }
         /// <summary>
@@ -184,10 +155,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (sliderWidth == value)
-                    return;
                 sliderWidth = value;
-                refreshMe(this.toRegion());
             }
         }
         /// <summary>
@@ -202,10 +170,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (height == value)
-                    return;
                 height = value;
-                refreshMe(this.toRegion());
             }
         }
         /// <summary>
@@ -220,12 +185,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (left == value)
-                    return;
-
-                int oldleft = left;
                 left = value;
-                refreshMe(new Rectangle(left > oldleft ? oldleft : left, top, width + Math.Abs(oldleft - left), height));
             }
         }
         /// <summary>
@@ -273,7 +233,6 @@ namespace OpenMobile.Controls
                 if ((value >= minimum) && (value <= maximum))
                 {
                     sliderPosition = (int)(((value - minimum) / (float)maximum) * (width - sliderWidth)) + (sliderWidth / 2);
-                    refreshMe(this.toRegion());
                 }
             }
         }
@@ -359,7 +318,6 @@ namespace OpenMobile.Controls
             if ((sliderPosition + (sliderWidth / 2)) > Width)
                 sliderPosition = Width - (SliderWidth / 2);
             ThreadPool.QueueUserWorkItem(new WaitCallback(raiseSliderEvent),screen);
-            this.refreshMe(this.toRegion());
         }
         void raiseSliderEvent(object state)
         {

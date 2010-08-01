@@ -47,16 +47,6 @@ namespace OpenMobile.Controls
         public event refreshNeeded UpdateThisControl;
 
         /// <summary>
-        /// Forces the renderer to redraw this control
-        /// </summary>
-        protected void refreshMe(Rectangle region)
-        {
-            if ((UpdateThisControl != null)&&(visible==true))
-            {
-                UpdateThisControl(region);
-            }
-        }
-        /// <summary>
         /// Returns the screen the control is currently being rendered on.
         /// Note this function uses reflection and is quite slow, use it only when other alternatives do not exist.
         /// Returns -1 if not attached to any screen
