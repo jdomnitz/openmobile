@@ -271,22 +271,6 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Effect Specific Second Color
-        /// </summary>
-        [DisplayName("Effect Color"), Description("Effect Specific Second Color")]
-        public override Color OutlineColor
-        {
-            get
-            {
-                return base.OutlineColor;
-            }
-            set
-            {
-                base.OutlineColor = value;
-            }
-        }
-
-        /// <summary>
         /// Effect specific-second font
         /// </summary>
         [Description("Effect specific-second font"), Category("Text")]

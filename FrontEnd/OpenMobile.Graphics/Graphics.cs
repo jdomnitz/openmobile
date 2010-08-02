@@ -152,15 +152,15 @@ namespace OpenMobile.Graphics
             private int height;
             private int width;
         #endregion
-            private float screenHeight;
-            private float screenWidth;
+            private float scaleHeight;
+            private float scaleWidth;
             private static string version;
             private static string renderer;
             private int maxTextureSize;
         public void Initialize(int screen)
         {
-            screenHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
-            screenWidth = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
+            scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
+            scaleWidth = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
             Raw.Disable(EnableCap.DepthTest);
             try
             {
@@ -765,11 +765,11 @@ namespace OpenMobile.Graphics
         }
         public OImage GenerateStringTexture(string s, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format)
         {
-            System.Drawing.Bitmap bmp = new Bitmap((int)(layoutRectangle.Width*screenWidth), (int)(layoutRectangle.Height*screenHeight));
+            System.Drawing.Bitmap bmp = new Bitmap((int)(layoutRectangle.Width*scaleWidth), (int)(layoutRectangle.Height*scaleHeight));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                g.ScaleTransform(screenWidth, screenHeight);
+                g.ScaleTransform(scaleWidth, scaleHeight);
                 g.DrawString(s, new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(brush.Color.R, brush.Color.G, brush.Color.B)), new System.Drawing.RectangleF(0, 0, (float)layoutRectangle.Width, (float)layoutRectangle.Height), format);
             }
             return new OImage(bmp);
@@ -778,10 +778,10 @@ namespace OpenMobile.Graphics
         {
             if ((w <= 0) || (h <= 0))
                 return null;
-            System.Drawing.Bitmap bmp = new Bitmap((int)(w*screenWidth),(int)(h*screenHeight));
+            System.Drawing.Bitmap bmp = new Bitmap((int)(w*scaleWidth),(int)(h*scaleHeight));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
-                g.ScaleTransform(screenWidth, screenHeight);
+                g.ScaleTransform(scaleWidth, scaleHeight);
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
             }

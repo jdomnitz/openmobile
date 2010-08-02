@@ -32,10 +32,6 @@ namespace OpenMobile.Controls
     public class OMLabel:OMControl
     {
         // Comment by Borte: access modefier changed to protected to allow more access when this control is inherited
-        protected int height=100;
-        protected int width = 130;
-        protected int top;
-        protected int left;
         protected string text="";
         protected OpenMobile.Graphics.eTextFormat textFormat = OpenMobile.Graphics.eTextFormat.Normal;
         protected OpenMobile.Graphics.Alignment textAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
@@ -63,6 +59,8 @@ namespace OpenMobile.Controls
         /// </summary>
         public OMLabel()
         {
+            height=100;
+            width = 130;
         }
         /// <summary>
         /// Create a new OMLabel
@@ -126,67 +124,6 @@ namespace OpenMobile.Controls
             get
             {
                 return "Label";
-            }
-        }
-
-        /// <summary>
-        /// The controls height in pixels
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the height of the control")]
-        public override int Height
-        {
-            get
-            {
-                return height;
-            }
-            set
-            {
-                height = value;
-            }
-        }
-        /// <summary>
-        /// The controls width in pixels
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the width of the control")]
-        public override int Width
-        {
-            get
-            {
-                return width;
-            }
-            set
-            {
-                width = value;
-            }
-        }
-        /// <summary>
-        /// The distance between the top edge of the control and the top edge of the user interface
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the top position of the control")]
-        public override int Top
-        {
-            get
-            {
-                return top;
-            }
-            set
-            {
-                top = value;
-            }
-        }
-        /// <summary>
-        /// The distance between the left edge of the control and the left edge of the user interface
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the left position of the control")]
-        public override int Left
-        {
-            get
-            {
-                return left;
-            }
-            set
-            {
-                left = value;
             }
         }
         protected OImage textTexture;

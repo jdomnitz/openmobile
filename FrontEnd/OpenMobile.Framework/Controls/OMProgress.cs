@@ -31,10 +31,6 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMProgress : OMControl
     {
-        protected int height;
-        protected int width;
-        protected int top;
-        protected int left;
         protected int value = 0;
         protected int minimum = 0;
         protected int maximum = 100;
@@ -188,78 +184,6 @@ namespace OpenMobile.Controls
             {
                 return "Progress Bar";
             }
-        }
-
-        /// <summary>
-        /// The height of the control in pixels
-        /// </summary>
-        [Category("General"), Description("The height of the control in pixels")]
-        public override int Height
-        {
-            get
-            {
-                return height;
-            }
-            set
-            {
-                height = value;
-            }
-        }
-
-        /// <summary>
-        /// The width of the control in pixels
-        /// </summary>
-        [Category("General"), Description("The width of the control in pixels")]
-        public override int Width
-        {
-            get
-            {
-                return width;
-            }
-            set
-            {
-                width = value;
-            }
-        }
-
-        /// <summary>
-        /// The distance between the top edge of the control and the top edge of the user interface
-        /// </summary>
-        [Category("General"), Description("The distance between the top edge of the control and the top edge of the user interface")]
-        public override int Top
-        {
-            get
-            {
-                return top;
-            }
-            set
-            {
-                top = value;
-            }
-        }
-
-        /// <summary>
-        /// The distance between the left edge of the control and the left edge of the user interface
-        /// </summary>
-        [Category("General"), Description("The distance between the left edge of the control and the left edge of the user interface")]
-        public override int Left
-        {
-            get
-            {
-                return left;
-            }
-            set
-            {
-                left = value;
-            }
-        }
-        /// <summary>
-        /// Returns the region occupied by the control
-        /// </summary>
-        /// <returns></returns>
-        public override Rectangle toRegion()
-        {
-            return new Rectangle(Left, Top, Width, Height);
         }
 
         /// <summary>

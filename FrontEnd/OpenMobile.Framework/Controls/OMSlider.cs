@@ -31,10 +31,6 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMSlider:OMControl,IThrow
     {
-        protected int width;
-        protected int height;
-        protected int top;
-        protected int left;
         protected int sliderHeight=25;
         protected int sliderWidth;
         protected int sliderPosition = 0;
@@ -97,52 +93,6 @@ namespace OpenMobile.Controls
             if (OnSliderMoved!=null)
                 OnSliderMoved(this,screen);
         }
-
-        /// <summary>
-        /// The height of the slider
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the height of the control")]
-        public override int Height
-        {
-            get
-            {
-                return sliderHeight;
-            }
-            set
-            {
-                height = value;
-            }
-        }
-        /// <summary>
-        /// The width of the slider track
-        /// </summary>
-        [CategoryAttribute("General"), Description("The width of the slider track")]
-        public override int Width
-        {
-            get
-            {
-                return width;
-            }
-            set
-            {
-                width = value;
-            }
-        }
-        /// <summary>
-        /// The top of this control
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the top position of the control")]
-        public override int Top
-        {
-            get
-            {
-                return top;
-            }
-            set
-            {
-                top = value;
-            }
-        }
         /// <summary>
         /// The width of the image on top of the slider track
         /// </summary>
@@ -171,21 +121,6 @@ namespace OpenMobile.Controls
             set
             {
                 height = value;
-            }
-        }
-        /// <summary>
-        /// The leftmost point of the slider bar
-        /// </summary>
-        [CategoryAttribute("General"), Description("The leftmost point of the slider bar")]
-        public override int Left
-        {
-            get
-            {
-                return left;
-            }
-            set
-            {
-                left = value;
             }
         }
         /// <summary>
