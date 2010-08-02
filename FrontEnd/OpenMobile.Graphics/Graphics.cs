@@ -487,10 +487,10 @@ namespace OpenMobile.Graphics
                     Raw.Disable(EnableCap.ScissorTest);
                 else
                 {
-                    if (_clip.Height<=0)
-                        return;
-                    if (_clip.Width <= 0)
-                        return;
+                    if (_clip.Height<0)
+                        _clip.Height=0;
+                    if (_clip.Width < 0)
+                        _clip.Width=0;
                     Raw.Enable(EnableCap.ScissorTest);
                     float wscale = (width / 1000F);
                     float hscale = (height / 600F);
