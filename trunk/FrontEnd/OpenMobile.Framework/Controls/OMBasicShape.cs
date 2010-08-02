@@ -61,8 +61,6 @@ namespace OpenMobile.Controls
             set { cornerRadius = value; }
         }
         // End of code added by Borte
-
-        protected int left, top, width, height;
         /// <summary>
         /// Creates a new Basic Shape
         /// </summary>
@@ -80,66 +78,6 @@ namespace OpenMobile.Controls
             top = y;
             width = w;
             height = h;
-        }
-        /// <summary>
-        /// The controls height in pixels
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the height of the control")]
-        public override int Height
-        {
-            get
-            {
-                return height;
-            }
-            set
-            {
-                height = value;
-            }
-        }
-        /// <summary>
-        /// The controls width in pixels
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the width of the control")]
-        public override int Width
-        {
-            get
-            {
-                return width;
-            }
-            set
-            {
-                width = value;
-            }
-        }
-        /// <summary>
-        /// The distance between the top edge of the control and the top edge of the user interface
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the top position of the control")]
-        public override int Top
-        {
-            get
-            {
-                return top;
-            }
-            set
-            {
-                top = value;
-            }
-        }
-        /// <summary>
-        /// The distance between the left edge of the control and the left edge of the user interface
-        /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the left position of the control")]
-        public override int Left
-        {
-            get
-            {
-                return left;
-            }
-            set
-            {
-                left = value;
-            }
         }
         /// <summary>
         /// Draws the basic shape

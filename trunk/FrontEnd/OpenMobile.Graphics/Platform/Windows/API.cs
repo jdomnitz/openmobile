@@ -806,13 +806,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region DwmGetWindowAttribute
-
-        [DllImport("dwmapi.dll")]
-        unsafe public static extern HRESULT DwmGetWindowAttribute(HWND hwnd, DwmWindowAttribute dwAttribute, void* pvAttribute, DWORD cbAttribute);
-
-        #endregion
-
         #region GetFocus
 
         [DllImport("user32.dll")]

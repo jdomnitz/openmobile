@@ -32,10 +32,6 @@ namespace OpenMobile.Controls
     [DefaultPropertyAttribute("Name")]
     public class OMImage : OMControl
     {
-        private int height;
-        private int width;
-        private int top;
-        private int left;
         private imageItem image;
         private int transparency = 100;
 
@@ -103,68 +99,6 @@ namespace OpenMobile.Controls
             get
             {
                 return "Image";
-            }
-        }
-        /// <summary>
-        /// The controls height in pixels
-        /// </summary>
-        [Category("General"), Description("The height of the control in pixels")]
-        public override int Height
-        {
-            get
-            {
-                return height;
-            }
-            set
-            {
-                height = value;
-            }
-        }
-        /// <summary>
-        /// The controls height in pixels
-        /// </summary>
-        [Category("General"), Description("The controls height in pixels")]
-        public override int Width
-        {
-            get
-            {
-                return width;
-            }
-            set
-            {
-                width = value;
-            }
-        }
-
-        /// <summary>
-        /// The distance from the top of the control to the top of the UI
-        /// </summary>
-        [Category("General"), Description("The distance from the top of the control to the top of the UI")]
-        public override int Top
-        {
-            get
-            {
-                return top;
-            }
-            set
-            {
-                top = value;
-            }
-        }
-
-        /// <summary>
-        /// The distance from the left of the control to the UI
-        /// </summary>
-        [Category("General"), Description("The distance from the left of the control to the UI")]
-        public override int Left
-        {
-            get
-            {
-                return left;
-            }
-            set
-            {
-                left = value;
             }
         }
         /// <summary>

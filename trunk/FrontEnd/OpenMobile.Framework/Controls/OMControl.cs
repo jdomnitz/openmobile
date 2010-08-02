@@ -40,7 +40,7 @@ namespace OpenMobile.Controls
         protected bool visible = true;
         protected object tag;
         protected string name;
-
+        protected int height, width, top, left;
         /// <summary>
         /// Forces the renderer to redraw this control
         /// </summary>
@@ -137,19 +137,19 @@ namespace OpenMobile.Controls
         /// The controls height in pixels
         /// </summary>
         [Description("The controls height in pixels")]
-        public abstract int Height
+        public virtual int Height
         {
-            get;
-            set;
+            get { return height; }
+            set { height = value; }
         }
         /// <summary>
         /// The controls width in pixels
         /// </summary>
         [Description("The controls width in pixels")]
-        public abstract int Width
+        public virtual int Width
         {
-            get;
-            set;
+            get { return width; }
+            set { width = value; }
         }
         /// <summary>
         /// Used to store additional information about a control
@@ -170,19 +170,19 @@ namespace OpenMobile.Controls
         /// The distance between the top of the UI and the Top of the control
         /// </summary>
         [Description("The distance between the top of the UI and the Top of the control")]
-        public abstract int Top
+        public virtual int Top
         {
-            get;
-            set;
+            get { return top; }
+            set { top = value; }
         }
         /// <summary>
         /// The distance between the left of the UI and the Left of the control
         /// </summary>
         [Description("The distance between the Left of the UI and the Left of the control")]
-        public abstract int Left
+        public virtual int Left
         {
-            get;
-            set;
+            get { return left; }
+            set { left = value; }
         }
         /// <summary>
         /// Renders the control
@@ -195,7 +195,10 @@ namespace OpenMobile.Controls
         /// Returns the region occupied by the control
         /// </summary>
         /// <returns></returns>
-        public abstract Rectangle toRegion();
+        public virtual Rectangle toRegion()
+        {
+            return new Rectangle(Left, Top, Width, Height);
+        }
         /// <summary>
         /// Create a deep copy of this control
         /// </summary>
