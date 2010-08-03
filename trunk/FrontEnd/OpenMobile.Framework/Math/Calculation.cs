@@ -48,40 +48,6 @@ namespace OpenMobile.Framework.Math
         /// </summary>
         terabytes
     }
-    /// <summary>
-    /// Unit types to represent Area
-    /// </summary>
-    public enum areaTypes
-    {
-        /// <summary>
-        /// Square Kilometre
-        /// </summary>
-        squareKilometre,
-        /// <summary>
-        /// Square Megametres
-        /// </summary>
-        squareMegametre,
-        /// <summary>
-        /// Square Foot
-        /// </summary>
-        squareFoot,
-        /// <summary>
-        /// Square Yard
-        /// </summary>
-        squareYard,
-        /// <summary>
-        /// Square Perch
-        /// </summary>
-        squarePerch,
-        /// <summary>
-        /// Square Acre
-        /// </summary>
-        acre,
-        /// <summary>
-        /// Square Mile
-        /// </summary>
-        squareMile
-    }
 
     /// <summary>
     /// Unit types to represent Volume
@@ -268,19 +234,6 @@ namespace OpenMobile.Framework.Math
         public int getFormulaSteps()
         {
             return e.steps;
-        }
-        /// <summary>
-        /// Converts the value in the source unit of measure to a value in the target unit of measure.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="source"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException">Unknown Type</exception>
-        public static double convertArea(double value, areaTypes source, areaTypes result)
-        {
-            //TODO
-            throw new NotImplementedException();
         }
         /// <summary>
         /// Converts the value in the source unit of measure to a value in the target unit of measure.

@@ -353,7 +353,7 @@ namespace OpenMobile
             volScreen = screen;
             if (sender.Top>0)
             {
-                if (sender.Top==511) //TODO: Disable when moving
+                if (sender.Top==511)
                     volTmr_Elapsed(null, null);
                 return;
             }

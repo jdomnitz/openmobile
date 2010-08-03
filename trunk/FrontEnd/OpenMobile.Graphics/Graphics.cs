@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Drawing;
-using System.ComponentModel;
-using OpenMobile.Graphics.OpenGL;
-using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using OpenMobile.Graphics.OpenGL;
 
 namespace OpenMobile.Graphics
 {
@@ -157,6 +154,7 @@ namespace OpenMobile.Graphics
             private static string version;
             private static string renderer;
             private int maxTextureSize;
+            private bool npot;
         public void Initialize(int screen)
         {
             scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
@@ -177,9 +175,11 @@ namespace OpenMobile.Graphics
             Raw.MatrixMode(MatrixMode.Modelview);
             virtualG=new Bitmap(1000,600);
             version=Raw.GetString(StringName.Version);
+            string[] extensions = Raw.GetString(StringName.Extensions).Split(new char[]{' '});
+            if (Array.Exists(extensions,t=>t=="GL_ARB_texture_non_power_of_two"))
+                npot = true;
             renderer = Raw.GetString(StringName.Renderer);
             Raw.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
-            //Raw.Enable((EnableCap)TextureTarget.TextureRectangleArb);
         }
         public void Clear(Color color)
         {
@@ -340,7 +340,6 @@ namespace OpenMobile.Graphics
                 return false;
             
             int texture;
-
             Raw.GenTextures(1, out texture);
             Raw.BindTexture(TextureTarget.Texture2D, texture);
             Bitmap img = image.image;
@@ -350,7 +349,6 @@ namespace OpenMobile.Graphics
                 kill = true;
                 fixImage(ref img);
             }
-
             BitmapData data;
             try
             {
@@ -360,7 +358,6 @@ namespace OpenMobile.Graphics
             catch (InvalidOperationException) { return false; }
             Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
                 OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-
             img.UnlockBits(data);
             if (kill)
                 img.Dispose();
@@ -391,6 +388,10 @@ namespace OpenMobile.Graphics
         private static int[] POTS = { 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
         private bool checkImage(Image image)
         {
+            if ((image.Width > maxTextureSize) || (image.Height > maxTextureSize))
+                return false;
+            if (npot)
+                return true;
             bool wok=false, hok=false;
             foreach (int i in POTS)
                 if (image.Height == i)
@@ -584,14 +585,16 @@ namespace OpenMobile.Graphics
         {
             if (brush.Gradient==Gradient.None)
                 FillSolidRoundRectangle(brush.Color,x,y,width,height,radius);
-            else if (brush.Gradient==Gradient.Vertical)
-            {
-                //TODO - Horizontal
-                //if (gr.Rectangle.Y == 0)
-                //    FillHorizRoundRectangle(gr,x,y,width,height,radius);
-                //else
+            else if (brush.Gradient==Gradient.Horizontal)
+                FillHorizRoundRectangle(brush,x,y,width,height,radius);
+            else
                 FillVertRoundRectangle(brush, x, y, width, height, radius);
-            }
+        }
+
+        private void FillHorizRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
+        {
+            //TODO - Actually implement
+            fillRectangleSolid(brush, x, y, width, height);
         }
 
         private void FillVertRoundRectangle(Brush gr, int x, int y, int width, int height, int radius)

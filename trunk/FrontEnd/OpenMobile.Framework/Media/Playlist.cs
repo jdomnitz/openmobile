@@ -71,6 +71,7 @@ namespace OpenMobile.Media
         /// <param name="type">The type of playlist to write</param>
         /// <param name="playlist">The playlist</param>
         /// <returns></returns>
+        [Obsolete("NOT YET IMPLEMENTED", true)]
         public static bool writePlaylist(string location, ePlaylistType type, List<string> playlist)
         {
             //TODO
@@ -83,6 +84,7 @@ namespace OpenMobile.Media
         /// <param name="type">The type of playlist to write</param>
         /// <param name="playlist">The playlist</param>
         /// <returns></returns>
+        [Obsolete("NOT YET IMPLEMENTED",true)]
         public static bool writePlaylist(string location, ePlaylistType type, List<mediaInfo> playlist)
         {
             //TODO

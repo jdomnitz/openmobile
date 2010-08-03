@@ -45,7 +45,7 @@ namespace OpenMobile.Platform.Windows
     {
         #region Fields
 
-        const ExtendedWindowStyle ParentStyleEx = ExtendedWindowStyle.WindowEdge | ExtendedWindowStyle.ApplicationWindow;
+        const ExtendedWindowStyle ParentStyleEx = ExtendedWindowStyle.WindowEdge | ExtendedWindowStyle.ApplicationWindow | ExtendedWindowStyle.Layered;
         const ExtendedWindowStyle ChildStyleEx = 0;
 
         readonly IntPtr Instance = Marshal.GetHINSTANCE(typeof(WinGLNative).Module);
@@ -105,7 +105,6 @@ namespace OpenMobile.Platform.Windows
             // This timer callback is called periodically when the window enters a sizing / moving modal loop.
             ModalLoopCallback = delegate(IntPtr handle, WindowMessage msg, UIntPtr eventId, int time)
             {
-                // Todo: find a way to notify the frontend that it should process queued up UpdateFrame/RenderFrame events.
                 if (Move != null)
                     Move(this, EventArgs.Empty);
             };
@@ -536,7 +535,7 @@ namespace OpenMobile.Platform.Windows
             if (parentHandle == IntPtr.Zero)
             {
                 style |= WindowStyle.OverlappedWindow | WindowStyle.ClipChildren;
-                ex_style = ParentStyleEx|ExtendedWindowStyle.Layered;
+                ex_style = ParentStyleEx;
             }
             else
             {

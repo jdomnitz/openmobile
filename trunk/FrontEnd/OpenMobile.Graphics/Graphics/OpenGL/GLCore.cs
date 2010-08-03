@@ -88,9 +88,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glArrayObjectATI", ExactSpelling = true)]
             internal extern static void ArrayObjectATI(OpenMobile.Graphics.OpenGL.EnableCap array, Int32 size, OpenMobile.Graphics.OpenGL.AtiVertexArrayObject type, Int32 stride, UInt32 buffer, UInt32 offset);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glAsyncMarkerSGIX", ExactSpelling = true)]
-            internal extern static void AsyncMarkerSGIX(UInt32 marker);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glAttachObjectARB", ExactSpelling = true)]
             internal extern static void AttachObjectARB(UInt32 containerObj, UInt32 obj);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -226,9 +223,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glBindVertexArray", ExactSpelling = true)]
             internal extern static void BindVertexArray(UInt32 array);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glBindVertexArrayAPPLE", ExactSpelling = true)]
-            internal extern static void BindVertexArrayAPPLE(UInt32 array);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glBindVertexShaderEXT", ExactSpelling = true)]
             internal extern static void BindVertexShaderEXT(UInt32 id);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -334,9 +328,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glBufferDataARB", ExactSpelling = true)]
             internal extern static void BufferDataARB(OpenMobile.Graphics.OpenGL.BufferTargetArb target, IntPtr size, IntPtr data, OpenMobile.Graphics.OpenGL.BufferUsageArb usage);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glBufferParameteriAPPLE", ExactSpelling = true)]
-            internal extern static void BufferParameteriAPPLE(OpenMobile.Graphics.OpenGL.BufferTarget target, OpenMobile.Graphics.OpenGL.BufferParameterApple pname, Int32 param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glBufferSubData", ExactSpelling = true)]
             internal extern static void BufferSubData(OpenMobile.Graphics.OpenGL.BufferTarget target, IntPtr offset, IntPtr size, IntPtr data);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -439,12 +430,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor3fv", ExactSpelling = true)]
             internal extern static unsafe void Color3fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void Color3fVertex3fSUN(Single r, Single g, Single b, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void Color3fVertex3fvSUN(Single* c, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor3hNV", ExactSpelling = true)]
             internal extern static void Color3hNV(OpenMobile.Half red, OpenMobile.Half green, OpenMobile.Half blue);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -496,12 +481,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4f", ExactSpelling = true)]
             internal extern static void Color4f(Single red, Single green, Single blue, Single alpha);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4fNormal3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void Color4fNormal3fVertex3fSUN(Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4fNormal3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void Color4fNormal3fVertex3fvSUN(Single* c, Single* n, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4fv", ExactSpelling = true)]
             internal extern static unsafe void Color4fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -528,18 +507,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4ubv", ExactSpelling = true)]
             internal extern static unsafe void Color4ubv(Byte* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4ubVertex2fSUN", ExactSpelling = true)]
-            internal extern static void Color4ubVertex2fSUN(Byte r, Byte g, Byte b, Byte a, Single x, Single y);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4ubVertex2fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void Color4ubVertex2fvSUN(Byte* c, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4ubVertex3fSUN", ExactSpelling = true)]
-            internal extern static void Color4ubVertex3fSUN(Byte r, Byte g, Byte b, Byte a, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4ubVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void Color4ubVertex3fvSUN(Byte* c, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4ui", ExactSpelling = true)]
             internal extern static void Color4ui(UInt32 red, UInt32 green, UInt32 blue, UInt32 alpha);
@@ -579,9 +546,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColorPointerEXT", ExactSpelling = true)]
             internal extern static void ColorPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.ColorPointerType type, Int32 stride, Int32 count, IntPtr pointer);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColorPointerListIBM", ExactSpelling = true)]
-            internal extern static void ColorPointerListIBM(Int32 size, OpenMobile.Graphics.OpenGL.ColorPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColorPointervINTEL", ExactSpelling = true)]
             internal extern static void ColorPointervINTEL(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, IntPtr pointer);
@@ -862,26 +826,11 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glCurrentPaletteMatrixARB", ExactSpelling = true)]
             internal extern static void CurrentPaletteMatrixARB(Int32 index);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeformationMap3dSGIX", ExactSpelling = true)]
-            internal extern static unsafe void DeformationMap3dSGIX(OpenMobile.Graphics.OpenGL.SgixPolynomialFfd target, Double u1, Double u2, Int32 ustride, Int32 uorder, Double v1, Double v2, Int32 vstride, Int32 vorder, Double w1, Double w2, Int32 wstride, Int32 worder, Double* points);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeformationMap3fSGIX", ExactSpelling = true)]
-            internal extern static unsafe void DeformationMap3fSGIX(OpenMobile.Graphics.OpenGL.SgixPolynomialFfd target, Single u1, Single u2, Int32 ustride, Int32 uorder, Single v1, Single v2, Int32 vstride, Int32 vorder, Single w1, Single w2, Int32 wstride, Int32 worder, Single* points);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeformSGIX", ExactSpelling = true)]
-            internal extern static void DeformSGIX(UInt32 mask);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeleteAsyncMarkersSGIX", ExactSpelling = true)]
-            internal extern static void DeleteAsyncMarkersSGIX(UInt32 marker, Int32 range);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeleteBuffers", ExactSpelling = true)]
             internal extern static unsafe void DeleteBuffers(Int32 n, UInt32* buffers);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeleteBuffersARB", ExactSpelling = true)]
             internal extern static unsafe void DeleteBuffersARB(Int32 n, UInt32* buffers);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeleteFencesAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void DeleteFencesAPPLE(Int32 n, UInt32* fences);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeleteFencesNV", ExactSpelling = true)]
             internal extern static unsafe void DeleteFencesNV(Int32 n, UInt32* fences);
@@ -946,9 +895,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeleteVertexArrays", ExactSpelling = true)]
             internal extern static unsafe void DeleteVertexArrays(Int32 n, UInt32* arrays);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeleteVertexArraysAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void DeleteVertexArraysAPPLE(Int32 n, UInt32* arrays);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDeleteVertexShaderEXT", ExactSpelling = true)]
             internal extern static void DeleteVertexShaderEXT(UInt32 id);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -997,9 +943,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDisableVariantClientStateEXT", ExactSpelling = true)]
             internal extern static void DisableVariantClientStateEXT(UInt32 id);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDisableVertexAttribAPPLE", ExactSpelling = true)]
-            internal extern static void DisableVertexAttribAPPLE(UInt32 index, OpenMobile.Graphics.OpenGL.AppleVertexProgramEvaluators pname);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDisableVertexAttribArray", ExactSpelling = true)]
             internal extern static void DisableVertexAttribArray(UInt32 index);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1033,9 +976,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDrawBuffersATI", ExactSpelling = true)]
             internal extern static unsafe void DrawBuffersATI(Int32 n, OpenMobile.Graphics.OpenGL.AtiDrawBuffers* bufs);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDrawElementArrayAPPLE", ExactSpelling = true)]
-            internal extern static void DrawElementArrayAPPLE(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32 first, Int32 count);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDrawElementArrayATI", ExactSpelling = true)]
             internal extern static void DrawElementArrayATI(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32 count);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1057,14 +997,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDrawElementsInstancedEXT", ExactSpelling = true)]
             internal extern static void DrawElementsInstancedEXT(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32 count, OpenMobile.Graphics.OpenGL.DrawElementsType type, IntPtr indices, Int32 primcount);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDrawMeshArraysSUN", ExactSpelling = true)]
-            internal extern static void DrawMeshArraysSUN(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32 first, Int32 count, Int32 width);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDrawPixels", ExactSpelling = true)]
             internal extern static void DrawPixels(Int32 width, Int32 height, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr pixels);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDrawRangeElementArrayAPPLE", ExactSpelling = true)]
-            internal extern static void DrawRangeElementArrayAPPLE(OpenMobile.Graphics.OpenGL.BeginMode mode, UInt32 start, UInt32 end, Int32 first, Int32 count);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glDrawRangeElementArrayATI", ExactSpelling = true)]
             internal extern static void DrawRangeElementArrayATI(OpenMobile.Graphics.OpenGL.BeginMode mode, UInt32 start, UInt32 end, Int32 count);
@@ -1090,14 +1024,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glEdgeFlagPointerEXT", ExactSpelling = true)]
             internal extern static unsafe void EdgeFlagPointerEXT(Int32 stride, Int32 count, bool* pointer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glEdgeFlagPointerListIBM", ExactSpelling = true)]
-            internal extern static unsafe void EdgeFlagPointerListIBM(Int32 stride, bool* pointer, Int32 ptrstride);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glEdgeFlagv", ExactSpelling = true)]
             internal extern static unsafe void EdgeFlagv(bool* flag);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glElementPointerAPPLE", ExactSpelling = true)]
-            internal extern static void ElementPointerAPPLE(OpenMobile.Graphics.OpenGL.AppleElementArray type, IntPtr pointer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glElementPointerATI", ExactSpelling = true)]
             internal extern static void ElementPointerATI(OpenMobile.Graphics.OpenGL.AtiElementArray type, IntPtr pointer);
@@ -1119,9 +1047,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glEnableVariantClientStateEXT", ExactSpelling = true)]
             internal extern static void EnableVariantClientStateEXT(UInt32 id);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glEnableVertexAttribAPPLE", ExactSpelling = true)]
-            internal extern static void EnableVertexAttribAPPLE(UInt32 index, OpenMobile.Graphics.OpenGL.AppleVertexProgramEvaluators pname);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glEnableVertexAttribArray", ExactSpelling = true)]
             internal extern static void EnableVertexAttribArray(UInt32 index);
@@ -1225,20 +1150,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFinish", ExactSpelling = true)]
             internal extern static void Finish();
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFinishAsyncSGIX", ExactSpelling = true)]
-            internal extern static unsafe Int32 FinishAsyncSGIX([OutAttribute] UInt32* markerp);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFinishFenceAPPLE", ExactSpelling = true)]
-            internal extern static void FinishFenceAPPLE(UInt32 fence);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFinishFenceNV", ExactSpelling = true)]
             internal extern static void FinishFenceNV(UInt32 fence);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFinishObjectAPPLE", ExactSpelling = true)]
-            internal extern static void FinishObjectAPPLE(OpenMobile.Graphics.OpenGL.AppleFence @object, Int32 name);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFinishTextureSUNX", ExactSpelling = true)]
-            internal extern static void FinishTextureSUNX();
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFlush", ExactSpelling = true)]
             internal extern static void Flush();
@@ -1246,17 +1159,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFlushMappedBufferRange", ExactSpelling = true)]
             internal extern static void FlushMappedBufferRange(OpenMobile.Graphics.OpenGL.BufferTarget target, IntPtr offset, IntPtr length);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFlushMappedBufferRangeAPPLE", ExactSpelling = true)]
-            internal extern static void FlushMappedBufferRangeAPPLE(OpenMobile.Graphics.OpenGL.BufferTarget target, IntPtr offset, IntPtr size);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFlushPixelDataRangeNV", ExactSpelling = true)]
             internal extern static void FlushPixelDataRangeNV(OpenMobile.Graphics.OpenGL.NvPixelDataRange target);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFlushRasterSGIX", ExactSpelling = true)]
-            internal extern static void FlushRasterSGIX();
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFlushVertexArrayRangeAPPLE", ExactSpelling = true)]
-            internal extern static void FlushVertexArrayRangeAPPLE(Int32 length, [OutAttribute] IntPtr pointer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFlushVertexArrayRangeNV", ExactSpelling = true)]
             internal extern static void FlushVertexArrayRangeNV();
@@ -1297,9 +1201,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFogCoordPointerEXT", ExactSpelling = true)]
             internal extern static void FogCoordPointerEXT(OpenMobile.Graphics.OpenGL.ExtFogCoord type, Int32 stride, IntPtr pointer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFogCoordPointerListIBM", ExactSpelling = true)]
-            internal extern static void FogCoordPointerListIBM(OpenMobile.Graphics.OpenGL.IbmVertexArrayLists type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFogf", ExactSpelling = true)]
             internal extern static void Fogf(OpenMobile.Graphics.OpenGL.FogParameter pname, Single param);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1314,45 +1215,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFogiv", ExactSpelling = true)]
             internal extern static unsafe void Fogiv(OpenMobile.Graphics.OpenGL.FogParameter pname, Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentColorMaterialSGIX", ExactSpelling = true)]
-            internal extern static void FragmentColorMaterialSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter mode);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentLightfSGIX", ExactSpelling = true)]
-            internal extern static void FragmentLightfSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Single param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentLightfvSGIX", ExactSpelling = true)]
-            internal extern static unsafe void FragmentLightfvSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentLightiSGIX", ExactSpelling = true)]
-            internal extern static void FragmentLightiSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32 param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentLightivSGIX", ExactSpelling = true)]
-            internal extern static unsafe void FragmentLightivSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentLightModelfSGIX", ExactSpelling = true)]
-            internal extern static void FragmentLightModelfSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Single param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentLightModelfvSGIX", ExactSpelling = true)]
-            internal extern static unsafe void FragmentLightModelfvSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentLightModeliSGIX", ExactSpelling = true)]
-            internal extern static void FragmentLightModeliSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32 param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentLightModelivSGIX", ExactSpelling = true)]
-            internal extern static unsafe void FragmentLightModelivSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentMaterialfSGIX", ExactSpelling = true)]
-            internal extern static void FragmentMaterialfSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Single param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentMaterialfvSGIX", ExactSpelling = true)]
-            internal extern static unsafe void FragmentMaterialfvSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentMaterialiSGIX", ExactSpelling = true)]
-            internal extern static void FragmentMaterialiSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Int32 param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFragmentMaterialivSGIX", ExactSpelling = true)]
-            internal extern static unsafe void FragmentMaterialivSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Int32* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFramebufferDrawBufferEXT", ExactSpelling = true)]
             internal extern static void FramebufferDrawBufferEXT(UInt32 framebuffer, OpenMobile.Graphics.OpenGL.DrawBufferMode mode);
@@ -1417,9 +1279,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFrameTerminatorGREMEDY", ExactSpelling = true)]
             internal extern static void FrameTerminatorGREMEDY();
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFrameZoomSGIX", ExactSpelling = true)]
-            internal extern static void FrameZoomSGIX(Int32 factor);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFreeObjectBufferATI", ExactSpelling = true)]
             internal extern static void FreeObjectBufferATI(UInt32 buffer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1428,9 +1287,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFrustum", ExactSpelling = true)]
             internal extern static void Frustum(Double left, Double right, Double bottom, Double top, Double zNear, Double zFar);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGenAsyncMarkersSGIX", ExactSpelling = true)]
-            internal extern static Int32 GenAsyncMarkersSGIX(Int32 range);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGenBuffers", ExactSpelling = true)]
             internal extern static unsafe void GenBuffers(Int32 n, [OutAttribute] UInt32* buffers);
@@ -1449,9 +1305,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGenerateTextureMipmapEXT", ExactSpelling = true)]
             internal extern static void GenerateTextureMipmapEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGenFencesAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void GenFencesAPPLE(Int32 n, [OutAttribute] UInt32* fences);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGenFencesNV", ExactSpelling = true)]
             internal extern static unsafe void GenFencesNV(Int32 n, [OutAttribute] UInt32* fences);
@@ -1506,9 +1359,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGenVertexArrays", ExactSpelling = true)]
             internal extern static unsafe void GenVertexArrays(Int32 n, [OutAttribute] UInt32* arrays);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGenVertexArraysAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void GenVertexArraysAPPLE(Int32 n, [OutAttribute] UInt32* arrays);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGenVertexShadersEXT", ExactSpelling = true)]
             internal extern static Int32 GenVertexShadersEXT(UInt32 range);
@@ -1699,18 +1549,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetFragDataLocationEXT", ExactSpelling = true)]
             internal extern static Int32 GetFragDataLocationEXT(UInt32 program, String name);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetFragmentLightfvSGIX", ExactSpelling = true)]
-            internal extern static unsafe void GetFragmentLightfvSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, [OutAttribute] Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetFragmentLightivSGIX", ExactSpelling = true)]
-            internal extern static unsafe void GetFragmentLightivSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, [OutAttribute] Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetFragmentMaterialfvSGIX", ExactSpelling = true)]
-            internal extern static unsafe void GetFragmentMaterialfvSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, [OutAttribute] Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetFragmentMaterialivSGIX", ExactSpelling = true)]
-            internal extern static unsafe void GetFragmentMaterialivSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, [OutAttribute] Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetFramebufferAttachmentParameteriv", ExactSpelling = true)]
             internal extern static unsafe void GetFramebufferAttachmentParameteriv(OpenMobile.Graphics.OpenGL.FramebufferTarget target, OpenMobile.Graphics.OpenGL.FramebufferAttachment attachment, OpenMobile.Graphics.OpenGL.FramebufferParameterName pname, [OutAttribute] Int32* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1741,17 +1579,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetHistogramParameterivEXT", ExactSpelling = true)]
             internal extern static unsafe void GetHistogramParameterivEXT(OpenMobile.Graphics.OpenGL.ExtHistogram target, OpenMobile.Graphics.OpenGL.ExtHistogram pname, [OutAttribute] Int32* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetImageTransformParameterfvHP", ExactSpelling = true)]
-            internal extern static unsafe void GetImageTransformParameterfvHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, [OutAttribute] Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetImageTransformParameterivHP", ExactSpelling = true)]
-            internal extern static unsafe void GetImageTransformParameterivHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, [OutAttribute] Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetInfoLogARB", ExactSpelling = true)]
             internal extern static unsafe void GetInfoLogARB(UInt32 obj, Int32 maxLength, [OutAttribute] Int32* length, [OutAttribute] StringBuilder infoLog);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetInstrumentsSGIX", ExactSpelling = true)]
-            internal extern static Int32 GetInstrumentsSGIX();
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetInteger64i_v", ExactSpelling = true)]
             internal extern static unsafe void GetInteger64i_v(OpenMobile.Graphics.OpenGL.Version32 target, UInt32 index, [OutAttribute] Int64* data);
@@ -1782,12 +1611,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetLightiv", ExactSpelling = true)]
             internal extern static unsafe void GetLightiv(OpenMobile.Graphics.OpenGL.LightName light, OpenMobile.Graphics.OpenGL.LightParameter pname, [OutAttribute] Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetListParameterfvSGIX", ExactSpelling = true)]
-            internal extern static unsafe void GetListParameterfvSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, [OutAttribute] Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetListParameterivSGIX", ExactSpelling = true)]
-            internal extern static unsafe void GetListParameterivSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, [OutAttribute] Int32* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetLocalConstantBooleanvEXT", ExactSpelling = true)]
             internal extern static unsafe void GetLocalConstantBooleanvEXT(UInt32 id, OpenMobile.Graphics.OpenGL.ExtVertexShader value, [OutAttribute] bool* data);
@@ -1929,9 +1752,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetObjectParameterfvARB", ExactSpelling = true)]
             internal extern static unsafe void GetObjectParameterfvARB(UInt32 obj, OpenMobile.Graphics.OpenGL.ArbShaderObjects pname, [OutAttribute] Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetObjectParameterivAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void GetObjectParameterivAPPLE(OpenMobile.Graphics.OpenGL.AppleObjectPurgeable objectType, UInt32 name, OpenMobile.Graphics.OpenGL.AppleObjectPurgeable pname, [OutAttribute] Int32* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetObjectParameterivARB", ExactSpelling = true)]
             internal extern static unsafe void GetObjectParameterivARB(UInt32 obj, OpenMobile.Graphics.OpenGL.ArbShaderObjects pname, [OutAttribute] Int32* @params);
@@ -2152,9 +1972,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetTexParameteriv", ExactSpelling = true)]
             internal extern static unsafe void GetTexParameteriv(OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.GetTextureParameter pname, [OutAttribute] Int32* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetTexParameterPointervAPPLE", ExactSpelling = true)]
-            internal extern static void GetTexParameterPointervAPPLE(OpenMobile.Graphics.OpenGL.AppleTextureRange target, OpenMobile.Graphics.OpenGL.AppleTextureRange pname, [OutAttribute] IntPtr @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetTextureImageEXT", ExactSpelling = true)]
             internal extern static void GetTextureImageEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 level, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, [OutAttribute] IntPtr pixels);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -2311,56 +2128,14 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetVideouivNV", ExactSpelling = true)]
             internal extern static unsafe void GetVideouivNV(UInt32 video_slot, OpenMobile.Graphics.OpenGL.NvPresentVideo pname, [OutAttribute] UInt32* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGlobalAlphaFactorbSUN", ExactSpelling = true)]
-            internal extern static void GlobalAlphaFactorbSUN(SByte factor);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGlobalAlphaFactordSUN", ExactSpelling = true)]
-            internal extern static void GlobalAlphaFactordSUN(Double factor);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGlobalAlphaFactorfSUN", ExactSpelling = true)]
-            internal extern static void GlobalAlphaFactorfSUN(Single factor);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGlobalAlphaFactoriSUN", ExactSpelling = true)]
-            internal extern static void GlobalAlphaFactoriSUN(Int32 factor);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGlobalAlphaFactorsSUN", ExactSpelling = true)]
-            internal extern static void GlobalAlphaFactorsSUN(Int16 factor);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGlobalAlphaFactorubSUN", ExactSpelling = true)]
-            internal extern static void GlobalAlphaFactorubSUN(Byte factor);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGlobalAlphaFactoruiSUN", ExactSpelling = true)]
-            internal extern static void GlobalAlphaFactoruiSUN(UInt32 factor);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGlobalAlphaFactorusSUN", ExactSpelling = true)]
-            internal extern static void GlobalAlphaFactorusSUN(UInt16 factor);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glHint", ExactSpelling = true)]
             internal extern static void Hint(OpenMobile.Graphics.OpenGL.HintTarget target, OpenMobile.Graphics.OpenGL.HintMode mode);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glHintPGI", ExactSpelling = true)]
-            internal extern static void HintPGI(OpenMobile.Graphics.OpenGL.PgiMiscHints target, Int32 mode);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glHistogram", ExactSpelling = true)]
             internal extern static void Histogram(OpenMobile.Graphics.OpenGL.HistogramTarget target, Int32 width, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, bool sink);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glHistogramEXT", ExactSpelling = true)]
             internal extern static void HistogramEXT(OpenMobile.Graphics.OpenGL.ExtHistogram target, Int32 width, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, bool sink);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIglooInterfaceSGIX", ExactSpelling = true)]
-            internal extern static void IglooInterfaceSGIX(OpenMobile.Graphics.OpenGL.All pname, IntPtr @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glImageTransformParameterfHP", ExactSpelling = true)]
-            internal extern static void ImageTransformParameterfHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, Single param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glImageTransformParameterfvHP", ExactSpelling = true)]
-            internal extern static unsafe void ImageTransformParameterfvHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glImageTransformParameteriHP", ExactSpelling = true)]
-            internal extern static void ImageTransformParameteriHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, Int32 param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glImageTransformParameterivHP", ExactSpelling = true)]
-            internal extern static unsafe void ImageTransformParameterivHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, Int32* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIndexd", ExactSpelling = true)]
             internal extern static void Indexd(Double c);
@@ -2395,9 +2170,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIndexPointerEXT", ExactSpelling = true)]
             internal extern static void IndexPointerEXT(OpenMobile.Graphics.OpenGL.IndexPointerType type, Int32 stride, Int32 count, IntPtr pointer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIndexPointerListIBM", ExactSpelling = true)]
-            internal extern static void IndexPointerListIBM(OpenMobile.Graphics.OpenGL.IndexPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIndexs", ExactSpelling = true)]
             internal extern static void Indexs(Int16 c);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -2416,14 +2188,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glInsertComponentEXT", ExactSpelling = true)]
             internal extern static void InsertComponentEXT(UInt32 res, UInt32 src, UInt32 num);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glInstrumentsBufferSGIX", ExactSpelling = true)]
-            internal extern static unsafe void InstrumentsBufferSGIX(Int32 size, [OutAttribute] Int32* buffer);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glInterleavedArrays", ExactSpelling = true)]
             internal extern static void InterleavedArrays(OpenMobile.Graphics.OpenGL.InterleavedArrayFormat format, Int32 stride, IntPtr pointer);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIsAsyncMarkerSGIX", ExactSpelling = true)]
-            internal extern static bool IsAsyncMarkerSGIX(UInt32 marker);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIsBuffer", ExactSpelling = true)]
             internal extern static bool IsBuffer(UInt32 buffer);
@@ -2439,9 +2205,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIsEnabledIndexedEXT", ExactSpelling = true)]
             internal extern static bool IsEnabledIndexedEXT(OpenMobile.Graphics.OpenGL.ExtDrawBuffers2 target, UInt32 index);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIsFenceAPPLE", ExactSpelling = true)]
-            internal extern static bool IsFenceAPPLE(UInt32 fence);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIsFenceNV", ExactSpelling = true)]
             internal extern static bool IsFenceNV(UInt32 fence);
@@ -2503,15 +2266,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIsVertexArray", ExactSpelling = true)]
             internal extern static bool IsVertexArray(UInt32 array);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIsVertexArrayAPPLE", ExactSpelling = true)]
-            internal extern static bool IsVertexArrayAPPLE(UInt32 array);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glIsVertexAttribEnabledAPPLE", ExactSpelling = true)]
-            internal extern static bool IsVertexAttribEnabledAPPLE(UInt32 index, OpenMobile.Graphics.OpenGL.AppleVertexProgramEvaluators pname);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glLightEnviSGIX", ExactSpelling = true)]
-            internal extern static void LightEnviSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32 param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glLightf", ExactSpelling = true)]
             internal extern static void Lightf(OpenMobile.Graphics.OpenGL.LightName light, OpenMobile.Graphics.OpenGL.LightParameter pname, Single param);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -2551,23 +2305,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glListBase", ExactSpelling = true)]
             internal extern static void ListBase(UInt32 @base);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glListParameterfSGIX", ExactSpelling = true)]
-            internal extern static void ListParameterfSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, Single param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glListParameterfvSGIX", ExactSpelling = true)]
-            internal extern static unsafe void ListParameterfvSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glListParameteriSGIX", ExactSpelling = true)]
-            internal extern static void ListParameteriSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, Int32 param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glListParameterivSGIX", ExactSpelling = true)]
-            internal extern static unsafe void ListParameterivSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glLoadIdentity", ExactSpelling = true)]
             internal extern static void LoadIdentity();
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glLoadIdentityDeformationMapSGIX", ExactSpelling = true)]
-            internal extern static void LoadIdentityDeformationMapSGIX(UInt32 mask);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glLoadMatrixd", ExactSpelling = true)]
             internal extern static unsafe void LoadMatrixd(Double* m);
@@ -2646,18 +2385,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMapParameterivNV", ExactSpelling = true)]
             internal extern static unsafe void MapParameterivNV(OpenMobile.Graphics.OpenGL.NvEvaluators target, OpenMobile.Graphics.OpenGL.NvEvaluators pname, Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMapVertexAttrib1dAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void MapVertexAttrib1dAPPLE(UInt32 index, UInt32 size, Double u1, Double u2, Int32 stride, Int32 order, Double* points);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMapVertexAttrib1fAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void MapVertexAttrib1fAPPLE(UInt32 index, UInt32 size, Single u1, Single u2, Int32 stride, Int32 order, Single* points);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMapVertexAttrib2dAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void MapVertexAttrib2dAPPLE(UInt32 index, UInt32 size, Double u1, Double u2, Int32 ustride, Int32 uorder, Double v1, Double v2, Int32 vstride, Int32 vorder, Double* points);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMapVertexAttrib2fAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void MapVertexAttrib2fAPPLE(UInt32 index, UInt32 size, Single u1, Single u2, Int32 ustride, Int32 uorder, Single v1, Single v2, Int32 vstride, Int32 vorder, Single* points);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMaterialf", ExactSpelling = true)]
             internal extern static void Materialf(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Single param);
@@ -2758,9 +2485,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiDrawArraysEXT", ExactSpelling = true)]
             internal extern static unsafe void MultiDrawArraysEXT(OpenMobile.Graphics.OpenGL.BeginMode mode, [OutAttribute] Int32* first, [OutAttribute] Int32* count, Int32 primcount);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiDrawElementArrayAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void MultiDrawElementArrayAPPLE(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32* first, Int32* count, Int32 primcount);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiDrawElements", ExactSpelling = true)]
             internal extern static unsafe void MultiDrawElements(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32* count, OpenMobile.Graphics.OpenGL.DrawElementsType type, IntPtr indices, Int32 primcount);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -2769,15 +2493,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiDrawElementsEXT", ExactSpelling = true)]
             internal extern static unsafe void MultiDrawElementsEXT(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32* count, OpenMobile.Graphics.OpenGL.DrawElementsType type, IntPtr indices, Int32 primcount);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiDrawRangeElementArrayAPPLE", ExactSpelling = true)]
-            internal extern static unsafe void MultiDrawRangeElementArrayAPPLE(OpenMobile.Graphics.OpenGL.BeginMode mode, UInt32 start, UInt32 end, Int32* first, Int32* count, Int32 primcount);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiModeDrawArraysIBM", ExactSpelling = true)]
-            internal extern static unsafe void MultiModeDrawArraysIBM(OpenMobile.Graphics.OpenGL.BeginMode* mode, Int32* first, Int32* count, Int32 primcount, Int32 modestride);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiModeDrawElementsIBM", ExactSpelling = true)]
-            internal extern static unsafe void MultiModeDrawElementsIBM(OpenMobile.Graphics.OpenGL.BeginMode* mode, Int32* count, OpenMobile.Graphics.OpenGL.DrawElementsType type, IntPtr indices, Int32 primcount, Int32 modestride);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexBufferEXT", ExactSpelling = true)]
             internal extern static void MultiTexBufferEXT(OpenMobile.Graphics.OpenGL.TextureUnit texunit, OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.ExtDirectStateAccess internalformat, UInt32 buffer);
@@ -3184,12 +2899,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormal3fv", ExactSpelling = true)]
             internal extern static unsafe void Normal3fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormal3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void Normal3fVertex3fSUN(Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormal3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void Normal3fVertex3fvSUN(Single* n, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormal3hNV", ExactSpelling = true)]
             internal extern static void Normal3hNV(OpenMobile.Half nx, OpenMobile.Half ny, OpenMobile.Half nz);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3213,9 +2922,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormalPointerEXT", ExactSpelling = true)]
             internal extern static void NormalPointerEXT(OpenMobile.Graphics.OpenGL.NormalPointerType type, Int32 stride, Int32 count, IntPtr pointer);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormalPointerListIBM", ExactSpelling = true)]
-            internal extern static void NormalPointerListIBM(OpenMobile.Graphics.OpenGL.NormalPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormalPointervINTEL", ExactSpelling = true)]
             internal extern static void NormalPointervINTEL(OpenMobile.Graphics.OpenGL.NormalPointerType type, IntPtr pointer);
@@ -3249,12 +2955,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormalStream3svATI", ExactSpelling = true)]
             internal extern static unsafe void NormalStream3svATI(OpenMobile.Graphics.OpenGL.AtiVertexStreams stream, Int16* coords);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glObjectPurgeableAPPLE", ExactSpelling = true)]
-            internal extern static System.IntPtr ObjectPurgeableAPPLE(OpenMobile.Graphics.OpenGL.AppleObjectPurgeable objectType, UInt32 name, OpenMobile.Graphics.OpenGL.AppleObjectPurgeable option);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glObjectUnpurgeableAPPLE", ExactSpelling = true)]
-            internal extern static System.IntPtr ObjectUnpurgeableAPPLE(OpenMobile.Graphics.OpenGL.AppleObjectPurgeable objectType, UInt32 name, OpenMobile.Graphics.OpenGL.AppleObjectPurgeable option);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glOrtho", ExactSpelling = true)]
             internal extern static void Ortho(Double left, Double right, Double bottom, Double top, Double zNear, Double zFar);
@@ -3297,9 +2997,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glPixelTexGenParameterivSGIS", ExactSpelling = true)]
             internal extern static unsafe void PixelTexGenParameterivSGIS(OpenMobile.Graphics.OpenGL.SgisPixelTexture pname, Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glPixelTexGenSGIX", ExactSpelling = true)]
-            internal extern static void PixelTexGenSGIX(OpenMobile.Graphics.OpenGL.SgixPixelTexture mode);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glPixelTransferf", ExactSpelling = true)]
             internal extern static void PixelTransferf(OpenMobile.Graphics.OpenGL.PixelTransferParameter pname, Single param);
@@ -3366,12 +3063,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glPointSize", ExactSpelling = true)]
             internal extern static void PointSize(Single size);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glPollAsyncSGIX", ExactSpelling = true)]
-            internal extern static unsafe Int32 PollAsyncSGIX([OutAttribute] UInt32* markerp);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glPollInstrumentsSGIX", ExactSpelling = true)]
-            internal extern static unsafe Int32 PollInstrumentsSGIX([OutAttribute] Int32* marker_p);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glPolygonMode", ExactSpelling = true)]
             internal extern static void PolygonMode(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.PolygonMode mode);
@@ -3733,9 +3424,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReadBuffer", ExactSpelling = true)]
             internal extern static void ReadBuffer(OpenMobile.Graphics.OpenGL.ReadBufferMode mode);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReadInstrumentsSGIX", ExactSpelling = true)]
-            internal extern static void ReadInstrumentsSGIX(Int32 marker);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReadPixels", ExactSpelling = true)]
             internal extern static void ReadPixels(Int32 x, Int32 y, Int32 width, Int32 height, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, [OutAttribute] IntPtr pixels);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3763,9 +3451,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glRectsv", ExactSpelling = true)]
             internal extern static unsafe void Rectsv(Int16* v1, Int16* v2);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReferencePlaneSGIX", ExactSpelling = true)]
-            internal extern static unsafe void ReferencePlaneSGIX(Double* equation);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glRenderbufferStorage", ExactSpelling = true)]
             internal extern static void RenderbufferStorage(OpenMobile.Graphics.OpenGL.RenderbufferTarget target, OpenMobile.Graphics.OpenGL.RenderbufferStorage internalformat, Int32 width, Int32 height);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3783,75 +3468,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glRenderMode", ExactSpelling = true)]
             internal extern static Int32 RenderMode(OpenMobile.Graphics.OpenGL.RenderingMode mode);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodePointerSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodePointerSUN(OpenMobile.Graphics.OpenGL.SunTriangleList type, Int32 stride, IntPtr pointer);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeubSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeubSUN(Byte code);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeubvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeubvSUN(Byte* code);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiColor3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeuiColor3fVertex3fSUN(UInt32 rc, Single r, Single g, Single b, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiColor3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeuiColor3fVertex3fvSUN(UInt32* rc, Single* c, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiColor4fNormal3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeuiColor4fNormal3fVertex3fSUN(UInt32 rc, Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiColor4fNormal3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeuiColor4fNormal3fVertex3fvSUN(UInt32* rc, Single* c, Single* n, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiColor4ubVertex3fSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeuiColor4ubVertex3fSUN(UInt32 rc, Byte r, Byte g, Byte b, Byte a, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiColor4ubVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeuiColor4ubVertex3fvSUN(UInt32* rc, Byte* c, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiNormal3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeuiNormal3fVertex3fSUN(UInt32 rc, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiNormal3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeuiNormal3fVertex3fvSUN(UInt32* rc, Single* n, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeuiSUN(UInt32 code);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN(UInt32 rc, Single s, Single t, Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN(UInt32* rc, Single* tc, Single* c, Single* n, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeuiTexCoord2fNormal3fVertex3fSUN(UInt32 rc, Single s, Single t, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN(UInt32* rc, Single* tc, Single* n, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiTexCoord2fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeuiTexCoord2fVertex3fSUN(UInt32 rc, Single s, Single t, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiTexCoord2fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeuiTexCoord2fVertex3fvSUN(UInt32* rc, Single* tc, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiVertex3fSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeuiVertex3fSUN(UInt32 rc, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuiVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeuiVertex3fvSUN(UInt32* rc, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeuivSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeuivSUN(UInt32* code);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeusSUN", ExactSpelling = true)]
-            internal extern static void ReplacementCodeusSUN(UInt16 code);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glReplacementCodeusvSUN", ExactSpelling = true)]
-            internal extern static unsafe void ReplacementCodeusvSUN(UInt16* code);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glRequestResidentProgramsNV", ExactSpelling = true)]
             internal extern static unsafe void RequestResidentProgramsNV(Int32 n, UInt32* programs);
@@ -4024,9 +3640,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSecondaryColorPointerEXT", ExactSpelling = true)]
             internal extern static void SecondaryColorPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.ColorPointerType type, Int32 stride, IntPtr pointer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSecondaryColorPointerListIBM", ExactSpelling = true)]
-            internal extern static void SecondaryColorPointerListIBM(Int32 size, OpenMobile.Graphics.OpenGL.IbmVertexArrayLists type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSelectBuffer", ExactSpelling = true)]
             internal extern static unsafe void SelectBuffer(Int32 size, [OutAttribute] UInt32* buffer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -4038,9 +3651,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSeparableFilter2DEXT", ExactSpelling = true)]
             internal extern static void SeparableFilter2DEXT(OpenMobile.Graphics.OpenGL.ExtConvolution target, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, Int32 width, Int32 height, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr row, IntPtr column);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSetFenceAPPLE", ExactSpelling = true)]
-            internal extern static void SetFenceAPPLE(UInt32 fence);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSetFenceNV", ExactSpelling = true)]
             internal extern static void SetFenceNV(UInt32 fence, OpenMobile.Graphics.OpenGL.NvFence condition);
@@ -4075,21 +3685,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSharpenTexFuncSGIS", ExactSpelling = true)]
             internal extern static unsafe void SharpenTexFuncSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 n, Single* points);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSpriteParameterfSGIX", ExactSpelling = true)]
-            internal extern static void SpriteParameterfSGIX(OpenMobile.Graphics.OpenGL.SgixSprite pname, Single param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSpriteParameterfvSGIX", ExactSpelling = true)]
-            internal extern static unsafe void SpriteParameterfvSGIX(OpenMobile.Graphics.OpenGL.SgixSprite pname, Single* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSpriteParameteriSGIX", ExactSpelling = true)]
-            internal extern static void SpriteParameteriSGIX(OpenMobile.Graphics.OpenGL.SgixSprite pname, Int32 param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSpriteParameterivSGIX", ExactSpelling = true)]
-            internal extern static unsafe void SpriteParameterivSGIX(OpenMobile.Graphics.OpenGL.SgixSprite pname, Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glStartInstrumentsSGIX", ExactSpelling = true)]
-            internal extern static void StartInstrumentsSGIX();
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glStencilClearTagEXT", ExactSpelling = true)]
             internal extern static void StencilClearTagEXT(Int32 stencilTagBits, UInt32 stencilClearTag);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -4117,17 +3712,11 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glStencilOpSeparateATI", ExactSpelling = true)]
             internal extern static void StencilOpSeparateATI(OpenMobile.Graphics.OpenGL.AtiSeparateStencil face, OpenMobile.Graphics.OpenGL.StencilOp sfail, OpenMobile.Graphics.OpenGL.StencilOp dpfail, OpenMobile.Graphics.OpenGL.StencilOp dppass);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glStopInstrumentsSGIX", ExactSpelling = true)]
-            internal extern static void StopInstrumentsSGIX(Int32 marker);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glStringMarkerGREMEDY", ExactSpelling = true)]
             internal extern static void StringMarkerGREMEDY(Int32 len, IntPtr @string);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSwizzleEXT", ExactSpelling = true)]
             internal extern static void SwizzleEXT(UInt32 res, UInt32 @in, OpenMobile.Graphics.OpenGL.ExtVertexShader outX, OpenMobile.Graphics.OpenGL.ExtVertexShader outY, OpenMobile.Graphics.OpenGL.ExtVertexShader outZ, OpenMobile.Graphics.OpenGL.ExtVertexShader outW);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTagSampleBufferSGIX", ExactSpelling = true)]
-            internal extern static void TagSampleBufferSGIX();
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTangent3bEXT", ExactSpelling = true)]
             internal extern static void Tangent3bEXT(SByte tx, SByte ty, SByte tz);
@@ -4171,14 +3760,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTessellationModeAMD", ExactSpelling = true)]
             internal extern static void TessellationModeAMD(OpenMobile.Graphics.OpenGL.AmdVertexShaderTesselator mode);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTestFenceAPPLE", ExactSpelling = true)]
-            internal extern static bool TestFenceAPPLE(UInt32 fence);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTestFenceNV", ExactSpelling = true)]
             internal extern static bool TestFenceNV(UInt32 fence);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTestObjectAPPLE", ExactSpelling = true)]
-            internal extern static bool TestObjectAPPLE(OpenMobile.Graphics.OpenGL.AppleFence @object, UInt32 name);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexBuffer", ExactSpelling = true)]
             internal extern static void TexBuffer(OpenMobile.Graphics.OpenGL.TextureBufferTarget target, OpenMobile.Graphics.OpenGL.SizedInternalFormat internalformat, UInt32 buffer);
@@ -4234,38 +3817,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2f", ExactSpelling = true)]
             internal extern static void TexCoord2f(Single s, Single t);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fColor3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void TexCoord2fColor3fVertex3fSUN(Single s, Single t, Single r, Single g, Single b, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fColor3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord2fColor3fVertex3fvSUN(Single* tc, Single* c, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fColor4fNormal3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void TexCoord2fColor4fNormal3fVertex3fSUN(Single s, Single t, Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fColor4fNormal3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord2fColor4fNormal3fVertex3fvSUN(Single* tc, Single* c, Single* n, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fColor4ubVertex3fSUN", ExactSpelling = true)]
-            internal extern static void TexCoord2fColor4ubVertex3fSUN(Single s, Single t, Byte r, Byte g, Byte b, Byte a, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fColor4ubVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord2fColor4ubVertex3fvSUN(Single* tc, Byte* c, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fNormal3fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void TexCoord2fNormal3fVertex3fSUN(Single s, Single t, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fNormal3fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord2fNormal3fVertex3fvSUN(Single* tc, Single* n, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fv", ExactSpelling = true)]
             internal extern static unsafe void TexCoord2fv(Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fVertex3fSUN", ExactSpelling = true)]
-            internal extern static void TexCoord2fVertex3fSUN(Single s, Single t, Single x, Single y, Single z);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2fVertex3fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord2fVertex3fvSUN(Single* tc, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2hNV", ExactSpelling = true)]
             internal extern static void TexCoord2hNV(OpenMobile.Half s, OpenMobile.Half t);
@@ -4324,20 +3877,8 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4f", ExactSpelling = true)]
             internal extern static void TexCoord4f(Single s, Single t, Single r, Single q);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4fColor4fNormal3fVertex4fSUN", ExactSpelling = true)]
-            internal extern static void TexCoord4fColor4fNormal3fVertex4fSUN(Single s, Single t, Single p, Single q, Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z, Single w);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4fColor4fNormal3fVertex4fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord4fColor4fNormal3fVertex4fvSUN(Single* tc, Single* c, Single* n, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4fv", ExactSpelling = true)]
             internal extern static unsafe void TexCoord4fv(Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4fVertex4fSUN", ExactSpelling = true)]
-            internal extern static void TexCoord4fVertex4fSUN(Single s, Single t, Single p, Single q, Single x, Single y, Single z, Single w);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4fVertex4fvSUN", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord4fVertex4fvSUN(Single* tc, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4hNV", ExactSpelling = true)]
             internal extern static void TexCoord4hNV(OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r, OpenMobile.Half q);
@@ -4362,9 +3903,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoordPointerEXT", ExactSpelling = true)]
             internal extern static void TexCoordPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.TexCoordPointerType type, Int32 stride, Int32 count, IntPtr pointer);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoordPointerListIBM", ExactSpelling = true)]
-            internal extern static void TexCoordPointerListIBM(Int32 size, OpenMobile.Graphics.OpenGL.TexCoordPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoordPointervINTEL", ExactSpelling = true)]
             internal extern static void TexCoordPointervINTEL(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, IntPtr pointer);
@@ -4512,9 +4050,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTextureParameterivEXT", ExactSpelling = true)]
             internal extern static unsafe void TextureParameterivEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.TextureParameterName pname, Int32* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTextureRangeAPPLE", ExactSpelling = true)]
-            internal extern static void TextureRangeAPPLE(OpenMobile.Graphics.OpenGL.AppleTextureRange target, Int32 length, IntPtr pointer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTextureRenderbufferEXT", ExactSpelling = true)]
             internal extern static void TextureRenderbufferEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target, UInt32 renderbuffer);
@@ -4884,12 +4419,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex4sv", ExactSpelling = true)]
             internal extern static unsafe void Vertex4sv(Int16* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexArrayParameteriAPPLE", ExactSpelling = true)]
-            internal extern static void VertexArrayParameteriAPPLE(OpenMobile.Graphics.OpenGL.AppleVertexArrayRange pname, Int32 param);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexArrayRangeAPPLE", ExactSpelling = true)]
-            internal extern static void VertexArrayRangeAPPLE(Int32 length, [OutAttribute] IntPtr pointer);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexArrayRangeNV", ExactSpelling = true)]
             internal extern static void VertexArrayRangeNV(Int32 length, IntPtr pointer);
@@ -5418,9 +4947,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexPointerEXT", ExactSpelling = true)]
             internal extern static void VertexPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, Int32 stride, Int32 count, IntPtr pointer);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexPointerListIBM", ExactSpelling = true)]
-            internal extern static void VertexPointerListIBM(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexPointervINTEL", ExactSpelling = true)]
             internal extern static void VertexPointervINTEL(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, IntPtr pointer);

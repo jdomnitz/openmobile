@@ -87,9 +87,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void ArrayObjectATI(OpenMobile.Graphics.OpenGL.EnableCap array, Int32 size, OpenMobile.Graphics.OpenGL.AtiVertexArrayObject type, Int32 stride, UInt32 buffer, UInt32 offset);
             internal static ArrayObjectATI glArrayObjectATI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void AsyncMarkerSGIX(UInt32 marker);
-            internal static AsyncMarkerSGIX glAsyncMarkerSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void AttachObjectARB(UInt32 containerObj, UInt32 obj);
             internal static AttachObjectARB glAttachObjectARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -225,9 +222,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void BindVertexArray(UInt32 array);
             internal static BindVertexArray glBindVertexArray;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BindVertexArrayAPPLE(UInt32 array);
-            internal static BindVertexArrayAPPLE glBindVertexArrayAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void BindVertexShaderEXT(UInt32 id);
             internal static BindVertexShaderEXT glBindVertexShaderEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -332,9 +326,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void BufferDataARB(OpenMobile.Graphics.OpenGL.BufferTargetArb target, IntPtr size, IntPtr data, OpenMobile.Graphics.OpenGL.BufferUsageArb usage);
             internal static BufferDataARB glBufferDataARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BufferParameteriAPPLE(OpenMobile.Graphics.OpenGL.BufferTarget target, OpenMobile.Graphics.OpenGL.BufferParameterApple pname, Int32 param);
-            internal static BufferParameteriAPPLE glBufferParameteriAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void BufferSubData(OpenMobile.Graphics.OpenGL.BufferTarget target, IntPtr offset, IntPtr size, IntPtr data);
             internal static BufferSubData glBufferSubData;
@@ -578,9 +569,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void ColorPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.ColorPointerType type, Int32 stride, Int32 count, IntPtr pointer);
             internal static ColorPointerEXT glColorPointerEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ColorPointerListIBM(Int32 size, OpenMobile.Graphics.OpenGL.ColorPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            internal static ColorPointerListIBM glColorPointerListIBM;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void ColorPointervINTEL(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, IntPtr pointer);
             internal static ColorPointervINTEL glColorPointervINTEL;
@@ -861,26 +849,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void CurrentPaletteMatrixARB(Int32 index);
             internal static CurrentPaletteMatrixARB glCurrentPaletteMatrixARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void DeformationMap3dSGIX(OpenMobile.Graphics.OpenGL.SgixPolynomialFfd target, Double u1, Double u2, Int32 ustride, Int32 uorder, Double v1, Double v2, Int32 vstride, Int32 vorder, Double w1, Double w2, Int32 wstride, Int32 worder, Double* points);
-            internal unsafe static DeformationMap3dSGIX glDeformationMap3dSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void DeformationMap3fSGIX(OpenMobile.Graphics.OpenGL.SgixPolynomialFfd target, Single u1, Single u2, Int32 ustride, Int32 uorder, Single v1, Single v2, Int32 vstride, Int32 vorder, Single w1, Single w2, Int32 wstride, Int32 worder, Single* points);
-            internal unsafe static DeformationMap3fSGIX glDeformationMap3fSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void DeformSGIX(UInt32 mask);
-            internal static DeformSGIX glDeformSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void DeleteAsyncMarkersSGIX(UInt32 marker, Int32 range);
-            internal static DeleteAsyncMarkersSGIX glDeleteAsyncMarkersSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void DeleteBuffers(Int32 n, UInt32* buffers);
             internal unsafe static DeleteBuffers glDeleteBuffers;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void DeleteBuffersARB(Int32 n, UInt32* buffers);
             internal unsafe static DeleteBuffersARB glDeleteBuffersARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void DeleteFencesAPPLE(Int32 n, UInt32* fences);
-            internal unsafe static DeleteFencesAPPLE glDeleteFencesAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void DeleteFencesNV(Int32 n, UInt32* fences);
             internal unsafe static DeleteFencesNV glDeleteFencesNV;
@@ -945,9 +918,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void DeleteVertexArrays(Int32 n, UInt32* arrays);
             internal unsafe static DeleteVertexArrays glDeleteVertexArrays;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void DeleteVertexArraysAPPLE(Int32 n, UInt32* arrays);
-            internal unsafe static DeleteVertexArraysAPPLE glDeleteVertexArraysAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void DeleteVertexShaderEXT(UInt32 id);
             internal static DeleteVertexShaderEXT glDeleteVertexShaderEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -996,9 +966,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void DisableVariantClientStateEXT(UInt32 id);
             internal static DisableVariantClientStateEXT glDisableVariantClientStateEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void DisableVertexAttribAPPLE(UInt32 index, OpenMobile.Graphics.OpenGL.AppleVertexProgramEvaluators pname);
-            internal static DisableVertexAttribAPPLE glDisableVertexAttribAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void DisableVertexAttribArray(UInt32 index);
             internal static DisableVertexAttribArray glDisableVertexAttribArray;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1032,9 +999,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void DrawBuffersATI(Int32 n, OpenMobile.Graphics.OpenGL.AtiDrawBuffers* bufs);
             internal unsafe static DrawBuffersATI glDrawBuffersATI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void DrawElementArrayAPPLE(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32 first, Int32 count);
-            internal static DrawElementArrayAPPLE glDrawElementArrayAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void DrawElementArrayATI(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32 count);
             internal static DrawElementArrayATI glDrawElementArrayATI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1062,9 +1026,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void DrawPixels(Int32 width, Int32 height, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr pixels);
             internal static DrawPixels glDrawPixels;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void DrawRangeElementArrayAPPLE(OpenMobile.Graphics.OpenGL.BeginMode mode, UInt32 start, UInt32 end, Int32 first, Int32 count);
-            internal static DrawRangeElementArrayAPPLE glDrawRangeElementArrayAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void DrawRangeElementArrayATI(OpenMobile.Graphics.OpenGL.BeginMode mode, UInt32 start, UInt32 end, Int32 count);
             internal static DrawRangeElementArrayATI glDrawRangeElementArrayATI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1089,14 +1050,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void EdgeFlagPointerEXT(Int32 stride, Int32 count, bool* pointer);
             internal unsafe static EdgeFlagPointerEXT glEdgeFlagPointerEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void EdgeFlagPointerListIBM(Int32 stride, bool* pointer, Int32 ptrstride);
-            internal unsafe static EdgeFlagPointerListIBM glEdgeFlagPointerListIBM;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void EdgeFlagv(bool* flag);
             internal unsafe static EdgeFlagv glEdgeFlagv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ElementPointerAPPLE(OpenMobile.Graphics.OpenGL.AppleElementArray type, IntPtr pointer);
-            internal static ElementPointerAPPLE glElementPointerAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void ElementPointerATI(OpenMobile.Graphics.OpenGL.AtiElementArray type, IntPtr pointer);
             internal static ElementPointerATI glElementPointerATI;
@@ -1118,9 +1073,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void EnableVariantClientStateEXT(UInt32 id);
             internal static EnableVariantClientStateEXT glEnableVariantClientStateEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void EnableVertexAttribAPPLE(UInt32 index, OpenMobile.Graphics.OpenGL.AppleVertexProgramEvaluators pname);
-            internal static EnableVertexAttribAPPLE glEnableVertexAttribAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void EnableVertexAttribArray(UInt32 index);
             internal static EnableVertexAttribArray glEnableVertexAttribArray;
@@ -1224,20 +1176,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void Finish();
             internal static Finish glFinish;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate Int32 FinishAsyncSGIX([OutAttribute] UInt32* markerp);
-            internal unsafe static FinishAsyncSGIX glFinishAsyncSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FinishFenceAPPLE(UInt32 fence);
-            internal static FinishFenceAPPLE glFinishFenceAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void FinishFenceNV(UInt32 fence);
             internal static FinishFenceNV glFinishFenceNV;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FinishObjectAPPLE(OpenMobile.Graphics.OpenGL.AppleFence @object, Int32 name);
-            internal static FinishObjectAPPLE glFinishObjectAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FinishTextureSUNX();
-            internal static FinishTextureSUNX glFinishTextureSUNX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Flush();
             internal static Flush glFlush;
@@ -1245,17 +1185,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void FlushMappedBufferRange(OpenMobile.Graphics.OpenGL.BufferTarget target, IntPtr offset, IntPtr length);
             internal static FlushMappedBufferRange glFlushMappedBufferRange;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FlushMappedBufferRangeAPPLE(OpenMobile.Graphics.OpenGL.BufferTarget target, IntPtr offset, IntPtr size);
-            internal static FlushMappedBufferRangeAPPLE glFlushMappedBufferRangeAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void FlushPixelDataRangeNV(OpenMobile.Graphics.OpenGL.NvPixelDataRange target);
             internal static FlushPixelDataRangeNV glFlushPixelDataRangeNV;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FlushRasterSGIX();
-            internal static FlushRasterSGIX glFlushRasterSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FlushVertexArrayRangeAPPLE(Int32 length, [OutAttribute] IntPtr pointer);
-            internal static FlushVertexArrayRangeAPPLE glFlushVertexArrayRangeAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void FlushVertexArrayRangeNV();
             internal static FlushVertexArrayRangeNV glFlushVertexArrayRangeNV;
@@ -1296,9 +1227,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void FogCoordPointerEXT(OpenMobile.Graphics.OpenGL.ExtFogCoord type, Int32 stride, IntPtr pointer);
             internal static FogCoordPointerEXT glFogCoordPointerEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FogCoordPointerListIBM(OpenMobile.Graphics.OpenGL.IbmVertexArrayLists type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            internal static FogCoordPointerListIBM glFogCoordPointerListIBM;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Fogf(OpenMobile.Graphics.OpenGL.FogParameter pname, Single param);
             internal static Fogf glFogf;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1313,45 +1241,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void Fogiv(OpenMobile.Graphics.OpenGL.FogParameter pname, Int32* @params);
             internal unsafe static Fogiv glFogiv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FragmentColorMaterialSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter mode);
-            internal static FragmentColorMaterialSGIX glFragmentColorMaterialSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FragmentLightfSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Single param);
-            internal static FragmentLightfSGIX glFragmentLightfSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void FragmentLightfvSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Single* @params);
-            internal unsafe static FragmentLightfvSGIX glFragmentLightfvSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FragmentLightiSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32 param);
-            internal static FragmentLightiSGIX glFragmentLightiSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void FragmentLightivSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32* @params);
-            internal unsafe static FragmentLightivSGIX glFragmentLightivSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FragmentLightModelfSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Single param);
-            internal static FragmentLightModelfSGIX glFragmentLightModelfSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void FragmentLightModelfvSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Single* @params);
-            internal unsafe static FragmentLightModelfvSGIX glFragmentLightModelfvSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FragmentLightModeliSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32 param);
-            internal static FragmentLightModeliSGIX glFragmentLightModeliSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void FragmentLightModelivSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32* @params);
-            internal unsafe static FragmentLightModelivSGIX glFragmentLightModelivSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FragmentMaterialfSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Single param);
-            internal static FragmentMaterialfSGIX glFragmentMaterialfSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void FragmentMaterialfvSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Single* @params);
-            internal unsafe static FragmentMaterialfvSGIX glFragmentMaterialfvSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FragmentMaterialiSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Int32 param);
-            internal static FragmentMaterialiSGIX glFragmentMaterialiSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void FragmentMaterialivSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Int32* @params);
-            internal unsafe static FragmentMaterialivSGIX glFragmentMaterialivSGIX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void FramebufferDrawBufferEXT(UInt32 framebuffer, OpenMobile.Graphics.OpenGL.DrawBufferMode mode);
             internal static FramebufferDrawBufferEXT glFramebufferDrawBufferEXT;
@@ -1416,9 +1305,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void FrameTerminatorGREMEDY();
             internal static FrameTerminatorGREMEDY glFrameTerminatorGREMEDY;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FrameZoomSGIX(Int32 factor);
-            internal static FrameZoomSGIX glFrameZoomSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void FreeObjectBufferATI(UInt32 buffer);
             internal static FreeObjectBufferATI glFreeObjectBufferATI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1427,9 +1313,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Frustum(Double left, Double right, Double bottom, Double top, Double zNear, Double zFar);
             internal static Frustum glFrustum;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate Int32 GenAsyncMarkersSGIX(Int32 range);
-            internal static GenAsyncMarkersSGIX glGenAsyncMarkersSGIX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GenBuffers(Int32 n, [OutAttribute] UInt32* buffers);
             internal unsafe static GenBuffers glGenBuffers;
@@ -1448,9 +1331,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void GenerateTextureMipmapEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target);
             internal static GenerateTextureMipmapEXT glGenerateTextureMipmapEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GenFencesAPPLE(Int32 n, [OutAttribute] UInt32* fences);
-            internal unsafe static GenFencesAPPLE glGenFencesAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GenFencesNV(Int32 n, [OutAttribute] UInt32* fences);
             internal unsafe static GenFencesNV glGenFencesNV;
@@ -1505,9 +1385,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GenVertexArrays(Int32 n, [OutAttribute] UInt32* arrays);
             internal unsafe static GenVertexArrays glGenVertexArrays;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GenVertexArraysAPPLE(Int32 n, [OutAttribute] UInt32* arrays);
-            internal unsafe static GenVertexArraysAPPLE glGenVertexArraysAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate Int32 GenVertexShadersEXT(UInt32 range);
             internal static GenVertexShadersEXT glGenVertexShadersEXT;
@@ -1698,18 +1575,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate Int32 GetFragDataLocationEXT(UInt32 program, String name);
             internal static GetFragDataLocationEXT glGetFragDataLocationEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetFragmentLightfvSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, [OutAttribute] Single* @params);
-            internal unsafe static GetFragmentLightfvSGIX glGetFragmentLightfvSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetFragmentLightivSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting light, OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, [OutAttribute] Int32* @params);
-            internal unsafe static GetFragmentLightivSGIX glGetFragmentLightivSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetFragmentMaterialfvSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, [OutAttribute] Single* @params);
-            internal unsafe static GetFragmentMaterialfvSGIX glGetFragmentMaterialfvSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetFragmentMaterialivSGIX(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, [OutAttribute] Int32* @params);
-            internal unsafe static GetFragmentMaterialivSGIX glGetFragmentMaterialivSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetFramebufferAttachmentParameteriv(OpenMobile.Graphics.OpenGL.FramebufferTarget target, OpenMobile.Graphics.OpenGL.FramebufferAttachment attachment, OpenMobile.Graphics.OpenGL.FramebufferParameterName pname, [OutAttribute] Int32* @params);
             internal unsafe static GetFramebufferAttachmentParameteriv glGetFramebufferAttachmentParameteriv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1740,17 +1605,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void GetHistogramParameterivEXT(OpenMobile.Graphics.OpenGL.ExtHistogram target, OpenMobile.Graphics.OpenGL.ExtHistogram pname, [OutAttribute] Int32* @params);
             internal unsafe static GetHistogramParameterivEXT glGetHistogramParameterivEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetImageTransformParameterfvHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, [OutAttribute] Single* @params);
-            internal unsafe static GetImageTransformParameterfvHP glGetImageTransformParameterfvHP;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetImageTransformParameterivHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, [OutAttribute] Int32* @params);
-            internal unsafe static GetImageTransformParameterivHP glGetImageTransformParameterivHP;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetInfoLogARB(UInt32 obj, Int32 maxLength, [OutAttribute] Int32* length, [OutAttribute] StringBuilder infoLog);
             internal unsafe static GetInfoLogARB glGetInfoLogARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate Int32 GetInstrumentsSGIX();
-            internal static GetInstrumentsSGIX glGetInstrumentsSGIX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetInteger64i_v(OpenMobile.Graphics.OpenGL.Version32 target, UInt32 index, [OutAttribute] Int64* data);
             internal unsafe static GetInteger64i_v glGetInteger64i_v;
@@ -1781,12 +1637,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetLightiv(OpenMobile.Graphics.OpenGL.LightName light, OpenMobile.Graphics.OpenGL.LightParameter pname, [OutAttribute] Int32* @params);
             internal unsafe static GetLightiv glGetLightiv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetListParameterfvSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, [OutAttribute] Single* @params);
-            internal unsafe static GetListParameterfvSGIX glGetListParameterfvSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetListParameterivSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, [OutAttribute] Int32* @params);
-            internal unsafe static GetListParameterivSGIX glGetListParameterivSGIX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetLocalConstantBooleanvEXT(UInt32 id, OpenMobile.Graphics.OpenGL.ExtVertexShader value, [OutAttribute] bool* data);
             internal unsafe static GetLocalConstantBooleanvEXT glGetLocalConstantBooleanvEXT;
@@ -1928,9 +1778,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetObjectParameterfvARB(UInt32 obj, OpenMobile.Graphics.OpenGL.ArbShaderObjects pname, [OutAttribute] Single* @params);
             internal unsafe static GetObjectParameterfvARB glGetObjectParameterfvARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetObjectParameterivAPPLE(OpenMobile.Graphics.OpenGL.AppleObjectPurgeable objectType, UInt32 name, OpenMobile.Graphics.OpenGL.AppleObjectPurgeable pname, [OutAttribute] Int32* @params);
-            internal unsafe static GetObjectParameterivAPPLE glGetObjectParameterivAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetObjectParameterivARB(UInt32 obj, OpenMobile.Graphics.OpenGL.ArbShaderObjects pname, [OutAttribute] Int32* @params);
             internal unsafe static GetObjectParameterivARB glGetObjectParameterivARB;
@@ -2151,9 +1998,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void GetTexParameteriv(OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.GetTextureParameter pname, [OutAttribute] Int32* @params);
             internal unsafe static GetTexParameteriv glGetTexParameteriv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GetTexParameterPointervAPPLE(OpenMobile.Graphics.OpenGL.AppleTextureRange target, OpenMobile.Graphics.OpenGL.AppleTextureRange pname, [OutAttribute] IntPtr @params);
-            internal static GetTexParameterPointervAPPLE glGetTexParameterPointervAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void GetTextureImageEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 level, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, [OutAttribute] IntPtr pixels);
             internal static GetTextureImageEXT glGetTextureImageEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -2337,29 +2181,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void Hint(OpenMobile.Graphics.OpenGL.HintTarget target, OpenMobile.Graphics.OpenGL.HintMode mode);
             internal static Hint glHint;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void HintPGI(OpenMobile.Graphics.OpenGL.PgiMiscHints target, Int32 mode);
-            internal static HintPGI glHintPGI;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Histogram(OpenMobile.Graphics.OpenGL.HistogramTarget target, Int32 width, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, bool sink);
             internal static Histogram glHistogram;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void HistogramEXT(OpenMobile.Graphics.OpenGL.ExtHistogram target, Int32 width, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, bool sink);
             internal static HistogramEXT glHistogramEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void IglooInterfaceSGIX(OpenMobile.Graphics.OpenGL.All pname, IntPtr @params);
-            internal static IglooInterfaceSGIX glIglooInterfaceSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ImageTransformParameterfHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, Single param);
-            internal static ImageTransformParameterfHP glImageTransformParameterfHP;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ImageTransformParameterfvHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, Single* @params);
-            internal unsafe static ImageTransformParameterfvHP glImageTransformParameterfvHP;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ImageTransformParameteriHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, Int32 param);
-            internal static ImageTransformParameteriHP glImageTransformParameteriHP;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ImageTransformParameterivHP(OpenMobile.Graphics.OpenGL.HpImageTransform target, OpenMobile.Graphics.OpenGL.HpImageTransform pname, Int32* @params);
-            internal unsafe static ImageTransformParameterivHP glImageTransformParameterivHP;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Indexd(Double c);
             internal static Indexd glIndexd;
@@ -2394,9 +2220,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void IndexPointerEXT(OpenMobile.Graphics.OpenGL.IndexPointerType type, Int32 stride, Int32 count, IntPtr pointer);
             internal static IndexPointerEXT glIndexPointerEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void IndexPointerListIBM(OpenMobile.Graphics.OpenGL.IndexPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            internal static IndexPointerListIBM glIndexPointerListIBM;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Indexs(Int16 c);
             internal static Indexs glIndexs;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -2415,14 +2238,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void InsertComponentEXT(UInt32 res, UInt32 src, UInt32 num);
             internal static InsertComponentEXT glInsertComponentEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void InstrumentsBufferSGIX(Int32 size, [OutAttribute] Int32* buffer);
-            internal unsafe static InstrumentsBufferSGIX glInstrumentsBufferSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void InterleavedArrays(OpenMobile.Graphics.OpenGL.InterleavedArrayFormat format, Int32 stride, IntPtr pointer);
             internal static InterleavedArrays glInterleavedArrays;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate bool IsAsyncMarkerSGIX(UInt32 marker);
-            internal static IsAsyncMarkerSGIX glIsAsyncMarkerSGIX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate bool IsBuffer(UInt32 buffer);
             internal static IsBuffer glIsBuffer;
@@ -2438,9 +2255,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate bool IsEnabledIndexedEXT(OpenMobile.Graphics.OpenGL.ExtDrawBuffers2 target, UInt32 index);
             internal static IsEnabledIndexedEXT glIsEnabledIndexedEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate bool IsFenceAPPLE(UInt32 fence);
-            internal static IsFenceAPPLE glIsFenceAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate bool IsFenceNV(UInt32 fence);
             internal static IsFenceNV glIsFenceNV;
@@ -2502,15 +2316,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate bool IsVertexArray(UInt32 array);
             internal static IsVertexArray glIsVertexArray;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate bool IsVertexArrayAPPLE(UInt32 array);
-            internal static IsVertexArrayAPPLE glIsVertexArrayAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate bool IsVertexAttribEnabledAPPLE(UInt32 index, OpenMobile.Graphics.OpenGL.AppleVertexProgramEvaluators pname);
-            internal static IsVertexAttribEnabledAPPLE glIsVertexAttribEnabledAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void LightEnviSGIX(OpenMobile.Graphics.OpenGL.SgixFragmentLighting pname, Int32 param);
-            internal static LightEnviSGIX glLightEnviSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Lightf(OpenMobile.Graphics.OpenGL.LightName light, OpenMobile.Graphics.OpenGL.LightParameter pname, Single param);
             internal static Lightf glLightf;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -2550,23 +2355,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void ListBase(UInt32 @base);
             internal static ListBase glListBase;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ListParameterfSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, Single param);
-            internal static ListParameterfSGIX glListParameterfSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ListParameterfvSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, Single* @params);
-            internal unsafe static ListParameterfvSGIX glListParameterfvSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ListParameteriSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, Int32 param);
-            internal static ListParameteriSGIX glListParameteriSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ListParameterivSGIX(UInt32 list, OpenMobile.Graphics.OpenGL.ListParameterName pname, Int32* @params);
-            internal unsafe static ListParameterivSGIX glListParameterivSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void LoadIdentity();
             internal static LoadIdentity glLoadIdentity;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void LoadIdentityDeformationMapSGIX(UInt32 mask);
-            internal static LoadIdentityDeformationMapSGIX glLoadIdentityDeformationMapSGIX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void LoadMatrixd(Double* m);
             internal unsafe static LoadMatrixd glLoadMatrixd;
@@ -2645,18 +2435,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void MapParameterivNV(OpenMobile.Graphics.OpenGL.NvEvaluators target, OpenMobile.Graphics.OpenGL.NvEvaluators pname, Int32* @params);
             internal unsafe static MapParameterivNV glMapParameterivNV;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MapVertexAttrib1dAPPLE(UInt32 index, UInt32 size, Double u1, Double u2, Int32 stride, Int32 order, Double* points);
-            internal unsafe static MapVertexAttrib1dAPPLE glMapVertexAttrib1dAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MapVertexAttrib1fAPPLE(UInt32 index, UInt32 size, Single u1, Single u2, Int32 stride, Int32 order, Single* points);
-            internal unsafe static MapVertexAttrib1fAPPLE glMapVertexAttrib1fAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MapVertexAttrib2dAPPLE(UInt32 index, UInt32 size, Double u1, Double u2, Int32 ustride, Int32 uorder, Double v1, Double v2, Int32 vstride, Int32 vorder, Double* points);
-            internal unsafe static MapVertexAttrib2dAPPLE glMapVertexAttrib2dAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MapVertexAttrib2fAPPLE(UInt32 index, UInt32 size, Single u1, Single u2, Int32 ustride, Int32 uorder, Single v1, Single v2, Int32 vstride, Int32 vorder, Single* points);
-            internal unsafe static MapVertexAttrib2fAPPLE glMapVertexAttrib2fAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Materialf(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.MaterialParameter pname, Single param);
             internal static Materialf glMaterialf;
@@ -2757,9 +2535,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void MultiDrawArraysEXT(OpenMobile.Graphics.OpenGL.BeginMode mode, [OutAttribute] Int32* first, [OutAttribute] Int32* count, Int32 primcount);
             internal unsafe static MultiDrawArraysEXT glMultiDrawArraysEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MultiDrawElementArrayAPPLE(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32* first, Int32* count, Int32 primcount);
-            internal unsafe static MultiDrawElementArrayAPPLE glMultiDrawElementArrayAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void MultiDrawElements(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32* count, OpenMobile.Graphics.OpenGL.DrawElementsType type, IntPtr indices, Int32 primcount);
             internal unsafe static MultiDrawElements glMultiDrawElements;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -2768,15 +2543,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void MultiDrawElementsEXT(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32* count, OpenMobile.Graphics.OpenGL.DrawElementsType type, IntPtr indices, Int32 primcount);
             internal unsafe static MultiDrawElementsEXT glMultiDrawElementsEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MultiDrawRangeElementArrayAPPLE(OpenMobile.Graphics.OpenGL.BeginMode mode, UInt32 start, UInt32 end, Int32* first, Int32* count, Int32 primcount);
-            internal unsafe static MultiDrawRangeElementArrayAPPLE glMultiDrawRangeElementArrayAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MultiModeDrawArraysIBM(OpenMobile.Graphics.OpenGL.BeginMode* mode, Int32* first, Int32* count, Int32 primcount, Int32 modestride);
-            internal unsafe static MultiModeDrawArraysIBM glMultiModeDrawArraysIBM;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MultiModeDrawElementsIBM(OpenMobile.Graphics.OpenGL.BeginMode* mode, Int32* count, OpenMobile.Graphics.OpenGL.DrawElementsType type, IntPtr indices, Int32 primcount, Int32 modestride);
-            internal unsafe static MultiModeDrawElementsIBM glMultiModeDrawElementsIBM;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void MultiTexBufferEXT(OpenMobile.Graphics.OpenGL.TextureUnit texunit, OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.ExtDirectStateAccess internalformat, UInt32 buffer);
             internal static MultiTexBufferEXT glMultiTexBufferEXT;
@@ -3213,9 +2979,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void NormalPointerEXT(OpenMobile.Graphics.OpenGL.NormalPointerType type, Int32 stride, Int32 count, IntPtr pointer);
             internal static NormalPointerEXT glNormalPointerEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void NormalPointerListIBM(OpenMobile.Graphics.OpenGL.NormalPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            internal static NormalPointerListIBM glNormalPointerListIBM;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void NormalPointervINTEL(OpenMobile.Graphics.OpenGL.NormalPointerType type, IntPtr pointer);
             internal static NormalPointervINTEL glNormalPointervINTEL;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3248,12 +3011,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void NormalStream3svATI(OpenMobile.Graphics.OpenGL.AtiVertexStreams stream, Int16* coords);
             internal unsafe static NormalStream3svATI glNormalStream3svATI;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate System.IntPtr ObjectPurgeableAPPLE(OpenMobile.Graphics.OpenGL.AppleObjectPurgeable objectType, UInt32 name, OpenMobile.Graphics.OpenGL.AppleObjectPurgeable option);
-            internal static ObjectPurgeableAPPLE glObjectPurgeableAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate System.IntPtr ObjectUnpurgeableAPPLE(OpenMobile.Graphics.OpenGL.AppleObjectPurgeable objectType, UInt32 name, OpenMobile.Graphics.OpenGL.AppleObjectPurgeable option);
-            internal static ObjectUnpurgeableAPPLE glObjectUnpurgeableAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Ortho(Double left, Double right, Double bottom, Double top, Double zNear, Double zFar);
             internal static Ortho glOrtho;
@@ -3296,9 +3053,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void PixelTexGenParameterivSGIS(OpenMobile.Graphics.OpenGL.SgisPixelTexture pname, Int32* @params);
             internal unsafe static PixelTexGenParameterivSGIS glPixelTexGenParameterivSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void PixelTexGenSGIX(OpenMobile.Graphics.OpenGL.SgixPixelTexture mode);
-            internal static PixelTexGenSGIX glPixelTexGenSGIX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void PixelTransferf(OpenMobile.Graphics.OpenGL.PixelTransferParameter pname, Single param);
             internal static PixelTransferf glPixelTransferf;
@@ -3365,12 +3119,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void PointSize(Single size);
             internal static PointSize glPointSize;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate Int32 PollAsyncSGIX([OutAttribute] UInt32* markerp);
-            internal unsafe static PollAsyncSGIX glPollAsyncSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate Int32 PollInstrumentsSGIX([OutAttribute] Int32* marker_p);
-            internal unsafe static PollInstrumentsSGIX glPollInstrumentsSGIX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void PolygonMode(OpenMobile.Graphics.OpenGL.MaterialFace face, OpenMobile.Graphics.OpenGL.PolygonMode mode);
             internal static PolygonMode glPolygonMode;
@@ -3732,9 +3480,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void ReadBuffer(OpenMobile.Graphics.OpenGL.ReadBufferMode mode);
             internal static ReadBuffer glReadBuffer;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReadInstrumentsSGIX(Int32 marker);
-            internal static ReadInstrumentsSGIX glReadInstrumentsSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void ReadPixels(Int32 x, Int32 y, Int32 width, Int32 height, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, [OutAttribute] IntPtr pixels);
             internal static ReadPixels glReadPixels;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3762,9 +3507,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void Rectsv(Int16* v1, Int16* v2);
             internal unsafe static Rectsv glRectsv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReferencePlaneSGIX(Double* equation);
-            internal unsafe static ReferencePlaneSGIX glReferencePlaneSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void RenderbufferStorage(OpenMobile.Graphics.OpenGL.RenderbufferTarget target, OpenMobile.Graphics.OpenGL.RenderbufferStorage internalformat, Int32 width, Int32 height);
             internal static RenderbufferStorage glRenderbufferStorage;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3782,9 +3524,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate Int32 RenderMode(OpenMobile.Graphics.OpenGL.RenderingMode mode);
             internal static RenderMode glRenderMode;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodePointerSUN(OpenMobile.Graphics.OpenGL.SunTriangleList type, Int32 stride, IntPtr pointer);
-            internal static ReplacementCodePointerSUN glReplacementCodePointerSUN;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void ReplacementCodeubSUN(Byte code);
             internal static ReplacementCodeubSUN glReplacementCodeubSUN;
@@ -4023,9 +3762,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void SecondaryColorPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.ColorPointerType type, Int32 stride, IntPtr pointer);
             internal static SecondaryColorPointerEXT glSecondaryColorPointerEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void SecondaryColorPointerListIBM(Int32 size, OpenMobile.Graphics.OpenGL.IbmVertexArrayLists type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            internal static SecondaryColorPointerListIBM glSecondaryColorPointerListIBM;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void SelectBuffer(Int32 size, [OutAttribute] UInt32* buffer);
             internal unsafe static SelectBuffer glSelectBuffer;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -4037,9 +3773,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void SeparableFilter2DEXT(OpenMobile.Graphics.OpenGL.ExtConvolution target, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, Int32 width, Int32 height, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr row, IntPtr column);
             internal static SeparableFilter2DEXT glSeparableFilter2DEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void SetFenceAPPLE(UInt32 fence);
-            internal static SetFenceAPPLE glSetFenceAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void SetFenceNV(UInt32 fence, OpenMobile.Graphics.OpenGL.NvFence condition);
             internal static SetFenceNV glSetFenceNV;
@@ -4074,21 +3807,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void SharpenTexFuncSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 n, Single* points);
             internal unsafe static SharpenTexFuncSGIS glSharpenTexFuncSGIS;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void SpriteParameterfSGIX(OpenMobile.Graphics.OpenGL.SgixSprite pname, Single param);
-            internal static SpriteParameterfSGIX glSpriteParameterfSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void SpriteParameterfvSGIX(OpenMobile.Graphics.OpenGL.SgixSprite pname, Single* @params);
-            internal unsafe static SpriteParameterfvSGIX glSpriteParameterfvSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void SpriteParameteriSGIX(OpenMobile.Graphics.OpenGL.SgixSprite pname, Int32 param);
-            internal static SpriteParameteriSGIX glSpriteParameteriSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void SpriteParameterivSGIX(OpenMobile.Graphics.OpenGL.SgixSprite pname, Int32* @params);
-            internal unsafe static SpriteParameterivSGIX glSpriteParameterivSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void StartInstrumentsSGIX();
-            internal static StartInstrumentsSGIX glStartInstrumentsSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void StencilClearTagEXT(Int32 stencilTagBits, UInt32 stencilClearTag);
             internal static StencilClearTagEXT glStencilClearTagEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -4116,17 +3834,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void StencilOpSeparateATI(OpenMobile.Graphics.OpenGL.AtiSeparateStencil face, OpenMobile.Graphics.OpenGL.StencilOp sfail, OpenMobile.Graphics.OpenGL.StencilOp dpfail, OpenMobile.Graphics.OpenGL.StencilOp dppass);
             internal static StencilOpSeparateATI glStencilOpSeparateATI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void StopInstrumentsSGIX(Int32 marker);
-            internal static StopInstrumentsSGIX glStopInstrumentsSGIX;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void StringMarkerGREMEDY(Int32 len, IntPtr @string);
             internal static StringMarkerGREMEDY glStringMarkerGREMEDY;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void SwizzleEXT(UInt32 res, UInt32 @in, OpenMobile.Graphics.OpenGL.ExtVertexShader outX, OpenMobile.Graphics.OpenGL.ExtVertexShader outY, OpenMobile.Graphics.OpenGL.ExtVertexShader outZ, OpenMobile.Graphics.OpenGL.ExtVertexShader outW);
             internal static SwizzleEXT glSwizzleEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TagSampleBufferSGIX();
-            internal static TagSampleBufferSGIX glTagSampleBufferSGIX;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Tangent3bEXT(SByte tx, SByte ty, SByte tz);
             internal static Tangent3bEXT glTangent3bEXT;
@@ -4170,14 +3882,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void TessellationModeAMD(OpenMobile.Graphics.OpenGL.AmdVertexShaderTesselator mode);
             internal static TessellationModeAMD glTessellationModeAMD;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate bool TestFenceAPPLE(UInt32 fence);
-            internal static TestFenceAPPLE glTestFenceAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate bool TestFenceNV(UInt32 fence);
             internal static TestFenceNV glTestFenceNV;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate bool TestObjectAPPLE(OpenMobile.Graphics.OpenGL.AppleFence @object, UInt32 name);
-            internal static TestObjectAPPLE glTestObjectAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexBuffer(OpenMobile.Graphics.OpenGL.TextureBufferTarget target, OpenMobile.Graphics.OpenGL.SizedInternalFormat internalformat, UInt32 buffer);
             internal static TexBuffer glTexBuffer;
@@ -4362,9 +4068,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void TexCoordPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.TexCoordPointerType type, Int32 stride, Int32 count, IntPtr pointer);
             internal static TexCoordPointerEXT glTexCoordPointerEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoordPointerListIBM(Int32 size, OpenMobile.Graphics.OpenGL.TexCoordPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            internal static TexCoordPointerListIBM glTexCoordPointerListIBM;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexCoordPointervINTEL(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, IntPtr pointer);
             internal static TexCoordPointervINTEL glTexCoordPointervINTEL;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -4511,9 +4214,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void TextureParameterivEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.TextureParameterName pname, Int32* @params);
             internal unsafe static TextureParameterivEXT glTextureParameterivEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TextureRangeAPPLE(OpenMobile.Graphics.OpenGL.AppleTextureRange target, Int32 length, IntPtr pointer);
-            internal static TextureRangeAPPLE glTextureRangeAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TextureRenderbufferEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target, UInt32 renderbuffer);
             internal static TextureRenderbufferEXT glTextureRenderbufferEXT;
@@ -4883,12 +4583,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void Vertex4sv(Int16* v);
             internal unsafe static Vertex4sv glVertex4sv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void VertexArrayParameteriAPPLE(OpenMobile.Graphics.OpenGL.AppleVertexArrayRange pname, Int32 param);
-            internal static VertexArrayParameteriAPPLE glVertexArrayParameteriAPPLE;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void VertexArrayRangeAPPLE(Int32 length, [OutAttribute] IntPtr pointer);
-            internal static VertexArrayRangeAPPLE glVertexArrayRangeAPPLE;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void VertexArrayRangeNV(Int32 length, IntPtr pointer);
             internal static VertexArrayRangeNV glVertexArrayRangeNV;
@@ -5417,9 +5111,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void VertexPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, Int32 stride, Int32 count, IntPtr pointer);
             internal static VertexPointerEXT glVertexPointerEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void VertexPointerListIBM(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, Int32 stride, IntPtr pointer, Int32 ptrstride);
-            internal static VertexPointerListIBM glVertexPointerListIBM;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void VertexPointervINTEL(Int32 size, OpenMobile.Graphics.OpenGL.VertexPointerType type, IntPtr pointer);
             internal static VertexPointervINTEL glVertexPointervINTEL;
