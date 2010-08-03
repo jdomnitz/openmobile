@@ -1984,14 +1984,6 @@ namespace OpenMobile.Graphics.OpenGL
         ModulateAddAti = ((int)0x8744),
         ModulateSignedAddAti = ((int)0x8745),
         ModulateSubtractAti = ((int)0x8746),
-        YcbcrMesa = ((int)0x8757),
-        PackInvertMesa = ((int)0x8758),
-        Texture1DStackMesax = ((int)0x8759),
-        Texture2DStackMesax = ((int)0x875A),
-        ProxyTexture1DStackMesax = ((int)0x875B),
-        ProxyTexture2DStackMesax = ((int)0x875C),
-        Texture1DStackBindingMesax = ((int)0x875D),
-        Texture2DStackBindingMesax = ((int)0x875E),
         StaticAti = ((int)0x8760),
         DynamicAti = ((int)0x8761),
         PreserveAti = ((int)0x8762),
@@ -5046,12 +5038,6 @@ namespace OpenMobile.Graphics.OpenGL
         ColorTableBias = ((int)0x80D7),
     }
 
-    public enum ColorTableParameterPNameSgi : int
-    {
-        ColorTableScaleSgi = ((int)0x80D6),
-        ColorTableBiasSgi = ((int)0x80D7),
-    }
-
     public enum ColorTableTarget : int
     {
         ColorTable = ((int)0x80D0),
@@ -5060,18 +5046,6 @@ namespace OpenMobile.Graphics.OpenGL
         ProxyColorTable = ((int)0x80D3),
         ProxyPostConvolutionColorTable = ((int)0x80D4),
         ProxyPostColorMatrixColorTable = ((int)0x80D5),
-    }
-
-    public enum ColorTableTargetSgi : int
-    {
-        TextureColorTableSgi = ((int)0x80BC),
-        ProxyTextureColorTableSgi = ((int)0x80BD),
-        ColorTableSgi = ((int)0x80D0),
-        PostConvolutionColorTableSgi = ((int)0x80D1),
-        PostColorMatrixColorTableSgi = ((int)0x80D2),
-        ProxyColorTableSgi = ((int)0x80D3),
-        ProxyPostConvolutionColorTableSgi = ((int)0x80D4),
-        ProxyPostColorMatrixColorTableSgi = ((int)0x80D5),
     }
 
     public enum ConditionalRenderType : int
@@ -5303,17 +5277,12 @@ namespace OpenMobile.Graphics.OpenGL
         EdgeFlagArray = ((int)0x8079),
         Multisample = ((int)0x809D),
         SampleAlphaToCoverage = ((int)0x809E),
-        SampleAlphaToMaskSgis = ((int)0x809E),
         SampleAlphaToOne = ((int)0x809F),
         SampleCoverage = ((int)0x80A0),
-        SampleMaskSgis = ((int)0x80A0),
-        TextureColorTableSgi = ((int)0x80BC),
         ColorTable = ((int)0x80D0),
         PostConvolutionColorTable = ((int)0x80D1),
         PostColorMatrixColorTable = ((int)0x80D2),
-        Texture4DSgis = ((int)0x8134),
         SharedTexturePaletteExt = ((int)0x81FB),
-        PixelTextureSgis = ((int)0x8353),
         FogCoordArray = ((int)0x8457),
         ColorSum = ((int)0x8458),
         SecondaryColorArray = ((int)0x845E),
@@ -6440,7 +6409,6 @@ namespace OpenMobile.Graphics.OpenGL
         Exp = ((int)0x0800),
         Exp2 = ((int)0x0801),
         Linear = ((int)0x2601),
-        FogFuncSgis = ((int)0x812A),
         FogCoord = ((int)0x8451),
         FragmentDepth = ((int)0x8452),
     }
@@ -6602,20 +6570,6 @@ namespace OpenMobile.Graphics.OpenGL
         ColorTableAlphaSize = ((int)0x80DD),
         ColorTableLuminanceSize = ((int)0x80DE),
         ColorTableIntensitySize = ((int)0x80DF),
-    }
-
-    public enum GetColorTableParameterPNameSgi : int
-    {
-        ColorTableScaleSgi = ((int)0x80D6),
-        ColorTableBiasSgi = ((int)0x80D7),
-        ColorTableFormatSgi = ((int)0x80D8),
-        ColorTableWidthSgi = ((int)0x80D9),
-        ColorTableRedSizeSgi = ((int)0x80DA),
-        ColorTableGreenSizeSgi = ((int)0x80DB),
-        ColorTableBlueSizeSgi = ((int)0x80DC),
-        ColorTableAlphaSizeSgi = ((int)0x80DD),
-        ColorTableLuminanceSizeSgi = ((int)0x80DE),
-        ColorTableIntensitySizeSgi = ((int)0x80DF),
     }
 
     public enum GetConvolutionParameter : int
@@ -6996,71 +6950,31 @@ namespace OpenMobile.Graphics.OpenGL
         TextureCoordArrayCountExt = ((int)0x808B),
         EdgeFlagArrayStride = ((int)0x808C),
         EdgeFlagArrayCountExt = ((int)0x808D),
-        DetailTexture2DBindingSgis = ((int)0x8096),
         Multisample = ((int)0x809D),
-        MultisampleSgis = ((int)0x809D),
         SampleAlphaToCoverage = ((int)0x809E),
-        SampleAlphaToMaskSgis = ((int)0x809E),
         SampleAlphaToOne = ((int)0x809F),
-        SampleAlphaToOneSgis = ((int)0x809F),
         SampleCoverage = ((int)0x80A0),
-        SampleMaskSgis = ((int)0x80A0),
         SampleBuffers = ((int)0x80A8),
-        SampleBuffersSgis = ((int)0x80A8),
         Samples = ((int)0x80A9),
-        SamplesSgis = ((int)0x80A9),
         SampleCoverageValue = ((int)0x80AA),
-        SampleMaskValueSgis = ((int)0x80AA),
         SampleCoverageInvert = ((int)0x80AB),
-        SampleMaskInvertSgis = ((int)0x80AB),
-        SamplePatternSgis = ((int)0x80AC),
-        ColorMatrixSgi = ((int)0x80B1),
-        ColorMatrixStackDepthSgi = ((int)0x80B2),
-        MaxColorMatrixStackDepthSgi = ((int)0x80B3),
-        PostColorMatrixRedScaleSgi = ((int)0x80B4),
-        PostColorMatrixGreenScaleSgi = ((int)0x80B5),
-        PostColorMatrixBlueScaleSgi = ((int)0x80B6),
-        PostColorMatrixAlphaScaleSgi = ((int)0x80B7),
-        PostColorMatrixRedBiasSgi = ((int)0x80B8),
-        PostColorMatrixGreenBiasSgi = ((int)0x80B9),
-        PostColorMatrixBlueBiasSgi = ((int)0x80BA),
-        PostColorMatrixAlphaBiasSgi = ((int)0x80BB),
-        TextureColorTableSgi = ((int)0x80BC),
         BlendDstRgb = ((int)0x80C8),
         BlendSrcRgb = ((int)0x80C9),
         BlendDstAlpha = ((int)0x80CA),
         BlendSrcAlpha = ((int)0x80CB),
-        ColorTableSgi = ((int)0x80D0),
-        PostConvolutionColorTableSgi = ((int)0x80D1),
-        PostColorMatrixColorTableSgi = ((int)0x80D2),
         MaxElementsVertices = ((int)0x80E8),
         MaxElementsIndices = ((int)0x80E9),
         PointSizeMin = ((int)0x8126),
-        PointSizeMinSgis = ((int)0x8126),
         PointSizeMax = ((int)0x8127),
-        PointSizeMaxSgis = ((int)0x8127),
         PointFadeThresholdSize = ((int)0x8128),
-        PointFadeThresholdSizeSgis = ((int)0x8128),
-        DistanceAttenuationSgis = ((int)0x8129),
         PointDistanceAttenuation = ((int)0x8129),
-        FogFuncPointsSgis = ((int)0x812B),
-        MaxFogFuncPointsSgis = ((int)0x812C),
-        PackSkipVolumesSgis = ((int)0x8130),
-        PackImageDepthSgis = ((int)0x8131),
-        UnpackSkipVolumesSgis = ((int)0x8132),
-        UnpackImageDepthSgis = ((int)0x8133),
-        Texture4DSgis = ((int)0x8134),
-        Max4DTextureSizeSgis = ((int)0x8138),
-        Texture4DBindingSgis = ((int)0x814F),
         GenerateMipmapHint = ((int)0x8192),
-        GenerateMipmapHintSgis = ((int)0x8192),
         LightModelColorControl = ((int)0x81F8),
         SharedTexturePaletteExt = ((int)0x81FB),
         MajorVersion = ((int)0x821B),
         MinorVersion = ((int)0x821C),
         NumExtensions = ((int)0x821D),
         ContextFlags = ((int)0x821E),
-        PixelTextureSgis = ((int)0x8353),
         CurrentFogCoord = ((int)0x8453),
         FogCoordArrayType = ((int)0x8454),
         FogCoordArrayStride = ((int)0x8455),
@@ -7244,25 +7158,11 @@ namespace OpenMobile.Graphics.OpenGL
         TextureDepthExt = ((int)0x8071),
         TextureWrapR = ((int)0x8072),
         TextureWrapRExt = ((int)0x8072),
-        DetailTextureLevelSgis = ((int)0x809A),
-        DetailTextureModeSgis = ((int)0x809B),
-        DetailTextureFuncPointsSgis = ((int)0x809C),
-        SharpenTextureFuncPointsSgis = ((int)0x80B0),
-        DualTextureSelectSgis = ((int)0x8124),
-        QuadTextureSelectSgis = ((int)0x8125),
-        Texture4DsizeSgis = ((int)0x8136),
-        TextureWrapQSgis = ((int)0x8137),
         TextureMinLod = ((int)0x813A),
-        TextureMinLodSgis = ((int)0x813A),
         TextureMaxLod = ((int)0x813B),
-        TextureMaxLodSgis = ((int)0x813B),
         TextureBaseLevel = ((int)0x813C),
-        TextureBaseLevelSgis = ((int)0x813C),
         TextureMaxLevel = ((int)0x813D),
-        TextureMaxLevelSgis = ((int)0x813D),
-        TextureFilter4SizeSgis = ((int)0x8147),
         GenerateMipmap = ((int)0x8191),
-        GenerateMipmapSgis = ((int)0x8191),
         TextureCompressedImageSize = ((int)0x86A0),
         TextureCompressed = ((int)0x86A1),
         TextureDepthSize = ((int)0x884A),
@@ -7325,7 +7225,6 @@ namespace OpenMobile.Graphics.OpenGL
         PackCmykHintExt = ((int)0x800E),
         UnpackCmykHintExt = ((int)0x800F),
         GenerateMipmapHint = ((int)0x8192),
-        GenerateMipmapHintSgis = ((int)0x8192),
         TextureCompressionHint = ((int)0x84EF),
         FragmentShaderDerivativeHint = ((int)0x8B8B),
     }
@@ -8335,26 +8234,6 @@ namespace OpenMobile.Graphics.OpenGL
         Rgb10A2 = ((int)0x8059),
         Rgba12 = ((int)0x805A),
         Rgba16 = ((int)0x805B),
-        DualAlpha4Sgis = ((int)0x8110),
-        DualAlpha8Sgis = ((int)0x8111),
-        DualAlpha12Sgis = ((int)0x8112),
-        DualAlpha16Sgis = ((int)0x8113),
-        DualLuminance4Sgis = ((int)0x8114),
-        DualLuminance8Sgis = ((int)0x8115),
-        DualLuminance12Sgis = ((int)0x8116),
-        DualLuminance16Sgis = ((int)0x8117),
-        DualIntensity4Sgis = ((int)0x8118),
-        DualIntensity8Sgis = ((int)0x8119),
-        DualIntensity12Sgis = ((int)0x811A),
-        DualIntensity16Sgis = ((int)0x811B),
-        DualLuminanceAlpha4Sgis = ((int)0x811C),
-        DualLuminanceAlpha8Sgis = ((int)0x811D),
-        QuadAlpha4Sgis = ((int)0x811E),
-        QuadAlpha8Sgis = ((int)0x811F),
-        QuadLuminance4Sgis = ((int)0x8120),
-        QuadLuminance8Sgis = ((int)0x8121),
-        QuadIntensity4Sgis = ((int)0x8122),
-        QuadIntensity8Sgis = ((int)0x8123),
         DepthComponent16 = ((int)0x81A5),
         DepthComponent24 = ((int)0x81A6),
         DepthComponent32 = ((int)0x81A7),
@@ -8475,10 +8354,6 @@ namespace OpenMobile.Graphics.OpenGL
         UnpackSkipImagesExt = ((int)0x806D),
         UnpackImageHeight = ((int)0x806E),
         UnpackImageHeightExt = ((int)0x806E),
-        PackSkipVolumesSgis = ((int)0x8130),
-        PackImageDepthSgis = ((int)0x8131),
-        UnpackSkipVolumesSgis = ((int)0x8132),
-        UnpackImageDepthSgis = ((int)0x8133),
     }
 
     public enum PixelTexGenMode : int
@@ -8488,12 +8363,6 @@ namespace OpenMobile.Graphics.OpenGL
         Rgba = ((int)0x1908),
         Luminance = ((int)0x1909),
         LuminanceAlpha = ((int)0x190A),
-    }
-
-    public enum PixelTexGenParameterNameSgis : int
-    {
-        PixelFragmentRgbSourceSgis = ((int)0x8354),
-        PixelFragmentAlphaSourceSgis = ((int)0x8355),
     }
 
     public enum PixelTransferParameter : int
@@ -8520,14 +8389,6 @@ namespace OpenMobile.Graphics.OpenGL
         PostConvolutionGreenBiasExt = ((int)0x8021),
         PostConvolutionBlueBiasExt = ((int)0x8022),
         PostConvolutionAlphaBiasExt = ((int)0x8023),
-        PostColorMatrixRedScaleSgi = ((int)0x80B4),
-        PostColorMatrixGreenScaleSgi = ((int)0x80B5),
-        PostColorMatrixBlueScaleSgi = ((int)0x80B6),
-        PostColorMatrixAlphaScaleSgi = ((int)0x80B7),
-        PostColorMatrixRedBiasSgi = ((int)0x80B8),
-        PostColorMatrixGreenBiasSgi = ((int)0x80B9),
-        PostColorMatrixBlueBiasSgi = ((int)0x80BA),
-        PostColorMatrixAlphaBiasSgi = ((int)0x80BB),
     }
 
     public enum PixelType : int
@@ -8571,14 +8432,6 @@ namespace OpenMobile.Graphics.OpenGL
         PointFadeThresholdSize = ((int)0x8128),
         PointDistanceAttenuation = ((int)0x8129),
         PointSpriteCoordOrigin = ((int)0x8CA0),
-    }
-
-    public enum PointParameterNameSgis : int
-    {
-        PointSizeMinSgis = ((int)0x8126),
-        PointSizeMaxSgis = ((int)0x8127),
-        PointFadeThresholdSizeSgis = ((int)0x8128),
-        DistanceAttenuationSgis = ((int)0x8129),
     }
 
     public enum PointSpriteCoordOriginParameter : int
@@ -8785,17 +8638,6 @@ namespace OpenMobile.Graphics.OpenGL
         Rgba4S3tc = ((int)0x83A3),
     }
 
-    public enum SamplePatternSgis : int
-    {
-        Gl1PassSgis = ((int)0x80A1),
-        Gl2Pass0Sgis = ((int)0x80A2),
-        Gl2Pass1Sgis = ((int)0x80A3),
-        Gl4Pass0Sgis = ((int)0x80A4),
-        Gl4Pass1Sgis = ((int)0x80A5),
-        Gl4Pass2Sgis = ((int)0x80A6),
-        Gl4Pass3Sgis = ((int)0x80A7),
-    }
-
     public enum SeparableTarget : int
     {
         Separable2D = ((int)0x8012),
@@ -8804,198 +8646,6 @@ namespace OpenMobile.Graphics.OpenGL
     public enum SeparableTargetExt : int
     {
         Separable2DExt = ((int)0x8012),
-    }
-
-    public enum SgiColorMatrix : int
-    {
-        ColorMatrixSgi = ((int)0x80B1),
-        ColorMatrixStackDepthSgi = ((int)0x80B2),
-        MaxColorMatrixStackDepthSgi = ((int)0x80B3),
-        PostColorMatrixRedScaleSgi = ((int)0x80B4),
-        PostColorMatrixGreenScaleSgi = ((int)0x80B5),
-        PostColorMatrixBlueScaleSgi = ((int)0x80B6),
-        PostColorMatrixAlphaScaleSgi = ((int)0x80B7),
-        PostColorMatrixRedBiasSgi = ((int)0x80B8),
-        PostColorMatrixGreenBiasSgi = ((int)0x80B9),
-        PostColorMatrixBlueBiasSgi = ((int)0x80BA),
-        PostColorMatrixAlphaBiasSgi = ((int)0x80BB),
-    }
-
-    public enum SgiColorTable : int
-    {
-        ColorTableSgi = ((int)0x80D0),
-        PostConvolutionColorTableSgi = ((int)0x80D1),
-        PostColorMatrixColorTableSgi = ((int)0x80D2),
-        ProxyColorTableSgi = ((int)0x80D3),
-        ProxyPostConvolutionColorTableSgi = ((int)0x80D4),
-        ProxyPostColorMatrixColorTableSgi = ((int)0x80D5),
-        ColorTableScaleSgi = ((int)0x80D6),
-        ColorTableBiasSgi = ((int)0x80D7),
-        ColorTableFormatSgi = ((int)0x80D8),
-        ColorTableWidthSgi = ((int)0x80D9),
-        ColorTableRedSizeSgi = ((int)0x80DA),
-        ColorTableGreenSizeSgi = ((int)0x80DB),
-        ColorTableBlueSizeSgi = ((int)0x80DC),
-        ColorTableAlphaSizeSgi = ((int)0x80DD),
-        ColorTableLuminanceSizeSgi = ((int)0x80DE),
-        ColorTableIntensitySizeSgi = ((int)0x80DF),
-    }
-
-    public enum SgisDetailTexture : int
-    {
-        DetailTexture2DSgis = ((int)0x8095),
-        DetailTexture2DBindingSgis = ((int)0x8096),
-        LinearDetailSgis = ((int)0x8097),
-        LinearDetailAlphaSgis = ((int)0x8098),
-        LinearDetailColorSgis = ((int)0x8099),
-        DetailTextureLevelSgis = ((int)0x809A),
-        DetailTextureModeSgis = ((int)0x809B),
-        DetailTextureFuncPointsSgis = ((int)0x809C),
-    }
-
-    public enum SgisFogFunction : int
-    {
-        FogFuncSgis = ((int)0x812A),
-        FogFuncPointsSgis = ((int)0x812B),
-        MaxFogFuncPointsSgis = ((int)0x812C),
-    }
-
-    public enum SgisGenerateMipmap : int
-    {
-        GenerateMipmapSgis = ((int)0x8191),
-        GenerateMipmapHintSgis = ((int)0x8192),
-    }
-
-    public enum SgisMultisample : int
-    {
-        MultisampleSgis = ((int)0x809D),
-        SampleAlphaToMaskSgis = ((int)0x809E),
-        SampleAlphaToOneSgis = ((int)0x809F),
-        SampleMaskSgis = ((int)0x80A0),
-        Gl1PassSgis = ((int)0x80A1),
-        Gl2Pass0Sgis = ((int)0x80A2),
-        Gl2Pass1Sgis = ((int)0x80A3),
-        Gl4Pass0Sgis = ((int)0x80A4),
-        Gl4Pass1Sgis = ((int)0x80A5),
-        Gl4Pass2Sgis = ((int)0x80A6),
-        Gl4Pass3Sgis = ((int)0x80A7),
-        SampleBuffersSgis = ((int)0x80A8),
-        SamplesSgis = ((int)0x80A9),
-        SampleMaskValueSgis = ((int)0x80AA),
-        SampleMaskInvertSgis = ((int)0x80AB),
-        SamplePatternSgis = ((int)0x80AC),
-    }
-
-    public enum SgisPixelTexture : int
-    {
-        PixelTextureSgis = ((int)0x8353),
-        PixelFragmentRgbSourceSgis = ((int)0x8354),
-        PixelFragmentAlphaSourceSgis = ((int)0x8355),
-        PixelGroupColorSgis = ((int)0x8356),
-    }
-
-    public enum SgisPointLineTexgen : int
-    {
-        EyeDistanceToPointSgis = ((int)0x81F0),
-        ObjectDistanceToPointSgis = ((int)0x81F1),
-        EyeDistanceToLineSgis = ((int)0x81F2),
-        ObjectDistanceToLineSgis = ((int)0x81F3),
-        EyePointSgis = ((int)0x81F4),
-        ObjectPointSgis = ((int)0x81F5),
-        EyeLineSgis = ((int)0x81F6),
-        ObjectLineSgis = ((int)0x81F7),
-    }
-
-    public enum SgisPointParameters : int
-    {
-        PointSizeMinSgis = ((int)0x8126),
-        PointSizeMaxSgis = ((int)0x8127),
-        PointFadeThresholdSizeSgis = ((int)0x8128),
-        DistanceAttenuationSgis = ((int)0x8129),
-    }
-
-    public enum SgisSharpenTexture : int
-    {
-        LinearSharpenSgis = ((int)0x80AD),
-        LinearSharpenAlphaSgis = ((int)0x80AE),
-        LinearSharpenColorSgis = ((int)0x80AF),
-        SharpenTextureFuncPointsSgis = ((int)0x80B0),
-    }
-
-    public enum SgisTexture4D : int
-    {
-        PackSkipVolumesSgis = ((int)0x8130),
-        PackImageDepthSgis = ((int)0x8131),
-        UnpackSkipVolumesSgis = ((int)0x8132),
-        UnpackImageDepthSgis = ((int)0x8133),
-        Texture4DSgis = ((int)0x8134),
-        ProxyTexture4DSgis = ((int)0x8135),
-        Texture4DsizeSgis = ((int)0x8136),
-        TextureWrapQSgis = ((int)0x8137),
-        Max4DTextureSizeSgis = ((int)0x8138),
-        Texture4DBindingSgis = ((int)0x814F),
-    }
-
-    public enum SgisTextureBorderClamp : int
-    {
-        ClampToBorderSgis = ((int)0x812D),
-    }
-
-    [Flags]
-    public enum SgisTextureColorMask : int
-    {
-        TextureColorWritemaskSgis = ((int)0x81EF),
-    }
-
-    public enum SgisTextureEdgeClamp : int
-    {
-        ClampToEdgeSgis = ((int)0x812F),
-    }
-
-    public enum SgisTextureFilter4 : int
-    {
-        Filter4Sgis = ((int)0x8146),
-        TextureFilter4SizeSgis = ((int)0x8147),
-    }
-
-    public enum SgisTextureLod : int
-    {
-        TextureMinLodSgis = ((int)0x813A),
-        TextureMaxLodSgis = ((int)0x813B),
-        TextureBaseLevelSgis = ((int)0x813C),
-        TextureMaxLevelSgis = ((int)0x813D),
-    }
-
-    public enum SgisTextureSelect : int
-    {
-        DualAlpha4Sgis = ((int)0x8110),
-        DualAlpha8Sgis = ((int)0x8111),
-        DualAlpha12Sgis = ((int)0x8112),
-        DualAlpha16Sgis = ((int)0x8113),
-        DualLuminance4Sgis = ((int)0x8114),
-        DualLuminance8Sgis = ((int)0x8115),
-        DualLuminance12Sgis = ((int)0x8116),
-        DualLuminance16Sgis = ((int)0x8117),
-        DualIntensity4Sgis = ((int)0x8118),
-        DualIntensity8Sgis = ((int)0x8119),
-        DualIntensity12Sgis = ((int)0x811A),
-        DualIntensity16Sgis = ((int)0x811B),
-        DualLuminanceAlpha4Sgis = ((int)0x811C),
-        DualLuminanceAlpha8Sgis = ((int)0x811D),
-        QuadAlpha4Sgis = ((int)0x811E),
-        QuadAlpha8Sgis = ((int)0x811F),
-        QuadLuminance4Sgis = ((int)0x8120),
-        QuadLuminance8Sgis = ((int)0x8121),
-        QuadIntensity4Sgis = ((int)0x8122),
-        QuadIntensity8Sgis = ((int)0x8123),
-        DualTextureSelectSgis = ((int)0x8124),
-        QuadTextureSelectSgis = ((int)0x8125),
-    }
-
-    public enum SgiTextureColorTable : int
-    {
-        TextureColorTableSgi = ((int)0x80BC),
-        ProxyTextureColorTableSgi = ((int)0x80BD),
     }
 
     public enum ShaderParameter : int
