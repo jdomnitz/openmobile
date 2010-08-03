@@ -429,12 +429,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void Color3fv(Single* v);
             internal unsafe static Color3fv glColor3fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Color3fVertex3fSUN(Single r, Single g, Single b, Single x, Single y, Single z);
-            internal static Color3fVertex3fSUN glColor3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Color3fVertex3fvSUN(Single* c, Single* v);
-            internal unsafe static Color3fVertex3fvSUN glColor3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Color3hNV(OpenMobile.Half red, OpenMobile.Half green, OpenMobile.Half blue);
             internal static Color3hNV glColor3hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -486,12 +480,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void Color4f(Single red, Single green, Single blue, Single alpha);
             internal static Color4f glColor4f;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Color4fNormal3fVertex3fSUN(Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            internal static Color4fNormal3fVertex3fSUN glColor4fNormal3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Color4fNormal3fVertex3fvSUN(Single* c, Single* n, Single* v);
-            internal unsafe static Color4fNormal3fVertex3fvSUN glColor4fNormal3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void Color4fv(Single* v);
             internal unsafe static Color4fv glColor4fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -518,18 +506,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void Color4ubv(Byte* v);
             internal unsafe static Color4ubv glColor4ubv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Color4ubVertex2fSUN(Byte r, Byte g, Byte b, Byte a, Single x, Single y);
-            internal static Color4ubVertex2fSUN glColor4ubVertex2fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Color4ubVertex2fvSUN(Byte* c, Single* v);
-            internal unsafe static Color4ubVertex2fvSUN glColor4ubVertex2fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Color4ubVertex3fSUN(Byte r, Byte g, Byte b, Byte a, Single x, Single y, Single z);
-            internal static Color4ubVertex3fSUN glColor4ubVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Color4ubVertex3fvSUN(Byte* c, Single* v);
-            internal unsafe static Color4ubVertex3fvSUN glColor4ubVertex3fvSUN;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Color4ui(UInt32 red, UInt32 green, UInt32 blue, UInt32 alpha);
             internal static Color4ui glColor4ui;
@@ -588,17 +564,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void ColorTableParameterfv(OpenMobile.Graphics.OpenGL.ColorTableTarget target, OpenMobile.Graphics.OpenGL.ColorTableParameterPName pname, Single* @params);
             internal unsafe static ColorTableParameterfv glColorTableParameterfv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ColorTableParameterfvSGI(OpenMobile.Graphics.OpenGL.SgiColorTable target, OpenMobile.Graphics.OpenGL.SgiColorTable pname, Single* @params);
-            internal unsafe static ColorTableParameterfvSGI glColorTableParameterfvSGI;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void ColorTableParameteriv(OpenMobile.Graphics.OpenGL.ColorTableTarget target, OpenMobile.Graphics.OpenGL.ColorTableParameterPName pname, Int32* @params);
             internal unsafe static ColorTableParameteriv glColorTableParameteriv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ColorTableParameterivSGI(OpenMobile.Graphics.OpenGL.SgiColorTable target, OpenMobile.Graphics.OpenGL.SgiColorTable pname, Int32* @params);
-            internal unsafe static ColorTableParameterivSGI glColorTableParameterivSGI;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ColorTableSGI(OpenMobile.Graphics.OpenGL.SgiColorTable target, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, Int32 width, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr table);
-            internal static ColorTableSGI glColorTableSGI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void CombinerInputNV(OpenMobile.Graphics.OpenGL.NvRegisterCombiners stage, OpenMobile.Graphics.OpenGL.NvRegisterCombiners portion, OpenMobile.Graphics.OpenGL.NvRegisterCombiners variable, OpenMobile.Graphics.OpenGL.NvRegisterCombiners input, OpenMobile.Graphics.OpenGL.NvRegisterCombiners mapping, OpenMobile.Graphics.OpenGL.NvRegisterCombiners componentUsage);
             internal static CombinerInputNV glCombinerInputNV;
@@ -746,9 +713,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void CopyColorTable(OpenMobile.Graphics.OpenGL.ColorTableTarget target, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, Int32 x, Int32 y, Int32 width);
             internal static CopyColorTable glCopyColorTable;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void CopyColorTableSGI(OpenMobile.Graphics.OpenGL.SgiColorTable target, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, Int32 x, Int32 y, Int32 width);
-            internal static CopyColorTableSGI glCopyColorTableSGI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void CopyConvolutionFilter1D(OpenMobile.Graphics.OpenGL.ConvolutionTarget target, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, Int32 x, Int32 y, Int32 width);
             internal static CopyConvolutionFilter1D glCopyConvolutionFilter1D;
@@ -945,9 +909,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void DetachShader(UInt32 program, UInt32 shader);
             internal static DetachShader glDetachShader;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void DetailTexFuncSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 n, Single* points);
-            internal unsafe static DetailTexFuncSGIS glDetailTexFuncSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Disable(OpenMobile.Graphics.OpenGL.EnableCap cap);
             internal static Disable glDisable;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1019,9 +980,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void DrawElementsInstancedEXT(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32 count, OpenMobile.Graphics.OpenGL.DrawElementsType type, IntPtr indices, Int32 primcount);
             internal static DrawElementsInstancedEXT glDrawElementsInstancedEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void DrawMeshArraysSUN(OpenMobile.Graphics.OpenGL.BeginMode mode, Int32 first, Int32 count, Int32 width);
-            internal static DrawMeshArraysSUN glDrawMeshArraysSUN;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void DrawPixels(Int32 width, Int32 height, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr pixels);
             internal static DrawPixels glDrawPixels;
@@ -1229,9 +1187,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Fogf(OpenMobile.Graphics.OpenGL.FogParameter pname, Single param);
             internal static Fogf glFogf;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void FogFuncSGIS(Int32 n, Single* points);
-            internal unsafe static FogFuncSGIS glFogFuncSGIS;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void Fogfv(OpenMobile.Graphics.OpenGL.FogParameter pname, Single* @params);
             internal unsafe static Fogfv glFogfv;
@@ -1479,20 +1434,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void GetColorTableParameterfvEXT(OpenMobile.Graphics.OpenGL.ColorTableTarget target, OpenMobile.Graphics.OpenGL.GetColorTableParameterPName pname, [OutAttribute] Single* @params);
             internal unsafe static GetColorTableParameterfvEXT glGetColorTableParameterfvEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetColorTableParameterfvSGI(OpenMobile.Graphics.OpenGL.SgiColorTable target, OpenMobile.Graphics.OpenGL.SgiColorTable pname, [OutAttribute] Single* @params);
-            internal unsafe static GetColorTableParameterfvSGI glGetColorTableParameterfvSGI;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetColorTableParameteriv(OpenMobile.Graphics.OpenGL.ColorTableTarget target, OpenMobile.Graphics.OpenGL.GetColorTableParameterPName pname, [OutAttribute] Int32* @params);
             internal unsafe static GetColorTableParameteriv glGetColorTableParameteriv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetColorTableParameterivEXT(OpenMobile.Graphics.OpenGL.ColorTableTarget target, OpenMobile.Graphics.OpenGL.GetColorTableParameterPName pname, [OutAttribute] Int32* @params);
             internal unsafe static GetColorTableParameterivEXT glGetColorTableParameterivEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetColorTableParameterivSGI(OpenMobile.Graphics.OpenGL.SgiColorTable target, OpenMobile.Graphics.OpenGL.SgiColorTable pname, [OutAttribute] Int32* @params);
-            internal unsafe static GetColorTableParameterivSGI glGetColorTableParameterivSGI;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GetColorTableSGI(OpenMobile.Graphics.OpenGL.SgiColorTable target, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, [OutAttribute] IntPtr table);
-            internal static GetColorTableSGI glGetColorTableSGI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetCombinerInputParameterfvNV(OpenMobile.Graphics.OpenGL.NvRegisterCombiners stage, OpenMobile.Graphics.OpenGL.NvRegisterCombiners portion, OpenMobile.Graphics.OpenGL.NvRegisterCombiners variable, OpenMobile.Graphics.OpenGL.NvRegisterCombiners pname, [OutAttribute] Single* @params);
             internal unsafe static GetCombinerInputParameterfvNV glGetCombinerInputParameterfvNV;
@@ -1539,9 +1485,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void GetConvolutionParameterivEXT(OpenMobile.Graphics.OpenGL.ExtConvolution target, OpenMobile.Graphics.OpenGL.ExtConvolution pname, [OutAttribute] Int32* @params);
             internal unsafe static GetConvolutionParameterivEXT glGetConvolutionParameterivEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetDetailTexFuncSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, [OutAttribute] Single* points);
-            internal unsafe static GetDetailTexFuncSGIS glGetDetailTexFuncSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetDoubleIndexedvEXT(OpenMobile.Graphics.OpenGL.ExtDirectStateAccess target, UInt32 index, [OutAttribute] Double* data);
             internal unsafe static GetDoubleIndexedvEXT glGetDoubleIndexedvEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1565,9 +1508,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetFloatv(OpenMobile.Graphics.OpenGL.GetPName pname, [OutAttribute] Single* @params);
             internal unsafe static GetFloatv glGetFloatv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetFogFuncSGIS([OutAttribute] Single* points);
-            internal unsafe static GetFogFuncSGIS glGetFogFuncSGIS;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate Int32 GetFragDataLocation(UInt32 program, String name);
             internal static GetFragDataLocation glGetFragDataLocation;
@@ -1815,12 +1755,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void GetPixelMapusv(OpenMobile.Graphics.OpenGL.PixelMap map, [OutAttribute] UInt16* values);
             internal unsafe static GetPixelMapusv glGetPixelMapusv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetPixelTexGenParameterfvSGIS(OpenMobile.Graphics.OpenGL.SgisPixelTexture pname, [OutAttribute] Single* @params);
-            internal unsafe static GetPixelTexGenParameterfvSGIS glGetPixelTexGenParameterfvSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetPixelTexGenParameterivSGIS(OpenMobile.Graphics.OpenGL.SgisPixelTexture pname, [OutAttribute] Int32* @params);
-            internal unsafe static GetPixelTexGenParameterivSGIS glGetPixelTexGenParameterivSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void GetPointerIndexedvEXT(OpenMobile.Graphics.OpenGL.ExtDirectStateAccess target, UInt32 index, [OutAttribute] IntPtr data);
             internal static GetPointerIndexedvEXT glGetPointerIndexedvEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1935,9 +1869,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void GetShaderSourceARB(UInt32 obj, Int32 maxLength, [OutAttribute] Int32* length, [OutAttribute] StringBuilder source);
             internal unsafe static GetShaderSourceARB glGetShaderSourceARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetSharpenTexFuncSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, [OutAttribute] Single* points);
-            internal unsafe static GetSharpenTexFuncSGIS glGetSharpenTexFuncSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate System.IntPtr GetString(OpenMobile.Graphics.OpenGL.StringName name);
             internal static GetString glGetString;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1958,9 +1889,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetTexEnviv(OpenMobile.Graphics.OpenGL.TextureEnvTarget target, OpenMobile.Graphics.OpenGL.TextureEnvParameter pname, [OutAttribute] Int32* @params);
             internal unsafe static GetTexEnviv glGetTexEnviv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetTexFilterFuncSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.SgisTextureFilter4 filter, [OutAttribute] Single* weights);
-            internal unsafe static GetTexFilterFuncSGIS glGetTexFilterFuncSGIS;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetTexGendv(OpenMobile.Graphics.OpenGL.TextureCoordName coord, OpenMobile.Graphics.OpenGL.TextureGenParameter pname, [OutAttribute] Double* @params);
             internal unsafe static GetTexGendv glGetTexGendv;
@@ -2153,30 +2081,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetVideouivNV(UInt32 video_slot, OpenMobile.Graphics.OpenGL.NvPresentVideo pname, [OutAttribute] UInt32* @params);
             internal unsafe static GetVideouivNV glGetVideouivNV;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GlobalAlphaFactorbSUN(SByte factor);
-            internal static GlobalAlphaFactorbSUN glGlobalAlphaFactorbSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GlobalAlphaFactordSUN(Double factor);
-            internal static GlobalAlphaFactordSUN glGlobalAlphaFactordSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GlobalAlphaFactorfSUN(Single factor);
-            internal static GlobalAlphaFactorfSUN glGlobalAlphaFactorfSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GlobalAlphaFactoriSUN(Int32 factor);
-            internal static GlobalAlphaFactoriSUN glGlobalAlphaFactoriSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GlobalAlphaFactorsSUN(Int16 factor);
-            internal static GlobalAlphaFactorsSUN glGlobalAlphaFactorsSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GlobalAlphaFactorubSUN(Byte factor);
-            internal static GlobalAlphaFactorubSUN glGlobalAlphaFactorubSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GlobalAlphaFactoruiSUN(UInt32 factor);
-            internal static GlobalAlphaFactoruiSUN glGlobalAlphaFactoruiSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void GlobalAlphaFactorusSUN(UInt16 factor);
-            internal static GlobalAlphaFactorusSUN glGlobalAlphaFactorusSUN;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Hint(OpenMobile.Graphics.OpenGL.HintTarget target, OpenMobile.Graphics.OpenGL.HintMode mode);
             internal static Hint glHint;
@@ -2949,16 +2853,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void Normal3fv(Single* v);
             internal unsafe static Normal3fv glNormal3fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Normal3fVertex3fSUN(Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            internal static Normal3fVertex3fSUN glNormal3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Normal3fVertex3fvSUN(Single* n, Single* v);
-            internal unsafe static Normal3fVertex3fvSUN glNormal3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Normal3hNV(OpenMobile.Half nx, OpenMobile.Half ny, OpenMobile.Half nz);
+            internal delegate void Normal3hNV(Half nx, Half ny, Half nz);
             internal static Normal3hNV glNormal3hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Normal3hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void Normal3hvNV(Half* v);
             internal unsafe static Normal3hvNV glNormal3hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Normal3i(Int32 nx, Int32 ny, Int32 nz);
@@ -3042,18 +2940,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void PixelStorei(OpenMobile.Graphics.OpenGL.PixelStoreParameter pname, Int32 param);
             internal static PixelStorei glPixelStorei;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void PixelTexGenParameterfSGIS(OpenMobile.Graphics.OpenGL.SgisPixelTexture pname, Single param);
-            internal static PixelTexGenParameterfSGIS glPixelTexGenParameterfSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void PixelTexGenParameterfvSGIS(OpenMobile.Graphics.OpenGL.SgisPixelTexture pname, Single* @params);
-            internal unsafe static PixelTexGenParameterfvSGIS glPixelTexGenParameterfvSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void PixelTexGenParameteriSGIS(OpenMobile.Graphics.OpenGL.SgisPixelTexture pname, Int32 param);
-            internal static PixelTexGenParameteriSGIS glPixelTexGenParameteriSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void PixelTexGenParameterivSGIS(OpenMobile.Graphics.OpenGL.SgisPixelTexture pname, Int32* @params);
-            internal unsafe static PixelTexGenParameterivSGIS glPixelTexGenParameterivSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void PixelTransferf(OpenMobile.Graphics.OpenGL.PixelTransferParameter pname, Single param);
             internal static PixelTransferf glPixelTransferf;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3090,9 +2976,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void PointParameterfEXT(OpenMobile.Graphics.OpenGL.ExtPointParameters pname, Single param);
             internal static PointParameterfEXT glPointParameterfEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void PointParameterfSGIS(OpenMobile.Graphics.OpenGL.SgisPointParameters pname, Single param);
-            internal static PointParameterfSGIS glPointParameterfSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void PointParameterfv(OpenMobile.Graphics.OpenGL.PointParameterName pname, Single* @params);
             internal unsafe static PointParameterfv glPointParameterfv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3101,9 +2984,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void PointParameterfvEXT(OpenMobile.Graphics.OpenGL.ExtPointParameters pname, Single* @params);
             internal unsafe static PointParameterfvEXT glPointParameterfvEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void PointParameterfvSGIS(OpenMobile.Graphics.OpenGL.SgisPointParameters pname, Single* @params);
-            internal unsafe static PointParameterfvSGIS glPointParameterfvSGIS;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void PointParameteri(OpenMobile.Graphics.OpenGL.PointParameterName pname, Int32 param);
             internal static PointParameteri glPointParameteri;
@@ -3525,72 +3405,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate Int32 RenderMode(OpenMobile.Graphics.OpenGL.RenderingMode mode);
             internal static RenderMode glRenderMode;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeubSUN(Byte code);
-            internal static ReplacementCodeubSUN glReplacementCodeubSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeubvSUN(Byte* code);
-            internal unsafe static ReplacementCodeubvSUN glReplacementCodeubvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeuiColor3fVertex3fSUN(UInt32 rc, Single r, Single g, Single b, Single x, Single y, Single z);
-            internal static ReplacementCodeuiColor3fVertex3fSUN glReplacementCodeuiColor3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeuiColor3fVertex3fvSUN(UInt32* rc, Single* c, Single* v);
-            internal unsafe static ReplacementCodeuiColor3fVertex3fvSUN glReplacementCodeuiColor3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeuiColor4fNormal3fVertex3fSUN(UInt32 rc, Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            internal static ReplacementCodeuiColor4fNormal3fVertex3fSUN glReplacementCodeuiColor4fNormal3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeuiColor4fNormal3fVertex3fvSUN(UInt32* rc, Single* c, Single* n, Single* v);
-            internal unsafe static ReplacementCodeuiColor4fNormal3fVertex3fvSUN glReplacementCodeuiColor4fNormal3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeuiColor4ubVertex3fSUN(UInt32 rc, Byte r, Byte g, Byte b, Byte a, Single x, Single y, Single z);
-            internal static ReplacementCodeuiColor4ubVertex3fSUN glReplacementCodeuiColor4ubVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeuiColor4ubVertex3fvSUN(UInt32* rc, Byte* c, Single* v);
-            internal unsafe static ReplacementCodeuiColor4ubVertex3fvSUN glReplacementCodeuiColor4ubVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeuiNormal3fVertex3fSUN(UInt32 rc, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            internal static ReplacementCodeuiNormal3fVertex3fSUN glReplacementCodeuiNormal3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeuiNormal3fVertex3fvSUN(UInt32* rc, Single* n, Single* v);
-            internal unsafe static ReplacementCodeuiNormal3fVertex3fvSUN glReplacementCodeuiNormal3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeuiSUN(UInt32 code);
-            internal static ReplacementCodeuiSUN glReplacementCodeuiSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN(UInt32 rc, Single s, Single t, Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            internal static ReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN(UInt32* rc, Single* tc, Single* c, Single* n, Single* v);
-            internal unsafe static ReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeuiTexCoord2fNormal3fVertex3fSUN(UInt32 rc, Single s, Single t, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            internal static ReplacementCodeuiTexCoord2fNormal3fVertex3fSUN glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN(UInt32* rc, Single* tc, Single* n, Single* v);
-            internal unsafe static ReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeuiTexCoord2fVertex3fSUN(UInt32 rc, Single s, Single t, Single x, Single y, Single z);
-            internal static ReplacementCodeuiTexCoord2fVertex3fSUN glReplacementCodeuiTexCoord2fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeuiTexCoord2fVertex3fvSUN(UInt32* rc, Single* tc, Single* v);
-            internal unsafe static ReplacementCodeuiTexCoord2fVertex3fvSUN glReplacementCodeuiTexCoord2fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeuiVertex3fSUN(UInt32 rc, Single x, Single y, Single z);
-            internal static ReplacementCodeuiVertex3fSUN glReplacementCodeuiVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeuiVertex3fvSUN(UInt32* rc, Single* v);
-            internal unsafe static ReplacementCodeuiVertex3fvSUN glReplacementCodeuiVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeuivSUN(UInt32* code);
-            internal unsafe static ReplacementCodeuivSUN glReplacementCodeuivSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ReplacementCodeusSUN(UInt16 code);
-            internal static ReplacementCodeusSUN glReplacementCodeusSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ReplacementCodeusvSUN(UInt16* code);
-            internal unsafe static ReplacementCodeusvSUN glReplacementCodeusvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void RequestResidentProgramsNV(Int32 n, UInt32* programs);
             internal unsafe static RequestResidentProgramsNV glRequestResidentProgramsNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3605,9 +3419,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void ResetMinmaxEXT(OpenMobile.Graphics.OpenGL.ExtHistogram target);
             internal static ResetMinmaxEXT glResetMinmaxEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ResizeBuffersMESA();
-            internal static ResizeBuffersMESA glResizeBuffersMESA;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void ResumeTransformFeedbackNV();
             internal static ResumeTransformFeedbackNV glResumeTransformFeedbackNV;
@@ -3636,14 +3447,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void SampleMaskIndexedNV(UInt32 index, UInt32 mask);
             internal static SampleMaskIndexedNV glSampleMaskIndexedNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void SampleMaskSGIS(Single value, bool invert);
-            internal static SampleMaskSGIS glSampleMaskSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void SamplePatternEXT(OpenMobile.Graphics.OpenGL.ExtMultisample pattern);
             internal static SamplePatternEXT glSamplePatternEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void SamplePatternSGIS(OpenMobile.Graphics.OpenGL.SgisMultisample pattern);
-            internal static SamplePatternSGIS glSamplePatternSGIS;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Scaled(Double x, Double y, Double z);
             internal static Scaled glScaled;
@@ -3804,9 +3609,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void ShaderSourceARB(UInt32 shaderObj, Int32 count, String[] @string, Int32* length);
             internal unsafe static ShaderSourceARB glShaderSourceARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void SharpenTexFuncSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 n, Single* points);
-            internal unsafe static SharpenTexFuncSGIS glSharpenTexFuncSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void StencilClearTagEXT(Int32 stencilTagBits, UInt32 stencilClearTag);
             internal static StencilClearTagEXT glStencilClearTagEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3939,38 +3741,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void TexCoord2f(Single s, Single t);
             internal static TexCoord2f glTexCoord2f;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord2fColor3fVertex3fSUN(Single s, Single t, Single r, Single g, Single b, Single x, Single y, Single z);
-            internal static TexCoord2fColor3fVertex3fSUN glTexCoord2fColor3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord2fColor3fVertex3fvSUN(Single* tc, Single* c, Single* v);
-            internal unsafe static TexCoord2fColor3fVertex3fvSUN glTexCoord2fColor3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord2fColor4fNormal3fVertex3fSUN(Single s, Single t, Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            internal static TexCoord2fColor4fNormal3fVertex3fSUN glTexCoord2fColor4fNormal3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord2fColor4fNormal3fVertex3fvSUN(Single* tc, Single* c, Single* n, Single* v);
-            internal unsafe static TexCoord2fColor4fNormal3fVertex3fvSUN glTexCoord2fColor4fNormal3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord2fColor4ubVertex3fSUN(Single s, Single t, Byte r, Byte g, Byte b, Byte a, Single x, Single y, Single z);
-            internal static TexCoord2fColor4ubVertex3fSUN glTexCoord2fColor4ubVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord2fColor4ubVertex3fvSUN(Single* tc, Byte* c, Single* v);
-            internal unsafe static TexCoord2fColor4ubVertex3fvSUN glTexCoord2fColor4ubVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord2fNormal3fVertex3fSUN(Single s, Single t, Single nx, Single ny, Single nz, Single x, Single y, Single z);
-            internal static TexCoord2fNormal3fVertex3fSUN glTexCoord2fNormal3fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord2fNormal3fVertex3fvSUN(Single* tc, Single* n, Single* v);
-            internal unsafe static TexCoord2fNormal3fVertex3fvSUN glTexCoord2fNormal3fVertex3fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void TexCoord2fv(Single* v);
             internal unsafe static TexCoord2fv glTexCoord2fv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord2fVertex3fSUN(Single s, Single t, Single x, Single y, Single z);
-            internal static TexCoord2fVertex3fSUN glTexCoord2fVertex3fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord2fVertex3fvSUN(Single* tc, Single* v);
-            internal unsafe static TexCoord2fVertex3fvSUN glTexCoord2fVertex3fvSUN;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexCoord2hNV(OpenMobile.Half s, OpenMobile.Half t);
             internal static TexCoord2hNV glTexCoord2hNV;
@@ -4029,20 +3801,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void TexCoord4f(Single s, Single t, Single r, Single q);
             internal static TexCoord4f glTexCoord4f;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord4fColor4fNormal3fVertex4fSUN(Single s, Single t, Single p, Single q, Single r, Single g, Single b, Single a, Single nx, Single ny, Single nz, Single x, Single y, Single z, Single w);
-            internal static TexCoord4fColor4fNormal3fVertex4fSUN glTexCoord4fColor4fNormal3fVertex4fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord4fColor4fNormal3fVertex4fvSUN(Single* tc, Single* c, Single* n, Single* v);
-            internal unsafe static TexCoord4fColor4fNormal3fVertex4fvSUN glTexCoord4fColor4fNormal3fVertex4fvSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void TexCoord4fv(Single* v);
             internal unsafe static TexCoord4fv glTexCoord4fv;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord4fVertex4fSUN(Single s, Single t, Single p, Single q, Single x, Single y, Single z, Single w);
-            internal static TexCoord4fVertex4fSUN glTexCoord4fVertex4fSUN;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord4fVertex4fvSUN(Single* tc, Single* v);
-            internal unsafe static TexCoord4fVertex4fvSUN glTexCoord4fVertex4fvSUN;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexCoord4hNV(OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r, OpenMobile.Half q);
             internal static TexCoord4hNV glTexCoord4hNV;
@@ -4083,9 +3843,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void TexEnviv(OpenMobile.Graphics.OpenGL.TextureEnvTarget target, OpenMobile.Graphics.OpenGL.TextureEnvParameter pname, Int32* @params);
             internal unsafe static TexEnviv glTexEnviv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexFilterFuncSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.SgisTextureFilter4 filter, Int32 n, Single* weights);
-            internal unsafe static TexFilterFuncSGIS glTexFilterFuncSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexGend(OpenMobile.Graphics.OpenGL.TextureCoordName coord, OpenMobile.Graphics.OpenGL.TextureGenParameter pname, Double param);
             internal static TexGend glTexGend;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -4121,9 +3878,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexImage3DMultisample(OpenMobile.Graphics.OpenGL.TextureTargetMultisample target, Int32 samples, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, Int32 width, Int32 height, Int32 depth, bool fixedsamplelocations);
             internal static TexImage3DMultisample glTexImage3DMultisample;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexImage4DSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 level, OpenMobile.Graphics.OpenGL.PixelInternalFormat internalformat, Int32 width, Int32 height, Int32 depth, Int32 size4d, Int32 border, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr pixels);
-            internal static TexImage4DSGIS glTexImage4DSGIS;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexParameterf(OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.TextureParameterName pname, Single param);
             internal static TexParameterf glTexParameterf;
@@ -4170,14 +3924,8 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void TexSubImage3DEXT(OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 level, Int32 xoffset, Int32 yoffset, Int32 zoffset, Int32 width, Int32 height, Int32 depth, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr pixels);
             internal static TexSubImage3DEXT glTexSubImage3DEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexSubImage4DSGIS(OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 level, Int32 xoffset, Int32 yoffset, Int32 zoffset, Int32 woffset, Int32 width, Int32 height, Int32 depth, Int32 size4d, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr pixels);
-            internal static TexSubImage4DSGIS glTexSubImage4DSGIS;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TextureBufferEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target, OpenMobile.Graphics.OpenGL.ExtDirectStateAccess internalformat, UInt32 buffer);
             internal static TextureBufferEXT glTextureBufferEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TextureColorMaskSGIS(bool red, bool green, bool blue, bool alpha);
-            internal static TextureColorMaskSGIS glTextureColorMaskSGIS;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TextureImage1DEXT(UInt32 texture, OpenMobile.Graphics.OpenGL.TextureTarget target, Int32 level, OpenMobile.Graphics.OpenGL.ExtDirectStateAccess internalformat, Int32 width, Int32 border, OpenMobile.Graphics.OpenGL.PixelFormat format, OpenMobile.Graphics.OpenGL.PixelType type, IntPtr pixels);
             internal static TextureImage1DEXT glTextureImage1DEXT;
@@ -5265,17 +5013,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void WindowPos2dARB(Double x, Double y);
             internal static WindowPos2dARB glWindowPos2dARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos2dMESA(Double x, Double y);
-            internal static WindowPos2dMESA glWindowPos2dMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos2dv(Double* v);
             internal unsafe static WindowPos2dv glWindowPos2dv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos2dvARB(Double* v);
             internal unsafe static WindowPos2dvARB glWindowPos2dvARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos2dvMESA(Double* v);
-            internal unsafe static WindowPos2dvMESA glWindowPos2dvMESA;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WindowPos2f(Single x, Single y);
             internal static WindowPos2f glWindowPos2f;
@@ -5283,17 +5025,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void WindowPos2fARB(Single x, Single y);
             internal static WindowPos2fARB glWindowPos2fARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos2fMESA(Single x, Single y);
-            internal static WindowPos2fMESA glWindowPos2fMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos2fv(Single* v);
             internal unsafe static WindowPos2fv glWindowPos2fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos2fvARB(Single* v);
             internal unsafe static WindowPos2fvARB glWindowPos2fvARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos2fvMESA(Single* v);
-            internal unsafe static WindowPos2fvMESA glWindowPos2fvMESA;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WindowPos2i(Int32 x, Int32 y);
             internal static WindowPos2i glWindowPos2i;
@@ -5301,17 +5037,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void WindowPos2iARB(Int32 x, Int32 y);
             internal static WindowPos2iARB glWindowPos2iARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos2iMESA(Int32 x, Int32 y);
-            internal static WindowPos2iMESA glWindowPos2iMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos2iv(Int32* v);
             internal unsafe static WindowPos2iv glWindowPos2iv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos2ivARB(Int32* v);
             internal unsafe static WindowPos2ivARB glWindowPos2ivARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos2ivMESA(Int32* v);
-            internal unsafe static WindowPos2ivMESA glWindowPos2ivMESA;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WindowPos2s(Int16 x, Int16 y);
             internal static WindowPos2s glWindowPos2s;
@@ -5319,17 +5049,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void WindowPos2sARB(Int16 x, Int16 y);
             internal static WindowPos2sARB glWindowPos2sARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos2sMESA(Int16 x, Int16 y);
-            internal static WindowPos2sMESA glWindowPos2sMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos2sv(Int16* v);
             internal unsafe static WindowPos2sv glWindowPos2sv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos2svARB(Int16* v);
             internal unsafe static WindowPos2svARB glWindowPos2svARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos2svMESA(Int16* v);
-            internal unsafe static WindowPos2svMESA glWindowPos2svMESA;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WindowPos3d(Double x, Double y, Double z);
             internal static WindowPos3d glWindowPos3d;
@@ -5337,17 +5061,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void WindowPos3dARB(Double x, Double y, Double z);
             internal static WindowPos3dARB glWindowPos3dARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos3dMESA(Double x, Double y, Double z);
-            internal static WindowPos3dMESA glWindowPos3dMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos3dv(Double* v);
             internal unsafe static WindowPos3dv glWindowPos3dv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos3dvARB(Double* v);
             internal unsafe static WindowPos3dvARB glWindowPos3dvARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos3dvMESA(Double* v);
-            internal unsafe static WindowPos3dvMESA glWindowPos3dvMESA;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WindowPos3f(Single x, Single y, Single z);
             internal static WindowPos3f glWindowPos3f;
@@ -5355,8 +5073,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void WindowPos3fARB(Single x, Single y, Single z);
             internal static WindowPos3fARB glWindowPos3fARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos3fMESA(Single x, Single y, Single z);
-            internal static WindowPos3fMESA glWindowPos3fMESA;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos3fv(Single* v);
             internal unsafe static WindowPos3fv glWindowPos3fv;
@@ -5364,17 +5080,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void WindowPos3fvARB(Single* v);
             internal unsafe static WindowPos3fvARB glWindowPos3fvARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos3fvMESA(Single* v);
-            internal unsafe static WindowPos3fvMESA glWindowPos3fvMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WindowPos3i(Int32 x, Int32 y, Int32 z);
             internal static WindowPos3i glWindowPos3i;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WindowPos3iARB(Int32 x, Int32 y, Int32 z);
             internal static WindowPos3iARB glWindowPos3iARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos3iMESA(Int32 x, Int32 y, Int32 z);
-            internal static WindowPos3iMESA glWindowPos3iMESA;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos3iv(Int32* v);
             internal unsafe static WindowPos3iv glWindowPos3iv;
@@ -5382,50 +5092,17 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void WindowPos3ivARB(Int32* v);
             internal unsafe static WindowPos3ivARB glWindowPos3ivARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos3ivMESA(Int32* v);
-            internal unsafe static WindowPos3ivMESA glWindowPos3ivMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WindowPos3s(Int16 x, Int16 y, Int16 z);
             internal static WindowPos3s glWindowPos3s;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WindowPos3sARB(Int16 x, Int16 y, Int16 z);
             internal static WindowPos3sARB glWindowPos3sARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos3sMESA(Int16 x, Int16 y, Int16 z);
-            internal static WindowPos3sMESA glWindowPos3sMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos3sv(Int16* v);
             internal unsafe static WindowPos3sv glWindowPos3sv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void WindowPos3svARB(Int16* v);
             internal unsafe static WindowPos3svARB glWindowPos3svARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos3svMESA(Int16* v);
-            internal unsafe static WindowPos3svMESA glWindowPos3svMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos4dMESA(Double x, Double y, Double z, Double w);
-            internal static WindowPos4dMESA glWindowPos4dMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos4dvMESA(Double* v);
-            internal unsafe static WindowPos4dvMESA glWindowPos4dvMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos4fMESA(Single x, Single y, Single z, Single w);
-            internal static WindowPos4fMESA glWindowPos4fMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos4fvMESA(Single* v);
-            internal unsafe static WindowPos4fvMESA glWindowPos4fvMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos4iMESA(Int32 x, Int32 y, Int32 z, Int32 w);
-            internal static WindowPos4iMESA glWindowPos4iMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos4ivMESA(Int32* v);
-            internal unsafe static WindowPos4ivMESA glWindowPos4ivMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void WindowPos4sMESA(Int16 x, Int16 y, Int16 z, Int16 w);
-            internal static WindowPos4sMESA glWindowPos4sMESA;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void WindowPos4svMESA(Int16* v);
-            internal unsafe static WindowPos4svMESA glWindowPos4svMESA;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void WriteMaskEXT(UInt32 res, UInt32 @in, OpenMobile.Graphics.OpenGL.ExtVertexShader outX, OpenMobile.Graphics.OpenGL.ExtVertexShader outY, OpenMobile.Graphics.OpenGL.ExtVertexShader outZ, OpenMobile.Graphics.OpenGL.ExtVertexShader outW);
             internal static WriteMaskEXT glWriteMaskEXT;
