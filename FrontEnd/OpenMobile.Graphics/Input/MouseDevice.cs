@@ -250,14 +250,15 @@ namespace OpenMobile.Input
         {
             if (Configuration.RunningOnWindows)
                 Platform.Windows.Functions.ShowCursor(false);
-            else if (Configuration.RunningOnX11)
+            else if (Configuration.RunningOnLinux)
             {
-                X11WindowInfo x11=(X11WindowInfo)info;
-                IntPtr pixmap = Platform.X11.Functions.XCreatePixmap(x11.Display, x11.WindowHandle, 8, 8, 8);
-                XColor black=new XColor();
-                IntPtr cursor= Platform.X11.Functions.XCreatePixmapCursor(x11.Display, pixmap, pixmap, ref black, ref black, 0, 0);
-                Platform.X11.Functions.XDefineCursor(x11.Display, x11.WindowHandle, cursor);
-                Platform.X11.Functions.XFreeCursor(x11.Display, cursor);
+                //TODO - FIX ME
+                //X11WindowInfo x11=(X11WindowInfo)info;
+                //IntPtr pixmap = Platform.X11.Functions.XCreatePixmap(x11.Display, x11.WindowHandle, 8, 8, 8);
+                //XColor black=new XColor();
+                //IntPtr cursor= Platform.X11.Functions.XCreatePixmapCursor(x11.Display, pixmap, pixmap, ref black, ref black, 0, 0);
+                //Platform.X11.Functions.XDefineCursor(x11.Display, x11.WindowHandle, cursor);
+                //Platform.X11.Functions.XFreeCursor(x11.Display, cursor);
             }
         }
         #endregion

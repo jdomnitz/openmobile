@@ -19,17 +19,24 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using OpenMobile.Input;
+using OpenMobile.Controls;
 
 namespace OpenMobile
 {
     public static class InputRouter
     {
+        public static event userInteraction OnHighlightedChanged;
         public static void SourceUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             if (Core.theHost.raiseKeyPressEvent(eKeypressType.KeyUp, e) == true)
                 return; //If an app handles it first don't show the UI
             for (int i = 0; i < Core.RenderingWindows.Count;i++ )
                 Core.RenderingWindows[i].RenderingWindow_KeyUp(sender, e);
+        }
+        internal static void raiseHighlightChanged(OMControl sender, int screen)
+        {
+            if (OnHighlightedChanged != null)
+                OnHighlightedChanged(sender, screen);
         }
         public static void SourceDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
@@ -38,19 +45,25 @@ namespace OpenMobile
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
                 Core.RenderingWindows[i].RenderingWindow_KeyDown(sender, e);
         }
-        public static bool SendKeyUp(int instance, string Key)
+        public static bool SendKeyUp(int screen, string Key)
         {
-            if ((instance < 0) || (instance >= Core.RenderingWindows.Count))
+            if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return false;
-            Core.RenderingWindows[instance].RenderingWindow_KeyUp(null, new KeyboardKeyEventArgs(getKey(Key)));
+            Core.RenderingWindows[screen].RenderingWindow_KeyUp(null, new KeyboardKeyEventArgs(getKey(Key)));
             return true;
         }
-        public static bool SendKeyDown(int instance, string Key)
+        public static bool SendKeyDown(int screen, string Key)
         {
-            if ((instance < 0) || (instance >= Core.RenderingWindows.Count))
+            if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return false;
-            Core.RenderingWindows[instance].RenderingWindow_KeyDown(null, new KeyboardKeyEventArgs(getKey(Key)));
+            Core.RenderingWindows[screen].RenderingWindow_KeyDown(null, new KeyboardKeyEventArgs(getKey(Key)));
             return true;
+        }
+        public static OMControl getHighlighted(int screen)
+        {
+            if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
+                return null;
+            return Core.RenderingWindows[screen].highlighted;
         }
         private static Key getKey(string key)
         {
@@ -66,7 +79,7 @@ namespace OpenMobile
                     return Key.Right;
                 case "enter":
                 case "return":
-                    return Key.Enter;//TODO - Verify Key
+                    return Key.Enter;
                 case "scrollup":
                     return Key.PageUp;
                 case "scrolldown":

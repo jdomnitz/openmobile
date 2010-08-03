@@ -60,8 +60,6 @@ namespace OpenMobile
         public NativeWindow()
             : this(640, 480, "OpenMobile Native Window", GameWindowFlags.Default, GraphicsMode.Default, DisplayDevice.Default) { }
 
-        // TODO: Remaining constructors.
-
         /// <summary>Constructs a new centered NativeWindow with the specified attributes.</summary>
         /// <param name="width">The width of the NativeWindow in pixels.</param>
         /// <param name="height">The height of the NativeWindow in pixels.</param>
@@ -89,7 +87,6 @@ namespace OpenMobile
         /// <exception cref="System.ArgumentNullException">If mode or device is null.</exception>
         public NativeWindow(int x, int y, int width, int height, string title, GameWindowFlags options, GraphicsMode mode, DisplayDevice device)
         {
-            // TODO: Should a constraint be added for the position?
             if (width < 1)
                 throw new ArgumentOutOfRangeException("width", "Must be greater than zero.");
             if (height < 1)
@@ -274,7 +271,7 @@ namespace OpenMobile
         {
             get
             {
-                return IsDisposed ? false : implementation.Exists; // TODO: Should disposed be ignored instead?
+                return IsDisposed ? false : implementation.Exists;
             }
         }
 

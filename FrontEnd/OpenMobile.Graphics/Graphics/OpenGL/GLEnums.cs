@@ -151,11 +151,9 @@ namespace OpenMobile.Graphics.OpenGL
         Gl2XBitAti = ((int)0x00000001),
         RedBitAti = ((int)0x00000001),
         SyncFlushCommandsBit = ((int)0x00000001),
-        TextureDeformationBitSgix = ((int)0x00000001),
         ClientVertexArrayBit = ((int)0x00000002),
         CompBitAti = ((int)0x00000002),
         ContextCompatibilityProfileBit = ((int)0x00000002),
-        GeometryDeformationBitSgix = ((int)0x00000002),
         Gl4XBitAti = ((int)0x00000002),
         GreenBitAti = ((int)0x00000002),
         PointBit = ((int)0x00000002),
@@ -186,16 +184,13 @@ namespace OpenMobile.Graphics.OpenGL
         ContextFlagForwardCompatibleBit = ((int)0x0001),
         Lines = ((int)0x0001),
         MapReadBit = ((int)0x0001),
-        RestartSun = ((int)0x0001),
         Color3BitPgi = ((int)0x00010000),
         EvalBit = ((int)0x00010000),
         LineLoop = ((int)0x0002),
         MapWriteBit = ((int)0x0002),
-        ReplaceMiddleSun = ((int)0x0002),
         Color4BitPgi = ((int)0x00020000),
         ListBit = ((int)0x00020000),
         LineStrip = ((int)0x0003),
-        ReplaceOldestSun = ((int)0x0003),
         MapInvalidateRangeBit = ((int)0x0004),
         Triangles = ((int)0x0004),
         EdgeflagBitPgi = ((int)0x00040000),
@@ -543,11 +538,7 @@ namespace OpenMobile.Graphics.OpenGL
         Gl3Bytes = ((int)0x1408),
         Gl4Bytes = ((int)0x1409),
         Double = ((int)0x140A),
-        DoubleExt = ((int)0x140A),
-        HalfApple = ((int)0x140B),
         HalfFloat = ((int)0x140B),
-        HalfFloatArb = ((int)0x140B),
-        HalfFloatNv = ((int)0x140B),
         Clear = ((int)0x1500),
         And = ((int)0x1501),
         AndReverse = ((int)0x1502),
@@ -587,7 +578,6 @@ namespace OpenMobile.Graphics.OpenGL
         Rgba = ((int)0x1908),
         Luminance = ((int)0x1909),
         LuminanceAlpha = ((int)0x190A),
-        RasterPositionUnclippedIbm = ((int)0x19262),
         Bitmap = ((int)0x1A00),
         PreferDoublebufferHintPgi = ((int)0x1A1F8),
         ConserveMemoryHintPgi = ((int)0x1A1FD),
@@ -986,7 +976,6 @@ namespace OpenMobile.Graphics.OpenGL
         TextureCoordArrayPointerExt = ((int)0x8092),
         EdgeFlagArrayPointer = ((int)0x8093),
         EdgeFlagArrayPointerExt = ((int)0x8093),
-        InterlaceSgix = ((int)0x8094),
         DetailTexture2DSgis = ((int)0x8095),
         DetailTexture2DBindingSgis = ((int)0x8096),
         LinearDetailSgis = ((int)0x8097),
@@ -1071,8 +1060,6 @@ namespace OpenMobile.Graphics.OpenGL
         PostColorMatrixAlphaBiasSgi = ((int)0x80BB),
         TextureColorTableSgi = ((int)0x80BC),
         ProxyTextureColorTableSgi = ((int)0x80BD),
-        TextureEnvBiasSgix = ((int)0x80BE),
-        ShadowAmbientSgix = ((int)0x80BF),
         TextureCompareFailValue = ((int)0x80BF),
         TextureCompareFailValueArb = ((int)0x80BF),
         BlendDstRgb = ((int)0x80C8),
@@ -1182,7 +1169,6 @@ namespace OpenMobile.Graphics.OpenGL
         ClampToBorder = ((int)0x812D),
         ClampToBorderArb = ((int)0x812D),
         ClampToBorderSgis = ((int)0x812D),
-        TextureMultiBufferHintSgix = ((int)0x812E),
         ClampToEdge = ((int)0x812F),
         ClampToEdgeSgis = ((int)0x812F),
         PackSkipVolumesSgis = ((int)0x8130),
@@ -1194,7 +1180,6 @@ namespace OpenMobile.Graphics.OpenGL
         Texture4DsizeSgis = ((int)0x8136),
         TextureWrapQSgis = ((int)0x8137),
         Max4DTextureSizeSgis = ((int)0x8138),
-        PixelTexGenSgix = ((int)0x8139),
         TextureMinLod = ((int)0x813A),
         TextureMinLodSgis = ((int)0x813A),
         TextureMaxLod = ((int)0x813B),
@@ -1203,107 +1188,18 @@ namespace OpenMobile.Graphics.OpenGL
         TextureBaseLevelSgis = ((int)0x813C),
         TextureMaxLevel = ((int)0x813D),
         TextureMaxLevelSgis = ((int)0x813D),
-        PixelTileBestAlignmentSgix = ((int)0x813E),
-        PixelTileCacheIncrementSgix = ((int)0x813F),
-        PixelTileWidthSgix = ((int)0x8140),
-        PixelTileHeightSgix = ((int)0x8141),
-        PixelTileGridWidthSgix = ((int)0x8142),
-        PixelTileGridHeightSgix = ((int)0x8143),
-        PixelTileGridDepthSgix = ((int)0x8144),
-        PixelTileCacheSizeSgix = ((int)0x8145),
         Filter4Sgis = ((int)0x8146),
         TextureFilter4SizeSgis = ((int)0x8147),
-        SpriteSgix = ((int)0x8148),
-        SpriteModeSgix = ((int)0x8149),
-        SpriteAxisSgix = ((int)0x814A),
-        SpriteTranslationSgix = ((int)0x814B),
-        SpriteAxialSgix = ((int)0x814C),
-        SpriteObjectAlignedSgix = ((int)0x814D),
-        SpriteEyeAlignedSgix = ((int)0x814E),
         Texture4DBindingSgis = ((int)0x814F),
-        IgnoreBorderHp = ((int)0x8150),
         ConstantBorder = ((int)0x8151),
-        ConstantBorderHp = ((int)0x8151),
         ReplicateBorder = ((int)0x8153),
-        ReplicateBorderHp = ((int)0x8153),
         ConvolutionBorderColor = ((int)0x8154),
-        ConvolutionBorderColorHp = ((int)0x8154),
-        ImageScaleXHp = ((int)0x8155),
-        ImageScaleYHp = ((int)0x8156),
-        ImageTranslateXHp = ((int)0x8157),
-        ImageTranslateYHp = ((int)0x8158),
-        ImageRotateAngleHp = ((int)0x8159),
-        ImageRotateOriginXHp = ((int)0x815A),
-        ImageRotateOriginYHp = ((int)0x815B),
-        ImageMagFilterHp = ((int)0x815C),
-        ImageMinFilterHp = ((int)0x815D),
-        ImageCubicWeightHp = ((int)0x815E),
-        CubicHp = ((int)0x815F),
-        AverageHp = ((int)0x8160),
-        ImageTransform2DHp = ((int)0x8161),
-        PostImageTransformColorTableHp = ((int)0x8162),
-        ProxyPostImageTransformColorTableHp = ((int)0x8163),
-        OcclusionTestHp = ((int)0x8165),
-        OcclusionTestResultHp = ((int)0x8166),
-        TextureLightingModeHp = ((int)0x8167),
-        TexturePostSpecularHp = ((int)0x8168),
-        TexturePreSpecularHp = ((int)0x8169),
-        LinearClipmapLinearSgix = ((int)0x8170),
-        TextureClipmapCenterSgix = ((int)0x8171),
-        TextureClipmapFrameSgix = ((int)0x8172),
-        TextureClipmapOffsetSgix = ((int)0x8173),
-        TextureClipmapVirtualDepthSgix = ((int)0x8174),
-        TextureClipmapLodOffsetSgix = ((int)0x8175),
-        TextureClipmapDepthSgix = ((int)0x8176),
-        MaxClipmapDepthSgix = ((int)0x8177),
-        MaxClipmapVirtualDepthSgix = ((int)0x8178),
-        PostTextureFilterBiasSgix = ((int)0x8179),
-        PostTextureFilterScaleSgix = ((int)0x817A),
-        PostTextureFilterBiasRangeSgix = ((int)0x817B),
-        PostTextureFilterScaleRangeSgix = ((int)0x817C),
-        ReferencePlaneSgix = ((int)0x817D),
-        ReferencePlaneEquationSgix = ((int)0x817E),
-        IrInstrument1Sgix = ((int)0x817F),
-        InstrumentBufferPointerSgix = ((int)0x8180),
-        InstrumentMeasurementsSgix = ((int)0x8181),
-        ListPrioritySgix = ((int)0x8182),
-        CalligraphicFragmentSgix = ((int)0x8183),
-        PixelTexGenQCeilingSgix = ((int)0x8184),
-        PixelTexGenQRoundSgix = ((int)0x8185),
-        PixelTexGenQFloorSgix = ((int)0x8186),
-        PixelTexGenAlphaReplaceSgix = ((int)0x8187),
-        PixelTexGenAlphaNoReplaceSgix = ((int)0x8188),
-        PixelTexGenAlphaLsSgix = ((int)0x8189),
-        PixelTexGenAlphaMsSgix = ((int)0x818A),
-        FramezoomSgix = ((int)0x818B),
-        FramezoomFactorSgix = ((int)0x818C),
-        MaxFramezoomFactorSgix = ((int)0x818D),
-        TextureLodBiasSSgix = ((int)0x818E),
-        TextureLodBiasTSgix = ((int)0x818F),
-        TextureLodBiasRSgix = ((int)0x8190),
         GenerateMipmap = ((int)0x8191),
         GenerateMipmapSgis = ((int)0x8191),
         GenerateMipmapHint = ((int)0x8192),
-        GenerateMipmapHintSgis = ((int)0x8192),
-        GeometryDeformationSgix = ((int)0x8194),
-        TextureDeformationSgix = ((int)0x8195),
-        DeformationsMaskSgix = ((int)0x8196),
-        MaxDeformationOrderSgix = ((int)0x8197),
-        FogOffsetSgix = ((int)0x8198),
-        FogOffsetValueSgix = ((int)0x8199),
-        TextureCompareSgix = ((int)0x819A),
-        TextureCompareOperatorSgix = ((int)0x819B),
-        TextureLequalRSgix = ((int)0x819C),
-        TextureGequalRSgix = ((int)0x819D),
         DepthComponent16 = ((int)0x81A5),
-        DepthComponent16Arb = ((int)0x81A5),
-        DepthComponent16Sgix = ((int)0x81A5),
         DepthComponent24 = ((int)0x81A6),
-        DepthComponent24Arb = ((int)0x81A6),
-        DepthComponent24Sgix = ((int)0x81A6),
         DepthComponent32 = ((int)0x81A7),
-        DepthComponent32Arb = ((int)0x81A7),
-        DepthComponent32Sgix = ((int)0x81A7),
         ArrayElementLockFirstExt = ((int)0x81A8),
         ArrayElementLockCountExt = ((int)0x81A9),
         CullVertexExt = ((int)0x81AA),
@@ -1323,15 +1219,6 @@ namespace OpenMobile.Graphics.OpenGL
         IndexMaterialExt = ((int)0x81B8),
         IndexMaterialParameterExt = ((int)0x81B9),
         IndexMaterialFaceExt = ((int)0x81BA),
-        Ycrcb422Sgix = ((int)0x81BB),
-        Ycrcb444Sgix = ((int)0x81BC),
-        WrapBorderSun = ((int)0x81D4),
-        UnpackConstantDataSunx = ((int)0x81D5),
-        TextureConstantDataSunx = ((int)0x81D6),
-        TriangleListSun = ((int)0x81D7),
-        ReplacementCodeSun = ((int)0x81D8),
-        GlobalAlphaSun = ((int)0x81D9),
-        GlobalAlphaFactorSun = ((int)0x81DA),
         TextureColorWritemaskSgis = ((int)0x81EF),
         EyeDistanceToPointSgis = ((int)0x81F0),
         ObjectDistanceToPointSgis = ((int)0x81F1),
@@ -1348,8 +1235,6 @@ namespace OpenMobile.Graphics.OpenGL
         SeparateSpecularColor = ((int)0x81FA),
         SeparateSpecularColorExt = ((int)0x81FA),
         SharedTexturePaletteExt = ((int)0x81FB),
-        FogScaleSgix = ((int)0x81FC),
-        FogScaleValueSgix = ((int)0x81FD),
         TextFragmentShaderAti = ((int)0x8200),
         FramebufferAttachmentColorEncoding = ((int)0x8210),
         FramebufferAttachmentComponentType = ((int)0x8211),
@@ -1393,19 +1278,6 @@ namespace OpenMobile.Graphics.OpenGL
         Rg16ui = ((int)0x823A),
         Rg32i = ((int)0x823B),
         Rg32ui = ((int)0x823C),
-        DepthPassInstrumentSgix = ((int)0x8310),
-        DepthPassInstrumentCountersSgix = ((int)0x8311),
-        DepthPassInstrumentMaxSgix = ((int)0x8312),
-        ConvolutionHintSgix = ((int)0x8316),
-        YcrcbSgix = ((int)0x8318),
-        YcrcbaSgix = ((int)0x8319),
-        AlphaMinSgix = ((int)0x8320),
-        AlphaMaxSgix = ((int)0x8321),
-        ScalebiasHintSgix = ((int)0x8322),
-        AsyncMarkerSgix = ((int)0x8329),
-        PixelTexGenModeSgix = ((int)0x832B),
-        AsyncHistogramSgix = ((int)0x832C),
-        MaxAsyncHistogramSgix = ((int)0x832D),
         PixelTransform2DExt = ((int)0x8330),
         PixelMagFilterExt = ((int)0x8331),
         PixelMinFilterExt = ((int)0x8332),
@@ -1428,12 +1300,6 @@ namespace OpenMobile.Graphics.OpenGL
         PixelFragmentRgbSourceSgis = ((int)0x8354),
         PixelFragmentAlphaSourceSgis = ((int)0x8355),
         PixelGroupColorSgis = ((int)0x8356),
-        AsyncTexImageSgix = ((int)0x835C),
-        AsyncDrawPixelsSgix = ((int)0x835D),
-        AsyncReadPixelsSgix = ((int)0x835E),
-        MaxAsyncTexImageSgix = ((int)0x835F),
-        MaxAsyncDrawPixelsSgix = ((int)0x8360),
-        MaxAsyncReadPixelsSgix = ((int)0x8361),
         UnsignedByte233Rev = ((int)0x8362),
         UnsignedByte233Reversed = ((int)0x8362),
         UnsignedByte233RevExt = ((int)0x8362),
@@ -1454,19 +1320,11 @@ namespace OpenMobile.Graphics.OpenGL
         UnsignedInt2101010Rev = ((int)0x8368),
         UnsignedInt2101010Reversed = ((int)0x8368),
         UnsignedInt2101010RevExt = ((int)0x8368),
-        TextureMaxClampSSgix = ((int)0x8369),
-        TextureMaxClampTSgix = ((int)0x836A),
-        TextureMaxClampRSgix = ((int)0x836B),
-        FogFactorToAlphaSgix = ((int)0x836F),
         MirroredRepeat = ((int)0x8370),
-        MirroredRepeatArb = ((int)0x8370),
-        MirroredRepeatIbm = ((int)0x8370),
         RgbS3tc = ((int)0x83A0),
         Rgb4S3tc = ((int)0x83A1),
         RgbaS3tc = ((int)0x83A2),
         Rgba4S3tc = ((int)0x83A3),
-        VertexPreclipSgix = ((int)0x83EE),
-        VertexPreclipHintSgix = ((int)0x83EF),
         CompressedRgbS3tcDxt1Ext = ((int)0x83F0),
         CompressedRgbaS3tcDxt1Ext = ((int)0x83F1),
         CompressedRgbaS3tcDxt3Ext = ((int)0x83F2),
@@ -1476,31 +1334,6 @@ namespace OpenMobile.Graphics.OpenGL
         NormalArrayParallelPointersIntel = ((int)0x83F6),
         ColorArrayParallelPointersIntel = ((int)0x83F7),
         TextureCoordArrayParallelPointersIntel = ((int)0x83F8),
-        FragmentLightingSgix = ((int)0x8400),
-        FragmentColorMaterialSgix = ((int)0x8401),
-        FragmentColorMaterialFaceSgix = ((int)0x8402),
-        FragmentColorMaterialParameterSgix = ((int)0x8403),
-        MaxFragmentLightsSgix = ((int)0x8404),
-        MaxActiveLightsSgix = ((int)0x8405),
-        CurrentRasterNormalSgix = ((int)0x8406),
-        LightEnvModeSgix = ((int)0x8407),
-        FragmentLightModelLocalViewerSgix = ((int)0x8408),
-        FragmentLightModelTwoSideSgix = ((int)0x8409),
-        FragmentLightModelAmbientSgix = ((int)0x840A),
-        FragmentLightModelNormalInterpolationSgix = ((int)0x840B),
-        FragmentLight0Sgix = ((int)0x840C),
-        FragmentLight1Sgix = ((int)0x840D),
-        FragmentLight2Sgix = ((int)0x840E),
-        FragmentLight3Sgix = ((int)0x840F),
-        FragmentLight4Sgix = ((int)0x8410),
-        FragmentLight5Sgix = ((int)0x8411),
-        FragmentLight6Sgix = ((int)0x8412),
-        FragmentLight7Sgix = ((int)0x8413),
-        PackResampleSgix = ((int)0x842C),
-        UnpackResampleSgix = ((int)0x842D),
-        ResampleReplicateSgix = ((int)0x842E),
-        ResampleZeroFillSgix = ((int)0x842F),
-        ResampleDecimateSgix = ((int)0x8430),
         TangentArrayExt = ((int)0x8439),
         BinormalArrayExt = ((int)0x843A),
         CurrentTangentExt = ((int)0x843B),
@@ -1515,9 +1348,6 @@ namespace OpenMobile.Graphics.OpenGL
         Map2TangentExt = ((int)0x8445),
         Map1BinormalExt = ((int)0x8446),
         Map2BinormalExt = ((int)0x8447),
-        NearestClipmapNearestSgix = ((int)0x844D),
-        NearestClipmapLinearSgix = ((int)0x844E),
-        LinearClipmapNearestSgix = ((int)0x844F),
         FogCoordinateSource = ((int)0x8450),
         FogCoordinateSourceExt = ((int)0x8450),
         FogCoordSrc = ((int)0x8450),
@@ -1737,19 +1567,11 @@ namespace OpenMobile.Graphics.OpenGL
         TextureCubeMapNegativeZArb = ((int)0x851A),
         TextureCubeMapNegativeZExt = ((int)0x851A),
         ProxyTextureCubeMap = ((int)0x851B),
-        ProxyTextureCubeMapArb = ((int)0x851B),
-        ProxyTextureCubeMapExt = ((int)0x851B),
         MaxCubeMapTextureSize = ((int)0x851C),
-        MaxCubeMapTextureSizeArb = ((int)0x851C),
-        MaxCubeMapTextureSizeExt = ((int)0x851C),
-        VertexArrayRangeApple = ((int)0x851D),
         VertexArrayRangeNv = ((int)0x851D),
-        VertexArrayRangeLengthApple = ((int)0x851E),
         VertexArrayRangeLengthNv = ((int)0x851E),
         VertexArrayRangeValidNv = ((int)0x851F),
-        VertexArrayStorageHintApple = ((int)0x851F),
         MaxVertexArrayRangeElementNv = ((int)0x8520),
-        VertexArrayRangePointerApple = ((int)0x8521),
         VertexArrayRangePointerNv = ((int)0x8521),
         RegisterCombinersNv = ((int)0x8522),
         VariableANv = ((int)0x8523),
@@ -1863,88 +1685,30 @@ namespace OpenMobile.Graphics.OpenGL
         Src2Rgb = ((int)0x8582),
         Source3RgbNv = ((int)0x8583),
         Source0Alpha = ((int)0x8588),
-        Source0AlphaArb = ((int)0x8588),
-        Source0AlphaExt = ((int)0x8588),
         Src0Alpha = ((int)0x8588),
         Source1Alpha = ((int)0x8589),
-        Source1AlphaArb = ((int)0x8589),
-        Source1AlphaExt = ((int)0x8589),
         Src1Alpha = ((int)0x8589),
         Source2Alpha = ((int)0x858A),
-        Source2AlphaArb = ((int)0x858A),
-        Source2AlphaExt = ((int)0x858A),
         Src2Alpha = ((int)0x858A),
         Source3AlphaNv = ((int)0x858B),
         Operand0Rgb = ((int)0x8590),
-        Operand0RgbArb = ((int)0x8590),
-        Operand0RgbExt = ((int)0x8590),
         Operand1Rgb = ((int)0x8591),
-        Operand1RgbArb = ((int)0x8591),
-        Operand1RgbExt = ((int)0x8591),
         Operand2Rgb = ((int)0x8592),
-        Operand2RgbArb = ((int)0x8592),
-        Operand2RgbExt = ((int)0x8592),
         Operand3RgbNv = ((int)0x8593),
         Operand0Alpha = ((int)0x8598),
-        Operand0AlphaArb = ((int)0x8598),
-        Operand0AlphaExt = ((int)0x8598),
         Operand1Alpha = ((int)0x8599),
-        Operand1AlphaArb = ((int)0x8599),
-        Operand1AlphaExt = ((int)0x8599),
         Operand2Alpha = ((int)0x859A),
-        Operand2AlphaArb = ((int)0x859A),
-        Operand2AlphaExt = ((int)0x859A),
         Operand3AlphaNv = ((int)0x859B),
-        PackSubsampleRateSgix = ((int)0x85A0),
-        UnpackSubsampleRateSgix = ((int)0x85A1),
-        PixelSubsample4444Sgix = ((int)0x85A2),
-        PixelSubsample2424Sgix = ((int)0x85A3),
-        PixelSubsample4242Sgix = ((int)0x85A4),
         PerturbExt = ((int)0x85AE),
         TextureNormalExt = ((int)0x85AF),
-        LightModelSpecularVectorApple = ((int)0x85B0),
-        TransformHintApple = ((int)0x85B1),
-        UnpackClientStorageApple = ((int)0x85B2),
-        BufferObjectApple = ((int)0x85B3),
         VertexArrayBinding = ((int)0x85B5),
-        VertexArrayBindingApple = ((int)0x85B5),
-        TextureRangeLengthApple = ((int)0x85B7),
-        TextureRangePointerApple = ((int)0x85B8),
-        Ycbcr422Apple = ((int)0x85B9),
-        UnsignedShort88Apple = ((int)0x85BA),
-        UnsignedShort88Mesa = ((int)0x85BA),
-        UnsignedShort88RevApple = ((int)0x85BB),
-        UnsignedShort88RevMesa = ((int)0x85BB),
-        TextureStorageHintApple = ((int)0x85BC),
-        StoragePrivateApple = ((int)0x85BD),
-        StorageCachedApple = ((int)0x85BE),
-        StorageSharedApple = ((int)0x85BF),
-        ReplacementCodeArraySun = ((int)0x85C0),
-        ReplacementCodeArrayTypeSun = ((int)0x85C1),
-        ReplacementCodeArrayStrideSun = ((int)0x85C2),
-        ReplacementCodeArrayPointerSun = ((int)0x85C3),
-        R1uiV3fSun = ((int)0x85C4),
-        R1uiC4ubV3fSun = ((int)0x85C5),
-        R1uiC3fV3fSun = ((int)0x85C6),
-        R1uiN3fV3fSun = ((int)0x85C7),
-        R1uiC4fN3fV3fSun = ((int)0x85C8),
-        R1uiT2fV3fSun = ((int)0x85C9),
-        R1uiT2fN3fV3fSun = ((int)0x85CA),
-        R1uiT2fC4fN3fV3fSun = ((int)0x85CB),
-        SliceAccumSun = ((int)0x85CC),
-        QuadMeshSun = ((int)0x8614),
-        TriangleMeshSun = ((int)0x8615),
         VertexProgram = ((int)0x8620),
-        VertexProgramArb = ((int)0x8620),
-        VertexProgramNv = ((int)0x8620),
         VertexStateProgramNv = ((int)0x8621),
         ArrayEnabled = ((int)0x8622),
         VertexAttribArrayEnabled = ((int)0x8622),
-        VertexAttribArrayEnabledArb = ((int)0x8622),
         ArraySize = ((int)0x8623),
         AttribArraySizeNv = ((int)0x8623),
         VertexAttribArraySize = ((int)0x8623),
-        VertexAttribArraySizeArb = ((int)0x8623),
         ArrayStride = ((int)0x8624),
         AttribArrayStrideNv = ((int)0x8624),
         VertexAttribArrayStride = ((int)0x8624),
@@ -2240,11 +2004,8 @@ namespace OpenMobile.Graphics.OpenGL
         ObjectBufferUsageAti = ((int)0x8765),
         ArrayObjectBufferAti = ((int)0x8766),
         ArrayObjectOffsetAti = ((int)0x8767),
-        ElementArrayApple = ((int)0x8768),
         ElementArrayAti = ((int)0x8768),
-        ElementArrayTypeApple = ((int)0x8769),
         ElementArrayTypeAti = ((int)0x8769),
-        ElementArrayPointerApple = ((int)0x876A),
         ElementArrayPointerAti = ((int)0x876A),
         MaxVertexStreamsAti = ((int)0x876B),
         VertexStream0Ati = ((int)0x876C),
@@ -2409,44 +2170,28 @@ namespace OpenMobile.Graphics.OpenGL
         MaxProgramNativeTexInstructionsArb = ((int)0x880F),
         MaxProgramNativeTexIndirectionsArb = ((int)0x8810),
         Rgba32f = ((int)0x8814),
-        Rgba32fArb = ((int)0x8814),
-        RgbaFloat32Apple = ((int)0x8814),
-        RgbaFloat32Ati = ((int)0x8814),
         Rgb32f = ((int)0x8815),
-        Rgb32fArb = ((int)0x8815),
-        RgbFloat32Apple = ((int)0x8815),
-        RgbFloat32Ati = ((int)0x8815),
         Alpha32fArb = ((int)0x8816),
-        AlphaFloat32Apple = ((int)0x8816),
         AlphaFloat32Ati = ((int)0x8816),
         Intensity32fArb = ((int)0x8817),
-        IntensityFloat32Apple = ((int)0x8817),
         IntensityFloat32Ati = ((int)0x8817),
         Luminance32fArb = ((int)0x8818),
-        LuminanceFloat32Apple = ((int)0x8818),
         LuminanceFloat32Ati = ((int)0x8818),
         LuminanceAlpha32fArb = ((int)0x8819),
-        LuminanceAlphaFloat32Apple = ((int)0x8819),
         LuminanceAlphaFloat32Ati = ((int)0x8819),
         Rgba16f = ((int)0x881A),
         Rgba16fArb = ((int)0x881A),
-        RgbaFloat16Apple = ((int)0x881A),
         RgbaFloat16Ati = ((int)0x881A),
         Rgb16f = ((int)0x881B),
         Rgb16fArb = ((int)0x881B),
-        RgbFloat16Apple = ((int)0x881B),
         RgbFloat16Ati = ((int)0x881B),
         Alpha16fArb = ((int)0x881C),
-        AlphaFloat16Apple = ((int)0x881C),
         AlphaFloat16Ati = ((int)0x881C),
         Intensity16fArb = ((int)0x881D),
-        IntensityFloat16Apple = ((int)0x881D),
         IntensityFloat16Ati = ((int)0x881D),
         Luminance16fArb = ((int)0x881E),
-        LuminanceFloat16Apple = ((int)0x881E),
         LuminanceFloat16Ati = ((int)0x881E),
         LuminanceAlpha16fArb = ((int)0x881F),
-        LuminanceAlphaFloat16Apple = ((int)0x881F),
         LuminanceAlphaFloat16Ati = ((int)0x881F),
         RgbaFloatMode = ((int)0x8820),
         RgbaFloatModeArb = ((int)0x8820),
@@ -2934,30 +2679,7 @@ namespace OpenMobile.Graphics.OpenGL
         ResampleZeroFillOml = ((int)0x8987),
         ResampleAverageOml = ((int)0x8988),
         ResampleDecimateOml = ((int)0x8989),
-        VertexAttribMap1Apple = ((int)0x8A00),
-        VertexAttribMap2Apple = ((int)0x8A01),
-        VertexAttribMap1SizeApple = ((int)0x8A02),
-        VertexAttribMap1CoeffApple = ((int)0x8A03),
-        VertexAttribMap1OrderApple = ((int)0x8A04),
-        VertexAttribMap1DomainApple = ((int)0x8A05),
-        VertexAttribMap2SizeApple = ((int)0x8A06),
-        VertexAttribMap2CoeffApple = ((int)0x8A07),
-        VertexAttribMap2OrderApple = ((int)0x8A08),
-        VertexAttribMap2DomainApple = ((int)0x8A09),
-        DrawPixelsApple = ((int)0x8A0A),
-        FenceApple = ((int)0x8A0B),
-        ColorFloatApple = ((int)0x8A0F),
         UniformBuffer = ((int)0x8A11),
-        BufferSerializedModifyApple = ((int)0x8A12),
-        BufferFlushingUnmapApple = ((int)0x8A13),
-        AuxDepthStencilApple = ((int)0x8A14),
-        PackRowBytesApple = ((int)0x8A15),
-        UnpackRowBytesApple = ((int)0x8A16),
-        ReleasedApple = ((int)0x8A19),
-        VolatileApple = ((int)0x8A1A),
-        RetainedApple = ((int)0x8A1B),
-        UndefinedApple = ((int)0x8A1C),
-        PurgeableApple = ((int)0x8A1D),
         UniformBufferBinding = ((int)0x8A28),
         UniformBufferStart = ((int)0x8A29),
         UniformBufferSize = ((int)0x8A2A),
@@ -3683,23 +3405,6 @@ namespace OpenMobile.Graphics.OpenGL
         TimeoutIgnored = unchecked((int)0xFFFFFFFFFFFFFFFF),
         One = ((int)1),
         True = ((int)1),
-        CullVertexIbm = ((int)103050),
-        VertexArrayListIbm = ((int)103070),
-        NormalArrayListIbm = ((int)103071),
-        ColorArrayListIbm = ((int)103072),
-        IndexArrayListIbm = ((int)103073),
-        TextureCoordArrayListIbm = ((int)103074),
-        EdgeFlagArrayListIbm = ((int)103075),
-        FogCoordinateArrayListIbm = ((int)103076),
-        SecondaryColorArrayListIbm = ((int)103077),
-        VertexArrayListStrideIbm = ((int)103080),
-        NormalArrayListStrideIbm = ((int)103081),
-        ColorArrayListStrideIbm = ((int)103082),
-        IndexArrayListStrideIbm = ((int)103083),
-        TextureCoordArrayListStrideIbm = ((int)103084),
-        EdgeFlagArrayListStrideIbm = ((int)103085),
-        FogCoordinateArrayListStrideIbm = ((int)103086),
-        SecondaryColorArrayListStrideIbm = ((int)103087),
         Two = ((int)2),
         Three = ((int)3),
         Four = ((int)4),
@@ -3745,125 +3450,6 @@ namespace OpenMobile.Graphics.OpenGL
         TessellationFactorAmd = ((int)0x9005),
         DiscreteAmd = ((int)0x9006),
         ContinuousAmd = ((int)0x9007),
-    }
-
-    public enum AppleAuxDepthStencil : int
-    {
-        AuxDepthStencilApple = ((int)0x8A14),
-    }
-
-    public enum AppleClientStorage : int
-    {
-        UnpackClientStorageApple = ((int)0x85B2),
-    }
-
-    public enum AppleElementArray : int
-    {
-        ElementArrayApple = ((int)0x8768),
-        ElementArrayTypeApple = ((int)0x8769),
-        ElementArrayPointerApple = ((int)0x876A),
-    }
-
-    public enum AppleFence : int
-    {
-        DrawPixelsApple = ((int)0x8A0A),
-        FenceApple = ((int)0x8A0B),
-    }
-
-    public enum AppleFloatPixels : int
-    {
-        HalfApple = ((int)0x140B),
-        RgbaFloat32Apple = ((int)0x8814),
-        RgbFloat32Apple = ((int)0x8815),
-        AlphaFloat32Apple = ((int)0x8816),
-        IntensityFloat32Apple = ((int)0x8817),
-        LuminanceFloat32Apple = ((int)0x8818),
-        LuminanceAlphaFloat32Apple = ((int)0x8819),
-        RgbaFloat16Apple = ((int)0x881A),
-        RgbFloat16Apple = ((int)0x881B),
-        AlphaFloat16Apple = ((int)0x881C),
-        IntensityFloat16Apple = ((int)0x881D),
-        LuminanceFloat16Apple = ((int)0x881E),
-        LuminanceAlphaFloat16Apple = ((int)0x881F),
-        ColorFloatApple = ((int)0x8A0F),
-    }
-
-    public enum AppleFlushBufferRange : int
-    {
-        BufferSerializedModifyApple = ((int)0x8A12),
-        BufferFlushingUnmapApple = ((int)0x8A13),
-    }
-
-    public enum AppleObjectPurgeable : int
-    {
-        BufferObjectApple = ((int)0x85B3),
-        ReleasedApple = ((int)0x8A19),
-        VolatileApple = ((int)0x8A1A),
-        RetainedApple = ((int)0x8A1B),
-        UndefinedApple = ((int)0x8A1C),
-        PurgeableApple = ((int)0x8A1D),
-    }
-
-    public enum AppleRowBytes : int
-    {
-        PackRowBytesApple = ((int)0x8A15),
-        UnpackRowBytesApple = ((int)0x8A16),
-    }
-
-    public enum AppleSpecularVector : int
-    {
-        LightModelSpecularVectorApple = ((int)0x85B0),
-    }
-
-    public enum AppleTextureRange : int
-    {
-        TextureRangeLengthApple = ((int)0x85B7),
-        TextureRangePointerApple = ((int)0x85B8),
-        TextureStorageHintApple = ((int)0x85BC),
-        StoragePrivateApple = ((int)0x85BD),
-        StorageCachedApple = ((int)0x85BE),
-        StorageSharedApple = ((int)0x85BF),
-    }
-
-    public enum AppleTransformHint : int
-    {
-        TransformHintApple = ((int)0x85B1),
-    }
-
-    public enum AppleVertexArrayObject : int
-    {
-        VertexArrayBindingApple = ((int)0x85B5),
-    }
-
-    public enum AppleVertexArrayRange : int
-    {
-        VertexArrayRangeApple = ((int)0x851D),
-        VertexArrayRangeLengthApple = ((int)0x851E),
-        VertexArrayStorageHintApple = ((int)0x851F),
-        VertexArrayRangePointerApple = ((int)0x8521),
-        StorageCachedApple = ((int)0x85BE),
-        StorageSharedApple = ((int)0x85BF),
-    }
-
-    public enum AppleVertexProgramEvaluators : int
-    {
-        VertexAttribMap1Apple = ((int)0x8A00),
-        VertexAttribMap2Apple = ((int)0x8A01),
-        VertexAttribMap1SizeApple = ((int)0x8A02),
-        VertexAttribMap1CoeffApple = ((int)0x8A03),
-        VertexAttribMap1OrderApple = ((int)0x8A04),
-        VertexAttribMap1DomainApple = ((int)0x8A05),
-        VertexAttribMap2SizeApple = ((int)0x8A06),
-        VertexAttribMap2CoeffApple = ((int)0x8A07),
-        VertexAttribMap2OrderApple = ((int)0x8A08),
-        VertexAttribMap2DomainApple = ((int)0x8A09),
-    }
-
-    public enum AppleYcbcr422 : int
-    {
-        Ycbcr422Apple = ((int)0x85B9),
-        UnsignedShort88Apple = ((int)0x85BA),
-        UnsignedShort88RevApple = ((int)0x85BB),
     }
 
     public enum ArbColorBufferFloat : int
@@ -5223,8 +4809,6 @@ namespace OpenMobile.Graphics.OpenGL
         MaxExt = ((int)0x8008),
         FuncSubtractExt = ((int)0x800A),
         FuncReverseSubtractExt = ((int)0x800B),
-        AlphaMinSgix = ((int)0x8320),
-        AlphaMaxSgix = ((int)0x8321),
     }
 
     public enum BlendingFactorDest : int
@@ -5305,12 +4889,6 @@ namespace OpenMobile.Graphics.OpenGL
         MapInvalidateBufferBit = ((int)0x0008),
         MapFlushExplicitBit = ((int)0x0010),
         MapUnsynchronizedBit = ((int)0x0020),
-    }
-
-    public enum BufferParameterApple : int
-    {
-        BufferSerializedModifyApple = ((int)0x8A12),
-        BufferFlushingUnmapApple = ((int)0x8A13),
     }
 
     public enum BufferParameterName : int
@@ -5710,17 +5288,12 @@ namespace OpenMobile.Graphics.OpenGL
         Light6 = ((int)0x4006),
         Light7 = ((int)0x4007),
         Convolution1D = ((int)0x8010),
-        Convolution1DExt = ((int)0x8010),
         Convolution2D = ((int)0x8011),
-        Convolution2DExt = ((int)0x8011),
         Separable2D = ((int)0x8012),
-        Separable2DExt = ((int)0x8012),
         Histogram = ((int)0x8024),
-        HistogramExt = ((int)0x8024),
         MinmaxExt = ((int)0x802E),
         PolygonOffsetFill = ((int)0x8037),
         RescaleNormal = ((int)0x803A),
-        RescaleNormalExt = ((int)0x803A),
         Texture3DExt = ((int)0x806F),
         VertexArray = ((int)0x8074),
         NormalArray = ((int)0x8075),
@@ -5728,45 +5301,19 @@ namespace OpenMobile.Graphics.OpenGL
         IndexArray = ((int)0x8077),
         TextureCoordArray = ((int)0x8078),
         EdgeFlagArray = ((int)0x8079),
-        InterlaceSgix = ((int)0x8094),
         Multisample = ((int)0x809D),
         SampleAlphaToCoverage = ((int)0x809E),
         SampleAlphaToMaskSgis = ((int)0x809E),
         SampleAlphaToOne = ((int)0x809F),
-        SampleAlphaToOneSgis = ((int)0x809F),
         SampleCoverage = ((int)0x80A0),
         SampleMaskSgis = ((int)0x80A0),
         TextureColorTableSgi = ((int)0x80BC),
         ColorTable = ((int)0x80D0),
-        ColorTableSgi = ((int)0x80D0),
         PostConvolutionColorTable = ((int)0x80D1),
-        PostConvolutionColorTableSgi = ((int)0x80D1),
         PostColorMatrixColorTable = ((int)0x80D2),
-        PostColorMatrixColorTableSgi = ((int)0x80D2),
         Texture4DSgis = ((int)0x8134),
-        PixelTexGenSgix = ((int)0x8139),
-        SpriteSgix = ((int)0x8148),
-        ReferencePlaneSgix = ((int)0x817D),
-        IrInstrument1Sgix = ((int)0x817F),
-        CalligraphicFragmentSgix = ((int)0x8183),
-        FramezoomSgix = ((int)0x818B),
-        FogOffsetSgix = ((int)0x8198),
         SharedTexturePaletteExt = ((int)0x81FB),
-        AsyncHistogramSgix = ((int)0x832C),
         PixelTextureSgis = ((int)0x8353),
-        AsyncTexImageSgix = ((int)0x835C),
-        AsyncDrawPixelsSgix = ((int)0x835D),
-        AsyncReadPixelsSgix = ((int)0x835E),
-        FragmentLightingSgix = ((int)0x8400),
-        FragmentColorMaterialSgix = ((int)0x8401),
-        FragmentLight0Sgix = ((int)0x840C),
-        FragmentLight1Sgix = ((int)0x840D),
-        FragmentLight2Sgix = ((int)0x840E),
-        FragmentLight3Sgix = ((int)0x840F),
-        FragmentLight4Sgix = ((int)0x8410),
-        FragmentLight5Sgix = ((int)0x8411),
-        FragmentLight6Sgix = ((int)0x8412),
-        FragmentLight7Sgix = ((int)0x8413),
         FogCoordArray = ((int)0x8457),
         ColorSum = ((int)0x8458),
         SecondaryColorArray = ((int)0x845E),
@@ -5781,6 +5328,7 @@ namespace OpenMobile.Graphics.OpenGL
         FramebufferSrgb = ((int)0x8DB9),
         SampleMask = ((int)0x8E51),
         PrimitiveRestart = ((int)0x8F9D),
+        TextureRectangleArb = ((int)0x84F5),
     }
 
     public enum ErrorCode : int
@@ -6887,19 +6435,6 @@ namespace OpenMobile.Graphics.OpenGL
         Gl4DColorTexture = ((int)0x0604),
     }
 
-    [Flags]
-    public enum FfdMaskSgix : int
-    {
-        TextureDeformationBitSgix = ((int)0x00000001),
-        GeometryDeformationBitSgix = ((int)0x00000002),
-    }
-
-    public enum FfdTargetSgix : int
-    {
-        GeometryDeformationSgix = ((int)0x8194),
-        TextureDeformationSgix = ((int)0x8195),
-    }
-
     public enum FogMode : int
     {
         Exp = ((int)0x0800),
@@ -6918,7 +6453,6 @@ namespace OpenMobile.Graphics.OpenGL
         FogEnd = ((int)0x0B64),
         FogMode = ((int)0x0B65),
         FogColor = ((int)0x0B66),
-        FogOffsetValueSgix = ((int)0x8199),
         FogCoordSrc = ((int)0x8450),
     }
 
@@ -6927,14 +6461,6 @@ namespace OpenMobile.Graphics.OpenGL
         Float = ((int)0x1406),
         Double = ((int)0x140A),
         HalfFloat = ((int)0x140B),
-    }
-
-    public enum FragmentLightModelParameterSgix : int
-    {
-        FragmentLightModelLocalViewerSgix = ((int)0x8408),
-        FragmentLightModelTwoSideSgix = ((int)0x8409),
-        FragmentLightModelAmbientSgix = ((int)0x840A),
-        FragmentLightModelNormalInterpolationSgix = ((int)0x840B),
     }
 
     public enum FramebufferAttachment : int
@@ -7470,7 +6996,6 @@ namespace OpenMobile.Graphics.OpenGL
         TextureCoordArrayCountExt = ((int)0x808B),
         EdgeFlagArrayStride = ((int)0x808C),
         EdgeFlagArrayCountExt = ((int)0x808D),
-        InterlaceSgix = ((int)0x8094),
         DetailTexture2DBindingSgis = ((int)0x8096),
         Multisample = ((int)0x809D),
         MultisampleSgis = ((int)0x809D),
@@ -7526,71 +7051,16 @@ namespace OpenMobile.Graphics.OpenGL
         UnpackImageDepthSgis = ((int)0x8133),
         Texture4DSgis = ((int)0x8134),
         Max4DTextureSizeSgis = ((int)0x8138),
-        PixelTexGenSgix = ((int)0x8139),
-        PixelTileBestAlignmentSgix = ((int)0x813E),
-        PixelTileCacheIncrementSgix = ((int)0x813F),
-        PixelTileWidthSgix = ((int)0x8140),
-        PixelTileHeightSgix = ((int)0x8141),
-        PixelTileGridWidthSgix = ((int)0x8142),
-        PixelTileGridHeightSgix = ((int)0x8143),
-        PixelTileGridDepthSgix = ((int)0x8144),
-        PixelTileCacheSizeSgix = ((int)0x8145),
-        SpriteSgix = ((int)0x8148),
-        SpriteModeSgix = ((int)0x8149),
-        SpriteAxisSgix = ((int)0x814A),
-        SpriteTranslationSgix = ((int)0x814B),
         Texture4DBindingSgis = ((int)0x814F),
-        MaxClipmapDepthSgix = ((int)0x8177),
-        MaxClipmapVirtualDepthSgix = ((int)0x8178),
-        PostTextureFilterBiasRangeSgix = ((int)0x817B),
-        PostTextureFilterScaleRangeSgix = ((int)0x817C),
-        ReferencePlaneSgix = ((int)0x817D),
-        ReferencePlaneEquationSgix = ((int)0x817E),
-        IrInstrument1Sgix = ((int)0x817F),
-        InstrumentMeasurementsSgix = ((int)0x8181),
-        CalligraphicFragmentSgix = ((int)0x8183),
-        FramezoomSgix = ((int)0x818B),
-        FramezoomFactorSgix = ((int)0x818C),
-        MaxFramezoomFactorSgix = ((int)0x818D),
         GenerateMipmapHint = ((int)0x8192),
         GenerateMipmapHintSgis = ((int)0x8192),
-        DeformationsMaskSgix = ((int)0x8196),
-        FogOffsetSgix = ((int)0x8198),
-        FogOffsetValueSgix = ((int)0x8199),
         LightModelColorControl = ((int)0x81F8),
         SharedTexturePaletteExt = ((int)0x81FB),
         MajorVersion = ((int)0x821B),
         MinorVersion = ((int)0x821C),
         NumExtensions = ((int)0x821D),
         ContextFlags = ((int)0x821E),
-        ConvolutionHintSgix = ((int)0x8316),
-        AsyncMarkerSgix = ((int)0x8329),
-        PixelTexGenModeSgix = ((int)0x832B),
-        AsyncHistogramSgix = ((int)0x832C),
-        MaxAsyncHistogramSgix = ((int)0x832D),
         PixelTextureSgis = ((int)0x8353),
-        AsyncTexImageSgix = ((int)0x835C),
-        AsyncDrawPixelsSgix = ((int)0x835D),
-        AsyncReadPixelsSgix = ((int)0x835E),
-        MaxAsyncTexImageSgix = ((int)0x835F),
-        MaxAsyncDrawPixelsSgix = ((int)0x8360),
-        MaxAsyncReadPixelsSgix = ((int)0x8361),
-        VertexPreclipSgix = ((int)0x83EE),
-        VertexPreclipHintSgix = ((int)0x83EF),
-        FragmentLightingSgix = ((int)0x8400),
-        FragmentColorMaterialSgix = ((int)0x8401),
-        FragmentColorMaterialFaceSgix = ((int)0x8402),
-        FragmentColorMaterialParameterSgix = ((int)0x8403),
-        MaxFragmentLightsSgix = ((int)0x8404),
-        MaxActiveLightsSgix = ((int)0x8405),
-        LightEnvModeSgix = ((int)0x8407),
-        FragmentLightModelLocalViewerSgix = ((int)0x8408),
-        FragmentLightModelTwoSideSgix = ((int)0x8409),
-        FragmentLightModelAmbientSgix = ((int)0x840A),
-        FragmentLightModelNormalInterpolationSgix = ((int)0x840B),
-        FragmentLight0Sgix = ((int)0x840C),
-        PackResampleSgix = ((int)0x842C),
-        UnpackResampleSgix = ((int)0x842D),
         CurrentFogCoord = ((int)0x8453),
         FogCoordArrayType = ((int)0x8454),
         FogCoordArrayStride = ((int)0x8455),
@@ -7618,8 +7088,6 @@ namespace OpenMobile.Graphics.OpenGL
         TextureCubeMap = ((int)0x8513),
         TextureBindingCubeMap = ((int)0x8514),
         MaxCubeMapTextureSize = ((int)0x851C),
-        PackSubsampleRateSgix = ((int)0x85A0),
-        UnpackSubsampleRateSgix = ((int)0x85A1),
         VertexArrayBinding = ((int)0x85B5),
         ProgramPointSize = ((int)0x8642),
         DepthClamp = ((int)0x864F),
@@ -7736,7 +7204,6 @@ namespace OpenMobile.Graphics.OpenGL
         IndexArrayPointer = ((int)0x8091),
         TextureCoordArrayPointer = ((int)0x8092),
         EdgeFlagArrayPointer = ((int)0x8093),
-        InstrumentBufferPointerSgix = ((int)0x8180),
         FogCoordArrayPointer = ((int)0x8456),
         SecondaryColorArrayPointer = ((int)0x845D),
     }
@@ -7781,7 +7248,6 @@ namespace OpenMobile.Graphics.OpenGL
         DetailTextureModeSgis = ((int)0x809B),
         DetailTextureFuncPointsSgis = ((int)0x809C),
         SharpenTextureFuncPointsSgis = ((int)0x80B0),
-        ShadowAmbientSgix = ((int)0x80BF),
         DualTextureSelectSgis = ((int)0x8124),
         QuadTextureSelectSgis = ((int)0x8125),
         Texture4DsizeSgis = ((int)0x8136),
@@ -7795,26 +7261,8 @@ namespace OpenMobile.Graphics.OpenGL
         TextureMaxLevel = ((int)0x813D),
         TextureMaxLevelSgis = ((int)0x813D),
         TextureFilter4SizeSgis = ((int)0x8147),
-        TextureClipmapCenterSgix = ((int)0x8171),
-        TextureClipmapFrameSgix = ((int)0x8172),
-        TextureClipmapOffsetSgix = ((int)0x8173),
-        TextureClipmapVirtualDepthSgix = ((int)0x8174),
-        TextureClipmapLodOffsetSgix = ((int)0x8175),
-        TextureClipmapDepthSgix = ((int)0x8176),
-        PostTextureFilterBiasSgix = ((int)0x8179),
-        PostTextureFilterScaleSgix = ((int)0x817A),
-        TextureLodBiasSSgix = ((int)0x818E),
-        TextureLodBiasTSgix = ((int)0x818F),
-        TextureLodBiasRSgix = ((int)0x8190),
         GenerateMipmap = ((int)0x8191),
         GenerateMipmapSgis = ((int)0x8191),
-        TextureCompareSgix = ((int)0x819A),
-        TextureCompareOperatorSgix = ((int)0x819B),
-        TextureLequalRSgix = ((int)0x819C),
-        TextureGequalRSgix = ((int)0x819D),
-        TextureMaxClampSSgix = ((int)0x8369),
-        TextureMaxClampTSgix = ((int)0x836A),
-        TextureMaxClampRSgix = ((int)0x836B),
         TextureCompressedImageSize = ((int)0x86A0),
         TextureCompressed = ((int)0x86A1),
         TextureDepthSize = ((int)0x884A),
@@ -7876,11 +7324,8 @@ namespace OpenMobile.Graphics.OpenGL
         FogHint = ((int)0x0C54),
         PackCmykHintExt = ((int)0x800E),
         UnpackCmykHintExt = ((int)0x800F),
-        TextureMultiBufferHintSgix = ((int)0x812E),
         GenerateMipmapHint = ((int)0x8192),
         GenerateMipmapHintSgis = ((int)0x8192),
-        ConvolutionHintSgix = ((int)0x8316),
-        VertexPreclipHintSgix = ((int)0x83EF),
         TextureCompressionHint = ((int)0x84EF),
         FragmentShaderDerivativeHint = ((int)0x8B8B),
     }
@@ -7895,85 +7340,6 @@ namespace OpenMobile.Graphics.OpenGL
     {
         HistogramExt = ((int)0x8024),
         ProxyHistogramExt = ((int)0x8025),
-    }
-
-    public enum HpConvolutionBorderModes : int
-    {
-        IgnoreBorderHp = ((int)0x8150),
-        ConstantBorderHp = ((int)0x8151),
-        ReplicateBorderHp = ((int)0x8153),
-        ConvolutionBorderColorHp = ((int)0x8154),
-    }
-
-    public enum HpImageTransform : int
-    {
-        ImageScaleXHp = ((int)0x8155),
-        ImageScaleYHp = ((int)0x8156),
-        ImageTranslateXHp = ((int)0x8157),
-        ImageTranslateYHp = ((int)0x8158),
-        ImageRotateAngleHp = ((int)0x8159),
-        ImageRotateOriginXHp = ((int)0x815A),
-        ImageRotateOriginYHp = ((int)0x815B),
-        ImageMagFilterHp = ((int)0x815C),
-        ImageMinFilterHp = ((int)0x815D),
-        ImageCubicWeightHp = ((int)0x815E),
-        CubicHp = ((int)0x815F),
-        AverageHp = ((int)0x8160),
-        ImageTransform2DHp = ((int)0x8161),
-        PostImageTransformColorTableHp = ((int)0x8162),
-        ProxyPostImageTransformColorTableHp = ((int)0x8163),
-    }
-
-    public enum HpOcclusionTest : int
-    {
-        OcclusionTestHp = ((int)0x8165),
-        OcclusionTestResultHp = ((int)0x8166),
-    }
-
-    public enum HpTextureLighting : int
-    {
-        TextureLightingModeHp = ((int)0x8167),
-        TexturePostSpecularHp = ((int)0x8168),
-        TexturePreSpecularHp = ((int)0x8169),
-    }
-
-    public enum IbmCullVertex : int
-    {
-        CullVertexIbm = ((int)103050),
-    }
-
-    public enum IbmMultimodeDrawArrays : int
-    {
-    }
-
-    public enum IbmRasterposClip : int
-    {
-        RasterPositionUnclippedIbm = ((int)0x19262),
-    }
-
-    public enum IbmTextureMirroredRepeat : int
-    {
-        MirroredRepeatIbm = ((int)0x8370),
-    }
-
-    public enum IbmVertexArrayLists : int
-    {
-        VertexArrayListIbm = ((int)103070),
-        NormalArrayListIbm = ((int)103071),
-        ColorArrayListIbm = ((int)103072),
-        IndexArrayListIbm = ((int)103073),
-        TextureCoordArrayListIbm = ((int)103074),
-        EdgeFlagArrayListIbm = ((int)103075),
-        FogCoordinateArrayListIbm = ((int)103076),
-        SecondaryColorArrayListIbm = ((int)103077),
-        VertexArrayListStrideIbm = ((int)103080),
-        NormalArrayListStrideIbm = ((int)103081),
-        ColorArrayListStrideIbm = ((int)103082),
-        IndexArrayListStrideIbm = ((int)103083),
-        TextureCoordArrayListStrideIbm = ((int)103084),
-        EdgeFlagArrayListStrideIbm = ((int)103085),
-        FogCoordinateArrayListStrideIbm = ((int)103086),
-        SecondaryColorArrayListStrideIbm = ((int)103087),
     }
 
     public enum IndexedEnableCap : int
@@ -8041,18 +7407,6 @@ namespace OpenMobile.Graphics.OpenGL
         T4fC4fN3fV4f = ((int)0x2A2D),
     }
 
-    public enum LightEnvModeSgix : int
-    {
-        Add = ((int)0x0104),
-        Replace = ((int)0x1E01),
-        Modulate = ((int)0x2100),
-    }
-
-    public enum LightEnvParameterSgix : int
-    {
-        LightEnvModeSgix = ((int)0x8407),
-    }
-
     public enum LightModelColorControl : int
     {
         SingleColor = ((int)0x81F9),
@@ -8077,14 +7431,6 @@ namespace OpenMobile.Graphics.OpenGL
         Light5 = ((int)0x4005),
         Light6 = ((int)0x4006),
         Light7 = ((int)0x4007),
-        FragmentLight0Sgix = ((int)0x840C),
-        FragmentLight1Sgix = ((int)0x840D),
-        FragmentLight2Sgix = ((int)0x840E),
-        FragmentLight3Sgix = ((int)0x840F),
-        FragmentLight4Sgix = ((int)0x8410),
-        FragmentLight5Sgix = ((int)0x8411),
-        FragmentLight6Sgix = ((int)0x8412),
-        FragmentLight7Sgix = ((int)0x8413),
     }
 
     public enum LightParameter : int
@@ -8119,11 +7465,6 @@ namespace OpenMobile.Graphics.OpenGL
         Gl2Bytes = ((int)0x1407),
         Gl3Bytes = ((int)0x1408),
         Gl4Bytes = ((int)0x1409),
-    }
-
-    public enum ListParameterName : int
-    {
-        ListPrioritySgix = ((int)0x8182),
     }
 
     public enum LogicOp : int
@@ -8166,8 +7507,6 @@ namespace OpenMobile.Graphics.OpenGL
         Map2TextureCoord4 = ((int)0x0DB6),
         Map2Vertex3 = ((int)0x0DB7),
         Map2Vertex4 = ((int)0x0DB8),
-        GeometryDeformationSgix = ((int)0x8194),
-        TextureDeformationSgix = ((int)0x8195),
     }
 
     public enum MaterialFace : int
@@ -8234,36 +7573,6 @@ namespace OpenMobile.Graphics.OpenGL
         Matrix29 = ((int)0x88DD),
         Matrix30 = ((int)0x88DE),
         Matrix31 = ((int)0x88DF),
-    }
-
-    public enum MesaPackInvert : int
-    {
-        PackInvertMesa = ((int)0x8758),
-    }
-
-    public enum MesaResizeBuffers : int
-    {
-    }
-
-    public enum MesaWindowPos : int
-    {
-    }
-
-    public enum MesaxTextureStack : int
-    {
-        Texture1DStackMesax = ((int)0x8759),
-        Texture2DStackMesax = ((int)0x875A),
-        ProxyTexture1DStackMesax = ((int)0x875B),
-        ProxyTexture2DStackMesax = ((int)0x875C),
-        Texture1DStackBindingMesax = ((int)0x875D),
-        Texture2DStackBindingMesax = ((int)0x875E),
-    }
-
-    public enum MesaYcbcrTexture : int
-    {
-        UnsignedShort88Mesa = ((int)0x85BA),
-        UnsignedShort88RevMesa = ((int)0x85BB),
-        YcbcrMesa = ((int)0x8757),
     }
 
     public enum MeshMode1 : int
@@ -8946,56 +8255,6 @@ namespace OpenMobile.Graphics.OpenGL
         FormatSubsample244244Oml = ((int)0x8983),
     }
 
-    public enum PgiMiscHints : int
-    {
-        PreferDoublebufferHintPgi = ((int)0x1A1F8),
-        ConserveMemoryHintPgi = ((int)0x1A1FD),
-        ReclaimMemoryHintPgi = ((int)0x1A1FE),
-        NativeGraphicsHandlePgi = ((int)0x1A202),
-        NativeGraphicsBeginHintPgi = ((int)0x1A203),
-        NativeGraphicsEndHintPgi = ((int)0x1A204),
-        AlwaysFastHintPgi = ((int)0x1A20C),
-        AlwaysSoftHintPgi = ((int)0x1A20D),
-        AllowDrawObjHintPgi = ((int)0x1A20E),
-        AllowDrawWinHintPgi = ((int)0x1A20F),
-        AllowDrawFrgHintPgi = ((int)0x1A210),
-        AllowDrawMemHintPgi = ((int)0x1A211),
-        StrictDepthfuncHintPgi = ((int)0x1A216),
-        StrictLightingHintPgi = ((int)0x1A217),
-        StrictScissorHintPgi = ((int)0x1A218),
-        FullStippleHintPgi = ((int)0x1A219),
-        ClipNearHintPgi = ((int)0x1A220),
-        ClipFarHintPgi = ((int)0x1A221),
-        WideLineHintPgi = ((int)0x1A222),
-        BackNormalsHintPgi = ((int)0x1A223),
-    }
-
-    public enum PgiVertexHints : int
-    {
-        Vertex23BitPgi = ((int)0x00000004),
-        Vertex4BitPgi = ((int)0x00000008),
-        Color3BitPgi = ((int)0x00010000),
-        Color4BitPgi = ((int)0x00020000),
-        EdgeflagBitPgi = ((int)0x00040000),
-        IndexBitPgi = ((int)0x00080000),
-        MatAmbientBitPgi = ((int)0x00100000),
-        MatAmbientAndDiffuseBitPgi = ((int)0x00200000),
-        MatDiffuseBitPgi = ((int)0x00400000),
-        MatEmissionBitPgi = ((int)0x00800000),
-        MatColorIndexesBitPgi = ((int)0x01000000),
-        MatShininessBitPgi = ((int)0x02000000),
-        MatSpecularBitPgi = ((int)0x04000000),
-        NormalBitPgi = ((int)0x08000000),
-        Texcoord1BitPgi = ((int)0x10000000),
-        VertexDataHintPgi = ((int)0x1A22A),
-        VertexConsistentHintPgi = ((int)0x1A22B),
-        MaterialSideHintPgi = ((int)0x1A22C),
-        MaxVertexHintPgi = ((int)0x1A22D),
-        Texcoord2BitPgi = ((int)0x20000000),
-        Texcoord3BitPgi = ((int)0x40000000),
-        Texcoord4BitPgi = unchecked((int)0x80000000),
-    }
-
     public enum PixelCopyType : int
     {
         Color = ((int)0x1800),
@@ -9021,8 +8280,6 @@ namespace OpenMobile.Graphics.OpenGL
         CmykaExt = ((int)0x800D),
         Bgr = ((int)0x80E0),
         Bgra = ((int)0x80E1),
-        Ycrcb422Sgix = ((int)0x81BB),
-        Ycrcb444Sgix = ((int)0x81BC),
         Rg = ((int)0x8227),
         RgInteger = ((int)0x8228),
         DepthStencil = ((int)0x84F9),
@@ -9098,12 +8355,9 @@ namespace OpenMobile.Graphics.OpenGL
         QuadLuminance8Sgis = ((int)0x8121),
         QuadIntensity4Sgis = ((int)0x8122),
         QuadIntensity8Sgis = ((int)0x8123),
-        DepthComponent16 = ((int)0x81a5),
-        DepthComponent16Sgix = ((int)0x81A5),
-        DepthComponent24 = ((int)0x81a6),
-        DepthComponent24Sgix = ((int)0x81A6),
-        DepthComponent32 = ((int)0x81a7),
-        DepthComponent32Sgix = ((int)0x81A7),
+        DepthComponent16 = ((int)0x81A5),
+        DepthComponent24 = ((int)0x81A6),
+        DepthComponent32 = ((int)0x81A7),
         CompressedRed = ((int)0x8225),
         CompressedRg = ((int)0x8226),
         R8 = ((int)0x8229),
@@ -9225,30 +8479,6 @@ namespace OpenMobile.Graphics.OpenGL
         PackImageDepthSgis = ((int)0x8131),
         UnpackSkipVolumesSgis = ((int)0x8132),
         UnpackImageDepthSgis = ((int)0x8133),
-        PixelTileWidthSgix = ((int)0x8140),
-        PixelTileHeightSgix = ((int)0x8141),
-        PixelTileGridWidthSgix = ((int)0x8142),
-        PixelTileGridHeightSgix = ((int)0x8143),
-        PixelTileGridDepthSgix = ((int)0x8144),
-        PixelTileCacheSizeSgix = ((int)0x8145),
-        PackResampleSgix = ((int)0x842C),
-        UnpackResampleSgix = ((int)0x842D),
-        PackSubsampleRateSgix = ((int)0x85A0),
-        UnpackSubsampleRateSgix = ((int)0x85A1),
-    }
-
-    public enum PixelStoreResampleMode : int
-    {
-        ResampleReplicateSgix = ((int)0x842E),
-        ResampleZeroFillSgix = ((int)0x842F),
-        ResampleDecimateSgix = ((int)0x8430),
-    }
-
-    public enum PixelStoreSubsampleRate : int
-    {
-        PixelSubsample4444Sgix = ((int)0x85A2),
-        PixelSubsample2424Sgix = ((int)0x85A3),
-        PixelSubsample4242Sgix = ((int)0x85A4),
     }
 
     public enum PixelTexGenMode : int
@@ -9258,10 +8488,6 @@ namespace OpenMobile.Graphics.OpenGL
         Rgba = ((int)0x1908),
         Luminance = ((int)0x1909),
         LuminanceAlpha = ((int)0x190A),
-        PixelTexGenAlphaReplaceSgix = ((int)0x8187),
-        PixelTexGenAlphaNoReplaceSgix = ((int)0x8188),
-        PixelTexGenAlphaLsSgix = ((int)0x8189),
-        PixelTexGenAlphaMsSgix = ((int)0x818A),
     }
 
     public enum PixelTexGenParameterNameSgis : int
@@ -9615,13 +8841,6 @@ namespace OpenMobile.Graphics.OpenGL
         ColorTableIntensitySizeSgi = ((int)0x80DF),
     }
 
-    public enum SgiDepthPassInstrument : int
-    {
-        DepthPassInstrumentSgix = ((int)0x8310),
-        DepthPassInstrumentCountersSgix = ((int)0x8311),
-        DepthPassInstrumentMaxSgix = ((int)0x8312),
-    }
-
     public enum SgisDetailTexture : int
     {
         DetailTexture2DSgis = ((int)0x8095),
@@ -9645,10 +8864,6 @@ namespace OpenMobile.Graphics.OpenGL
     {
         GenerateMipmapSgis = ((int)0x8191),
         GenerateMipmapHintSgis = ((int)0x8192),
-        GeometryDeformationSgix = ((int)0x8194),
-        TextureDeformationSgix = ((int)0x8195),
-        DeformationsMaskSgix = ((int)0x8196),
-        MaxDeformationOrderSgix = ((int)0x8197),
     }
 
     public enum SgisMultisample : int
@@ -9783,289 +8998,6 @@ namespace OpenMobile.Graphics.OpenGL
         ProxyTextureColorTableSgi = ((int)0x80BD),
     }
 
-    public enum SgixAsync : int
-    {
-        AsyncMarkerSgix = ((int)0x8329),
-    }
-
-    public enum SgixAsyncHistogram : int
-    {
-        AsyncHistogramSgix = ((int)0x832C),
-        MaxAsyncHistogramSgix = ((int)0x832D),
-    }
-
-    public enum SgixAsyncPixel : int
-    {
-        AsyncTexImageSgix = ((int)0x835C),
-        AsyncDrawPixelsSgix = ((int)0x835D),
-        AsyncReadPixelsSgix = ((int)0x835E),
-        MaxAsyncTexImageSgix = ((int)0x835F),
-        MaxAsyncDrawPixelsSgix = ((int)0x8360),
-        MaxAsyncReadPixelsSgix = ((int)0x8361),
-    }
-
-    public enum SgixBlendAlphaMinmax : int
-    {
-        AlphaMinSgix = ((int)0x8320),
-        AlphaMaxSgix = ((int)0x8321),
-        AsyncMarkerSgix = ((int)0x8329),
-    }
-
-    public enum SgixCalligraphicFragment : int
-    {
-        CalligraphicFragmentSgix = ((int)0x8183),
-    }
-
-    public enum SgixClipmap : int
-    {
-        LinearClipmapLinearSgix = ((int)0x8170),
-        TextureClipmapCenterSgix = ((int)0x8171),
-        TextureClipmapFrameSgix = ((int)0x8172),
-        TextureClipmapOffsetSgix = ((int)0x8173),
-        TextureClipmapVirtualDepthSgix = ((int)0x8174),
-        TextureClipmapLodOffsetSgix = ((int)0x8175),
-        TextureClipmapDepthSgix = ((int)0x8176),
-        MaxClipmapDepthSgix = ((int)0x8177),
-        MaxClipmapVirtualDepthSgix = ((int)0x8178),
-        NearestClipmapNearestSgix = ((int)0x844D),
-        NearestClipmapLinearSgix = ((int)0x844E),
-        LinearClipmapNearestSgix = ((int)0x844F),
-    }
-
-    public enum SgixConvolutionAccuracy : int
-    {
-        ConvolutionHintSgix = ((int)0x8316),
-    }
-
-    public enum SgixDepthTexture : int
-    {
-        DepthComponent16Sgix = ((int)0x81A5),
-        DepthComponent24Sgix = ((int)0x81A6),
-        DepthComponent32Sgix = ((int)0x81A7),
-    }
-
-    public enum SgixFlushRaster : int
-    {
-    }
-
-    public enum SgixFogOffset : int
-    {
-        FogOffsetSgix = ((int)0x8198),
-        FogOffsetValueSgix = ((int)0x8199),
-    }
-
-    public enum SgixFogScale : int
-    {
-        FogScaleSgix = ((int)0x81FC),
-        FogScaleValueSgix = ((int)0x81FD),
-    }
-
-    public enum SgixFragmentLighting : int
-    {
-        FragmentLightingSgix = ((int)0x8400),
-        FragmentColorMaterialSgix = ((int)0x8401),
-        FragmentColorMaterialFaceSgix = ((int)0x8402),
-        FragmentColorMaterialParameterSgix = ((int)0x8403),
-        MaxFragmentLightsSgix = ((int)0x8404),
-        MaxActiveLightsSgix = ((int)0x8405),
-        CurrentRasterNormalSgix = ((int)0x8406),
-        LightEnvModeSgix = ((int)0x8407),
-        FragmentLightModelLocalViewerSgix = ((int)0x8408),
-        FragmentLightModelTwoSideSgix = ((int)0x8409),
-        FragmentLightModelAmbientSgix = ((int)0x840A),
-        FragmentLightModelNormalInterpolationSgix = ((int)0x840B),
-        FragmentLight0Sgix = ((int)0x840C),
-        FragmentLight1Sgix = ((int)0x840D),
-        FragmentLight2Sgix = ((int)0x840E),
-        FragmentLight3Sgix = ((int)0x840F),
-        FragmentLight4Sgix = ((int)0x8410),
-        FragmentLight5Sgix = ((int)0x8411),
-        FragmentLight6Sgix = ((int)0x8412),
-        FragmentLight7Sgix = ((int)0x8413),
-    }
-
-    public enum SgixFramezoom : int
-    {
-        FramezoomSgix = ((int)0x818B),
-        FramezoomFactorSgix = ((int)0x818C),
-        MaxFramezoomFactorSgix = ((int)0x818D),
-    }
-
-    public enum SgixImpactPixelTexture : int
-    {
-        PixelTexGenQCeilingSgix = ((int)0x8184),
-        PixelTexGenQRoundSgix = ((int)0x8185),
-        PixelTexGenQFloorSgix = ((int)0x8186),
-        PixelTexGenAlphaReplaceSgix = ((int)0x8187),
-        PixelTexGenAlphaNoReplaceSgix = ((int)0x8188),
-        PixelTexGenAlphaLsSgix = ((int)0x8189),
-        PixelTexGenAlphaMsSgix = ((int)0x818A),
-    }
-
-    public enum SgixInstruments : int
-    {
-        InstrumentBufferPointerSgix = ((int)0x8180),
-        InstrumentMeasurementsSgix = ((int)0x8181),
-    }
-
-    public enum SgixInterlace : int
-    {
-        InterlaceSgix = ((int)0x8094),
-    }
-
-    public enum SgixIrInstrument1 : int
-    {
-        IrInstrument1Sgix = ((int)0x817F),
-    }
-
-    public enum SgixListPriority : int
-    {
-        ListPrioritySgix = ((int)0x8182),
-    }
-
-    public enum SgixPixelTexture : int
-    {
-        PixelTexGenSgix = ((int)0x8139),
-        PixelTexGenModeSgix = ((int)0x832B),
-    }
-
-    public enum SgixPixelTiles : int
-    {
-        PixelTileBestAlignmentSgix = ((int)0x813E),
-        PixelTileCacheIncrementSgix = ((int)0x813F),
-        PixelTileWidthSgix = ((int)0x8140),
-        PixelTileHeightSgix = ((int)0x8141),
-        PixelTileGridWidthSgix = ((int)0x8142),
-        PixelTileGridHeightSgix = ((int)0x8143),
-        PixelTileGridDepthSgix = ((int)0x8144),
-        PixelTileCacheSizeSgix = ((int)0x8145),
-    }
-
-    public enum SgixPolynomialFfd : int
-    {
-        GeometryDeformationSgix = ((int)0x8194),
-        TextureDeformationSgix = ((int)0x8195),
-        DeformationsMaskSgix = ((int)0x8196),
-        MaxDeformationOrderSgix = ((int)0x8197),
-    }
-
-    public enum SgixReferencePlane : int
-    {
-        ReferencePlaneSgix = ((int)0x817D),
-        ReferencePlaneEquationSgix = ((int)0x817E),
-    }
-
-    public enum SgixResample : int
-    {
-        PackResampleSgix = ((int)0x842C),
-        UnpackResampleSgix = ((int)0x842D),
-        ResampleReplicateSgix = ((int)0x842E),
-        ResampleZeroFillSgix = ((int)0x842F),
-        ResampleDecimateSgix = ((int)0x8430),
-    }
-
-    public enum SgixScalebiasHint : int
-    {
-        ScalebiasHintSgix = ((int)0x8322),
-    }
-
-    public enum SgixShadow : int
-    {
-        TextureCompareSgix = ((int)0x819A),
-        TextureCompareOperatorSgix = ((int)0x819B),
-        TextureLequalRSgix = ((int)0x819C),
-        TextureGequalRSgix = ((int)0x819D),
-    }
-
-    public enum SgixShadowAmbient : int
-    {
-        ShadowAmbientSgix = ((int)0x80BF),
-    }
-
-    public enum SgixSprite : int
-    {
-        SpriteSgix = ((int)0x8148),
-        SpriteModeSgix = ((int)0x8149),
-        SpriteAxisSgix = ((int)0x814A),
-        SpriteTranslationSgix = ((int)0x814B),
-        SpriteAxialSgix = ((int)0x814C),
-        SpriteObjectAlignedSgix = ((int)0x814D),
-        SpriteEyeAlignedSgix = ((int)0x814E),
-    }
-
-    public enum SgixSubsample : int
-    {
-        PackSubsampleRateSgix = ((int)0x85A0),
-        UnpackSubsampleRateSgix = ((int)0x85A1),
-        PixelSubsample4444Sgix = ((int)0x85A2),
-        PixelSubsample2424Sgix = ((int)0x85A3),
-        PixelSubsample4242Sgix = ((int)0x85A4),
-    }
-
-    public enum SgixTagSampleBuffer : int
-    {
-    }
-
-    public enum SgixTextureAddEnv : int
-    {
-        TextureEnvBiasSgix = ((int)0x80BE),
-    }
-
-    public enum SgixTextureCoordinateClamp : int
-    {
-        TextureMaxClampSSgix = ((int)0x8369),
-        TextureMaxClampTSgix = ((int)0x836A),
-        TextureMaxClampRSgix = ((int)0x836B),
-        FogFactorToAlphaSgix = ((int)0x836F),
-    }
-
-    public enum SgixTextureLodBias : int
-    {
-        TextureLodBiasSSgix = ((int)0x818E),
-        TextureLodBiasTSgix = ((int)0x818F),
-        TextureLodBiasRSgix = ((int)0x8190),
-    }
-
-    public enum SgixTextureMultiBuffer : int
-    {
-        TextureMultiBufferHintSgix = ((int)0x812E),
-    }
-
-    public enum SgixTextureScaleBias : int
-    {
-        PostTextureFilterBiasSgix = ((int)0x8179),
-        PostTextureFilterScaleSgix = ((int)0x817A),
-        PostTextureFilterBiasRangeSgix = ((int)0x817B),
-        PostTextureFilterScaleRangeSgix = ((int)0x817C),
-    }
-
-    public enum SgixVertexPreclip : int
-    {
-        VertexPreclipSgix = ((int)0x83EE),
-        VertexPreclipHintSgix = ((int)0x83EF),
-    }
-
-    public enum SgixYcrcb : int
-    {
-        Ycrcb422Sgix = ((int)0x81BB),
-        Ycrcb444Sgix = ((int)0x81BC),
-    }
-
-    public enum SgixYcrcba : int
-    {
-        YcrcbSgix = ((int)0x8318),
-        YcrcbaSgix = ((int)0x8319),
-    }
-
-    public enum SgixYcrcbSubsample : int
-    {
-        PackSubsampleRateSgix = ((int)0x85A0),
-        UnpackSubsampleRateSgix = ((int)0x85A1),
-        PixelSubsample4444Sgix = ((int)0x85A2),
-        PixelSubsample2424Sgix = ((int)0x85A3),
-        PixelSubsample4242Sgix = ((int)0x85A4),
-    }
-
     public enum ShaderParameter : int
     {
         ShaderType = ((int)0x8B4F),
@@ -10163,59 +9095,6 @@ namespace OpenMobile.Graphics.OpenGL
         ShadingLanguageVersion = ((int)0x8B8C),
     }
 
-    public enum SunConvolutionBorderModes : int
-    {
-        WrapBorderSun = ((int)0x81D4),
-    }
-
-    public enum SunGlobalAlpha : int
-    {
-        GlobalAlphaSun = ((int)0x81D9),
-        GlobalAlphaFactorSun = ((int)0x81DA),
-    }
-
-    public enum SunMeshArray : int
-    {
-        QuadMeshSun = ((int)0x8614),
-        TriangleMeshSun = ((int)0x8615),
-    }
-
-    public enum SunSliceAccum : int
-    {
-        SliceAccumSun = ((int)0x85CC),
-    }
-
-    public enum SunTriangleList : int
-    {
-        RestartSun = ((int)0x0001),
-        ReplaceMiddleSun = ((int)0x0002),
-        ReplaceOldestSun = ((int)0x0003),
-        TriangleListSun = ((int)0x81D7),
-        ReplacementCodeSun = ((int)0x81D8),
-        ReplacementCodeArraySun = ((int)0x85C0),
-        ReplacementCodeArrayTypeSun = ((int)0x85C1),
-        ReplacementCodeArrayStrideSun = ((int)0x85C2),
-        ReplacementCodeArrayPointerSun = ((int)0x85C3),
-        R1uiV3fSun = ((int)0x85C4),
-        R1uiC4ubV3fSun = ((int)0x85C5),
-        R1uiC3fV3fSun = ((int)0x85C6),
-        R1uiN3fV3fSun = ((int)0x85C7),
-        R1uiC4fN3fV3fSun = ((int)0x85C8),
-        R1uiT2fV3fSun = ((int)0x85C9),
-        R1uiT2fN3fV3fSun = ((int)0x85CA),
-        R1uiT2fC4fN3fV3fSun = ((int)0x85CB),
-    }
-
-    public enum SunVertex : int
-    {
-    }
-
-    public enum SunxConstantData : int
-    {
-        UnpackConstantDataSunx = ((int)0x81D5),
-        TextureConstantDataSunx = ((int)0x81D6),
-    }
-
     public enum TexCoordPointerType : int
     {
         Short = ((int)0x1402),
@@ -10252,7 +9131,6 @@ namespace OpenMobile.Graphics.OpenGL
         Modulate = ((int)0x2100),
         Decal = ((int)0x2101),
         ReplaceExt = ((int)0x8062),
-        TextureEnvBiasSgix = ((int)0x80BE),
         Combine = ((int)0x8570),
     }
 
@@ -10406,9 +9284,6 @@ namespace OpenMobile.Graphics.OpenGL
         LinearSharpenAlphaSgis = ((int)0x80AE),
         LinearSharpenColorSgis = ((int)0x80AF),
         Filter4Sgis = ((int)0x8146),
-        PixelTexGenQCeilingSgix = ((int)0x8184),
-        PixelTexGenQRoundSgix = ((int)0x8185),
-        PixelTexGenQFloorSgix = ((int)0x8186),
     }
 
     public enum TextureMinFilter : int
@@ -10420,13 +9295,6 @@ namespace OpenMobile.Graphics.OpenGL
         NearestMipmapLinear = ((int)0x2702),
         LinearMipmapLinear = ((int)0x2703),
         Filter4Sgis = ((int)0x8146),
-        LinearClipmapLinearSgix = ((int)0x8170),
-        PixelTexGenQCeilingSgix = ((int)0x8184),
-        PixelTexGenQRoundSgix = ((int)0x8185),
-        PixelTexGenQFloorSgix = ((int)0x8186),
-        NearestClipmapNearestSgix = ((int)0x844D),
-        NearestClipmapLinearSgix = ((int)0x844E),
-        LinearClipmapNearestSgix = ((int)0x844F),
     }
 
     public enum TextureParameterName : int
@@ -10443,7 +9311,6 @@ namespace OpenMobile.Graphics.OpenGL
         TextureWrapRExt = ((int)0x8072),
         DetailTextureLevelSgis = ((int)0x809A),
         DetailTextureModeSgis = ((int)0x809B),
-        ShadowAmbientSgix = ((int)0x80BF),
         TextureCompareFailValue = ((int)0x80BF),
         DualTextureSelectSgis = ((int)0x8124),
         QuadTextureSelectSgis = ((int)0x8125),
@@ -10454,24 +9321,8 @@ namespace OpenMobile.Graphics.OpenGL
         TextureMaxLod = ((int)0x813B),
         TextureBaseLevel = ((int)0x813C),
         TextureMaxLevel = ((int)0x813D),
-        TextureClipmapCenterSgix = ((int)0x8171),
-        TextureClipmapFrameSgix = ((int)0x8172),
-        TextureClipmapOffsetSgix = ((int)0x8173),
-        TextureClipmapVirtualDepthSgix = ((int)0x8174),
-        TextureClipmapLodOffsetSgix = ((int)0x8175),
-        TextureClipmapDepthSgix = ((int)0x8176),
-        PostTextureFilterBiasSgix = ((int)0x8179),
-        PostTextureFilterScaleSgix = ((int)0x817A),
-        TextureLodBiasSSgix = ((int)0x818E),
-        TextureLodBiasTSgix = ((int)0x818F),
-        TextureLodBiasRSgix = ((int)0x8190),
         GenerateMipmap = ((int)0x8191),
         GenerateMipmapSgis = ((int)0x8191),
-        TextureCompareSgix = ((int)0x819A),
-        TextureCompareOperatorSgix = ((int)0x819B),
-        TextureMaxClampSSgix = ((int)0x8369),
-        TextureMaxClampTSgix = ((int)0x836A),
-        TextureMaxClampRSgix = ((int)0x836B),
         TextureLodBias = ((int)0x8501),
         DepthTextureMode = ((int)0x884B),
         TextureCompareMode = ((int)0x884C),

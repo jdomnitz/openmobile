@@ -74,7 +74,7 @@ namespace OpenMobile
                 return new PointF(widthScale, heightScale);
             }
         }
-        OMControl highlighted
+        internal OMControl highlighted
         {
             get
             {
@@ -82,9 +82,12 @@ namespace OpenMobile
             }
             set
             {
-                if ((varHighlighted != null) && (varHighlighted != value) && (varHighlighted.Mode == eModeType.Highlighted))
+                if (varHighlighted == value)
+                    return;
+                if ((varHighlighted != null) && (varHighlighted.Mode == eModeType.Highlighted))
                     varHighlighted.Mode = eModeType.Normal;
                 varHighlighted = value;
+                InputRouter.raiseHighlightChanged(varHighlighted, screen);
             }
         }
 
