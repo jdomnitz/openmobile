@@ -23,7 +23,7 @@ namespace OpenMobile.Graphics
             if (Configuration.RunningOnWindows)
             {
                 OpenMobile.Platform.Windows.MSG msg = new OpenMobile.Platform.Windows.MSG();
-                while (true)
+                while (msg.Message!=Platform.Windows.WindowMessage.CLOSE)
                 {
                     ret = OpenMobile.Platform.Windows.Functions.GetMessage(ref msg, IntPtr.Zero, 0, 0);
                     if (ret == -1)

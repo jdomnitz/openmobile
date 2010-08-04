@@ -12,17 +12,10 @@ namespace OMDebug
 {
     public sealed class Debugger:IOther
     {
-        #region IOther Members
-
-        public object getData(string type)
-        {
-            throw new NotImplementedException();
-        }
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
-        #endregion
 
         #region IBasePlugin Members
 
@@ -56,7 +49,7 @@ namespace OMDebug
             log("********"+source + "******\r\n" + message);
             return true;
         }
-
+        /*
         void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
             Exception ex = e.Exception;
@@ -64,7 +57,7 @@ namespace OMDebug
             log("Source: "+ex.Source);
             log("Stack Trace: " + ex.StackTrace);
             writer.WriteLine("----------------------------------------------------------------");
-        }
+        }*/
 
         public bool incomingMessage<T>(string message, string source, ref T data)
         {

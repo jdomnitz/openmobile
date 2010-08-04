@@ -1233,6 +1233,7 @@ namespace OpenMobile
             if (to == "SandboxedThread")
             {
                 SandboxedThread.handle(data as Exception);
+                return true;
             }
             try
             {

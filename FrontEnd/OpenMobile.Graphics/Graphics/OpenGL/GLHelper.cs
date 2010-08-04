@@ -299,11 +299,6 @@ namespace OpenMobile.Graphics.OpenGL
             Raw.Normal3(normal.X, normal.Y, normal.Z);
         }
 
-        public static void RasterPos2(Vector2d pos)
-        {
-            Raw.RasterPos2(pos.X, pos.Y);
-        }
-
         public static void RasterPos3(Vector3d pos)
         {
             Raw.RasterPos3(pos.X, pos.Y, pos.Z);

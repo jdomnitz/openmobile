@@ -3271,9 +3271,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glProvokingVertexEXT", ExactSpelling = true)]
             internal extern static void ProvokingVertexEXT(OpenMobile.Graphics.OpenGL.ExtProvokingVertex mode);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glPushAttrib", ExactSpelling = true)]
-            internal extern static void PushAttrib(OpenMobile.Graphics.OpenGL.AttribMask mask);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glPushClientAttrib", ExactSpelling = true)]
             internal extern static void PushClientAttrib(OpenMobile.Graphics.OpenGL.ClientAttribMask mask);
             [System.Security.SuppressUnmanagedCodeSecurity()]

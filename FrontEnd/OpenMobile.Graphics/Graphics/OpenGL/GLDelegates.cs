@@ -3270,9 +3270,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void ProvokingVertexEXT(OpenMobile.Graphics.OpenGL.ExtProvokingVertex mode);
             internal static ProvokingVertexEXT glProvokingVertexEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void PushAttrib(OpenMobile.Graphics.OpenGL.AttribMask mask);
-            internal static PushAttrib glPushAttrib;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void PushClientAttrib(OpenMobile.Graphics.OpenGL.ClientAttribMask mask);
             internal static PushClientAttrib glPushClientAttrib;
             [System.Security.SuppressUnmanagedCodeSecurity()]
