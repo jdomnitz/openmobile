@@ -1085,6 +1085,7 @@ namespace OpenMobile.Graphics
                 if (this.texture[i] == 0)
                     return;
             img.Dispose();
+            img = null;
         }
         public OImage(System.Drawing.Bitmap i)
         {
@@ -1144,12 +1145,14 @@ namespace OpenMobile.Graphics
         }
         public void Dispose()
         {
-            if (img == null)
+            if (texture == null)
                 return;
             for(int i=0;i<texture.Length;i++)
                 if (texture[i] > 0)
                     Graphics.DeleteTexture(i, texture[i]);
-            img.Dispose();
+            texture = null;
+            if (img!=null)
+                img.Dispose();
             img = null;
             GC.SuppressFinalize(this);
         }

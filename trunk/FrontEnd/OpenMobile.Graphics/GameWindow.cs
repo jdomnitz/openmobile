@@ -409,7 +409,8 @@ namespace OpenMobile
                         DispatchUpdateAndRenderFrame(this, EventArgs.Empty);
                     else
                         return;
-                    Thread.Sleep(10);
+                    if (render_time<33)
+                        Thread.Sleep((int)(33-render_time));
                 }
             }
             finally
@@ -451,7 +452,7 @@ namespace OpenMobile
                 render_watch.Reset();
                 render_watch.Start();
 
-                if (time > 0)
+                if (time > 0)//TargetRenderPeriod)
                 {
                     // Todo: revisit this code. Maybe check average framerate instead?
                     // Note: VSyncMode.Adaptive enables vsync by default. The code below
@@ -466,7 +467,7 @@ namespace OpenMobile
                     if (Context.IsCurrent && VSync == VSyncMode.Adaptive)
                     {
                         // Check if we have enough time for a vsync
-                        if (RenderTime > 2.0 * TargetRenderPeriod)
+                        if ((RenderTime/1000) > 2.0 * TargetRenderPeriod)
                             Context.VSync = false;
                         else
                             Context.VSync = true;
@@ -474,7 +475,8 @@ namespace OpenMobile
                     render_period = render_args.Time = time;
                     OnRenderFrameInternal(render_args);
                     MakeCurrent(null);
-                    render_time = render_watch.Elapsed.TotalSeconds;
+                    render_time = render_watch.Elapsed.TotalMilliseconds;
+                    //Debug.Print((1 / render_args.Time).ToString("0.00") + "fps");
                 }
             }
         }

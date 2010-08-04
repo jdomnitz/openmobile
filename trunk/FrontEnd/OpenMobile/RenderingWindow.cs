@@ -248,18 +248,7 @@ namespace OpenMobile
         }
         public void UpdateThisControl(Rectangle region)
         {
-            if (region == Rectangle.Empty)
-                Invalidate();
-            //else
-            //    Invalidate(region);
-        }
-
-        private void Invalidate(Rectangle region)
-        {
-            //Unneeded - And causes problems with the double buffer
-            //g.SetClip(region);
-            //OnUpdateFrame(new FrameEventArgs());
-            //g.ResetClip();
+            //
         }
         public void transitionOutEverything()
         {
@@ -340,7 +329,6 @@ namespace OpenMobile
                 lastClick.Mode = eModeType.Normal;
             lastClick = null;
             RenderingWindow_MouseMove(null,new OpenMobile.Input.MouseMoveEventArgs(Mouse.X,Mouse.Y,0,0,MouseButton.None));
-            Invalidate();
         }
         #endregion
 
@@ -447,14 +435,12 @@ namespace OpenMobile
                             //Recheck where the mouse is at
                             RenderingWindow_MouseMove(this, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0,0,MouseButton.None));
                         }
-                        Invalidate();
                     }
                 }
                 else
                 {
                     rParam.transparency = 1;
                     rParam.transitionTop = 0;
-                    Invalidate();
                 }
                 lastClick = null;
                 return;
@@ -582,8 +568,6 @@ namespace OpenMobile
 
                         if (done == false)
                         {
-                            //if (typeof(IHighlightable).IsInstanceOfType(highlighted) == true)
-                            //    UpdateThisControl(highlighted.toRegion());
                             highlighted = null;
                         }
                     }
@@ -760,7 +744,6 @@ namespace OpenMobile
                     currentGesture = null;
                     rParam.currentMode = eModeType.Highlighted;
                     RenderingWindow_MouseMove(sender, new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
-                    Invalidate();
                 }
             }
             ThrowStart.X = -1;
@@ -913,7 +896,6 @@ namespace OpenMobile
                     ofsetIn = new Point((125 * tick) - 1000, 0);
                     break;
             }
-            Invalidate();
         }
         public void RenderingWindow_KeyDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
