@@ -594,12 +594,12 @@ namespace OpenMobile
                         //    UpdateThisControl(b.toRegion());
                         b.Mode = eModeType.Highlighted;
                     }
-                    Rectangle r = Rectangle.Empty;
-                    if (highlighted != null)
-                    {
-                        if (typeof(IHighlightable).IsInstanceOfType(highlighted) == true)
-                            r = highlighted.toRegion();
-                    }
+                    //Rectangle r = Rectangle.Empty;
+                    //if (highlighted != null)
+                    //{
+                    //    if (typeof(IHighlightable).IsInstanceOfType(highlighted) == true)
+                    //        r = highlighted.toRegion();
+                    //}
                     highlighted = b;
                     done = true;
                     //if (r != Rectangle.Empty)

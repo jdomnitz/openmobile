@@ -277,6 +277,7 @@ namespace OpenMobile
             icon4.Name = "UI.Icon4";
             icon4.OnClick += new userInteraction(icon_OnClick);
             VolumeBar volume = new VolumeBar(6, -510, 130, 510);
+            volume.Visible = false;
             volume.OnSliderMoved += new userInteraction(volumeChange);
             //***
             p.addControl(Back);
@@ -351,12 +352,15 @@ namespace OpenMobile
             //    tmp.Dispose();
             //}
             volScreen = screen;
+
             if (sender.Top>0)
             {
                 if (sender.Top==511)
                     volTmr_Elapsed(null, null);
                 return;
             }
+
+            manager[screen][26].Visible = true;
             volTmr = new System.Timers.Timer(2500);
             volTmr.Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
             OMButton btn = (OMButton)manager[screen][27];
@@ -384,6 +388,7 @@ namespace OpenMobile
                         Thread.Sleep(50);
                     }
                 }
+                manager[volScreen][26].Visible = false;
             }
             volScreen = -1;
             if (volTmr != null)
@@ -838,10 +843,15 @@ namespace OpenMobile
                                 album.Transition(eAnimation.UnveilRight, info.Album,50);
                             OMImage cover = ((OMImage)p[9]);
                             cover.Image = it;
-                            if ((cover.Image.image!=null)&&(cover.Height < cover.Width))
+                            if ((cover.Image.image != null) && (cover.Height < cover.Width))
                             {
                                 cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
                                 cover.Top = 2 + (85 - cover.Height) / 2;
+                            }
+                            else
+                            {
+                                cover.Height = 85;
+                                cover.Top = 2;
                             }
                         }
                         ((OMButton)p[10]).Image = theHost.getSkinImage("Pause");

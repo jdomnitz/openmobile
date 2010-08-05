@@ -52,6 +52,7 @@ namespace OpenMobile.Controls
             set
             {
                 color = value;
+                textTexture = null;
             }
         }
         /// <summary>
@@ -96,7 +97,10 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (outlineColor == value)
+                    return;
                 outlineColor = value;
+                textTexture = null;
             }
         }
 
@@ -112,7 +116,10 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (font == value)
+                    return;
                 font = value;
+                textTexture = null;
             }
         }
 
@@ -179,17 +186,11 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (textAlignment == value)
+                    return;
                 textAlignment = value;
                 textTexture = null;
             }
-        }
-        /// <summary>
-        /// Returns the region occupied by the control
-        /// </summary>
-        /// <returns></returns>
-        public override Rectangle toRegion()
-        {
-            return new Rectangle(Left, Top, Width+2, Height+2);
         }
 
         /// <summary>

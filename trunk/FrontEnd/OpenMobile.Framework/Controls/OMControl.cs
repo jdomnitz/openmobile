@@ -125,11 +125,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (visible == value)
-                    return;
                 visible = value;
-                if (UpdateThisControl != null)
-                    UpdateThisControl(this.toRegion());
             }
         }
 

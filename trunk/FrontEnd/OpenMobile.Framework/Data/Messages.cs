@@ -56,9 +56,13 @@ namespace OpenMobile.Data
             /// </summary>
             messageRespondedTo = 8,
             /// <summary>
-            /// Message is an SMS
+            /// Message is an SMS/MMS
             /// </summary>
-            messageIsSMS=16
+            messageIsSMS=16,
+            /// <summary>
+            /// SPAM/Junk
+            /// </summary>
+            messageIsSpam=32
         };
         /// <summary>
         /// A message
@@ -74,6 +78,11 @@ namespace OpenMobile.Data
             /// </summary>
             public string content;
             /// <summary>
+            /// Mime type of content (ex: text/plain or text/html)
+            /// </summary>
+            [Obsolete("Not saved in database")]
+            public string contentType;
+            /// <summary>
             /// Message From Address
             /// </summary>
             public string fromAddress;
@@ -81,6 +90,11 @@ namespace OpenMobile.Data
             /// Message From Name
             /// </summary>
             public string fromName;
+            /// <summary>
+            /// Recipient
+            /// </summary>
+            [Obsolete("Not saved in database")]
+            public string toName;
             /// <summary>
             /// Message Flags
             /// </summary>
@@ -90,9 +104,15 @@ namespace OpenMobile.Data
             /// </summary>
             public DateTime messageReceived;
             /// <summary>
-            /// Message Attachment
+            /// Message Attachment (local URLs)
             /// </summary>
-            public byte[] attachment;
+            [Obsolete("Not saved in database-database uses byte buffer instead of file paths")]
+            public string[] attachment;
+            /// <summary>
+            /// Source Name (ex: facebook, twitter, email)
+            /// </summary>
+            [Obsolete("Not saved in database")]
+            public string sourceName;
             /// <summary>
             /// Message Guid
             /// </summary>

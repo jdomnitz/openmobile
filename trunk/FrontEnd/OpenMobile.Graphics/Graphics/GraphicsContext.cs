@@ -46,7 +46,7 @@ namespace OpenMobile.Graphics
         /// <param name="mode">The OpenMobile.Graphics.GraphicsMode of the GraphicsContext.</param>
         /// <param name="window">The OpenMobile.Platform.IWindowInfo to attach the GraphicsContext to.</param>
         public GraphicsContext(GraphicsMode mode, IWindowInfo window)
-            : this(mode, window, 1, 0, GraphicsContextFlags.Default)
+            : this(mode, window, 3, 0, GraphicsContextFlags.Default)
         { }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace OpenMobile.Graphics
         /// <param name="window">The window this context is bound to. This must be a valid window obtained through Utilities.CreateWindowInfo.</param>
         /// <exception cref="GraphicsContextException">Occurs if handle is identical to a context already registered with OpenMobile.</exception>
         public GraphicsContext(ContextHandle handle, IWindowInfo window)
-            : this(handle, window, null, 1, 0, GraphicsContextFlags.Default)
+            : this(handle, window, null, 3, 0, GraphicsContextFlags.Default)
         { }
 
         /// <summary>
