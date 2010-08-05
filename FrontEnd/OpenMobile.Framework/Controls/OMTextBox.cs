@@ -44,6 +44,7 @@ namespace OpenMobile.Controls
             set
             {
                 flags = value;
+                textTexture = null;
             }
         }
 
@@ -79,7 +80,7 @@ namespace OpenMobile.Controls
         /// </summary>
         public void clickMe(int screen)
         {
-            if (OnClick!=null)
+            if (OnClick != null)
                 OnClick(this, screen);
         }
         /// <summary>
@@ -116,13 +117,13 @@ namespace OpenMobile.Controls
                 if (text == value)
                     return;
                 //Pre-Screen
-                if ((flags&textboxFlags.NumericOnly)==textboxFlags.NumericOnly)
+                if ((flags & textboxFlags.NumericOnly) == textboxFlags.NumericOnly)
                 {
                     double tmp;
-                    if ((value!="")&&(double.TryParse(value,out tmp)==false))
+                    if ((value != "") && (double.TryParse(value, out tmp) == false))
                         return;
                 }
-                if ((flags&textboxFlags.AlphabeticalOnly)==textboxFlags.AlphabeticalOnly)
+                if ((flags & textboxFlags.AlphabeticalOnly) == textboxFlags.AlphabeticalOnly)
                 {
                     if (IsAlphabetic(value) == false)
                         return;
@@ -131,7 +132,7 @@ namespace OpenMobile.Controls
                 text = value;
                 try
                 {
-                    if (OnTextChange!=null)
+                    if (OnTextChange != null)
                         OnTextChange(this, this.containingScreen());
                 }
                 catch (Exception) { };
@@ -140,7 +141,7 @@ namespace OpenMobile.Controls
         private bool IsAlphabetic(string strToCheck)
         {
             foreach (int chr in strToCheck)
-                if ((chr < 0x41 || chr > 0x5A && chr < 0x61 || chr > 0x7A)&&(chr!=30))
+                if ((chr < 0x41 || chr > 0x5A && chr < 0x61 || chr > 0x7A) && (chr != 30))
                     return false;
             return true;
         }
@@ -196,38 +197,33 @@ namespace OpenMobile.Controls
             float tmp = 1;
             if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
-            if (this.Mode == eModeType.transitioningOut)
+            else if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
-            Rectangle r = new Rectangle(this.Left, this.Top, this.Width, this.Height);
-            
-            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 255), background)), r,10);
-            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 2F), r,10);
-            
+
+            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 255), background)), left, top, width, height, 10);
+            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 2F), left, top, width, height, 10);
+
             if (this.Mode == eModeType.Highlighted)
             {
-                Rectangle r2 = new Rectangle(r.Left + 1, r.Top + 1, r.Width - 2, r.Height - 2);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(40 * tmp), this.OutlineColor), 4F), r2,10);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * tmp), this.OutlineColor), 3F), r2, 10);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * tmp), this.OutlineColor), 2F), r2, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(40 * tmp), this.OutlineColor), 4F), left + 1, top + 1, width - 2, height - 2, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * tmp), this.OutlineColor), 3F), left + 1, top + 1, width - 2, height - 2, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * tmp), this.OutlineColor), 2F), left + 1, top + 1, width - 2, height - 2, 10);
             }
-            using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
+            if (text != null)
             {
-                f.Alignment = System.Drawing.StringAlignment.Center;
-                f.LineAlignment = System.Drawing.StringAlignment.Center;
-                if ((flags & textboxFlags.EllipsisCenter) == textboxFlags.EllipsisCenter)
-                    f.Trimming = System.Drawing.StringTrimming.EllipsisPath;
-                else if ((flags & textboxFlags.EllipsisEnd) == textboxFlags.EllipsisEnd)
-                    f.Trimming = System.Drawing.StringTrimming.EllipsisCharacter;
-                else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
-                    f.Trimming = System.Drawing.StringTrimming.Word;
-                if (text != null)
+                using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
                 {
-                    Rectangle rect = new Rectangle(this.Left, this.Top, this.Width + 5, this.Height);
-                    {
-                        if (textTexture == null)
-                            textTexture = g.GenerateStringTexture((this.flags & textboxFlags.Password) == textboxFlags.Password ? new String('*', text.Length) : text, this.Font, new Brush(Color.FromArgb((int)(tmp * Color.A), this.Color)), new Rectangle(this.Left, this.Top, this.Width + 5, this.Height), f);
-                        g.DrawImage(textTexture, rect);
-                    }
+                    f.Alignment = System.Drawing.StringAlignment.Center;
+                    f.LineAlignment = System.Drawing.StringAlignment.Center;
+                    if ((flags & textboxFlags.EllipsisCenter) == textboxFlags.EllipsisCenter)
+                        f.Trimming = System.Drawing.StringTrimming.EllipsisPath;
+                    else if ((flags & textboxFlags.EllipsisEnd) == textboxFlags.EllipsisEnd)
+                        f.Trimming = System.Drawing.StringTrimming.EllipsisCharacter;
+                    else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
+                        f.Trimming = System.Drawing.StringTrimming.Word;
+                    if (textTexture == null)
+                        textTexture = g.GenerateStringTexture((this.flags & textboxFlags.Password) == textboxFlags.Password ? new String('*', text.Length) : text, this.Font, new Brush(Color.FromArgb((int)(tmp * Color.A), this.Color)), this.Left, this.Top, this.Width + 5, this.Height, f);
+                    g.DrawImage(textTexture, this.Left, this.Top, this.Width + 5, this.Height, tmp);
                 }
             }
         }

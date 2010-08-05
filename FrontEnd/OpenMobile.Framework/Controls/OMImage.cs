@@ -101,14 +101,6 @@ namespace OpenMobile.Controls
                 return "Image";
             }
         }
-        /// <summary>
-        /// Returns the region occupied by the control
-        /// </summary>
-        /// <returns></returns>
-        public override Rectangle toRegion()
-        {
-            return new Rectangle(Left - 1, Top - 1, Width + 2, Height + 2);
-        }
 
         /// <summary>
         /// Draws the control
@@ -124,29 +116,31 @@ namespace OpenMobile.Controls
             }
             else
             {
-                float tmp = 1;
+                float alpha = 1;
                 if (this.Mode == eModeType.transitioningIn)
                 {
-                    tmp = e.globalTransitionIn;
+                    alpha = e.globalTransitionIn;
                 }
                 if (this.Mode == eModeType.transitioningOut)
                 {
-                    tmp = e.globalTransitionOut;
+                    alpha = e.globalTransitionOut;
                 }
-                float alpha = tmp * (transparency / 100F);
+                alpha = alpha * (transparency / 100F);
                 lock (image.image)
                 {
                     // Start of code added by Borte
                     switch (drawmode)
                     {
                         case DrawModes.Crop:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, alpha);
+                            //TODO
+                            //g.DrawImage(image.image, left, top, width, height, 0, 0, width, height, alpha);
                             break;
                         case DrawModes.CropLeft:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, alpha);
+                            //TODO
+                            //g.DrawImage(image.image, left, top, width, height, image.image.Width - width, image.image.Height - height, width, height, alpha);
                             break;
                         case DrawModes.Scale:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), alpha);
+                            g.DrawImage(image.image, left, top, width, height, alpha);
                             break;
                     }
                 }

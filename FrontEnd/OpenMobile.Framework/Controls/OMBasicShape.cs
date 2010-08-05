@@ -90,13 +90,9 @@ namespace OpenMobile.Controls
             // Basic shape didn't respect the transition values while rendering
             float tmp = 1;
             if (this.Mode == eModeType.transitioningIn)
-            {
                 tmp = e.globalTransitionIn;
-            }
-            if (this.Mode == eModeType.transitioningOut)
-            {
+            else if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
-            }
 
             Brush Fill = new Brush(Color.FromArgb((int)(tmp * fillColor.A), fillColor));
             Pen BorderPen = new Pen(Color.FromArgb((int)(tmp * borderColor.A), borderColor), borderSize);
@@ -105,24 +101,24 @@ namespace OpenMobile.Controls
             switch (shape)
             {
                 case shapes.Rectangle:
-                    g.FillRectangle(Fill, toRegion());
+                    g.FillRectangle(Fill, left,top,width,height);
                     if (borderSize > 0)
-                        g.DrawRectangle(BorderPen, toRegion());
+                        g.DrawRectangle(BorderPen, left,top,width,height);
                     break;
                 case shapes.Triangle:
-                    g.FillPolygon(Fill, new Point[] { new Point(left, top + height), new Point(left + width, top + height), new Point(left + (width / 2), top) });
+                    g.FillPolygon(Fill, triPoint);
                     if (borderSize > 0)
-                        g.DrawPolygon(BorderPen, new Point[] { new Point(left, top + height), new Point(left + width, top + height), new Point(left + (width / 2), top) });
+                        g.DrawPolygon(BorderPen, triPoint);
                     break;
                 case shapes.Oval:
-                    g.FillEllipse(Fill, toRegion());
+                    g.FillEllipse(Fill, left,top,width,height);
                     if (borderSize > 0)
-                        g.DrawEllipse(BorderPen, toRegion());
+                        g.DrawEllipse(BorderPen, left,top,width,height);
                     break;
                 case shapes.RoundedRectangle:
-                    g.FillRoundRectangle(Fill, new Rectangle(this.left, this.top, this.width, this.height), cornerRadius);
+                    g.FillRoundRectangle(Fill, left, top, width, height, cornerRadius);
                     if (borderSize > 0)
-                        g.DrawRoundRectangle(BorderPen, new Rectangle(this.left, this.top, this.width, this.height), cornerRadius);
+                        g.DrawRoundRectangle(BorderPen, left, top, width, height, cornerRadius);
                     break;
             }
         }
@@ -135,13 +131,22 @@ namespace OpenMobile.Controls
         /// </summary>
         public shapes Shape
         {
-            set
-            {
-                shape = value;
-            }
             get
             {
                 return shape;
+            }
+            set
+            {
+                shape = value;
+                genTriangle();
+            }
+        }
+        Point[] triPoint=new Point[0];
+        private void genTriangle()
+        {
+            if (shape == shapes.Triangle)
+            {
+                triPoint = new Point[] { new Point(left, top + height), new Point(left + width, top + height), new Point(left + (width / 2), top) };
             }
         }
         /// <summary>
@@ -186,13 +191,53 @@ namespace OpenMobile.Controls
                 borderSize = value;
             }
         }
-        /// <summary>
-        /// Returns a rectangle representing the area covered
-        /// </summary>
-        /// <returns></returns>
-        public override Rectangle toRegion()
+        public override int Height
         {
-            return new Rectangle(Left,Top,Width,Height);
+            get
+            {
+                return base.Height;
+            }
+            set
+            {
+                base.Height = value;
+                genTriangle();
+            }
+        }
+        public override int Width
+        {
+            get
+            {
+                return base.Width;
+            }
+            set
+            {
+                base.Width = value;
+                genTriangle();
+            }
+        }
+        public override int Left
+        {
+            get
+            {
+                return base.Left;
+            }
+            set
+            {
+                base.Left = value;
+                genTriangle();
+            }
+        }
+        public override int Top
+        {
+            get
+            {
+                return base.Top;
+            }
+            set
+            {
+                base.Top = value;
+                genTriangle();
+            }
         }
         /// <summary>
         /// Returns the type of control

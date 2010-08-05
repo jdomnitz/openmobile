@@ -524,7 +524,7 @@ namespace OpenMobile.Controls
         {
             lock (g)
             {
-                if (width == 0)
+                if ((width == 0)||(height==0))
                     return;
                 float tmp = 1;
                 if (this.Mode == eModeType.transitioningIn)
@@ -534,11 +534,11 @@ namespace OpenMobile.Controls
                 Rectangle r = g.Clip; //Save the drawing size
                 g.SetClip(this.toRegion()); //But only draw out control
                 if (background != Color.Transparent)
-                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)), new Rectangle(Left + 1, Top + 1, Width - 2, Height - 2));
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)),Left + 1, Top + 1, Width - 2, Height - 2);
                 
-                int minListHeight = (int)(g.MeasureString("A", Font).Height + 0.5); //Round up
+                int minListHeight = (int)(Graphics.Graphics.MeasureString("A", Font).Height + 0.5); //Round up
                 if ((style == eListStyle.MultiList) && (items.Count > 0)&&(items[0].subitemFormat!=null))
-                    minListHeight += (int)(g.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
+                    minListHeight += (int)(Graphics.Graphics.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
                 if (listHeight < minListHeight)
                     listHeight = minListHeight;
                 if (selectQueued == true)
@@ -618,20 +618,20 @@ namespace OpenMobile.Controls
                                     if (selectedIndex == i)
                                     {
                                         if (items[i].textTex == null)
-                                            items[i].textTex = g.GenerateTextTexture(0, 0, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, highlightColor, highlightColor);
-                                        g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
+                                            items[i].textTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, highlightColor, highlightColor);
+                                        g.DrawImage(items[i].textTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height,tmp);
                                         if (items[i].subitemTex == null)
-                                            items[i].subitemTex = g.GenerateTextTexture((int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
-                                        g.DrawImage(items[i].subitemTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
+                                            items[i].subitemTex = g.GenerateTextTexture((rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
+                                        g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height,tmp);
                                     }
                                     else
                                     {
                                         if (items[i].textTex == null)
-                                            items[i].textTex = g.GenerateTextTexture(0, 0, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, color, color);
-                                        g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
+                                            items[i].textTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, color, color);
+                                        g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height,tmp);
                                         if (items[i].subitemTex == null)
-                                            items[i].subitemTex = g.GenerateTextTexture((int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.color, items[i].subitemFormat.color);
-                                        g.DrawImage(items[i].subitemTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
+                                            items[i].subitemTex = g.GenerateTextTexture((rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.color, items[i].subitemFormat.color);
+                                        g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height,tmp);
                                     }
                                 }
                             }
@@ -644,17 +644,17 @@ namespace OpenMobile.Controls
                                     if (targetHeight == 0)
                                         targetHeight = listHeight;
                                     if ((selectedIndex == i) & ((mode == eModeType.Highlighted) || (!showSelectedItemOnlyOnFocus)))
-                                        items[i].textTex = g.GenerateTextTexture(0, 0, (int)(targetWidth - listViewItemOffset), (int)targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
+                                        items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
                                     else
-                                        items[i].textTex = g.GenerateTextTexture(0, 0, (int)(targetWidth - listViewItemOffset), (int)targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
+                                        items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
                                 }
-                                g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), (int)rect.Top, (int)(rect.Width - listViewItemOffset), (int)rect.Height,tmp);
+                                g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height,tmp);
                             }
                         }
                         if (listViewItemOffset == 0)
                             continue;
                         if ((items.Count > i) && (items[i].image != null)) //rare thread collision
-                            g.DrawImage(items[i].image, (int)rect.Left + 5, (int)rect.Top + 2, (int)rect.Height-5, (int)rect.Height - imgSze, tmp);
+                            g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height-5, rect.Height - imgSze, tmp);
                     }
                 }
                 g.Clip = r; //Reset the clip size for the rest of the controls
@@ -663,7 +663,7 @@ namespace OpenMobile.Controls
                     int nheight = (int)(height * ((float)(height / listHeight) / items.Count));
                     //TODO - Actually calculate ntop correctly
                     int ntop = Top - (int)((moved*((float)items.Count-count+1)/items.Count));
-                    g.FillRoundRectangle(new Brush(color), new Rectangle(left + width - 3, ntop, 6, nheight), 3);
+                    g.FillRoundRectangle(new Brush(color), left + width - 3, ntop, 6, nheight, 3);
                 }
             }
         }

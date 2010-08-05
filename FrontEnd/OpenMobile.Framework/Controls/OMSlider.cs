@@ -211,17 +211,6 @@ namespace OpenMobile.Controls
                 return "Slider";
             }
         }
-        /// <summary>
-        /// Returns the region occupied by the control
-        /// </summary>
-        /// <returns></returns>
-        public override Rectangle toRegion()
-        {
-            if (sliderHeight>height)
-                return new Rectangle(Left - (sliderWidth / 2), Top - (sliderHeight / 2)+(height/2)-1, Width + sliderWidth, sliderHeight+2);
-            else
-                return new Rectangle(Left, Top, Width, Height);
-        }
 
         /// <summary>
         /// Draws the slider to the User Interface
@@ -232,8 +221,8 @@ namespace OpenMobile.Controls
         {
             try
             {
-                g.DrawImage(sliderBar.image, new Rectangle(left, top, width, height));
-                g.DrawImage(slider.image, new Rectangle(left + sliderPosition-(sliderHeight/2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight));
+                g.DrawImage(sliderBar.image, left, top, width, height);
+                g.DrawImage(slider.image, left + sliderPosition-(sliderHeight/2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight);
             }
             catch (Exception) { }
         }

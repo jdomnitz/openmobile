@@ -65,6 +65,22 @@ namespace OpenMobile.Controls
                 return title; 
             }
         }
+        float letterHeight;
+        public override string Text
+        {
+            get
+            {
+                return base.Text;
+            }
+            set
+            {
+                if (text == value)
+                    return;
+                base.Text = value;
+                height = (int)Graphics.Graphics.MeasureString(this.Text, Font, this.Width - 1).Height + 1;
+                letterHeight = Graphics.Graphics.MeasureString("A", Font).Height + 1;
+            }
+        }
         /// <summary>
         /// Fires the OnDoubleClick Event
         /// </summary>
@@ -111,8 +127,6 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionIn;
             if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
-            height= (int)g.MeasureString(this.Text, Font, this.Width-1).Height+1;
-            float letterHeight = g.MeasureString("A", Font).Height+1;
             height += (int)letterHeight;
             Rectangle r = new Rectangle(this.Left, top, this.Width, height);
             g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), Gradient.Vertical), r,20);

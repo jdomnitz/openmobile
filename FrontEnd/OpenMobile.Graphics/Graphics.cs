@@ -142,7 +142,7 @@ namespace OpenMobile.Graphics
     public sealed class Graphics
     {
         #region private vars
-            Bitmap virtualG;
+            static Bitmap virtualG;
             static List<List<int>> textures = new List<List<int>>();
             private static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
             private Rectangle _clip = NoClip;
@@ -766,14 +766,14 @@ namespace OpenMobile.Graphics
                 for (int i = 0; i < DisplayDevice.AvailableDisplays.Count; i++)
                     textures.Add(new List<int>());
         }
-        public OImage GenerateStringTexture(string s, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format)
+        public OImage GenerateStringTexture(string s, Font font, Brush brush, int Left,int Top,int Width,int Height, StringFormat format)
         {
-            System.Drawing.Bitmap bmp = new Bitmap((int)(layoutRectangle.Width*scaleWidth), (int)(layoutRectangle.Height*scaleHeight));
+            System.Drawing.Bitmap bmp = new Bitmap((int)(Width*scaleWidth), (int)(Height*scaleHeight));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 g.ScaleTransform(scaleWidth, scaleHeight);
-                g.DrawString(s, new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(brush.Color.R, brush.Color.G, brush.Color.B)), new System.Drawing.RectangleF(0, 0, (float)layoutRectangle.Width, (float)layoutRectangle.Height), format);
+                g.DrawString(s, new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(brush.Color.R, brush.Color.G, brush.Color.B)), new System.Drawing.RectangleF(0, 0, (float)Width, (float)Height), format);
             }
             return new OImage(bmp);
         }
@@ -843,8 +843,8 @@ namespace OpenMobile.Graphics
             Raw.Begin(BeginMode.Quads);
             {
                 Raw.Color4(brush.Color);
-                Raw.Vertex2(x+width, y+height);
-                Raw.Vertex2(x+width, y);
+                Raw.Vertex2(x+width, y+height); //(1,1)
+                Raw.Vertex2(x+width, y); //(1,0)
                 
                 Raw.Color4(brush.SecondColor);
                 Raw.Vertex2(x, y);
@@ -926,7 +926,7 @@ namespace OpenMobile.Graphics
         {
             Clip=Rect;
         }
-        public SizeF MeasureString(String str, Font ft)
+        public static SizeF MeasureString(String str, Font ft)
         {
             lock (virtualG)
             {
@@ -934,7 +934,7 @@ namespace OpenMobile.Graphics
                 return gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, (System.Drawing.FontStyle)ft.Style));
             }
         }
-        public SizeF MeasureString(String str, Font ft, int width)
+        public static SizeF MeasureString(String str, Font ft, int width)
         {
             lock (virtualG)
             {
@@ -942,7 +942,7 @@ namespace OpenMobile.Graphics
                 return gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, (System.Drawing.FontStyle)ft.Style), width);
             }
         }
-        public Rectangle MeasureCharacterRanges(string text, Font font, Rectangle rect, StringFormat format)
+        public static Rectangle MeasureCharacterRanges(string text, Font font, Rectangle rect, StringFormat format)
         {
             System.Drawing.RectangleF input = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height);
             lock (virtualG)

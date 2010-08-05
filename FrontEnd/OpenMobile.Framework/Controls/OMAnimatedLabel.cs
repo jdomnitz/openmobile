@@ -266,8 +266,15 @@ namespace OpenMobile.Controls
                     charTex = new OImage[value.Length];
                     base.text = value;
                     textTexture = null;
+                    recalc();
                 }
             }
+        }
+
+        private void recalc()
+        {
+            if ((text!=null)&&(text.Length>0))
+                avgChar = (Graphics.Graphics.MeasureString(text, this.Font).Width / Text.Length);
         }
 
         /// <summary>
@@ -350,52 +357,46 @@ namespace OpenMobile.Controls
         }
         private void draw(Graphics.Graphics g, renderingParams e, eAnimation animation)
         {
-            float tmp = 1;
             t.Enabled = this.hooked();
             if ((text == null) || (text.Length == 0))
                 return;
+            float tmp = 1;
             if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
             if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
+            Rectangle old;
             switch (animation)
             {
-                case eAnimation.Scroll:
-                case eAnimation.BounceScroll:
                 case eAnimation.None:
                 case eAnimation.UnveilLeft:
                 case eAnimation.UnveilRight:
-                    if ((animation == eAnimation.Scroll) || (animation == eAnimation.BounceScroll))
-                        avgChar = (g.MeasureString(Text, this.Font).Width / Text.Length);
-
-                    Rectangle old = g.Clip;
-                    if ((animation == eAnimation.None) || (animation == eAnimation.UnveilRight) || (animation == eAnimation.UnveilLeft))
+                    old = g.Clip;
+                    g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
+                    if (textTexture == null)
+                        textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
+                    g.DrawImage(textTexture, left, top, width, height, tmp);
+                    if (tempTransition != eAnimation.None)
                     {
-                        g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
-                        System.Drawing.StringFormat format = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap);
-                        if (textTexture == null)
-                            textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
-                        g.DrawImage(textTexture, left, top, width, height, tmp);
-                        if (tempTransition != eAnimation.None)
-                        {
-                            g.SetClip(new Rectangle(left + (width - veilRight), top, veilRight, height));
-                            if (oldTexture == null)
-                                oldTexture = g.GenerateTextTexture(0, 0, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
-                            g.DrawImage(oldTexture, left, top, width, height, tmp);
-                        }
+                        g.SetClip(new Rectangle(left + (width - veilRight), top, veilRight, height));
+                        if (oldTexture == null)
+                            oldTexture = g.GenerateTextTexture(0, 0, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
+                        g.DrawImage(oldTexture, left, top, width, height, tmp);
                     }
-                    else
+                    g.SetClip(old);
+                    return;
+               case eAnimation.Scroll:
+               case eAnimation.BounceScroll:
+                    old = g.Clip;
+                    if (avgChar * text.Length < width)
                     {
-                        if (avgChar * text.Length < width)
-                        {
-                            currentAnimation = eAnimation.None;
-                            scrollPos = 0;
-                        }
-                        g.SetClip(new Rectangle(left, top, width, height));
-                        if (textTexture == null)
-                            textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
-                        g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, width, height, tmp);
+                        currentAnimation = eAnimation.None;
+                        scrollPos = 0;
                     }
+                    g.SetClip(new Rectangle(left, top, width, height));
+                    if (textTexture == null)
+                        textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
+                    g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, width, height, tmp);
                     g.SetClip(old);
                     return;
                 case eAnimation.GlowPulse:
@@ -407,7 +408,7 @@ namespace OpenMobile.Controls
                         {
                             x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, i), Font);
                             if (charTex[i] == null)
-                                charTex[i] = g.GenerateStringTexture(Text[i].ToString(), this.Font, new Brush(Color.FromArgb((int)(tmp * 255), this.Color)), new Rectangle(x2, this.Top, 30, 30), System.Drawing.StringFormat.GenericDefault);
+                                charTex[i] = g.GenerateStringTexture(Text[i].ToString(), this.Font, new Brush(Color.FromArgb((int)(tmp * 255), this.Color)), x2, this.Top, 30, 30, System.Drawing.StringFormat.GenericDefault);
                             g.DrawImage(charTex[i], x2, this.Top, 30, 30, tmp);
                         }
                     }
@@ -415,7 +416,7 @@ namespace OpenMobile.Controls
                     if (animation == eAnimation.Pulse)
                     {
                         if (currentLetterTex == null)
-                            currentLetterTex = g.GenerateStringTexture(Text[currentLetter].ToString(), effectFont, new Brush(Color.FromArgb((int)(tmp * 255), this.OutlineColor)), new Rectangle(0, 0, 30, 30), System.Drawing.StringFormat.GenericDefault);
+                            currentLetterTex = g.GenerateStringTexture(Text[currentLetter].ToString(), effectFont, new Brush(Color.FromArgb((int)(tmp * 255), this.OutlineColor)), 0, 0, 30, 30, System.Drawing.StringFormat.GenericDefault);
                         g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30, tmp);
                     }
                     else
@@ -433,7 +434,7 @@ namespace OpenMobile.Controls
         {
             if (text == "")
                 return 0;
-            int newWidth = (int)graphics.MeasureString(text, font).Width;
+            int newWidth = (int)Graphics.Graphics.MeasureString(text, font).Width;
             System.Drawing.StringFormat format = new System.Drawing.StringFormat();
             format.FormatFlags = System.Drawing.StringFormatFlags.MeasureTrailingSpaces;
             Rectangle rect = new Rectangle(0, 0, 1000, 1000);
@@ -442,7 +443,7 @@ namespace OpenMobile.Controls
                                                                text.Length) };
             format.SetMeasurableCharacterRanges(ranges);
 
-            rect = graphics.MeasureCharacterRanges(text, font, rect, format);
+            rect = Graphics.Graphics.MeasureCharacterRanges(text, font, rect, format);
             return (int)(rect.Right - (Font.Size / 4.5));
         }
     }
