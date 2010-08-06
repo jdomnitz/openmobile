@@ -44,10 +44,9 @@ namespace OpenMobile
                 Text += "UnusuallyGenius - Graphics Designer\r\n";
                 Text += "ws6vert - openOBD and Garmin Mobile PC Projects\r\n";
                 Text += "Borte - Developer\r\n";
-                Text += "malcom2073 - Developer\r\n";
                 Text += "jheizer - Developer\r\n";
                 Text += "\r\nSupporting Projects:\r\n";
-                Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, Sqlite, Aqua Gauge and CoreAudio";
+                Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, Sqlite, Aqua Gauge, CoreAudio and the Open ToolKit Project";
                 return Text;
             }
         }

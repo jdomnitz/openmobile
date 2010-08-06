@@ -148,13 +148,15 @@ namespace OpenMobile.Graphics
             private Rectangle _clip = NoClip;
             private int height;
             private int width;
-        #endregion
             private float scaleHeight;
             private float scaleWidth;
             private static string version;
             private static string renderer;
             private int maxTextureSize;
             private bool npot;
+            float wscale;
+            float hscale;
+        #endregion
         public void Initialize(int screen)
         {
             scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
@@ -173,7 +175,6 @@ namespace OpenMobile.Graphics
             Raw.LoadIdentity();
             Raw.Ortho(0, 1000, 600, 0, 0, 1);
             Raw.MatrixMode(MatrixMode.Modelview);
-            virtualG=new Bitmap(1000,600);
             version=Raw.GetString(StringName.Version);
             string[] extensions = Raw.GetString(StringName.Extensions).Split(new char[]{' '});
             if (Array.Exists(extensions,t=>t=="GL_ARB_texture_non_power_of_two"))
@@ -493,8 +494,6 @@ namespace OpenMobile.Graphics
                     if (_clip.Width < 0)
                         _clip.Width=0;
                     Raw.Enable(EnableCap.ScissorTest);
-                    float wscale = (width / 1000F);
-                    float hscale = (height / 600F);
                     try
                     {
                         Raw.Scissor((int)(_clip.X * wscale), (int)((600 - _clip.Y - _clip.Height) * hscale), (int)(_clip.Width * wscale), (int)(_clip.Height * hscale));
@@ -765,6 +764,7 @@ namespace OpenMobile.Graphics
             if (textures.Count == 0)
                 for (int i = 0; i < DisplayDevice.AvailableDisplays.Count; i++)
                     textures.Add(new List<int>());
+            virtualG = new Bitmap(1000, 600);
         }
         public OImage GenerateStringTexture(string s, Font font, Brush brush, int Left,int Top,int Width,int Height, StringFormat format)
         {
@@ -892,6 +892,8 @@ namespace OpenMobile.Graphics
         {
             width = Width;
             height = Height;
+            wscale = (width / 1000F);
+            hscale = (height / 600F);
             Raw.Viewport(0, 0, width, height);
         }
 
@@ -925,6 +927,15 @@ namespace OpenMobile.Graphics
         public void SetClip(Rectangle Rect)
         {
             Clip=Rect;
+        }
+        public void SetClipFast(int x, int y, int width, int height)
+        {
+            if (height<0)
+                height=0;
+            if (width < 0)
+                width=0;
+            Raw.Enable(EnableCap.ScissorTest);
+            Raw.Scissor((int)(x * wscale), (int)((600 - y - height) * hscale), (int)(width * wscale), (int)(height * hscale));
         }
         public static SizeF MeasureString(String str, Font ft)
         {

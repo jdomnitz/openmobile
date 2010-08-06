@@ -372,13 +372,13 @@ namespace OpenMobile.Controls
                 case eAnimation.UnveilLeft:
                 case eAnimation.UnveilRight:
                     old = g.Clip;
-                    g.SetClip(new Rectangle(left + veilLeft, top, width - veilRight, height));
+                    g.SetClipFast(left + veilLeft, top, width - veilRight, height);
                     if (textTexture == null)
                         textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
                     g.DrawImage(textTexture, left, top, width, height, tmp);
                     if (tempTransition != eAnimation.None)
                     {
-                        g.SetClip(new Rectangle(left + (width - veilRight), top, veilRight, height));
+                        g.SetClipFast(left + (width - veilRight), top, veilRight, height);
                         if (oldTexture == null)
                             oldTexture = g.GenerateTextTexture(0, 0, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
                         g.DrawImage(oldTexture, left, top, width, height, tmp);
@@ -393,7 +393,7 @@ namespace OpenMobile.Controls
                         currentAnimation = eAnimation.None;
                         scrollPos = 0;
                     }
-                    g.SetClip(new Rectangle(left, top, width, height));
+                    g.SetClipFast(left, top, width, height);
                     if (textTexture == null)
                         textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
                     g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, width, height, tmp);

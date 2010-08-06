@@ -3,14 +3,14 @@ using System.Reflection;
 
 namespace OpenMobile.Graphics
 {
-    public enum Gradient
+    public enum Gradient:byte
     {
         None=0,
         Vertical=1,
         Horizontal=2
     }
     [Flags]
-    public enum FontStyle
+    public enum FontStyle:byte
     {
         Regular = 0,
         Bold = 1,
@@ -68,7 +68,7 @@ namespace OpenMobile.Graphics
             set { style = value; }
         }
         #region IDisposable Members
-
+        [Obsolete]
         public void Dispose()
         {
             //Legacy
@@ -1698,53 +1698,53 @@ namespace OpenMobile.Graphics
     public struct Rectangle
     {
         public static readonly Rectangle Empty;
-        private int x;
-        private int y;
-        private int width;
-        private int height;
+        public int X;
+        public int Y;
+        public int Width;
+        public int Height;
 
         public int Left
         {
-            get { return x; }
-            set { x = value; }
+            get { return X; }
+            set { X = value; }
         }
         public int Top
         {
-            get { return y; }
-            set { y = value; }
+            get { return Y; }
+            set { Y = value; }
         }
         public int Right
         {
-            get { return x+width; }
-            set { width = value-x; }
+            get { return X+Width; }
+            set { Width = value-X; }
         }
         public int Bottom
         {
-            get { return height+y; }
-            set { height = value-y; }
+            get { return Height+Y; }
+            set { Height = value-Y; }
         }
         public Rectangle(int x, int y, int width, int height)
         {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
+            this.X = x;
+            this.Y = y;
+            this.Width = width;
+            this.Height = height;
         }
 
         public Rectangle(float x, float y, float width, float height)
         {
-            this.x = (int)Math.Round(x);
-            this.y = (int)Math.Round(y);
-            this.width = (int)Math.Round(width);
-            this.height = (int)Math.Round(height);
+            this.X = (int)Math.Round(x);
+            this.Y = (int)Math.Round(y);
+            this.Width = (int)Math.Round(width);
+            this.Height = (int)Math.Round(height);
         }
 
         public Rectangle(Point location, Size size)
         {
-            this.x = location.X;
-            this.y = location.Y;
-            this.width = size.Width;
-            this.height = size.Height;
+            this.X = location.X;
+            this.Y = location.Y;
+            this.Width = size.Width;
+            this.Height = size.Height;
         }
 
         public Point Location
@@ -1772,55 +1772,11 @@ namespace OpenMobile.Graphics
                 this.Height = value.Height;
             }
         }
-        public int X
-        {
-            get
-            {
-                return this.x;
-            }
-            set
-            {
-                this.x = value;
-            }
-        }
-        public int Y
-        {
-            get
-            {
-                return this.y;
-            }
-            set
-            {
-                this.y = value;
-            }
-        }
-        public int Width
-        {
-            get
-            {
-                return this.width;
-            }
-            set
-            {
-                this.width = value;
-            }
-        }
-        public int Height
-        {
-            get
-            {
-                return this.height;
-            }
-            set
-            {
-                this.height = value;
-            }
-        }
         public bool IsEmpty
         {
             get
             {
-                return ((((this.height == 0) && (this.width == 0)) && (this.x == 0)) && (this.y == 0));
+                return ((((this.Height == 0) && (this.Width == 0)) && (this.X == 0)) && (this.Y == 0));
             }
         }
         public override bool Equals(object obj)

@@ -345,12 +345,6 @@ namespace OpenMobile
         int volScreen = -1;
         void vol_OnClick(OMControl sender, int screen)
         {
-            //if (volTmr != null)
-            //{
-            //    System.Timers.Timer tmp = volTmr;
-            //    volTmr = null;
-            //    tmp.Dispose();
-            //}
             volScreen = screen;
 
             if (sender.Top>0)
