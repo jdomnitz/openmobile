@@ -67,7 +67,6 @@ namespace OpenMobile
             IEnumerable<DisplayResolution> availableResolutions, Rectangle bounds)
             : this()
         {
-#warning "Consolidate current resolution with bounds? Can they fall out of sync right now?"
             this.current_resolution = currentResolution;
             IsPrimary = primary;
             this.available_resolutions.AddRange(availableResolutions);

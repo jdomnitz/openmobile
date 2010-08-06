@@ -118,13 +118,9 @@ namespace OpenMobile.Controls
             {
                 float alpha = 1;
                 if (this.Mode == eModeType.transitioningIn)
-                {
                     alpha = e.globalTransitionIn;
-                }
-                if (this.Mode == eModeType.transitioningOut)
-                {
+                else if (this.Mode == eModeType.transitioningOut)
                     alpha = e.globalTransitionOut;
-                }
                 alpha = alpha * (transparency / 100F);
                 lock (image.image)
                 {

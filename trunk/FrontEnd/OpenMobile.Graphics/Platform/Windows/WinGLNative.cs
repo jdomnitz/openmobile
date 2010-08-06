@@ -39,13 +39,13 @@ namespace OpenMobile.Platform.Windows
     /// \internal
     /// <summary>
     /// Drives GameWindow on Windows.
-    /// This class supports OpenMobile, and is not intended for use by OpenMobile programs.
+    /// This class supports OpenTK, and is not intended for use by OpenTK programs.
     /// </summary>
     internal sealed class WinGLNative : INativeWindow, IInputDriver
     {
         #region Fields
 
-        const ExtendedWindowStyle ParentStyleEx = ExtendedWindowStyle.WindowEdge | ExtendedWindowStyle.ApplicationWindow | ExtendedWindowStyle.Layered;
+        ExtendedWindowStyle ParentStyleEx = ExtendedWindowStyle.WindowEdge | ExtendedWindowStyle.ApplicationWindow;
         const ExtendedWindowStyle ChildStyleEx = 0;
 
         readonly IntPtr Instance = Marshal.GetHINSTANCE(typeof(WinGLNative).Module);
@@ -108,7 +108,8 @@ namespace OpenMobile.Platform.Windows
                 if (Move != null)
                     Move(this, EventArgs.Empty);
             };
-
+            if (Environment.OSVersion.Version.Major>5)
+                ParentStyleEx|= ExtendedWindowStyle.Layered;
             // To avoid issues with Ati drivers on Windows 6+ with compositing enabled, the context will not be
             // bound to the top-level window, but rather to a child window docked in the parent.
             window = new WinWindowInfo(

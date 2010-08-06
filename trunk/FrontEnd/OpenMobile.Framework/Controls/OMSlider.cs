@@ -219,12 +219,8 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            try
-            {
-                g.DrawImage(sliderBar.image, left, top, width, height);
-                g.DrawImage(slider.image, left + sliderPosition-(sliderHeight/2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight);
-            }
-            catch (Exception) { }
+            g.DrawImage(sliderBar.image, left, top, width, height);
+            g.DrawImage(slider.image, left + sliderPosition-(sliderHeight/2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight);
         }
 
         #region IThrow Members

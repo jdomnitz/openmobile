@@ -61,11 +61,6 @@ namespace OpenMobile.Controls
         private eButtonTransition transition = eButtonTransition.BoxOut;
 
         /// <summary>
-        /// Show the buttons area as an yellow overlay(debug usage only) - (Added by Borte)
-        /// </summary>
-        public bool ShowArea = false;
-
-        /// <summary>
         /// The rendering mode of the control
         /// </summary>
         [Browsable(false)]
@@ -297,17 +292,18 @@ namespace OpenMobile.Controls
             }
             else if ((this.Mode == eModeType.Clicked) || (this.Mode == eModeType.ClickedAndTransitioningOut))
             {
-                if (focusImage.image != null)
+                alpha *= e.transparency;
+                if (downImage.image != null)
                 {
-                    g.DrawImage(focusImage.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha,orientation);
+                    g.DrawImage(downImage.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha,orientation);
                     if (textTexture == null)
                         textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                     g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha);
                     return;
                 }
-                else if (downImage.image != null)
+                else if (focusImage.image != null)
                 {
-                    g.DrawImage(downImage.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha,orientation);
+                    g.DrawImage(focusImage.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha,orientation);
                     if (textTexture == null)
                         textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                     g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha);
@@ -317,21 +313,19 @@ namespace OpenMobile.Controls
             if (image.image == null)
             {
                 if (image == imageItem.MISSING)
-                {
-                    using (Pen p = new Pen(Color.White, 4F))
-                        g.DrawRoundRectangle(p,left + 2, top + 2, width - 4, height - 4, 8);
-                }
+                    g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
             }
             else
             {
-                g.DrawImage(image.image,this.Left, this.Top, this.Width, this.Height, alpha,orientation);
+                g.DrawImage(image.image,left, top, width, height, alpha,orientation);
             }
 
             // Debug function added by Borte
-            if (ShowArea)
+            #if (ShowArea)
                 g.FillRectangle(new Brush(Color.FromArgb(75, Color.Yellow)), left,top,width,height);
+            #endif
             if (textTexture == null)
-                textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+                textTexture = g.GenerateTextTexture(left, top, width, height, text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
             g.DrawImage(textTexture, left, top, width, height, alpha);
         }
     }

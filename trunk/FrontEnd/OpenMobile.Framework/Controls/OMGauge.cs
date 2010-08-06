@@ -32,7 +32,7 @@ namespace OpenMobile.Controls
         private Color dialColor = Color.Lavender;
         private float glossinessAlpha = 25;
         private int oldWidth, oldHeight;
-        int x, y, width, height;
+        int x, y;
         float fromAngle = 135F;
         float toAngle = 405F;
         private bool requiresRedraw;
