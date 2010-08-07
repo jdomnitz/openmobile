@@ -1240,9 +1240,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFramebufferTextureEXT", ExactSpelling = true)]
             internal extern static void FramebufferTextureEXT(OpenMobile.Graphics.OpenGL.FramebufferTarget target, OpenMobile.Graphics.OpenGL.FramebufferAttachment attachment, UInt32 texture, Int32 level);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFramebufferTextureFace", ExactSpelling = true)]
-            internal extern static void FramebufferTextureFace(OpenMobile.Graphics.OpenGL.Version32 target, OpenMobile.Graphics.OpenGL.Version32 attachment, UInt32 texture, Int32 level, OpenMobile.Graphics.OpenGL.Version32 face);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFramebufferTextureFaceARB", ExactSpelling = true)]
             internal extern static void FramebufferTextureFaceARB(OpenMobile.Graphics.OpenGL.FramebufferTarget target, OpenMobile.Graphics.OpenGL.FramebufferAttachment attachment, UInt32 texture, Int32 level, OpenMobile.Graphics.OpenGL.TextureTarget face);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1399,9 +1396,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetBooleanv", ExactSpelling = true)]
             internal extern static unsafe void GetBooleanv(OpenMobile.Graphics.OpenGL.GetPName pname, [OutAttribute] bool* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetBufferParameteri64v", ExactSpelling = true)]
-            internal extern static unsafe void GetBufferParameteri64v(OpenMobile.Graphics.OpenGL.Version32 target, OpenMobile.Graphics.OpenGL.Version32 pname, [OutAttribute] Int64* @params);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetBufferParameteriv", ExactSpelling = true)]
             internal extern static unsafe void GetBufferParameteriv(OpenMobile.Graphics.OpenGL.BufferTarget target, OpenMobile.Graphics.OpenGL.BufferParameterName pname, [OutAttribute] Int32* @params);
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1548,9 +1542,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetInfoLogARB", ExactSpelling = true)]
             internal extern static unsafe void GetInfoLogARB(UInt32 obj, Int32 maxLength, [OutAttribute] Int32* length, [OutAttribute] StringBuilder infoLog);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetInteger64i_v", ExactSpelling = true)]
-            internal extern static unsafe void GetInteger64i_v(OpenMobile.Graphics.OpenGL.Version32 target, UInt32 index, [OutAttribute] Int64* data);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glGetInteger64v", ExactSpelling = true)]
             internal extern static unsafe void GetInteger64v(OpenMobile.Graphics.OpenGL.ArbSync pname, [OutAttribute] Int64* @params);
@@ -3144,9 +3135,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glProgramParameter4fvNV", ExactSpelling = true)]
             internal extern static unsafe void ProgramParameter4fvNV(OpenMobile.Graphics.OpenGL.AssemblyProgramTargetArb target, UInt32 index, Single* v);
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glProgramParameteri", ExactSpelling = true)]
-            internal extern static void ProgramParameteri(UInt32 program, OpenMobile.Graphics.OpenGL.Version32 pname, Int32 value);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glProgramParameteriARB", ExactSpelling = true)]
             internal extern static void ProgramParameteriARB(UInt32 program, OpenMobile.Graphics.OpenGL.ArbGeometryShader4 pname, Int32 value);

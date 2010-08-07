@@ -33,13 +33,13 @@ namespace OpenMobile.Controls
     public class OMImage : OMControl
     {
         private imageItem image;
-        private int transparency = 100;
+        private byte transparency = 100;
 
         /// <summary>
         /// Forces the renderer to redraw this control
         /// </summary>
 
-        public int Transparency
+        public byte Transparency
         {
             get
             {
@@ -68,7 +68,7 @@ namespace OpenMobile.Controls
         /// <param name="top"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public OMImage(int left, int top, int width, int height)
+        public OMImage(short left, short top, short width, short height)
         {
             this.top = top;
             this.left = left;

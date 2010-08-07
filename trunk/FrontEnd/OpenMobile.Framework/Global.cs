@@ -29,7 +29,8 @@ namespace OpenMobile
     /// <summary>
     /// The rendering mode
     /// </summary>
-    public enum eModeType {
+    public enum eModeType:byte
+    {
         /// <summary>
         /// Normal
         /// </summary>
@@ -78,7 +79,7 @@ namespace OpenMobile
     /// <summary>
     /// The style list to render
     /// </summary>
-    public enum eListStyle
+    public enum eListStyle:byte
     {
         /// <summary>
         /// A text only list
@@ -401,7 +402,8 @@ namespace OpenMobile
     /// <summary>
     /// The button click transition
     /// </summary>
-    public enum eButtonTransition {
+    public enum eButtonTransition:byte
+    {
         /// <summary>
         /// None
         /// </summary>
@@ -419,7 +421,7 @@ namespace OpenMobile
     /// <summary>
     /// The type of transition between panels
     /// </summary>
-    public enum eGlobalTransition
+    public enum eGlobalTransition:short
     {
         /// <summary>
         /// Panel A is unloaded and Panel B is loaded (more efficient then the load and unload functions)
@@ -477,7 +479,7 @@ namespace OpenMobile
     /// <summary>
     /// Gloabl Functions
     /// </summary>
-    public enum eFunction
+    public enum eFunction:short
     {
         /// <summary>
         /// Unknown Function or Function Handled
@@ -947,7 +949,7 @@ namespace OpenMobile
     /// <summary>
     /// The status of a plugins initialization
     /// </summary>
-    public enum eLoadStatus
+    public enum eLoadStatus:byte
     {
         /// <summary>
         /// Everything went OK.  Plugin is initialized
@@ -1016,7 +1018,7 @@ namespace OpenMobile
     /// <summary>
     /// Various Wireless Events (Bluetooth, WiFi, etc.)
     /// </summary>
-    public enum eWirelessEvent
+    public enum eWirelessEvent:byte
     {
         /// <summary>
         /// An unknown or handled event
@@ -1110,7 +1112,7 @@ namespace OpenMobile
     /// <summary>
     /// Type of media
     /// </summary>
-    public enum eMediaType
+    public enum eMediaType:short
     {
         /// <summary>
         /// A device has been removed
@@ -1201,7 +1203,7 @@ namespace OpenMobile
     /// Textbox Options
     /// </summary>
     [Flags]
-    public enum textboxFlags
+    public enum textboxFlags:byte
     {
         /// <summary>
         /// None Set
@@ -1235,7 +1237,7 @@ namespace OpenMobile
     /// <summary>
     /// The style of background for an OMPanel
     /// </summary>
-    public enum backgroundStyle
+    public enum backgroundStyle:byte
     {
         /// <summary>
         /// No Background (use the layer underneath)
@@ -1257,7 +1259,7 @@ namespace OpenMobile
     /// <summary>
     /// Priority
     /// </summary>
-    public enum ePriority
+    public enum ePriority:byte
     {
         /// <summary>
         /// Low Priority
@@ -1427,7 +1429,7 @@ namespace OpenMobile
     /// <summary>
     /// The current status of the Tuned Content Plugin
     /// </summary>
-    public enum eTunedContentStatus
+    public enum eTunedContentStatus:byte
     {
         /// <summary>
         /// Unknown
@@ -1466,7 +1468,7 @@ namespace OpenMobile
     /// <summary>
     /// Type of Tuned Content
     /// </summary>
-    public enum eTunedContentBand
+    public enum eTunedContentBand:byte
     {
         /// <summary>
         /// None or Unknown
@@ -1565,7 +1567,7 @@ namespace OpenMobile
     /// <summary>
     /// Password Type
     /// </summary>
-    public enum ePassType
+    public enum ePassType:byte
     {
         /// <summary>
         /// None
@@ -1809,7 +1811,7 @@ namespace OpenMobile
     /// <summary>
     /// A/V Player statue
     /// </summary>
-    public enum ePlayerStatus
+    public enum ePlayerStatus:byte
     {
         /// <summary>
         /// Unknown

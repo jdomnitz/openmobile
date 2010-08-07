@@ -34,8 +34,6 @@ namespace OpenMobile.Platform.Windows
 {
     internal class WinGraphicsMode : IGraphicsMode
     {
-        // Todo: Get rid of the System.Windows.Forms.Control dependency.
-
         #region --- Fields ---
 
         // To avoid recursion when calling GraphicsMode.Default

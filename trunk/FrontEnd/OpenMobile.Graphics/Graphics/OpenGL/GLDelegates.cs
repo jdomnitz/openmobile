@@ -1239,9 +1239,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void FramebufferTextureEXT(OpenMobile.Graphics.OpenGL.FramebufferTarget target, OpenMobile.Graphics.OpenGL.FramebufferAttachment attachment, UInt32 texture, Int32 level);
             internal static FramebufferTextureEXT glFramebufferTextureEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FramebufferTextureFace(OpenMobile.Graphics.OpenGL.Version32 target, OpenMobile.Graphics.OpenGL.Version32 attachment, UInt32 texture, Int32 level, OpenMobile.Graphics.OpenGL.Version32 face);
-            internal static FramebufferTextureFace glFramebufferTextureFace;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void FramebufferTextureFaceARB(OpenMobile.Graphics.OpenGL.FramebufferTarget target, OpenMobile.Graphics.OpenGL.FramebufferAttachment attachment, UInt32 texture, Int32 level, OpenMobile.Graphics.OpenGL.TextureTarget face);
             internal static FramebufferTextureFaceARB glFramebufferTextureFaceARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1398,9 +1395,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void GetBooleanv(OpenMobile.Graphics.OpenGL.GetPName pname, [OutAttribute] bool* @params);
             internal unsafe static GetBooleanv glGetBooleanv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetBufferParameteri64v(OpenMobile.Graphics.OpenGL.Version32 target, OpenMobile.Graphics.OpenGL.Version32 pname, [OutAttribute] Int64* @params);
-            internal unsafe static GetBufferParameteri64v glGetBufferParameteri64v;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetBufferParameteriv(OpenMobile.Graphics.OpenGL.BufferTarget target, OpenMobile.Graphics.OpenGL.BufferParameterName pname, [OutAttribute] Int32* @params);
             internal unsafe static GetBufferParameteriv glGetBufferParameteriv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1547,9 +1541,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetInfoLogARB(UInt32 obj, Int32 maxLength, [OutAttribute] Int32* length, [OutAttribute] StringBuilder infoLog);
             internal unsafe static GetInfoLogARB glGetInfoLogARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetInteger64i_v(OpenMobile.Graphics.OpenGL.Version32 target, UInt32 index, [OutAttribute] Int64* data);
-            internal unsafe static GetInteger64i_v glGetInteger64i_v;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetInteger64v(OpenMobile.Graphics.OpenGL.ArbSync pname, [OutAttribute] Int64* @params);
             internal unsafe static GetInteger64v glGetInteger64v;
@@ -3143,9 +3134,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void ProgramParameter4fvNV(OpenMobile.Graphics.OpenGL.AssemblyProgramTargetArb target, UInt32 index, Single* v);
             internal unsafe static ProgramParameter4fvNV glProgramParameter4fvNV;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void ProgramParameteri(UInt32 program, OpenMobile.Graphics.OpenGL.Version32 pname, Int32 value);
-            internal static ProgramParameteri glProgramParameteri;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void ProgramParameteriARB(UInt32 program, OpenMobile.Graphics.OpenGL.ArbGeometryShader4 pname, Int32 value);
             internal static ProgramParameteriARB glProgramParameteriARB;

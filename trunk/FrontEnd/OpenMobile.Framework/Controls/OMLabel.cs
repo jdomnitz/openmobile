@@ -202,13 +202,9 @@ namespace OpenMobile.Controls
         {
             float tmp = 1;
             if (this.Mode == eModeType.transitioningIn)
-            {
                 tmp = e.globalTransitionIn;
-            }
             else if (this.Mode == eModeType.transitioningOut)
-            {
                 tmp = e.globalTransitionOut;
-            }
             if (textTexture==null)
                 textTexture=g.GenerateTextTexture(left, top, width, height, text, font, textFormat, textAlignment, color, outlineColor);
             g.DrawImage(textTexture, left, top, width, height,tmp);

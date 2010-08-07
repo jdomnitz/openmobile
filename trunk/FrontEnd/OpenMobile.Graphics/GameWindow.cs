@@ -81,7 +81,6 @@ namespace OpenMobile
 
         double render_period;
         double target_render_period;
-        // TODO: Implement these:
         double render_time;
         VSyncMode vsync;
 
@@ -213,8 +212,6 @@ namespace OpenMobile
                 (glContext as IGraphicsContextInternal).LoadAll();
 
                 VSync = VSyncMode.Adaptive;
-
-                //glWindow.WindowInfoChanged += delegate(object sender, EventArgs e) { OnWindowInfoChangedInternal(e); };
             }
             catch (Exception e)
             {
@@ -417,13 +414,6 @@ namespace OpenMobile
             {
                 Move -= DispatchUpdateAndRenderFrame;
                 Resize -= DispatchUpdateAndRenderFrame;
-
-                //if (Exists)
-                {
-                    // TODO: Should similar behaviour be retained, possibly on native window level?
-                    //while (this.Exists)
-                    //    ProcessEvents(false);
-                }
             }
         }
         void DispatchUpdateAndRenderFrame(object sender, EventArgs e)
@@ -573,18 +563,6 @@ namespace OpenMobile
 
         #region --- GameWindow Timing ---
 
-        // TODO: Disabled because it is not reliable enough. Use vsync as a workaround.
-
-        //#region public bool AllowSleep
-
-        //public bool AllowSleep
-        //{
-        //    get { return allow_sleep; }
-        //    set { allow_sleep = value; }
-        //}
-
-        //#endregion
-
         #region RenderFrequency
 
         /// <summary>
@@ -669,7 +647,7 @@ namespace OpenMobile
                 {
                     TargetRenderPeriod = 1.0 / value;
                 }
-                else Debug.Print("Target render frequency clamped to 200.0Hz."); // TODO: Where is it actually performed?
+                else Debug.Print("Target render frequency clamped to 200.0Hz.");
             }
         }
 

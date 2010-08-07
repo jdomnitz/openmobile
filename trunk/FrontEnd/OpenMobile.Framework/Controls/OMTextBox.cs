@@ -222,7 +222,7 @@ namespace OpenMobile.Controls
                     else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
                         f.Trimming = System.Drawing.StringTrimming.Word;
                     if (textTexture == null)
-                        textTexture = g.GenerateStringTexture((this.flags & textboxFlags.Password) == textboxFlags.Password ? new String('*', text.Length) : text, this.Font, new Brush(Color.FromArgb((int)(tmp * Color.A), this.Color)), this.Left, this.Top, this.Width + 5, this.Height, f);
+                        textTexture = g.GenerateStringTexture((this.flags & textboxFlags.Password) == textboxFlags.Password ? new String('*', text.Length) : text, this.Font, Color.FromArgb((int)(tmp * Color.A), this.Color), this.Left, this.Top, this.Width + 5, this.Height, f);
                     g.DrawImage(textTexture, this.Left, this.Top, this.Width + 5, this.Height, tmp);
                 }
             }

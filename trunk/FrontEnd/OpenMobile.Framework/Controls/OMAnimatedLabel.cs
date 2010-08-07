@@ -29,7 +29,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// The various effects the control is capable of rendering
     /// </summary>
-    public enum eAnimation
+    public enum eAnimation:byte
     {
         /// <summary>
         /// No Animation
@@ -408,7 +408,7 @@ namespace OpenMobile.Controls
                         {
                             x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, i), Font);
                             if (charTex[i] == null)
-                                charTex[i] = g.GenerateStringTexture(Text[i].ToString(), this.Font, new Brush(Color.FromArgb((int)(tmp * 255), this.Color)), x2, this.Top, 30, 30, System.Drawing.StringFormat.GenericDefault);
+                                charTex[i] = g.GenerateStringTexture(Text[i].ToString(), this.Font, Color.FromArgb((int)(tmp * 255), this.Color), x2, this.Top, 30, 30, System.Drawing.StringFormat.GenericDefault);
                             g.DrawImage(charTex[i], x2, this.Top, 30, 30, tmp);
                         }
                     }
@@ -416,7 +416,7 @@ namespace OpenMobile.Controls
                     if (animation == eAnimation.Pulse)
                     {
                         if (currentLetterTex == null)
-                            currentLetterTex = g.GenerateStringTexture(Text[currentLetter].ToString(), effectFont, new Brush(Color.FromArgb((int)(tmp * 255), this.OutlineColor)), 0, 0, 30, 30, System.Drawing.StringFormat.GenericDefault);
+                            currentLetterTex = g.GenerateStringTexture(Text[currentLetter].ToString(), effectFont, Color.FromArgb((int)(tmp * 255), this.OutlineColor), 0, 0, 30, 30, System.Drawing.StringFormat.GenericDefault);
                         g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30, tmp);
                     }
                     else
