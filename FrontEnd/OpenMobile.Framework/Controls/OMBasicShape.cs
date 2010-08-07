@@ -26,7 +26,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Available Shapes
     /// </summary>
-    public enum shapes
+    public enum shapes:byte
     {
         /// <summary>
         /// Draws a Rectangle (or Square)
@@ -79,6 +79,7 @@ namespace OpenMobile.Controls
             width = w;
             height = h;
         }
+        Pen BorderPen;
         /// <summary>
         /// Draws the basic shape
         /// </summary>
@@ -95,7 +96,8 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionOut;
 
             Brush Fill = new Brush(Color.FromArgb((int)(tmp * fillColor.A), fillColor));
-            Pen BorderPen = new Pen(Color.FromArgb((int)(tmp * borderColor.A), borderColor), borderSize);
+            if (borderSize > 0)
+                BorderPen= new Pen(Color.FromArgb((int)(tmp * borderColor.A), borderColor), borderSize);
             // End of code added by Borte
 
             switch (shape)

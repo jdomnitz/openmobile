@@ -766,14 +766,14 @@ namespace OpenMobile.Graphics
                     textures.Add(new List<int>());
             virtualG = new Bitmap(1000, 600);
         }
-        public OImage GenerateStringTexture(string s, Font font, Brush brush, int Left,int Top,int Width,int Height, StringFormat format)
+        public OImage GenerateStringTexture(string s, Font font, Color color, int Left,int Top,int Width,int Height, StringFormat format)
         {
             System.Drawing.Bitmap bmp = new Bitmap((int)(Width*scaleWidth), (int)(Height*scaleHeight));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 g.ScaleTransform(scaleWidth, scaleHeight);
-                g.DrawString(s, new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(brush.Color.R, brush.Color.G, brush.Color.B)), new System.Drawing.RectangleF(0, 0, (float)Width, (float)Height), format);
+                g.DrawString(s, new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(color.R, color.G, color.B)), new System.Drawing.RectangleF(0, 0, (float)Width, (float)Height), format);
             }
             return new OImage(bmp);
         }

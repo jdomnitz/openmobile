@@ -1715,13 +1715,13 @@ namespace OpenMobile.Graphics
         }
         public int Right
         {
-            get { return X+Width; }
-            set { Width = value-X; }
+            get { return X + Width; }
+            set { Width = value - X; }
         }
         public int Bottom
         {
-            get { return Height+Y; }
-            set { Height = value-Y; }
+            get { return Height + Y; }
+            set { Height = value - Y; }
         }
         public Rectangle(int x, int y, int width, int height)
         {

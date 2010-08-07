@@ -56,7 +56,7 @@ namespace OpenMobile.Controls
         private imageItem focusImage;
         private imageItem image;
         private imageItem downImage;
-        private int transparency = 100;
+        private byte transparency = 100;
         private eAngle orientation;
         private eButtonTransition transition = eButtonTransition.BoxOut;
 
@@ -180,7 +180,7 @@ namespace OpenMobile.Controls
         /// An integer from 0-100 (100% being opaque)
         /// </summary>
         [Category("Graphical"), Description("A value from 0-100 (100% being opaque)")]
-        public int Transparency
+        public byte Transparency
         {
             get
             {

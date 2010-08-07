@@ -196,7 +196,7 @@ namespace OpenMobile.Controls
             float tmp = 1;
             if (Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
-            if (Mode == eModeType.transitioningOut)
+            else if (Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
             g.FillRectangle(new Brush(Color.FromArgb((int)(backColor.A * tmp), backColor)),left,top,width,height);
             if (vertical == false)

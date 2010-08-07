@@ -87,6 +87,8 @@ namespace OpenMobile.Framework
                             info.SetValue(o, int.Parse(reader.Value), null);
                         else if (info.PropertyType == typeof(float))
                             info.SetValue(o, float.Parse(reader.Value), null);
+                        else if (info.PropertyType == typeof(byte))
+                            info.SetValue(o, byte.Parse(reader.Value), null);
                         else if (info.PropertyType == typeof(bool))
                             info.SetValue(o, bool.Parse(reader.Value), null);
                         else if (info.PropertyType == typeof(double))

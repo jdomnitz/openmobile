@@ -353,8 +353,6 @@ namespace OpenMobile.Platform.Windows
                             // may result in both keys being held down (but not always).
                             // The only reliably way to solve this was reported by BlueMonkMN at the forums: we should
                             // check the scancodes. It looks like GLFW does the same thing, so it should be reliable.
-
-                            // TODO: Not 100% reliable, when both keys are pressed at once.
                             if (ShiftRightScanCode != 0)
                             {
                                 unchecked

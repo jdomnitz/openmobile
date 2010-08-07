@@ -128,105 +128,13 @@ namespace OpenMobile
                 {
                     if (!pluginType.IsAbstract)  //Only look at non-abstract types
                     {
-                        //Gets a type object of the interface we need the plugins to match
-                        Type typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IHighLevel");
+                        Type typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IBasePlugin");
 
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
                         {
-                            IHighLevel availablePlugin = (IHighLevel)Activator.CreateInstance(pluginType);
-                            
-                            pluginCollection.Add(availablePlugin);
-                            return;
-                        }
-                        //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IAVPlayer");
+                            IBasePlugin availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginType);
 
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface != null)
-                        {
-                            IAVPlayer availablePlugin = (IAVPlayer)Activator.CreateInstance(pluginType);
-                            pluginCollection.Add(availablePlugin);
-                            return;
-                        }
-                        //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IOther");
-
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface != null)
-                        {
-                            IOther availablePlugin = (IOther)Activator.CreateInstance(pluginType);
-                            pluginCollection.Add(availablePlugin);
-                            return;
-                        }
-                        //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IRawHardware");
-
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface != null)
-                        {
-                            IRawHardware availablePlugin = (IRawHardware)Activator.CreateInstance(pluginType);
-                            pluginCollection.Add(availablePlugin);
-                            return;
-                        }
-                        //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IMediaDatabase");
-
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface !=null)
-                        {
-                            IMediaDatabase availablePlugin = (IMediaDatabase)Activator.CreateInstance(pluginType);
-                            pluginCollection.Add(availablePlugin);
-                            return;
-                        }
-                        //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.ITunedContent");
-
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface !=null)
-                        {
-                            ITunedContent availablePlugin = (ITunedContent)Activator.CreateInstance(pluginType);
-                            pluginCollection.Add(availablePlugin);
-                            return;
-                        }
-                        //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IDataProvider");
-
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface != null)
-                        {
-                            IDataProvider availablePlugin = (IDataProvider)Activator.CreateInstance(pluginType);
-                            pluginCollection.Add(availablePlugin);
-                            return;
-                        }
-                        //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.INetwork");
-
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface != null)
-                        {
-                            INetwork availablePlugin = (INetwork)Activator.CreateInstance(pluginType);
-                            pluginCollection.Add(availablePlugin);
-                            availablePlugin.OnWirelessEvent += new WirelessEvent(theHost.raiseWirelessEvent);
-                            return;
-                        }
-                        //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.ISpeech");
-
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface != null)
-                        {
-                            ISpeech availablePlugin = (ISpeech)Activator.CreateInstance(pluginType);
-                            pluginCollection.Add(availablePlugin);
-                            return;
-                        }
-                        //Next one
-                        typeInterface = pluginType.GetInterface("OpenMobile.Plugin.INavigation");
-
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface != null)
-                        {
-                            INavigation availablePlugin = (INavigation)Activator.CreateInstance(pluginType);
                             pluginCollection.Add(availablePlugin);
                             return;
                         }
