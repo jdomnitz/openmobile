@@ -22,7 +22,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 
 namespace TagLib.Mpeg4 {
 	/// <summary>
@@ -58,9 +57,9 @@ namespace TagLib.Mpeg4 {
 		private Properties  properties;
 		
 		/// <summary>
-		///    Contains the ISO user data boxes.
+		///    Contains the ISO user data box.
 		/// </summary>
-        private List<IsoUserDataBox> udta_boxes = new List<IsoUserDataBox>();
+		private IsoUserDataBox udta_box;
 		
 		#endregion
 		
@@ -213,11 +212,7 @@ namespace TagLib.Mpeg4 {
 		{
 			if (type == TagTypes.Apple) {
 				if (apple_tag == null && create) {
-					IsoUserDataBox udtaBox = FindAppleTagUdta();
-					if (null == udtaBox) {
-						udtaBox = new IsoUserDataBox();
-					}
-					apple_tag = new AppleTag (udtaBox);
+					apple_tag = new AppleTag (udta_box);
 					tag.SetTags (apple_tag);
 				}
 				
@@ -255,25 +250,18 @@ namespace TagLib.Mpeg4 {
 				
 				InvariantStartPosition = parser.MdatStartPosition;
 				InvariantEndPosition = parser.MdatEndPosition;
-
-                udta_boxes.AddRange(parser.UserDataBoxes);
 				
-				// Ensure our collection contains at least a single empty box
-				if (udta_boxes.Count == 0) {
-					IsoUserDataBox dummy = new IsoUserDataBox ();
-					udta_boxes.Add(dummy);
-				}
-
-				// Check if a udta with ILST actually exists				
-				if (IsAppleTagUdtaPresent ())
-					TagTypesOnDisk |= TagTypes.Apple;	//There is an udta present with ILST info
-					
-				// Find the udta box with the Apple Tag ILST
-				IsoUserDataBox udtaBox = FindAppleTagUdta();
-				if (null == udtaBox) {
-					udtaBox = new IsoUserDataBox();
-				}
-				apple_tag = new AppleTag (udtaBox);
+				udta_box = parser.UserDataBox;
+				
+				if (udta_box != null && udta_box.GetChild (BoxType.Meta)
+					!= null && udta_box.GetChild (BoxType.Meta
+					).GetChild (BoxType.Ilst) != null)
+					TagTypesOnDisk |= TagTypes.Apple;
+				
+				if (udta_box == null)
+					udta_box = new IsoUserDataBox ();
+				
+				apple_tag = new AppleTag (udta_box);
 				tag.SetTags (apple_tag);
 				
 				// If we're not reading properties, we're done.
@@ -301,45 +289,6 @@ namespace TagLib.Mpeg4 {
 			} finally {
 				Mode = AccessMode.Closed;
 			}
-		}
-		
-        /// <summary>
-		///    Find the udta box within our collection that contains the Apple ILST data.
-		/// </summary>
-		/// <remarks>
-		///		If there is a single udta in a file, we return that.
-		///		If there are multiple udtas, we search for the one that contains the ILST box.
-		/// </remarks>		
-		private IsoUserDataBox FindAppleTagUdta ()
-		{
-			if (udta_boxes.Count == 1)
-				return udta_boxes[0];	//Single udta - just return it
-			
-			foreach (IsoUserDataBox udtaBox in udta_boxes) {
-				if (udtaBox.GetChild (BoxType.Meta)
-					!= null && udtaBox.GetChild (BoxType.Meta
-					).GetChild (BoxType.Ilst) != null)
-				
-					return udtaBox;
-			}
-			
-			return null;
-		}
-		
-		/// <summary>
-		///    Returns true if there is a udta with ILST present in our collection
-		/// </summary>
-		private bool IsAppleTagUdtaPresent ()
-		{
-			foreach (IsoUserDataBox udtaBox in udta_boxes) {
-				if (udtaBox.GetChild (BoxType.Meta)
-					!= null && udtaBox.GetChild (BoxType.Meta
-					).GetChild (BoxType.Ilst) != null)
-				
-					return true;
-			}
-			
-			return false;
 		}
 		
 		#endregion
