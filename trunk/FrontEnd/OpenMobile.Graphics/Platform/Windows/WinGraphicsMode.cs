@@ -168,10 +168,10 @@ namespace OpenMobile.Platform.Windows
                 {
                     (int)WGL_ARB_pixel_format.AccelerationArb,
 
-                    (int)WGL_ARB_pixel_format.AlphaBitsArb,
                     (int)WGL_ARB_pixel_format.RedBitsArb,
                     (int)WGL_ARB_pixel_format.GreenBitsArb,
                     (int)WGL_ARB_pixel_format.BlueBitsArb,
+                    (int)WGL_ARB_pixel_format.AlphaBitsArb,
                     (int)WGL_ARB_pixel_format.ColorBitsArb,
                     
                     (int)WGL_ARB_pixel_format.DepthBitsArb,
@@ -180,10 +180,10 @@ namespace OpenMobile.Platform.Windows
                     (int)WGL_ARB_multisample.SampleBuffersArb,
                     (int)WGL_ARB_multisample.SamplesArb,
 
-                    (int)WGL_ARB_pixel_format.AccumAlphaBitsArb,
                     (int)WGL_ARB_pixel_format.AccumRedBitsArb,
                     (int)WGL_ARB_pixel_format.AccumGreenBitsArb,
                     (int)WGL_ARB_pixel_format.AccumBlueBitsArb,
+                    (int)WGL_ARB_pixel_format.AccumAlphaBitsArb,
                     (int)WGL_ARB_pixel_format.AccumBitsArb,
 
                     (int)WGL_ARB_pixel_format.DoubleBufferArb,
@@ -201,7 +201,7 @@ namespace OpenMobile.Platform.Windows
                     (int)WGL_ARB_pixel_format.GreenBitsArb, color.Green,
                     (int)WGL_ARB_pixel_format.BlueBitsArb, color.Blue,
                     (int)WGL_ARB_pixel_format.AlphaBitsArb, color.Alpha,
-                    (int)WGL_ARB_pixel_format.ColorBitsArb, color.BitsPerPixel,
+                    (int)WGL_ARB_pixel_format.ColorBitsArb, color.BitsPerPixel - color.Alpha, // Should not contain alpha bpp (see spec)
                     
                     (int)WGL_ARB_pixel_format.DepthBitsArb, depth,
                     (int)WGL_ARB_pixel_format.StencilBitsArb, stencil,
@@ -213,29 +213,37 @@ namespace OpenMobile.Platform.Windows
                     (int)WGL_ARB_pixel_format.AccumGreenBitsArb, accum.Green,
                     (int)WGL_ARB_pixel_format.AccumBlueBitsArb, accum.Blue,
                     (int)WGL_ARB_pixel_format.AccumAlphaBitsArb, accum.Alpha,
-                    (int)WGL_ARB_pixel_format.AccumBitsArb, accum.BitsPerPixel,
+                    (int)WGL_ARB_pixel_format.AccumBitsArb, accum.BitsPerPixel, // Spec doesn't mention wether alpha bpp should be included...
 
-                    (int)WGL_ARB_pixel_format.DoubleBufferArb, 1,
+                     (int)WGL_ARB_pixel_format.DoubleBufferArb, buffers > 1 ? 1 : 0,
                     (int)WGL_ARB_pixel_format.StereoArb, stereo ? 1 : 0,
                     0, 0
                 };
 
                     int[] pixel = new int[1], num_formats = new int[1];
-                    Wgl.Arb.ChoosePixelFormat(window.DeviceContext, attribs_values, null, 1, pixel, num_formats);
-                    if (num_formats[0] == 0 || pixel[0] == 0)
-                    {
-                        // Try again without an accumulator. Many modern cards cannot accelerate multisampled formats with accumulator buffers.
-                        attribs_values[10 * 2 + 1] = attribs_values[11 * 2 + 1] = attribs_values[12 * 2 + 1] = attribs_values[13 * 2 + 1] = attribs_values[14 * 2 + 1] = 0;
-                        Wgl.Arb.ChoosePixelFormat(window.DeviceContext, attribs_values, null, 1, pixel, num_formats);
-                    }
-                    if (num_formats[0] == 0 || pixel[0] == 0)
-                    {
-                        Debug.WriteLine("failed");
-                        return null;
-                    }
-
-                    // Find out what we really got as a format:
-                    Wgl.Arb.GetPixelFormatAttrib(window.DeviceContext, pixel[0], 0, attribs.Length, attribs, values);
+                    bool success = Wgl.Arb.ChoosePixelFormat(window.DeviceContext, attribs_values, null, 1, pixel, num_formats);
+	                if (!success || num_formats[0] == 0 || pixel[0] == 0)
+	                {
+	                    // Try again without an accumulator. Many modern cards cannot accelerate multisampled formats with accumulator buffers.
+	                    int index_of_accum = Array.IndexOf(attribs_values, (int)WGL_ARB_pixel_format.AccumRedBitsArb);
+	                    attribs_values[index_of_accum + 1] = attribs_values[index_of_accum + 3] =
+	                        attribs_values[index_of_accum + 5] = attribs_values[index_of_accum + 7] =
+	                        attribs_values[index_of_accum + 9] = 0;
+	                    Wgl.Arb.ChoosePixelFormat(window.DeviceContext, attribs_values, null, 1, pixel, num_formats);
+	                }
+	                if (!success || num_formats[0] == 0 || pixel[0] == 0)
+	                {
+	                    Debug.WriteLine("failed (no suitable pixel format).");
+	                    return null;
+	                }
+	
+	                // Find out what we really got as a format:
+	                success = Wgl.Arb.GetPixelFormatAttrib(window.DeviceContext, pixel[0], 0, attribs.Length - 1, attribs, values);
+	                if (!success)
+	                {
+	                    Debug.WriteLine("failed (pixel format attributes could not be determined).");
+	                    return null;
+	                }
 
                     GraphicsMode mode = new GraphicsMode(new IntPtr(pixel[0]),
                         new ColorDepth(values[1], values[2], values[3], values[4]),

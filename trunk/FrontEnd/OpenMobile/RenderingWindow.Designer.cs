@@ -60,7 +60,6 @@ namespace OpenMobile
             this.Keyboard.KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
             this.Keyboard.KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
             this.Closed += new EventHandler<EventArgs>(RenderingWindow_Closed);
-
         }
         #endregion
         private System.Timers.Timer tmrClick;

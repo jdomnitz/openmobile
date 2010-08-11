@@ -505,8 +505,6 @@ namespace Media
                         {
                             l.Left = i - 2;
                         }
-                        //OMList c=(OMList)l1;
-                        //loadSongs(c[c.SelectedIndex].text, screen);
                     }
                     Thread.Sleep(25);
                 }

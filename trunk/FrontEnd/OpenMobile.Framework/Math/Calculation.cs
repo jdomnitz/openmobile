@@ -295,7 +295,7 @@ namespace OpenMobile.Framework.Math
         /// <returns></returns>
         /// <exception cref="ArgumentException">Unknown Type</exception>
         public static double convertFuelConsumption(double value, fuelConsumptionTypes source, fuelConsumptionTypes target)
-        { //ToDo - Check this...I was a little tired when I wrote it [jd]
+        {
             if (source == target)
                 return value;
             switch (source)

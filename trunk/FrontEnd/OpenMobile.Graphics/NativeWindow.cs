@@ -103,7 +103,7 @@ namespace OpenMobile
         public void NativeInitialize()
         {
             implementation = Factory.Default.CreateNativeWindow(device.Bounds.X + (device.Bounds.Width - 640) / 2, device.Bounds.Y + (device.Bounds.Height - 480) / 2, 640, 480, "OpenMobile Native Window", GraphicsMode.Default,GameWindowFlags.Default, DisplayDevice.Default);
-
+            implementation.Visible = false;
             if ((options & GameWindowFlags.Fullscreen) != 0)
             {
                 this.device.ChangeResolution(640, 480, GraphicsMode.Default.ColorFormat.BitsPerPixel, 0);

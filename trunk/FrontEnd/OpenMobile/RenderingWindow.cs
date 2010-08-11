@@ -108,10 +108,6 @@ namespace OpenMobile
             InitializeRendering();
             Run(updateRate, 0.0);
         }
-        public IntPtr getHandle()
-        {
-            return this.WindowHandle;
-        }
         Graphics.Graphics g;
         public RenderingWindow(int s)
         {
@@ -129,6 +125,7 @@ namespace OpenMobile
             hide += new voiddel(hideCursor);
             identify += new voiddel(paintIdentity);
             redraw += new voiddel(invokePaint);
+            this.Keyboard.KeyRepeat = true;
         }
         bool Identify = false;
         private void paintIdentity()
@@ -157,14 +154,7 @@ namespace OpenMobile
 
         private void Invalidate()
         {
-            if (this.InvokeRequired)
-                this.invokePaint();
-            else
-            {
-                MakeCurrent();
-                g.ResetClip();
-                OnRenderFrame(new FrameEventArgs());
-            }
+            refresh = true;
         }
         //Code Added by Borte
         public new int Width
@@ -242,25 +232,40 @@ namespace OpenMobile
             else
                 newP.Mode = eModeType.transitioningIn;
             if (!backgroundQueue.Contains(newP))
-                backgroundQueue.Add(newP);
+                insertPanel(newP);
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;
         }
-        public void UpdateThisControl(Rectangle region)
+
+        private void insertPanel(OMPanel newP)
         {
-            //
+            for (int i = backgroundQueue.Count - 1; i >= 0; i--)
+                if (backgroundQueue[i].Priority < newP.Priority)
+                {
+                    backgroundQueue.Insert(i+1, newP);
+                    return;
+                }
+            backgroundQueue.Insert(0, newP);
+        }
+        public void UpdateThisControl(Rectangle r)
+        {
+            if (r == Rectangle.Empty)
+                Invalidate();
+            //else
+                //Invalidate(r);
         }
         public void transitionOutEverything()
         {
             highlighted = null;
-            for (int i = Core.theHost.RenderFirst; i < p.controlCount; i++)
-                if (p.getControl(i).Mode != eModeType.transitionLock)
-                    p[i].Mode = eModeType.transitioningOut;
-            for (int i = backgroundQueue.Count - 1; i > 1; i--)
-                if (backgroundQueue[i].Mode == eModeType.transitioningIn)
+            for (int i = backgroundQueue.Count - 1; i >=0; i--)
+                if ((backgroundQueue[i].Mode == eModeType.transitioningIn) || (backgroundQueue[i].UIPanel))
                     backgroundQueue[i].Mode = eModeType.Normal;
                 else
+                {
                     backgroundQueue[i].Mode = eModeType.transitioningOut;
+                    for (int j = backgroundQueue[i].controlCount-1; j >=0; j--)
+                        backgroundQueue[i][j].Mode = eModeType.transitioningOut;
+                }
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;
         }
@@ -328,6 +333,7 @@ namespace OpenMobile
             if (lastClick != null)
                 lastClick.Mode = eModeType.Normal;
             lastClick = null;
+            Invalidate();
             RenderingWindow_MouseMove(null,new OpenMobile.Input.MouseMoveEventArgs(Mouse.X,Mouse.Y,0,0,MouseButton.None));
         }
         #endregion
@@ -336,6 +342,7 @@ namespace OpenMobile
         OImage identity;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            //g.ResetClip();
             OnPaint();
             if ((currentGesture!=null)&&(currentGesture.Count > 0))
                 lock(painting)
@@ -349,9 +356,8 @@ namespace OpenMobile
                     g.DrawImage(identity, 0, 0, 1000, 600);
                 }
             }
+            SwapBuffers(); //show the new image before potentially lagging
             g.Finish();
-            SwapBuffers();
-            base.OnRenderFrame(e);
         }
 
         private void RenderGesture()
@@ -369,19 +375,15 @@ namespace OpenMobile
         {
             lock (painting)
             {
-                //Render everything under the UI
-                foreach(ePriority priority in Enum.GetValues(typeof(ePriority)))
+                for (int i = 0; i < backgroundQueue.Count;i++ )
                 {
-                    foreach (OMPanel panel in backgroundQueue.FindAll(q => q.Priority == priority))
-                    {
-                        if (panel.Mode == eModeType.transitioningIn)
-                            modifyIn(g);
-                        else if (panel.Mode == eModeType.transitioningOut)
-                            modifyOut(g);
-                        else
-                            modifyNeutral(g);
-                        panel.Render(g, rParam);
-                    }
+                    if (backgroundQueue[i].Mode == eModeType.transitioningIn)
+                        modifyIn(g);
+                    else if (backgroundQueue[i].Mode == eModeType.transitioningOut)
+                        modifyOut(g);
+                    else
+                        modifyNeutral(g);
+                    backgroundQueue[i].Render(g, rParam);
                 }
             }
         }
@@ -435,12 +437,14 @@ namespace OpenMobile
                             //Recheck where the mouse is at
                             RenderingWindow_MouseMove(this, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0,0,MouseButton.None));
                         }
+                        Invalidate();
                     }
                 }
                 else
                 {
                     rParam.transparency = 1;
                     rParam.transitionTop = 0;
+                    Invalidate();
                 }
                 lastClick = null;
                 return;
@@ -467,8 +471,7 @@ namespace OpenMobile
                 rParam.transparency = rParam.transparency - 0.15F;
                 rParam.transitionTop += 7;
             }
-            //if (lastClick != null)
-            //    UpdateThisControl(new Rectangle(lastClick.Left - rParam.transitionTop, lastClick.Top - rParam.transitionTop, lastClick.Width + (int)(rParam.transitionTop * 2.5), lastClick.Height + (int)(rParam.transitionTop * 2.5)));
+            Invalidate();
         }
 
         private void tmrClosing_Tick(object sender, EventArgs e)
@@ -522,7 +525,7 @@ namespace OpenMobile
             }
             else
             {
-                if ((this.Mouse[MouseButton.Left]) & (!ThrowStarted))
+                if ((this.Mouse[MouseButton.Left]) && (!ThrowStarted))
                 {
                     if (currentGesture == null)
                     {
@@ -537,21 +540,7 @@ namespace OpenMobile
                 }
                 else
                 {
-                    for (int i = Core.theHost.RenderFirst - 1; i >= 0; i--)
-                    {
-                        checkControl(i, ref done, ref e);
-                        if (done == true)
-                            break;
-                    }
-                    if (done == false)
-                    {
-                        for (int i = p.controlCount - 1; i >= Core.theHost.RenderFirst; i--)
-                        {
-                            checkControl(i, ref done, ref e);
-                            if (done == true)
-                                break;
-                        }
-                    }
+                    done=checkControl(e);
                     if (highlighted != null)
                     {
                         if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
@@ -569,43 +558,38 @@ namespace OpenMobile
                         if (done == false)
                         {
                             highlighted = null;
+                            Invalidate();
                         }
                     }
                 }
             }
         }
-        private void checkControl(int i, ref bool done, ref OpenMobile.Input.MouseMoveEventArgs e)
+        private bool checkControl(OpenMobile.Input.MouseMoveEventArgs e)
         {
-            //Note potential drawing error with updated rectangle
-            OMControl b = (OMControl)p.getControl(i);
-            if (b == null)
-                Thread.Sleep(10);
-            b = (OMControl)p.getControl(i);
-            if (b == null)
-                return; //failsafe - occurs when loading UI on very slow computers
-            if ((e.X > (b.Left * widthScale)) && (e.Y > (b.Top * heightScale)) && (e.X < ((b.Left + b.Width) * widthScale)) && (e.Y < ((b.Top + b.Height) * heightScale)))
+            OMControl b;
+            for (int i = backgroundQueue.Count - 1; i >= 0; i--)
             {
-                if (b.Visible == true)
+                for (int j = backgroundQueue[i].controlCount - 1; j >= 0; j--)
                 {
-                    rParam.currentMode = eModeType.Highlighted;
-                    if ((b.Mode == eModeType.Normal))
+                    b = backgroundQueue[i][j];
+                    //Note potential drawing error with updated rectangle
+                    if ((e.X > (b.Left * widthScale)) && (e.Y > (b.Top * heightScale)) && (e.X < ((b.Left + b.Width) * widthScale)) && (e.Y < ((b.Top + b.Height) * heightScale)))
                     {
-                        //if (typeof(IHighlightable).IsInstanceOfType(b) == true)
-                        //    UpdateThisControl(b.toRegion());
-                        b.Mode = eModeType.Highlighted;
+                        if (b.Visible == true)
+                        {
+                            rParam.currentMode = eModeType.Highlighted;
+                            if ((b.Mode == eModeType.Normal))
+                                b.Mode = eModeType.Highlighted;
+                            if (b == highlighted)
+                                return true;
+                            highlighted = b;
+                            Invalidate();
+                            return true;
+                        }
                     }
-                    //Rectangle r = Rectangle.Empty;
-                    //if (highlighted != null)
-                    //{
-                    //    if (typeof(IHighlightable).IsInstanceOfType(highlighted) == true)
-                    //        r = highlighted.toRegion();
-                    //}
-                    highlighted = b;
-                    done = true;
-                    //if (r != Rectangle.Empty)
-                    //    UpdateThisControl(r);
                 }
             }
+            return false;
         }
         private void RenderingWindow_MouseClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
         {
@@ -659,11 +643,6 @@ namespace OpenMobile
             }
         }
 
-        private void tmrMouse_Tick(object sender, EventArgs e)
-        {
-            SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
-        }
-
         private void tmrLongClick_Tick(object sender, EventArgs e)
         {
             tmrLongClick.Enabled = false;
@@ -687,7 +666,6 @@ namespace OpenMobile
                     if (lastClick != null)
                     {
                         lastClick.Mode = eModeType.Normal;
-                        //UpdateThisControl(lastClick.toRegion());
                     }
                     lastClick = (OMButton)highlighted;
                     if (lastClick.Mode == eModeType.transitioningOut)
@@ -695,7 +673,7 @@ namespace OpenMobile
                     else
                         lastClick.Mode = eModeType.Clicked;
                     tmrLongClick.Enabled = true;
-                    //UpdateThisControl(lastClick.toRegion());
+                    Invalidate();
                 }
                 else if (typeof(IClickable).IsInstanceOfType(highlighted))  // Added by Borte to support long click for other controls than a button
                 {
@@ -717,7 +695,7 @@ namespace OpenMobile
             if ((lastClick != null) && (lastClick.DownImage.image != null))
             {
                 lastClick.Mode = eModeType.Highlighted;
-                //UpdateThisControl(lastClick.toRegion());
+                Invalidate();
             }
             if (highlighted != null)
             {
@@ -745,6 +723,7 @@ namespace OpenMobile
                     rParam.currentMode = eModeType.Highlighted;
                     RenderingWindow_MouseMove(sender, new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
                 }
+                Invalidate();
             }
             ThrowStart.X = -1;
             ThrowStart.Y = -1;
@@ -755,8 +734,6 @@ namespace OpenMobile
         protected override void OnLoad(EventArgs e)
         {
             g.Initialize(screen);
-            g.Clear(Color.Black);
-            SwapBuffers();
             base.OnLoad(e);
         }
         private void RenderingWindow_FormClosing(object sender,CancelEventArgs e)
@@ -792,7 +769,7 @@ namespace OpenMobile
                     if(lastClick.DownImage.image != null)
                     {
                         lastClick.Mode = eModeType.Highlighted;
-                        //UpdateThisControl(lastClick.toRegion());
+                        Invalidate();
                     }
                 }
             }
@@ -896,6 +873,7 @@ namespace OpenMobile
                     ofsetIn = new Point((125 * tick) - 1000, 0);
                     break;
             }
+            Invalidate();
         }
         public void RenderingWindow_KeyDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
@@ -909,7 +887,7 @@ namespace OpenMobile
                     for (int i = 0; i < p.controlCount; i++)
                         //Modified by Borte
                         if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                            if ((p[i].Left < left) && (p[i].Top < top) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
+                            if ((p[i].Left < left) && (p[i].Top < top) && (inBounds(p[i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                             {
                                 b = p[i];
                                 top = b.Top;
@@ -919,7 +897,7 @@ namespace OpenMobile
                         return;
                     b.Mode = eModeType.Highlighted;
                     highlighted = b;
-                    //UpdateThisControl(highlighted.toRegion());
+                    Invalidate();
                 }
             }
             else
@@ -934,7 +912,7 @@ namespace OpenMobile
                     case Key.Left:
                         for (int i = 0; i < p.controlCount; i++)
                             if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                                if ((p[i].Left + p[i].Width <= highlighted.Left) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
+                                if ((p[i].Left + p[i].Width <= highlighted.Left) && (inBounds(p[i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
                                         if (notCovered(p[i],'l') == true)
@@ -947,14 +925,17 @@ namespace OpenMobile
                             break;
                         b.Mode = eModeType.Highlighted;
                         highlighted.Mode = eModeType.Normal;
-                        //UpdateThisControl(highlighted.toRegion());
+                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                            ((IKeyboard)highlighted).KeyboardExit(screen);
                         highlighted = b;
-                        //UpdateThisControl(highlighted.toRegion());
+                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                            ((IKeyboard)highlighted).KeyboardEnter(screen);
+                        Invalidate();
                         break;
                     case Key.Right:
                         for (int i = 0; i < p.controlCount; i++)
                             if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                                if ((p[i].Left >= highlighted.Left + highlighted.Width) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
+                                if ((p[i].Left >= highlighted.Left + highlighted.Width) && (inBounds(p[i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
                                         if (notCovered(p[i],'r') == true)
@@ -967,14 +948,17 @@ namespace OpenMobile
                             break;
                         b.Mode = eModeType.Highlighted;
                         highlighted.Mode = eModeType.Normal;
-                        //UpdateThisControl(highlighted.toRegion());
+                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                            ((IKeyboard)highlighted).KeyboardExit(screen);
                         highlighted = b;
-                        //UpdateThisControl(highlighted.toRegion());
+                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                            ((IKeyboard)highlighted).KeyboardEnter(screen);
+                        Invalidate();
                         break;
                     case Key.Up:
                         for (int i = 0; i < p.controlCount; i++)
                             if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                                if ((p[i].Top + p[i].Height <= highlighted.Top) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
+                                if ((p[i].Top + p[i].Height <= highlighted.Top) && (inBounds(p[i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
                                         if (notCovered(p[i],'u') == true)
@@ -987,14 +971,17 @@ namespace OpenMobile
                             break;
                         b.Mode = eModeType.Highlighted;
                         highlighted.Mode = eModeType.Normal;
-                        //UpdateThisControl(highlighted.toRegion());
+                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                            ((IKeyboard)highlighted).KeyboardExit(screen);
                         highlighted = b;
-                        //UpdateThisControl(highlighted.toRegion());
+                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                            ((IKeyboard)highlighted).KeyboardEnter(screen);
+                        Invalidate();
                         break;
                     case Key.Down:
                         for (int i = 0; i < p.controlCount; i++)
                             if (typeof(IHighlightable).IsInstanceOfType(p[i]))
-                                if ((p[i].Top >= highlighted.Top + highlighted.Height) && (inBounds(p[i].toRegion(), this.ClientRectangle) == true))
+                                if ((p[i].Top >= highlighted.Top + highlighted.Height) && (inBounds(p[i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                     if (distance(highlighted.toRegion(), p[i].toRegion()) < best)
                                     {
                                         if (notCovered(p[i],'d') == true)
@@ -1007,9 +994,12 @@ namespace OpenMobile
                             break;
                         b.Mode = eModeType.Highlighted;
                         highlighted.Mode = eModeType.Normal;
-                        //UpdateThisControl(highlighted.toRegion());
+                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                            ((IKeyboard)highlighted).KeyboardExit(screen);
                         highlighted = b;
-                        //UpdateThisControl(highlighted.toRegion());
+                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                            ((IKeyboard)highlighted).KeyboardEnter(screen);
+                        Invalidate();
                         break;
                     case Key.Enter:
                         if (typeof(OMButton).IsInstanceOfType(highlighted))
@@ -1048,31 +1038,23 @@ namespace OpenMobile
                     pnt=new Point(oMControl.Left+(oMControl.Width/2),oMControl.Top+oMControl.Height);
                     break;
             }
-            for (int i = Core.theHost.RenderFirst - 1; i >= 0; i--)
+            for (int h = backgroundQueue.Count - 1; h >= 0; h--)
             {
-                if (p[i].Visible == false)
-                    continue;
-                if ((pnt.X >= p[i].Left) && (pnt.Y >= p[i].Top) && (pnt.X <= (p[i].Left + p[i].Width)) && (pnt.Y <= (p[i].Top + p[i].Height)))
+                for (int i = backgroundQueue[h].controlCount - 1; i >= 0; i--)
                 {
+                    if (backgroundQueue[h][i].Visible == false)
+                        continue;
+                    if ((pnt.X >= backgroundQueue[h][i].Left) && (pnt.Y >= backgroundQueue[h][i].Top) && (pnt.X <= (backgroundQueue[h][i].Left + backgroundQueue[h][i].Width)) && (pnt.Y <= (backgroundQueue[h][i].Top + backgroundQueue[h][i].Height)))
+                    {
 
-                    if (p[i] == oMControl)
-                        return true;
-                    else
-                        return false;
+                        if (backgroundQueue[h][i] == oMControl)
+                            return true;
+                        else
+                            return false;
+                    }
                 }
-            }
-            for (int i = p.controlCount - 1; i >= Core.theHost.RenderFirst; i--)
-            {
-                if (p[i].Visible == false)
-                    continue;
-                if ((pnt.X >= p[i].Left) && (pnt.Y >= p[i].Top) && (pnt.X <= (p[i].Left + p[i].Width)) && (pnt.Y <= (p[i].Top + p[i].Height)))
-                {
-
-                    if (p[i] == oMControl)
-                        return true;
-                    else
-                        return false;
-                }
+                if (backgroundQueue[h].BackgroundType != backgroundStyle.None)
+                    return false;
             }
             return true;
         }
@@ -1088,6 +1070,7 @@ namespace OpenMobile
             {
                 rParam.currentMode = eModeType.Highlighted;
                 ThrowStart.Y = -1;
+                ThrowStart.X = -1;
                 if ((highlighted != null) && typeof(IThrow).IsInstanceOfType(highlighted))
                     ((IThrow)highlighted).MouseThrowEnd(screen, Point.Empty);
             }

@@ -80,7 +80,7 @@ namespace OpenMobile
         bool isExiting = false;
 
         double render_period;
-        double target_render_period;
+        double target_render_period=(1.0/35);
         double render_time;
         VSyncMode vsync;
 
@@ -210,8 +210,10 @@ namespace OpenMobile
                 glContext = new GraphicsContext(GraphicsMode.Default,WindowInfo);
                 glContext.MakeCurrent(WindowInfo);
                 (glContext as IGraphicsContextInternal).LoadAll();
-
-                VSync = VSyncMode.Adaptive;
+                Visible = true;
+                OpenMobile.Graphics.OpenGL.Raw.ClearColor(OpenMobile.Graphics.Color.Black);
+                SwapBuffers();
+                VSync = VSyncMode.On;
             }
             catch (Exception e)
             {
@@ -361,7 +363,7 @@ namespace OpenMobile
         #endregion
 
         #region public void Run(double updates_per_second, double frames_per_second)
-
+        public static bool refresh;
         /// <summary>
         /// Enters the game loop of the GameWindow updating and rendering at the specified frequency.
         /// </summary>
@@ -380,12 +382,6 @@ namespace OpenMobile
             Initialize();
             try
             {
-                if (frames_per_second < 0.0 || frames_per_second > 200.0)
-                    throw new ArgumentOutOfRangeException("frames_per_second", frames_per_second,
-                                                          "Parameter should be inside the range [0.0, 200.0]");
-
-                TargetRenderFrequency = 30;//frames_per_second;
-
                 Visible = true;   // Make sure the GameWindow is visible.
                 OnLoadInternal(EventArgs.Empty);
                 OnResize(EventArgs.Empty);
@@ -393,82 +389,59 @@ namespace OpenMobile
                 // On some platforms, ProcessEvents() does not return while the user is resizing or moving
                 // the window. We can avoid this issue by raising UpdateFrame and RenderFrame events
                 // whenever we encounter a size or move event.
-                // Note: hack disabled. Threaded rendering isprovides a better solution to this issue.
-                //Move += DispatchUpdateAndRenderFrame;
-                //Resize += DispatchUpdateAndRenderFrame;
+                //Move += DispatchRenderFrame;
+                Resize += DispatchRenderFrame;
 
                 Debug.Print("Entering main loop.");
                 render_watch.Start();
                 while (true)
                 {
-                    ProcessEvents();
+                    for (int i = 0; i < 29; i++)
+                    {
+                        ProcessEvents();
+                        if (refresh)
+                            break;
+                        Thread.Sleep(15);
+                    }
+                    refresh = false;
                     if (Exists && !IsExiting)
-                        DispatchUpdateAndRenderFrame(this, EventArgs.Empty);
+                        DispatchRenderFrame(this, EventArgs.Empty);
                     else
                         return;
-                    if (render_time<33)
-                        Thread.Sleep((int)(33-render_time));
+                    if (render_time<34)
+                        Thread.Sleep((int)(34-render_time));
                 }
             }
             finally
             {
-                Move -= DispatchUpdateAndRenderFrame;
-                Resize -= DispatchUpdateAndRenderFrame;
+                //Move -= DispatchRenderFrame;
+                Resize -= DispatchRenderFrame;
             }
         }
-        void DispatchUpdateAndRenderFrame(object sender, EventArgs e)
+        public void DispatchRenderFrame(object sender, EventArgs e)
         {
-            RaiseRenderFrame(render_watch, ref next_render, render_args);
+            lock(render_watch)
+                RaiseRenderFrame(render_watch, ref next_render, render_args);
         }
 
         void RaiseRenderFrame(Stopwatch render_watch, ref double next_render, FrameEventArgs render_args)
         {
             // Cap the maximum time drift to 1 second (e.g. when the process is suspended).
             double time = render_watch.Elapsed.TotalSeconds;
-            if (time > 1.0)
-                time = 1.0;
-            if (time <= 0)
-                return;
-            double time_left = next_render - time;
+            double time_left = target_render_period - time;
 
             if (time_left <= 0.0)
             {
-                // Schedule next render event. The 1 second cap ensures
-                // the process does not appear to hang.
-                next_render = time_left + TargetRenderPeriod;
-                if (next_render < -1.0)
-                    next_render = -1.0;
-
                 render_watch.Reset();
                 render_watch.Start();
-
-                if (time > 0)//TargetRenderPeriod)
-                {
-                    // Todo: revisit this code. Maybe check average framerate instead?
-                    // Note: VSyncMode.Adaptive enables vsync by default. The code below
-                    // is supposed to disable vsync if framerate becomes too low (half of target
-                    // framerate in the current approach) and reenable once the framerate
-                    // rises again.
-                    // Note 2: calling Context.VSync = true repeatedly seems to cause jitter on
-                    // some configurations. If possible, we should avoid repeated calls.
-                    // Note 3: we may not read/write the VSync property without a current context.
-                    // This may come to pass if the user has moved rendering to his own thread.
-                    MakeCurrent();
-                    if (Context.IsCurrent && VSync == VSyncMode.Adaptive)
-                    {
-                        // Check if we have enough time for a vsync
-                        if ((RenderTime/1000) > 2.0 * TargetRenderPeriod)
-                            Context.VSync = false;
-                        else
-                            Context.VSync = true;
-                    }
-                    render_period = render_args.Time = time;
-                    OnRenderFrameInternal(render_args);
-                    MakeCurrent(null);
-                    render_time = render_watch.Elapsed.TotalMilliseconds;
-                    //Debug.Print((1 / render_args.Time).ToString("0.00") + "fps");
-                }
+                
+                render_period = render_args.Time = time;
+                OnRenderFrameInternal(render_args);
+                render_time = render_watch.Elapsed.TotalMilliseconds;
+                Debug.Print((1 / render_args.Time).ToString("0.00") + "fps");
             }
+            else
+                Debug.Print(DateTime.Now.ToString()+"-Frame Dropped!");
         }
 
         #endregion
@@ -618,74 +591,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region TargetRenderFrequency
-
-        /// <summary>
-        /// Gets or sets a double representing the target render frequency, in hertz.
-        /// </summary>
-        /// <remarks>
-        /// <para>A value of 0.0 indicates that RenderFrame events are generated at the maximum possible frequency (i.e. only limited by the hardware's capabilities).</para>
-        /// <para>Values lower than 1.0Hz are clamped to 1.0Hz. Values higher than 200.0Hz are clamped to 200.0Hz.</para>
-        /// </remarks>
-        public double TargetRenderFrequency
-        {
-            get
-            {
-                EnsureUndisposed();
-                if (TargetRenderPeriod == 0.0)
-                    return 0.0;
-                return 1.0 / TargetRenderPeriod;
-            }
-            set
-            {
-                EnsureUndisposed();
-                if (value < 1.0)
-                {
-                    TargetRenderPeriod = 0.0;
-                }
-                else if (value <= 200.0)
-                {
-                    TargetRenderPeriod = 1.0 / value;
-                }
-                else Debug.Print("Target render frequency clamped to 200.0Hz.");
-            }
-        }
-
-        #endregion
-
-        #region TargetRenderPeriod
-
-        /// <summary>
-        /// Gets or sets a double representing the target render period, in seconds.
-        /// </summary>
-        /// <remarks>
-        /// <para>A value of 0.0 indicates that RenderFrame events are generated at the maximum possible frequency (i.e. only limited by the hardware's capabilities).</para>
-        /// <para>Values lower than 0.005 seconds (200Hz) are clamped to 0.0. Values higher than 1.0 seconds (1Hz) are clamped to 1.0.</para>
-        /// </remarks>
-        public double TargetRenderPeriod
-        {
-            get
-            {
-                EnsureUndisposed();
-                return target_render_period;
-            }
-            set
-            {
-                EnsureUndisposed();
-                if (value <= 0.005)
-                {
-                    target_render_period = 0.0;
-                }
-                else if (value <= 1.0)
-                {
-                    target_render_period = value;
-                }
-                else Debug.Print("Target render period clamped to 1.0 seconds.");
-            }
-        }
-
-        #endregion
-
         #endregion
 
         #region VSync
@@ -821,7 +726,15 @@ namespace OpenMobile
 
         #region OnRenderFrameInternal
 
-        private void OnRenderFrameInternal(FrameEventArgs e) { if (Exists && !isExiting) OnRenderFrame(e); }
+        private void OnRenderFrameInternal(FrameEventArgs e)
+        {
+            if (Exists && !isExiting)
+            {
+                MakeCurrent(); //switch context
+                OnRenderFrame(e);
+                MakeCurrent(null); //release context
+            }
+        }
 
         #endregion
 

@@ -142,6 +142,7 @@ namespace OpenMobile.Controls
                             oldTick = 0;
                             tempTransition = eAnimation.None;
                         }
+                        raiseUpdate(Rectangle.Empty);
                         return;
                     }
                 }
@@ -210,6 +211,8 @@ namespace OpenMobile.Controls
                         veilRight = Width;
                     }
                 }
+                if ((text!=null)&&(text.Length>0))
+                    raiseUpdate(Rectangle.Empty);
             }
         }
 

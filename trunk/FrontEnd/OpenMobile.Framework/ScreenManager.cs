@@ -93,14 +93,17 @@ namespace OpenMobile.Framework
         /// </summary>
         /// <param name="source"></param>
         public void loadPanel(OMPanel source)
-        {//ToDo Re-add smart instance management
+        {
             if (source == null)
                 return;
             lock (this)
             {
                 OMPanel[] collection = new OMPanel[screens];
                 for (int i = 0; i < screens; i++)
-                    collection[i] = source.Clone();
+                    if (i == screens - 1)
+                        collection[i] = source;
+                    else
+                        collection[i] = source.Clone();
                 panels.Add(collection);
             }
         }

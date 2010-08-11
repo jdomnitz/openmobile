@@ -47,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPGWeather", "..\Plugins\DP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Graphics", "OpenMobile.Graphics\OpenMobile.Graphics.csproj", "{E1727C23-C7FD-4FBA-B09F-7160B5947F85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatterySupport", "..\Plugins\BatterySupport\BatterySupport.csproj", "{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,10 @@ Global
 		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1727C23-C7FD-4FBA-B09F-7160B5947F85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

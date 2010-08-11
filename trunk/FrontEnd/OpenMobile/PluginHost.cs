@@ -20,16 +20,16 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Threading;
 using Microsoft.Win32;
 using OpenMobile.Controls;
 using OpenMobile.Data;
-using OpenMobile.Plugin;
-using OpenMobile.Media;
 using OpenMobile.Graphics;
-using System.Diagnostics;
+using OpenMobile.Media;
+using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
@@ -38,7 +38,6 @@ namespace OpenMobile
         #region Private Vars
         private IAVPlayer[] currentMediaPlayer;
         private ITunedContent[] currentTunedContent;
-        private int renderfirst;
         private static int screenCount = DisplayDevice.AvailableDisplays.Count;
         private int instanceCount = -1;
         private int[] instance;
@@ -229,18 +228,6 @@ namespace OpenMobile
             if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return (IntPtr)(-1); //Out of bounds
             return Core.RenderingWindows[screen].WindowHandle;
-        }
-
-        public Int32 RenderFirst
-        {
-            get
-            {
-                return renderfirst;
-            }
-            set
-            {
-                renderfirst = value;
-            }
         }
         public eGraphicsLevel GraphicsLevel
         {

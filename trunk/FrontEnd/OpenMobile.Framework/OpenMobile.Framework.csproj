@@ -52,6 +52,7 @@
     <Compile Include="Controls\IClickable.cs" />
     <Compile Include="Controls\IHighlightable.cs" />
     <Compile Include="Controls\IKey.cs" />
+    <Compile Include="Controls\IKeyboard.cs" />
     <Compile Include="Controls\IList.cs" />
     <Compile Include="Controls\IMouse.cs" />
     <Compile Include="Controls\IThrow.cs" />

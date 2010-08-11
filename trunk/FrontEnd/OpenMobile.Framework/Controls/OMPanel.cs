@@ -177,7 +177,9 @@ namespace OpenMobile.Controls
                 if (containedControls[i].Visible)
                     containedControls[i].Render(g, e);
         }
-        public ePriority Priority;
+        public ePriority Priority=ePriority.Normal;
+
+        public bool UIPanel;
         /// <summary>
         /// Removes the given control from this panel
         /// </summary>
