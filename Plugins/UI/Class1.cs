@@ -310,13 +310,14 @@ namespace OpenMobile
             p.addControl(vol); //27
             icons.OnIconsChanged += new IconManager.IconsChanged(icons_OnIconsChanged);
             p.Priority = ePriority.High;
-            theHost.RenderFirst = p.controlCount;
+            p.UIPanel = true;
             manager.loadPanel(p);
             OMPanel background = new OMPanel("background");
             background.BackgroundType = backgroundStyle.Gradiant;
             background.BackgroundColor1 = Color.FromArgb(0, 0, 4);
             background.BackgroundColor2 = Color.FromArgb(0, 0, 20);
             background.Priority = ePriority.Low;
+            background.UIPanel = true;
             background.Forgotten = true;
             manager.loadPanel(background);
             theHost.OnMediaEvent += theHost_OnMediaEvent;

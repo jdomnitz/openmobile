@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using OpenMobile.Graphics.OpenGL;
+using System.Diagnostics;
 
 namespace OpenMobile.Graphics
 {
@@ -143,8 +144,8 @@ namespace OpenMobile.Graphics
     {
         #region private vars
             static Bitmap virtualG;
-            static List<List<int>> textures = new List<List<int>>();
-            private static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
+            static List<List<uint>> textures = new List<List<uint>>();
+            public static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
             private Rectangle _clip = NoClip;
             private int height;
             private int width;
@@ -167,8 +168,8 @@ namespace OpenMobile.Graphics
                 Raw.Disable(EnableCap.Multisample);
             }
             catch (Exception) { } //Anti-Aliasing isn't supported
-            Raw.Disable(EnableCap.Lighting);
             Raw.Enable(EnableCap.Blend);
+            Raw.Disable(EnableCap.Dither); //Necessary?
             Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             Raw.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             Raw.MatrixMode(MatrixMode.Projection);
@@ -340,7 +341,7 @@ namespace OpenMobile.Graphics
             if (image.Size == Size.Empty)
                 return false;
             
-            int texture;
+            uint texture;
             Raw.GenTextures(1, out texture);
             Raw.BindTexture(TextureTarget.Texture2D, texture);
             Bitmap img = image.image;
@@ -365,6 +366,8 @@ namespace OpenMobile.Graphics
             image.SetTexture(screen,texture);
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            Raw.TexParameter(TextureTarget.Texture2D,TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToEdge);
+            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToEdge);
             return true;
         }
 
@@ -763,7 +766,7 @@ namespace OpenMobile.Graphics
             this.screen = screen;
             if (textures.Count == 0)
                 for (int i = 0; i < DisplayDevice.AvailableDisplays.Count; i++)
-                    textures.Add(new List<int>());
+                    textures.Add(new List<uint>());
             virtualG = new Bitmap(1000, 600);
         }
         public OImage GenerateStringTexture(string s, Font font, Color color, int Left,int Top,int Width,int Height, StringFormat format)
@@ -897,7 +900,7 @@ namespace OpenMobile.Graphics
             Raw.Viewport(0, 0, width, height);
         }
 
-        internal static void DeleteTexture(int screen,int texture)
+        internal static void DeleteTexture(int screen,uint texture)
         {
             if (screen<textures.Count)
                 textures[screen].Add(texture);
@@ -1080,15 +1083,15 @@ namespace OpenMobile.Graphics
     public class OImage:IDisposable,ICloneable
     {
         Bitmap img;
-        private int[] texture;
+        private uint[] texture;
         int height, width;
-        public int Texture(int screen)
+        public uint Texture(int screen)
         {
             if (screen < texture.Length)
                 return texture[screen];
             return 0;
         }
-        internal void SetTexture(int screen,int texture)
+        internal void SetTexture(int screen,uint texture)
         {
             if (screen < this.texture.Length)
                 this.texture[screen] = texture;
@@ -1100,7 +1103,7 @@ namespace OpenMobile.Graphics
         }
         public OImage(System.Drawing.Bitmap i)
         {
-            texture=new int[DisplayDevice.AvailableDisplays.Count];
+            texture=new uint[DisplayDevice.AvailableDisplays.Count];
             img = i;
             height = img.Height;
             width = img.Width;
@@ -1174,7 +1177,7 @@ namespace OpenMobile.Graphics
             lock (img)
             {
                 OImage ret = new OImage((Bitmap)img.Clone());
-                ret.texture = (int[])this.texture.Clone();
+                ret.texture = (uint[])this.texture.Clone();
                 return ret;
             }
         }

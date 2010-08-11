@@ -33,7 +33,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A listbox control
     /// </summary>
-    public class OMList : OMLabel, IClickable, IHighlightable, IKey, IList, IThrow, IMouse
+    public class OMList : OMLabel, IClickable, IHighlightable, IKey, IList, IThrow, IMouse,IKeyboard
     {
         /// <summary>
         /// Occurs when the list index changes
@@ -126,6 +126,7 @@ namespace OpenMobile.Controls
                 }
             }
             selectQueued = false;
+            raiseUpdate(Rectangle.Empty);
         }
 
         /// <summary>
@@ -425,6 +426,7 @@ namespace OpenMobile.Controls
             else
                 thrown += 1;
             moved += thrown;
+            raiseUpdate(Rectangle.Empty);
         }
         /// <summary>
         /// Gets or Sets the list style
@@ -570,41 +572,41 @@ namespace OpenMobile.Controls
                 {
                     if (width == 0) //Failsafe -> 1/100 chance that the width changes during rendering
                         return;
-                    Rectangle rect = new Rectangle(new Point(Left, Top + (moved % listHeight) + ((i - listStart) * listHeight)), new Size(this.Width, listHeight));
+                    Rectangle rect = new Rectangle(Left, Top + (moved % listHeight) + ((i - listStart) * listHeight), this.Width, listHeight);
                     switch (style)
                     {
                         case eListStyle.RoundedImageList:
                         case eListStyle.RoundedTextList:
-                            if (selectedIndex == i)
+                            if ((selectedIndex == i)&&(focused))
                                 g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), Gradient.Vertical), rect, 10);
                             else
                                 g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), Gradient.Vertical), rect, 10);
                             break;
                         case eListStyle.TextList:
                         case eListStyle.ImageList:
-                            if (selectedIndex == i)
+                            if ((selectedIndex == i) && (focused))
                                 g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), Gradient.Vertical), rect);
                             else
                                 g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), Gradient.Vertical), rect);
                             break;
                         case eListStyle.TransparentImageList:
                         case eListStyle.TransparentTextList:
-                            if (selectedIndex == i)
-                                g.FillRectangle(new Brush(selectedItemColor1), rect);
+                            if ((selectedIndex == i) && (focused))
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A),selectedItemColor1)), rect);
                             break;
                         case eListStyle.DroidStyleImage:
                         case eListStyle.DroidStyleText:
                             imgSze = 6;
-                            if (selectedIndex == i)
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A * 0.6), selectedItemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 2));
+                            if ((selectedIndex == i) && (focused))
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A * 0.6), selectedItemColor1)), rect.Left, rect.Top, rect.Width, rect.Height - 2);
                             else
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 2));
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), rect.Left, rect.Top, rect.Width, rect.Height - 2);
                             break;
                         case eListStyle.MultiList:
-                            if (selectedIndex == i)
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 1));
+                            if ((selectedIndex == i) && (focused))
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), rect.Left, rect.Top, rect.Width, rect.Height - 1);
                             else
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - 1));
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)),rect.Left, rect.Top, rect.Width, rect.Height - 1);
                             break;
                     }
                     if ((i < items.Count) && (i >= 0))
@@ -615,7 +617,7 @@ namespace OpenMobile.Controls
                             {
                                 if (items[i].subitemFormat != null)
                                 {
-                                    if (selectedIndex == i)
+                                    if ((selectedIndex == i) && (focused))
                                     {
                                         if (items[i].textTex == null)
                                             items[i].textTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, highlightColor, highlightColor);
@@ -643,7 +645,7 @@ namespace OpenMobile.Controls
                                         targetWidth = width;
                                     if (targetHeight == 0)
                                         targetHeight = listHeight;
-                                    if ((selectedIndex == i) & ((mode == eModeType.Highlighted) || (!showSelectedItemOnlyOnFocus)))
+                                    if ((selectedIndex == i) && (focused))
                                         items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
                                     else
                                         items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
@@ -756,10 +758,6 @@ namespace OpenMobile.Controls
                 Select(SelectedIndex + 1, true, screen);
                 return true;
             }
-            if ((e.Key == Key.Left) || (e.Key == Key.Right) || (e.Key == Key.Up) || (e.Key == Key.Down))
-            {
-                Select(-1, false, screen);
-            }
             return false;
         }
         /// <summary>
@@ -801,6 +799,7 @@ namespace OpenMobile.Controls
                 if (selectedIndex >= 0)
                     items[selectedIndex].textTex = items[selectedIndex].subitemTex = null;
                 selectedIndex = -1;
+                raiseUpdate(Rectangle.Empty);
             }
         }
 
@@ -842,20 +841,6 @@ namespace OpenMobile.Controls
                 selectFollowsHighlight = value;
             }
         }
-        /// <summary>
-        /// Draw selected item only when control has focus (Mode = Highlighted)
-        /// </summary>
-        public bool ShowSelectedItemOnlyOnFocus
-        {
-            get
-            {
-                return showSelectedItemOnlyOnFocus;
-            }
-            set
-            {
-                showSelectedItemOnlyOnFocus = value;
-            }
-        }
 
         /// <summary>
         /// Returns the index of the item under the mouse
@@ -891,6 +876,7 @@ namespace OpenMobile.Controls
         {
             throwtmr.Enabled = false;
             lastSelected = selectedIndex;
+            focused = true;
             Select(highlightedIndex, false, screen);
             if (selectedIndex == lastSelected)
                 return;
@@ -901,6 +887,26 @@ namespace OpenMobile.Controls
         public virtual void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             //
+        }
+
+        #endregion
+
+        #region IKeyboard Members
+        bool focused=true;
+        public void KeyboardEnter(int screen)
+        {
+            focused = true;
+            if (selectedIndex>-1)
+                items[selectedIndex].textTex = null;
+            if (selectedIndex == -1)
+                Select(0,false,screen);
+        }
+
+        public void KeyboardExit(int screen)
+        {
+            focused = false;
+            if (selectedIndex > -1)
+                items[selectedIndex].textTex = null;
         }
 
         #endregion

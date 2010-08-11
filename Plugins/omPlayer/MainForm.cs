@@ -523,7 +523,7 @@ namespace OMPlayer
         public int currentVolume = 100;
         public IGraphBuilder graphBuilder = null;
         public int instance = -1;
-        public bool isAudioOnly = false;
+        public bool isAudioOnly = true;
         public IMediaControl mediaControl = null;
         private IMediaEventEx mediaEventEx = null;
         public IMediaPosition mediaPosition = null;

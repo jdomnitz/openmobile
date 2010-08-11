@@ -80,7 +80,11 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Minimal Graphics - aka no effects
         /// </summary>
-        Minimal=1
+        Minimal=1,
+        /// <summary>
+        /// High Graphics - aka disable adaptive framerate
+        /// </summary>
+        High=2
     }
     /// <summary>
     /// The default plugin host interface
@@ -117,10 +121,6 @@ namespace OpenMobile.Plugin
         /// The path to the skins folder
         /// </summary>
         string SkinPath { get; }
-        /// <summary>
-        /// For UI plugins only.  Sets the number of controls to render first
-        /// </summary>
-        Int32 RenderFirst { get; set; }
         /// <summary>
         /// If the vehicle is in motion returns true (returns false if unknown)
         /// </summary>
