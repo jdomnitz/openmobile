@@ -324,7 +324,6 @@ namespace OpenMobile.Platform.Windows
                     break;
 
                 case WindowMessage.XBUTTONUP:
-                    // TODO: Is this correct?
                     mouse[((wParam.ToInt32() & 0xFFFF0000) >> 16) != (int)MouseKeys.XButton1 ? MouseButton.Button1 : MouseButton.Button2] = false;
                     break;
 

@@ -536,61 +536,6 @@ namespace OpenMobile
 
         #region --- GameWindow Timing ---
 
-        #region RenderFrequency
-
-        /// <summary>
-        /// Gets a double representing the actual frequency of RenderFrame events, in hertz (i.e. fps or frames per second).
-        /// </summary>
-        public double RenderFrequency
-        {
-            get
-            {
-                EnsureUndisposed();
-                if (render_period == 0.0)
-                    return 1.0;
-                return 1.0 / render_period;
-            }
-        }
-
-        #endregion
-
-        #region RenderPeriod
-
-        /// <summary>
-        /// Gets a double representing the period of RenderFrame events, in seconds.
-        /// </summary>
-        public double RenderPeriod
-        {
-            get
-            {
-                EnsureUndisposed();
-                return render_period;
-            }
-        }
-
-        #endregion
-
-        #region RenderTime
-
-        /// <summary>
-        /// Gets a double representing the time spent in the RenderFrame function, in seconds.
-        /// </summary>
-        public double RenderTime
-        {
-            get
-            {
-                EnsureUndisposed();
-                return render_time;
-            }
-            protected set
-            {
-                EnsureUndisposed();
-                render_time = value;
-            }
-        }
-
-        #endregion
-
         #endregion
 
         #region VSync

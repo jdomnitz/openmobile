@@ -260,8 +260,6 @@ namespace OpenMobile.Platform.MacOS
             Debug.Print("Prev Size: {0}, {1}", Width, Height);
 			clientRectangle.Size = new Size(width, height);
 			Debug.Print("New Size: {0}, {1}", Width, Height);
-
-			// TODO: if we go full screen we need to make this use the device specified.
             bounds = mDisplayDevice.Bounds;
 
             
