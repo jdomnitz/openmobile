@@ -143,6 +143,7 @@ namespace OpenMobile.Graphics
     public sealed class Graphics
     {
         #region private vars
+            private static int[] POTS = { 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
             static Bitmap virtualG;
             static List<List<uint>> textures = new List<List<uint>>();
             public static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
@@ -155,6 +156,7 @@ namespace OpenMobile.Graphics
             private static string renderer;
             private int maxTextureSize;
             private bool npot;
+            private bool AA;
             float wscale;
             float hscale;
         #endregion
@@ -163,11 +165,6 @@ namespace OpenMobile.Graphics
             scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
             scaleWidth = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
             Raw.Disable(EnableCap.DepthTest);
-            try
-            {
-                Raw.Disable(EnableCap.Multisample);
-            }
-            catch (Exception) { } //Anti-Aliasing isn't supported
             Raw.Enable(EnableCap.Blend);
             Raw.Disable(EnableCap.Dither); //Necessary?
             Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
@@ -181,6 +178,9 @@ namespace OpenMobile.Graphics
             if (Array.Exists(extensions,t=>t=="GL_ARB_texture_non_power_of_two"))
                 npot = true;
             renderer = Raw.GetString(StringName.Renderer);
+            AA = ((version[0] != '1') || (int.Parse(version[2].ToString()) >= 3));
+            if (AA)
+                Raw.Disable(EnableCap.Multisample);
             Raw.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
         }
         public void Clear(Color color)
@@ -359,7 +359,7 @@ namespace OpenMobile.Graphics
             }
             catch (InvalidOperationException) { return false; }
             Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-                OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                            OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             img.UnlockBits(data);
             if (kill)
                 img.Dispose();
@@ -389,7 +389,6 @@ namespace OpenMobile.Graphics
                     return i;
             return maxTextureSize;
         }
-        private static int[] POTS = { 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
         private bool checkImage(Image image)
         {
             if ((image.Width > maxTextureSize) || (image.Height > maxTextureSize))
@@ -798,11 +797,12 @@ namespace OpenMobile.Graphics
             FillEllipse(brush, rect.X, rect.Y, rect.Width, rect.Height);
         }
         public void FillEllipse(Brush brush, int x, int y, int width, int height)
-        { //TODO - LinearGradiantBrush
+        {
             Raw.Color4(brush.Color);
             Raw.Enable(EnableCap.LineSmooth);
             Raw.Enable(EnableCap.PointSmooth);
-            Raw.Enable(EnableCap.Multisample);
+            if (AA)
+                Raw.Enable(EnableCap.Multisample);
                 Raw.Begin(BeginMode.TriangleFan);
                 {
                     Raw.Vertex2(x + (width / 2), y + (height / 2));
@@ -812,7 +812,8 @@ namespace OpenMobile.Graphics
                 Raw.End();
             Raw.Disable(EnableCap.LineSmooth);
             Raw.Disable(EnableCap.PointSmooth);
-            Raw.Disable(EnableCap.Multisample);
+            if (AA)
+                Raw.Disable(EnableCap.Multisample);
         }
         public void FillPolygon(Brush brush, Point[] points)
         {
