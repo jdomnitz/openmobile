@@ -74,6 +74,7 @@
     <Compile Include="Data\Calendar.cs" />
     <Compile Include="Data\Collections.cs" />
     <Compile Include="Data\Contacts.cs" />
+    <Compile Include="Data\Credentials.cs" />
     <Compile Include="Data\GasStations.cs" />
     <Compile Include="Data\Messages.cs" />
     <Compile Include="Data\Personal.cs" />

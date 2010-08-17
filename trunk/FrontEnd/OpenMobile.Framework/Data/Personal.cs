@@ -83,6 +83,7 @@ namespace OpenMobile.Data
         /// Load (or reload) a users personal info.
         /// </summary>
         /// <returns>If successful</returns>
+        [Obsolete("Use Credentials class instead!")]
         public static bool readInfo()
         {
             SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Pooling=True;Max Pool Size=6;");
@@ -194,6 +195,7 @@ namespace OpenMobile.Data
         /// <param name="passType"></param>
         /// <param name="password"></param>
         /// <param name="appKey"></param>
+        [Obsolete("Use Credentials class instead!")]
         public static void setPassword(ePassword passType, string password, string appKey)
         {
             switch (passType)
@@ -219,6 +221,7 @@ namespace OpenMobile.Data
         /// Writes the given personal info to the database
         /// </summary>
         /// <returns></returns>
+        [Obsolete("Use Credentials class instead!")]
         public static bool writeInfo()
         {
             personalInfo info = Collections.personalInfo;

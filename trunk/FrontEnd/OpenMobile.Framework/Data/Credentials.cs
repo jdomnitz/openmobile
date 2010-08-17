@@ -1,0 +1,184 @@
+﻿/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System;
+using System.Collections.Generic;
+using Mono.Data.Sqlite;
+using System.Data;
+using System.Reflection;
+using System.Security.Cryptography;
+using OpenMobile.helperFunctions;
+
+namespace OpenMobile.Data
+{
+    public static class Credentials
+    {
+        private static SqliteConnection con;
+        private static void createDB()
+        {
+            SqliteCommand cmd = new SqliteCommand(con);
+            cmd.CommandText = "BEGIN TRANSACTION;CREATE TABLE tblCache(UID INTEGER PRIMARY KEY, EncryptedName TEXT, Value TEXT);CREATE TABLE tblAccess(UID INTEGER, AssemblyHash TEXT);COMMIT;";
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            { }
+        }
+        /// <summary>
+        /// Used internally
+        /// </summary>
+        public static void Open()
+        {
+            try
+            {
+                if (uid==null)
+                {
+                    uid = "";
+                    for (int i = 0; i < Environment.UserName.Length; i++)
+                        uid += (char)(Environment.UserName[i] << Environment.ProcessorCount);
+                }
+                if (con == null)
+                    con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=True;temp_store=2;locking_mode=exclusive");
+                if (con.State==ConnectionState.Closed)
+                    con.Open();
+            }
+            catch (SqliteException)
+            {
+                if (con != null)
+                    con.Dispose();
+                con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=False;temp_store=2;locking_mode=exclusive");
+                con.Open();
+                createDB();
+            }
+        }
+        private static List<string> blockedHashes = new List<string>();
+        private static string uid;
+        public static string getCredential(string credentialName)
+        {
+            if (credentialName == null)
+                return null;
+            Open();
+            lock (con)
+            {
+                string hash = Assembly.GetCallingAssembly().GetModules()[0].ModuleVersionId.ToString();
+                if (blockedHashes.Contains(hash))
+                    return null;
+                string md5 = md5Encode(credentialName + uid);
+                SqliteCommand cmd = new SqliteCommand(con);
+                cmd.CommandText="SELECT Value from tblCache where EncryptedName='"+md5+"'";
+                object ret = cmd.ExecuteScalar();
+                string value;
+                if (ret != null)
+                    value = ret.ToString();
+                else
+                    return null;
+                cmd.CommandText="SELECT UID from tblCache WHERE EncryptedName='" + md5 + "'";
+                ret=cmd.ExecuteScalar();
+                string UID;
+                if (ret != null)
+                    UID = ret.ToString();
+                else
+                    return null;
+                cmd.CommandText = "SELECT Count(*) from tblAccess WHERE UID='" + UID + "' AND AssemblyHash='" + hash + "'";
+                int count = (int)(Int64)cmd.ExecuteScalar();
+                if (count > 0)
+                    return Encryption.AESDecrypt(value, credentialName);
+                else
+                    if (promptAccess())
+                    {
+                        cmd.CommandText = "INSERT INTO tblAccess (UID,AssemblyHash)VALUES('" + UID + "','" + hash + "')";
+                        cmd.ExecuteNonQuery();
+                        return Encryption.AESDecrypt(value, credentialName);
+                    }
+                    else
+                        blockedHashes.Add(hash);
+                return null;
+            }
+        }
+
+        private static bool promptAccess()
+        {
+            //TODO
+            return true;
+        }
+        private static string md5Encode(string value)
+        {
+            MD5 client = MD5.Create();
+            byte[] md5 = client.ComputeHash(System.Text.ASCIIEncoding.ASCII.GetBytes(value));
+            string ret="";
+            foreach (byte b in md5)
+                ret += b.ToString("X2");
+            return ret;
+        }
+        public static void setCredential(string credentialName, string value)
+        {
+            Open();
+            lock (con)
+            {
+                string hash = Assembly.GetCallingAssembly().GetModules()[0].ModuleVersionId.ToString();
+                if (blockedHashes.Contains(hash))
+                    return;
+                SqliteCommand cmd = new SqliteCommand(con);
+                string md5 = md5Encode(credentialName + uid);
+                cmd.CommandText = "SELECT Count(*) from tblCache WHERE EncryptedName='" + md5 + "'";
+                int count = (int)(Int64)cmd.ExecuteScalar();
+                string UID;
+                if (count > 0)
+                {
+                    cmd.CommandText = "SELECT UID from tblCache WHERE EncryptedName='" + md5 + "'";
+                    object ret = cmd.ExecuteScalar();
+                    if (ret != null)
+                        UID = ret.ToString();
+                    else
+                        return;
+                    cmd.CommandText = "SELECT Count(*) from tblAccess WHERE UID='" + UID + "' AND AssemblyHash='" + hash + "'";
+                    count = (int)(Int64)cmd.ExecuteScalar();
+                    if (count > 0)
+                    {
+                        cmd.CommandText = "UPDATE tblCache SET Value='" + Encryption.AESEncrypt(value, credentialName) + "' WHERE EncryptedName='" + md5 + "'";
+                        cmd.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        if (promptAccess())
+                        {
+                            cmd.CommandText = "SELECT UID from tblCache WHERE EncryptedName='" + md5 + "'";
+                            UID = cmd.ExecuteScalar().ToString();
+                            cmd.CommandText = "INSERT OR REPLACE INTO tblAccess (UID,AssemblyHash)VALUES('" + UID + "','" + hash + "')";
+                            cmd.ExecuteNonQuery();
+                        }
+                        else
+                            blockedHashes.Add(hash);
+                    }
+                }
+                else
+                {
+                    cmd.CommandText = "INSERT INTO tblCache (Value,EncryptedName)VALUES('" + Encryption.AESEncrypt(value, credentialName) + "','" + md5 + "')";
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "SELECT UID from tblCache WHERE EncryptedName='" + md5 + "'";
+                    UID = cmd.ExecuteScalar().ToString();
+                    cmd.CommandText = "INSERT OR REPLACE INTO tblAccess (UID,AssemblyHash)VALUES('" + UID + "','" + hash + "')";
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+    }
+}

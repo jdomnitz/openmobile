@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using OpenMobile.Graphics;
+using OpenMobile.Controls;
 namespace OpenMobile.Plugin
 {
     /// <summary>
@@ -265,6 +266,10 @@ namespace OpenMobile.Plugin
         /// Triggered when a wireless event occurs
         /// </summary>
         event WirelessEvent OnWirelessEvent;
+        /// <summary>
+        /// Occurs when a control is highlighted in a rendering window
+        /// </summary>
+        event userInteraction OnHighlightedChanged;
         /// <summary>
         /// Returns the requested data
         /// </summary>
