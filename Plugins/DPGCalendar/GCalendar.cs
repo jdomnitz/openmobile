@@ -46,16 +46,15 @@ namespace DPGCalendar
             string data;
             string email = "";
             string pass = "";
-            Personal.readInfo();
-            email = Collections.personalInfo.googleUsername;
-            if (email == "")
+            email = Credentials.getCredential("Google Username");
+            if (email == null)
             {
                 status = -1;
                 theHost.execute(eFunction.settingsChanged, "Calendar");
                 return;
             }
-            pass = Personal.getPassword(Personal.ePassword.google, "GOOGLEPW");
-            if (pass == "")
+            pass = Credentials.getCredential("Google Password");
+            if (pass == null)
             {
                 status = -1;
                 theHost.execute(eFunction.settingsChanged, "Calendar");

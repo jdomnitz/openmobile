@@ -179,11 +179,9 @@ namespace PandoraPlayer
 
         private void initialize()
         {
-            using (PluginSettings settings = new PluginSettings())
-                client.username = settings.getSetting("Pandora.Username");
-            Personal.readInfo();
-            client.password = Personal.getPassword(Personal.ePassword.Pandora, "Pandora1");
-            if ((client.password != "") && (client.username != ""))
+            client.username = Credentials.getCredential("Pandora Username");
+            client.password = Credentials.getCredential("Pandora Password");
+            if ((client.password != null) && (client.username != null))
                 client.startWorker();
         }
         bool loggedIn = false;
@@ -208,11 +206,11 @@ namespace PandoraPlayer
                     currentSong.coverArt = OpenMobile.Net.Network.imageFromURL(e.Song.AArtUrl);
                     if (currentSong.coverArt != null)
                     {
-                        Graphics g = Graphics.FromImage(currentSong.coverArt);
+                        Graphics g = Graphics.FromImage(currentSong.coverArt.image);
                         imageItem p = theHost.getSkinImage("Pandora");
                         if (p != null)
                         {
-                            g.DrawImage(theHost.getSkinImage("Pandora").image, new Rectangle(currentSong.coverArt.Width - 30, currentSong.coverArt.Height - 30, 30, 30));
+                            g.DrawImage(theHost.getSkinImage("Pandora").image.image, new Rectangle(currentSong.coverArt.Width - 30, currentSong.coverArt.Height - 30, 30, 30));
                         }
                         g.Dispose();
                     }
@@ -386,14 +384,9 @@ namespace PandoraPlayer
                 return;
             }
             if (s.Name == "Pandora.Username")
-                using (PluginSettings setting = new PluginSettings())
-                    setting.setSetting(s.Name, s.Value);
+                Credentials.setCredential("Pandora Username", s.Value);
             else if (s.Name == "Pandora.Password")
-            {
-                Personal.readInfo();
-                Personal.setPassword(Personal.ePassword.Pandora, s.Value, "Pandora1");
-                Personal.writeInfo();
-            }
+                Credentials.setCredential("Pandora Password", s.Value);
             initialize();
         }
         public Settings loadSettings()
@@ -403,9 +396,8 @@ namespace PandoraPlayer
                 settings = new Settings("Pandora Settings");
                 using (PluginSettings setting = new PluginSettings())
                 {
-                    settings.Add(new Setting(SettingTypes.Text, "Pandora.Username", "", "Username",setting.getSetting("Pandora.Username")));
-                    Personal.readInfo();
-                    settings.Add(new Setting(SettingTypes.Password, "Pandora.Password", "", "Password", Personal.getPassword(Personal.ePassword.Pandora,"Pandora1")));
+                    settings.Add(new Setting(SettingTypes.Text, "Pandora.Username", "", "Username",Credentials.getCredential("Pandora Username")));
+                    settings.Add(new Setting(SettingTypes.Password, "Pandora.Password", "", "Password", Credentials.getCredential("Pandora Password")));
                     string volume=setting.getSetting("Pandora.Volume");
                     settings.Add(new Setting(SettingTypes.Range,"Pandora.Volume","Volume","Currently at %value%%",null,new List<string>(new string[]{"0","100"}), (volume=="")?"100":volume));
                 }
