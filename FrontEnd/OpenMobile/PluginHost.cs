@@ -269,6 +269,13 @@ namespace OpenMobile
                 history.Enqueue(i, "MainMenu", "", false);
             for (int i = 0; i < 8; i++)
                 queued[i] = new List<mediaInfo>();
+            InputRouter.OnHighlightedChanged += new userInteraction(InputRouter_OnHighlightedChanged);
+        }
+
+        private void InputRouter_OnHighlightedChanged(OMControl sender, int screen)
+        {
+            if (OnHighlightedChanged != null)
+                OnHighlightedChanged(sender, screen);
         }
         public void load()
         {
@@ -1293,7 +1300,7 @@ namespace OpenMobile
         public event NavigationEvent OnNavigationEvent;
         public event KeyboardEvent OnKeyPress;
         public event WirelessEvent OnWirelessEvent;
-
+        public event userInteraction OnHighlightedChanged;
         private List<imageItem> imageCache = new List<imageItem>();
         public imageItem getSkinImage(string imageName)
         {
