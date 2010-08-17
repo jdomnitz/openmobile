@@ -270,6 +270,14 @@ namespace OpenMobile
             for (int i = 0; i < 8; i++)
                 queued[i] = new List<mediaInfo>();
             InputRouter.OnHighlightedChanged += new userInteraction(InputRouter_OnHighlightedChanged);
+            Credentials.OnAuthorizationRequested += new Credentials.Authorization(Credentials_OnAuthorizationRequested);
+            Credentials.Open();
+        }
+
+        bool Credentials_OnAuthorizationRequested(string pluginName, string requestedAccess)
+        {
+            //TODO
+            return true;
         }
 
         private void InputRouter_OnHighlightedChanged(OMControl sender, int screen)

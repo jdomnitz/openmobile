@@ -33,10 +33,6 @@ namespace OpenMobile.Data
         /// </summary>
         public static List<Messages.message> Messages = new List<Messages.message>();
         /// <summary>
-        /// Personal Info
-        /// </summary>
-        public static Personal.personalInfo personalInfo = new Personal.personalInfo();
-        /// <summary>
         /// Gas Stations
         /// </summary>
         public static List<GasStations.gasStation> gasStations = new List<GasStations.gasStation>();

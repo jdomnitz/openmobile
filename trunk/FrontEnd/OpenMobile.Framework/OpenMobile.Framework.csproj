@@ -77,7 +77,6 @@
     <Compile Include="Data\Credentials.cs" />
     <Compile Include="Data\GasStations.cs" />
     <Compile Include="Data\Messages.cs" />
-    <Compile Include="Data\Personal.cs" />
     <Compile Include="Data\Phone.cs" />
     <Compile Include="Data\PluginSettings.cs" />
     <Compile Include="Data\SQL.Designer.cs">

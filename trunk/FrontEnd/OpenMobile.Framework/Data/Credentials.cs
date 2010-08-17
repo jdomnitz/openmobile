@@ -31,6 +31,8 @@ namespace OpenMobile.Data
     public static class Credentials
     {
         private static SqliteConnection con;
+        public delegate bool Authorization(string pluginName,string requestedAccess);
+        public static event Authorization OnAuthorizationRequested;
         private static void createDB()
         {
             SqliteCommand cmd = new SqliteCommand(con);
@@ -56,16 +58,22 @@ namespace OpenMobile.Data
                         uid += (char)(Environment.UserName[i] << Environment.ProcessorCount);
                 }
                 if (con == null)
-                    con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=True;temp_store=2;locking_mode=exclusive");
-                if (con.State==ConnectionState.Closed)
+                    con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=True");
+                if (con.State == ConnectionState.Closed)
+                {
                     con.Open();
+                    SqliteCommand cmd = new SqliteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con);
+                    cmd.ExecuteNonQuery();
+                }
             }
             catch (SqliteException)
             {
                 if (con != null)
                     con.Dispose();
-                con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=False;temp_store=2;locking_mode=exclusive");
+                con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=False;temp_store=2;");
                 con.Open();
+                SqliteCommand cmd = new SqliteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con);
+                cmd.ExecuteNonQuery();
                 createDB();
             }
         }
@@ -102,7 +110,7 @@ namespace OpenMobile.Data
                 if (count > 0)
                     return Encryption.AESDecrypt(value, credentialName);
                 else
-                    if (promptAccess())
+                    if (promptAccess(Assembly.GetCallingAssembly().GetModules()[0].Name, credentialName))
                     {
                         cmd.CommandText = "INSERT INTO tblAccess (UID,AssemblyHash)VALUES('" + UID + "','" + hash + "')";
                         cmd.ExecuteNonQuery();
@@ -114,10 +122,15 @@ namespace OpenMobile.Data
             }
         }
 
-        private static bool promptAccess()
+        private static bool promptAccess(string pluginName,string access)
         {
-            //TODO
-            return true;
+            if (OnAuthorizationRequested == null)
+                return false;
+            if (OnAuthorizationRequested.GetInvocationList().Length>1)
+                throw new System.Security.SecurityException(OnAuthorizationRequested.GetInvocationList()[1].Method.Module.Name+" attempted to circumvent OM security!  Protection mode enabled!");
+            if (OnAuthorizationRequested(pluginName,access))
+                return true;
+            return false;
         }
         private static string md5Encode(string value)
         {
@@ -158,7 +171,7 @@ namespace OpenMobile.Data
                     }
                     else
                     {
-                        if (promptAccess())
+                        if (promptAccess(Assembly.GetCallingAssembly().GetModules()[0].Name,credentialName))
                         {
                             cmd.CommandText = "SELECT UID from tblCache WHERE EncryptedName='" + md5 + "'";
                             UID = cmd.ExecuteScalar().ToString();
@@ -171,12 +184,17 @@ namespace OpenMobile.Data
                 }
                 else
                 {
-                    cmd.CommandText = "INSERT INTO tblCache (Value,EncryptedName)VALUES('" + Encryption.AESEncrypt(value, credentialName) + "','" + md5 + "')";
-                    cmd.ExecuteNonQuery();
-                    cmd.CommandText = "SELECT UID from tblCache WHERE EncryptedName='" + md5 + "'";
-                    UID = cmd.ExecuteScalar().ToString();
-                    cmd.CommandText = "INSERT OR REPLACE INTO tblAccess (UID,AssemblyHash)VALUES('" + UID + "','" + hash + "')";
-                    cmd.ExecuteNonQuery();
+                    if (promptAccess(Assembly.GetCallingAssembly().GetModules()[0].Name,credentialName))
+                    {
+                        cmd.CommandText = "INSERT INTO tblCache (Value,EncryptedName)VALUES('" + Encryption.AESEncrypt(value, credentialName) + "','" + md5 + "')";
+                        cmd.ExecuteNonQuery();
+                        cmd.CommandText = "SELECT UID from tblCache WHERE EncryptedName='" + md5 + "'";
+                        UID = cmd.ExecuteScalar().ToString();
+                        cmd.CommandText = "INSERT OR REPLACE INTO tblAccess (UID,AssemblyHash)VALUES('" + UID + "','" + hash + "')";
+                        cmd.ExecuteNonQuery();
+                    }
+                    else
+                        blockedHashes.Add(hash);
                 }
             }
         }

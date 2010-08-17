@@ -416,9 +416,8 @@ namespace OMSettings
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
                     break;
                 case 1:
-                    Personal.readInfo();
-                    ((OMTextBox)manager[screen, "personal"][6]).Text = Personal.getPassword(Personal.ePassword.google, "GOOGLEPW");
-                    ((OMTextBox)manager[screen, "personal"][5]).Text = Collections.personalInfo.googleUsername;
+                    ((OMTextBox)manager[screen, "personal"][6]).Text = Credentials.getCredential("Google Password");
+                    ((OMTextBox)manager[screen, "personal"][5]).Text = Credentials.getCredential("Google Username");
 
                     theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
                     theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "personal");
@@ -473,11 +472,11 @@ namespace OMSettings
 
         void Save2_OnClick(OMControl sender, int screen)
         {
-            Personal.setPassword(Personal.ePassword.google,((OMTextBox)manager[screen,"personal"][6]).Text,"GOOGLEPW");
-            Collections.personalInfo.googleUsername = ((OMTextBox)manager[screen, "personal"][5]).Text;
-            if ((Collections.personalInfo.googleUsername!=null)&&(Collections.personalInfo.googleUsername.EndsWith("@gmail.com") == false))
-                Collections.personalInfo.googleUsername += "@gmail.com";
-            Personal.writeInfo();
+            Credentials.setCredential("Google Password", ((OMTextBox)manager[screen, "personal"][6]).Text);
+            string googleUsername = ((OMTextBox)manager[screen, "personal"][5]).Text;
+            if ((googleUsername!=null)&&(googleUsername.EndsWith("@gmail.com") == false))
+                googleUsername += "@gmail.com";
+            Credentials.setCredential("Google Username", googleUsername);
             theHost.execute(eFunction.goBack, screen.ToString());
         }
 
