@@ -438,7 +438,7 @@ namespace OpenMobile
                 render_period = render_args.Time = time;
                 OnRenderFrameInternal(render_args);
                 render_time = render_watch.Elapsed.TotalMilliseconds;
-                Debug.Print((1 / render_args.Time).ToString("0.00") + "fps");
+                //Debug.Print((1 / render_args.Time).ToString("0.00") + "fps");
             }
             else
                 Debug.Print(DateTime.Now.ToString()+"-Frame Dropped!");
