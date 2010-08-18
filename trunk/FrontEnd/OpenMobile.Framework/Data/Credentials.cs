@@ -78,6 +78,7 @@ namespace OpenMobile.Data
             }
         }
         private static List<string> blockedHashes = new List<string>();
+        private static List<string> allowedHashes = new List<string>();
         private static string uid;
         public static string getCredential(string credentialName)
         {
@@ -89,7 +90,7 @@ namespace OpenMobile.Data
                 string hash = Assembly.GetCallingAssembly().GetModules()[0].ModuleVersionId.ToString();
                 if (blockedHashes.Contains(hash))
                     return null;
-                string md5 = md5Encode(credentialName + uid);
+                string md5 = Encryption.md5Encode(credentialName + uid);
                 SqliteCommand cmd = new SqliteCommand(con);
                 cmd.CommandText="SELECT Value from tblCache where EncryptedName='"+md5+"'";
                 object ret = cmd.ExecuteScalar();
@@ -98,6 +99,8 @@ namespace OpenMobile.Data
                     value = ret.ToString();
                 else
                     return null;
+                if (allowedHashes.Contains(hash+credentialName))
+                    return Encryption.AESDecrypt(value, credentialName);
                 cmd.CommandText="SELECT UID from tblCache WHERE EncryptedName='" + md5 + "'";
                 ret=cmd.ExecuteScalar();
                 string UID;
@@ -107,6 +110,7 @@ namespace OpenMobile.Data
                     return null;
                 cmd.CommandText = "SELECT Count(*) from tblAccess WHERE UID='" + UID + "' AND AssemblyHash='" + hash + "'";
                 int count = (int)(Int64)cmd.ExecuteScalar();
+                allowedHashes.Add(hash + credentialName);
                 if (count > 0)
                     return Encryption.AESDecrypt(value, credentialName);
                 else
@@ -132,15 +136,6 @@ namespace OpenMobile.Data
                 return true;
             return false;
         }
-        private static string md5Encode(string value)
-        {
-            MD5 client = MD5.Create();
-            byte[] md5 = client.ComputeHash(System.Text.ASCIIEncoding.ASCII.GetBytes(value));
-            string ret="";
-            foreach (byte b in md5)
-                ret += b.ToString("X2");
-            return ret;
-        }
         public static void setCredential(string credentialName, string value)
         {
             Open();
@@ -150,7 +145,7 @@ namespace OpenMobile.Data
                 if (blockedHashes.Contains(hash))
                     return;
                 SqliteCommand cmd = new SqliteCommand(con);
-                string md5 = md5Encode(credentialName + uid);
+                string md5 = Encryption.md5Encode(credentialName + uid);
                 cmd.CommandText = "SELECT Count(*) from tblCache WHERE EncryptedName='" + md5 + "'";
                 int count = (int)(Int64)cmd.ExecuteScalar();
                 string UID;
@@ -162,8 +157,13 @@ namespace OpenMobile.Data
                         UID = ret.ToString();
                     else
                         return;
-                    cmd.CommandText = "SELECT Count(*) from tblAccess WHERE UID='" + UID + "' AND AssemblyHash='" + hash + "'";
-                    count = (int)(Int64)cmd.ExecuteScalar();
+                    if (allowedHashes.Contains(hash + credentialName))
+                        count = 1;
+                    else
+                    {
+                        cmd.CommandText = "SELECT Count(*) from tblAccess WHERE UID='" + UID + "' AND AssemblyHash='" + hash + "'";
+                        count = (int)(Int64)cmd.ExecuteScalar();
+                    }
                     if (count > 0)
                     {
                         cmd.CommandText = "UPDATE tblCache SET Value='" + Encryption.AESEncrypt(value, credentialName) + "' WHERE EncryptedName='" + md5 + "'";

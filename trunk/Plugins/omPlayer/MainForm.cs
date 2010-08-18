@@ -395,6 +395,11 @@ namespace OMPlayer
                     if (s.getSetting("Music.PlayProtected") != "True")
                         return false;
             }
+            if (url.EndsWith(".IFO"))
+            {
+                theHost.execute(eFunction.Play, instance.ToString(), System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(url)));
+                return false;
+            }
             checkInstance(instance);
             return player[instance].play(url);
         }

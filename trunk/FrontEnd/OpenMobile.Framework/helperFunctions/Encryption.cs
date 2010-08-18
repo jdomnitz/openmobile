@@ -87,5 +87,19 @@ namespace OpenMobile.helperFunctions
             cryptoStream.Close();
             return Encoding.UTF8.GetString(PlainTextBytes, 0, ByteCount);
         }
+        /// <summary>
+        /// Encrypt a string using MD5 Encryption
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string md5Encode(string value)
+        {
+            MD5 client = MD5.Create();
+            byte[] md5 = client.ComputeHash(System.Text.ASCIIEncoding.ASCII.GetBytes(value));
+            string ret = "";
+            foreach (byte b in md5)
+                ret += b.ToString("X2");
+            return ret;
+        }
     }
 }
