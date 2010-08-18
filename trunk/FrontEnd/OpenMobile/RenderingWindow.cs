@@ -143,13 +143,8 @@ namespace OpenMobile
         }
         public void invokePaint()
         {
-            if (this.InvokeRequired)
-                this.Invoke(redraw);
-            else
-            {
-                Invalidate();
-                RenderingWindow_MouseMove(null, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
-            }
+            Invalidate();
+            RenderingWindow_MouseMove(null, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
         }
 
         private void Invalidate()
@@ -240,7 +235,7 @@ namespace OpenMobile
         private void insertPanel(OMPanel newP)
         {
             for (int i = backgroundQueue.Count - 1; i >= 0; i--)
-                if (backgroundQueue[i].Priority < newP.Priority)
+                if (backgroundQueue[i].Priority <= newP.Priority)
                 {
                     backgroundQueue.Insert(i+1, newP);
                     return;
@@ -251,8 +246,6 @@ namespace OpenMobile
         {
             if (r == Rectangle.Empty)
                 Invalidate();
-            //else
-                //Invalidate(r);
         }
         public void transitionOutEverything()
         {

@@ -131,7 +131,10 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (visible == value)
+                    return;
                 visible = value;
+                raiseUpdate(Rectangle.Empty);
             }
         }
 

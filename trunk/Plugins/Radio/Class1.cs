@@ -602,9 +602,17 @@ namespace OMRadio
         void Button_TuneTo_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            string newStation=input.getNumber(screen, "Radio");
-            //TODO - Actually get and use the proper band
-            theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), "FM:" + newStation);
+            string newStation = input.getNumber(screen, "Radio");
+            object o;
+            theHost.getData(eGetData.GetMediaStatus, "", out o);
+            if (o == null)
+                return;
+            stationInfo info = (stationInfo)o;
+            if (info.stationID.Contains(":"))
+            {
+                newStation = info.stationID.Substring(0,info.stationID.IndexOf(':')) + newStation;
+                theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), newStation);
+            }
         }
 
         void Button_No_OnClick(OMControl sender, int screen)

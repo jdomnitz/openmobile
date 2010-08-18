@@ -1204,9 +1204,7 @@ namespace OpenMobile
                 if (message == "Identify")
                     for (int i = 0; i < screenCount; i++)
                         Core.RenderingWindows[i].Invoke(Core.RenderingWindows[i].identify);
-                if (message == "Redraw")
-                    Core.RenderingWindows[0].Invoke(Core.RenderingWindows[0].redraw);
-                if (message == "ToggleCursor")
+                else if (message == "ToggleCursor")
                     for (int i = 0; i < screenCount; i++)
                         Core.RenderingWindows[i].hideCursor();
                 return true;

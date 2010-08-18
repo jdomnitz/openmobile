@@ -463,7 +463,6 @@ namespace OpenMobile
             manager[screen][21].Visible = false;
             manager[screen][20].Visible = false;
             manager[screen][19].Visible = false;
-            theHost.sendMessage("RenderingWindow", "UI", "Redraw");
         }
         void statusReset_Elapsed(object sender, ElapsedEventArgs e)
         {
