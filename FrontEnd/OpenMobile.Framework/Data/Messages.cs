@@ -36,33 +36,37 @@ namespace OpenMobile.Data
         [Flags]
         public enum flags {
             /// <summary>
-            /// Message Unread
+            /// No Flags
             /// </summary>
-            messageUnread = 0,
+            None = 0,
             /// <summary>
             /// Message Read
             /// </summary>
-            messageRead = 1,
+            Read = 1,
             /// <summary>
             /// Message is Important
             /// </summary>
-            messageImportant = 2,
+            Important = 2,
             /// <summary>
             /// Message has attachment
             /// </summary>
-            messageHasAttachment = 4,
+            HasAttachment = 4,
             /// <summary>
             /// Message has been responded to
             /// </summary>
-            messageRespondedTo = 8,
+            RespondedTo = 8,
             /// <summary>
             /// Message is an SMS/MMS
             /// </summary>
-            messageIsSMS=16,
+            SMS=16,
             /// <summary>
             /// SPAM/Junk
             /// </summary>
-            messageIsSpam=32
+            Spam=32,
+            /// <summary>
+            /// Message is an outbound/sent message
+            /// </summary>
+            Outbound=64
         };
         /// <summary>
         /// A message

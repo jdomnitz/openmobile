@@ -188,15 +188,11 @@ namespace OpenMobile.Data
             }
         }
 
-        #region IDisposable Members
-
         public void Dispose()
         {
             con.Dispose();
             if (asyncReader != null)
                 asyncReader.Dispose();
         }
-
-        #endregion
     }
 }

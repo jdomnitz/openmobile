@@ -24,9 +24,20 @@ namespace OpenMobile.Data
     /// <summary>
     /// Vehicle
     /// </summary>
-    public sealed class Vehicle
+    public static class Vehicle
     {
-        //ToDo
+        public static string VIN;
+        public static string Driver;
+        public static int FuelType;
+        public static int Mileage;
+        public static void LoadData()
+        {
+            //TODO
+        }
+        public static void SaveData()
+        {
+            //TODO
+        }
     }
 }
 
