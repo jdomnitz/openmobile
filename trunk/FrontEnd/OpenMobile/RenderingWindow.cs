@@ -247,8 +247,11 @@ namespace OpenMobile
             if (r == Rectangle.Empty)
                 Invalidate();
         }
-        public void transitionOutEverything()
+        public bool blockHome = false;
+        public bool transitionOutEverything()
         {
+            if (blockHome)
+                return false;
             highlighted = null;
             for (int i = backgroundQueue.Count - 1; i >=0; i--)
                 if ((backgroundQueue[i].Mode == eModeType.transitioningIn) || (backgroundQueue[i].UIPanel))
@@ -261,6 +264,7 @@ namespace OpenMobile
                 }
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;
+            return true;
         }
         public void transitionOutPanel(OMPanel oldP)
         {
@@ -791,7 +795,7 @@ namespace OpenMobile
         {
             heightScale = (this.ClientRectangle.Height / 600F);
             widthScale = (this.ClientRectangle.Width / 1000F);
-            Invalidate();
+            OnRenderFrameInternal(null);
             Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
         }
         #endregion

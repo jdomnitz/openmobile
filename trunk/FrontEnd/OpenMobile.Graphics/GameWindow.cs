@@ -671,7 +671,7 @@ namespace OpenMobile
 
         #region OnRenderFrameInternal
 
-        private void OnRenderFrameInternal(FrameEventArgs e)
+        public void OnRenderFrameInternal(FrameEventArgs e)
         {
             if (Exists && !isExiting)
             {

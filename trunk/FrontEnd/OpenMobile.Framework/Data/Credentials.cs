@@ -70,11 +70,11 @@ namespace OpenMobile.Data
             {
                 if (con != null)
                     con.Dispose();
-                con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=False;temp_store=2;");
+                con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=False;");
                 con.Open();
+                createDB();
                 SqliteCommand cmd = new SqliteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con);
                 cmd.ExecuteNonQuery();
-                createDB();
             }
         }
         private static List<string> blockedHashes = new List<string>();
@@ -138,6 +138,8 @@ namespace OpenMobile.Data
         }
         public static void setCredential(string credentialName, string value)
         {
+            if (value == null)
+                return;
             Open();
             lock (con)
             {
