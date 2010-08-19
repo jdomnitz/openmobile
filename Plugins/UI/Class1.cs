@@ -573,9 +573,11 @@ namespace OpenMobile
 
         void HomeButton_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromAny,screen.ToString());
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"MainMenu");
-            theHost.execute(eFunction.ExecuteTransition,screen.ToString());
+            if (theHost.execute(eFunction.TransitionFromAny, screen.ToString()))
+            {
+                theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
+                theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            }
         }
 
         void slider_OnSliderMoved(OMSlider sender,int screen)

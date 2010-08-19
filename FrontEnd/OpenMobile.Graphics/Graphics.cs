@@ -53,7 +53,11 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Glowing Text
         /// </summary>
-        Glow = 9
+        Glow = 9,
+        /// <summary>
+        /// Bold Glowing Text
+        /// </summary>
+        BoldGlow=10
     };
     /// <summary>
     /// Alignment arguments
@@ -107,7 +111,11 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Centered with Word Wrap
         /// </summary>
-        WordWrap = 10011
+        WordWrap = 10011,
+        /// <summary>
+        /// Top Centered Word Wrap
+        /// </summary>
+        WordWrapTC = 10001
     };
     /// <summary>
     /// The angle to rotate the control
@@ -988,15 +996,15 @@ namespace OpenMobile.Graphics
             if ((text == null) || (text == ""))
                 return;
             FontStyle f = FontStyle.Regular;
-            if ((format == eTextFormat.Bold) || (format == eTextFormat.BoldShadow))
+            if ((format == eTextFormat.Bold) || (format == eTextFormat.BoldShadow)||(format==eTextFormat.BoldGlow))
             {
                 f = FontStyle.Bold;
             }
-            if ((format == eTextFormat.Italic) || (format == eTextFormat.ItalicShadow))
+            else if ((format == eTextFormat.Italic) || (format == eTextFormat.ItalicShadow))
             {
                 f = FontStyle.Italic;
             }
-            if ((format == eTextFormat.Underline) || (format == eTextFormat.UnderlineShadow))
+            else if ((format == eTextFormat.Underline) || (format == eTextFormat.UnderlineShadow))
             {
                 f = FontStyle.Underline;
             }
@@ -1017,7 +1025,7 @@ namespace OpenMobile.Graphics
                     g.FillPath(new SolidBrush(color), path);
                 }
             }
-            else if (format == eTextFormat.Glow)
+            else if ((format == eTextFormat.Glow)||(format==eTextFormat.BoldGlow))
             {
                 using (StringFormat sFormat = new StringFormat())
                 {
@@ -1049,7 +1057,7 @@ namespace OpenMobile.Graphics
                     System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)f);
                     using (SolidBrush defaultBrush = new SolidBrush(color))
                     {
-                        if ((alignment & Alignment.WordWrap) != Alignment.WordWrap)
+                        if (((int)alignment & 10000) != 10000)
                             sFormat.FormatFlags = StringFormatFlags.NoWrap; // Added by Borte to block automatic wrapping of text (should this be a parameter that can be controled from the outside?)
                         if (((int)format % 2) == 1)
                             g.DrawString(text, currentFont, new SolidBrush(secondColor), new RectangleF(x + 1, y + 2, w, h), sFormat);

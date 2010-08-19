@@ -273,11 +273,77 @@ namespace OpenMobile
             Credentials.OnAuthorizationRequested += new Credentials.Authorization(Credentials_OnAuthorizationRequested);
             Credentials.Open();
         }
-
+        EventWaitHandle secure = new EventWaitHandle(false, EventResetMode.AutoReset);
         bool Credentials_OnAuthorizationRequested(string pluginName, string requestedAccess)
         {
-            //TODO
-            return true;
+            OMPanel security = new OMPanel("Security");
+            security.BackgroundColor1 = Color.FromArgb(100, Color.Black);
+            security.Forgotten = true;
+            security.Priority = ePriority.Urgent;
+            OMBasicShape box = new OMBasicShape(250, 130, 500, 300);
+            box.BorderColor = Color.Silver;
+            box.BorderSize = 3F;
+            box.CornerRadius = 15;
+            box.FillColor = Color.FromArgb(0, 0, 15);
+            box.Shape = shapes.RoundedRectangle;
+            security.addControl(box);
+            OMImage img = new OMImage(400, 140, 225, 280);
+            img.Image = Core.theHost.getSkinImage("Lock");
+            security.addControl(img);
+            OMLabel label = new OMLabel(250, 200, 500, 115);
+            label.Text = pluginName + " is requesting access to the credentials cache to access your " + requestedAccess;
+            label.TextAlignment = Alignment.WordWrapTC;
+            label.Font = new Font(Font.Arial, 22F);
+            security.addControl(label);
+            OMLabel title = new OMLabel(260, 135, 480, 60);
+            title.Text = "Authorization Required";
+            title.Font = new Font(Font.Verdana, 29F);
+            title.Format = eTextFormat.Glow;
+            title.OutlineColor = Color.Yellow;
+            security.addControl(title);
+            OMButton accept = new OMButton(295, 340, 200, 80);
+            accept.Image = Core.theHost.getSkinImage("Full");
+            accept.FocusImage = Core.theHost.getSkinImage("Full.Highlighted");
+            accept.Text = "Allow";
+            accept.OnClick += security_OnClick;
+            security.addControl(accept);
+            OMButton deny = new OMButton(515, 340, 200, 80);
+            deny.Image = Core.theHost.getSkinImage("Full");
+            deny.FocusImage = Core.theHost.getSkinImage("Full.Highlighted");
+            deny.Text = "Deny";
+            deny.OnClick += security_OnClick;
+            security.addControl(deny);
+            for(int i=0;i<ScreenCount;i++)
+            {
+                lock (Core.RenderingWindows[i])
+                {
+                    Core.RenderingWindows[i].transitionInPanel(security);
+                    Core.RenderingWindows[i].executeTransition(eGlobalTransition.None);
+                    history.setDisabled(i, true);
+                    Core.RenderingWindows[i].blockHome = true;
+                }
+            }
+            secure.WaitOne();
+            for (int i = 0; i < ScreenCount; i++)
+            {
+                lock (Core.RenderingWindows[i])
+                {
+                    Core.RenderingWindows[i].transitionOutPanel(security);
+                    Core.RenderingWindows[i].executeTransition(eGlobalTransition.None);
+                    history.setDisabled(i, false);
+                    Core.RenderingWindows[i].blockHome = false;
+                }
+            }
+            if ((accept.Tag!=null)&&(accept.Tag.ToString() == "True"))
+                return true;
+            else
+                return false;
+        }
+
+        void security_OnClick(OMControl sender, int screen)
+        {
+            sender.Tag = "True";
+            secure.Set();
         }
 
         private void InputRouter_OnHighlightedChanged(OMControl sender, int screen)
@@ -773,7 +839,8 @@ namespace OpenMobile
                             return false;
                         lock (Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[ret].transitionOutEverything();
+                            if (!Core.RenderingWindows[ret].transitionOutEverything())
+                                return false;
                         }
                         history.setDisabled(ret, false);
                         raiseSystemEvent(eFunction.TransitionFromAny, arg, "", "");
