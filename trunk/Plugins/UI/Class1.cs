@@ -383,7 +383,8 @@ namespace OpenMobile
                         Thread.Sleep(50);
                     }
                 }
-                manager[volScreen][26].Visible = false;
+                if (volScreen>=0)
+                    manager[volScreen][26].Visible = false;
             }
             volScreen = -1;
             if (volTmr != null)

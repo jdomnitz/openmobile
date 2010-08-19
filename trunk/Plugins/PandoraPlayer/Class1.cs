@@ -30,7 +30,7 @@ using System.Diagnostics;
 
 namespace PandoraPlayer
 {
-    public class Pandora:ITunedContent
+    public class Pandora:ITunedContent,IPausable
     {
         PClient client;
         int instance=0;
@@ -346,17 +346,19 @@ namespace PandoraPlayer
         bool paused;
         public bool incomingMessage(string message, string source)
         {
-            if (message == "PlayPause")
-                if (client != null)
-                {
-                    client.PlayPause();
-                    paused = !paused;
-                }
+            return false;
+        }
+        public bool pause(int instance)
+        {
+            if (client != null)
+            {
+                client.PlayPause();
+                paused = !paused;
+            }
             if (!paused)
                 raiseMediaEvent(eFunction.Play, instance.ToString());
             return paused;
         }
-
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
             throw new NotImplementedException();

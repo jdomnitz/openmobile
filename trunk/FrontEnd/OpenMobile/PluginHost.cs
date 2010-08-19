@@ -291,7 +291,7 @@ namespace OpenMobile
             img.Image = Core.theHost.getSkinImage("Lock");
             security.addControl(img);
             OMLabel label = new OMLabel(250, 200, 500, 115);
-            label.Text = pluginName + " is requesting access to the credentials cache to access your " + requestedAccess;
+            label.Text = pluginName + " is requesting access to the credentials cache to access your " + requestedAccess+".";
             label.TextAlignment = Alignment.WordWrapTC;
             label.Font = new Font(Font.Arial, 22F);
             security.addControl(label);
@@ -712,7 +712,10 @@ namespace OpenMobile
                     if (currentMediaPlayer[ret] == null)
                     {
                         if (currentTunedContent[ret] != null)
-                            return sendMessage(currentTunedContent[ret].pluginName, "PluginHost", "PlayPause"); //TODO: IExtendedTuner
+                        {
+                            if (typeof(IPausable).IsInstanceOfType(currentTunedContent[ret]))
+                                return ((IPausable)currentTunedContent[ret]).pause(ret);
+                        }
                         return false;
                     }
                     return currentMediaPlayer[ret].pause(ret);
