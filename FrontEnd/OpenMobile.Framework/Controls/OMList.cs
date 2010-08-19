@@ -606,7 +606,7 @@ namespace OpenMobile.Controls
                             if (i > 0)
                             {
                                 int t = ((rect.Top % 2) == 0) ? 1 : 0;
-                                g.DrawLine(new Pen(background, 2F), rect.Left, rect.Top-t, rect.Left + rect.Width, rect.Top-t);
+                                g.DrawLine(new Pen(Color.FromArgb((int)(tmp*background.A), background), 2F), rect.Left, rect.Top-t, rect.Left + rect.Width, rect.Top-t);
                             }
                             if ((selectedIndex == i) && (focused))
                                 g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), rect.Left, rect.Top, rect.Width, rect.Height);

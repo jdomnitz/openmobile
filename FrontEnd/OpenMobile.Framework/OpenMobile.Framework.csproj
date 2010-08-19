@@ -113,6 +113,7 @@
     <Compile Include="Plugin\INavigation.cs" />
     <Compile Include="Plugin\INetwork.cs" />
     <Compile Include="Plugin\IOther.cs" />
+    <Compile Include="Plugin\IPausable.cs" />
     <Compile Include="Plugin\IPlayer.cs" />
     <Compile Include="Plugin\IRawHardware.cs" />
     <Compile Include="Plugin\ISpeech.cs" />

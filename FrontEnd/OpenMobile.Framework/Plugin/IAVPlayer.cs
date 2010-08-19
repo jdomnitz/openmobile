@@ -24,18 +24,13 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Plays audio and/or video
     /// </summary>
-    public interface IAVPlayer:IPlayer
+    public interface IAVPlayer:IPlayer,IPausable
     {
         /// <summary>
         /// Play the current media
         /// </summary>
         /// <returns></returns>
         bool play(int instance);
-        /// <summary>
-        /// Pause the current media
-        /// </summary>
-        /// <returns></returns>
-        bool pause(int instance);
         /// <summary>
         /// Stop the currently playing media
         /// </summary>

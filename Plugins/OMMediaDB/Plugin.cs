@@ -354,7 +354,7 @@ namespace OMMediaDB
                     s.Append(General.escape(info.Artist));
                     s.Append("',@cover)");
                     System.Drawing.ImageConverter img = new System.Drawing.ImageConverter();
-                    command.Parameters.Add(new SqliteParameter("@cover", img.ConvertTo(info.coverArt, typeof(byte[]))));
+                    command.Parameters.Add(new SqliteParameter("@cover", img.ConvertTo(info.coverArt.image, typeof(byte[]))));
                     hasCover = true;
                 }
                 else
