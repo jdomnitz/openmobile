@@ -53,7 +53,7 @@ namespace OpenMobile.Media
         /// <summary>
         /// XML Shareable Playlist Format
         /// </summary>
-        ASPF,
+        XSPF,
         /// <summary>
         /// A PodCast
         /// </summary>
@@ -183,7 +183,7 @@ namespace OpenMobile.Media
                 case ".wvx":
                     return readASX(location);
                 case "xspf":
-                    return readASPF(location);
+                    return readXSPF(location);
                 case "cast": //podcast (.pcast)
                     return readPCAST(location);
             }
@@ -216,7 +216,7 @@ namespace OpenMobile.Media
             }
             return playlist;
         }
-        private static List<mediaInfo> readASPF(string location)
+        private static List<mediaInfo> readXSPF(string location)
         {
             List<mediaInfo> playlist = new List<mediaInfo>();
             XmlDocument reader = new XmlDocument();

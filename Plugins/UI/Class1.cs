@@ -576,6 +576,7 @@ namespace OpenMobile
         {
             if (theHost.execute(eFunction.TransitionFromAny, screen.ToString()))
             {
+                theHost.execute(eFunction.clearHistory, screen.ToString());
                 theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
                 theHost.execute(eFunction.ExecuteTransition, screen.ToString());
             }

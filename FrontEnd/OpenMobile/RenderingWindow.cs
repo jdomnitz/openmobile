@@ -203,7 +203,10 @@ namespace OpenMobile
             {
                 c = newP.getControl(i);
                 c.UpdateThisControl += UpdateThisControl;
-                c.Mode = eModeType.transitioningIn;
+                if ((c.Mode == eModeType.ClickedAndTransitioningOut) || (c.Mode == eModeType.transitioningOut))
+                    c.Mode = eModeType.transitionLock;
+                else
+                    c.Mode = eModeType.transitioningIn;
             }
             if (newP.Mode == eModeType.transitioningOut)
                 newP.Mode = eModeType.Normal;
@@ -792,8 +795,8 @@ namespace OpenMobile
             switch (currentTransition)
             {
                 case eGlobalTransition.Crossfade:
-                    rParam.globalTransitionIn += 0.075F;
-                    rParam.globalTransitionOut -= 0.075F;
+                    rParam.globalTransitionIn += 0.1F;
+                    rParam.globalTransitionOut -= 0.1F;
                     if (rParam.globalTransitionOut < 0.1F)
                     {
                         transitioning = false;
@@ -816,46 +819,46 @@ namespace OpenMobile
                 case eGlobalTransition.SlideUp:
                     rParam.globalTransitionIn = 1;
                     tick++;
-                    if (tick == 9)
+                    if (tick == 6)
                     {
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(0, -(75 * tick));
-                    ofsetIn = new Point(0, 600 - (75 * tick));
+                    ofsetOut = new Point(0, -(120 * tick));
+                    ofsetIn = new Point(0, 600 - (120 * tick));
                     break;
                 case eGlobalTransition.SlideDown:
                     rParam.globalTransitionIn = 1;
                     tick++;
-                    if (tick == 9)
+                    if (tick == 6)
                     {
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(0, (75 * tick));
-                    ofsetIn = new Point(0, (75 * tick) - 600);
+                    ofsetOut = new Point(0, (120 * tick));
+                    ofsetIn = new Point(0, (120 * tick) - 600);
                     break;
                 case eGlobalTransition.SlideLeft:
                     rParam.globalTransitionIn = 1;
                     tick++;
-                    if (tick == 9)
+                    if (tick == 6)
                     {
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(-125 * tick, 0);
-                    ofsetIn = new Point(1000 - (125 * tick), 0);
+                    ofsetOut = new Point(-200 * tick, 0);
+                    ofsetIn = new Point(1000 - (200 * tick), 0);
                     break;
                 case eGlobalTransition.SlideRight:
                     rParam.globalTransitionIn = 1;
                     tick++;
-                    if (tick == 9)
+                    if (tick == 6)
                     {
                         transitioning = false;
                         return;
                     }
-                    ofsetOut = new Point(125 * tick, 0);
-                    ofsetIn = new Point((125 * tick) - 1000, 0);
+                    ofsetOut = new Point(200 * tick, 0);
+                    ofsetIn = new Point((200 * tick) - 1000, 0);
                     break;
             }
             Invalidate();

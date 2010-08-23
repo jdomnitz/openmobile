@@ -280,8 +280,6 @@ namespace OpenMobile
             RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
             for (int i = 0; i < RenderingWindows.Capacity; i++)
                 RenderingWindows.Add(new RenderingWindow(i));
-            if (Directory.Exists(theHost.DataPath) == false)
-                Directory.CreateDirectory(theHost.DataPath);
             if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
             {
                 using (PluginSettings settings = new PluginSettings())

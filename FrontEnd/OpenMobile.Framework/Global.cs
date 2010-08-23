@@ -848,6 +848,10 @@ namespace OpenMobile
         /// </summary>
         stepBackward = 64,
         /// <summary>
+        /// Clear the panel (go back) history
+        /// </summary>
+        clearHistory=65,
+        /// <summary>
         /// Sends a keypress to the target UI window
         /// Possible keys: Up, Down, Left, Right, Enter, ScrollUp, ScrollDown
         /// <para>---------------------------------------</para>
