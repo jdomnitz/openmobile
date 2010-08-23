@@ -269,6 +269,8 @@ namespace OpenMobile
                 history.Enqueue(i, "MainMenu", "", false);
             for (int i = 0; i < 8; i++)
                 queued[i] = new List<mediaInfo>();
+            if (Directory.Exists(DataPath) == false)
+                Directory.CreateDirectory(DataPath);
             InputRouter.OnHighlightedChanged += new userInteraction(InputRouter_OnHighlightedChanged);
             Credentials.OnAuthorizationRequested += new Credentials.Authorization(Credentials_OnAuthorizationRequested);
             Credentials.Open();
@@ -602,6 +604,11 @@ namespace OpenMobile
             {
                 return items[screen].Count;
             }
+            public void Clear(int screen)
+            {
+                items[screen].Clear();
+                currentItem[screen] = new historyItem();
+            }
         }
         public int ScreenCount
         {
@@ -878,6 +885,13 @@ namespace OpenMobile
                     if (int.TryParse(arg, out ret) == true)
                     {
                         history.setDisabled(ret, false);
+                        return true;
+                    }
+                    return false;
+                case eFunction.clearHistory:
+                    if (int.TryParse(arg, out ret))
+                    {
+                        history.Clear(ret);
                         return true;
                     }
                     return false;

@@ -81,20 +81,6 @@ namespace TagLib.Ogg
 		
 #endregion
 		
-		
-		
-#region Private Static Fields
-		
-		/// <summary>
-		///    Contains registered codec providers.
-		/// </summary>
-		private static List<CodecProvider> providers =
-			new List<CodecProvider> ();
-		
-#endregion
-		
-		
-		
 #region Private Static Methods
 		
 		/// <summary>
@@ -118,15 +104,10 @@ namespace TagLib.Ogg
 		///    This method will first use CodecProvider
 		///    delegates registered with <see cref="AddCodecProvider" />
 		///    and then attempt to use the built-in codecs.
-		/// </remarks>
+		/// </remarks>,.
 		public static Codec GetCodec (ByteVector packet)
 		{
 			Codec c = null;
-			
-			foreach (CodecProvider p in providers) {
-				c = p (packet);
-				if (c != null) return c;
-			}
 			
 			c = Codecs.Vorbis.FromPacket (packet);
 			if (c != null)
@@ -141,23 +122,6 @@ namespace TagLib.Ogg
                 return c;
 
 			throw new UnsupportedFormatException ("Unknown codec.");
-		}
-		
-		/// <summary>
-		///    Adds a codec 
-		/// </summary>
-		/// <param name="provider">
-		/// A <see cref="CodecProvider"/>
-		/// </param>
-		/// <remarks>
-		///    A CodecProvider delegate is used to add
-		///    support for new <see cref="Codec" /> subclasses in <see
-		///    cref="GetCodec" />.
-		/// </remarks>
-		/// <seealso cref="CodecProvider" />
-		public static void AddCodecProvider (CodecProvider provider)
-		{
-			providers.Insert (0, provider);
 		}
 		
 #endregion
