@@ -346,6 +346,8 @@ namespace OpenMobile.Controls
             lock (this)
             {
                 items.Add(item);
+                if (items.Count < count)
+                    raiseUpdate(Rectangle.Empty);
             }
         }
         /// <summary>
@@ -368,6 +370,8 @@ namespace OpenMobile.Controls
             lock (this)
             {
                 items.Add(new OMListItem(item));
+                if (items.Count < count)
+                    raiseUpdate(Rectangle.Empty);
             }
         }
 
@@ -517,6 +521,7 @@ namespace OpenMobile.Controls
             get { return scrollbars; }
             set { scrollbars = value; }
         }
+        int count;
         /// <summary>
         /// Draws the control
         /// </summary>
@@ -534,7 +539,7 @@ namespace OpenMobile.Controls
                 else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                     tmp = e.globalTransitionOut;
                 Rectangle r = g.Clip; //Save the drawing size
-                g.SetClip(this.toRegion()); //But only draw out control
+                g.Clip=this.toRegion(); //But only draw out control
                 if (background != Color.Transparent)
                     g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)),Left + 1, Top + 1, Width - 2, Height - 2);
                 
@@ -553,7 +558,7 @@ namespace OpenMobile.Controls
                     else
                         listHeight = (listHeight > listViewItemOffset) ? listHeight : listViewItemOffset;
                 }
-                int count = (this.Height / listHeight);
+                count = (this.Height / listHeight);
                 int imgSze = 4;
                 if ((moved > 0) || (items.Count * listHeight < Height)) //List start below top
                 {

@@ -1268,27 +1268,27 @@ namespace OpenMobile
         /// <summary>
         /// Low Priority
         /// </summary>
-        Low,
+        Low=0,
         /// <summary>
         /// Medium-Low Priority
         /// </summary>
-        MediumLow,
+        MediumLow=1,
         /// <summary>
         /// Normal Priority
         /// </summary>
-        Normal,
+        Normal=2,
         /// <summary>
         /// Medium-High Priority
         /// </summary>
-        MediumHigh,
+        MediumHigh=3,
         /// <summary>
         /// High Priority
         /// </summary>
-        High,
+        High=4,
         /// <summary>
         /// Urgent Priority
         /// </summary>
-        Urgent
+        Urgent=5
     }
     /// <summary>
     /// The type of data to retrieve

@@ -270,7 +270,10 @@ namespace OMSettings
         void text_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", sender.Name);
+            if ((((OMTextBox)sender).Flags&textboxFlags.Password)==textboxFlags.Password)
+                ((OMTextBox)sender).Text = input.getPassword(screen, "OMSettings", sender.Name);
+            else
+                ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", sender.Name);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.Value = ((OMTextBox)sender).Text;
             collection.changeSetting(s);

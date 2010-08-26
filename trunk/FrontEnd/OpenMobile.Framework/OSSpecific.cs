@@ -19,15 +19,12 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
-using OpenMobile.Plugin;
-using System.Drawing;
-using System.Text;
-using System.Net;
 using System.IO;
-using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Microsoft.Win32;
+using OpenMobile.Graphics;
+using OpenMobile.Plugin;
 
 namespace OpenMobile.Framework
 {

@@ -19,7 +19,6 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Drawing;
 using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Data;
@@ -50,7 +49,7 @@ namespace OMContacts
             border.Name = "border";
             OMImage picture = new OMImage(351, 137, 125, 150);
             picture.Name = "picture";
-            Font f = new Font("Microsoft Sans Serif", 24F);
+            Font f = new Font(Font.GenericSansSerif, 24F);
             OMLabel home = new OMLabel(342, 284, 500, 50);
             home.Font = f;
             home.TextAlignment = Alignment.CenterLeft;
@@ -206,6 +205,5 @@ namespace OMContacts
         {
             //
         }
-
     }
 }

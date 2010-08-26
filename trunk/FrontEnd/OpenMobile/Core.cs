@@ -39,7 +39,6 @@ namespace OpenMobile
         public static List<RenderingWindow> RenderingWindows = null;
         public static List<IBasePlugin> pluginCollection = new List<IBasePlugin>();
         public static bool exitTransition = true;
-        public static bool FullScreen = false;
 
         private static void loadMainMenu()
         {
@@ -294,30 +293,6 @@ namespace OpenMobile
             theHost.load();
             Thread rapidMenu=new Thread(new ThreadStart(Core.initialize));
             rapidMenu.Start();
-            if (Environment.GetCommandLineArgs().Length > 1)
-            {
-                if (Environment.GetCommandLineArgs()[1].ToLower() == "-fullscreen")
-                {
-                    FullScreen = true;
-                    for (int i = 0; i < RenderingWindows.Count; i++)
-                    {
-                        RenderingWindows[i].WindowBorder = WindowBorder.Hidden;
-                        RenderingWindows[i].WindowState = WindowState.Fullscreen;
-                    }
-                }
-                if (Environment.GetCommandLineArgs()[1].ToLower().StartsWith("-size=")==true)
-                {
-                    string[] part = Environment.GetCommandLineArgs()[1].Substring(6).Split(new char[] { 'x' });
-                    for (int i = 0; i < RenderingWindows.Count; i++)
-                    {
-                        try
-                        {
-                            RenderingWindows[i].Size = new Size(int.Parse(part[0]), int.Parse(part[1]));
-                        }
-                        catch (ArgumentException) { break; }
-                    }
-                }
-            }
             for (int i = 1; i<RenderingWindows.Count; i++)
                 RenderingWindows[i].RunAsync(1);
             RenderingWindows[0].Run(1);

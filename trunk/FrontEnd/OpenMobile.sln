@@ -35,8 +35,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPGContacts", "..\Plugins\D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networking", "..\Plugins\Networking\Networking.csproj", "{779AEDF3-DD8D-44F5-BBD2-012A2F550EF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinWifi", "..\Plugins\WinWifi\WinWifi.csproj", "{2CD462A0-5AE7-475A-8C52-6B2415089ACE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMDebug", "..\Plugins\OMDebug\OMDebug.csproj", "{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Video", "..\Plugins\Video\Video.csproj", "{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}"
@@ -48,6 +46,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Graphics", "OpenMobile.Graphics\OpenMobile.Graphics.csproj", "{E1727C23-C7FD-4FBA-B09F-7160B5947F85}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatterySupport", "..\Plugins\BatterySupport\BatterySupport.csproj", "{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBrowser", "..\Plugins\WebBrowser\WebBrowser.csproj", "{7AC98765-7597-4BDD-B72F-5E83D9DBB486}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -123,10 +123,6 @@ Global
 		{779AEDF3-DD8D-44F5-BBD2-012A2F550EF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{779AEDF3-DD8D-44F5-BBD2-012A2F550EF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{779AEDF3-DD8D-44F5-BBD2-012A2F550EF3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C80AF7A1-7FAB-4EC1-9734-4D416BECA551}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -151,6 +147,10 @@ Global
 		{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AC98765-7597-4BDD-B72F-5E83D9DBB486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AC98765-7597-4BDD-B72F-5E83D9DBB486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AC98765-7597-4BDD-B72F-5E83D9DBB486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AC98765-7597-4BDD-B72F-5E83D9DBB486}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

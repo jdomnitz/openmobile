@@ -936,6 +936,7 @@ namespace OpenMobile.Graphics
         {
             DrawLine(pen,(int)x1,(int)y1,(int)x2,(int)y2);
         }
+        [Obsolete("Set Clip Property Directly")]
         public void SetClip(Rectangle Rect)
         {
             Clip=Rect;

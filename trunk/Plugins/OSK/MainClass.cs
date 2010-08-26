@@ -44,10 +44,21 @@ namespace OpenMobile
             else
                 setLowercase(screen);
             if (name == "")
+            {
                 name = "OSK";
+                ((OMTextBox)manager[screen, "OSK"]["Text"]).Flags = textboxFlags.None;
+            }
             if ((name != "OSK") && (name != "NUMOSK") && (name != "SYM"))
             {
-                ((OMTextBox)manager[screen, "OSK"]["Text"]).Text = name;
+                OMTextBox tb=((OMTextBox)manager[screen, "OSK"]["Text"]);
+                if ((name!=null)&&(name.StartsWith("PASSWORD|")))
+                {
+                    tb.Flags = textboxFlags.Password;
+                    name = name.Substring(9);
+                }
+                else
+                    tb.Flags = textboxFlags.None;
+                tb.Text = name;
                 name = "OSK";
             }
             return manager[screen,name];

@@ -33,7 +33,7 @@ namespace OpenMobile
     {
         public static void Asynchronous(Function function)
         {
-            new Thread(delegate()
+            new Thread(()=>
                 {
                     try
                     {

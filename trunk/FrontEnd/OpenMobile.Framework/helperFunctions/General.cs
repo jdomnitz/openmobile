@@ -66,13 +66,40 @@ namespace OpenMobile.helperFunctions
             {
                 return getText(screen, pluginname, new string[] { panelName });
             }
+            public string getPassword(int screen, string pluginname, string defaultValue)
+            {
+                return getPassword(screen, pluginname, new string[] { ""},defaultValue);
+            }
             public string getText(int screen, string pluginname, string panelName, string defaultValue)
             {
                 return getText(screen, pluginname, new string[]{panelName}, defaultValue);
             }
+            public string getPassword(int screen, string pluginname, string panelName, string defaultValue)
+            {
+                return getPassword(screen, pluginname, new string[] { panelName }, defaultValue);
+            }
             public string getText(int screen,string pluginname,string[] panelNames)
             {
                 return getText(screen, pluginname, panelNames,"OSK");
+            }
+            public string getPassword(int screen, string pluginname, string[] panelNames, string defaultValue)
+            {
+                SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);
+                host.OnSystemEvent += ev;
+                this.screen = screen;
+                wait.Reset();
+                bool error = false;
+                host.execute(eFunction.TransitionFromAny, screen.ToString());
+                error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "PASSWORD|"+defaultValue);
+                host.execute(eFunction.ExecuteTransition,screen.ToString());
+                if (!error)
+                    wait.WaitOne();
+                host.OnSystemEvent -= ev;
+                host.execute(eFunction.TransitionFromAny, screen.ToString());
+                foreach(string panelName in panelNames)
+                    host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
+                host.execute(eFunction.ExecuteTransition, screen.ToString());
+                return theText;
             }
             public string getText(int screen,string pluginname,string[] panelNames,string defaultValue)
             {
