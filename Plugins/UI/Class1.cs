@@ -623,7 +623,8 @@ namespace OpenMobile
                 {
                     ((OMLabel)manager[j]["UI.Elapsed"]).Text = "";
                     ((OMSlider)manager[j]["UI.Slider"]).Value = 0;
-                }else if ((i < ((OMSlider)manager[j]["UI.Slider"]).Maximum) && (i >= 0))
+                }
+                else if ((i < ((OMSlider)manager[j]["UI.Slider"]).Maximum) && (i >= 0))
                 {
                     if (((OMSlider)manager[j]["UI.Slider"]).Mode == eModeType.Scrolling)
                         return;

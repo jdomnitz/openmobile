@@ -929,8 +929,9 @@ namespace OpenMobile.Platform.Windows
                         // command for windows with hidden borders.
 
                         // Reset state to avoid strange side-effects from maximized/minimized windows.
-                        ResetWindowState();
-
+                        //ResetWindowState();
+                        Functions.ShowWindow(window.WindowHandle, ShowWindowCommand.NORMAL);
+                        
                         previous_bounds = Bounds;
                         previous_window_border = WindowBorder;
                         HideBorder();
@@ -990,7 +991,7 @@ namespace OpenMobile.Platform.Windows
                 // To ensure maximized/minimized windows work correctly, reset state to normal,
                 // change the border, then go back to maximized/minimized.
                 WindowState state = WindowState;
-                ResetWindowState();
+                //ResetWindowState();
 
                 WindowStyle style = WindowStyle.ClipChildren | WindowStyle.ClipSiblings;
 

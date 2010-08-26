@@ -281,7 +281,7 @@ namespace OpenMobile
             OMPanel security = new OMPanel("Security");
             security.BackgroundColor1 = Color.FromArgb(100, Color.Black);
             security.Forgotten = true;
-            security.Priority = ePriority.Urgent;
+            security.Priority = (ePriority)6;
             OMBasicShape box = new OMBasicShape(250, 130, 500, 300);
             box.BorderColor = Color.Silver;
             box.BorderSize = 3F;
@@ -1236,6 +1236,8 @@ namespace OpenMobile
                         panel = getPanelByName(arg2, arg3, ret);
                         if (panel == null)
                             return false;
+                        if (panel.Priority > ePriority.Urgent) //prevent panels from entering the security layer
+                            panel.Priority = ePriority.Urgent;
                         lock (Core.RenderingWindows[ret])
                         {
                             Core.RenderingWindows[ret].transitionInPanel(panel);

@@ -101,7 +101,7 @@ namespace OpenMobile.Controls
                 return "Textbox";
             }
         }
-
+        private int count;
         /// <summary>
         /// The text contained by the textbox
         /// </summary>
@@ -128,6 +128,8 @@ namespace OpenMobile.Controls
                     if (IsAlphabetic(value) == false)
                         return;
                 }
+                if (((flags & textboxFlags.Password) == textboxFlags.Password)&&(value!=null)&&(text!="")&&((text==null)||(value.Contains(text))))
+                    count = 6;
                 textTexture = null;
                 text = value;
                 raiseUpdate(Rectangle.Empty);
@@ -222,8 +224,20 @@ namespace OpenMobile.Controls
                         f.Trimming = System.Drawing.StringTrimming.EllipsisCharacter;
                     else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
                         f.Trimming = System.Drawing.StringTrimming.Word;
-                    if (textTexture == null)
-                        textTexture = g.GenerateStringTexture((this.flags & textboxFlags.Password) == textboxFlags.Password ? new String('*', text.Length) : text, this.Font, Color.FromArgb((int)(tmp * Color.A), this.Color), this.Left, this.Top, this.Width + 5, this.Height, f);
+                    if ((textTexture == null)||(count>0))
+                    {
+                        string tempStr = text;
+                        if (((this.flags & textboxFlags.Password) == textboxFlags.Password)&&(text.Length>0))
+                        {
+                            tempStr = new String('*', text.Length - 1);
+                            if (count > 1)
+                                tempStr += text[text.Length - 1];
+                            else
+                                tempStr += '*';
+                            count--;
+                        }
+                        textTexture = g.GenerateStringTexture(tempStr, this.Font, Color.FromArgb((int)(tmp * Color.A), this.Color), this.Left, this.Top, this.Width + 5, this.Height, f);
+                    }
                     g.DrawImage(textTexture, this.Left, this.Top, this.Width + 5, this.Height, tmp);
                 }
             }

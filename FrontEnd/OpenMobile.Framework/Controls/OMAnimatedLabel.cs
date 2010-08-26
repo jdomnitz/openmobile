@@ -148,7 +148,8 @@ namespace OpenMobile.Controls
                 }
                 if (currentAnimation == eAnimation.Scroll)
                 {
-                    scrollPos++;
+                    if (avgChar * text.Length >= width)
+                        scrollPos++;
                     if ((scrollPos * avgChar) + width > (Text.Length * (avgChar + 0.5)))
                     {
                         Thread.Sleep(500);
@@ -265,10 +266,13 @@ namespace OpenMobile.Controls
                     value = "";
                 lock (this)
                 {
+                    if (value == base.text)
+                        return;
                     currentAnimation = animation;
                     charTex = new OImage[value.Length];
                     base.text = value;
                     textTexture = null;
+                    scrollPos = 0;
                     recalc();
                 }
             }
@@ -386,21 +390,22 @@ namespace OpenMobile.Controls
                             oldTexture = g.GenerateTextTexture(0, 0, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
                         g.DrawImage(oldTexture, left, top, width, height, tmp);
                     }
-                    g.SetClip(old);
+                    g.Clip =old;
                     return;
                case eAnimation.Scroll:
                case eAnimation.BounceScroll:
                     old = g.Clip;
+                    g.SetClipFast(left, top, width, height);
+                    if (textTexture == null)
+                        textTexture = g.GenerateTextTexture(0, 0, (int)((avgChar+0.5) * text.Length), height, text, font, textFormat, textAlignment, color, outlineColor);
+                    g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, (int)((avgChar+0.5)*text.Length), height, tmp);
+                    g.Clip=old;
                     if (avgChar * text.Length < width)
                     {
                         currentAnimation = eAnimation.None;
                         scrollPos = 0;
+                        textTexture = null;
                     }
-                    g.SetClipFast(left, top, width, height);
-                    if (textTexture == null)
-                        textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
-                    g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, width, height, tmp);
-                    g.SetClip(old);
                     return;
                 case eAnimation.GlowPulse:
                 case eAnimation.Pulse:

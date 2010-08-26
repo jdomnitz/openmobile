@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using OpenMobile;
@@ -28,6 +27,7 @@ using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using OpenMobile.Threading;
+using OpenMobile.Graphics;
 
 namespace WebBrowser
 {
@@ -126,21 +126,22 @@ namespace WebBrowser
 
         private void setScreenshot(int screen)
         {
-            Form f = (Form)Form.FromHandle(theHost.UIHandle(0));
+            OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
+            OpenMobile.Platform.Windows.Functions.GetWindowInfo(theHost.UIHandle(screen), ref info);
             object o;
             theHost.getData(eGetData.GetScaleFactors, "", "0", out o);
             if (o == null)
                 return;
             PointF scale = (PointF)o;
-            Bitmap bmp = new Bitmap((int)(1000 * scale.X), (int)(500 * scale.Y));
-            using (Graphics g = Graphics.FromImage(bmp))
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap((int)(1000 * scale.X), (int)(500 * scale.Y));
+            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
-                if (f.WindowState == FormWindowState.Maximized)
-                    g.CopyFromScreen(new Point(f.Left, f.Top + (int)(100 * scale.Y)), Point.Empty, bmp.Size);
+                if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) != OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
+                    g.CopyFromScreen(new System.Drawing.Point(info.Window.Left, info.Window.Top + (int)(100 * scale.Y)), System.Drawing.Point.Empty, bmp.Size);
                 else
-                    g.CopyFromScreen(new Point(f.Left + 8, f.Top + 30 + (int)(100 * scale.Y)), Point.Empty, bmp.Size);
+                    g.CopyFromScreen(new System.Drawing.Point(info.Window.Left + 8, info.Window.Top + 30 + (int)(100 * scale.Y)), System.Drawing.Point.Empty, bmp.Size);
             }
-            ((OMImage)manager[screen][0]).Image = new imageItem(bmp);
+            ((OMImage)manager[screen][0]).Image = new imageItem(new OImage(bmp));
         }
 
         public OMPanel loadPanel(string name, int screen)

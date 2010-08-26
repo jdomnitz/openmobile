@@ -467,7 +467,10 @@ namespace OMSettings
         void user_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "personal",((OMTextBox)sender).Text);
+            if ((((OMTextBox)sender).Flags&textboxFlags.Password)==textboxFlags.Password)
+                ((OMTextBox)sender).Text = input.getPassword(screen, "OMSettings", "personal", ((OMTextBox)sender).Text);
+            else
+                ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "personal",((OMTextBox)sender).Text);
         }
 
         void Save2_OnClick(OMControl sender, int screen)

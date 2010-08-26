@@ -19,10 +19,10 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using OpenMobile.Graphics;
 using System.IO;
 using OpenMobile;
 using OpenMobile.Controls;
+using OpenMobile.Graphics;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
 
@@ -42,17 +42,14 @@ namespace ControlDemo
             p = new OMPanel();
             OMImage Image1 = new OMImage(275, 115, 400, 400);
             Image1.Image = theHost.getSkinImage("MediaBorder");
-            Image1.Name = "Image1";
             OMLabel Label2 = new OMLabel(430, 150, 250, 40);
             Label2.Format = eTextFormat.Bold;
-            Label2.Name = "Label2";
             Label2.TextAlignment = Alignment.CenterLeft;
             OMImage icon = new OMImage(350, 135, 60, 60);
             List3 = new OMList(286, 200, 378, 290);
             List3.Background = Color.Silver;
             List3.ListStyle = eListStyle.DroidStyleImage;
             List3.ItemColor1 = Color.Black;
-            List3.Name = "List3";
             List3.ListItemHeight = 70;
             List3.SelectedIndexChanged += new OMList.IndexChangedDelegate(List3_SelectedIndexChanged);
             p.addControl(Image1);
@@ -102,6 +99,8 @@ namespace ControlDemo
                         theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
                     break;
                 case "Play DVD":
+                case "Play Blu-Ray":
+                case "Play HDDVD":
                     if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), lastPath))
                         theHost.sendMessage("UI", "OMNotify", "ShowMediaControls" + screen.ToString());
                     break;
@@ -274,9 +273,20 @@ namespace ControlDemo
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
             IconManager.UIIcon ui = data as IconManager.UIIcon;
-            theHost_OnStorageEvent(eMediaType.NotSet,true, ui.tag);
-            theHost_OnStorageEvent(eMediaType.AudioCD,true, ui.tag);
-            return true;
+            if (data != null)
+            {
+                theHost_OnStorageEvent(eMediaType.NotSet, true, ui.tag);
+                if (ui.image == theHost.getSkinImage("Discs|AudioCD").image)
+                    theHost_OnStorageEvent(eMediaType.AudioCD, true, ui.tag);
+                else if (ui.image == theHost.getSkinImage("Discs|DVD").image)
+                    theHost_OnStorageEvent(eMediaType.DVD, true, ui.tag);
+                else if (ui.image == theHost.getSkinImage("Discs|BluRay").image)
+                    theHost_OnStorageEvent(eMediaType.BluRay, true, ui.tag);
+                else if (ui.image == theHost.getSkinImage("Discs|HDDVD").image)
+                    theHost_OnStorageEvent(eMediaType.HDDVD, true, ui.tag);
+                return true;
+            }
+            return false;
         }
         public void Dispose()
         {

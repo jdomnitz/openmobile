@@ -41,6 +41,7 @@ namespace OMDVD
         static int WM_Graph_Notify = 0x8001;
         static int WM_LBUTTONDOWN = 0x0201;
         static int WM_LBUTTONUP = 0x0202;
+        private static MessageProc Invoker;
 
         // Events
         public event MediaEvent OnMediaEvent;
@@ -158,6 +159,8 @@ namespace OMDVD
             OnPlay += new stringRet(invokePlay);
             OnSpeed += new Speed(InvokeOnSpeed);
             OnStop += new delVoid(invokeStop);
+            Invoker = new MessageProc();
+            IntPtr tmp = Invoker.Handle; //stupid hack
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -221,8 +224,7 @@ namespace OMDVD
             try
             {
                 checkInstance(instance);
-                Form f=(Form)Form.FromHandle(theHost.UIHandle(0));
-                return (bool)f.Invoke(OnPlay, new object[] { instance, url });// player[instance].play(url);
+                return (bool)Invoker.Invoke(OnPlay, new object[] { instance, url });// player[instance].play(url);
             }
             catch (Exception)
             {
@@ -255,8 +257,7 @@ namespace OMDVD
         public bool setPlaybackSpeed(int instance, float speed)
         {
             checkInstance(instance);
-            Form frm=(Form)Form.FromHandle(theHost.UIHandle(0));
-            return (bool)frm.Invoke(OnSpeed, new object[] { instance, speed });
+            return (bool)Invoker.Invoke(OnSpeed, new object[] { instance, speed });
         }
 
         public bool setPosition(int instance, float seconds)
@@ -302,8 +303,7 @@ namespace OMDVD
         public bool stop(int instance)
         {
             checkInstance(instance);
-            Form f = (Form)Form.FromHandle(theHost.UIHandle(0));
-            return (bool)f.Invoke(OnStop,new object[]{instance});
+            return (bool)Invoker.Invoke(OnStop,new object[]{instance});
         }
 
         // Properties
@@ -659,7 +659,7 @@ namespace OMDVD
                 DsError.ThrowExceptionForHR(Resize());
                 DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(sink.Handle));
                 hr = dvdctrl.SetSubpictureState(false, DvdCmdFlags.None, out cmd);
-                hr = dvdctrl.SelectVideoModePreference(DvdPreferredDisplayMode.Display16x9);
+                //hr = dvdctrl.SelectVideoModePreference(DvdPreferredDisplayMode.Display16x9);
                 hr = dvdctrl.PlayForwards(1.0, DirectShowLib.Dvd.DvdCmdFlags.None, out cmd);
                 if (hr != 0)
                     return false;
