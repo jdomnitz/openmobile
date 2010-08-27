@@ -79,7 +79,6 @@
     <Compile Include="Controls\OMProgress.cs" />
     <Compile Include="Controls\OMSlider.cs" />
     <Compile Include="Controls\OMTextBox.cs" />
-    <Compile Include="Controls\Renderer.cs" />
     <Compile Include="Data\Calendar.cs" />
     <Compile Include="Data\Collections.cs" />
     <Compile Include="Data\Contacts.cs" />
