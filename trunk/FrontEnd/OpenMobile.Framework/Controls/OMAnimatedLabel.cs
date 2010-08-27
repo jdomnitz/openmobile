@@ -212,7 +212,7 @@ namespace OpenMobile.Controls
                         veilRight = Width;
                     }
                 }
-                if ((text!=null)&&(text.Length>0))
+                if ((text!=null)&&(text.Length>0)&&(currentAnimation!=eAnimation.None))
                     raiseUpdate(Rectangle.Empty);
             }
         }
@@ -455,7 +455,6 @@ namespace OpenMobile.Controls
             return (int)(rect.Right - (Font.Size / 4.5));
         }
     }
-
     public sealed class HomemadeTimer : IDisposable
     {
         public event ElapsedEventHandler Elapsed;

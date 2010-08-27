@@ -57,20 +57,16 @@ namespace ControlDemo
         label4.ContiuousAnimation = eAnimation.UnveilLeft;
         OMAnimatedLabel label5 = new OMAnimatedLabel(50, 350, 200, 30);
         label5.Text = "This is the starting text";
-        OMGauge gauge = new OMGauge();
+        ReflectedImage gauge = new ReflectedImage();
         gauge.Left = 300;
-        gauge.Top = 200;
+        gauge.Top = 150;
         gauge.Width = 300;
-        gauge.Height = 300;
-        gauge.MaxValue = 20;
+        gauge.Height = 200;
+        gauge.Image=new imageItem(OImage.FromFile(@"C:\Users\Justin2\Desktop\OMgenius.png"));
         OMButton button = new OMButton(50, 400, 200, 50);
         button.Text = "Toggle Buffer";
         button.Image = imageItem.MISSING;
         button.OnClick += new userInteraction(button_OnClick);
-        //p.addControl(label1);
-        //p.addControl(label2);
-        //p.addControl(label3);
-        //p.addControl(label4);
         p.addControl(label5);
         p.addControl(button);
         p.addControl(gauge);
@@ -84,7 +80,7 @@ namespace ControlDemo
 
     void t_Elapsed(object sender, ElapsedEventArgs e)
     {
-        ((OMGauge)manager[0][2]).Value = OpenMobile.Framework.Math.Calculation.RandomNumber(0, 20);
+        //((OMGauge)manager[0][2]).Value = OpenMobile.Framework.Math.Calculation.RandomNumber(0, 20);
     }
 
     void button_OnClick(OMControl sender, int screen)

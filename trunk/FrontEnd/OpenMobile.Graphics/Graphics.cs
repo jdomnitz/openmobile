@@ -1089,6 +1089,51 @@ namespace OpenMobile.Graphics
                 return renderer;
             }
         }
+
+        public void DrawReflection(int X,int Y, int Width, int Height,OImage image, float percent, float angle)
+        {
+            if (image == null)
+                return;
+            Raw.Enable(EnableCap.Texture2D);
+            if (image.Texture(screen) == 0)
+                if (!loadTexture(ref image))
+                {
+                    Raw.Disable(EnableCap.Texture2D);
+                    return;
+                }
+            Raw.BindTexture(TextureTarget.Texture2D, image.Texture(screen));
+            Raw.Color4(1F, 1F, 1F, 0.0);
+            Raw.Begin(BeginMode.Quads);
+            {
+                Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(X, (int)(Height * percent) + Y);
+                Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(Width + X, (int)(Height * percent) + Y);
+                Raw.Color4(1F, 1F, 1F, 0.2);
+                Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(Width + X, Y);
+                Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(X, Y);
+            }
+            Raw.End();
+            Raw.Color4(1F, 1F, 1F, 0.0);
+            Raw.Begin(BeginMode.Quads);
+            {
+                Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(X, (int)(Height * percent) + Y + 2);
+                Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(Width + X, (int)(Height*percent) + Y+2);
+                Raw.Color4(1F, 1F, 1F, 0.2);
+                Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(Width + X, Y+2);
+                Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(X, Y+2);
+            }
+            Raw.End();
+            Raw.Color4(1F, 1F, 1F, 0.0);
+            Raw.Begin(BeginMode.Quads);
+            {
+                Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(X+2, (int)(Height*percent) + Y);
+                Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(Width + 2 + X, (int)(Height * percent) + Y);
+                Raw.Color4(1F, 1F, 1F, 0.2);
+                Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(Width+2 + X, Y);
+                Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(X+2, Y);
+            }
+            Raw.End();
+            Raw.Disable(EnableCap.Texture2D);
+        }
     }
     public class OImage:IDisposable,ICloneable
     {
