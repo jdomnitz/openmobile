@@ -199,8 +199,8 @@ namespace WebBrowser
         public void Dispose()
         {
             Process[] p = Process.GetProcessesByName("TouchBrowser");
-            if (p.Length > 0)
-                p[0].CloseMainWindow();
+            for(int i=0;i<p.Length;i++)
+                p[i].CloseMainWindow();
         }
 
         #endregion

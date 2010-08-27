@@ -280,6 +280,7 @@ namespace OpenMobile
                     transition_Tick();
                     Thread.Sleep(25);
                 }
+                Invalidate();
             }
             lock (painting)
             {
