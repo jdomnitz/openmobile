@@ -690,25 +690,6 @@ namespace OpenMobile.Platform.MacOS
             OpenMobile.Platform.MacOS.Carbon.Application.ProcessEvents();
         }
 
-        public Point PointToClient(Point point)
-        {
-            IntPtr handle = window.WindowRef;
-
-            Rect r = Carbon.API.GetWindowBounds(window.WindowRef, WindowRegionCode.ContentRegion);
-            Debug.Print("Rect: {0}", r);
-
-            return new Point(point.X - r.X, point.Y - r.Y);
-        }
-        public Point PointToScreen(Point point)
-        {
-			IntPtr handle = window.WindowRef;
-
-			Rect r = Carbon.API.GetWindowBounds(window.WindowRef, WindowRegionCode.ContentRegion);
-			Debug.Print("Rect: {0}", r);
-
-			return new Point(point.X + r.X, point.Y + r.Y);
-        }
-
         public bool Exists
         {
             get { return mExists; }
@@ -717,11 +698,6 @@ namespace OpenMobile.Platform.MacOS
         public IWindowInfo WindowInfo
         {
             get { return window; }
-        }
-
-        public bool IsIdle
-        {
-            get { return true; }
         }
 
         public OpenMobile.Input.IInputDriver InputDriver
@@ -735,7 +711,6 @@ namespace OpenMobile.Platform.MacOS
 
         public Icon Icon
         {
-			get { return mIcon; }
             set {
 				SetIcon(value);
 			}
@@ -794,10 +769,6 @@ namespace OpenMobile.Platform.MacOS
 
         public string Title
         {
-            get
-            {
-                return title;
-            }
             set
             {
                 API.SetWindowTitle(window.WindowRef, value);
@@ -815,11 +786,6 @@ namespace OpenMobile.Platform.MacOS
                 else
                     Hide();
             }
-        }
-
-        public bool Focused
-        {
-			get { return this.mIsActive; }
         }
 
         public Rectangle Bounds
@@ -1121,32 +1087,20 @@ namespace OpenMobile.Platform.MacOS
 		private void OnActivate()
 		{
 			mIsActive = true;
-			if (FocusedChanged != null)
-				FocusedChanged(this, EventArgs.Empty);
 		}
 		private void OnDeactivate()
 		{
 			mIsActive = false;
-			if (FocusedChanged != null)
-				FocusedChanged(this, EventArgs.Empty);
 		}
 
 		#endregion
-
-		public event EventHandler<EventArgs> Idle;
         public event EventHandler<EventArgs> Load;
         public event EventHandler<EventArgs> Unload;
-        public event EventHandler<EventArgs> Move;
         public event EventHandler<EventArgs> Resize;
         public event EventHandler<CancelEventArgs> Closing;
         public event EventHandler<EventArgs> Closed;
-        public event EventHandler<EventArgs> Disposed;
-        public event EventHandler<EventArgs> IconChanged;
-        public event EventHandler<EventArgs> TitleChanged;
         public event EventHandler<EventArgs> ClientSizeChanged;
-        public event EventHandler<EventArgs> VisibleChanged;
         public event EventHandler<EventArgs> WindowInfoChanged;
-        public event EventHandler<EventArgs> FocusedChanged;
         public event EventHandler<EventArgs> WindowBorderChanged;
         public event EventHandler<EventArgs> WindowStateChanged;
         public event EventHandler<KeyPressEventArgs> KeyPress;

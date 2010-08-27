@@ -90,119 +90,7 @@ namespace OpenMobile
 
         #endregion
 
-        #region --- Contructors ---
-
-        #region public GameWindow()
-
-        /// <summary>Constructs a new GameWindow with sensible default attributes.</summary>
-        public GameWindow()
-            : this(640, 480, GraphicsMode.Default, "OpenMobile Game Window", 0, DisplayDevice.Default) { }
-
-        #endregion
-
-        #region public GameWindow(int width, int height)
-
-        /// <summary>Constructs a new GameWindow with the specified attributes.</summary>
-        /// <param name="width">The width of the GameWindow in pixels.</param>
-        /// <param name="height">The height of the GameWindow in pixels.</param>
-        public GameWindow(int width, int height)
-            : this(width, height, GraphicsMode.Default, "OpenMobile Game Window", 0, DisplayDevice.Default) { }
-
-        #endregion
-
-        #region public GameWindow(int width, int height, GraphicsMode mode)
-
-        /// <summary>Constructs a new GameWindow with the specified attributes.</summary>
-        /// <param name="width">The width of the GameWindow in pixels.</param>
-        /// <param name="height">The height of the GameWindow in pixels.</param>
-        /// <param name="mode">The OpenMobile.Graphics.GraphicsMode of the GameWindow.</param>
-        public GameWindow(int width, int height, GraphicsMode mode)
-            : this(width, height, mode, "OpenMobile Game Window", 0, DisplayDevice.Default) { }
-
-        #endregion
-
-        #region public GameWindow(int width, int height, GraphicsMode mode, string title)
-
-        /// <summary>Constructs a new GameWindow with the specified attributes.</summary>
-        /// <param name="width">The width of the GameWindow in pixels.</param>
-        /// <param name="height">The height of the GameWindow in pixels.</param>
-        /// <param name="mode">The OpenMobile.Graphics.GraphicsMode of the GameWindow.</param>
-        /// <param name="title">The title of the GameWindow.</param>
-        public GameWindow(int width, int height, GraphicsMode mode, string title)
-            : this(width, height, mode, title, 0, DisplayDevice.Default) { }
-
-        #endregion
-
-        #region public GameWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options)
-
-        /// <summary>Constructs a new GameWindow with the specified attributes.</summary>
-        /// <param name="width">The width of the GameWindow in pixels.</param>
-        /// <param name="height">The height of the GameWindow in pixels.</param>
-        /// <param name="mode">The OpenMobile.Graphics.GraphicsMode of the GameWindow.</param>
-        /// <param name="title">The title of the GameWindow.</param>
-        /// <param name="options">GameWindow options regarding window appearance and behavior.</param>
-        public GameWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options)
-            : this(width, height, mode, title, options, DisplayDevice.Default) { }
-
-        #endregion
-
-        #region public GameWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options, DisplayDevice device)
-
-        /// <summary>Constructs a new GameWindow with the specified attributes.</summary>
-        /// <param name="width">The width of the GameWindow in pixels.</param>
-        /// <param name="height">The height of the GameWindow in pixels.</param>
-        /// <param name="mode">The OpenMobile.Graphics.GraphicsMode of the GameWindow.</param>
-        /// <param name="title">The title of the GameWindow.</param>
-        /// <param name="options">GameWindow options regarding window appearance and behavior.</param>
-        /// <param name="device">The OpenMobile.Graphics.DisplayDevice to construct the GameWindow in.</param>
-        public GameWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options, DisplayDevice device)
-            : this(width, height, mode, title, options, device, 3, 0, GraphicsContextFlags.Default)
-        { }
-
-        #endregion
-
-        #region public GameWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options, DisplayDevice device, int major, int minor, GraphicsContextFlags flags)
-
-        /// <summary>Constructs a new GameWindow with the specified attributes.</summary>
-        /// <param name="width">The width of the GameWindow in pixels.</param>
-        /// <param name="height">The height of the GameWindow in pixels.</param>
-        /// <param name="mode">The OpenMobile.Graphics.GraphicsMode of the GameWindow.</param>
-        /// <param name="title">The title of the GameWindow.</param>
-        /// <param name="options">GameWindow options regarding window appearance and behavior.</param>
-        /// <param name="device">The OpenMobile.Graphics.DisplayDevice to construct the GameWindow in.</param>
-        /// <param name="major">The major version for the OpenGL GraphicsContext.</param>
-        /// <param name="minor">The minor version for the OpenGL GraphicsContext.</param>
-        /// <param name="flags">The GraphicsContextFlags version for the OpenGL GraphicsContext.</param>
-        public GameWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options, DisplayDevice device,
-            int major, int minor, GraphicsContextFlags flags)
-            : this(width, height, mode, title, options, device, major, minor, flags, null)
-        { }
-
-        #endregion
-
-        #region public GameWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options, DisplayDevice device, int major, int minor, GraphicsContextFlags flags, IGraphicsContext sharedContext)
-
-        /// <summary>Constructs a new GameWindow with the specified attributes.</summary>
-        /// <param name="width">The width of the GameWindow in pixels.</param>
-        /// <param name="height">The height of the GameWindow in pixels.</param>
-        /// <param name="mode">The OpenMobile.Graphics.GraphicsMode of the GameWindow.</param>
-        /// <param name="title">The title of the GameWindow.</param>
-        /// <param name="options">GameWindow options regarding window appearance and behavior.</param>
-        /// <param name="device">The OpenMobile.Graphics.DisplayDevice to construct the GameWindow in.</param>
-        /// <param name="major">The major version for the OpenGL GraphicsContext.</param>
-        /// <param name="minor">The minor version for the OpenGL GraphicsContext.</param>
-        /// <param name="flags">The GraphicsContextFlags version for the OpenGL GraphicsContext.</param>
-        /// <param name="sharedContext">An IGraphicsContext to share resources with.</param>
-        public GameWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options, DisplayDevice device,
-                          int major, int minor, GraphicsContextFlags flags, IGraphicsContext sharedContext)
-            : base(width, height, title, options,
-                   mode == null ? GraphicsMode.Default : mode,
-                   device == null ? DisplayDevice.Default : device)
-        {
-            // :)
-        }
-
-        #endregion
+        #region Contructors
         public void Initialize()
         {
             try
@@ -224,7 +112,7 @@ namespace OpenMobile
         }
         #endregion
 
-        #region --- Public Members ---
+        #region Public Members
 
         #region Methods
 
@@ -545,12 +433,6 @@ namespace OpenMobile
         /// </summary>
         public VSyncMode VSync
         {
-            get
-            {
-                EnsureUndisposed();
-                GraphicsContext.Assert();
-                return vsync;
-            }
             set
             {
                 EnsureUndisposed();

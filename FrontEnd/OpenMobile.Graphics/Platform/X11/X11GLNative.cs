@@ -95,7 +95,6 @@ namespace OpenMobile.Platform.X11
         Rectangle bounds, client_rectangle;
         int border_left, border_right, border_top, border_bottom;
         System.Drawing.Icon icon;
-        bool has_focus;
         bool visible;
 
         // Used for event loop.
@@ -709,9 +708,6 @@ namespace OpenMobile.Platform.X11
                         {
                             bool previous_visible = visible;
                             visible = true;
-                            if (visible != previous_visible)
-                                if (VisibleChanged != null)
-                                    VisibleChanged(this, EventArgs.Empty);
                         }
                         return;
 
@@ -719,9 +715,6 @@ namespace OpenMobile.Platform.X11
                         {
                             bool previous_visible = visible;
                             visible = false;
-                            if (visible != previous_visible)
-                                if (VisibleChanged != null)
-                                    VisibleChanged(this, EventArgs.Empty);
                         }
                         break;
 
@@ -793,26 +786,6 @@ namespace OpenMobile.Platform.X11
                     case XEventName.ButtonPress:
                     case XEventName.ButtonRelease:
                         driver.ProcessEvent(ref e);
-                        break;
-
-                    case XEventName.FocusIn:
-                        {
-                            bool previous_focus = has_focus;
-                            has_focus = true;
-                            if (has_focus != previous_focus)
-                                if (FocusedChanged != null)
-                                    FocusedChanged(this, EventArgs.Empty);
-                        }
-                        break;
-
-                    case XEventName.FocusOut:
-                        {
-                            bool previous_focus = has_focus;
-                            has_focus = false;
-                            if (has_focus != previous_focus)
-                                if (FocusedChanged != null)
-                                    FocusedChanged(this, EventArgs.Empty);
-                        }
                         break;
 
                     case XEventName.LeaveNotify:
@@ -1020,10 +993,6 @@ namespace OpenMobile.Platform.X11
 
         public System.Drawing.Icon Icon
         {
-            get
-            {
-                return icon;
-            }
             set
             {
                 if (value == icon)
@@ -1084,20 +1053,6 @@ namespace OpenMobile.Platform.X11
                 }
 
                 icon = value;
-                if (IconChanged != null)
-                    IconChanged(this, EventArgs.Empty);
-            }
-        }
-
-        #endregion
-
-        #region Focused
-
-        public bool Focused
-        {
-            get
-            {
-                return has_focus;
             }
         }
 
@@ -1304,16 +1259,6 @@ namespace OpenMobile.Platform.X11
 
         public event EventHandler<EventArgs> Closed;
 
-        public event EventHandler<EventArgs> Disposed;
-
-        public event EventHandler<EventArgs> IconChanged;
-
-        public event EventHandler<EventArgs> TitleChanged;
-
-        public event EventHandler<EventArgs> VisibleChanged;
-
-        public event EventHandler<EventArgs> FocusedChanged;
-
         public event EventHandler<EventArgs> WindowBorderChanged;
 
         public event EventHandler<EventArgs> WindowStateChanged;
@@ -1354,15 +1299,6 @@ namespace OpenMobile.Platform.X11
 
         #endregion
 
-        #region public bool IsIdle
-
-        public bool IsIdle
-        {
-            get { throw new Exception("The method or operation is not implemented."); }
-        }
-
-        #endregion
-
         #region public IntPtr Handle
 
         /// <summary>
@@ -1383,21 +1319,9 @@ namespace OpenMobile.Platform.X11
         /// </summary>
         public string Title
         {
-            get
-            {
-                IntPtr name = IntPtr.Zero;
-                using (new XLock(window.Display))
-                {
-                    Functions.XFetchName(window.Display, window.WindowHandle, ref name);
-                }
-                if (name != IntPtr.Zero)
-                    return Marshal.PtrToStringAnsi(name);
-
-                return String.Empty;
-            }
             set
             {
-                if (value != null && value != Title)
+                if (value != null)
                 {
                     using (new XLock(window.Display))
                     {
@@ -1405,8 +1329,6 @@ namespace OpenMobile.Platform.X11
                     }
                 }
 
-                if (TitleChanged != null)
-                    TitleChanged(this, EventArgs.Empty);
             }
         }
 
@@ -1481,46 +1403,6 @@ namespace OpenMobile.Platform.X11
             {
                 Functions.XDestroyWindow(window.Display, window.WindowHandle);
             }
-        }
-
-        #endregion
-
-        #region PointToClient
-
-        public Point PointToClient(Point point)
-        {
-            int ox, oy;
-            IntPtr child;
-
-            using (new XLock(window.Display))
-            {
-                Functions.XTranslateCoordinates(window.Display, window.RootWindow, window.WindowHandle, point.X, point.Y, out ox, out oy, out child);
-            }
-
-            point.X = ox;
-            point.Y = oy;
-
-            return point;
-        }
-
-        #endregion
-
-        #region PointToScreen
-
-        public Point PointToScreen(Point point)
-        {
-            int ox, oy;
-            IntPtr child;
-
-            using (new XLock(window.Display))
-            {
-                Functions.XTranslateCoordinates(window.Display, window.WindowHandle, window.RootWindow, point.X, point.Y, out ox, out oy, out child);
-            }
-
-            point.X = ox;
-            point.Y = oy;
-
-            return point;
         }
 
         #endregion

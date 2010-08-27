@@ -42,17 +42,12 @@ namespace OpenMobile
         /// <summary>
         /// Gets or sets the <see cref="System.Drawing.Icon"/> of the window.
         /// </summary>
-        System.Drawing.Icon Icon { get; set; }
+        System.Drawing.Icon Icon { set; }
 
         /// <summary>
         /// Gets or sets the title of the window.
         /// </summary>
-        string Title { get; set; }
-        
-        /// <summary>
-        /// Gets a System.Boolean that indicates whether this window has input focus.
-        /// </summary>
-        bool Focused { get; }
+        string Title { set; }
         
         /// <summary>
         /// Gets or sets a System.Boolean that indicates whether the window is visible.
@@ -145,33 +140,6 @@ namespace OpenMobile
         /// Processes pending window events.
         /// </summary>
         void ProcessEvents();
-        
-        /// <summary>
-        /// Transforms the specified point from screen to client coordinates. 
-        /// </summary>
-        /// <param name="point">
-        /// A <see cref="System.Drawing.Point"/> to transform.
-        /// </param>
-        /// <returns>
-        /// The point transformed to client coordinates.
-        /// </returns>
-        Point PointToClient(Point point);
-        
-        /// <summary>
-        /// Transforms the specified point from client to screen coordinates. 
-        /// </summary>
-        /// <param name="point">
-        /// A <see cref="System.Drawing.Point"/> to transform.
-        /// </param>
-        /// <returns>
-        /// The point transformed to screen coordinates.
-        /// </returns>
-        Point PointToScreen(Point point);
-
-        /// <summary>
-        /// Occurs whenever the window is moved. 
-        /// </summary>
-        event EventHandler<EventArgs> Move;
 
         /// <summary>
         /// Occurs whenever the window is resized. 
@@ -187,31 +155,6 @@ namespace OpenMobile
         /// Occurs after the window has closed. 
         /// </summary>
         event EventHandler<EventArgs> Closed;
-
-        /// <summary>
-        /// Occurs when the window is disposed. 
-        /// </summary>
-        event EventHandler<EventArgs> Disposed;
-
-        /// <summary>
-        /// Occurs when the <see cref="Icon"/> property of the window changes. 
-        /// </summary>
-        event EventHandler<EventArgs> IconChanged;
-
-        /// <summary>
-        /// Occurs when the <see cref="Title"/> property of the window changes.
-        /// </summary>
-        event EventHandler<EventArgs> TitleChanged;
-
-        /// <summary>
-        /// Occurs when the <see cref="Visible"/> property of the window changes.
-        /// </summary>
-        event EventHandler<EventArgs> VisibleChanged;
-
-        /// <summary>
-        /// Occurs when the <see cref="Focused"/> property of the window changes.
-        /// </summary>
-        event EventHandler<EventArgs> FocusedChanged;
 
         /// <summary>
         /// Occurs when the <see cref="WindowBorder"/> property of the window changes.

@@ -110,7 +110,7 @@ namespace OpenMobile
             if (this.WindowState == WindowState.Fullscreen)
                 Mouse.Location = this.Location;
             if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
-                this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[screen].Bounds.Location, new Size(720, 450));
+                this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[screen].Bounds.Location, this.Size);
             InitializeComponent();
             this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
             hide += new voiddel(hideCursor);
