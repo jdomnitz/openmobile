@@ -64,7 +64,6 @@ namespace OpenMobile.Platform.Windows
         Nullable<WindowBorder> deferred_window_border; // Set to avoid changing borders during fullscreen state.
         WindowState windowState = WindowState.Normal;
         bool borderless_maximized_window_state = false; // To get maximized mode with hidden border (not normally possible).
-        bool focused;
         bool mouse_outside_window = true;
         bool invisible_since_creation; // Set by WindowsMessage.CREATE and consumed by Visible = true (calls BringWindowToFront).
         int suppress_resize; // Used in WindowBorder and WindowState in order to avoid rapid, consecutive resize events.
@@ -104,10 +103,7 @@ namespace OpenMobile.Platform.Windows
 
             // This timer callback is called periodically when the window enters a sizing / moving modal loop.
             ModalLoopCallback = delegate(IntPtr handle, WindowMessage msg, UIntPtr eventId, int time)
-            {
-                if (Move != null)
-                    Move(this, EventArgs.Empty);
-            };
+            {};
             if (Environment.OSVersion.Version.Major>5)
                 ParentStyleEx|= ExtendedWindowStyle.Layered;
             // To avoid issues with Ati drivers on Windows 6+ with compositing enabled, the context will not be
@@ -144,19 +140,6 @@ namespace OpenMobile.Platform.Windows
             {
                 #region Size / Move / Style events
 
-                case WindowMessage.ACTIVATE:
-                    // See http://msdn.microsoft.com/en-us/library/ms646274(VS.85).aspx (WM_ACTIVATE notification):
-                    // wParam: The low-order word specifies whether the window is being activated or deactivated.
-                    bool new_focused_state = Focused;
-                    if (IntPtr.Size == 4)
-                        focused = (wParam.ToInt32() & 0xFFFF) != 0;
-                    else
-                        focused = (wParam.ToInt64() & 0xFFFF) != 0;
-
-                    if (new_focused_state != Focused && FocusedChanged != null)
-                        FocusedChanged(this, EventArgs.Empty);
-                    break;
-
                 case WindowMessage.ENTERMENULOOP:
                 case WindowMessage.ENTERSIZEMOVE:
                     // Entering the modal size/move loop: we don't want rendering to
@@ -185,8 +168,6 @@ namespace OpenMobile.Platform.Windows
                             if (Location != new_location)
                             {
                                 bounds.Location = new_location;
-                                if (Move != null)
-                                    Move(this, EventArgs.Empty);
                             }
 
                             Size new_size = new Size(pos->cx, pos->cy);
@@ -556,9 +537,8 @@ namespace OpenMobile.Platform.Windows
                 wc.Instance = Instance;
                 wc.WndProc = WindowProcedureDelegate;
                 wc.ClassName = ClassName;
-                wc.Icon = Icon != null ? Icon.Handle : IntPtr.Zero;
-#warning "This seems to resize one of the 'large' icons, rather than using a small icon directly (multi-icon files). Investigate!"
-                wc.IconSm = Icon != null ? new System.Drawing.Icon(Icon, 16, 16).Handle : IntPtr.Zero;
+                wc.Icon = IntPtr.Zero;
+                wc.IconSm = IntPtr.Zero;
                 wc.Cursor = Functions.LoadCursor(CursorName.Arrow);
                 ushort atom = Functions.RegisterClassEx(ref wc);
 
@@ -771,10 +751,7 @@ namespace OpenMobile.Platform.Windows
 
         public System.Drawing.Icon Icon
         {
-            get
-            {
-                return icon;
-            }
+            get { return icon; }
             set
             {
                 icon = value;
@@ -788,27 +765,12 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region Focused
-
-        public bool Focused
-        {
-            get { return focused; }
-        }
-
-        #endregion
 
         #region Title
 
         StringBuilder sb_title = new StringBuilder(256);
         public string Title
         {
-            get
-            {
-                sb_title.Remove(0, sb_title.Length);
-                if (Functions.GetWindowText(window.WindowHandle, sb_title, sb_title.MaxCapacity) == 0)
-                    Debug.Print("Failed to retrieve window title (window:{0}, reason:{2}).", window.WindowHandle, Marshal.GetLastWin32Error());
-                return sb_title.ToString();
-            }
             set
             {
                 if (!Functions.SetWindowText(window.WindowHandle, value))
@@ -1040,38 +1002,11 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region PointToClient
-
-        public Point PointToClient(Point point)
-        {
-            if (!Functions.ScreenToClient(window.WindowHandle, ref point))
-                throw new InvalidOperationException(String.Format(
-                    "Could not convert point {0} from client to screen coordinates. Windows error: {1}",
-                    point.ToString(), Marshal.GetLastWin32Error()));
-
-            return point;
-        }
-
-        #endregion
-
-        #region PointToScreen
-
-        public Point PointToScreen(Point p)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
         #region Events
-
-        public event EventHandler<EventArgs> Idle;
 
         public event EventHandler<EventArgs> Load;
 
         public event EventHandler<EventArgs> Unload;
-
-        public event EventHandler<EventArgs> Move;
 
         public event EventHandler<EventArgs> Resize;
 
@@ -1079,19 +1014,9 @@ namespace OpenMobile.Platform.Windows
 
         public event EventHandler<EventArgs> Closed;
 
-        public event EventHandler<EventArgs> Disposed;
-
-        public event EventHandler<EventArgs> IconChanged;
-
-        public event EventHandler<EventArgs> TitleChanged;
-
         public event EventHandler<EventArgs> ClientSizeChanged;
 
-        public event EventHandler<EventArgs> VisibleChanged;
-
         public event EventHandler<EventArgs> WindowInfoChanged;
-
-        public event EventHandler<EventArgs> FocusedChanged;
 
         public event EventHandler<EventArgs> WindowBorderChanged;
 

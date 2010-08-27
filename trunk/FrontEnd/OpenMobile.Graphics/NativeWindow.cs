@@ -53,57 +53,18 @@ namespace OpenMobile
         private bool disposed, events;
 
         #endregion
-
-        #region --- Contructors ---
-
-        /// <summary>Constructs a new NativeWindow with default attributes without enabling events.</summary>
         public NativeWindow()
-            : this(640, 480, "OpenMobile Native Window", GameWindowFlags.Default, GraphicsMode.Default, DisplayDevice.Default) { }
-
-        /// <summary>Constructs a new centered NativeWindow with the specified attributes.</summary>
-        /// <param name="width">The width of the NativeWindow in pixels.</param>
-        /// <param name="height">The height of the NativeWindow in pixels.</param>
-        /// <param name="title">The title of the NativeWindow.</param>
-        /// <param name="options">GameWindow options specifying window appearance and behavior.</param>
-        /// <param name="mode">The OpenMobile.Graphics.GraphicsMode of the NativeWindow.</param>
-        /// <param name="device">The OpenMobile.Graphics.DisplayDevice to construct the NativeWindow in.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">If width or height is less than 1.</exception>
-        /// <exception cref="System.ArgumentNullException">If mode or device is null.</exception>
-        public NativeWindow(int width, int height, string title, GameWindowFlags options, GraphicsMode mode, DisplayDevice device)
-            : this(device.Bounds.X + (device.Bounds.Width - width) / 2,
-                   device.Bounds.Y + (device.Bounds.Height - height) / 2,
-                   width, height, title, options, mode, device) { }
-
-        /// <summary>Constructs a new NativeWindow with the specified attributes.</summary>
-        /// <param name="x">Horizontal screen space coordinate of the NativeWindow's origin.</param>
-        /// <param name="y">Vertical screen space coordinate of the NativeWindow's origin.</param>
-        /// <param name="width">The width of the NativeWindow in pixels.</param>
-        /// <param name="height">The height of the NativeWindow in pixels.</param>
-        /// <param name="title">The title of the NativeWindow.</param>
-        /// <param name="options">GameWindow options specifying window appearance and behavior.</param>
-        /// <param name="mode">The OpenMobile.Graphics.GraphicsMode of the NativeWindow.</param>
-        /// <param name="device">The OpenMobile.Graphics.DisplayDevice to construct the NativeWindow in.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">If width or height is less than 1.</exception>
-        /// <exception cref="System.ArgumentNullException">If mode or device is null.</exception>
-        public NativeWindow(int x, int y, int width, int height, string title, GameWindowFlags options, GraphicsMode mode, DisplayDevice device)
         {
-            if (width < 1)
-                throw new ArgumentOutOfRangeException("width", "Must be greater than zero.");
-            if (height < 1)
-                throw new ArgumentOutOfRangeException("height", "Must be greater than zero.");
-            if (mode == null)
-                throw new ArgumentNullException("mode");
-            if (device == null)
-                throw new ArgumentNullException("device");
-
-            this.options = options;
-            this.device = device;
+            this.options = GameWindowFlags.Default;
+            this.device = DisplayDevice.Default;
         }
-
+        #region --- Contructors ---
         public void NativeInitialize()
         {
-            implementation = Factory.Default.CreateNativeWindow(device.Bounds.X + (device.Bounds.Width - 640) / 2, device.Bounds.Y + (device.Bounds.Height - 480) / 2, 640, 480, "OpenMobile Native Window", GraphicsMode.Default,GameWindowFlags.Default, DisplayDevice.Default);
+            implementation = Factory.Default.CreateNativeWindow(device.Bounds.X + (device.Bounds.Width - 720) / 2, device.Bounds.Y + (device.Bounds.Height - 450) / 2, 720, 450, "OpenMobile Native Window", GraphicsMode.Default,GameWindowFlags.Default, DisplayDevice.Default);
             implementation.Visible = false;
+            
+
             if (Environment.GetCommandLineArgs().Length > 1)
             {
                 if (Environment.GetCommandLineArgs()[1].ToLower() == "-fullscreen")
@@ -137,47 +98,6 @@ namespace OpenMobile
         {
             EnsureUndisposed();
             implementation.Close();
-        }
-
-        #endregion
-
-        #region PointToClient
-
-        /// <summary>
-        /// Transforms the specified point from screen to client coordinates. 
-        /// </summary>
-        /// <param name="point">
-        /// A <see cref="System.Drawing.Point"/> to transform.
-        /// </param>
-        /// <returns>
-        /// The point transformed to client coordinates.
-        /// </returns>
-        public Point PointToClient(Point point)
-        {
-            return implementation.PointToClient(point);
-        }
-
-        #endregion
-
-        #region PointToScreen
-
-        /// <summary>
-        /// Transforms the specified point from client to screen coordinates.
-        /// </summary>
-        /// <param name="point">
-        /// A <see cref="System.Drawing.Point"/> to transform.
-        /// </param>
-        /// <returns>
-        /// The point transformed to screen coordinates.
-        /// </returns>
-        public Point PointToScreen(Point point)
-        {
-            // Here we use the fact that PointToClient just translates the point, and PointToScreen
-            // should perform the inverse operation.
-            Point trans = PointToClient(Point.Empty);
-            point.X -= trans.X;
-            point.Y -= trans.Y;
-            return point;
         }
 
         #endregion
@@ -286,22 +206,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region Focused
-
-        /// <summary>
-        /// Gets a System.Boolean that indicates whether this NativeWindow has input focus.
-        /// </summary>
-        public bool Focused
-        {
-            get
-            {
-                EnsureUndisposed();
-                return implementation.Focused;
-            }
-        }
-
-        #endregion
-
         #region Height
 
         /// <summary>
@@ -330,11 +234,6 @@ namespace OpenMobile
         /// </summary>
         public System.Drawing.Icon Icon
         {
-            get
-            {
-                EnsureUndisposed();
-                return implementation.Icon;
-            }
             set
             {
                 EnsureUndisposed();
@@ -410,11 +309,6 @@ namespace OpenMobile
         /// </summary>
         public string Title
         {
-            get
-            {
-                EnsureUndisposed();
-                return implementation.Title;
-            }
             set
             {
                 EnsureUndisposed();
@@ -599,29 +493,9 @@ namespace OpenMobile
         public event EventHandler<CancelEventArgs> Closing;
 
         /// <summary>
-        /// Occurs when the window is disposed.
-        /// </summary>
-        public event EventHandler<EventArgs> Disposed;
-
-        /// <summary>
-        /// Occurs when the <see cref="Focused"/> property of the window changes.
-        /// </summary>
-        public event EventHandler<EventArgs> FocusedChanged;
-
-        /// <summary>
-        /// Occurs when the <see cref="Icon"/> property of the window changes. 
-        /// </summary>
-        public event EventHandler<EventArgs> IconChanged;
-
-        /// <summary>
         /// Occurs whenever a character is typed.
         /// </summary>
         public event EventHandler<KeyPressEventArgs> KeyPress;
-
-        /// <summary>
-        /// Occurs whenever the window is moved.
-        /// </summary>
-        public event EventHandler<EventArgs> Move;
 
         /// <summary>
         /// Occurs whenever the mouse cursor enters the window <see cref="Bounds"/>.
@@ -637,16 +511,6 @@ namespace OpenMobile
         /// Occurs whenever the window is resized.
         /// </summary>
         public event EventHandler<EventArgs> Resize;
-
-        /// <summary>
-        /// Occurs when the <see cref="Title"/> property of the window changes.
-        /// </summary>
-        public event EventHandler<EventArgs> TitleChanged;
-
-        /// <summary>
-        /// Occurs when the <see cref="Visible"/> property of the window changes.
-        /// </summary>
-        public event EventHandler<EventArgs> VisibleChanged;
 
         /// <summary>
         /// Occurs when the <see cref="WindowBorder"/> property of the window changes.
@@ -750,45 +614,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region OnDisposed
-
-        /// <summary>
-        /// Called when the NativeWindow is disposed.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnDisposed(EventArgs e)
-        {
-            if (Disposed != null) Disposed(this, e);
-        }
-
-        #endregion
-
-        #region OnFocusedChanged
-
-        /// <summary>
-        /// Called when the <see cref="OpenMobile.INativeWindow.Focused"/> property of the NativeWindow has changed.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnFocusedChanged(EventArgs e)
-        {
-            if (FocusedChanged != null) FocusedChanged(this, e);
-        }
-
-        #endregion
-
-        #region OnIconChanged
-
-        /// <summary>
-        /// Called when the <see cref="OpenMobile.INativeWindow.Icon"/> property of the NativeWindow has changed.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnIconChanged(EventArgs e)
-        {
-            if (IconChanged != null) IconChanged(this, e);
-        }
-
-        #endregion
-
         #region OnKeyPress
 
         /// <summary>
@@ -798,19 +623,6 @@ namespace OpenMobile
         protected virtual void OnKeyPress(KeyPressEventArgs e)
         {
             if (KeyPress != null) KeyPress(this, e);
-        }
-
-        #endregion
-
-        #region OnMove
-
-        /// <summary>
-        /// Called when the NativeWindow is moved.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnMove(EventArgs e)
-        {
-            if (Move != null) Move(this, e);
         }
 
         #endregion
@@ -850,32 +662,6 @@ namespace OpenMobile
         protected virtual void OnResize(EventArgs e)
         {
             if (Resize != null) Resize(this, e);
-        }
-
-        #endregion
-
-        #region OnTitleChanged
-
-        /// <summary>
-        /// Called when the <see cref="OpenMobile.INativeWindow.Title"/> property of the NativeWindow has changed.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnTitleChanged(EventArgs e)
-        {
-            if (TitleChanged != null) TitleChanged(this, e);
-        }
-
-        #endregion
-
-        #region OnVisibleChanged
-
-        /// <summary>
-        /// Called when the <see cref="OpenMobile.INativeWindow.Visible"/> property of the NativeWindow has changed.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnVisibleChanged(EventArgs e)
-        {
-            if (VisibleChanged != null) VisibleChanged(this, e);
         }
 
         #endregion
@@ -959,24 +745,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region OnDisposedInternal
-
-        private void OnDisposedInternal(object sender, EventArgs e) { OnDisposed(e); }
-
-        #endregion
-
-        #region OnFocusedChangedInternal
-
-        private void OnFocusedChangedInternal(object sender, EventArgs e) { OnFocusedChanged(e); }
-
-        #endregion
-
-        #region OnIconChangedInternal
-
-        private void OnIconChangedInternal(object sender, EventArgs e) { OnIconChanged(e); }
-
-        #endregion
-
         #region OnKeyPressInternal
 
         private void OnKeyPressInternal(object sender, KeyPressEventArgs e) { OnKeyPress(e); }
@@ -995,27 +763,9 @@ namespace OpenMobile
 
         #endregion
 
-        #region OnMoveInternal
-
-        private void OnMoveInternal(object sender, EventArgs e) { OnMove(e); }
-
-        #endregion
-
         #region OnResizeInternal
 
         private void OnResizeInternal(object sender, EventArgs e) { OnResize(e); }
-
-        #endregion
-
-        #region OnTitleChangedInternal
-
-        private void OnTitleChangedInternal(object sender, EventArgs e) { OnTitleChanged(e); }
-
-        #endregion
-
-        #region OnVisibleChangedInternal
-
-        private void OnVisibleChangedInternal(object sender, EventArgs e) { OnVisibleChanged(e); }
 
         #endregion
 
@@ -1049,16 +799,10 @@ namespace OpenMobile
                     }
                     implementation.Closed += OnClosedInternal;
                     implementation.Closing += OnClosingInternal;
-                    implementation.Disposed += OnDisposedInternal;
-                    implementation.FocusedChanged += OnFocusedChangedInternal;
-                    implementation.IconChanged += OnIconChangedInternal;
                     implementation.KeyPress += OnKeyPressInternal;
                     implementation.MouseEnter += OnMouseEnterInternal;
                     implementation.MouseLeave += OnMouseLeaveInternal;
-                    implementation.Move += OnMoveInternal;
                     implementation.Resize += OnResizeInternal;
-                    implementation.TitleChanged += OnTitleChangedInternal;
-                    implementation.VisibleChanged += OnVisibleChangedInternal;
                     implementation.WindowBorderChanged += OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged += OnWindowStateChangedInternal;
                     events = true;
@@ -1067,16 +811,10 @@ namespace OpenMobile
                 {
                     implementation.Closed -= OnClosedInternal;
                     implementation.Closing -= OnClosingInternal;
-                    implementation.Disposed -= OnDisposedInternal;
-                    implementation.FocusedChanged -= OnFocusedChangedInternal;
-                    implementation.IconChanged -= OnIconChangedInternal;
                     implementation.KeyPress -= OnKeyPressInternal;
                     implementation.MouseEnter -= OnMouseEnterInternal;
                     implementation.MouseLeave -= OnMouseLeaveInternal;
-                    implementation.Move -= OnMoveInternal;
                     implementation.Resize -= OnResizeInternal;
-                    implementation.TitleChanged -= OnTitleChangedInternal;
-                    implementation.VisibleChanged -= OnVisibleChangedInternal;
                     implementation.WindowBorderChanged -= OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged -= OnWindowStateChangedInternal;
                     events = false;
