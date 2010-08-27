@@ -440,10 +440,13 @@ namespace OpenMobile
 
         void icons_OnIconsChanged()
         {
-            ((OMButton)manager[0][22]).Image = new imageItem(icons.getIcon(1, true).image);
-            ((OMButton)manager[0][23]).Image = new imageItem(icons.getIcon(1, false).image);
-            ((OMButton)manager[0][24]).Image = new imageItem(icons.getIcon(2, false).image);
-            ((OMButton)manager[0][25]).Image = new imageItem(icons.getIcon(3, false).image);
+            for (int i = 0; i < theHost.ScreenCount; i++)
+            {
+                ((OMButton)manager[i][22]).Image = new imageItem(icons.getIcon(1, true).image);
+                ((OMButton)manager[i][23]).Image = new imageItem(icons.getIcon(1, false).image);
+                ((OMButton)manager[i][24]).Image = new imageItem(icons.getIcon(2, false).image);
+                ((OMButton)manager[i][25]).Image = new imageItem(icons.getIcon(3, false).image);
+            }
         }
 
         void speech_OnClick(OMControl sender, int screen)

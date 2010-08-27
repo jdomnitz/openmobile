@@ -18,16 +18,15 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Windows.Forms;
 using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Framework;
+using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 using OpenMobile.Threading;
-using OpenMobile.Graphics;
+using System;
+using System.Diagnostics;
+using System.Threading;
 
 namespace WebBrowser
 {
