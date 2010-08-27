@@ -251,7 +251,7 @@ namespace OpenMobile
         #endregion
 
         #region public void Run(double updates_per_second, double frames_per_second)
-        public static bool refresh;
+        public bool refresh;
         /// <summary>
         /// Enters the game loop of the GameWindow updating and rendering at the specified frequency.
         /// </summary>

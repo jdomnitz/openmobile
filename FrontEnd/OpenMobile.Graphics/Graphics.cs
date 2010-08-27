@@ -1158,7 +1158,7 @@ namespace OpenMobile.Graphics
         }
         public OImage(System.Drawing.Bitmap i)
         {
-            texture=new uint[DisplayDevice.AvailableDisplays.Count];
+            texture = new uint[DisplayDevice.AvailableDisplays.Count];
             img = i;
             height = img.Height;
             width = img.Width;
@@ -1170,12 +1170,10 @@ namespace OpenMobile.Graphics
         public Size Size {
             get
             {
-                lock (img)
-                {
-                    if (img == null)
+                if (img == null)
                         return new Size();
+                lock (img)    
                     return new Size(width,height);
-                }
             }
         }
         public int Height
