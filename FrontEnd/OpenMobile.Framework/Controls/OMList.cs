@@ -126,7 +126,7 @@ namespace OpenMobile.Controls
                 }
             }
             selectQueued = false;
-            raiseUpdate(Rectangle.Empty);
+            raiseUpdate(false);
         }
 
         /// <summary>
@@ -347,7 +347,7 @@ namespace OpenMobile.Controls
             {
                 items.Add(item);
                 if (items.Count < count)
-                    raiseUpdate(Rectangle.Empty);
+                    raiseUpdate(false);
             }
         }
         /// <summary>
@@ -371,7 +371,7 @@ namespace OpenMobile.Controls
             {
                 items.Add(new OMListItem(item));
                 if (items.Count < count)
-                    raiseUpdate(Rectangle.Empty);
+                    raiseUpdate(false);
             }
         }
 
@@ -430,7 +430,7 @@ namespace OpenMobile.Controls
             else
                 thrown += 1;
             moved += thrown;
-            raiseUpdate(Rectangle.Empty);
+            raiseUpdate(false);
         }
         /// <summary>
         /// Gets or Sets the list style
@@ -809,7 +809,7 @@ namespace OpenMobile.Controls
                 if (selectedIndex >= 0)
                     items[selectedIndex].textTex = items[selectedIndex].subitemTex = null;
                 selectedIndex = -1;
-                raiseUpdate(Rectangle.Empty);
+                raiseUpdate(false);
             }
         }
 

@@ -132,7 +132,7 @@ namespace OpenMobile.Controls
                     count = 6;
                 textTexture = null;
                 text = value;
-                raiseUpdate(Rectangle.Empty);
+                raiseUpdate(false);
                 try
                 {
                     if (OnTextChange != null)

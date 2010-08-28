@@ -958,6 +958,27 @@ namespace OpenMobile.Graphics
                 return gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, (System.Drawing.FontStyle)ft.Style));
             }
         }
+        public static SizeF MeasureString(String str, Font ft,eTextFormat format)
+        {
+            System.Drawing.FontStyle style = System.Drawing.FontStyle.Regular;
+            switch (format)
+            {
+                case eTextFormat.Bold:
+                case eTextFormat.BoldGlow:
+                case eTextFormat.BoldShadow:
+                    style = System.Drawing.FontStyle.Bold;
+                    break;
+                case eTextFormat.Italic:
+                case eTextFormat.ItalicShadow:
+                    style = System.Drawing.FontStyle.Italic;
+                    break;
+            }
+            lock (virtualG)
+            {
+                System.Drawing.Graphics gr = System.Drawing.Graphics.FromImage(virtualG);
+                return gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, style));
+            }
+        }
         public static SizeF MeasureString(String str, Font ft, int width)
         {
             lock (virtualG)

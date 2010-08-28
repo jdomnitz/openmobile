@@ -62,7 +62,7 @@ namespace ControlDemo
         gauge.Top = 150;
         gauge.Width = 300;
         gauge.Height = 200;
-        gauge.Image=new imageItem(OImage.FromFile(@"C:\Users\Justin2\Desktop\OMgenius.png"));
+        gauge.Image=theHost.getSkinImage("OMGenius");
         OMButton button = new OMButton(50, 400, 200, 50);
         button.Text = "Toggle Buffer";
         button.Image = imageItem.MISSING;

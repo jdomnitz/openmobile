@@ -203,7 +203,7 @@ namespace OpenMobile.Controls
             {
                 base.Height = value;
                 genTriangle();
-                raiseUpdate(Rectangle.Empty);
+                raiseUpdate(true);
             }
         }
         public override int Width
@@ -216,7 +216,7 @@ namespace OpenMobile.Controls
             {
                 base.Width = value;
                 genTriangle();
-                raiseUpdate(Rectangle.Empty);
+                raiseUpdate(true);
             }
         }
         public override int Left
@@ -229,7 +229,7 @@ namespace OpenMobile.Controls
             {
                 base.Left = value;
                 genTriangle();
-                raiseUpdate(Rectangle.Empty);
+                raiseUpdate(true);
             }
         }
         public override int Top
@@ -242,7 +242,7 @@ namespace OpenMobile.Controls
             {
                 base.Top = value;
                 genTriangle();
-                raiseUpdate(Rectangle.Empty);
+                raiseUpdate(true);
             }
         }
         /// <summary>

@@ -135,7 +135,7 @@ namespace OpenMobile
         public void invokePaint()
         {
             Invalidate();
-            RenderingWindow_MouseMove(null, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+            RenderingWindow_MouseMove(null, new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
         }
 
         private void Invalidate()
@@ -228,10 +228,11 @@ namespace OpenMobile
                 }
             backgroundQueue.Insert(0, newP);
         }
-        public void UpdateThisControl(Rectangle r)
+        public void UpdateThisControl(bool resetHighlighted)
         {
-            if (r == Rectangle.Empty)
-                Invalidate();
+            Invalidate();
+            if (resetHighlighted)
+                RenderingWindow_MouseMove(null, new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
         }
         public bool blockHome = false;
         public bool transitionOutEverything()
@@ -314,8 +315,7 @@ namespace OpenMobile
             if (lastClick != null)
                 lastClick.Mode = eModeType.Normal;
             lastClick = null;
-            Invalidate();
-            RenderingWindow_MouseMove(null, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+            UpdateThisControl(true);
         }
         #endregion
 

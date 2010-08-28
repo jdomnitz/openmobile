@@ -108,7 +108,7 @@ namespace OpenMobile.Controls
                 if ((value >= this.minimum) && (value <= this.maximum))
                 {
                     this.value = value;
-                    raiseUpdate(Rectangle.Empty);
+                    raiseUpdate(false);
                 }
             }
         }

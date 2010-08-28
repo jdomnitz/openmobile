@@ -107,7 +107,20 @@ namespace OpenMobile.Plugin
                 DefaultValue = new string[] { value };
             }
         }
-
+        public string getInstanceValue(int screen)
+        {
+            if ((DefaultValue == null) || (DefaultValue.Length == 0))
+                return null;
+            if ((screen<0)||(screen>DefaultValue.Length-1))
+                return DefaultValue[0];
+            return DefaultValue[screen];
+        }
+        public void setInstanceValue(int screen,string value)
+        {
+            if ((DefaultValue == null)||(screen < 0) || (screen > DefaultValue.Length - 1))
+                return;
+            DefaultValue[screen]=value;
+        }
         /// <summary>
         /// Creates a new Text, Numeric, File or Folder Setting
         /// </summary>
