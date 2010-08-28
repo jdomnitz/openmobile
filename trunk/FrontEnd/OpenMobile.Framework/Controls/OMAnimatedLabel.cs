@@ -117,6 +117,7 @@ namespace OpenMobile.Controls
             singleAnimation = false;
             t.Enabled = false;
             currentAnimation = eAnimation.None;
+            textTexture = null;
         }
 
         private bool directionReverse;
@@ -141,8 +142,9 @@ namespace OpenMobile.Controls
                             t.Interval = oldTick;
                             oldTick = 0;
                             tempTransition = eAnimation.None;
+                            textTexture = null;
                         }
-                        raiseUpdate(Rectangle.Empty);
+                        raiseUpdate(false);
                         return;
                     }
                 }
@@ -150,7 +152,7 @@ namespace OpenMobile.Controls
                 {
                     if (avgChar * text.Length >= width)
                         scrollPos++;
-                    if ((scrollPos * avgChar) + width > (Text.Length * (avgChar + 0.5)))
+                    if ((scrollPos * avgChar) + width > (Text.Length * avgChar)+1)
                     {
                         Thread.Sleep(500);
                         if (singleAnimation == true)
@@ -165,7 +167,7 @@ namespace OpenMobile.Controls
                         scrollPos--;
                     else
                         scrollPos++;
-                    if ((scrollPos * avgChar) + width > (Text.Length * (avgChar + 0.5)))
+                    if ((scrollPos * avgChar) + width > (Text.Length * avgChar)+1)
                     {
                         scrollPos = text.Length - (int)(width / avgChar);
                         directionReverse = true;
@@ -213,7 +215,7 @@ namespace OpenMobile.Controls
                     }
                 }
                 if ((text!=null)&&(text.Length>0)&&(currentAnimation!=eAnimation.None))
-                    raiseUpdate(Rectangle.Empty);
+                    raiseUpdate(false);
             }
         }
 
@@ -281,7 +283,7 @@ namespace OpenMobile.Controls
         private void recalc()
         {
             if ((text!=null)&&(text.Length>0))
-                avgChar = (Graphics.Graphics.MeasureString(text, this.Font).Width / Text.Length);
+                avgChar = (Graphics.Graphics.MeasureString(text, this.Font,textFormat).Width / Text.Length);
         }
 
         /// <summary>
@@ -325,6 +327,8 @@ namespace OpenMobile.Controls
             veilRight = Width;
             tempTransition = effect;
             currentAnimation = animation;
+            scrollPos = 0;
+            recalc();
             textTexture = oldTexture = null;
             if (oldTick == 0)
                 oldTick = t.Interval;
@@ -335,7 +339,7 @@ namespace OpenMobile.Controls
         OImage oldTexture;
         eAnimation tempTransition;
         int scrollPos = 0;
-        float avgChar = 1;
+        double avgChar = 1;
         int veilRight = 0;
         int veilLeft = 0;
         OImage[] charTex;
@@ -397,8 +401,8 @@ namespace OpenMobile.Controls
                     old = g.Clip;
                     g.SetClipFast(left, top, width, height);
                     if (textTexture == null)
-                        textTexture = g.GenerateTextTexture(0, 0, (int)((avgChar+0.5) * text.Length), height, text, font, textFormat, textAlignment, color, outlineColor);
-                    g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, (int)((avgChar+0.5)*text.Length), height, tmp);
+                        textTexture = g.GenerateTextTexture(0, 0, (int)(avgChar * text.Length)+1, height, text, font, textFormat, textAlignment, color, outlineColor);
+                    g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, (int)(avgChar*text.Length)+1, height, tmp);
                     g.Clip=old;
                     if (avgChar * text.Length < width)
                     {

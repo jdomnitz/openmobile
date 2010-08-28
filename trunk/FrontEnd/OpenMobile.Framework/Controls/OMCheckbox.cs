@@ -74,7 +74,7 @@ namespace OpenMobile.Controls
             Checked = !Checked;
             if (OnClick != null)
                 OnClick(this, screen);
-            raiseUpdate(Rectangle.Empty);
+            raiseUpdate(false);
         }
         /// <summary>
         /// Fires the OnLongClick event

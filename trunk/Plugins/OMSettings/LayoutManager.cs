@@ -37,6 +37,7 @@ namespace OMSettings
                 return null;
             theHost = host;
             collection = s;
+            collection.OnSettingChanged += new SettingChanged(collection_OnSettingChanged);
             OMPanel ret = new OMPanel(s.Title);
             OMButton OK = new OMButton(13, 136, 200, 110);
             OK.Image = theHost.getSkinImage("Full");
@@ -56,9 +57,25 @@ namespace OMSettings
             ret.addControl(Heading);
             return ret;
         }
+
+        void collection_OnSettingChanged(Setting setting)
+        {
+            OMControl c=ret.Find(s => ((s.Tag!=null)&&(s.Tag.ToString() == setting.Name)));
+            if (typeof(OMCheckbox).IsInstanceOfType(c))
+                ((OMCheckbox)c).Checked = bool.Parse(setting.Value);
+            else if (typeof(OMTextBox).IsInstanceOfType(c))
+            {
+                if (setting.Type == SettingTypes.MultiChoice)
+                    ((OMTextBox)c).Text = setting.Options[setting.Values.FindIndex(p => p == setting.Value)];
+                else
+                    ((OMTextBox)c).Text = setting.Value;
+            }
+            else if (typeof(OMSlider).IsInstanceOfType(c))
+                ((OMSlider)c).Value = int.Parse(setting.Value);
+        }
+        List<OMControl> ret = new List<OMControl>();
         List<OMControl> generate(Setting s,string title)
         {
-            List<OMControl> ret = new List<OMControl>();
             switch (s.Type)
             {
                 case SettingTypes.MultiChoice:
@@ -82,14 +99,14 @@ namespace OMSettings
                         scrollRight.Image = theHost.getSkinImage("Play");
                         scrollRight.DownImage = theHost.getSkinImage("Play.Highlighted");
                         scrollRight.OnClick += new userInteraction(scrollRight_OnClick);
-                        scrollRight.Tag = s.Name;
+                        scrollRight.Tag = "btn" + s.Name;
                         scrollRight.Transition = eButtonTransition.None;
                         OMButton scrollLeft = new OMButton(370, ofset, 70, 60);
                         scrollLeft.Image = scrollRight.Image;
                         scrollLeft.DownImage = scrollRight.DownImage;
                         scrollLeft.Orientation = eAngle.FlipHorizontal;
                         scrollLeft.OnClick += new userInteraction(scrollLeft_OnClick);
-                        scrollLeft.Tag = s.Name;
+                        scrollLeft.Tag = "btn" + s.Name;
                         scrollLeft.Transition = eButtonTransition.None;
                         OMTextBox txtchoice = new OMTextBox(450, ofset+5, 460, 50);
                         txtchoice.Flags = textboxFlags.EllipsisEnd;
@@ -97,7 +114,7 @@ namespace OMSettings
                         if (index != -1)
                             txtchoice.Text = s.Options[index];
                         txtchoice.Font = new Font(Font.GenericSansSerif, 24F);
-                        txtchoice.Name = "txt"+s.Name;
+                        txtchoice.Tag = txtchoice.Name = s.Name;
                         OMLabel mcTitle = new OMLabel(100, ofset, 270, 50);
                         mcTitle.Font = new Font(Font.GenericSansSerif, 32.25F, FontStyle.Bold);
                         mcTitle.Text = s.Header + ((s.Header!=null)?":":"");
@@ -122,7 +139,6 @@ namespace OMSettings
                     tdesc.Text = s.Description+":";
                     tdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     tdesc.Name = title;
-                    tdesc.Tag = s.Name;
                     tdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(tdesc);
                     OMTextBox text = new OMTextBox(450, ofset, 500, 50);
@@ -140,7 +156,6 @@ namespace OMSettings
                     fdesc.Text = s.Description + ":";
                     fdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     fdesc.Name = title;
-                    fdesc.Tag = s.Name;
                     fdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(fdesc);
                     OMTextBox folder = new OMTextBox(450, ofset, 500, 50);
@@ -158,7 +173,6 @@ namespace OMSettings
                     fldesc.Text = s.Description + ":";
                     fldesc.Font = new Font(Font.GenericSansSerif, 24F);
                     fldesc.Name = title;
-                    fldesc.Tag = s.Name;
                     fldesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(fldesc);
                     OMTextBox file = new OMTextBox(450, ofset, 500, 50);
@@ -176,7 +190,6 @@ namespace OMSettings
                     pdesc.Text = s.Description + ":";
                     pdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     pdesc.Name = title;
-                    pdesc.Tag = s.Name;
                     pdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(pdesc);
                     OMTextBox ptext = new OMTextBox(450, ofset, 500, 50);
@@ -195,7 +208,6 @@ namespace OMSettings
                     rdesc.Text = s.Header + ":";
                     rdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     rdesc.Name = title;
-                    rdesc.Tag = s.Name;
                     rdesc.TextAlignment = Alignment.CenterRight;
                     if (s.Values.Count != 2)
                         break;
@@ -218,7 +230,6 @@ namespace OMSettings
                     {
                         OMLabel rDescription = new OMLabel(450, ofset + 35, 500, 30);
                         rDescription.Font = new Font(Font.GenericSansSerif, 20);
-                        rDescription.Tag= s.Description;
                         rDescription.Text = s.Description.Replace("%value%", s.Value);
                         rDescription.Name = "dsc" + s.Name;
                         ret.Add(rDescription);
@@ -270,12 +281,13 @@ namespace OMSettings
         void text_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            if ((((OMTextBox)sender).Flags&textboxFlags.Password)==textboxFlags.Password)
-                ((OMTextBox)sender).Text = input.getPassword(screen, "OMSettings", sender.Name);
+            OMTextBox tb = ((OMTextBox)sender);
+            if ((tb.Flags&textboxFlags.Password)==textboxFlags.Password)
+                tb.Text = input.getPassword(screen, "OMSettings", sender.Name,tb.Text);
             else
-                ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", sender.Name);
+                tb.Text = input.getText(screen, "OMSettings", sender.Name,tb.Text);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
-            s.Value = ((OMTextBox)sender).Text;
+            s.Value = tb.Text;
             collection.changeSetting(s);
         }
         void Save_OnClick(OMControl sender, int screen)
@@ -284,8 +296,8 @@ namespace OMSettings
         }
         void scrollRight_OnClick(OMControl sender, int screen)
         {
-            Setting setting=collection.Find(s => s.Name == sender.Tag.ToString());
-            OMTextBox tb = (OMTextBox)sender.Parent["txt" + setting.Name];
+            Setting setting=collection.Find(s => s.Name == sender.Tag.ToString().Substring(3));
+            OMTextBox tb = (OMTextBox)sender.Parent[setting.Name];
             int index = setting.Options.FindIndex(s => s == tb.Text);
             if (index >= setting.Options.Count - 1)
                 return;
@@ -295,8 +307,8 @@ namespace OMSettings
         }
         void scrollLeft_OnClick(OMControl sender, int screen)
         {
-            Setting setting = collection.Find(s => s.Name == sender.Tag.ToString());
-            OMTextBox tb = (OMTextBox)sender.Parent["txt" + setting.Name];
+            Setting setting = collection.Find(s => s.Name == sender.Tag.ToString().Substring(3));
+            OMTextBox tb = (OMTextBox)sender.Parent[setting.Name];
             int index = setting.Options.FindIndex(s => s == tb.Text);
             if (index <= 0)
                 return;

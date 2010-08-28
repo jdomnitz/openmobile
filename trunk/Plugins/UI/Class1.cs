@@ -347,26 +347,28 @@ namespace OpenMobile
         void vol_OnClick(OMControl sender, int screen)
         {
             volScreen = screen;
-
-            if (sender.Top>0)
+            lock (sender)
             {
-                if (sender.Top==511)
-                    volTmr_Elapsed(null, null);
-                return;
-            }
+                if (sender.Top > 0)
+                {
+                    if (sender.Top == 511)
+                        volTmr_Elapsed(null, null);
+                    return;
+                }
 
-            manager[screen][26].Visible = true;
-            volTmr = new System.Timers.Timer(2500);
-            volTmr.Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
-            OMButton btn = (OMButton)manager[screen][27];
-            for (int i = 0; i <= 10; i++)
-            {
-                manager[screen][26].Top =  (51 * i)-510;
-                btn.Top = (int)(51.1 * i);
-                Thread.Sleep(50);
+                manager[screen][26].Visible = true;
+                volTmr = new System.Timers.Timer(2500);
+                volTmr.Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
+                OMButton btn = (OMButton)manager[screen][27];
+                for (int i = 0; i <= 10; i++)
+                {
+                    manager[screen][26].Top = (51 * i) - 510;
+                    btn.Top = (int)(51.1 * i);
+                    Thread.Sleep(50);
+                }
+                if (volTmr != null)
+                    volTmr.Enabled = true;
             }
-            if (volTmr!=null)
-                volTmr.Enabled = true;
         }
 
         void volTmr_Elapsed(object sender, ElapsedEventArgs e)

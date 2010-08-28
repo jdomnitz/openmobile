@@ -29,7 +29,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Forces the renderer to redraw this control
     /// </summary>
-    public delegate void refreshNeeded(Rectangle r);
+    public delegate void refreshNeeded(bool resetHighlighted);
 
     /// <summary>
     /// The base control type
@@ -46,10 +46,10 @@ namespace OpenMobile.Controls
         /// </summary>
         public event refreshNeeded UpdateThisControl;
 
-        protected void raiseUpdate(Rectangle r)
+        protected void raiseUpdate(bool resetHighlighted)
         {
             if (UpdateThisControl != null)
-                UpdateThisControl(r);
+                UpdateThisControl(resetHighlighted);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace OpenMobile.Controls
                 if (visible == value)
                     return;
                 visible = value;
-                raiseUpdate(Rectangle.Empty);
+                raiseUpdate(true);
             }
         }
 
@@ -145,7 +145,7 @@ namespace OpenMobile.Controls
         public virtual int Height
         {
             get { return height; }
-            set { height = value; raiseUpdate(Rectangle.Empty); }
+            set { height = value; raiseUpdate(true); }
         }
         /// <summary>
         /// The controls width in pixels
@@ -154,7 +154,7 @@ namespace OpenMobile.Controls
         public virtual int Width
         {
             get { return width; }
-            set { width = value; raiseUpdate(Rectangle.Empty); }
+            set { width = value; raiseUpdate(true); }
         }
         /// <summary>
         /// Used to store additional information about a control
@@ -178,7 +178,7 @@ namespace OpenMobile.Controls
         public virtual int Top
         {
             get { return top; }
-            set { top = value; raiseUpdate(Rectangle.Empty); }
+            set { top = value; raiseUpdate(true); }
         }
         /// <summary>
         /// The distance between the left of the UI and the Left of the control
@@ -187,7 +187,7 @@ namespace OpenMobile.Controls
         public virtual int Left
         {
             get { return left; }
-            set { left = value; raiseUpdate(Rectangle.Empty); }
+            set { left = value; raiseUpdate(true); }
         }
         /// <summary>
         /// Renders the control
