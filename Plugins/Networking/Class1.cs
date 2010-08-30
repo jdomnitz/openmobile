@@ -346,10 +346,14 @@ namespace Networking
         {
             if (message == "IconClicked")
             {
-                theHost.execute(eFunction.TransitionFromAny, source.Substring(2));
-                theHost.execute(eFunction.TransitionToPanel, source.Substring(2), "Networking");
-                theHost.execute(eFunction.ExecuteTransition, source.Substring(2), "None");
-                return true;
+                string[] parts = source.Split(new char[] { '|' });
+                if (parts.Length == 2)
+                {
+                    theHost.execute(eFunction.TransitionFromAny, parts[1]);
+                    theHost.execute(eFunction.TransitionToPanel, parts[1], "Networking");
+                    theHost.execute(eFunction.ExecuteTransition, parts[1], "None");
+                    return true;
+                }
             }
             return false;
         }

@@ -37,7 +37,7 @@ namespace OpenMobile.Controls
         float toAngle = 405F;
         private bool requiresRedraw;
         private OImage backgroundImg;
-        private Rectangle rectImg;
+        private System.Drawing.Rectangle rectImg;
         private int controlHeight;
         private int controlWidth;
         private int controlTop;
@@ -468,8 +468,8 @@ namespace OpenMobile.Controls
         /// <param name="rect"></param>
         /// <param name="cX"></param>
         /// <param name="cY"></param>
-        private void DrawCalibration(System.Drawing.Graphics g, Rectangle rect, int cX, int cY)
-        {/*
+        private void DrawCalibration(System.Drawing.Graphics g, System.Drawing.Rectangle rect, int cX, int cY)
+        {
             int noOfParts = this.noOfDivisions + 1;
             int noOfIntermediates = this.noOfSubDivisions;
             float currentAngle = GetRadian(fromAngle);
@@ -482,8 +482,8 @@ namespace OpenMobile.Controls
             float totalAngle = toAngle - fromAngle;
             float incr = GetRadian(((totalAngle) / ((noOfParts - 1) * (noOfIntermediates + 1))));
 
-            Pen thickPen = new Pen(Color.Black, Width / 50);
-            Pen thinPen = new Pen(Color.Black, Width / 100);
+            System.Drawing.Pen thickPen = new System.Drawing.Pen(System.Drawing.Color.Black, Width / 50);
+            System.Drawing.Pen thinPen = new System.Drawing.Pen(System.Drawing.Color.Black, Width / 100);
             float rulerValue = MinValue;
             for (int i = 0; i <= noOfParts; i++)
             {
@@ -498,11 +498,11 @@ namespace OpenMobile.Controls
                 System.Drawing.StringFormat format = new System.Drawing.StringFormat();
                 tx = (float)(cX + (radius - Width / 10) * Math.Cos(currentAngle));
                 ty = (float)(cY - shift + (radius - Width / 10) * Math.Sin(currentAngle));
-                Brush stringPen = new Brush(this.ForeColor);
-                System.Drawing.StringFormat strFormat = new System.Drawing.StringFormat(StringFormatFlags.NoClip);
+                System.Drawing.Brush stringPen = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(ForeColor.A,ForeColor.R,ForeColor.G,ForeColor.B));
+                System.Drawing.StringFormat strFormat = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoClip);
                 strFormat.Alignment = System.Drawing.StringAlignment.Center;
-                Font f = new Font(this.Font.Family, (float)(this.Width / 23), this.Font.Style);
-                g.DrawString(rulerValue.ToString() + "", f, stringPen, new PointF(tx, ty), strFormat);
+                System.Drawing.Font f = new System.Drawing.Font(font.Name, (float)(this.Width / 23), (System.Drawing.FontStyle)this.Font.Style);
+                g.DrawString(rulerValue.ToString() + "", f, stringPen, new System.Drawing.PointF(tx, ty), strFormat);
                 rulerValue += (float)((MaxValue - MinValue) / (noOfParts - 1));
                 rulerValue = (float)Math.Round(rulerValue, 2);
 
@@ -519,7 +519,7 @@ namespace OpenMobile.Controls
                     y1 = (float)(cY + (radius - Width / 50) * Math.Sin(currentAngle));
                     g.DrawLine(thinPen, x, y, x1, y1);
                 }
-            }*/
+            }
         }
 
         /// <summary>
@@ -864,7 +864,6 @@ namespace OpenMobile.Controls
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
             //TODO - FIX
-            /*
             if ((this.Width == 0) || (this.Height == 0))
                 return;
             //paint the gauge
@@ -876,33 +875,31 @@ namespace OpenMobile.Controls
                 bg.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 width = this.Width - x * 2;
                 height = this.Height - y * 2;
-                rectImg = new Rectangle(0, 0, width, height);
+                rectImg = new System.Drawing.Rectangle(0, 0, width, height);
 
                 //Draw background color
-                Brush backGroundBrush = new Brush(Color.FromArgb(120, dialColor));
+                System.Drawing.Brush backGroundBrush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(120, System.Drawing.Color.FromArgb(dialColor.A, dialColor.R, dialColor.G, dialColor.B)));
                 float gg = width / 60;
                 bg.FillEllipse(backGroundBrush, 0, 0, width, height);
 
                 //Draw Rim
-                Brush outlineBrush = new Brush(Color.FromArgb(100, Color.SlateGray));
-                Pen outline = new Pen(outlineBrush, (float)(width * .03));
+                System.Drawing.Pen outline = new System.Drawing.Pen(System.Drawing.Color.FromArgb(100, System.Drawing.Color.SlateGray), (float)(width * .03));
                 bg.DrawEllipse(outline, rectImg);
-                Pen darkRim = new Pen(Color.SlateGray);
+                System.Drawing.Pen darkRim = new System.Drawing.Pen(System.Drawing.Color.SlateGray);
                 bg.DrawEllipse(darkRim, 0, 0, width, height);
 
                 //Draw Callibration
                 DrawCalibration(bg, rectImg, (int)((width) / 2) + x, (int)((height) / 2) + y);
 
                 //Draw Colored Rim
-                Pen colorPen = new Pen(Color.FromArgb(190, Color.Gainsboro), this.Width / 40);
-                Pen blackPen = new Pen(Color.FromArgb(250, Color.Black), this.Width / 200);
+                System.Drawing.Pen colorPen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(190, System.Drawing.Color.Gainsboro), this.Width / 40);
                 int gap = (int)(this.Width * 0.03F);
-                Rectangle rectg = new Rectangle(gap, gap, rectImg.Width - gap * 2, rectImg.Height - gap * 2);
+                System.Drawing.Rectangle rectg = new System.Drawing.Rectangle(gap, gap, rectImg.Width - gap * 2, rectImg.Height - gap * 2);
                 bg.DrawArc(colorPen, rectg, 135, 270);
 
                 //Draw Threshold
-                colorPen = new Pen(Color.FromArgb(200, Color.LawnGreen), this.Width / 50);
-                rectg = new Rectangle(gap, gap, rectImg.Width - gap * 2, rectImg.Height - gap * 2);
+                colorPen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(200, System.Drawing.Color.LawnGreen), this.Width / 50);
+                rectg = new System.Drawing.Rectangle(gap, gap, rectImg.Width - gap * 2, rectImg.Height - gap * 2);
                 float val = MaxValue - MinValue;
                 val = (100 * (this.recommendedValue - MinValue)) / val;
                 val = ((toAngle - fromAngle) * val) / 100;
@@ -912,25 +909,23 @@ namespace OpenMobile.Controls
                 float sweepAngle = ((270 * threshold) / 100);
                 if (stAngle + sweepAngle > 405) sweepAngle = 405 - stAngle;
                 bg.DrawArc(colorPen, rectg, stAngle, sweepAngle);
-
-                Size textSize = bg.MeasureString(this.dialText, this.Font);
-                Rectangle digiFRectText = new Rectangle(this.Width / 2 - textSize.Width / 2, (int)(this.height / 1.5), textSize.Width, textSize.Height);
-                bg.DrawString(dialText, this.Font, new SolidBrush(this.ForeColor), digiFRectText);
+                System.Drawing.Font fnt = new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)font.Style);
+                System.Drawing.SizeF textSize = bg.MeasureString(this.dialText, fnt);
+                System.Drawing.RectangleF digiFRectText = new System.Drawing.RectangleF(this.Width / 2 - textSize.Width / 2, (int)(this.height / 1.5), textSize.Width, textSize.Height);
+                bg.DrawString(dialText, fnt, new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(ForeColor.A, ForeColor.R, ForeColor.G, ForeColor.B)), digiFRectText);
                 requiresRedraw = false;
             }
-            g.DrawImage(backgroundImg, this.toRegion());
+            g.DrawImage(backgroundImg, controlLeft, controlTop, controlWidth, controlHeight);
 
             //Draw Digital Value
-            Rectangle digiRect = new Rectangle((int)(this.Left+(float)this.Width / 2F - (float)this.width / 5F),(int)(this.Top+ (float)this.height / 1.2F), (int)((float)this.width / 2.5F),(int)((float)this.Height / 9F));
             Rectangle digiFRect = new Rectangle(this.Left+this.Width / 2 - this.width / 7,this.Top+ (int)(this.height / 1.18), this.width / 4, this.Height / 12);
-            g.FillRectangle(new Brush(Color.FromArgb(30, Color.Gray)), digiRect);
+            g.FillRectangle(new Brush(Color.FromArgb(30, Color.Gray)), (this.Left + (float)this.Width / 2F - (float)this.width / 5F), (this.Top + (float)this.height / 1.2F), ((float)this.width / 2.5F), ((float)this.Height / 9F));
             DisplayNumber(g, this.currentValue, digiFRect);
 
             //Paint the needle
             width = this.Width - x * 2;
             height = this.Height - y * 2;
             DrawPointer(g, ((width) / 2) + x, ((height) / 2) + y);
-             */
         }
         /// <summary>
         /// Returns the area covered by the gauge control

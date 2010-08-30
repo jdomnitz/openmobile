@@ -134,7 +134,7 @@ namespace DPGWeather
         private static DateTime getDate(string p)
         {
             for (int i = 0; i < 7; i++)
-                if (DateTime.Today.AddDays(i).ToString("ddd") == p)
+                if (DateTime.Today.AddDays(i).ToString("ddd",CultureInfo.GetCultureInfo(1033).DateTimeFormat) == p)
                     return DateTime.Today.AddDays(i);
             return DateTime.MinValue;
         }
@@ -158,6 +158,7 @@ namespace DPGWeather
                 case "Smoke":
                     return Weather.weatherConditions.Smoke;
                 case "Drizzle":
+                case "Chance of Rain": 
                 case "Light Rain":
                 case "Chance of Showers":
                 case "Rain":
