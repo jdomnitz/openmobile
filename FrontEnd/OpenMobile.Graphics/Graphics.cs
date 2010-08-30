@@ -354,21 +354,24 @@ namespace OpenMobile.Graphics
             Raw.BindTexture(TextureTarget.Texture2D, texture);
             Bitmap img = image.image;
             bool kill=false;
-            if (!checkImage(image.image))
+            lock (image.image)
             {
-                kill = true;
-                fixImage(ref img);
+                if (!checkImage(image.image))
+                {
+                    kill = true;
+                    fixImage(ref img);
+                }
+                BitmapData data;
+                try
+                {
+                    data = img.LockBits(new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
+                    ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                }
+                catch (InvalidOperationException) { return false; }
+                Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                                OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                img.UnlockBits(data);
             }
-            BitmapData data;
-            try
-            {
-                data = img.LockBits(new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
-                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            }
-            catch (InvalidOperationException) { return false; }
-            Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-                            OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-            img.UnlockBits(data);
             if (kill)
                 img.Dispose();
             image.SetTexture(screen,texture);
@@ -1159,6 +1162,7 @@ namespace OpenMobile.Graphics
     public class OImage:IDisposable,ICloneable
     {
         Bitmap img;
+        public bool persist;
         private uint[] texture;
         int height, width;
         public uint Texture(int screen)
@@ -1167,6 +1171,15 @@ namespace OpenMobile.Graphics
                 return texture[screen];
             return 0;
         }
+        public void rotateTexture()
+        {
+            for (int i = 0; i < texture.Length; i++)
+                if (texture[i] > 0)
+                {
+                    Graphics.DeleteTexture(i, texture[i]);
+                    texture[i] = 0;
+                }
+        }
         internal void SetTexture(int screen,uint texture)
         {
             if (screen < this.texture.Length)
@@ -1174,8 +1187,11 @@ namespace OpenMobile.Graphics
             for (int i = 0; i < this.texture.Length; i++)
                 if (this.texture[i] == 0)
                     return;
-            img.Dispose();
-            img = null;
+            if (!persist)
+            {
+                img.Dispose();
+                img = null;
+            }
         }
         public OImage(System.Drawing.Bitmap i)
         {

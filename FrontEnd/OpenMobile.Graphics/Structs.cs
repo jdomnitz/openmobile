@@ -1,6 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 0659,0661
+using System;
 using System.Reflection;
-
 namespace OpenMobile.Graphics
 {
     public enum Gradient:byte
@@ -152,7 +152,11 @@ namespace OpenMobile.Graphics
         {
             return ((left.A == right.A) && (left.b == right.B) && (left.G == right.G) && (left.R == right.R));
         }
-
+        public override bool Equals(object obj)
+        {
+            Color right = (Color)obj;
+            return ((this.A == right.A) && (this.b == right.B) && (this.G == right.G) && (this.R == right.R));
+        }
         public static bool operator !=(Color left, Color right)
         {
             return !(left == right);

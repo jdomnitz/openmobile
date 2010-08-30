@@ -19,14 +19,12 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Drawing;
-using System.Timers;
 using System.Threading;
 using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
-using System.Windows.Forms;
+using OpenMobile.Input;
 
 namespace Navigation
 {
@@ -109,10 +107,10 @@ namespace Navigation
                     if (arg2 == "back")
                         arg2 = "Back";
                     int screen = int.Parse(arg1);
-                    Keys k = (Keys)Enum.Parse(typeof(Keys), arg2);
-                    ((IKey)manager[screen][0]).KeyDown(screen, new KeyEventArgs(k), 1.0F, 1.0F);
+                    Key k = (Key)Enum.Parse(typeof(Key), arg2);
+                    ((IKey)manager[screen][0]).KeyDown(screen, new KeyboardKeyEventArgs(k), 1.0F, 1.0F);
                     Thread.Sleep(100);
-                    ((IKey)manager[screen][0]).KeyUp(screen, new KeyEventArgs(k), 1.0F, 1.0F);
+                    ((IKey)manager[screen][0]).KeyUp(screen, new KeyboardKeyEventArgs(k), 1.0F, 1.0F);
                 }
             }
         }
