@@ -135,7 +135,11 @@ namespace OMSettings
                     }
                     break;
                 case SettingTypes.Text:
-                    OMLabel tdesc = new OMLabel(220, ofset, 200, 50);
+                    OMLabel tdesc;
+                    if (ofset<240)
+                        tdesc= new OMLabel(220, ofset, 200, 50);
+                    else
+                        tdesc= new OMLabel(120, ofset, 300, 50);
                     tdesc.Text = s.Description+":";
                     tdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     tdesc.Name = title;
@@ -283,9 +287,9 @@ namespace OMSettings
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
             OMTextBox tb = ((OMTextBox)sender);
             if ((tb.Flags&textboxFlags.Password)==textboxFlags.Password)
-                tb.Text = input.getPassword(screen, "OMSettings", sender.Name,tb.Text);
+                tb.Text = input.getPassword(screen, "OMSettings", sender.Parent.Name,tb.Text);
             else
-                tb.Text = input.getText(screen, "OMSettings", sender.Name,tb.Text);
+                tb.Text = input.getText(screen, "OMSettings", sender.Parent.Name,tb.Text);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.Value = tb.Text;
             collection.changeSetting(s);
