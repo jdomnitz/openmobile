@@ -325,7 +325,7 @@ namespace ControlDemo
 
         public OMPanel loadSettings(string name, int screen)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public string authorName
@@ -358,16 +358,15 @@ namespace ControlDemo
 
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public void Dispose()
         {
-            p = null;
-            widget = null;
+            //
         }
     }
 }

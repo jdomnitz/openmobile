@@ -169,7 +169,7 @@ namespace OMPlayer
     public mediaInfo getMediaInfo(int instance)
     {
         checkInstance(instance);
-        if (player[instance].currentState == ePlayerStatus.Stopped)
+        if ((player[instance].currentState == ePlayerStatus.Stopped)||(player[instance].currentState==ePlayerStatus.Ready))
             return new mediaInfo();
         else
             return player[instance].nowPlaying;
