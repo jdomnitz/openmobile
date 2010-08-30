@@ -290,7 +290,7 @@ namespace ControlDemo
         }
         public void Dispose()
         {
-            p = null;
+            //
         }
     }
 }
