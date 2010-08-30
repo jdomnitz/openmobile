@@ -17,10 +17,10 @@ using System.Security;
 
 /* TODO: Update the description of TimeBeginPeriod and other native methods. Update Timer. */
 
-#pragma warning disable 3019    // CLS-compliance checking
-#pragma warning disable 0649    // struct members not explicitly initialized
-#pragma warning disable 0169    // field / method is never used.
-#pragma warning disable 0414    // field assigned but never used.
+#pragma warning disable 3019,3001,3002,3003,3009   // CLS-compliance checking
+#pragma warning disable 0649        // struct members not explicitly initialized
+#pragma warning disable 0169        // field / method is never used.
+#pragma warning disable 0414        // field assigned but never used.
 
 namespace OpenMobile.Platform.Windows
 {

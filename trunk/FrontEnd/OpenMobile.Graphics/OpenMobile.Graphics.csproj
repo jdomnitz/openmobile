@@ -92,7 +92,6 @@
     <Compile Include="Input\IJoystickDriver.cs" />
     <Compile Include="Input\IKeyboardDriver.cs" />
     <Compile Include="Input\IMouseDriver.cs" />
-    <Compile Include="Input\InputDriver.cs" />
     <Compile Include="Input\JoystickDevice.cs" />
     <Compile Include="Input\Key.cs" />
     <Compile Include="Input\Keyboard.cs" />
