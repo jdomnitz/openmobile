@@ -128,7 +128,7 @@ namespace OpenMobile.Controls
                     if (IsAlphabetic(value) == false)
                         return;
                 }
-                if (((flags & textboxFlags.Password) == textboxFlags.Password)&&(value!=null)&&(text!="")&&((text==null)||(value.Contains(text))))
+                if (((flags & textboxFlags.Password) == textboxFlags.Password)&&(value!=null)&&((text!="")||((value!=null)&&(value.Length==1)))&&((text!=null)&&(value.Contains(text))))
                     count = 6;
                 textTexture = null;
                 text = value;

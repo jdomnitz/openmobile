@@ -278,7 +278,7 @@ namespace OpenMobile
                 // the window. We can avoid this issue by raising UpdateFrame and RenderFrame events
                 // whenever we encounter a size or move event.
                 //Move += DispatchRenderFrame;
-                Resize += DispatchRenderFrame;
+                //Resize += DispatchRenderFrame;
 
                 Debug.Print("Entering main loop.");
                 render_watch.Start();
