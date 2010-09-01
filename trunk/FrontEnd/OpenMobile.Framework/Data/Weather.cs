@@ -267,7 +267,7 @@ namespace OpenMobile.Data
                 w.precipitationPercent=reader.GetInt32(reader.GetOrdinal("precip"));
                 w.location = location;
                 w.feelsLike = reader.GetFloat(reader.GetOrdinal("feelsLike"));
-                w.date =DateTime.Parse(reader["Date"].ToString());
+                w.date =DateTime.Parse(reader["Date"].ToString()).ToLocalTime();
                 w.contrib = reader["contrib"].ToString();
             }
             reader.Close();

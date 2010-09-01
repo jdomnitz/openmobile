@@ -113,7 +113,7 @@ namespace DPGWeather
                         ret.humidity = int.Parse(n.ChildNodes[3].Attributes[0].Value.Replace("Humidity: ", "").Replace("%", ""));
                         parseWind(n.ChildNodes[5].Attributes[0].Value.Replace("Wind: ",""),ref ret);
                         ret.conditions = parseCondition(n.ChildNodes[0].Attributes[0].Value);
-                        ret.date = DateTime.Today;
+                        ret.date = DateTime.Today.ToUniversalTime();
                         break;
                     case "forecast_conditions":
                         ret.lowTemp = float.Parse(n.ChildNodes[1].Attributes[0].Value);
@@ -135,7 +135,7 @@ namespace DPGWeather
         {
             for (int i = 0; i < 7; i++)
                 if (DateTime.Today.AddDays(i).ToString("ddd",CultureInfo.GetCultureInfo(1033).DateTimeFormat) == p)
-                    return DateTime.Today.AddDays(i);
+                    return DateTime.Today.AddDays(i).ToUniversalTime();
             return DateTime.MinValue;
         }
 

@@ -44,5 +44,20 @@ namespace OpenMobile.Threading
                     }
                 }).Start();
         }
+        public static void Asynchronous(Delegate function,object[] args, IPluginHost host)
+        {
+            new Thread(delegate()
+            {
+                try
+                {
+                    function.DynamicInvoke(args);
+                }
+                catch (Exception e)
+                {
+                    if (host != null)
+                        host.sendMessage("SandboxedThread", "SafeThread", "", ref e);
+                }
+            }).Start();
+        }
     }
 }
