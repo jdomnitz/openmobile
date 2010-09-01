@@ -199,20 +199,23 @@ namespace OpenMobile
         public void transitionInPanel(OMPanel newP)
         {
             OMControl c;
+            bool exists = backgroundQueue.Contains(newP);
             for (int i = 0; i < newP.controlCount; i++)
             {
                 c = newP.getControl(i);
                 c.UpdateThisControl += UpdateThisControl;
-                if ((c.Mode == eModeType.ClickedAndTransitioningOut) || (c.Mode == eModeType.transitioningOut))
+                if ((c.Mode == eModeType.ClickedAndTransitioningOut) || (c.Mode == eModeType.transitioningOut)||(exists))
                     c.Mode = eModeType.transitionLock;
                 else
                     c.Mode = eModeType.transitioningIn;
             }
-            if (newP.Mode == eModeType.transitioningOut)
+            if (exists)
+                newP.Mode = eModeType.transitionLock;
+            else if (newP.Mode == eModeType.transitioningOut)
                 newP.Mode = eModeType.Normal;
             else
                 newP.Mode = eModeType.transitioningIn;
-            if (!backgroundQueue.Contains(newP))
+            if (!exists)
                 insertPanel(newP);
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;

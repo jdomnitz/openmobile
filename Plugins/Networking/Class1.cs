@@ -118,7 +118,7 @@ namespace Networking
             prompt.addControl(login);
             manager.loadPanel(p);
             manager.loadPanel(prompt);
-            OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.Normal, "Refresh Networks");
+            OpenMobile.Threading.TaskManager.QueueTask(UpdateList, ePriority.Normal, "Refresh Networks");
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
@@ -273,7 +273,7 @@ namespace Networking
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
                     icon=new IconManager.UIIcon(theHost.getSkinImage("WifiNew").image,ePriority.Normal,false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
-                    OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.Normal, "Refresh Networks");
+                    OpenMobile.Threading.TaskManager.QueueTask(UpdateList, ePriority.Normal, "Refresh Networks");
                     return;
                 case eWirelessEvent.ConnectingToWirelessNetwork:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
@@ -281,7 +281,7 @@ namespace Networking
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
                     return;
                 case eWirelessEvent.ConnectedToWirelessNetwork:
-                    OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.Normal, "Refresh Networks");
+                    OpenMobile.Threading.TaskManager.QueueTask(UpdateList, ePriority.Normal, "Refresh Networks");
                     return;
                 case eWirelessEvent.WirelessSignalStrengthChanged:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
@@ -298,7 +298,7 @@ namespace Networking
                     return;
                 case eWirelessEvent.DisconnectedFromWirelessNetwork:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
-                    OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(UpdateList), ePriority.Normal, "Refresh Networks");
+                    OpenMobile.Threading.TaskManager.QueueTask(UpdateList, ePriority.Normal, "Refresh Networks");
                     return;
             }
         }

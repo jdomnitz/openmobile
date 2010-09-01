@@ -25,6 +25,7 @@ using OpenMobile.Data;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using OpenMobile.Graphics;
+using OpenMobile.Threading;
 
 namespace OMContacts
 {
@@ -36,10 +37,11 @@ namespace OMContacts
         {
             manager = new ScreenManager(host.ScreenCount);
             theHost = host;
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             OMList list = new OMList(275, 105, 700, 420);
             list.ListStyle = eListStyle.TransparentImageList;
             list.OnClick += new userInteraction(list_OnClick);
-            list.ListItemHeight = 80;
+            list.ListItemHeight = 100;
             OMPanel main = new OMPanel("main");
             main.addControl(list);
             manager.loadPanel(main);
@@ -99,6 +101,22 @@ namespace OMContacts
             manager.loadPanel(p);
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
+        public delegate void refresh(int screen);
+        private string last;
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if ((function == eFunction.TransitionFromPanel) && (arg2 == "OMContacts") && (arg3 == "contact"))
+                last = arg1;
+            if ((function == eFunction.TransitionToPanel) && (arg2 == "OMContacts") && (arg3 == ""))
+            {
+                if (arg1 == last)
+                {
+                    last = null;
+                    return;
+                }
+                SafeThread.Asynchronous(new refresh(refreshList), new object[] { int.Parse(arg1) }, theHost);
+            }
+        }
 
         void list_OnClick(OMControl sender, int screen)
         {
@@ -128,7 +146,6 @@ namespace OMContacts
                 return null;
             if (name == "contact")
                 return manager[screen, "contact"];
-            refreshList(screen);
             return manager[screen,"main"];
         }
 
