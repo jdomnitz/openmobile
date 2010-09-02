@@ -49,8 +49,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatterySupport", "..\Plugin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMContacts", "..\Plugins\OMContacts\OMContacts.csproj", "{D71091AB-F622-4688-8B2B-377C3928F77F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPEmail", "..\Plugins\DPEmail\DPEmail.csproj", "{B2483F87-566A-4AFD-9816-42BC6107CB3E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -202,12 +200,6 @@ Global
 		{D71091AB-F622-4688-8B2B-377C3928F77F}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
 		{D71091AB-F622-4688-8B2B-377C3928F77F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D71091AB-F622-4688-8B2B-377C3928F77F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2483F87-566A-4AFD-9816-42BC6107CB3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2483F87-566A-4AFD-9816-42BC6107CB3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2483F87-566A-4AFD-9816-42BC6107CB3E}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2483F87-566A-4AFD-9816-42BC6107CB3E}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
-		{B2483F87-566A-4AFD-9816-42BC6107CB3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2483F87-566A-4AFD-9816-42BC6107CB3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
