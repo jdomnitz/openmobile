@@ -285,5 +285,16 @@ namespace OpenMobile.Plugin
         /// <param name="data">The returned data</param>
         /// <param name="param"></param>
         void getData(eGetData dataType, string name, string param, out object data);
+        /// <summary>
+        /// Sets sensor value
+        /// </summary>
+        /// <param name="PID">Sensor PID</param>
+        /// <param name="value">Value to set sensor to</param>
+        bool setSensorValue(int PID, object value);
+        /// <summary>
+        /// Retrieve sensor value
+        /// </summary>
+        /// <param name="PID">Sensor PID</param>
+        object getSensorValue(int PID);
     }
 }

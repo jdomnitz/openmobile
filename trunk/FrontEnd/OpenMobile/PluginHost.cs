@@ -508,6 +508,7 @@ namespace OpenMobile
                         result = result & execute(eFunction.refreshData, p.pluginName);
                     }
                     return result;
+                    
             }
             return false;
         }
@@ -1562,6 +1563,28 @@ namespace OpenMobile
                         ret[i] = ret[i].Replace(Path.Combine(Application.StartupPath, "Skins", ""), "");
                     data = ret;
                     return;
+                case eGetData.GetAvailableSensors:
+                    {
+                        if (string.IsNullOrEmpty(name))
+                        {
+                            List<Sensor> Sensors = new List<Sensor>();
+                            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p)))
+                            {
+                                Sensors.AddRange(g.getAvailableSensors(eSensorType.All));
+
+                            }
+                            data = Sensors;
+                            return;
+                        }
+                        else
+                        {
+                            plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                            if (plugin == null)
+                                return;
+                            data = ((IRawHardware)plugin).getAvailableSensors(eSensorType.All);
+                        }
+                        return;
+                    }
             }
         }
         public void getData(eGetData dataType, string name, string param, out object data)
@@ -1707,6 +1730,24 @@ namespace OpenMobile
                     }
                     return;
             }
+
         }
+
+        public bool setSensorValue(int PID, object value)
+        {
+            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p)))
+                if (g.TestPID(PID))
+                    return g.setValue(PID, value);
+            return false;
+        }
+
+        public object getSensorValue(int PID)
+        {
+            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p)))
+                if (g.TestPID(PID))
+                    return g.getValue(PID);
+            return null;
+        }
+
     }
 }

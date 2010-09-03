@@ -37,6 +37,13 @@ namespace OpenMobile.Plugin
         public string Name;
         public int PID;
         public eSensorType Type;
+
+        public Sensor(string Name, int PID, eSensorType Type)
+        {
+            this.Name = Name;
+            this.PID = PID;
+            this.Type = Type;
+        }
     }
     /// <summary>
     /// Interface with I/O devices and other raw hardware
@@ -49,7 +56,7 @@ namespace OpenMobile.Plugin
             lastMask++;
             return lastMask;
         }
-        private static bool CheckPID(ref int PID, int mask)
+        private static bool CheckPID(int PID, int mask)
         {
             if ((PID / 100000) == mask)
             {
@@ -62,6 +69,32 @@ namespace OpenMobile.Plugin
         {
             return (mask * 100000) + PID;
         }
+        private static int RemoveMask(int maskedPID, int mask)
+        {
+            return maskedPID - (mask * 100000);
+        }
+        
+        private int myMask;
+        protected void InitPIDMask()
+        {
+            myMask = generateMask();
+        }
+        protected int MaskPID(int PID)
+        {
+            return ApplyMask(PID, myMask);
+        }
+        protected int UnmaskPID(int maskedPID)
+        {
+            return RemoveMask(maskedPID, myMask);
+        }
+
+        public bool TestPID(int PID)
+        {
+            return CheckPID(PID, myMask);
+        }
+
+        
+        
         /// <summary>
         /// List available sensors of the given type
         /// </summary>
@@ -74,13 +107,13 @@ namespace OpenMobile.Plugin
         /// <param name="PID"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public abstract bool setValue(int PID, double value);
+        public abstract bool setValue(int PID, object value);
         /// <summary>
         /// Get a sensor value
         /// </summary>
         /// <param name="PID"></param>
         /// <returns></returns>
-        public abstract double getValue(int PID);
+        public abstract object getValue(int PID);
         /// <summary>
         /// Reset the hardware device.
         /// </summary>

@@ -949,6 +949,7 @@ namespace OpenMobile
         /// <para>Arg2: (Optional) Display Name</para>
         /// </summary>
         promptDialNumber=301
+        
     }
     /// <summary>
     /// The status of a plugins initialization
@@ -1398,7 +1399,13 @@ namespace OpenMobile
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetPlayerVolume=22
+        GetPlayerVolume=22,
+        /// <summary>
+        /// Gets the list of available sensors
+        /// <para>----------------------------------------------------</para>
+        /// <para>Param: Optional Plugin Name [string]</para>
+        /// </summary>
+        GetAvailableSensors = 23
     }
     /// <summary>
     /// Information on Tuned Content
