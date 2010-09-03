@@ -173,7 +173,7 @@ namespace OMContacts
 
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         #region IBasePlugin Members

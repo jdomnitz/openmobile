@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OpenMobile.Email, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Libraries\OpenMobile.Email\bin\Debug\OpenMobile.Email.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
@@ -42,6 +38,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Libraries\OpenMobile.Email\OpenMobile.Email.csproj">
+      <Project>{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}</Project>
+      <Name>OpenMobile.Email</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">
       <Project>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</Project>
       <Name>OpenMobile.Framework</Name>

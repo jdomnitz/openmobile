@@ -30,6 +30,9 @@ namespace OpenMobile.Data
     /// </summary>
     public sealed class Messages:IDisposable
     {
+        public delegate void newMessage(message msg);
+        public event newMessage newOutboundMessage;
+
         /// <summary>
         /// Message Flags
         /// </summary>
@@ -82,11 +85,6 @@ namespace OpenMobile.Data
             /// </summary>
             public string content;
             /// <summary>
-            /// Mime type of content (ex: text/plain or text/html)
-            /// </summary>
-            [Obsolete("Not saved in database")]
-            public string contentType;
-            /// <summary>
             /// Message From Address
             /// </summary>
             public string fromAddress;
@@ -97,7 +95,6 @@ namespace OpenMobile.Data
             /// <summary>
             /// Recipient
             /// </summary>
-            [Obsolete("Not saved in database")]
             public string toName;
             /// <summary>
             /// Message Flags
@@ -110,17 +107,15 @@ namespace OpenMobile.Data
             /// <summary>
             /// Message Attachment (local URLs)
             /// </summary>
-            [Obsolete("Not saved in database-database uses byte buffer instead of file paths")]
             public string[] attachment;
             /// <summary>
             /// Source Name (ex: facebook, twitter, email)
             /// </summary>
-            [Obsolete("Not saved in database")]
             public string sourceName;
             /// <summary>
             /// Message Guid
             /// </summary>
-            public Int64 guid;
+            public UInt64 guid;
         }
 
         /// <summary>
@@ -129,26 +124,17 @@ namespace OpenMobile.Data
         /// <returns>Number of Messages loaded</returns>
         public static int readMessages()
         {
-            SqliteConnection con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
-            SqliteCommand cmd = con.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Message";
-            con.Open();
-            SqliteDataReader reader = cmd.ExecuteReader();
-            Collections.Messages.Clear();
-            while (reader.Read())
+            using (Messages m = new Messages())
             {
-                message info = new message();
-                info.content = reader["Content"].ToString();
-                info.fromAddress = reader["fromEmailOrNum"].ToString();
-                info.fromName = reader["fromName"].ToString();
-                info.guid = Convert.ToInt64(reader["ID"]);
-                info.messageFlags = (flags)reader.GetByte(reader.GetOrdinal("Flags"));
-                info.messageReceived = reader.GetDateTime(reader.GetOrdinal("Date"));
-                info.subject = reader["Subject"].ToString();
-                Collections.Messages.Add(info);
+                if (!m.beginReadMessages())
+                    return 0;
+                Collections.Messages.Clear();
+                message msg = m.readNext(true);
+                while (msg.guid > 0)
+                {
+                    msg = m.readNext(true);
+                }
             }
-            reader.Close();
-            con.Close();
             return Collections.Messages.Count;
         }
 
@@ -208,13 +194,23 @@ namespace OpenMobile.Data
             info.content = asyncReader["Content"].ToString();
             info.fromAddress = asyncReader["fromEmailOrNum"].ToString();
             info.fromName = asyncReader["fromName"].ToString();
-            info.guid = Convert.ToInt64(asyncReader["ID"]);
+            info.guid = Convert.ToUInt64(asyncReader["ID"]);
             info.messageFlags = (flags)Enum.Parse(typeof(flags), asyncReader["Flags"].ToString());
             info.messageReceived = DateTime.Parse(asyncReader["Date"].ToString());
             info.subject = asyncReader["Subject"].ToString();
+            if (asyncReader.GetOrdinal("toName") < 0)
+                updateDB();
+            info.sourceName = asyncReader["Source"].ToString();
+            info.toName = asyncReader["toName"].ToString();
+            info.attachment = asyncReader["Attachment"].ToString().Split(new char[] { '|' });
             if (storeAlso == true)
                 Collections.Messages.Add(info);
             return info;
+        }
+
+        private void updateDB()
+        {
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Closes the database connection
@@ -241,8 +237,19 @@ namespace OpenMobile.Data
         {
             if (asyncCmd == null)
                 return false;
-            StringBuilder query = new StringBuilder("INSERT INTO Message ('Content','fromEmailOrNum','fromName','Flags','Date','Subject')VALUES('");
+            if ((m.messageFlags & flags.Outbound) == flags.Outbound)
+                if (newOutboundMessage != null)
+                    newOutboundMessage(m);
+            StringBuilder query = new StringBuilder("INSERT OR REPLACE INTO Message (");
+            if (m.guid > 0)
+                query.Append("'ID',");
+            query.Append("'Content','fromEmailOrNum','fromName','Flags','Date','Subject','Source','toName','Attachment')VALUES('");
             {
+                if (m.guid > 0)
+                {
+                    query.Append(m.guid.ToString());
+                    query.Append("','");
+                }
                 query.Append(General.escape(m.content));
                 query.Append("','");
                 query.Append(m.fromAddress);
@@ -254,10 +261,30 @@ namespace OpenMobile.Data
                 query.Append(m.messageReceived);
                 query.Append("','");
                 query.Append(General.escape(m.subject));
+                query.Append("','");
+                query.Append(General.escape(m.sourceName));
+                query.Append("','");
+                query.Append(General.escape(m.toName));
+                query.Append("','");
+                StringBuilder sb=new StringBuilder();
+                if (m.attachment!=null)
+                    foreach(string s in m.attachment)
+                    {
+                        sb.Append(s);
+                        sb.Append('|');
+                    }
+                query.Append(General.escape((sb.Length==0) ? "":sb.ToString(0,sb.Length-1)));
                 query.Append("')");
             }
             asyncCmd.CommandText = query.ToString();
-            return (asyncCmd.ExecuteNonQuery() == 1);
+            try
+            {
+                return (asyncCmd.ExecuteNonQuery() == 1);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
         /// <summary>
         /// Begins an asynchronous connection to the database
