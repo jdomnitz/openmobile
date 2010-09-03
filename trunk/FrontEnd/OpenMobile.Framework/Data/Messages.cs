@@ -67,9 +67,17 @@ namespace OpenMobile.Data
             /// </summary>
             Spam=32,
             /// <summary>
-            /// Message is an outbound/sent message
+            /// Message is an outbound message (may or may not be sent)
             /// </summary>
-            Outbound=64
+            Outbound=64,
+            /// <summary>
+            /// Message has been sent (should be combined with outbound)
+            /// </summary>
+            Sent=128,
+            /// <summary>
+            /// Message is a Draft (not yet sent)
+            /// </summary>
+            Draft=256
         };
         /// <summary>
         /// A message
