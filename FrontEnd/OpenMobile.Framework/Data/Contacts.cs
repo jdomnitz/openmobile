@@ -78,6 +78,11 @@ namespace OpenMobile.Data
         /// Extra info
         /// </summary>
         public string comments;
+        /// <summary>
+        /// Social Networking Status Message
+        /// </summary>
+        [Obsolete("Not Yet Saved")]
+        public string status;
     }
     /// <summary>
     /// Contacts

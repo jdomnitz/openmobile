@@ -63,8 +63,8 @@ namespace OpenMobile.Framework.Data {
         /// <summary>
         ///   Looks up a localized string similar to BEGIN TRANSACTION;
         ///CREATE TABLE Calendar (Description TEXT, End Julian, Location TEXT, LocationLat NUMERIC, LocationLong NUMERIC, Reminder Julian, Repeat NUMERIC, Start Julian, Title TEXT);
-        ///CREATE TABLE Message (Attachment BLOB, Content TEXT, Date Julian, Flags NUMERIC, fromEmailOrNum TEXT, fromName TEXT, ID INTEGER PRIMARY KEY, Subject TEXT);
-        ///CREATE TABLE Phone (Calendar NUMERIC, deviceID NUMERIC, deviceName TEXT, Dial NUMERIC, ESN NUMERIC, Image NUMERIC, Manufacturer TEXT, Model TEXT, Phonebook NUMERIC [rest of string was truncated]&quot;;.
+        ///CREATE TABLE Message (Attachment TEXT, Content TEXT, Date Julian, Flags NUMERIC, fromEmailOrNum TEXT, fromName TEXT, ID INTEGER PRIMARY KEY, Subject TEXT, Source TEXT, toName TEXT);
+        ///CREATE TABLE Phone (Calendar NUMERIC, deviceID NUMERIC, deviceName TEXT, Dial NUMERIC, ESN NUMERIC, Image NUMERIC, Manufacturer TEXT, Mod [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string OMData {
             get {
