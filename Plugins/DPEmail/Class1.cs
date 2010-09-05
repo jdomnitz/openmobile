@@ -142,7 +142,34 @@ namespace DPEmail
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
             theHost = host;
             email = new EmailClient();
+            Messages.newOutboundMessage += new Messages.newMessage(Messages_newOutboundMessage);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void Messages_newOutboundMessage(Messages.message msg)
+        {
+            sendMessage(ref msg);
+            using (Messages m = new Messages())
+            {
+                m.beginWriteMessages();
+                m.writeNext(msg);
+            }
+        }
+
+        private void sendMessage(ref Messages.message msg)
+        {
+            lock (this)
+            {
+                EmailMessage em=new EmailMessage();
+                em.guid=msg.guid;
+                em.Recipient=msg.toName;
+                em.Sender=msg.fromName;
+                em.SenderEmail=msg.fromAddress;
+                em.Subject=msg.subject;
+                em.TextBody=msg.content;
+                if (email.sendMessage(em,Credentials.getCredential("Email Address"),Credentials.getCredential("Email Password")))
+                    msg.messageFlags |= Messages.flags.Sent;
+            }
         }
 
         void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
