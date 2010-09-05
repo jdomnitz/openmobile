@@ -53,7 +53,7 @@ namespace DPEmail
                     setting.setSetting("Plugins.DPEmail.LastUpdate", DateTime.Now.ToString());
                 theHost.execute(eFunction.dataUpdated, "DPEmail");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 status = -1;
                 theHost.execute(eFunction.dataUpdated, "DPEmail");

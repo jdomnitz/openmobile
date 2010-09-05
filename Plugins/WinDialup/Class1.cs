@@ -109,7 +109,7 @@ namespace WinDialup
         #region IBasePlugin Members
         public Settings loadSettings()
         {
-            throw new NotImplementedException();
+            return null;
         }
         public string authorName
         {
