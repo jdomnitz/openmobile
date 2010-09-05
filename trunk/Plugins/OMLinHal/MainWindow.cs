@@ -16,7 +16,6 @@ public partial class MainWindow : Gtk.Window
 	UPower up;
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
-		Build ();
 		system=Bus.System;
 		session=Bus.Session;
 		try
