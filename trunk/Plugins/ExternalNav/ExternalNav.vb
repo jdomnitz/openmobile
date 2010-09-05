@@ -26,8 +26,7 @@ Public Class ExternalNav
                             If m_Process Is Nothing Then
                                 LoadNavApp()
                             End If
-
-                            OSSpecific.embedApplication(m_Process.ProcessName, m_Screen, m_Host, New System.Drawing.Rectangle(0, 98, 1000, 430))
+                            OSSpecific.embedApplication(m_Process.ProcessName, m_Screen, m_Host, New OpenMobile.Graphics.Rectangle(0, 98, 1000, 430))
                             m_Embedded = True
                         End If
                     End If

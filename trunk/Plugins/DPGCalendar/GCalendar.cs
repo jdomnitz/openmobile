@@ -22,13 +22,12 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using OpenMobile;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
-using System.Reflection;
-using System.Threading;
 
 namespace DPGCalendar
 {
@@ -255,7 +254,7 @@ namespace DPGCalendar
                 if ((DateTime.Now - lastUpdated) > TimeSpan.FromMinutes(30))
                 {
                     status = 0;
-                    OpenMobile.Threading.TaskManager.QueueTask(getCal, OpenMobile.ePriority.MediumHigh);
+                    OpenMobile.Threading.TaskManager.QueueTask(getCal, OpenMobile.ePriority.MediumHigh,"Sync Calendar");
                     return true;
                 }
                 else

@@ -133,7 +133,7 @@ Public Class RadioComm
                 'Hardware powers on ahead of time since it is slow...
                 Return True
             Else
-                If m_Audio.ActiveInstances.Count > 0 Then
+                If m_Audio.ActiveInstances.Length > 0 Then
                     Return True
                 End If
 
@@ -242,7 +242,9 @@ Public Class RadioComm
     End Function
 
     Public Function getStationList(ByVal instance As Integer) As OpenMobile.stationInfo() Implements OpenMobile.Plugin.ITunedContent.getStationList
-        Return m_StationList.Values.ToArray
+        Dim info(m_StationList.Values.Count) As stationInfo
+        m_StationList.Values.CopyTo(info, 0) 'Faster then ToArray :)
+        Return info
     End Function
 
     Public Function tuneTo(ByVal instance As Integer, ByVal station As String) As Boolean Implements OpenMobile.Plugin.ITunedContent.tuneTo
@@ -255,7 +257,7 @@ Public Class RadioComm
             m_CurrentInstance = instance
 
             Chan = station.Split(":")
-            If Chan.Count > 1 Then
+            If Chan.Length > 1 Then
 
                 If Chan(0) = "FM" OrElse Chan(0) = "HD" Then
                     Band = HDRadio.HDRadioBands.FM
@@ -269,10 +271,10 @@ Public Class RadioComm
 
                 m_Radio.TuneToChannel(Freq, Band)
 
-                If Chan.Count = 3 Then
+                If Chan.Length = 3 Then
                     System.Threading.Thread.Sleep(500)
                     If m_Radio.HDSubChannelCount > 0 Then
-                        If m_Radio.HDSubChannelList.Contains(SubChan) Then
+                        If Array.Exists(m_Radio.HDSubChannelList, Function(p) p = SubChan) Then
                             m_Radio.HDSubChannelSelect(SubChan)
                         End If
                     End If
@@ -398,7 +400,7 @@ Public Class RadioComm
 
             RaiseMediaEvent(eFunction.tunerDataUpdated, "")
 
-            If m_StationList.Count = getStatus(m_CurrentInstance).stationList.Count Then
+            If m_StationList.Count = getStatus(m_CurrentInstance).stationList.Length Then
                 RaiseMediaEvent(eFunction.stationListUpdated, "")
             End If
 
