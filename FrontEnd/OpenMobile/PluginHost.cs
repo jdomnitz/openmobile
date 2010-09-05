@@ -190,6 +190,10 @@ namespace OpenMobile
                 }
                 return skinpath;
             }
+            set
+            {
+                skinpath = skinpath = Path.Combine(Application.StartupPath, "Skins", value);
+            }
         }
         public string DataPath
         {

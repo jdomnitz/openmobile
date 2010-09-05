@@ -274,6 +274,12 @@ namespace OpenMobile
                     }
                     catch (ArgumentException) { break; }
                 }
+
+                // Override current skin to use
+                if (arg.ToLower().StartsWith("-skinpath=") == true)
+                {
+                    theHost.SkinPath = arg.Substring(10);
+                }
             }
             // Initialize screens
             RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
