@@ -28,7 +28,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// The default control container
     /// </summary>
-    public sealed class OMPanel
+    public class OMPanel
     {
         private List<OMControl> containedControls=new List<OMControl>();
         private imageItem background;
