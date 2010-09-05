@@ -31,7 +31,7 @@ namespace OpenMobile.Data
     public sealed class Messages:IDisposable
     {
         public delegate void newMessage(message msg);
-        public event newMessage newOutboundMessage;
+        public static event newMessage newOutboundMessage;
 
         /// <summary>
         /// Message Flags
