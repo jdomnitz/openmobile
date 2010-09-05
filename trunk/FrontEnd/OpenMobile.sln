@@ -51,7 +51,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMContacts", "..\Plugins\OM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPEmail", "..\Plugins\DPEmail\DPEmail.csproj", "{B2483F87-566A-4AFD-9816-42BC6107CB3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Email", "..\..\Libraries\OpenMobile.Email\OpenMobile.Email.csproj", "{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Email", "..\..\branches\Libraries\OpenMobile.Email\OpenMobile.Email.csproj", "{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -38,7 +38,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Libraries\OpenMobile.Email\OpenMobile.Email.csproj">
+    <ProjectReference Include="..\..\..\branches\Libraries\OpenMobile.Email\OpenMobile.Email.csproj">
       <Project>{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}</Project>
       <Name>OpenMobile.Email</Name>
     </ProjectReference>
