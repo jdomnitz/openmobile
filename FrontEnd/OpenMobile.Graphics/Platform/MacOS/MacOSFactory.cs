@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if OSX
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -78,3 +78,4 @@ namespace OpenMobile.Platform.MacOS
         #endregion
     }
 }
+#endif

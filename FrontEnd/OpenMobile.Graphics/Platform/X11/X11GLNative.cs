@@ -1247,10 +1247,6 @@ namespace OpenMobile.Platform.X11
 
         #region Events
 
-        public event EventHandler<EventArgs> Load;
-
-        public event EventHandler<EventArgs> Unload;
-
         public event EventHandler<EventArgs> Move;
 
         public event EventHandler<EventArgs> Resize;

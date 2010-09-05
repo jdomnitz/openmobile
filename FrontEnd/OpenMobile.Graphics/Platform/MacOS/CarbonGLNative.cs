@@ -32,6 +32,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 
+#if OSX
 namespace OpenMobile.Platform.MacOS
 {
     using Carbon;
@@ -1110,3 +1111,4 @@ namespace OpenMobile.Platform.MacOS
         #endregion
     }
 }
+#endif

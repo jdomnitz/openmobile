@@ -46,7 +46,9 @@ namespace OpenMobile.Platform
         static Factory()
         {
             if (Configuration.RunningOnWindows) Default = new Windows.WinFactory();
+            #if OSX
             else if (Configuration.RunningOnMacOS) Default = new MacOS.MacOSFactory();
+            #endif
             else if (Configuration.RunningOnX11) Default = new X11.X11Factory();
             else Default = new UnsupportedPlatform();
         }

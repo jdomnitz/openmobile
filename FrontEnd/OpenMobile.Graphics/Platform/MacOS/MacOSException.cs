@@ -1,4 +1,4 @@
-
+#if OSX
 using System;
 
 namespace OpenMobile.Platform.MacOS
@@ -94,3 +94,4 @@ namespace OpenMobile.Platform.MacOS
     }
 
 }
+#endif

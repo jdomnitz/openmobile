@@ -1,3 +1,4 @@
+#if OSX
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -122,3 +123,4 @@ namespace OpenMobile.Platform.MacOS.Carbon
         Option   = 0x0800,  // Option key is same position as the alt key on non-mac keyboards.
     }
 }
+#endif
