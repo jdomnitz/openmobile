@@ -233,6 +233,7 @@ namespace OpenMobile.Platform
 
         #endregion
 
+#if OSX
         #region CreateMacOSCarbonWindowInfo
 
         /// <summary>
@@ -248,7 +249,7 @@ namespace OpenMobile.Platform
         }
 
         #endregion
-
+#endif
         #endregion
 
 

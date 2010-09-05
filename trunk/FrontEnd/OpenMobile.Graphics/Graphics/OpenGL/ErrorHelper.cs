@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if DEBUG
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -132,3 +132,4 @@ namespace OpenMobile.Graphics.OpenGL
         #endregion
     }
 }
+#endif

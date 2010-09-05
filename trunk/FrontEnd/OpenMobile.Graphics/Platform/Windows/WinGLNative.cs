@@ -424,9 +424,6 @@ namespace OpenMobile.Platform.Windows
 
                     if (!e.Cancel)
                     {
-                        if (Unload != null)
-                            Unload(this, EventArgs.Empty);
-
                         DestroyWindow();
                         break;
                     }
@@ -1003,10 +1000,6 @@ namespace OpenMobile.Platform.Windows
         #endregion
 
         #region Events
-
-        public event EventHandler<EventArgs> Load;
-
-        public event EventHandler<EventArgs> Unload;
 
         public event EventHandler<EventArgs> Resize;
 

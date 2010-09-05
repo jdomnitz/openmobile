@@ -6,7 +6,7 @@
 //  Copyright 2008. All rights reserved.
 //
 //
-
+#if OSX
 using System;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
@@ -1082,3 +1082,4 @@ namespace OpenMobile.Platform.MacOS.Carbon
 }
 
 
+#endif

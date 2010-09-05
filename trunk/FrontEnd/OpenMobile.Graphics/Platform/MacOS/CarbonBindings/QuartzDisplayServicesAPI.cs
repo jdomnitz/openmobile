@@ -1,3 +1,4 @@
+#if OSX
 using System;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
@@ -52,3 +53,4 @@ namespace OpenMobile.Platform.MacOS.Carbon
 
     }
 }
+#endif

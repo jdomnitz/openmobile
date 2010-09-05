@@ -293,6 +293,8 @@ namespace OpenMobile
             theHost.load();
             Thread rapidMenu=new Thread(new ThreadStart(Core.initialize));
             rapidMenu.Start();
+            if (RenderingWindows.Count == 0)
+                throw new PlatformException("Unable to detect any monitors on this platform!");
             for (int i = 1; i<RenderingWindows.Count; i++)
                 RenderingWindows[i].RunAsync(1);
             RenderingWindows[0].Run(1);

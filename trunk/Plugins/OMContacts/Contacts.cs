@@ -78,13 +78,13 @@ namespace OMContacts
             email.TextAlignment = Alignment.CenterLeft;
             email.Name = "email";
             OMLabel name = new OMLabel(463, 124, 500, 50);
-            name.Font = new Font("Microsoft Sans Serif", 27.75F);
+            name.Font = new Font(Font.GenericSansSerif, 27.75F);
             name.Format = eTextFormat.Outline;
             name.Name = "name";
             OMLabel Address = new OMLabel(563, 204, 300, 80);
             Address.Name = "Address";
             OMLabel birthday = new OMLabel(550,163,400,40);
-            birthday.Font = new Font("Microsoft Sans Serif", 21.75F);
+            birthday.Font = new Font(Font.GenericSansSerif, 21.75F);
             birthday.Name = "birthday";
             birthday.TextAlignment = Alignment.CenterLeft;
             p.addControl(border);

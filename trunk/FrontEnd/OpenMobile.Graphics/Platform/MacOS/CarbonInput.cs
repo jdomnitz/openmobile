@@ -1,3 +1,4 @@
+#if OSX
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -64,3 +65,4 @@ namespace OpenMobile.Platform.MacOS
         #endregion
     }
 }
+#endif

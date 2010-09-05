@@ -6,7 +6,7 @@
 //  Copyright 2008. All rights reserved.
 //
 //
-
+#if OSX
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -463,3 +463,4 @@ namespace OpenMobile.Platform.MacOS
         #pragma warning restore 0169
     }
 }
+#endif
