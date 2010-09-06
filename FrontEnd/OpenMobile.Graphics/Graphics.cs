@@ -206,17 +206,19 @@ namespace OpenMobile.Graphics
             Raw.Color4(pen.Color);
             Raw.LineWidth(pen.Width);
             Raw.Enable(EnableCap.LineSmooth);
-            Raw.Begin(BeginMode.LinesAdjacency);
+            Raw.Enable(EnableCap.Multisample);
+            Raw.Begin(BeginMode.LineStrip);
             float yrad = height / 2F;
             float xrad = width / 2F;
             startAngle = 360 - startAngle;
-            for (double t = startAngle; t > (startAngle-sweepAngle); t--)
+            for (double t = startAngle; t >= (startAngle-sweepAngle); t=t-0.5)
             {
                 double rad = t * DEG2RAD;
                 Raw.Vertex2(x + xrad + (xrad * Math.Cos(rad)), y + yrad + (yrad * Math.Sin(rad)));
             }
             Raw.End();
             Raw.Disable(EnableCap.LineSmooth);
+            Raw.Disable(EnableCap.Multisample);
         }
 
         public void DrawEllipse(Pen pen, Rectangle rect)
