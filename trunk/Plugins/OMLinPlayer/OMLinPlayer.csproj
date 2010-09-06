@@ -35,15 +35,11 @@
     </Reference>
     <Reference Include="gstreamer-sharp, Version=0.9.2.0, Culture=neutral, PublicKeyToken=4956b48baf980190">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Projects\playbin\playbin\bin\Debug\gstreamer-sharp.dll</HintPath>
+      <HintPath>gstreamer-sharp.dll</HintPath>
     </Reference>
     <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
       <Package>glib-sharp-2.0</Package>
-    </Reference>
-    <Reference Include="OpenMobile.Framework, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\OM 0.7 RC1\OpenMobile.Framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -51,4 +47,10 @@
     <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">
+      <Project>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</Project>
+      <Name>OpenMobile.Framework</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
