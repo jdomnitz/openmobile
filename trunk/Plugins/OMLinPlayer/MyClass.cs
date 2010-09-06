@@ -1,12 +1,9 @@
-
-using System;
-using OpenMobile.Plugin;
-using OpenMobile;
-using Gst.BasePlugins;
-using Gst;
 using GLib;
-using System.Diagnostics;
+using Gst;
+using Gst.BasePlugins;
 using Gst.Interfaces;
+using OpenMobile;
+using OpenMobile.Plugin;
 
 namespace OMLinPlayer
 {
