@@ -51,8 +51,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMContacts", "..\Plugins\OM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPEmail", "..\Plugins\DPEmail\DPEmail.csproj", "{B2483F87-566A-4AFD-9816-42BC6107CB3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Email", "..\..\Libraries\OpenMobile.Email\OpenMobile.Email.csproj", "{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPGCalendar", "..\Plugins\DPGCalendar\DPGCalendar.csproj", "{87F6FCA7-B025-421F-ABBB-D5E6E70A1ECE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamepadSupport", "..\Plugins\GamepadSupport\GamepadSupport.csproj", "{D937AADC-277A-462D-B20B-036734B82F7E}"
@@ -76,6 +74,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMFolderDB", "..\Plugins\OMFolderDB\OMFolderDB.csproj", "{61B40A2E-2859-4FFA-86D4-657A6A8A3D6C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioRouter", "..\..\Sub-Projects\AudioRouter\AudioRouter.csproj", "{B1FF1393-9BE4-49E0-B1C2-BD748EC445B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Email", "..\..\branches\Libraries\OpenMobile.Email\OpenMobile.Email.csproj", "{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "OMSensorTester", "..\Plugins\OMSensorTester\OMSensorTester.vbproj", "{CC77B666-46A3-4092-AED7-5A380C7E493D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -234,12 +236,6 @@ Global
 		{B2483F87-566A-4AFD-9816-42BC6107CB3E}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
 		{B2483F87-566A-4AFD-9816-42BC6107CB3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2483F87-566A-4AFD-9816-42BC6107CB3E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
-		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
-		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Release|Any CPU.Build.0 = Release|Any CPU
 		{87F6FCA7-B025-421F-ABBB-D5E6E70A1ECE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{87F6FCA7-B025-421F-ABBB-D5E6E70A1ECE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87F6FCA7-B025-421F-ABBB-D5E6E70A1ECE}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
@@ -312,6 +308,18 @@ Global
 		{B1FF1393-9BE4-49E0-B1C2-BD748EC445B9}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
 		{B1FF1393-9BE4-49E0-B1C2-BD748EC445B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1FF1393-9BE4-49E0-B1C2-BD748EC445B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC77B666-46A3-4092-AED7-5A380C7E493D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC77B666-46A3-4092-AED7-5A380C7E493D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC77B666-46A3-4092-AED7-5A380C7E493D}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC77B666-46A3-4092-AED7-5A380C7E493D}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{CC77B666-46A3-4092-AED7-5A380C7E493D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC77B666-46A3-4092-AED7-5A380C7E493D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
