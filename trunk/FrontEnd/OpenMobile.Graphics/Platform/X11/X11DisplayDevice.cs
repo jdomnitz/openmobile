@@ -79,7 +79,7 @@ namespace OpenMobile.Platform.X11
 
                     if (!xf86_supported)
                     {
-                        Debug.Print("XF86 query failed, no DisplayDevice support available.");
+                        throw new PlatformException("XF86 query failed, no DisplayDevice support available.");
                     }
                 }
             }
