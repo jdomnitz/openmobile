@@ -245,7 +245,7 @@ namespace OpenMobile.Data
         {
             if (asyncCmd == null)
                 return false;
-            if ((m.messageFlags & flags.Outbound) == flags.Outbound)
+            if (((m.messageFlags & flags.Outbound) == flags.Outbound)&&((m.messageFlags & flags.Sent) != flags.Sent))
                 if (newOutboundMessage != null)
                     newOutboundMessage(m);
             StringBuilder query = new StringBuilder("INSERT OR REPLACE INTO Message (");
