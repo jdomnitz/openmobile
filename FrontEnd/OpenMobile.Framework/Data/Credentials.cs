@@ -43,6 +43,7 @@ namespace OpenMobile.Data
             }
             catch (Exception e)
             { }
+            finally { cmd.Dispose(); }
         }
         /// <summary>
         /// Used internally
@@ -62,8 +63,8 @@ namespace OpenMobile.Data
                 if (con.State == ConnectionState.Closed)
                 {
                     con.Open();
-                    SqliteCommand cmd = new SqliteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con);
-                    cmd.ExecuteNonQuery();
+                    using (SqliteCommand cmd = new SqliteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con))
+                        cmd.ExecuteNonQuery();
                 }
             }
             catch (SqliteException)
@@ -73,8 +74,8 @@ namespace OpenMobile.Data
                 con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=False;");
                 con.Open();
                 createDB();
-                SqliteCommand cmd = new SqliteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con);
-                cmd.ExecuteNonQuery();
+                using(SqliteCommand cmd = new SqliteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con))
+                    cmd.ExecuteNonQuery();
             }
         }
         private static List<string> blockedHashes = new List<string>();
@@ -94,6 +95,7 @@ namespace OpenMobile.Data
                 SqliteCommand cmd = new SqliteCommand(con);
                 cmd.CommandText="SELECT Value from tblCache where EncryptedName='"+md5+"'";
                 object ret = cmd.ExecuteScalar();
+                cmd.Dispose();
                 string value;
                 if (ret != null)
                     value = ret.ToString();

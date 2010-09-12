@@ -19,8 +19,9 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using Mono.Data.Sqlite;
+using System.Data;
 using System.Text;
+using Mono.Data.Sqlite;
 using OpenMobile.helperFunctions;
 
 namespace OpenMobile.Data
@@ -30,7 +31,14 @@ namespace OpenMobile.Data
     /// </summary>
     public sealed class Messages:IDisposable
     {
+        /// <summary>
+        /// A new message delegate
+        /// </summary>
+        /// <param name="msg"></param>
         public delegate void newMessage(message msg);
+        /// <summary>
+        /// Occurs when a new outbound message is saved to the database
+        /// </summary>
         public static event newMessage newOutboundMessage;
 
         /// <summary>
@@ -126,6 +134,36 @@ namespace OpenMobile.Data
             public UInt64 guid;
         }
 
+        private static void createDB()
+        {
+            SqliteCommand cmd = new SqliteCommand(asyncCon);
+            cmd.CommandText = "BEGIN TRANSACTION;CREATE TABLE Message (Attachment TEXT, Content TEXT, Date Julian, Flags NUMERIC, fromEmailOrNum TEXT, fromName TEXT, ID INTEGER PRIMARY KEY, Subject TEXT, Source TEXT, toName TEXT);COMMIT;";
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            { }
+            finally { cmd.Dispose(); }
+        }
+        private void Open()
+        {
+            try
+            {
+                if (asyncCon == null)
+                    asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMMessages") + ";Version=3;FailIfMissing=True");
+                if (asyncCon.State == ConnectionState.Closed)
+                    asyncCon.Open();
+            }
+            catch (SqliteException)
+            {
+                if (asyncCon != null)
+                    asyncCon.Dispose();
+                asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMMessages") + ";Version=3;FailIfMissing=False;");
+                asyncCon.Open();
+                createDB();
+            }
+        }
         /// <summary>
         /// Load (or reload) each Message into memory.
         /// </summary>
@@ -157,16 +195,16 @@ namespace OpenMobile.Data
         public bool beginReadMessages()
         {
             try{
-                asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+                Open();
                 asyncCmd = asyncCon.CreateCommand();
                 asyncCmd.CommandText = "SELECT * FROM Message";
-                asyncCon.Open();
                 asyncReader = asyncCmd.ExecuteReader();
-            }catch(Exception)
+                return true;
+            }
+            catch(Exception)
             {
                 return false;
             }
-            return true;
         }
         /// <summary>
         /// Retrieves the message with the given guid
@@ -177,10 +215,9 @@ namespace OpenMobile.Data
         {
             try
             {
-                asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+                Open();
                 asyncCmd = asyncCon.CreateCommand();
                 asyncCmd.CommandText = "SELECT * FROM Message WHERE ID='"+guid+"'";
-                asyncCon.Open();
                 asyncReader = asyncCmd.ExecuteReader();
             }
             catch (Exception)
@@ -206,8 +243,6 @@ namespace OpenMobile.Data
             info.messageFlags = (flags)Enum.Parse(typeof(flags), asyncReader["Flags"].ToString());
             info.messageReceived = DateTime.Parse(asyncReader["Date"].ToString());
             info.subject = asyncReader["Subject"].ToString();
-            if (asyncReader.GetOrdinal("toName") < 0)
-                updateDB();
             info.sourceName = asyncReader["Source"].ToString();
             info.toName = asyncReader["toName"].ToString();
             info.attachment = asyncReader["Attachment"].ToString().Split(new char[] { '|' });
@@ -300,10 +335,16 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool beginWriteMessages()
         {
-            asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
-            asyncCon.Open();
-            asyncCmd = asyncCon.CreateCommand();
-            return true;
+            try
+            {
+                Open();
+                asyncCmd = asyncCon.CreateCommand();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
         /// <summary>
         /// Deletes the message with the given ID.  beginWriteMessages should be called first
