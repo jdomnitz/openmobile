@@ -735,13 +735,15 @@ namespace OpenMobile
                 ePlayerStatus status = (ePlayerStatus)o;
                 if (status == ePlayerStatus.Playing)
                 {
-                    theHost.execute(eFunction.Pause, theHost.instanceForScreen(screen).ToString());
-                    for (int i = 0; i < theHost.ScreenCount; i++)
+                    if (theHost.execute(eFunction.Pause, theHost.instanceForScreen(screen).ToString()))
                     {
-                        if (theHost.instanceForScreen(i) == theHost.instanceForScreen(screen))
+                        for (int i = 0; i < theHost.ScreenCount; i++)
                         {
-                            ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
-                            ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                            if (theHost.instanceForScreen(i) == theHost.instanceForScreen(screen))
+                            {
+                                ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
+                                ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                            }
                         }
                     }
                 }

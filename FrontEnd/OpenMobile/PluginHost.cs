@@ -82,7 +82,7 @@ namespace OpenMobile
                 return eMediaType.RTSPUrl;
             if (source.ToLower().StartsWith("mms:") == true)
                 return eMediaType.MMSUrl;
-            if (source.ToLower().StartsWith("CAM") == true)
+            if (source.ToLower().StartsWith("cam") == true)
                 return eMediaType.LiveCamera;
             if (source.Contains(".") == true) //Check if its a file
             {

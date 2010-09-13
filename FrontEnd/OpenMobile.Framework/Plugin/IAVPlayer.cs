@@ -35,7 +35,7 @@ namespace OpenMobile.Plugin
         /// Stop the currently playing media
         /// </summary>
         /// <returns></returns>
-        bool stop(int stop);
+        bool stop(int instance);
         /// <summary>
         /// The the media playback position (in seconds)
         /// </summary>
