@@ -1200,6 +1200,10 @@ namespace OpenMobile
         /// </summary>
         InternetRadio=18,
         /// <summary>
+        /// One or more live camera streams
+        /// </summary>
+        LiveCamera=19,
+        /// <summary>
         /// Other
         /// </summary>
         Other	=	20
