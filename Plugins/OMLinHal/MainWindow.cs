@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Diagnostics;
 using System.Text;
 using Gtk;
 using NDesk.DBus;
@@ -14,6 +15,9 @@ public partial class MainWindow : Gtk.Window
 	Bus session;
 	SessionManager sm;
 	UPower up;
+	Backlight bk;
+	UDisks disks;
+	Device[] devices;
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
 		system=Bus.System;
@@ -21,7 +25,8 @@ public partial class MainWindow : Gtk.Window
 		try
         {
             receive = new UdpClient(8549);
-        }catch(SocketException)
+        }
+		catch(SocketException)
         {
             Environment.Exit(0);
         }
@@ -29,8 +34,33 @@ public partial class MainWindow : Gtk.Window
         receive.BeginReceive(recv, null);
 		sm=session.GetObject<SessionManager>("org.gnome.SessionManager",new ObjectPath("/org/gnome/SessionManager"));
 		up=system.GetObject<UPower>("org.freedesktop.UPower",new ObjectPath("/org/freedesktop/UPower"));
+		up.Resuming+=Resuming;
+		up.Sleeping+=Suspending;
+		sm.SessionOver+=Shutdown;
+		bk=session.GetObject<Backlight>("org.gnome.PowerManager",new ObjectPath("/org/gnome/PowerManager/Backlight"));
+		disks=system.GetObject<UDisks>("org.freedesktop.UDisks",new ObjectPath("/org/freedesktop/UDisks"));
+		ObjectPath[] devPaths=disks.EnumerateDevices();
+		devices=new Device[devPaths.Length];
+		for(int i=0;i<devices.Length;i++)
+			devices[i]=system.GetObject<Device>("org.freedesktop.UDisks",devPaths[i]);
+		//Can't do any more until property support is fixed in dbus
 	}
-	
+	private void Shutdown()
+	{
+		raisePowerEvent(ePowerEvent.ShutdownPending);	
+	}
+	private void Resuming()
+	{
+		raisePowerEvent(ePowerEvent.SystemResumed);
+	}
+	private void Suspending()
+	{
+		raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
+	}
+	public static void raisePowerEvent(ePowerEvent e)
+        {
+            sendIt("-2|"+((int)e).ToString());
+        }
 	public static void raiseSystemEvent(eFunction eFunction, string arg, string arg2, string arg3)
         {
             string s=((int)eFunction).ToString();
@@ -69,10 +99,22 @@ public partial class MainWindow : Gtk.Window
                     //TODO
                     break;
                 case "40": //Set Monitor Brightness
-                    //TODO
+					if (arg1=="0")
+						try
+						{
+							Process.Start("gnome-screensaver-command","-a");
+						}catch(Exception)
+						{
+							try
+							{
+								Process.Start("qdbus","org.freedesktop.ScreenSaver /ScreenSaver Lock");	
+							}catch(Exception){}
+						}
+					else
+                    	bk.SetBrightness(uint.Parse(arg1));
                     break;
                 case "44": //Close Program
-                    Environment.Exit(0);
+					Application.Quit();
                     break;
                 case "45": //Hibernate
                     up.Hibernate();
