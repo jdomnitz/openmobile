@@ -60,6 +60,7 @@
     <Compile Include="Power.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="UDiscs.cs" />
+    <Compile Include="Props.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">
