@@ -1,4 +1,5 @@
 using NDesk.DBus;
+using System;
 [Interface("org.freedesktop.UDisks.Device")]
 public interface Device 
 {
@@ -6,7 +7,8 @@ public interface Device
     void DriveEject(string[] options);
     void DrivePollMedia();
     void DriveUninhibitPolling(string cookie);
-    
+    string FilesystemMount(string type, string[] options);
+	
     string LinuxLoopFilename { get; }
     uint OpticalDiscNumSessions { get; }
     uint OpticalDiscNumAudioTracks { get; }
@@ -71,4 +73,5 @@ public interface Device
     ulong DeviceMediaDetectionTime { get; }
     ulong DeviceDetectionTime { get; }
     string NativePath { get; }
+	event VoidCallback Changed;
 }

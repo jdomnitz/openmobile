@@ -6,6 +6,7 @@ using System.Text;
 using Gtk;
 using NDesk.DBus;
 using OpenMobile;
+using System.Threading;
 
 public partial class MainWindow : Gtk.Window
 {
@@ -18,6 +19,7 @@ public partial class MainWindow : Gtk.Window
 	Backlight bk;
 	UDisks disks;
 	Device[] devices;
+	Properties[] props; 
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
 		system=Bus.System;
@@ -39,11 +41,40 @@ public partial class MainWindow : Gtk.Window
 		sm.SessionOver+=Shutdown;
 		bk=session.GetObject<Backlight>("org.gnome.PowerManager",new ObjectPath("/org/gnome/PowerManager/Backlight"));
 		disks=system.GetObject<UDisks>("org.freedesktop.UDisks",new ObjectPath("/org/freedesktop/UDisks"));
-		ObjectPath[] devPaths=disks.EnumerateDevices();
-		devices=new Device[devPaths.Length];
-		for(int i=0;i<devices.Length;i++)
-			devices[i]=system.GetObject<Device>("org.freedesktop.UDisks",devPaths[i]);
-		//Can't do any more until property support is fixed in dbus
+		disks.DeviceAdded+=added;
+		disks.DeviceChanged+=changed;
+		//disks.DeviceRemoved+=remove;
+	}
+	private void changed(ObjectPath path)
+	{
+		Debug.Print("Change "+path.ToString());
+	}
+	private void remove(ObjectPath path)
+	{
+		Properties p=system.GetObject<Properties>("org.freedesktop.UDisks",path);
+		string[] str=(string[])p.Get("org.freedesktop.UDisks.Device","DeviceMountPaths");
+		Debug.Print(str[0]);
+	}
+	private void added(ObjectPath path)
+	{
+		Properties p=system.GetObject<Properties>("org.freedesktop.UDisks",path);
+		string[] str=new string[0];
+		for(int i=0;i<20;i++)
+		{
+			str=(string[])p.Get("org.freedesktop.UDisks.Device","DeviceMountPaths");
+			if (str.Length>0)
+				break;
+			Thread.Sleep(100);
+		}
+		if (str.Length==0)
+		{
+			Device d=system.GetObject<Device>("org.freedesktop.UDisks",path);
+			object ret=d.FilesystemMount("auto",new string[0]);
+			if (ret!=null)
+				raiseStorageEvent(eMediaType.NotSet,ret.ToString());
+		}
+		else
+			raiseStorageEvent(eMediaType.NotSet,str[0]);
 	}
 	private void Shutdown()
 	{
