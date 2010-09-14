@@ -20,10 +20,10 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
-using Mono.Data.Sqlite;
+using System.ComponentModel;
 using System.Data;
 using System.Reflection;
-using System.Security.Cryptography;
+using Mono.Data.Sqlite;
 using OpenMobile.helperFunctions;
 
 namespace OpenMobile.Data
@@ -48,6 +48,7 @@ namespace OpenMobile.Data
         /// <summary>
         /// Used internally
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Open()
         {
             try
