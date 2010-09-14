@@ -320,7 +320,7 @@ namespace OpenMobile.Controls
         /// Can controls on this panel be double clicked (setting to false increases responsiveness)
         /// </summary>
         [Category("Panel")]
-        [Obsolete]
+        [Obsolete("Compatability Stub")]
         public bool DoubleClickable
         {
             get

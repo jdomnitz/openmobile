@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 
 using System.Threading;
+using System.ComponentModel;
 
 namespace OpenMobile.Threading
 {
@@ -78,6 +79,7 @@ namespace OpenMobile.Threading
         /// <param name="task"></param>
         /// <param name="taskPriority"></param>
         [Obsolete("All Tasks should provide a task name")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static void QueueTask(Function task, ePriority taskPriority)
         {
             QueueTask(task, taskPriority, "Unknown Task");
