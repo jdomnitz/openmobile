@@ -38,10 +38,6 @@
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AudioRouter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Sub-Projects\AudioRouter\bin\Debug\AudioRouter.dll</HintPath>
-    </Reference>
     <Reference Include="HDRadioComm, Version=1.6.0.3, Culture=neutral, PublicKeyToken=6059837a14fef3b8, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\HDRadioComm.dll</HintPath>
@@ -61,6 +57,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="RadioComm.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\branches\Libraries\AudioRouter\AudioRouter.csproj">
+      <Project>{B1FF1393-9BE4-49E0-B1C2-BD748EC445B9}</Project>
+      <Name>AudioRouter</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="My Project\" />

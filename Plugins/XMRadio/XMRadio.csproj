@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AudioRouter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Sub-Projects\AudioRouter\bin\Release\AudioRouter.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="XMComm, Version=1.4.0.1, Culture=neutral, PublicKeyToken=536ebb5739538f70, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -46,6 +42,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\branches\Libraries\AudioRouter\AudioRouter.csproj">
+      <Project>{B1FF1393-9BE4-49E0-B1C2-BD748EC445B9}</Project>
+      <Name>AudioRouter</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">
       <Project>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</Project>
       <Name>OpenMobile.Framework</Name>
