@@ -102,12 +102,41 @@ namespace WinCam
         }
 
         public event MediaEvent OnMediaEvent;
+        private int getCam(string name)
+        {
+            DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+            string[] lst = new string[d.Length];
+            for (int i = 0; i < d.Length; i++)
+            {
+                if (d[i].Name == name)
+                    return i;
+            }
+            return -1;
+        }
+        private string[] getcams()
+        {
+            DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+           string[] lst = new string[d.Length];
+            for (int i = 0; i < d.Length; i++)
+            {
+                lst[i] = d[i].Name;
+            }
+            return lst;
+        }
         public string[] OutputDevices
         {
             get
             {
-                //todo
-                throw new NotImplementedException(); 
+                DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
+                List<string> lst = new List<string>();
+                for (int i = 0; i < d.Length; i++)
+                {
+                    if (d[i].Name.Contains("DirectSound"))
+                    {
+                        lst.Add(d[i].Name.Replace("DirectSound", "").Replace(":", "").Replace("  ", " "));
+                    }
+                }
+                return lst.ToArray();
             }
         }
 
@@ -136,10 +165,24 @@ namespace WinCam
             streams = new List<stream>[theHost.InstanceCount];
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
-
+        Settings settings;
         public Settings loadSettings()
         {
-            return null;
+            if (settings == null)
+            {
+                settings = new Settings("Camera Settings");
+                List<string> cams=new List<string>(getcams());
+                settings.Add(new Setting(SettingTypes.MultiChoice,"WinCam.Source1.Source",null,"Camera 1 Source",cams,cams));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Source", null, "Camera 2 Source", cams, cams));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Source", null, "Camera 3 Source", cams, cams));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Source", null, "Camera 4 Source", cams, cams));
+                List<string> choices = new List<string>(new string[] { "None", "Flip Vertically", "Flip Horizontally", "Flip Both" });
+                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Flip", null, "Source 1 Flip", choices, choices));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Flip", null, "Source 2 Flip", choices, choices));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Flip", null, "Source 3 Flip", choices, choices));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Flip", null, "Source 4 Flip", choices, choices));
+            }
+            return settings;
         }
 
         public string authorName
@@ -223,8 +266,9 @@ namespace WinCam
                 hr = builder.SetFiltergraph(graph);
                 hr = builder.RenderStream(null, null, source, null, null);
                 window = (IVideoWindow)graph;
-                //TODO - fix screen lookup
-                hr = window.put_Owner(theHost.UIHandle(instance));
+                for(int i=0;i<theHost.ScreenCount;i++)
+                    if(instance==theHost.instanceForScreen(i))
+                        window.put_Owner(theHost.UIHandle(i));
                 hr = window.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren);
                 control = (IMediaControl)graph;
                 hr=control.Run();
