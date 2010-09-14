@@ -73,7 +73,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPYWeather", "..\Plugins\DP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMFolderDB", "..\Plugins\OMFolderDB\OMFolderDB.csproj", "{61B40A2E-2859-4FFA-86D4-657A6A8A3D6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioRouter", "..\..\Sub-Projects\AudioRouter\AudioRouter.csproj", "{B1FF1393-9BE4-49E0-B1C2-BD748EC445B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioRouter", "..\..\branches\Libraries\AudioRouter\AudioRouter.csproj", "{B1FF1393-9BE4-49E0-B1C2-BD748EC445B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Email", "..\..\branches\Libraries\OpenMobile.Email\OpenMobile.Email.csproj", "{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}"
 EndProject
