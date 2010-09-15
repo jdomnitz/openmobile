@@ -68,7 +68,7 @@ namespace OpenMobile
                 else if(i == -2)
                     Core.theHost.raisePowerEvent((ePowerEvent)Enum.Parse(typeof(ePowerEvent),arg1));
                 else if (i == -3)
-                    Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1), true, arg2);
+                    Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1),bool.Parse(arg2),arg3);
             }
             void recv(IAsyncResult res)
             {

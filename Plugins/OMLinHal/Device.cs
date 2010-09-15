@@ -8,7 +8,7 @@ public interface Device
     void DrivePollMedia();
     void DriveUninhibitPolling(string cookie);
     string FilesystemMount(string type, string[] options);
-	
+	void FilesystemUnmount(string[] options);
     string LinuxLoopFilename { get; }
     uint OpticalDiscNumSessions { get; }
     uint OpticalDiscNumAudioTracks { get; }

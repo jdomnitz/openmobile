@@ -51,7 +51,7 @@ namespace OpenMobile
                 else
                     foreach (string folder in folders)
                     {
-                        switch (folder.Substring(path.Length).ToUpper())
+                        switch (Path.GetFileName(folder).ToUpper())
                         {
                             case "VIDEO_TS":
                                 return eMediaType.DVD;

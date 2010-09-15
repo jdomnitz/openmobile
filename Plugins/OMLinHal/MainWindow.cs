@@ -7,6 +7,7 @@ using Gtk;
 using NDesk.DBus;
 using OpenMobile;
 using System.Threading;
+using System.Collections.Generic;
 
 public partial class MainWindow : Gtk.Window
 {
@@ -17,9 +18,7 @@ public partial class MainWindow : Gtk.Window
 	SessionManager sm;
 	UPower up;
 	Backlight bk;
-	UDisks disks;
-	Device[] devices;
-	Properties[] props; 
+	UDisks disks; 
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
 		system=Bus.System;
@@ -45,9 +44,37 @@ public partial class MainWindow : Gtk.Window
 		disks.DeviceChanged+=changed;
 		//disks.DeviceRemoved+=remove;
 	}
+	Dictionary<ObjectPath,string> removables=new Dictionary<ObjectPath, string>();
 	private void changed(ObjectPath path)
 	{
-		Debug.Print("Change "+path.ToString());
+		Properties p=system.GetObject<Properties>("org.freedesktop.UDisks",path);
+		if ((bool)p.Get("org.freedesktop.UDisks.Device","DriveIsMediaEjectable"))
+		{
+			if ((bool)p.Get("org.freedesktop.UDisks.Device","DeviceIsMediaAvailable"))
+			{
+				string[] mountPath=((string[])p.Get("org.freedesktop.UDisks.Device","DeviceMountPaths"));
+				if (mountPath.Length>0)
+				{
+					if (removables.ContainsKey(path))
+						removables[path]=mountPath[0];
+					else
+						removables.Add(path,mountPath[0]);
+					raiseStorageEvent(eMediaType.NotSet,true,mountPath[0]);
+				}
+			}
+			else
+			{
+				string[] mountPath=(string[])p.Get("org.freedesktop.UDisks.Device","DeviceMountPaths");
+				if (mountPath.Length>0)
+				{
+					if (removables.ContainsValue(mountPath[0]))
+					{
+						removables.Remove(path);
+						raiseStorageEvent(eMediaType.DeviceRemoved,true,mountPath[0]);
+					}
+				}
+			}
+		}
 	}
 	private void remove(ObjectPath path)
 	{
@@ -71,10 +98,10 @@ public partial class MainWindow : Gtk.Window
 			Device d=system.GetObject<Device>("org.freedesktop.UDisks",path);
 			object ret=d.FilesystemMount("auto",new string[0]);
 			if (ret!=null)
-				raiseStorageEvent(eMediaType.NotSet,ret.ToString());
+				raiseStorageEvent(eMediaType.NotSet,true,ret.ToString());
 		}
 		else
-			raiseStorageEvent(eMediaType.NotSet,str[0]);
+			raiseStorageEvent(eMediaType.NotSet,true,str[0]);
 	}
 	private void Shutdown()
 	{
@@ -123,11 +150,38 @@ public partial class MainWindow : Gtk.Window
                 case "3": //GetData - System Volume
                     //TODO
                     break;
+				case "32": //Plugins Loaded
+					foreach(ObjectPath path in disks.EnumerateDevices())
+					{
+						Properties p=system.GetObject<Properties>("org.freedesktop.UDisks",path);
+						if ((bool)p.Get("org.freedesktop.UDisks.Device","DriveIsMediaEjectable"))
+							if ((bool)p.Get("org.freedesktop.UDisks.Device","DeviceIsMediaAvailable"))
+							{
+								string[] mountPath=(string[])p.Get("org.freedesktop.UDisks.Device","DeviceMountPaths");
+								if (mountPath.Length>0)
+								{
+									removables.Add(path,mountPath[0]);
+									raiseStorageEvent(eMediaType.NotSet,false,mountPath[0]);
+								}
+							}
+					}
+					break;
                 case "34": //Set Volume
                     //TODO;
                     break;
                 case "35": //Eject Disc
-                    //TODO
+                    if (removables.ContainsValue(arg1))
+					{
+						foreach(var pair in removables)
+							if (pair.Value==arg1)
+							{
+								Properties p=system.GetObject<Properties>("org.freedesktop.UDisks",pair.Key);
+								Device d=system.GetObject<Device>("org.freedesktop.UDisks",pair.Key);
+								if ((bool)p.Get("org.freedesktop.UDisks","DeviceIsMounted"))
+									d.FilesystemUnmount(new string[0]);
+								d.DriveEject(new string[0]);
+							}
+					}
                     break;
                 case "40": //Set Monitor Brightness
 					if (arg1=="0")
@@ -168,9 +222,9 @@ public partial class MainWindow : Gtk.Window
             receive.BeginReceive(recv, null);
         }
 
-        public static void raiseStorageEvent(eMediaType MediaType, string drive)
+        public static void raiseStorageEvent(eMediaType MediaType,bool justInserted, string drive)
         {
-            sendIt("-3|" + MediaType + "|" + drive);
+            sendIt("-3|" + MediaType + "|" + justInserted + "|" + drive);
         }
 	
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
@@ -179,4 +233,5 @@ public partial class MainWindow : Gtk.Window
 		a.RetVal = true;
 	}
 }
+
 
