@@ -133,7 +133,8 @@ namespace OpenMobile
                         if (typeInterface != null)
                         {
                             IBasePlugin availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginType);
-
+							if (typeof(INetwork).IsInstanceOfType(availablePlugin))
+								((INetwork)availablePlugin).OnWirelessEvent+=theHost.raiseWirelessEvent;
                             pluginCollection.Add(availablePlugin);
                             return;
                         }
