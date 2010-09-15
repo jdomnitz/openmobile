@@ -96,7 +96,6 @@ namespace OpenMobile.Data
                 SqliteCommand cmd = new SqliteCommand(con);
                 cmd.CommandText="SELECT Value from tblCache where EncryptedName='"+md5+"'";
                 object ret = cmd.ExecuteScalar();
-                cmd.Dispose();
                 string value;
                 if (ret != null)
                     value = ret.ToString();
