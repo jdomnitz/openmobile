@@ -213,6 +213,7 @@ namespace OpenMobile
             theHost.hal = new HalInterface();
             getEmReady();
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete,"","","");
+			theHost.hal.snd("32");
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(theHost.NetworkChange_NetworkAvailabilityChanged);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
             OpenMobile.Threading.TaskManager.Enable(Core.theHost); //Start executing background tasks
@@ -228,10 +229,11 @@ namespace OpenMobile
                 if (settings.getSetting("UI.MinGraphics") == "True")
                     theHost.GraphicsLevel = eGraphicsLevel.Minimal;
             }
-            foreach (DriveInfo drive in DriveInfo.GetDrives())
-                if (drive.DriveType == DriveType.CDRom)
-                    if (drive.IsReady == true)
-                        theHost.RaiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
+			//TODO: Move to WinHal
+            //foreach (DriveInfo drive in DriveInfo.GetDrives())
+            //    if (drive.DriveType == DriveType.CDRom)
+            //        if (drive.IsReady == true)
+            //            theHost.RaiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
             pluginCollection.TrimExcess();
             ThreadPool.SetMaxThreads(50, 500);
             Application.Run();
