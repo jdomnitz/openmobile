@@ -245,13 +245,13 @@ namespace Networking
         {
             OImage icon;
             if (c.signalStrength>=75)
-                icon = theHost.getSkinImage("Wifi3").image;
+                icon = theHost.getSkinImage("WiFi3").image;
             else if (c.signalStrength >= 50)
-                icon = theHost.getSkinImage("Wifi2").image;
+                icon = theHost.getSkinImage("WiFi2").image;
             else if (c.signalStrength >= 25)
-                icon = theHost.getSkinImage("Wifi1").image;
+                icon = theHost.getSkinImage("WiFi1").image;
             else if(c.signalStrength>0)
-                icon = theHost.getSkinImage("Wifi0").image;
+                icon = theHost.getSkinImage("WiFi0").image;
             else
                 icon = theHost.getSkinImage("Fixed").image;
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
@@ -271,13 +271,13 @@ namespace Networking
             {
                 case eWirelessEvent.WirelessNetworksAvailable:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
-                    icon=new IconManager.UIIcon(theHost.getSkinImage("WifiNew").image,ePriority.Normal,false, "Networking");
+                    icon=new IconManager.UIIcon(theHost.getSkinImage("WiFiNew").image,ePriority.Normal,false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
                     OpenMobile.Threading.TaskManager.QueueTask(UpdateList, ePriority.Normal, "Refresh Networks");
                     return;
                 case eWirelessEvent.ConnectingToWirelessNetwork:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
-                    icon = new IconManager.UIIcon(theHost.getSkinImage("WifiConnecting").image, ePriority.Normal, false, "Networking");
+                    icon = new IconManager.UIIcon(theHost.getSkinImage("WiFiConnecting").image, ePriority.Normal, false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
                     return;
                 case eWirelessEvent.ConnectedToWirelessNetwork:
@@ -287,13 +287,13 @@ namespace Networking
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
                     int strength = int.Parse(arg);
                     if (strength>=75)
-                        icon = new IconManager.UIIcon(theHost.getSkinImage("Wifi3").image, ePriority.Normal, false, "Networking");
+                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi3").image, ePriority.Normal, false, "Networking");
                     else if (strength >= 50)
-                        icon = new IconManager.UIIcon(theHost.getSkinImage("Wifi2").image, ePriority.Normal, false, "Networking");
+                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi2").image, ePriority.Normal, false, "Networking");
                     else if (strength >= 25)
-                        icon = new IconManager.UIIcon(theHost.getSkinImage("Wifi1").image, ePriority.Normal, false, "Networking");
+                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi1").image, ePriority.Normal, false, "Networking");
                     else
-                        icon = new IconManager.UIIcon(theHost.getSkinImage("Wifi0").image, ePriority.Normal, false, "Networking");
+                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi0").image, ePriority.Normal, false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
                     return;
                 case eWirelessEvent.DisconnectedFromWirelessNetwork:
