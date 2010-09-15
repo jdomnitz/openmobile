@@ -158,6 +158,7 @@ namespace PandoraPlayer
                 loggedIn = false;
                 currentSong = new mediaInfo();
                 client = null;
+                error = false;
                 raiseMediaEvent(eFunction.Stop, "");
                 return true;
             }
@@ -166,6 +167,7 @@ namespace PandoraPlayer
 
         void client_Error(object o, StringEventArgs e)
         {
+            error = true;
             if (theHost != null)
                 theHost.sendMessage("OMDebug", "Pandora", e.Value);
             Debug.Print(e.Value);
@@ -257,7 +259,7 @@ namespace PandoraPlayer
         {
             return false;
         }
-
+        bool error;
         public tunedContentInfo getStatus(int instance)
         {
             tunedContentInfo info = new tunedContentInfo();
@@ -266,7 +268,10 @@ namespace PandoraPlayer
             info.powerState = (client != null);
             info.currentStation = getStationInfo(instance);
             info.stationList = getStationList(instance);
-            info.status = (client != null)? eTunedContentStatus.Tuned:eTunedContentStatus.Unknown;
+            if (error)
+                info.status = eTunedContentStatus.Error;
+            else
+                info.status = (client != null)? eTunedContentStatus.Tuned:eTunedContentStatus.Unknown;
             return info;
         }
 

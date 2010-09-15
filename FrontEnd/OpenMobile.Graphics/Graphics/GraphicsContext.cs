@@ -78,7 +78,7 @@ namespace OpenMobile.Graphics
                 {
                     #if DEBUG
                         Debug.Indent();
-                        Debug.Print("GraphicsMode: {0}", mode);
+                        //Debug.Print("GraphicsMode: {0}", mode);
                         Debug.Print("IWindowInfo: {0}", window);
                         Debug.Print("GraphicsContextFlags: {0}", flags);
                         Debug.Print("Requested version: {0}.{1}", major, minor);
