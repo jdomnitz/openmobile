@@ -26,6 +26,7 @@ using System.Text;
 using System.Windows.Forms;
 using OpenMobile;
 using Microsoft.Win32;
+using System.IO;
 
 namespace OMHal
 {
@@ -108,6 +109,12 @@ namespace OMHal
                             }
                     }
                     break;
+                case "32":
+                    foreach (DriveInfo drive in DriveInfo.GetDrives())
+                        if ((drive.DriveType == DriveType.CDRom)||(drive.DriveType==DriveType.Removable))
+                            if (drive.IsReady == true)
+                                raiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
+                    break;
                 case "34": //Set Volume
                     if (int.TryParse(arg2, out ret))
                     {
@@ -163,9 +170,9 @@ namespace OMHal
             receive.BeginReceive(recv, null);
         }
 
-        public static void raiseStorageEvent(eMediaType MediaType, string drive)
+        public static void raiseStorageEvent(eMediaType MediaType,bool justHappened, string drive)
         {
-            sendIt("-3|" + MediaType + "|" + drive);
+            sendIt("-3|" + MediaType +"|" + justHappened + "|" + drive);
         }
 
         public void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)

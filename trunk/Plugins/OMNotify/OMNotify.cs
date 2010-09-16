@@ -126,7 +126,11 @@ namespace ControlDemo
             switch (type)
             {
                 case eMediaType.DeviceRemoved:
+                    //TODO-better way
                     IconManager.UIIcon removeMe = new IconManager.UIIcon(theHost.getSkinImage("Discs|AudioCD").image, ePriority.MediumHigh, true, "OMNotify");
+                    removeMe.tag = lastPath;
+                    theHost.sendMessage("UI", "OMNotify", "RemoveIcon", ref removeMe);
+                    removeMe = new IconManager.UIIcon(theHost.getSkinImage("Discs|DVD").image, ePriority.MediumHigh, true, "OMNotify");
                     removeMe.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "RemoveIcon", ref removeMe);
                     return;

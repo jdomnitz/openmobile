@@ -229,11 +229,6 @@ namespace OpenMobile
                 if (settings.getSetting("UI.MinGraphics") == "True")
                     theHost.GraphicsLevel = eGraphicsLevel.Minimal;
             }
-			//TODO: Move to WinHal
-            //foreach (DriveInfo drive in DriveInfo.GetDrives())
-            //    if (drive.DriveType == DriveType.CDRom)
-            //        if (drive.IsReady == true)
-            //            theHost.RaiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
             pluginCollection.TrimExcess();
             ThreadPool.SetMaxThreads(50, 500);
             Application.Run();
