@@ -227,7 +227,7 @@ namespace OMDir
         void left_SelectedIndexChanged(OMList sender, int screen)
         {
             if (sender.SelectedIndex != -1)
-                if (type[screen] == 1)
+                if ((screen>=0)&&(type[screen] == 1))
                     ((OMButton)manager[screen][6]).Visible = true;
         }
         private void loadRoot(OMList l)

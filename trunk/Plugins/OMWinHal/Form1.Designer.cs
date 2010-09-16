@@ -13,6 +13,8 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            if (DriveHandler.id > 0)
+                DriveHandler.unhook();
             if (disposing && (components != null))
             {
                 components.Dispose();

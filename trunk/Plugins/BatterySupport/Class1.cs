@@ -173,6 +173,8 @@ namespace BatterySupport
             while (true)
             {
                 Thread.Sleep(60000);
+                if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Charging)
+                    return;
                 int newbatt = (int)(SystemInformation.PowerStatus.BatteryLifePercent * 100);
                 if (newbatt != lastBatt)
                 {
