@@ -19,14 +19,13 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
-using OpenMobile;
 using Microsoft.Win32;
-using System.IO;
+using OpenMobile;
 
 namespace OMHal
 {
@@ -48,6 +47,7 @@ namespace OMHal
             }
             send = new UdpClient("127.0.0.1", 8550);
             Specific.hookVolume(this.Handle);
+            DriveHandler.hook(this.Handle);
             if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
                 raisePowerEvent(ePowerEvent.SystemOnBattery);
             SystemEvents.PowerModeChanged+=new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
@@ -61,7 +61,7 @@ namespace OMHal
         }
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == WM_DEVICECHANGE)
+            if (m.Msg==DriveHandler.WM_MEDIA_CHANGE)
                 DriveHandler.WndProc(ref m);
             else
                 base.WndProc(ref m);
