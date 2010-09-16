@@ -84,13 +84,13 @@ namespace OMHal
             DriveInfo info = new DriveInfo(drive);
             if (info.IsReady == true)
             {
-                Form1.raiseStorageEvent(eMediaType.NotSet, drive);
+                Form1.raiseStorageEvent(eMediaType.NotSet,true, drive);
             }
         }
         private static void DeviceRemoved(string drive)
         {
             DriveInfo info = new DriveInfo(drive);
-            Form1.raiseStorageEvent(eMediaType.DeviceRemoved, drive);
+            Form1.raiseStorageEvent(eMediaType.DeviceRemoved,true, drive);
         }
     }
 }
