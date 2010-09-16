@@ -807,6 +807,8 @@ namespace OpenMobile
             if (function == eFunction.Play)
             {
                 mediaInfo info = theHost.getPlayingMedia(instance);
+				if (info==null)
+					return;
                 imageItem it = new imageItem(info.coverArt);
                 object o = new object();
                 tunedContentInfo TunedContentInfo = null;
