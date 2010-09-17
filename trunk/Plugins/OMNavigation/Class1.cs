@@ -43,7 +43,7 @@ namespace Navigation
             Object o;
             host.getData(eGetData.GetMap, "", out o);
             if (o == null)
-                return eLoadStatus.LoadFailedRetryRequested;
+                return eLoadStatus.LoadFailedGracefulUnloadRequested;
             p.addControl(o as OMControl);
             imageItem img = theHost.getSkinImage("Tab", true);
             OMButton setButton = new OMButton(175, 533, 150, 70);

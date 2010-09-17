@@ -390,7 +390,9 @@ public sealed class MainMenu : IHighLevel
                 list.Add("Exit");
                 list.Add("About");
                 Type hl = typeof(IHighLevel); //performance improvement
-                foreach (IBasePlugin b in (List<IBasePlugin>)o)
+                List<IBasePlugin> plugins = (List<IBasePlugin>)o;
+                plugins.Sort(new comp());
+                foreach (IBasePlugin b in plugins)
                 {
                     if (hl.IsInstanceOfType(b))
                         if ((b.pluginName != "UI") && (b.pluginName != "MainMenu") && (b.pluginName != "OMNotify")) //FS#7
@@ -399,7 +401,13 @@ public sealed class MainMenu : IHighLevel
             }
             return screens[screen,name];
         }
-
+        class comp : IComparer<IBasePlugin>
+        {
+            public int Compare(IBasePlugin x, IBasePlugin y)
+            {
+                return x.pluginName.CompareTo(y.pluginName);
+            }
+        }
         public Settings loadSettings()
         {
             return null;

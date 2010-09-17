@@ -33,7 +33,7 @@
   <ItemGroup>
     <Reference Include="Pandora, Version=1.0.0.27, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Release\Pandora.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Reflector\Disassembler\Pandora\bin\Release\Pandora.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
