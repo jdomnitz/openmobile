@@ -237,7 +237,58 @@ namespace OMDir
             l.Add(new OMListItem("Pictures",folder));
             l.Add(new OMListItem("Music",folder));
             l.Add(new OMListItem("Videos", folder));
-            l.AddRange(Environment.GetLogicalDrives());
+            DriveInfo info;
+            foreach(string drive in Environment.GetLogicalDrives())
+            {
+                try
+                {
+                    info = new DriveInfo(drive);
+                }
+                catch (IOException e)
+                {
+                    continue;
+                }
+                switch (info.DriveType)
+                {
+                    case DriveType.CDRom:
+                        l.Add(new OMListItem(genLabel(info), theHost.getSkinImage("Drives|CD-ROM Drive").image));
+                        break;
+                    case DriveType.Fixed:
+                    case DriveType.Unknown:
+                    case DriveType.Ram:
+                        l.Add(new OMListItem(genLabel(info), theHost.getSkinImage("Drives|Local Drive").image));
+                        break;
+                    case DriveType.Network:
+                        l.Add(new OMListItem(genLabel(info), theHost.getSkinImage("Drives|Network Drive").image));
+                        break;
+                    case DriveType.Removable:
+                        l.Add(new OMListItem(genLabel(info), theHost.getSkinImage("Drives|Removable Drive").image));
+                        break;
+                }
+            }
+        }
+
+        private string genLabel(DriveInfo info)
+        {
+            if (!info.IsReady)
+            {
+                if (info.DriveType == DriveType.CDRom)
+                    return "CD/DVD Drive (" + info.Name + ")";
+                else if (info.DriveType == DriveType.Removable)
+                    return "Removable Disk (" + info.Name + ")";
+                return info.Name;
+            }
+            if (string.IsNullOrEmpty(info.VolumeLabel))
+            {
+                if (info.DriveType == DriveType.Fixed)
+                    return "Local Disk (" + info.Name + ")";
+                else if (info.DriveType == DriveType.Removable)
+                    return "Removable Disk (" + info.Name + ")";
+                else if (info.DriveType == DriveType.Network)
+                    return "Network Drive (" + info.Name + ")";
+                return info.Name;
+            }
+            return info.VolumeLabel+" ("+info.Name+")";
         }
         private void loadPath(int screen,string path)
         {
