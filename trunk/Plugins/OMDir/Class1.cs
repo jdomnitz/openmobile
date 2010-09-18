@@ -214,9 +214,13 @@ namespace OMDir
                     case "Videos":
                         return Environment.GetFolderPath(Environment.SpecialFolder.MyMusic).Replace("Music", "Videos");
                 }
+				if (l[l.SelectedIndex].subItem!=null)
+					return l[l.SelectedIndex].subItem;
             }
             else
             {
+				if (l[l.SelectedIndex]==null)
+					throw new Exception("DAMN!");
                 source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
                 if (l.Tag.ToString() == "")
                     l.Tag = null;
@@ -251,18 +255,18 @@ namespace OMDir
                 switch (info.DriveType)
                 {
                     case DriveType.CDRom:
-                        l.Add(new OMListItem(genLabel(info), theHost.getSkinImage("Drives|CD-ROM Drive").image));
+                        l.Add(new OMListItem(genLabel(info),drive, theHost.getSkinImage("Drives|CD-ROM Drive").image));
                         break;
                     case DriveType.Fixed:
                     case DriveType.Unknown:
                     case DriveType.Ram:
-                        l.Add(new OMListItem(genLabel(info), theHost.getSkinImage("Drives|Local Drive").image));
+                        l.Add(new OMListItem(genLabel(info),drive, theHost.getSkinImage("Drives|Local Drive").image));
                         break;
                     case DriveType.Network:
-                        l.Add(new OMListItem(genLabel(info), theHost.getSkinImage("Drives|Network Drive").image));
+                        l.Add(new OMListItem(genLabel(info),drive, theHost.getSkinImage("Drives|Network Drive").image));
                         break;
                     case DriveType.Removable:
-                        l.Add(new OMListItem(genLabel(info), theHost.getSkinImage("Drives|Removable Drive").image));
+                        l.Add(new OMListItem(genLabel(info),drive, theHost.getSkinImage("Drives|Removable Drive").image));
                         break;
                 }
             }
