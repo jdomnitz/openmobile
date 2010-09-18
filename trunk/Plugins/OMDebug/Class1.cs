@@ -81,9 +81,7 @@ namespace OMDebug
             writer.WriteLine("------------------Software-------------------");
             writer.WriteLine("OS: " + OpenMobile.Framework.OSSpecific.getOSVersion());
             writer.WriteLine("Framework: " + OpenMobile.Framework.OSSpecific.getFramework());
-			if (Configuration.RunningOnWindows)
-            	writer.WriteLine("Open Mobile: v" + Process.GetCurrentProcess().Modules[0].FileVersionInfo.FileVersion);
-            //TODO - Linux/OSX
+			writer.WriteLine("Open Mobile: v" + Assembly.GetEntryAssembly().GetName().Version.ToString());
 			writer.WriteLine("Open GL v." + Graphics.Version);
             writer.WriteLine("------------------Hardware-------------------");
             writer.WriteLine("Processors: " + Environment.ProcessorCount);
