@@ -29,7 +29,7 @@ using OpenMobile.Data;
 
 namespace OMDir
 {
-    public class Dir:IHighLevel
+    public class Dir : IHighLevel
     {
         ScreenManager manager;
         IPluginHost theHost;
@@ -104,7 +104,7 @@ namespace OMDir
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
-			theHost.OnStorageEvent+=new StorageEvent(on_storageEvent);
+            theHost.OnStorageEvent += new StorageEvent(on_storageEvent);
             OMPanel p = new OMPanel();
             manager = new ScreenManager(theHost.ScreenCount);
             OMLabel caption = new OMLabel(275, 95, 400, 60);
@@ -128,12 +128,12 @@ namespace OMDir
             right.Font = new Font(Font.GenericSansSerif, 28F);
             right.OnClick += new userInteraction(right_OnClick);
             right.ListStyle = eListStyle.DroidStyleImage;
-            right.Background = Color.FromArgb(180,Color.LightGray);
-            right.ItemColor1 = Color.FromArgb(0,0,16);
+            right.Background = Color.FromArgb(180, Color.LightGray);
+            right.ItemColor1 = Color.FromArgb(0, 0, 16);
             right.ClickToSelect = true;
             OMList left = new OMList(15, 150, 470, 375);
             left.Font = right.Font;
-            left.OnClick+=new userInteraction(left_OnClick);
+            left.OnClick += new userInteraction(left_OnClick);
             left.SelectedIndexChanged += new OMList.IndexChangedDelegate(left_SelectedIndexChanged);
             left.ListStyle = eListStyle.DroidStyleImage;
             left.Background = right.Background;
@@ -163,24 +163,24 @@ namespace OMDir
             return eLoadStatus.LoadSuccessful;
         }
 
-		private void on_storageEvent(eMediaType type,bool justInserted,string path)
-		{
-			if (type==eMediaType.NotSet)
-				return;
-			for(int i=0;i<theHost.ScreenCount;i++)
-			{
-				OMList l=(OMList)manager[i][3];
-				if (l.Tag==null)
-					return;
-				if (l.Tag.ToString()=="")
-					loadRoot(l);
-			}
-		}
-		
+        private void on_storageEvent(eMediaType type, bool justInserted, string path)
+        {
+            if (type == eMediaType.NotSet)
+                return;
+            for (int i = 0; i < theHost.ScreenCount; i++)
+            {
+                OMList l = (OMList)manager[i][3];
+                if (l.Tag == null)
+                    return;
+                if (l.Tag.ToString() == "")
+                    loadRoot(l);
+            }
+        }
+
         void top_OnClick(object sender, int screen)
         {
-            OMList l=(OMList)manager[screen][3];
-            OMList r=(OMList)manager[screen][4];
+            OMList l = (OMList)manager[screen][3];
+            OMList r = (OMList)manager[screen][4];
             if (l.Tag == null)
                 return;
             r.Tag = l.Tag;
@@ -205,13 +205,13 @@ namespace OMDir
 
         void select_OnClick(object sender, int screen)
         {
-            OMList l=(OMList)manager[screen][3];
-            theHost.execute(eFunction.userInputReady, screen.ToString(),"Dir", translateLocal(l));
+            OMList l = (OMList)manager[screen][3];
+            theHost.execute(eFunction.userInputReady, screen.ToString(), "Dir", translateLocal(l));
         }
 
         private string translateLocal(OMList l)
         {
-            string source="";
+            string source = "";
             if (l.Tag == null)
             {
                 //source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
@@ -229,13 +229,13 @@ namespace OMDir
                     case "Videos":
                         return Environment.GetFolderPath(Environment.SpecialFolder.MyMusic).Replace("Music", "Videos");
                 }
-				if (l[l.SelectedIndex].subItem!=null)
-					return l[l.SelectedIndex].subItem;
+                if (l[l.SelectedIndex].subItem != null)
+                    return l[l.SelectedIndex].subItem;
             }
             else
             {
-				if (l[l.SelectedIndex]==null)
-					throw new Exception("DAMN!");
+                if (l[l.SelectedIndex] == null)
+                    throw new Exception("DAMN!");
                 source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
                 if (l.Tag.ToString() == "")
                     l.Tag = null;
@@ -246,44 +246,40 @@ namespace OMDir
         void left_SelectedIndexChanged(OMList sender, int screen)
         {
             if (sender.SelectedIndex != -1)
-                if ((screen>=0)&&(type[screen] == 1))
+                if ((screen >= 0) && (type[screen] == 1))
                     ((OMButton)manager[screen][6]).Visible = true;
         }
         private void loadRoot(OMList l)
         {
-            l.Add(new OMListItem("Desktop",folder));
-            l.Add(new OMListItem("Documents",folder));
-            l.Add(new OMListItem("Pictures",folder));
-            l.Add(new OMListItem("Music",folder));
+            l.Add(new OMListItem("Desktop", folder));
+            l.Add(new OMListItem("Documents", folder));
+            l.Add(new OMListItem("Pictures", folder));
+            l.Add(new OMListItem("Music", folder));
             l.Add(new OMListItem("Videos", folder));
             DriveInfo info;
-            foreach(string drive in Environment.GetLogicalDrives())
+            foreach (string drive in Environment.GetLogicalDrives())
             {
                 switch (OSSpecific.getDriveType(drive))
                 {
                     case DriveType.CDRom:
-                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive),drive, theHost.getSkinImage("Drives|CD-ROM Drive").image));
+                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|CD-ROM Drive").image));
                         break;
                     case DriveType.Fixed:
                     case DriveType.Unknown:
                     case DriveType.Ram:
-                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive),drive, theHost.getSkinImage("Drives|Local Drive").image));
+                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|Local Drive").image));
                         break;
                     case DriveType.Network:
-                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive),drive, theHost.getSkinImage("Drives|Network Drive").image));
+                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|Network Drive").image));
                         break;
                     case DriveType.Removable:
-                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive),drive, theHost.getSkinImage("Drives|Removable Drive").image));
+                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|Removable Drive").image));
                         break;
                 }
             }
         }
 
-        private string genLabel(DriveInfo info)
-        {
-            return OSSpecific.getVolumeLabel(info.Name);
-        }
-        private void loadPath(int screen,string path)
+        private void loadPath(int screen, string path)
         {
             OMList l = (OMList)manager[screen][3];
             OMList r = (OMList)manager[screen][4];
@@ -293,7 +289,7 @@ namespace OMDir
             {
                 l.Tag = "";
                 loadRoot(l);
-                ((OMButton)manager[screen][5]).Visible=false;
+                ((OMButton)manager[screen][5]).Visible = false;
             }
             else
             {
@@ -310,7 +306,7 @@ namespace OMDir
         {
             OMList r = (OMList)manager[screen][4];
             OMList l = ((OMList)manager[screen][3]);
-            if (r.SelectedIndex==-1)
+            if (r.SelectedIndex == -1)
                 return;
             string source = OpenMobile.Path.Combine(r.Tag.ToString(), r[r.SelectedIndex].text);
             if (System.IO.Path.HasExtension(source) == true)
@@ -327,7 +323,7 @@ namespace OMDir
             l.Tag = r.Tag;
             r.Clear();
             r.Tag = source;
-            DirectoryInfo info =new DirectoryInfo(source);
+            DirectoryInfo info = new DirectoryInfo(source);
             try
             {
                 foreach (DirectoryInfo s in info.GetDirectories())
@@ -345,15 +341,15 @@ namespace OMDir
                 }
             }
             catch (Exception) { }
-            ((OMButton)manager[screen][5]).Visible=true;
+            ((OMButton)manager[screen][5]).Visible = true;
         }
 
         void left_OnClick(object sender, int screen)
         {
             OMList r = (OMList)manager[screen][4];
-            OMList l=((OMList)manager[screen][3]);
+            OMList l = ((OMList)manager[screen][3]);
             r.Clear();
-            string source=translateLocal(l);
+            string source = translateLocal(l);
             r.Tag = source;
             DirectoryInfo info = new DirectoryInfo(source);
             try
@@ -361,7 +357,8 @@ namespace OMDir
                 foreach (DirectoryInfo s in info.GetDirectories())
                     if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                         r.Add(new OMListItem(s.Name, folder));
-            }catch(Exception){}
+            }
+            catch (Exception) { }
             try
             {
                 if (type[screen] == 0)
@@ -376,7 +373,7 @@ namespace OMDir
 
         public void Dispose()
         {
-            if (manager!=null)
+            if (manager != null)
                 manager.Dispose();
             GC.SuppressFinalize(this);
         }
