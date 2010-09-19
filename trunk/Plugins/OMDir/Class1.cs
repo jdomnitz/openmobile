@@ -261,19 +261,21 @@ namespace OMDir
             {
                 switch (OSSpecific.getDriveType(drive))
                 {
-                    case DriveType.CDRom:
+                    case OSSpecific.eDriveType.CDRom:
                         l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|CD-ROM Drive").image));
                         break;
-                    case DriveType.Fixed:
-                    case DriveType.Unknown:
-                    case DriveType.Ram:
+                    case OSSpecific.eDriveType.Fixed:
+                    case OSSpecific.eDriveType.Unknown:
                         l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|Local Drive").image));
                         break;
-                    case DriveType.Network:
+                    case OSSpecific.eDriveType.Network:
                         l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|Network Drive").image));
                         break;
-                    case DriveType.Removable:
+                    case OSSpecific.eDriveType.Removable:
                         l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|Removable Drive").image));
+                        break;
+                    case OSSpecific.eDriveType.Phone:
+                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Discs|Phone").image));
                         break;
                 }
             }

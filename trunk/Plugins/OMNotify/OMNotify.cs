@@ -212,9 +212,15 @@ namespace ControlDemo
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
                     return;
-                case eMediaType.iPodiPhone:
-                    ((OMLabel)p[1]).Text = "iPod/iPhone";
+                case eMediaType.AppleDevice:
+                    ((OMLabel)p[1]).Text = "Apple Device";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|iPodiPhone", true);
+                    itm = theHost.getSkinImage("Close", true);
+                    List3.Add(new OMListItem("Close", itm.image));
+                    return;
+                case eMediaType.Smartphone:
+                    ((OMLabel)p[1]).Text = "Phone";
+                    ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|Phone", true);
                     itm = theHost.getSkinImage("Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
                     return;

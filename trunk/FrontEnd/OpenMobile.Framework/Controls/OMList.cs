@@ -239,10 +239,7 @@ namespace OpenMobile.Controls
                 return items.Count;
             }
         }
-        /// <summary>
-        /// Returns the index of the currently selected item
-        /// </summary>
-        [Category("List"), Description("Returns the index of the currently selected item")]
+
         public int SelectedIndex
         {
             get
@@ -435,7 +432,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Gets or Sets the list style
         /// </summary>
-        [Description("The rendering style of the list"), Category("List")]
         public eListStyle ListStyle
         {
             get
@@ -452,7 +448,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The first background color of a non-selected item
         /// </summary>
-        [Description("The second background color of a non-selected item"), Category("List")]
         public Color ItemColor1
         {
             get { return itemColor1; }
@@ -462,7 +457,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The second background color of a non-selected item
         /// </summary>
-        [Description("The second background color of a non-selected item"), Category("List")]
         public Color ItemColor2
         {
             get { return itemColor2; }
@@ -471,7 +465,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The Text Color for highlighted items
         /// </summary>
-        [Description("The Text Color for highlighted items"), Category("Text")]
         public Color HighlightColor
         {
             get { return highlightColor; }
@@ -480,7 +473,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The Text Outline/Effect Color for highlighted items
         /// </summary>
-        [Description("The Text Outline/Effect Color for highlighted items"), Category("Text")]
         public Color HighlightedOutlineColor
         {
             get { return highlightColorOutline; }
@@ -490,7 +482,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The highlighted item text format
         /// </summary>
-        [Description("The highlighted item text format"), Category("Text")]
         public OpenMobile.Graphics.eTextFormat HighlightedItemFormat
         {
             get { return highlightedItemFormat; }
@@ -499,7 +490,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The first background color of selected items
         /// </summary>
-        [Description("The first background color of selected items"), Category("List")]
         public Color SelectedItemColor1
         {
             get { return selectedItemColor1; }
@@ -509,7 +499,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The second background color of selected items
         /// </summary>
-        [Description("The second background color of selected items"), Category("List")]
         public Color SelectedItemColor2
         {
             get { return selectedItemColor2; }

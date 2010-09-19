@@ -51,6 +51,7 @@ namespace OMHal
             if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
                 raisePowerEvent(ePowerEvent.SystemOnBattery);
             SystemEvents.PowerModeChanged+=new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
+            SystemEvents.SessionEnding += new SessionEndingEventHandler(SystemEvents_SessionEnding);
             receive.BeginReceive(recv, null);
             this.Visible = false;
         }
@@ -174,7 +175,21 @@ namespace OMHal
         {
             sendIt("-3|" + MediaType +"|" + justHappened + "|" + drive);
         }
-
+        public void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            if (e.Reason == SessionEndReasons.Logoff)
+                try
+                {
+                    raisePowerEvent(ePowerEvent.LogoffPending);
+                }
+                catch (Exception) { }
+            if (e.Reason == SessionEndReasons.SystemShutdown)
+                try
+                {
+                    raisePowerEvent(ePowerEvent.ShutdownPending);
+                }
+                catch (Exception) { }
+        }
         public void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
             if (e.Mode == PowerModes.Resume)
