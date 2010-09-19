@@ -224,6 +224,54 @@ namespace OpenMobile.Framework
             return osVersion;
         }
 
+		static string translateLocal(string path)
+		{
+			StreamReader r=new StreamReader(File.OpenRead("/proc/mounts"));
+			string[] lines=r.ReadToEnd().Split(new char[]{'\r','\n'});
+			foreach(string line in lines)
+				if (line.Contains(path))
+					return Path.GetFileName(line.Substring(0,line.IndexOf(' ')));
+			return null;
+		}
+		public static DriveType getDriveType(string path)
+		{
+			if ((Configuration.RunningOnWindows)||(Configuration.RunningOnMacOS)) //OSX - Untested
+				return new DriveInfo(path).DriveType;
+			else
+			{
+				string local=translateLocal(path);
+				if (string.IsNullOrEmpty(local))
+					return DriveType.Unknown;
+				if(local=="rootfs")
+					return DriveType.Fixed;
+				string response=null;
+				ProcessStartInfo info=new ProcessStartInfo("qdbus","--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/"+local+" org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveIsMediaEjectable'");
+				info.RedirectStandardOutput=true;info.UseShellExecute=false;
+				info.WindowStyle=ProcessWindowStyle.Hidden;
+				Process p=new Process();
+				p.StartInfo=info;
+				p.Start();
+				p.WaitForExit();
+				response=p.StandardOutput.ReadToEnd().Trim();
+				if(p.ExitCode!=0)
+					response=null;
+				if (response=="true")
+					return DriveType.CDRom;
+				info=new ProcessStartInfo("qdbus","--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/"+local+" org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveCanDetach'");
+				info.RedirectStandardOutput=true;info.UseShellExecute=false;
+				info.WindowStyle=ProcessWindowStyle.Hidden;
+				p=new Process();
+				p.StartInfo=info;
+				p.Start();
+				p.WaitForExit();
+				response=p.StandardOutput.ReadToEnd().Trim();
+				if(p.ExitCode!=0)
+					response=null;
+				if (response=="true")
+					return DriveType.Removable;
+				return DriveType.Fixed;
+			}
+		}
         public static string getVolumeLabel(string path)
         {
             if (Configuration.RunningOnWindows)
@@ -289,6 +337,30 @@ namespace OpenMobile.Framework
                 }
                 return info.VolumeLabel + " (" + info.Name + ")";
             }
+			else if(Configuration.RunningOnUnix)
+			{
+				if (path=="/")
+					return "File System (/)";
+				string local=translateLocal(path);
+				string response=null;
+				if (local!=null)
+				{
+				ProcessStartInfo info=new ProcessStartInfo("qdbus","--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/"+local+" org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'IdLabel'");
+				info.RedirectStandardOutput=true;info.UseShellExecute=false;
+				info.WindowStyle=ProcessWindowStyle.Hidden;
+				Process p=new Process();
+				p.StartInfo=info;
+				p.Start();
+				p.WaitForExit();
+				response=p.StandardOutput.ReadToEnd().Trim();
+				if(p.ExitCode!=0)
+					response=null;
+				}
+				if (string.IsNullOrEmpty(response))
+					return Path.GetFileName(new DriveInfo(path).VolumeLabel);
+				else
+					return response.Replace("_"," ");
+			}
             return path;
         }
         /// <summary>

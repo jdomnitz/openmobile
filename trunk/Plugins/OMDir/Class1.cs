@@ -104,6 +104,7 @@ namespace OMDir
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
+			theHost.OnStorageEvent+=new StorageEvent(on_storageEvent);
             OMPanel p = new OMPanel();
             manager = new ScreenManager(theHost.ScreenCount);
             OMLabel caption = new OMLabel(275, 95, 400, 60);
@@ -162,6 +163,20 @@ namespace OMDir
             return eLoadStatus.LoadSuccessful;
         }
 
+		private void on_storageEvent(eMediaType type,bool justInserted,string path)
+		{
+			if (type==eMediaType.NotSet)
+				return;
+			for(int i=0;i<theHost.ScreenCount;i++)
+			{
+				OMList l=(OMList)manager[i][3];
+				if (l.Tag==null)
+					return;
+				if (l.Tag.ToString()=="")
+					loadRoot(l);
+			}
+		}
+		
         void top_OnClick(object sender, int screen)
         {
             OMList l=(OMList)manager[screen][3];
@@ -244,29 +259,21 @@ namespace OMDir
             DriveInfo info;
             foreach(string drive in Environment.GetLogicalDrives())
             {
-                try
-                {
-                    info = new DriveInfo(drive);
-                }
-                catch (IOException e)
-                {
-                    continue;
-                }
-                switch (info.DriveType)
+                switch (OSSpecific.getDriveType(drive))
                 {
                     case DriveType.CDRom:
-                        l.Add(new OMListItem(genLabel(info),drive, theHost.getSkinImage("Drives|CD-ROM Drive").image));
+                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive),drive, theHost.getSkinImage("Drives|CD-ROM Drive").image));
                         break;
                     case DriveType.Fixed:
                     case DriveType.Unknown:
                     case DriveType.Ram:
-                        l.Add(new OMListItem(genLabel(info),drive, theHost.getSkinImage("Drives|Local Drive").image));
+                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive),drive, theHost.getSkinImage("Drives|Local Drive").image));
                         break;
                     case DriveType.Network:
-                        l.Add(new OMListItem(genLabel(info),drive, theHost.getSkinImage("Drives|Network Drive").image));
+                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive),drive, theHost.getSkinImage("Drives|Network Drive").image));
                         break;
                     case DriveType.Removable:
-                        l.Add(new OMListItem(genLabel(info),drive, theHost.getSkinImage("Drives|Removable Drive").image));
+                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive),drive, theHost.getSkinImage("Drives|Removable Drive").image));
                         break;
                 }
             }
