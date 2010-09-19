@@ -274,25 +274,7 @@ namespace OMDir
 
         private string genLabel(DriveInfo info)
         {
-            if (!info.IsReady)
-            {
-                if (info.DriveType == DriveType.CDRom)
-                    return "CD/DVD Drive (" + info.Name + ")";
-                else if (info.DriveType == DriveType.Removable)
-                    return "Removable Disk (" + info.Name + ")";
-                return info.Name;
-            }
-            if (string.IsNullOrEmpty(info.VolumeLabel)||(info.VolumeLabel=="/"))
-            {
-                if ((info.DriveType == DriveType.Fixed)||(info.DriveType==DriveType.Unknown))
-                    return "Local Disk (" + info.Name + ")";
-                else if (info.DriveType == DriveType.Removable)
-                    return "Removable Disk (" + info.Name + ")";
-                else if (info.DriveType == DriveType.Network)
-                    return "Network Drive (" + info.Name + ")";
-                return info.Name;
-            }
-            return OpenMobile.Path.GetFileName(info.VolumeLabel)+" ("+info.Name+")";
+            return OSSpecific.getVolumeLabel(info.Name);
         }
         private void loadPath(int screen,string path)
         {
