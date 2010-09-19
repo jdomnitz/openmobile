@@ -58,7 +58,7 @@ namespace OpenMobile.Framework
                 theHost = host;
                 theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             }
-            if (os.Platform == PlatformID.Win32NT)
+            if (Configuration.RunningOnWindows)
             {
                 try
                 {
@@ -88,7 +88,7 @@ namespace OpenMobile.Framework
         {
             if (function == eFunction.RenderingWindowResized)
             {
-                if (os.Platform == PlatformID.Win32NT)
+                if (Configuration.RunningOnWindows)
                 {
                     int screen = int.Parse(arg1);
                     object o;
@@ -109,7 +109,7 @@ namespace OpenMobile.Framework
         /// <returns>Returns true if the application was unembedded</returns>
         public static bool unEmbedApplication(string name, int screen)
         {
-            if ((lastHandle != null) && (os.Platform == PlatformID.Win32NT))
+            if ((lastHandle != null) && (Configuration.RunningOnWindows))
             {
                 try
                 {
@@ -205,16 +205,21 @@ namespace OpenMobile.Framework
                         else
                             osVersion = "Windows 7";
                         break;
+                    case 7:
+                        if (os.Version.Minor == 0)
+                            osVersion = "Windows 8";
+                        break;
                     default:
                         break;
                 }
                 return osVersion;
             }
-            else if (os.Platform == PlatformID.Unix)
+            else if (Configuration.RunningOnLinux)
             {
                 ProcessStartInfo info = new ProcessStartInfo("lsb_release", "-d");
                 info.RedirectStandardOutput = true;
                 info.UseShellExecute = false;
+                info.WindowStyle = ProcessWindowStyle.Hidden;
                 Process p = Process.Start(info);
                 StreamReader reader = p.StandardOutput;
                 osVersion = reader.ReadLine().Replace("Description:", "").Trim();
@@ -224,57 +229,67 @@ namespace OpenMobile.Framework
             return osVersion;
         }
 
-		static string translateLocal(string path)
-		{
-			StreamReader r=new StreamReader(File.OpenRead("/proc/mounts"));
-			string[] lines=r.ReadToEnd().Split(new char[]{'\r','\n'});
-			foreach(string line in lines)
-				if (line.Contains(path))
-					return Path.GetFileName(line.Substring(0,line.IndexOf(' ')));
-			return null;
-		}
-		public static DriveType getDriveType(string path)
-		{
-			if ((Configuration.RunningOnWindows)||(Configuration.RunningOnMacOS)) //OSX - Untested
-				return new DriveInfo(path).DriveType;
-			else
-			{
-				string local=translateLocal(path);
-				if (string.IsNullOrEmpty(local))
-					return DriveType.Unknown;
-				if(local=="rootfs")
-					return DriveType.Fixed;
-				string response=null;
-				ProcessStartInfo info=new ProcessStartInfo("qdbus","--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/"+local+" org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveIsMediaEjectable'");
-				info.RedirectStandardOutput=true;info.UseShellExecute=false;
-				info.WindowStyle=ProcessWindowStyle.Hidden;
-				Process p=new Process();
-				p.StartInfo=info;
-				p.Start();
-				p.WaitForExit();
-				response=p.StandardOutput.ReadToEnd().Trim();
-				if(p.ExitCode!=0)
-					response=null;
-				if (response=="true")
-					return DriveType.CDRom;
-				info=new ProcessStartInfo("qdbus","--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/"+local+" org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveCanDetach'");
-				info.RedirectStandardOutput=true;info.UseShellExecute=false;
-				info.WindowStyle=ProcessWindowStyle.Hidden;
-				p=new Process();
-				p.StartInfo=info;
-				p.Start();
-				p.WaitForExit();
-				response=p.StandardOutput.ReadToEnd().Trim();
-				if(p.ExitCode!=0)
-					response=null;
-				if (response=="true")
-					return DriveType.Removable;
-				return DriveType.Fixed;
-			}
-		}
+        private static string translateLocal(string path)
+        {
+            StreamReader r = new StreamReader(File.OpenRead("/proc/mounts"));
+            string[] lines = r.ReadToEnd().Split(new char[] { '\r', '\n' });
+            foreach (string line in lines)
+                if (line.Contains(path))
+                    return Path.GetFileName(line.Substring(0, line.IndexOf(' ')));
+            return null;
+        }
+        /// <summary>
+        /// Returns the type of drive at the given path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static DriveType getDriveType(string path)
+        {
+            if ((Configuration.RunningOnWindows) || (Configuration.RunningOnMacOS)) //OSX - Untested
+                return new DriveInfo(path).DriveType;
+            else
+            {
+                string local = translateLocal(path);
+                if (string.IsNullOrEmpty(local))
+                    return DriveType.Unknown;
+                if (local == "rootfs")
+                    return DriveType.Fixed;
+                string response = null;
+                ProcessStartInfo info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveIsMediaEjectable'");
+                info.RedirectStandardOutput = true; info.UseShellExecute = false;
+                info.WindowStyle = ProcessWindowStyle.Hidden;
+                Process p = new Process();
+                p.StartInfo = info;
+                p.Start();
+                p.WaitForExit();
+                response = p.StandardOutput.ReadToEnd().Trim();
+                if (p.ExitCode != 0)
+                    response = null;
+                if (response == "true")
+                    return DriveType.CDRom;
+                info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveCanDetach'");
+                info.RedirectStandardOutput = true; info.UseShellExecute = false;
+                info.WindowStyle = ProcessWindowStyle.Hidden;
+                p = new Process();
+                p.StartInfo = info;
+                p.Start();
+                p.WaitForExit();
+                response = p.StandardOutput.ReadToEnd().Trim();
+                if (p.ExitCode != 0)
+                    response = null;
+                if (response == "true")
+                    return DriveType.Removable;
+                return DriveType.Fixed;
+            }
+        }
+        /// <summary>
+        /// Returns the volume label for the given drive
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static string getVolumeLabel(string path)
         {
-            if (Configuration.RunningOnWindows)
+            if (!Configuration.RunningOnLinux)
             {
                 DriveInfo info = null;
                 foreach (DriveInfo i in DriveInfo.GetDrives())
@@ -286,37 +301,40 @@ namespace OpenMobile.Framework
                 {
                     if (info.DriveType == DriveType.CDRom)
                     {
-                        var discMaster = new MsftDiscMaster2();
-
-                        if (!discMaster.IsSupportedEnvironment)
-                            return path;
-                        foreach (string uniqueRecorderId in discMaster)
+                        if (Configuration.RunningOnWindows)
                         {
-                            var discRecorder2 = new MsftDiscRecorder2();
-                            discRecorder2.InitializeDiscRecorder(uniqueRecorderId);
-                            if (discRecorder2.VolumePathNames[0].ToString() == path)
+                            var discMaster = new MsftDiscMaster2();
+
+                            if (!discMaster.IsSupportedEnvironment)
+                                return "CD/DVD Drive (" + info.Name + ")";
+                            foreach (string uniqueRecorderId in discMaster)
                             {
-                                List<IMAPI_PROFILE_TYPE> profiles = new List<IMAPI_PROFILE_TYPE>();
-                                foreach (IMAPI_PROFILE_TYPE t in discRecorder2.SupportedProfiles)
-                                    profiles.Add(t);
-                                if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_R_SEQUENTIAL))
-                                    return "BD-R (" + path + ")";
-                                else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_REWRITABLE))
-                                    return "BD-RW (" + path + ")";
-                                else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_ROM))
-                                    return "BD (" + path + ")";
-                                else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_REWRITABLE))
-                                    return "DVD RW  (" + path + ")";
-                                else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_RECORDABLE))
-                                    return "DVD R  (" + path + ")";
-                                else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVDROM))
-                                    return "DVD  (" + path + ")";
-                                else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_REWRITABLE))
-                                    return "CD RW  (" + path + ")";
-                                else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_RECORDABLE))
-                                    return "CD R (" + path + ")";
-                                else
-                                    return "CD  (" + path + ")";
+                                var discRecorder2 = new MsftDiscRecorder2();
+                                discRecorder2.InitializeDiscRecorder(uniqueRecorderId);
+                                if (discRecorder2.VolumePathNames[0].ToString() == path)
+                                {
+                                    List<IMAPI_PROFILE_TYPE> profiles = new List<IMAPI_PROFILE_TYPE>();
+                                    foreach (IMAPI_PROFILE_TYPE t in discRecorder2.SupportedProfiles)
+                                        profiles.Add(t);
+                                    if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_R_SEQUENTIAL))
+                                        return "BD-R (" + path + ")";
+                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_REWRITABLE))
+                                        return "BD-RW (" + path + ")";
+                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_ROM))
+                                        return "BD (" + path + ")";
+                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_REWRITABLE))
+                                        return "DVD RW  (" + path + ")";
+                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_RECORDABLE))
+                                        return "DVD R  (" + path + ")";
+                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVDROM))
+                                        return "DVD  (" + path + ")";
+                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_REWRITABLE))
+                                        return "CD RW  (" + path + ")";
+                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_RECORDABLE))
+                                        return "CD R (" + path + ")";
+                                    else
+                                        return "CD  (" + path + ")";
+                                }
                             }
                         }
                         return "CD/DVD Drive (" + info.Name + ")";
@@ -337,31 +355,30 @@ namespace OpenMobile.Framework
                 }
                 return info.VolumeLabel + " (" + info.Name + ")";
             }
-			else if(Configuration.RunningOnUnix)
-			{
-				if (path=="/")
-					return "File System (/)";
-				string local=translateLocal(path);
-				string response=null;
-				if (local!=null)
-				{
-				ProcessStartInfo info=new ProcessStartInfo("qdbus","--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/"+local+" org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'IdLabel'");
-				info.RedirectStandardOutput=true;info.UseShellExecute=false;
-				info.WindowStyle=ProcessWindowStyle.Hidden;
-				Process p=new Process();
-				p.StartInfo=info;
-				p.Start();
-				p.WaitForExit();
-				response=p.StandardOutput.ReadToEnd().Trim();
-				if(p.ExitCode!=0)
-					response=null;
-				}
-				if (string.IsNullOrEmpty(response))
-					return Path.GetFileName(new DriveInfo(path).VolumeLabel);
-				else
-					return response.Replace("_"," ");
-			}
-            return path;
+            else
+            {
+                if (path == "/")
+                    return "File System (/)";
+                string local = translateLocal(path);
+                string response = null;
+                if (local != null)
+                {
+                    ProcessStartInfo info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'IdLabel'");
+                    info.RedirectStandardOutput = true; info.UseShellExecute = false;
+                    info.WindowStyle = ProcessWindowStyle.Hidden;
+                    Process p = new Process();
+                    p.StartInfo = info;
+                    p.Start();
+                    p.WaitForExit();
+                    response = p.StandardOutput.ReadToEnd().Trim();
+                    if (p.ExitCode != 0)
+                        response = null;
+                }
+                if (string.IsNullOrEmpty(response))
+                    return Path.GetFileName(new DriveInfo(path).VolumeLabel);
+                else
+                    return response.Replace("_", " ");
+            }
         }
         /// <summary>
         /// Is the program running on the Mono Framework
