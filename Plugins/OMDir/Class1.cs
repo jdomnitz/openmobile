@@ -256,7 +256,6 @@ namespace OMDir
             l.Add(new OMListItem("Pictures", folder));
             l.Add(new OMListItem("Music", folder));
             l.Add(new OMListItem("Videos", folder));
-            DriveInfo info;
             foreach (string drive in Environment.GetLogicalDrives())
             {
                 switch (OSSpecific.getDriveType(drive))

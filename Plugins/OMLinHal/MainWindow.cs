@@ -42,6 +42,25 @@ public partial class MainWindow : Gtk.Window
 		disks=system.GetObject<UDisks>("org.freedesktop.UDisks",new ObjectPath("/org/freedesktop/UDisks"));
 		disks.DeviceAdded+=added;
 		disks.DeviceChanged+=changed;
+		Process p=new Process();
+		ProcessStartInfo info=new ProcessStartInfo("pacmd","list-sinks volume");
+		info.WindowStyle=ProcessWindowStyle.Hidden;
+		info.UseShellExecute=false;
+		info.RedirectStandardOutput=true;
+		p.StartInfo=info;
+		p.Start();
+		p.WaitForExit();
+		string response=p.StandardOutput.ReadToEnd();
+		string[] lines=response.Split(new char[]{'\r','\n','\t'});
+		int i=0;
+		foreach(string line in lines)
+		{
+			if (line.StartsWith("volume:"))
+			{
+				raiseSystemEvent(eFunction.systemVolumeChanged,line.Substring(11,3).Trim(),i.ToString(),"");
+				i++;
+			}
+		}
 		//disks.DeviceRemoved+=remove;
 	}
 	Dictionary<ObjectPath,string> removables=new Dictionary<ObjectPath, string>();
@@ -167,7 +186,16 @@ public partial class MainWindow : Gtk.Window
 					}
 					break;
                 case "34": //Set Volume
-                    //TODO;
+					int val;
+                    if (int.TryParse(arg2,out val))
+						if (int.TryParse(arg1,out val))
+						{
+							Process p=new Process();
+							ProcessStartInfo info=new ProcessStartInfo("pacmd","set-sink-volume "+arg2+" "+((int)(val*655.35)).ToString());
+							info.WindowStyle=ProcessWindowStyle.Hidden;
+							p.StartInfo=info;
+							p.Start();
+						}
                     break;
                 case "35": //Eject Disc
                     if (removables.ContainsValue(arg1))

@@ -296,7 +296,21 @@ namespace OpenMobile.Framework
                 if (p.ExitCode != 0)
                     response = null;
                 if (response == "true")
+				{
+					info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveModel'");
+	                info.RedirectStandardOutput = true; info.UseShellExecute = false;
+	                info.WindowStyle = ProcessWindowStyle.Hidden;
+	                p = new Process();
+	                p.StartInfo = info;
+	                p.Start();
+	                p.WaitForExit();
+	                response = p.StandardOutput.ReadToEnd().Trim();
+	                if (p.ExitCode != 0)
+	                    response = null;
+					if (response.Contains("Phone"))
+						return eDriveType.Phone;
                     return eDriveType.Removable;
+				}
                 return eDriveType.Fixed;
             }
         }
