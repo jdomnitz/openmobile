@@ -381,7 +381,7 @@ namespace OMPlayer
             case eMediaType.BluRay:
             case eMediaType.HDDVD:
             case eMediaType.HTTPUrl:
-            case eMediaType.iPodiPhone:
+            case eMediaType.AppleDevice:
             case eMediaType.RTSPUrl:
             case eMediaType.MMSUrl:
             case eMediaType.DVD:

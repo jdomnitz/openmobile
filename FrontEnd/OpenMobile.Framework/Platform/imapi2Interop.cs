@@ -445,6 +445,3 @@ namespace IMAPI2.Interop
     {
     }
 }
-
-
-

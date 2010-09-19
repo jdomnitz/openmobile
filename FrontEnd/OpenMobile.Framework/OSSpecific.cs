@@ -72,11 +72,11 @@ namespace OpenMobile.Framework
                     if (o == null)
                         return false;
                     PointF scale = (PointF)o;
-                    if (windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0), (int)(position.Width * scale.X), (int)(position.Height * scale.Y), 0x20) == false)
+                    if (Windows.windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0), (int)(position.Width * scale.X), (int)(position.Height * scale.Y), 0x20) == false)
                         return false;
-                    if (windowsEmbedder.SetParent(lastHandle[screen].handle, theHost.UIHandle(screen)) == IntPtr.Zero)
+                    if (Windows.windowsEmbedder.SetParent(lastHandle[screen].handle, theHost.UIHandle(screen)) == IntPtr.Zero)
                         return false;
-                    windowsEmbedder.SetFocus(lastHandle[screen].handle);
+                    Windows.windowsEmbedder.SetFocus(lastHandle[screen].handle);
                     return true;
                 }
                 catch (Exception) { return false; }
@@ -97,7 +97,7 @@ namespace OpenMobile.Framework
                         return;
                     PointF scale = (PointF)o;
                     if (lastHandle[screen].handle != IntPtr.Zero)
-                        windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(lastHandle[screen].position.X * scale.X + 1.0), (int)(lastHandle[screen].position.Y * scale.Y + 1.0), (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y), 0x20);
+                        Windows.windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(lastHandle[screen].position.X * scale.X + 1.0), (int)(lastHandle[screen].position.Y * scale.Y + 1.0), (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y), 0x20);
                 }
             }
         }
@@ -113,8 +113,8 @@ namespace OpenMobile.Framework
             {
                 try
                 {
-                    windowsEmbedder.SetParent(lastHandle[screen].handle, IntPtr.Zero);
-                    windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, 10, 10, 400, 300, 0x20);
+                    Windows.windowsEmbedder.SetParent(lastHandle[screen].handle, IntPtr.Zero);
+                    Windows.windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, 10, 10, 400, 300, 0x20);
                     lastHandle[screen].handle = IntPtr.Zero;
                     return true;
                 }
@@ -238,22 +238,40 @@ namespace OpenMobile.Framework
                     return Path.GetFileName(line.Substring(0, line.IndexOf(' ')));
             return null;
         }
+        public enum eDriveType
+        {
+            Unknown=0,
+            NoRootDirectory=1,
+            Removable=2,
+            Fixed=3,
+            Network=4,
+            CDRom=5,
+            Phone=7
+        }
         /// <summary>
         /// Returns the type of drive at the given path
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static DriveType getDriveType(string path)
+        public static eDriveType getDriveType(string path)
         {
             if ((Configuration.RunningOnWindows) || (Configuration.RunningOnMacOS)) //OSX - Untested
-                return new DriveInfo(path).DriveType;
+            {
+                DriveType type= new DriveInfo(path).DriveType;
+                if (type == DriveType.Ram)
+                    return eDriveType.Fixed;
+                if ((Configuration.RunningOnWindows) && (type == DriveType.Removable))
+                    if (Windows.detectPhone(path))
+                        return eDriveType.Phone;
+                return (eDriveType)type;
+            }
             else
             {
                 string local = translateLocal(path);
                 if (string.IsNullOrEmpty(local))
-                    return DriveType.Unknown;
+                    return eDriveType.Unknown;
                 if (local == "rootfs")
-                    return DriveType.Fixed;
+                    return eDriveType.Fixed;
                 string response = null;
                 ProcessStartInfo info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveIsMediaEjectable'");
                 info.RedirectStandardOutput = true; info.UseShellExecute = false;
@@ -266,7 +284,7 @@ namespace OpenMobile.Framework
                 if (p.ExitCode != 0)
                     response = null;
                 if (response == "true")
-                    return DriveType.CDRom;
+                    return eDriveType.CDRom;
                 info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveCanDetach'");
                 info.RedirectStandardOutput = true; info.UseShellExecute = false;
                 info.WindowStyle = ProcessWindowStyle.Hidden;
@@ -278,8 +296,8 @@ namespace OpenMobile.Framework
                 if (p.ExitCode != 0)
                     response = null;
                 if (response == "true")
-                    return DriveType.Removable;
-                return DriveType.Fixed;
+                    return eDriveType.Removable;
+                return eDriveType.Fixed;
             }
         }
         /// <summary>
@@ -345,7 +363,7 @@ namespace OpenMobile.Framework
                 }
                 if (string.IsNullOrEmpty(info.VolumeLabel))
                 {
-                    if (info.DriveType == DriveType.Fixed)
+                    if ((info.DriveType == DriveType.Fixed)||(info.DriveType==DriveType.Ram))
                         return "Local Disk (" + info.Name + ")";
                     else if (info.DriveType == DriveType.Removable)
                         return "Removable Disk (" + info.Name + ")";
@@ -397,22 +415,7 @@ namespace OpenMobile.Framework
             if (IsMono())
                 return "Mono v" + Environment.Version.ToString();
             else
-                return getNetFramework();
-        }
-
-        private static string getNetFramework()
-        {
-            RegistryKey componentsKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Net Framework Setup\NDP\");
-            string[] lst = componentsKey.GetSubKeyNames();
-            object SP = componentsKey.OpenSubKey(lst[lst.Length - 1]).GetValue("SP");
-            string servicePack = "";
-            if (SP != null)
-                servicePack = SP.ToString();
-            if ((servicePack == "") || (servicePack == "0"))
-                servicePack = "";
-            else
-                servicePack = " SP" + servicePack;
-            return "Microsoft .Net " + lst[lst.Length - 1] + servicePack;
+                return Windows.getNetFramework();
         }
         /// <summary>
         /// Run a manged process using mono if necessary
@@ -435,17 +438,6 @@ namespace OpenMobile.Framework
                 return true;
             }
             catch (Exception) { return false; }
-        }
-        private sealed class windowsEmbedder
-        {
-            [DllImport("user32.dll")]
-            public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
-
-            [DllImport("user32.dll")]
-            public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-            [DllImport("user32.dll")]
-            public static extern IntPtr SetFocus(IntPtr hWnd);
         }
     }
 }

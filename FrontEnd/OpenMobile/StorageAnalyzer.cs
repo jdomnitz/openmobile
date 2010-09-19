@@ -58,7 +58,7 @@ namespace OpenMobile
                             case "BDMV":
                                 return eMediaType.BluRay;
                             case "IPOD_CONTROL":
-                                return eMediaType.iPodiPhone;
+                                return eMediaType.AppleDevice;
                             case "HVDVD_TS":
                                 return eMediaType.HDDVD;
                             case "DCIM":

@@ -405,21 +405,6 @@ namespace OpenMobile
         }
 
         #region Power Events
-        public void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
-        {
-            if (e.Reason == SessionEndReasons.Logoff)
-                try
-                {
-                    raisePowerEvent(ePowerEvent.LogoffPending);
-                }
-                catch (Exception) { }
-            if (e.Reason == SessionEndReasons.SystemShutdown)
-                try
-                {
-                    raisePowerEvent(ePowerEvent.ShutdownPending);
-                }
-                catch (Exception) { }
-        }
         public void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
         {
             if (screenCount != DisplayDevice.AvailableDisplays.Count)

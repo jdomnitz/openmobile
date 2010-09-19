@@ -217,7 +217,6 @@ namespace OpenMobile
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(theHost.NetworkChange_NetworkAvailabilityChanged);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
             OpenMobile.Threading.TaskManager.Enable(Core.theHost); //Start executing background tasks
-            SystemEvents.SessionEnding += new SessionEndingEventHandler(theHost.SystemEvents_SessionEnding);
             SystemEvents.DisplaySettingsChanged+=new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);
             if (OpenMobile.Net.Network.IsAvailable==true)
                 theHost.raiseSystemEvent(eFunction.connectedToInternet, "", "", "");

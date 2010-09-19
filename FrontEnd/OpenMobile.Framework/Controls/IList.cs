@@ -65,6 +65,10 @@ namespace OpenMobile.Controls
         /// <param name="index"></param>
         void Select(int index);
         /// <summary>
+        /// Returns the index of the currently selected item
+        /// </summary>
+        int SelectedIndex{get;set;}
+        /// <summary>
         /// Sorts the list alphabetically
         /// </summary>
         void Sort();

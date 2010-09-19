@@ -1170,7 +1170,7 @@ namespace OpenMobile
         /// <summary>
         /// An iPod
         /// </summary>
-        iPodiPhone	=	11,
+        AppleDevice	=	11,
         /// <summary>
         /// A bluetooth audio device
         /// </summary>
@@ -1204,9 +1204,13 @@ namespace OpenMobile
         /// </summary>
         LiveCamera=19,
         /// <summary>
+        /// Smartphone
+        /// </summary>
+        Smartphone=20,
+        /// <summary>
         /// Other
         /// </summary>
-        Other	=	20
+        Other	=	25
     }
     /// <summary>
     /// Textbox Options
