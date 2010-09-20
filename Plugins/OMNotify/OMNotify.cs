@@ -52,7 +52,7 @@ namespace ControlDemo
             List3.ListStyle = eListStyle.DroidStyleImage;
             List3.ItemColor1 = Color.Black;
             List3.ListItemHeight = 70;
-            List3.SelectedIndexChanged += new OMList.IndexChangedDelegate(List3_SelectedIndexChanged);
+            List3.OnClick+= new userInteraction(List3_OnClick);
             p.addControl(Image1);
             p.addControl(Label2);
             p.addControl(List3);
@@ -83,10 +83,8 @@ namespace ControlDemo
             }
         }
 
-        void List3_SelectedIndexChanged(OMList sender, int screen)
+        void List3_OnClick(OMControl sender, int screen)
         {
-            if (List3.SelectedIndex < 0)
-                return;
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
                 theHost.execute(eFunction.TransitionFromPanel,i.ToString(), "OMNotify", "notify");
@@ -109,6 +107,8 @@ namespace ControlDemo
                     DeviceInfo info = DeviceInfo.getDeviceInfo(lastPath);
                     List<mediaInfo>media=new List<mediaInfo>();
                     theHost.execute(eFunction.backgroundOperationStatus, "Loading playlists . . .");
+                    if (info.PlaylistFolders.Length == 0)
+                        return;
                     foreach (string playlist in Playlist.listPlaylists(info.PlaylistFolders[0]))
                         media.AddRange(Playlist.readPlaylist(playlist));
                     theHost.setPlaylist(media, theHost.instanceForScreen(screen));
