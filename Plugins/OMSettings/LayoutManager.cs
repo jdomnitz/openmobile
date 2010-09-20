@@ -165,6 +165,7 @@ namespace OMSettings
                     OMTextBox folder = new OMTextBox(450, ofset, 500, 50);
                     folder.Font = new Font(Font.GenericSansSerif, 28F);
                     folder.TextAlignment = Alignment.CenterLeft;
+					folder.Flags=textboxFlags.EllipsisCenter;
                     folder.OnClick += new userInteraction(folder_OnClick);
                     folder.Name = title;
                     folder.Text = s.Value;
@@ -185,6 +186,7 @@ namespace OMSettings
                     file.OnClick += new userInteraction(file_OnClick);
                     file.Name = title;
                     file.Text = s.Value;
+					file.Flags=textboxFlags.EllipsisCenter;
                     file.Tag = s.Name;
                     ret.Add(file);
                     ofset += 60;
