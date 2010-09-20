@@ -205,7 +205,7 @@ namespace ControlDemo
                 case eMediaType.Camera:
                     ((OMLabel)p[1]).Text = "Camera";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|Camera", true);
-                    itm = theHost.getSkinImage("Discs|SlideShow", true);
+                    itm = theHost.getSkinImage("Discs|Slideshow", true);
                     List3.Add(new OMListItem("View Slide Show", itm.image));
                     itm = theHost.getSkinImage("Discs|Add", true);
                     List3.Add(new OMListItem("Copy Photos to Disk", itm.image));
@@ -225,7 +225,7 @@ namespace ControlDemo
                 case eMediaType.AppleDevice:
                     ((OMLabel)p[1]).Text = "Apple Device";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|iPodiPhone", true);
-                    itm = theHost.getSkinImage("Close", true);
+                    itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
                     return;
                 case eMediaType.Smartphone:
@@ -244,10 +244,10 @@ namespace ControlDemo
                     }
                     if (info.PictureFolders.Length > 0)
                     {
-                        itm = theHost.getSkinImage("Discs|SlideShow", true);
+                        itm = theHost.getSkinImage("Discs|Slideshow", true);
                         List3.Add(new OMListItem("View Pictures", itm.image));
                     }
-                    itm = theHost.getSkinImage("Close", true);
+                    itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
                     return;
             }
