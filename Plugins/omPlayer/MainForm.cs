@@ -383,6 +383,7 @@ namespace OMPlayer
             case eMediaType.HTTPUrl:
             case eMediaType.AppleDevice:
             case eMediaType.RTSPUrl:
+            case eMediaType.Smartphone:
             case eMediaType.MMSUrl:
             case eMediaType.DVD:
                 return false;

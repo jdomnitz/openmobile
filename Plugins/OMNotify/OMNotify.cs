@@ -25,6 +25,7 @@ using OpenMobile.Controls;
 using OpenMobile.Graphics;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
+using System.Collections.Generic;
 
 namespace ControlDemo
 {
@@ -103,6 +104,15 @@ namespace ControlDemo
                 case "Play HDDVD":
                     if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), lastPath))
                         theHost.sendMessage("UI", "OMNotify", "ShowMediaControls" + screen.ToString());
+                    break;
+                case "Play Playlists":
+                    DeviceInfo info = DeviceInfo.getDeviceInfo(lastPath);
+                    List<mediaInfo>media=new List<mediaInfo>();
+                    theHost.execute(eFunction.backgroundOperationStatus, "Loading playlists . . .");
+                    foreach (string playlist in Playlist.listPlaylists(info.PlaylistFolders[0]))
+                        media.AddRange(Playlist.readPlaylist(playlist));
+                    theHost.setPlaylist(media, theHost.instanceForScreen(screen));
+                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), media[0].Location);
                     break;
                 case "Eject":
                     theHost.execute(eFunction.ejectDisc, lastPath);
@@ -221,6 +231,22 @@ namespace ControlDemo
                 case eMediaType.Smartphone:
                     ((OMLabel)p[1]).Text = "Phone";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|Phone", true);
+                    DeviceInfo info = DeviceInfo.getDeviceInfo(arg);
+                    if (info.PlaylistFolders.Length > 0)
+                    {
+                        itm = theHost.getSkinImage("Discs|Play", true);
+                        List3.Add(new OMListItem("Play Playlists", itm.image));
+                    }
+                    if (info.MusicFolders.Length > 0)
+                    {
+                        itm = theHost.getSkinImage("Discs|Play", true);
+                        List3.Add(new OMListItem("Play All Music", itm.image));
+                    }
+                    if (info.PictureFolders.Length > 0)
+                    {
+                        itm = theHost.getSkinImage("Discs|SlideShow", true);
+                        List3.Add(new OMListItem("View Pictures", itm.image));
+                    }
                     itm = theHost.getSkinImage("Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
                     return;
