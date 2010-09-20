@@ -104,6 +104,7 @@
     <Compile Include="helperFunctions\Encryption.cs" />
     <Compile Include="helperFunctions\General.cs" />
     <Compile Include="Math\Evaluator.cs" />
+    <Compile Include="Media\DeviceInfo.cs" />
     <Compile Include="Media\MediaLoader.cs" />
     <Compile Include="Net\Connections.cs" />
     <Compile Include="Net\Network.cs" />

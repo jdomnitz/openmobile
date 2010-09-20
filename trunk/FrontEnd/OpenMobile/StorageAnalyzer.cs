@@ -21,6 +21,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using OpenMobile.Framework;
 
 namespace OpenMobile
 {
@@ -69,6 +70,8 @@ namespace OpenMobile
                     }
                 if (File.Exists(Path.Combine(path, "OpenDrive.ini")))
                     return eMediaType.OpenDrive;
+                if (OSSpecific.getDriveType(path) == OSSpecific.eDriveType.Phone)
+                    return eMediaType.Smartphone;
                 return eMediaType.LocalHardware;
             }catch(Exception){
                 return eMediaType.LocalHardware;
