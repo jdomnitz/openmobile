@@ -107,24 +107,16 @@ namespace OpenMobile.Controls
         /// </summary>
         public void doubleClickMe(int screen)
         {
-            try
-            {
                 if (OnDoubleClick != null)
                     OnDoubleClick(this, screen);
-            }
-            catch (Exception) { };//If no one has hooked the double click event
         }
         /// <summary>
         /// Fires the OnLongClick event
         /// </summary>
         public void longClickMe(int screen)
         {
-            try
-            {
                 if (OnLongClick != null)
                     OnLongClick(this, screen);
-            }
-            catch (Exception) { };
         }
 
         /// <summary>
