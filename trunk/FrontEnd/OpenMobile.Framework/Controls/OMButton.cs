@@ -279,7 +279,7 @@ namespace OpenMobile.Controls
             float alpha = 1;
             if (this.Mode == eModeType.transitioningIn)
                 alpha = e.globalTransitionIn;
-            if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
+            else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                 alpha = e.globalTransitionOut;
             alpha *= ((float)transparency / 100);
             if ((this.Mode == eModeType.Highlighted) && (this.FocusImage.image != null))
@@ -295,7 +295,7 @@ namespace OpenMobile.Controls
                 alpha *= e.transparency;
                 if (downImage.image != null)
                 {
-                    g.DrawImage(downImage.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha,orientation);
+                    g.DrawImage(downImage.image, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha,orientation);
                     if (textTexture == null)
                         textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                     g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha);
@@ -308,6 +308,15 @@ namespace OpenMobile.Controls
                         textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                     g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha);
                     return;
+                }
+                else if (image.image == null)
+                {
+                    if (image == imageItem.MISSING)
+                        g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                }
+                else
+                {
+                    g.DrawImage(image.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha, orientation);
                 }
             }
             if (image.image == null)

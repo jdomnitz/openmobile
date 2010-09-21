@@ -444,7 +444,7 @@ namespace OpenMobile
                     if (lastClick.Mode == eModeType.ClickedAndTransitioningOut)
                         lastClick.Mode = eModeType.transitioningOut;
                     else
-                        lastClick.Mode = eModeType.Normal;
+                        lastClick.Mode = eModeType.Highlighted;
                     tmrClick.Enabled = false;
                     lastClick = null;
                     return;
