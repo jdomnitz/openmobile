@@ -444,7 +444,8 @@ namespace OpenMobile
                     if (lastClick.Mode == eModeType.ClickedAndTransitioningOut)
                         lastClick.Mode = eModeType.transitioningOut;
                     else
-                        lastClick.Mode = eModeType.Highlighted;
+                        lastClick.Mode = eModeType.Normal;
+                    RenderingWindow_MouseMove(this, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
                     tmrClick.Enabled = false;
                     lastClick = null;
                     return;
