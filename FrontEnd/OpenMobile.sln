@@ -53,6 +53,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPEmail", "..\Plugins\DPEma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Email", "..\..\branches\Libraries\OpenMobile.Email\OpenMobile.Email.csproj", "{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewMedia", "..\Plugins\NewMedia\NewMedia.csproj", "{F15159CB-BC40-4ABD-B23F-B41320FF16B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -216,6 +218,12 @@ Global
 		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
 		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B2070DD-CBB9-4A42-9938-3814BCEDCEED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
