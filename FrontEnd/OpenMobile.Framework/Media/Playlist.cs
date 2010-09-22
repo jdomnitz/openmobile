@@ -108,6 +108,24 @@ namespace OpenMobile.Media
             return db.writePlaylist(playlist.ConvertAll<string>(convertMediaInfo),name,false);
         }
 
+        /// <summary>
+        /// Writes a playlist to the database
+        /// </summary>
+        /// <param name="theHost"></param>
+        /// <param name="name"></param>
+        /// <param name="playlist"></param>
+        /// <returns></returns>
+        public static bool deletePlaylistFromDB(IPluginHost theHost, string name)
+        {
+            object o;
+            using (PluginSettings s = new PluginSettings())
+                theHost.getData(eGetData.GetMediaDatabase, s.getSetting("Default.MusicDatabase"), out o);
+            if (o == null)
+                return false;
+            IMediaDatabase db = (IMediaDatabase)o;
+            return db.removePlaylist(name);
+        }
+
         private static string convertMediaInfo(mediaInfo info)
         {
             return info.Location;

@@ -27,6 +27,7 @@ namespace ControlDemo
             theHost = host;
             if (host.InstanceCount == -1)
                 return eLoadStatus.LoadFailedRetryRequested;
+            theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
             manager = new ScreenManager(host.ScreenCount);
             OMPanel p = new OMPanel("Media");
             imageItem opt1 = theHost.getSkinImage("DownTab");
@@ -40,6 +41,7 @@ namespace ControlDemo
             List.Color = Color.Black;
             List.Font = new Font(Font.GenericSansSerif, 28F);
             List.OnClick += new userInteraction(List_OnClick);
+            List.OnLongClick += new userInteraction(List_OnLongClick);
             OMImage LeftTab = new OMImage(-18, 155, 225, 150);
             LeftTab.Image = theHost.getSkinImage("LeftSlidingSelect");
             OMButton Artists = new OMButton(24, 168, 130, 130);
@@ -90,8 +92,41 @@ namespace ControlDemo
             Sources.Font = Zones.Font;
             Sources.Text = " Source:";
             Sources.TextAlignment = Alignment.CenterLeft;
-            OMImage Source = new OMImage(105, 85, 75, 100);
+            Sources.OnClick += new userInteraction(Sources_OnClick);
+            OMButton Source = new OMButton(105, 85, 75, 100);
             Source.Image = theHost.getSkinImage("Local Drive");
+            Source.OnClick += new userInteraction(Sources_OnClick);
+            Source.Transition = eButtonTransition.None;
+            OMBasicShape shapeBar = new OMBasicShape(4, 97, 173, 0);
+            shapeBar.FillColor = Color.Black;
+            shapeBar.Shape = shapes.Rectangle;
+            shapeBar.BorderColor = Color.Gray;
+            shapeBar.BorderSize = 2F;
+            Font f = new Font(Font.GenericSansSerif, 17F);
+            OMButton source1 = new OMButton(37, 75, 100, 100);
+            source1.Visible = false;
+            source1.OnClick += new userInteraction(source_OnClick);
+            OMLabel label1 = new OMLabel(2, 150, 175, 50);
+            label1.Visible = false;
+            label1.Font = f;
+            OMButton source2 = new OMButton(37, 175, 100, 100);
+            source2.Visible = false;
+            source2.OnClick += new userInteraction(source_OnClick);
+            OMLabel label2 = new OMLabel(2, 250, 175, 50);
+            label2.Visible = false;
+            label2.Font = f;
+            OMButton source3 = new OMButton(37, 275, 100, 100);
+            source3.Visible = false;
+            source3.OnClick += new userInteraction(source_OnClick);
+            OMLabel label3 = new OMLabel(2, 350, 175, 50);
+            label3.Visible = false;
+            label3.Font = f;
+            OMButton source4 = new OMButton(37, 375, 100, 100);
+            source4.Visible = false;
+            source4.OnClick += new userInteraction(source_OnClick);
+            OMLabel label4 = new OMLabel(2, 450, 175, 50);
+            label4.Visible = false;
+            label4.Font = f;
             p.addControl(Background);
             p.addControl(LeftTab);
             p.addControl(Artists);
@@ -102,21 +137,97 @@ namespace ControlDemo
             p.addControl(PlaySelected);
             p.addControl(Enqueue);
             p.addControl(RightTab);
-            p.addControl(Playlists);
-            p.addControl(Sources);
+            p.addControl(Playlists);//10
+            p.addControl(shapeBar);
             p.addControl(Zones);
-            p.addControl(Source);
+            p.addControl(Sources);
             p.addControl(List);
+            p.addControl(Source);
+            p.addControl(source1);
+            p.addControl(source2);
+            p.addControl(source3);
+            p.addControl(source4);
+            p.addControl(label1);
+            p.addControl(label2);
+            p.addControl(label3);
+            p.addControl(label4);
             manager.loadPanel(p);
             for (int i = 0; i < theHost.ScreenCount; i++)
                 ((OMButton)manager[i][12]).Text = "Zone " + (theHost.instanceForScreen(i) + 1).ToString();
             using (PluginSettings ps = new PluginSettings())
                 dbname = ps.getSetting("Default.MusicDatabase");
+            SafeThread.Asynchronous(delegate() { theHost_OnStorageEvent(eMediaType.NotSet, true, null); }, theHost);
             OpenMobile.Threading.TaskManager.QueueTask(loadArtists, ePriority.High, "Load Artists");
             format.color = Color.FromArgb(175,Color.Black);
             format.highlightColor = Color.LightGray;
             format.font = new Font(Font.GenericSansSerif, 20F);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void source_OnClick(OMControl sender, int screen)
+        {
+            ((OMButton)sender.Parent[15]).Image = ((OMButton)sender).Image;
+            currentSource = (DeviceInfo)sender.Tag;
+            Sources_OnClick(sender, screen);
+        }
+
+        void Sources_OnClick(OMControl sender, int screen)
+        {
+            if (sender.Parent[13].Top == 100)
+            {
+                sender.Parent[13].Top = 100 + (100 * sources.Count);
+                sender.Parent[15].Top = 85 + (100 * sources.Count);
+                sender.Parent[11].Height = 6 + (100 * sources.Count);
+                for (int i = 0; i < sources.Count; i++)
+                    sender.Parent[16 + i].Visible = true;
+                for (int i = 0; i < sources.Count; i++)
+                    sender.Parent[20 + i].Visible = true;
+            }
+            else
+            {
+                sender.Parent[13].Top = 100;
+                sender.Parent[15].Top = 85;
+                sender.Parent[11].Height=0;
+                for (int i = 0; i < sources.Count; i++)
+                    sender.Parent[16 + i].Visible = false;
+                for (int i = 0; i < sources.Count; i++)
+                    sender.Parent[20 + i].Visible = false;
+            }
+        }
+
+        DeviceInfo currentSource=null;
+        List<DeviceInfo> sources = new List<DeviceInfo>();
+        void theHost_OnStorageEvent(eMediaType type, bool justInserted, string arg)
+        {
+            if (justInserted)
+            {
+                List<DeviceInfo> temp = new List<DeviceInfo>();
+                int source=0;
+                foreach (string drive in Environment.GetLogicalDrives())
+                {
+                    DeviceInfo info = DeviceInfo.getDeviceInfo(drive);
+                    switch (info.DriveType)
+                    {
+                        case OSSpecific.eDriveType.CDRom:
+                            ((OMButton)manager[0][source + 16]).Image = theHost.getSkinImage("CD-ROM Drive");
+                            break;
+                        case OSSpecific.eDriveType.Fixed:
+                        case OSSpecific.eDriveType.Network:
+                        case OSSpecific.eDriveType.Unknown:
+                            ((OMButton)manager[0][source + 16]).Image = theHost.getSkinImage("Local Drive");
+                            break;
+                        case OSSpecific.eDriveType.Removable:
+                        case OSSpecific.eDriveType.Phone: //TODO - separate icon
+                            ((OMButton)manager[0][source + 16]).Image = theHost.getSkinImage("Removable Drive");
+                            break;
+                    }
+                    ((OMButton)manager[0][source + 16]).Tag = info;
+                    ((OMLabel)manager[0][source + 20]).Text = OSSpecific.getVolumeLabel(drive);
+                    source++;
+                    temp.Add(info);
+                }
+                sources = temp; //do this instead of clearing to ensure the list is never empty
+            }
         }
 
         void Enqueue_OnClick(OMControl sender, int screen)
@@ -250,6 +361,29 @@ namespace ControlDemo
                 moveToTracks(screen);
             }
         }
+        void List_OnLongClick(OMControl sender, int screen)
+        {
+            OMList l = (OMList)sender;
+            if ((l.SelectedItem != null) && (l.SelectedItem.text == "Current Playlist"))
+            {
+                OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+                string title = input.getText(screen, "NewMedia");
+                if (title != null)
+                {
+                    Playlist.writePlaylistToDB(theHost, title, theHost.getPlaylist(theHost.instanceForScreen(screen)));
+                    ((OMLabel)sender.Parent[6]).Text = title + " Tracks";
+                    SafeThread.Asynchronous(delegate() { showPlaylist(screen, title); }, theHost);
+                    moveToTracks(screen);
+                }
+            }
+            else if (l.SelectedItem != null)
+            {
+                Playlist.deletePlaylistFromDB(theHost, l.SelectedItem.text);
+                SafeThread.Asynchronous(delegate() { showPlaylists(screen); }, theHost);
+            }
+        }
+
+
         List<string> Artists = new List<string>();
         private void loadArtists()
         {
@@ -284,13 +418,17 @@ namespace ControlDemo
                 if ((playlist.Length != 8) && (!playlist.StartsWith("Current")))
                     l.Add(new OMListItem(playlist, null, playlist));
             }
-            foreach (string drive in Environment.GetLogicalDrives())
-            {
-                DeviceInfo info = DeviceInfo.getDeviceInfo(drive);
-                foreach (string playlistPath in info.PlaylistFolders)
-                    foreach (string playlist in Playlist.listPlaylists(playlistPath))
-                        l.Add(new OMListItem(Path.GetFileNameWithoutExtension(playlist), null, playlist));
-            }
+            if (currentSource == null)
+                foreach (DeviceInfo info in sources)
+                    loadPlaylists(info, l);
+            else
+                loadPlaylists(currentSource, l);
+        }
+        private void loadPlaylists(DeviceInfo info,OMList l)
+        {
+            foreach (string playlistPath in info.PlaylistFolders)
+                foreach (string playlist in Playlist.listPlaylists(playlistPath))
+                    l.Add(new OMListItem(Path.GetFileNameWithoutExtension(playlist), null, playlist));
         }
         private void showPlaylist(int screen, string path)
         {
