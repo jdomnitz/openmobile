@@ -1018,8 +1018,8 @@ namespace OpenMobile.Graphics
         [Obsolete]
         public void renderText(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)
         {
-            System.Drawing.Color color = System.Drawing.Color.FromArgb(c.R, c.G, c.B);
-            System.Drawing.Color secondColor = System.Drawing.Color.FromArgb(sC.R, sC.G, sC.B);
+            System.Drawing.Color color = System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
+            System.Drawing.Color secondColor = System.Drawing.Color.FromArgb(sC.A, sC.R, sC.G, sC.B);
             if ((text == null) || (text == ""))
                 return;
             FontStyle f = FontStyle.Regular;

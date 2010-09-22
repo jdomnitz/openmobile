@@ -128,6 +128,24 @@ namespace OpenMobile.Media
             ret.TrimExcess();
             return ret;
         }
+        public static List<string> listPlaylistsFromDB(IPluginHost theHost)
+        {
+            object o = null;
+            List<string> playlists = new List<string>();
+            string dbName = "";
+            using (PluginSettings s = new PluginSettings())
+                dbName = s.getSetting("Default.MusicDatabase");
+            for (int i = 0; ((i < 35) && (o == null)); i++)
+            {
+                theHost.getData(eGetData.GetMediaDatabase, dbName, out o);
+                if (i > 0)
+                    Thread.Sleep(200);
+            }
+            if (o == null)
+                return playlists;
+            IMediaDatabase db = (IMediaDatabase)o;
+            return db.listPlaylists();
+        }
         /// <summary>
         /// Reads a playlist from the database
         /// </summary>

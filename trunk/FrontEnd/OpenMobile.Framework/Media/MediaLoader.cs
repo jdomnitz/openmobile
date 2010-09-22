@@ -20,6 +20,7 @@
 *********************************************************************************/
 using OpenMobile.Data;
 using OpenMobile.Plugin;
+using OpenMobile.Controls;
 
 namespace OpenMobile.Media
 {
@@ -66,7 +67,7 @@ namespace OpenMobile.Media
         /// <param name="artist"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadAlbums(IPluginHost host, string artist, OpenMobile.Controls.IList list)
+        public static bool loadAlbums(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format)
         {
             PluginSettings ps = new PluginSettings();
             string dbname = ps.getSetting("Default.MusicDatabase");
@@ -84,7 +85,7 @@ namespace OpenMobile.Media
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
-                    list.AddDistinct(new OMListItem(info.Album, artist, info.coverArt));
+                    list.AddDistinct(new OMListItem(info.Album, artist, info.coverArt,format));
                     info = db.getNextMedia();
                 }
                 db.endSearch();
@@ -98,7 +99,38 @@ namespace OpenMobile.Media
         /// <param name="artist"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list)
+        public static bool loadSongs(IPluginHost host, IList list,OMListItem.subItemFormat format)
+        {
+            PluginSettings ps = new PluginSettings();
+            string dbname = ps.getSetting("Default.MusicDatabase");
+            ps.Dispose();
+            if (dbname == "")
+                return false;
+            object o;
+            host.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            using (IMediaDatabase db = (IMediaDatabase)o)
+            {
+                db.beginGetSongs(true, eMediaField.Title);
+                list.Clear();
+                mediaInfo info = db.getNextMedia();
+                list.Clear();
+                while (info != null)
+                {
+                    list.AddDistinct(new OMListItem(info.Name, info.Album, info.coverArt,format,info.Location));
+                    info = db.getNextMedia();
+                }
+                db.endSearch();
+            }
+            return true;
+        }
+        /// <summary>
+        /// Loads all songs from the given artist
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="artist"></param>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format)
         {
             PluginSettings ps = new PluginSettings();
             string dbname = ps.getSetting("Default.MusicDatabase");
@@ -115,7 +147,7 @@ namespace OpenMobile.Media
                 list.Clear();
                 while (info != null)
                 {
-                    list.AddDistinct(new OMListItem(info.Name,info.Album, info.coverArt));
+                    list.AddDistinct(new OMListItem(info.Name,info.Album, info.coverArt,format,info.Location));
                     info = db.getNextMedia();
                 }
                 db.endSearch();
@@ -130,7 +162,7 @@ namespace OpenMobile.Media
         /// <param name="album"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list)
+        public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list,OMListItem.subItemFormat format)
         {
             PluginSettings ps = new PluginSettings();
             string dbname = ps.getSetting("Default.MusicDatabase");
@@ -148,7 +180,7 @@ namespace OpenMobile.Media
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
-                    list.AddDistinct(new OMListItem(info.Name,artist, info.coverArt));
+                    list.AddDistinct(new OMListItem(info.Name,artist, info.coverArt,format,info.Location));
                     info = db.getNextMedia();
                 }
                 db.endSearch();

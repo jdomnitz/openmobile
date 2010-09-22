@@ -9,6 +9,9 @@ using System.Runtime.InteropServices;
 using OpenMobile.Graphics;
 using System.Threading;
 using OpenMobile.Data;
+using OpenMobile.Threading;
+using OpenMobile.Media;
+using System.Collections.Generic;
 
 namespace ControlDemo
 {
@@ -17,6 +20,8 @@ namespace ControlDemo
         ScreenManager manager;
         IPluginHost theHost;
         static string dbname;
+        int level=0;
+        OMListItem.subItemFormat format = new OMListItem.subItemFormat();
         public eLoadStatus initialize(OpenMobile.Plugin.IPluginHost host)
         {
             theHost = host;
@@ -27,6 +32,14 @@ namespace ControlDemo
             imageItem opt1 = theHost.getSkinImage("DownTab");
             OMImage Background = new OMImage(150, 140, 700, 400);
             Background.Image = theHost.getSkinImage("Center");
+            OMList List = new OMList(180, 163, 644, 354);
+            List.HighlightColor = Color.White;
+            List.ListStyle = eListStyle.MultiList;
+            List.SelectedItemColor1 = Color.Black;
+            List.ItemColor1 = Color.Transparent;
+            List.Color = Color.Black;
+            List.Font = new Font(Font.GenericSansSerif, 28F);
+            List.OnClick += new userInteraction(List_OnClick);
             OMImage LeftTab = new OMImage(-18, 155, 225, 150);
             LeftTab.Image = theHost.getSkinImage("LeftSlidingSelect");
             OMButton Artists = new OMButton(24, 168, 130, 130);
@@ -47,10 +60,11 @@ namespace ControlDemo
             Down.Transition = eButtonTransition.None;
             OMLabel Title = new OMLabel(250, 111, 500, 50);
             Title.Font = new Font(Font.GenericSansSerif, 26F);
-            Title.Text = "Example Artist";
+            Title.Text = "Select an Artist";
             OMButton PlaySelected = new OMButton(830, 165, 150, 150);
             PlaySelected.Image = theHost.getSkinImage("PlayIcon");
             PlaySelected.DownImage = theHost.getSkinImage("PlayIcon_Selected");
+            PlaySelected.OnClick += new userInteraction(PlaySelected_OnClick);
             PlaySelected.Transition = eButtonTransition.None;
             OMButton Enqueue = new OMButton(830, 265, 150, 150);
             Enqueue.Image = theHost.getSkinImage("EnqueIcon");
@@ -92,20 +106,190 @@ namespace ControlDemo
             p.addControl(Sources);
             p.addControl(Zones);
             p.addControl(Source);
+            p.addControl(List);
             manager.loadPanel(p);
             using (PluginSettings ps = new PluginSettings())
                 dbname = ps.getSetting("Default.MusicDatabase");
             OpenMobile.Threading.TaskManager.QueueTask(loadArtists, ePriority.High, "Load Artists");
+            format.color = Color.FromArgb(175,Color.Black);
+            format.highlightColor = Color.LightGray;
+            format.font = new Font(Font.GenericSansSerif, 20F);
             return eLoadStatus.LoadSuccessful;
         }
 
+        void PlaySelected_OnClick(OMControl sender, int screen)
+        {
+            OMList l = (OMList)manager[screen][14];
+            if (level == 2)
+            {
+                if (l.SelectedIndex >= 0)
+                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l.SelectedItem.tag.ToString());
+                else
+                {
+                    if (l.Count == 0)
+                        return;
+                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l[0].tag.ToString());
+                    List<string> queue=new List<string>();
+                    for (int i = 0; i < l.Count; i++)
+                        queue.Add(l[i].tag.ToString());
+                    theHost.setPlaylist(Playlist.Convert(queue), theHost.instanceForScreen(screen));
+                }
+            }
+            else if (level == 1)
+            {
+                if (l.SelectedIndex < 0)
+                {
+                    if (l.Count == 0)
+                        return;
+                    List<string> ret = getSongs(l[0].subItem, l[0].text);
+                    if (ret.Count > 0)
+                        theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
+                    for (int i = 1; i < l.Count; i++)
+                        ret.AddRange(getSongs(l[i].subItem, l[i].text));
+                    if (ret.Count > 0)
+                        theHost.setPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
+                }
+                else
+                {
+                    List<string> ret = getSongs(l[l.SelectedIndex].subItem, l[l.SelectedIndex].text);
+                    if (ret.Count > 0)
+                    {
+                        theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
+                        theHost.setPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
+                    }
+                }
+            }
+        }
+        private List<string> getSongs(string artist, string album)
+        {
+            object o;
+            theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            if (o == null)
+                return new List<string>();
+            IMediaDatabase db = (IMediaDatabase)o;
+            db.beginGetSongsByAlbum(artist, album, false, eMediaField.Title);
+            List<string> ret = new List<string>();
+            mediaInfo info = db.getNextMedia();
+            while (info != null)
+            {
+                ret.Add(info.Location);
+                info = db.getNextMedia();
+            }
+            db.endSearch();
+            return ret;
+        }
+        string currentArtist;
+        string currentAlbum;
+        void List_OnClick(OMControl sender, int screen)
+        {
+            OMList l=(OMList)sender;
+            if (level == 0)
+            {
+                currentArtist = l.SelectedItem.text;
+                currentAlbum = null;
+                ((OMLabel)l.Parent[6]).Text = currentArtist + " Albums";
+                SafeThread.Asynchronous(delegate() { showAlbums(screen, currentArtist); },theHost);
+                moveToAlbums(screen);
+            }
+            else if (level == 1)
+            {
+                currentAlbum = l.SelectedItem.text;
+                ((OMLabel)l.Parent[6]).Text = currentAlbum + " Tracks";
+                SafeThread.Asynchronous(delegate() { showTracks(screen, l.SelectedItem.subItem, currentAlbum); }, theHost);
+                moveToTracks(screen);
+            }
+        }
+        List<string> Artists = new List<string>();
         private void loadArtists()
         {
-            //STUB
+            object o;
+            theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            if (o == null)
+                return;
+            using (IMediaDatabase db = (IMediaDatabase)o)
+            {
+                db.beginGetArtists(false);
+                mediaInfo info = db.getNextMedia();
+                while (info != null)
+                {
+                    Artists.Add(info.Artist);
+                    info = db.getNextMedia();
+                }
+                db.endSearch();
+            }
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                showArtists(i);
+        }
+        private void showPlaylists(int screen)
+        {
+            OMList l = (OMList)manager[screen][14];
+            l.Clear();
+            l.ListItemOffset = 0;
+            l.ListItemHeight = 0;
+            l.AddRange(Playlist.listPlaylistsFromDB(theHost));
+            foreach (string drive in Environment.GetLogicalDrives())
+            {
+                DeviceInfo info = DeviceInfo.getDeviceInfo(drive);
+                foreach (string playlistPath in info.PlaylistFolders)
+                    foreach(string playlist in Playlist.listPlaylists(playlistPath))
+                        l.Add(new OMListItem(Path.GetFileNameWithoutExtension(playlist),null,playlist));
+            }
+        }
+        private void showArtists(int screen)
+        {
+            level = 0;
+            OMList l = (OMList)manager[screen][14];
+            l.Clear();
+            l.ListItemOffset = 0;
+            l.ListItemHeight = 0;
+            l.AddRange(Artists);
+        }
+        private void showAlbums(int screen)
+        {
+            level = 1;
+            //TODO
+        }
+        private void showAlbums(int screen, string artist)
+        {
+            level = 1;
+            OMList l = (OMList)manager[screen][14];
+            l.Clear();
+            l.Add("Loading . . .");
+            l.ListItemOffset = 80;
+            MediaLoader.loadAlbums(theHost, artist,l, format);
+        }
+        private void showTracks(int screen)
+        {
+            level = 2;
+            OMList l = (OMList)manager[screen][14];
+            l.Clear();
+            l.Add("Loading . . .");
+            l.ListItemOffset = 80;
+            MediaLoader.loadSongs(theHost, l,format);
+        }
+        private void showTracks(int screen, string artist)
+        {
+            level = 2;
+            OMList l = (OMList)manager[screen][14];
+            l.Clear();
+            l.Add("Loading . . .");
+            l.ListItemOffset = 80;
+            MediaLoader.loadSongs(theHost,artist, l,format);
+        }
+        private void showTracks(int screen, string artist, string album)
+        {
+            level = 2;
+            OMList l = (OMList)manager[screen][14];
+            l.Clear();
+            l.Add("Loading . . .");
+            l.ListItemOffset = 80;
+            MediaLoader.loadSongs(theHost, artist,album,l,format);
         }
 
         void Playlists_OnClick(OMControl sender, int screen)
         {
+            ((OMLabel)sender.Parent[6]).Text = "Select a Playlist";
+            SafeThread.Asynchronous(delegate() { showPlaylists(screen); }, theHost);
             ((OMButton)sender).Image = theHost.getSkinImage("PlaylistIcon_Selected");
             ((OMButton)sender.Parent[2]).Image = theHost.getSkinImage("ArtistIcon");
             ((OMButton)sender.Parent[3]).Image = theHost.getSkinImage("AlbumIcon");
@@ -113,56 +297,95 @@ namespace ControlDemo
             sender.Parent[9].Visible = true;
             sender.Parent[1].Visible = false;
         }
-
+        void moveToTracks(int screen)
+        {
+            manager[screen][9].Visible = false;
+            ((OMButton)manager[screen][4]).Image = theHost.getSkinImage("TracksIcon_Selected");
+            int diff = (360 - manager[screen][1].Top) / 5;
+            for (int i = 1; i < 5; i++)
+            {
+                manager[screen][1].Top += diff;
+                Thread.Sleep(20);
+            }
+            manager[screen][1].Top = 360;
+            manager[screen][1].Visible = true;
+            ((OMButton)manager[screen][2]).Image = theHost.getSkinImage("ArtistIcon");
+            ((OMButton)manager[screen][3]).Image = theHost.getSkinImage("AlbumIcon");
+            ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("PlaylistIcon");
+        }
         void Tracks_OnClick(OMControl sender, int screen)
         {
-            sender.Parent[9].Visible = false;
-            ((OMButton)sender).Image = theHost.getSkinImage("TracksIcon_Selected");
-            int diff = (360-sender.Parent[1].Top) / 5;
+            if (currentAlbum != null)
+            {
+                ((OMLabel)sender.Parent[6]).Text = currentAlbum + " Tracks";
+                SafeThread.Asynchronous(delegate() { showTracks(screen,currentArtist,currentAlbum); }, theHost);
+            }
+            else if (currentArtist != null)
+            {
+                ((OMLabel)sender.Parent[6]).Text = currentArtist + " Tracks";
+                SafeThread.Asynchronous(delegate() { showTracks(screen, currentArtist); }, theHost);
+            }
+            else
+            {
+                ((OMLabel)sender.Parent[6]).Text = "Select a Track";
+                SafeThread.Asynchronous(delegate() { showTracks(screen); }, theHost);
+            }
+            moveToTracks(screen);
+        }
+        void moveToAlbums(int screen)
+        {
+            manager[screen][9].Visible = false;
+            ((OMButton)manager[screen][3]).Image = theHost.getSkinImage("AlbumIcon_Selected");
+            int diff = (255 - manager[screen][1].Top) / 5;
             for (int i = 1; i < 5; i++)
             {
-                sender.Parent[1].Top += diff;
+                manager[screen][1].Top += diff;
                 Thread.Sleep(20);
             }
-            sender.Parent[1].Top = 360;
-            sender.Parent[1].Visible = true;
-            ((OMButton)sender.Parent[2]).Image = theHost.getSkinImage("ArtistIcon");
-            ((OMButton)sender.Parent[3]).Image = theHost.getSkinImage("AlbumIcon");
-            ((OMButton)sender.Parent[10]).Image = theHost.getSkinImage("PlaylistIcon");
+            manager[screen][1].Top = 255;
+            manager[screen][1].Visible = true;
+            ((OMButton)manager[screen][2]).Image = theHost.getSkinImage("ArtistIcon");
+            ((OMButton)manager[screen][4]).Image = theHost.getSkinImage("TracksIcon");
+            ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("PlaylistIcon");
         }
-
         void Albums_OnClick(OMControl sender, int screen)
         {
-            sender.Parent[9].Visible = false;
-            ((OMButton)sender).Image = theHost.getSkinImage("AlbumIcon_Selected");
-            int diff = (255 - sender.Parent[1].Top) / 5;
+            currentAlbum = null;
+            if (currentArtist != null)
+            {
+                ((OMLabel)sender.Parent[6]).Text = currentArtist + " Albums";
+                SafeThread.Asynchronous(delegate() { showAlbums(screen, currentArtist); }, theHost);
+            }
+            else
+            {
+                ((OMLabel)sender.Parent[6]).Text = "Select an Album";
+                SafeThread.Asynchronous(delegate() { showAlbums(screen); }, theHost);
+            }
+            moveToAlbums(screen);
+        }
+        void moveToArtists(int screen)
+        {
+            manager[screen][9].Visible = false;
+            ((OMButton)manager[screen][2]).Image = theHost.getSkinImage("ArtistIcon_Selected");
+            int diff = (155 - manager[screen][1].Top) / 5;
             for (int i = 1; i < 5; i++)
             {
-                sender.Parent[1].Top += diff;
+                manager[screen][1].Top += diff;
                 Thread.Sleep(20);
             }
-            sender.Parent[1].Top = 255;
-            sender.Parent[1].Visible = true;
-            ((OMButton)sender.Parent[2]).Image = theHost.getSkinImage("ArtistIcon");
-            ((OMButton)sender.Parent[4]).Image = theHost.getSkinImage("TracksIcon");
-            ((OMButton)sender.Parent[10]).Image = theHost.getSkinImage("PlaylistIcon");
+            manager[screen][1].Top = 155;
+            manager[screen][1].Visible = true;
+            ((OMButton)manager[screen][3]).Image = theHost.getSkinImage("AlbumIcon");
+            ((OMButton)manager[screen][4]).Image = theHost.getSkinImage("TracksIcon");
+            ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("PlaylistIcon");
         }
-
         void Artists_OnClick(OMControl sender, int screen)
         {
-            sender.Parent[9].Visible = false;
-            ((OMButton)sender).Image = theHost.getSkinImage("ArtistIcon_Selected");
-            int diff = (155 - sender.Parent[1].Top) / 5;
-            for (int i = 1; i < 5; i++)
-            {
-                sender.Parent[1].Top += diff;
-                Thread.Sleep(20);
-            }
-            sender.Parent[1].Top = 155;
-            sender.Parent[1].Visible = true;
-            ((OMButton)sender.Parent[3]).Image = theHost.getSkinImage("AlbumIcon");
-            ((OMButton)sender.Parent[4]).Image = theHost.getSkinImage("TracksIcon");
-            ((OMButton)sender.Parent[10]).Image = theHost.getSkinImage("PlaylistIcon");
+            currentArtist = null;
+            currentAlbum = null;
+            ((OMLabel)sender.Parent[6]).Text = "Select an Artist";
+            SafeThread.Asynchronous(delegate() { showArtists(screen); }, theHost);
+            moveToArtists(screen);
         }
 
         public OMPanel loadPanel(string name, int screen)
