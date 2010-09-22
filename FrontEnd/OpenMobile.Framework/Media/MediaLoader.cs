@@ -129,8 +129,22 @@ namespace OpenMobile.Media
         /// <param name="host"></param>
         /// <param name="artist"></param>
         /// <param name="list"></param>
+        /// <param name="format"></param>
         /// <returns></returns>
         public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format)
+        {
+            return loadSongs(host, artist, list, format, true);
+        }
+        /// <summary>
+        /// Loads all songs from the given artist
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="artist"></param>
+        /// <param name="list"></param>
+        /// <param name="clear"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear)
         {
             PluginSettings ps = new PluginSettings();
             string dbname = ps.getSetting("Default.MusicDatabase");
@@ -142,9 +156,9 @@ namespace OpenMobile.Media
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
                 db.beginGetSongsByArtist(artist, true,eMediaField.Title);
-                list.Clear();
                 mediaInfo info = db.getNextMedia();
-                list.Clear();
+                if (clear)
+                    list.Clear();
                 while (info != null)
                 {
                     list.AddDistinct(new OMListItem(info.Name,info.Album, info.coverArt,format,info.Location));

@@ -239,6 +239,13 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         bool setPlaylist(List<mediaInfo> source, int instance);
         /// <summary>
+        /// Appends a playlist to the currently loaded playlist
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        bool appendPlaylist(List<mediaInfo> source, int instance);
+        /// <summary>
         /// A system-wide event notification
         /// </summary>
         event SystemEvent OnSystemEvent;
