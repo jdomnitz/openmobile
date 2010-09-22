@@ -146,6 +146,19 @@ namespace OpenMobile
             SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, instance, ""); });
             return true;
         }
+        public bool appendPlaylist(List<mediaInfo> source, int instance)
+        {
+            if ((instance < 0) || (instance >= 8))
+                return false;
+            if (queued[instance].Count == 0)
+                return setPlaylist(source, instance);
+            bool single = (queued[instance].Count == 1);
+            queued[instance].AddRange(source.GetRange(0, source.Count));
+            if (single)
+                generateNext(instance);
+            SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, instance, ""); });
+            return true;
+        }
         public int instanceForScreen(int screen)
         { //Instance numbers are incremented by 1 so that "not set"==0
             if (instance == null)
