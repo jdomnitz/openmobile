@@ -290,6 +290,14 @@ namespace OpenMobile
             this.image = img;
             this.subitemFormat = subitemFormat;
         }
+        public OMListItem(string text, string subitem, OImage img, subItemFormat subitemFormat,object tag)//Added by Borte
+        {
+            this.text = text;
+            this.subItem = subitem;
+            this.image = img;
+            this.subitemFormat = subitemFormat;
+            this.tag = tag;
+        }
     }
     
     

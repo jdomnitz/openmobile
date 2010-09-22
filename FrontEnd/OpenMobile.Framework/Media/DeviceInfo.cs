@@ -20,81 +20,119 @@
 *********************************************************************************/
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 namespace OpenMobile.Media
 {
     public sealed class DeviceInfo
     {
+        private static bool systemDrive(string path)
+        {
+            if (Configuration.RunningOnWindows)
+            {
+                if (System.IO.Path.GetPathRoot(path) == System.IO.Path.GetPathRoot(System.Environment.GetFolderPath(System.Environment.SpecialFolder.System)))
+                    return true;
+                return false;
+            }
+            else if (Configuration.RunningOnLinux)
+            {
+                //TODO
+                return false;
+            }
+            else
+                return false;
+        }
         public static DeviceInfo getDeviceInfo(string path)
         {
             List<string>playlists=new List<string>();
             List<string>music=new List<string>();
             List<string> video = new List<string>();
             List<string> pictures = new List<string>();
-            if (Directory.Exists(Path.Combine(path, "Playlists")))
-                playlists.Add(Path.Combine(path, "Playlists"));
-            if (Configuration.RunningOnLinux)
+            if (systemDrive(path))
             {
-                if (Directory.Exists(Path.Combine(path, "playlists")))
-                    playlists.Add(Path.Combine(path, "playlists"));
+                string tmp = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                if (Directory.Exists(tmp))
+                    pictures.Add(tmp);
+                tmp = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+                if (Directory.Exists(tmp))
+                    music.Add(tmp);
+                if (Configuration.RunningOnWindows)
+                {
+                    string t = Path.Combine(tmp, "Playlists");
+                    if (Directory.Exists(t))
+                        playlists.Add(t);
+                    t = Path.Combine(tmp, "My Playlists");
+                    if (Directory.Exists(t))
+                        playlists.Add(t);
+                }
             }
-            if (Directory.Exists(Path.Combine(path,"Music", "Playlists")))
-                playlists.Add(Path.Combine(path, "Music","Playlists"));
-            if (Configuration.RunningOnLinux)
+            else
             {
-                if (Directory.Exists(Path.Combine(path,"Music", "playlists")))
-                    playlists.Add(Path.Combine(path, "Music","playlists"));
-                if (Directory.Exists(Path.Combine(path, "music", "playlists")))
-                    playlists.Add(Path.Combine(path, "music", "playlists"));
-            }
-            if (Directory.Exists(Path.Combine(path, "Music")))
-                music.Add(Path.Combine(path, "Music"));
-            if (Configuration.RunningOnLinux)
-            {
-                if (Directory.Exists(Path.Combine(path, "music")))
-                    music.Add(Path.Combine(path, "music"));
-            }
-            if (Directory.Exists(Path.Combine(path, "AmazonMP3")))
-                music.Add(Path.Combine(path, "AmazonMP3"));
-            if (Configuration.RunningOnLinux)
-            {
-                if (Directory.Exists(Path.Combine(path, "amazonmp3")))
-                    music.Add(Path.Combine(path, "amazonmp3"));
-            }
-            if (Directory.Exists(Path.Combine(path, "Video")))
-                video.Add(Path.Combine(path, "Video"));
-            if (Configuration.RunningOnLinux)
-            {
-                if (Directory.Exists(Path.Combine(path, "video")))
-                    video.Add(Path.Combine(path, "video"));
-            }
-            if (Directory.Exists(Path.Combine(path, "Movies")))
-                video.Add(Path.Combine(path, "Movies"));
-            if (Configuration.RunningOnLinux)
-            {
-                if (Directory.Exists(Path.Combine(path, "movies")))
-                    video.Add(Path.Combine(path, "movies"));
-            }
-            if (Directory.Exists(Path.Combine(path, "Pictures")))
-                pictures.Add(Path.Combine(path, "Pictures"));
-            if (Configuration.RunningOnLinux)
-            {
-                if (Directory.Exists(Path.Combine(path, "pictures")))
-                    pictures.Add(Path.Combine(path, "pictures"));
-            }
-            if (Directory.Exists(Path.Combine(path, "DCIM")))
-            {
-                string[] sub = Directory.GetDirectories(Path.Combine(path, "DCIM"));
-                foreach (string dir in sub)
-                    if (!dir.Contains(".thumbnails"))
-                        pictures.Add(dir);
-            }
-            if (Configuration.RunningOnLinux)
-            {
-                string[] sub = Directory.GetDirectories(Path.Combine(path, "dcim"));
-                foreach (string dir in sub)
-                    if (!dir.Contains(".thumbnails"))
-                        pictures.Add(dir);
+                if (Directory.Exists(Path.Combine(path, "Playlists")))
+                    playlists.Add(Path.Combine(path, "Playlists"));
+                if (Configuration.RunningOnLinux)
+                {
+                    if (Directory.Exists(Path.Combine(path, "playlists")))
+                        playlists.Add(Path.Combine(path, "playlists"));
+                }
+                if (Directory.Exists(Path.Combine(path, "Music", "Playlists")))
+                    playlists.Add(Path.Combine(path, "Music", "Playlists"));
+                if (Configuration.RunningOnLinux)
+                {
+                    if (Directory.Exists(Path.Combine(path, "Music", "playlists")))
+                        playlists.Add(Path.Combine(path, "Music", "playlists"));
+                    if (Directory.Exists(Path.Combine(path, "music", "playlists")))
+                        playlists.Add(Path.Combine(path, "music", "playlists"));
+                }
+                if (Directory.Exists(Path.Combine(path, "Music")))
+                    music.Add(Path.Combine(path, "Music"));
+                if (Configuration.RunningOnLinux)
+                {
+                    if (Directory.Exists(Path.Combine(path, "music")))
+                        music.Add(Path.Combine(path, "music"));
+                }
+                if (Directory.Exists(Path.Combine(path, "AmazonMP3")))
+                    music.Add(Path.Combine(path, "AmazonMP3"));
+                if (Configuration.RunningOnLinux)
+                {
+                    if (Directory.Exists(Path.Combine(path, "amazonmp3")))
+                        music.Add(Path.Combine(path, "amazonmp3"));
+                }
+                if (Directory.Exists(Path.Combine(path, "Video")))
+                    video.Add(Path.Combine(path, "Video"));
+                if (Configuration.RunningOnLinux)
+                {
+                    if (Directory.Exists(Path.Combine(path, "video")))
+                        video.Add(Path.Combine(path, "video"));
+                }
+                if (Directory.Exists(Path.Combine(path, "Movies")))
+                    video.Add(Path.Combine(path, "Movies"));
+                if (Configuration.RunningOnLinux)
+                {
+                    if (Directory.Exists(Path.Combine(path, "movies")))
+                        video.Add(Path.Combine(path, "movies"));
+                }
+                if (Directory.Exists(Path.Combine(path, "Pictures")))
+                    pictures.Add(Path.Combine(path, "Pictures"));
+                if (Configuration.RunningOnLinux)
+                {
+                    if (Directory.Exists(Path.Combine(path, "pictures")))
+                        pictures.Add(Path.Combine(path, "pictures"));
+                }
+                if (Directory.Exists(Path.Combine(path, "DCIM")))
+                {
+                    string[] sub = Directory.GetDirectories(Path.Combine(path, "DCIM"));
+                    foreach (string dir in sub)
+                        if (!dir.Contains(".thumbnails"))
+                            pictures.Add(dir);
+                }
+                if (Configuration.RunningOnLinux)
+                {
+                    string[] sub = Directory.GetDirectories(Path.Combine(path, "dcim"));
+                    foreach (string dir in sub)
+                        if (!dir.Contains(".thumbnails"))
+                            pictures.Add(dir);
+                }
             }
             return new DeviceInfo(music.ToArray(), playlists.ToArray(), video.ToArray(),pictures.ToArray());
         }
