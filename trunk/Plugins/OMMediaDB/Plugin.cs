@@ -739,6 +739,28 @@ namespace OMMediaDB
             return true;
         }
 
+        public bool removePlaylist(string name)
+        {
+            StringBuilder query = new StringBuilder("BEGIN;");
+            {
+                query.Append("DELETE FROM Playlists WHERE Name='");
+                query.Append(name);
+                query.Append("';");
+                query.Append("END;");
+            }
+            if (con == null)
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
+            if (con.State != ConnectionState.Open)
+                con.Open();
+            lock (con)
+            {
+                SqliteCommand command = con.CreateCommand();
+                command.CommandText = query.ToString();
+                command.ExecuteNonQuery();
+            }
+            return true;
+        }
+        
         public string getNextPlaylistItem()
         {
             if ((reader==null)||(reader.Read() == false))

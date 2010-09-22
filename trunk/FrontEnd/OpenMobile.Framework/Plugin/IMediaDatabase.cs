@@ -215,6 +215,12 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         bool writePlaylist(List<string> URLs,string name,bool append);
         /// <summary>
+        /// Deletes a playlist from the database
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        bool removePlaylist(string name);
+        /// <summary>
         /// Returns a list of playlists available in the database
         /// </summary>
         /// <returns></returns>
