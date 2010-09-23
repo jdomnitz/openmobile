@@ -37,8 +37,7 @@ namespace OpenMobile.Media
             }
             else if (Configuration.RunningOnLinux)
             {
-                //TODO
-                return false;
+                return (path=="/");
             }
             else
                 return false;
@@ -61,15 +60,12 @@ namespace OpenMobile.Media
                 tmp = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
                 if (Directory.Exists(tmp))
                     music.Add(tmp);
-                if (Configuration.RunningOnWindows)
-                {
-                    string t = Path.Combine(tmp, "Playlists");
-                    if (Directory.Exists(t))
-                        playlists.Add(t);
-                    t = Path.Combine(tmp, "My Playlists");
-                    if (Directory.Exists(t))
-                        playlists.Add(t);
-                }
+                string t = Path.Combine(tmp, "Playlists");
+                if (Directory.Exists(t))
+                    playlists.Add(t);
+                t = Path.Combine(tmp, "My Playlists");
+                if (Directory.Exists(t))
+                    playlists.Add(t);
             }
             else if(type==OSSpecific.eDriveType.CDRom)
             {
@@ -77,16 +73,31 @@ namespace OpenMobile.Media
             }
             else
             {
+				bool caseInsensitive=false;
+				if (Configuration.RunningOnLinux)
+				{
+					DriveInfo info=new DriveInfo(path);
+					switch(info.DriveFormat)
+					{
+						case "ntfs":
+						case "ntfs-3g":
+						case "fat":
+						case "vfat":
+						case "exfat":
+							caseInsensitive=true;
+							break;
+					}
+				}
                 if (Directory.Exists(Path.Combine(path, "Playlists")))
                     playlists.Add(Path.Combine(path, "Playlists"));
-                if (Configuration.RunningOnLinux)
+                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "playlists")))
                         playlists.Add(Path.Combine(path, "playlists"));
                 }
                 if (Directory.Exists(Path.Combine(path, "Music", "Playlists")))
                     playlists.Add(Path.Combine(path, "Music", "Playlists"));
-                if (Configuration.RunningOnLinux)
+                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "Music", "playlists")))
                         playlists.Add(Path.Combine(path, "Music", "playlists"));
@@ -95,35 +106,35 @@ namespace OpenMobile.Media
                 }
                 if (Directory.Exists(Path.Combine(path, "Music")))
                     music.Add(Path.Combine(path, "Music"));
-                if (Configuration.RunningOnLinux)
+                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "music")))
                         music.Add(Path.Combine(path, "music"));
                 }
                 if (Directory.Exists(Path.Combine(path, "AmazonMP3")))
                     music.Add(Path.Combine(path, "AmazonMP3"));
-                if (Configuration.RunningOnLinux)
+                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "amazonmp3")))
                         music.Add(Path.Combine(path, "amazonmp3"));
                 }
                 if (Directory.Exists(Path.Combine(path, "Video")))
                     video.Add(Path.Combine(path, "Video"));
-                if (Configuration.RunningOnLinux)
+                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "video")))
                         video.Add(Path.Combine(path, "video"));
                 }
                 if (Directory.Exists(Path.Combine(path, "Movies")))
                     video.Add(Path.Combine(path, "Movies"));
-                if (Configuration.RunningOnLinux)
+                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "movies")))
                         video.Add(Path.Combine(path, "movies"));
                 }
                 if (Directory.Exists(Path.Combine(path, "Pictures")))
                     pictures.Add(Path.Combine(path, "Pictures"));
-                if (Configuration.RunningOnLinux)
+                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "pictures")))
                         pictures.Add(Path.Combine(path, "pictures"));
@@ -135,7 +146,7 @@ namespace OpenMobile.Media
                         if (!dir.Contains(".thumbnails"))
                             pictures.Add(dir);
                 }
-                if (Configuration.RunningOnLinux)
+                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
                 {
                     string[] sub = Directory.GetDirectories(Path.Combine(path, "dcim"));
                     foreach (string dir in sub)

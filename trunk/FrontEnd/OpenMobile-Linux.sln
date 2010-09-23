@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMLinHal", "..\Plugins\OMLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinWifi", "..\Plugins\LinWifi\LinWifi.csproj", "{E1C45521-0F97-4D7F-B77C-704CA59444D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewMedia", "..\Plugins\NewMedia\NewMedia.csproj", "{F15159CB-BC40-4ABD-B23F-B41320FF16B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -200,6 +202,12 @@ Global
 		{ED2CD8E9-1C0F-4CC7-B163-34F72093AF75}.Debug-Fast|Any CPU.Build.0 = Debug-Fast|Any CPU
 		{ED2CD8E9-1C0F-4CC7-B163-34F72093AF75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED2CD8E9-1C0F-4CC7-B163-34F72093AF75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = OpenMobile\OpenMobile.csproj
