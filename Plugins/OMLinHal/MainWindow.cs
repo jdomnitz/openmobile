@@ -8,6 +8,7 @@ using NDesk.DBus;
 using OpenMobile;
 using System.Threading;
 using System.Collections.Generic;
+using OpenMobile.Input;
 
 public partial class MainWindow : Gtk.Window
 {
@@ -19,6 +20,7 @@ public partial class MainWindow : Gtk.Window
 	UPower up;
 	Backlight bk;
 	UDisks disks; 
+	MultimediaKeys.MultimediaKeysService mediaKeys=new MultimediaKeys.MultimediaKeysService();
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
 		system=Bus.System;
@@ -61,8 +63,34 @@ public partial class MainWindow : Gtk.Window
 				i++;
 			}
 		}
+		mediaKeys.keyPressed+=new MultimediaKeys.MultimediaKeysService.MediaPlayerKeyPressedHandler(handleKey);
+		mediaKeys.Initialize();
 		//disks.DeviceRemoved+=remove;
 	}
+	
+	private void handleKey(string application,string key)
+	{
+		switch(key)
+		{
+			case "Play":
+                raiseKeypressEvent(eKeypressType.KeyDown,OpenMobile.Input.Key.PlayPause);
+				raiseKeypressEvent(eKeypressType.KeyUp,OpenMobile.Input.Key.PlayPause);
+                break;
+            case "Next":
+                raiseKeypressEvent(eKeypressType.KeyDown,OpenMobile.Input.Key.TrackNext);
+				raiseKeypressEvent(eKeypressType.KeyUp,OpenMobile.Input.Key.TrackNext);
+                break;
+            case "Previous":
+                raiseKeypressEvent(eKeypressType.KeyDown,OpenMobile.Input.Key.TrackPrevious);
+				raiseKeypressEvent(eKeypressType.KeyUp,OpenMobile.Input.Key.TrackPrevious);
+                break;
+            case "Stop":
+                raiseKeypressEvent(eKeypressType.KeyDown,OpenMobile.Input.Key.Stop);
+				raiseKeypressEvent(eKeypressType.KeyUp,OpenMobile.Input.Key.Stop);
+                break;
+		}
+	}
+	
 	Dictionary<ObjectPath,string> removables=new Dictionary<ObjectPath, string>();
 	private void changed(ObjectPath path)
 	{
@@ -254,6 +282,10 @@ public partial class MainWindow : Gtk.Window
         {
             sendIt("-3|" + MediaType + "|" + justInserted + "|" + drive);
         }
+		public static void raiseKeypressEvent(eKeypressType type,OpenMobile.Input.Key args)
+		{
+			sendIt("-4|"+type+"|"+args);
+		}
 	
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
 	{
