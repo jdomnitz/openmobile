@@ -21,6 +21,7 @@
 using System;
 using System.Net;
 using System.Text;
+using OpenMobile.Input;
 
 namespace OpenMobile
 {
@@ -69,7 +70,9 @@ namespace OpenMobile
                     Core.theHost.raisePowerEvent((ePowerEvent)Enum.Parse(typeof(ePowerEvent),arg1));
                 else if (i == -3)
                     Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1),bool.Parse(arg2),arg3);
-            }
+            	else if (i == -4)
+					Core.theHost.raiseKeyPressEvent((eKeypressType)Enum.Parse(typeof(eKeypressType), arg1),new KeyboardKeyEventArgs((Key)Enum.Parse(typeof(Key), arg2)));
+			}
             void recv(IAsyncResult res)
             {
                 if (isDisposed)
