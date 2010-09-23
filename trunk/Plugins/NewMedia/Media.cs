@@ -28,6 +28,7 @@ namespace ControlDemo
             if (host.InstanceCount == -1)
                 return eLoadStatus.LoadFailedRetryRequested;
             theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             manager = new ScreenManager(host.ScreenCount);
             OMPanel p = new OMPanel("Media");
             imageItem opt1 = theHost.getSkinImage("DownTab");
@@ -157,7 +158,7 @@ namespace ControlDemo
                 ((OMButton)manager[i][12]).Text = "Zone " + (theHost.instanceForScreen(i) + 1).ToString();
             using (PluginSettings ps = new PluginSettings())
                 dbname = ps.getSetting("Default.MusicDatabase");
-            kickdown = new bool[theHost.ScreenCount];
+            abortJob = new bool[theHost.ScreenCount];
             SafeThread.Asynchronous(delegate() { theHost_OnStorageEvent(eMediaType.NotSet, true, null); }, theHost);
             OpenMobile.Threading.TaskManager.QueueTask(loadArtists, ePriority.High, "Load Artists");
             format.color = Color.FromArgb(175,Color.Black);
@@ -166,11 +167,34 @@ namespace ControlDemo
             return eLoadStatus.LoadSuccessful;
         }
 
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.backgroundOperationStatus)
+                if (arg1 == "Indexing Complete!")
+                {
+                    loadArtists(); //TODO - instance specific
+                    if (level == 0)
+                        showArtists(0);
+                }
+        }
+
         void source_OnClick(OMControl sender, int screen)
         {
             ((OMButton)sender.Parent[15]).Image = ((OMButton)sender).Image;
             currentSource = (DeviceInfo)sender.Tag;
+            if ((currentSource.DriveType == OSSpecific.eDriveType.Removable) || (currentSource.DriveType == OSSpecific.eDriveType.Phone))
+            {
+                using (PluginSettings s = new PluginSettings())
+                    dbname = s.getSetting("Default.RemovableDatabase");
+            }
+            else
+            {
+                using (PluginSettings ps = new PluginSettings())
+                    dbname = ps.getSetting("Default.MusicDatabase");
+            }
             Sources_OnClick(sender, screen);
+            loadArtists();
+            showArtists(screen);
         }
 
         void Sources_OnClick(OMControl sender, int screen)
@@ -229,6 +253,11 @@ namespace ControlDemo
                     temp.Add(info);
                 }
                 sources = temp; //do this instead of clearing to ensure the list is never empty
+                if (!sources.Contains(currentSource)) //TODO: currentSource per zone
+                {
+                    Artists.Clear();
+                    ((OMList)manager[0][14]).Clear();
+                }
             }
         }
 
@@ -393,6 +422,7 @@ namespace ControlDemo
             theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
             if (o == null)
                 return;
+            Artists.Clear();
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
                 db.beginGetArtists(false);
@@ -436,7 +466,7 @@ namespace ControlDemo
         {
             level = 2;
             OMList l = (OMList)manager[screen][14];
-            kickdown[screen] = true;
+            abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.ListItemOffset = 80;
@@ -493,7 +523,7 @@ namespace ControlDemo
         {
             level = 0;
             OMList l = (OMList)manager[screen][14];
-            kickdown[screen] = true;
+            abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.ListItemOffset = 0;
@@ -504,28 +534,28 @@ namespace ControlDemo
         {
             level = 1;
             OMList l = (OMList)manager[screen][14];
-            kickdown[screen] = true;
+            abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.ListItemOffset = 80;
             lock (manager[screen][12])
             {
-                kickdown[screen] = false;
+                abortJob[screen] = false;
                 foreach (string artist in Artists)
                 {
-                    if (kickdown[screen])
+                    if (abortJob[screen])
                         return;
                     MediaLoader.loadAlbums(theHost, artist, l, format, false, dbname);
                 }
                 l.Sort();
             }
         }
-        bool[] kickdown;
+        bool[] abortJob;
         private void showAlbums(int screen, string artist)
         {
             level = 1;
             OMList l = (OMList)manager[screen][14];
-            kickdown[screen] = true;
+            abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.ListItemOffset = 80;
@@ -538,13 +568,13 @@ namespace ControlDemo
             OMList l = (OMList)manager[screen][14];
             l.Clear();
             l.ListItemOffset = 80;
-            kickdown[screen] = true;
+            abortJob[screen] = true;
             lock (manager[screen][12])
             {
-                kickdown[screen] = false;
+                abortJob[screen] = false;
                 foreach (string artist in Artists)
                 {
-                    if (kickdown[screen])
+                    if (abortJob[screen])
                         return;
                     MediaLoader.loadSongs(theHost, artist, l, format, false, dbname);
                 }
@@ -555,7 +585,7 @@ namespace ControlDemo
         {
             level = 2;
             OMList l = (OMList)manager[screen][14];
-            kickdown[screen] = true;
+            abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.Add("Loading . . .");
@@ -566,7 +596,7 @@ namespace ControlDemo
         {
             level = 2;
             OMList l = (OMList)manager[screen][14];
-            kickdown[screen] = true;
+            abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.Add("Loading . . .");

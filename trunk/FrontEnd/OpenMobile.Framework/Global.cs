@@ -121,7 +121,7 @@ namespace OpenMobile
     /// <summary>
     /// An item in an OMList
     /// </summary>
-    public sealed class OMListItem
+    public sealed class OMListItem:IComparable
     {
         /// <summary>
         /// Format information for a list subitem
@@ -298,6 +298,16 @@ namespace OpenMobile
             this.subitemFormat = subitemFormat;
             this.tag = tag;
         }
+
+        #region IComparable Members
+
+        public int CompareTo(object obj)
+        {
+            OMListItem two = obj as OMListItem;
+            return this.text.CompareTo(two.text);
+        }
+
+        #endregion
     }
     
     

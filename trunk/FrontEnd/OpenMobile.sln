@@ -55,6 +55,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Email", "..\..\b
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewMedia", "..\Plugins\NewMedia\NewMedia.csproj", "{F15159CB-BC40-4ABD-B23F-B41320FF16B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemovableDB", "..\Plugins\RemovableDB\RemovableDB.csproj", "{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -224,6 +226,12 @@ Global
 		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
 		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F15159CB-BC40-4ABD-B23F-B41320FF16B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
