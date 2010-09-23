@@ -35,11 +35,8 @@ namespace OpenMobile.Media
         /// <param name="host"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadArtists(IPluginHost host, OpenMobile.Controls.IList list)
+        public static bool loadArtists(IPluginHost host, OpenMobile.Controls.IList list,string dbname)
         {
-            PluginSettings ps = new PluginSettings();
-            string dbname = ps.getSetting("Default.MusicDatabase");
-            ps.Dispose();
             if (dbname == "")
                 return false;
             object o;
@@ -67,11 +64,8 @@ namespace OpenMobile.Media
         /// <param name="artist"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadAlbums(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format)
+        public static bool loadAlbums(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname)
         {
-            PluginSettings ps = new PluginSettings();
-            string dbname = ps.getSetting("Default.MusicDatabase");
-            ps.Dispose();
             if (dbname == "")
                 return false;
             object o;
@@ -81,7 +75,8 @@ namespace OpenMobile.Media
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
                 db.beginGetAlbums(artist, true);
-                list.Clear();
+                if (clear)
+                    list.Clear();
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
@@ -99,11 +94,8 @@ namespace OpenMobile.Media
         /// <param name="artist"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, IList list,OMListItem.subItemFormat format)
+        public static bool loadSongs(IPluginHost host, IList list,OMListItem.subItemFormat format,string dbname)
         {
-            PluginSettings ps = new PluginSettings();
-            string dbname = ps.getSetting("Default.MusicDatabase");
-            ps.Dispose();
             if (dbname == "")
                 return false;
             object o;
@@ -131,9 +123,9 @@ namespace OpenMobile.Media
         /// <param name="list"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format)
+        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname)
         {
-            return loadSongs(host, artist, list, format, true);
+            return loadSongs(host, artist, list, format, true,dbname);
         }
         /// <summary>
         /// Loads all songs from the given artist
@@ -144,11 +136,8 @@ namespace OpenMobile.Media
         /// <param name="clear"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear)
+        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname)
         {
-            PluginSettings ps = new PluginSettings();
-            string dbname = ps.getSetting("Default.MusicDatabase");
-            ps.Dispose();
             if (dbname == "")
                 return false;
             object o;
@@ -176,11 +165,8 @@ namespace OpenMobile.Media
         /// <param name="album"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list,OMListItem.subItemFormat format)
+        public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname)
         {
-            PluginSettings ps = new PluginSettings();
-            string dbname = ps.getSetting("Default.MusicDatabase");
-            ps.Dispose();
             if (dbname == "")
                 return false;
             object o;

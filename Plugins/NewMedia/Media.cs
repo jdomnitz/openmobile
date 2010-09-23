@@ -42,6 +42,7 @@ namespace ControlDemo
             List.Font = new Font(Font.GenericSansSerif, 28F);
             List.OnClick += new userInteraction(List_OnClick);
             List.OnLongClick += new userInteraction(List_OnLongClick);
+            List.Add("Loading . . .");
             OMImage LeftTab = new OMImage(-18, 155, 225, 150);
             LeftTab.Image = theHost.getSkinImage("LeftSlidingSelect");
             OMButton Artists = new OMButton(24, 168, 130, 130);
@@ -156,6 +157,7 @@ namespace ControlDemo
                 ((OMButton)manager[i][12]).Text = "Zone " + (theHost.instanceForScreen(i) + 1).ToString();
             using (PluginSettings ps = new PluginSettings())
                 dbname = ps.getSetting("Default.MusicDatabase");
+            kickdown = new bool[theHost.ScreenCount];
             SafeThread.Asynchronous(delegate() { theHost_OnStorageEvent(eMediaType.NotSet, true, null); }, theHost);
             OpenMobile.Threading.TaskManager.QueueTask(loadArtists, ePriority.High, "Load Artists");
             format.color = Color.FromArgb(175,Color.Black);
@@ -434,7 +436,9 @@ namespace ControlDemo
         {
             level = 2;
             OMList l = (OMList)manager[screen][14];
-            l.Clear();
+            kickdown[screen] = true;
+            lock (manager[screen][12])
+                l.Clear();
             l.ListItemOffset = 80;
             if (path == "Current Playlist")
             {
@@ -489,7 +493,9 @@ namespace ControlDemo
         {
             level = 0;
             OMList l = (OMList)manager[screen][14];
-            l.Clear();
+            kickdown[screen] = true;
+            lock (manager[screen][12])
+                l.Clear();
             l.ListItemOffset = 0;
             l.ListItemHeight = 0;
             l.AddRange(Artists);
@@ -497,16 +503,34 @@ namespace ControlDemo
         private void showAlbums(int screen)
         {
             level = 1;
-            //TODO
+            OMList l = (OMList)manager[screen][14];
+            kickdown[screen] = true;
+            lock (manager[screen][12])
+                l.Clear();
+            l.ListItemOffset = 80;
+            lock (manager[screen][12])
+            {
+                kickdown[screen] = false;
+                foreach (string artist in Artists)
+                {
+                    if (kickdown[screen])
+                        return;
+                    MediaLoader.loadAlbums(theHost, artist, l, format, false, dbname);
+                }
+                l.Sort();
+            }
         }
+        bool[] kickdown;
         private void showAlbums(int screen, string artist)
         {
             level = 1;
             OMList l = (OMList)manager[screen][14];
-            l.Clear();
-            l.Add("Loading . . .");
+            kickdown[screen] = true;
+            lock (manager[screen][12])
+                l.Clear();
             l.ListItemOffset = 80;
-            MediaLoader.loadAlbums(theHost, artist,l, format);
+            l.Add("Loading . . .");
+            MediaLoader.loadAlbums(theHost, artist,l, format,true,dbname);
         }
         private void showTracks(int screen)
         {
@@ -514,27 +538,40 @@ namespace ControlDemo
             OMList l = (OMList)manager[screen][14];
             l.Clear();
             l.ListItemOffset = 80;
-            foreach(string artist in Artists)
-                MediaLoader.loadSongs(theHost,artist, l,format,false);
-            l.Sort();
+            kickdown[screen] = true;
+            lock (manager[screen][12])
+            {
+                kickdown[screen] = false;
+                foreach (string artist in Artists)
+                {
+                    if (kickdown[screen])
+                        return;
+                    MediaLoader.loadSongs(theHost, artist, l, format, false, dbname);
+                }
+                l.Sort();
+            }
         }
         private void showTracks(int screen, string artist)
         {
             level = 2;
             OMList l = (OMList)manager[screen][14];
-            l.Clear();
+            kickdown[screen] = true;
+            lock (manager[screen][12])
+                l.Clear();
             l.Add("Loading . . .");
             l.ListItemOffset = 80;
-            MediaLoader.loadSongs(theHost,artist, l,format);
+            MediaLoader.loadSongs(theHost,artist, l,format,dbname);
         }
         private void showTracks(int screen, string artist, string album)
         {
             level = 2;
             OMList l = (OMList)manager[screen][14];
-            l.Clear();
+            kickdown[screen] = true;
+            lock (manager[screen][12])
+                l.Clear();
             l.Add("Loading . . .");
             l.ListItemOffset = 80;
-            MediaLoader.loadSongs(theHost, artist,album,l,format);
+            MediaLoader.loadSongs(theHost, artist,album,l,format,dbname);
         }
 
         void Playlists_OnClick(OMControl sender, int screen)
