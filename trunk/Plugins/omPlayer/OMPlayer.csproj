@@ -113,8 +113,10 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CDDB.cs" />
     <Compile Include="CDDB\CDDB.cs" />
     <Compile Include="CDDB\freedb\CDEntry.cs" />
     <Compile Include="CDDB\freedb\FreedbHelper.cs" />

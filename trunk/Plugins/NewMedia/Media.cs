@@ -187,6 +187,11 @@ namespace ControlDemo
                 using (PluginSettings s = new PluginSettings())
                     dbname = s.getSetting("Default.RemovableDatabase");
             }
+            else if (currentSource.DriveType == OSSpecific.eDriveType.CDRom)
+            {
+                using (PluginSettings s = new PluginSettings())
+                    dbname = s.getSetting("Default.CDDatabase");
+            }
             else
             {
                 using (PluginSettings ps = new PluginSettings())

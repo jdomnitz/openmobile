@@ -658,7 +658,7 @@ namespace OMPlayer
             pos = 0;
             if (url.EndsWith(".cda")==true)
             {
-                nowPlaying = CDDB.getSongInfo(url);
+                nowPlaying = CDDBClient.getSongInfo(url);
                 if (nowPlaying == null)
                     nowPlaying = new mediaInfo();
                 nowPlaying.coverArt = theHost.getSkinImage("Discs|AudioCD").image;
