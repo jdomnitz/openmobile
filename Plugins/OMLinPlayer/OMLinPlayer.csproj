@@ -53,5 +53,9 @@
       <Name>OpenMobile.Framework</Name>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\FrontEnd\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
+      <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
+      <Name>OpenMobile.Graphics</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
