@@ -7,6 +7,7 @@ using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 using System.Diagnostics;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace OMDebug
 {
@@ -98,6 +99,12 @@ namespace OMDebug
             theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
             theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
+            if (queue.Count > 0)
+            {
+                foreach (string queued in queue)
+                    log(queued);
+                queue.Clear();
+            }
         }
         void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
@@ -145,9 +152,12 @@ namespace OMDebug
         {
             log(function.ToString() + "(" + instance.ToString() + "," + arg + ")");
         }
+        List<string> queue = new List<string>();
         private void log(string text)
         {
-            if (writer.BaseStream != null)
+            if (writer == null)
+                queue.Add(text);
+            else if (writer.BaseStream != null)
             {
                 writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + ": " + text);
                 writer.Flush();
