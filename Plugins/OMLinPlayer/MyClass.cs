@@ -17,16 +17,25 @@ namespace OMLinPlayer
 			State currentState;
 			player.GetState(out currentState,500);
 			if (currentState==State.Playing)
-				return (player.SetState(State.Paused)==StateChangeReturn.Success);
+				pause(instance);
 			else
-				return (player.SetState(State.Playing)==StateChangeReturn.Success);
+				if (player.SetState(State.Playing)==StateChangeReturn.Success)
+				{
+					OnMediaEvent(eFunction.Play, instance, "");
+					return true;
+				}
+			return false;
 		}
 
 
 		public bool pause (int instance)
 		{
 			if (player!=null)
-				return (player.SetState(State.Paused)==StateChangeReturn.Success);
+				if (player.SetState(State.Paused)==StateChangeReturn.Success)
+				{
+					OnMediaEvent(eFunction.Pause, instance, "");
+					return true;
+				}
 			return false;
 		}
 
