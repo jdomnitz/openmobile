@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainMenu", "..\Plugins\Main
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "..\Plugins\UI\UI.csproj", "{A0F59B9B-C8B7-4A91-ACDA-9F35C60D3DBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Media", "..\Plugins\Media\Media.csproj", "{D2989666-BA3C-447F-BE90-7A0630C290CB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TagLib", "..\Plugins\TagLib\TagLib.csproj", "{087D2157-E9B3-4CE1-8304-89B421328111}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMMediaDB", "..\Plugins\OMMediaDB\OMMediaDB.csproj", "{1E5CFF3D-3EFF-459B-A302-BA12F5CC6079}"
@@ -47,9 +45,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMLinPlayer", "..\Plugins\O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMLinHal", "..\Plugins\OMLinHal\OMLinHal.csproj", "{8B857996-C57B-44AE-B41D-ECB166F02B9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewMedia", "..\Plugins\NewMedia\NewMedia.csproj", "{F15159CB-BC40-4ABD-B23F-B41320FF16B7}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinWifi", "..\Plugins\LinWifi\LinWifi.csproj", "{E1C45521-0F97-4D7F-B77C-704CA59444D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewMedia", "..\Plugins\NewMedia\NewMedia.csproj", "{F15159CB-BC40-4ABD-B23F-B41320FF16B7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemovableDB", "..\Plugins\RemovableDB\RemovableDB.csproj", "{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Media", "..\Plugins\Media\Media.csproj", "{D2989666-BA3C-447F-BE90-7A0630C290CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -112,6 +114,12 @@ Global
 		{932DE238-14C8-4D0E-840A-646E165D9947}.Debug-Fast|Any CPU.Build.0 = Debug-Fast|Any CPU
 		{932DE238-14C8-4D0E-840A-646E165D9947}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{932DE238-14C8-4D0E-840A-646E165D9947}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A0F59B9B-C8B7-4A91-ACDA-9F35C60D3DBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A0F59B9B-C8B7-4A91-ACDA-9F35C60D3DBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0F59B9B-C8B7-4A91-ACDA-9F35C60D3DBD}.Debug-Fast|Any CPU.ActiveCfg = Debug-Fast|Any CPU

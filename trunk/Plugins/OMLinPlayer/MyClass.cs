@@ -4,11 +4,9 @@ using Gst.BasePlugins;
 using Gst.Interfaces;
 using OpenMobile;
 using OpenMobile.Plugin;
-
+using OpenMobile.Media;
 namespace OMLinPlayer
 {
-
-
 	public class MyClass : IAVPlayer
 	{
 		#region IAVPlayer implementation
@@ -81,7 +79,16 @@ namespace OMLinPlayer
 			player.SetState(State.Ready);
 			player.Uri="file://"+url;
 			player.SetState(State.Playing);
-			nowPlaying=OpenMobile.Media.TagReader.getInfo(url);
+			nowPlaying=TagReader.getInfo(url);
+			if (nowPlaying == null)
+                nowPlaying = new mediaInfo(url);
+            nowPlaying.Type = eMediaType.Local;
+            if (nowPlaying.coverArt == null)
+                nowPlaying.coverArt = TagReader.getCoverFromDB(nowPlaying.Artist, nowPlaying.Album, theHost);
+            if (nowPlaying.coverArt == null)
+                nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
+            if (nowPlaying.coverArt == null)
+                nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
 			OnMediaEvent(eFunction.Play,0,url);
 			loop.Run();
 			return true;
@@ -97,7 +104,6 @@ namespace OMLinPlayer
 			player.QueryPosition(ref f,out pos);
 			return (float)(pos/1000000000.0);
 		}
-
 
 		public OpenMobile.ePlayerStatus getPlayerStatus (int instance)
 		{
@@ -131,8 +137,8 @@ namespace OMLinPlayer
 		IPluginHost theHost;
 		public eLoadStatus initialize(IPluginHost host)
 		{
-			theHost=host;
 			Gst.Application.Init();
+			theHost=host;
 			return eLoadStatus.LoadSuccessful;
 		}
 		
@@ -219,7 +225,8 @@ namespace OMLinPlayer
 
 		public bool setVolume (int instance, int percent)
 		{
-			if (player!=null){
+			if (player!=null)
+			{
 				player.SetVolume(StreamVolumeFormat.Linear,percent);
 				return true;
 			}

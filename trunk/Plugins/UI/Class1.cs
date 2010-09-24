@@ -205,7 +205,7 @@ namespace OpenMobile
             Image2.Name = "UI.TopBar";
             Image2.Image = theHost.getSkinImage("topBar");
             OMImage mediaBar = new OMImage(0,620,1000,140);
-            mediaBar.Image = theHost.getSkinImage("MediaBar", true);
+            mediaBar.Image = theHost.getSkinImage("mediaBar", true);
             mediaBar.Transparency = 80;
             OMSlider slider = new OMSlider(20,635,960,25,12,40);
             slider.Name = "UI.Slider";
