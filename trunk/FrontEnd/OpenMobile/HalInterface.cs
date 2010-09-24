@@ -22,6 +22,7 @@ using System;
 using System.Net;
 using System.Text;
 using OpenMobile.Input;
+using System.Reflection;
 
 namespace OpenMobile
 {
@@ -32,8 +33,8 @@ namespace OpenMobile
             public string[] volume = null;
             private bool isDisposed = false;
             public HalInterface()
-            {
-                OpenMobile.Framework.OSSpecific.runManagedProcess("OMHal.exe", "", false);
+            {			
+                OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase).Replace("file:",""), "OMHal.exe"), "", false);
                 receive = new System.Net.Sockets.UdpClient(8550);
                 receive.BeginReceive(recv, null);
                 send = new System.Net.Sockets.UdpClient("127.0.0.1", 8549);
