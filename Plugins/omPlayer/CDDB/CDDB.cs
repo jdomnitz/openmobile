@@ -29,7 +29,7 @@ using Ripper;
 
 namespace OMPlayer
 {
-    internal static class CDDB
+    internal static class CDDBClient
     {
         //Remove this if unused
         public static mediaInfo[] getInfo(string path)
