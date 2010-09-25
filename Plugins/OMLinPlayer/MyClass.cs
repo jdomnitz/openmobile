@@ -123,6 +123,8 @@ namespace OMLinPlayer
 				{
 					mediaInfo[] info=CDDBClient.getTracks("/dev/sr0");
 					nowPlaying=info[int.Parse(url.Substring(7))-1];
+                    if (nowPlaying.coverArt == null)
+                        nowPlaying.coverArt = theHost.getSkinImage("Discs|AudioCD").image;
 				}
 				if (nowPlaying==null)
 					nowPlaying=new mediaInfo(url);
