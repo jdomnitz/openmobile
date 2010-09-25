@@ -28,24 +28,31 @@ namespace OpenMobile.Framework
     {
         internal static bool detectPhone(string path)
         {
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
-            foreach (ManagementObject wmi_HD in searcher.Get())
+            try
             {
-                var wmiDiskPartitions = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" +
-                wmi_HD["DeviceID"].ToString() + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
-                foreach (ManagementObject partition in wmiDiskPartitions.Get())
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
+                foreach (ManagementObject wmi_HD in searcher.Get())
                 {
-                    var wmiLogicalDisks = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" +
-                    partition["DeviceID"].ToString() + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
-                    foreach (ManagementObject disk in wmiLogicalDisks.Get())
-                        if (disk["DeviceID"].ToString() == path.TrimEnd(new char[] { '\\' }))
-                            if (wmi_HD["Model"].ToString().Contains("Phone"))
-                                return true;
-                            else
-                                return false;
+                    var wmiDiskPartitions = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" +
+                    wmi_HD["DeviceID"].ToString() + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
+                    foreach (ManagementObject partition in wmiDiskPartitions.Get())
+                    {
+                        var wmiLogicalDisks = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" +
+                        partition["DeviceID"].ToString() + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
+                        foreach (ManagementObject disk in wmiLogicalDisks.Get())
+                            if ((wmi_HD["DeviceID"]!=null)&&(disk["DeviceID"].ToString() == path.TrimEnd(new char[] { '\\' })))
+                                if ((wmi_HD["Model"]!=null)&&(wmi_HD["Model"].ToString().Contains("Phone")))
+                                    return true;
+                                else
+                                    return false;
+                    }
                 }
+                return false;
             }
-            return false;
+            catch (Exception)
+            {
+                return false;
+            }
         }
         internal static string getNetFramework()
         {
