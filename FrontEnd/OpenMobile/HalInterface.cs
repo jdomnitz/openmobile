@@ -34,8 +34,16 @@ namespace OpenMobile
             private bool isDisposed = false;
             public HalInterface()
             {
-                if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "").Replace("file:", "")), "OMHal.exe"), "", false))
+			if (Configuration.RunningOnWindows)
+			{
+                if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")), "OMHal.exe"), "", false))
                     Core.theHost.sendMessage("OMDebug", "HalInterface", "Unable to start HAL!");
+			}
+			else if(Configuration.RunningOnLinux)
+			{
+				if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:", "")), "OMHal.exe"), "", false))
+                    Core.theHost.sendMessage("OMDebug", "HalInterface", "Unable to start HAL!");
+			}
                 receive = new System.Net.Sockets.UdpClient(8550);
                 receive.BeginReceive(recv, null);
                 send = new System.Net.Sockets.UdpClient("127.0.0.1", 8549);

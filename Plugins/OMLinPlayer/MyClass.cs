@@ -5,6 +5,7 @@ using Gst.Interfaces;
 using OpenMobile;
 using OpenMobile.Plugin;
 using OpenMobile.Media;
+using System.Collections.Generic;
 namespace OMLinPlayer
 {
 	public class MyClass : IAVPlayer
@@ -76,7 +77,22 @@ namespace OMLinPlayer
 		MainLoop loop;
 		public bool play (int instance, string url, OpenMobile.eMediaType type)
 		{
+			error=false;
 			stop(instance);
+			switch(type)
+			{
+				case eMediaType.Local:
+					url="file://"+url;
+					break;
+				case eMediaType.DVD:
+					url="dvd://1";
+					break;
+				case eMediaType.AudioCD:
+					url="cdda://"+Path.GetFileNameWithoutExtension(url);
+					break;
+				default:
+					return false;
+			}
 			loop=new MainLoop();
 			if (player==null)
 			{
@@ -86,18 +102,25 @@ namespace OMLinPlayer
 			if (player==null)
 				return false;
 			player.SetState(State.Ready);
-			player.Uri="file://"+url;
+			player.Uri=url;
 			player.SetState(State.Playing);
-			nowPlaying=TagReader.getInfo(url);
-			if (nowPlaying == null)
-                nowPlaying = new mediaInfo(url);
-            nowPlaying.Type = eMediaType.Local;
-            if (nowPlaying.coverArt == null)
-                nowPlaying.coverArt = TagReader.getCoverFromDB(nowPlaying.Artist, nowPlaying.Album, theHost);
-            if (nowPlaying.coverArt == null)
-                nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
-            if (nowPlaying.coverArt == null)
-                nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
+			if (type==eMediaType.Local)
+			{
+				nowPlaying=TagReader.getInfo(url);
+				if (nowPlaying == null)
+	                nowPlaying = new mediaInfo(url);
+	            nowPlaying.Type = eMediaType.Local;
+	            if (nowPlaying.coverArt == null)
+	                nowPlaying.coverArt = TagReader.getCoverFromDB(nowPlaying.Artist, nowPlaying.Album, theHost);
+	            if (nowPlaying.coverArt == null)
+	                nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
+	            if (nowPlaying.coverArt == null)
+	                nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
+			}else
+			{
+				nowPlaying=new mediaInfo(url);
+				nowPlaying.Type=type;
+			}
 			OnMediaEvent(eFunction.Play,0,url);
 			loop.Run();
 			return true;
@@ -113,9 +136,11 @@ namespace OMLinPlayer
 			player.QueryPosition(ref f,out pos);
 			return (float)(pos/1000000000.0);
 		}
-
+		bool error=false;
 		public OpenMobile.ePlayerStatus getPlayerStatus (int instance)
 		{
+			if (error)
+				return ePlayerStatus.Error;
 			if (player==null)
 				return ePlayerStatus.Stopped;
 			State currentState;
@@ -140,13 +165,13 @@ namespace OMLinPlayer
 
 		public MyClass ()
 		{
+			Gst.Application.Init();
 		}
 		#region IBasePlugin implementation
 		private PlayBin2 player;
 		IPluginHost theHost;
 		public eLoadStatus initialize(IPluginHost host)
 		{
-			Gst.Application.Init();
 			theHost=host;
 			return eLoadStatus.LoadSuccessful;
 		}
@@ -158,6 +183,10 @@ namespace OMLinPlayer
 				case MessageType.Eos:
 					stop(0);
 					OnMediaEvent(eFunction.nextMedia,0,"");
+					break;
+				case MessageType.Error:
+					error=true;	
+					stop(0);
 					break;
 			}
 			return true;
@@ -266,7 +295,16 @@ namespace OMLinPlayer
 		public string[] OutputDevices {
 			get 
 			{
-				return new string[] { "Default Device" };
+				if (player==null)
+				{
+					player = ElementFactory.Make ("playbin2", "play") as PlayBin2;
+					player.Bus.AddWatch (new BusFunc (BusCb));
+				}
+				List<string> pads=new List<string>();
+				pads.Add("Default Device");
+				foreach(Gst.Element e in player.SinkElements)
+					pads.Add(e.Name);
+				return pads.ToArray();
 			}
 		}
 
