@@ -39,6 +39,8 @@ namespace OpenMobile
 
         public OMPanel loadPanel(string name,int screen)
         {
+            if (manager == null)
+                return null;
             if (Console.CapsLock)
                 setUppercase(screen);
             else

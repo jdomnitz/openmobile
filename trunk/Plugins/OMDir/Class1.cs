@@ -38,6 +38,8 @@ namespace OMDir
 
         public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)
         {
+            if (manager == null)
+                return null;
             if (name == "Folder")
             {
                 ((OMLabel)manager[screen][2]).Text = "Select a Folder";
