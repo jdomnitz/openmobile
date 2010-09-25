@@ -60,6 +60,17 @@ namespace OMHal
                     StringBuilder path = new StringBuilder();
                     SHGetPathFromIDListW(nfy.dwItem1, path);
                     DeviceRemoved(path.ToString());
+                }else if((int)m.LParam == (int)SHCNE.SHCNE_DRIVEADD)
+                {
+                    StringBuilder path=new StringBuilder();
+                    SHGetPathFromIDListW(nfy.dwItem1, path);
+                    DeviceArrived(path.ToString());
+                }
+                else if ((int)m.LParam == (int)SHCNE.SHCNE_DRIVEREMOVED)
+                {
+                    StringBuilder path = new StringBuilder();
+                    SHGetPathFromIDListW(nfy.dwItem1, path);
+                    DeviceRemoved(path.ToString());
                 }
             }
         }
@@ -70,7 +81,7 @@ namespace OMHal
         {
             SHChangeNotifyEntry entry =new SHChangeNotifyEntry();
             entry.Recursively=true;
-            id=SHChangeNotifyRegister(form, 3, SHCNE.SHCNE_MEDIAINSERTED | SHCNE.SHCNE_MEDIAREMOVED, WM_MEDIA_CHANGE, 1, ref entry);
+            id=SHChangeNotifyRegister(form, 3, SHCNE.SHCNE_DRIVEADD| SHCNE.SHCNE_DRIVEREMOVED | SHCNE.SHCNE_MEDIAINSERTED | SHCNE.SHCNE_MEDIAREMOVED, WM_MEDIA_CHANGE, 1, ref entry);
         }
         public static void unhook()
         {
