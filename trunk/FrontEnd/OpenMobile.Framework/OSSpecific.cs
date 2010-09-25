@@ -406,8 +406,23 @@ namespace OpenMobile.Framework
                     if (p.ExitCode != 0)
                         response = null;
                 }
-                if (string.IsNullOrEmpty(response))
-                    return Path.GetFileName(new DriveInfo(path).VolumeLabel);
+				if (path.StartsWith("cdda:"))
+				{
+					local=path.Substring(7).TrimEnd(new char[]{'/'});
+					path=null;
+				}
+				ProcessStartInfo info2 = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'OpticalDiscNumAudioTracks'");
+                info2.RedirectStandardOutput = true; info2.UseShellExecute = false;
+                info2.WindowStyle = ProcessWindowStyle.Hidden;
+                Process t = new Process();
+                t.StartInfo = info2;
+                t.Start();
+                t.WaitForExit();
+                string tracks = t.StandardOutput.ReadToEnd().Trim();
+				if (path==null)
+					return "CD-ROM|"+tracks;
+                else if (string.IsNullOrEmpty(response))
+                    return Path.GetFileName(new DriveInfo(path).VolumeLabel)+"|"+tracks;
                 else
                     return response.Replace("_", " ");
             }

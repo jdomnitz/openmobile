@@ -41,10 +41,16 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>gstreamer-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MyClass.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="CDDB\DiscLinux.cs" />
+    <Compile Include="CDDB\LocalDisc.cs" />
+    <Compile Include="CDDB\Disc.cs" />
+    <Compile Include="CDDB\CDDBClient.cs" />
+    <Compile Include="CDDB.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

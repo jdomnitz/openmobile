@@ -148,11 +148,14 @@ namespace OpenMobile.Media
                 }
                 if ((Configuration.RunningOnLinux)&&!caseInsensitive)
                 {
-                    string[] sub = Directory.GetDirectories(Path.Combine(path, "dcim"));
-                    foreach (string dir in sub)
-                        if (!dir.Contains(".thumbnails"))
-                            pictures.Add(dir);
-                }
+					if (Directory.Exists(Path.Combine(path, "dcim")))
+                	{
+	                    string[] sub = Directory.GetDirectories(Path.Combine(path, "dcim"));
+	                    foreach (string dir in sub)
+	                        if (!dir.Contains(".thumbnails"))
+	                            pictures.Add(dir);
+                	}
+				}
             }
             return new DeviceInfo(music.ToArray(), playlists.ToArray(), video.ToArray(),pictures.ToArray(),type);
         }

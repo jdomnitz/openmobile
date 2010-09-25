@@ -85,10 +85,9 @@ namespace OMLinPlayer
 					url="file://"+url;
 					break;
 				case eMediaType.DVD:
-					url="dvd://1";
+					url="dvd://";
 					break;
 				case eMediaType.AudioCD:
-					url="cdda://"+Path.GetFileNameWithoutExtension(url);
 					break;
 				default:
 					return false;
@@ -116,9 +115,21 @@ namespace OMLinPlayer
 	                nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
 	            if (nowPlaying.coverArt == null)
 	                nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
+				if (nowPlaying.Length==0)
+					setDuration();
 			}else
 			{
-				nowPlaying=new mediaInfo(url);
+				if (type==eMediaType.AudioCD)
+				{
+					mediaInfo[] info=CDDBClient.getTracks("/dev/sr0");
+					nowPlaying=info[int.Parse(url.Substring(7))-1];
+				}
+				if (nowPlaying==null)
+					nowPlaying=new mediaInfo(url);
+				if (nowPlaying.Length==0)
+					setDuration();
+				if (string.IsNullOrEmpty(nowPlaying.Name))
+					nowPlaying.Name=url;
 				nowPlaying.Type=type;
 			}
 			OnMediaEvent(eFunction.Play,0,url);
@@ -126,6 +137,18 @@ namespace OMLinPlayer
 			return true;
 		}
 
+		private void setDuration()
+		{
+			Format f=Format.Time;
+			long duration;
+			State s;
+			do{
+				player.GetState(out s,1000);
+				System.Threading.Thread.Sleep(5);
+			}while(s!=State.Playing);
+			player.QueryDuration(ref f,out duration);
+			nowPlaying.Length=(int)(duration/1000000000.0);
+		}
 
 		public float getCurrentPosition (int instance)
 		{
@@ -295,8 +318,6 @@ namespace OMLinPlayer
 		public string[] OutputDevices {
 			get 
 			{
-                return new string[] { "Default Device" };
-                /*
 				if (player==null)
 				{
 					player = ElementFactory.Make ("playbin2", "play") as PlayBin2;
@@ -307,7 +328,6 @@ namespace OMLinPlayer
 				foreach(Gst.Element e in player.SinkElements)
 					pads.Add(e.Name);
 				return pads.ToArray();
-                */
 			}
 		}
 
