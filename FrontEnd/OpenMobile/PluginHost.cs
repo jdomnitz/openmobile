@@ -84,6 +84,8 @@ namespace OpenMobile
                 return eMediaType.MMSUrl;
             if (source.ToLower().StartsWith("cam") == true)
                 return eMediaType.LiveCamera;
+			if (source.ToLower().StartsWith("cdda:") == true)
+                return eMediaType.AudioCD;
             if (source.Contains(".") == true) //Check if its a file
             {
                 if (source.StartsWith(@"\\") == true)
@@ -414,7 +416,10 @@ namespace OpenMobile
                 if (type == eMediaType.NotSet)
                     StorageAnalyzer.AnalyzeAsync(arg, justInserted);
             }
-            catch (Exception) { }
+            catch (Exception e) 
+			{
+				sendMessage("OMDebug","PluginHost",e.StackTrace);
+			}
         }
 
         #region Power Events
@@ -1298,6 +1303,10 @@ namespace OpenMobile
                 else if (message == "ToggleCursor")
                     for (int i = 0; i < screenCount; i++)
                         Core.RenderingWindows[i].hideCursor();
+				else if(message=="MakeCurrent")
+					Core.RenderingWindows[0].MakeCurrent();
+				else if(message=="KillCurrent")
+					Core.RenderingWindows[0].MakeCurrent(null);
                 return true;
             }
             else if (to == "OMHal")

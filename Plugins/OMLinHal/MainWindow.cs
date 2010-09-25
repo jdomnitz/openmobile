@@ -132,6 +132,12 @@ public partial class MainWindow : Gtk.Window
 						removables.Add(path,mountPath[0]);
 					raiseStorageEvent(eMediaType.NotSet,true,mountPath[0]);
 				}
+				uint tracks=(uint)p.Get("org.freedesktop.UDisks.Device","OpticalDiscNumAudioTracks");
+				if (tracks>0)
+				{
+					string tmpPath="cdda://"+System.IO.Path.GetFileName(path.ToString())+"/";
+					raiseStorageEvent(eMediaType.AudioCD,false,tmpPath);
+				}
 			}
 			else
 			{
@@ -238,6 +244,13 @@ public partial class MainWindow : Gtk.Window
 								{
 									removables.Add(path,mountPath[0]);
 									raiseStorageEvent(eMediaType.NotSet,false,mountPath[0]);
+									continue;
+								}
+								uint tracks=(uint)p.Get("org.freedesktop.UDisks.Device","OpticalDiscNumAudioTracks");
+								if (tracks>0)
+								{
+									string tmpPath="cdda://"+System.IO.Path.GetFileName(path.ToString())+"/";
+									raiseStorageEvent(eMediaType.AudioCD,false,tmpPath);
 								}
 							}
 					}

@@ -72,8 +72,12 @@ namespace OpenMobile
                     return eMediaType.OpenDrive;
                 if (OSSpecific.getDriveType(path) == OSSpecific.eDriveType.Phone)
                     return eMediaType.Smartphone;
+				if (OSSpecific.getDriveType(path)==OSSpecific.eDriveType.CDRom)
+					return eMediaType.AudioCD;
                 return eMediaType.LocalHardware;
             }catch(Exception){
+				if (OSSpecific.getDriveType(path)==OSSpecific.eDriveType.CDRom)
+					return eMediaType.AudioCD;
                 return eMediaType.LocalHardware;
             };
         }

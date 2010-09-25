@@ -93,10 +93,23 @@ namespace ControlDemo
             switch (List3[List3.SelectedIndex].text)
             {
                 case "Play CD":
-                    string[] songs=Directory.GetFiles(lastPath);
-                    if (theHost.setPlaylist(Playlist.Convert(songs), theHost.instanceForScreen(screen)))
-                        theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
-                    break;
+					if (Configuration.RunningOnWindows)
+					{
+                    	string[] songs=Directory.GetFiles(lastPath);
+                    	if (theHost.setPlaylist(Playlist.Convert(songs), theHost.instanceForScreen(screen)))
+                        	theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
+					}else if(Configuration.RunningOnLinux)
+					{
+						string name=OpenMobile.Framework.OSSpecific.getVolumeLabel(lastPath);
+						string[] arg=name.Split(new char[]{'|'});
+						List<string> songs=new List<string>();
+						int tracks=int.Parse(arg[1]);
+						for(int i=1;i<=tracks;i++)
+							songs.Add("cdda://"+i.ToString());
+						if (theHost.setPlaylist(Playlist.Convert(songs), theHost.instanceForScreen(screen)))
+                        	theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
+					}
+					break;
                 case "Play DVD":
                 case "Play Blu-Ray":
                 case "Play HDDVD":
