@@ -295,6 +295,8 @@ namespace OMLinPlayer
 		public string[] OutputDevices {
 			get 
 			{
+                return new string[] { "Default Device" };
+                /*
 				if (player==null)
 				{
 					player = ElementFactory.Make ("playbin2", "play") as PlayBin2;
@@ -305,6 +307,7 @@ namespace OMLinPlayer
 				foreach(Gst.Element e in player.SinkElements)
 					pads.Add(e.Name);
 				return pads.ToArray();
+                */
 			}
 		}
 

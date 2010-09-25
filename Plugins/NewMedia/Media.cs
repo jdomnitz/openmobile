@@ -399,23 +399,26 @@ namespace ControlDemo
         }
         void List_OnLongClick(OMControl sender, int screen)
         {
-            OMList l = (OMList)sender;
-            if ((l.SelectedItem != null) && (l.SelectedItem.text == "Current Playlist"))
+            if (level == 3)
             {
-                OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-                string title = input.getText(screen, "NewMedia");
-                if (title != null)
+                OMList l = (OMList)sender;
+                if ((l.SelectedItem != null) && (l.SelectedItem.text == "Current Playlist"))
                 {
-                    Playlist.writePlaylistToDB(theHost, title, theHost.getPlaylist(theHost.instanceForScreen(screen)));
-                    ((OMLabel)sender.Parent[6]).Text = title + " Tracks";
-                    SafeThread.Asynchronous(delegate() { showPlaylist(screen, title); }, theHost);
-                    moveToTracks(screen);
+                    OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+                    string title = input.getText(screen, "NewMedia");
+                    if (title != null)
+                    {
+                        Playlist.writePlaylistToDB(theHost, title, theHost.getPlaylist(theHost.instanceForScreen(screen)));
+                        ((OMLabel)sender.Parent[6]).Text = title + " Tracks";
+                        SafeThread.Asynchronous(delegate() { showPlaylist(screen, title); }, theHost);
+                        moveToTracks(screen);
+                    }
                 }
-            }
-            else if (l.SelectedItem != null)
-            {
-                Playlist.deletePlaylistFromDB(theHost, l.SelectedItem.text);
-                SafeThread.Asynchronous(delegate() { showPlaylists(screen); }, theHost);
+                else if (l.SelectedItem != null)
+                {
+                    Playlist.deletePlaylistFromDB(theHost, l.SelectedItem.text);
+                    SafeThread.Asynchronous(delegate() { showPlaylists(screen); }, theHost);
+                }
             }
         }
 
@@ -722,6 +725,8 @@ namespace ControlDemo
 
         public OMPanel loadPanel(string name, int screen)
         {
+            if (manager == null)
+                return null;
             return manager[screen];
         }
 
