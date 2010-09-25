@@ -21,6 +21,48 @@ public partial class MainWindow : Gtk.Window
 	Backlight bk;
 	UDisks disks; 
 	MultimediaKeys.MultimediaKeysService mediaKeys=new MultimediaKeys.MultimediaKeysService();
+	
+	void checkVolume (int instance)
+	{
+		Process p=new Process();
+		ProcessStartInfo info=new ProcessStartInfo("pacmd","list-sinks volume");
+		info.WindowStyle=ProcessWindowStyle.Hidden;
+		info.UseShellExecute=false;
+		info.RedirectStandardOutput=true;
+		p.StartInfo=info;
+		p.Start();
+		p.WaitForExit();
+		string response=p.StandardOutput.ReadToEnd();
+		string[] lines=response.Split(new char[]{'\r','\n','\t'});
+		int i=0;
+		string vol="0";
+		foreach(string line in lines)
+		{
+			if (line.StartsWith("volume:"))
+			{
+				vol=line.Substring(11,3).Trim();
+			}
+			else if(line.StartsWith("muted:"))
+			{
+				if (line.Contains("yes"))
+				{
+					if (instance!=i)
+						raiseSystemEvent(eFunction.systemVolumeChanged,"-1",i.ToString(),"");
+					else
+						sendIt("3|"+i.ToString()+"|-1");
+				}
+				else
+				{
+					if (instance!=i)
+						raiseSystemEvent(eFunction.systemVolumeChanged,vol,i.ToString(),"");
+					else
+						sendIt("3|"+i.ToString()+"|"+vol);
+					i++;
+				}
+			}
+		}
+	}
+
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
 		system=Bus.System;
@@ -44,25 +86,7 @@ public partial class MainWindow : Gtk.Window
 		disks=system.GetObject<UDisks>("org.freedesktop.UDisks",new ObjectPath("/org/freedesktop/UDisks"));
 		disks.DeviceAdded+=added;
 		disks.DeviceChanged+=changed;
-		Process p=new Process();
-		ProcessStartInfo info=new ProcessStartInfo("pacmd","list-sinks volume");
-		info.WindowStyle=ProcessWindowStyle.Hidden;
-		info.UseShellExecute=false;
-		info.RedirectStandardOutput=true;
-		p.StartInfo=info;
-		p.Start();
-		p.WaitForExit();
-		string response=p.StandardOutput.ReadToEnd();
-		string[] lines=response.Split(new char[]{'\r','\n','\t'});
-		int i=0;
-		foreach(string line in lines)
-		{
-			if (line.StartsWith("volume:"))
-			{
-				raiseSystemEvent(eFunction.systemVolumeChanged,line.Substring(11,3).Trim(),i.ToString(),"");
-				i++;
-			}
-		}
+		checkVolume(-1);
 		mediaKeys.keyPressed+=new MultimediaKeys.MultimediaKeysService.MediaPlayerKeyPressedHandler(handleKey);
 		mediaKeys.Initialize();
 		//disks.DeviceRemoved+=remove;
@@ -195,7 +219,12 @@ public partial class MainWindow : Gtk.Window
             switch (parts[0])
             {
                 case "3": //GetData - System Volume
-                    //TODO
+					int ret;
+                    if (int.TryParse(arg1,out ret))
+					{
+                        if(ret>=0)
+							checkVolume(ret);
+					}
                     break;
 				case "32": //Plugins Loaded
 					foreach(ObjectPath path in disks.EnumerateDevices())
@@ -219,7 +248,20 @@ public partial class MainWindow : Gtk.Window
 						if (int.TryParse(arg1,out val))
 						{
 							Process p=new Process();
-							ProcessStartInfo info=new ProcessStartInfo("pacmd","set-sink-volume "+arg2+" "+((int)(val*655.35)).ToString());
+							ProcessStartInfo info;
+							if (val==-1)
+								info=new ProcessStartInfo("pacmd","set-sink-mute "+arg2+" true");
+							else
+								info=new ProcessStartInfo("pacmd","set-sink-mute "+arg2+" false");
+							info.WindowStyle=ProcessWindowStyle.Hidden;
+							Process q=new Process();
+							q.StartInfo=info;
+							q.Start();
+							if (val==-2)
+								checkVolume(-1);
+							if(val<0)
+								return;
+							info=new ProcessStartInfo("pacmd","set-sink-volume "+arg2+" "+((int)(val*655.35)).ToString());
 							info.WindowStyle=ProcessWindowStyle.Hidden;
 							p.StartInfo=info;
 							p.Start();
