@@ -198,7 +198,7 @@ namespace OMLinPlayer
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting("Default.CDDatabase", "CDDB");
             foreach (string drive in Environment.GetLogicalDrives())
-                if (OSSpecific.getDriveType(drive) == OSSpecific.eDriveType.CDRom)
+                if (OSSpecific.getDriveType(drive) == eDriveType.CDRom)
                     TaskManager.QueueTask(delegate() { indexDirectory(drive, false); }, ePriority.Normal, "Lookup CD Info");
             return eLoadStatus.LoadSuccessful;
         }
@@ -208,8 +208,8 @@ namespace OMLinPlayer
             if (type == eMediaType.AudioCD)
                 indexDirectory(arg, false);
             else if (type == eMediaType.DeviceRemoved)
-                if (OSSpecific.getDriveType(arg) == OSSpecific.eDriveType.CDRom)
-                    clearIndex(); //TODO - multiple CD-ROM Drives
+                if (OSSpecific.getDriveType(arg) == eDriveType.CDRom)
+                    clearIndex();
         }
 
         public Settings loadSettings()
