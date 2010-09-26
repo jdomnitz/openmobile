@@ -37,19 +37,19 @@ namespace OpenMobile.Media
             }
             else if (Configuration.RunningOnLinux)
             {
-                return (path=="/");
+                return (path == "/");
             }
             else
                 return false;
         }
         public static DeviceInfo getDeviceInfo(string path)
         {
-            List<string>playlists=new List<string>();
-            List<string>music=new List<string>();
+            List<string> playlists = new List<string>();
+            List<string> music = new List<string>();
             List<string> video = new List<string>();
             List<string> pictures = new List<string>();
             OSSpecific.eDriveType type = OSSpecific.getDriveType(path);
-            if (((type==OSSpecific.eDriveType.Fixed)||(type==OSSpecific.eDriveType.Unknown))&& systemDrive(path))
+            if (((type == OSSpecific.eDriveType.Fixed) || (type == OSSpecific.eDriveType.Unknown)) && systemDrive(path))
             {
                 string tmp = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
                 if (Directory.Exists(tmp))
@@ -67,37 +67,42 @@ namespace OpenMobile.Media
                 if (Directory.Exists(t))
                     playlists.Add(t);
             }
-            else if(type==OSSpecific.eDriveType.CDRom)
+            else if (type == OSSpecific.eDriveType.CDRom)
             {
                 music.Add(path);
             }
+            else if (type == OSSpecific.eDriveType.iPod)
+            {
+                music.Add(Path.Combine(path, "iPod_Control", "Music"));
+                video.Add(Path.Combine(path, "iPod_Control", "Music"));//video files are stored in music with an m4v extension
+            }
             else
             {
-				bool caseInsensitive=false;
-				if (Configuration.RunningOnLinux)
-				{
-					DriveInfo info=new DriveInfo(path);
-					switch(info.DriveFormat)
-					{
-						case "ntfs":
-						case "ntfs-3g":
-						case "fat":
-						case "vfat":
-						case "exfat":
-							caseInsensitive=true;
-							break;
-					}
-				}
+                bool caseInsensitive = false;
+                if (Configuration.RunningOnLinux)
+                {
+                    DriveInfo info = new DriveInfo(path);
+                    switch (info.DriveFormat)
+                    {
+                        case "ntfs":
+                        case "ntfs-3g":
+                        case "fat":
+                        case "vfat":
+                        case "exfat":
+                            caseInsensitive = true;
+                            break;
+                    }
+                }
                 if (Directory.Exists(Path.Combine(path, "Playlists")))
                     playlists.Add(Path.Combine(path, "Playlists"));
-                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
+                if ((Configuration.RunningOnLinux) && !caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "playlists")))
                         playlists.Add(Path.Combine(path, "playlists"));
                 }
                 if (Directory.Exists(Path.Combine(path, "Music", "Playlists")))
                     playlists.Add(Path.Combine(path, "Music", "Playlists"));
-                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
+                if ((Configuration.RunningOnLinux) && !caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "Music", "playlists")))
                         playlists.Add(Path.Combine(path, "Music", "playlists"));
@@ -106,35 +111,35 @@ namespace OpenMobile.Media
                 }
                 if (Directory.Exists(Path.Combine(path, "Music")))
                     music.Add(Path.Combine(path, "Music"));
-                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
+                if ((Configuration.RunningOnLinux) && !caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "music")))
                         music.Add(Path.Combine(path, "music"));
                 }
                 if (Directory.Exists(Path.Combine(path, "AmazonMP3")))
                     music.Add(Path.Combine(path, "AmazonMP3"));
-                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
+                if ((Configuration.RunningOnLinux) && !caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "amazonmp3")))
                         music.Add(Path.Combine(path, "amazonmp3"));
                 }
                 if (Directory.Exists(Path.Combine(path, "Video")))
                     video.Add(Path.Combine(path, "Video"));
-                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
+                if ((Configuration.RunningOnLinux) && !caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "video")))
                         video.Add(Path.Combine(path, "video"));
                 }
                 if (Directory.Exists(Path.Combine(path, "Movies")))
                     video.Add(Path.Combine(path, "Movies"));
-                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
+                if ((Configuration.RunningOnLinux) && !caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "movies")))
                         video.Add(Path.Combine(path, "movies"));
                 }
                 if (Directory.Exists(Path.Combine(path, "Pictures")))
                     pictures.Add(Path.Combine(path, "Pictures"));
-                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
+                if ((Configuration.RunningOnLinux) && !caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "pictures")))
                         pictures.Add(Path.Combine(path, "pictures"));
@@ -146,18 +151,18 @@ namespace OpenMobile.Media
                         if (!dir.Contains(".thumbnails"))
                             pictures.Add(dir);
                 }
-                if ((Configuration.RunningOnLinux)&&!caseInsensitive)
+                if ((Configuration.RunningOnLinux) && !caseInsensitive)
                 {
-					if (Directory.Exists(Path.Combine(path, "dcim")))
-                	{
-	                    string[] sub = Directory.GetDirectories(Path.Combine(path, "dcim"));
-	                    foreach (string dir in sub)
-	                        if (!dir.Contains(".thumbnails"))
-	                            pictures.Add(dir);
-                	}
-				}
+                    if (Directory.Exists(Path.Combine(path, "dcim")))
+                    {
+                        string[] sub = Directory.GetDirectories(Path.Combine(path, "dcim"));
+                        foreach (string dir in sub)
+                            if (!dir.Contains(".thumbnails"))
+                                pictures.Add(dir);
+                    }
+                }
             }
-            return new DeviceInfo(music.ToArray(), playlists.ToArray(), video.ToArray(),pictures.ToArray(),type);
+            return new DeviceInfo(music.ToArray(), playlists.ToArray(), video.ToArray(), pictures.ToArray(), type);
         }
         public DeviceInfo(string[] music, string[] playlist, string[] video, string[] picture, OSSpecific.eDriveType type)
         {

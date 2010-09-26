@@ -44,23 +44,27 @@ namespace ControlDemo
             List.OnClick += new userInteraction(List_OnClick);
             List.OnLongClick += new userInteraction(List_OnLongClick);
             List.Add("Loading . . .");
-            OMImage LeftTab = new OMImage(-18, 155, 225, 150);
+            OMImage LeftTab = new OMImage(-5, 160, 225, 150);
             LeftTab.Image = theHost.getSkinImage("LeftSlidingSelect");
             OMButton Artists = new OMButton(24, 168, 130, 130);
             Artists.Image = theHost.getSkinImage("ArtistIcon_Selected");
+            Artists.FocusImage = theHost.getSkinImage("ArtistIcon_SelectedHighlighted");
             Artists.Transition = eButtonTransition.None;
             Artists.OnClick += new userInteraction(Artists_OnClick);
             OMButton Albums = new OMButton(29, 265, 130, 130);
             Albums.Image = theHost.getSkinImage("AlbumIcon");
+            Albums.FocusImage = theHost.getSkinImage("AlbumIcon_Highlighted");
             Albums.Transition = eButtonTransition.None;
             Albums.OnClick += new userInteraction(Albums_OnClick);
             OMButton Tracks = new OMButton(33, 370, 130, 130);
             Tracks.Transition = eButtonTransition.None;
             Tracks.Image = theHost.getSkinImage("TracksIcon");
+            Tracks.FocusImage = theHost.getSkinImage("TracksIcon_Highlighted");
             Tracks.OnClick += new userInteraction(Tracks_OnClick);
             OMButton Down = new OMButton(5, 450, 190, 120);
             Down.Image = theHost.getSkinImage("DownArrowIcon");
             Down.DownImage = theHost.getSkinImage("DownArrowIcon_Selected");
+            Down.FocusImage = theHost.getSkinImage("DownArrowIcon_Highlighted");
             Down.Transition = eButtonTransition.None;
             OMLabel Title = new OMLabel(250, 111, 500, 50);
             Title.Font = new Font(Font.GenericSansSerif, 26F);
@@ -68,20 +72,22 @@ namespace ControlDemo
             OMButton PlaySelected = new OMButton(830, 165, 150, 150);
             PlaySelected.Image = theHost.getSkinImage("PlayIcon");
             PlaySelected.DownImage = theHost.getSkinImage("PlayIcon_Selected");
+            PlaySelected.FocusImage = theHost.getSkinImage("PlayIcon_Highlighted");
             PlaySelected.OnClick += new userInteraction(PlaySelected_OnClick);
             PlaySelected.Transition = eButtonTransition.None;
             OMButton Enqueue = new OMButton(830, 265, 150, 150);
             Enqueue.Image = theHost.getSkinImage("EnqueIcon");
             Enqueue.DownImage = theHost.getSkinImage("EnqueIcon_Selected");
+            Enqueue.FocusImage = theHost.getSkinImage("EnqueIcon_Highlighted");
             Enqueue.Transition = eButtonTransition.None;
             Enqueue.OnClick += new userInteraction(Enqueue_OnClick);
-            OMImage RightTab = new OMImage(788, 375, 225, 150);
+            OMImage RightTab = new OMImage(778, 375, 225, 150);
             RightTab.Image = theHost.getSkinImage("RightSlidingSelect");
             RightTab.Visible = false;
             OMButton Playlists = new OMButton(830, 375, 150, 150);
             Playlists.Transition = eButtonTransition.None;
             Playlists.Image = theHost.getSkinImage("PlaylistIcon");
-            Playlists.FocusImage = theHost.getSkinImage("Playlists_Selected");
+            Playlists.FocusImage = theHost.getSkinImage("PlaylistIcon_Highlighted");
             Playlists.OnClick += new userInteraction(Playlists_OnClick);
             OMButton Zones = new OMButton(817, 100, 175, 75);
             Zones.Image = opt1;
@@ -237,25 +243,40 @@ namespace ControlDemo
                 foreach (string drive in Environment.GetLogicalDrives())
                 {
                     DeviceInfo info = DeviceInfo.getDeviceInfo(drive);
+                    if ((info.MusicFolders.Length == 0) && (info.PlaylistFolders.Length == 0) && (info.VideoFolders.Length == 0))
+                        continue;
+                    OMButton button=(OMButton)manager[0][source + 16];
                     switch (info.DriveType)
                     {
                         case OSSpecific.eDriveType.CDRom:
-                            ((OMButton)manager[0][source + 16]).Image = theHost.getSkinImage("CD-ROM Drive");
+                            button.Image = theHost.getSkinImage("CDIcon");
+                            button.FocusImage = theHost.getSkinImage("CDIcon_Highlighted");
                             break;
                         case OSSpecific.eDriveType.Fixed:
                         case OSSpecific.eDriveType.Network:
-                        case OSSpecific.eDriveType.Unknown:
-                            ((OMButton)manager[0][source + 16]).Image = theHost.getSkinImage("Local Drive");
+                            button.Image = theHost.getSkinImage("Local Drive");
+                            button.FocusImage = theHost.getSkinImage("Local Drive_Highlighted");
                             break;
+                        case OSSpecific.eDriveType.Unknown:
                         case OSSpecific.eDriveType.Removable:
-                        case OSSpecific.eDriveType.Phone: //TODO - separate icon
-                            ((OMButton)manager[0][source + 16]).Image = theHost.getSkinImage("Removable Drive");
+                            button.Image = theHost.getSkinImage("USBDriveIcon");
+                            button.FocusImage = theHost.getSkinImage("USBDriveIcon_Highlighted");
+                            break;
+                        case OSSpecific.eDriveType.Phone:
+                            button.Image = theHost.getSkinImage("PhoneIcon");
+                            button.FocusImage = theHost.getSkinImage("PhoneIcon_Highlighted");
+                            break;
+                        case OSSpecific.eDriveType.iPod:
+                            button.Image = theHost.getSkinImage("IpodIcon");
+                            button.FocusImage = theHost.getSkinImage("IpodIcon_Highlighted");
                             break;
                     }
                     ((OMButton)manager[0][source + 16]).Tag = info;
                     ((OMLabel)manager[0][source + 20]).Text = OSSpecific.getVolumeLabel(drive);
                     source++;
                     temp.Add(info);
+                    if (source > 3)
+                        break;
                 }
                 sources = temp; //do this instead of clearing to ensure the list is never empty
                 if (!sources.Contains(currentSource)) //TODO: currentSource per zone
@@ -617,9 +638,13 @@ namespace ControlDemo
             ((OMLabel)sender.Parent[6]).Text = "Select a Playlist";
             SafeThread.Asynchronous(delegate() { showPlaylists(screen); }, theHost);
             ((OMButton)sender).Image = theHost.getSkinImage("PlaylistIcon_Selected");
-            ((OMButton)sender.Parent[2]).Image = theHost.getSkinImage("ArtistIcon");
-            ((OMButton)sender.Parent[3]).Image = theHost.getSkinImage("AlbumIcon");
-            ((OMButton)sender.Parent[4]).Image = theHost.getSkinImage("TracksIcon");
+            ((OMButton)sender).FocusImage = theHost.getSkinImage("PlaylistIcon_SelectedHighlighted");
+            ((OMButton)manager[screen][2]).Image = theHost.getSkinImage("ArtistIcon");
+            ((OMButton)manager[screen][3]).Image = theHost.getSkinImage("AlbumIcon");
+            ((OMButton)manager[screen][4]).Image = theHost.getSkinImage("TracksIcon");
+            ((OMButton)manager[screen][2]).FocusImage = theHost.getSkinImage("ArtistIcon_Highlighted");
+            ((OMButton)manager[screen][3]).FocusImage = theHost.getSkinImage("AlbumIcon_Highlighted");
+            ((OMButton)manager[screen][4]).FocusImage = theHost.getSkinImage("TracksIcon_Highlighted");
             sender.Parent[9].Visible = true;
             sender.Parent[1].Visible = false;
         }
@@ -629,6 +654,7 @@ namespace ControlDemo
             {
                 manager[screen][9].Visible = false;
                 ((OMButton)manager[screen][4]).Image = theHost.getSkinImage("TracksIcon_Selected");
+                ((OMButton)manager[screen][4]).FocusImage = theHost.getSkinImage("TracksIcon_SelectedHighlighted");
                 int diff = (360 - manager[screen][1].Top) / 5;
                 for (int i = 1; i < 5; i++)
                 {
@@ -640,6 +666,9 @@ namespace ControlDemo
                 ((OMButton)manager[screen][2]).Image = theHost.getSkinImage("ArtistIcon");
                 ((OMButton)manager[screen][3]).Image = theHost.getSkinImage("AlbumIcon");
                 ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("PlaylistIcon");
+                ((OMButton)manager[screen][2]).FocusImage = theHost.getSkinImage("ArtistIcon_Highlighted");
+                ((OMButton)manager[screen][3]).FocusImage = theHost.getSkinImage("AlbumIcon_Highlighted");
+                ((OMButton)manager[screen][10]).FocusImage = theHost.getSkinImage("PlaylistIcon_Highlighted");
             }
         }
         void Tracks_OnClick(OMControl sender, int screen)
@@ -667,6 +696,7 @@ namespace ControlDemo
             {
                 manager[screen][9].Visible = false;
                 ((OMButton)manager[screen][3]).Image = theHost.getSkinImage("AlbumIcon_Selected");
+                ((OMButton)manager[screen][3]).FocusImage = theHost.getSkinImage("AlbumIcon_SelectedHighlighted");
                 int diff = (255 - manager[screen][1].Top) / 5;
                 for (int i = 1; i < 5; i++)
                 {
@@ -678,6 +708,9 @@ namespace ControlDemo
                 ((OMButton)manager[screen][2]).Image = theHost.getSkinImage("ArtistIcon");
                 ((OMButton)manager[screen][4]).Image = theHost.getSkinImage("TracksIcon");
                 ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("PlaylistIcon");
+                ((OMButton)manager[screen][2]).FocusImage = theHost.getSkinImage("ArtistIcon_Highlighted");
+                ((OMButton)manager[screen][4]).FocusImage = theHost.getSkinImage("TracksIcon_Highlighted");
+                ((OMButton)manager[screen][10]).FocusImage = theHost.getSkinImage("PlaylistIcon_Highlighted");
             }
         }
         void Albums_OnClick(OMControl sender, int screen)
@@ -701,17 +734,21 @@ namespace ControlDemo
             {
                 manager[screen][9].Visible = false;
                 ((OMButton)manager[screen][2]).Image = theHost.getSkinImage("ArtistIcon_Selected");
-                int diff = (155 - manager[screen][1].Top) / 5;
+                ((OMButton)manager[screen][2]).FocusImage = theHost.getSkinImage("ArtistIcon_SelectedHighlighted");
+                int diff = (160 - manager[screen][1].Top) / 5;
                 for (int i = 1; i < 5; i++)
                 {
                     manager[screen][1].Top += diff;
                     Thread.Sleep(20);
                 }
-                manager[screen][1].Top = 155;
+                manager[screen][1].Top = 160;
                 manager[screen][1].Visible = true;
                 ((OMButton)manager[screen][3]).Image = theHost.getSkinImage("AlbumIcon");
                 ((OMButton)manager[screen][4]).Image = theHost.getSkinImage("TracksIcon");
                 ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("PlaylistIcon");
+                ((OMButton)manager[screen][3]).FocusImage = theHost.getSkinImage("AlbumIcon_Highlighted");
+                ((OMButton)manager[screen][4]).FocusImage = theHost.getSkinImage("TracksIcon_Highlighted");
+                ((OMButton)manager[screen][10]).FocusImage = theHost.getSkinImage("PlaylistIcon_Highlighted");
             }
         }
         void Artists_OnClick(OMControl sender, int screen)

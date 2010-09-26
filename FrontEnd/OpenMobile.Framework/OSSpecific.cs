@@ -21,12 +21,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.Win32;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
-using IMAPI2.Interop;
-using System.Collections.Generic;
 
 namespace OpenMobile.Framework
 {
@@ -246,7 +242,8 @@ namespace OpenMobile.Framework
             Fixed=3,
             Network=4,
             CDRom=5,
-            Phone=7
+            Phone=7,
+            iPod=8
         }
         /// <summary>
         /// Returns the type of drive at the given path
@@ -261,8 +258,11 @@ namespace OpenMobile.Framework
                 if (type == DriveType.Ram)
                     return eDriveType.Fixed;
                 if ((Configuration.RunningOnWindows) && (type == DriveType.Removable))
-                    if (Windows.detectPhone(path))
-                        return eDriveType.Phone;
+                {
+                    eDriveType tmp = Windows.detectPhone(path);
+                    if (tmp!=eDriveType.Unknown)
+                        return tmp;
+                }
                 return (eDriveType)type;
             }
             else
@@ -309,6 +309,8 @@ namespace OpenMobile.Framework
 	                    response = null;
 					if (response.Contains("Phone"))
 						return eDriveType.Phone;
+                    if (response.Contains("iPod")||response.Contains("Apple Mobile Device"))
+                        return eDriveType.iPod;
                     return eDriveType.Removable;
 				}
                 return eDriveType.Fixed;
@@ -334,41 +336,7 @@ namespace OpenMobile.Framework
                     if (info.DriveType == DriveType.CDRom)
                     {
                         if (Configuration.RunningOnWindows)
-                        {
-                            var discMaster = new MsftDiscMaster2();
-
-                            if (!discMaster.IsSupportedEnvironment)
-                                return "CD/DVD Drive (" + info.Name + ")";
-                            foreach (string uniqueRecorderId in discMaster)
-                            {
-                                var discRecorder2 = new MsftDiscRecorder2();
-                                discRecorder2.InitializeDiscRecorder(uniqueRecorderId);
-                                if (discRecorder2.VolumePathNames[0].ToString() == path)
-                                {
-                                    List<IMAPI_PROFILE_TYPE> profiles = new List<IMAPI_PROFILE_TYPE>();
-                                    foreach (IMAPI_PROFILE_TYPE t in discRecorder2.SupportedProfiles)
-                                        profiles.Add(t);
-                                    if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_R_SEQUENTIAL))
-                                        return "BD-R (" + path + ")";
-                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_REWRITABLE))
-                                        return "BD-RW (" + path + ")";
-                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_ROM))
-                                        return "BD (" + path + ")";
-                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_REWRITABLE))
-                                        return "DVD RW  (" + path + ")";
-                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_RECORDABLE))
-                                        return "DVD R  (" + path + ")";
-                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVDROM))
-                                        return "DVD  (" + path + ")";
-                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_REWRITABLE))
-                                        return "CD RW  (" + path + ")";
-                                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_RECORDABLE))
-                                        return "CD R (" + path + ")";
-                                    else
-                                        return "CD  (" + path + ")";
-                                }
-                            }
-                        }
+                            return Windows.getCDType(path, info);
                         return "CD/DVD Drive (" + info.Name + ")";
                     }
                     else if (info.DriveType == DriveType.Removable)
