@@ -26,6 +26,18 @@ using OpenMobile.Plugin;
 
 namespace OpenMobile.Framework
 {
+    public enum eDriveType
+    {
+        Unknown = 0,
+        NoRootDirectory = 1,
+        Removable = 2,
+        Fixed = 3,
+        Network = 4,
+        CDRom = 5,
+        Phone = 7,
+        iPod = 8
+    }
+
     /// <summary>
     /// OS Specific Functions
     /// </summary>
@@ -224,27 +236,6 @@ namespace OpenMobile.Framework
             osVersion = getOS() + " " + os.Version.ToString();
             return osVersion;
         }
-
-        private static string translateLocal(string path)
-        {
-            StreamReader r = new StreamReader(File.OpenRead("/proc/mounts"));
-            string[] lines = r.ReadToEnd().Split(new char[] { '\r', '\n' });
-            foreach (string line in lines)
-                if (line.Contains(path))
-                    return Path.GetFileName(line.Substring(0, line.IndexOf(' ')));
-            return null;
-        }
-        public enum eDriveType
-        {
-            Unknown=0,
-            NoRootDirectory=1,
-            Removable=2,
-            Fixed=3,
-            Network=4,
-            CDRom=5,
-            Phone=7,
-            iPod=8
-        }
         /// <summary>
         /// Returns the type of drive at the given path
         /// </summary>
@@ -263,53 +254,7 @@ namespace OpenMobile.Framework
             }
             else
             {
-                string local = translateLocal(path);
-                if (string.IsNullOrEmpty(local))
-                    return eDriveType.Unknown;
-                if (local == "rootfs")
-                    return eDriveType.Fixed;
-                string response = null;
-                ProcessStartInfo info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveIsMediaEjectable'");
-                info.RedirectStandardOutput = true; info.UseShellExecute = false;
-                info.WindowStyle = ProcessWindowStyle.Hidden;
-                Process p = new Process();
-                p.StartInfo = info;
-                p.Start();
-                p.WaitForExit();
-                response = p.StandardOutput.ReadToEnd().Trim();
-                if (p.ExitCode != 0)
-                    response = null;
-                if (response == "true")
-                    return eDriveType.CDRom;
-                info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveCanDetach'");
-                info.RedirectStandardOutput = true; info.UseShellExecute = false;
-                info.WindowStyle = ProcessWindowStyle.Hidden;
-                p = new Process();
-                p.StartInfo = info;
-                p.Start();
-                p.WaitForExit();
-                response = p.StandardOutput.ReadToEnd().Trim();
-                if (p.ExitCode != 0)
-                    response = null;
-                if (response == "true")
-				{
-					info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'DriveModel'");
-	                info.RedirectStandardOutput = true; info.UseShellExecute = false;
-	                info.WindowStyle = ProcessWindowStyle.Hidden;
-	                p = new Process();
-	                p.StartInfo = info;
-	                p.Start();
-	                p.WaitForExit();
-	                response = p.StandardOutput.ReadToEnd().Trim();
-	                if (p.ExitCode != 0)
-	                    response = null;
-					if (response.Contains("Phone"))
-						return eDriveType.Phone;
-                    if (response.Contains("iPod")||response.Contains("Apple Mobile Device"))
-                        return eDriveType.iPod;
-                    return eDriveType.Removable;
-				}
-                return eDriveType.Fixed;
+                return Linux.detectType(path);
             }
         }
         /// <summary>
@@ -353,42 +298,7 @@ namespace OpenMobile.Framework
             }
             else
             {
-                if (path == "/")
-                    return "File System (/)";
-                string local = translateLocal(path);
-                string response = null;
-                if (local != null)
-                {
-                    ProcessStartInfo info = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'IdLabel'");
-                    info.RedirectStandardOutput = true; info.UseShellExecute = false;
-                    info.WindowStyle = ProcessWindowStyle.Hidden;
-                    Process p = new Process();
-                    p.StartInfo = info;
-                    p.Start();
-                    p.WaitForExit();
-                    response = p.StandardOutput.ReadToEnd().Trim();
-                    if (p.ExitCode != 0)
-                        response = null;
-                }
-				if (path.StartsWith("cdda:"))
-				{
-					local=path.Substring(7).TrimEnd(new char[]{'/'});
-					path=null;
-				}
-				ProcessStartInfo info2 = new ProcessStartInfo("qdbus", "--system org.freedesktop.UDisks /org/freedesktop/UDisks/devices/" + local + " org.freedesktop.DBus.Properties.Get 'org.freedesktop.UDisks.Device' 'OpticalDiscNumAudioTracks'");
-                info2.RedirectStandardOutput = true; info2.UseShellExecute = false;
-                info2.WindowStyle = ProcessWindowStyle.Hidden;
-                Process t = new Process();
-                t.StartInfo = info2;
-                t.Start();
-                t.WaitForExit();
-                string tracks = t.StandardOutput.ReadToEnd().Trim();
-				if (path==null)
-					return "CD-ROM|"+tracks;
-                else if (string.IsNullOrEmpty(response))
-                    return Path.GetFileName(new DriveInfo(path).VolumeLabel)+"|"+tracks;
-                else
-                    return response.Replace("_", " ");
+                return Linux.getVolumeLabel(path);
             }
         }
         /// <summary>

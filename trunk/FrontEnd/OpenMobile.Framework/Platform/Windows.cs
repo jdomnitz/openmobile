@@ -18,18 +18,18 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-using System.Management;
 using System;
-using System.Runtime.InteropServices;
-using Microsoft.Win32;
-using System.IO;
-using IMAPI2.Interop;
 using System.Collections.Generic;
+using System.IO;
+using System.Management;
+using System.Runtime.InteropServices;
+using IMAPI2.Interop;
+using Microsoft.Win32;
 namespace OpenMobile.Framework
 {
     public sealed class Windows
     {
-        internal static OSSpecific.eDriveType detectType(string path,DriveType type)
+        internal static eDriveType detectType(string path,DriveType type)
         {
             try
             {
@@ -46,21 +46,21 @@ namespace OpenMobile.Framework
                             if ((wmi_HD["DeviceID"] != null) && (disk["DeviceID"].ToString() == path.TrimEnd(new char[] { '\\' })))
                             {
                                 if ((wmi_HD["Model"] != null) && ((wmi_HD["Model"].ToString().Contains("iPod")) || (wmi_HD["Model"].ToString().Contains("Apple Mobile Device"))))
-                                    return OSSpecific.eDriveType.iPod;
+                                    return eDriveType.iPod;
                                 else if ((wmi_HD["Model"] != null) && (wmi_HD["Model"].ToString().Contains("Phone")))
-                                    return OSSpecific.eDriveType.Phone;
+                                    return eDriveType.Phone;
                                 else if (wmi_HD["InterfaceType"].ToString() == "USB")
-                                    return OSSpecific.eDriveType.Removable;
+                                    return eDriveType.Removable;
                                 else
-                                    return (OSSpecific.eDriveType)type;
+                                    return (eDriveType)type;
                             }
                     }
                 }
-                return (OSSpecific.eDriveType)type;
+                return (eDriveType)type;
             }
             catch (Exception)
             {
-                return (OSSpecific.eDriveType)type;
+                return (eDriveType)type;
             }
         }
 

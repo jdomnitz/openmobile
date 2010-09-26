@@ -1,12 +1,31 @@
-﻿using System;
+﻿/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System;
 using System.Collections.Generic;
-using System.Text;
-using OpenMobile.Plugin;
-using OpenMobile;
-using OpenMobile.Framework;
 using System.IO;
-using OpenMobile.Threading;
+using OpenMobile;
 using OpenMobile.Data;
+using OpenMobile.Framework;
+using OpenMobile.Plugin;
+using OpenMobile.Threading;
 
 namespace OMPlayer
 {
@@ -58,7 +77,10 @@ namespace OMPlayer
 
         public bool beginGetSongsByGenre(string genre, bool covers, eMediaField sortBy)
         {
-            throw new NotImplementedException();
+            foreach (mediaInfo info in media)
+                if (info.Genre == genre)
+                    ret.Add(info);
+            return true;
         }
 
         public bool beginGetSongsByRating(string genre, bool covers, eMediaField sortBy)
@@ -76,12 +98,18 @@ namespace OMPlayer
 
         public bool beginGetSongsByLyrics(string phrase, bool covers, eMediaField sortBy)
         {
-            throw new NotImplementedException();
+            foreach (mediaInfo info in media)
+                if (info.Lyrics.Contains(phrase))
+                    ret.Add(info);
+            return true;
         }
 
         public bool beginGetGenres()
         {
-            throw new NotImplementedException();
+            foreach (mediaInfo info in media)
+                if (!ret.Exists(p => p.Genre == info.Genre))
+                    ret.Add(info);
+            return true;
         }
 
         public bool setRating(OpenMobile.mediaInfo info)
@@ -198,7 +226,7 @@ namespace OMPlayer
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting("Default.CDDatabase", "CDDB");
             foreach (string drive in Environment.GetLogicalDrives())
-                if (OSSpecific.getDriveType(drive) == OSSpecific.eDriveType.CDRom)
+                if (OSSpecific.getDriveType(drive) == eDriveType.CDRom)
                     TaskManager.QueueTask(delegate() { indexDirectory(drive, false); }, ePriority.Normal, "Lookup CD Info");
             return eLoadStatus.LoadSuccessful;
         }
@@ -208,7 +236,7 @@ namespace OMPlayer
             if (type == eMediaType.AudioCD)
                 indexDirectory(arg, false);
             else if (type == eMediaType.DeviceRemoved)
-                if (OSSpecific.getDriveType(arg) == OSSpecific.eDriveType.CDRom)
+                if (OSSpecific.getDriveType(arg) == eDriveType.CDRom)
                     clearIndex(); //TODO - multiple CD-ROM Drives
         }
 

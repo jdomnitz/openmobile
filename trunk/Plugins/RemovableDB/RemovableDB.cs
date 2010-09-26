@@ -663,8 +663,8 @@ namespace RemovableDB
                 createDB();
             foreach (string drive in Environment.GetLogicalDrives())
             {
-                OSSpecific.eDriveType type = OSSpecific.getDriveType(drive);
-                if ((type == OSSpecific.eDriveType.Removable) || (type == OSSpecific.eDriveType.Phone))
+                eDriveType type = OSSpecific.getDriveType(drive);
+                if ((type == eDriveType.Removable) || (type == eDriveType.Phone) || (type==eDriveType.iPod))
                 {
                     foreach (string path in DeviceInfo.getDeviceInfo(drive).MusicFolders)
                         indexDirectory(path, true);
@@ -678,7 +678,7 @@ namespace RemovableDB
         {
             if (!justInserted)
                 return;
-            if ((type == eMediaType.Smartphone) || (type == eMediaType.LocalHardware))
+            if ((type == eMediaType.Smartphone) || (type==eMediaType.AppleDevice) || (type == eMediaType.LocalHardware))
             {
                 foreach (string path in DeviceInfo.getDeviceInfo(arg).MusicFolders)
                     indexDirectory(path, true);

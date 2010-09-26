@@ -150,7 +150,10 @@ namespace OpenMobile.Media
                     list.Clear();
                 while (info != null)
                 {
-                    list.AddDistinct(new OMListItem(info.Name,info.Album, info.coverArt,format,info.Location));
+                    if (info.Type==eMediaType.AudioCD)
+                        list.AddDistinct(new OMListItem(info.Name, info.Album, info.coverArt, format, info.Location,info.TrackNumber.ToString()));
+                    else
+                        list.AddDistinct(new OMListItem(info.Name,info.Album, info.coverArt,format,info.Location));
                     info = db.getNextMedia();
                 }
                 db.endSearch();

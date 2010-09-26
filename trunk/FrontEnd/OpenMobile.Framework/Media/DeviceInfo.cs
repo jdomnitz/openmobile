@@ -48,8 +48,9 @@ namespace OpenMobile.Media
             List<string> music = new List<string>();
             List<string> video = new List<string>();
             List<string> pictures = new List<string>();
-            OSSpecific.eDriveType type = OSSpecific.getDriveType(path);
-            if (((type == OSSpecific.eDriveType.Fixed) || (type == OSSpecific.eDriveType.Unknown)) && systemDrive(path))
+            eDriveType type = OSSpecific.getDriveType(path);
+            bool sys = systemDrive(path);
+            if (((type == eDriveType.Fixed) || (type == eDriveType.Unknown)) && sys)
             {
                 string tmp = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
                 if (Directory.Exists(tmp))
@@ -67,11 +68,12 @@ namespace OpenMobile.Media
                 if (Directory.Exists(t))
                     playlists.Add(t);
             }
-            else if (type == OSSpecific.eDriveType.CDRom)
+            else if (type == eDriveType.CDRom)
             {
-                music.Add(path);
+                if (Directory.Exists(path))
+                    music.Add(path);
             }
-            else if (type == OSSpecific.eDriveType.iPod)
+            else if (type == eDriveType.iPod)
             {
                 music.Add(Path.Combine(path, "iPod_Control", "Music"));
                 video.Add(Path.Combine(path, "iPod_Control", "Music"));//video files are stored in music with an m4v extension
@@ -164,18 +166,20 @@ namespace OpenMobile.Media
             }
             return new DeviceInfo(music.ToArray(), playlists.ToArray(), video.ToArray(), pictures.ToArray(), type);
         }
-        public DeviceInfo(string[] music, string[] playlist, string[] video, string[] picture, OSSpecific.eDriveType type)
+        public DeviceInfo(string[] music, string[] playlist, string[] video, string[] picture, eDriveType type,bool sys)
         {
             MusicFolders = music;
             PlaylistFolders = playlist;
             VideoFolders = video;
             PictureFolders = picture;
             DriveType = type;
+            systemDrive = sys;
         }
         public string[] MusicFolders;
         public string[] PlaylistFolders;
         public string[] VideoFolders;
         public string[] PictureFolders;
-        public OSSpecific.eDriveType DriveType;
+        public eDriveType DriveType;
+        public bool systemDrive;
     }
 }
