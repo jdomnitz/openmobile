@@ -257,12 +257,8 @@ namespace OpenMobile.Framework
                 DriveType type= new DriveInfo(path).DriveType;
                 if (type == DriveType.Ram)
                     return eDriveType.Fixed;
-                if ((Configuration.RunningOnWindows) && (type == DriveType.Removable))
-                {
-                    eDriveType tmp = Windows.detectPhone(path);
-                    if (tmp!=eDriveType.Unknown)
-                        return tmp;
-                }
+                if (Configuration.RunningOnWindows)
+                    return Windows.detectType(path,type);
                 return (eDriveType)type;
             }
             else

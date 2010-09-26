@@ -29,7 +29,7 @@ namespace OpenMobile.Framework
 {
     public sealed class Windows
     {
-        internal static OSSpecific.eDriveType detectPhone(string path)
+        internal static OSSpecific.eDriveType detectType(string path,DriveType type)
         {
             try
             {
@@ -45,20 +45,22 @@ namespace OpenMobile.Framework
                         foreach (ManagementObject disk in wmiLogicalDisks.Get())
                             if ((wmi_HD["DeviceID"] != null) && (disk["DeviceID"].ToString() == path.TrimEnd(new char[] { '\\' })))
                             {
-                                if ((wmi_HD["Model"] != null) && ((wmi_HD["Model"].ToString().Contains("iPod"))||(wmi_HD["Model"].ToString().Contains("Apple Mobile Device"))))
+                                if ((wmi_HD["Model"] != null) && ((wmi_HD["Model"].ToString().Contains("iPod")) || (wmi_HD["Model"].ToString().Contains("Apple Mobile Device"))))
                                     return OSSpecific.eDriveType.iPod;
                                 else if ((wmi_HD["Model"] != null) && (wmi_HD["Model"].ToString().Contains("Phone")))
                                     return OSSpecific.eDriveType.Phone;
+                                else if (wmi_HD["InterfaceType"].ToString() == "USB")
+                                    return OSSpecific.eDriveType.Removable;
                                 else
-                                    return OSSpecific.eDriveType.Unknown;
+                                    return (OSSpecific.eDriveType)type;
                             }
                     }
                 }
-                return OSSpecific.eDriveType.Unknown;
+                return (OSSpecific.eDriveType)type;
             }
             catch (Exception)
             {
-                return OSSpecific.eDriveType.Unknown;
+                return (OSSpecific.eDriveType)type;
             }
         }
 
