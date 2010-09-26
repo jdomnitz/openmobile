@@ -187,8 +187,15 @@ namespace OpenMobile.Graphics
                 npot = true;
             renderer = Raw.GetString(StringName.Renderer);
             AA = ((version[0] != '1') || (int.Parse(version[2].ToString()) >= 3));
+            #if DEBUG
+            try
+            {
+            #endif
             if (AA)
                 Raw.Disable(EnableCap.Multisample);
+            #if DEBUG
+            }catch(Exception){}
+            #endif
             Raw.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
         }
         public void Clear(Color color)
