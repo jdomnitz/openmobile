@@ -1,17 +1,34 @@
+/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using OpenMobile;
 using OpenMobile.Controls;
-using OpenMobile.Plugin;
-using OpenMobile.Framework;
-using System;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using OpenMobile.Graphics;
-using System.Threading;
 using OpenMobile.Data;
-using OpenMobile.Threading;
+using OpenMobile.Framework;
+using OpenMobile.Graphics;
 using OpenMobile.Media;
-using System.Collections.Generic;
+using OpenMobile.Plugin;
+using OpenMobile.Threading;
 
 namespace ControlDemo
 {
@@ -188,12 +205,12 @@ namespace ControlDemo
         {
             ((OMButton)sender.Parent[15]).Image = ((OMButton)sender).Image;
             currentSource = (DeviceInfo)sender.Tag;
-            if ((currentSource.DriveType == OSSpecific.eDriveType.Removable) || (currentSource.DriveType == OSSpecific.eDriveType.Phone))
+            if ((currentSource.DriveType == eDriveType.Removable) || (currentSource.DriveType == eDriveType.Phone) || (currentSource.DriveType == eDriveType.iPod))
             {
                 using (PluginSettings s = new PluginSettings())
                     dbname = s.getSetting("Default.RemovableDatabase");
             }
-            else if (currentSource.DriveType == OSSpecific.eDriveType.CDRom)
+            else if (currentSource.DriveType == eDriveType.CDRom)
             {
                 using (PluginSettings s = new PluginSettings())
                     dbname = s.getSetting("Default.CDDatabase");
@@ -248,31 +265,34 @@ namespace ControlDemo
                     OMButton button=(OMButton)manager[0][source + 16];
                     switch (info.DriveType)
                     {
-                        case OSSpecific.eDriveType.CDRom:
+                        case eDriveType.CDRom:
                             button.Image = theHost.getSkinImage("CDIcon");
                             button.FocusImage = theHost.getSkinImage("CDIcon_Highlighted");
                             break;
-                        case OSSpecific.eDriveType.Fixed:
-                        case OSSpecific.eDriveType.Network:
+                        case eDriveType.Fixed:
+                        case eDriveType.Network:
                             button.Image = theHost.getSkinImage("Local Drive");
                             button.FocusImage = theHost.getSkinImage("Local Drive_Highlighted");
                             break;
-                        case OSSpecific.eDriveType.Unknown:
-                        case OSSpecific.eDriveType.Removable:
+                        case eDriveType.Unknown:
+                        case eDriveType.Removable:
                             button.Image = theHost.getSkinImage("USBDriveIcon");
                             button.FocusImage = theHost.getSkinImage("USBDriveIcon_Highlighted");
                             break;
-                        case OSSpecific.eDriveType.Phone:
+                        case eDriveType.Phone:
                             button.Image = theHost.getSkinImage("PhoneIcon");
                             button.FocusImage = theHost.getSkinImage("PhoneIcon_Highlighted");
                             break;
-                        case OSSpecific.eDriveType.iPod:
+                        case eDriveType.iPod:
                             button.Image = theHost.getSkinImage("IpodIcon");
                             button.FocusImage = theHost.getSkinImage("IpodIcon_Highlighted");
                             break;
                     }
                     ((OMButton)manager[0][source + 16]).Tag = info;
-                    ((OMLabel)manager[0][source + 20]).Text = OSSpecific.getVolumeLabel(drive);
+                    if (info.systemDrive)
+                        ((OMLabel)manager[0][source + 20]).Text = "My CarPC";
+                    else
+                        ((OMLabel)manager[0][source + 20]).Text = OSSpecific.getVolumeLabel(drive);
                     source++;
                     temp.Add(info);
                     if (source > 3)
@@ -372,6 +392,23 @@ namespace ControlDemo
                     }
                 }
             }
+            else if (level == 0)
+            {
+                if (l.Count == 0)
+                    return;
+                List<string> ret = getSongs(l[0].text);
+                if (ret.Count > 0)
+                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
+                theHost.setPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
+                ret.Clear();
+                for (int i = 1; i < l.Count; i++)
+                {
+                    ret.AddRange(getSongs(l[i].text));
+                    if (ret.Count > 0)
+                        theHost.appendPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
+                    ret.Clear();
+                }
+            }
         }
         private List<string> getSongs(string artist, string album)
         {
@@ -391,6 +428,25 @@ namespace ControlDemo
             db.endSearch();
             return ret;
         }
+        private List<string> getSongs(string artist)
+        {
+            object o;
+            theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            if (o == null)
+                return new List<string>();
+            IMediaDatabase db = (IMediaDatabase)o;
+            db.beginGetSongsByArtist(artist, false, eMediaField.Title);
+            List<string> ret = new List<string>();
+            mediaInfo info = db.getNextMedia();
+            while (info != null)
+            {
+                ret.Add(info.Location);
+                info = db.getNextMedia();
+            }
+            db.endSearch();
+            return ret;
+        }
+
         string currentArtist;
         string currentAlbum;
         void List_OnClick(OMControl sender, int screen)

@@ -70,13 +70,13 @@ namespace OpenMobile
                     }
                 if (File.Exists(Path.Combine(path, "OpenDrive.ini")))
                     return eMediaType.OpenDrive;
-                if (OSSpecific.getDriveType(path) == OSSpecific.eDriveType.Phone)
+                if (OSSpecific.getDriveType(path) == eDriveType.Phone)
                     return eMediaType.Smartphone;
-				if (OSSpecific.getDriveType(path)==OSSpecific.eDriveType.CDRom)
+				if (OSSpecific.getDriveType(path)==eDriveType.CDRom)
 					return eMediaType.AudioCD;
                 return eMediaType.LocalHardware;
             }catch(Exception){
-				if (OSSpecific.getDriveType(path)==OSSpecific.eDriveType.CDRom)
+				if (OSSpecific.getDriveType(path)==eDriveType.CDRom)
 					return eMediaType.AudioCD;
                 return eMediaType.LocalHardware;
             };

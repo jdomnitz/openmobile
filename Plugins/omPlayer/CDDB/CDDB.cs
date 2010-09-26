@@ -111,6 +111,7 @@ namespace OMPlayer
                     inf.Artist = text.ToTitleCase(cdEntry.Tracks[i].Artist.ToLower());
                 inf.TrackNumber = i+1;
                 inf.coverArt = cover;
+                inf.Type = eMediaType.AudioCD;
                 info.Add(inf);
             }
             return info.ToArray();

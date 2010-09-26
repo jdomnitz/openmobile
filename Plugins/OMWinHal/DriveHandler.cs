@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Windows.Forms;
-/*********************************************************************************
+﻿/*********************************************************************************
     This file is part of Open Mobile.
 
     Open Mobile is free software: you can redistribute it and/or modify
@@ -24,6 +19,11 @@ using System.Windows.Forms;
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using OpenMobile;
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Windows.Forms;
 namespace OMHal
 {
     static class DriveHandler

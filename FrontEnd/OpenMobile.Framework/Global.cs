@@ -186,6 +186,10 @@ namespace OpenMobile
         /// </summary>
         public object tag; //Added by Borte
         /// <summary>
+        /// A tag to sort by (defaults to text if not set)
+        /// </summary>
+        public string sort;
+        /// <summary>
         /// Creates a new list item
         /// </summary>
         /// <param name="text"></param>
@@ -298,12 +302,22 @@ namespace OpenMobile
             this.subitemFormat = subitemFormat;
             this.tag = tag;
         }
-
+        public OMListItem(string text, string subitem, OImage img, subItemFormat subitemFormat, object tag,string sort)
+        {
+            this.text = text;
+            this.subItem = subitem;
+            this.image = img;
+            this.subitemFormat = subitemFormat;
+            this.tag = tag;
+            this.sort = sort;
+        }
         #region IComparable Members
 
         public int CompareTo(object obj)
         {
             OMListItem two = obj as OMListItem;
+            if (this.sort != null)
+                return this.text.CompareTo(two.sort);
             return this.text.CompareTo(two.text);
         }
 
