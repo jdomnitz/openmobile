@@ -27,7 +27,7 @@ namespace OpenMobile.Media
 {
     public sealed class DeviceInfo
     {
-        private static bool systemDrive(string path)
+        private static bool isSystemDrive(string path)
         {
             if (Configuration.RunningOnWindows)
             {
@@ -49,7 +49,7 @@ namespace OpenMobile.Media
             List<string> video = new List<string>();
             List<string> pictures = new List<string>();
             eDriveType type = OSSpecific.getDriveType(path);
-            bool sys = systemDrive(path);
+            bool sys = isSystemDrive(path);
             if (((type == eDriveType.Fixed) || (type == eDriveType.Unknown)) && sys)
             {
                 string tmp = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
@@ -164,7 +164,7 @@ namespace OpenMobile.Media
                     }
                 }
             }
-            return new DeviceInfo(music.ToArray(), playlists.ToArray(), video.ToArray(), pictures.ToArray(), type);
+            return new DeviceInfo(music.ToArray(), playlists.ToArray(), video.ToArray(), pictures.ToArray(), type,sys);
         }
         public DeviceInfo(string[] music, string[] playlist, string[] video, string[] picture, eDriveType type,bool sys)
         {
