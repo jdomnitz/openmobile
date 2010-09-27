@@ -197,6 +197,7 @@ namespace OpenMobile.Controls
         /// Placeholder method
         /// </summary>
         [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public new string Text
         {
             get
@@ -402,7 +403,7 @@ namespace OpenMobile.Controls
         }
         private bool clickSelect;
         /// <summary>
-        /// Click only fires on selected items
+        /// Click only fires when an already selected item is clicked
         /// </summary>
         public bool ClickToSelect
         {
@@ -907,6 +908,7 @@ namespace OpenMobile.Controls
 
         #region IKeyboard Members
         bool focused=true;
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void KeyboardEnter(int screen)
         {
             focused = true;
@@ -915,7 +917,7 @@ namespace OpenMobile.Controls
             if (selectedIndex == -1)
                 Select(0,false,screen);
         }
-
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void KeyboardExit(int screen)
         {
             focused = false;

@@ -218,7 +218,31 @@ namespace OMPlayer
         {
             return new List<string>();
         }
-
+        internal static mediaInfo getSongInfo(IPluginHost theHost, string path)
+        {
+            string dbname;
+            object o;
+            using (PluginSettings ps = new PluginSettings())
+                dbname = ps.getSetting("Default.CDDatabase");
+            theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            if (o == null)
+                return new mediaInfo(path);
+            IMediaDatabase db=(IMediaDatabase)o;
+            int trackNum;
+            if (int.TryParse(OpenMobile.Path.GetFileNameWithoutExtension(path).ToLower().Replace("track", ""), out trackNum) == false)
+                return null;
+            db.beginGetSongs(true, eMediaField.Track);
+            mediaInfo song=db.getNextMedia();
+            int i=1;
+            while (song != null)
+            {
+                if (i == trackNum)
+                    return song;
+                i++;
+                song = db.getNextMedia();
+            }
+            return new mediaInfo(path);
+        }
         #region IBasePlugin Members
 
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
