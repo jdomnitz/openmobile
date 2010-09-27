@@ -57,6 +57,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewMedia", "..\Plugins\NewM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemovableDB", "..\Plugins\RemovableDB\RemovableDB.csproj", "{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinWifi", "..\Plugins\WinWifi\WinWifi.csproj", "{2CD462A0-5AE7-475A-8C52-6B2415089ACE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinDialup", "..\Plugins\WinDialup\WinDialup.csproj", "{7198645A-5039-43E9-8FE0-F1972E38C12A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -232,6 +236,18 @@ Global
 		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
 		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A00BCAB4-8E1B-408A-AD08-D174928BFAA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CD462A0-5AE7-475A-8C52-6B2415089ACE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7198645A-5039-43E9-8FE0-F1972E38C12A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7198645A-5039-43E9-8FE0-F1972E38C12A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7198645A-5039-43E9-8FE0-F1972E38C12A}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{7198645A-5039-43E9-8FE0-F1972E38C12A}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{7198645A-5039-43E9-8FE0-F1972E38C12A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7198645A-5039-43E9-8FE0-F1972E38C12A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

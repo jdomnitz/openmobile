@@ -248,7 +248,7 @@ namespace OpenMobile.Data
             SqliteCommand cmd = con.CreateCommand();
             cmd.CommandText = "SELECT * FROM Weather WHERE Code='" + location + "'";
             if (day!=DateTime.MinValue)
-                cmd.CommandText+=" AND Date='"+day.ToString()+"'";
+                cmd.CommandText += " AND Date='" + day.ToUniversalTime().ToString() + "'";
             SqliteDataReader reader = cmd.ExecuteReader();
             if (reader.Read() == false)
                 throw new ArgumentException();
@@ -298,7 +298,7 @@ namespace OpenMobile.Data
                 query.Append("';INSERT INTO Weather (Conditions, Date, dewPoint, feelsLike, highTemp, lowTemp, Temp, Humidity, UVIndex, windDirection, windSpeed, precip, Code, contrib)VALUES('");
                 query.Append(w.conditions);
                 query.Append("','");
-                query.Append(w.date);
+                query.Append(w.date.ToUniversalTime());
                 query.Append("','");
                 query.Append(w.dewPoint);
                 query.Append("','");
