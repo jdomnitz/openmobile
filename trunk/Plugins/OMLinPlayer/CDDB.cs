@@ -136,7 +136,7 @@ namespace OMLinPlayer
             {
                 if (!Directory.Exists(directory))
                     return false;
-                string name=DeviceInfo.get(directory);
+                string name=DeviceInfo.get(directory).VolumeLabel;
                 foreach (string track in Directory.GetFiles(directory))
                 {
                     mediaInfo currentTrack = new mediaInfo(track);
@@ -209,7 +209,7 @@ namespace OMLinPlayer
             if (type == eMediaType.AudioCD)
                 indexDirectory(arg, false);
             else if (type == eMediaType.DeviceRemoved)
-                if (OSSpecific.getDriveType(arg) == eDriveType.CDRom)
+                if (DeviceInfo.get(arg).DriveType == eDriveType.CDRom)
                     clearIndex();
         }
 
