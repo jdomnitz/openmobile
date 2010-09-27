@@ -255,6 +255,26 @@ namespace ControlDemo
         {
             if (justInserted)
             {
+                if (type == eMediaType.DeviceRemoved)
+                {
+                    if (currentSource.path == arg)
+                    {
+                        foreach(DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
+                            if (info.systemDrive)
+                            {
+                                currentSource = info;
+                                using (PluginSettings ps = new PluginSettings())
+                                    dbname = ps.getSetting("Default.MusicDatabase");
+                                ((OMButton)manager[0][15]).Image = theHost.getSkinImage("Local Drive");
+                                SafeThread.Asynchronous(delegate()
+                                {
+                                    loadArtists();
+                                    moveToArtists(0);
+                                    showArtists(0);//TODO-multizone    
+                                }, theHost);
+                            }
+                    }
+                }
                 List<DeviceInfo> temp = new List<DeviceInfo>();
                 int source=0;
                 foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
