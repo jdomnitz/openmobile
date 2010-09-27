@@ -7,6 +7,7 @@ using OpenMobile.Framework;
 using System.IO;
 using OpenMobile.Threading;
 using OpenMobile.Data;
+using OpenMobile.Media;
 
 namespace OMLinPlayer
 {
@@ -135,7 +136,7 @@ namespace OMLinPlayer
             {
                 if (!Directory.Exists(directory))
                     return false;
-                string name=OSSpecific.getVolumeLabel(directory);
+                string name=DeviceInfo.get(directory);
                 foreach (string track in Directory.GetFiles(directory))
                 {
                     mediaInfo currentTrack = new mediaInfo(track);
@@ -197,9 +198,9 @@ namespace OMLinPlayer
             host.OnStorageEvent += new StorageEvent(host_OnStorageEvent);
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting("Default.CDDatabase", "CDDB");
-            foreach (string drive in Environment.GetLogicalDrives())
-                if (OSSpecific.getDriveType(drive) == eDriveType.CDRom)
-                    TaskManager.QueueTask(delegate() { indexDirectory(drive, false); }, ePriority.Normal, "Lookup CD Info");
+            foreach (DeviceInfo drive in DeviceInfo.EnumerateDevices(host))
+                if (drive.DriveType == eDriveType.CDRom)
+                    TaskManager.QueueTask(delegate() { indexDirectory(drive.path, false); }, ePriority.Normal, "Lookup CD Info");
             return eLoadStatus.LoadSuccessful;
         }
 
