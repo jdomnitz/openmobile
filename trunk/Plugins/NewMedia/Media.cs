@@ -630,8 +630,8 @@ namespace ControlDemo
                     if (abortJob[screen])
                         return;
                     MediaLoader.loadAlbums(theHost, artist, l, format, false, dbname);
+                    l.Sort();
                 }
-                l.Sort();
             }
         }
         bool[] abortJob;
@@ -661,8 +661,8 @@ namespace ControlDemo
                     if (abortJob[screen])
                         return;
                     MediaLoader.loadSongs(theHost, artist, l, format, false, dbname);
+                    l.Sort();
                 }
-                l.Sort();
             }
         }
         private void showTracks(int screen, string artist)
@@ -863,6 +863,8 @@ namespace ControlDemo
         }
         public void Dispose()
         {
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                abortJob[i] = true;
             if (manager != null)
             {
                 manager.Dispose();
