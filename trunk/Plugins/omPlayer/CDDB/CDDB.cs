@@ -116,14 +116,5 @@ namespace OMPlayer
             }
             return info.ToArray();
         }
-        //keep this one instead
-        public static mediaInfo getSongInfo(string path)
-        {
-            mediaInfo[] info = getInfo(path);
-            int trackNum;
-            if (int.TryParse(Path.GetFileNameWithoutExtension(path).ToLower().Replace("track", ""), out trackNum) ==false)
-                return null;
-            return info[trackNum-1];
-        }
     }
 }

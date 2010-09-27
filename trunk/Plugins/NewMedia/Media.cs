@@ -380,7 +380,13 @@ namespace ControlDemo
                 {
                     if (l.Count == 0)
                         return;
-                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l[0].tag.ToString());
+                    if (theHost.getRandom(theHost.instanceForScreen(screen)))
+                    {
+                        int random=OpenMobile.Framework.Math.Calculation.RandomNumber(0, l.Count - 1);
+                        theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l[random].tag.ToString());
+                    }
+                    else
+                        theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l[0].tag.ToString());
                     List<string> queue = new List<string>();
                     for (int i = 0; i < l.Count; i++)
                         queue.Add(l[i].tag.ToString());
@@ -395,7 +401,15 @@ namespace ControlDemo
                         return;
                     List<string> ret = getSongs(l[0].subItem, l[0].text);
                     if (ret.Count > 0)
-                        theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
+                    {
+                        if (theHost.getRandom(theHost.instanceForScreen(screen)))
+                        {
+                            int random = OpenMobile.Framework.Math.Calculation.RandomNumber(0, ret.Count - 1);
+                            theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[random]);
+                        }
+                        else
+                            theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
+                    }
                     for (int i = 1; i < l.Count; i++)
                         ret.AddRange(getSongs(l[i].subItem, l[i].text));
                     if (ret.Count > 0)
@@ -406,7 +420,13 @@ namespace ControlDemo
                     List<string> ret = getSongs(l[l.SelectedIndex].subItem, l[l.SelectedIndex].text);
                     if (ret.Count > 0)
                     {
-                        theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
+                        if (theHost.getRandom(theHost.instanceForScreen(screen)))
+                        {
+                            int random = OpenMobile.Framework.Math.Calculation.RandomNumber(0, ret.Count - 1);
+                            theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[random]);
+                        }
+                        else
+                            theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
                         theHost.setPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
                     }
                 }
@@ -417,7 +437,15 @@ namespace ControlDemo
                     return;
                 List<string> ret = getSongs(l[0].text);
                 if (ret.Count > 0)
-                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
+                {
+                    if (theHost.getRandom(theHost.instanceForScreen(screen)))
+                    {
+                        int random = OpenMobile.Framework.Math.Calculation.RandomNumber(0, ret.Count - 1);
+                        theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[random]);
+                    }
+                    else
+                        theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
+                }
                 theHost.setPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
                 ret.Clear();
                 for (int i = 1; i < l.Count; i++)

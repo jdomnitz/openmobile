@@ -88,7 +88,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Raises the OnSliderMoved event
         /// </summary>
-        public void sliderMoved(int screen)
+        private void sliderMoved(int screen)
         {
             if (OnSliderMoved!=null)
                 OnSliderMoved(this,screen);

@@ -144,7 +144,7 @@ namespace OpenMobile.Net
         /// <exception cref="WebException">WebException</exception>
         public static OImage imageFromURL(string URL)
         {
-            if ((URL == null)||(URL==""))
+            if (string.IsNullOrEmpty(URL))
                 return null;
             try
             {
