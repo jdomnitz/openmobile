@@ -76,8 +76,6 @@ namespace OpenMobile
 					return eMediaType.AudioCD;
                 return eMediaType.LocalHardware;
             }catch(Exception){
-                if (OpenMobile.Media.DeviceInfo.get(path).DriveType == eDriveType.CDRom)
-					return eMediaType.AudioCD;
                 return eMediaType.LocalHardware;
             };
         }

@@ -168,15 +168,14 @@ namespace OMDir
 
         private void on_storageEvent(eMediaType type, bool justInserted, string path)
         {
-            if (type == eMediaType.NotSet)
-                return;
-            for (int i = 0; i < theHost.ScreenCount; i++)
+            if ((type == eMediaType.NotSet)||(type==eMediaType.DeviceRemoved))
             {
-                OMList l = (OMList)manager[i][3];
-                if (l.Tag == null)
-                    return;
-                if (l.Tag.ToString() == "")
-                    loadRoot(l);
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                {
+                    OMList l = (OMList)manager[i][3];
+                    if ((l.Tag == null)||(l.Tag.ToString() == ""))
+                        loadRoot(l);
+                }
             }
         }
 
@@ -239,7 +238,14 @@ namespace OMDir
             {
                 if (l[l.SelectedIndex] == null)
                     throw new Exception("DAMN!");
-                source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
+                if (l.Tag.ToString() == "")
+                {
+                    foreach(DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
+                        if (info.VolumeLabel==l[l.SelectedIndex].text)
+                            source=info.path;
+                }
+                else
+                    source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
                 if (l.Tag.ToString() == "")
                     l.Tag = null;
             }
@@ -304,7 +310,11 @@ namespace OMDir
                     if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                         l.Add(new OMListItem(s.Name, folder));
             }
-            l.Select(l.indexOf(new DirectoryInfo(path).Name));
+            DeviceInfo info = DeviceInfo.get(path);
+            if (info == null)
+                l.Select(l.indexOf(new DirectoryInfo(path).Name));
+            else
+                l.Select(l.indexOf(info.VolumeLabel));
             left_OnClick(l, screen); //refresh the right screen
         }
         void right_OnClick(object sender, int screen)

@@ -111,7 +111,7 @@ namespace OpenMobile
                     int result;
                     do
                     {
-                        result = Framework.Math.Calculation.RandomNumber(0, queued[instance].Count);
+                        result = OpenMobile.Framework.Math.Calculation.RandomNumber(0, queued[instance].Count);
                     }
                     while (nextPosition[instance] == result);
                     nextPosition[instance] = result;
