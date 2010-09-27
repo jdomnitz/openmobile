@@ -217,6 +217,8 @@ namespace Networking
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
                 {
+                    if (c.IsConnected)
+                        host_OnWirelessEvent(eWirelessEvent.WirelessSignalStrengthChanged, c.signalStrength.ToString());
                     OMList list=((OMList)manager[i][1]);
                     list.Add(getListItem(c));
                     if ((((OMLabel)manager[i][4]).Text == c.NetworkName) && (((OMLabel)manager[i][5]).Text == c.ConnectionType))
