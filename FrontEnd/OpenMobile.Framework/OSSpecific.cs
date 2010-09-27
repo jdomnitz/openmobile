@@ -241,7 +241,7 @@ namespace OpenMobile.Framework
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static eDriveType getDriveType(string path)
+        internal static eDriveType getDriveType(string path)
         {
             if ((Configuration.RunningOnWindows) || (Configuration.RunningOnMacOS)) //OSX - Untested
             {
@@ -262,7 +262,7 @@ namespace OpenMobile.Framework
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static string getVolumeLabel(string path)
+        internal static string getVolumeLabel(string path)
         {
             if (!Configuration.RunningOnLinux)
             {

@@ -22,11 +22,41 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using OpenMobile.Framework;
+using OpenMobile.Plugin;
 
 namespace OpenMobile.Media
 {
     public sealed class DeviceInfo
     {
+        private static List<DeviceInfo> AllDevices = new List<DeviceInfo>();
+        public static List<DeviceInfo> EnumerateDevices(IPluginHost theHost)
+        {
+            lock (AllDevices)
+            {
+                if (AllDevices.Count > 0)
+                    return AllDevices;
+                theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
+                foreach (string drive in Environment.GetLogicalDrives())
+                {
+                    AllDevices.Add(getDeviceInfo(drive));
+                }
+                return AllDevices;
+            }
+        }
+        public static DeviceInfo get(string drive)
+        {
+            return AllDevices.Find(p => p.path == drive);
+        }
+        static void theHost_OnStorageEvent(eMediaType type, bool justInserted, string arg)
+        {
+            if (type == eMediaType.DeviceRemoved)
+                AllDevices.RemoveAll(p => p.path == arg);
+            else
+            {
+                AllDevices.RemoveAll(p => p.path == arg);
+                AllDevices.Add(getDeviceInfo(arg));
+            }
+        }
         private static bool isSystemDrive(string path)
         {
             if (Configuration.RunningOnWindows)
@@ -42,7 +72,7 @@ namespace OpenMobile.Media
             else
                 return false;
         }
-        public static DeviceInfo getDeviceInfo(string path)
+        private static DeviceInfo getDeviceInfo(string path)
         {
             List<string> playlists = new List<string>();
             List<string> music = new List<string>();
@@ -164,9 +194,9 @@ namespace OpenMobile.Media
                     }
                 }
             }
-            return new DeviceInfo(music.ToArray(), playlists.ToArray(), video.ToArray(), pictures.ToArray(), type,sys);
+            return new DeviceInfo(path,music.ToArray(), playlists.ToArray(), video.ToArray(), pictures.ToArray(), type,sys,OSSpecific.getVolumeLabel(path));
         }
-        public DeviceInfo(string[] music, string[] playlist, string[] video, string[] picture, eDriveType type,bool sys)
+        internal DeviceInfo(string path,string[] music, string[] playlist, string[] video, string[] picture, eDriveType type,bool sys,string label)
         {
             MusicFolders = music;
             PlaylistFolders = playlist;
@@ -174,12 +204,16 @@ namespace OpenMobile.Media
             PictureFolders = picture;
             DriveType = type;
             systemDrive = sys;
+            this.path = path;
+            VolumeLabel = label;
         }
+        public string path;
         public string[] MusicFolders;
         public string[] PlaylistFolders;
         public string[] VideoFolders;
         public string[] PictureFolders;
         public eDriveType DriveType;
         public bool systemDrive;
+        public string VolumeLabel;
     }
 }

@@ -26,6 +26,7 @@ using OpenMobile.Data;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using OpenMobile.Threading;
+using OpenMobile.Media;
 
 namespace OMPlayer
 {
@@ -163,7 +164,7 @@ namespace OMPlayer
             {
                 if (!Directory.Exists(directory))
                     return false;
-                string name=OSSpecific.getVolumeLabel(directory);
+                string name=DeviceInfo.get(directory).VolumeLabel;
                 foreach (string track in Directory.GetFiles(directory))
                 {
                     mediaInfo currentTrack = new mediaInfo(track);
@@ -225,9 +226,9 @@ namespace OMPlayer
             host.OnStorageEvent += new StorageEvent(host_OnStorageEvent);
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting("Default.CDDatabase", "CDDB");
-            foreach (string drive in Environment.GetLogicalDrives())
-                if (OSSpecific.getDriveType(drive) == eDriveType.CDRom)
-                    TaskManager.QueueTask(delegate() { indexDirectory(drive, false); }, ePriority.Normal, "Lookup CD Info");
+            foreach (DeviceInfo drive in DeviceInfo.EnumerateDevices(host))
+                if (drive.DriveType == eDriveType.CDRom)
+                    TaskManager.QueueTask(delegate() { indexDirectory(drive.path, false); }, ePriority.Normal, "Lookup CD Info");
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -236,7 +237,7 @@ namespace OMPlayer
             if (type == eMediaType.AudioCD)
                 indexDirectory(arg, false);
             else if (type == eMediaType.DeviceRemoved)
-                if (OSSpecific.getDriveType(arg) == eDriveType.CDRom)
+                if (DeviceInfo.get(arg).DriveType == eDriveType.CDRom)
                     clearIndex(); //TODO - multiple CD-ROM Drives
         }
 

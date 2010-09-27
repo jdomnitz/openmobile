@@ -824,7 +824,7 @@ namespace OMPlayer
             IBaseFilter source = null;
             hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance), null, "OutputDevice", out source);
             hr = graphBuilder.RenderFile(filename, null);
-            if (hr != 0)
+            if (hr < 0)
                 return false;
             mediaControl = (IMediaControl) graphBuilder;
             mediaEventEx = (IMediaEventEx) graphBuilder;

@@ -257,9 +257,8 @@ namespace ControlDemo
             {
                 List<DeviceInfo> temp = new List<DeviceInfo>();
                 int source=0;
-                foreach (string drive in Environment.GetLogicalDrives())
+                foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
                 {
-                    DeviceInfo info = DeviceInfo.getDeviceInfo(drive);
                     if ((info.MusicFolders.Length == 0) && (info.PlaylistFolders.Length == 0) && (info.VideoFolders.Length == 0))
                         continue;
                     OMButton button=(OMButton)manager[0][source + 16];
@@ -292,7 +291,7 @@ namespace ControlDemo
                     if (info.systemDrive)
                         ((OMLabel)manager[0][source + 20]).Text = "My CarPC";
                     else
-                        ((OMLabel)manager[0][source + 20]).Text = OSSpecific.getVolumeLabel(drive);
+                        ((OMLabel)manager[0][source + 20]).Text = info.VolumeLabel;
                     source++;
                     temp.Add(info);
                     if (source > 3)
