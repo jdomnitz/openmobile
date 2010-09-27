@@ -100,7 +100,7 @@ namespace ControlDemo
                         	theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
 					}else if(Configuration.RunningOnLinux)
 					{
-						string name=OpenMobile.Framework.OSSpecific.getVolumeLabel(lastPath);
+						string name=DeviceInfo.get(lastPath).VolumeLabel;
 						string[] arg=name.Split(new char[]{'|'});
 						List<string> songs=new List<string>();
 						int tracks=int.Parse(arg[1]);
@@ -117,7 +117,7 @@ namespace ControlDemo
                         theHost.sendMessage("UI", "OMNotify", "ShowMediaControls" + screen.ToString());
                     break;
                 case "Play Playlists":
-                    DeviceInfo info = DeviceInfo.getDeviceInfo(lastPath);
+                    DeviceInfo info = DeviceInfo.get(lastPath);
                     List<mediaInfo>media=new List<mediaInfo>();
                     theHost.execute(eFunction.backgroundOperationStatus, "Loading playlists . . .");
                     if (info.PlaylistFolders.Length == 0)
@@ -244,7 +244,7 @@ namespace ControlDemo
                 case eMediaType.Smartphone:
                     ((OMLabel)p[1]).Text = "Phone";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|Phone", true);
-                    DeviceInfo info = DeviceInfo.getDeviceInfo(arg);
+                    DeviceInfo info = DeviceInfo.get(arg);
                     if (info.PlaylistFolders.Length > 0)
                     {
                         itm = theHost.getSkinImage("Discs|Play", true);

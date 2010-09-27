@@ -26,6 +26,7 @@ using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using OpenMobile.Data;
+using OpenMobile.Media;
 
 namespace OMDir
 {
@@ -258,25 +259,26 @@ namespace OMDir
             l.Add(new OMListItem("Pictures", folder));
             l.Add(new OMListItem("Music", folder));
             l.Add(new OMListItem("Videos", folder));
-            foreach (string drive in Environment.GetLogicalDrives())
+            foreach (DeviceInfo drive in DeviceInfo.EnumerateDevices(theHost))
             {
-                switch (OSSpecific.getDriveType(drive))
+                switch (drive.DriveType)
                 {
                     case eDriveType.CDRom:
-                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|CD-ROM Drive").image));
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Drives|CD-ROM Drive").image));
                         break;
                     case eDriveType.Fixed:
                     case eDriveType.Unknown:
-                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|Local Drive").image));
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Drives|Local Drive").image));
                         break;
                     case eDriveType.Network:
-                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|Network Drive").image));
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Drives|Network Drive").image));
                         break;
                     case eDriveType.Removable:
-                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Drives|Removable Drive").image));
+                    case eDriveType.iPod:
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Drives|Removable Drive").image));
                         break;
                     case eDriveType.Phone:
-                        l.Add(new OMListItem(OSSpecific.getVolumeLabel(drive), drive, theHost.getSkinImage("Discs|Phone").image));
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Discs|Phone").image));
                         break;
                 }
             }

@@ -564,7 +564,7 @@ namespace OpenMobile.Controls
 
                 for (int i = listStart; i <= (count + listStart + 1); i++)
                 {
-                    if (width == 0) //Failsafe -> 1/100 chance that the width changes during rendering
+                    if ((width == 0)||(height==0)||(listHeight==0)) //Failsafe -> 1/100 chance that the width changes during rendering
                         return;
                     Rectangle rect = new Rectangle(Left, Top + (moved % listHeight) + ((i - listStart) * listHeight), this.Width, listHeight);
                     switch (style)

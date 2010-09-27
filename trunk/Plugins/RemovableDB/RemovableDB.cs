@@ -33,6 +33,7 @@ using OpenMobile.helperFunctions;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
 using OpenMobile.Framework;
+using OpenMobile.Threading;
 
 namespace RemovableDB
 {
@@ -54,7 +55,6 @@ namespace RemovableDB
                     this.reader.Dispose();
                 }
                 catch (InvalidOperationException) { }
-            //GC.SuppressFinalize(this);
         }
         public string databaseType
         {
@@ -661,15 +661,18 @@ namespace RemovableDB
             //TODO - index existing removable drives
             lock(this)
                 createDB();
-            foreach (string drive in Environment.GetLogicalDrives())
+            SafeThread.Asynchronous(() =>
             {
-                eDriveType type = OSSpecific.getDriveType(drive);
-                if ((type == eDriveType.Removable) || (type == eDriveType.Phone) || (type==eDriveType.iPod))
+                foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
                 {
-                    foreach (string path in DeviceInfo.getDeviceInfo(drive).MusicFolders)
-                        indexDirectory(path, true);
+                    eDriveType type = info.DriveType;
+                    if ((type == eDriveType.Removable) || (type == eDriveType.Phone) || (type == eDriveType.iPod))
+                    {
+                        foreach (string path in info.MusicFolders)
+                            indexDirectory(path, true);
+                    }
                 }
-            }
+            }, theHost);
             theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
             return eLoadStatus.LoadSuccessful;
         }
@@ -680,7 +683,7 @@ namespace RemovableDB
                 return;
             if ((type == eMediaType.Smartphone) || (type==eMediaType.AppleDevice) || (type == eMediaType.LocalHardware))
             {
-                foreach (string path in DeviceInfo.getDeviceInfo(arg).MusicFolders)
+                foreach (string path in DeviceInfo.get(arg).MusicFolders)
                     indexDirectory(path, true);
             }
             else if (type == eMediaType.DeviceRemoved)
