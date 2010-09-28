@@ -348,7 +348,7 @@ public sealed class MainMenu : IHighLevel
         }
         private void createDefaultSettings(PluginSettings settings)
         {
-            settings.setSetting("MainMenu.MainMenu11.Plugin", "Media");;
+            settings.setSetting("MainMenu.MainMenu11.Plugin", "NewMedia");;
             settings.setSetting("MainMenu.MainMenu12.Plugin", "About");
             settings.setSetting("MainMenu.MainMenu13.Plugin", "OMSettings");
             settings.setSetting("MainMenu.MainMenu22.Plugin", "Exit");

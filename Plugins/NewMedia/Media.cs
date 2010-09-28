@@ -889,7 +889,7 @@ namespace ControlDemo
         }
         public string displayName
         {
-            get { return "NewMedia"; }
+            get { return "Music"; }
         }
         public float pluginVersion
         {
@@ -911,6 +911,8 @@ namespace ControlDemo
         }
         public void Dispose()
         {
+            if (theHost == null)
+                return;
             for (int i = 0; i < theHost.ScreenCount; i++)
                 abortJob[i] = true;
             if (manager != null)

@@ -91,7 +91,10 @@ namespace BatterySupport
                 OnBatteryAction = s.getSetting("BatterySupport.OnBatteryAction");
             if (string.IsNullOrEmpty(OnBatteryAction))
                 OnBatteryAction="Nothing";
-
+            if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
+            {
+                theHost_OnPowerChange(ePowerEvent.SystemOnBattery);
+            }
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
