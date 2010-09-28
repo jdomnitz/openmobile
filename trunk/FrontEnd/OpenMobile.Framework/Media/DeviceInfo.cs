@@ -78,8 +78,13 @@ namespace OpenMobile.Media
             List<string> music = new List<string>();
             List<string> video = new List<string>();
             List<string> pictures = new List<string>();
-            eDriveType type = OSSpecific.getDriveType(path);
             bool sys = isSystemDrive(path);
+            eDriveType type;
+            if (sys)
+                type = eDriveType.Fixed;
+            else
+                type = OSSpecific.getDriveType(path);
+
             if (((type == eDriveType.Fixed) || (type == eDriveType.Unknown)) && sys)
             {
                 string tmp = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
@@ -194,9 +199,9 @@ namespace OpenMobile.Media
                     }
                 }
             }
-            return new DeviceInfo(path,music.ToArray(), playlists.ToArray(), video.ToArray(), pictures.ToArray(), type,sys,OSSpecific.getVolumeLabel(path));
+            return new DeviceInfo(path, music.ToArray(), playlists.ToArray(), video.ToArray(), pictures.ToArray(), type, sys, OSSpecific.getVolumeLabel(path));
         }
-        internal DeviceInfo(string path,string[] music, string[] playlist, string[] video, string[] picture, eDriveType type,bool sys,string label)
+        internal DeviceInfo(string path, string[] music, string[] playlist, string[] video, string[] picture, eDriveType type, bool sys, string label)
         {
             MusicFolders = music;
             PlaylistFolders = playlist;
