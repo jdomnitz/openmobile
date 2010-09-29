@@ -32,6 +32,8 @@ namespace Video
 
         public OMPanel loadPanel(string name, int screen)
         {
+            if (theHost == null)
+                return null;
             if (theHost.execute(eFunction.showVideoWindow, theHost.instanceForScreen(screen).ToString()) == true)
                 return null;
             General.getFilePath path = new General.getFilePath(theHost);

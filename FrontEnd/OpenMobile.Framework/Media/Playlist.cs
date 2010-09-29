@@ -71,11 +71,9 @@ namespace OpenMobile.Media
         /// <param name="type">The type of playlist to write</param>
         /// <param name="playlist">The playlist</param>
         /// <returns></returns>
-        [Obsolete("NOT YET IMPLEMENTED", true)]
         public static bool writePlaylist(string location, ePlaylistType type, List<string> playlist)
         {
-            //TODO
-            throw new NotImplementedException();
+            writePlaylist(location, type, Convert(playlist));
         }
         /// <summary>
         /// Writes a playlist to a file
