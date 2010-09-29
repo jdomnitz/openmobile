@@ -517,7 +517,7 @@ namespace NewMedia
             if (level[screen] == 0)
             {
                 currentArtist[screen] = l.SelectedItem.text;
-                currentAlbum = null;
+                currentAlbum[screen] = null;
                 ((OMLabel)l.Parent[6]).Text = currentArtist[screen] + " Albums";
                 SafeThread.Asynchronous(delegate() { showAlbums(screen, currentArtist[screen]); },theHost);
                 moveToAlbums(screen);
@@ -600,7 +600,7 @@ namespace NewMedia
                 if ((playlist.Length != 8) && (!playlist.StartsWith("Current")))
                     l.Add(new OMListItem(playlist, null, playlist));
             }
-            if (currentSource == null)
+            if (currentSource[screen] == null)
                 foreach (DeviceInfo info in sources)
                     loadPlaylists(info, l);
             else
@@ -836,7 +836,7 @@ namespace NewMedia
         }
         void Albums_OnClick(OMControl sender, int screen)
         {
-            currentAlbum = null;
+            currentAlbum[screen] = null;
             if (currentArtist != null)
             {
                 ((OMLabel)sender.Parent[6]).Text = currentArtist[screen] + " Albums";
@@ -874,8 +874,8 @@ namespace NewMedia
         }
         void Artists_OnClick(OMControl sender, int screen)
         {
-            currentArtist = null;
-            currentAlbum = null;
+            currentArtist[screen] = null;
+            currentAlbum[screen] = null;
             ((OMLabel)sender.Parent[6]).Text = "Select an Artist";
             SafeThread.Asynchronous(delegate() { showArtists(screen); }, theHost);
             moveToArtists(screen);

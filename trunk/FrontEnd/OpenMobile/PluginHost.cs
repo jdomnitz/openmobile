@@ -1299,7 +1299,7 @@ namespace OpenMobile
             {
                 if (message == "Identify")
                     for (int i = 0; i < screenCount; i++)
-                        Core.RenderingWindows[i].Invoke(Core.RenderingWindows[i].identify);
+                        Core.RenderingWindows[i].paintIdentity();
                 else if (message == "ToggleCursor")
                     for (int i = 0; i < screenCount; i++)
                         Core.RenderingWindows[i].hideCursor();
