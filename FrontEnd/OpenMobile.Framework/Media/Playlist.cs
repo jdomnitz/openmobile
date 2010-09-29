@@ -73,7 +73,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool writePlaylist(string location, ePlaylistType type, List<string> playlist)
         {
-            writePlaylist(location, type, Convert(playlist));
+            return writePlaylist(location, type, Convert(playlist));
         }
         /// <summary>
         /// Writes a playlist to a file
@@ -82,11 +82,38 @@ namespace OpenMobile.Media
         /// <param name="type">The type of playlist to write</param>
         /// <param name="playlist">The playlist</param>
         /// <returns></returns>
-        [Obsolete("NOT YET IMPLEMENTED",true)]
+        [Obsolete("NOT YET IMPLEMENTED")]
         public static bool writePlaylist(string location, ePlaylistType type, List<mediaInfo> playlist)
         {
-            //TODO
-            throw new NotImplementedException();
+            switch(type)
+            {
+            
+                case ePlaylistType.PLS:
+                    return writePLS(location, playlist);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private static bool writePLS(string location, List<mediaInfo> p)
+        {
+            try
+            {
+                FileStream f = File.Create(location);
+                StreamWriter writer = new StreamWriter(f);
+                writer.WriteLine("[playlist]\r\n");
+                for (int i = 0; i < p.Count; i++)
+                {
+                    writer.WriteLine("File" + (i + 1).ToString() + "=" + p[i].Location);
+                    writer.WriteLine("Title" + (i + 1).ToString() + "=" + p[i].Name);
+                    writer.WriteLine("Length" + (i + 1).ToString() + "=" + ((p[i].Length == 0) ? -1 : p[i].Length).ToString());
+                    writer.WriteLine(string.Empty);
+                }
+                writer.WriteLine("NumberOfEntries=" + p.Count.ToString());
+                writer.WriteLine("Version=2");
+                return true;
+            }
+            catch (Exception) { return false; }
         }
         /// <summary>
         /// Writes a playlist to the database
