@@ -207,9 +207,9 @@ namespace OMHal
                         return false;
                     device = new MMDevice[col.Count + 1];
                     device[0] = DevEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
-                    for (int i = 1; i <= col.Count; i++)
+                    for (int i = 0; i < col.Count; i++)
                     {
-                        device[i + 1] = col[i-1];
+                        device[i + 1] = col[col.Count-i-1];
                         col[i].AudioEndpointVolume.OnVolumeNotification += new AudioEndpointVolumeNotificationDelegate(AudioEndpointVolume_OnVolumeNotification);
                     }
                     for(int i=0;i<device.Length;i++)
