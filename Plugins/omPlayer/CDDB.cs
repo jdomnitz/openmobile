@@ -244,16 +244,25 @@ namespace OMPlayer
             return new mediaInfo(path);
         }
         #region IBasePlugin Members
-
+        IPluginHost theHost;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
+            theHost = host;
             host.OnStorageEvent += new StorageEvent(host_OnStorageEvent);
+            host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting("Default.CDDatabase", "CDDB");
-            foreach (DeviceInfo drive in DeviceInfo.EnumerateDevices(host))
-                if (drive.DriveType == eDriveType.CDRom)
-                    TaskManager.QueueTask(delegate() { indexDirectory(drive.path, false); }, ePriority.Normal, "Lookup CD Info");
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.pluginLoadingComplete)
+            {
+                foreach (DeviceInfo drive in DeviceInfo.EnumerateDevices(theHost))
+                    if (drive.DriveType == eDriveType.CDRom)
+                        TaskManager.QueueTask(delegate() { indexDirectory(drive.path, false); }, ePriority.Normal, "Lookup CD Info");
+            }
         }
 
         void host_OnStorageEvent(eMediaType type, bool justInserted, string arg)

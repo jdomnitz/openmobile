@@ -282,7 +282,7 @@ namespace OMPlayer
                         player[k].mediaPosition.put_CurrentPosition(pos);
                     }
                 }
-                fadeIn();
+                OpenMobile.Threading.SafeThread.Asynchronous(delegate() { fadeIn(); },theHost);
             }
         }
         return eLoadStatus.LoadSuccessful;

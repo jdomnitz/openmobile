@@ -138,18 +138,17 @@ namespace WinDialup
 
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            return false;
         }
         IPluginHost theHost;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
-            getAvailableNetworks();
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
