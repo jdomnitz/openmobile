@@ -41,7 +41,6 @@ namespace OpenMobile
         public delegate IntPtr getVal();
         public delegate void voiddel();
         public voiddel hide;
-        public voiddel identify;
         public voiddel redraw;
         List<OMPanel> backgroundQueue = new List<OMPanel>();
         float heightScale = 1F;
@@ -114,23 +113,17 @@ namespace OpenMobile
             InitializeComponent();
             this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
             hide += new voiddel(hideCursor);
-            identify += new voiddel(paintIdentity);
             redraw += new voiddel(invokePaint);
             this.Keyboard.KeyRepeat = true;
         }
         bool Identify = false;
-        private void paintIdentity()
+        public void paintIdentity()
         {
-            if (this.InvokeRequired)
-                this.Invoke(identify);
-            else
-            {
-                Identify = true;
-                Invalidate();
-                Thread.Sleep(1500);
-                Identify = false;
-                Invalidate();
-            }
+            Identify = true;
+            Invalidate();
+            Thread.Sleep(1500);
+            Identify = false;
+            Invalidate();
         }
         public void invokePaint()
         {

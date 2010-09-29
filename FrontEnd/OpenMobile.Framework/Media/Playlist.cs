@@ -26,6 +26,7 @@ using OpenMobile.Net;
 using OpenMobile.Plugin;
 using System.Threading;
 using OpenMobile.Data;
+using OpenMobile.Framework;
 
 namespace OpenMobile.Media
 {
@@ -82,7 +83,6 @@ namespace OpenMobile.Media
         /// <param name="type">The type of playlist to write</param>
         /// <param name="playlist">The playlist</param>
         /// <returns></returns>
-        [Obsolete("NOT YET IMPLEMENTED")]
         public static bool writePlaylist(string location, ePlaylistType type, List<mediaInfo> playlist)
         {
             switch(type)
@@ -90,13 +90,121 @@ namespace OpenMobile.Media
             
                 case ePlaylistType.PLS:
                     return writePLS(location, playlist);
+                case ePlaylistType.M3U:
+                    return writeM3U(location, playlist);
+                case ePlaylistType.XSPF:
+                    return writeXSPF(location, playlist);
+                case ePlaylistType.WPL:
+                    return writeWPL(location, playlist);
                 default:
                     throw new NotImplementedException();
             }
         }
 
+        private static bool writeWPL(string location, List<mediaInfo> playlist)
+        {
+
+            if (!location.ToLower().EndsWith(".wpl"))
+                location += ".wpl";
+            string folder = Directory.GetParent(location).FullName;
+            try
+            {
+                XmlWriterSettings settings=new XmlWriterSettings();
+                settings.ConformanceLevel = ConformanceLevel.Fragment;
+                XmlWriter writer = XmlWriter.Create(location,settings);
+                writer.WriteRaw("<?wpl version=\"1.0\"?>");
+                writer.WriteStartElement("smil");
+                writer.WriteStartElement("head");
+                {
+                    writer.WriteStartElement("meta");
+                    writer.WriteAttributeString("name", "Generator");
+                    writer.WriteAttributeString("content", "OpenMobile v0.8");
+                    writer.WriteEndElement();
+                    writer.WriteStartElement("meta");
+                    writer.WriteAttributeString("name", "ItemCount");
+                    writer.WriteAttributeString("content", playlist.Count.ToString());
+                    writer.WriteEndElement();
+                }
+                writer.WriteEndElement();
+                writer.WriteStartElement("body");
+                writer.WriteStartElement("seq");
+                for (int i = 0; i < playlist.Count; i++)
+                {
+                    writer.WriteStartElement("media");
+                    writer.WriteAttributeString("src", Path.getRelativePath(folder,playlist[i].Location));
+                    writer.WriteEndElement();
+                }
+                writer.WriteEndElement();
+                writer.WriteEndElement();
+                writer.WriteEndElement();
+                writer.Close();
+                return true;
+            }
+            catch (Exception) { return false; }
+        }
+
+        private static bool writeXSPF(string location, List<mediaInfo> playlist)
+        {
+            if (!location.ToLower().EndsWith(".xspf"))
+                location += ".xspf";
+            string folder = Directory.GetParent(location).FullName;
+            try
+            {
+                XmlWriter writer = XmlWriter.Create(location);
+                writer.WriteStartDocument();
+                writer.WriteStartElement("playlist");
+                writer.WriteAttributeString("Version", "1");
+                writer.WriteStartElement("trackList");
+                for (int i = 0; i < playlist.Count; i++)
+                {
+                    writer.WriteStartElement("track");
+                    if (playlist[i].Name!=null)
+                        writer.WriteElementString("title", playlist[i].Name);
+                    if (playlist[i].Artist != null)
+                    writer.WriteElementString("creator", playlist[i].Artist);
+                    if (playlist[i].Album != null)
+                        writer.WriteElementString("album", playlist[i].Album);
+                    writer.WriteElementString("location", "file://" + Path.getRelativePath(folder, playlist[i].Location));
+                    writer.WriteEndElement();
+                }
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+                writer.Close();
+                return true;
+            }
+            catch (Exception) { return false; }
+        }
+
+        private static bool writeM3U(string location, List<mediaInfo> playlist)
+        {
+            if (!location.ToLower().EndsWith(".m3u"))
+                location += ".m3u";
+            string folder = Directory.GetParent(location).FullName;
+            try
+            {
+                FileStream f = File.Create(location);
+                StreamWriter writer = new StreamWriter(f);
+                writer.WriteLine("#EXTM3U\r\n");
+                for (int i = 0; i < playlist.Count; i++)
+                {
+                    writer.Write("#EXTINF:");
+                    writer.Write(((playlist[i].Length == 0) ? -1 : playlist[i].Length).ToString());
+                    if (playlist[i].Name!=null)
+                        writer.WriteLine(","+playlist[i].Artist+" - "+playlist[i].Name);
+                    writer.WriteLine(Path.getRelativePath(folder,playlist[i].Location));
+                    writer.WriteLine(string.Empty);
+                }
+                f.Close();
+                return true;
+            }
+            catch (Exception) { return false; }
+        }
+
         private static bool writePLS(string location, List<mediaInfo> p)
         {
+            if (!location.ToLower().EndsWith(".pls"))
+                location += ".pls";
+            string folder = Directory.GetParent(location).FullName;
             try
             {
                 FileStream f = File.Create(location);
@@ -104,13 +212,16 @@ namespace OpenMobile.Media
                 writer.WriteLine("[playlist]\r\n");
                 for (int i = 0; i < p.Count; i++)
                 {
-                    writer.WriteLine("File" + (i + 1).ToString() + "=" + p[i].Location);
-                    writer.WriteLine("Title" + (i + 1).ToString() + "=" + p[i].Name);
-                    writer.WriteLine("Length" + (i + 1).ToString() + "=" + ((p[i].Length == 0) ? -1 : p[i].Length).ToString());
+                    writer.WriteLine("File" + (i + 1).ToString() + "=" + Path.getRelativePath(folder,p[i].Location));
+                    if (p[i].Name!=null)
+                        writer.WriteLine("Title" + (i + 1).ToString() + "=" + p[i].Name);
+                    if (p[i].Length>0)
+                        writer.WriteLine("Length" + (i + 1).ToString() + "=" + p[i].Length.ToString());
                     writer.WriteLine(string.Empty);
                 }
                 writer.WriteLine("NumberOfEntries=" + p.Count.ToString());
                 writer.WriteLine("Version=2");
+                f.Close();
                 return true;
             }
             catch (Exception) { return false; }
