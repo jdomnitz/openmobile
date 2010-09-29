@@ -824,21 +824,29 @@ namespace OMMediaDB
         public eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             alreadyIndexed = new Queue<string>();
             toBeIndexed = new List<string>();
-            string path=null;
-            using(PluginSettings settings=new PluginSettings())
-            {
-                if ((settings.getSetting("Music.AutoIndex") == "True")||(settings.getSetting("OpenMobile.FirstRun")=="True"))
-                    path = settings.getSetting("Music.Path");
-                settings.setSetting("Default.MusicDatabase", "OMMediaDB");
-                settings.setSetting("OpenMobile.FirstRun", "False");
-            }
-            if ((path!=null)&&(path.Length>0))
-                indexDirectory(path, true);
             if (File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2")) == false)
                 createDB();
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.pluginLoadingComplete)
+            {
+                string path = null;
+                using (PluginSettings settings = new PluginSettings())
+                {
+                    if ((settings.getSetting("Music.AutoIndex") == "True") || (settings.getSetting("OpenMobile.FirstRun") == "True"))
+                        path = settings.getSetting("Music.Path");
+                    settings.setSetting("Default.MusicDatabase", "OMMediaDB");
+                    settings.setSetting("OpenMobile.FirstRun", "False");
+                }
+                if ((path != null) && (path.Length > 0))
+                    indexDirectory(path, true);
+            }
         }
 
         private void createDB()
