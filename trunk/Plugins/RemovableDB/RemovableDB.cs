@@ -658,23 +658,30 @@ namespace RemovableDB
             {
                 settings.setSetting("Default.RemovableDatabase", "RemovableDB");
             }
-            //TODO - index existing removable drives
-            lock(this)
+            lock (this)
                 createDB();
-            SafeThread.Asynchronous(() =>
-            {
-                foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
-                {
-                    eDriveType type = info.DriveType;
-                    if ((type == eDriveType.Removable) || (type == eDriveType.Phone) || (type == eDriveType.iPod))
-                    {
-                        foreach (string path in info.MusicFolders)
-                            indexDirectory(path, true);
-                    }
-                }
-            }, theHost);
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.pluginLoadingComplete)
+            {
+                SafeThread.Asynchronous(() =>
+                {
+                    foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
+                    {
+                        eDriveType type = info.DriveType;
+                        if ((type == eDriveType.Removable) || (type == eDriveType.Phone) || (type == eDriveType.iPod))
+                        {
+                            foreach (string path in info.MusicFolders)
+                                indexDirectory(path, true);
+                        }
+                    }
+                }, theHost);
+            }
         }
 
         void theHost_OnStorageEvent(eMediaType type, bool justInserted, string arg)
