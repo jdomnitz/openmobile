@@ -60,7 +60,15 @@ namespace OMMediaDB
         private void changed(Setting s)
         {
             using (PluginSettings settings = new PluginSettings())
+            {
+                if (s.Name == "Music.AutoIndex")
+                {
+                    if (settings.getSetting("Music.AutoIndex") != s.Value)
+                        if (s.Value == "True")
+                            this.indexDirectory(settings.getSetting("Music.Path"), true);
+                }
                 settings.setSetting(s.Name, s.Value);
+            }
         }
         public void Dispose()
         {
@@ -821,9 +829,10 @@ namespace OMMediaDB
             string path=null;
             using(PluginSettings settings=new PluginSettings())
             {
-                if (settings.getSetting("Music.AutoIndex") == "True")
+                if ((settings.getSetting("Music.AutoIndex") == "True")||(settings.getSetting("OpenMobile.FirstRun")=="True"))
                     path = settings.getSetting("Music.Path");
                 settings.setSetting("Default.MusicDatabase", "OMMediaDB");
+                settings.setSetting("OpenMobile.FirstRun", "False");
             }
             if ((path!=null)&&(path.Length>0))
                 indexDirectory(path, true);
