@@ -30,20 +30,28 @@ using OpenMobile.Media;
 using OpenMobile.Plugin;
 using OpenMobile.Threading;
 
-namespace ControlDemo
+namespace NewMedia
 {
     public class NewMedia : IHighLevel
     {
         ScreenManager manager;
         IPluginHost theHost;
-        static string dbname;
-        int level=0;
+        string[] dbname;
+        int[] level;
         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
         public eLoadStatus initialize(OpenMobile.Plugin.IPluginHost host)
         {
             theHost = host;
             if (host.InstanceCount == -1)
                 return eLoadStatus.LoadFailedRetryRequested;
+            currentSource = new DeviceInfo[host.ScreenCount];
+            currentAlbum = new string[host.ScreenCount];
+            currentArtist = new string[host.ScreenCount];
+            Artists = new List<string>[host.ScreenCount];
+            dbname = new string[host.ScreenCount];
+            for (int i = 0; i < host.ScreenCount; i++)
+                Artists[i] = new List<string>();
+            level = new int[host.ScreenCount];
             theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             manager = new ScreenManager(host.ScreenCount);
@@ -63,11 +71,11 @@ namespace ControlDemo
             List.Add("Loading . . .");
             OMImage LeftTab = new OMImage(-5, 160, 225, 150);
             LeftTab.Image = theHost.getSkinImage("LeftSlidingSelect");
-            OMButton Artists = new OMButton(24, 168, 130, 130);
-            Artists.Image = theHost.getSkinImage("ArtistIcon_Selected");
-            Artists.FocusImage = theHost.getSkinImage("ArtistIcon_SelectedHighlighted");
-            Artists.Transition = eButtonTransition.None;
-            Artists.OnClick += new userInteraction(Artists_OnClick);
+            OMButton ArtistsBtn = new OMButton(24, 168, 130, 130);
+            ArtistsBtn.Image = theHost.getSkinImage("ArtistIcon_Selected");
+            ArtistsBtn.FocusImage = theHost.getSkinImage("ArtistIcon_SelectedHighlighted");
+            ArtistsBtn.Transition = eButtonTransition.None;
+            ArtistsBtn.OnClick += new userInteraction(Artists_OnClick);
             OMButton Albums = new OMButton(29, 265, 130, 130);
             Albums.Image = theHost.getSkinImage("AlbumIcon");
             Albums.FocusImage = theHost.getSkinImage("AlbumIcon_Highlighted");
@@ -154,7 +162,7 @@ namespace ControlDemo
             label4.Font = f;
             p.addControl(Background);
             p.addControl(LeftTab);
-            p.addControl(Artists);
+            p.addControl(ArtistsBtn);
             p.addControl(Albums);
             p.addControl(Tracks);
             p.addControl(Down);
@@ -177,13 +185,17 @@ namespace ControlDemo
             p.addControl(label3);
             p.addControl(label4);
             manager.loadPanel(p);
-            for (int i = 0; i < theHost.ScreenCount; i++)
-                ((OMButton)manager[i][12]).Text = "Zone " + (theHost.instanceForScreen(i) + 1).ToString();
             using (PluginSettings ps = new PluginSettings())
-                dbname = ps.getSetting("Default.MusicDatabase");
+            {
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                {
+                    ((OMButton)manager[i][12]).Text = "Zone " + (theHost.instanceForScreen(i) + 1).ToString();
+                    dbname[i] = ps.getSetting("Default.MusicDatabase");
+                }
+            }
             abortJob = new bool[theHost.ScreenCount];
             SafeThread.Asynchronous(delegate() { theHost_OnStorageEvent(eMediaType.NotSet, true, null); }, theHost);
-            OpenMobile.Threading.TaskManager.QueueTask(loadArtists, ePriority.High, "Load Artists");
+            OpenMobile.Threading.TaskManager.QueueTask(delegate() { loadArtists(); }, ePriority.High, "Load Artists");
             format.color = Color.FromArgb(175,Color.Black);
             format.highlightColor = Color.LightGray;
             format.font = new Font(Font.GenericSansSerif, 20F);
@@ -195,34 +207,31 @@ namespace ControlDemo
             if (function == eFunction.backgroundOperationStatus)
                 if (arg1 == "Indexing Complete!")
                 {
-                    loadArtists(); //TODO - instance specific
-                    if (level == 0)
-                        showArtists(0);
+                    loadArtists();
                 }
         }
 
         void source_OnClick(OMControl sender, int screen)
         {
             ((OMButton)sender.Parent[15]).Image = ((OMButton)sender).Image;
-            currentSource = (DeviceInfo)sender.Tag;
-            if ((currentSource.DriveType == eDriveType.Removable) || (currentSource.DriveType == eDriveType.Phone) || (currentSource.DriveType == eDriveType.iPod))
+            currentSource[screen] = (DeviceInfo)sender.Tag;
+            if ((currentSource[screen].DriveType == eDriveType.Removable) || (currentSource[screen].DriveType == eDriveType.Phone) || (currentSource[screen].DriveType == eDriveType.iPod))
             {
                 using (PluginSettings s = new PluginSettings())
-                    dbname = s.getSetting("Default.RemovableDatabase");
+                    dbname[screen] = s.getSetting("Default.RemovableDatabase");
             }
-            else if (currentSource.DriveType == eDriveType.CDRom)
+            else if (currentSource[screen].DriveType == eDriveType.CDRom)
             {
                 using (PluginSettings s = new PluginSettings())
-                    dbname = s.getSetting("Default.CDDatabase");
+                    dbname[screen] = s.getSetting("Default.CDDatabase");
             }
             else
             {
                 using (PluginSettings ps = new PluginSettings())
-                    dbname = ps.getSetting("Default.MusicDatabase");
+                    dbname[screen] = ps.getSetting("Default.MusicDatabase");
             }
             Sources_OnClick(sender, screen);
-            loadArtists();
-            showArtists(screen);
+            loadArtists(screen);
         }
 
         void Sources_OnClick(OMControl sender, int screen)
@@ -249,7 +258,7 @@ namespace ControlDemo
             }
         }
 
-        DeviceInfo currentSource=null;
+        DeviceInfo[] currentSource;
         List<DeviceInfo> sources = new List<DeviceInfo>();
         void theHost_OnStorageEvent(eMediaType type, bool justInserted, string arg)
         {
@@ -257,71 +266,77 @@ namespace ControlDemo
             {
                 if (type == eMediaType.DeviceRemoved)
                 {
-                    if (currentSource.path == arg)
+                    for (int i = 0; i < theHost.ScreenCount; i++)
                     {
-                        foreach(DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
-                            if (info.systemDrive)
-                            {
-                                currentSource = info;
-                                using (PluginSettings ps = new PluginSettings())
-                                    dbname = ps.getSetting("Default.MusicDatabase");
-                                ((OMButton)manager[0][15]).Image = theHost.getSkinImage("Local Drive");
-                                SafeThread.Asynchronous(delegate()
+                        if (currentSource[i].path == arg)
+                        {
+                            foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
+                                if (info.systemDrive)
                                 {
-                                    loadArtists();
-                                    moveToArtists(0);
-                                    showArtists(0);//TODO-multizone    
-                                }, theHost);
-                            }
+                                    currentSource[i] = info;
+                                    using (PluginSettings ps = new PluginSettings())
+                                        dbname[i] = ps.getSetting("Default.MusicDatabase");
+                                    ((OMButton)manager[0][15]).Image = theHost.getSkinImage("Local Drive");
+                                    SafeThread.Asynchronous(delegate()
+                                    {
+                                        loadArtists(i);
+                                        moveToArtists(i);
+                                    }, theHost);
+                                }
+                        }
                     }
+                    return;
                 }
-                List<DeviceInfo> temp = new List<DeviceInfo>();
-                int source=0;
-                foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
+                for (int screen = 0; screen < theHost.ScreenCount; screen++)
                 {
-                    if ((info.MusicFolders.Length == 0) && (info.PlaylistFolders.Length == 0) && (info.VideoFolders.Length == 0))
-                        continue;
-                    OMButton button=(OMButton)manager[0][source + 16];
-                    switch (info.DriveType)
+                    List<DeviceInfo> temp = new List<DeviceInfo>();
+                    int source = 0;
+                    foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
                     {
-                        case eDriveType.CDRom:
-                            button.Image = theHost.getSkinImage("CDIcon");
-                            button.FocusImage = theHost.getSkinImage("CDIcon_Highlighted");
-                            break;
-                        case eDriveType.Fixed:
-                        case eDriveType.Network:
-                            button.Image = theHost.getSkinImage("Local Drive");
-                            button.FocusImage = theHost.getSkinImage("Local Drive_Highlighted");
-                            break;
-                        case eDriveType.Unknown:
-                        case eDriveType.Removable:
-                            button.Image = theHost.getSkinImage("USBDriveIcon");
-                            button.FocusImage = theHost.getSkinImage("USBDriveIcon_Highlighted");
-                            break;
-                        case eDriveType.Phone:
-                            button.Image = theHost.getSkinImage("PhoneIcon");
-                            button.FocusImage = theHost.getSkinImage("PhoneIcon_Highlighted");
-                            break;
-                        case eDriveType.iPod:
-                            button.Image = theHost.getSkinImage("IpodIcon");
-                            button.FocusImage = theHost.getSkinImage("IpodIcon_Highlighted");
+                        if ((info.MusicFolders.Length == 0) && (info.PlaylistFolders.Length == 0) && (info.VideoFolders.Length == 0))
+                            continue;
+                        OMButton button = (OMButton)manager[screen][source + 16];
+                        switch (info.DriveType)
+                        {
+                            case eDriveType.CDRom:
+                                button.Image = theHost.getSkinImage("CDIcon");
+                                button.FocusImage = theHost.getSkinImage("CDIcon_Highlighted");
+                                break;
+                            case eDriveType.Fixed:
+                            case eDriveType.Network:
+                                button.Image = theHost.getSkinImage("Local Drive");
+                                button.FocusImage = theHost.getSkinImage("Local Drive_Highlighted");
+                                break;
+                            case eDriveType.Unknown:
+                            case eDriveType.Removable:
+                                button.Image = theHost.getSkinImage("USBDriveIcon");
+                                button.FocusImage = theHost.getSkinImage("USBDriveIcon_Highlighted");
+                                break;
+                            case eDriveType.Phone:
+                                button.Image = theHost.getSkinImage("PhoneIcon");
+                                button.FocusImage = theHost.getSkinImage("PhoneIcon_Highlighted");
+                                break;
+                            case eDriveType.iPod:
+                                button.Image = theHost.getSkinImage("IpodIcon");
+                                button.FocusImage = theHost.getSkinImage("IpodIcon_Highlighted");
+                                break;
+                        }
+                        ((OMButton)manager[screen][source + 16]).Tag = info;
+                        if (info.systemDrive)
+                            ((OMLabel)manager[screen][source + 20]).Text = "My CarPC";
+                        else
+                            ((OMLabel)manager[screen][source + 20]).Text = info.VolumeLabel;
+                        source++;
+                        temp.Add(info);
+                        if (source > 3)
                             break;
                     }
-                    ((OMButton)manager[0][source + 16]).Tag = info;
-                    if (info.systemDrive)
-                        ((OMLabel)manager[0][source + 20]).Text = "My CarPC";
-                    else
-                        ((OMLabel)manager[0][source + 20]).Text = info.VolumeLabel;
-                    source++;
-                    temp.Add(info);
-                    if (source > 3)
-                        break;
-                }
-                sources = temp; //do this instead of clearing to ensure the list is never empty
-                if (!sources.Contains(currentSource)) //TODO: currentSource per zone
-                {
-                    Artists.Clear();
-                    ((OMList)manager[0][14]).Clear();
+                    sources = temp; //do this instead of clearing to ensure the list is never empty
+                    if (!sources.Contains(currentSource[screen])) //TODO: currentSource per zone
+                    {
+                        Artists[screen].Clear();
+                        ((OMList)manager[screen][14]).Clear();
+                    }
                 }
             }
         }
@@ -329,7 +344,7 @@ namespace ControlDemo
         void Enqueue_OnClick(OMControl sender, int screen)
         {
             OMList l = (OMList)manager[screen][14];
-            if (level == 2)
+            if (level[screen] == 2)
             {
                 if (l.SelectedIndex >= 0)
                 {
@@ -345,21 +360,21 @@ namespace ControlDemo
                     theHost.appendPlaylist(Playlist.Convert(queue), theHost.instanceForScreen(screen));
                 }
             }
-            else if (level == 1)
+            else if (level[screen] == 1)
             {
                 if (l.SelectedIndex < 0)
                 {
                     if (l.Count == 0)
                         return;
-                    List<string> ret = getSongs(l[0].subItem, l[0].text);
+                    List<string> ret = getSongs(l[0].subItem, l[0].text,screen);
                     for (int i = 1; i < l.Count; i++)
-                        ret.AddRange(getSongs(l[i].subItem, l[i].text));
+                        ret.AddRange(getSongs(l[i].subItem, l[i].text,screen));
                     if (ret.Count > 0)
                         theHost.appendPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
                 }
                 else
                 {
-                    List<string> ret = getSongs(l[l.SelectedIndex].subItem, l[l.SelectedIndex].text);
+                    List<string> ret = getSongs(l[l.SelectedIndex].subItem, l[l.SelectedIndex].text,screen);
                     if (ret.Count > 0)
                         theHost.appendPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
                 }
@@ -369,7 +384,7 @@ namespace ControlDemo
         void PlaySelected_OnClick(OMControl sender, int screen)
         {
             OMList l = (OMList)manager[screen][14];
-            if (level == 2)
+            if (level[screen] == 2)
             {
                 if (l.SelectedIndex >= 0)
                 {
@@ -393,13 +408,13 @@ namespace ControlDemo
                     theHost.setPlaylist(Playlist.Convert(queue), theHost.instanceForScreen(screen));
                 }
             }
-            else if (level == 1)
+            else if (level[screen] == 1)
             {
                 if (l.SelectedIndex < 0)
                 {
                     if (l.Count == 0)
                         return;
-                    List<string> ret = getSongs(l[0].subItem, l[0].text);
+                    List<string> ret = getSongs(l[0].subItem, l[0].text,screen);
                     if (ret.Count > 0)
                     {
                         if (theHost.getRandom(theHost.instanceForScreen(screen)))
@@ -411,13 +426,13 @@ namespace ControlDemo
                             theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), ret[0]);
                     }
                     for (int i = 1; i < l.Count; i++)
-                        ret.AddRange(getSongs(l[i].subItem, l[i].text));
+                        ret.AddRange(getSongs(l[i].subItem, l[i].text,screen));
                     if (ret.Count > 0)
                         theHost.setPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
                 }
                 else
                 {
-                    List<string> ret = getSongs(l[l.SelectedIndex].subItem, l[l.SelectedIndex].text);
+                    List<string> ret = getSongs(l[l.SelectedIndex].subItem, l[l.SelectedIndex].text,screen);
                     if (ret.Count > 0)
                     {
                         if (theHost.getRandom(theHost.instanceForScreen(screen)))
@@ -431,11 +446,11 @@ namespace ControlDemo
                     }
                 }
             }
-            else if (level == 0)
+            else if (level[screen] == 0)
             {
                 if (l.Count == 0)
                     return;
-                List<string> ret = getSongs(l[0].text);
+                List<string> ret = getSongs(l[0].text,screen);
                 if (ret.Count > 0)
                 {
                     if (theHost.getRandom(theHost.instanceForScreen(screen)))
@@ -450,17 +465,17 @@ namespace ControlDemo
                 ret.Clear();
                 for (int i = 1; i < l.Count; i++)
                 {
-                    ret.AddRange(getSongs(l[i].text));
+                    ret.AddRange(getSongs(l[i].text,screen));
                     if (ret.Count > 0)
                         theHost.appendPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
                     ret.Clear();
                 }
             }
         }
-        private List<string> getSongs(string artist, string album)
+        private List<string> getSongs(string artist, string album,int screen)
         {
             object o;
-            theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            theHost.getData(eGetData.GetMediaDatabase, dbname[screen], out  o);
             if (o == null)
                 return new List<string>();
             IMediaDatabase db = (IMediaDatabase)o;
@@ -475,10 +490,10 @@ namespace ControlDemo
             db.endSearch();
             return ret;
         }
-        private List<string> getSongs(string artist)
+        private List<string> getSongs(string artist,int screen)
         {
             object o;
-            theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            theHost.getData(eGetData.GetMediaDatabase, dbname[screen], out  o);
             if (o == null)
                 return new List<string>();
             IMediaDatabase db = (IMediaDatabase)o;
@@ -494,27 +509,27 @@ namespace ControlDemo
             return ret;
         }
 
-        string currentArtist;
-        string currentAlbum;
+        string[] currentArtist;
+        string[] currentAlbum;
         void List_OnClick(OMControl sender, int screen)
         {
             OMList l=(OMList)sender;
-            if (level == 0)
+            if (level[screen] == 0)
             {
-                currentArtist = l.SelectedItem.text;
+                currentArtist[screen] = l.SelectedItem.text;
                 currentAlbum = null;
-                ((OMLabel)l.Parent[6]).Text = currentArtist + " Albums";
-                SafeThread.Asynchronous(delegate() { showAlbums(screen, currentArtist); },theHost);
+                ((OMLabel)l.Parent[6]).Text = currentArtist[screen] + " Albums";
+                SafeThread.Asynchronous(delegate() { showAlbums(screen, currentArtist[screen]); },theHost);
                 moveToAlbums(screen);
             }
-            else if (level == 1)
+            else if (level[screen] == 1)
             {
-                currentAlbum = l.SelectedItem.text;
-                ((OMLabel)l.Parent[6]).Text = currentAlbum + " Tracks";
-                SafeThread.Asynchronous(delegate() { showTracks(screen, l.SelectedItem.subItem, currentAlbum); }, theHost);
+                currentAlbum[screen] = l.SelectedItem.text;
+                ((OMLabel)l.Parent[6]).Text = currentAlbum[screen] + " Tracks";
+                SafeThread.Asynchronous(delegate() { showTracks(screen, l.SelectedItem.subItem, currentAlbum[screen]); }, theHost);
                 moveToTracks(screen);
             }
-            else if (level == 3)
+            else if (level[screen] == 3)
             {
                 ((OMLabel)l.Parent[6]).Text = l.SelectedItem.text + " Tracks";
                 SafeThread.Asynchronous(delegate() { showPlaylist(screen, l.SelectedItem.tag.ToString()); }, theHost);
@@ -523,7 +538,7 @@ namespace ControlDemo
         }
         void List_OnLongClick(OMControl sender, int screen)
         {
-            if (level == 3)
+            if (level[screen] == 3)
             {
                 OMList l = (OMList)sender;
                 if ((l.SelectedItem != null) && (l.SelectedItem.text == "Current Playlist"))
@@ -546,32 +561,35 @@ namespace ControlDemo
             }
         }
 
-
-        List<string> Artists = new List<string>();
+        List<string>[] Artists;
         private void loadArtists()
         {
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                loadArtists(i);
+        }
+        private void loadArtists(int screen)
+        {
             object o;
-            theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            theHost.getData(eGetData.GetMediaDatabase, dbname[screen], out  o);
             if (o == null)
                 return;
-            Artists.Clear();
+            Artists[screen].Clear();
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
                 db.beginGetArtists(false);
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
-                    Artists.Add(info.Artist);
+                    Artists[screen].Add(info.Artist);
                     info = db.getNextMedia();
                 }
                 db.endSearch();
             }
-            for (int i = 0; i < theHost.ScreenCount; i++)
-                showArtists(i);
+            showArtists(screen);
         }
         private void showPlaylists(int screen)
         {
-            level = 3;
+            level[screen] = 3;
             OMList l = (OMList)manager[screen][14];
             l.Clear();
             l.ListItemOffset = 0;
@@ -586,7 +604,7 @@ namespace ControlDemo
                 foreach (DeviceInfo info in sources)
                     loadPlaylists(info, l);
             else
-                loadPlaylists(currentSource, l);
+                loadPlaylists(currentSource[screen], l);
         }
         private void loadPlaylists(DeviceInfo info,OMList l)
         {
@@ -596,7 +614,7 @@ namespace ControlDemo
         }
         private void showPlaylist(int screen, string path)
         {
-            level = 2;
+            level[screen] = 2;
             OMList l = (OMList)manager[screen][14];
             abortJob[screen] = true;
             lock (manager[screen][12])
@@ -653,18 +671,18 @@ namespace ControlDemo
         }
         private void showArtists(int screen)
         {
-            level = 0;
+            level[screen] = 0;
             OMList l = (OMList)manager[screen][14];
             abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.ListItemOffset = 0;
             l.ListItemHeight = 0;
-            l.AddRange(Artists);
+            l.AddRange(Artists[screen]);
         }
         private void showAlbums(int screen)
         {
-            level = 1;
+            level[screen] = 1;
             OMList l = (OMList)manager[screen][14];
             abortJob[screen] = true;
             lock (manager[screen][12])
@@ -673,11 +691,11 @@ namespace ControlDemo
             lock (manager[screen][12])
             {
                 abortJob[screen] = false;
-                foreach (string artist in Artists)
+                foreach (string artist in Artists[screen])
                 {
                     if (abortJob[screen])
                         return;
-                    MediaLoader.loadAlbums(theHost, artist, l, format, false, dbname);
+                    MediaLoader.loadAlbums(theHost, artist, l, format, false, dbname[screen]);
                     l.Sort();
                 }
             }
@@ -685,18 +703,18 @@ namespace ControlDemo
         bool[] abortJob;
         private void showAlbums(int screen, string artist)
         {
-            level = 1;
+            level[screen] = 1;
             OMList l = (OMList)manager[screen][14];
             abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.ListItemOffset = 80;
             l.Add("Loading . . .");
-            MediaLoader.loadAlbums(theHost, artist,l, format,true,dbname);
+            MediaLoader.loadAlbums(theHost, artist, l, format, true, dbname[screen]);
         }
         private void showTracks(int screen)
         {
-            level = 2;
+            level[screen] = 2;
             OMList l = (OMList)manager[screen][14];
             l.Clear();
             l.ListItemOffset = 80;
@@ -704,36 +722,36 @@ namespace ControlDemo
             lock (manager[screen][12])
             {
                 abortJob[screen] = false;
-                foreach (string artist in Artists)
+                foreach (string artist in Artists[screen])
                 {
                     if (abortJob[screen])
                         return;
-                    MediaLoader.loadSongs(theHost, artist, l, format, false, dbname);
+                    MediaLoader.loadSongs(theHost, artist, l, format, false, dbname[screen]);
                     l.Sort();
                 }
             }
         }
         private void showTracks(int screen, string artist)
         {
-            level = 2;
+            level[screen] = 2;
             OMList l = (OMList)manager[screen][14];
             abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.Add("Loading . . .");
             l.ListItemOffset = 80;
-            MediaLoader.loadSongs(theHost,artist, l,format,dbname);
+            MediaLoader.loadSongs(theHost, artist, l, format, dbname[screen]);
         }
         private void showTracks(int screen, string artist, string album)
         {
-            level = 2;
+            level[screen] = 2;
             OMList l = (OMList)manager[screen][14];
             abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
             l.Add("Loading . . .");
             l.ListItemOffset = 80;
-            MediaLoader.loadSongs(theHost, artist,album,l,format,dbname);
+            MediaLoader.loadSongs(theHost, artist, album, l, format, dbname[screen]);
         }
 
         void Playlists_OnClick(OMControl sender, int screen)
@@ -778,13 +796,13 @@ namespace ControlDemo
         {
             if (currentAlbum != null)
             {
-                ((OMLabel)sender.Parent[6]).Text = currentAlbum + " Tracks";
-                SafeThread.Asynchronous(delegate() { showTracks(screen,currentArtist,currentAlbum); }, theHost);
+                ((OMLabel)sender.Parent[6]).Text = currentAlbum[screen] + " Tracks";
+                SafeThread.Asynchronous(delegate() { showTracks(screen,currentArtist[screen],currentAlbum[screen]); }, theHost);
             }
             else if (currentArtist != null)
             {
-                ((OMLabel)sender.Parent[6]).Text = currentArtist + " Tracks";
-                SafeThread.Asynchronous(delegate() { showTracks(screen, currentArtist); }, theHost);
+                ((OMLabel)sender.Parent[6]).Text = currentArtist[screen] + " Tracks";
+                SafeThread.Asynchronous(delegate() { showTracks(screen, currentArtist[screen]); }, theHost);
             }
             else
             {
@@ -821,8 +839,8 @@ namespace ControlDemo
             currentAlbum = null;
             if (currentArtist != null)
             {
-                ((OMLabel)sender.Parent[6]).Text = currentArtist + " Albums";
-                SafeThread.Asynchronous(delegate() { showAlbums(screen, currentArtist); }, theHost);
+                ((OMLabel)sender.Parent[6]).Text = currentArtist[screen] + " Albums";
+                SafeThread.Asynchronous(delegate() { showAlbums(screen, currentArtist[screen]); }, theHost);
             }
             else
             {
