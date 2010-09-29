@@ -349,10 +349,12 @@ namespace OMPlayer
     public bool SetVideoVisible(int instance, bool visible)
     {
         checkInstance(instance);
+        if (player[instance].videoWindow == null)
+            return false;
         if (visible == false)
             return (player[instance].videoWindow.put_Visible(OABool.False)==0);
         else
-            if ((player[instance].currentState!=ePlayerStatus.Ready)&&(player[instance].currentState==ePlayerStatus.Stopped))
+            if ((player[instance].currentState!=ePlayerStatus.Ready)&&(player[instance].currentState!=ePlayerStatus.Stopped))
                 return (player[instance].videoWindow.put_Visible(OABool.True)==0);
         return false;
     }
