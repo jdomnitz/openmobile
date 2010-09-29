@@ -32,6 +32,7 @@ using OpenMobile.Data;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using System.Diagnostics;
+using OpenMobile.Media;
 
 //All High Level plugins should implement IHighLevel
 [InitialTransition(eGlobalTransition.SlideDown)]
@@ -357,6 +358,15 @@ public sealed class MainMenu : IHighLevel
             settings.setSetting("MainMenu.MainMenu12.Display", "About");
             settings.setSetting("MainMenu.MainMenu13.Display", "Settings");
             settings.setSetting("MainMenu.MainMenu22.Display", "Exit");
+            foreach(DeviceInfo device in DeviceInfo.EnumerateDevices(theHost))
+                if (device.systemDrive)
+                {
+                    if (device.MusicFolders.Length > 0)
+                    {
+                        settings.setSetting("Music.Path", device.MusicFolders[0]);
+                        settings.setSetting("OpenMobile.FirstRun", "True");
+                    }
+                }
         }
 
         void cancel_OnClick(OMControl sender, int screen)
