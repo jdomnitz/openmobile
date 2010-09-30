@@ -67,6 +67,10 @@ namespace OMMediaDB
                         if (s.Value == "True")
                             this.indexDirectory(settings.getSetting("Music.Path"), true);
                 }
+                else if (s.Name == "Music.Path")
+                {
+                    this.indexDirectory(s.Value, true);
+                }
                 settings.setSetting(s.Name, s.Value);
             }
         }

@@ -728,9 +728,10 @@ namespace NewMedia
         {
             level[screen] = 2;
             OMList l = (OMList)manager[screen][14];
-            l.Clear();
-            l.ListItemOffset = 80;
             abortJob[screen] = true;
+            lock (manager[screen][12])
+                l.Clear();
+            l.ListItemOffset = 80;
             lock (manager[screen][12])
             {
                 abortJob[screen] = false;
@@ -806,12 +807,12 @@ namespace NewMedia
         }
         void Tracks_OnClick(OMControl sender, int screen)
         {
-            if (currentAlbum != null)
+            if (currentAlbum[screen] != null)
             {
                 ((OMLabel)sender.Parent[6]).Text = currentAlbum[screen] + " Tracks";
                 SafeThread.Asynchronous(delegate() { showTracks(screen,currentArtist[screen],currentAlbum[screen]); }, theHost);
             }
-            else if (currentArtist != null)
+            else if (currentArtist[screen] != null)
             {
                 ((OMLabel)sender.Parent[6]).Text = currentArtist[screen] + " Tracks";
                 SafeThread.Asynchronous(delegate() { showTracks(screen, currentArtist[screen]); }, theHost);
@@ -849,7 +850,7 @@ namespace NewMedia
         void Albums_OnClick(OMControl sender, int screen)
         {
             currentAlbum[screen] = null;
-            if (currentArtist != null)
+            if (currentArtist[screen] != null)
             {
                 ((OMLabel)sender.Parent[6]).Text = currentArtist[screen] + " Albums";
                 SafeThread.Asynchronous(delegate() { showAlbums(screen, currentArtist[screen]); }, theHost);
