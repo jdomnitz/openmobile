@@ -25,6 +25,7 @@ using System.Timers;
 using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
+using OpenMobile.Data;
 
 namespace OpenMobile
 {
@@ -32,8 +33,8 @@ namespace OpenMobile
     {
         private IPluginHost theHost;
         private System.Timers.Timer tick = new System.Timers.Timer();
-        private imageItem blank = new imageItem();
         private System.Timers.Timer statusReset = new System.Timers.Timer(2100);
+        private bool showVolumeChanges;
         #region IBasePlugin Members
 
         public string authorName
@@ -170,7 +171,7 @@ namespace OpenMobile
             trackArtist.ContiuousAnimation = eAnimation.Scroll;
             trackArtist.TickSpeed = 250;
             OMImage cover = new OMImage(150,2,90,85);
-            cover.Image = blank;
+            cover.Image = imageItem.NONE;
             OMButton mediaButton = new OMButton(9,533,160,70);
             mediaButton.Image = theHost.getSkinImage("MediaButton", true);
             mediaButton.Transition = eButtonTransition.None;
@@ -526,6 +527,11 @@ namespace OpenMobile
                 }
                 else
                 {
+                    if ((showVolumeChanges)&&(volTmr != null))
+                    {
+                        volTmr.Enabled = false;
+                        volTmr.Enabled = true;
+                    }
                     for (int i = 0; i < theHost.ScreenCount; i++)
                     {
                         if (arg2 != theHost.instanceForScreen(i).ToString())
@@ -533,13 +539,16 @@ namespace OpenMobile
                         OMButton b = ((OMButton)manager[i][27]);
                         b.Image = theHost.getSkinImage("VolumeButton");
                         b.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
-                        ((VolumeBar)manager[i][26]).Value = int.Parse(arg1);
+                        VolumeBar vb=((VolumeBar)manager[i][26]);
+                        vb.Value = int.Parse(arg1);
+                        if ((showVolumeChanges)&&(vb.Top==-510))
+                            vol_OnClick(vb.Parent[27],i);
                     }
                 }
             }
-            if (function == eFunction.stopListeningForSpeech)
+            else if (function == eFunction.stopListeningForSpeech)
                 hideSpeech(0); //ToDo - Instance specific
-            if (function == eFunction.gesture)
+            else if (function == eFunction.gesture)
             {
                 if ((arg3!="OSK")&&(arg3!="Navigation"))
                     switch (arg2)
@@ -574,6 +583,19 @@ namespace OpenMobile
                             skipBackwardButton_OnClick(null, int.Parse(arg1));
                             break;
                     }
+            }
+            else if (function == eFunction.settingsChanged)
+            {
+                if (arg1 == "UI.VolumeChangesVisible")
+                {
+                    using (PluginSettings settings = new PluginSettings())
+                        showVolumeChanges = (settings.getSetting("UI.VolumeChangesVisible") == "True");
+                }
+            }
+            else if (function == eFunction.pluginLoadingComplete)
+            {
+                using (PluginSettings settings = new PluginSettings())
+                    showVolumeChanges = (settings.getSetting("UI.VolumeChangesVisible") == "True");
             }
         }
 
@@ -890,7 +912,7 @@ namespace OpenMobile
                         ((OMLabel)p[6]).Text = "";
                         ((OMLabel)p[7]).Text = "";
                         ((OMLabel)p[8]).Text = "";
-                        ((OMImage)p[9]).Image = blank;
+                        ((OMImage)p[9]).Image = imageItem.NONE;
                         ((OMButton)p[10]).Image = theHost.getSkinImage("Play");
                         ((OMButton)p[10]).DownImage = theHost.getSkinImage("Play.Highlighted");
                         ((OMLabel)p["UI.Elapsed"]).Text = "";

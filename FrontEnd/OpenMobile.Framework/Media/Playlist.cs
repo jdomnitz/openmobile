@@ -96,11 +96,9 @@ namespace OpenMobile.Media
                     return writeXSPF(location, playlist);
                 case ePlaylistType.WPL:
                     return writeWPL(location, playlist);
-                default:
-                    throw new NotImplementedException();
             }
+            return false;
         }
-
         private static bool writeWPL(string location, List<mediaInfo> playlist)
         {
 
@@ -142,7 +140,6 @@ namespace OpenMobile.Media
             }
             catch (Exception) { return false; }
         }
-
         private static bool writeXSPF(string location, List<mediaInfo> playlist)
         {
             if (!location.ToLower().EndsWith(".xspf"))
@@ -174,7 +171,6 @@ namespace OpenMobile.Media
             }
             catch (Exception) { return false; }
         }
-
         private static bool writeM3U(string location, List<mediaInfo> playlist)
         {
             if (!location.ToLower().EndsWith(".m3u"))
@@ -199,7 +195,6 @@ namespace OpenMobile.Media
             }
             catch (Exception) { return false; }
         }
-
         private static bool writePLS(string location, List<mediaInfo> p)
         {
             if (!location.ToLower().EndsWith(".pls"))
@@ -226,6 +221,7 @@ namespace OpenMobile.Media
             }
             catch (Exception) { return false; }
         }
+
         /// <summary>
         /// Writes a playlist to the database
         /// </summary>
