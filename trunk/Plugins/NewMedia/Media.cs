@@ -332,7 +332,7 @@ namespace NewMedia
                             break;
                     }
                     sources = temp; //do this instead of clearing to ensure the list is never empty
-                    if (!sources.Contains(currentSource[screen])) //TODO: currentSource per zone
+                    if (!sources.Contains(currentSource[screen]))
                     {
                         Artists[screen].Clear();
                         ((OMList)manager[screen][14]).Clear();

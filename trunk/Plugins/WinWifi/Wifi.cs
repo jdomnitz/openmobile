@@ -41,11 +41,9 @@ namespace WinWifi
                 if (networks[i].networkConnectable == true)
                 {
                     connectionInfo info = new connectionInfo(System.Text.ASCIIEncoding.ASCII.GetString(networks[i].dot11Ssid.SSID, 0, (int)networks[i].dot11Ssid.SSIDLength), networks[i].GetHashCode().ToString(), getSpeed(networks[i].Dot11PhyTypes), networks[i].wlanSignalQuality, getType(networks[i]) + " (" + getSecurity(networks[i]) + ")", getPass(networks[i]));
+                    info.IsConnected=((networks[i].flags&Wlan.WlanAvailableNetworkFlags.Connected)==Wlan.WlanAvailableNetworkFlags.Connected);
                     if (!connections.Contains(info))
                         connections.Add(info);
-                    if (client.Interfaces[0].InterfaceState==Wlan.WlanInterfaceState.Connected)
-                        if (client.Interfaces[0].CurrentConnection.wlanAssociationAttributes.dot11Ssid.Equals(networks[i].dot11Ssid))
-                            connections[connections.Count - 1].IsConnected = true;
                 }
             return connections.ToArray();
         }

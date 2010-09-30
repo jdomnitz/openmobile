@@ -297,6 +297,18 @@ namespace Networking
                     else
                         icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi0").image, ePriority.Normal, false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
+                    for(int i=0;i<networks.Count;i++)
+                        if (networks[i].IsConnected)
+                        {
+                            networks[i].signalStrength = (uint)strength;
+                            for(int k=0;k<theHost.ScreenCount;k++)
+                            {
+                                OMList itm=((OMList)manager[k][1]);
+                                for (int l = 0; l < itm.Count; l++)
+                                    if (itm[l].tag.ToString() == networks[i].UID)
+                                        itm[l] = getListItem(networks[i]);
+                            }
+                        }
                     return;
                 case eWirelessEvent.DisconnectedFromWirelessNetwork:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
