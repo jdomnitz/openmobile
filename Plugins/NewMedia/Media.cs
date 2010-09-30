@@ -591,7 +591,9 @@ namespace NewMedia
         {
             level[screen] = 3;
             OMList l = (OMList)manager[screen][14];
-            l.Clear();
+            abortJob[screen] = true;
+            lock (manager[screen][12])
+                l.Clear();
             l.ListItemOffset = 0;
             l.ListItemHeight = 0;
             l.Add(new OMListItem("Current Playlist",null,"Current Playlist"));
@@ -620,52 +622,62 @@ namespace NewMedia
             lock (manager[screen][12])
                 l.Clear();
             l.ListItemOffset = 80;
-            if (path == "Current Playlist")
+            lock (manager[screen][12])
             {
-                foreach (mediaInfo info in theHost.getPlaylist(theHost.instanceForScreen(screen)))
+                abortJob[screen] = false;
+                if (path == "Current Playlist")
                 {
-                    mediaInfo tmp = info; // <-stupid .Net limitation
-                    if (tmp.Name == null)
-                        tmp = OpenMobile.Media.TagReader.getInfo(info.Location);
-                    if (tmp == null)
-                        continue;
-                    if (tmp.coverArt == null)
-                        tmp.coverArt = TagReader.getCoverFromDB(tmp.Artist, tmp.Album, theHost);
-                    if (tmp.coverArt == null)
-                        tmp.coverArt = TagReader.getFolderImage(tmp.Location);
-                    l.Add(new OMListItem(tmp.Name, tmp.Artist, tmp.coverArt, format, tmp.Location));
+                    foreach (mediaInfo info in theHost.getPlaylist(theHost.instanceForScreen(screen)))
+                    {
+                        if (abortJob[screen])
+                            return;
+                        mediaInfo tmp = info; // <-stupid .Net limitation
+                        if (tmp.Name == null)
+                            tmp = OpenMobile.Media.TagReader.getInfo(info.Location);
+                        if (tmp == null)
+                            continue;
+                        if (tmp.coverArt == null)
+                            tmp.coverArt = TagReader.getCoverFromDB(tmp.Artist, tmp.Album, theHost);
+                        if (tmp.coverArt == null)
+                            tmp.coverArt = TagReader.getFolderImage(tmp.Location);
+                        l.Add(new OMListItem(tmp.Name, tmp.Artist, tmp.coverArt, format, tmp.Location));
+                    }
                 }
-            }
-            else if (System.IO.Path.IsPathRooted(path))
-            {
-                foreach (mediaInfo info in Playlist.readPlaylist(path))
+                else if (System.IO.Path.IsPathRooted(path))
                 {
-                    mediaInfo tmp = info; // <-stupid .Net limitation
-                    if (tmp.Name == null)
-                        tmp = OpenMobile.Media.TagReader.getInfo(info.Location);
-                    if (tmp == null)
-                        continue;
-                    if (tmp.coverArt == null)
-                        tmp.coverArt = TagReader.getCoverFromDB(tmp.Artist, tmp.Album, theHost);
-                    if (tmp.coverArt == null)
-                        tmp.coverArt = TagReader.getFolderImage(tmp.Location);
-                    l.Add(new OMListItem(tmp.Name, tmp.Artist, tmp.coverArt, format, tmp.Location));
+                    foreach (mediaInfo info in Playlist.readPlaylist(path))
+                    {
+                        if (abortJob[screen])
+                            return;
+                        mediaInfo tmp = info; // <-stupid .Net limitation
+                        if (tmp.Name == null)
+                            tmp = OpenMobile.Media.TagReader.getInfo(info.Location);
+                        if (tmp == null)
+                            continue;
+                        if (tmp.coverArt == null)
+                            tmp.coverArt = TagReader.getCoverFromDB(tmp.Artist, tmp.Album, theHost);
+                        if (tmp.coverArt == null)
+                            tmp.coverArt = TagReader.getFolderImage(tmp.Location);
+                        l.Add(new OMListItem(tmp.Name, tmp.Artist, tmp.coverArt, format, tmp.Location));
+                    }
                 }
-            }
-            else
-            {
-                foreach (mediaInfo info in Playlist.readPlaylistFromDB(theHost, path))
+                else
                 {
-                    mediaInfo tmp = info; // <-stupid .Net limitation
-                    if (tmp.Name == null)
-                        tmp = OpenMobile.Media.TagReader.getInfo(info.Location);
-                    if (tmp == null)
-                        continue;
-                    if (tmp.coverArt == null)
-                        tmp.coverArt = TagReader.getCoverFromDB(tmp.Artist, tmp.Album, theHost);
-                    if (tmp.coverArt == null)
-                        tmp.coverArt = TagReader.getFolderImage(tmp.Location);
-                    l.Add(new OMListItem(tmp.Name, tmp.Artist, tmp.coverArt, format, tmp.Location));
+                    foreach (mediaInfo info in Playlist.readPlaylistFromDB(theHost, path))
+                    {
+                        if (abortJob[screen])
+                            return;
+                        mediaInfo tmp = info; // <-stupid .Net limitation
+                        if (tmp.Name == null)
+                            tmp = OpenMobile.Media.TagReader.getInfo(info.Location);
+                        if (tmp == null)
+                            continue;
+                        if (tmp.coverArt == null)
+                            tmp.coverArt = TagReader.getCoverFromDB(tmp.Artist, tmp.Album, theHost);
+                        if (tmp.coverArt == null)
+                            tmp.coverArt = TagReader.getFolderImage(tmp.Location);
+                        l.Add(new OMListItem(tmp.Name, tmp.Artist, tmp.coverArt, format, tmp.Location));
+                    }
                 }
             }
         }

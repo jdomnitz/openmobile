@@ -265,6 +265,24 @@ namespace OpenMobile
                                 else
                                     text.Text += '=';
                                 break;
+                            case 122:
+                                if (arg.Shift == true)
+                                    text.Text += '{';
+                                else
+                                    text.Text += '[';
+                                break;
+                            case 123:
+                                if (arg.Shift == true)
+                                    text.Text += '}';
+                                else
+                                    text.Text += ']';
+                                break;
+                            case 125:
+                                if (arg.Shift == true)
+                                    text.Text += '"';
+                                else
+                                    text.Text += '\'';
+                                break;
                             case 126:
                                 if (arg.Shift == true)
                                     text.Text += '<';

@@ -150,10 +150,10 @@ namespace ControlDemo
             {
                 case eMediaType.DeviceRemoved:
                     //TODO-better way
-                    IconManager.UIIcon removeMe = new IconManager.UIIcon(theHost.getSkinImage("Discs|AudioCD").image, ePriority.MediumHigh, true, "OMNotify");
+                    IconManager.UIIcon removeMe = new IconManager.UIIcon(theHost.getSkinImage("Discs|AudioCD"), ePriority.MediumHigh, true, "OMNotify");
                     removeMe.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "RemoveIcon", ref removeMe);
-                    removeMe = new IconManager.UIIcon(theHost.getSkinImage("Discs|DVD").image, ePriority.MediumHigh, true, "OMNotify");
+                    removeMe = new IconManager.UIIcon(theHost.getSkinImage("Discs|DVD"), ePriority.MediumHigh, true, "OMNotify");
                     removeMe.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "RemoveIcon", ref removeMe);
                     return;
@@ -172,7 +172,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    IconManager.UIIcon audiocd=new IconManager.UIIcon(theHost.getSkinImage("Discs|AudioCD").image, ePriority.MediumHigh, true,"OMNotify");
+                    IconManager.UIIcon audiocd=new IconManager.UIIcon(theHost.getSkinImage("Discs|AudioCD"), ePriority.MediumHigh, true,"OMNotify");
                     audiocd.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "AddIcon", ref audiocd);
                     return;
@@ -185,7 +185,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    IconManager.UIIcon dvd = new IconManager.UIIcon(theHost.getSkinImage("Discs|DVD").image, ePriority.MediumHigh, true, "OMNotify");
+                    IconManager.UIIcon dvd = new IconManager.UIIcon(theHost.getSkinImage("Discs|DVD"), ePriority.MediumHigh, true, "OMNotify");
                     dvd.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "AddIcon", ref dvd);
                     return;
@@ -198,7 +198,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    IconManager.UIIcon hddvd = new IconManager.UIIcon(theHost.getSkinImage("Discs|HDDVD").image, ePriority.MediumHigh, true,"OMNotify");
+                    IconManager.UIIcon hddvd = new IconManager.UIIcon(theHost.getSkinImage("Discs|HDDVD"), ePriority.MediumHigh, true,"OMNotify");
                     hddvd.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "AddIcon", ref hddvd);
                     return;
@@ -211,7 +211,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    IconManager.UIIcon bluray = new IconManager.UIIcon(theHost.getSkinImage("Discs|BluRay").image, ePriority.MediumHigh, true, "OMNotify");
+                    IconManager.UIIcon bluray = new IconManager.UIIcon(theHost.getSkinImage("Discs|BluRay"), ePriority.MediumHigh, true, "OMNotify");
                     bluray.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "AddIcon", ref bluray);
                     return;
@@ -325,13 +325,13 @@ namespace ControlDemo
             if (data != null)
             {
                 theHost_OnStorageEvent(eMediaType.NotSet, true, ui.tag);
-                if (ui.image == theHost.getSkinImage("Discs|AudioCD").image)
+                if (ui.image == theHost.getSkinImage("Discs|AudioCD"))
                     theHost_OnStorageEvent(eMediaType.AudioCD, true, ui.tag);
-                else if (ui.image == theHost.getSkinImage("Discs|DVD").image)
+                else if (ui.image == theHost.getSkinImage("Discs|DVD"))
                     theHost_OnStorageEvent(eMediaType.DVD, true, ui.tag);
-                else if (ui.image == theHost.getSkinImage("Discs|BluRay").image)
+                else if (ui.image == theHost.getSkinImage("Discs|BluRay"))
                     theHost_OnStorageEvent(eMediaType.BluRay, true, ui.tag);
-                else if (ui.image == theHost.getSkinImage("Discs|HDDVD").image)
+                else if (ui.image == theHost.getSkinImage("Discs|HDDVD"))
                     theHost_OnStorageEvent(eMediaType.HDDVD, true, ui.tag);
                 return true;
             }

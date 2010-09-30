@@ -273,13 +273,13 @@ namespace Networking
             {
                 case eWirelessEvent.WirelessNetworksAvailable:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
-                    icon=new IconManager.UIIcon(theHost.getSkinImage("WiFiNew").image,ePriority.Normal,false, "Networking");
+                    icon=new IconManager.UIIcon(theHost.getSkinImage("WiFiNew"),ePriority.Normal,false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
                     OpenMobile.Threading.TaskManager.QueueTask(UpdateList, ePriority.Normal, "Refresh Networks");
                     return;
                 case eWirelessEvent.ConnectingToWirelessNetwork:
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
-                    icon = new IconManager.UIIcon(theHost.getSkinImage("WiFiConnecting").image, ePriority.Normal, false, "Networking");
+                    icon = new IconManager.UIIcon(theHost.getSkinImage("WiFiConnecting"), ePriority.Normal, false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
                     return;
                 case eWirelessEvent.ConnectedToWirelessNetwork:
@@ -289,13 +289,13 @@ namespace Networking
                     theHost.sendMessage("UI", "Networking", "RemoveIcon", ref icon);
                     int strength = int.Parse(arg);
                     if (strength>=75)
-                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi3").image, ePriority.Normal, false, "Networking");
+                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi3"), ePriority.Normal, false, "Networking");
                     else if (strength >= 50)
-                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi2").image, ePriority.Normal, false, "Networking");
+                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi2"), ePriority.Normal, false, "Networking");
                     else if (strength >= 25)
-                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi1").image, ePriority.Normal, false, "Networking");
+                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi1"), ePriority.Normal, false, "Networking");
                     else
-                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi0").image, ePriority.Normal, false, "Networking");
+                        icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi0"), ePriority.Normal, false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
                     for(int i=0;i<networks.Count;i++)
                         if (networks[i].IsConnected)

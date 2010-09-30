@@ -45,7 +45,7 @@ namespace OpenMobile
             /// <summary>
             /// The icons image
             /// </summary>
-            public OImage image;
+            public imageItem image;
             /// <summary>
             /// The icons priority
             /// </summary>
@@ -72,7 +72,7 @@ namespace OpenMobile
             /// <param name="i"></param>
             /// <param name="p"></param>
             /// <param name="f"></param>
-            public UIIcon(OImage i,ePriority p,bool f)
+            public UIIcon(imageItem i,ePriority p,bool f)
             {
                 image=i;
                 priority=p;
@@ -85,7 +85,7 @@ namespace OpenMobile
             /// <param name="p"></param>
             /// <param name="f"></param>
             /// <param name="plugin"></param>
-            public UIIcon(OImage i, ePriority p, bool f,string plugin)
+            public UIIcon(imageItem i, ePriority p, bool f,string plugin)
             {
                 image = i;
                 priority = p;
