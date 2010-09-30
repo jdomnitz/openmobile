@@ -344,7 +344,7 @@ namespace NewMedia
         void Enqueue_OnClick(OMControl sender, int screen)
         {
             OMList l = (OMList)manager[screen][14];
-            if (level[screen] == 2)
+            if ((level[screen] == 2)||(level[screen] == 4))
             {
                 if (l.SelectedIndex >= 0)
                 {
@@ -379,12 +379,27 @@ namespace NewMedia
                         theHost.appendPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
                 }
             }
+            else if(level[screen]==0)
+            { 
+                if (l.Count == 0)
+                    return;
+                List<string> ret = getSongs(l[0].text, screen);
+                theHost.appendPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
+                ret.Clear();
+                for (int i = 1; i < l.Count; i++)
+                {
+                    ret.AddRange(getSongs(l[i].text, screen));
+                    if (ret.Count > 0)
+                        theHost.appendPlaylist(Playlist.Convert(ret), theHost.instanceForScreen(screen));
+                    ret.Clear();
+                }
+            }
         }
 
         void PlaySelected_OnClick(OMControl sender, int screen)
         {
             OMList l = (OMList)manager[screen][14];
-            if (level[screen] == 2)
+            if ((level[screen] == 2)||(level[screen] ==4))
             {
                 if (l.SelectedIndex >= 0)
                 {
@@ -559,6 +574,23 @@ namespace NewMedia
                     SafeThread.Asynchronous(delegate() { showPlaylists(screen); }, theHost);
                 }
             }
+            else if (level[screen] == 4)
+            {
+                OMLabel label=((OMLabel)sender.Parent[6]);
+                string song=((OMList)sender).SelectedItem.tag.ToString();
+                string title = label.Text.Substring(0, label.Text.Length - 7);
+                List<mediaInfo> list;
+                if (title != "Current Playlist")
+                    list = Playlist.readPlaylistFromDB(theHost, title);
+                else
+                    list = theHost.getPlaylist(theHost.instanceForScreen(screen));
+                if (list.RemoveAll(l => l.Location == song) > 0)
+                {
+                    if (title != "Current Playlist")
+                        Playlist.writePlaylistToDB(theHost, title, list);
+                    SafeThread.Asynchronous(delegate() { showPlaylist(screen, title); }, theHost);
+                }
+            }
         }
 
         List<string>[] Artists;
@@ -616,7 +648,7 @@ namespace NewMedia
         }
         private void showPlaylist(int screen, string path)
         {
-            level[screen] = 2;
+            level[screen] = 4;
             OMList l = (OMList)manager[screen][14];
             abortJob[screen] = true;
             lock (manager[screen][12])
