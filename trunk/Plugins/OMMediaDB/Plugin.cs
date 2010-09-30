@@ -721,7 +721,7 @@ namespace OMMediaDB
                 if (append == false)
                 {
                     query.Append("DELETE FROM Playlists WHERE Name='");
-                    query.Append(name);
+                    query.Append(General.escape(name));
                     query.Append("';");
                 }
                 foreach (string url in URLs)

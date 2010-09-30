@@ -445,10 +445,10 @@ namespace OpenMobile
         {
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
-                ((OMButton)manager[i][22]).Image = new imageItem(icons.getIcon(1, true).image);
-                ((OMButton)manager[i][23]).Image = new imageItem(icons.getIcon(1, false).image);
-                ((OMButton)manager[i][24]).Image = new imageItem(icons.getIcon(2, false).image);
-                ((OMButton)manager[i][25]).Image = new imageItem(icons.getIcon(3, false).image);
+                ((OMButton)manager[i][22]).Image = new imageItem(icons.getIcon(1, true).image.image);
+                ((OMButton)manager[i][23]).Image = new imageItem(icons.getIcon(1, false).image.image);
+                ((OMButton)manager[i][24]).Image = new imageItem(icons.getIcon(2, false).image.image);
+                ((OMButton)manager[i][25]).Image = new imageItem(icons.getIcon(3, false).image.image);
             }
         }
 
