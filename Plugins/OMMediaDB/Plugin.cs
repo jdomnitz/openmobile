@@ -756,7 +756,7 @@ namespace OMMediaDB
             StringBuilder query = new StringBuilder("BEGIN;");
             {
                 query.Append("DELETE FROM Playlists WHERE Name='");
-                query.Append(name);
+                query.Append(General.escape(name));
                 query.Append("';");
                 query.Append("END;");
             }
