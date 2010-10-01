@@ -53,8 +53,8 @@ Public Class SensorTester
             Dim Sensors As Generic.List(Of Sensor) = o
 
             For Each Sen As Sensor In Sensors
-                If Sen.Type = eSensorType.Output Then
-                    List.Add(New OMListItem(Sen.Name & "-" & m_Host.getsensorvalue(Sen.PID).ToString))
+                If Sen.Type = eSensorType.deviceSuppliesData Then
+                    List.Add(New OMListItem(Sen.Name & "-" & m_Host.getSensorValue(Sen.PID).ToString))
                 End If
             Next
 

@@ -27,8 +27,8 @@ namespace OpenMobile.Plugin
     public enum eSensorType
     {
         Unknown=0,
-        Input=1,
-        Output=2,
+        deviceReceivesData=1,
+        deviceSuppliesData=2,
         Other=4,
         All=0xFF
     }
