@@ -922,6 +922,17 @@ namespace OpenMobile
                     }
                 }
             }
+            else if (function == eFunction.Pause)
+            {
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                {
+                    if (theHost.instanceForScreen(i) == instance)
+                    {
+                        ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
+                        ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                    }
+                }
+            }
             else if (function == eFunction.RandomChanged)
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)

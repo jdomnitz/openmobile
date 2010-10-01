@@ -695,7 +695,6 @@ namespace OpenMobile
                     rec.Initialize();
                     for (int i = 0; i < currentGesture.Count; i++)
                         rec.AddPoint(currentGesture[i], false);
-                    currentGesture = null;
 					Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
                     rParam.currentMode = eModeType.Highlighted;
                     RenderingWindow_MouseMove(sender, new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
@@ -705,6 +704,7 @@ namespace OpenMobile
             ThrowStart.X = -1;
             ThrowStart.Y = -1;
             ThrowStarted = false;
+            currentGesture = null;
         }
         #endregion
         #region OtherUIEvents
