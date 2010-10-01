@@ -21,6 +21,7 @@
 using OpenMobile.Data;
 using OpenMobile.Plugin;
 using OpenMobile.Controls;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.Media
 {
@@ -64,7 +65,7 @@ namespace OpenMobile.Media
         /// <param name="artist"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadAlbums(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname)
+        public static bool loadAlbums(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
         {
             if (dbname == "")
                 return false;
@@ -80,6 +81,8 @@ namespace OpenMobile.Media
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
+                    if (info.coverArt == null)
+                        info.coverArt = noCover;
                     list.AddDistinct(new OMListItem(info.Album, artist, info.coverArt,format));
                     info = db.getNextMedia();
                 }
@@ -94,7 +97,7 @@ namespace OpenMobile.Media
         /// <param name="artist"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, IList list,OMListItem.subItemFormat format,string dbname)
+        public static bool loadSongs(IPluginHost host, IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {
             if (dbname == "")
                 return false;
@@ -108,6 +111,8 @@ namespace OpenMobile.Media
                 list.Clear();
                 while (info != null)
                 {
+                    if (info.coverArt == null)
+                        info.coverArt = noCover;
                     list.AddDistinct(new OMListItem(info.Name, info.Album, info.coverArt,format,info.Location));
                     info = db.getNextMedia();
                 }
@@ -123,9 +128,9 @@ namespace OpenMobile.Media
         /// <param name="list"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname)
+        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {
-            return loadSongs(host, artist, list, format, true,dbname);
+            return loadSongs(host, artist, list, format, true,dbname,noCover);
         }
         /// <summary>
         /// Loads all songs from the given artist
@@ -136,7 +141,7 @@ namespace OpenMobile.Media
         /// <param name="clear"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname)
+        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
         {
             if (dbname == "")
                 return false;
@@ -150,6 +155,8 @@ namespace OpenMobile.Media
                     list.Clear();
                 while (info != null)
                 {
+                    if (info.coverArt == null)
+                        info.coverArt = noCover;
                     if (info.Type==eMediaType.AudioCD)
                         list.AddDistinct(new OMListItem(info.Name, info.Album, info.coverArt, format, info.Location,info.TrackNumber.ToString()));
                     else
@@ -168,7 +175,7 @@ namespace OpenMobile.Media
         /// <param name="album"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname)
+        public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {
             if (dbname == "")
                 return false;
@@ -183,6 +190,8 @@ namespace OpenMobile.Media
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
+                    if (info.coverArt == null)
+                        info.coverArt = noCover;
                     list.AddDistinct(new OMListItem(info.Name,artist, info.coverArt,format,info.Location));
                     info = db.getNextMedia();
                 }

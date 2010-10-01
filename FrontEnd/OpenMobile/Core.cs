@@ -243,8 +243,9 @@ namespace OpenMobile
             string strEx = spewException(ex);
             //ErrorReporting reporting=new ErrorReporting(strEx);
             //reporting.ShowDialog(System.Windows.Forms.Form.FromHandle(RenderingWindows[0].getHandle()));
-            if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>1) //Prevent Loops
-                theHost.execute(eFunction.restartProgram);
+            //if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>1) //Prevent Loops
+            //    theHost.execute(eFunction.restartProgram);
+            Environment.Exit(0);
         }
         private static string spewException(Exception e)
         {

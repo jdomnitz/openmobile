@@ -20,12 +20,12 @@
 *********************************************************************************/
 using System;
 using System.Threading;
+using System.Windows.Forms;
 using OpenMobile;
 using OpenMobile.Controls;
-using OpenMobile.Plugin;
 using OpenMobile.Data;
 using OpenMobile.Graphics;
-using System.Windows.Forms;
+using OpenMobile.Plugin;
 
 namespace BatterySupport
 {
@@ -75,11 +75,11 @@ namespace BatterySupport
         }
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            return false;
         }
         IPluginHost theHost;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
@@ -106,6 +106,7 @@ namespace BatterySupport
             {
                 RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
                 batteryImage = theHost.getSkinImage("BatteryCharged", true);
+                batteryImage.image.persist = true;
                 System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
                     OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
                     gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
@@ -117,6 +118,7 @@ namespace BatterySupport
             {
                 RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
                 batteryImage = theHost.getSkinImage("BatteryWarning", true);
+                batteryImage.image.persist = true;
                 System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
                     OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
                     gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
@@ -128,6 +130,7 @@ namespace BatterySupport
             {
                 RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
                 batteryImage = theHost.getSkinImage("BatteryCritical", true);
+                batteryImage.image.persist = true;
                 System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
                     OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
                     gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);

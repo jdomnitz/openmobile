@@ -105,6 +105,8 @@ namespace OMPlayer
             if (oldPlayer != null)
                 oldPlayer.CloseClip();
         }
+        if (sink!=null)
+            sink.Dispose();
         GC.SuppressFinalize(this);
     }
     AVPlayer oldPlayer;

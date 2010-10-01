@@ -39,11 +39,13 @@ namespace NewMedia
         string[] dbname;
         int[] level;
         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
+        static OImage noCover;
         public eLoadStatus initialize(OpenMobile.Plugin.IPluginHost host)
         {
             theHost = host;
             if (host.InstanceCount == -1)
                 return eLoadStatus.LoadFailedRetryRequested;
+            noCover = theHost.getSkinImage("Unknown Album").image;
             currentSource = new DeviceInfo[host.ScreenCount];
             currentAlbum = new string[host.ScreenCount];
             currentArtist = new string[host.ScreenCount];
@@ -739,7 +741,7 @@ namespace NewMedia
                 {
                     if (abortJob[screen])
                         return;
-                    MediaLoader.loadAlbums(theHost, artist, l, format, false, dbname[screen]);
+                    MediaLoader.loadAlbums(theHost, artist, l, format, false, dbname[screen],noCover);
                     l.Sort();
                 }
             }
@@ -754,7 +756,7 @@ namespace NewMedia
                 l.Clear();
             l.ListItemOffset = 80;
             l.Add("Loading . . .");
-            MediaLoader.loadAlbums(theHost, artist, l, format, true, dbname[screen]);
+            MediaLoader.loadAlbums(theHost, artist, l, format, true, dbname[screen],noCover);
         }
         private void showTracks(int screen)
         {
@@ -771,7 +773,7 @@ namespace NewMedia
                 {
                     if (abortJob[screen])
                         return;
-                    MediaLoader.loadSongs(theHost, artist, l, format, false, dbname[screen]);
+                    MediaLoader.loadSongs(theHost, artist, l, format, false, dbname[screen],noCover);
                     l.Sort();
                 }
             }
@@ -785,7 +787,7 @@ namespace NewMedia
                 l.Clear();
             l.Add("Loading . . .");
             l.ListItemOffset = 80;
-            MediaLoader.loadSongs(theHost, artist, l, format, dbname[screen]);
+            MediaLoader.loadSongs(theHost, artist, l, format, dbname[screen],noCover);
         }
         private void showTracks(int screen, string artist, string album)
         {
@@ -796,7 +798,7 @@ namespace NewMedia
                 l.Clear();
             l.Add("Loading . . .");
             l.ListItemOffset = 80;
-            MediaLoader.loadSongs(theHost, artist, album, l, format, dbname[screen]);
+            MediaLoader.loadSongs(theHost, artist, album, l, format, dbname[screen],noCover);
         }
 
         void Playlists_OnClick(OMControl sender, int screen)
