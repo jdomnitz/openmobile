@@ -142,6 +142,7 @@ namespace OpenMobile
         #region IBasePlugin Members
         IconManager icons = new IconManager();
         ScreenManager manager;
+        int volScreen = -1;
         public eLoadStatus initialize(IPluginHost host)
         {
             OMPanel p = new OMPanel("");
@@ -344,12 +345,11 @@ namespace OpenMobile
                 theHost.execute(eFunction.setSystemVolume,"-1",theHost.instanceForScreen(screen).ToString());
         }
         System.Timers.Timer volTmr;
-        int volScreen = -1;
         void vol_OnClick(OMControl sender, int screen)
         {
-            volScreen = screen;
             lock (sender)
             {
+                volScreen= screen;
                 if (sender.Top > 0)
                 {
                     if (sender.Top == 511)
@@ -874,6 +874,8 @@ namespace OpenMobile
                                 album.Transition(eAnimation.UnveilRight, info.Album,50);
                             OMImage cover = ((OMImage)p[9]);
                             cover.Image = it;
+                            if ((cover.Image==null)||(cover.Image.image == null))
+                                cover.Image = theHost.getSkinImage("Unknown Album");
                             if ((cover.Image.image != null) && (cover.Height < cover.Width))
                             {
                                 cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));

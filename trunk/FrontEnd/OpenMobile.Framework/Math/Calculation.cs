@@ -363,7 +363,7 @@ namespace OpenMobile.Framework.Math
                     value = value / 3.6;
                     break;
                 case speedTypes.knots:
-                    value = value * 0.514444444;
+                    value = value * 0.514444444444444;
                     break;
                 case speedTypes.Mach:
                     value = value * 340;
