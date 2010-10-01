@@ -58,6 +58,7 @@ namespace OMPlayer
                 List<string> crossfadeo = new List<string>(new string[] { "None", "1 Second", "2 Seconds", "3 Seconds", "4 Seconds", "5 Seconds" });
                 List<string> crossfadev = new List<string>(new string[] { "", "1000", "2000", "3000", "4000", "5000" });
                 settings.Add(new Setting(SettingTypes.MultiChoice, "Music.CrossfadeDuration", "Crossfade", "Crossfade between songs",crossfadeo,crossfadev, s.getSetting("Music.CrossfadeDuration")));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.MediaKeys", "", "Respond to media keys", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.MediaKeys")));
             }
             settings.OnSettingChanged += new SettingChanged(changed);
         }
@@ -255,6 +256,7 @@ namespace OMPlayer
         player = new AVPlayer[theHost.InstanceCount];
         host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
         host.OnPowerChange += new PowerEvent(host_OnPowerChange);
+        host.OnKeyPress += new KeyboardEvent(host_OnKeyPress);
         OnPlayerRequested += new CreateNewPlayer(createInstance);
         using (PluginSettings setting = new PluginSettings())
         {
@@ -288,6 +290,55 @@ namespace OMPlayer
             }
         }
         return eLoadStatus.LoadSuccessful;
+    }
+
+    bool host_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
+    {
+        if (type != eKeypressType.KeyDown)
+            return false;
+        if (settings[3].Value == "True")
+        {
+            switch (arg.Key)
+            {
+                case OpenMobile.Input.Key.PlayPause:
+                    object o = new object();
+                    theHost.getData(eGetData.GetMediaStatus, "", theHost.instanceForScreen(0).ToString(), out o);
+                    if (o == null)
+                        return false;
+                    if (o.GetType() == typeof(ePlayerStatus))
+                    {
+                        ePlayerStatus status = (ePlayerStatus)o;
+                        if (status == ePlayerStatus.Playing)
+                            theHost.execute(eFunction.Pause, theHost.instanceForScreen(0).ToString());
+                        else
+                        {
+                            if ((status == ePlayerStatus.FastForwarding) || (status == ePlayerStatus.Rewinding))
+                                theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(0).ToString(), "1");
+                            else
+                                theHost.execute(eFunction.Play, theHost.instanceForScreen(0).ToString());
+                        }
+                    }
+                    else if (o.GetType() == typeof(stationInfo))
+                        theHost.execute(eFunction.Pause, theHost.instanceForScreen(0).ToString());
+                    return true;
+                case OpenMobile.Input.Key.Pause:
+                    theHost.execute(eFunction.Pause, theHost.instanceForScreen(0).ToString());
+                    return true;
+                case OpenMobile.Input.Key.TrackNext:
+                    if (theHost.execute(eFunction.stepForward, theHost.instanceForScreen(0).ToString()) == false)
+                        theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(0).ToString());
+                    return true;
+                case OpenMobile.Input.Key.TrackPrevious:
+                    if (theHost.execute(eFunction.stepBackward, theHost.instanceForScreen(0).ToString()) == false)
+                        theHost.execute(eFunction.previousMedia, theHost.instanceForScreen(0).ToString());
+                    return true;
+                case OpenMobile.Input.Key.Stop:
+                    theHost.execute(eFunction.Stop, theHost.instanceForScreen(0).ToString());
+                    theHost.execute(eFunction.unloadTunedContent, theHost.instanceForScreen(0).ToString());
+                    return true;
+            }
+        }
+        return false;
     }
     void host_OnPowerChange(ePowerEvent type)
     {
