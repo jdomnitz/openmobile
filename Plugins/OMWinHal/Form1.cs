@@ -162,6 +162,9 @@ namespace OMHal
                 case "48":
                     Application.SetSuspendState(PowerState.Suspend, false, false);
                     break;
+                case "66":
+                    Specific.setSubVolume(int.Parse(arg1), int.Parse(arg2));
+                    break;
             }
         }
         void recv(IAsyncResult res)

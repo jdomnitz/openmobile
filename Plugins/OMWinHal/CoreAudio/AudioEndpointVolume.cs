@@ -139,6 +139,20 @@ namespace OSSpecificLib.CoreAudioApi
         }
 
         #endregion
-       
+
+
+        internal void setSub(int level)
+        {
+            int channels;
+            _AudioEndPointVolume.GetChannelCount(out channels);
+            if (channels == 3)
+            {
+                _AudioEndPointVolume.SetChannelVolumeLevelScalar(3, (level / 100F), Guid.Empty);
+            }
+            else if (channels >= 5)
+            {
+                _AudioEndPointVolume.SetChannelVolumeLevelScalar(5, (level / 100F), Guid.Empty);
+            }
+        }
     }
 }

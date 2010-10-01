@@ -24,7 +24,8 @@ namespace WaveLib.AudioMixer
 		Channel_1	= 1,
 		Channel_2	= 2,
 		Channel_3	= 3,
-		Channel_4	= 4
+		Channel_4	= 4,
+        Channel_5   = 5
 	}
 	#endregion
 

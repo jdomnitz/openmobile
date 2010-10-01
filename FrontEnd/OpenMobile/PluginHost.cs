@@ -1153,6 +1153,19 @@ namespace OpenMobile
                         return true;
                     }
                     return false;
+                case eFunction.setSubVolume:
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        if ((ret < -2) || (ret > 100))
+                            return false;
+                        if (int.TryParse(arg2, out ret) == false)
+                            return false;
+                        if ((ret < 0) || (ret >= instanceCount))
+                            return false;
+                        hal.snd("66|" + arg1 + "|" + arg2);
+                        return true;
+                    }
+                    return false;
                 case eFunction.setBand:
                     if (int.TryParse(arg1, out ret) == true)
                     {
