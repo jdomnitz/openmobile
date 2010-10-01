@@ -885,6 +885,13 @@ namespace OpenMobile
         /// </summary>
         clearHistory=65,
         /// <summary>
+        /// Set subwoofer channel volume
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Instance Number</para>
+        /// <para>Arg2: Volume</para>
+        /// </summary>
+        setSubVolume=66,
+        /// <summary>
         /// Sends a keypress to the target UI window
         /// Possible keys: Up, Down, Left, Right, Enter, ScrollUp, ScrollDown
         /// <para>---------------------------------------</para>

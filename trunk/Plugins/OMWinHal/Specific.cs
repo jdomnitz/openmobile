@@ -143,6 +143,35 @@ namespace OMHal
                 }
             }
         }
+        public static void setSubVolume(int instance, int level)
+        {
+            if (os.Version.Major < 6) //Xp
+            {
+                if (instance > m.Playback.Devices.Count)
+                    return;
+                if (instance == 0)
+                    m.Playback.DeviceId = m.Playback.DeviceIdDefault;
+                else
+                    m.Playback.DeviceId = m.Playback.Devices[instance - 1].DeviceId;
+                MixerLine l = m.Playback.Lines.GetMixerFirstLineByComponentType(WaveLib.AudioMixer.MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
+                if (l.Channels == 3)
+                    l.Channel = Channel.Channel_3;
+                else if (l.Channels >= 5)
+                    l.Channels = Channel.Channel_5;
+                else
+                    return;
+                l.Volume = (int)((level / 100.0) * l.VolumeMax);
+            }
+            else
+            {
+                if (device != null)
+                {
+                    if (instance >= device.Length)
+                        return;
+                    device[instance].AudioEndpointVolume.setSub(level);
+                }
+            }
+        }
         public static void setBalance(int instance,int balance)//Left=0
         {
             if (os.Version.Major < 6) //Xp
