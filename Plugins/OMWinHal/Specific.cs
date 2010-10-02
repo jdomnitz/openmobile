@@ -157,7 +157,7 @@ namespace OMHal
                 if (l.Channels == 3)
                     l.Channel = Channel.Channel_3;
                 else if (l.Channels >= 5)
-                    l.Channels = Channel.Channel_5;
+                    l.Channel = Channel.Channel_5;
                 else
                     return;
                 l.Volume = (int)((level / 100.0) * l.VolumeMax);
