@@ -930,7 +930,8 @@ namespace OpenMobile
         /// <summary>
         /// Used to manually change the current position in a playlist
         /// <para>---------------------------------------</para>
-        /// <para>Arg1: The position [int]</para>
+        /// <para>Arg1: The instance [int]</para>
+        /// <para>Arg2: The position [int]</para>
         /// </summary>
         setPlaylistPosition=82,
         /// <summary>
