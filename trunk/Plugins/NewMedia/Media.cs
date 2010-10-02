@@ -401,7 +401,27 @@ namespace NewMedia
         void PlaySelected_OnClick(OMControl sender, int screen)
         {
             OMList l = (OMList)manager[screen][14];
-            if ((level[screen] == 2)||(level[screen] ==4))
+            if (level[screen] == 4)
+            {
+                if (l.Count == 0)
+                    return;
+                int index = 0;
+                if (l.SelectedIndex >= 0)
+                    index=l.SelectedIndex;
+                if (theHost.getRandom(theHost.instanceForScreen(screen)))
+                {
+                    int random = (l.SelectedIndex >= 0) ? index : OpenMobile.Framework.Math.Calculation.RandomNumber(0, l.Count - 1);
+                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l[random].tag.ToString());
+                }
+                else
+                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l[index].tag.ToString());
+                List<string> queue = new List<string>();
+                for (int i = 0; i < l.Count; i++)
+                    queue.Add(l[i].tag.ToString());
+                theHost.setPlaylist(Playlist.Convert(queue), theHost.instanceForScreen(screen));
+                theHost.execute(eFunction.setPlaylistPosition, theHost.instanceForScreen(screen).ToString(), index.ToString());
+            }
+            else if (level[screen] == 2)
             {
                 if (l.SelectedIndex >= 0)
                 {
