@@ -212,10 +212,10 @@ namespace ControlDemo
             day5low.Format = eTextFormat.Glow;
             day5low.TextAlignment = Alignment.CenterLeft;
             day5low.Name = "day5low";
-            OMLabel provider = new OMLabel(300, 560, 120, 30);
+            OMLabel provider = new OMLabel(250, 110, 120, 30);
             provider.Text = "Provided by:";
             provider.Font = new Font(Font.GenericSansSerif, 12F);
-            OMImage attrib = new OMImage(420,550, 120, 50);
+            OMImage attrib = new OMImage(370,100, 120, 50);
             p.addControl(Title);
             p.addControl(day1high);
             p.addControl(day1low);
