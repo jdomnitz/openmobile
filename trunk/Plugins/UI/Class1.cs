@@ -34,6 +34,7 @@ namespace OpenMobile
         private IPluginHost theHost;
         private System.Timers.Timer tick = new System.Timers.Timer();
         private System.Timers.Timer statusReset = new System.Timers.Timer(2100);
+        private System.Timers.Timer clockTimer = new System.Timers.Timer(60000);
         private bool showVolumeChanges;
         #region IBasePlugin Members
 
@@ -281,6 +282,21 @@ namespace OpenMobile
             VolumeBar volume = new VolumeBar(6, -510, 130, 510);
             volume.Visible = false;
             volume.OnSliderMoved += new userInteraction(volumeChange);
+            OMLabel clocktime = new OMLabel(350, 520, 300, 60);
+            clocktime.TextAlignment = Alignment.CenterCenter;
+            clocktime.Font = new Font(Font.GenericSansSerif, 32F);
+            clocktime.Format = eTextFormat.BoldShadow;
+            clocktime.Name = "UI.clocktime";
+            clocktime.Text = DateTime.Now.ToShortTimeString();
+            OMLabel clockdate = new OMLabel(350, 570, 300, 30);
+            clockdate.TextAlignment = Alignment.CenterCenter;
+            clockdate.Font = new Font(Font.GenericSansSerif, 20F);
+            clockdate.Format = eTextFormat.BoldShadow;
+            clockdate.Name = "UI.clockdate";
+            clockdate.Text = DateTime.Now.ToString("MMMM d");
+            clockTimer.Elapsed += new ElapsedEventHandler(clock_Elapsed);
+            clockTimer.Enabled = true;
+            
             //***
             p.addControl(Back);
             p.addControl(speech);
@@ -310,6 +326,8 @@ namespace OpenMobile
             p.addControl(icon4);
             p.addControl(volume);
             p.addControl(vol); //27
+            p.addControl(clocktime);
+            p.addControl(clockdate);
             icons.OnIconsChanged += new IconManager.IconsChanged(icons_OnIconsChanged);
             p.Priority = ePriority.High;
             p.UIPanel = true;
@@ -326,6 +344,15 @@ namespace OpenMobile
             theHost.OnSystemEvent += theHost_OnSystemEvent;
             theHost.VideoPosition = new Rectangle(0, 100, 1000, 368);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void clock_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            for (int i = 0; i < theHost.ScreenCount; i++)
+            {
+                ((OMLabel)manager[i][28]).Text = DateTime.Now.ToShortTimeString();
+                ((OMLabel)manager[i][29]).Text = DateTime.Now.ToString("MMMM d");
+            }
         }
 
         void random_OnClick(OMControl sender, int screen)
