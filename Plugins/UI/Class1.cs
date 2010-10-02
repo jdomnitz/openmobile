@@ -282,13 +282,13 @@ namespace OpenMobile
             VolumeBar volume = new VolumeBar(6, -510, 130, 510);
             volume.Visible = false;
             volume.OnSliderMoved += new userInteraction(volumeChange);
-            OMLabel clocktime = new OMLabel(350, 520, 300, 60);
+            OMLabel clocktime = new OMLabel(350, 522, 300, 60);
             clocktime.TextAlignment = Alignment.CenterCenter;
             clocktime.Font = new Font(Font.GenericSansSerif, 32F);
             clocktime.Format = eTextFormat.BoldShadow;
             clocktime.Name = "UI.clocktime";
             clocktime.Text = DateTime.Now.ToShortTimeString();
-            OMLabel clockdate = new OMLabel(350, 570, 300, 30);
+            OMLabel clockdate = new OMLabel(350, 572, 300, 30);
             clockdate.TextAlignment = Alignment.CenterCenter;
             clockdate.Font = new Font(Font.GenericSansSerif, 20F);
             clockdate.Format = eTextFormat.BoldShadow;
