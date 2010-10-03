@@ -138,6 +138,10 @@ namespace ControlDemo
                 case "Dial Number":
                     theHost.execute(eFunction.dialNumber, lastPath);
                     break;
+                case "View Slide Show":
+                    if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Slideshow", lastPath))
+                        theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                    break;
             }
             List3.SelectedIndex = -1;
         }
