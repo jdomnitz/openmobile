@@ -35,10 +35,6 @@ namespace OpenMobile.Controls
         private imageItem image;
         private byte transparency = 100;
 
-        /// <summary>
-        /// Forces the renderer to redraw this control
-        /// </summary>
-
         public byte Transparency
         {
             get
@@ -47,7 +43,10 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (transparency == value)
+                    return;
                 transparency = value;
+                raiseUpdate(false);
             }
         }
 
