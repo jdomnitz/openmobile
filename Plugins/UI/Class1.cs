@@ -581,7 +581,7 @@ namespace OpenMobile
                 hideSpeech(0); //ToDo - Instance specific
             else if (function == eFunction.gesture)
             {
-                if ((arg3!="OSK")&&(arg3!="Navigation"))
+                if ((arg3 != "OSK") && (arg3 != "Navigation") && (arg3 != "Slideshow"))
                     switch (arg2)
                     {
                         case "M":
