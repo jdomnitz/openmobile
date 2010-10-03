@@ -72,6 +72,8 @@ namespace OpenMobile
                     if (manager[screen][2].Top == 533)
                     {
                         timerForward = false;
+                        manager[screen][28].Visible = false;
+                        manager[screen][29].Visible = false;
                         moveMediaBar(screen);
                     }
                 return true;
@@ -84,6 +86,8 @@ namespace OpenMobile
                     {
                         timerForward = true;
                         moveMediaBar(screen);
+                        manager[screen][28].Visible = true;
+                        manager[screen][29].Visible = true;
                     }
                 return true;
             }
@@ -839,10 +843,14 @@ namespace OpenMobile
             {
                 timerForward = true;
                 moveMediaBar(screen);
+                manager[screen][28].Visible = true;
+                manager[screen][29].Visible = true;
             }
             else if (manager[screen][2].Top == 533)
             {
                 timerForward = false;
+                manager[screen][28].Visible = false;
+                manager[screen][29].Visible = false;
                 moveMediaBar(screen);
             }
         }
