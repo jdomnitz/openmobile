@@ -33,7 +33,7 @@ namespace OpenMobile.Platform.X11
 {
     /// \internal
     /// <summary>Describes an X11 window.</summary>
-    sealed class X11WindowInfo : IWindowInfo
+    public sealed class X11WindowInfo : IWindowInfo
     {
         IntPtr handle, rootWindow, display;
         X11WindowInfo parent;

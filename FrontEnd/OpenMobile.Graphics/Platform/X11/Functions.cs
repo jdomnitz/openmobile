@@ -46,7 +46,7 @@ namespace OpenMobile.Platform.X11
    
     #endregion
 
-    internal static partial class Functions
+    public static partial class Functions
     {
         public static readonly object Lock = API.Lock;
 
@@ -141,7 +141,7 @@ namespace OpenMobile.Platform.X11
         }
 
         [DllImport("libX11", EntryPoint = "XQueryTree")]
-        public extern static int XQueryTree(IntPtr display, IntPtr window, out IntPtr root_return, out IntPtr parent_return, out IntPtr children_return, out int nchildren_return);
+        public extern static int XQueryTree(IntPtr display, IntPtr window, out IntPtr root_return, out IntPtr parent_return, out Window[] children_return, out int nchildren_return);
 
         [DllImport("libX11", EntryPoint = "XFree")]
         public extern static int XFree(IntPtr data);

@@ -582,7 +582,7 @@ XF86VidModeGetGammaRampSize(
     #region internal class XVisualInfo
 
     [StructLayout(LayoutKind.Sequential)]
-    struct XVisualInfo
+    public struct XVisualInfo
     {
         public IntPtr Visual;
         public VisualID VisualID;
@@ -700,7 +700,7 @@ XF86VidModeGetGammaRampSize(
 
     #region internal struct XRRScreenSize
 
-    internal struct XRRScreenSize
+    public struct XRRScreenSize
     {
         internal int Width, Height;
         internal int MWidth, MHeight;
@@ -710,7 +710,7 @@ XF86VidModeGetGammaRampSize(
 
     #region unsafe internal struct Screen
 
-    unsafe internal struct Screen
+    unsafe public struct Screen
     {
         XExtData ext_data;    /* hook for extension to hang buffer */
         IntPtr display;     /* back pointer to display structure */ /* _XDisplay */
@@ -749,7 +749,7 @@ XF86VidModeGetGammaRampSize(
     #region Motif
     
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MotifWmHints
+    public struct MotifWmHints
     {
         internal IntPtr flags;
         internal IntPtr functions;
@@ -1264,7 +1264,7 @@ XF86VidModeGetGammaRampSize(
 #pragma warning restore 1591
 
     [Flags]
-    internal enum XVisualInfoMask
+    public enum XVisualInfoMask
     {
         No = 0x0,
         ID = 0x1,
@@ -1310,7 +1310,7 @@ XF86VidModeGetGammaRampSize(
 
     #endregion
 
-    internal static partial class Functions
+    public static partial class Functions
     {
         internal const string X11Library = "libX11";
 
