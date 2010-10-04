@@ -1302,7 +1302,13 @@ namespace OpenMobile.Platform.X11
         /// </summary>
         public IntPtr Handle
         {
-            get { return this.window.WindowHandle; }
+            get
+            {
+                IntPtr ret=new IntPtr();
+                Marshal.StructureToPtr(window, ret, false);
+                return ret;
+            }
+                //this.window.WindowHandle; }
         }
 
         #endregion

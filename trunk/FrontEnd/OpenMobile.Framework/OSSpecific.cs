@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
+using System.Runtime.InteropServices;
 
 namespace OpenMobile.Framework
 {
@@ -75,7 +76,8 @@ namespace OpenMobile.Framework
 				theHost = host;
 				theHost.OnSystemEvent += new SystemEvent (theHost_OnSystemEvent);
 			}
-			if (Configuration.RunningOnWindows) {
+			if (Configuration.RunningOnWindows) 
+            {
 				try {
 					Process[] p = Process.GetProcessesByName (name);
 					if (lastHandle == null)
@@ -96,7 +98,38 @@ namespace OpenMobile.Framework
 				} catch (Exception) {
 					return false;
 				}
-			}
+            }
+            else if (Configuration.RunningOnX11)
+            {
+                if (lastHandle == null)
+                    lastHandle = new embedInfo[theHost.ScreenCount];
+                IntPtr ourWindow = theHost.UIHandle(screen);
+                OpenMobile.Platform.X11.X11WindowInfo info =new OpenMobile.Platform.X11.X11WindowInfo();
+                Marshal.PtrToStructure(ourWindow,info);
+                IntPtr tmp1; IntPtr tmp2;
+                int count;
+                IntPtr[] windows;
+                OpenMobile.Platform.X11.Functions.XQueryTree(info.Display,info.RootWindow,out tmp1,out tmp2,out windows,out count);
+                name = name.ToLower();
+                foreach (IntPtr window in windows)
+                {
+                    IntPtr windowName=new IntPtr();
+                    OpenMobile.Platform.X11.Functions.XFetchName(info.Display, window, ref windowName);
+                    if (Marshal.PtrToStringAuto(windowName).ToLower().StartsWith(name))
+                    {
+                        object o;
+                        theHost.getData(eGetData.GetScaleFactors, "", screen.ToString(), out o);
+                        if (o == null)
+                            return false;
+                        PointF scale = (PointF)o;
+                        OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, window, (int)(position.Width * scale.X), (int)(position.Height * scale.Y));
+                        OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, window, info.WindowHandle, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
+                        lastHandle[screen].handle = window;
+                        lastHandle[screen].position = position;
+                        return true;
+                    }
+                }
+            }
 			return false;
 		}
 
@@ -123,16 +156,27 @@ namespace OpenMobile.Framework
 		/// <returns>Returns true if the application was unembedded</returns>
 		public static bool unEmbedApplication (string name, int screen)
 		{
-			if ((lastHandle != null) && (Configuration.RunningOnWindows)) {
-				try {
-					Windows.windowsEmbedder.SetParent (lastHandle[screen].handle, IntPtr.Zero);
-					Windows.windowsEmbedder.SetWindowPos (lastHandle[screen].handle, (IntPtr)0, 10, 10, 400, 300, 0x20);
-					lastHandle[screen].handle = IntPtr.Zero;
-					return true;
-				} catch (Exception) {
-					return false;
-				}
-			}
+			if (lastHandle != null)
+            {
+                if(Configuration.RunningOnWindows)
+                {
+				    try {
+					    Windows.windowsEmbedder.SetParent (lastHandle[screen].handle, IntPtr.Zero);
+					    Windows.windowsEmbedder.SetWindowPos (lastHandle[screen].handle, (IntPtr)0, 10, 10, 400, 300, 0x20);
+					    lastHandle[screen].handle = IntPtr.Zero;
+					    return true;
+				    } catch (Exception) {
+					    return false;
+				    }
+                }
+                else if (Configuration.RunningOnX11)
+                {
+                    IntPtr ourWindow = theHost.UIHandle(screen);
+                    OpenMobile.Platform.X11.X11WindowInfo info = new OpenMobile.Platform.X11.X11WindowInfo();
+                    Marshal.PtrToStructure(ourWindow, info);
+                    OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
+                }
+            }
 			return false;
 		}
 		/// <summary>
@@ -275,13 +319,62 @@ namespace OpenMobile.Framework
 			}
 			else if (Configuration.RunningOnWindows)
 			{
-				if (IntPtr.Size == 4)
-					return eArchType.x86;
-				else
-					return eArchType.x8664;
+                SYSTEM_INFO info;
+                GetSystemInfo(out info);
+                switch (info.processorArchitecture)
+                {
+                    case wArchitecture.PROCESSOR_ARCHITECTURE_IA64:
+                    case wArchitecture.PROCESSOR_ARCHITECTURE_AMD64:
+                        return eArchType.x8664;
+                    case wArchitecture.PROCESSOR_ARCHITECTURE_IA32_ON_WIN64:
+                    case wArchitecture.PROCESSOR_ARCHITECTURE_INTEL:
+                        return eArchType.x86;
+                    case wArchitecture.PROCESSOR_ARCHITECTURE_ARM:
+                        return eArchType.ARM;
+                    case wArchitecture.PROCESSOR_ARCHITECTURE_MIPS:
+                        return eArchType.MIPS;
+                    case wArchitecture.PROCESSOR_ARCHITECTURE_PPC:
+                        return eArchType.PowerPC;
+                    case wArchitecture.PROCESSOR_ARCHITECTURE_MSIL:
+                    case wArchitecture.PROCESSOR_ARCHITECTURE_UNKNOWN:
+                    default:
+                        return eArchType.Unknown;
+                }
 			}
 			return eArchType.Unknown;
 		}
+        private enum wArchitecture:ushort
+        {
+            PROCESSOR_ARCHITECTURE_INTEL = 0,
+            PROCESSOR_ARCHITECTURE_MIPS =1,
+            PROCESSOR_ARCHITECTURE_ALPHA =2,
+            PROCESSOR_ARCHITECTURE_PPC =3,
+            PROCESSOR_ARCHITECTURE_SHX =4,
+            PROCESSOR_ARCHITECTURE_ARM =5,
+            PROCESSOR_ARCHITECTURE_IA64     = 6,
+            PROCESSOR_ARCHITECTURE_ALPHA64 = 7,
+            PROCESSOR_ARCHITECTURE_MSIL = 8, //wouldn't that be cool
+            PROCESSOR_ARCHITECTURE_AMD64    = 9,
+            PROCESSOR_ARCHITECTURE_IA32_ON_WIN64 =10,
+            PROCESSOR_ARCHITECTURE_UNKNOWN  = 0xffff 
+        }
+        [StructLayout(LayoutKind.Sequential)]
+        private struct SYSTEM_INFO
+        {
+            public wArchitecture processorArchitecture;
+            ushort reserved;
+            public uint pageSize;
+            public IntPtr minimumApplicationAddress;
+            public IntPtr maximumApplicationAddress;
+            public IntPtr activeProcessorMask;
+            public uint numberOfProcessors;
+            public uint processorType;
+            public uint allocationGranularity;
+            public ushort processorLevel;
+            public ushort processorRevision;
+        }
+        [DllImport("kernel32.dll")]
+        static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
 
 		/// <summary>
 		/// Returns the type of drive at the given path
