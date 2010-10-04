@@ -43,9 +43,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CoreAudio\AudioEndpointVolume.cs" />
@@ -54,6 +56,7 @@
     <Compile Include="CoreAudio\AudioEndPointVolumeVolumeRange.cs" />
     <Compile Include="CoreAudio\AudioVolumeNotificationData.cs" />
     <Compile Include="CoreAudio\Interfaces\AUDIO_VOLUME_NOTIFICATION_DATA.cs" />
+    <Compile Include="CoreAudio\Interfaces\IAudioBass.cs" />
     <Compile Include="CoreAudio\Interfaces\IAudioEndpointVolume.cs" />
     <Compile Include="CoreAudio\Interfaces\IAudioEndpointVolumeCallback.cs" />
     <Compile Include="CoreAudio\Interfaces\IMMDevice.cs" />

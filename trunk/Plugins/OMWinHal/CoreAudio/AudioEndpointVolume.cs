@@ -147,9 +147,9 @@ namespace OSSpecificLib.CoreAudioApi
             _AudioEndPointVolume.GetChannelCount(out channels);
             if (channels == 3)
             {
-                _AudioEndPointVolume.SetChannelVolumeLevelScalar(3, (level / 100F), Guid.Empty);
+                _AudioEndPointVolume.SetChannelVolumeLevelScalar(2, (level / 100F), Guid.Empty);
             }
-            else if (channels >= 5)
+            else if (channels > 5)
             {
                 _AudioEndPointVolume.SetChannelVolumeLevelScalar(5, (level / 100F), Guid.Empty);
             }
