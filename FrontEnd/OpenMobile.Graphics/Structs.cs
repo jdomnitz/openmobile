@@ -275,7 +275,14 @@ namespace OpenMobile.Graphics
                 return new Color(0xFF, 255,228,196, "Bisque");
             }
         }
-        public static Color Black;
+        private static Color black;
+        public static Color Black
+        {
+            get
+            {
+                return black;
+            }
+        }
         public static Color Blue
         {
             get
@@ -1161,7 +1168,14 @@ namespace OpenMobile.Graphics
                 return new Color(0xFF, 253, 99, 71, "Tomato");
             }
         }
-        public static Color Transparent;
+        private static Color transparent;
+        public static Color Transparent
+        {
+            get
+            {
+                return transparent;
+            }
+        }
         public static Color Turquoise
         {
             get
@@ -1183,7 +1197,14 @@ namespace OpenMobile.Graphics
                 return new Color(0xFF, 245, 222, 179, "Wheat");
             }
         }
-        public static Color White;
+        private static Color white;
+        public static Color White
+        {
+            get
+            {
+                return white;
+            }
+        }
         public static Color WhiteSmoke
         {
             get
@@ -1226,9 +1247,9 @@ namespace OpenMobile.Graphics
         static Color()
         {
             Empty = new Color();
-            Black = new Color(0xFF, 0, 0, 0, "Black");
-            White = new Color(0xFF, 255, 255, 255, "White");
-            Transparent = new Color(0, 0xFF, 0xFF, 0xFF, "Transparent");
+            black = new Color(0xFF, 0, 0, 0, "Black");
+            white = new Color(0xFF, 255, 255, 255, "White");
+            transparent = new Color(0, 0xFF, 0xFF, 0xFF, "Transparent");
         }
     }
     public struct PointF
