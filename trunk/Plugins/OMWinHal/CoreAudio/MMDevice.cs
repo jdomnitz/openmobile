@@ -31,11 +31,13 @@ namespace OSSpecificLib.CoreAudioApi
         private IMMDevice _RealDevice;
         private PropertyStore _PropertyStore;
         private AudioEndpointVolume _AudioEndpointVolume;
+        private IAudioBass _AudioBass;
 
         #endregion
 
         #region Guids
         private static Guid IID_IAudioEndpointVolume = new Guid("5CDF2C82-841E-4546-9722-0CF74078229A");
+        private static Guid IID_IAudioBass = new Guid("A2B1A1D9-4DB3-425D-A2B2-BD335CB3E2E");
         #endregion
 
         #region Init
@@ -51,6 +53,9 @@ namespace OSSpecificLib.CoreAudioApi
             object result;
             Marshal.ThrowExceptionForHR(_RealDevice.Activate(ref IID_IAudioEndpointVolume, CLSCTX.ALL, IntPtr.Zero, out result));
             _AudioEndpointVolume = new AudioEndpointVolume(result as IAudioEndpointVolume);
+            result = null;
+            Marshal.ThrowExceptionForHR(_RealDevice.Activate(ref IID_IAudioBass, CLSCTX.ALL, IntPtr.Zero, out result));
+            _AudioBass = result as IAudioBass;
         }
 
         #endregion
@@ -66,6 +71,14 @@ namespace OSSpecificLib.CoreAudioApi
                     GetAudioEndpointVolume();
 
                 return _AudioEndpointVolume;
+            }
+        }
+
+        public IAudioBass Bass
+        {
+            get
+            {
+                return _AudioBass;
             }
         }
 
