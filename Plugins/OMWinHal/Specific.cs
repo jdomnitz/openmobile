@@ -156,8 +156,8 @@ namespace OMHal
                 MixerLine l = m.Playback.Lines.GetMixerFirstLineByComponentType(WaveLib.AudioMixer.MIXERLINE_COMPONENTTYPE.DST_SPEAKERS);
                 if (l.Channels == 3)
                     l.Channel = Channel.Channel_3;
-                else if (l.Channels >= 5)
-                    l.Channel = Channel.Channel_5;
+                else if (l.Channels > 5)
+                    l.Channel = Channel.Channel_6;
                 else
                     return;
                 l.Volume = (int)((level / 100.0) * l.VolumeMax);
@@ -236,6 +236,8 @@ namespace OMHal
                         return false;
                     device = new MMDevice[col.Count + 1];
                     device[0] = DevEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
+                    //uint count;
+                    //device[0].Bass.GetChannelCount(out count);
                     for (int i = 0; i < col.Count; i++)
                     {
                         device[i + 1] = col[col.Count-i-1];
