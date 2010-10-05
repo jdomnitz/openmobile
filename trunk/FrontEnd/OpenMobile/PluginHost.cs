@@ -244,7 +244,7 @@ namespace OpenMobile
             }
             catch (NotImplementedException) { return null; }
         }
-        public IntPtr UIHandle(int screen)
+        public object UIHandle(int screen)
         {
             if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return (IntPtr)(-1); //Out of bounds

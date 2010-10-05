@@ -819,7 +819,7 @@ namespace OpenMobile.Platform.Windows
         }
 
         #endregion
-        public IntPtr WindowHandle
+        public object WindowHandle
         {
             get
             {

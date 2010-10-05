@@ -74,7 +74,7 @@ namespace OpenMobile
         /// </summary>
         WindowBorder WindowBorder { get; set; }
 
-        IntPtr WindowHandle { get; }
+        object WindowHandle { get; }
 
         float Opacity { get; set; }
 

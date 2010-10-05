@@ -679,11 +679,11 @@ namespace OpenMobile.Platform.X11
 
         #region INativeWindow Members
 
-        public IntPtr WindowHandle
+        public object WindowHandle
         {
             get
-            {
-                return window.WindowHandle;
+			{
+            	return window;
             }
         }
 
@@ -1302,13 +1302,7 @@ namespace OpenMobile.Platform.X11
         /// </summary>
         public IntPtr Handle
         {
-            get
-            {
-                IntPtr ret=new IntPtr();
-                Marshal.StructureToPtr(window, ret, false);
-                return ret;
-            }
-                //this.window.WindowHandle; }
+            get {return this.window.WindowHandle; }
         }
 
         #endregion
