@@ -147,6 +147,10 @@ namespace WinCam
 
         public bool SetVideoVisible(int instance, bool visible)
         {
+            if (streams == null)
+                return false;
+            if (streams.Length >= instance)
+                return false;
             foreach (stream s in streams[instance])
                 s.visible(visible);
             return true;
