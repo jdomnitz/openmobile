@@ -108,8 +108,10 @@ namespace BatterySupport
                 batteryImage = theHost.getSkinImage("BatteryCharged", true);
                 batteryImage.image.persist = true;
                 System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
+                {
                     OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
                     gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
+                }
                 g.Dispose();
                 AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
                 startWatching();

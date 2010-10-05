@@ -270,7 +270,7 @@ namespace OMPlayer
             if (type == eMediaType.AudioCD)
                 indexDirectory(arg, false);
             else if (type == eMediaType.DeviceRemoved)
-                if (DeviceInfo.get(arg).DriveType == eDriveType.CDRom)
+                if ((DeviceInfo.get(arg)!=null)&&(DeviceInfo.get(arg).DriveType == eDriveType.CDRom))
                     clearIndex(); //TODO - multiple CD-ROM Drives
         }
 

@@ -160,6 +160,9 @@ namespace ControlDemo
                     removeMe = new IconManager.UIIcon(theHost.getSkinImage("Discs|DVD"), ePriority.MediumHigh, true, "OMNotify");
                     removeMe.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "RemoveIcon", ref removeMe);
+                    removeMe = new IconManager.UIIcon(theHost.getSkinImage("Discs|BluRay"), ePriority.MediumHigh, true, "OMNotify");
+                    removeMe.tag = lastPath;
+                    theHost.sendMessage("UI", "OMNotify", "RemoveIcon", ref removeMe);
                     return;
                 case eMediaType.NotSet:
                     ((OMLabel)p[1]).Text = "Identifying . . .";
