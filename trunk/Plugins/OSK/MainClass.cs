@@ -240,6 +240,36 @@ namespace OpenMobile
                                 return false;//break;
                             case 60:
                                 return false;
+                            case 67:
+                                text.Text += "0";
+                                break;
+                            case 68:
+                                text.Text += "1";
+                                break;
+                            case 69:
+                                text.Text += "2";
+                                break;
+                            case 70:
+                                text.Text += "3";
+                                break;
+                            case 71:
+                                text.Text += "4";
+                                break;
+                            case 72:
+                                text.Text += "5";
+                                break;
+                            case 73:
+                                text.Text += "6";
+                                break;
+                            case 74:
+                                text.Text += "7";
+                                break;
+                            case 75:
+                                text.Text += "8";
+                                break;
+                            case 76:
+                                text.Text += "9";
+                                break;
                             case 51:
                                 text.Text += " ";
                                 break;
