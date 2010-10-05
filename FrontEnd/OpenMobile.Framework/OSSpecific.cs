@@ -91,7 +91,7 @@ namespace OpenMobile.Framework
 					PointF scale = (PointF)o;
 					if (Windows.windowsEmbedder.SetWindowPos (lastHandle[screen].handle, (IntPtr)0, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0), (int)(position.Width * scale.X), (int)(position.Height * scale.Y), 0x20) == false)
 						return false;
-					if (Windows.windowsEmbedder.SetParent (lastHandle[screen].handle, theHost.UIHandle (screen)) == IntPtr.Zero)
+					if (Windows.windowsEmbedder.SetParent (lastHandle[screen].handle, (IntPtr)theHost.UIHandle (screen)) == IntPtr.Zero)
 						return false;
 					Windows.windowsEmbedder.SetFocus (lastHandle[screen].handle);
 					return true;
@@ -103,19 +103,22 @@ namespace OpenMobile.Framework
             {
                 if (lastHandle == null)
                     lastHandle = new embedInfo[theHost.ScreenCount];
-                IntPtr ourWindow = theHost.UIHandle(screen);
-                OpenMobile.Platform.X11.X11WindowInfo info =new OpenMobile.Platform.X11.X11WindowInfo();
-                Marshal.PtrToStructure(ourWindow,info);
+                OpenMobile.Platform.X11.X11WindowInfo info =(OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
                 IntPtr tmp1; IntPtr tmp2;
                 int count;
-                IntPtr[] windows;
-                OpenMobile.Platform.X11.Functions.XQueryTree(info.Display,info.RootWindow,out tmp1,out tmp2,out windows,out count);
+                IntPtr w;
+                OpenMobile.Platform.X11.Functions.XQueryTree(info.Display,info.RootWindow,out tmp1,out tmp2,out w,out count);
                 name = name.ToLower();
-                foreach (IntPtr window in windows)
+				IntPtr[] windows=new IntPtr[count];
+				Marshal.Copy(w,windows,0,count);
+				foreach (IntPtr window in windows)
                 {
                     IntPtr windowName=new IntPtr();
                     OpenMobile.Platform.X11.Functions.XFetchName(info.Display, window, ref windowName);
-                    if (Marshal.PtrToStringAuto(windowName).ToLower().StartsWith(name))
+					if (windowName==IntPtr.Zero)
+						continue;
+                    string localName=Marshal.PtrToStringAuto(windowName);
+					if (localName.ToLower().Contains(name))
                     {
                         object o;
                         theHost.getData(eGetData.GetScaleFactors, "", screen.ToString(), out o);
@@ -171,10 +174,10 @@ namespace OpenMobile.Framework
                 }
                 else if (Configuration.RunningOnX11)
                 {
-                    IntPtr ourWindow = theHost.UIHandle(screen);
-                    OpenMobile.Platform.X11.X11WindowInfo info = new OpenMobile.Platform.X11.X11WindowInfo();
-                    Marshal.PtrToStructure(ourWindow, info);
-                    OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
+                    //IntPtr ourWindow = theHost.UIHandle(screen);
+                    //OpenMobile.Platform.X11.X11WindowInfo info = new OpenMobile.Platform.X11.X11WindowInfo();
+                    //Marshal.PtrToStructure(ourWindow, info);
+                    //OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
                 }
             }
 			return false;

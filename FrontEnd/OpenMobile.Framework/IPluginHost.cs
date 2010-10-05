@@ -95,7 +95,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Handle for the main rendering window
         /// </summary>
-        IntPtr UIHandle(int screen);
+        object UIHandle(int screen);
         /// <summary>
         /// Returns the audio instance that matches the given screen
         /// </summary>

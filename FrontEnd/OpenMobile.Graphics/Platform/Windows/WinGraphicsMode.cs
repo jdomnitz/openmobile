@@ -84,7 +84,7 @@ namespace OpenMobile.Platform.Windows
             using (NativeWindow native_window = new NativeWindow())
             {
                 native_window.NativeInitialize();
-                using (WinWindowInfo window = new WinWindowInfo(native_window.WindowHandle, null))
+                using (WinWindowInfo window = new WinWindowInfo((IntPtr)native_window.WindowHandle, null))
                 {
                     IntPtr deviceContext = ((WinWindowInfo)window).DeviceContext;
                     Debug.WriteLine(String.Format("Device context: {0}", deviceContext));

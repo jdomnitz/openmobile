@@ -140,7 +140,7 @@ namespace OpenMobile
 
         #endregion
 
-        public IntPtr WindowHandle
+        public object WindowHandle
         {
             get
             {
