@@ -270,7 +270,7 @@ namespace NewMedia
                 {
                     for (int i = 0; i < theHost.ScreenCount; i++)
                     {
-                        if (currentSource[i].path == arg)
+                        if ((currentSource[i]!=null)&&(currentSource[i].path == arg))
                         {
                             foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
                                 if (info.systemDrive)

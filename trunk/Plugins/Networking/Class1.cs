@@ -297,6 +297,8 @@ namespace Networking
                     else
                         icon = new IconManager.UIIcon(theHost.getSkinImage("WiFi0"), ePriority.Normal, false, "Networking");
                     theHost.sendMessage("UI", "Networking", "AddIcon", ref icon);
+                    if (networks == null)
+                        return;
                     for(int i=0;i<networks.Count;i++)
                         if (networks[i].IsConnected)
                         {
