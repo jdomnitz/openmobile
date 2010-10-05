@@ -587,7 +587,7 @@ namespace OMDVD
                 if (fullscreen == true)
                 {
                     OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
-                    OpenMobile.Platform.Windows.Functions.GetWindowInfo(OMDVD.theHost.UIHandle(screen()), ref info);
+                    OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)OMDVD.theHost.UIHandle(screen()), ref info);
                     if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
                         return videoWindow.SetWindowPosition(0, 0, info.Window.Width - (info.Window.Width - info.Client.Width), info.Window.Height - (info.Window.Height - info.Client.Height));
                     else
@@ -629,7 +629,7 @@ namespace OMDVD
                 mediaEventEx.SetNotifyWindow(sink.Handle, WM_Graph_Notify, new IntPtr(instance));
                 for(int i=0;i<theHost.ScreenCount;i++)
                     if (theHost.instanceForScreen(i)==instance)
-                        hr = videoWindow.put_Owner(OMDVD.theHost.UIHandle(i));
+                        hr = videoWindow.put_Owner((IntPtr)OMDVD.theHost.UIHandle(i));
                 if (hr != 0)
                     return false;
                 hr = videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren);

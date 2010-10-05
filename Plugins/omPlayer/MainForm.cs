@@ -850,7 +850,7 @@ namespace OMPlayer
             if (fullscreen == true)
             {
                 OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
-                OpenMobile.Platform.Windows.Functions.GetWindowInfo(OMPlayer.theHost.UIHandle(screen()),ref info);
+                OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)OMPlayer.theHost.UIHandle(screen()),ref info);
                 if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
                     return videoWindow.SetWindowPosition(0, 0, info.Window.Width - (info.Window.Width-info.Client.Width), info.Window.Height - (info.Window.Height-info.Client.Height));
                 else
@@ -890,7 +890,7 @@ namespace OMPlayer
             CheckVisibility();
             if (!isAudioOnly)
             {
-                DsError.ThrowExceptionForHR(videoWindow.put_Owner(OMPlayer.theHost.UIHandle(getFirstScreen(instance))));
+                DsError.ThrowExceptionForHR(videoWindow.put_Owner((IntPtr)OMPlayer.theHost.UIHandle(getFirstScreen(instance))));
                 DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
                 DsError.ThrowExceptionForHR(Resize());
                 DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(drain));

@@ -268,7 +268,7 @@ namespace WinCam
                 window = (IVideoWindow)graph;
                 for(int i=0;i<theHost.ScreenCount;i++)
                     if(instance==theHost.instanceForScreen(i))
-                        window.put_Owner(theHost.UIHandle(i));
+                        window.put_Owner((IntPtr)theHost.UIHandle(i));
                 hr = window.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren);
                 control = (IMediaControl)graph;
                 hr=control.Run();
