@@ -127,6 +127,7 @@ namespace OpenMobile.Framework
                         PointF scale = (PointF)o;
                         OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, window, (int)(position.Width * scale.X), (int)(position.Height * scale.Y));
                         OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, window, info.WindowHandle, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
+						OpenMobile.Platform.X11.Functions.XMoveWindow(info.Display,window,(int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
                         lastHandle[screen].handle = window;
                         lastHandle[screen].position = position;
                         return true;
@@ -161,6 +162,8 @@ namespace OpenMobile.Framework
 		{
 			if (lastHandle != null)
             {
+				if (lastHandle[screen].handle==IntPtr.Zero)
+					return false;
                 if(Configuration.RunningOnWindows)
                 {
 				    try {
@@ -174,11 +177,11 @@ namespace OpenMobile.Framework
                 }
                 else if (Configuration.RunningOnX11)
                 {
-                    //IntPtr ourWindow = theHost.UIHandle(screen);
-                    //OpenMobile.Platform.X11.X11WindowInfo info = new OpenMobile.Platform.X11.X11WindowInfo();
-                    //Marshal.PtrToStructure(ourWindow, info);
-                    //OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
-                }
+                    OpenMobile.Platform.X11.X11WindowInfo info =(OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
+                    OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
+                	lastHandle[screen].handle = IntPtr.Zero;
+					return true;
+				}
             }
 			return false;
 		}
