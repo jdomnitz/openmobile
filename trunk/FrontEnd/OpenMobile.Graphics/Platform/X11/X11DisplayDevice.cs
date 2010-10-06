@@ -202,29 +202,32 @@ namespace OpenMobile.Platform.X11
             int minor;
             if (!API.XF86VidModeQueryVersion(API.DefaultDisplay, out major, out minor))
                 return false;
+            int currentScreen = 0;
             foreach(DisplayDevice dev in devices)
             {
                 Debug.Print("Using XF86 v" + major.ToString() + "." + minor.ToString());
                 int count;
                 IntPtr srcArray;
-                API.XF86VidModeGetAllModeLines(API.DefaultDisplay, 0, out count, out srcArray);
+                API.XF86VidModeGetAllModeLines(API.DefaultDisplay, currentScreen, out count, out srcArray);
                 Debug.Print(count.ToString()+" modes detected on screen 0");
                 IntPtr[] array=new IntPtr[count];
                 Marshal.Copy(srcArray, array, 0, count);
                 API.XF86VidModeModeInfo[] Modes = new API.XF86VidModeModeInfo[count];
                 int x;
                 int y;
-                API.XF86VidModeGetViewPort(API.DefaultDisplay,0,out x,out y);
+                API.XF86VidModeGetViewPort(API.DefaultDisplay,currentScreen,out x,out y);
                 for(int i=0;i<count;i++)
                 {
                     Marshal.PtrToStructure(array[i],Modes[i]);
-                    dev.AvailableResolutions.Add(new DisplayResolution(Modes[i].hsyncstart,Modes[i].vsyncstart,Modes[i].hdisplay,Modes[i].vdisplay,32,60));
+                    dev.AvailableResolutions.Add(new DisplayResolution(Modes[i].hsyncstart,Modes[i].vsyncstart,Modes[i].hdisplay,Modes[i].vdisplay,32,Modes[i].dotclock/((float)Modes[i].htotal*Modes[i].vtotal)));
                 }
                 int pixelClock;
                 API.XF86VidModeModeLine currentMode;
-                API.XF86VidModeGetModeLine(API.DefaultDisplay,0,out pixelClock,out currentMode);
+                API.XF86VidModeGetModeLine(API.DefaultDisplay,currentScreen,out pixelClock,out currentMode);
                 dev.Bounds = new Rectangle(x, y, dev.Width, dev.Height);
                 dev.BitsPerPixel = 32;
+                dev.RefreshRate = pixelClock / ((float)currentMode.htotal * currentMode.vtotal);
+                currentScreen++;
             }
             return true;
         }
