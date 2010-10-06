@@ -57,17 +57,18 @@ namespace Slideshow
             return manager[screen];
         }
         ScreenManager manager;
+        int[] pos;
+        List<string>[] allImages;
         private void showEm(string path,int screen)
         {
-            List<string> allImages = getImages(path);
-            int pos=0;
+            allImages[screen]= getImages(path);
             while (manager[screen].Mode != eModeType.Highlighted)
             {
-                transition(allImages[pos], pos % 2,screen);
+                transition(allImages[screen][pos[screen]], pos[screen] % 2,screen);
                 Thread.Sleep(3000);
-                pos++;
-                if (pos == allImages.Count)
-                    pos = 0;
+                pos[screen]++;
+                if (pos[screen] == allImages[screen].Count)
+                    pos[screen] = 0;
             }
         }
         private void transition(string image,int num,int screen)
@@ -141,6 +142,8 @@ namespace Slideshow
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
+            pos=new int[theHost.ScreenCount];
+            allImages = new List<string>[theHost.ScreenCount];
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             manager = new ScreenManager(host.ScreenCount);
             OMPanel p = new OMPanel("Slideshow");
@@ -162,13 +165,16 @@ namespace Slideshow
         {
             if (function == eFunction.gesture)
             {
+                int screen=int.Parse(arg1);
                 switch (arg2)
                 {
                     case "back":
-                        //TODO
+                        pos[screen]--;
+                        transition(allImages[pos[screen]-1][pos[screen]], pos[screen] % 2, screen);
                         break;
                     case " ":
-                        //TODO
+                        transition(allImages[pos[screen]][pos[screen]], pos[screen] % 2, screen);
+                        pos[screen]++;
                         break;
                 }
             }

@@ -173,8 +173,6 @@ Public Class SerialAmpControl
                 End If
             End If
 
-            ' TODO: free your own state (unmanaged objects).
-            ' TODO: set large fields to null.
         End If
         Me.disposedValue = True
     End Sub

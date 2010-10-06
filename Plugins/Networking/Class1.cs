@@ -27,6 +27,7 @@ using OpenMobile.Controls;
 using OpenMobile.Graphics;
 using OpenMobile.Framework;
 using System.Collections.Generic;
+using OpenMobile.Data;
 namespace Networking
 {
     public sealed class Class1:IHighLevel
@@ -38,6 +39,14 @@ namespace Networking
         {
             if (manager == null)
                 return null;
+            if (name == "Prompt2")
+            {
+                name = "Prompt";
+                ((OMLabel)manager[screen,name][2]).Text = "Enter Credentials To Connect";
+                manager[screen,name][4].Visible = true;
+                manager[screen,name][5].Top = 370;
+                manager[screen, name][1].Height = 235;
+            }
             return manager[screen,name];
         }
 
@@ -98,6 +107,10 @@ namespace Networking
             OMTextBox textbox = new OMTextBox(310, 250, 380, 50);
             textbox.OutlineColor = Color.Red;
             textbox.OnClick += new userInteraction(textbox_OnClick);
+            OMTextBox textbox2 = new OMTextBox(310, 310, 380, 50);
+            textbox2.OutlineColor = Color.Red;
+            textbox2.OnClick += new userInteraction(textbox_OnClick);
+            textbox2.Visible = false;
             OMButton login = new OMButton(310, 310, 380, 50);
             login.Text = "Login";
             login.OnClick += new userInteraction(login_OnClick);
@@ -115,6 +128,7 @@ namespace Networking
             prompt.addControl(password);
             prompt.addControl(caption);
             prompt.addControl(textbox);
+            prompt.addControl(textbox2);
             prompt.addControl(login);
             manager.loadPanel(p);
             manager.loadPanel(prompt);
@@ -139,7 +153,7 @@ namespace Networking
         void textbox_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
-            ((OMTextBox)sender).Text= input.getText(screen, "Networking",new string[]{"","Prompt"});
+            ((OMTextBox)sender).Text = input.getText(screen, "Networking", new string[] { "", "Prompt" }, ((OMTextBox)sender).Text);
         }
 
         void connect_OnClick(OMControl sender, int screen)
@@ -155,7 +169,10 @@ namespace Networking
                             return;
                         switch(info.requiresPassword)
                         {
-                            case ePassType.UserPass: //TODO
+                            case ePassType.UserPass:
+                                theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Networking", "Prompt2");
+                                theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                                return;
                             case ePassType.UserPassDomain:
                             case ePassType.SharedKey:
                                 theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Networking", "Prompt");
@@ -170,7 +187,8 @@ namespace Networking
                         theHost.execute(eFunction.disconnectFromInternet, list.SelectedItem.tag.ToString());
                         return;
                     case "Scan":
-                        theHost.execute(eFunction.refreshData, "WinWifi"); //TODO: Make this generic
+                        using (PluginSettings settings = new PluginSettings())
+                            theHost.execute(eFunction.refreshData, settings.getSetting("Default.Wifi"));
                         UpdateList();
                         return;
                 }

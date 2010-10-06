@@ -311,16 +311,16 @@ namespace OpenMobile.Platform.X11
         [StructLayout(LayoutKind.Sequential)]
         internal struct XF86VidModeModeLine
         {
-            short hdisplay;   /* Number of display pixels horizontally */
-            short hsyncstart; /* Horizontal sync start */
-            short hsyncend;   /* Horizontal sync end */
-            short htotal;     /* Total horizontal pixels */
-            short vdisplay;   /* Number of display pixels vertically */
-            short vsyncstart; /* Vertical sync start */
-            short vsyncend;   /* Vertical sync start */
-            short vtotal;     /* Total vertical pixels */
-            int flags;      /* Mode flags */
-            int privsize;   /* Size of private */
+            internal short hdisplay;   /* Number of display pixels horizontally */
+            internal short hsyncstart; /* Horizontal sync start */
+            internal short hsyncend;   /* Horizontal sync end */
+            internal short htotal;     /* Total horizontal pixels */
+            internal short vdisplay;   /* Number of display pixels vertically */
+            internal short vsyncstart; /* Vertical sync start */
+            internal short vsyncend;   /* Vertical sync start */
+            internal short vtotal;     /* Total vertical pixels */
+            internal int flags;      /* Mode flags */
+            internal int privsize;   /* Size of private */
             IntPtr _private;   /* Server privates */
         }
 
@@ -486,15 +486,22 @@ namespace OpenMobile.Platform.X11
             int x,
             int y);
 
+        [DllImport(_dll_name_vid)]
+        extern public static bool XF86VidModeGetViewPort(
+            Display display,
+            int screen,
+            out int x_return,
+            out int y_return);
+
+        [DllImport(_dll_name_vid)]
+        extern public static bool XF86VidModeGetModeLine(
+            Display display,
+            int screen,
+            out int dotclock_return,
+            out XF86VidModeModeLine modeline);
         /*
 Bool XF86VidModeSetClientVersion(
     Display *display);
-
-Bool XF86VidModeGetModeLine(
-    Display *display,
-    int screen,
-    int *dotclock_return,
-    XF86VidModeModeLine *modeline);
 
 Bool XF86VidModeDeleteModeLine(
     Display *display,
@@ -521,12 +528,6 @@ Bool XF86VidModeGetMonitor(
     Display *display,
     int screen,
     XF86VidModeMonitor *monitor);
-
-Bool XF86VidModeGetViewPort(
-    Display *display,
-    int screen,
-    int *x_return,
-    int *y_return);
 
 
 XF86VidModeGetDotClocks(

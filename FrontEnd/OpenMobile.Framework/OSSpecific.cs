@@ -140,7 +140,8 @@ namespace OpenMobile.Framework
 		static void theHost_OnSystemEvent (eFunction function, string arg1, string arg2, string arg3)
 		{
 			if (function == eFunction.RenderingWindowResized) {
-				if (Configuration.RunningOnWindows) {
+				if (Configuration.RunningOnWindows)
+                {
 					int screen = int.Parse (arg1);
 					object o;
 					theHost.getData (eGetData.GetScaleFactors, "", arg1, out o);
@@ -149,7 +150,18 @@ namespace OpenMobile.Framework
 					PointF scale = (PointF)o;
 					if (lastHandle[screen].handle != IntPtr.Zero)
 						Windows.windowsEmbedder.SetWindowPos (lastHandle[screen].handle, (IntPtr)0, (int)(lastHandle[screen].position.X * scale.X + 1.0), (int)(lastHandle[screen].position.Y * scale.Y + 1.0), (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y), 0x20);
-				}
+                }
+                else if (Configuration.RunningOnX11)
+                {
+                    int screen = int.Parse(arg1);
+                    object o;
+                    theHost.getData(eGetData.GetScaleFactors, "", arg1, out o);
+                    if (o == null)
+                        return;
+                    OpenMobile.Platform.X11.X11WindowInfo info=(OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
+                    PointF scale = (PointF)o;
+                    OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, lastHandle[screen].handle, (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y));
+                }
 			}
 		}
 		/// <summary>

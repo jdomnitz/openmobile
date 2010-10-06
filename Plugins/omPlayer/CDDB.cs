@@ -189,6 +189,12 @@ namespace OMPlayer
             return true;
         }
 
+        public bool clearIndex(string drive)
+        {
+            media.RemoveAll(p => p.Location.StartsWith(drive));
+            return true;
+        }
+
         public bool supportsPlaylists
         {
             get { return false; }
@@ -271,7 +277,7 @@ namespace OMPlayer
                 indexDirectory(arg, false);
             else if (type == eMediaType.DeviceRemoved)
                 if ((DeviceInfo.get(arg)!=null)&&(DeviceInfo.get(arg).DriveType == eDriveType.CDRom))
-                    clearIndex(); //TODO - multiple CD-ROM Drives
+                    clearIndex(arg);
         }
 
         public Settings loadSettings()
