@@ -42,7 +42,7 @@ namespace OpenMobile.Framework
 	{
 		Unknown,
 		x86,
-		x8664,
+		x64,
 		ARM,
 		MIPS,
 		PowerPC,
@@ -320,7 +320,7 @@ namespace OpenMobile.Framework
 					if (IntPtr.Size == 4)
 						return eArchType.x86;
 					else
-						return eArchType.x8664;
+						return eArchType.x64;
 				case "arm":
 				case "arm26":
 					return eArchType.ARM;
@@ -343,7 +343,7 @@ namespace OpenMobile.Framework
                 {
                     case wArchitecture.PROCESSOR_ARCHITECTURE_IA64:
                     case wArchitecture.PROCESSOR_ARCHITECTURE_AMD64:
-                        return eArchType.x8664;
+                        return eArchType.x64;
                     case wArchitecture.PROCESSOR_ARCHITECTURE_IA32_ON_WIN64:
                     case wArchitecture.PROCESSOR_ARCHITECTURE_INTEL:
                         return eArchType.x86;

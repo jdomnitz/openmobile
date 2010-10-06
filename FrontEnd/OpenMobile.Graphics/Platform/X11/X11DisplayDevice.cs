@@ -214,17 +214,15 @@ namespace OpenMobile.Platform.X11
                 API.XF86VidModeModeInfo[] Modes = new API.XF86VidModeModeInfo[count];
                 int x;
                 int y;
+                API.XF86VidModeGetViewPort(API.DefaultDisplay,0,out x,out y);
                 for(int i=0;i<count;i++)
                 {
                     Marshal.PtrToStructure(array[i],Modes[i]);
-                    API.XF86VidModeGetViewPort(API.DefaultDisplay,0,out x,out y);
                     dev.AvailableResolutions.Add(new DisplayResolution(Modes[i].hsyncstart,Modes[i].vsyncstart,Modes[i].hdisplay,Modes[i].vdisplay,32,60));
                 }
                 int pixelClock;
                 API.XF86VidModeModeLine currentMode;
                 API.XF86VidModeGetModeLine(API.DefaultDisplay,0,out pixelClock,out currentMode);
-                dev.Height = currentMode.vdisplay;
-                dev.Width = currentMode.hdisplay;
                 dev.Bounds = new Rectangle(x, y, dev.Width, dev.Height);
                 dev.BitsPerPixel = 32;
             }
