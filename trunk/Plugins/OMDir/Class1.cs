@@ -173,8 +173,11 @@ namespace OMDir
                 for (int i = 0; i < theHost.ScreenCount; i++)
                 {
                     OMList l = (OMList)manager[i][3];
-                    if ((l.Tag == null)||(l.Tag.ToString() == ""))
+                    if ((l.Tag == null) || (l.Tag.ToString() == ""))
+                    {
+                        l.Clear();
                         loadRoot(l);
+                    }
                 }
             }
         }

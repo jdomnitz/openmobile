@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using OpenMobile.Plugin;
 using OpenMobile;
 using System.Threading;
+using OpenMobile.Data;
 namespace LinWifi
 {
 	public class LinWifi:INetwork
@@ -69,6 +70,8 @@ namespace LinWifi
 			b=NDesk.DBus.Bus.System;
 			if (!detectHardware())
 				return eLoadStatus.LoadFailedGracefulUnloadRequested;
+            using (PluginSettings settings = new PluginSettings())
+                settings.setSetting("Default.Wifi", "LinWifi");
 			checkNetworks();
 			t=new Thread(delegate(){while(true) b.Iterate();});
 			t.Start();
@@ -258,7 +261,7 @@ namespace LinWifi
 		}
 		public void Dispose ()
 		{
-			//TODO
+            //
 		}
 		#endregion		
 	}

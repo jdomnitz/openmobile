@@ -195,10 +195,40 @@ namespace OpenMobile.Platform.X11
 
             return true;
         }
-
+        //UNTESTED
         static bool QueryXF86(List<DisplayDevice> devices)
         {
-            return false;
+            int major;
+            int minor;
+            if (!API.XF86VidModeQueryVersion(API.DefaultDisplay, out major, out minor))
+                return false;
+            foreach(DisplayDevice dev in devices)
+            {
+                Debug.Print("Using XF86 v" + major.ToString() + "." + minor.ToString());
+                int count;
+                IntPtr srcArray;
+                API.XF86VidModeGetAllModeLines(API.DefaultDisplay, 0, out count, out srcArray);
+                Debug.Print(count.ToString()+" modes detected on screen 0");
+                IntPtr[] array=new IntPtr[count];
+                Marshal.Copy(srcArray, array, 0, count);
+                API.XF86VidModeModeInfo[] Modes = new API.XF86VidModeModeInfo[count];
+                int x;
+                int y;
+                for(int i=0;i<count;i++)
+                {
+                    Marshal.PtrToStructure(array[i],Modes[i]);
+                    API.XF86VidModeGetViewPort(API.DefaultDisplay,0,out x,out y);
+                    dev.AvailableResolutions.Add(new DisplayResolution(Modes[i].hsyncstart,Modes[i].vsyncstart,Modes[i].hdisplay,Modes[i].vdisplay,32,60));
+                }
+                int pixelClock;
+                API.XF86VidModeModeLine currentMode;
+                API.XF86VidModeGetModeLine(API.DefaultDisplay,0,out pixelClock,out currentMode);
+                dev.Height = currentMode.vdisplay;
+                dev.Width = currentMode.hdisplay;
+                dev.Bounds = new Rectangle(x, y, dev.Width, dev.Height);
+                dev.BitsPerPixel = 32;
+            }
+            return true;
         }
 
         #region static int[] FindAvailableDepths(int screen)
