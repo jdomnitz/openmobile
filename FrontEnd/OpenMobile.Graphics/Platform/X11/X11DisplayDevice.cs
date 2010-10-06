@@ -79,12 +79,23 @@ namespace OpenMobile.Platform.X11
 
                     if (!xf86_supported)
                     {
-                        throw new PlatformException("XF86 query failed, no DisplayDevice support available.");
+                        QueryBestGuess(devices);
                     }
                 }
             }
         }
-
+		
+		static void QueryBestGuess(List<DisplayDevice> devices)
+		{
+			foreach(DisplayDevice device in devices)
+			{
+				device.BitsPerPixel=24;
+				device.Bounds=new Rectangle(0,0,800,600);
+				device.IsPrimary=true;
+				device.RefreshRate=60;
+			}
+		}
+		
         internal X11DisplayDevice() { }
 
         #endregion
@@ -116,7 +127,7 @@ namespace OpenMobile.Platform.X11
                     deviceToScreen.Add(dev, 0 /*screen.ScreenNumber*/);
                 }
             }
-            return true;
+            return (devices.Count>0);
         }
 
         static bool QueryXRandR(List<DisplayDevice> devices)
@@ -200,8 +211,13 @@ namespace OpenMobile.Platform.X11
         {
             int major;
             int minor;
+			try{
             if (!API.XF86VidModeQueryVersion(API.DefaultDisplay, out major, out minor))
                 return false;
+			}catch(DllNotFoundException)
+			{
+				return false;
+			}
             int currentScreen = 0;
             foreach(DisplayDevice dev in devices)
             {
@@ -225,7 +241,7 @@ namespace OpenMobile.Platform.X11
                 API.XF86VidModeModeLine currentMode;
                 API.XF86VidModeGetModeLine(API.DefaultDisplay,currentScreen,out pixelClock,out currentMode);
                 dev.Bounds = new Rectangle(x, y, dev.Width, dev.Height);
-                dev.BitsPerPixel = 32;
+                dev.BitsPerPixel = FindCurrentDepth(currentScreen);
                 dev.RefreshRate = pixelClock / ((float)currentMode.htotal * currentMode.vtotal);
                 currentScreen++;
             }

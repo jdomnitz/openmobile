@@ -40,9 +40,9 @@ namespace OpenMobile.Platform.X11
     /// \internal
     /// <summary>
     /// Drives GameWindow on X11.
-    /// This class supports OpenMobile, and is not intended for use by OpenMobile programs.
+    /// This class supports OpenTK, and is not intended for use by OpenTK programs.
     /// </summary>
-    internal sealed class X11GLNative : INativeWindow, IDisposable
+    public sealed class X11GLNative : INativeWindow, IDisposable
     {
         // TODO: Disable screensaver.
         // TODO: What happens if we can't disable decorations through motif?
@@ -928,7 +928,18 @@ namespace OpenMobile.Platform.X11
                 ClientRectangle = new Rectangle(Point.Empty, value);
             }
         }
-
+		public IntPtr Parent
+		{
+			get
+			{
+				return window.Parent.WindowHandle;	
+			}
+			set
+			{
+				Functions.XReparentWindow(window.Display,window.WindowHandle,value,0,0);
+				window.Parent.WindowHandle=value;
+			}
+		}
         #endregion
         private float opacity = 1F;
         public float Opacity
