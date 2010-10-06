@@ -86,7 +86,7 @@ namespace OMDebug
 			writer.WriteLine("Open GL v." + Graphics.Version);
             writer.WriteLine("------------------Hardware-------------------");
             writer.WriteLine("Processors: " + Environment.ProcessorCount);
-            writer.WriteLine("Architecture: x" + ((IntPtr.Size == 4) ? "86" : "64"));
+            writer.WriteLine("Architecture: "+OpenMobile.Framework.OSSpecific.getArchitecture().ToString());
             writer.WriteLine("Screens: " + DisplayDevice.AvailableDisplays.Count.ToString());
             writer.WriteLine("Graphics Card: " + Graphics.GraphicsEngine);
             writer.WriteLine("----------------Inital Assemblies-------------");
