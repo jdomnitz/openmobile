@@ -64,6 +64,12 @@
     <Compile Include="Graphics.cs" />
     <Compile Include="Graphics\Color4.cs" />
     <Compile Include="Graphics\ColorFormat.cs" />
+    <Compile Include="Graphics\ES20\Core.cs" />
+    <Compile Include="Graphics\ES20\Delegates.cs" />
+    <Compile Include="Graphics\ES20\Enums.cs" />
+    <Compile Include="Graphics\ES20\ErrorHelper.cs" />
+    <Compile Include="Graphics\ES20\ES.cs" />
+    <Compile Include="Graphics\ES20\Helper.cs" />
     <Compile Include="Graphics\GraphicsBindingsBase.cs" />
     <Compile Include="Graphics\GraphicsContext.cs" />
     <Compile Include="Graphics\GraphicsContextBase.cs" />
@@ -128,6 +134,14 @@
     <Compile Include="Math\Vector4h.cs" />
     <Compile Include="NativeWindow.cs" />
     <Compile Include="Platform\DesktopGraphicsContext.cs" />
+    <Compile Include="Platform\Egl\Egl.cs" />
+    <Compile Include="Platform\Egl\EglContext.cs" />
+    <Compile Include="Platform\Egl\EglGraphicsMode.cs" />
+    <Compile Include="Platform\Egl\EglMacPlatformFactory.cs" />
+    <Compile Include="Platform\Egl\EglWindowInfo.cs" />
+    <Compile Include="Platform\Egl\EglWinPlatformFactory.cs" />
+    <Compile Include="Platform\Egl\EglX11PlatformFactory.cs" />
+    <Compile Include="Platform\EmbeddedGraphicsContext.cs" />
     <Compile Include="Platform\Factory.cs" />
     <Compile Include="Platform\IDisplayDeviceDriver.cs" />
     <Compile Include="Platform\INativeGLWindow.cs" />
