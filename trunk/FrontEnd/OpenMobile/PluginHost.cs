@@ -277,8 +277,11 @@ namespace OpenMobile
             }
             set
             {
+                if (value == null)
+                    return;
                 _location = value;
-                raiseNavigationEvent(eNavigationEvent.LocationChanged, _location.ToString());
+                if ((_location == null) || (_location.City != value.City)||(_location.Street!=value.Street)||(_location.Zip!=value.Zip))
+                    raiseNavigationEvent(eNavigationEvent.LocationChanged, _location.ToString());
             }
         }
         public Rectangle VideoPosition
