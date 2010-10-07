@@ -601,12 +601,14 @@ namespace OMPlayer
         private bool fullscreen = false;
         IntPtr drain = IntPtr.Zero;
         private delegate bool PositionCallback(float seconds);
-        private delegate bool StopCallback();
+        private delegate int SpeedCallback(double rate);
+        private delegate bool VoidCallback();
         private delegate bool PlayCallback(string filename);
         private delegate void GetPositionCallback();
         private event PositionCallback OnSetPosition;
-        private event StopCallback OnStop;
+        private event VoidCallback OnStop;
         private event PlayCallback OnPlay;
+        private event SpeedCallback OnSetRate;
         private event GetPositionCallback OnGetPosition;
         // Methods
         public AVPlayer(int instanceNum)
@@ -617,7 +619,8 @@ namespace OMPlayer
             sink.OnClick += new MessageProc.Click(clicked);
             sink.OnEvent += new MessageProc.eventOccured(eventOccured);
             OnSetPosition += new PositionCallback(AVPlayer_OnSetPosition);
-            OnStop+=new StopCallback(stop);
+            OnStop+=new VoidCallback(stop);
+            OnSetRate+=new SpeedCallback(SetRate);
             OnPlay+=new PlayCallback(PlayMovieInWindow);
             OnGetPosition+=new GetPositionCallback(getCurrentPos);
         }
@@ -923,6 +926,10 @@ namespace OMPlayer
             int hr = 0;
             if (mediaPosition != null)
             {
+                if (sink.InvokeRequired)
+                {
+                    return (int)sink.Invoke(OnSetRate, new object[] { rate });
+                }
                 hr = mediaSeeking.SetRate(rate);
                 if (hr == 0)
                     currentPlaybackRate = rate;
