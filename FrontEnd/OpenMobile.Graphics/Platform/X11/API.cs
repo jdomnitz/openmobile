@@ -54,7 +54,7 @@ namespace OpenMobile.Platform.X11
         #region --- Fields ---
 
         private const string _dll_name = "libX11";
-        private const string _dll_name_vid = "libXxf86vm";
+        private const string _dll_name_vid = "libXxf86vm.so.1";
 
         static Display defaultDisplay;
         static int defaultScreen;

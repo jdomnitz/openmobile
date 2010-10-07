@@ -79,6 +79,7 @@ namespace OpenMobile.Platform.X11
 
                     if (!xf86_supported)
                     {
+						Debug.Print("XF86 query failed, falling back to XF86.");
                         QueryBestGuess(devices);
                     }
                 }
@@ -206,7 +207,7 @@ namespace OpenMobile.Platform.X11
 
             return true;
         }
-        //UNTESTED
+
         static bool QueryXF86(List<DisplayDevice> devices)
         {
             int major;
@@ -228,21 +229,23 @@ namespace OpenMobile.Platform.X11
                 Debug.Print(count.ToString()+" modes detected on screen 0");
                 IntPtr[] array=new IntPtr[count];
                 Marshal.Copy(srcArray, array, 0, count);
-                API.XF86VidModeModeInfo[] Modes = new API.XF86VidModeModeInfo[count];
+                API.XF86VidModeModeInfo Mode = new API.XF86VidModeModeInfo();
                 int x;
                 int y;
                 API.XF86VidModeGetViewPort(API.DefaultDisplay,currentScreen,out x,out y);
+				List<OpenMobile.DisplayResolution> resolutions=new List<OpenMobile.DisplayResolution>();
                 for(int i=0;i<count;i++)
                 {
-                    Marshal.PtrToStructure(array[i],Modes[i]);
-                    dev.AvailableResolutions.Add(new DisplayResolution(Modes[i].hsyncstart,Modes[i].vsyncstart,Modes[i].hdisplay,Modes[i].vdisplay,32,Modes[i].dotclock/((float)Modes[i].htotal*Modes[i].vtotal)));
+                    Mode=(API.XF86VidModeModeInfo)Marshal.PtrToStructure(array[i],typeof(API.XF86VidModeModeInfo));
+                    resolutions.Add(new DisplayResolution(x,y,Mode.hdisplay,Mode.vdisplay,24,(Mode.dotclock*1000F)/(Mode.vtotal*Mode.htotal)));
                 }
+				dev.AvailableResolutions=resolutions;
                 int pixelClock;
                 API.XF86VidModeModeLine currentMode;
                 API.XF86VidModeGetModeLine(API.DefaultDisplay,currentScreen,out pixelClock,out currentMode);
-                dev.Bounds = new Rectangle(x, y, dev.Width, dev.Height);
+                dev.Bounds = new Rectangle(x, y, currentMode.hdisplay, (currentMode.vdisplay==0) ? currentMode.vsyncstart : currentMode.vdisplay);
                 dev.BitsPerPixel = FindCurrentDepth(currentScreen);
-                dev.RefreshRate = pixelClock / ((float)currentMode.htotal * currentMode.vtotal);
+                dev.RefreshRate = (pixelClock*1000F)/(currentMode.vtotal*currentMode.htotal);
                 currentScreen++;
             }
             return true;
