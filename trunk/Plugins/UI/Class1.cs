@@ -34,7 +34,7 @@ namespace OpenMobile
         private IPluginHost theHost;
         private System.Timers.Timer tick = new System.Timers.Timer();
         private System.Timers.Timer statusReset = new System.Timers.Timer(2100);
-        private System.Timers.Timer clockTimer = new System.Timers.Timer(60000);
+        private System.Timers.Timer clockTimer = new System.Timers.Timer(10000);
         private bool showVolumeChanges;
         #region IBasePlugin Members
 
