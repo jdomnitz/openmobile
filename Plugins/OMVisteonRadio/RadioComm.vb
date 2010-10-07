@@ -1,4 +1,23 @@
-﻿Imports OpenMobile
+﻿#Region "GPL"
+'    This file is part of OpenMobile.
+
+'    OpenMobile is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+
+'    OpenMobile is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+
+'    You should have received a copy of the GNU General Public License
+'    along with OpenMobile.  If not, see <http://www.gnu.org/licenses/>.
+
+'    Copyright 2010 Jonathan Heizer jheizer@gmail.com
+#End Region
+
+Imports OpenMobile
 Imports OpenMobile.Controls
 Imports OpenMobile.Plugin
 Imports OpenMobile.Framework
@@ -38,22 +57,31 @@ Public Class RadioComm
     End Function
 
     Private Sub BackgroundLoad()
-        LoadRadioSettings()
+        Try
+            LoadRadioSettings()
 
-        m_Audio = New AudioRouter.AudioManager(m_SourceDevice)
-        m_Audio.FadeIn = m_Fade
-        m_Audio.FadeOut = m_Fade
+            'Check to see if the source audio device still exists, if not switch to default
+            If Not Array.IndexOf(AudioRouter.AudioRouter.listSources, m_SourceDevice) > -1 Then
+                m_SourceDevice = 0
+            End If
 
-        If m_ComPort > 0 Then
-            m_Radio.AutoSearch = False
-            m_Radio.ComPort = m_ComPort
-        Else
-            m_Radio.AutoSearch = True
-        End If
+            m_Audio = New AudioRouter.AudioManager(m_SourceDevice)
+            m_Audio.FadeIn = m_Fade
+            m_Audio.FadeOut = m_Fade
 
-        m_Radio.Open()
+            If m_ComPort > 0 Then
+                m_Radio.AutoSearch = False
+                m_Radio.ComPort = m_ComPort
+            Else
+                m_Radio.AutoSearch = True
+            End If
 
+            m_Radio.Open()
 
+        Catch ex As Exception
+            m_Host.sendMessage("OMDebug", ex.Source, ex.ToString)
+
+        End Try
     End Sub
 
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
@@ -230,7 +258,7 @@ Public Class RadioComm
             Info = m_StationList(m_Radio.CurrentFrequency)
             Info.HD = m_Radio.IsHDActive
             Info.stationName = m_Radio.CurrentFormattedChannel
-            
+
             Return Info
         End If
 
@@ -330,26 +358,30 @@ Public Class RadioComm
     End Function
 
     Private Sub Scan()
-        Dim StartFreq As Integer = m_Radio.CurrentFrequency
-        While m_IsScanning
-            If m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
-                m_Radio.SeekUp(HDRadio.HDRadioSeekType.ALL)
-            End If
+        Try
+            Dim StartFreq As Integer = m_Radio.CurrentFrequency
+            While m_IsScanning
+                If m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
+                    m_Radio.SeekUp(HDRadio.HDRadioSeekType.ALL)
+                End If
 
-            System.Threading.Thread.Sleep(3000)
+                System.Threading.Thread.Sleep(5000)
 
-            If m_Radio.CurrentFrequency = StartFreq Then
-                m_IsScanning = False
-            End If
-        End While
+                If m_Radio.CurrentFrequency = StartFreq Then
+                    m_IsScanning = False
+                End If
+            End While
+
+        Catch ex As Exception
+        End Try
     End Sub
-  
+
     Public Function setBand(ByVal instance As Integer, ByVal band As OpenMobile.eTunedContentBand) As Boolean Implements OpenMobile.Plugin.ITunedContent.setBand
         m_CurrentInstance = instance
         If band = eTunedContentBand.AM Then
-            Return tuneTo(instance, "AM:5200")
+            Return tuneTo(instance, "AM:53000")
         ElseIf band = eTunedContentBand.FM OrElse band = eTunedContentBand.HD Then
-            Return tuneTo(instance, "FM:8750")
+            Return tuneTo(instance, "FM:87500")
         End If
     End Function
 
@@ -399,6 +431,7 @@ Public Class RadioComm
             m_CurrentMedia.Album = " "
 
             RaiseMediaEvent(eFunction.tunerDataUpdated, "")
+            RaiseMediaEvent(eFunction.Play, "")
 
             If m_StationList.Count = getStatus(m_CurrentInstance).stationList.Length Then
                 RaiseMediaEvent(eFunction.stationListUpdated, "")
@@ -573,6 +606,7 @@ Public Class RadioComm
     Protected Overridable Sub Dispose(ByVal disposing As Boolean)
         If Not Me.disposedValue Then
             If disposing Then
+                ' TODO: free other state (managed objects).
                 Try
                     m_Radio.PowerOff()
                     m_Audio.Suspend()
@@ -582,8 +616,10 @@ Public Class RadioComm
                 End Try
             End If
 
+            ' TODO: free your own state (unmanaged objects).
+            ' TODO: set large fields to null.
         End If
-            Me.disposedValue = True
+        Me.disposedValue = True
     End Sub
 
 #Region " IDisposable Support "
