@@ -232,7 +232,6 @@ Public Class OMSerialGPS
     End Sub
 
     Private Sub RefreshLocation(ByVal Latitude As Double, ByVal Longitude As Double)
-        Dim CityChanged As Boolean = False
 
         m_Longitude = Longitude
         m_Latitude = Latitude
@@ -257,13 +256,10 @@ Public Class OMSerialGPS
 
                     Rdr.Read()
 
-                    If (Not m_Zip = Rdr(0).ToString) OrElse (Not m_City = Rdr(2).ToString) Then
-                        m_Zip = Rdr(0).ToString
-                        m_State = Rdr(1).ToString
-                        m_City = Rdr(2).ToString
-                        m_StateCode = Rdr(3).ToString
-                        CityChanged = True
-                    End If
+                    m_Zip = Rdr(0).ToString
+                    m_State = Rdr(1).ToString
+                    m_City = Rdr(2).ToString
+                    m_StateCode = Rdr(3).ToString
                     m_LastLocationUpdate = DateTime.Now
 
                     Rdr.Close()
@@ -276,11 +272,9 @@ Public Class OMSerialGPS
             End If
             Loc.Latitude = m_Latitude
             Loc.Longitude = m_Longitude
-            If CityChanged Then
-                Loc.City = m_City
-                Loc.Zip = m_Zip
-                Loc.State = m_State
-            End If
+            Loc.City = m_City
+            Loc.Zip = m_Zip
+            Loc.State = m_State
             m_Host.CurrentLocation = Loc
 
         Catch ex As Exception
