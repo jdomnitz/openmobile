@@ -268,6 +268,19 @@ namespace OpenMobile
                 return vehicleInMotion;
             }
         }
+        private Location _location = new Location();
+        public Location CurrentLocation
+        {
+            get
+            {
+                return _location;
+            }
+            set
+            {
+                _location = value;
+                raiseNavigationEvent(eNavigationEvent.LocationChanged, _location.ToString());
+            }
+        }
         public Rectangle VideoPosition
         {
             get
