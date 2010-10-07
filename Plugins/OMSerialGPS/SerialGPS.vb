@@ -77,7 +77,6 @@ Public Class OMSerialGPS
 
     Public Overrides Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus
         m_Host = host
-        RefreshLocation()
         InitPIDMask()
         LoadGPSSettings()
 
@@ -207,19 +206,15 @@ Public Class OMSerialGPS
 
                 'Zip DB
             Case Is = PIDs.ZipCode
-                RefreshLocation()
                 Return m_Zip
 
             Case Is = PIDs.City
-                RefreshLocation()
                 Return m_City
 
             Case Is = PIDs.StateCode
-                RefreshLocation()
                 Return m_StateCode
 
             Case Is = PIDs.State
-                RefreshLocation()
                 Return m_State
 
         End Select
@@ -236,7 +231,12 @@ Public Class OMSerialGPS
         m_Host.sendMessage("UI", "OMSerialGPS", "RemoveIcon", Icon)
     End Sub
 
-    Private Sub RefreshLocation()
+    Private Sub RefreshLocation(ByVal Latitude As Double, ByVal Longitude As Double)
+        Dim CityChanged As Boolean = False
+
+        m_Longitude = Longitude
+        m_Latitude = Latitude
+
         'Restrict this to once a minute.  Not changing often so give the DB a break.
         Try
             If m_IconShowing Then
@@ -256,19 +256,34 @@ Public Class OMSerialGPS
                     Rdr = Cmd.ExecuteReader()
 
                     Rdr.Read()
-                    m_Zip = Rdr(0).ToString
-                    m_State = Rdr(1).ToString
-                    m_City = Rdr(2).ToString
-                    m_StateCode = Rdr(3).ToString
 
+                    If (Not m_Zip = Rdr(0).ToString) OrElse (Not m_City = Rdr(2).ToString) Then
+                        m_Zip = Rdr(0).ToString
+                        m_State = Rdr(1).ToString
+                        m_City = Rdr(2).ToString
+                        m_StateCode = Rdr(3).ToString
+                        CityChanged = True
+                    End If
                     m_LastLocationUpdate = DateTime.Now
 
                     Rdr.Close()
                 End If
             End If
 
-        Catch ex As Exception
+            Dim Loc As Location = m_Host.CurrentLocation
+            If Loc Is Nothing Then
+                Loc = New Location
+            End If
+            Loc.Latitude = m_Latitude
+            Loc.Longitude = m_Longitude
+            If CityChanged Then
+                Loc.City = m_City
+                Loc.Zip = m_Zip
+                Loc.State = m_State
+            End If
+            m_Host.CurrentLocation = Loc
 
+        Catch ex As Exception
         End Try
     End Sub
 
@@ -346,14 +361,12 @@ Public Class OMSerialGPS
 
     Private Sub m_GPS_NewGPGGA(ByVal Data As SerialGPS.GPGGA) Handles m_GPS.NewGPGGA
         m_GPGGA = Data
-        m_Longitude = m_GPGGA.Longitude
-        m_Latitude = m_GPGGA.Latitude
+        RefreshLocation(m_GPGGA.Latitude, m_GPGGA.Longitude)
     End Sub
 
     Private Sub m_GPS_NewGPGLL(ByVal Data As SerialGPS.GPGLL) Handles m_GPS.NewGPGLL
         m_GPGLL = Data
-        m_Longitude = m_GPGLL.Longitude
-        m_Latitude = m_GPGLL.Latitude
+        RefreshLocation(m_GPGLL.Latitude, m_GPGLL.Longitude)
     End Sub
 
     Private Sub m_GPS_NewGPGSA(ByVal Data As SerialGPS.GPGSA) Handles m_GPS.NewGPGSA
@@ -366,8 +379,7 @@ Public Class OMSerialGPS
 
     Private Sub m_GPS_NewGPRMC(ByVal Data As SerialGPS.GPRMC) Handles m_GPS.NewGPRMC
         m_GPRMC = Data
-        m_Longitude = m_GPRMC.Longitude
-        m_Latitude = m_GPRMC.Latitude
+        RefreshLocation(m_GPRMC.Latitude, m_GPRMC.Longitude)
 
         If m_GPRMC.SatFix AndAlso Not m_IconShowing Then
             ShowIcon()
