@@ -31,14 +31,14 @@ namespace OpenMobile.Plugin
     /// <param name="arg1"></param>
     /// <param name="arg2"></param>
     /// <param name="arg3"></param>
-    public delegate void SystemEvent(eFunction function,string arg1,string arg2,string arg3);
+    public delegate void SystemEvent(eFunction function, string arg1, string arg2, string arg3);
     /// <summary>
     /// A media specific event notification
     /// </summary>
     /// <param name="function"></param>
     /// <param name="arg"></param>
     /// <param name="instance"></param>
-    public delegate void MediaEvent(eFunction function, int instance,string arg);
+    public delegate void MediaEvent(eFunction function, int instance, string arg);
     /// <summary>
     /// Triggered when a key is pressed on the keyboard
     /// </summary>
@@ -68,7 +68,7 @@ namespace OpenMobile.Plugin
     /// </summary>
     /// <param name="type"></param>
     /// <param name="arg"></param>
-    public delegate void WirelessEvent(eWirelessEvent type,string arg);
+    public delegate void WirelessEvent(eWirelessEvent type, string arg);
     /// <summary>
     /// Represents the graphics capabilities of the current platform
     /// </summary>
@@ -77,21 +77,25 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Full Graphics
         /// </summary>
-        Standard=0,
+        Standard = 0,
         /// <summary>
         /// Minimal Graphics - aka no effects
         /// </summary>
-        Minimal=1,
+        Minimal = 1,
         /// <summary>
         /// High Graphics - aka disable adaptive framerate
         /// </summary>
-        High=2
+        High = 2
     }
     /// <summary>
     /// The default plugin host interface
     /// </summary>
     public interface IPluginHost
     {
+        /// <summary>
+        /// The current GPS position and/or city/state/zip
+        /// </summary>
+        Location CurrentLocation { get; set; }
         /// <summary>
         /// Handle for the main rendering window
         /// </summary>
@@ -105,7 +109,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Returns the number of screens currently being rendered
         /// </summary>
-        int ScreenCount{get;}
+        int ScreenCount { get; }
         /// <summary>
         /// Returns the number of unique audio instances
         /// </summary>
@@ -189,7 +193,7 @@ namespace OpenMobile.Plugin
         /// <param name="arg1">Optional Argument</param>
         /// <param name="arg2">Optional Argument</param>
         /// <returns></returns>
-        bool executeByType(Type type, eFunction function, string arg1,string arg2);
+        bool executeByType(Type type, eFunction function, string arg1, string arg2);
         /// <summary>
         /// Get the specified image from the skin directory
         /// </summary>
@@ -202,7 +206,7 @@ namespace OpenMobile.Plugin
         /// <param name="imageName"></param>
         /// <param name="noCache">Dont cache the image in the gloabl cache</param>
         /// <returns></returns>
-        imageItem getSkinImage(string imageName,bool noCache);
+        imageItem getSkinImage(string imageName, bool noCache);
         /// <summary>
         /// Gets information on the currently playing media
         /// </summary>
