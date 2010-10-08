@@ -432,10 +432,7 @@ namespace OpenMobile
                 if (type == eMediaType.NotSet)
                     StorageAnalyzer.AnalyzeAsync(arg, justInserted);
             }
-            catch (Exception e) 
-			{
-				sendMessage("OMDebug","PluginHost",e.StackTrace);
-			}
+            catch (Exception e) { SandboxedThread.handle(e); }
         }
 
         #region Power Events
@@ -1380,8 +1377,12 @@ namespace OpenMobile
         }
         public void raiseSystemEvent(eFunction e, string arg1, string arg2, string arg3)
         {
-            if (OnSystemEvent != null)
-                OnSystemEvent(e, arg1, arg2, arg3);
+            try
+            {
+                if (OnSystemEvent != null)
+                    OnSystemEvent(e, arg1, arg2, arg3);
+            }
+            catch (Exception error) { SandboxedThread.handle(error); }
         }
         public void raisePowerEvent(ePowerEvent e)
         {
@@ -1400,19 +1401,24 @@ namespace OpenMobile
         {
             try
             {
-                OnNavigationEvent(type, arg);
+                if (OnNavigationEvent!=null)
+                    OnNavigationEvent(type, arg);
             }
-            catch (Exception) { }
+            catch (Exception e) { SandboxedThread.handle(e); }
         }
         public void raiseWirelessEvent(eWirelessEvent type, string arg)
         {
-            if (OnWirelessEvent != null)
-                OnWirelessEvent(type, arg);
+            try
+            {
+                if (OnWirelessEvent != null)
+                    OnWirelessEvent(type, arg);
+            }
+            catch (Exception e) { SandboxedThread.handle(e); }
         }
         private void raiseMediaEvent(eFunction e, int instance, string arg)
         {
             if (OnMediaEvent != null)
-                OnMediaEvent(e, instance, arg);
+                SandboxedThread.Asynchronous(delegate() { OnMediaEvent(e, instance, arg); });
             if (e == eFunction.nextMedia)
                 if (!execute(eFunction.nextMedia, instance.ToString()))
                     raiseMediaEvent(eFunction.Stop, instance, "");
@@ -1424,7 +1430,7 @@ namespace OpenMobile
                 if (OnKeyPress != null)
                     return OnKeyPress(type, arg);
             }
-            catch (Exception) { }
+            catch (Exception e) { SandboxedThread.handle(e); }
             return false;
         }
 

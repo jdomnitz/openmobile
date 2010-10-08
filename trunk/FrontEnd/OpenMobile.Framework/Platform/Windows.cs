@@ -66,39 +66,43 @@ namespace OpenMobile.Framework
 
         internal static string getCDType(string path,DriveInfo info)
         {
-            var discMaster = new MsftDiscMaster2();
-
-            if (!discMaster.IsSupportedEnvironment)
-                return "CD/DVD Drive (" + info.Name + ")";
-            foreach (string uniqueRecorderId in discMaster)
+            try
             {
-                var discRecorder2 = new MsftDiscRecorder2();
-                discRecorder2.InitializeDiscRecorder(uniqueRecorderId);
-                if (discRecorder2.VolumePathNames[0].ToString() == path)
+                var discMaster = new MsftDiscMaster2();
+
+                if (!discMaster.IsSupportedEnvironment)
+                    return "CD/DVD Drive (" + info.Name + ")";
+                foreach (string uniqueRecorderId in discMaster)
                 {
-                    List<IMAPI_PROFILE_TYPE> profiles = new List<IMAPI_PROFILE_TYPE>();
-                    foreach (IMAPI_PROFILE_TYPE t in discRecorder2.SupportedProfiles)
-                        profiles.Add(t);
-                    if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_R_SEQUENTIAL))
-                        return "BD-R (" + path + ")";
-                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_REWRITABLE))
-                        return "BD-RW (" + path + ")";
-                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_ROM))
-                        return "BD-ROM (" + path + ")";
-                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_REWRITABLE))
-                        return "DVD RW  (" + path + ")";
-                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_RECORDABLE))
-                        return "DVD R  (" + path + ")";
-                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVDROM))
-                        return "DVD-ROM  (" + path + ")";
-                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_REWRITABLE))
-                        return "CD RW  (" + path + ")";
-                    else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_RECORDABLE))
-                        return "CD R (" + path + ")";
-                    else
-                        return "CD-ROM  (" + path + ")";
+                    var discRecorder2 = new MsftDiscRecorder2();
+                    discRecorder2.InitializeDiscRecorder(uniqueRecorderId);
+                    if (discRecorder2.VolumePathNames[0].ToString() == path)
+                    {
+                        List<IMAPI_PROFILE_TYPE> profiles = new List<IMAPI_PROFILE_TYPE>();
+                        foreach (IMAPI_PROFILE_TYPE t in discRecorder2.SupportedProfiles)
+                            profiles.Add(t);
+                        if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_R_SEQUENTIAL))
+                            return "BD-R (" + path + ")";
+                        else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_REWRITABLE))
+                            return "BD-RW (" + path + ")";
+                        else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_BD_ROM))
+                            return "BD-ROM (" + path + ")";
+                        else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_REWRITABLE))
+                            return "DVD RW  (" + path + ")";
+                        else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVD_DASH_RECORDABLE))
+                            return "DVD R  (" + path + ")";
+                        else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_DVDROM))
+                            return "DVD-ROM  (" + path + ")";
+                        else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_REWRITABLE))
+                            return "CD RW  (" + path + ")";
+                        else if (profiles.Contains(IMAPI_PROFILE_TYPE.IMAPI_PROFILE_TYPE_CD_RECORDABLE))
+                            return "CD R (" + path + ")";
+                        else
+                            return "CD-ROM  (" + path + ")";
+                    }
                 }
             }
+            catch (COMException) { }
             return "CD/DVD Drive (" + info.Name + ")";
         }
 
