@@ -47,7 +47,8 @@ namespace OpenMobile.Media
             list.Clear();
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetArtists(false);
+                if (!db.beginGetArtists(false))
+                    return false;
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
@@ -75,7 +76,15 @@ namespace OpenMobile.Media
                 return false;
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetAlbums(artist, true);
+                try
+                {
+                    if (!db.beginGetAlbums(artist, true))
+                        return false;
+                }
+                catch (Mono.Data.Sqlite.SqliteException)
+                {
+                    return false;
+                }
                 if (clear)
                     list.Clear();
                 mediaInfo info = db.getNextMedia();
@@ -105,10 +114,17 @@ namespace OpenMobile.Media
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetSongs(true, eMediaField.Title);
+                try
+                {
+                    if (!db.beginGetSongs(true, eMediaField.Title))
+                        return false;
+                }
+                catch (Mono.Data.Sqlite.SqliteException)
+                {
+                    return false;
+                }
                 list.Clear();
                 mediaInfo info = db.getNextMedia();
-                list.Clear();
                 while (info != null)
                 {
                     if (info.coverArt == null)
@@ -149,7 +165,15 @@ namespace OpenMobile.Media
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetSongsByArtist(artist, true,eMediaField.Title);
+                try
+                {
+                    if (!db.beginGetSongsByArtist(artist, true, eMediaField.Title))
+                        return false;
+                }
+                catch (Mono.Data.Sqlite.SqliteException)
+                {
+                    return false;
+                }
                 mediaInfo info = db.getNextMedia();
                 if (clear)
                     list.Clear();
@@ -185,7 +209,8 @@ namespace OpenMobile.Media
                 return false;
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetSongsByAlbum(artist, album, true,eMediaField.Title);
+                if (!db.beginGetSongsByAlbum(artist, album, true, eMediaField.Title))
+                    return false;
                 list.Clear();
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
