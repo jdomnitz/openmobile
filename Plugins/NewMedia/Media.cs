@@ -336,7 +336,8 @@ namespace NewMedia
                     sources = temp; //do this instead of clearing to ensure the list is never empty
                     if (!sources.Contains(currentSource[screen]))
                     {
-                        Artists[screen].Clear();
+                        lock (manager[screen][12])
+                            Artists[screen].Clear();
                         ((OMList)manager[screen][14]).Clear();
                     }
                 }
@@ -627,17 +628,20 @@ namespace NewMedia
             theHost.getData(eGetData.GetMediaDatabase, dbname[screen], out  o);
             if (o == null)
                 return;
-            Artists[screen].Clear();
-            using (IMediaDatabase db = (IMediaDatabase)o)
+            lock (manager[screen][12])
             {
-                db.beginGetArtists(false);
-                mediaInfo info = db.getNextMedia();
-                while (info != null)
+                Artists[screen].Clear();
+                using (IMediaDatabase db = (IMediaDatabase)o)
                 {
-                    Artists[screen].Add(info.Artist);
-                    info = db.getNextMedia();
+                    db.beginGetArtists(false);
+                    mediaInfo info = db.getNextMedia();
+                    while (info != null)
+                    {
+                        Artists[screen].Add(info.Artist);
+                        info = db.getNextMedia();
+                    }
+                    db.endSearch();
                 }
-                db.endSearch();
             }
             showArtists(screen);
         }
@@ -741,10 +745,12 @@ namespace NewMedia
             OMList l = (OMList)manager[screen][14];
             abortJob[screen] = true;
             lock (manager[screen][12])
+            {
                 l.Clear();
-            l.ListItemOffset = 0;
-            l.ListItemHeight = 0;
-            l.AddRange(Artists[screen]);
+                l.ListItemOffset = 0;
+                l.ListItemHeight = 0;
+                l.AddRange(Artists[screen]);
+            }
         }
         private void showAlbums(int screen)
         {

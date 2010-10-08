@@ -54,13 +54,15 @@ namespace OpenMobile.Framework
             {
                 lock (this)
                 {
-                    if ((screen < 0) || (screen >= screens)||(panels.Count==0))
+                    if (panels.Count == 0)
+                        return null;
+                    if ((screen < 0) || (screen >= screens))
                         throw new IndexOutOfRangeException();
                     if (panels[0] == null)
                     {
                         Thread.Sleep(300);
                         if (panels[0] == null)
-                            throw new InvalidOperationException("Source Panel has not been defined!  Use load panel before trying to access panels!");
+                            return null;
                     }
                     return panels[0][screen];
                 }
@@ -78,6 +80,8 @@ namespace OpenMobile.Framework
             {
                 lock (this)
                 {
+                    if ((screen < 0) || (screen >= screens))
+                        throw new IndexOutOfRangeException();
                     OMPanel[] p = panels.Find(x => x[0].Name == name);
                     if (p == null)
                         return null;
