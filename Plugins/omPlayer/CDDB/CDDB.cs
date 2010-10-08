@@ -92,7 +92,8 @@ namespace OMPlayer
             code = m_freedb.Read(queryResult, out cdEntry);
             if (code != FreedbHelper.ResponseCodes.CODE_210)
                 return null;
-            cdEntry.Artist=cdEntry.Artist.Remove(cdEntry.Artist.Length-7);
+            if (cdEntry.Artist.Length>7)
+                cdEntry.Artist=cdEntry.Artist.Remove(cdEntry.Artist.Length-7);
             OImage cover = OpenMobile.Media.TagReader.getLastFMImage(cdEntry.Artist, cdEntry.Title);
             List<mediaInfo> info=new List<mediaInfo>();
             System.Globalization.TextInfo text= System.Globalization.CultureInfo.CurrentCulture.TextInfo;
