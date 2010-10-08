@@ -428,12 +428,15 @@ namespace OpenMobile.Framework
 						info = i;
 				if (info == null)
 					return path;
-				if (!info.IsReady) {
-					if (info.DriveType == DriveType.CDRom) {
+				if (!info.IsReady)
+                {
+					if (info.DriveType == DriveType.CDRom) 
+                    {
 						if (Configuration.RunningOnWindows)
 							return Windows.getCDType (path, info);
 						return "CD/DVD Drive (" + info.Name + ")";
-					} else if (info.DriveType == DriveType.Removable)
+					}
+                    else if (info.DriveType == DriveType.Removable)
 						return "Removable Disk (" + info.Name + ")";
 					return info.Name;
 				}
