@@ -45,7 +45,7 @@ namespace OpenMobile
                 setUppercase(screen);
             else
                 setLowercase(screen);
-            if (name == "")
+            if ((name == "") || (name == "OSK"))
             {
                 name = "OSK";
                 ((OMTextBox)manager[screen, "OSK"]["Text"]).Flags = textboxFlags.None;

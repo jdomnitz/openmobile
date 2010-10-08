@@ -39,6 +39,8 @@ namespace OpenMobile.helperFunctions
             IPluginHost host;
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
             int screen = -1;
+            bool bail;
+            bool armed;
 
             /// <summary>
             /// Initializes the Keyboard Input class
@@ -87,14 +89,18 @@ namespace OpenMobile.helperFunctions
                 SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
                 this.screen = screen;
-                wait.Reset();
+                
                 bool error = false;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
                 error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "PASSWORD|"+defaultValue);
+                wait.Reset();
+                armed = true;
                 host.execute(eFunction.ExecuteTransition,screen.ToString());
                 if (!error)
                     wait.WaitOne();
                 host.OnSystemEvent -= ev;
+                if (bail)
+                    return null;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
                 foreach(string panelName in panelNames)
                     host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
@@ -106,14 +112,17 @@ namespace OpenMobile.helperFunctions
                 SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
                 this.screen = screen;
-                wait.Reset();
                 bool error = false;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
                 error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", defaultValue);
+                wait.Reset();
+                armed = true;
                 host.execute(eFunction.ExecuteTransition,screen.ToString());
                 if (!error)
                     wait.WaitOne();
                 host.OnSystemEvent -= ev;
+                if (bail)
+                    return null;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
                 foreach(string panelName in panelNames)
                     host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
@@ -141,6 +150,7 @@ namespace OpenMobile.helperFunctions
                 host.OnSystemEvent += ev;
                 this.screen = screen;
                 wait.Reset();
+                armed = true;
                 if (host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "NUMOSK") == false)
                 {
                     return null;
@@ -149,6 +159,8 @@ namespace OpenMobile.helperFunctions
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 wait.WaitOne();
                 host.OnSystemEvent -= ev;
+                if (bail)
+                    return null;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
                 host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
@@ -165,6 +177,14 @@ namespace OpenMobile.helperFunctions
                             theText = arg3;
                             wait.Set();
                         }
+                    }
+                }
+                else if ((function == eFunction.TransitionFromAny)&&(int.Parse(arg1)==screen))
+                {
+                    if (armed)
+                    {
+                        bail = true;
+                        wait.Set();
                     }
                 }
             }
