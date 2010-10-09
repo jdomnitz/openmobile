@@ -309,11 +309,15 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name)
         {
-            object o=null;
-            List<mediaInfo> playlist = new List<mediaInfo>();
-            string dbName="";
+            string dbName = "";
             using (PluginSettings s = new PluginSettings())
                 dbName = s.getSetting("Default.MusicDatabase");
+            return readPlaylistFromDB(theHost, name, dbName);
+        }
+        public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name,string dbName)
+        {
+            object o=null;
+            List<mediaInfo> playlist = new List<mediaInfo>();
             for (int i = 0; ((i < 35)&&(o==null)); i++)
             {
                 theHost.getData(eGetData.GetMediaDatabase, dbName, out o);
