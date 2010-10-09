@@ -758,13 +758,13 @@ namespace OMFolderDB
             }
             return true;
         }
-        public string getNextPlaylistItem()
+        public mediaInfo getNextPlaylistItem()
         {
             if ((reader==null)||(reader.Read() == false))
             {
                 return null;
             }
-            return reader[0].ToString();
+            return new mediaInfo(reader[0].ToString());
         }
 
         #region IBasePlugin Members

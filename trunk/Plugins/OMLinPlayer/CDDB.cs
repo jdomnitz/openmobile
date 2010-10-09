@@ -171,7 +171,7 @@ namespace OMLinPlayer
             throw new NotImplementedException();
         }
 
-        public string getNextPlaylistItem()
+        public mediaInfo getNextPlaylistItem()
         {
             throw new NotImplementedException();
         }

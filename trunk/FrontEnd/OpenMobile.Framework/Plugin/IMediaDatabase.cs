@@ -205,7 +205,7 @@ namespace OpenMobile.Plugin
         /// Returns the URL of the next file in the playlist
         /// </summary>
         /// <returns></returns>
-        string getNextPlaylistItem();
+        mediaInfo getNextPlaylistItem();
         /// <summary>
         /// Writes a playlist to the database
         /// </summary>

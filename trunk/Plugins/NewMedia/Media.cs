@@ -217,10 +217,19 @@ namespace NewMedia
         {
             ((OMButton)sender.Parent[15]).Image = ((OMButton)sender).Image;
             currentSource[screen] = (DeviceInfo)sender.Tag;
-            if ((currentSource[screen].DriveType == eDriveType.Removable) || (currentSource[screen].DriveType == eDriveType.Phone) || (currentSource[screen].DriveType == eDriveType.iPod))
+            if ((currentSource[screen].DriveType == eDriveType.Removable) || (currentSource[screen].DriveType == eDriveType.Phone))
             {
                 using (PluginSettings s = new PluginSettings())
                     dbname[screen] = s.getSetting("Default.RemovableDatabase");
+            }
+            else if (currentSource[screen].DriveType == eDriveType.iPod)
+            {
+                using (PluginSettings s = new PluginSettings())
+                {
+                    dbname[screen] = s.getSetting("Default.AppleDatabase");
+                    if (dbname[screen]=="")
+                        dbname[screen] = s.getSetting("Default.RemovableDatabase");
+                }
             }
             else if (currentSource[screen].DriveType == eDriveType.CDRom)
             {
@@ -279,10 +288,11 @@ namespace NewMedia
                                     using (PluginSettings ps = new PluginSettings())
                                         dbname[i] = ps.getSetting("Default.MusicDatabase");
                                     ((OMButton)manager[0][15]).Image = theHost.getSkinImage("Local Drive");
+                                    int tmp = i;
                                     SafeThread.Asynchronous(delegate()
                                     {
-                                        loadArtists(i);
-                                        moveToArtists(i);
+                                        loadArtists(tmp);
+                                        moveToArtists(tmp);
                                     }, theHost);
                                 }
                         }
@@ -334,7 +344,7 @@ namespace NewMedia
                             break;
                     }
                     sources = temp; //do this instead of clearing to ensure the list is never empty
-                    if (!sources.Contains(currentSource[screen]))
+                    if ((currentSource[screen]!=null)&&(!sources.Contains(currentSource[screen])))
                     {
                         lock (manager[screen][12])
                             Artists[screen].Clear();
@@ -655,7 +665,7 @@ namespace NewMedia
             l.ListItemOffset = 0;
             l.ListItemHeight = 0;
             l.Add(new OMListItem("Current Playlist",null,"Current Playlist"));
-            foreach(string playlist in Playlist.listPlaylistsFromDB(theHost))
+            foreach(string playlist in Playlist.listPlaylistsFromDB(theHost,dbname[screen]))
             {
                 if ((playlist.Length != 8) && (!playlist.StartsWith("Current")))
                     l.Add(new OMListItem(playlist, null, playlist));
@@ -698,6 +708,8 @@ namespace NewMedia
                             tmp.coverArt = TagReader.getCoverFromDB(tmp.Artist, tmp.Album, theHost);
                         if (tmp.coverArt == null)
                             tmp.coverArt = TagReader.getFolderImage(tmp.Location);
+                        if (tmp.coverArt == null)
+                            tmp.coverArt = theHost.getSkinImage("Unknown Album").image;
                         l.Add(new OMListItem(tmp.Name, tmp.Artist, tmp.coverArt, format, tmp.Location));
                     }
                 }
@@ -721,7 +733,7 @@ namespace NewMedia
                 }
                 else
                 {
-                    foreach (mediaInfo info in Playlist.readPlaylistFromDB(theHost, path))
+                    foreach (mediaInfo info in Playlist.readPlaylistFromDB(theHost, path,dbname[screen]))
                     {
                         if (abortJob[screen])
                             return;
@@ -731,9 +743,9 @@ namespace NewMedia
                         if (tmp == null)
                             continue;
                         if (tmp.coverArt == null)
-                            tmp.coverArt = TagReader.getCoverFromDB(tmp.Artist, tmp.Album, theHost);
+                            tmp.coverArt = TagReader.getCoverFromDB(tmp.Artist, tmp.Album, theHost,dbname[screen]);
                         if (tmp.coverArt == null)
-                            tmp.coverArt = TagReader.getFolderImage(tmp.Location);
+                            tmp.coverArt = theHost.getSkinImage("Unknown Album").image;
                         l.Add(new OMListItem(tmp.Name, tmp.Artist, tmp.coverArt, format, tmp.Location));
                     }
                 }
@@ -742,6 +754,7 @@ namespace NewMedia
         private void showArtists(int screen)
         {
             level[screen] = 0;
+            ((OMLabel)manager[screen][6]).Text = "Select an Artist";
             OMList l = (OMList)manager[screen][14];
             abortJob[screen] = true;
             lock (manager[screen][12])
@@ -949,7 +962,6 @@ namespace NewMedia
         {
             currentArtist[screen] = null;
             currentAlbum[screen] = null;
-            ((OMLabel)sender.Parent[6]).Text = "Select an Artist";
             SafeThread.Asynchronous(delegate() { showArtists(screen); }, theHost);
             moveToArtists(screen);
         }

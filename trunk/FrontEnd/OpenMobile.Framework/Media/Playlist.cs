@@ -329,10 +329,10 @@ namespace OpenMobile.Media
             IMediaDatabase db = (IMediaDatabase)o;
             if (db.beginGetPlaylist(name) == false)
                 return playlist;
-            string url=db.getNextPlaylistItem();
+            mediaInfo url=db.getNextPlaylistItem();
             while (url != null)
             {
-                playlist.Add(new mediaInfo(url));
+                playlist.Add(url);
                 url = db.getNextPlaylistItem();
             }
             return playlist;

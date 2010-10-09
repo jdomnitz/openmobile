@@ -103,6 +103,11 @@ namespace OpenMobile
         {
             g = new OpenMobile.Graphics.Graphics(s);
             this.screen = s;
+
+            this.tmrClick = new System.Timers.Timer(20);
+            this.tmrLongClick = new System.Timers.Timer(500);
+            this.tmrClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrClick_Tick);
+            this.tmrLongClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrLongClick_Tick);
         }
         public void InitializeRendering()
         {
@@ -110,8 +115,8 @@ namespace OpenMobile
                 Mouse.Location = this.Location;
             if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
                 this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[screen].Bounds.Location, this.Size);
-            InitializeComponent();
             this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
+            InitializeComponent();
             hide += new voiddel(hideCursor);
             redraw += new voiddel(invokePaint);
             this.Keyboard.KeyRepeat = true;

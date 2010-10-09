@@ -20,28 +20,28 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Data;
-using Mono.Data.Sqlite;
-using System.Drawing;
-using OpenMobile.Graphics;
-using System.IO;
 using System.Text;
-using System.Threading;
+using Mono.Data.Sqlite;
+using OpenMobile.Plugin;
 using OpenMobile;
-using OpenMobile.Data;
+using System.Threading;
 using OpenMobile.helperFunctions;
 using OpenMobile.Media;
-using OpenMobile.Plugin;
-using OpenMobile.Framework;
 using OpenMobile.Threading;
+using OpenMobile.Framework;
+using OpenMobile.Graphics;
+using System.IO;
+using OpenMobile.Data;
+using OpenPOD;
+using System.Drawing;
+using System.Diagnostics;
 
-namespace RemovableDB
+namespace iPodDB
 {
-    public sealed class RemovableDB : IMediaDatabase
+    public class iPodDB:IMediaDatabase
     {
         public SqliteDataReader reader;
         public SqliteConnection con;
-        private List<string> toBeIndexed;
 
         public Settings loadSettings()
         {
@@ -58,7 +58,7 @@ namespace RemovableDB
         }
         public string databaseType
         {
-            get { return "Removable"; }
+            get { return "iPod"; }
         }
 
         public bool indexDirectory(string location, bool subdirectories)
@@ -80,13 +80,12 @@ namespace RemovableDB
         }
         public List<string> listPlaylists()
         {
-            return new List<string>();
-        }
-        private void parseDirectory(string location, bool subdirectories)
-        {
-            if ((location == null) || (location == ""))
-                return;
-            parse(location, subdirectories);
+            if (db == null)
+                return new List<string>();
+            List<string> ret = new List<string>();
+            for (int i = 0; i < db.playlists.Count; i++)
+                ret.Add(db.playlists[i].title);
+            return ret;
         }
         public IMediaDatabase getNew()
         {
@@ -94,103 +93,45 @@ namespace RemovableDB
                 return null;
             return this;
         }
-        private void parse(string location, bool subdirectories)
-        {
-            string[] filters = new string[] { "*.mp3", "*.m4a", "*.mpc", "*.flac", "*.wv", "*.aac", "*.aif", "*.aiff", "*.asf", "*.ape", "*.wav", "*.m4p", "*.ogg", "*.wma", "*.oga", "*.spx", "*.m4b", "*.rma", "*.mpp" };
-            foreach (string filter in filters)
-                foreach (string file in Directory.GetFiles(location, filter))
-                    if (toBeIndexed != null)
-                        toBeIndexed.Add(file);
-            if (subdirectories == true)
-                foreach (string folder in Directory.GetDirectories(location))
-                    parse(folder, true);
-        }
 
-        private int startCount;
-        ManualResetEvent task1 = new ManualResetEvent(false);
         private void makeItSo(string location, bool subdirectories)
         {
-            //Phase 1 - Find out what needs to be indexed
-            parseDirectory(location, subdirectories);
-            //Phase 2 - Extract info from everything unindexed
-            startCount = toBeIndexed.Count;
-            abc += def;
-            tmr = new System.Threading.Timer(abc, null, 0, 2000);
+            currentURL = location;
             doWork();
+            
         }
-        private System.Threading.Timer tmr;
-        private TimerCallback abc;
-        private int lastCount;
-        private string lastURL;
         private string currentURL = "";
-        private void def(object state)
-        {
-            if ((toBeIndexed == null) || (toBeIndexed.Count == 0))
-            {
-                if (tmr == null)
-                    return;
-                else
-                {
-                    tmr.Dispose();
-                    tmr = null;
-                }
-                theHost.execute(eFunction.backgroundOperationStatus, "Indexing Complete!");
-                return;
-            }
-            if (lastURL == currentURL)
-                theHost.execute(eFunction.backgroundOperationStatus, "FAILURE:" + System.IO.Path.GetFileName(currentURL));
-            else
-                theHost.execute(eFunction.backgroundOperationStatus, (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count) - lastCount) / 2).ToString() + " songs/sec)");
-            lastURL = currentURL;
-            lastCount = (startCount - toBeIndexed.Count);
-        }
+        ArtReader art;
+        DBReader db;
         private void doWork()
         {
-            while (true)
+            db = new DBReader(currentURL);
+            art = new ArtReader(OpenMobile.Path.Combine(currentURL,"iPod_Control","Artwork"));
+            for (int i = 0; i < db.songs.Count; i++)
             {
-                if (toBeIndexed == null)
-                    return;
-                lock (toBeIndexed)
-                {
-                    if (toBeIndexed.Count == 0)
-                        return;
-                    currentURL = toBeIndexed[toBeIndexed.Count - 1];
-                    toBeIndexed.RemoveAt(toBeIndexed.Count - 1);
-                }
-                processFile(currentURL);
+                processFile(db.songs[i]);
             }
         }
 
         public bool indexFile(string file)
         {
-            try
-            {
-                processFile(file);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return false;
         }
         private string album;
         private string artist;
         private bool hasCover;
         private long albumNum;
-        private void processFile(string filepath)
+        private void processFile(Song info)
         {
             lock (con)
             {
-                mediaInfo info = TagReader.getInfo(filepath);
-                if (info == null)
-                    return;
                 if ((info.Album == null) || (info.Album == ""))
                     info.Album = "Unknown Album";
                 if ((info.Artist == null) || (info.Artist == ""))
                     info.Artist = "Unknown Artist";
                 if ((info.Album == album) && (info.Artist == artist))
                 {
-                    if ((hasCover == false) && (info.coverArt != null))
+                    if ((hasCover == false) && (info.ArtID>0))
                         updateCover(info);
                     writeSong(info);
                 }
@@ -200,8 +141,8 @@ namespace RemovableDB
                         writeSong(info);
                     else
                     {
-                        if (info.coverArt == null)
-                            info.coverArt = TagReader.getFolderImage(info.Location);
+                        //if (info.coverArt == null)
+                        //    info.coverArt = TagReader.getFolderImage(info.Location);
                         //Too slow for a removable database
                         //if (info.coverArt == null)
                         //    info.coverArt = TagReader.getLastFMImage(info.Artist, info.Album);
@@ -212,21 +153,23 @@ namespace RemovableDB
             }
         }
 
-        private void updateCover(mediaInfo info)
+        private void updateCover(Song info)
         {
-            if (info.coverArt == null)
+            AlbumImage aimg=art.images.Find(p=>p.ArtworkID==info.ArtID);
+            if (aimg.size==0)
                 return;
+            Bitmap bmp = art.getCoverArt(aimg);
             using (SqliteCommand command = con.CreateCommand())
             {
                 command.CommandText = "UPDATE tblAlbum SET Cover=@cover WHERE ID='" + albumNum + "'";
                 System.Drawing.ImageConverter img = new System.Drawing.ImageConverter();
-                command.Parameters.Add(new SqliteParameter("@cover", img.ConvertTo(info.coverArt, typeof(byte[]))));
+                command.Parameters.Add(new SqliteParameter("@cover", img.ConvertTo(bmp, typeof(byte[]))));
                 command.ExecuteNonQuery();
                 hasCover = true;
             }
         }
 
-        private bool albumExists(mediaInfo info)
+        private bool albumExists(Song info)
         {
             using (SqliteCommand command = con.CreateCommand())
             {
@@ -244,26 +187,26 @@ namespace RemovableDB
             }
         }
 
-        private void writeSong(mediaInfo info)
+        private void writeSong(Song info)
         {
             using (SqliteCommand command = con.CreateCommand())
             {
                 if ((info.Location == null) || (info.Location == ""))
                     return;
                 StringBuilder s = new StringBuilder("BEGIN;INSERT INTO tblSongs(Title,URL,AlbumNum,Track,Rating,Genre,Lyrics,Device)VALUES('");
-                s.Append(General.escape(info.Name));
+                s.Append(General.escape(info.Title));
                 s.Append("','");
                 s.Append(General.escape(info.Location));
                 s.Append("','");
                 s.Append(albumNum.ToString());
                 s.Append("','");
-                s.Append(info.TrackNumber.ToString());
+                s.Append("0");//stub
                 s.Append("','");
                 s.Append(info.Rating.ToString());
                 s.Append("','");
                 s.Append(General.escape(info.Genre));
                 s.Append("','");
-                s.Append(General.escape(info.Lyrics));
+                s.Append("");
                 s.Append("','");
                 s.Append(General.escape(System.IO.Path.GetPathRoot(info.Location)));
                 s.Append("');COMMIT");
@@ -271,12 +214,16 @@ namespace RemovableDB
                 command.ExecuteNonQuery();
             }
         }
-        private void writeAlbum(mediaInfo info)
+        private void writeAlbum(Song info)
         {
+            Bitmap bmp = null;
+            AlbumImage aimg = art.images.Find(p => p.ArtworkID == info.ArtID);
+            if (aimg.size>0)
+                bmp = art.getCoverArt(aimg);
             using (SqliteCommand command = con.CreateCommand())
             {
                 StringBuilder s;
-                if (info.coverArt != null)
+                if (bmp != null)
                     s = new StringBuilder("INSERT INTO tblAlbum(Album,Device,Artist,Cover)VALUES('");
                 else
                     s = new StringBuilder("INSERT INTO tblAlbum(Album,Device,Artist)VALUES('");
@@ -285,12 +232,12 @@ namespace RemovableDB
                 s.Append(General.escape(System.IO.Path.GetPathRoot(info.Location)));
                 s.Append("','");
                 info.Artist = correctArtist(info.Artist);
-                if (info.coverArt != null)
+                if (bmp != null)
                 {
                     s.Append(General.escape(info.Artist));
                     s.Append("',@cover)");
                     System.Drawing.ImageConverter img = new System.Drawing.ImageConverter();
-                    command.Parameters.Add(new SqliteParameter("@cover", img.ConvertTo(info.coverArt.image, typeof(byte[]))));
+                    command.Parameters.Add(new SqliteParameter("@cover", img.ConvertTo(bmp, typeof(byte[]))));
                     hasCover = true;
                 }
                 else
@@ -336,8 +283,6 @@ namespace RemovableDB
                     command.CommandText = "SELECT Distinct Artist FROM tblAlbum";
                 else
                     command.CommandText = "SELECT Distinct(Artist),Cover FROM tblAlbum";
-                // Comment from Borte: This SQL query contains a bug since it returns multiple rows for one artist if the images are different
-                //command.CommandText = "SELECT Distinct Artist,Cover FROM tblAlbum";
                 reader = command.ExecuteReader();
             }
             field = eMediaField.Artist;
@@ -586,12 +531,20 @@ namespace RemovableDB
         {
             throw new NotImplementedException();
         }
-
+        int currentplaylist;
         public bool beginGetPlaylist(string name)
         {
+            if (db == null)
+                return false;
+            for (int i = 0; i < db.playlists.Count; i++)
+                if (db.playlists[i].title == name)
+                {
+                    currentplaylist = i;
+                    return true;
+                }
             return false;
         }
-        public bool supportsPlaylists { get { return false; } }
+        public bool supportsPlaylists { get { return true; } }
 
         public bool writePlaylist(List<string> URLs, string name, bool append)
         {
@@ -602,10 +555,22 @@ namespace RemovableDB
         {
             return false;
         }
-
+        int playlistPos;
         public mediaInfo getNextPlaylistItem()
         {
-            return new mediaInfo();
+            if (playlistPos >= db.playlists[currentplaylist].songs.Count)
+                return null;
+            int id=db.playlists[currentplaylist].songs[playlistPos];
+            playlistPos++;
+            Song ret= db.songs.Find(p=>p.id==id);
+            if (ret.id == 0)
+                return new mediaInfo();
+            mediaInfo info = new mediaInfo(ret.Location);
+            info.Name = ret.Title;
+            info.Type = eMediaType.Local;
+            info.Artist = ret.Artist;
+            info.Album = ret.Album;
+            return info;
         }
 
         #region IBasePlugin Members
@@ -622,17 +587,17 @@ namespace RemovableDB
 
         public string pluginName
         {
-            get { return "RemovableDB"; }
+            get { return "iPodDB"; }
         }
 
         public float pluginVersion
         {
-            get { return 0.1F; }
+            get { return 0.8F; }
         }
 
         public string pluginDescription
         {
-            get { return "The Default Removable Media Database (Sqlite)"; }
+            get { return "The Default iPod Media Database (Sqlite)"; }
         }
 
         public bool incomingMessage(string message, string source)
@@ -643,20 +608,18 @@ namespace RemovableDB
         {
             return false;
         }
-        public RemovableDB() { }
-        public RemovableDB(IPluginHost host)
+        public iPodDB() { }
+        public iPodDB(IPluginHost host)
         {
             theHost = host;
-            toBeIndexed = new List<string>();
         }
         private IPluginHost theHost;
         public eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
-            toBeIndexed = new List<string>();
             using (PluginSettings settings = new PluginSettings())
             {
-                settings.setSetting("Default.RemovableDatabase", "RemovableDB");
+                settings.setSetting("Default.AppleDatabase", "iPodDB");
             }
             lock (this)
                 createDB();
@@ -673,11 +636,9 @@ namespace RemovableDB
                 {
                     foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
                     {
-                        eDriveType type = info.DriveType;
-                        if ((type == eDriveType.Removable) || (type == eDriveType.Phone))
+                        if (info.DriveType == eDriveType.iPod)
                         {
-                            foreach (string path in info.MusicFolders)
-                                indexDirectory(path, true);
+                            indexDirectory(info.path, true);
                         }
                     }
                 }, theHost);
@@ -688,10 +649,9 @@ namespace RemovableDB
         {
             if (!justInserted)
                 return;
-            if ((type == eMediaType.Smartphone) || (type == eMediaType.LocalHardware))
+            if (type==eMediaType.AppleDevice)
             {
-                foreach (string path in DeviceInfo.get(arg).MusicFolders)
-                    indexDirectory(path, true);
+                indexDirectory(arg, true);
             }
             else if (type == eMediaType.DeviceRemoved)
             {

@@ -34,16 +34,6 @@ namespace OpenMobile
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RenderingWindow));
-            this.tmrClick = new System.Timers.Timer(20);
-            this.tmrLongClick =new System.Timers.Timer(500);
-            // 
-            // tmrClick
-            // 
-            this.tmrClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrClick_Tick);
-            // 
-            // tmrLongClick
-            // 
-            this.tmrLongClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrLongClick_Tick);
             // 
             // RenderingWindow
             // 
