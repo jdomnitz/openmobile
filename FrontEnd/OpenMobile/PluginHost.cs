@@ -479,6 +479,8 @@ namespace OpenMobile
                     {
                         ProcessStartInfo info = Process.GetCurrentProcess().StartInfo;
                         info.FileName = Process.GetCurrentProcess().Modules[0].FileName;
+                        if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen)
+                            info.Arguments = "-fullscreen";
                         Core.RenderingWindows[0].Exit();
                         Process.Start(info);
                     }

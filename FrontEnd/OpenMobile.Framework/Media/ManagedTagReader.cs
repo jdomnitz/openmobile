@@ -178,9 +178,13 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static OImage getCoverFromDB(string artist, string album, IPluginHost pluginHost)
         {
+            using (PluginSettings s = new PluginSettings())
+                return getCoverFromDB(artist, album, pluginHost, s.getSetting("Default.MusicDatabase"));
+        }
+        public static OImage getCoverFromDB(string artist, string album, IPluginHost pluginHost,string dbName)
+        {
             object o = new object();
-            using(PluginSettings s=new PluginSettings())
-            pluginHost.getData(eGetData.GetMediaDatabase, s.getSetting("Default.MusicDatabase"), out o);
+            pluginHost.getData(eGetData.GetMediaDatabase, dbName, out o);
             if (o == null)
                 return null;
             using (IMediaDatabase db = (IMediaDatabase)o)

@@ -679,8 +679,15 @@ namespace OMMediaDB
                     
                     if (vl.GetType() != typeof(DBNull))
                     {
-                        MemoryStream m = new MemoryStream((byte[])vl);
-                        i.coverArt = OImage.FromStream(m);
+                        try
+                        {
+                            MemoryStream m = new MemoryStream((byte[])vl);
+                            i.coverArt = OImage.FromStream(m);
+                        }
+                        catch (OutOfMemoryException)
+                        {
+                            return null;
+                        }
                     }
                 }
             return i;
@@ -773,13 +780,13 @@ namespace OMMediaDB
             return true;
         }
         
-        public string getNextPlaylistItem()
+        public mediaInfo getNextPlaylistItem()
         {
             if ((reader==null)||(reader.Read() == false))
             {
                 return null;
             }
-            return reader[0].ToString();
+            return new mediaInfo(reader[0].ToString());
         }
 
         #region IBasePlugin Members
@@ -832,7 +839,11 @@ namespace OMMediaDB
             alreadyIndexed = new Queue<string>();
             toBeIndexed = new List<string>();
             if (File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2")) == false)
+            {
+                using (PluginSettings settings = new PluginSettings())
+                    settings.setSetting("Default.MusicDatabase", "OMMediaDB");
                 createDB();
+            }
             return eLoadStatus.LoadSuccessful;
         }
 
