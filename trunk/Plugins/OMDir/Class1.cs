@@ -240,7 +240,7 @@ namespace OMDir
             else
             {
                 if (l[l.SelectedIndex] == null)
-                    throw new Exception("DAMN!");
+                    return "";
                 if (l.Tag.ToString() == "")
                 {
                     foreach(DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
@@ -368,6 +368,8 @@ namespace OMDir
             OMList l = ((OMList)manager[screen][3]);
             r.Clear();
             string source = translateLocal(l);
+            if (source == "")
+                return;
             r.Tag = source;
             DirectoryInfo info = new DirectoryInfo(source);
             try
