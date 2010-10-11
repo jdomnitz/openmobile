@@ -298,7 +298,10 @@ namespace OpenMobile.Framework
 			osVersion = getOS () + " " + os.Version.ToString ();
 			return osVersion;
 		}
-
+        /// <summary>
+        /// Returns the current system Architecture
+        /// </summary>
+        /// <returns></returns>
 		public static eArchType getArchitecture ()
 		{
 			if (Configuration.RunningOnUnix) 

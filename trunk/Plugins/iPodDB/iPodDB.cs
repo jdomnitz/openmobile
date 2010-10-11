@@ -97,8 +97,9 @@ namespace iPodDB
         private void makeItSo(string location, bool subdirectories)
         {
             currentURL = location;
+            theHost.execute(eFunction.backgroundOperationStatus, "Syncing with device...");
             doWork();
-            
+            theHost.execute(eFunction.backgroundOperationStatus, "Indexing Complete!");
         }
         private string currentURL = "";
         ArtReader art;
@@ -106,7 +107,11 @@ namespace iPodDB
         private void doWork()
         {
             db = new DBReader(currentURL);
-            art = new ArtReader(OpenMobile.Path.Combine(currentURL,"iPod_Control","Artwork"));
+            try
+            {
+                art = new ArtReader(OpenMobile.Path.Combine(currentURL, "iPod_Control", "Artwork"));
+            }
+            catch (Exception) { }
             for (int i = 0; i < db.songs.Count; i++)
             {
                 processFile(db.songs[i]);
@@ -137,16 +142,14 @@ namespace iPodDB
                 }
                 else
                 {
+                    Bitmap bmp=null;
                     if (albumExists(info) == true)
                         writeSong(info);
                     else
                     {
-                        //if (info.coverArt == null)
-                        //    info.coverArt = TagReader.getFolderImage(info.Location);
-                        //Too slow for a removable database
-                        //if (info.coverArt == null)
-                        //    info.coverArt = TagReader.getLastFMImage(info.Artist, info.Album);
-                        writeAlbum(info);
+                        if (info.ArtID == 0)
+                            bmp=TagReader.getInfo(info.Location).coverArt.image;
+                        writeAlbum(info,bmp);
                         writeSong(info);
                     }
                 }
@@ -155,10 +158,14 @@ namespace iPodDB
 
         private void updateCover(Song info)
         {
-            AlbumImage aimg=art.images.Find(p=>p.ArtworkID==info.ArtID);
-            if (aimg.size==0)
-                return;
-            Bitmap bmp = art.getCoverArt(aimg);
+            Bitmap bmp = null;
+            if (art != null)
+            {
+                AlbumImage aimg = art.images.Find(p => p.ArtworkID == info.ArtID);
+                if (aimg.size == 0)
+                    return;
+                bmp = art.getCoverArt(aimg);
+            }
             using (SqliteCommand command = con.CreateCommand())
             {
                 command.CommandText = "UPDATE tblAlbum SET Cover=@cover WHERE ID='" + albumNum + "'";
@@ -214,12 +221,14 @@ namespace iPodDB
                 command.ExecuteNonQuery();
             }
         }
-        private void writeAlbum(Song info)
+        private void writeAlbum(Song info,Bitmap bmp)
         {
-            Bitmap bmp = null;
-            AlbumImage aimg = art.images.Find(p => p.ArtworkID == info.ArtID);
-            if (aimg.size>0)
-                bmp = art.getCoverArt(aimg);
+            if (art != null)
+            {
+                AlbumImage aimg = art.images.Find(p => p.ArtworkID == info.ArtID);
+                if (aimg.size > 0)
+                    bmp = art.getCoverArt(aimg);
+            }
             using (SqliteCommand command = con.CreateCommand())
             {
                 StringBuilder s;
@@ -502,13 +511,18 @@ namespace iPodDB
 
                 if (rCover == true)
                 {
-                    object vl = reader.GetValue(reader.GetOrdinal("Cover"));
-
-                    if (vl.GetType() != typeof(DBNull))
+                    try
                     {
-                        MemoryStream m = new MemoryStream((byte[])vl);
-                        i.coverArt = OImage.FromStream(m);
+                        object vl = reader.GetValue(reader.GetOrdinal("Cover"));
+
+                        if (vl.GetType() != typeof(DBNull))
+                        {
+                            MemoryStream m = new MemoryStream((byte[])vl);
+                            if (m.Length>10)
+                                i.coverArt = OImage.FromStream(m);
+                        }
                     }
+                    catch (Exception) { }
                 }
                 return i;
             }
@@ -536,6 +550,7 @@ namespace iPodDB
         {
             if (db == null)
                 return false;
+            playlistPos = 0;
             for (int i = 0; i < db.playlists.Count; i++)
                 if (db.playlists[i].title == name)
                 {
