@@ -452,7 +452,7 @@ namespace OMDVD
                         nowPlaying.Length = (time.bHours * 3600) + (time.bMinutes * 60) + time.bSeconds;
                         break;
                     case EventCode.DvdCurrentTime:
-                        byte[] part = BitConverter.GetBytes(arg1.ToInt32());
+                        byte[] part = BitConverter.GetBytes(arg1.ToInt64());
                         pos = (3600 * part[0]) + (60 * part[1]) + part[2];
                         break;
                 }

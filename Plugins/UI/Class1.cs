@@ -262,7 +262,7 @@ namespace OpenMobile
             OMImage imgSpeak = new OMImage(350, 200, 300, 300);
             imgSpeak.Name = "UI.imgSpeak";
             imgSpeak.Visible = false;
-            OMLabel caption = new OMLabel(300, 150, 400, 50);
+            OMLabel caption = new OMLabel(300, 150, 400, 60);
             caption.Font = new Font(Font.GenericSerif, 48F);
             caption.Format = eTextFormat.BoldShadow;
             caption.Visible = false;
@@ -587,6 +587,7 @@ namespace OpenMobile
                         case "M":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
                             theHost.execute(eFunction.TransitionToPanel, arg1, "Media");
+                            theHost.execute(eFunction.TransitionToPanel, arg1, "NewMedia");
                             theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
                         case "R":

@@ -243,6 +243,7 @@ namespace NewMedia
             }
             Sources_OnClick(sender, screen);
             loadArtists(screen);
+            moveToArtists(screen);
         }
 
         void Sources_OnClick(OMControl sender, int screen)

@@ -255,7 +255,7 @@ namespace OMSettings
             s.Value = ((OMSlider)sender).Value.ToString();
             OMLabel lbl = (OMLabel)sender.Parent["dsc" + s.Name];
             if (lbl!=null)
-                lbl.Text = lbl.Tag.ToString().Replace("%value%", s.Value);
+                lbl.Text = s.Description.Replace("%value%", s.Value);
             collection.changeSetting(s);
         }
 
