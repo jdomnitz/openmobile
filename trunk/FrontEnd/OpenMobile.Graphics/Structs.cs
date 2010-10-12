@@ -1809,7 +1809,7 @@ namespace OpenMobile.Graphics
             return !(first == second);
         }
 
-        public static Rectangle Round(Rectangle value)
+        public static Rectangle Round(System.Drawing.RectangleF value)
         {
             return new Rectangle((int)Math.Round((double)value.X), (int)Math.Round((double)value.Y), (int)Math.Round((double)value.Width), (int)Math.Round((double)value.Height));
         }

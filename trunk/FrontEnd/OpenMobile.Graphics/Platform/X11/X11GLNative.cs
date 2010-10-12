@@ -165,6 +165,11 @@ namespace OpenMobile.Platform.X11
                 
                 if (title != null)
 	 	            Functions.XStoreName(window.Display, window.WindowHandle, title);
+                if (options == GameWindowFlags.Fullscreen)
+                {
+                    Functions.SendNetWMMessage(window, _atom_net_wm_state, _atom_add,
+                                                      _atom_net_wm_state_fullscreen, IntPtr.Zero);
+                }
             }
 
             // Set the window hints

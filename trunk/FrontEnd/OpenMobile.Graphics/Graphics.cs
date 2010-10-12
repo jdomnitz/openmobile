@@ -371,15 +371,30 @@ namespace OpenMobile.Graphics
                     fixImage(ref img);
                 }
                 BitmapData data;
-                try
+                if (img.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
                 {
-                    data = img.LockBits(new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
-                    ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    try
+                    {
+                        data = img.LockBits(new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
+                        ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    }
+                    catch (InvalidOperationException) { return false; }
+                    Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                                    OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                    img.UnlockBits(data);
                 }
-                catch (InvalidOperationException) { return false; }
-                Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-                                OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-                img.UnlockBits(data);
+                else if (img.PixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb)
+                {
+                    try
+                    {
+                        data = img.LockBits(new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
+                        ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                    }
+                    catch (InvalidOperationException) { return false; }
+                    Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
+                                    OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                    img.UnlockBits(data);
+                }
             }
             if (kill)
                 img.Dispose();

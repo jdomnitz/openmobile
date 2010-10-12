@@ -81,22 +81,22 @@ namespace OpenMobile
             }
         }
 
-        public void RunAsync(double updateRate)
+        public void RunAsync(GameWindowFlags flags)
         {
             Thread t = new Thread(delegate()
             {
-                NativeInitialize();
+                NativeInitialize(flags);
                 InitializeRendering();
-                this.Run(updateRate, 0.0);
+                this.Run(1.0, 0.0);
             });
             t.TrySetApartmentState(ApartmentState.STA);
             t.Start();
         }
-        public void Run(double updateRate)
+        public void Run(GameWindowFlags flags)
         {
-            NativeInitialize();
+            NativeInitialize(flags);
             InitializeRendering();
-            Run(updateRate, 0.0);
+            Run(1.0, 0.0);
         }
         Graphics.Graphics g;
         public RenderingWindow(int s)

@@ -83,7 +83,7 @@ namespace OpenMobile.Platform.Windows
         {
             using (NativeWindow native_window = new NativeWindow())
             {
-                native_window.NativeInitialize();
+                native_window.NativeInitialize(GameWindowFlags.Default);
                 using (WinWindowInfo window = new WinWindowInfo((IntPtr)native_window.WindowHandle, null))
                 {
                     IntPtr deviceContext = ((WinWindowInfo)window).DeviceContext;
@@ -152,7 +152,7 @@ namespace OpenMobile.Platform.Windows
         {
             using (NativeWindow native_window = new NativeWindow())
             {
-                native_window.NativeInitialize();
+                native_window.NativeInitialize(GameWindowFlags.Default);
                 using (IGraphicsContext context = new GraphicsContext(new GraphicsMode(new ColorFormat(), 0, 0, 0, new ColorFormat(), 2, false), native_window.WindowInfo, 1, 0, GraphicsContextFlags.Default))
                 {
                     WinWindowInfo window = (WinWindowInfo)native_window.WindowInfo;
