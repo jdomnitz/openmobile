@@ -241,7 +241,7 @@ Public Class OMSerialGPS
             If m_IconShowing Then
                 If DateTime.Now.Subtract(m_LastLocationUpdate).TotalMinutes > 1 Then
                     If m_Conn Is Nothing Then
-                        m_Conn = New SqliteConnection("Data Source=" & OpenMobile.Path.Combine(m_Host.PluginPath, "zips") & ";Pooling=false;synchronous=0;")
+                        m_Conn = New SqliteConnection("Data Source=" & OpenMobile.Path.Combine(m_Host.PluginPath, "zips.sqlite") & ";Pooling=false;synchronous=0;")
                     End If
 
                     If Not m_Conn.State = ConnectionState.Open Then
