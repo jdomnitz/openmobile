@@ -170,11 +170,15 @@ namespace Slideshow
                 {
                     case "back":
                         pos[screen]--;
-                        transition(allImages[pos[screen]-1][pos[screen]], pos[screen] % 2, screen);
+                        if (pos[screen] < 0)
+                            pos[screen] = allImages[screen].Count - 1;
+                        transition(allImages[screen][pos[screen]], pos[screen] % 2, screen);
                         break;
                     case " ":
-                        transition(allImages[pos[screen]][pos[screen]], pos[screen] % 2, screen);
                         pos[screen]++;
+                        if (pos[screen] == allImages[screen].Count)
+                            pos[screen] = 0;
+                        transition(allImages[screen][pos[screen]], pos[screen] % 2, screen);
                         break;
                 }
             }
