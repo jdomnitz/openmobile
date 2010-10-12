@@ -39,7 +39,7 @@ namespace OpenMobile
         public static List<RenderingWindow> RenderingWindows = null;
         public static List<IBasePlugin> pluginCollection = new List<IBasePlugin>();
         public static bool exitTransition = true;
-
+        public static GameWindowFlags Fullscreen;
         private static void loadMainMenu()
         {
 
@@ -271,9 +271,12 @@ namespace OpenMobile
                     }
                     catch (ArgumentException) { break; }
                 }
-
+                else if (arg.ToLower()=="-fullscreen")
+                {
+                    Fullscreen = GameWindowFlags.Fullscreen;
+                }
                 // Override current skin to use
-                if (arg.ToLower().StartsWith("-skinpath=") == true)
+                else if (arg.ToLower().StartsWith("-skinpath=") == true)
                 {
                     theHost.SkinPath = arg.Substring(10);
                 }
@@ -299,8 +302,8 @@ namespace OpenMobile
             if (RenderingWindows.Count == 0)
                 throw new PlatformException("Unable to detect any monitors on this platform!");
             for (int i = 1; i<RenderingWindows.Count; i++)
-                RenderingWindows[i].RunAsync(1);
-            RenderingWindows[0].Run(1);
+                RenderingWindows[i].RunAsync(Fullscreen);
+            RenderingWindows[0].Run(Fullscreen);
             for (int i = 0; i < RenderingWindows.Count; i++)
                 RenderingWindows[i].Dispose();
             for (int i = 0; i < pluginCollection.Count;i++ )

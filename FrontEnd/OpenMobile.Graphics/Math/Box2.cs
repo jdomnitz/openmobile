@@ -45,8 +45,8 @@ namespace OpenMobile
         {
             Left = topLeft.X;
             Top = topLeft.Y;
-            Right = topLeft.X;
-            Bottom = topLeft.Y;
+            Right = bottomRight.X;
+            Bottom = bottomRight.Y;
         }
 
         /// <summary>

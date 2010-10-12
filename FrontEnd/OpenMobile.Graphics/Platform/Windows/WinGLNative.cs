@@ -510,8 +510,19 @@ namespace OpenMobile.Platform.Windows
             ExtendedWindowStyle ex_style = 0;
             if (parentHandle == IntPtr.Zero)
             {
-                style |= WindowStyle.OverlappedWindow | WindowStyle.ClipChildren;
-                ex_style = ParentStyleEx;
+                if (options == GameWindowFlags.Fullscreen)
+                {
+                    style = WindowStyle.Popup | WindowStyle.Maximize;
+                    ex_style = ExtendedWindowStyle.Topmost;
+                    windowState = WindowState.Fullscreen;
+                    windowBorder = WindowBorder.Hidden;
+                    previous_window_border = WindowBorder.Resizable;
+                }
+                else
+                {
+                    style |= WindowStyle.OverlappedWindow | WindowStyle.ClipChildren;
+                    ex_style = ParentStyleEx;
+                }
             }
             else
             {
@@ -789,6 +800,8 @@ namespace OpenMobile.Platform.Windows
             {
                 if (value)
                 {
+                    if (windowState == WindowState.Fullscreen)
+                        Functions.ShowWindow(window.WindowHandle, ShowWindowCommand.SHOWMAXIMIZED);
                     Functions.ShowWindow(window.WindowHandle, ShowWindowCommand.SHOW);
                     if (invisible_since_creation)
                     {

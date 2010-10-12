@@ -59,17 +59,15 @@ namespace OpenMobile
             this.device = DisplayDevice.Default;
         }
         #region --- Contructors ---
-        public void NativeInitialize()
+        public void NativeInitialize(GameWindowFlags flags)
         {
-            implementation = Factory.Default.CreateNativeWindow(device.Bounds.X + (device.Bounds.Width - 720) / 2, device.Bounds.Y + (device.Bounds.Height - 450) / 2, 720, 450, "OpenMobile Native Window", GraphicsMode.Default,GameWindowFlags.Default, DisplayDevice.Default);
+            implementation = Factory.Default.CreateNativeWindow(device.Bounds.X + (device.Bounds.Width - 720) / 2, device.Bounds.Y + (device.Bounds.Height - 450) / 2, 720, 450, "OpenMobile Native Window", GraphicsMode.Default,flags, DisplayDevice.Default);
             implementation.Visible = false;
             
 
             if (Environment.GetCommandLineArgs().Length > 1)
             {
-                if (Environment.GetCommandLineArgs()[1].ToLower() == "-fullscreen")
-                    WindowState = WindowState.Fullscreen;
-                else if (Environment.GetCommandLineArgs()[1].ToLower().StartsWith("-size=") == true)
+                if (Environment.GetCommandLineArgs()[1].ToLower().StartsWith("-size=") == true)
                 {
                     string[] part = Environment.GetCommandLineArgs()[1].Substring(6).Split(new char[] { 'x' });
                     try
