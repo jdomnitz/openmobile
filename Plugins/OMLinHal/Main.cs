@@ -11,7 +11,7 @@ namespace OMLinHal
 			Application.Init ();
 			MainWindow win = new MainWindow ();
 			win.Opacity=0;
-			win.Show ();
+			//win.Show ();
 			Application.Run ();
 		}
 	}
