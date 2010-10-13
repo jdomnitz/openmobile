@@ -115,7 +115,9 @@ namespace WinCam
         }
         private string[] getcams()
         {
-            DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+            DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AMKSVideo);
+            if (d.Length == 0)
+                d = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
            string[] lst = new string[d.Length];
             for (int i = 0; i < d.Length; i++)
             {

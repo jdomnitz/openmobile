@@ -40,7 +40,7 @@ namespace OpenMobile.Platform
         static IPlatformFactory default_implementation, embedded_implementation;
 
         #endregion
-
+        static bool _embedded;
         #region Constructors
 
         static Factory()
@@ -62,9 +62,11 @@ namespace OpenMobile.Platform
                 else Embedded = new UnsupportedPlatform();
             }
             else Embedded = new UnsupportedPlatform();
-
-            if (Default is UnsupportedPlatform && !(Embedded is UnsupportedPlatform))
+            _embedded=Default is UnsupportedPlatform;
+            if (_embedded && !(Embedded is UnsupportedPlatform))
                 Default = Embedded;
+            else
+                _embedded = false;
         }
 
         #endregion
@@ -122,12 +124,15 @@ namespace OpenMobile.Platform
         {
             return default_implementation.CreateKeyboardDriver();
         }
-
+        public static bool IsEmbedded
+        {
+            get { return _embedded; }
+        }
         class UnsupportedPlatform : IPlatformFactory
         {
             #region Fields
             
-            static readonly string error_string = "Please, refer to http://www.OpenMobile.com for more information.";
+            static readonly string error_string = "Please, refer to http://www.OpenTK.com for more information.";
             
             #endregion
             
