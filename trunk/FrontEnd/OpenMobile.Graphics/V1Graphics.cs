@@ -152,9 +152,8 @@ namespace OpenMobile.Graphics
     {
         #region private vars
             private static int[] POTS = { 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
-            static Bitmap virtualG;
             static List<List<uint>> textures = new List<List<uint>>();
-            public static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
+            private static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
             private Rectangle _clip = NoClip;
             private int height;
             private int width;
@@ -791,9 +790,12 @@ namespace OpenMobile.Graphics
         public V1Graphics(int screen)
         {
             this.screen = screen;
-            if (textures.Count == 0)
-                for (int i = 0; i < DisplayDevice.AvailableDisplays.Count; i++)
-                    textures.Add(new List<uint>());
+            lock (textures)
+            {
+                if (textures.Count == 0)
+                    for (int i = 0; i < DisplayDevice.AvailableDisplays.Count; i++)
+                        textures.Add(new List<uint>());
+            }
         }
         public OImage GenerateStringTexture(string s, Font font, Color color, int Left,int Top,int Width,int Height, StringFormat format)
         {
@@ -896,10 +898,10 @@ namespace OpenMobile.Graphics
         }
         public void Finish()
         {
-            if (textures.Count > 0)
+            if (textures[screen].Count > 0)
             {
                 Raw.DeleteTextures(textures[screen].Count, textures[screen].ToArray());
-                textures.Clear();
+                textures[screen].Clear();
             }
         }
 

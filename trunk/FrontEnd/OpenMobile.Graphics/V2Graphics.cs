@@ -28,9 +28,12 @@ namespace OpenMobile.Graphics
         public V2Graphics(int screen)
         {
             this.screen = screen;
-            if (textures.Count == 0)
-                for (int i = 0; i < DisplayDevice.AvailableDisplays.Count; i++)
-                    textures.Add(new List<uint>());
+            lock (textures)
+            {
+                if (textures.Count == 0)
+                    for (int i = 0; i < DisplayDevice.AvailableDisplays.Count; i++)
+                        textures.Add(new List<uint>());
+            }
             virtualG = new Bitmap(1000, 600);
         }
 
@@ -108,7 +111,7 @@ namespace OpenMobile.Graphics
             Raw.Clear(ClearBufferMask.ColorBufferBit);
             Raw.ClearColor(color);
         }
-        private Rectangle _clip;
+        private Rectangle _clip = NoClip;
         public Rectangle Clip
         {
             get
@@ -197,6 +200,8 @@ namespace OpenMobile.Graphics
         int[] normalTex;
         public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle)
         {
+            if (image == null)
+                return;
             Raw.Enable(EnableCap.Texture2D);
             if (image.Texture(screen) == 0)
                 if (!loadTexture(ref image))
@@ -205,12 +210,11 @@ namespace OpenMobile.Graphics
                     return;
                 }
             Raw.BindTexture(TextureTarget.Texture2D, image.Texture(screen));
-            Raw.EnableClientState(ArrayCap.ColorArray);
-            Raw.ColorPointer(4, ColorPointerType.Float, 0, new float[] { 1F, 1F, 1F, transparency,1F, 1F, 1F, transparency,1F, 1F, 1F, transparency,1F, 1F, 1F, transparency});
+            Raw.Color4(1F, 1F, 1F, transparency);
             int[] tex = new int[] { X, Height + Y, Width + X, Height + Y, X, Y, Width + X, Y };
             Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.EnableClientState(ArrayCap.TextureCoordArray);
             Raw.VertexPointer(2, VertexPointerType.Int, 0, tex);
+            Raw.EnableClientState(ArrayCap.TextureCoordArray);
             Raw.TexCoordPointer(2, TexCoordPointerType.Int, 0, normalTex);
             Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
             Raw.DisableClientState(ArrayCap.TextureCoordArray);
@@ -230,17 +234,33 @@ namespace OpenMobile.Graphics
 
         public void DrawLine(Pen pen, int x1, int y1, int x2, int y2)
         {
-            //throw new NotImplementedException();
+            Raw.LineWidth(pen.Width);
+            Raw.Enable(EnableCap.LineSmooth);
+            int[] arr = new int[] { x1, y1, x2, y2 };
+            Raw.Color4(pen.Color);
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.Lines, 0, 2);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+            Raw.Disable(EnableCap.LineSmooth);
         }
 
         public void DrawLine(Pen pen, Point pt1, Point pt2)
         {
-            //throw new NotImplementedException();
+            DrawLine(pen, pt1.X, pt1.Y, pt2.X, pt2.Y);
         }
 
         public void DrawLine(Pen pen, float x1, float y1, float x2, float y2)
         {
-            //throw new NotImplementedException();
+            Raw.LineWidth(pen.Width);
+            Raw.Enable(EnableCap.LineSmooth);
+            float[] arr = new float[] { x1, y1, x2, y2 };
+            Raw.Color4(pen.Color);
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.VertexPointer(2, VertexPointerType.Float, 0, arr);
+            Raw.DrawArrays(BeginMode.Lines, 0, 2);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+            Raw.Disable(EnableCap.LineSmooth);
         }
 
         public void DrawPolygon(Pen pen, Point[] points)
@@ -250,20 +270,17 @@ namespace OpenMobile.Graphics
 
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
         {
-            Color c = pen.Color;
             float[] ar = new float[] { x, y, x + width, y, x + width, y + height, x, y + height };
             Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.EnableClientState(ArrayCap.ColorArray);
-            Raw.ColorPointer(4, ColorPointerType.UnsignedByte, 0, new byte[] { c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A });
+            Raw.Color4(pen.Color);
             Raw.VertexPointer(2, VertexPointerType.Float, 0, ar);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, 4);
-            Raw.DisableClientState(ArrayCap.ColorArray);
+            Raw.DrawArrays(BeginMode.LineLoop, 0, 4);
             Raw.DisableClientState(ArrayCap.VertexArray);
         }
 
         public void DrawRectangle(Pen pen, Rectangle rect)
         {
-            //throw new NotImplementedException();
+            DrawRectangle(pen, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
         public void DrawReflection(int X, int Y, int Width, int Height, OImage image, float percent, float angle)
@@ -273,22 +290,35 @@ namespace OpenMobile.Graphics
 
         public void DrawRoundRectangle(Pen pen, int x, int y, int width, int height, int radius)
         {
-            //throw new NotImplementedException();
+            //TODO
+            DrawRectangle(pen, x, y, width, height);
         }
 
         public void DrawRoundRectangle(Pen p, Rectangle rect, int radius)
         {
-            //throw new NotImplementedException();
+            DrawRoundRectangle(p, rect.X, rect.Y, rect.Width, rect.Height, radius);
         }
 
         public void FillEllipse(Brush brush, int x, int y, int width, int height)
-        {
-            //throw new NotImplementedException();
+        {//TODO - Verify smoothness
+            Raw.Color4(brush.Color);
+            int[] arr=new int[722];
+            arr[720]=x + (width / 2);
+            arr[721]=y + (height / 2);
+            for (int angle = 0; angle < 360; angle++)
+            {
+                arr[angle]=(int)(x + (width / 2) + Math.Sin(angle) * (width / 2));
+                arr[angle+1]= (int)(y + (height / 2) + Math.Cos(angle) * (height / 2));
+            }
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleFan, 0, 361);
+            Raw.DisableClientState(ArrayCap.VertexArray);
         }
 
         public void FillEllipse(Brush brush, Rectangle rect)
         {
-            //throw new NotImplementedException();
+            FillEllipse(brush, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
         public void FillPolygon(Brush brush, Point[] points)
@@ -298,6 +328,7 @@ namespace OpenMobile.Graphics
 
         public void FillRectangle(Brush brush, float x, float y, float width, float height)
         {
+            //TODO-Gradient
             FillRectangleSolid(brush.Color, x, y, width, height);
         }
 
@@ -320,22 +351,29 @@ namespace OpenMobile.Graphics
 
         public void FillRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
         {
-            //throw new NotImplementedException();
+            //if (brush.Gradient == Gradient.None)
+                FillSolidRoundRectangle(brush.Color, x, y,width, height, radius);
         }
 
         public void FillRoundRectangle(Brush brush, Rectangle rect, int radius)
         {
-            //throw new NotImplementedException();
+            //if (brush.Gradient == Gradient.None)
+                FillSolidRoundRectangle(brush.Color, rect.X, rect.Y, rect.Width, rect.Height, radius);
         }
 
         public void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
         {
-            //throw new NotImplementedException();
+            //TODO - FIX
+            FillRectangleSolid(color, x, y, width, height);
         }
 
         public void Finish()
         {
-            //throw new NotImplementedException();
+            if (textures[screen].Count > 0)
+            {
+                Raw.DeleteTextures(textures[screen].Count, textures[screen].ToArray());
+                textures[screen].Clear();
+            }
         }
 
         public OImage GenerateStringTexture(string s, Font font, Color color, int Left, int Top, int Width, int Height, System.Drawing.StringFormat format)
@@ -352,6 +390,7 @@ namespace OpenMobile.Graphics
         {
             Raw.Disable(EnableCap.DepthTest);
             Raw.Enable(EnableCap.Blend);
+            Raw.Disable(EnableCap.Dither); //Necessary?
             Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             Raw.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             Raw.MatrixMode(MatrixMode.Projection);
@@ -375,7 +414,7 @@ namespace OpenMobile.Graphics
 
         public void ResetTransform()
         {
-            //throw new NotImplementedException();
+            Raw.LoadIdentity();
         }
 
         public void Resize(int Width, int Height)
@@ -394,7 +433,12 @@ namespace OpenMobile.Graphics
 
         public void SetClipFast(int x, int y, int width, int height)
         {
-            //throw new NotImplementedException();
+            if (height < 0)
+                height = 0;
+            if (width < 0)
+                width = 0;
+            Raw.Enable(EnableCap.ScissorTest);
+            Raw.Scissor((int)(x * wscale), (int)((600 - y - height) * hscale), (int)(width * wscale), (int)(height * hscale));
         }
 
         public void TranslateTransform(float dx, float dy)

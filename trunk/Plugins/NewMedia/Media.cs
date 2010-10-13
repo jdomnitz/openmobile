@@ -690,12 +690,14 @@ namespace NewMedia
             abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
+            l.Add("Loading...");
             l.ListItemOffset = 80;
             lock (manager[screen][12])
             {
                 abortJob[screen] = false;
                 if (path == "Current Playlist")
                 {
+                    l.Clear();
                     foreach (mediaInfo info in theHost.getPlaylist(theHost.instanceForScreen(screen)))
                     {
                         if (abortJob[screen])
@@ -716,7 +718,9 @@ namespace NewMedia
                 }
                 else if (System.IO.Path.IsPathRooted(path))
                 {
-                    foreach (mediaInfo info in Playlist.readPlaylist(path))
+                    List<mediaInfo> playlist = Playlist.readPlaylist(path);
+                    l.Clear();
+                    foreach (mediaInfo info in playlist)
                     {
                         if (abortJob[screen])
                             return;

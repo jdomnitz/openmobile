@@ -10,7 +10,6 @@ namespace OpenMobile.Graphics
         static bool v2;
         static Bitmap virtualG;
         public static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
-
         IGraphics implementation;
         static string version;
         static string renderer;
@@ -34,7 +33,16 @@ namespace OpenMobile.Graphics
                 return renderer;
             }
         }
-
+        public static string GLType
+        {
+            get
+            {
+                if (Platform.Factory.IsEmbedded)
+                    return "OpenGL ES";
+                else
+                    return "OpenGL";
+            }
+        }
         internal static void DeleteTexture(int screen, uint texture)
         {
             if (v2)
@@ -248,7 +256,9 @@ namespace OpenMobile.Graphics
         public void Initialize(int screen)
         {
             version = Raw.GetString(StringName.Version);
-            if (version.Length < 3)
+            if (Platform.Factory.IsEmbedded)
+                v2 = true;
+            else if (version.Length < 3)
                 v2 = false;
             else if (version[0] >= '2') //2.0 or higher
                 v2 = true;
