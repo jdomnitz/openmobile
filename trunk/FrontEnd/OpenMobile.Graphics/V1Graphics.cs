@@ -921,8 +921,11 @@ namespace OpenMobile.Graphics
         }
         public void DrawImage(OImage image, Rectangle rect, int x, int y, int Width, int Height, float transparency)
         {
-            //TODO - Crop
-            DrawImage(image, rect,transparency);
+            Rectangle clp = Clip;
+            SetClipFast(rect.X, rect.Y, rect.Width, rect.Height);
+            float xs = (rect.Width / Width), ys = (rect.Height / Height);
+            DrawImage(image, rect.X - (int)(xs * x), rect.X - (int)(y * ys), (int)(xs * (image.Width - x)), (int)(ys * (image.Height - y)), transparency, eAngle.Normal);
+            Clip = clp;
         }
         public void DrawImage(OImage image, Rectangle rect, float transparency)
         {
@@ -934,8 +937,7 @@ namespace OpenMobile.Graphics
         }
         public void DrawImage(OImage img, Rectangle rect, int x, int y, int width, int height)
         {
-            //TODO - Crop
-            DrawImage(img, rect);
+            DrawImage(img, rect, x, y, width, height, 1F);
         }
         public void DrawLine(Pen pen, float x1, float y1, float x2, float y2)
         {

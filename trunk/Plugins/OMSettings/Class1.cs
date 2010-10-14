@@ -332,8 +332,12 @@ namespace OMSettings
             List<Exception> problems = new List<Exception>();
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(140, Color.White);
-            OMList lstplugins = (OMList)manager[0, "Plugins"][0];
-            lstplugins.Clear();
+            OMList[] lstplugins = new OMList[theHost.ScreenCount];
+            for (int i = 0; i < theHost.ScreenCount; i++)
+            {
+                lstplugins[i] = (OMList)manager[i, "Plugins"][0];
+                lstplugins[i].Clear();
+            }
             foreach (IBasePlugin b in plugins)
             {
                 LayoutManager lm = new LayoutManager();
@@ -351,7 +355,8 @@ namespace OMSettings
                 if (panel != null)
                 {
                     panel.Name = b.pluginName + " Settings";
-                    lstplugins.Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
+                    for(int i=0;i<theHost.ScreenCount;i++)
+                        lstplugins[i].Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
                     manager.loadPanel(panel);
                 }
             }
@@ -389,20 +394,23 @@ namespace OMSettings
                 return;
             List<IBasePlugin> plugins = (List<IBasePlugin>)o;
             plugins=plugins.FindAll(p => typeof(IDataProvider).IsInstanceOfType(p));
-            OMList list = (OMList)manager[0, "data"][7];
-            OImage img = null;
-            list.Clear();
-            OMListItem.subItemFormat format = new OMListItem.subItemFormat();
-            format.color = Color.FromArgb(140, Color.White);
-            foreach (IDataProvider d in plugins)
+            for (int i = 0; i < theHost.ScreenCount; i++)
             {
-                if (d.updaterStatus() == 1)
-                    img = theHost.getSkinImage("Checkmark").image;
-                if (d.updaterStatus() == -1)
-                    img = theHost.getSkinImage("Error").image;
-                if (d.updaterStatus() == 0)
-                    img = theHost.getSkinImage("Waiting").image;
-                list.Add(new OMListItem(d.pluginDescription, d.lastUpdated.ToString(),img,format));   
+                OMList list = (OMList)manager[i, "data"][7];
+                OImage img = null;
+                list.Clear();
+                OMListItem.subItemFormat format = new OMListItem.subItemFormat();
+                format.color = Color.FromArgb(140, Color.White);
+                foreach (IDataProvider d in plugins)
+                {
+                    if (d.updaterStatus() == 1)
+                        img = theHost.getSkinImage("Checkmark").image;
+                    if (d.updaterStatus() == -1)
+                        img = theHost.getSkinImage("Error").image;
+                    if (d.updaterStatus() == 0)
+                        img = theHost.getSkinImage("Waiting").image;
+                    list.Add(new OMListItem(d.pluginDescription, d.lastUpdated.ToString(), img, format));
+                }
             }
         }
 

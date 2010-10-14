@@ -814,7 +814,7 @@ namespace OpenMobile.Platform.MacOS
                 SetLocation((short)value.X, (short)value.Y);
             }
         }
-        public IntPtr WindowHandle
+        public object WindowHandle
         {
             get
             {

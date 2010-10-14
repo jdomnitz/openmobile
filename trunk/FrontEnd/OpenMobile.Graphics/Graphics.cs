@@ -30,6 +30,16 @@ namespace OpenMobile.Graphics
         {
             get
             {
+                if (v2)
+                    return "GreenNitrous v2";
+                else
+                    return "GreenNitrous v1";
+            }
+        }
+        public static string Renderer
+        {
+            get
+            {
                 return renderer;
             }
         }
@@ -270,7 +280,7 @@ namespace OpenMobile.Graphics
             if (v2)
                 implementation = new V2Graphics(screen);
             else
-                  implementation = new V1Graphics(screen);
+                implementation = new V1Graphics(screen);
             scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
             scaleWidth = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
             renderer = Raw.GetString(StringName.Renderer);
