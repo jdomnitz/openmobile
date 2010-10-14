@@ -165,6 +165,8 @@ namespace Slideshow
         {
             if (function == eFunction.gesture)
             {
+                if (arg3 != "Slideshow")
+                    return;
                 int screen=int.Parse(arg1);
                 switch (arg2)
                 {

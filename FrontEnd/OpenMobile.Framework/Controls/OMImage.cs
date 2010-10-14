@@ -153,7 +153,7 @@ namespace OpenMobile.Controls
             /// </summary>
             Crop,
             /// <summary>
-            /// Cut image to match control size (Left and bottom side of image will be cut)
+            /// Cut image to match control size (Left and top side of image will be cut)
             /// </summary>
             CropLeft
         }

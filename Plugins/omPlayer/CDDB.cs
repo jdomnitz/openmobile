@@ -175,9 +175,10 @@ namespace OMPlayer
                 }
             }
             if (info == null)
-                media = new List<mediaInfo>();
+                media= list;
             else
-                media= new List<mediaInfo>(info);
+                media = new List<mediaInfo>(info);
+            theHost.execute(eFunction.backgroundOperationStatus, "Indexing Complete!");
             return true;
         }
 
