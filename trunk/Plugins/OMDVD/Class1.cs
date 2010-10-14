@@ -448,7 +448,8 @@ namespace OMDVD
                         theHost.execute(eFunction.setPlaylistPosition, instance.ToString(), (currentChapter-1).ToString());
                         DvdHMSFTimeCode time = new DvdHMSFTimeCode();
                         DvdTimeCodeFlags flags;
-                        info.GetTotalTitleTime(time, out flags);
+                        if (info!=null)
+                            info.GetTotalTitleTime(time, out flags);
                         nowPlaying.Length = (time.bHours * 3600) + (time.bMinutes * 60) + time.bSeconds;
                         break;
                     case EventCode.DvdCurrentTime:
@@ -690,8 +691,9 @@ namespace OMDVD
             }
             private void updateDVD()
             {
-                DvdPlaybackLocation2 loc;
-                info.GetCurrentLocation(out loc);
+                DvdPlaybackLocation2 loc=new DvdPlaybackLocation2();
+                if (info!=null)
+                    info.GetCurrentLocation(out loc);
                 pos = new TimeSpan(loc.TimeCode.bHours, loc.TimeCode.bMinutes, loc.TimeCode.bSeconds).TotalSeconds;
                 DvdHMSFTimeCode code = new DvdHMSFTimeCode();
                 DvdTimeCodeFlags flags;
