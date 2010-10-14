@@ -235,6 +235,10 @@ namespace NewMedia
             {
                 using (PluginSettings s = new PluginSettings())
                     dbname[screen] = s.getSetting("Default.CDDatabase");
+                Sources_OnClick(sender, screen);
+                loadArtists(screen);
+                Tracks_OnClick(sender, screen);
+                return;
             }
             else
             {
