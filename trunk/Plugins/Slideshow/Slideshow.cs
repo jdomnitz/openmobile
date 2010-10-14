@@ -46,7 +46,9 @@ namespace Slideshow
                 string url = path.getFolder(screen, "MainMenu", "");
                 theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Slideshow", url);
                 //theHost.execute(eFunction.ExecuteTransition, screen.ToString());
-                return null;
+                OMPanel p = new OMPanel("Dummy Panel");
+                p.Priority = ePriority.Low;
+                return p;
             }
             SafeThread.Asynchronous(delegate()
             {
@@ -71,8 +73,12 @@ namespace Slideshow
                     pos[screen] = 0;
             }
         }
+        bool[] transitioning;
         private void transition(string image,int num,int screen)
         {
+            if (transitioning[screen] == true)
+                return;
+            transitioning[screen] = true;
             int transitionType = OpenMobile.Framework.Math.Calculation.RandomNumber(0, 4);
             ((OMButton)manager[screen][num]).Image = new imageItem(OImage.FromFile(image));
             for (int i = 1; i <= 10; i++)
@@ -80,24 +86,32 @@ namespace Slideshow
                 switch(transitionType)
                 {
                     case 0:
+                        manager[screen][1].Left = 0;
+                        manager[screen][1].Top = 0;
                         if (num==1)
                             ((OMButton)manager[screen][1]).Transparency = (byte)(i * 10);
                         else
                             ((OMButton)manager[screen][1]).Transparency = (byte)(100 - (i * 10));
                         break;
                     case 1:
+                        manager[screen][1].Left = 0;
+                        ((OMButton)manager[screen][1]).Transparency = 100;
                         if (num == 1)
                             manager[screen][1].Top = ((i * 60) - 600);
                         else
                             manager[screen][1].Top = ((i * 60));
                         break;
                     case 2:
+                        manager[screen][1].Left = 0;
+                        ((OMButton)manager[screen][1]).Transparency = 100;
                         if (num == 1)
                             manager[screen][1].Top = (600-(i * 60));
                         else
                             manager[screen][1].Top = (-(i * 60));
                         break;
                     case 3:
+                        ((OMButton)manager[screen][1]).Transparency = 100;
+                        manager[screen][1].Top = 0;
                         if (num == 1)
                             manager[screen][1].Left = (1000-(i*100));
                         else
@@ -105,6 +119,8 @@ namespace Slideshow
                         break;
                     case 4:
                     default:
+                        manager[screen][1].Top = 0;
+                        ((OMButton)manager[screen][1]).Transparency = 100;
                         if (num == 1)
                             manager[screen][1].Left = ((i * 100) - 1000);
                         else
@@ -113,6 +129,7 @@ namespace Slideshow
                 }
                 Thread.Sleep(50);
             }
+            transitioning[screen] = false;
         }
         private List<string> getImages(string path)
         {
@@ -142,6 +159,7 @@ namespace Slideshow
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
+            transitioning = new bool[theHost.ScreenCount];
             pos=new int[theHost.ScreenCount];
             allImages = new List<string>[theHost.ScreenCount];
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);

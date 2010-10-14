@@ -122,7 +122,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the button image
         /// </summary>
-        [Category("Graphical"), Description("Sets the button image")]
         public imageItem Image
         {
             get
@@ -138,7 +137,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the effect when the button is clicked
         /// </summary>
-        [CategoryAttribute("Graphical"), DescriptionAttribute("Sets the effect when the button is clicked")]
         public eButtonTransition Transition
         {
             get
@@ -155,7 +153,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the image displayed when the button is pressed
         /// </summary>
-        [Category("Graphical"), Description("Sets the image displayed when the button is pressed")]
         public imageItem DownImage
         {
             get
@@ -171,7 +168,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// An integer from 0-100 (100% being opaque)
         /// </summary>
-        [Category("Graphical"), Description("A value from 0-100 (100% being opaque)")]
         public byte Transparency
         {
             get
@@ -181,13 +177,13 @@ namespace OpenMobile.Controls
             set
             {
                 transparency = value;
+                raiseUpdate(false);
             }
         }
 
         /// <summary>
         /// Sets the image to display when the button has focus
         /// </summary>
-        [Category("Graphical"), Description("Sets the image to display when the button has focus")]
         public imageItem FocusImage
         {
             get
@@ -203,7 +199,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the rotation of the control
         /// </summary>
-        [CategoryAttribute("Graphical"), DescriptionAttribute("Sets the rotation of the control")]
         public eAngle Orientation
         {
             get
