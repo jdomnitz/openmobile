@@ -245,6 +245,8 @@ namespace ControlDemo
                 case eMediaType.AppleDevice:
                     ((OMLabel)p[1]).Text = "Apple Device";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|iPodiPhone", true);
+                    itm = theHost.getSkinImage("Discs|Play", true);
+                    List3.Add(new OMListItem("Play All Music", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
                     return;

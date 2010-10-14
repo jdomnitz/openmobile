@@ -114,14 +114,14 @@ namespace PandoraPlayer
         {
             stationInfo info=new stationInfo();
             info.HD=true;
-            info.signal=5;
+            info.signal=signal ? 5:0;
             if (client.CurrentStation != null)
             {
                 info.stationName = client.CurrentStation.Name;
                 info.stationID = "Pandora:"+client.CurrentStation.SID;
             }
             info.Channels = 2;
-            info.Bitrate = 196;
+            info.Bitrate = (client.BitrateKBS==0) ? 128 : client.BitrateKBS*8;
             return info;
         }
 
@@ -140,6 +140,7 @@ namespace PandoraPlayer
                     this.instance = instance;
                     int vol = getVolume(instance);
                     client = new PClient(false);
+                    client.OnSignalChange += new streamStatus(client_OnSignalChange);
                     stationsAvailable=loggedIn=false;
                     client.LoggedIn += new StringEventHandler(client_LoggedIn);
                     client.StationChanged += new StringEventHandler(client_StationChanged);
@@ -164,10 +165,15 @@ namespace PandoraPlayer
             }
             return false;
         }
+        bool signal=true;
+        void client_OnSignalChange(bool good)
+        {
+            signal = good;
+            raiseMediaEvent(eFunction.tunerDataUpdated, "");
+        }
 
         void client_Error(object o, StringEventArgs e)
         {
-            error = true;
             if (theHost != null)
                 theHost.sendMessage("OMDebug", "Pandora", e.Value);
             Debug.Print(e.Value);
@@ -185,6 +191,8 @@ namespace PandoraPlayer
             client.password = Credentials.getCredential("Pandora Password");
             if ((client.password != null) && (client.username != null))
                 client.startWorker();
+            else
+                error = true;
         }
         bool loggedIn = false;
         void client_LoggedIn(object o, StringEventArgs e)
@@ -263,7 +271,7 @@ namespace PandoraPlayer
         public tunedContentInfo getStatus(int instance)
         {
             tunedContentInfo info = new tunedContentInfo();
-            info.band = eTunedContentBand.Other;
+            info.band = eTunedContentBand.Internet;
             info.channels = 2;
             info.powerState = (client != null);
             info.currentStation = getStationInfo(instance);

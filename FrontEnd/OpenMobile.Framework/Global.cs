@@ -842,6 +842,8 @@ namespace OpenMobile
         RandomChanged=57,
         /// <summary>
         /// Occurs when siganl strength, status, # of channels, etc changes
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Instance Number</para>
         /// </summary>
         tunerDataUpdated=58,
         /// <summary>
@@ -1561,7 +1563,11 @@ namespace OpenMobile
         /// <summary>
         /// Everything else
         /// </summary>
-        Other=7
+        Other=7,
+        /// <summary>
+        /// Internet Radio
+        /// </summary>
+        Internet=8
     }
 
     /// <summary>

@@ -742,6 +742,7 @@ namespace NewMedia
                 }
                 else
                 {
+                    l.Clear();
                     foreach (mediaInfo info in Playlist.readPlaylistFromDB(theHost, path,dbname[screen]))
                     {
                         if (abortJob[screen])

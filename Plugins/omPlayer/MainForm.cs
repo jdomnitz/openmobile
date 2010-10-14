@@ -294,6 +294,8 @@ namespace OMPlayer
     {
         if (type != eKeypressType.KeyDown)
             return false;
+        if ((settings == null)||(settings.Count<4))
+            return false;
         if (settings[3].Value == "True")
         {
             switch (arg.Key)
