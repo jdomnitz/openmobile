@@ -24,6 +24,8 @@ namespace UASControl
         {
             if (function == eFunction.loadTunedContent)
             {
+                if (_settings == null)
+                    return;
                 foreach(Setting s in _settings)
                 {
                     if (s.Value == arg)
@@ -83,7 +85,8 @@ namespace UASControl
 
         void _settings_OnSettingChanged(Setting setting)
         {
-            throw new System.NotImplementedException();
+            using(PluginSettings s=new PluginSettings())
+                s.setSetting(setting.Name,setting.Value);
         }
 
         public string authorName
