@@ -174,7 +174,10 @@ namespace OMPlayer
                     list.Add(currentTrack);
                 }
             }
-            media= new List<mediaInfo>(info);
+            if (info == null)
+                media = new List<mediaInfo>();
+            else
+                media= new List<mediaInfo>(info);
             return true;
         }
 

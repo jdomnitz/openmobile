@@ -84,11 +84,12 @@ namespace OMDebug
             writer.WriteLine("Framework: " + OpenMobile.Framework.OSSpecific.getFramework());
 			writer.WriteLine("Open Mobile: v" + Assembly.GetEntryAssembly().GetName().Version.ToString());
 			writer.WriteLine(Graphics.GLType+" v" + Graphics.Version);
+            writer.WriteLine("Graphics Engine: " + Graphics.GraphicsEngine);
             writer.WriteLine("------------------Hardware-------------------");
             writer.WriteLine("Processors: " + Environment.ProcessorCount);
             writer.WriteLine("Architecture: "+OpenMobile.Framework.OSSpecific.getArchitecture().ToString());
             writer.WriteLine("Screens: " + DisplayDevice.AvailableDisplays.Count.ToString());
-            writer.WriteLine("Graphics Card: " + Graphics.GraphicsEngine);
+            writer.WriteLine("Graphics Card: " + Graphics.Renderer);
             writer.WriteLine("----------------Inital Assemblies-------------");
             time = Environment.TickCount;
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
@@ -133,8 +134,8 @@ namespace OMDebug
 
         void theHost_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
         {
-            if ((function == eFunction.userInputReady) || (function == eFunction.gesture))
-                return; //Protect Users Privacy - Potentially contain password info
+            if ((function == eFunction.userInputReady) || (function == eFunction.gesture)||(function==eFunction.systemVolumeChanged))
+                return; //Protect Users Privacy - Potentially contains password info
             log(function.ToString() + "(" + arg1 + "," + arg2 + "," + arg3 + ")");
         }
 

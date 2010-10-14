@@ -319,6 +319,7 @@ namespace OpenMobile.Framework
 				case "i586":
 				case "i686":
 				case "x86_64":
+                case "x86-64":
 				case "ia64":
 					if (IntPtr.Size == 4)
 						return eArchType.x86;

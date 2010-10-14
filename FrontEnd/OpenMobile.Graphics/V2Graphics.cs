@@ -170,7 +170,7 @@ namespace OpenMobile.Graphics
 
         public void DrawImage(OImage img, Rectangle rect, int x, int y, int width, int height)
         {
-            //throw new NotImplementedException();
+            DrawImage(img, rect, x, y, width, height, 1F);
         }
 
         public void DrawImage(OImage image, Rectangle rect, float transparency)
@@ -185,7 +185,11 @@ namespace OpenMobile.Graphics
 
         public void DrawImage(OImage image, Rectangle rect, int x, int y, int Width, int Height, float transparency)
         {
-            DrawImage(image, rect, transparency);
+            Rectangle clp = Clip;
+            SetClipFast(rect.X, rect.Y, rect.Width, rect.Height);
+            float xs = (rect.Width / Width), ys = (rect.Height / Height);
+            DrawImage(image, rect.X - (int)(xs*x), rect.X - (int)(y*ys), (int)(xs*(image.Width-x)), (int)(ys*(image.Height-y)), transparency,eAngle.Normal);
+            Clip = clp;
         }
 
         public void DrawImage(OImage image, Rectangle rect)
@@ -290,8 +294,60 @@ namespace OpenMobile.Graphics
 
         public void DrawRoundRectangle(Pen pen, int x, int y, int width, int height, int radius)
         {
-            //TODO
-            DrawRectangle(pen, x, y, width, height);
+            double ang = 0;
+            Raw.Color4(pen.Color);
+            Raw.LineWidth(pen.Width);
+            Raw.Enable(EnableCap.LineSmooth);
+            Raw.Enable(EnableCap.PointSmooth);
+            int[] arr = new int[] { x, y + radius, x, y + height - radius, x + radius-1, y, x + width - radius, y, x + width, y + radius-1, x + width, y + height - radius, x + radius, y + height, x + width - radius, y + height };
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.Lines, 0, 8);
+            float cX = x + radius, cY = y + radius;
+            arr = new int[64];
+            int count = 0;
+            for (ang = Math.PI; ang <= (1.5 * Math.PI); ang = ang + 0.05)
+            {
+                arr[count] = (int)(radius * Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                count += 2;
+            }
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
+
+            cX = x + width - radius;
+            count = 0;
+            for (ang = (1.5 * Math.PI); ang <= (2 * Math.PI); ang = ang + 0.05)
+            {
+                arr[count] = (int)(radius * Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                count += 2;
+            }
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
+            cY = y + height - radius;
+            count = 0;
+            for (ang = 0; ang <= (0.5 * Math.PI); ang = ang + 0.05)
+            {
+                arr[count] = (int)(radius * Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                count += 2;
+            }
+            cX = x + radius;
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
+            count = 0;
+            for (ang = (0.5 * Math.PI); ang <= Math.PI; ang = ang + 0.05)
+            {
+                arr[count] = (int)(radius * Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                count += 2;
+            }
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+            Raw.Disable(EnableCap.LineSmooth);
+            Raw.Disable(EnableCap.PointSmooth);
         }
 
         public void DrawRoundRectangle(Pen p, Rectangle rect, int radius)
@@ -300,20 +356,26 @@ namespace OpenMobile.Graphics
         }
 
         public void FillEllipse(Brush brush, int x, int y, int width, int height)
-        {//TODO - Verify smoothness
+        {
+            Raw.Enable(EnableCap.LineSmooth);
+            Raw.Enable(EnableCap.PointSmooth);
+            Raw.Enable(EnableCap.Multisample);
             Raw.Color4(brush.Color);
             int[] arr=new int[722];
             arr[720]=x + (width / 2);
             arr[721]=y + (height / 2);
             for (int angle = 0; angle < 360; angle++)
             {
-                arr[angle]=(int)(x + (width / 2) + Math.Sin(angle) * (width / 2));
-                arr[angle+1]= (int)(y + (height / 2) + Math.Cos(angle) * (height / 2));
+                arr[angle*2]=(int)(x + (width / 2) + Math.Sin(angle) * (width / 2));
+                arr[(angle*2)+1]= (int)(y + (height / 2) + Math.Cos(angle) * (height / 2));
             }
             Raw.EnableClientState(ArrayCap.VertexArray);
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
             Raw.DrawArrays(BeginMode.TriangleFan, 0, 361);
             Raw.DisableClientState(ArrayCap.VertexArray);
+            Raw.Disable(EnableCap.LineSmooth);
+            Raw.Disable(EnableCap.PointSmooth);
+            Raw.Disable(EnableCap.Multisample);
         }
 
         public void FillEllipse(Brush brush, Rectangle rect)
@@ -323,7 +385,16 @@ namespace OpenMobile.Graphics
 
         public void FillPolygon(Brush brush, Point[] points)
         {
-            //throw new NotImplementedException();
+            int[] arr = new int[points.Length * 2];
+            for (int i = 0; i < points.Length; i++)
+            {
+                arr[2 * i] = points[i].X;
+                arr[(2 * i)+1] = points[i].Y;
+            }
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleStrip, 0, points.Length);
+            Raw.DisableClientState(ArrayCap.VertexArray);
         }
 
         public void FillRectangle(Brush brush, float x, float y, float width, float height)
@@ -363,8 +434,70 @@ namespace OpenMobile.Graphics
 
         public void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
         {
-            //TODO - FIX
-            FillRectangleSolid(color, x, y, width, height);
+            double ang = 0;
+            Raw.Color4(color);
+            Raw.Enable(EnableCap.LineSmooth);
+            Raw.Enable(EnableCap.PointSmooth);
+            int[] arr = new int[] { x + width - radius, y, x + radius, y, x, y + height - radius, x, y + radius, x + radius, y + height, x + width - radius, y + height, x + width, y + radius, x + width, y + height - radius };
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 8);
+            float cX = x + radius, cY = y + radius;
+            arr = new int[66];
+            arr[0] = (int)cX;
+            arr[1] = (int)cY;
+            int count = 2;
+            for (ang = Math.PI; ang <= (1.5 * Math.PI); ang = ang + 0.05)
+            {
+                arr[count]=(int)(radius * Math.Cos(ang) + cX);
+                arr[count+1]=(int)(radius * Math.Sin(ang) + cY);
+                count+=2;
+            }
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            
+            cX = x + width - radius;
+            arr = new int[66];
+            arr[0] = (int)cX;
+            arr[1] = (int)cY;
+            count = 2;
+            for (ang = (1.5 * Math.PI); ang <= (2 * Math.PI); ang = ang + 0.05)
+            {
+                arr[count]=(int)(radius * Math.Cos(ang) + cX);
+                arr[count+1]=(int)(radius * Math.Sin(ang) + cY);
+                count+=2;
+            }
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            arr = new int[66];
+            arr[0] = (int)cX;
+            cY = y + height - radius;
+            arr[1] = (int)cY;
+            count = 2;
+            for (ang = 0; ang <= (0.5 * Math.PI); ang = ang + 0.05)
+            {
+                arr[count]=(int)(radius * Math.Cos(ang) + cX);
+                arr[count+1]=(int)(radius * Math.Sin(ang) + cY);
+                count+=2;
+            }
+            cX = x + radius;
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            arr = new int[66];
+            arr[0] = (int)cX;
+            arr[1] = (int)cY;
+            count = 2;
+            for (ang = (0.5 * Math.PI); ang <= Math.PI; ang = ang + 0.05)
+            {
+                arr[count]=(int)(radius * Math.Cos(ang) + cX);
+                arr[count+1]=(int)(radius * Math.Sin(ang) + cY);
+                count+=2;
+            }
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+            Raw.Disable(EnableCap.LineSmooth);
+            Raw.Disable(EnableCap.PointSmooth);
         }
 
         public void Finish()
@@ -389,6 +522,7 @@ namespace OpenMobile.Graphics
         public void Initialize(int screen)
         {
             Raw.Disable(EnableCap.DepthTest);
+            Raw.Disable(EnableCap.Multisample);
             Raw.Enable(EnableCap.Blend);
             Raw.Disable(EnableCap.Dither); //Necessary?
             Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);

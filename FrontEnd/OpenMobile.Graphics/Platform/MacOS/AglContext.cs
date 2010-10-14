@@ -220,25 +220,25 @@ namespace OpenMobile.Platform.MacOS
         {
             if (carbonWindow.IsControl == false)
                 return;
-            //TO - Re-Enable
-            //System.Windows.Forms.Control ctrl = Control.FromHandle(carbonWindow.WindowRef);
+            //Never Used since we use a window not a control
+            /*System.Windows.Forms.Control ctrl = Control.FromHandle(carbonWindow.WindowRef);
                 
-            //if (ctrl.TopLevelControl == null)
-            //    return;
+            if (ctrl.TopLevelControl == null)
+                return;
                 
             Rect rect = API.GetControlBounds(carbonWindow.WindowRef);
-            //System.Windows.Forms.Form frm = (System.Windows.Forms.Form) ctrl.TopLevelControl;
+            System.Windows.Forms.Form frm = (System.Windows.Forms.Form) ctrl.TopLevelControl;
 
-            //System.Drawing.Point loc =
-            //    frm.PointToClient(ctrl.PointToScreen(System.Drawing.Point.Empty));
+            System.Drawing.Point loc =
+                frm.PointToClient(ctrl.PointToScreen(System.Drawing.Point.Empty));
 
-            //rect.X = (short)loc.X;
-            //rect.Y = (short)loc.Y;
+            rect.X = (short)loc.X;
+            rect.Y = (short)loc.Y;
             
             Debug.Print("Setting buffer_rect for control.");
             Debug.Print("MacOS Coordinate Rect:   {0}", rect);
             
-            //rect.Y = (short)(ctrl.TopLevelControl.ClientSize.Height - rect.Y - rect.Height);
+            rect.Y = (short)(ctrl.TopLevelControl.ClientSize.Height - rect.Y - rect.Height);
             Debug.Print("  AGL Coordinate Rect:   {0}", rect);
             
             int[] glrect = new int[4];
@@ -252,8 +252,7 @@ namespace OpenMobile.Platform.MacOS
             MyAGLReportError("aglSetInteger");
 
             Agl.aglEnable(Handle.Handle, Agl.ParameterNames.AGL_BUFFER_RECT);
-            MyAGLReportError("aglEnable");
-  
+            MyAGLReportError("aglEnable");*/
         }
         void SetDrawable(CarbonWindowInfo carbonWindow)
         {
