@@ -174,7 +174,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The image of the slider track
         /// </summary>
-        [Category("Graphics"),Description("The image of the slider track")]
         public imageItem SliderBar
         {
             get
@@ -186,10 +185,22 @@ namespace OpenMobile.Controls
                 sliderBar = value;
             }
         }
+        imageItem sliderTrackFull;
+        public imageItem SliderTrackFull
+        {
+            get
+            {
+                return sliderTrackFull;
+            }
+            set
+            {
+                sliderTrackFull = value;
+            }
+        }
+
         /// <summary>
         /// The image of the slider
         /// </summary>
-        [Category("Graphics"),Description("The image of the slider")]
         public imageItem Slider
         {
             get
@@ -220,7 +231,14 @@ namespace OpenMobile.Controls
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
             g.DrawImage(sliderBar.image, left, top, width, height);
-            g.DrawImage(slider.image, left + sliderPosition-(sliderHeight/2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight);
+            if (sliderTrackFull.image != null)
+            {
+                Rectangle clip = g.Clip;
+                g.SetClipFast(left,top, sliderPosition, height);
+                g.DrawImage(sliderTrackFull.image, left, top, width, height);
+                g.Clip = clip;
+            }
+            g.DrawImage(slider.image, left + sliderPosition - (sliderHeight / 2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight);
         }
 
         #region IThrow Members

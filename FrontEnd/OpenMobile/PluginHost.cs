@@ -703,8 +703,9 @@ namespace OpenMobile
                         }
                         catch (Exception) { }
                         currentMediaPlayer[ret].OnMediaEvent -= raiseMediaEvent;
+                        string name = currentMediaPlayer[ret].pluginName;
                         currentMediaPlayer[ret] = null;
-                        raiseMediaEvent(eFunction.unloadAVPlayer, ret, "");
+                        raiseMediaEvent(eFunction.unloadAVPlayer, ret, name);
                         return true;
                     }
                     return false;
@@ -715,8 +716,9 @@ namespace OpenMobile
                             return false;
                         currentTunedContent[ret].setPowerState(ret, false);
                         currentTunedContent[ret].OnMediaEvent -= raiseMediaEvent;
+                        string name = currentTunedContent[ret].pluginName;
                         currentTunedContent[ret] = null;
-                        raiseMediaEvent(eFunction.unloadTunedContent, ret, "");
+                        raiseMediaEvent(eFunction.unloadTunedContent, ret, name);
                         return true;
                     }
                     return false;

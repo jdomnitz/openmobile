@@ -921,10 +921,12 @@ namespace OpenMobile.Graphics
         }
         public void DrawImage(OImage image, Rectangle rect, int x, int y, int Width, int Height, float transparency)
         {
+            if ((Width == 0) || (Height == 0))
+                return;
             Rectangle clp = Clip;
             SetClipFast(rect.X, rect.Y, rect.Width, rect.Height);
             float xs = (rect.Width / Width), ys = (rect.Height / Height);
-            DrawImage(image, rect.X - (int)(xs * x), rect.X - (int)(y * ys), (int)(xs * (image.Width - x)), (int)(ys * (image.Height - y)), transparency, eAngle.Normal);
+            DrawImage(image, rect.X - (int)(xs * x), rect.Y - (int)(y * ys), (int)(xs * (image.Width - x)), (int)(ys * (image.Height - y)), transparency, eAngle.Normal);
             Clip = clp;
         }
         public void DrawImage(OImage image, Rectangle rect, float transparency)
