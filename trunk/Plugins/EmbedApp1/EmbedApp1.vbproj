@@ -5,10 +5,10 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{26C68D93-DF6F-4655-9E83-4A34CB8440B4}</ProjectGuid>
+    <ProjectGuid>{BE20A805-F837-4A3D-A0B0-248D2C997A7E}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>ExternalNav</RootNamespace>
-    <AssemblyName>ExternalNav</AssemblyName>
+    <RootNamespace>EmbedApp1</RootNamespace>
+    <AssemblyName>EmbedApp1</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -22,8 +22,8 @@
     <DebugType>full</DebugType>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
-    <OutputPath>..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\</OutputPath>
-    <DocumentationFile>ExternalNav.xml</DocumentationFile>
+    <OutputPath>..\..\FrontEnd\OpenMobile\bin\Debug\Skins\Default\</OutputPath>
+    <DocumentationFile>EmbedApp1.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -32,7 +32,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>..\..\FrontEnd\OpenMobile\bin\Release\Plugins\</OutputPath>
-    <DocumentationFile>ExternalNav.xml</DocumentationFile>
+    <DocumentationFile>EmbedApp1.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <ItemGroup>
@@ -54,7 +54,7 @@
     <Import Include="System.Diagnostics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExternalNav.vb" />
+    <Compile Include="EmbedApp1.vb" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
