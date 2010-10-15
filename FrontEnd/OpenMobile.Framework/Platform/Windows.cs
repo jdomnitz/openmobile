@@ -130,6 +130,18 @@ namespace OpenMobile.Framework
 
             [DllImport("user32.dll")]
             public static extern IntPtr SetFocus(IntPtr hWnd);
+
+            [DllImport("user32.dll")]
+            public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+            [DllImport("user32.dll", SetLastError = true)]
+            public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+            public static int removeWindowBorder(IntPtr WindowsHandle)
+            {
+                return SetWindowLong(WindowsHandle, -16, GetWindowLong(WindowsHandle, -16) & ~(0xc00000) & ~(0x800000));
+            }
+
         }
     }
 }
