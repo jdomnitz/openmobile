@@ -161,6 +161,7 @@ namespace OpenMobile
             {
                 try
                 {
+                    theHost.sendMessage("OMDebug", "Plugin Manager", "Initializing "+pluginCollection[i].pluginName);
                     if (pluginCollection[i]!=null)
                         status[i]= pluginCollection[i].initialize(theHost);
                 }

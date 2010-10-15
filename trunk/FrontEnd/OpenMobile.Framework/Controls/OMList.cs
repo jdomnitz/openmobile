@@ -922,7 +922,10 @@ namespace OpenMobile.Controls
         {
             focused = false;
             if (selectedIndex > -1)
+            {
                 items[selectedIndex].textTex = null;
+                items[selectedIndex].subitemTex = null;
+            }
         }
 
         #endregion

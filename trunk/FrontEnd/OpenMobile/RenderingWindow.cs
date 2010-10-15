@@ -905,7 +905,7 @@ namespace OpenMobile
                         for (int j = 0; j < backgroundQueue.Count; j++)
                             for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                    if ((backgroundQueue[j][i].Left + backgroundQueue[j][i].Width <= highlighted.Left) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
+                                    if ((backgroundQueue[j][i].Left < highlighted.Left) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                         if (distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
                                             if (notCovered(backgroundQueue[j][i], 'l') == true)
@@ -953,7 +953,7 @@ namespace OpenMobile
                         for (int j = 0; j < backgroundQueue.Count; j++)
                             for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                    if ((backgroundQueue[j][i].Top + backgroundQueue[j][i].Height <= highlighted.Top) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
+                                    if ((backgroundQueue[j][i].Top < highlighted.Top) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                         if (distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
                                             if (notCovered(backgroundQueue[j][i], 'u') == true)
@@ -977,7 +977,7 @@ namespace OpenMobile
                         for (int j = 0; j < backgroundQueue.Count; j++)
                             for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                    if ((backgroundQueue[j][i].Top >= highlighted.Top + highlighted.Height) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
+                                    if ((backgroundQueue[j][i].Top > highlighted.Top) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                         if (distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
                                             if (notCovered(backgroundQueue[j][i], 'd') == true)

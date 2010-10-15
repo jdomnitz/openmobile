@@ -230,14 +230,14 @@ namespace OpenMobile
             stopButton.OnClick += new userInteraction(stopButton_OnClick);
             stopButton.Transition = eButtonTransition.None;
             OMButton rewindButton = new OMButton(149, 648, 135, 100);
-            rewindButton.Image = theHost.getSkinImage("Rewind", true);
-            rewindButton.DownImage = theHost.getSkinImage("Rewind.Highlighted", true);
+            rewindButton.Image = theHost.getSkinImage("Rewind");
+            rewindButton.DownImage = theHost.getSkinImage("Rewind.Highlighted");
             rewindButton.OnClick += new userInteraction(rewindButton_OnClick);
             rewindButton.Transition = eButtonTransition.None;
             OMButton fastForwardButton = new OMButton(564, 648, 135, 100);
             fastForwardButton.OnClick += new userInteraction(fastForwardButton_OnClick);
-            fastForwardButton.Image = theHost.getSkinImage("fastForward", true);
-            fastForwardButton.DownImage = theHost.getSkinImage("fastForward.Highlighted", true);
+            fastForwardButton.Image = theHost.getSkinImage("fastForward");
+            fastForwardButton.DownImage = theHost.getSkinImage("fastForward.Highlighted");
             fastForwardButton.Transition = eButtonTransition.None;
             OMButton skipForwardButton = new OMButton(703, 648, 135, 100);
             skipForwardButton.Image = theHost.getSkinImage("SkipForward", true);
@@ -863,7 +863,38 @@ namespace OpenMobile
 
         void theHost_OnMediaEvent(eFunction function, int instance,string arg)
         {
-            if (function == eFunction.Play)
+            if (function == eFunction.loadTunedContent)
+            {
+                if (arg == "Pandora")
+                {
+                    for(int i=0;i<theHost.ScreenCount;i++)
+                        if (theHost.instanceForScreen(i) == instance)
+                        {
+                            OMButton rw=(OMButton)manager[i][12];
+                            OMButton ff = (OMButton)manager[i][15];
+                            rw.Image = theHost.getSkinImage("ThumbsDown");
+                            rw.DownImage = imageItem.NONE;
+                            ff.Image = theHost.getSkinImage("ThumbsUp");
+                            ff.DownImage = imageItem.NONE;
+                        }
+                }
+            }else if(function==eFunction.unloadTunedContent)
+            {
+                if (arg == "Pandora")
+                {
+                    for (int i = 0; i < theHost.ScreenCount; i++)
+                        if (theHost.instanceForScreen(i) == instance)
+                        {
+                            OMButton rw = (OMButton)manager[i][12];
+                            OMButton ff = (OMButton)manager[i][15];
+                            rw.Image = theHost.getSkinImage("Rewind", true);
+                            rw.DownImage = theHost.getSkinImage("Rewind.Highlighted");
+                            ff.Image = theHost.getSkinImage("FastForward", true);
+                            ff.DownImage = theHost.getSkinImage("FastForward.Highlighted");
+                        }
+                }
+            }
+            else if (function == eFunction.Play)
             {
                 mediaInfo info = theHost.getPlayingMedia(instance);
 				if (info==null)
