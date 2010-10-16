@@ -757,7 +757,7 @@ namespace OpenMobile
                     keyboardActive = true;
                     tmrClick.Enabled = true;
                     SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
-                    if (lastClick.DownImage.image != null)
+                    if (lastClick.FocusImage.image != null)
                     {
                         lastClick.Mode = eModeType.Highlighted;
                         Invalidate();
@@ -906,11 +906,11 @@ namespace OpenMobile
                             for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
                                     if ((backgroundQueue[j][i].Left < highlighted.Left) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
-                                        if (distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
+                                        if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
                                             if (notCovered(backgroundQueue[j][i], 'l') == true)
                                             {
-                                                best = distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
+                                                best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
                                                 b = backgroundQueue[j][i];
                                             }
                                         }
@@ -929,12 +929,12 @@ namespace OpenMobile
                         for (int j = 0; j < backgroundQueue.Count; j++)
                             for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                    if ((backgroundQueue[j][i].Left >= highlighted.Left + highlighted.Width) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
-                                        if (distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
+                                    if ((backgroundQueue[j][i].Left > highlighted.Left) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
+                                        if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
                                             if (notCovered(backgroundQueue[j][i], 'r') == true)
                                             {
-                                                best = distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
+                                                best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
                                                 b = backgroundQueue[j][i];
                                             }
                                         }
@@ -954,11 +954,11 @@ namespace OpenMobile
                             for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
                                     if ((backgroundQueue[j][i].Top < highlighted.Top) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
-                                        if (distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
+                                        if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
                                             if (notCovered(backgroundQueue[j][i], 'u') == true)
                                             {
-                                                best = distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
+                                                best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
                                                 b = backgroundQueue[j][i];
                                             }
                                         }
@@ -978,11 +978,11 @@ namespace OpenMobile
                             for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
                                     if ((backgroundQueue[j][i].Top > highlighted.Top) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
-                                        if (distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
+                                        if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
                                             if (notCovered(backgroundQueue[j][i], 'd') == true)
                                             {
-                                                best = distance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
+                                                best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
                                                 b = backgroundQueue[j][i];
                                             }
                                         }
@@ -1018,31 +1018,15 @@ namespace OpenMobile
 
         private bool notCovered(OMControl oMControl, char direction)
         {
-            Point pnt = Point.Empty;
-            switch (direction)
-            {
-                case 'l':
-                    pnt = new Point(oMControl.Left + oMControl.Width, oMControl.Top + (oMControl.Height / 2));
-                    break;
-                case 'r':
-                    pnt = new Point(oMControl.Left, oMControl.Top + (oMControl.Height / 2));
-                    break;
-                case 'd':
-                    pnt = new Point(oMControl.Left + (oMControl.Width / 2), oMControl.Top);
-                    break;
-                case 'u':
-                    pnt = new Point(oMControl.Left + (oMControl.Width / 2), oMControl.Top + oMControl.Height);
-                    break;
-            }
             for (int h = backgroundQueue.Count - 1; h >= 0; h--)
             {
                 for (int i = backgroundQueue[h].controlCount - 1; i >= 0; i--)
                 {
                     if (backgroundQueue[h][i].Visible == false)
                         continue;
-                    if ((pnt.X >= backgroundQueue[h][i].Left) && (pnt.Y >= backgroundQueue[h][i].Top) && (pnt.X <= (backgroundQueue[h][i].Left + backgroundQueue[h][i].Width)) && (pnt.Y <= (backgroundQueue[h][i].Top + backgroundQueue[h][i].Height)))
+                    if ((oMControl.Left >= backgroundQueue[h][i].Left) && (oMControl.Top >= backgroundQueue[h][i].Top) && ((oMControl.Left+oMControl.Width) <= (backgroundQueue[h][i].Left + backgroundQueue[h][i].Width)) && ((oMControl.Top+oMControl.Height) <= (backgroundQueue[h][i].Top + backgroundQueue[h][i].Height)))
                     {
-
+                        
                         if (backgroundQueue[h][i] == oMControl)
                             return true;
                         else
@@ -1055,11 +1039,14 @@ namespace OpenMobile
             return true;
         }
 
-        private int distance(Rectangle r1, Rectangle r2)
+        private int xdistance(Rectangle r1, Rectangle r2)
         {
-            return Math.Max(Math.Abs((r1.Left + r1.Width / 2) - (r2.Left + r2.Width / 2)) - (r1.Width + r2.Width) / 2, 0) + Math.Max(Math.Abs((r1.Top + r1.Height / 2) - (r2.Top + r2.Height / 2)) - (r1.Height + r2.Height) / 2, 0);
+            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 3*Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
         }
-
+        private int ydistance(Rectangle r1, Rectangle r2)
+        {
+            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2)*3 + Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
+        }
         private void RenderingWindow_MouseLeave(object sender, EventArgs e)
         {
             if (rParam.currentMode == eModeType.Scrolling)
