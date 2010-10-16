@@ -53,12 +53,12 @@ namespace OpenMobile.Controls
         /// </summary>
         public event userInteraction OnDoubleClick;
 
-        private imageItem focusImage;
-        private imageItem image;
-        private imageItem downImage;
-        private byte transparency = 100;
-        private eAngle orientation;
-        private eButtonTransition transition = eButtonTransition.BoxOut;
+        protected imageItem focusImage;
+        protected imageItem image;
+        protected imageItem downImage;
+        protected byte transparency = 100;
+        protected eAngle orientation;
+        protected eButtonTransition transition = eButtonTransition.BoxOut;
 
         /// <summary>
         /// The rendering mode of the control

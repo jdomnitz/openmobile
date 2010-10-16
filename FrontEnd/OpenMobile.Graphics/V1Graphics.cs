@@ -925,7 +925,7 @@ namespace OpenMobile.Graphics
                 return;
             Rectangle clp = Clip;
             SetClipFast(rect.X, rect.Y, rect.Width, rect.Height);
-            float xs = (rect.Width / Width), ys = (rect.Height / Height);
+            float xs = ((float)rect.Width / Width), ys = ((float)rect.Height / Height);
             DrawImage(image, rect.X - (int)(xs * x), rect.Y - (int)(y * ys), (int)(xs * (image.Width - x)), (int)(ys * (image.Height - y)), transparency, eAngle.Normal);
             Clip = clp;
         }
