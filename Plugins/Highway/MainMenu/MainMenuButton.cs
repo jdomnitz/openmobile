@@ -47,10 +47,10 @@ namespace MainMenu
         public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
         {
             base.Render(g, e);
-            g.DrawImage(icon.image, left + 46, top+10, 96, 96);
+            g.DrawImage(icon.image, left + 48, top+18, 92, 92);
             if (ourTextTex == null)
-                ourTextTex = g.GenerateTextTexture(0, 0, width, 40, ourText, localFont, eTextFormat.Bold, Alignment.CenterCenter, Color.White, Color.Gray);
-            g.DrawImage(ourTextTex, left, top + 106, width, 40);
+                ourTextTex = g.GenerateTextTexture(0, 0, width, 34, ourText, localFont, eTextFormat.Bold, Alignment.CenterCenter, Color.White, Color.Gray);
+            g.DrawImage(ourTextTex, left, top + 112, width, 34);
         }
     }
 }

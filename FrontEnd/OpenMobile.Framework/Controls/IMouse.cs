@@ -24,7 +24,7 @@
 namespace OpenMobile.Controls
 {
     /// <summary>
-    /// Controls that support mouse interaction (Added by Borte)
+    /// Controls that support mouse interaction
     /// </summary>
     public interface IMouse
     {

@@ -443,7 +443,17 @@ namespace OpenMobile
                         lastClick.Mode = eModeType.transitioningOut;
                     else
                         lastClick.Mode = eModeType.Normal;
-                    RenderingWindow_MouseMove(this, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+
+                    if (keyboardActive == true)
+                    {
+                        keyboardActive = false;
+                        lastClick.Mode = eModeType.Highlighted;
+                    }
+                    else
+                    {
+                        //Recheck where the mouse is at
+                        RenderingWindow_MouseMove(this, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+                    }
                     tmrClick.Enabled = false;
                     lastClick = null;
                     return;
@@ -526,7 +536,11 @@ namespace OpenMobile
                     if (highlighted != null)
                     {
                         if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
-                            ((IMouse)highlighted).MouseMove(screen, e, widthScale, heightScale);
+                            try
+                            {
+                                ((IMouse)highlighted).MouseMove(screen, e, widthScale, heightScale);
+                            }
+                            catch (Exception ex) { SandboxedThread.handle(ex); }
                         if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                             if (ThrowStarted)
                                 if (Math.Abs(e.X - ThrowStart.X) > 3 || (Math.Abs(e.Y - ThrowStart.Y) > 3))
@@ -757,7 +771,7 @@ namespace OpenMobile
                     keyboardActive = true;
                     tmrClick.Enabled = true;
                     SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
-                    if (lastClick.FocusImage.image != null)
+                    if ((lastClick!=null)&&(lastClick.FocusImage.image != null))
                     {
                         lastClick.Mode = eModeType.Highlighted;
                         Invalidate();
@@ -1006,6 +1020,7 @@ namespace OpenMobile
                             else
                                 lastClick.Mode = eModeType.Clicked;
                             tmrLongClick.Enabled = true;
+                            Invalidate();
                         }
                         else if (typeof(IClickable).IsInstanceOfType(highlighted))
                         {
@@ -1041,11 +1056,11 @@ namespace OpenMobile
 
         private int xdistance(Rectangle r1, Rectangle r2)
         {
-            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 3*Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
+            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 5*Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
         }
         private int ydistance(Rectangle r1, Rectangle r2)
         {
-            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2)*3 + Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
+            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2)*5 + Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
         }
         private void RenderingWindow_MouseLeave(object sender, EventArgs e)
         {

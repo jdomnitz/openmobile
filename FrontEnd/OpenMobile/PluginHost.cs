@@ -1473,7 +1473,12 @@ namespace OpenMobile
                     {
                         try
                         {
-                            im.image = OImage.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".gif"));
+                            string file = Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".gif");
+                            if (!File.Exists(file))
+                            {
+                                file = Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png");
+                            }
+                            im.image = OImage.FromFile(file);
                             im.name = imageName;
                             imageCache.Add(im);
                             return im;

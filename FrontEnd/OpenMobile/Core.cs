@@ -211,6 +211,7 @@ namespace OpenMobile
             loadMainMenu();
             loadEmUp();
             theHost.hal = new HalInterface();
+            theHost.load(); //Stagger I/O
             getEmReady();
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete,"","","");
 			theHost.hal.snd("32");
@@ -242,6 +243,9 @@ namespace OpenMobile
             if (theHost.hal!=null)
                 theHost.hal.close();
             string strEx = spewException(ex);
+            FileStream fs=File.OpenWrite(Path.Combine(theHost.DataPath, "AppCrash.log"));
+            fs.Write(System.Text.ASCIIEncoding.ASCII.GetBytes(strEx), 0, strEx.Length);
+            fs.Close();
             //ErrorReporting reporting=new ErrorReporting(strEx);
             //reporting.ShowDialog(System.Windows.Forms.Form.FromHandle(RenderingWindows[0].getHandle()));
             //if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>1) //Prevent Loops
@@ -297,7 +301,6 @@ namespace OpenMobile
                     return;
                 }
             }
-            theHost.load();
             Thread rapidMenu=new Thread(new ThreadStart(Core.initialize));
             rapidMenu.Start();
             if (RenderingWindows.Count == 0)
