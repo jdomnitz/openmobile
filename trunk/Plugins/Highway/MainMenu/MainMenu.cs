@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using OpenMobile.Plugin;
 using OpenMobile.Framework;
 using OpenMobile.Controls;
+using OpenMobile.Data;
 
 namespace MainMenu
 {
@@ -77,7 +78,9 @@ namespace MainMenu
             b4.FocusImage = theHost.getSkinImage("HomeButton_HL");
             b4.DownImage = theHost.getSkinImage("HomeButton_Selected");
             b4.Icon = theHost.getSkinImage("Icons|Settings");
-            b4.Text = "Settings";
+            b4.Text = "Swap Skin";
+            //TODO-Remove
+            b4.OnClick += new userInteraction(b4_OnClick);
             p.addControl(t1);
             p.addControl(t2);
             p.addControl(t3);
@@ -88,6 +91,21 @@ namespace MainMenu
             p.addControl(b4);
             manager.loadPanel(p);
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void b4_OnClick(OMControl sender, int screen)
+        {
+            if (theHost.SkinPath.EndsWith("Default"))
+            {
+                using (PluginSettings s = new PluginSettings())
+                    s.setSetting("UI.Skin", "Highway");
+            }
+            else
+            {
+                using (PluginSettings s = new PluginSettings())
+                    s.setSetting("UI.Skin", "Default");
+            }
+            theHost.execute(OpenMobile.eFunction.restartProgram);
         }
 
         public Settings loadSettings()

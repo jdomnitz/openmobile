@@ -917,6 +917,13 @@ namespace OpenMobile
         /// </summary>
         setBand=70,
         /// <summary>
+        /// Manually sets the instance for a given zone
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// <para>Arg2: Instance Number</para>
+        /// </summary>
+        impersonateInstanceForScreen=71,
+        /// <summary>
         /// Go back to the previous panel
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>

@@ -235,7 +235,7 @@ namespace OpenMobile.Controls
             {
                 Rectangle clip = g.Clip;
                 g.SetClipFast(left,top, sliderPosition, height);
-                g.DrawImage(sliderTrackFull.image, left, top, width, height);
+                g.DrawImage(sliderTrackFull.image, left-2, top, width+4, height);
                 g.Clip = clip;
             }
             g.DrawImage(slider.image, left + sliderPosition - (sliderHeight / 2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight);

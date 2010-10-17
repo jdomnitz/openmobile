@@ -141,7 +141,6 @@ namespace OpenMobile.Framework
             {
                 return SetWindowLong(WindowsHandle, -16, GetWindowLong(WindowsHandle, -16) & ~(0xc00000) & ~(0x800000));
             }
-
         }
     }
 }

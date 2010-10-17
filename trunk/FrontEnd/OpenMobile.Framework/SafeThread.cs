@@ -39,8 +39,8 @@ namespace OpenMobile.Threading
                     }
                     catch (Exception e)
                     {
-                        if (host!=null)
-                            host.sendMessage("SandboxedThread","SafeThread","",ref e);
+                        if (host != null)
+                            host.sendMessage("SandboxedThread", "SafeThread", "", ref e);
                     }
                 }).Start();
         }
