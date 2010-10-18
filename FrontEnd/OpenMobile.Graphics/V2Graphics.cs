@@ -204,6 +204,7 @@ namespace OpenMobile.Graphics
             DrawImage(image, X, Y, Width, Height, 1F, eAngle.Normal);
         }
         int[] normalTex;
+        int[] flipTex;
         public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle)
         {
             if (image == null)
@@ -424,14 +425,101 @@ namespace OpenMobile.Graphics
 
         public void FillRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
         {
-            //if (brush.Gradient == Gradient.None)
-                FillSolidRoundRectangle(brush.Color, x, y,width, height, radius);
+            if (brush.Gradient == Gradient.None)
+                FillSolidRoundRectangle(brush.Color, x, y, width, height, radius);
+            else //if(brush.Gradient==Gradient.Horizontal)
+                FillVertRoundRectangle(brush, x, y, width, height, radius);
+        }
+
+        private void FillVertRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
+        {
+            double ang = 0;
+            Raw.Enable(EnableCap.LineSmooth);
+            Raw.Enable(EnableCap.PointSmooth);
+            int[] arr = new int[] 
+            { 
+                x + width - radius, y,//8
+                x + radius, y, //7
+                x + width, y + radius, //6
+                x, y + radius, //5
+                x + width, y + height - radius, //4
+                x, y + height - radius, //3
+                x + width - radius, y + height, //1
+                x + radius, y + height, //2
+            };
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.EnableClientState(ArrayCap.ColorArray);
+            Byte[] colors = new Byte[] { brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A };
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.ColorPointer(4, ColorPointerType.UnsignedByte, 0, colors);
+            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 8);
+            Raw.DisableClientState(ArrayCap.ColorArray);
+            float cX = x + radius, cY = y + radius;
+            arr = new int[66];
+            arr[0] = (int)cX;
+            arr[1] = (int)cY;
+            int count = 2;
+            Raw.Color4(brush.Color);
+            for (ang = Math.PI; ang <= (1.5 * Math.PI); ang = ang + 0.05)
+            {
+                arr[count] = (int)(radius * Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                count += 2;
+            }
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+
+            cX = x + width - radius;
+            arr = new int[66];
+            arr[0] = (int)cX;
+            arr[1] = (int)cY;
+            count = 2;
+            for (ang = (1.5 * Math.PI); ang <= (2 * Math.PI); ang = ang + 0.05)
+            {
+                arr[count] = (int)(radius * Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                count += 2;
+            }
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            Raw.Color4(brush.SecondColor);
+            arr = new int[66];
+            arr[0] = (int)cX;
+            cY = y + height - radius;
+            arr[1] = (int)cY;
+            count = 2;
+            for (ang = 0; ang <= (0.5 * Math.PI); ang = ang + 0.05)
+            {
+                arr[count] = (int)(radius * Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                count += 2;
+            }
+            cX = x + radius;
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            arr = new int[66];
+            arr[0] = (int)cX;
+            arr[1] = (int)cY;
+            count = 2;
+            for (ang = (0.5 * Math.PI); ang <= Math.PI; ang = ang + 0.05)
+            {
+                arr[count] = (int)(radius * Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                count += 2;
+            }
+            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+            Raw.Disable(EnableCap.LineSmooth);
+            Raw.Disable(EnableCap.PointSmooth);
         }
 
         public void FillRoundRectangle(Brush brush, Rectangle rect, int radius)
         {
-            //if (brush.Gradient == Gradient.None)
+            if (brush.Gradient == Gradient.None)
                 FillSolidRoundRectangle(brush.Color, rect.X, rect.Y, rect.Width, rect.Height, radius);
+            else
+                FillRoundRectangle(brush, rect.X, rect.Y, rect.Width, rect.Height, radius);
         }
 
         public void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
@@ -440,7 +528,17 @@ namespace OpenMobile.Graphics
             Raw.Color4(color);
             Raw.Enable(EnableCap.LineSmooth);
             Raw.Enable(EnableCap.PointSmooth);
-            int[] arr = new int[] { x + width - radius, y, x + radius, y, x, y + height - radius, x, y + radius, x + radius, y + height, x + width - radius, y + height, x + width, y + radius, x + width, y + height - radius };
+            int[] arr = new int[] 
+            { 
+                x + width - radius, y,//8
+                x + radius, y, //7
+                x + width, y + radius, //6
+                x, y + radius, //5
+                x + width, y + height - radius, //4
+                x, y + height - radius, //3
+                x + width - radius, y + height, //1
+                x + radius, y + height, //2
+            };
             Raw.EnableClientState(ArrayCap.VertexArray);
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
             Raw.DrawArrays(BeginMode.TriangleStrip, 0, 8);

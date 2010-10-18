@@ -872,9 +872,10 @@ namespace OpenMobile.Platform.Windows
                         // manually to cover the whole working area of the current monitor.
 
                         // Reset state to avoid strange interactions with fullscreen/minimized windows.
-                        ResetWindowState();
+                        //ResetWindowState();
 
-                        if (WindowBorder == WindowBorder.Hidden)
+                        //Yes we do
+                        /*if (WindowBorder == WindowBorder.Hidden)
                         {
                             IntPtr current_monitor = Functions.MonitorFromWindow(window.WindowHandle, MonitorFrom.Nearest);
                             MonitorInfo info = new MonitorInfo();
@@ -886,9 +887,9 @@ namespace OpenMobile.Platform.Windows
                             Bounds = info.Work.ToRectangle();
                         }
                         else
-                        {
+                        {*/
                             command = ShowWindowCommand.MAXIMIZE;
-                        }
+                        //}
                         break;
 
                     case WindowState.Minimized:
@@ -902,7 +903,7 @@ namespace OpenMobile.Platform.Windows
 
                         // Reset state to avoid strange side-effects from maximized/minimized windows.
                         //ResetWindowState();
-                        Functions.ShowWindow(window.WindowHandle, ShowWindowCommand.NORMAL);
+                        Functions.ShowWindow(window.WindowHandle, ShowWindowCommand.SHOWDEFAULT);
                         
                         previous_bounds = Bounds;
                         previous_window_border = WindowBorder;
