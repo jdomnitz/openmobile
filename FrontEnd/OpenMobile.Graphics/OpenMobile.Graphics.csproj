@@ -114,7 +114,6 @@
     <Compile Include="Math\BezierCurveCubic.cs" />
     <Compile Include="Math\BezierCurveQuadric.cs" />
     <Compile Include="Math\Box2.cs" />
-    <Compile Include="Math\Functions.cs" />
     <Compile Include="Math\Half.cs" />
     <Compile Include="Math\MathHelper.cs" />
     <Compile Include="Math\Matrix3d.cs" />
@@ -146,7 +145,6 @@
     <Compile Include="Platform\EmbeddedGraphicsContext.cs" />
     <Compile Include="Platform\Factory.cs" />
     <Compile Include="Platform\IDisplayDeviceDriver.cs" />
-    <Compile Include="Platform\INativeGLWindow.cs" />
     <Compile Include="Platform\IPlatformFactory.cs" />
     <Compile Include="Platform\IWindowInfo.cs" />
     <Compile Include="Platform\MacOS\AglContext.cs" />

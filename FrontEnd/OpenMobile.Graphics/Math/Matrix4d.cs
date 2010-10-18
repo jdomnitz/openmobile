@@ -672,40 +672,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region Obsolete Functions
-
-        #region Translation Functions
-
-        /// <summary>
-        /// Build a translation matrix with the given translation
-        /// </summary>
-        /// <param name="trans">The vector to translate along</param>
-        /// <returns>A Translation matrix</returns>
-        [Obsolete("Use CreateTranslation instead.")]
-        public static Matrix4d Translation(Vector3d trans)
-        {
-            return Translation(trans.X, trans.Y, trans.Z);
-        }
-
-        /// <summary>
-        /// Build a translation matrix with the given translation
-        /// </summary>
-        /// <param name="x">X translation</param>
-        /// <param name="y">Y translation</param>
-        /// <param name="z">Z translation</param>
-        /// <returns>A Translation matrix</returns>
-        [Obsolete("Use CreateTranslation instead.")]
-        public static Matrix4d Translation(double x, double y, double z)
-        {
-            Matrix4d result = Identity;
-            result.Row3 = new Vector4d(x, y, z, 1.0);
-            return result;
-        }
-
-        #endregion
-
-        #endregion
-
         #region Scale Functions
 
         /// <summary>

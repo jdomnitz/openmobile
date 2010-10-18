@@ -238,7 +238,10 @@ namespace OpenMobile.Input
             else if (Configuration.RunningOnX11)
             {
                 X11WindowInfo x11 = (X11WindowInfo)info;
-                Platform.X11.Functions.XUndefineCursor(x11.Display, x11.WindowHandle);
+                using (new XLock(x11.Display))
+                {
+                    Platform.X11.Functions.XUndefineCursor(x11.Display, x11.WindowHandle);
+                }
             }
         }
         internal void Reset()
@@ -250,15 +253,23 @@ namespace OpenMobile.Input
         {
             if (Configuration.RunningOnWindows)
                 Platform.Windows.Functions.ShowCursor(false);
-            else if (Configuration.RunningOnLinux)
+            else if (Configuration.RunningOnX11)
             {
-                //TODO - FIX ME
-                //X11WindowInfo x11=(X11WindowInfo)info;
-                //IntPtr pixmap = Platform.X11.Functions.XCreatePixmap(x11.Display, x11.WindowHandle, 8, 8, 8);
-                //XColor black=new XColor();
-                //IntPtr cursor= Platform.X11.Functions.XCreatePixmapCursor(x11.Display, pixmap, pixmap, ref black, ref black, 0, 0);
-                //Platform.X11.Functions.XDefineCursor(x11.Display, x11.WindowHandle, cursor);
-                //Platform.X11.Functions.XFreeCursor(x11.Display, cursor);
+                X11WindowInfo window = (X11WindowInfo)info;
+                using (new XLock(window.Display))
+                {
+                    XColor black, dummy;
+                    IntPtr cmap = Platform.X11.Functions.XDefaultColormap(window.Display, window.Screen);
+                    Platform.X11.Functions.XAllocNamedColor(window.Display, cmap, "black", out black, out dummy);
+                    IntPtr bmp_empty = Platform.X11.Functions.XCreateBitmapFromData(window.Display,
+                        window.WindowHandle, new byte[,] { { 0 } });
+                    IntPtr cursor_empty = Platform.X11.Functions.XCreatePixmapCursor(window.Display,
+                    bmp_empty, bmp_empty, ref black, ref black, 0, 0);
+
+                    Platform.X11.Functions.XDefineCursor(window.Display, window.WindowHandle, cursor_empty);
+
+                    Platform.X11.Functions.XFreeCursor(window.Display, cursor_empty);
+                }
             }
         }
         #endregion
