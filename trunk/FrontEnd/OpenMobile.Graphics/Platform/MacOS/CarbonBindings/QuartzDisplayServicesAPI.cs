@@ -13,7 +13,7 @@ namespace OpenMobile.Platform.MacOS.Carbon
 
     }
 
-    internal static class CG
+    public static class CG
     {
         const string appServices = "/System/Library/Frameworks/ApplicationServices.framework/Versions/Current/ApplicationServices";
 
@@ -51,6 +51,11 @@ namespace OpenMobile.Platform.MacOS.Carbon
         [DllImport(appServices, EntryPoint = "CGDisplaySwitchToMode")]
         internal static extern IntPtr DisplaySwitchToMode(IntPtr display, IntPtr displayMode);
 
+        [DllImport(appServices, EntryPoint = "CGDisplayShowCursor")]
+        public static extern IntPtr CGDisplayShowCursor(IntPtr display);
+
+        [DllImport(appServices, EntryPoint = "CGDisplayHideCursor")]
+        public static extern IntPtr CGDisplayHideCursor(IntPtr display);
     }
 }
 #endif
