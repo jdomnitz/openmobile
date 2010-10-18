@@ -38,6 +38,7 @@ namespace UI
             OMPanel background = new OMPanel("background");
             background.UIPanel = true;
             background.Priority = ePriority.Low;
+            background.Forgotten = true;
             background.BackgroundType = backgroundStyle.Image;
             background.BackgroundImage = theHost.getSkinImage("Backgrounds|Highway 1", true);
             manager.loadSharedPanel(background);
@@ -45,7 +46,9 @@ namespace UI
             OMPanel media = new OMPanel("media");
             p.Priority = ePriority.High;
             p.UIPanel = true;
+            p.Forgotten = true;
             media.UIPanel = true;
+            media.Forgotten = true;
             media.Priority = ePriority.High;
             OMImage topBar = new OMImage(0, 0, 1000, 68);
             topBar.Image = theHost.getSkinImage("TopBar");
@@ -163,6 +166,7 @@ namespace UI
             manager.loadPanel(media);
             OMPanel volume = new OMPanel("volume");
             volume.Priority = ePriority.High;
+            volume.Forgotten = true;
             OMImage volBack = new OMImage(-9, 62, 257, 508);
             volBack.Image = theHost.getSkinImage("VolumeBG");
             volume.addControl(volBack);
