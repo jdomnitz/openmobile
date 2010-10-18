@@ -243,6 +243,10 @@ namespace OpenMobile.Input
                     Platform.X11.Functions.XUndefineCursor(x11.Display, x11.WindowHandle);
                 }
             }
+            else if (Configuration.RunningOnMacOS)
+            {
+                Platform.MacOS.Carbon.CG.CGDisplayShowCursor(IntPtr.Zero);
+            }
         }
         internal void Reset()
         {
@@ -267,9 +271,12 @@ namespace OpenMobile.Input
                     bmp_empty, bmp_empty, ref black, ref black, 0, 0);
 
                     Platform.X11.Functions.XDefineCursor(window.Display, window.WindowHandle, cursor_empty);
-
                     Platform.X11.Functions.XFreeCursor(window.Display, cursor_empty);
                 }
+            }
+            else if (Configuration.RunningOnMacOS)
+            {
+                Platform.MacOS.Carbon.CG.CGDisplayHideCursor(IntPtr.Zero);
             }
         }
         #endregion
