@@ -135,7 +135,7 @@ namespace MainMenu
 
         public string pluginDescription
         {
-            get { throw new NotImplementedException(); }
+            get { return "The Main Menu"; }
         }
 
         public bool incomingMessage(string message, string source)
