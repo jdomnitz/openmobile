@@ -45,7 +45,7 @@ namespace OpenMobile.Platform.Windows
     {
         #region Fields
 
-        ExtendedWindowStyle ParentStyleEx = ExtendedWindowStyle.WindowEdge | ExtendedWindowStyle.ApplicationWindow;
+        ExtendedWindowStyle ParentStyleEx = ExtendedWindowStyle.WindowEdge | ExtendedWindowStyle.ApplicationWindow | ExtendedWindowStyle.Topmost;
         const ExtendedWindowStyle ChildStyleEx = 0;
 
         readonly IntPtr Instance = Marshal.GetHINSTANCE(typeof(WinGLNative).Module);
@@ -607,13 +607,13 @@ namespace OpenMobile.Platform.Windows
             deferred_window_border = previous_window_border = null;
         }
 
-        void ResetWindowState()
+        /*void ResetWindowState()
         {
             suppress_resize++;
             WindowState = WindowState.Normal;
             ProcessEvents();
             suppress_resize--;
-        }
+        }*/
 
         #endregion
 
@@ -903,8 +903,9 @@ namespace OpenMobile.Platform.Windows
 
                         // Reset state to avoid strange side-effects from maximized/minimized windows.
                         //ResetWindowState();
+                        suppress_resize++;
                         Functions.ShowWindow(window.WindowHandle, ShowWindowCommand.SHOWDEFAULT);
-                        
+                        suppress_resize--;
                         previous_bounds = Bounds;
                         previous_window_border = WindowBorder;
                         HideBorder();
