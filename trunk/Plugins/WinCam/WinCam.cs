@@ -19,6 +19,8 @@ namespace WinCam
 
         public bool stop(int instance)
         {
+            if ((streams == null) || (streams.Length <= instance))
+                return false;
             foreach (stream s in streams[instance])
             {
                 s.Dispose();
