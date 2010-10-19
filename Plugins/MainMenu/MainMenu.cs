@@ -34,11 +34,13 @@ using OpenMobile.Plugin;
 using System.Diagnostics;
 using OpenMobile.Media;
 
+namespace OpenMobile
+{
+
 //All High Level plugins should implement IHighLevel
 [InitialTransition(eGlobalTransition.SlideDown)]
 public sealed class MainMenu : IHighLevel
     {
-
         #region IHighLevel Members
         //Here we create two panels, one for the main menu and one to assign button actions
 
@@ -456,11 +458,11 @@ public sealed class MainMenu : IHighLevel
 
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            return false;
         }
         #endregion
 
@@ -475,3 +477,4 @@ public sealed class MainMenu : IHighLevel
 
         #endregion
     }
+}

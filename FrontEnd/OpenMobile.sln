@@ -63,6 +63,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainMenu", "..\Plugins\Main
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "..\Plugins\UI\UI.csproj", "{A0F59B9B-C8B7-4A91-ACDA-9F35C60D3DBD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Music", "..\Plugins\Highway\Music\Music.csproj", "{38066D21-7E7B-4450-9A6F-8702FE1C0659}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -256,6 +258,12 @@ Global
 		{A0F59B9B-C8B7-4A91-ACDA-9F35C60D3DBD}.Debug-Fast|Any CPU.Build.0 = Debug-Fast|Any CPU
 		{A0F59B9B-C8B7-4A91-ACDA-9F35C60D3DBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0F59B9B-C8B7-4A91-ACDA-9F35C60D3DBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38066D21-7E7B-4450-9A6F-8702FE1C0659}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38066D21-7E7B-4450-9A6F-8702FE1C0659}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38066D21-7E7B-4450-9A6F-8702FE1C0659}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{38066D21-7E7B-4450-9A6F-8702FE1C0659}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{38066D21-7E7B-4450-9A6F-8702FE1C0659}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38066D21-7E7B-4450-9A6F-8702FE1C0659}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

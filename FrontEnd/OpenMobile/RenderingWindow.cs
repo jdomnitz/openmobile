@@ -730,6 +730,11 @@ namespace OpenMobile
         protected override void OnLoad(EventArgs e)
         {
             g.Initialize(screen);
+            if (screen == 0)
+            {
+                if ((Graphics.Graphics.Renderer == "GDI Generic") || (Graphics.Graphics.Renderer == "Software Rasterizer"))
+                    Application.ShowError(this.WindowHandle, "This application has been forced to use software rendering.  Performance will be horrible until you install proper graphics drivers!!", "Performance Warning");
+            }
             base.OnLoad(e);
         }
         private void RenderingWindow_FormClosing(object sender, CancelEventArgs e)

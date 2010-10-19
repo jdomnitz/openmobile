@@ -50,7 +50,7 @@ namespace OpenMobile
             {
                 availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetTypes()[0]);
             }
-            catch 
+            catch (Exception e)
             {
                 //handled below
             }
@@ -296,7 +296,7 @@ namespace OpenMobile
                     settings.createDB();
                 if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
                 {
-                    //System.Windows.Forms.MessageBox.Show("A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.");
+                    Application.ShowError(IntPtr.Zero,"A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.","Database Missing!");
                     Environment.Exit(0);
                     return;
                 }

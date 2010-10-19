@@ -33,6 +33,7 @@ namespace OpenMobile
         List<DisplayResolution> available_resolutions = new List<DisplayResolution>();
         IList<DisplayResolution> available_resolutions_readonly;
         bool primary;
+        bool landscape;
 
         Rectangle bounds;
 
@@ -71,7 +72,7 @@ namespace OpenMobile
             IsPrimary = primary;
             this.available_resolutions.AddRange(availableResolutions);
             this.bounds = bounds == Rectangle.Empty ? currentResolution.Bounds : bounds;
-
+            this.landscape = (current_resolution.Width > current_resolution.Height);
             Debug.Print("DisplayDevice {0} ({1}) supports {2} resolutions.",
                 available_displays.Count, primary ? "primary" : "secondary", available_resolutions.Count);
         }
@@ -135,6 +136,13 @@ namespace OpenMobile
         }
 
         #endregion
+        /// <summary>
+        /// Returns true if the display is in landscape mode...false if the display is in portrait mode
+        /// </summary>
+        public bool Landscape
+        {
+            get { return landscape; }
+        }
 
         #region public bool IsPrimary
 

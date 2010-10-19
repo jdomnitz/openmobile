@@ -39,7 +39,23 @@ namespace OpenMobile.Graphics
                 }
             }
         }
+        public static void ShowError(object window, string text, string title)
+        {
+            if (Configuration.RunningOnWindows)
+            {
+                MessageBox((IntPtr)window, text, title, 0x10);
+            }
+            else if (Configuration.RunningOnLinux)
+            {
+                //TODO
+            }
+        }
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        static extern int MessageBox(IntPtr hWnd, String text, String caption, int options);
     }
+
+    
+    
     public class KeyPressEventArgs : EventArgs
     {
         private bool handled;

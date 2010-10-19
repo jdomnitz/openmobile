@@ -4,8 +4,9 @@ using OpenMobile.Plugin;
 using OpenMobile.Framework;
 using OpenMobile.Controls;
 using OpenMobile.Data;
+using MainMenu;
 
-namespace MainMenu
+namespace OpenMobile
 {
     public class MainMenu:IHighLevel
     {
@@ -37,6 +38,7 @@ namespace MainMenu
             t1.DownImage = theHost.getSkinImage("HomeButton_Selected");
             t1.Icon = theHost.getSkinImage("Icons|Music");
             t1.Text = "Music";
+            t1.OnClick += new userInteraction(t1_OnClick);
             MainMenuButton t2 = new MainMenuButton(321, 143);
             t2.Image = theHost.getSkinImage("HomeButton");
             t2.FocusImage = theHost.getSkinImage("HomeButton_HL");
@@ -91,6 +93,13 @@ namespace MainMenu
             p.addControl(b4);
             manager.loadPanel(p);
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void t1_OnClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu");
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Music");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
         void b4_OnClick(OMControl sender, int screen)

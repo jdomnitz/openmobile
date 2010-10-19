@@ -924,6 +924,13 @@ namespace OpenMobile
         /// </summary>
         impersonateInstanceForScreen=71,
         /// <summary>
+        /// Alerts skins that the screen orientation has changed
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// <para>Arg2: Orientation ["Landscape"/"Portrait"]</para>
+        /// </summary>
+        screenOrientationChanged=72,
+        /// <summary>
         /// Go back to the previous panel
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>

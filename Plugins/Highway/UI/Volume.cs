@@ -6,7 +6,7 @@ using OpenMobile.Input;
 
 namespace UI
 {
-    class VolumeBar:OMProgress,IMouse
+    internal class VolumeBar:OMProgress,IMouse
     {
         imageItem bottom;
         imageItem overlay;
