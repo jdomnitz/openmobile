@@ -6,7 +6,7 @@ using OpenMobile.Graphics;
 
 namespace MainMenu
 {
-    sealed class MainMenuButton:OMButton
+    internal sealed class MainMenuButton:OMButton
     {
         Font localFont;
         public MainMenuButton(int x,int y)

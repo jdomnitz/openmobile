@@ -6,8 +6,9 @@ using OpenMobile.Controls;
 using OpenMobile;
 using OpenMobile.Graphics;
 using System.Threading;
+using UI;
 
-namespace UI
+namespace OpenMobile
 {
     public sealed class UI:IHighLevel
     {
@@ -167,7 +168,7 @@ namespace UI
             OMPanel volume = new OMPanel("volume");
             volume.Priority = ePriority.High;
             volume.Forgotten = true;
-            OMImage volBack = new OMImage(-9, 62, 257, 508);
+            OMImage volBack = new OMImage(-8, 62, 257, 508);
             volBack.Image = theHost.getSkinImage("VolumeBG");
             volume.addControl(volBack);
             VolumeBar bar = new VolumeBar(31, 125, 152, 350);

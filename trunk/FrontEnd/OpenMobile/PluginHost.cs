@@ -392,6 +392,9 @@ namespace OpenMobile
         }
         public void load()
         {
+            for (int i = 0; i < ScreenCount; i++)
+                if (!DisplayDevice.AvailableDisplays[i].Landscape)
+                    raiseSystemEvent(eFunction.screenOrientationChanged, i.ToString(), "Portrait","");
             SandboxedThread.Asynchronous(loadPlaylists);
         }
         public void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
@@ -447,10 +450,11 @@ namespace OpenMobile
                 }
                 else
                 {
-                    screenCount = DisplayDevice.AvailableDisplays.Count;
+                    //screenCount = DisplayDevice.AvailableDisplays.Count;
                     raiseSystemEvent(eFunction.screenRemoved, "", "", "");
                 }
             }
+            //TODO - refresh screen resolutions and fire rotation message if necessary
         }
         #endregion
         public bool execute(eFunction function)
@@ -1211,6 +1215,21 @@ namespace OpenMobile
                             return false;
                         hal.snd("42|" + arg1 + "|" + arg2);
                         return true;
+                    }
+                    return false;
+                case eFunction.impersonateInstanceForScreen:
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        if ((ret < 0) || (ret >= screenCount))
+                            return false;
+                        int ret2;
+                        if (int.TryParse(arg2, out ret2))
+                        {
+                            if ((ret2 < 0) || (ret2 >= instanceCount))
+                                return false;
+                            instance[ret] = ret2 + 1;
+                            raiseSystemEvent(eFunction.impersonateInstanceForScreen, arg1, arg2, "");
+                        }
                     }
                     return false;
             }

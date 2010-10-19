@@ -82,7 +82,7 @@ namespace OMHal
                         if (device[instance].AudioEndpointVolume.Mute == true)
                             return -1;
                         else
-                            return (int)(device[instance].AudioEndpointVolume.MasterVolumeLevelScalar * 100);
+                            return (int)Math.Round(device[instance].AudioEndpointVolume.MasterVolumeLevelScalar * 100);
                     }
                 }
                 return -1;
@@ -268,7 +268,7 @@ namespace OMHal
                 if ((data.MasterVolume != device[i].AudioEndpointVolume.MasterVolumeLevelScalar)||(device[i].AudioEndpointVolume.Mute!=data.Muted))
                     continue;
                 if (data.Muted == false)
-                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, ((int)(data.MasterVolume * 100)).ToString(), i.ToString(), "");
+                    Form1.raiseSystemEvent(eFunction.systemVolumeChanged, ((int)Math.Round(data.MasterVolume * 100)).ToString(), i.ToString(), "");
                 else
                     Form1.raiseSystemEvent(eFunction.systemVolumeChanged, "-1", i.ToString(), "");
             }
