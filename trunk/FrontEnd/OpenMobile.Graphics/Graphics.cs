@@ -2,6 +2,7 @@
 using System.Drawing;
 using System;
 using System.Drawing.Drawing2D;
+using System.Runtime.InteropServices;
 
 namespace OpenMobile.Graphics
 {
@@ -239,7 +240,7 @@ namespace OpenMobile.Graphics
             {
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 g.ScaleTransform(scaleWidth, scaleHeight);
-                g.DrawString(s, new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(color.R, color.G, color.B)), new System.Drawing.RectangleF(0, 0, (float)Width, (float)Height), format);
+                g.DrawString(s, new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(color.R, color.G, color.B)), new System.Drawing.RectangleF(0, 0, (float)Width, (float)Height), format);
             }
             return new OImage(bmp);
         }
@@ -263,6 +264,7 @@ namespace OpenMobile.Graphics
         }
         private float scaleHeight;
         private float scaleWidth;
+        private float dpi=1F;
         public void Initialize(int screen)
         {
             version = Raw.GetString(StringName.Version);
@@ -283,9 +285,18 @@ namespace OpenMobile.Graphics
                 implementation = new V1Graphics(screen);
             scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
             scaleWidth = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
+            if (Configuration.RunningOnWindows)
+            {
+                IntPtr dc = GetDC(IntPtr.Zero);
+                dpi = GetDeviceCaps(dc, 88) / 96F;
+            }
             renderer = Raw.GetString(StringName.Renderer);
             implementation.Initialize(screen);
         }
+        [DllImport("user32.dll")]
+        static extern IntPtr GetDC(IntPtr hWnd);
+        [DllImport("gdi32.dll")]
+        static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
         public static SizeF MeasureString(String str, Font ft)
         {
             lock (virtualG)
@@ -363,7 +374,7 @@ namespace OpenMobile.Graphics
                     if (alignment == Alignment.CenterLeftEllipsis)
                         sFormat.Trimming = StringTrimming.EllipsisWord;
                     GraphicsPath path = new GraphicsPath(FillMode.Winding);
-                    path.AddString(text, new System.Drawing.Font(font.Name, 1F).FontFamily, (int)f, font.Size + 6, new RectangleF(x, y, w, h), sFormat);
+                    path.AddString(text, new System.Drawing.Font(font.Name, 1F).FontFamily, (int)f, (font.Size + 6)/dpi, new RectangleF(x, y, w, h), sFormat);
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.DrawPath(new System.Drawing.Pen(secondColor, 3), path);
                     g.FillPath(new SolidBrush(color), path);
@@ -379,7 +390,7 @@ namespace OpenMobile.Graphics
                         sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
                     if (alignment == Alignment.CenterLeftEllipsis)
                         sFormat.Trimming = StringTrimming.EllipsisWord;
-                    using (System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)f))
+                    using (System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)f))
                     {
                         for (int i = -3; i < 3; i++)
                             for (int j = -3; j < 3; j++)
@@ -398,7 +409,7 @@ namespace OpenMobile.Graphics
                         sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
                     if (alignment == Alignment.CenterLeftEllipsis)
                         sFormat.Trimming = StringTrimming.EllipsisWord;
-                    System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size, (System.Drawing.FontStyle)f);
+                    System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)f);
                     using (SolidBrush defaultBrush = new SolidBrush(color))
                     {
                         if (((int)alignment & 10000) != 10000)

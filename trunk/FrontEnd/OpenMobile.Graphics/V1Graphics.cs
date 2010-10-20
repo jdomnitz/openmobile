@@ -65,17 +65,17 @@ namespace OpenMobile.Graphics
     public enum Alignment
     {
         /// <summary>
-        /// Buttom Left
+        /// Top Left
         /// </summary>
-        BottomLeft = 0,
+        TopLeft = 0,
         /// <summary>
-        /// Bottom Center
+        /// Top Center
         /// </summary>
-        BottomCenter = 1,
+        TopCenter = 1,
         /// <summary>
-        /// Bottom Right
+        /// Top Right
         /// </summary>
-        BottomRight = 2,
+        TopRight = 2,
         /// <summary>
         /// Center Left
         /// </summary>
@@ -89,17 +89,17 @@ namespace OpenMobile.Graphics
         /// </summary>
         CenterRight = 12,
         /// <summary>
-        /// Top Left
+        /// Buttom Left
         /// </summary>
-        TopLeft = 20,
+        BottomLeft = 20,
         /// <summary>
-        /// Top Center
+        /// Bottom Center
         /// </summary>
-        TopCenter = 21,
+        BottomCenter = 21,
         /// <summary>
-        /// Top Right
+        /// Bottom Right
         /// </summary>
-        TopRight = 22,
+        BottomRight = 22,
         /// <summary>
         /// Vertical
         /// </summary>
