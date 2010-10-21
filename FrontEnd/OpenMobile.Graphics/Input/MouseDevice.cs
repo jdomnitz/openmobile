@@ -1,6 +1,4 @@
-﻿#define COMPAT_REV1519 // Keeps compatibility with revision 1519
-
- #region License
+﻿ #region License
  //
  // The Open Toolkit Library License
  //
@@ -243,10 +241,12 @@ namespace OpenMobile.Input
                     Platform.X11.Functions.XUndefineCursor(x11.Display, x11.WindowHandle);
                 }
             }
+            #if OSX
             else if (Configuration.RunningOnMacOS)
             {
                 Platform.MacOS.Carbon.CG.CGDisplayShowCursor(IntPtr.Zero);
             }
+            #endif
         }
         internal void Reset()
         {
@@ -274,10 +274,12 @@ namespace OpenMobile.Input
                     Platform.X11.Functions.XFreeCursor(window.Display, cursor_empty);
                 }
             }
+            #if OSX
             else if (Configuration.RunningOnMacOS)
             {
                 Platform.MacOS.Carbon.CG.CGDisplayHideCursor(IntPtr.Zero);
             }
+            #endif
         }
         #endregion
 
