@@ -290,9 +290,30 @@ namespace OpenMobile.Framework
 				info.RedirectStandardOutput = true;
 				info.UseShellExecute = false;
 				info.WindowStyle = ProcessWindowStyle.Hidden;
-				Process p = Process.Start (info);
-				StreamReader reader = p.StandardOutput;
-				osVersion = reader.ReadLine ().Replace ("Description:", "").Trim ();
+                try
+                {
+                    Process p = Process.Start(info);
+                    StreamReader reader = p.StandardOutput;
+                    osVersion = reader.ReadLine().Replace("Description:", "").Trim();
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        DirectoryInfo di=new DirectoryInfo("/etc/");
+                        FileInfo[] files = di.GetFiles("*release");
+                        if (files.Length == 0)
+                            files = di.GetFiles("*version");
+                        if (files.Length > 0)
+                            osVersion = File.ReadAllText(files[0].FullName).TrimEnd(new char[]{' ','\r','\n'});
+                        else
+                            osVersion = "Unknown Linux";
+                    }
+                    catch(Exception)
+                    {
+                        osVersion = "Unknown Linux";
+                    }
+                }
 				return osVersion;
 			}
 			osVersion = getOS () + " " + os.Version.ToString ();
