@@ -540,6 +540,20 @@ namespace OpenMobile
                     //if (WindowState == WindowState.Fullscreen) WindowState = WindowState.Normal; // TODO: Revise.
                     device.RestoreResolution();
                 }
+                if (queuedInvokes.Count > 0)
+                {
+                    for (int i = queuedInvokes.Count - 1; i >= 0; i--)
+                    {
+                        Delegate d = queuedInvokes[i];
+                        try
+                        {
+                            if (d != null)
+                                d.Method.Invoke(d.Target, null);
+                        }
+                        catch (TargetInvocationException) { }
+                        queuedInvokes.RemoveAt(i);
+                    }
+                }
                 implementation.Dispose();
                 GC.SuppressFinalize(this);
 
@@ -698,7 +712,8 @@ namespace OpenMobile
         /// <param name="retainEvents">If true, the state of underlying system event propagation will be preserved, otherwise event propagation will be enabled if it has not been already.</param>
         protected void ProcessEvents(bool retainEvents)
         {
-            EnsureUndisposed();
+            if (IsDisposed)
+                return;
             if (!retainEvents && !events) Events = true;
             implementation.ProcessEvents();
             if (queuedInvokes.Count > 0)

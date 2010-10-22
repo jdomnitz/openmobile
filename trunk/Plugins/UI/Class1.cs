@@ -926,7 +926,8 @@ namespace OpenMobile
                                 cover.Image = theHost.getSkinImage("Radio");
                             else
                                 cover.Image = new imageItem(info.coverArt);
-                            if (cover.Height<cover.Width){
+                            if (cover.Image.image.Height < cover.Image.image.Width)
+                            {
                                 cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
                                 cover.Top = 2 + (85-cover.Height)/2;
                             }
@@ -943,7 +944,7 @@ namespace OpenMobile
                             cover.Image = it;
                             if ((cover.Image==null)||(cover.Image.image == null))
                                 cover.Image = theHost.getSkinImage("Unknown Album");
-                            if ((cover.Image.image != null) && (cover.Height < cover.Width))
+                            if ((cover.Image.image != null) && (cover.Image.image.Height < cover.Image.image.Width))
                             {
                                 cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
                                 cover.Top = 2 + (85 - cover.Height) / 2;

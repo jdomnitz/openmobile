@@ -326,9 +326,12 @@ public sealed class MainMenu : IHighLevel
                     if (theList[theList.SelectedIndex].text == "Not Set")
                         theList[theList.SelectedIndex].text = "";
                     setting.setSetting(currentlySetting + ".Plugin", theList[theList.SelectedIndex].text);
-                    screens[screen][currentlySetting].Tag = theList[theList.SelectedIndex].text;
                     setting.setSetting(currentlySetting + ".Display", getDisplayName(theList[theList.SelectedIndex].text));
-                    ((OMButton)screens[screen][currentlySetting]).Text = getDisplayName(theList[theList.SelectedIndex].text);
+                    for (int i = 0; i < theHost.ScreenCount; i++)
+                    {
+                        screens[i][currentlySetting].Tag = theList[theList.SelectedIndex].text;
+                        ((OMButton)screens[i][currentlySetting]).Text = getDisplayName(theList[theList.SelectedIndex].text);
+                    }
                 }
             }
             theHost.execute(eFunction.TransitionFromPanel,screen.ToString(),"MainMenu","Settings");
