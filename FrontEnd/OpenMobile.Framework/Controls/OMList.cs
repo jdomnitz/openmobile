@@ -442,7 +442,7 @@ namespace OpenMobile.Controls
             set
             {
                 style = value;
-                if (style == eListStyle.MultiList)
+                if ((style == eListStyle.MultiList)||(style==eListStyle.MultiListText))
                     textAlignment = OpenMobile.Graphics.Alignment.TopLeft;
             }
         }
@@ -534,7 +534,7 @@ namespace OpenMobile.Controls
                     g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)),Left + 1, Top + 1, Width - 2, Height - 2);
                 
                 int minListHeight = (int)(Graphics.Graphics.MeasureString("A", Font).Height + 0.5); //Round up
-                if ((style == eListStyle.MultiList) && (items.Count > 0)&&(items[0].subitemFormat!=null))
+                if (((style == eListStyle.MultiList)||(style==eListStyle.MultiListText)) && (items.Count > 0)&&(items[0].subitemFormat!=null))
                     minListHeight += (int)(Graphics.Graphics.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
                 if (listHeight < minListHeight)
                     listHeight = minListHeight;
@@ -598,6 +598,7 @@ namespace OpenMobile.Controls
                                 g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), rect.Left, rect.Top, rect.Width, rect.Height - 2);
                             break;
                         case eListStyle.MultiList:
+                        case eListStyle.MultiListText:
                             if (i > 0)
                             {
                                 int t = ((rect.Top % 2) == 0) ? 1 : 0;
@@ -613,7 +614,7 @@ namespace OpenMobile.Controls
                     {
                         using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
                         {
-                            if (ListStyle == eListStyle.MultiList)
+                            if ((ListStyle == eListStyle.MultiList)||(ListStyle==eListStyle.MultiListText))
                             {
                                 if (items[i].subitemFormat != null)
                                 {

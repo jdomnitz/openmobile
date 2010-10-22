@@ -44,7 +44,7 @@ namespace OMSettings
             main.BackgroundColor1 = Color.Black;
             main.BackgroundType = backgroundStyle.SolidColor;
             OMList menu = new OMList(10, 100, 980, 433);
-            menu.ListStyle = eListStyle.MultiList;
+            menu.ListStyle = eListStyle.MultiListText;
             menu.Background = Color.Silver;
             menu.ItemColor1 = Color.Black;
             menu.Font = new Font(Font.GenericSansSerif, 30F);
@@ -306,7 +306,7 @@ namespace OMSettings
             hardware.BackgroundColor1 = Color.Black;
             hardware.BackgroundType = backgroundStyle.SolidColor;
             OMList lstplugins = new OMList(10, 100, 980, 433);
-            lstplugins.ListStyle = eListStyle.MultiList;
+            lstplugins.ListStyle = eListStyle.MultiListText;
             lstplugins.Background = Color.Silver;
             lstplugins.ItemColor1 = Color.Black;
             lstplugins.Font = new Font(Font.GenericSansSerif, 30F);

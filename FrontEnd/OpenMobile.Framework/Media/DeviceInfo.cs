@@ -51,7 +51,7 @@ namespace OpenMobile.Media
         {
             if (type == eMediaType.DeviceRemoved)
                 AllDevices.RemoveAll(p => p.path == arg);
-            else
+            else if(type==eMediaType.NotSet)
             {
                 AllDevices.RemoveAll(p => p.path == arg);
                 AllDevices.Add(getDeviceInfo(arg));

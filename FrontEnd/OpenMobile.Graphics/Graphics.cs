@@ -238,9 +238,9 @@ namespace OpenMobile.Graphics
             System.Drawing.Bitmap bmp = new System.Drawing.Bitmap((int)(Width * scaleWidth), (int)(Height * scaleHeight));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
                 g.ScaleTransform(scaleWidth, scaleHeight);
-                g.DrawString(s, new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(color.R, color.G, color.B)), new System.Drawing.RectangleF(0, 0, (float)Width, (float)Height), format);
+                g.DrawString(s, new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(color.R, color.G, color.B)), new System.Drawing.RectangleF(0, 0, Width, Height), format);
             }
             return new OImage(bmp);
         }
@@ -253,7 +253,7 @@ namespace OpenMobile.Graphics
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
                 g.ScaleTransform(scaleWidth, scaleHeight);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
                 renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
             }
             return new OImage(bmp);
@@ -375,7 +375,7 @@ namespace OpenMobile.Graphics
                         sFormat.Trimming = StringTrimming.EllipsisWord;
                     GraphicsPath path = new GraphicsPath(FillMode.Winding);
                     path.AddString(text, new System.Drawing.Font(font.Name, 1F).FontFamily, (int)f, (font.Size + 6)/dpi, new RectangleF(x, y, w, h), sFormat);
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
+					g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.DrawPath(new System.Drawing.Pen(secondColor, 3), path);
                     g.FillPath(new SolidBrush(color), path);
                 }
