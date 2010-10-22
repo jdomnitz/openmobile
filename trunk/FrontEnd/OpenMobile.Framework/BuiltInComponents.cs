@@ -60,7 +60,7 @@ namespace OpenMobile
             if (about == null)
             {
                 about = new OMPanel("About");
-                OMLabel description = new OMLabel(30, 55, 900, 550);
+                OMLabel description = new OMLabel(30, 55, 940, 540);
                 description.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap|OpenMobile.Graphics.Alignment.TopCenter;
                 description.Text = AboutText;
                 about.addControl(description);

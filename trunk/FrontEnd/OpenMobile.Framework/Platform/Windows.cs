@@ -29,7 +29,12 @@ namespace OpenMobile.Framework
 {
     public sealed class Windows
     {
-        internal static eDriveType detectType(string path,DriveType type)
+        internal static eDriveType detectType(string path, DriveType type)
+        {
+            //CHANGE THIS TO SWITCH BETWEEN NEW AND OLD
+            return newdetectType(path, type);
+        }
+        internal static eDriveType olddetectType(string path, DriveType type)
         {
             try
             {
@@ -63,6 +68,152 @@ namespace OpenMobile.Framework
                 return (eDriveType)type;
             }
         }
+        internal static eDriveType newdetectType(string path, DriveType type)
+        {
+            if ((type == DriveType.Network) || (type == DriveType.CDRom))
+                return (eDriveType)type;
+            Guid disk=new Guid("53F56307-B6BF-11D0-94F2-00A0C91EFB8B");
+            IntPtr ptrDevs= SetupDiGetClassDevs(ref disk,IntPtr.Zero,IntPtr.Zero,0x12);
+            SP_DEVICE_INTERFACE_DATA interf=new SP_DEVICE_INTERFACE_DATA();
+            interf.cbSize=(uint)Marshal.SizeOf(interf);
+            int deviceNumber = GetInstanceNumber("\\\\.\\"+path);
+            bool success = true;
+            uint i = 0;
+            while (success)
+            {
+                success = SetupDiEnumDeviceInterfaces(ptrDevs, IntPtr.Zero, ref disk, i, ref interf);
+                if (success)
+                {
+                    SP_DEVINFO_DATA da = new SP_DEVINFO_DATA();
+                    da.cbSize = (uint)Marshal.SizeOf(da);
+                    SP_DEVICE_INTERFACE_DETAIL_DATA did = new SP_DEVICE_INTERFACE_DETAIL_DATA();
+                    if (IntPtr.Size == 8)
+                        did.cbSize = 8;
+                    else
+                        did.cbSize = (uint)(4 + Marshal.SystemDefaultCharSize);
+                    uint requiredSize = 0;
+                    if (SetupDiGetDeviceInterfaceDetail(ptrDevs, ref interf, ref did, 256, out requiredSize, ref da))
+                    {
+                        if (GetInstanceNumber(did.DevicePath) == deviceNumber)
+                        {
+                            uint instance;
+                            CM_Get_Parent(out instance, da.DevInst, 0);
+                            IntPtr buffer = Marshal.AllocHGlobal(256);
+                            CM_Get_Device_ID(instance, buffer, 256, 0);
+                            string deviceID = Marshal.PtrToStringAuto(buffer);
+                            Marshal.FreeHGlobal(buffer);
+                            if (deviceID.StartsWith("USB"))
+                            {
+                                uint tmp;
+                                IntPtr buff=Marshal.AllocHGlobal(256);
+                                SetupDiGetDeviceRegistryProperty(ptrDevs, ref da, 0xC, out tmp, buff, 256, out tmp);
+                                string model = Marshal.PtrToStringAnsi(buff);
+                                Marshal.FreeHGlobal(buff);
+                                if ((model != null) && (model.Contains("iPod")) || (model.Contains("Apple Mobile Device")))
+                                    return eDriveType.iPod;
+                                else if ((model != null) && (model.Contains("Phone")))
+                                    return eDriveType.Phone;
+                                else
+                                    return eDriveType.Removable;
+                            }
+                            else
+                                return (eDriveType)type;
+                        }
+                    }
+                }
+                i++;
+            }
+            return (eDriveType)type;
+        }
+        private static int GetInstanceNumber(string drive)
+        {
+            int ret = -1;
+            IntPtr file= CreateFile(drive,0,0,IntPtr.Zero,3,0,IntPtr.Zero);
+            if (file==IntPtr.Zero)
+                return ret;
+            STORAGE_DEVICE_NUMBER num=new STORAGE_DEVICE_NUMBER();
+            int size=Marshal.SizeOf(num);
+            IntPtr buff=Marshal.AllocHGlobal(size);
+            uint length;
+            if (DeviceIoControl(file, 0x2D1080, IntPtr.Zero, 0, buff, (uint)size, out length, IntPtr.Zero))
+            {
+                num=(STORAGE_DEVICE_NUMBER)Marshal.PtrToStructure(buff, typeof(STORAGE_DEVICE_NUMBER));
+                ret = (num.DeviceType << 8) + num.DeviceNumber;
+            }
+            Marshal.FreeHGlobal(buff);
+            CloseHandle(file);
+            return ret;
+        }
+        [StructLayout(LayoutKind.Sequential)]
+        struct STORAGE_DEVICE_NUMBER
+        {
+            public int DeviceType;
+            public int DeviceNumber;
+            public int PartitionNumber;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SP_DEVINFO_DATA
+        {
+            public uint cbSize;
+            public Guid ClassGuid;
+            public uint DevInst;
+            public IntPtr Reserved;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SP_DEVICE_INTERFACE_DATA
+        {
+            public uint cbSize;
+            public Guid InterfaceClassGuid;
+            public uint Flags;
+            public IntPtr Reserved;
+        }
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct SP_DEVICE_INTERFACE_DETAIL_DATA
+        {
+            public UInt32 cbSize;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string DevicePath;
+        }
+        [DllImport("setupapi.dll", SetLastError = true)]
+        public static extern bool SetupDiGetDeviceRegistryProperty(
+            IntPtr DeviceInfoSet,
+            ref SP_DEVINFO_DATA DeviceInfoData,
+            uint Property,
+            out UInt32 PropertyRegDataType,
+            IntPtr PropertyBuffer, // the difference between this signature and the one above.
+            uint PropertyBufferSize,
+            out UInt32 RequiredSize
+            );
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool CloseHandle(IntPtr hObject);
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true, CharSet = CharSet.Auto)]
+        static extern bool DeviceIoControl(IntPtr hDevice, uint dwIoControlCode,
+        IntPtr lpInBuffer, uint nInBufferSize,
+        IntPtr lpOutBuffer, uint nOutBufferSize,
+        out uint lpBytesReturned, IntPtr lpOverlapped);
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+  public static extern IntPtr CreateFile(
+        string lpFileName,
+        uint dwDesiredAccess,
+        uint dwShareMode,
+        IntPtr SecurityAttributes,
+        uint dwCreationDisposition,
+        uint dwFlagsAndAttributes,
+        IntPtr hTemplateFile
+        );
+        [DllImport("setupapi.dll", CharSet = CharSet.Auto)]
+        static extern int CM_Get_Device_ID(UInt32 dnDevInst,IntPtr Buffer,int BufferLen,int ulFlags);
+        [DllImport("setupapi.dll")]
+        static extern int CM_Get_Parent(out UInt32 pdnDevInst,UInt32 dnDevInst,int ulFlags);
+        [DllImport(@"setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern Boolean SetupDiGetDeviceInterfaceDetail(IntPtr hDevInfo,ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData,ref SP_DEVICE_INTERFACE_DETAIL_DATA deviceInterfaceDetailData,UInt32 deviceInterfaceDetailDataSize,out UInt32 requiredSize,ref SP_DEVINFO_DATA deviceInfoData);
+        [DllImport(@"setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern Boolean SetupDiEnumDeviceInterfaces(IntPtr hDevInfo,IntPtr devInfo,ref Guid interfaceClassGuid,UInt32 memberIndex,ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData);
+        [DllImport("setupapi.dll", CharSet = CharSet.Auto)]
+        static extern IntPtr SetupDiGetClassDevs(ref Guid ClassGuid,IntPtr enumerator,IntPtr hwndParent,UInt32 Flags);
 
         internal static string getCDType(string path,DriveInfo info)
         {

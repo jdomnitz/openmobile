@@ -1330,7 +1330,28 @@ namespace OpenMobile.Graphics
         string name;
         float size;
         FontStyle style;
+        static Font arial;
+        static Font times;
+        static Font()
+        {
+            System.Drawing.FontFamily[] supported = System.Drawing.FontFamily.Families;
+            if (Configuration.RunningOnLinux)
+            {
+                if (Array.Exists<System.Drawing.FontFamily>(supported, p => p.Name == "Arial"))
+                    arial = new Font("Arial");
+                else if (Array.Exists<System.Drawing.FontFamily>(supported, p => p.Name == "Arial"))
+                    arial = new Font("Liberation Sans");
+                else
+                    arial = new Font("FreeSans");
+            }
+            else
+                arial = new Font("Arial");
+            times=new Font("Times New Roman");
+            if (Configuration.RunningOnLinux)
+                if (!Array.Exists<System.Drawing.FontFamily>(supported, p => p.Name == "Times New Roman"))
+                    times = new Font("FreeSerif");
 
+        }
         public static bool operator ==(Font left, Font right)
         {
             if (left.name != right.name)
@@ -1350,7 +1371,7 @@ namespace OpenMobile.Graphics
         {
             get
             {
-                return new Font("Arial");
+                return arial;
             }
         }
         public static Font ArialBlack 
@@ -1405,14 +1426,23 @@ namespace OpenMobile.Graphics
                 return ComicSansMS;
             }
         }
+        public static Font Tahoma
+        {
+            get
+            {
+                if (Configuration.RunningOnLinux)
+                    return new Font("Kalimati");
+                else if (Configuration.RunningOnMacOS)
+                    return new Font("Geneva");
+                else
+                    return new Font("Tahoma");
+            }
+        }
         public static Font TimesNewRoman
         {
             get
             {
-                if (Configuration.RunningOnMacOS)
-                    return new Font("Times");
-                else
-                    return new Font("Times New Roman");
+                return times;
             }
         }
         public static Font Webdings
