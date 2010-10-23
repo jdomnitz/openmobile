@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace OpenMobile.Graphics
 {
@@ -47,7 +48,23 @@ namespace OpenMobile.Graphics
             }
             else if (Configuration.RunningOnLinux)
             {
-                //TODO
+				if (File.Exists("/usr/bin/zenity"))
+				{
+	                try
+					{
+						Process p=Process.Start("zenity","--error --text='"+text+"' --title='"+title+"'");
+						p.WaitForExit();
+					}
+					catch(Exception){}
+				}else if (File.Exists("/usr/bin/kdialog"))
+				{
+					 try
+					{
+						Process p=Process.Start("kdialog","--caption '"+title+"' --error '"+text+"'");
+						p.WaitForExit();
+					}
+					catch(Exception){}
+				}
             }
         }
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
