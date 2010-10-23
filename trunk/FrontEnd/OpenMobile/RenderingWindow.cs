@@ -352,6 +352,7 @@ namespace OpenMobile
             MakeCurrent();
             g.Resize(Width, Height);
             base.OnResize(e);
+            MakeCurrent(null);
         }
         protected void OnPaint()
         {

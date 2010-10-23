@@ -177,6 +177,8 @@ namespace OpenMobile
         public void MakeCurrent(IWindowInfo info)
         {
             EnsureUndisposed();
+            if ((!Context.IsCurrent) && (info == null))
+                return;
             Context.MakeCurrent(info);
         }
         #endregion
@@ -272,6 +274,7 @@ namespace OpenMobile
             {
                 Visible = true;   // Make sure the GameWindow is visible.
                 OnLoadInternal(EventArgs.Empty);
+                MakeCurrent();
                 OnResize(EventArgs.Empty);
 
                 // On some platforms, ProcessEvents() does not return while the user is resizing or moving
@@ -531,9 +534,7 @@ namespace OpenMobile
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            MakeCurrent();
             glContext.Update(base.WindowInfo);
-            MakeCurrent(null);
         }
 
         #endregion

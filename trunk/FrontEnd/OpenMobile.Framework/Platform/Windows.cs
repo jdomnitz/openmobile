@@ -21,7 +21,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Management;
 using System.Runtime.InteropServices;
 using IMAPI2.Interop;
 using Microsoft.Win32;
@@ -29,11 +28,8 @@ namespace OpenMobile.Framework
 {
     public sealed class Windows
     {
-        internal static eDriveType detectType(string path, DriveType type)
-        {
-            //CHANGE THIS TO SWITCH BETWEEN NEW AND OLD
-            return newdetectType(path, type);
-        }
+        #region oldCode
+        /*
         internal static eDriveType olddetectType(string path, DriveType type)
         {
             try
@@ -67,62 +63,67 @@ namespace OpenMobile.Framework
             {
                 return (eDriveType)type;
             }
-        }
-        internal static eDriveType newdetectType(string path, DriveType type)
+        }*/
+        #endregion
+        internal static eDriveType detectType(string path, DriveType type)
         {
             if ((type == DriveType.Network) || (type == DriveType.CDRom))
                 return (eDriveType)type;
             Guid disk=new Guid("53F56307-B6BF-11D0-94F2-00A0C91EFB8B");
-            IntPtr ptrDevs= SetupDiGetClassDevs(ref disk,IntPtr.Zero,IntPtr.Zero,0x12);
-            SP_DEVICE_INTERFACE_DATA interf=new SP_DEVICE_INTERFACE_DATA();
-            interf.cbSize=(uint)Marshal.SizeOf(interf);
-            int deviceNumber = GetInstanceNumber("\\\\.\\"+path);
-            bool success = true;
-            uint i = 0;
-            while (success)
+            try
             {
-                success = SetupDiEnumDeviceInterfaces(ptrDevs, IntPtr.Zero, ref disk, i, ref interf);
-                if (success)
+                IntPtr ptrDevs = SetupDiGetClassDevs(ref disk, IntPtr.Zero, IntPtr.Zero, 0x12);
+                SP_DEVICE_INTERFACE_DATA interf = new SP_DEVICE_INTERFACE_DATA();
+                interf.cbSize = (uint)Marshal.SizeOf(interf);
+                int deviceNumber = GetInstanceNumber("\\\\.\\" + path);
+                bool success = true;
+                uint i = 0;
+                while (success)
                 {
-                    SP_DEVINFO_DATA da = new SP_DEVINFO_DATA();
-                    da.cbSize = (uint)Marshal.SizeOf(da);
-                    SP_DEVICE_INTERFACE_DETAIL_DATA did = new SP_DEVICE_INTERFACE_DETAIL_DATA();
-                    if (IntPtr.Size == 8)
-                        did.cbSize = 8;
-                    else
-                        did.cbSize = (uint)(4 + Marshal.SystemDefaultCharSize);
-                    uint requiredSize = 0;
-                    if (SetupDiGetDeviceInterfaceDetail(ptrDevs, ref interf, ref did, 256, out requiredSize, ref da))
+                    success = SetupDiEnumDeviceInterfaces(ptrDevs, IntPtr.Zero, ref disk, i, ref interf);
+                    if (success)
                     {
-                        if (GetInstanceNumber(did.DevicePath) == deviceNumber)
+                        SP_DEVINFO_DATA da = new SP_DEVINFO_DATA();
+                        da.cbSize = (uint)Marshal.SizeOf(da);
+                        SP_DEVICE_INTERFACE_DETAIL_DATA did = new SP_DEVICE_INTERFACE_DETAIL_DATA();
+                        if (IntPtr.Size == 8)
+                            did.cbSize = 8;
+                        else
+                            did.cbSize = (uint)(4 + Marshal.SystemDefaultCharSize);
+                        uint requiredSize = 0;
+                        if (SetupDiGetDeviceInterfaceDetail(ptrDevs, ref interf, ref did, 256, out requiredSize, ref da))
                         {
-                            uint instance;
-                            CM_Get_Parent(out instance, da.DevInst, 0);
-                            IntPtr buffer = Marshal.AllocHGlobal(256);
-                            CM_Get_Device_ID(instance, buffer, 256, 0);
-                            string deviceID = Marshal.PtrToStringAuto(buffer);
-                            Marshal.FreeHGlobal(buffer);
-                            if (deviceID.StartsWith("USB"))
+                            if (GetInstanceNumber(did.DevicePath) == deviceNumber)
                             {
-                                uint tmp;
-                                IntPtr buff=Marshal.AllocHGlobal(256);
-                                SetupDiGetDeviceRegistryProperty(ptrDevs, ref da, 0xC, out tmp, buff, 256, out tmp);
-                                string model = Marshal.PtrToStringAnsi(buff);
-                                Marshal.FreeHGlobal(buff);
-                                if ((model != null) && (model.Contains("iPod")) || (model.Contains("Apple Mobile Device")))
-                                    return eDriveType.iPod;
-                                else if ((model != null) && (model.Contains("Phone")))
-                                    return eDriveType.Phone;
+                                uint instance;
+                                CM_Get_Parent(out instance, da.DevInst, 0);
+                                IntPtr buffer = Marshal.AllocHGlobal(256);
+                                CM_Get_Device_ID(instance, buffer, 256, 0);
+                                string deviceID = Marshal.PtrToStringAuto(buffer);
+                                Marshal.FreeHGlobal(buffer);
+                                if (deviceID.StartsWith("USB"))
+                                {
+                                    uint tmp;
+                                    IntPtr buff = Marshal.AllocHGlobal(256);
+                                    SetupDiGetDeviceRegistryProperty(ptrDevs, ref da, 0xC, out tmp, buff, 256, out tmp);
+                                    string model = Marshal.PtrToStringAnsi(buff);
+                                    Marshal.FreeHGlobal(buff);
+                                    if ((model != null) && (model.Contains("iPod")) || (model.Contains("Apple Mobile Device")))
+                                        return eDriveType.iPod;
+                                    else if ((model != null) && (model.Contains("Phone")))
+                                        return eDriveType.Phone;
+                                    else
+                                        return eDriveType.Removable;
+                                }
                                 else
-                                    return eDriveType.Removable;
+                                    return (eDriveType)type;
                             }
-                            else
-                                return (eDriveType)type;
                         }
                     }
+                    i++;
                 }
-                i++;
             }
+            catch (Exception) { }
             return (eDriveType)type;
         }
         private static int GetInstanceNumber(string drive)
@@ -131,19 +132,24 @@ namespace OpenMobile.Framework
             IntPtr file= CreateFile(drive,0,0,IntPtr.Zero,3,0,IntPtr.Zero);
             if (file==IntPtr.Zero)
                 return ret;
-            STORAGE_DEVICE_NUMBER num=new STORAGE_DEVICE_NUMBER();
-            int size=Marshal.SizeOf(num);
-            IntPtr buff=Marshal.AllocHGlobal(size);
-            uint length;
-            if (DeviceIoControl(file, 0x2D1080, IntPtr.Zero, 0, buff, (uint)size, out length, IntPtr.Zero))
+            try
             {
-                num=(STORAGE_DEVICE_NUMBER)Marshal.PtrToStructure(buff, typeof(STORAGE_DEVICE_NUMBER));
-                ret = (num.DeviceType << 8) + num.DeviceNumber;
+                STORAGE_DEVICE_NUMBER num = new STORAGE_DEVICE_NUMBER();
+                int size = Marshal.SizeOf(num);
+                IntPtr buff = Marshal.AllocHGlobal(size);
+                uint length;
+                if (DeviceIoControl(file, 0x2D1080, IntPtr.Zero, 0, buff, (uint)size, out length, IntPtr.Zero))
+                {
+                    num = (STORAGE_DEVICE_NUMBER)Marshal.PtrToStructure(buff, typeof(STORAGE_DEVICE_NUMBER));
+                    ret = (num.DeviceType << 8) + num.DeviceNumber;
+                }
+                Marshal.FreeHGlobal(buff);
             }
-            Marshal.FreeHGlobal(buff);
+            catch (Exception) { }
             CloseHandle(file);
             return ret;
         }
+        #region structs
         [StructLayout(LayoutKind.Sequential)]
         struct STORAGE_DEVICE_NUMBER
         {
@@ -176,6 +182,8 @@ namespace OpenMobile.Framework
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
             public string DevicePath;
         }
+        #endregion
+        #region PInvokes
         [DllImport("setupapi.dll", SetLastError = true)]
         public static extern bool SetupDiGetDeviceRegistryProperty(
             IntPtr DeviceInfoSet,
@@ -214,7 +222,7 @@ namespace OpenMobile.Framework
         public static extern Boolean SetupDiEnumDeviceInterfaces(IntPtr hDevInfo,IntPtr devInfo,ref Guid interfaceClassGuid,UInt32 memberIndex,ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData);
         [DllImport("setupapi.dll", CharSet = CharSet.Auto)]
         static extern IntPtr SetupDiGetClassDevs(ref Guid ClassGuid,IntPtr enumerator,IntPtr hwndParent,UInt32 Flags);
-
+        #endregion
         internal static string getCDType(string path,DriveInfo info)
         {
             try
