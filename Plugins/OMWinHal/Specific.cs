@@ -323,19 +323,45 @@ namespace OMHal
 
         public static void Shutdown(bool restart)
         {
-            ManagementBaseObject mboShutdown = null;
-            ManagementClass mcWin32 = new ManagementClass("Win32_OperatingSystem");
-            mcWin32.Get();
-            mcWin32.Scope.Options.EnablePrivileges = true;
-            ManagementBaseObject mboShutdownParams = mcWin32.GetMethodParameters("Win32Shutdown");
+            bool ok;
+            TokPriv1Luid tp;
+            IntPtr hproc = GetCurrentProcess();
+            IntPtr htok = IntPtr.Zero;
+            ok = OpenProcessToken(hproc, 0x28, ref htok);
+            if (!ok)
+                return;
+            tp.Count = 1;
+            tp.Luid = 0;
+            tp.Attr = 0x2;
+            LookupPrivilegeValue(null, "SeShutdownPrivilege", ref tp.Luid);
+            AdjustTokenPrivileges(htok, false, ref tp, 0, IntPtr.Zero,IntPtr.Zero);
             if (restart)
-                mboShutdownParams["Flags"] = "18";
+                ExitWindowsEx(0x12, 0x80000000);
             else
-                mboShutdownParams["Flags"] = "17";
-            mboShutdownParams["Reserved"] = "0";
-            foreach (ManagementObject manObj in mcWin32.GetInstances())
-                mboShutdown = manObj.InvokeMethod("Win32Shutdown", mboShutdownParams, null);
+                ExitWindowsEx(0x18, 0x80000000);
         }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        internal struct TokPriv1Luid
+        {
+            public int Count;
+            public long Luid;
+            public int Attr;
+        }
+
+        [DllImport("kernel32.dll", ExactSpelling = true)]
+        internal static extern IntPtr GetCurrentProcess();
+        [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
+        internal static extern bool OpenProcessToken(IntPtr h, int acc, ref IntPtr
+        phtok);
+        [DllImport("advapi32.dll", SetLastError = true)]
+        internal static extern bool LookupPrivilegeValue(string host, string name,
+        ref long pluid);
+        [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
+        internal static extern bool AdjustTokenPrivileges(IntPtr htok, bool disall,
+        ref TokPriv1Luid newst, int len, IntPtr prev, IntPtr relen);
+        [DllImport("user32.dll", ExactSpelling = true, SetLastError = true)]
+        internal static extern bool ExitWindowsEx(uint flg, uint rea);
 
         [DllImport("user32.dll")]
         private static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
