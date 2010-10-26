@@ -264,6 +264,8 @@ namespace OMPlayer
                 crossfade = int.Parse(cf);
             if (setting.getSetting("Music.AutoResume") == "True")
             {
+                OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+                {
                 for (int i = 0; i < theHost.ScreenCount; i++)
                 {
                     int k = theHost.instanceForScreen(i);
@@ -275,7 +277,7 @@ namespace OMPlayer
                     theHost.execute(eFunction.setPlaylistPosition, k.ToString(), lastUrl);
                     player[k].currentVolume = 100;
                     if (player[k].mediaPosition == null)
-                        return eLoadStatus.LoadSuccessful;
+                        return;
                     if (double.TryParse(setting.getSetting("Music.Instance" + k.ToString() + ".LastPlayingPosition"), out player[k].pos) == true)
                     {
                         if (player[k].pos > 1)
@@ -283,7 +285,8 @@ namespace OMPlayer
                         player[k].mediaPosition.put_CurrentPosition(player[k].pos);
                     }
                 }
-                OpenMobile.Threading.SafeThread.Asynchronous(delegate() { fadeIn(); },theHost);
+                fadeIn(); 
+                },theHost);
             }
         }
         return eLoadStatus.LoadSuccessful;

@@ -94,12 +94,15 @@ namespace OpenMobile.Platform.Windows
         #endregion
 
         #region Contructors
-
+        uint queryDisableAutoplay=0;
         public WinGLNative(int x, int y, int width, int height, string title, GameWindowFlags options, DisplayDevice device)
         {
             // This is the main window procedure callback. We need the callback in order to create the window, so
             // don't move it below the CreateWindow calls.
             WindowProcedureDelegate = WindowProcedure;
+
+            //Needs to be done before we start processing windows messages
+            queryDisableAutoplay = Functions.RegisterWindowMessage("QueryCancelAutoPlay");
 
             // This timer callback is called periodically when the window enters a sizing / moving modal loop.
             ModalLoopCallback = delegate(IntPtr handle, WindowMessage msg, UIntPtr eventId, int time)
@@ -441,10 +444,10 @@ namespace OpenMobile.Platform.Windows
                         Closed(this, EventArgs.Empty);
 
                     break;
-
                 #endregion
             }
-
+            if (message == (WindowMessage)queryDisableAutoplay)
+                return new IntPtr(1);
             return Functions.DefWindowProc(handle, message, wParam, lParam);
         }
 

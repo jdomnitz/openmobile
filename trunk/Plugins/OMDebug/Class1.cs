@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-//using System.Windows.Forms;
 using OpenMobile;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
@@ -72,11 +71,16 @@ namespace OMDebug
             theHost = host;
             writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-            new Thread(() => writeHeader()).Start();
+            OpenMobile.Threading.SafeThread.Asynchronous(() => writeHeader(),theHost);
             return eLoadStatus.LoadSuccessful;
         }
         private void writeHeader()
         {
+            AppDomain.CurrentDomain.AssemblyLoad += new AssemblyLoadEventHandler(CurrentDomain_AssemblyLoad);
+            theHost.OnMediaEvent += new MediaEvent(theHost_OnMediaEvent);
+            theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
+            theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             while (Graphics.Version == null)
                 Thread.Sleep(10);
             writer.WriteLine("------------------Software-------------------");
@@ -90,16 +94,12 @@ namespace OMDebug
             writer.WriteLine("Architecture: "+OpenMobile.Framework.OSSpecific.getArchitecture().ToString());
             writer.WriteLine("Screens: " + DisplayDevice.AvailableDisplays.Count.ToString());
             writer.WriteLine("Graphics Card: " + Graphics.Renderer);
+            writer.WriteLine("Embedded:" + Configuration.RunningOnEmbedded);
             writer.WriteLine("----------------Inital Assemblies-------------");
             time = Environment.TickCount;
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
                 log("LOADED (" + a.GetName() + ")");
             writer.WriteLine("---------------------------------------------");
-            AppDomain.CurrentDomain.AssemblyLoad += new AssemblyLoadEventHandler(CurrentDomain_AssemblyLoad);
-            theHost.OnMediaEvent += new MediaEvent(theHost_OnMediaEvent);
-            theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
-            theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
-            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             if (queue.Count > 0)
             {
                 foreach (string queued in queue)
