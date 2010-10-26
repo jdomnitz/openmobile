@@ -219,7 +219,30 @@ namespace OpenMobile.Graphics
                 }
             Raw.BindTexture(TextureTarget.Texture2D, image.Texture(screen));
             Raw.Color4(1F, 1F, 1F, transparency);
+
+            // Added support for angle parameter (Borte)
             int[] tex = new int[] { X, Height + Y, Width + X, Height + Y, X, Y, Width + X, Y };
+            switch (angle)
+            {
+                case eAngle.Normal:
+                    break;
+                case eAngle.FlipHorizontal:
+                    tex = new int[] { Width + X, Height + Y, X, Height + Y, Width + X, Y, X, Y };
+                    break;
+                case eAngle.FlipVertical:
+                    tex = new int[] { Width + X, Height + Y, X, Height + Y, Width + X, Y, X, Y };
+                    break;
+                case eAngle.Rotate90:
+                    tex = new int[] { X, Y, X, Height + Y, Width + X, Y, Width + X, Height + Y };
+                    break;
+                case eAngle.Rotate180:
+                    tex = new int[] { Width + X, Y, X, Y, Width + X, Height + Y, X, Height + Y };
+                    break;
+                case eAngle.Rotate270:
+                    tex = new int[] { Width + X, Height + Y, Width + X, Y, X, Height + Y, X, Y };
+                    break;
+            }
+
             Raw.EnableClientState(ArrayCap.VertexArray);
             Raw.VertexPointer(2, VertexPointerType.Int, 0, tex);
             Raw.EnableClientState(ArrayCap.TextureCoordArray);
