@@ -1473,6 +1473,9 @@ namespace OpenMobile.Platform.Windows
         [DllImport("shell32.dll")]
         public static extern DWORD_PTR SHGetFileInfo(LPCTSTR pszPath, DWORD dwFileAttributes, ref SHFILEINFO psfi, UINT cbFileInfo, ShGetFileIconFlags uFlags);
 
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern uint RegisterWindowMessage(string lpString);
+
         #endregion
     }
 

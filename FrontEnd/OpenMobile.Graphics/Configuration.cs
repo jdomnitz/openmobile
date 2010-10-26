@@ -38,7 +38,7 @@ namespace OpenMobile
     /// <summary>Provides information about the underlying OS and runtime.</summary>
     public static class Configuration
     {
-        static bool runningOnWindows, runningOnUnix, runningOnX11, runningOnMacOS, runningOnLinux, runningOnMono;
+        static bool runningOnWindows, runningOnUnix, runningOnX11, runningOnMacOS, runningOnLinux, runningOnEmbedded;
 
         #region --- Constructors ---
 
@@ -76,7 +76,7 @@ namespace OpenMobile
                 }
             }
             else
-                throw new PlatformNotSupportedException("Unknown platform. Please report this error at http://www.OpenMobile.com.");
+                throw new PlatformNotSupportedException("Unknown platform. Please report this error at http://www.OpenTK.com.");
 
             // Detect whether X is present.
             // It seems that this check will cause X to initialize itself on Mac OS X Leopard and newer.
@@ -89,14 +89,15 @@ namespace OpenMobile
             }
 
             // Detect the Mono runtime (code taken from http://mono.wikia.com/wiki/Detecting_if_program_is_running_in_Mono).
-            Type t = Type.GetType("Mono.Runtime");
-            if (t != null)
-                runningOnMono = true;
+            //Type t = Type.GetType("Mono.Runtime");
+            //if (t != null)
+            //    runningOnMono = true;
             
-            Debug.Print("Detected configuration: {0} / {1}",
-                RunningOnWindows ? "Windows" : RunningOnLinux ? "Linux" : RunningOnMacOS ? "MacOS" :
-                runningOnUnix ? "Unix" : RunningOnX11 ? "X11" : "Unknown Platform",
-                RunningOnMono ? "Mono" : ".Net");
+            //Debug.Print("Detected configuration: {0} / {1}",
+            //    RunningOnWindows ? "Windows" : RunningOnLinux ? "Linux" : RunningOnMacOS ? "MacOS" :
+            //    runningOnUnix ? "Unix" : RunningOnX11 ? "X11" : "Unknown Platform",
+            //    RunningOnMono ? "Mono" : ".Net");
+            runningOnEmbedded = OpenMobile.Platform.Egl.Egl.IsSupported;
         }
 
         #endregion
@@ -142,12 +143,11 @@ namespace OpenMobile
 
         #endregion
 
-        #region public static bool RunningOnMono
-
+        #region public static bool RunningOnEmbedded
         /// <summary>
-        /// Gets a System.Boolean indicating whether OpenMobile is running on the Mono runtime.
+        /// Gets a System.Boolean indicating whether OpenMobile is running on embedded hardware
         /// </summary>
-        public static bool RunningOnMono { get { return runningOnMono; } }
+        public static bool RunningOnEmbedded { get { return runningOnEmbedded; } }
 
         #endregion
 
@@ -184,11 +184,14 @@ namespace OpenMobile
         /// <returns></returns>
         private static string DetectUnixKernel()
         {
+            #if DEBUG
             Debug.Print("Size: {0}", Marshal.SizeOf(typeof(utsname)).ToString());
             Debug.Flush();
+            #endif
             utsname uts = new utsname();
             uname(out uts);
 
+            #if DEBUG
             Debug.WriteLine("System:");
             Debug.Indent();
             Debug.WriteLine(uts.sysname);
@@ -197,7 +200,7 @@ namespace OpenMobile
             Debug.WriteLine(uts.version);
             Debug.WriteLine(uts.machine);
             Debug.Unindent();
-
+            #endif
             return uts.sysname.ToString();
         }
 
