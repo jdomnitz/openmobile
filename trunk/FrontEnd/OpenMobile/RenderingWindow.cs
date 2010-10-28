@@ -103,7 +103,8 @@ namespace OpenMobile
         {
             g = new OpenMobile.Graphics.Graphics(s);
             this.screen = s;
-
+            if (s == 0)
+                InputRouter.Initialize();
             this.tmrClick = new System.Timers.Timer(20);
             this.tmrLongClick = new System.Timers.Timer(500);
             this.tmrClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrClick_Tick);
@@ -119,7 +120,8 @@ namespace OpenMobile
             InitializeComponent();
             hide += new voiddel(hideCursor);
             redraw += new voiddel(invokePaint);
-            this.Keyboard.KeyRepeat = true;
+            for (int i = 0; i < this.Keyboard.Count;i++ )
+                this.Keyboard[i].KeyRepeat = true;
         }
         bool Identify = false;
         public void paintIdentity()
@@ -133,7 +135,7 @@ namespace OpenMobile
         public void invokePaint()
         {
             Invalidate();
-            RenderingWindow_MouseMove(null, new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+            MouseMove(new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
         }
 
         private void Invalidate()
@@ -233,7 +235,7 @@ namespace OpenMobile
         {
             Invalidate();
             if (resetHighlighted)
-                RenderingWindow_MouseMove(null, new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+                MouseMove(new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
         }
         public bool blockHome = false;
         public bool transitionOutEverything()
@@ -418,7 +420,7 @@ namespace OpenMobile
                         {
                             lastClick.Mode = eModeType.Normal;
                             //Recheck where the mouse is at
-                            RenderingWindow_MouseMove(this, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+                            MouseMove(new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
                         }
                         Invalidate();
                     }
@@ -453,7 +455,7 @@ namespace OpenMobile
                     else
                     {
                         //Recheck where the mouse is at
-                        RenderingWindow_MouseMove(this, new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+                        MouseMove(new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
                     }
                     tmrClick.Enabled = false;
                     lastClick = null;
@@ -492,6 +494,12 @@ namespace OpenMobile
 
         #region MouseHandlers
         private void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
+        {
+            int scr = (int)sender;
+            if ((scr==-1)||(scr==screen))
+                MouseMove(e);
+        }
+        private void MouseMove(MouseMoveEventArgs e)
         {
             bool done = false; //We found something that was selected
             if (rParam.currentMode == eModeType.Scrolling)
@@ -717,7 +725,7 @@ namespace OpenMobile
                         rec.AddPoint(currentGesture[i], false);
 					Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
                     rParam.currentMode = eModeType.Highlighted;
-                    RenderingWindow_MouseMove(sender, new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
+                    MouseMove(new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
                 }
                 Invalidate();
             }

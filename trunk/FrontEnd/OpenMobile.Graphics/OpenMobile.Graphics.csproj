@@ -62,6 +62,8 @@
     <Compile Include="GameWindow.cs" />
     <Compile Include="GameWindowFlags.cs" />
     <Compile Include="Graphics.cs" />
+    <Compile Include="Platform\Windows\WinRawInput.cs" />
+    <Compile Include="Platform\Windows\WinRawKeyboard.cs" />
     <Compile Include="V1Graphics.cs" />
     <Compile Include="Graphics\Color4.cs" />
     <Compile Include="Graphics\ColorFormat.cs" />

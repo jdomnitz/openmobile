@@ -214,7 +214,7 @@ namespace OpenMobile.Input
             {
                 bool previous_state = button_state[(int)button];
                 if (!value && previous_state)
-                    MouseClick(this, button_args);
+                    MouseClick(-1, button_args);
                 button_state[(int)button] = value;
 
                 button_args.X = pos.X;
@@ -222,9 +222,9 @@ namespace OpenMobile.Input
                 button_args.Button = button;
                 button_args.IsPressed = value;
                 if (value && !previous_state)
-                    ButtonDown(this, button_args);
+                    ButtonDown(-1, button_args);
                 else if (!value && previous_state)
-                    ButtonUp(this, button_args);
+                    ButtonUp(-1, button_args);
             }
         }
 
@@ -300,7 +300,7 @@ namespace OpenMobile.Input
                 move_args.XDelta = pos.X - last_pos.X;
                 move_args.YDelta = pos.Y - last_pos.Y;
                 move_args.Buttons=getButton(button_state);
-                Move(this, move_args);
+                Move(-1, move_args);
                 last_pos = pos;
             }
         }

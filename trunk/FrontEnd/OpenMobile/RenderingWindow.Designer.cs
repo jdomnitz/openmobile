@@ -21,6 +21,7 @@
 //this.KeyUp += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceUp);
 //this.KeyDown+=new System.Windows.Forms.KeyEventHandler(InputRouter.SourceDown);
 using System;
+using OpenMobile.Input;
 namespace OpenMobile
 {
     partial class RenderingWindow
@@ -45,10 +46,13 @@ namespace OpenMobile
             this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
             this.Closing += new EventHandler<System.ComponentModel.CancelEventArgs>(this.RenderingWindow_FormClosing);
             this.WindowStateChanged += new System.EventHandler<System.EventArgs>(this.RenderingWindow_Resize); //TODO - Separate function
-            this.Resize+=new EventHandler<EventArgs>(this.RenderingWindow_Resize);
+            this.Resize += new EventHandler<EventArgs>(this.RenderingWindow_Resize);
             this.Mouse.Move += new EventHandler<OpenMobile.Input.MouseMoveEventArgs>(this.RenderingWindow_MouseMove);
-            this.Keyboard.KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
-            this.Keyboard.KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
+            foreach (KeyboardDevice dev in Keyboard)
+            {
+                dev.KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
+                dev.KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
+            }
         }
         #endregion
         private System.Timers.Timer tmrClick;

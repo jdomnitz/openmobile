@@ -25,13 +25,34 @@ namespace OpenMobile
 {
     public static class InputRouter
     {
+        static IInputDriver driver;
+        public static void Initialize()
+        {
+            if (Configuration.RunningOnWindows)
+                driver = new Platform.Windows.WinRawInput();
+            if (driver != null)
+            {
+                foreach (KeyboardDevice dev in driver.Keyboard)
+                {
+                    dev.KeyDown += new System.EventHandler<KeyboardKeyEventArgs>(SourceDown);
+                    dev.KeyUp += new System.EventHandler<KeyboardKeyEventArgs>(SourceUp);
+                }
+            }
+        }
         public static event userInteraction OnHighlightedChanged;
         public static void SourceUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
+            KeyboardDevice dev=(KeyboardDevice)sender;
             if (Core.theHost.raiseKeyPressEvent(eKeypressType.KeyUp, e) == true)
                 return; //If an app handles it first don't show the UI
-            for (int i = 0; i < Core.RenderingWindows.Count;i++ )
-                Core.RenderingWindows[i].RenderingWindow_KeyUp(sender, e);
+
+            if (dev.Instance == -1)
+            {
+                for (int i = 0; i < Core.RenderingWindows.Count; i++)
+                    Core.RenderingWindows[i].RenderingWindow_KeyUp(sender, e);
+            }
+            else if (dev.Instance < Core.RenderingWindows.Count)
+                Core.RenderingWindows[dev.Instance].RenderingWindow_KeyUp(sender, e);
         }
         internal static void raiseHighlightChanged(OMControl sender, int screen)
         {
@@ -42,8 +63,12 @@ namespace OpenMobile
         {
             if (Core.theHost.raiseKeyPressEvent(eKeypressType.KeyDown,e)==true)
                 return; //If an app handles it first don't show the UI
-            for (int i = 0; i < Core.RenderingWindows.Count; i++)
-                Core.RenderingWindows[i].RenderingWindow_KeyDown(sender, e);
+            if (e.Screen == -1)
+            {
+                for (int i = 0; i < Core.RenderingWindows.Count; i++)
+                    Core.RenderingWindows[i].RenderingWindow_KeyDown(sender, e);
+            }else
+                Core.RenderingWindows[e.Screen].RenderingWindow_KeyDown(sender, e);
         }
         public static bool SendKeyUp(int screen, string Key)
         {

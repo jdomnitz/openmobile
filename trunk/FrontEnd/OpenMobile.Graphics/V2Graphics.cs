@@ -146,27 +146,70 @@ namespace OpenMobile.Graphics
 
         public void DrawArc(Pen pen, int x, int y, int width, int height, float startAngle, float sweepAngle)
         {
-            //throw new NotImplementedException();
+            Raw.Color4(pen.Color);
+            Raw.LineWidth(pen.Width);
+            Raw.Enable(EnableCap.LineSmooth);
+            Raw.Enable(EnableCap.Multisample);
+
+            float yrad = height / 2F;
+            float xrad = width / 2F;
+            startAngle = 360 - startAngle;
+            float[] arr = new float[(int)((sweepAngle + 0.5) * 2)];
+            int i = 0;
+            for (float t = startAngle; t >= (startAngle + sweepAngle); t = t - 0.5F)
+            {
+                float rad = OpenMobile.MathHelper.DegreesToRadians(t);
+                arr[i]=x + xrad + (float)(xrad * Math.Cos(rad));
+                arr[i+1]=y + yrad + (float)(yrad * Math.Sin(rad));
+                i += 2;
+            }
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.VertexPointer(2, VertexPointerType.Float, 0, arr);
+            Raw.DrawArrays(BeginMode.LineStrip, 0, arr.Length/2);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+
+            Raw.Disable(EnableCap.LineSmooth);
+            Raw.Disable(EnableCap.Multisample);
         }
 
         public void DrawArc(Pen pen, Rectangle rect, float startAngle, float sweepAngle)
         {
-            //throw new NotImplementedException();
+            DrawArc(pen, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
         }
 
         public void DrawEllipse(Pen pen, int x, int y, int width, int height)
         {
-            //throw new NotImplementedException();
+            Raw.Color4(pen.Color);
+            Raw.LineWidth(pen.Width);
+            Raw.Enable(EnableCap.LineSmooth);
+            Raw.Enable(EnableCap.PointSmooth);
+
+            float yrad = height / 2F;
+            float xrad = width / 2F;
+            float[] arr = new float[720];
+            for (int t = 0; t < 360; t++)
+            {
+                float rad = OpenMobile.MathHelper.DegreesToRadians(t);
+                arr[2*t]=x + xrad + (float)(xrad * Math.Cos(rad));
+                arr[(2*t)+1]=y + yrad + (float)(yrad * Math.Sin(rad));
+            }
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.VertexPointer(2, VertexPointerType.Float, 0, arr);
+            Raw.DrawArrays(BeginMode.LineLoop, 0, 360);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+
+            Raw.Disable(EnableCap.LineSmooth);
+            Raw.Disable(EnableCap.PointSmooth);
         }
 
         public void DrawEllipse(Pen pen, Rectangle rect)
         {
-            //throw new NotImplementedException();
+            DrawEllipse(pen, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
         public void DrawImage(OImage image, Rectangle rect, Rectangle srcRect)
         {
-            //throw new NotImplementedException();
+            DrawImage(image, rect, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, 1F);
         }
 
         public void DrawImage(OImage img, Rectangle rect, int x, int y, int width, int height)
@@ -220,33 +263,22 @@ namespace OpenMobile.Graphics
             Raw.BindTexture(TextureTarget.Texture2D, image.Texture(screen));
             Raw.Color4(1F, 1F, 1F, transparency);
 
-            // Added support for angle parameter (Borte)
             int[] tex = new int[] { X, Height + Y, Width + X, Height + Y, X, Y, Width + X, Y };
-            switch (angle)
-            {
-                case eAngle.Normal:
-                    break;
-                case eAngle.FlipHorizontal:
-                    tex = new int[] { Width + X, Height + Y, X, Height + Y, Width + X, Y, X, Y };
-                    break;
-                case eAngle.FlipVertical:
-                    tex = new int[] { Width + X, Height + Y, X, Height + Y, Width + X, Y, X, Y };
-                    break;
-                case eAngle.Rotate90:
-                    tex = new int[] { X, Y, X, Height + Y, Width + X, Y, Width + X, Height + Y };
-                    break;
-                case eAngle.Rotate180:
-                    tex = new int[] { Width + X, Y, X, Y, Width + X, Height + Y, X, Height + Y };
-                    break;
-                case eAngle.Rotate270:
-                    tex = new int[] { Width + X, Height + Y, Width + X, Y, X, Height + Y, X, Y };
-                    break;
-            }
-
             Raw.EnableClientState(ArrayCap.VertexArray);
             Raw.VertexPointer(2, VertexPointerType.Int, 0, tex);
             Raw.EnableClientState(ArrayCap.TextureCoordArray);
-            Raw.TexCoordPointer(2, TexCoordPointerType.Int, 0, normalTex);
+            switch(angle)
+            {
+                case eAngle.FlipHorizontal:
+                    Raw.TexCoordPointer(2, TexCoordPointerType.Int, 0, horizTex);
+                    break;
+                case eAngle.FlipVertical:
+                    Raw.TexCoordPointer(2, TexCoordPointerType.Int, 0, vertTex);
+                    break;
+                default:
+                    Raw.TexCoordPointer(2, TexCoordPointerType.Int, 0, normalTex);
+                    break;
+            }
             Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
             Raw.DisableClientState(ArrayCap.TextureCoordArray);
             Raw.DisableClientState(ArrayCap.VertexArray);
@@ -643,6 +675,8 @@ namespace OpenMobile.Graphics
             throw new NotImplementedException();
         }
         int maxTextureSize;
+        int[] horizTex;
+        int[] vertTex;
         public void Initialize(int screen)
         {
             Raw.Disable(EnableCap.DepthTest);
@@ -658,6 +692,8 @@ namespace OpenMobile.Graphics
             Raw.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
             //Init arrays
             normalTex = new int[] { 0, 1, 1, 1, 0, 0, 1, 0 };
+            vertTex = new int[] { 0, 0, 1, 0, 0, 1, 1, 1 };
+            horizTex = new int[] { 1, 1, 0, 1, 1, 0, 0, 0 };
         }
 
         public void renderText(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)

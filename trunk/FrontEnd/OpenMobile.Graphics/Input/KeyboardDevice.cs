@@ -25,6 +25,7 @@ namespace OpenMobile.Input
         private string description;
         private int numKeys, numFKeys, numLeds;
         private IntPtr devID;
+        private int instance=-1;
         private bool repeat;
         private KeyboardKeyEventArgs args = new KeyboardKeyEventArgs();
 
@@ -104,6 +105,12 @@ namespace OpenMobile.Input
         {
             get { return devID; }
             internal set { devID = value; }
+        }
+
+        public int Instance
+        {
+            get { return instance; }
+            internal set { instance = value; }
         }
 
         #region public bool KeyRepeat

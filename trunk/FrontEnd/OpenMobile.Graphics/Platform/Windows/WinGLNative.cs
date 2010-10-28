@@ -85,7 +85,6 @@ namespace OpenMobile.Platform.Windows
         MouseDevice mouse = new MouseDevice();
         IList<KeyboardDevice> keyboards = new List<KeyboardDevice>(1);
         IList<MouseDevice> mice = new List<MouseDevice>(1);
-        internal static readonly WinKeyMap KeyMap = new WinKeyMap();
         const long ExtendedBit = 1 << 24;           // Used to distinguish left and right control, alt and enter keys.
         static readonly uint ShiftRightScanCode = Functions.MapVirtualKey(VirtualKeys.RSHIFT, 0);         // Used to distinguish left and right shift keys.
 
@@ -95,6 +94,7 @@ namespace OpenMobile.Platform.Windows
 
         #region Contructors
         uint queryDisableAutoplay=0;
+        WinRawInput raw;
         public WinGLNative(int x, int y, int width, int height, string title, GameWindowFlags options, DisplayDevice device)
         {
             // This is the main window procedure callback. We need the callback in order to create the window, so
@@ -117,13 +117,14 @@ namespace OpenMobile.Platform.Windows
                 CreateWindow(0, 0, ClientSize.Width, ClientSize.Height, title, options, device, window.WindowHandle), window);
 
             exists = true;
-
-            keyboard.Description = "Standard Windows keyboard";
+            
+            keyboard.Description = "Default Windows keyboard";
             keyboard.NumberOfFunctionKeys = 12;
             keyboard.NumberOfKeys = 101;
             keyboard.NumberOfLeds = 3;
 
-            mouse.Description = "Standard Windows mouse";
+            //TODO: Enumerate Mice
+            mouse.Description = "Default Windows mouse";
             mouse.NumberOfButtons = 3;
             mouse.NumberOfWheels = 1;
 
@@ -375,14 +376,14 @@ namespace OpenMobile.Platform.Windows
                             return IntPtr.Zero;
 
                         default:
-                            if (!KeyMap.ContainsKey((VirtualKeys)wParam))
+                            if (!WinRawKeyboard.KeyMap.ContainsKey((VirtualKeys)wParam))
                             {
                                 Debug.Print("Virtual key {0} ({1}) not mapped.", (VirtualKeys)wParam, (int)lParam);
                                 break;
                             }
                             else
                             {
-                                Key key=KeyMap[(VirtualKeys)wParam];
+                                Key key=WinRawKeyboard.KeyMap[(VirtualKeys)wParam];
                                 keyboard[key] = pressed;
                                 if (key == Key.CapsLock)
                                     keyboard[Key.CapsLock] = Console.CapsLock;
