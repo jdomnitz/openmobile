@@ -276,7 +276,7 @@ namespace OpenMobile
                 OnLoadInternal(EventArgs.Empty);
                 MakeCurrent();
                 OnResize(EventArgs.Empty);
-
+                
                 // On some platforms, ProcessEvents() does not return while the user is resizing or moving
                 // the window. We can avoid this issue by raising UpdateFrame and RenderFrame events
                 // whenever we encounter a size or move event.
@@ -406,9 +406,9 @@ namespace OpenMobile
         /// <summary>
         /// Gets the primary Keyboard device, or null if no Keyboard exists.
         /// </summary>
-        public KeyboardDevice Keyboard
+        public IList<KeyboardDevice> Keyboard
         {
-            get { return InputDriver.Keyboard.Count > 0 ? InputDriver.Keyboard[0] : null; }
+            get { return InputDriver.Keyboard; }
         }
 
         #endregion

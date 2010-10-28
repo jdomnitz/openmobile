@@ -39,7 +39,7 @@ namespace OpenMobile.Platform.X11
             using (new XLock(API.DefaultDisplay))
             {
                 List<DisplayDevice> devices = new List<DisplayDevice>();
-                bool xinerama_supported = false;
+                xinerama_supported = false;
                 try
                 {
                     xinerama_supported = QueryXinerama(devices);
@@ -79,7 +79,7 @@ namespace OpenMobile.Platform.X11
 
                     if (!xf86_supported)
                     {
-						Debug.Print("XF86 query failed, falling back to XF86.");
+						Debug.Print("XF86 query failed, falling back to dummy device.");
                         QueryBestGuess(devices);
                     }
                 }

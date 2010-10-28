@@ -54,8 +54,12 @@ namespace OpenMobile
             {
                 //handled below
             }
-            if (availablePlugin==null)
+            if (availablePlugin == null)
+            {
                 availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
+                if (availablePlugin == null)
+                    Application.ShowError(RenderingWindows[0].WindowHandle, "No UI Skin available!", "No skin available!");
+            }
             //End Modifications by Borte
             pluginCollection.Add(availablePlugin);
             availablePlugin.initialize(theHost);
@@ -69,7 +73,11 @@ namespace OpenMobile
             }
             catch { }
             if (mmPlugin == null)
+            {
                 mmPlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.MainMenu"));
+                if (mmPlugin == null)
+                    Application.ShowError(RenderingWindows[0].WindowHandle, "No Main Menu Skin available!", "No skin available!");
+            }
             //End Modifications by Borte
             pluginCollection.Add(mmPlugin);
             mmPlugin.initialize(theHost);

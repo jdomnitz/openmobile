@@ -1095,8 +1095,6 @@ namespace OpenMobile.Platform.MacOS
 		}
 
 		#endregion
-        public event EventHandler<EventArgs> Load;
-        public event EventHandler<EventArgs> Unload;
         public event EventHandler<EventArgs> Resize;
         public event EventHandler<CancelEventArgs> Closing;
         public event EventHandler<EventArgs> Closed;

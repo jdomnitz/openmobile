@@ -49,7 +49,7 @@ namespace OpenMobile.Input
         bool shift;
         bool control;
         bool caps;
-        int screen;
+        int screen=-1;
         #endregion
 
         #region Constructors
@@ -102,6 +102,9 @@ namespace OpenMobile.Input
             get { return caps; }
             set { caps = value; }
         }
+        /// <summary>
+        /// -1 for unknown
+        /// </summary>
         public int Screen
         {
             get { return screen; }

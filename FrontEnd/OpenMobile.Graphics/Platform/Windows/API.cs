@@ -951,6 +951,9 @@ namespace OpenMobile.Platform.Windows
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern int ShowCursor(bool bShow);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+
         #region Async input
 
         #region GetCursorPos
@@ -1568,6 +1571,8 @@ namespace OpenMobile.Platform.Windows
             // (found in winuser.h)
             internal const int ENUM_REGISTRY_SETTINGS = -2;
             internal const int ENUM_CURRENT_SETTINGS = -1;
+
+            internal static readonly IntPtr MESSAGE_ONLY = new IntPtr(-3);
         }
 
         #endregion
