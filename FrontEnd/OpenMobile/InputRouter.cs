@@ -47,12 +47,12 @@ namespace OpenMobile
                 driver = new Platform.Windows.WinRawInput();
             if (driver != null)
             {
+                mapKeyboards();
                 foreach (KeyboardDevice dev in driver.Keyboard)
                 {
                     dev.KeyDown += new System.EventHandler<KeyboardKeyEventArgs>(SourceDown);
                     dev.KeyUp += new System.EventHandler<KeyboardKeyEventArgs>(SourceUp);
                 }
-                mapKeyboards();
             }
         }
         static int[] deviceMap;
