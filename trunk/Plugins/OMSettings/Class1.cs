@@ -201,6 +201,25 @@ namespace OMSettings
             caption.Font = new Font(Font.GenericSansSerif, 36);
             caption.Format = eTextFormat.Glow;
             caption.Name = "caption";
+
+            OMButton right2 = new OMButton(842, 330, 120, 80);
+            right2.Image = opt3;
+            right2.FocusImage = opt2;
+            right2.OnClick += new userInteraction(right2_OnClick);
+            right2.Transition = eButtonTransition.None;
+            OMButton left2 = new OMButton(255, 330, 120, 80);
+            left2.Image = opt3;
+            left2.FocusImage = opt2;
+            left2.Orientation = eAngle.FlipHorizontal;
+            left2.Transition = eButtonTransition.None;
+            left2.OnClick += new userInteraction(left2_OnClick);
+            OMLabel Label2 = new OMLabel(383, 260, 450, 100);
+            Label2.Font = new Font(Font.GenericSansSerif, 36F);
+            Label2.Text = "Keyboard";
+            OMTextBox Textbox = new OMTextBox(383, 345, 450, 50);
+            Textbox.Flags = textboxFlags.EllipsisEnd;
+            Textbox.Font = new Font(Font.GenericSansSerif, 21.75F);
+
             zone.addControl(Save);
             zone.addControl(Cancel);
             zone.addControl(right);
@@ -208,11 +227,19 @@ namespace OMSettings
             zone.addControl(Label);
             zone.addControl(Textbox3);
             zone.addControl(caption);
+            zone.addControl(left2);
+            zone.addControl(right2);
+            zone.addControl(Label2);
+            zone.addControl(Textbox);
             manager.loadPanel(zone);
             object o;
             theHost.getData(eGetData.GetAudioDevices, "", out o);
             if (o!=null)
                 devices=new List<string>((string[])o);
+            o = new object();
+            theHost.getData(eGetData.GetAvailableKeyboards, "", out o);
+            if (o != null)
+                keyboards = (string[])o;
             #endregion
             #region personal
             OMPanel personal = new OMPanel("personal");
@@ -319,6 +346,28 @@ namespace OMSettings
             manager.loadPanel(hardware);
             #endregion
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void right2_OnClick(OMControl sender, int screen)
+        {
+            if (keyboards == null)
+                return;
+            string current = ((OMTextBox)manager[screen, "zone"][10]).Text;
+            int pos = Array.FindIndex(keyboards,p => p.Replace("  ", " ") == current);
+            if (pos == keyboards.Length - 1)
+                return;
+            ((OMTextBox)manager[screen, "zone"][10]).Text = keyboards[pos + 1].Replace("  ", " ");
+        }
+        string[] keyboards;
+        void left2_OnClick(OMControl sender, int screen)
+        {
+            if (keyboards == null)
+                return;
+            string current = ((OMTextBox)manager[screen, "zone"][10]).Text;
+            if (current.Replace("  ", " ") == "Default Keyboard")
+                return;
+            int pos = Array.FindIndex(keyboards,p => p.Replace("  ", " ") == current);
+            ((OMTextBox)manager[screen, "zone"][10]).Text = keyboards[pos - 1].Replace("  ", " ");
         }
 
         private void loadPluginSettings()
@@ -505,7 +554,10 @@ namespace OMSettings
         {
             string scr=((OMLabel)manager[screen, "zone"][6]).Text;
             using (PluginSettings settings = new PluginSettings())
+            {
                 settings.setSetting("Screen" + scr.Substring(5) + ".SoundCard", ((OMLabel)manager[screen, "zone"][5]).Text);
+                settings.setSetting("Screen" + scr.Substring(5) + ".Keyboard", ((OMLabel)manager[screen, "zone"][10]).Text);
+            }
             theHost.execute(eFunction.goBack, screen.ToString());
             theHost.execute(eFunction.settingsChanged);
         }
@@ -535,13 +587,20 @@ namespace OMSettings
         void Button_OnClick(OMControl sender, int screen)
         {
             ((OMLabel)manager[screen, "zone"][6]).Text = "Zone " + ((OMButton)sender).Text;
-            string s;
-            using(PluginSettings settings=new PluginSettings())
-                s=settings.getSetting("Screen"+((OMButton)sender).Text+".SoundCard");
+            string s,keyboard;
+            using (PluginSettings settings = new PluginSettings())
+            {
+                s = settings.getSetting("Screen" + ((OMButton)sender).Text + ".SoundCard");
+                keyboard = settings.getSetting("Screen" + ((OMButton)sender).Text + ".Keyboard");
+            }
             if (s != "")
                 ((OMLabel)manager[screen, "zone"][5]).Text = s;
             else
                 ((OMLabel)manager[screen, "zone"][5]).Text = "Default Device";
+            if (keyboard != "")
+                ((OMLabel)manager[screen, "zone"][10]).Text = keyboard;
+            else
+                ((OMLabel)manager[screen, "zone"][10]).Text = "Default Keyboard";
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings", "MultiZone");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "zone");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"SlideLeft");

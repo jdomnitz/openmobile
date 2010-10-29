@@ -1661,6 +1661,9 @@ namespace OpenMobile
                         }
                         return;
                     }
+                case eGetData.GetAvailableKeyboards:
+                    data = InputRouter.Keyboards;
+                    return;
             }
         }
         public void getData(eGetData dataType, string name, string param, out object data)

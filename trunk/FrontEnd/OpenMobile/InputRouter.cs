@@ -20,12 +20,27 @@
 *********************************************************************************/
 using OpenMobile.Controls;
 using OpenMobile.Input;
+using OpenMobile.Data;
+using System;
 
 namespace OpenMobile
 {
     public static class InputRouter
     {
         static IInputDriver driver;
+        public static string[] Keyboards
+        {
+            get
+            {
+                if (driver==null)
+                    return new string[]{"Default Keyboard"};
+                string[] ret=new string[driver.Keyboard.Count+1];
+                ret[0] = "Default Keyboard";
+                for (int i = 0; i < driver.Keyboard.Count; i++)
+                    ret[i+1]=driver.Keyboard[i].Description;
+                return ret;
+            }
+        }
         public static void Initialize()
         {
             if (Configuration.RunningOnWindows)
@@ -37,22 +52,54 @@ namespace OpenMobile
                     dev.KeyDown += new System.EventHandler<KeyboardKeyEventArgs>(SourceDown);
                     dev.KeyUp += new System.EventHandler<KeyboardKeyEventArgs>(SourceUp);
                 }
+                mapKeyboards();
+            }
+        }
+        static int[] deviceMap;
+        private static void mapKeyboards()
+        {
+            deviceMap = new int[Core.theHost.ScreenCount];
+            using (PluginSettings s = new PluginSettings())
+            {
+                for (int i = 0; i < deviceMap.Length; i++)
+                {
+                    string val = s.getSetting("Screen" + (i+1).ToString() + ".Keyboard");
+                    for(int j=0;j<driver.Keyboard.Count;j++)
+                        if (driver.Keyboard[j].Description == val)
+                        {
+                            deviceMap[i] = j;
+                            break;
+                        }
+                    
+                }
             }
         }
         public static event userInteraction OnHighlightedChanged;
         public static void SourceUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             KeyboardDevice dev=(KeyboardDevice)sender;
+            if (dev.Instance >= 0)
+                for (int i = 0; i < deviceMap.Length; i++)
+                {
+                    e.Screen = i;
+                    if (deviceMap[i] == dev.Instance)
+                        raiseSourceUp(sender, e);
+                }
+            else
+                raiseSourceUp(sender, e);
+        }
+        private static void raiseSourceUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
+        {
             if (Core.theHost.raiseKeyPressEvent(eKeypressType.KeyUp, e) == true)
                 return; //If an app handles it first don't show the UI
 
-            if (dev.Instance == -1)
+            if (e.Screen == -1)
             {
                 for (int i = 0; i < Core.RenderingWindows.Count; i++)
                     Core.RenderingWindows[i].RenderingWindow_KeyUp(sender, e);
             }
-            else if (dev.Instance < Core.RenderingWindows.Count)
-                Core.RenderingWindows[dev.Instance].RenderingWindow_KeyUp(sender, e);
+            else if (e.Screen < Core.RenderingWindows.Count)
+                Core.RenderingWindows[e.Screen].RenderingWindow_KeyUp(sender, e);
         }
         internal static void raiseHighlightChanged(OMControl sender, int screen)
         {
@@ -60,6 +107,19 @@ namespace OpenMobile
                 OnHighlightedChanged(sender, screen);
         }
         public static void SourceDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
+        {
+            KeyboardDevice dev = (KeyboardDevice)sender;
+            if (dev.Instance >= 0)
+                for (int i = 0; i < deviceMap.Length; i++)
+                {
+                    e.Screen = i;
+                    if (deviceMap[i] == dev.Instance)
+                        raiseSourceDown(sender, e);
+                }
+            else
+                raiseSourceDown(sender, e);
+        }
+        private static void raiseSourceDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             if (Core.theHost.raiseKeyPressEvent(eKeypressType.KeyDown,e)==true)
                 return; //If an app handles it first don't show the UI

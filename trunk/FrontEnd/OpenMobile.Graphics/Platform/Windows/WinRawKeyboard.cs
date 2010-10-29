@@ -123,7 +123,11 @@ namespace OpenMobile.Platform.Windows
                     if (!String.IsNullOrEmpty(deviceClass) && deviceClass.ToLower().Equals("keyboard"))
                     {
                         KeyboardDevice kb = new KeyboardDevice();
-                        kb.Description = deviceDesc;
+                        string[] parts = deviceDesc.Split(new char[] { ';' });
+                        if (parts.Length == 2)
+                            kb.Description = parts[1]+" ("+ridl[i].Device.ToString()+")";
+                        else
+                            kb.Description = deviceDesc;
 
                         // Register the keyboard:
                         RawInputDeviceInfo info = new RawInputDeviceInfo();
