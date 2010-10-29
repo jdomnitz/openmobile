@@ -238,7 +238,7 @@ namespace OpenMobile.Graphics
             System.Drawing.Bitmap bmp = new System.Drawing.Bitmap((int)(Width * scaleWidth), (int)(Height * scaleHeight));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 g.ScaleTransform(scaleWidth, scaleHeight);
                 g.DrawString(s, new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(color.R, color.G, color.B)), new System.Drawing.RectangleF(0, 0, Width, Height), format);
             }
@@ -253,7 +253,7 @@ namespace OpenMobile.Graphics
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
                 g.ScaleTransform(scaleWidth, scaleHeight);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
             }
             return new OImage(bmp);

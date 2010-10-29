@@ -1474,7 +1474,11 @@ namespace OpenMobile
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Optional Plugin Name [string]</para>
         /// </summary>
-        GetAvailableSensors = 23
+        GetAvailableSensors = 23,
+        /// <summary>
+        /// Gets a list of available keyboards
+        /// </summary>
+        GetAvailableKeyboards=24
     }
     /// <summary>
     /// Information on Tuned Content
