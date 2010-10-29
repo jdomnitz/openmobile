@@ -118,13 +118,12 @@ namespace OpenMobile.Platform.Windows
 
             exists = true;
             
-            keyboard.Description = "Default Windows keyboard";
+            keyboard.Description = "Default Keyboard";
             keyboard.NumberOfFunctionKeys = 12;
             keyboard.NumberOfKeys = 101;
             keyboard.NumberOfLeds = 3;
 
-            //TODO: Enumerate Mice
-            mouse.Description = "Default Windows mouse";
+            mouse.Description = "Default Mouse";
             mouse.NumberOfButtons = 3;
             mouse.NumberOfWheels = 1;
 
