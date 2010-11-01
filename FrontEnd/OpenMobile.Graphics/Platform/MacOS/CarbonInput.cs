@@ -8,7 +8,7 @@ namespace OpenMobile.Platform.MacOS
 {
     using Input;
 
-    class CarbonInput : IInputDriver
+    class CarbonInput:IInputDriver
     {
         List<KeyboardDevice> dummy_keyboard_list = new List<KeyboardDevice>(1);
         List<MouseDevice> dummy_mice_list = new List<MouseDevice>(1);
@@ -20,14 +20,6 @@ namespace OpenMobile.Platform.MacOS
             dummy_keyboard_list.Add(new KeyboardDevice());
             dummy_joystick_list.Add(new JoystickDevice<object>(0, 0, 0));
         }
-
-        #region IInputDriver Members
-
-        public void Poll()
-        {
-        }
-
-        #endregion
 
         #region IKeyboardDriver Members
 

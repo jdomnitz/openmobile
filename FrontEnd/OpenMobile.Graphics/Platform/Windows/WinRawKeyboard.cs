@@ -123,12 +123,6 @@ namespace OpenMobile.Platform.Windows
                     if (!String.IsNullOrEmpty(deviceClass) && deviceClass.ToLower().Equals("keyboard"))
                     {
                         KeyboardDevice kb = new KeyboardDevice();
-                        string[] parts = deviceDesc.Split(new char[] { ';' });
-                        if (parts.Length == 2)
-                            kb.Description = parts[1]+" ("+ridl[i].Device.ToString()+")";
-                        else
-                            kb.Description = deviceDesc;
-
                         // Register the keyboard:
                         RawInputDeviceInfo info = new RawInputDeviceInfo();
                         int devInfoSize = API.RawInputDeviceInfoSize;
@@ -138,6 +132,11 @@ namespace OpenMobile.Platform.Windows
                         kb.NumberOfLeds = info.Device.Keyboard.NumberOfIndicators;
                         kb.NumberOfFunctionKeys = info.Device.Keyboard.NumberOfFunctionKeys;
                         kb.NumberOfKeys = info.Device.Keyboard.NumberOfKeysTotal;
+                        string[] parts = deviceDesc.Split(new char[] { ';' });
+                        if (parts.Length == 2)
+                            kb.Description = parts[1] + " (" + ridl[i].Device.ToString() + ")";
+                        else
+                            kb.Description = deviceDesc;
                         //kb.DeviceID = (info.Device.Keyboard.Type << 32) + info.Device.Keyboard.SubType;
                         kb.DeviceID = ridl[i].Device;
 

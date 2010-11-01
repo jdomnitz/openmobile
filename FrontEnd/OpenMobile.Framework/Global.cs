@@ -1478,7 +1478,11 @@ namespace OpenMobile
         /// <summary>
         /// Gets a list of available keyboards
         /// </summary>
-        GetAvailableKeyboards=24
+        GetAvailableKeyboards=24,
+        /// <summary>
+        /// Gets a list of available mice
+        /// </summary>
+        GetAvailableMice = 25
     }
     /// <summary>
     /// Information on Tuned Content

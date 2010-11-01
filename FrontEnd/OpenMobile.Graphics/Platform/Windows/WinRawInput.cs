@@ -40,7 +40,7 @@ using System.Threading;
 namespace OpenMobile.Platform.Windows
 {
     // Not complete.
-    public sealed class WinRawInput : IInputDriver
+    public sealed class WinRawInput:IInputDriver
     {
         // Input event data.
         static RawInput data = new RawInput();
@@ -48,7 +48,7 @@ namespace OpenMobile.Platform.Windows
         static readonly Thread InputThread = new Thread(ProcessEvents);
 
         static WinRawKeyboard keyboardDriver;
-        //static WinRawMouse mouseDriver;
+        static WinRawMouse mouseDriver;
         //static readonly WinMMJoystick joystickDriver = new WinMMJoystick();
 
         static NativeWindow Native;
@@ -63,7 +63,7 @@ namespace OpenMobile.Platform.Windows
             InputThread.IsBackground = true;
             InputThread.Start();
 
-            while(keyboardDriver == null)//while (mouseDriver == null || keyboardDriver == null)
+            while (mouseDriver == null || keyboardDriver == null)
                 Thread.Sleep(0);
         }
 
@@ -108,7 +108,7 @@ namespace OpenMobile.Platform.Windows
 
             Debug.Print("Input window attached to parent {0}", Parent);
             keyboardDriver = new WinRawKeyboard(Parent.WindowHandle);
-           // mouseDriver = new WinRawMouse(Parent.WindowHandle);
+            mouseDriver = new WinRawMouse(Parent.WindowHandle);
 
             Debug.Unindent();
             return Native;
@@ -140,10 +140,10 @@ namespace OpenMobile.Platform.Windows
                                     return IntPtr.Zero;
                                 break;
 
-                            //case RawInputDeviceType.MOUSE:
-                            //    if (mouseDriver.ProcessMouseEvent(data))
-                            //        return IntPtr.Zero;
-                            //    break;
+                            case RawInputDeviceType.MOUSE:
+                                if (mouseDriver.ProcessMouseEvent(data))
+                                    return IntPtr.Zero;
+                                break;
 
                             case RawInputDeviceType.HID:
                                 break;
@@ -184,90 +184,11 @@ namespace OpenMobile.Platform.Windows
 
         #region IInputDriver Members
 
-        #region IInputDriver Members
-
-        public void Poll()
-        {
-            return;
-#if false
-            // We will do a buffered read for all input devices and route the RawInput structures
-            // to the correct 'ProcessData' handlers. First, we need to find out the size of the
-            // buffer to allocate for the structures. Then we allocate the buffer and read the
-            // structures, calling the correct handler for each one. Last, we free the allocated
-            // buffer.
-            int size = 0;
-            Functions.GetRawInputBuffer(IntPtr.Zero, ref size, API.RawInputHeaderSize);
-            size *= 256;
-            IntPtr rin_data = Marshal.AllocHGlobal(size);
-
-            while (true)
-            {
-                // Iterate reading all available RawInput structures and routing them to their respective
-                // handlers.
-                int num = Functions.GetRawInputBuffer(rin_data, ref size, API.RawInputHeaderSize);
-                if (num == 0)
-                    break;
-                else if (num < 0)
-                {
-                    /*int error = Marshal.GetLastWin32Error();
-                    if (error == 122)
-                    {
-                        // Enlarge the buffer, it was too small.
-                        AllocateBuffer();
-                    }
-                    else
-                    {
-                        throw new ApplicationException(String.Format(
-                            "GetRawInputBuffer failed with code: {0}", error));
-                    }*/
-                    Debug.Print("GetRawInputBuffer failed with code: {0}", Marshal.GetLastWin32Error());
-                    //AllocateBuffer();
-                    break;
-                }
-
-                RawInput[] rin_structs = new RawInput[num];
-                IntPtr next_rin = rin_data;
-                for (int i = 0; i < num; i++)
-                {
-                    rin_structs[i] = (RawInput)Marshal.PtrToStructure(next_rin, typeof(RawInput));
-
-                    switch (rin_structs[i].Header.Type)
-                    {
-                        case RawInputDeviceType.KEYBOARD:
-                            keyboardDriver.ProcessKeyboardEvent(rin_structs[i]);
-                            break;
-
-                        case RawInputDeviceType.MOUSE:
-                            mouseDriver.ProcessEvent(rin_structs[i]);
-                            break;
-                    }
-
-                    next_rin = Functions.NextRawInputStructure(next_rin);
-                }
-                Functions.DefRawInputProc(rin_structs, num, (uint)API.RawInputHeaderSize);
-            }
-
-            Marshal.FreeHGlobal(rin_data);
-#endif
-        }
-
-        #endregion
-
         #region IKeyboardDriver Members
 
         public IList<KeyboardDevice> Keyboard
         {
             get { return KeyboardDriver.Keyboard; }
-        }
-
-        public KeyboardState GetState()
-        {
-            throw new NotImplementedException();
-        }
-
-        public KeyboardState GetState(int index)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion
@@ -278,16 +199,6 @@ namespace OpenMobile.Platform.Windows
         {
             get { return MouseDriver.Mouse; }
         }
-
-        //MouseState IMouseDriver.GetState()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //MouseState IMouseDriver.GetState(int index)
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         #endregion
 
@@ -306,7 +217,7 @@ namespace OpenMobile.Platform.Windows
 
         public IMouseDriver MouseDriver
         {
-            get { return null; }//return mouseDriver; }
+            get { return mouseDriver; }
         }
 
         public IKeyboardDriver KeyboardDriver
@@ -338,7 +249,7 @@ namespace OpenMobile.Platform.Windows
                 if (manual)
                 {
                     keyboardDriver.Dispose();
-                    //mouseDriver.Dispose();
+                    mouseDriver.Dispose();
                 }
 
                 disposed = true;

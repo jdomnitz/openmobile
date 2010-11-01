@@ -20,7 +20,7 @@ namespace OpenMobile.Platform.X11
     /// Drives the InputDriver on X11.
     /// This class supports OpenMobile, and is not intended for users of OpenMobile.
     /// </summary>
-    internal sealed class X11Input : IInputDriver
+    internal sealed class X11Input:IInputDriver
     {
         X11Joystick joystick_driver = new X11Joystick();
         //X11WindowInfo window;
@@ -56,7 +56,7 @@ namespace OpenMobile.Platform.X11
             X11WindowInfo window = (X11WindowInfo)attach;
 
             // Init mouse
-            mouse.Description = "Default X11 mouse";
+            mouse.Description = "Default Mouse";
             mouse.DeviceID = IntPtr.Zero;
             mouse.NumberOfButtons = 5;
             mouse.NumberOfWheels = 1;
@@ -77,7 +77,7 @@ namespace OpenMobile.Platform.X11
                 API.Free(keysym_ptr);
     
                 KeyboardDevice kb = new KeyboardDevice();
-                keyboard.Description = "Default X11 keyboard";
+                keyboard.Description = "Default Keyboard";
                 keyboard.NumberOfKeys = lastKeyCode - firstKeyCode + 1;
                 keyboard.DeviceID = IntPtr.Zero;
                 dummy_keyboard_list.Add(keyboard);
@@ -236,18 +236,6 @@ namespace OpenMobile.Platform.X11
         public IList<JoystickDevice> Joysticks
         {
             get { return joystick_driver.Joysticks; }
-        }
-
-        #endregion
-
-        #region public void Poll()
-
-        /// <summary>
-        /// Polls and updates state of all keyboard, mouse and joystick devices.
-        /// </summary>
-        public void Poll()
-        {
-            joystick_driver.Poll();
         }
 
         #endregion

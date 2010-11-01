@@ -62,8 +62,10 @@
     <Compile Include="GameWindow.cs" />
     <Compile Include="GameWindowFlags.cs" />
     <Compile Include="Graphics.cs" />
+    <Compile Include="Input\IInputDriver.cs" />
     <Compile Include="Platform\Windows\WinRawInput.cs" />
     <Compile Include="Platform\Windows\WinRawKeyboard.cs" />
+    <Compile Include="Platform\Windows\WinRawMouse.cs" />
     <Compile Include="V1Graphics.cs" />
     <Compile Include="Graphics\Color4.cs" />
     <Compile Include="Graphics\ColorFormat.cs" />
@@ -98,7 +100,6 @@
     <Compile Include="Input\GamePad.cs" />
     <Compile Include="Input\GamePadState.cs" />
     <Compile Include="Input\IInputDevice.cs" />
-    <Compile Include="Input\IInputDriver.cs" />
     <Compile Include="Input\IJoystickDriver.cs" />
     <Compile Include="Input\IKeyboardDriver.cs" />
     <Compile Include="Input\IMouseDriver.cs" />
