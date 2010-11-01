@@ -424,6 +424,8 @@ namespace OpenMobile
         {
             get
             {
+                if (implementation == null)
+                    return WindowState.Normal;
                 return implementation.WindowState;
             }
             set

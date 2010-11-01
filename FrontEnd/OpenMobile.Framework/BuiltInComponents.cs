@@ -76,16 +76,13 @@ namespace OpenMobile
         {
             theHost = host;
             Settings gl = new Settings("General Settings");
-            Setting cursor=new Setting(SettingTypes.MultiChoice,"UI.HideCursor","","Hide Mouse Cursor",Setting.BooleanList,Setting.BooleanList);
             Setting graphics=new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", "", "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
             using (PluginSettings settings = new PluginSettings())
             {
-                cursor.Value= settings.getSetting("UI.HideCursor");
                 graphics.Value=settings.getSetting("UI.MinGraphics");
                 volume.Value = settings.getSetting("UI.VolumeChangesVisible");
             }
-            gl.Add(cursor);
             gl.Add(graphics);
             gl.Add(volume);
             gl.OnSettingChanged+=new SettingChanged(SettingsChanged);
@@ -98,10 +95,6 @@ namespace OpenMobile
             {
                 switch (setting.Name)
                 {
-                    case "UI.HideCursor":
-                        if (setting.Value != s.getSetting("UI.HideCursor"))
-                            theHost.sendMessage("RenderingWindow", "OMSettings", "ToggleCursor");
-                        break;
                     case "UI.MinGraphics":
                         if (setting.Value == "True")
                             theHost.GraphicsLevel = eGraphicsLevel.Minimal;

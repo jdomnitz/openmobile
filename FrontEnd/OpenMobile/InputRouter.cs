@@ -84,12 +84,16 @@ namespace OpenMobile
                 for (int i = 0; i < deviceMapM.Length; i++)
                 {
                     if (deviceMapM[i] == (int)sender)
+                    {
+                        Core.RenderingWindows[i].defaultMouse = (deviceMapM[i]==-1);
                         Core.RenderingWindows[i].RenderingWindow_MouseMove(i, e);
+                    }
                 }
             }
             else if ((int)sender < 0)
             {
                 int i = ((int)sender + 1) * -1;
+                Core.RenderingWindows[i].defaultMouse = (deviceMapM[i] == -1);
                 Core.RenderingWindows[i].RenderingWindow_MouseMove(i, e);
             }
         }
@@ -154,13 +158,17 @@ namespace OpenMobile
                 for (int i = 0; i < deviceMapK.Length; i++)
                 {
                     string val = s.getSetting("Screen" + (i+1).ToString() + ".Keyboard");
-                    for(int j=0;j<driver.Keyboard.Count;j++)
-                        if (driver.Keyboard[j].Description == val)
-                        {
-                            deviceMapK[i] = j;
-                            break;
-                        }
-                    
+                    if (val == "Default Keyboard")
+                        deviceMapK[i] = -1;
+                    else
+                    {
+                        for (int j = 0; j < driver.Keyboard.Count; j++)
+                            if (driver.Keyboard[j].Description == val)
+                            {
+                                deviceMapK[i] = j;
+                                break;
+                            }
+                    }
                 }
             }
         }
@@ -172,14 +180,20 @@ namespace OpenMobile
                 for (int i = 0; i < deviceMapM.Length; i++)
                 {
                     string val = s.getSetting("Screen" + (i + 1).ToString() + ".Mouse");
-                    for (int j = 0; j < driver.Mouse.Count; j++)
-                        if (driver.Mouse[j].Description == val)
-                        {
-                            deviceMapM[i] = j;
-                            driver.Mouse[j].SetBounds(DisplayDevice.AvailableDisplays[i].Width, DisplayDevice.AvailableDisplays[i].Height);
-                            break;
-                        }
-
+                    if (val == "Default Mouse")
+                    {
+                        deviceMapM[i] = -1;
+                    }
+                    else
+                    {
+                        for (int j = 0; j < driver.Mouse.Count; j++)
+                            if (driver.Mouse[j].Description == val)
+                            {
+                                deviceMapM[i] = j;
+                                driver.Mouse[j].SetBounds(DisplayDevice.AvailableDisplays[i].Width, DisplayDevice.AvailableDisplays[i].Height);
+                                break;
+                            }
+                    }
                 }
             }
         }
@@ -187,15 +201,12 @@ namespace OpenMobile
         public static void SourceUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             KeyboardDevice dev=(KeyboardDevice)sender;
-            if (dev.Instance >= 0)
-                for (int i = 0; i < deviceMapK.Length; i++)
-                {
-                    e.Screen = i;
-                    if (deviceMapK[i] == dev.Instance)
-                        raiseSourceUp(sender, e);
-                }
-            else
-                raiseSourceUp(sender, e);
+            for (int i = 0; i < deviceMapK.Length; i++)
+            {
+                e.Screen = i;
+                if (deviceMapK[i] == dev.Instance)
+                    raiseSourceUp(sender, e);
+            }
         }
         private static void raiseSourceUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
@@ -218,15 +229,12 @@ namespace OpenMobile
         public static void SourceDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             KeyboardDevice dev = (KeyboardDevice)sender;
-            if (dev.Instance >= 0)
-                for (int i = 0; i < deviceMapK.Length; i++)
-                {
-                    e.Screen = i;
-                    if (deviceMapK[i] == dev.Instance)
-                        raiseSourceDown(sender, e);
-                }
-            else
-                raiseSourceDown(sender, e);
+            for (int i = 0; i < deviceMapK.Length; i++)
+            {
+                e.Screen = i;
+                if (deviceMapK[i] == dev.Instance)
+                    raiseSourceDown(sender, e);
+            }
         }
         private static void raiseSourceDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
