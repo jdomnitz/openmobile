@@ -1349,9 +1349,6 @@ namespace OpenMobile
                 if (message == "Identify")
                     for (int i = 0; i < screenCount; i++)
                         Core.RenderingWindows[i].paintIdentity();
-                else if (message == "ToggleCursor")
-                    for (int i = 0; i < screenCount; i++)
-                        Core.RenderingWindows[i].hideCursor();
 				else if(message=="MakeCurrent")
 					Core.RenderingWindows[0].MakeCurrent();
 				else if(message=="KillCurrent")

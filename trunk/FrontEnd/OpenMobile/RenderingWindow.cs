@@ -112,7 +112,7 @@ namespace OpenMobile
         }
         public void InitializeRendering()
         {
-            if (this.WindowState == WindowState.Fullscreen)
+            if ((this.WindowState == WindowState.Fullscreen)&&(screen==0))
                 Mouse.Location = this.Location;
             if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
                 this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[screen].Bounds.Location, this.Size);
@@ -120,7 +120,6 @@ namespace OpenMobile
             this.Mouse.Instance = (screen * -1) - 1;
             this.Mouse.SetBounds(DisplayDevice.AvailableDisplays[screen].Width, DisplayDevice.AvailableDisplays[screen].Height);
             InitializeComponent();
-            hide += new voiddel(hideCursor);
             redraw += new voiddel(invokePaint);
             for (int i = 0; i < this.Keyboard.Count;i++ )
                 this.Keyboard[i].KeyRepeat = true;
@@ -179,23 +178,6 @@ namespace OpenMobile
             }
         }
         // End of code added by Borte
-
-        public void hideCursor()
-        {
-            if (this.InvokeRequired == true)
-                this.Invoke(hide);
-            else
-                if (hidden)
-                {
-                    Mouse.ShowCursor(WindowInfo);
-                    hidden = false;
-                }
-                else
-                {
-                    Mouse.HideCursor(WindowInfo);
-                    hidden = true;
-                }
-        }
 
         #region ControlManagement
         public void transitionInPanel(OMPanel newP)
@@ -506,7 +488,7 @@ namespace OpenMobile
             bool done = false; //We found something that was selected
             if (rParam.currentMode == eModeType.Scrolling)
             {
-                if (this.Mouse[MouseButton.Left])
+                if (e.Buttons==MouseButton.Left)
                 {
                     if (highlighted != null)
                     {
@@ -527,7 +509,7 @@ namespace OpenMobile
             }
             else
             {
-                if ((this.Mouse[MouseButton.Left]) && (!ThrowStarted))
+                if ((e.Buttons==MouseButton.Left) && (!ThrowStarted))
                 {
                     if (currentGesture == null)
                     {
@@ -818,9 +800,13 @@ namespace OpenMobile
         {
             if (this.WindowState == WindowState.Maximized)
                 this.WindowState = WindowState.Fullscreen;
+            if ((this.WindowState == WindowState.Fullscreen) && (!defaultMouse))
+                Mouse.HideCursor(this.WindowInfo);
+            else
+                Mouse.ShowCursor(this.WindowInfo);
             base.OnWindowStateChanged(e);
         }
-
+        public bool defaultMouse = false;
         private void RenderingWindow_Resize(object sender, EventArgs e)
         {
             heightScale = (this.ClientRectangle.Height / 600F);
