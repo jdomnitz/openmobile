@@ -41,7 +41,7 @@ namespace OpenMobile.Platform.Windows
     /// Drives GameWindow on Windows.
     /// This class supports OpenTK, and is not intended for use by OpenTK programs.
     /// </summary>
-    internal sealed class WinGLNative : INativeWindow, IInputDriver
+    internal sealed class WinGLNative : INativeWindow,IInputDriver
     {
         #region Fields
 
@@ -1085,15 +1085,6 @@ namespace OpenMobile.Platform.Windows
         }
 
         #endregion
-
-        #endregion
-
-        #region IInputDriver Members
-
-        public void Poll()
-        {
-            joystick_driver.Poll();
-        }
 
         #endregion
 

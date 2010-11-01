@@ -41,6 +41,19 @@ namespace OpenMobile
                 return ret;
             }
         }
+        public static string[] Mice
+        {
+            get
+            {
+                if (driver == null)
+                    return new string[] { "Default Mouse" };
+                string[] ret = new string[driver.Mouse.Count + 1];
+                ret[0] = "Default Mouse";
+                for (int i = 0; i < driver.Mouse.Count; i++)
+                    ret[i + 1] = driver.Mouse[i].Description;
+                return ret;
+            }
+        }
         public static void Initialize()
         {
             if (Configuration.RunningOnWindows)

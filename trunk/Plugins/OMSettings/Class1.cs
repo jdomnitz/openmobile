@@ -175,13 +175,13 @@ namespace OMSettings
             Cancel.Name = "Media.Cancel";
             Cancel.Transition = eButtonTransition.None;
             Cancel.OnClick += new userInteraction(Cancel_OnClick);
-            OMButton right = new OMButton(842, 230, 120, 80);
+            OMButton right = new OMButton(842, 215, 120, 80);
             right.Image = opt3;
             right.FocusImage = opt2;
             right.Name = "Button1";
             right.OnClick += new userInteraction(right_OnClick);
             right.Transition = eButtonTransition.None;
-            OMButton left = new OMButton(255, 230, 120, 80);
+            OMButton left = new OMButton(255, 215, 120, 80);
             left.Image = opt3;
             left.FocusImage = opt2;
             left.Orientation = eAngle.FlipHorizontal;
@@ -192,7 +192,7 @@ namespace OMSettings
             Label.Font = new Font(Font.GenericSansSerif, 36F);
             Label.Text = "Audio Zone";
             Label.Name = "Label";
-            OMTextBox Textbox3 = new OMTextBox(383,245,450,50);
+            OMTextBox Textbox3 = new OMTextBox(383,230,450,50);
             Textbox3.Flags = textboxFlags.EllipsisEnd;
             Textbox3.Font = new Font(Font.GenericSansSerif, 21.75F);
             Textbox3.Name = "Textbox3";
@@ -202,12 +202,12 @@ namespace OMSettings
             caption.Format = eTextFormat.Glow;
             caption.Name = "caption";
 
-            OMButton right2 = new OMButton(842, 330, 120, 80);
+            OMButton right2 = new OMButton(842, 315, 120, 80);
             right2.Image = opt3;
             right2.FocusImage = opt2;
             right2.OnClick += new userInteraction(right2_OnClick);
             right2.Transition = eButtonTransition.None;
-            OMButton left2 = new OMButton(255, 330, 120, 80);
+            OMButton left2 = new OMButton(255, 315, 120, 80);
             left2.Image = opt3;
             left2.FocusImage = opt2;
             left2.Orientation = eAngle.FlipHorizontal;
@@ -216,9 +216,27 @@ namespace OMSettings
             OMLabel Label2 = new OMLabel(383, 260, 450, 100);
             Label2.Font = new Font(Font.GenericSansSerif, 36F);
             Label2.Text = "Keyboard";
-            OMTextBox Textbox = new OMTextBox(383, 345, 450, 50);
+            OMTextBox Textbox = new OMTextBox(383, 330, 450, 50);
             Textbox.Flags = textboxFlags.EllipsisEnd;
             Textbox.Font = new Font(Font.GenericSansSerif, 21.75F);
+
+            OMButton right3 = new OMButton(842, 415, 120, 80);
+            right3.Image = opt3;
+            right3.FocusImage = opt2;
+            right3.OnClick += new userInteraction(right3_OnClick);
+            right3.Transition = eButtonTransition.None;
+            OMButton left3 = new OMButton(255, 415, 120, 80);
+            left3.Image = opt3;
+            left3.FocusImage = opt2;
+            left3.Orientation = eAngle.FlipHorizontal;
+            left3.Transition = eButtonTransition.None;
+            left3.OnClick += new userInteraction(left3_OnClick);
+            OMLabel Label3 = new OMLabel(383, 360, 450, 100);
+            Label3.Font = new Font(Font.GenericSansSerif, 36F);
+            Label3.Text = "Mouse";
+            OMTextBox Textbox4 = new OMTextBox(383, 430, 450, 50);
+            Textbox4.Flags = textboxFlags.EllipsisEnd;
+            Textbox4.Font = new Font(Font.GenericSansSerif, 21.75F);
 
             zone.addControl(Save);
             zone.addControl(Cancel);
@@ -231,6 +249,10 @@ namespace OMSettings
             zone.addControl(right2);
             zone.addControl(Label2);
             zone.addControl(Textbox);
+            zone.addControl(left3);
+            zone.addControl(right3);
+            zone.addControl(Label3);
+            zone.addControl(Textbox4);
             manager.loadPanel(zone);
             object o;
             theHost.getData(eGetData.GetAudioDevices, "", out o);
@@ -240,6 +262,10 @@ namespace OMSettings
             theHost.getData(eGetData.GetAvailableKeyboards, "", out o);
             if (o != null)
                 keyboards = (string[])o;
+            o = new object();
+            theHost.getData(eGetData.GetAvailableMice, "", out o);
+            if (o != null)
+                mice = (string[])o;
             #endregion
             #region personal
             OMPanel personal = new OMPanel("personal");
@@ -348,26 +374,49 @@ namespace OMSettings
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
+        void right3_OnClick(OMControl sender, int screen)
+        {
+            if (mice == null)
+                return;
+            string current = ((OMTextBox)manager[screen, "zone"][14]).Text;
+            int pos = Array.FindIndex(mice, p => p == current);
+            if (pos == mice.Length - 1)
+                return;
+            ((OMTextBox)manager[screen, "zone"][14]).Text = mice[pos + 1];
+        }
+
+        void left3_OnClick(OMControl sender, int screen)
+        {
+            if (mice == null)
+                return;
+            string current = ((OMTextBox)manager[screen, "zone"][14]).Text;
+            if (current == "Default Mouse")
+                return;
+            int pos = Array.FindIndex(mice, p => p == current);
+            ((OMTextBox)manager[screen, "zone"][14]).Text = mice[pos - 1];
+        }
+
         void right2_OnClick(OMControl sender, int screen)
         {
             if (keyboards == null)
                 return;
             string current = ((OMTextBox)manager[screen, "zone"][10]).Text;
-            int pos = Array.FindIndex(keyboards,p => p.Replace("  ", " ") == current);
+            int pos = Array.FindIndex(keyboards,p => p == current);
             if (pos == keyboards.Length - 1)
                 return;
-            ((OMTextBox)manager[screen, "zone"][10]).Text = keyboards[pos + 1].Replace("  ", " ");
+            ((OMTextBox)manager[screen, "zone"][10]).Text = keyboards[pos + 1];
         }
         string[] keyboards;
+        string[] mice;
         void left2_OnClick(OMControl sender, int screen)
         {
             if (keyboards == null)
                 return;
             string current = ((OMTextBox)manager[screen, "zone"][10]).Text;
-            if (current.Replace("  ", " ") == "Default Keyboard")
+            if (current == "Default Keyboard")
                 return;
-            int pos = Array.FindIndex(keyboards,p => p.Replace("  ", " ") == current);
-            ((OMTextBox)manager[screen, "zone"][10]).Text = keyboards[pos - 1].Replace("  ", " ");
+            int pos = Array.FindIndex(keyboards,p => p == current);
+            ((OMTextBox)manager[screen, "zone"][10]).Text = keyboards[pos - 1];
         }
 
         private void loadPluginSettings()
@@ -557,6 +606,7 @@ namespace OMSettings
             {
                 settings.setSetting("Screen" + scr.Substring(5) + ".SoundCard", ((OMLabel)manager[screen, "zone"][5]).Text);
                 settings.setSetting("Screen" + scr.Substring(5) + ".Keyboard", ((OMLabel)manager[screen, "zone"][10]).Text);
+                settings.setSetting("Screen" + scr.Substring(5) + ".Mouse", ((OMLabel)manager[screen, "zone"][14]).Text);
             }
             theHost.execute(eFunction.goBack, screen.ToString());
             theHost.execute(eFunction.settingsChanged);
@@ -587,11 +637,12 @@ namespace OMSettings
         void Button_OnClick(OMControl sender, int screen)
         {
             ((OMLabel)manager[screen, "zone"][6]).Text = "Zone " + ((OMButton)sender).Text;
-            string s,keyboard;
+            string s,keyboard,mouse;
             using (PluginSettings settings = new PluginSettings())
             {
                 s = settings.getSetting("Screen" + ((OMButton)sender).Text + ".SoundCard");
                 keyboard = settings.getSetting("Screen" + ((OMButton)sender).Text + ".Keyboard");
+                mouse = settings.getSetting("Screen" + ((OMButton)sender).Text + ".Mouse");
             }
             if (s != "")
                 ((OMLabel)manager[screen, "zone"][5]).Text = s;
@@ -601,6 +652,10 @@ namespace OMSettings
                 ((OMLabel)manager[screen, "zone"][10]).Text = keyboard;
             else
                 ((OMLabel)manager[screen, "zone"][10]).Text = "Default Keyboard";
+            if (mouse != "")
+                ((OMLabel)manager[screen, "zone"][14]).Text = keyboard;
+            else
+                ((OMLabel)manager[screen, "zone"][14]).Text = "Default Mouse";
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings", "MultiZone");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "zone");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"SlideLeft");
