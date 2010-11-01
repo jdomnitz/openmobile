@@ -653,7 +653,7 @@ namespace OMSettings
             else
                 ((OMLabel)manager[screen, "zone"][10]).Text = "Default Keyboard";
             if (mouse != "")
-                ((OMLabel)manager[screen, "zone"][14]).Text = keyboard;
+                ((OMLabel)manager[screen, "zone"][14]).Text = mouse;
             else
                 ((OMLabel)manager[screen, "zone"][14]).Text = "Default Mouse";
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings", "MultiZone");

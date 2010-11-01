@@ -146,7 +146,6 @@ namespace OpenMobile.Platform.Windows
                         kb.Instance = keyboards_old.Count;
                         keyboards_old.Add(kb);
                         //}
-
                         //keyboards.Add(new KeyboardState());
                         rawids.Add(new ContextHandle(ridl[i].Device), keyboards_old.Count - 1);
                     }

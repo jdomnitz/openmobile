@@ -66,24 +66,120 @@ namespace OpenMobile
                     dev.KeyDown += new System.EventHandler<KeyboardKeyEventArgs>(SourceDown);
                     dev.KeyUp += new System.EventHandler<KeyboardKeyEventArgs>(SourceUp);
                 }
+                mapMice();
+                foreach (MouseDevice dev in driver.Mouse)
+                {
+                    dev.ButtonDown += new EventHandler<MouseButtonEventArgs>(dev_ButtonDown);
+                    dev.ButtonUp += new EventHandler<MouseButtonEventArgs>(dev_ButtonUp);
+                    dev.MouseClick += new EventHandler<MouseButtonEventArgs>(dev_MouseClick);
+                    dev.Move += new EventHandler<MouseMoveEventArgs>(dev_Move);
+                }
             }
         }
-        static int[] deviceMap;
+
+        internal static void dev_Move(object sender, MouseMoveEventArgs e)
+        {
+            if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen)
+            {
+                for (int i = 0; i < deviceMapM.Length; i++)
+                {
+                    if (deviceMapM[i] == (int)sender)
+                        Core.RenderingWindows[i].RenderingWindow_MouseMove(i, e);
+                }
+            }
+            else if ((int)sender < 0)
+            {
+                int i = ((int)sender + 1) * -1;
+                Core.RenderingWindows[i].RenderingWindow_MouseMove(i, e);
+            }
+        }
+
+        internal static void dev_MouseClick(object sender, MouseButtonEventArgs e)
+        {
+            if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen)
+            {
+                for (int i = 0; i < deviceMapM.Length; i++)
+                {
+                    if (deviceMapM[i] == (int)sender)
+                        Core.RenderingWindows[i].RenderingWindow_MouseClick(i, e);
+                }
+            }
+            else if ((int)sender < 0)
+            {
+                int i = ((int)sender + 1) * -1;
+                Core.RenderingWindows[i].RenderingWindow_MouseClick(i, e);
+            }
+        }
+
+        internal static void dev_ButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen)
+            {
+                for (int i = 0; i < deviceMapM.Length; i++)
+                {
+                    if (deviceMapM[i] == (int)sender)
+                        Core.RenderingWindows[i].RenderingWindow_MouseUp(i, e);
+                }
+            }
+            else if ((int)sender < 0)
+            {
+                int i = ((int)sender + 1) * -1;
+                Core.RenderingWindows[i].RenderingWindow_MouseUp(i, e);
+            }
+        }
+
+        internal static void dev_ButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen)
+            {
+                for (int i = 0; i < deviceMapM.Length; i++)
+                {
+                    if (deviceMapM[i] == (int)sender)
+                        Core.RenderingWindows[i].RenderingWindow_MouseDown(i, e);
+                }
+            }
+            else if ((int)sender < 0)
+            {
+                int i = ((int)sender + 1) * -1;
+                Core.RenderingWindows[i].RenderingWindow_MouseDown(i, e);
+            }
+        }
+        static int[] deviceMapK;
+        static int[] deviceMapM;
         private static void mapKeyboards()
         {
-            deviceMap = new int[Core.theHost.ScreenCount];
+            deviceMapK = new int[Core.theHost.ScreenCount];
             using (PluginSettings s = new PluginSettings())
             {
-                for (int i = 0; i < deviceMap.Length; i++)
+                for (int i = 0; i < deviceMapK.Length; i++)
                 {
                     string val = s.getSetting("Screen" + (i+1).ToString() + ".Keyboard");
                     for(int j=0;j<driver.Keyboard.Count;j++)
                         if (driver.Keyboard[j].Description == val)
                         {
-                            deviceMap[i] = j;
+                            deviceMapK[i] = j;
                             break;
                         }
                     
+                }
+            }
+        }
+        private static void mapMice()
+        {
+            deviceMapM = new int[Core.theHost.ScreenCount];
+            using (PluginSettings s = new PluginSettings())
+            {
+                for (int i = 0; i < deviceMapM.Length; i++)
+                {
+                    string val = s.getSetting("Screen" + (i + 1).ToString() + ".Mouse");
+                    for (int j = 0; j < driver.Mouse.Count; j++)
+                        if (driver.Mouse[j].Description == val)
+                        {
+                            deviceMapM[i] = j;
+                            driver.Mouse[j].SetBounds(DisplayDevice.AvailableDisplays[i].Width, DisplayDevice.AvailableDisplays[i].Height);
+                            break;
+                        }
+
                 }
             }
         }
@@ -92,10 +188,10 @@ namespace OpenMobile
         {
             KeyboardDevice dev=(KeyboardDevice)sender;
             if (dev.Instance >= 0)
-                for (int i = 0; i < deviceMap.Length; i++)
+                for (int i = 0; i < deviceMapK.Length; i++)
                 {
                     e.Screen = i;
-                    if (deviceMap[i] == dev.Instance)
+                    if (deviceMapK[i] == dev.Instance)
                         raiseSourceUp(sender, e);
                 }
             else
@@ -123,10 +219,10 @@ namespace OpenMobile
         {
             KeyboardDevice dev = (KeyboardDevice)sender;
             if (dev.Instance >= 0)
-                for (int i = 0; i < deviceMap.Length; i++)
+                for (int i = 0; i < deviceMapK.Length; i++)
                 {
                     e.Screen = i;
-                    if (deviceMap[i] == dev.Instance)
+                    if (deviceMapK[i] == dev.Instance)
                         raiseSourceDown(sender, e);
                 }
             else
