@@ -41,7 +41,7 @@ namespace OpenMobile.Input
     public sealed class MouseDevice : IInputDevice
     {
         #region --- Fields ---
-
+        int instance=-1;
         string description;
         IntPtr id;
         int numButtons, numWheels;
@@ -174,6 +174,11 @@ namespace OpenMobile.Input
         }
 
         #endregion
+        public int Instance
+        {
+            get { return instance; }
+            set { instance = value; }
+        }
         public Point Location
         {
             get { return pos; }
@@ -214,7 +219,7 @@ namespace OpenMobile.Input
             {
                 bool previous_state = button_state[(int)button];
                 if (!value && previous_state)
-                    MouseClick(-1, button_args);
+                    MouseClick(instance, button_args);
                 button_state[(int)button] = value;
 
                 button_args.X = pos.X;
@@ -222,13 +227,33 @@ namespace OpenMobile.Input
                 button_args.Button = button;
                 button_args.IsPressed = value;
                 if (value && !previous_state)
-                    ButtonDown(-1, button_args);
+                    ButtonDown(instance, button_args);
                 else if (!value && previous_state)
-                    ButtonUp(-1, button_args);
+                    ButtonUp(instance, button_args);
             }
         }
 
         #endregion
+        int height, width;
+        internal int Width
+        {
+            get
+            {
+                return width;
+            }
+        }
+        internal int Height
+        {
+            get
+            {
+                return height;
+            }
+        }
+        public void SetBounds(int width, int height)
+        {
+            this.width = width;
+            this.height = height;
+        }
         public void ShowCursor(IWindowInfo info)
         {
             if (Configuration.RunningOnWindows)
@@ -295,12 +320,20 @@ namespace OpenMobile.Input
             set
             {
                 pos = value;
+                if (pos.X < 0)
+                    pos.X = 0;
+                if (pos.Y < 0)
+                    pos.Y = 0;
+                if (pos.X > width)
+                    pos.X = width;
+                if (pos.Y > height)
+                    pos.Y = height;
                 move_args.X = pos.X;
                 move_args.Y = pos.Y;
                 move_args.XDelta = pos.X - last_pos.X;
                 move_args.YDelta = pos.Y - last_pos.Y;
                 move_args.Buttons=getButton(button_state);
-                Move(-1, move_args);
+                Move(instance, move_args);
                 last_pos = pos;
             }
         }

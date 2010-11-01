@@ -75,14 +75,6 @@ namespace OpenMobile.Platform.Windows
         {
             lock (UpdateLock)
             {
-                // Mark all devices as disconnected. We will check which of those
-                // are connected later on.
-                for (int i = 0; i < mice.Count; i++)
-                {
-                    MouseDevice state = mice[i];
-                    mice[i] = state;
-                }
-
                 int count = WinRawInput.DeviceCount;
                 RawInputDeviceList[] ridl = new RawInputDeviceList[count];
                 for (int i = 0; i < count; i++)
@@ -95,9 +87,7 @@ namespace OpenMobile.Platform.Windows
                     ContextHandle id = new ContextHandle(dev.Device);
                     if (rawids.ContainsKey(id))
                     {
-                        // Device already registered, mark as connected
-                        MouseDevice state = mice[rawids[id]];
-                        mice[rawids[id]] = state;
+                        // Device already registered
                         continue;
                     }
 
@@ -132,6 +122,7 @@ namespace OpenMobile.Platform.Windows
                                 state.Description = deviceDesc + " (" + info.Device.Mouse.Id.ToString() + ")";
                                 state.DeviceID = new IntPtr(info.Device.Mouse.Id);
                                 state.NumberOfButtons = info.Device.Mouse.NumberOfButtons;
+                                state.Instance = mice.Count;
                                 mice.Add(state);
                                 rawids.Add(new ContextHandle(dev.Device), mice.Count - 1);
                             }
@@ -166,14 +157,26 @@ namespace OpenMobile.Platform.Windows
 
             if ((raw.ButtonFlags & RawInputMouseState.WHEEL) != 0)
                 mouse.WheelPrecise += (short)raw.ButtonData / 120.0f;
-
             if ((raw.Flags & RawMouseFlags.MOUSE_MOVE_ABSOLUTE) != 0)
             {
+                raw.LastX = (int)((raw.LastX / 65535F) * mouse.Width);
+                raw.LastY = (int)((raw.LastY / 65535F) * mouse.Height);
                 mouse.Position = new OpenMobile.Graphics.Point(raw.LastX, raw.LastY);
             }
             else
             {   // Seems like MOUSE_MOVE_RELATIVE is the default, unless otherwise noted.
-                mouse.Position = new OpenMobile.Graphics.Point(mouse.X + raw.LastX, mouse.Y + raw.LastY);
+                int rawx = raw.LastX / 256;
+                int rawy = raw.LastY / 256;
+                //Apply pointer acceleration
+                //if (Math.Abs(rawx) >= 6)
+                //    rawx *= 2;
+                if (Math.Abs(rawx) >= 10)
+                    rawx *= 2;
+                //if (Math.Abs(rawy) >= 6)
+                //    rawy *= 2;
+                if (Math.Abs(rawy) >= 10)
+                    rawy *= 2;
+                mouse.Position = new OpenMobile.Graphics.Point(mouse.X + rawx, mouse.Y + rawy);
             }
 
             lock (UpdateLock)

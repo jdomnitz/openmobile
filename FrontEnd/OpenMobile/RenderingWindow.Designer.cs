@@ -39,15 +39,15 @@ namespace OpenMobile
             // RenderingWindow
             // 
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Mouse.ButtonUp += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseUp);
+            this.Mouse.ButtonUp += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_ButtonUp);
             //this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.RenderingWindow_MouseDoubleClick);
-            this.Mouse.MouseClick += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseClick);
-            this.Mouse.ButtonDown += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(this.RenderingWindow_MouseDown);
+            this.Mouse.MouseClick += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_MouseClick);
+            this.Mouse.ButtonDown += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_ButtonDown);
             this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
             this.Closing += new EventHandler<System.ComponentModel.CancelEventArgs>(this.RenderingWindow_FormClosing);
             this.WindowStateChanged += new System.EventHandler<System.EventArgs>(this.RenderingWindow_Resize); //TODO - Separate function
             this.Resize += new EventHandler<EventArgs>(this.RenderingWindow_Resize);
-            this.Mouse.Move += new EventHandler<OpenMobile.Input.MouseMoveEventArgs>(this.RenderingWindow_MouseMove);
+            this.Mouse.Move += new EventHandler<OpenMobile.Input.MouseMoveEventArgs>(InputRouter.dev_Move);
             this.Keyboard[0].KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
             this.Keyboard[0].KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
         }

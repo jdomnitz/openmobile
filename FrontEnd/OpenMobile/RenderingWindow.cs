@@ -117,6 +117,8 @@ namespace OpenMobile
             if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
                 this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[screen].Bounds.Location, this.Size);
             this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
+            this.Mouse.Instance = (screen * -1) - 1;
+            this.Mouse.SetBounds(DisplayDevice.AvailableDisplays[screen].Width, DisplayDevice.AvailableDisplays[screen].Height);
             InitializeComponent();
             hide += new voiddel(hideCursor);
             redraw += new voiddel(invokePaint);
@@ -493,10 +495,10 @@ namespace OpenMobile
         #endregion
 
         #region MouseHandlers
-        private void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
+        internal void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
         {
             int scr = (int)sender;
-            if ((scr==-1)||(scr==screen))
+            if (scr==screen)
                 MouseMove(e);
         }
         private void MouseMove(MouseMoveEventArgs e)
@@ -596,8 +598,10 @@ namespace OpenMobile
             }
             return false;
         }
-        private void RenderingWindow_MouseClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
+        internal void RenderingWindow_MouseClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
         {
+            if ((int)sender != screen)
+                return;
             if ((e.Buttons == MouseButton.Left) && (highlighted != null))
             {
                 if (rParam.currentMode == eModeType.Highlighted)
@@ -623,7 +627,7 @@ namespace OpenMobile
                 }
             }
         }
-
+#if false
         private void RenderingWindow_MouseDoubleClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
         {
             tmrLongClick.Enabled = false;
@@ -647,7 +651,7 @@ namespace OpenMobile
                 }
             }
         }
-
+#endif
         private void tmrLongClick_Tick(object sender, EventArgs e)
         {
             tmrLongClick.Enabled = false;
@@ -662,8 +666,10 @@ namespace OpenMobile
             lastClick = null;
         }
 
-        private void RenderingWindow_MouseDown(object sender, OpenMobile.Input.MouseButtonEventArgs e)
+        internal void RenderingWindow_MouseDown(object sender, OpenMobile.Input.MouseButtonEventArgs e)
         {
+            if ((int)sender != screen)
+                return;
             if (highlighted != null)
             {
                 if ((rParam.currentMode == eModeType.Highlighted) && (typeof(OMButton).IsInstanceOfType(highlighted)))
@@ -694,8 +700,10 @@ namespace OpenMobile
             } ThrowStart = e.Location; //If we're not throwing something we're gesturing
         }
 
-        private void RenderingWindow_MouseUp(object sender, OpenMobile.Input.MouseButtonEventArgs e)
+        internal void RenderingWindow_MouseUp(object sender, OpenMobile.Input.MouseButtonEventArgs e)
         {
+            if ((int)sender != screen)
+                return;
             tmrLongClick.Enabled = false;
             if ((lastClick != null) && (lastClick.DownImage.image != null))
             {
