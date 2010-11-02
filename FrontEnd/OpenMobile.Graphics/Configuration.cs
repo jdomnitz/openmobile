@@ -201,7 +201,7 @@ namespace OpenMobile
             Debug.WriteLine(uts.machine);
             Debug.Unindent();
             #endif
-            return uts.sysname.ToString();
+            return uts.sysname;
         }
 
         [DllImport("libc")]
