@@ -969,6 +969,18 @@ namespace OpenMobile
         /// </summary>
         gesture=100,
         /// <summary>
+        /// A multi-touch gesture has been recognized
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen</para>
+        /// <para>Arg2: Gesture</para>
+        /// <para>Possible Gestures:</para>
+        /// <para>Pan|Distance Between Fingers|Current Position</para>
+        /// <para>Zoom|Distance Between Fingers|Center of gesture</para>
+        /// <para>Rotate|Radians|Center of gesture</para>
+        /// <para>Arg3: Plugin (The name of the plugin with the top most panel)</para>
+        /// </summary>
+        multiTouchGesture=101,
+        /// <summary>
         /// Instructs the navigation engine to construct a route to the given address
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Address</para>

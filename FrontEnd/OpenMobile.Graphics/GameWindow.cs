@@ -306,7 +306,7 @@ namespace OpenMobile
             finally
             {
                 //Move -= DispatchRenderFrame;
-                Resize -= DispatchRenderFrame;
+                //Resize -= DispatchRenderFrame;
             }
         }
         public void DispatchRenderFrame(object sender, EventArgs e)

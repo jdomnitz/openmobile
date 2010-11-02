@@ -168,12 +168,8 @@ namespace OpenMobile.Platform.Windows
                 int rawx = raw.LastX / 256;
                 int rawy = raw.LastY / 256;
                 //Apply pointer acceleration
-                //if (Math.Abs(rawx) >= 6)
-                //    rawx *= 2;
                 if (Math.Abs(rawx) >= 10)
                     rawx *= 2;
-                //if (Math.Abs(rawy) >= 6)
-                //    rawy *= 2;
                 if (Math.Abs(rawy) >= 10)
                     rawy *= 2;
                 mouse.Position = new OpenMobile.Graphics.Point(mouse.X + rawx, mouse.Y + rawy);

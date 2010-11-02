@@ -1158,6 +1158,13 @@ namespace OpenMobile
                         return true;
                     }
                     return false;
+                case eFunction.multiTouchGesture:
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        raiseSystemEvent(eFunction.multiTouchGesture, arg1, arg2, history.CurrentItem(ret).pluginName);
+                        return true;
+                    }
+                    return false;
                 case eFunction.connectToInternet:
                     return Net.Connections.connect(this, arg1,arg2);
                 case eFunction.setSystemVolume:

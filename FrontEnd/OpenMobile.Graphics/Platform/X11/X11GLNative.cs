@@ -1280,7 +1280,8 @@ namespace OpenMobile.Platform.X11
         public event EventHandler<EventArgs> MouseEnter;
 
         public event EventHandler<EventArgs> MouseLeave;
-        
+
+        public event EventHandler<TouchEventArgs> Gesture;
         #endregion
 
         #endregion

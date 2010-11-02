@@ -791,6 +791,17 @@ namespace OpenMobile
             new Thread(delegate() { tmrClosing_Tick(null, null); }).Start();
         }
 
+        void RenderingWindow_Gesture(object sender, OpenMobile.Graphics.TouchEventArgs e)
+        {
+            string gesture=e.Name+"|";
+            if (e.Name=="Rotate")
+                gesture+=e.Arg1.ToString()+"|";
+            else
+                gesture=(e.Arg1*totalScale).ToString("0.00")+"|";
+            gesture += ((e.Position.X - this.X) * widthScale).ToString()+",";
+            gesture += ((e.Position.Y - this.Y) * heightScale).ToString();
+            Core.theHost.execute(eFunction.multiTouchGesture, screen.ToString(), gesture);
+        }
         public static void closeRenderer()
         {
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
@@ -807,10 +818,12 @@ namespace OpenMobile
             base.OnWindowStateChanged(e);
         }
         public bool defaultMouse = false;
+        float totalScale = 1F;
         private void RenderingWindow_Resize(object sender, EventArgs e)
         {
             heightScale = (this.ClientRectangle.Height / 600F);
             widthScale = (this.ClientRectangle.Width / 1000F);
+            totalScale = (float)Math.Sqrt(Math.Pow(heightScale, 2) + Math.Pow(widthScale, 2));
             OnRenderFrameInternal(null);
             Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
         }

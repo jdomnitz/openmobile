@@ -934,6 +934,9 @@ namespace OpenMobile.Platform.Windows
         #region Input functions
 
         [DllImport("user32.dll", SetLastError=true)]
+        public static extern bool GetGestureInfo(IntPtr hGestureInfo, GESTUREINFO pGestureInfo);
+
+        [DllImport("user32.dll", SetLastError=true)]
         public static extern BOOL TrackMouseEvent(ref TrackMouseEventStructure lpEventTrack);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
@@ -3777,6 +3780,7 @@ namespace OpenMobile.Platform.Windows
         INITMENU = 0x0116,
         INITMENUPOPUP = 0x0117,
         //              internal const uint SYSTIMER       = 0x0118;
+        GESTURE=0x0119,
         MENUSELECT = 0x011F,
         MENUCHAR = 0x0120,
         ENTERIDLE = 0x0121,
@@ -4144,6 +4148,19 @@ namespace OpenMobile.Platform.Windows
     }
 
     #endregion
+
+    public struct GESTUREINFO
+    {
+        public UINT cbSize;
+        public DWORD dwFlags;
+        public DWORD dwID;
+        public HWND hwndTarget;
+        public Point ptLocation;
+        public DWORD dwInstanceID;
+        public DWORD dwSequenceID;
+        public UInt64 ullArguments;
+        public UINT cbExtraArgs;
+    }
 
     #region MouseActivate
 

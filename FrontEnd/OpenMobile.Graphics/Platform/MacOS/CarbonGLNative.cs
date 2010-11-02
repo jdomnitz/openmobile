@@ -1105,7 +1105,7 @@ namespace OpenMobile.Platform.MacOS
         public event EventHandler<KeyPressEventArgs> KeyPress;
         public event EventHandler<EventArgs> MouseEnter;
         public event EventHandler<EventArgs> MouseLeave;
-
+        public event EventHandler<TouchEventArgs> Gesture;
         #endregion
     }
 }
