@@ -31,7 +31,7 @@ namespace OpenMobile.Platform.MacOS
         GraphicsMode graphics_mode;
         CarbonWindowInfo carbonWindow;
         IntPtr shareContextRef;
-		DisplayDevice device;
+		//DisplayDevice device;
 		bool mIsFullscreen = false;
 
         public AglContext(GraphicsMode mode, IWindowInfo window, IGraphicsContext shareContext)

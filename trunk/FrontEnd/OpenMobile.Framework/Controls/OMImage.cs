@@ -34,7 +34,9 @@ namespace OpenMobile.Controls
     {
         private imageItem image;
         private byte transparency = 100;
-
+        /// <summary>
+        /// Opacity (0-100%)
+        /// </summary>
         public byte Transparency
         {
             get

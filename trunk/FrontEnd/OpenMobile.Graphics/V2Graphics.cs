@@ -248,7 +248,6 @@ namespace OpenMobile.Graphics
             DrawImage(image, X, Y, Width, Height, 1F, eAngle.Normal);
         }
         int[] normalTex;
-        int[] flipTex;
         public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle)
         {
             if (image == null)

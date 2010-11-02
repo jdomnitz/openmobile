@@ -1035,7 +1035,7 @@ namespace OpenMobile.Graphics
         public bool persist;
         private uint[] texture;
         int height, width;
-        [CLSCompliant(false)]
+
         public uint Texture(int screen)
         {
             if (screen < texture.Length)

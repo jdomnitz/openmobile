@@ -23,7 +23,7 @@ using System.IO;
 
 namespace OpenMobile.Framework
 {
-    public static class Linux
+    internal static class Linux
     {
         internal static eDriveType detectType(string path)
         {

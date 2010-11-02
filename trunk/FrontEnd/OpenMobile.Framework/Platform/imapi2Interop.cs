@@ -17,7 +17,7 @@ namespace IMAPI2.Interop
 {
     #region IMAPI2 Enums
 
-    public enum EmulationType
+    internal enum EmulationType
     {
         EmulationNone,
         Emulation12MFloppy,
@@ -26,7 +26,7 @@ namespace IMAPI2.Interop
         EmulationHardDisk
     }
 
-    public enum IMAPI_PROFILE_TYPE
+    internal enum IMAPI_PROFILE_TYPE
     {
         IMAPI_PROFILE_TYPE_INVALID = 0,
         IMAPI_PROFILE_TYPE_NON_REMOVABLE_DISK = 1,
@@ -69,7 +69,7 @@ namespace IMAPI2.Interop
     [ComImport]
     [Guid("27354131-7F64-5B0F-8F00-5D77AFBE261E")]
     [TypeLibType(TypeLibTypeFlags.FNonExtensible|TypeLibTypeFlags.FOleAutomation|TypeLibTypeFlags.FDispatchable)]
-    public interface DDiscMaster2Events
+    internal interface DDiscMaster2Events
     {
         // A device was added to the system
         [DispId(0x100)]     // DISPID_DDISCMASTER2EVENTS_DEVICEADDED
@@ -86,7 +86,7 @@ namespace IMAPI2.Interop
     [ComVisible(false)]
     [TypeLibType(TypeLibTypeFlags.FHidden)]
     [ComEventInterface(typeof(DDiscMaster2Events), typeof(DiscMaster2_EventProvider))]
-    public interface DiscMaster2_Event
+    internal interface DiscMaster2_Event
     {
         // Events
         event DiscMaster2_NotifyDeviceAddedEventHandler NotifyDeviceAdded;
@@ -210,14 +210,14 @@ namespace IMAPI2.Interop
     }
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    public delegate void DiscMaster2_NotifyDeviceAddedEventHandler([In, MarshalAs(UnmanagedType.IDispatch)]object sender,  string uniqueId);
+    internal delegate void DiscMaster2_NotifyDeviceAddedEventHandler([In, MarshalAs(UnmanagedType.IDispatch)]object sender,  string uniqueId);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    public delegate void DiscMaster2_NotifyDeviceRemovedEventHandler([In, MarshalAs(UnmanagedType.IDispatch)]object sender,  string uniqueId);
+    internal delegate void DiscMaster2_NotifyDeviceRemovedEventHandler([In, MarshalAs(UnmanagedType.IDispatch)]object sender,  string uniqueId);
 
     [ClassInterface(ClassInterfaceType.None)]
     [TypeLibType(TypeLibTypeFlags.FHidden)]
-    public sealed class DiscMaster2_SinkHelper : DDiscMaster2Events
+    internal sealed class DiscMaster2_SinkHelper : DDiscMaster2Events
     {
         // Fields
         private int m_dwCookie;
@@ -297,7 +297,7 @@ namespace IMAPI2.Interop
     [ComImport]
     [Guid("27354130-7F64-5B0F-8F00-5D77AFBE261E")]
     [TypeLibType(TypeLibTypeFlags.FDual | TypeLibTypeFlags.FDispatchable | TypeLibTypeFlags.FNonExtensible)]
-    public interface IDiscMaster2
+    internal interface IDiscMaster2
     {
         // Enumerates the list of CD/DVD devices on the system (VT_BSTR)
         [DispId(-4), TypeLibFunc((short)0x41)]
@@ -322,7 +322,7 @@ namespace IMAPI2.Interop
     [ComImport]
     [TypeLibType(TypeLibTypeFlags.FDual | TypeLibTypeFlags.FDispatchable | TypeLibTypeFlags.FNonExtensible)]
     [Guid("27354133-7F64-5B0F-8F00-5D77AFBE261E")]
-    public interface IDiscRecorder2
+    internal interface IDiscRecorder2
     {
         // Ejects the media (if any) and opens the tray
         [DispId(0x100)]
@@ -417,7 +417,7 @@ namespace IMAPI2.Interop
     [ComImport]
     [Guid("27354130-7F64-5B0F-8F00-5D77AFBE261E")]
     [CoClass(typeof(MsftDiscMaster2Class))]
-    public interface MsftDiscMaster2 : IDiscMaster2 //, DiscMaster2_Event
+    internal interface MsftDiscMaster2 : IDiscMaster2 //, DiscMaster2_Event
     {
     }
 
@@ -425,14 +425,14 @@ namespace IMAPI2.Interop
     [TypeLibType(TypeLibTypeFlags.FCanCreate)]
     [Guid("2735412E-7F64-5B0F-8F00-5D77AFBE261E")]
     [ClassInterface(ClassInterfaceType.None)]
-    public class MsftDiscMaster2Class
+    internal class MsftDiscMaster2Class
     {
     }
 
     [ComImport]
     [CoClass(typeof(MsftDiscRecorder2Class))]
     [Guid("27354133-7F64-5B0F-8F00-5D77AFBE261E")]
-    public interface MsftDiscRecorder2 : IDiscRecorder2
+    internal interface MsftDiscRecorder2 : IDiscRecorder2
     {
     }
 
@@ -441,7 +441,7 @@ namespace IMAPI2.Interop
     [Guid("2735412D-7F64-5B0F-8F00-5D77AFBE261E")]
     [TypeLibType(TypeLibTypeFlags.FCanCreate)]
     [ClassInterface(ClassInterfaceType.None)]
-    public class MsftDiscRecorder2Class 
+    internal class MsftDiscRecorder2Class 
     {
     }
 }

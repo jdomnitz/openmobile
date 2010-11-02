@@ -1325,6 +1325,7 @@ namespace OpenMobile.Graphics
             Empty=new PointF();
         }
     }
+#pragma warning disable 0660
     public struct Font
     {
         string name;

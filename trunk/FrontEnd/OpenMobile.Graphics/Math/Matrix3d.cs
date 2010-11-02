@@ -192,7 +192,7 @@ namespace OpenMobile
         /// <summary>Converts the matrix into left double*.</summary>
         /// <param name="matrix">The matrix to convert.</param>
         /// <returns>A double* for the matrix.</returns>
-        [CLSCompliant(false)]
+
         unsafe public static explicit operator double*(Matrix3d matrix)
         {
             return &matrix.R0C0;
@@ -323,7 +323,7 @@ namespace OpenMobile
         /// <summary>Indicates whether the current matrix is equal to another matrix.</summary>
         /// <param name="matrix">The OpenMobile.Matrix3d structure to compare with.</param>
         /// <returns>true if the current matrix is equal to the matrix parameter; otherwise, false.</returns>
-        [CLSCompliant(false)]
+
         public bool Equals(Matrix3d matrix)
         {
             return

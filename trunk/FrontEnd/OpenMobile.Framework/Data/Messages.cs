@@ -142,7 +142,7 @@ namespace OpenMobile.Data
             {
                 cmd.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             { }
             finally { cmd.Dispose(); }
         }
@@ -324,7 +324,7 @@ namespace OpenMobile.Data
             {
                 return (asyncCmd.ExecuteNonQuery() == 1);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }

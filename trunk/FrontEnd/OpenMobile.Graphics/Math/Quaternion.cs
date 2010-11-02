@@ -76,7 +76,7 @@ namespace OpenMobile
         /// Gets or sets an OpenMobile.Vector3 with the X, Y and Z components of this instance.
         /// </summary>
         [Obsolete("Use Xyz property instead.")]
-        [CLSCompliant(false)]
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public Vector3 XYZ { get { return Xyz; } set { Xyz = value; } }
 

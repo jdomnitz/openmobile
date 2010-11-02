@@ -189,7 +189,7 @@ namespace OpenMobile
 
         /// <summary>Scales this instance by the given parameter.</summary>
         /// <param name="scale">The scaling of the individual components.</param>
-        [CLSCompliant(false)]
+
         [Obsolete("Use static Multiply() method instead.")]
         public void Scale(ref Vector2d scale)
         {

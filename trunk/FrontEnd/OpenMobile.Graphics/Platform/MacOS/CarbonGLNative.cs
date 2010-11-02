@@ -68,9 +68,9 @@ namespace OpenMobile.Platform.MacOS
 		KeyPressEventArgs mKeyPressArgs = new KeyPressEventArgs((char)0);
 
 		bool mMouseIn = false;
-		bool mIsActive = false;
+		//bool mIsActive = false;
 
-		Icon mIcon;
+		//Icon mIcon;
 
         #endregion
 
@@ -427,11 +427,9 @@ namespace OpenMobile.Platform.MacOS
                     return OSStatus.EventNotHandled;
 
 				case WindowEventKind.WindowActivate:
-					OnActivate();
 					return OSStatus.EventNotHandled;
 
 				case WindowEventKind.WindowDeactivate:
-					OnDeactivate();
 					return OSStatus.EventNotHandled;
 
                 default:
@@ -1085,21 +1083,12 @@ namespace OpenMobile.Platform.MacOS
 				MouseEnter(this, EventArgs.Empty);
 		}
 
-		private void OnActivate()
-		{
-			mIsActive = true;
-		}
-		private void OnDeactivate()
-		{
-			mIsActive = false;
-		}
-
 		#endregion
         public event EventHandler<EventArgs> Resize;
         public event EventHandler<CancelEventArgs> Closing;
         public event EventHandler<EventArgs> Closed;
-        public event EventHandler<EventArgs> ClientSizeChanged;
-        public event EventHandler<EventArgs> WindowInfoChanged;
+        //public event EventHandler<EventArgs> ClientSizeChanged;
+        //public event EventHandler<EventArgs> WindowInfoChanged;
         public event EventHandler<EventArgs> WindowBorderChanged;
         public event EventHandler<EventArgs> WindowStateChanged;
         public event EventHandler<KeyPressEventArgs> KeyPress;

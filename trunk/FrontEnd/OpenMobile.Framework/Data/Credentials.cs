@@ -41,7 +41,7 @@ namespace OpenMobile.Data
             {
                 cmd.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             { }
             finally { cmd.Dispose(); }
         }

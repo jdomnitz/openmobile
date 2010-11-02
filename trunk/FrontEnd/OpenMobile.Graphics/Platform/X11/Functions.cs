@@ -14,7 +14,6 @@ using System.Runtime.InteropServices;
 namespace OpenMobile.Platform.X11
 {
     #region Types
-
     // using XID = System.Int32;
     using Window = System.IntPtr;
     using Drawable = System.IntPtr;

@@ -32,8 +32,6 @@ namespace OMHal
         private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
         private const int DBT_DEVTYP_VOLUME = 0x00000002; // drive type is logical volume
 
-        private static string Drive;
-
         [StructLayout(LayoutKind.Sequential)]
         public struct DEV_BROADCAST_VOLUME
         {

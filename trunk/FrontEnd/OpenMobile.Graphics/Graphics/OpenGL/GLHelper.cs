@@ -400,19 +400,19 @@ namespace OpenMobile.Graphics.OpenGL
 
         #region Uniform
 
-        [CLSCompliant(false)]
+
         public static void Uniform2(int location, ref Vector2 vector)
         {
             Raw.Uniform2(location, vector.X, vector.Y);
         }
 
-        [CLSCompliant(false)]
+
         public static void Uniform3(int location, ref Vector3 vector)
         {
             Raw.Uniform3(location, vector.X, vector.Y, vector.Z);
         }
 
-        [CLSCompliant(false)]
+
         public static void Uniform4(int location, ref Vector4 vector)
         {
             Raw.Uniform4(location, vector.X, vector.Y, vector.Z, vector.W);
@@ -601,19 +601,19 @@ namespace OpenMobile.Graphics.OpenGL
 
         #region VertexAttrib|MultiTexCoord
 
-        [CLSCompliant(false)]
+
         public static void VertexAttrib2(Int32 index, ref Vector2 v)
         {
             Raw.VertexAttrib2(index, v.X, v.Y);
         }
 
-        [CLSCompliant(false)]
+
         public static void VertexAttrib3(Int32 index, ref Vector3 v)
         {
             Raw.VertexAttrib3(index, v.X, v.Y, v.Z);
         }
 
-        [CLSCompliant(false)]
+
         public static void VertexAttrib4(Int32 index, ref Vector4 v)
         {
             Raw.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
@@ -649,19 +649,19 @@ namespace OpenMobile.Graphics.OpenGL
             Raw.MultiTexCoord4(target, v.X, v.Y, v.Z, v.W);
         }
 
-        [CLSCompliant(false)]
+
         public static void VertexAttrib2(Int32 index, ref Vector2d v)
         {
             Raw.VertexAttrib2(index, v.X, v.Y);
         }
 
-        [CLSCompliant(false)]
+
         public static void VertexAttrib3(Int32 index, ref Vector3d v)
         {
             Raw.VertexAttrib3(index, v.X, v.Y, v.Z);
         }
 
-        [CLSCompliant(false)]
+
         public static void VertexAttrib4(Int32 index, ref Vector4d v)
         {
             Raw.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
@@ -706,7 +706,7 @@ namespace OpenMobile.Graphics.OpenGL
             Raw.Rect(rect.Left, rect.Top, rect.Right, rect.Bottom);
         }
 
-        [CLSCompliant(false)]
+
         public static void Rect(ref OpenMobile.Graphics.Rectangle rect)
         {
             Raw.Rect(rect.Left, rect.Top, rect.Right, rect.Bottom);

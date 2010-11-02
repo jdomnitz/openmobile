@@ -55,7 +55,6 @@ namespace OpenMobile
         private bool ThrowStarted = false;
         // Relative mouse moved distance for thrown interface
         private Point ThrowRelativeDistance = new Point(-1, -1);
-        private bool hidden;
         private int tick = 0;
         public PointF ScaleFactors
         {

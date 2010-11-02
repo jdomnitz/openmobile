@@ -84,7 +84,7 @@ namespace OpenMobile
         /// The new Half2 instance will convert the Vector2 into 16-bit half-precision floating-point.
         /// </summary>
         /// <param name="v">OpenMobile.Vector2</param>
-        [CLSCompliant(false)]
+
         public Vector2h(Vector2 v)
         {
             X = new Half(v.X);
@@ -96,7 +96,7 @@ namespace OpenMobile
         /// </summary>
         /// <param name="v">OpenMobile.Vector2</param>
         /// <param name="throwOnError">Enable checks that will throw if the conversion result is not meaningful.</param>
-        [CLSCompliant(false)]
+
         public Vector2h(Vector2 v, bool throwOnError)
         {
             X = new Half(v.X, throwOnError);
@@ -151,7 +151,7 @@ namespace OpenMobile
         /// This is the faster constructor.
         /// </summary>
         /// <param name="v">OpenMobile.Vector2d</param>
-        [CLSCompliant(false)]
+
         public Vector2h(ref Vector2d v)
         {
             X = new Half(v.X);
@@ -163,7 +163,7 @@ namespace OpenMobile
         /// </summary>
         /// <param name="v">OpenMobile.Vector2d</param>
         /// <param name="throwOnError">Enable checks that will throw if the conversion result is not meaningful.</param>
-        [CLSCompliant(false)]
+
         public Vector2h(ref Vector2d v, bool throwOnError)
         {
             X = new Half(v.X, throwOnError);

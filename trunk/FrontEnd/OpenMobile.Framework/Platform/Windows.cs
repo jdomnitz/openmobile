@@ -26,45 +26,8 @@ using IMAPI2.Interop;
 using Microsoft.Win32;
 namespace OpenMobile.Framework
 {
-    public sealed class Windows
+    internal sealed class Windows
     {
-        #region oldCode
-        /*
-        internal static eDriveType olddetectType(string path, DriveType type)
-        {
-            try
-            {
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
-                foreach (ManagementObject wmi_HD in searcher.Get())
-                {
-                    var wmiDiskPartitions = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" +
-                    wmi_HD["DeviceID"].ToString() + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
-                    foreach (ManagementObject partition in wmiDiskPartitions.Get())
-                    {
-                        var wmiLogicalDisks = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" +
-                        partition["DeviceID"].ToString() + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
-                        foreach (ManagementObject disk in wmiLogicalDisks.Get())
-                            if ((wmi_HD["DeviceID"] != null) && (disk["DeviceID"].ToString() == path.TrimEnd(new char[] { '\\' })))
-                            {
-                                if ((wmi_HD["Model"] != null) && ((wmi_HD["Model"].ToString().Contains("iPod")) || (wmi_HD["Model"].ToString().Contains("Apple Mobile Device"))))
-                                    return eDriveType.iPod;
-                                else if ((wmi_HD["Model"] != null) && (wmi_HD["Model"].ToString().Contains("Phone")))
-                                    return eDriveType.Phone;
-                                else if (wmi_HD["InterfaceType"].ToString() == "USB")
-                                    return eDriveType.Removable;
-                                else
-                                    return (eDriveType)type;
-                            }
-                    }
-                }
-                return (eDriveType)type;
-            }
-            catch (Exception)
-            {
-                return (eDriveType)type;
-            }
-        }*/
-        #endregion
         internal static eDriveType detectType(string path, DriveType type)
         {
             if ((type == DriveType.Network) || (type == DriveType.CDRom))
@@ -159,7 +122,7 @@ namespace OpenMobile.Framework
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct SP_DEVINFO_DATA
+        internal struct SP_DEVINFO_DATA
         {
             public uint cbSize;
             public Guid ClassGuid;
@@ -168,7 +131,7 @@ namespace OpenMobile.Framework
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct SP_DEVICE_INTERFACE_DATA
+        internal struct SP_DEVICE_INTERFACE_DATA
         {
             public uint cbSize;
             public Guid InterfaceClassGuid;
@@ -176,7 +139,7 @@ namespace OpenMobile.Framework
             public IntPtr Reserved;
         }
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        public struct SP_DEVICE_INTERFACE_DETAIL_DATA
+        internal struct SP_DEVICE_INTERFACE_DETAIL_DATA
         {
             public UInt32 cbSize;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
@@ -185,7 +148,7 @@ namespace OpenMobile.Framework
         #endregion
         #region PInvokes
         [DllImport("setupapi.dll", SetLastError = true)]
-        public static extern bool SetupDiGetDeviceRegistryProperty(
+        internal static extern bool SetupDiGetDeviceRegistryProperty(
             IntPtr DeviceInfoSet,
             ref SP_DEVINFO_DATA DeviceInfoData,
             uint Property,
@@ -203,7 +166,7 @@ namespace OpenMobile.Framework
         IntPtr lpOutBuffer, uint nOutBufferSize,
         out uint lpBytesReturned, IntPtr lpOverlapped);
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
-  public static extern IntPtr CreateFile(
+  internal static extern IntPtr CreateFile(
         string lpFileName,
         uint dwDesiredAccess,
         uint dwShareMode,
@@ -217,9 +180,9 @@ namespace OpenMobile.Framework
         [DllImport("setupapi.dll")]
         static extern int CM_Get_Parent(out UInt32 pdnDevInst,UInt32 dnDevInst,int ulFlags);
         [DllImport(@"setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern Boolean SetupDiGetDeviceInterfaceDetail(IntPtr hDevInfo,ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData,ref SP_DEVICE_INTERFACE_DETAIL_DATA deviceInterfaceDetailData,UInt32 deviceInterfaceDetailDataSize,out UInt32 requiredSize,ref SP_DEVINFO_DATA deviceInfoData);
+        internal static extern Boolean SetupDiGetDeviceInterfaceDetail(IntPtr hDevInfo,ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData,ref SP_DEVICE_INTERFACE_DETAIL_DATA deviceInterfaceDetailData,UInt32 deviceInterfaceDetailDataSize,out UInt32 requiredSize,ref SP_DEVINFO_DATA deviceInfoData);
         [DllImport(@"setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern Boolean SetupDiEnumDeviceInterfaces(IntPtr hDevInfo,IntPtr devInfo,ref Guid interfaceClassGuid,UInt32 memberIndex,ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData);
+        internal static extern Boolean SetupDiEnumDeviceInterfaces(IntPtr hDevInfo, IntPtr devInfo, ref Guid interfaceClassGuid, UInt32 memberIndex, ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData);
         [DllImport("setupapi.dll", CharSet = CharSet.Auto)]
         static extern IntPtr SetupDiGetClassDevs(ref Guid ClassGuid,IntPtr enumerator,IntPtr hwndParent,UInt32 Flags);
         #endregion

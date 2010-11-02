@@ -245,7 +245,6 @@ namespace OpenMobile.Media
         /// </summary>
         /// <param name="theHost"></param>
         /// <param name="name"></param>
-        /// <param name="playlist"></param>
         /// <returns></returns>
         public static bool deletePlaylistFromDB(IPluginHost theHost, string name)
         {
@@ -278,6 +277,11 @@ namespace OpenMobile.Media
             ret.TrimExcess();
             return ret;
         }
+        /// <summary>
+        /// Lists playlists available in the media database
+        /// </summary>
+        /// <param name="theHost"></param>
+        /// <returns></returns>
         public static List<string> listPlaylistsFromDB(IPluginHost theHost)
         {
             string dbName = "";
@@ -285,6 +289,12 @@ namespace OpenMobile.Media
                 dbName = s.getSetting("Default.MusicDatabase");
             return listPlaylistsFromDB(theHost, dbName);
         }
+        /// <summary>
+        /// Lists playlists available in the given media database
+        /// </summary>
+        /// <param name="theHost"></param>
+        /// <param name="dbName"></param>
+        /// <returns></returns>
         public static List<string> listPlaylistsFromDB(IPluginHost theHost,string dbName)
         {
             object o = null;

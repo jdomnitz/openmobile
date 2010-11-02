@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using OpenMobile.Graphics;
 
+#pragma warning disable 0659
 namespace OpenMobile
 {
     /// <summary>

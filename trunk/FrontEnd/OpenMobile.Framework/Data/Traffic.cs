@@ -122,7 +122,7 @@ namespace OpenMobile.Data
     public class Traffic:IDisposable
     {
         private SqliteConnection con;
-        private SqliteDataReader asyncReader;
+        //private SqliteDataReader asyncReader;
         private bool tableCreated;
         public Traffic()
         {
@@ -191,8 +191,6 @@ namespace OpenMobile.Data
         public void Dispose()
         {
             con.Dispose();
-            if (asyncReader != null)
-                asyncReader.Dispose();
         }
     }
 }
