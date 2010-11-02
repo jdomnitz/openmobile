@@ -27,8 +27,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>OSX</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -36,7 +35,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug-Fast|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug-Fast\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;OSX</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -97,22 +96,16 @@
     <Compile Include="IGameWindow.cs" />
     <Compile Include="IGraphics.cs" />
     <Compile Include="INativeWindow.cs" />
-    <Compile Include="Input\GamePad.cs" />
-    <Compile Include="Input\GamePadState.cs" />
     <Compile Include="Input\IInputDevice.cs" />
     <Compile Include="Input\IJoystickDriver.cs" />
     <Compile Include="Input\IKeyboardDriver.cs" />
     <Compile Include="Input\IMouseDriver.cs" />
     <Compile Include="Input\JoystickDevice.cs" />
     <Compile Include="Input\Key.cs" />
-    <Compile Include="Input\Keyboard.cs" />
     <Compile Include="Input\KeyboardDevice.cs" />
     <Compile Include="Input\KeyboardKeyEventArgs.cs" />
-    <Compile Include="Input\KeyboardState.cs" />
-    <Compile Include="Input\Mouse.cs" />
     <Compile Include="Input\MouseButton.cs" />
     <Compile Include="Input\MouseDevice.cs" />
-    <Compile Include="Input\MouseState.cs" />
     <Compile Include="Math\BezierCurve.cs" />
     <Compile Include="Math\BezierCurveCubic.cs" />
     <Compile Include="Math\BezierCurveQuadric.cs" />
