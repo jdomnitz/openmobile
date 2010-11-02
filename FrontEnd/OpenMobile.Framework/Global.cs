@@ -299,6 +299,14 @@ namespace OpenMobile
             this.image = img;
             this.subitemFormat = subitemFormat;
         }
+        /// <summary>
+        /// Creates a new list item
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="subitem"></param>
+        /// <param name="img"></param>
+        /// <param name="subitemFormat"></param>
+        /// <param name="tag"></param>
         public OMListItem(string text, string subitem, OImage img, subItemFormat subitemFormat,object tag)//Added by Borte
         {
             this.text = text;
@@ -307,6 +315,15 @@ namespace OpenMobile
             this.subitemFormat = subitemFormat;
             this.tag = tag;
         }
+        /// <summary>
+        /// Creates a new list item
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="subitem"></param>
+        /// <param name="img"></param>
+        /// <param name="subitemFormat"></param>
+        /// <param name="tag"></param>
+        /// <param name="sort"></param>
         public OMListItem(string text, string subitem, OImage img, subItemFormat subitemFormat, object tag,string sort)
         {
             this.text = text;
@@ -317,7 +334,11 @@ namespace OpenMobile
             this.sort = sort;
         }
         #region IComparable Members
-
+        /// <summary>
+        /// Compare list items
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public int CompareTo(object obj)
         {
             OMListItem two = obj as OMListItem;
@@ -1607,7 +1628,7 @@ namespace OpenMobile
         /// </summary>
         Internet=8
     }
-
+#pragma warning disable 0659
     /// <summary>
     /// Information about a network connection
     /// </summary>
@@ -1663,6 +1684,11 @@ namespace OpenMobile
             ConnectionType = type;
             requiresPassword = passwordRequired;
         }
+        /// <summary>
+        /// Compare connection info by UID
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
             return (((connectionInfo)obj).UID == this.UID);
@@ -2068,6 +2094,12 @@ namespace OpenMobile
             }
             return file;
         }
+        /// <summary>
+        /// Gets the relative path to a file
+        /// </summary>
+        /// <param name="fromDirectory"></param>
+        /// <param name="toPath"></param>
+        /// <returns></returns>
         public static string getRelativePath(string fromDirectory, string toPath)
         {
             if (fromDirectory == null)

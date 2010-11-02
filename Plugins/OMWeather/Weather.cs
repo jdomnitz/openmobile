@@ -254,7 +254,6 @@ namespace ControlDemo
                 if (arg2 == "OMWeather")
                 {
                     refresh();
-                    ((OMImage)widget[0]).Image = new imageItem(Widget.generate("OMWeather", theHost));
                 }
         }
         public Settings loadSettings()

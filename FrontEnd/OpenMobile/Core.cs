@@ -50,7 +50,7 @@ namespace OpenMobile
             {
                 availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetTypes()[0]);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //handled below
             }

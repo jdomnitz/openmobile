@@ -341,7 +341,7 @@ namespace OpenMobile.Platform.Windows
         /// <param name="flags">Not used</param>
         /// <returns>True if there is a message pending.</returns>
         [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("User32.dll"), CLSCompliant(false)]
+        [DllImport("User32.dll")]//, CLSCompliant(false)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool PeekMessage(ref MSG msg, IntPtr hWnd, int messageFilterMin, int messageFilterMax, int flags);
 
@@ -363,7 +363,7 @@ namespace OpenMobile.Platform.Windows
         /// To get extended error information, call GetLastError.
         /// </returns>
         [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("User32.dll"), CLSCompliant(false)]
+        [DllImport("User32.dll")]//, CLSCompliant(false)]
         //[return: MarshalAs(UnmanagedType.Bool)]
         internal static extern INT GetMessage(ref MSG msg,
             IntPtr windowHandle, int messageFilterMin, int messageFilterMax);
@@ -379,7 +379,7 @@ namespace OpenMobile.Platform.Windows
 
         #region PostMessage
 
-        [CLSCompliant(false)]
+
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("User32.dll", CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -404,7 +404,7 @@ namespace OpenMobile.Platform.Windows
 #if RELEASE
         [System.Security.SuppressUnmanagedCodeSecurity]
 #endif
-        [DllImport("User32.dll"), CLSCompliant(false)]
+        [DllImport("User32.dll")]//, CLSCompliant(false)]
         internal static extern LRESULT DispatchMessage(ref MSG msg);
 
         #endregion
@@ -414,7 +414,7 @@ namespace OpenMobile.Platform.Windows
 #if RELEASE
         [System.Security.SuppressUnmanagedCodeSecurity]
 #endif
-        [DllImport("User32.dll"), CLSCompliant(false)]
+        [DllImport("User32.dll")]//, CLSCompliant(false)]
         internal static extern BOOL TranslateMessage(ref MSG lpMsg);
 
         #endregion
@@ -992,17 +992,17 @@ namespace OpenMobile.Platform.Windows
         /// <param name="Input">Number of RawInput structures pointed to by paRawInput.</param>
         /// <param name="SizeHeader">Size, in bytes, of the RawInputHeader structure.</param>
         /// <returns>If successful, the function returns S_OK. Otherwise it returns an error value.</returns>
-        [CLSCompliant(false)]
+
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern LRESULT DefRawInputProc(RawInput[] RawInput, INT Input, UINT SizeHeader);
 
-        [CLSCompliant(false)]
+
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
         unsafe internal static extern LRESULT DefRawInputProc(ref RawInput RawInput, INT Input, UINT SizeHeader);
 
-        [CLSCompliant(false)]
+
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
         unsafe internal static extern LRESULT DefRawInputProc(IntPtr RawInput, INT Input, UINT SizeHeader);
@@ -1026,7 +1026,7 @@ namespace OpenMobile.Platform.Windows
         /// <returns>
         /// TRUE if the function succeeds; otherwise, FALSE. If the function fails, call GetLastError for more information.
         /// </returns>
-        [CLSCompliant(false)]
+
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern BOOL RegisterRawInputDevices(
@@ -1062,7 +1062,7 @@ namespace OpenMobile.Platform.Windows
         /// of RawInput structures written to Data.
         /// If an error occurs, the return value is (UINT)-1. Call GetLastError for the error code.
         /// </returns>
-        [CLSCompliant(false)]
+
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern UINT GetRawInputBuffer(
@@ -1117,7 +1117,7 @@ namespace OpenMobile.Platform.Windows
         /// If the function fails for any other reason, it returns -1. For more details, call GetLastError.
         /// </para>
         /// </returns>
-        [CLSCompliant(false)]
+
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern UINT GetRegisteredRawInputDevices(
             [Out] RawInput[] RawInputDevices,
@@ -1163,7 +1163,7 @@ namespace OpenMobile.Platform.Windows
         /// Calling GetLastError returns ERROR_INSUFFICIENT_BUFFER.
         /// On any other error, the function returns (UINT) -1 and GetLastError returns the error indication.
         /// </returns>
-        [CLSCompliant(false)]
+
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern UINT GetRawInputDeviceList(
             [In, Out] RawInputDeviceList[] RawInputDeviceList,
@@ -1205,7 +1205,7 @@ namespace OpenMobile.Platform.Windows
         /// Calling GetLastError returns ERROR_INSUFFICIENT_BUFFER.
         /// On any other error, the function returns (UINT) -1 and GetLastError returns the error indication.
         /// </returns>
-        [CLSCompliant(false)]
+
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern UINT GetRawInputDeviceList(
             [In, Out] IntPtr RawInputDeviceList,
@@ -1255,7 +1255,7 @@ namespace OpenMobile.Platform.Windows
         /// <para>If Data is not large enough for the data, the function returns -1. If Data is NULL, the function returns a value of zero. In both of these cases, Size is set to the minimum size required for the Data buffer.</para>
         /// <para>Call GetLastError to identify any other errors.</para>
         /// </returns>
-        [CLSCompliant(false)]
+
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern UINT GetRawInputDeviceInfo(
@@ -1305,7 +1305,7 @@ namespace OpenMobile.Platform.Windows
         /// <para>If Data is not large enough for the data, the function returns -1. If Data is NULL, the function returns a value of zero. In both of these cases, Size is set to the minimum size required for the Data buffer.</para>
         /// <para>Call GetLastError to identify any other errors.</para>
         /// </returns>
-        [CLSCompliant(false)]
+
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern UINT GetRawInputDeviceInfo(
@@ -1350,7 +1350,7 @@ namespace OpenMobile.Platform.Windows
         /// <remarks>
         /// GetRawInputData gets the raw input one RawInput structure at a time. In contrast, GetRawInputBuffer gets an array of RawInput structures.
         /// </remarks>
-        [CLSCompliant(false)]
+
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern UINT GetRawInputData(
@@ -1392,7 +1392,7 @@ namespace OpenMobile.Platform.Windows
         /// <remarks>
         /// GetRawInputData gets the raw input one RawInput structure at a time. In contrast, GetRawInputBuffer gets an array of RawInput structures.
         /// </remarks>
-        [CLSCompliant(false)]
+
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern UINT GetRawInputData(
@@ -4182,7 +4182,7 @@ namespace OpenMobile.Platform.Windows
 
     #region Message
 
-    [StructLayout(LayoutKind.Sequential), CLSCompliant(false)]
+    [StructLayout(LayoutKind.Sequential)]//, CLSCompliant(false)]
     internal struct MSG
     {
         internal IntPtr HWnd;

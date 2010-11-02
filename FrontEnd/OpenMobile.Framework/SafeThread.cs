@@ -29,6 +29,11 @@ namespace OpenMobile.Threading
     /// </summary>
     public static class SafeThread
     {
+        /// <summary>
+        /// Creates a new asynchronous safe thread
+        /// </summary>
+        /// <param name="function"></param>
+        /// <param name="host"></param>
         public static void Asynchronous(Function function,IPluginHost host)
         {
             new Thread(delegate()
@@ -44,6 +49,12 @@ namespace OpenMobile.Threading
                     }
                 }).Start();
         }
+        /// <summary>
+        /// Creates a new asynchronous safe thread
+        /// </summary>
+        /// <param name="function"></param>
+        /// <param name="args"></param>
+        /// <param name="host"></param>
         public static void Asynchronous(Delegate function,object[] args, IPluginHost host)
         {
             new Thread(delegate()

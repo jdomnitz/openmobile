@@ -32,7 +32,6 @@ namespace OpenMobile.Platform.Windows
             return Delegates.wglMakeCurrent((IntPtr)hDc, (IntPtr)newContext);
         }
 
-        [System.CLSCompliant(false)]
         public static 
         Boolean CopyContext(IntPtr hglrcSrc, IntPtr hglrcDst, UInt32 mask)
         {
@@ -69,14 +68,14 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe int ChoosePixelFormat(IntPtr hDc, PixelFormatDescriptor* pPfd)
         {
             return Delegates.wglChoosePixelFormat((IntPtr)hDc, (PixelFormatDescriptor*)pPfd);
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         int DescribePixelFormat(IntPtr hdc, int ipfd, UInt32 cjpfd, PixelFormatDescriptor[] ppfd)
         {
@@ -101,7 +100,7 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         int DescribePixelFormat(IntPtr hdc, int ipfd, UInt32 cjpfd, ref PixelFormatDescriptor ppfd)
         {
@@ -126,14 +125,14 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe int DescribePixelFormat(IntPtr hdc, int ipfd, UInt32 cjpfd, PixelFormatDescriptor* ppfd)
         {
             return Delegates.wglDescribePixelFormat((IntPtr)hdc, (int)ipfd, (UInt32)cjpfd, (PixelFormatDescriptor*)ppfd);
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe int DescribePixelFormat(IntPtr hdc, int ipfd, Int32 cjpfd, PixelFormatDescriptor* ppfd)
         {
@@ -188,7 +187,7 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe Boolean SetPixelFormat(IntPtr hdc, int ipfd, PixelFormatDescriptor* ppfd)
         {
@@ -213,7 +212,7 @@ namespace OpenMobile.Platform.Windows
             return Delegates.wglCreateLayerContext((IntPtr)hDc, (int)level);
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         Boolean DescribeLayerPlane(IntPtr hDc, int pixelFormat, int layerPlane, UInt32 nBytes, LayerPlaneDescriptor[] plpd)
         {
@@ -238,7 +237,7 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         Boolean DescribeLayerPlane(IntPtr hDc, int pixelFormat, int layerPlane, UInt32 nBytes, ref LayerPlaneDescriptor plpd)
         {
@@ -263,14 +262,14 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe Boolean DescribeLayerPlane(IntPtr hDc, int pixelFormat, int layerPlane, UInt32 nBytes, LayerPlaneDescriptor* plpd)
         {
             return Delegates.wglDescribeLayerPlane((IntPtr)hDc, (int)pixelFormat, (int)layerPlane, (UInt32)nBytes, (LayerPlaneDescriptor*)plpd);
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe Boolean DescribeLayerPlane(IntPtr hDc, int pixelFormat, int layerPlane, Int32 nBytes, LayerPlaneDescriptor* plpd)
         {
@@ -301,7 +300,7 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe int SetLayerPaletteEntries(IntPtr hdc, int iLayerPlane, int iStart, int cEntries, Int32* pcr)
         {
@@ -332,7 +331,7 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe int GetLayerPaletteEntries(IntPtr hdc, int iLayerPlane, int iStart, int cEntries, Int32* pcr)
         {
@@ -345,7 +344,7 @@ namespace OpenMobile.Platform.Windows
             return Delegates.wglRealizeLayerPalette((IntPtr)hdc, (int)iLayerPlane, (Boolean)bRealize);
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         Boolean SwapLayerBuffers(IntPtr hdc, UInt32 fuFlags)
         {
@@ -394,7 +393,7 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe Boolean UseFontOutlinesA(IntPtr hDC, Int32 first, Int32 count, Int32 listBase, float thickness, float deviation, Int32 fontMode, GlyphMetricsFloat* glyphMetrics)
         {
@@ -425,7 +424,7 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe Boolean UseFontOutlinesW(IntPtr hDC, Int32 first, Int32 count, Int32 listBase, float thickness, float deviation, Int32 fontMode, GlyphMetricsFloat* glyphMetrics)
         {
@@ -438,7 +437,7 @@ namespace OpenMobile.Platform.Windows
             return Delegates.wglMakeContextCurrentEXT((IntPtr)hDrawDC, (IntPtr)hReadDC, (IntPtr)hglrc);
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         Boolean ChoosePixelFormatEXT(IntPtr hdc, int[] piAttribIList, Single[] pfAttribFList, UInt32 nMaxFormats, [Out] int[] piFormats, [Out] UInt32[] nNumFormats)
         {
@@ -469,7 +468,7 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         Boolean ChoosePixelFormatEXT(IntPtr hdc, ref int piAttribIList, ref Single pfAttribFList, UInt32 nMaxFormats, [Out] out int piFormats, [Out] out UInt32 nNumFormats)
         {
@@ -506,14 +505,14 @@ namespace OpenMobile.Platform.Windows
             }
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe Boolean ChoosePixelFormatEXT(IntPtr hdc, int* piAttribIList, Single* pfAttribFList, UInt32 nMaxFormats, [Out] int* piFormats, [Out] UInt32* nNumFormats)
         {
             return Delegates.wglChoosePixelFormatEXT((IntPtr)hdc, (int*)piAttribIList, (Single*)pfAttribFList, (UInt32)nMaxFormats, (int*)piFormats, (UInt32*)nNumFormats);
         }
 
-        [System.CLSCompliant(false)]
+
         public static 
         unsafe Boolean ChoosePixelFormatEXT(IntPtr hdc, int* piAttribIList, Single* pfAttribFList, Int32 nMaxFormats, [Out] int* piFormats, [Out] Int32* nNumFormats)
         {
@@ -522,7 +521,7 @@ namespace OpenMobile.Platform.Windows
 
         public static partial class Arb
         {
-            [CLSCompliant(false)]
+    
             unsafe public static
             IntPtr CreateContextAttribs(IntPtr hDC, IntPtr hShareContext, int* attribList)
             {
@@ -553,7 +552,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
             
-            [System.CLSCompliant(false)]
+    
             public static 
             IntPtr CreateBufferRegion(IntPtr hDC, int iLayerPlane, UInt32 uType)
             {
@@ -593,7 +592,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, int[] piAttributes, [Out] int[] piValues)
             {
@@ -620,7 +619,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, ref int piAttributes, [Out] out int piValues)
             {
@@ -651,21 +650,21 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, int* piAttributes, [Out] int* piValues)
             {
                 return Delegates.wglGetPixelFormatAttribivARB((IntPtr)hdc, (int)iPixelFormat, (int)iLayerPlane, (UInt32)nAttributes, (int*)piAttributes, (int*)piValues);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, Int32 nAttributes, int* piAttributes, [Out] int* piValues)
             {
                 return Delegates.wglGetPixelFormatAttribivARB((IntPtr)hdc, (int)iPixelFormat, (int)iLayerPlane, (UInt32)nAttributes, (int*)piAttributes, (int*)piValues);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, int[] piAttributes, [Out] Single[] pfValues)
             {
@@ -692,7 +691,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, ref int piAttributes, [Out] out Single pfValues)
             {
@@ -723,21 +722,21 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, int* piAttributes, [Out] Single* pfValues)
             {
                 return Delegates.wglGetPixelFormatAttribfvARB((IntPtr)hdc, (int)iPixelFormat, (int)iLayerPlane, (UInt32)nAttributes, (int*)piAttributes, (Single*)pfValues);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, Int32 nAttributes, int* piAttributes, [Out] Single* pfValues)
             {
                 return Delegates.wglGetPixelFormatAttribfvARB((IntPtr)hdc, (int)iPixelFormat, (int)iLayerPlane, (UInt32)nAttributes, (int*)piAttributes, (Single*)pfValues);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean ChoosePixelFormat(IntPtr hdc, int[] piAttribIList, Single[] pfAttribFList, UInt32 nMaxFormats, [Out] int[] piFormats, [Out] UInt32[] nNumFormats)
             {
@@ -768,7 +767,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean ChoosePixelFormat(IntPtr hdc, ref int piAttribIList, ref Single pfAttribFList, UInt32 nMaxFormats, [Out] out int piFormats, [Out] out UInt32 nNumFormats)
             {
@@ -805,14 +804,14 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean ChoosePixelFormat(IntPtr hdc, int* piAttribIList, Single* pfAttribFList, UInt32 nMaxFormats, [Out] int* piFormats, [Out] UInt32* nNumFormats)
             {
                 return Delegates.wglChoosePixelFormatARB((IntPtr)hdc, (int*)piAttribIList, (Single*)pfAttribFList, (UInt32)nMaxFormats, (int*)piFormats, (UInt32*)nNumFormats);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean ChoosePixelFormat(IntPtr hdc, int* piAttribIList, Single* pfAttribFList, Int32 nMaxFormats, [Out] int* piFormats, [Out] Int32* nNumFormats)
             {
@@ -855,7 +854,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe IntPtr CreatePbuffer(IntPtr hDC, int iPixelFormat, int iWidth, int iHeight, int* piAttribList)
             {
@@ -906,7 +905,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean QueryPbuffer(IntPtr hPbuffer, int iAttribute, [Out] int* piValue)
             {
@@ -949,7 +948,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean SetPbufferAttrib(IntPtr hPbuffer, int* piAttribList)
             {
@@ -960,7 +959,7 @@ namespace OpenMobile.Platform.Windows
 
         public static partial class Ext
         {
-            [System.CLSCompliant(false)]
+    
             public static 
             bool CreateDisplayColorTable(UInt16 id)
             {
@@ -973,7 +972,7 @@ namespace OpenMobile.Platform.Windows
                 return Delegates.wglCreateDisplayColorTableEXT((UInt16)id);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             bool LoadDisplayColorTable(UInt16[] table, UInt32 length)
             {
@@ -998,7 +997,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             bool LoadDisplayColorTable(ref UInt16 table, UInt32 length)
             {
@@ -1023,21 +1022,21 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe bool LoadDisplayColorTable(UInt16* table, UInt32 length)
             {
                 return Delegates.wglLoadDisplayColorTableEXT((UInt16*)table, (UInt32)length);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe bool LoadDisplayColorTable(Int16* table, Int32 length)
             {
                 return Delegates.wglLoadDisplayColorTableEXT((UInt16*)table, (UInt32)length);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             bool BindDisplayColorTable(UInt16 id)
             {
@@ -1050,7 +1049,7 @@ namespace OpenMobile.Platform.Windows
                 return Delegates.wglBindDisplayColorTableEXT((UInt16)id);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             void DestroyDisplayColorTable(UInt16 id)
             {
@@ -1102,7 +1101,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe IntPtr CreatePbuffer(IntPtr hDC, int iPixelFormat, int iWidth, int iHeight, int* piAttribList)
             {
@@ -1153,14 +1152,14 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean QueryPbuffer(IntPtr hPbuffer, int iAttribute, [Out] int* piValue)
             {
                 return Delegates.wglQueryPbufferEXT((IntPtr)hPbuffer, (int)iAttribute, (int*)piValue);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, [Out] int[] piAttributes, [Out] int[] piValues)
             {
@@ -1187,7 +1186,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, [Out] out int piAttributes, [Out] out int piValues)
             {
@@ -1220,21 +1219,21 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, [Out] int* piAttributes, [Out] int* piValues)
             {
                 return Delegates.wglGetPixelFormatAttribivEXT((IntPtr)hdc, (int)iPixelFormat, (int)iLayerPlane, (UInt32)nAttributes, (int*)piAttributes, (int*)piValues);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, Int32 nAttributes, [Out] int* piAttributes, [Out] int* piValues)
             {
                 return Delegates.wglGetPixelFormatAttribivEXT((IntPtr)hdc, (int)iPixelFormat, (int)iLayerPlane, (UInt32)nAttributes, (int*)piAttributes, (int*)piValues);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, [Out] int[] piAttributes, [Out] Single[] pfValues)
             {
@@ -1261,7 +1260,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, [Out] out int piAttributes, [Out] out Single pfValues)
             {
@@ -1294,14 +1293,14 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, UInt32 nAttributes, [Out] int* piAttributes, [Out] Single* pfValues)
             {
                 return Delegates.wglGetPixelFormatAttribfvEXT((IntPtr)hdc, (int)iPixelFormat, (int)iLayerPlane, (UInt32)nAttributes, (int*)piAttributes, (Single*)pfValues);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetPixelFormatAttrib(IntPtr hdc, int iPixelFormat, int iLayerPlane, Int32 nAttributes, [Out] int* piAttributes, [Out] Single* pfValues)
             {
@@ -1324,7 +1323,7 @@ namespace OpenMobile.Platform.Windows
 
         public static partial class NV
         {
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe IntPtr AllocateMemory(Int32 size, Single readfreq, Single writefreq, Single priority)
             {
@@ -1393,7 +1392,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetSyncValues(IntPtr hdc, [Out] Int64* ust, [Out] Int64* msc, [Out] Int64* sbc)
             {
@@ -1429,7 +1428,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetMscRate(IntPtr hdc, [Out] Int32* numerator, [Out] Int32* denominator)
             {
@@ -1480,7 +1479,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean WaitForMsc(IntPtr hdc, Int64 target_msc, Int64 divisor, Int64 remainder, [Out] Int64* ust, [Out] Int64* msc, [Out] Int64* sbc)
             {
@@ -1519,7 +1518,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean WaitForSbc(IntPtr hdc, Int64 target_sbc, [Out] Int64* ust, [Out] Int64* msc, [Out] Int64* sbc)
             {
@@ -1556,7 +1555,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetDigitalVideoParameters(IntPtr hDC, int iAttribute, [Out] int* piValue)
             {
@@ -1587,7 +1586,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean SetDigitalVideoParameters(IntPtr hDC, int iAttribute, int* piValue)
             {
@@ -1620,7 +1619,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGammaTableParameters(IntPtr hDC, int iAttribute, [Out] int* piValue)
             {
@@ -1651,14 +1650,14 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean SetGammaTableParameters(IntPtr hDC, int iAttribute, int* piValue)
             {
                 return Delegates.wglSetGammaTableParametersI3D((IntPtr)hDC, (int)iAttribute, (int*)piValue);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGammaTable(IntPtr hDC, int iEntries, [Out] UInt16[] puRed, [Out] UInt16[] puGreen, [Out] UInt16[] puBlue)
             {
@@ -1687,7 +1686,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGammaTable(IntPtr hDC, int iEntries, [Out] out UInt16 puRed, [Out] out UInt16 puGreen, [Out] out UInt16 puBlue)
             {
@@ -1724,21 +1723,21 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGammaTable(IntPtr hDC, int iEntries, [Out] UInt16* puRed, [Out] UInt16* puGreen, [Out] UInt16* puBlue)
             {
                 return Delegates.wglGetGammaTableI3D((IntPtr)hDC, (int)iEntries, (UInt16*)puRed, (UInt16*)puGreen, (UInt16*)puBlue);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGammaTable(IntPtr hDC, int iEntries, [Out] Int16* puRed, [Out] Int16* puGreen, [Out] Int16* puBlue)
             {
                 return Delegates.wglGetGammaTableI3D((IntPtr)hDC, (int)iEntries, (UInt16*)puRed, (UInt16*)puGreen, (UInt16*)puBlue);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean SetGammaTable(IntPtr hDC, int iEntries, UInt16[] puRed, UInt16[] puGreen, UInt16[] puBlue)
             {
@@ -1767,7 +1766,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean SetGammaTable(IntPtr hDC, int iEntries, ref UInt16 puRed, ref UInt16 puGreen, ref UInt16 puBlue)
             {
@@ -1796,14 +1795,14 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean SetGammaTable(IntPtr hDC, int iEntries, UInt16* puRed, UInt16* puGreen, UInt16* puBlue)
             {
                 return Delegates.wglSetGammaTableI3D((IntPtr)hDC, (int)iEntries, (UInt16*)puRed, (UInt16*)puGreen, (UInt16*)puBlue);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean SetGammaTable(IntPtr hDC, int iEntries, Int16* puRed, Int16* puGreen, Int16* puBlue)
             {
@@ -1848,14 +1847,14 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean IsEnabledGenlock(IntPtr hDC, [Out] Boolean* pFlag)
             {
                 return Delegates.wglIsEnabledGenlockI3D((IntPtr)hDC, (Boolean*)pFlag);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GenlockSource(IntPtr hDC, UInt32 uSource)
             {
@@ -1868,7 +1867,7 @@ namespace OpenMobile.Platform.Windows
                 return Delegates.wglGenlockSourceI3D((IntPtr)hDC, (UInt32)uSource);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGenlockSource(IntPtr hDC, [Out] UInt32[] uSource)
             {
@@ -1893,7 +1892,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGenlockSource(IntPtr hDC, [Out] out UInt32 uSource)
             {
@@ -1922,21 +1921,21 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGenlockSource(IntPtr hDC, [Out] UInt32* uSource)
             {
                 return Delegates.wglGetGenlockSourceI3D((IntPtr)hDC, (UInt32*)uSource);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGenlockSource(IntPtr hDC, [Out] Int32* uSource)
             {
                 return Delegates.wglGetGenlockSourceI3D((IntPtr)hDC, (UInt32*)uSource);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GenlockSourceEdge(IntPtr hDC, UInt32 uEdge)
             {
@@ -1949,7 +1948,7 @@ namespace OpenMobile.Platform.Windows
                 return Delegates.wglGenlockSourceEdgeI3D((IntPtr)hDC, (UInt32)uEdge);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGenlockSourceEdge(IntPtr hDC, [Out] UInt32[] uEdge)
             {
@@ -1974,7 +1973,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGenlockSourceEdge(IntPtr hDC, [Out] out UInt32 uEdge)
             {
@@ -2003,21 +2002,21 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGenlockSourceEdge(IntPtr hDC, [Out] UInt32* uEdge)
             {
                 return Delegates.wglGetGenlockSourceEdgeI3D((IntPtr)hDC, (UInt32*)uEdge);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGenlockSourceEdge(IntPtr hDC, [Out] Int32* uEdge)
             {
                 return Delegates.wglGetGenlockSourceEdgeI3D((IntPtr)hDC, (UInt32*)uEdge);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GenlockSampleRate(IntPtr hDC, UInt32 uRate)
             {
@@ -2030,7 +2029,7 @@ namespace OpenMobile.Platform.Windows
                 return Delegates.wglGenlockSampleRateI3D((IntPtr)hDC, (UInt32)uRate);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGenlockSampleRate(IntPtr hDC, [Out] UInt32[] uRate)
             {
@@ -2055,7 +2054,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGenlockSampleRate(IntPtr hDC, [Out] out UInt32 uRate)
             {
@@ -2084,21 +2083,21 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGenlockSampleRate(IntPtr hDC, [Out] UInt32* uRate)
             {
                 return Delegates.wglGetGenlockSampleRateI3D((IntPtr)hDC, (UInt32*)uRate);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGenlockSampleRate(IntPtr hDC, [Out] Int32* uRate)
             {
                 return Delegates.wglGetGenlockSampleRateI3D((IntPtr)hDC, (UInt32*)uRate);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GenlockSourceDelay(IntPtr hDC, UInt32 uDelay)
             {
@@ -2111,7 +2110,7 @@ namespace OpenMobile.Platform.Windows
                 return Delegates.wglGenlockSourceDelayI3D((IntPtr)hDC, (UInt32)uDelay);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGenlockSourceDelay(IntPtr hDC, [Out] UInt32[] uDelay)
             {
@@ -2136,7 +2135,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean GetGenlockSourceDelay(IntPtr hDC, [Out] out UInt32 uDelay)
             {
@@ -2165,21 +2164,21 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGenlockSourceDelay(IntPtr hDC, [Out] UInt32* uDelay)
             {
                 return Delegates.wglGetGenlockSourceDelayI3D((IntPtr)hDC, (UInt32*)uDelay);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetGenlockSourceDelay(IntPtr hDC, [Out] Int32* uDelay)
             {
                 return Delegates.wglGetGenlockSourceDelayI3D((IntPtr)hDC, (UInt32*)uDelay);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean QueryGenlockMaxSourceDelay(IntPtr hDC, [Out] UInt32[] uMaxLineDelay, [Out] UInt32[] uMaxPixelDelay)
             {
@@ -2206,7 +2205,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean QueryGenlockMaxSourceDelay(IntPtr hDC, [Out] out UInt32 uMaxLineDelay, [Out] out UInt32 uMaxPixelDelay)
             {
@@ -2239,28 +2238,28 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean QueryGenlockMaxSourceDelay(IntPtr hDC, [Out] UInt32* uMaxLineDelay, [Out] UInt32* uMaxPixelDelay)
             {
                 return Delegates.wglQueryGenlockMaxSourceDelayI3D((IntPtr)hDC, (UInt32*)uMaxLineDelay, (UInt32*)uMaxPixelDelay);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean QueryGenlockMaxSourceDelay(IntPtr hDC, [Out] Int32* uMaxLineDelay, [Out] Int32* uMaxPixelDelay)
             {
                 return Delegates.wglQueryGenlockMaxSourceDelayI3D((IntPtr)hDC, (UInt32*)uMaxLineDelay, (UInt32*)uMaxPixelDelay);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe IntPtr CreateImageBuffer(IntPtr hDC, Int32 dwSize, UInt32 uFlags)
             {
                 return Delegates.wglCreateImageBufferI3D((IntPtr)hDC, (Int32)dwSize, (UInt32)uFlags);
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe IntPtr CreateImageBuffer(IntPtr hDC, Int32 dwSize, Int32 uFlags)
             {
@@ -2293,7 +2292,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean AssociateImageBufferEvents(IntPtr hDC, IntPtr[] pEvent, IntPtr pAddress, Int32[] pSize, UInt32 count)
             {
@@ -2320,7 +2319,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean AssociateImageBufferEvents(IntPtr hDC, IntPtr[] pEvent, [In, Out] object pAddress, Int32[] pSize, UInt32 count)
             {
@@ -2363,7 +2362,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean AssociateImageBufferEvents(IntPtr hDC, IntPtr[] pEvent, [In, Out] object pAddress, ref Int32 pSize, UInt32 count)
             {
@@ -2406,7 +2405,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean AssociateImageBufferEvents(IntPtr hDC, ref IntPtr pEvent, [In, Out] object pAddress, Int32[] pSize, UInt32 count)
             {
@@ -2449,7 +2448,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean AssociateImageBufferEvents(IntPtr hDC, ref IntPtr pEvent, [In, Out] object pAddress, ref Int32 pSize, UInt32 count)
             {
@@ -2492,7 +2491,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean AssociateImageBufferEvents(IntPtr hDC, IntPtr* pEvent, [In, Out] object pAddress, Int32* pSize, UInt32 count)
             {
@@ -2507,7 +2506,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean AssociateImageBufferEvents(IntPtr hDC, IntPtr* pEvent, [In, Out] object pAddress, Int32* pSize, Int32 count)
             {
@@ -2522,7 +2521,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean AssociateImageBufferEvents(IntPtr hDC, IntPtr* pEvent, [In, Out] object pAddress, Int32[] pSize, UInt32 count)
             {
@@ -2543,7 +2542,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean AssociateImageBufferEvents(IntPtr hDC, IntPtr* pEvent, [In, Out] object pAddress, Int32[] pSize, Int32 count)
             {
@@ -2564,7 +2563,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean AssociateImageBufferEvents(IntPtr hDC, IntPtr* pEvent, [In, Out] object pAddress, ref Int32 pSize, UInt32 count)
             {
@@ -2585,7 +2584,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean AssociateImageBufferEvents(IntPtr hDC, IntPtr* pEvent, [In, Out] object pAddress, ref Int32 pSize, Int32 count)
             {
@@ -2606,7 +2605,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean ReleaseImageBufferEvents(IntPtr hDC, IntPtr pAddress, UInt32 count)
             {
@@ -2625,7 +2624,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             Boolean ReleaseImageBufferEvents(IntPtr hDC, [In, Out] object pAddress, UInt32 count)
             {
@@ -2698,7 +2697,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean IsEnabledFrameLock([Out] Boolean* pFlag)
             {
@@ -2731,7 +2730,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean QueryFrameLockMaster([Out] Boolean* pFlag)
             {
@@ -2764,7 +2763,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean GetFrameUsage([Out] float* pUsage)
             {
@@ -2815,7 +2814,7 @@ namespace OpenMobile.Platform.Windows
                 }
             }
 
-            [System.CLSCompliant(false)]
+    
             public static 
             unsafe Boolean QueryFrameTracking([Out] Int32* pFrameCount, [Out] Int32* pMissedFrames, [Out] float* pLastMissedUsage)
             {

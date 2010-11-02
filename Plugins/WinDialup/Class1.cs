@@ -34,7 +34,6 @@ namespace WinDialup
 
         public event WirelessEvent OnWirelessEvent;
         private IntPtr conPtr=IntPtr.Zero;
-        bool m_connected;
 
         public connectionInfo[] getAvailableNetworks()
         {
@@ -47,15 +46,10 @@ namespace WinDialup
             int lpcConnections = 0;
 
             int nRet = RAS.RasEnumConnections(ref lprasConn, ref lpcb,ref lpcConnections);
-            if (nRet != 0)
-                m_connected = false;
-            else if (lpcConnections > 0)
+            if (lpcConnections > 0)
             {
                 conPtr = lprasConn.hrasconn;
-                m_connected = true;
             }
-            else
-                m_connected = false;
 
             int lpNames = 10;
             int entryNameSize = Marshal.SizeOf(typeof(RasEntryName));

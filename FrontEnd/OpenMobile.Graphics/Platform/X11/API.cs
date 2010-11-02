@@ -842,7 +842,7 @@ XF86VidModeGetGammaRampSize(
     /// <summary>
     /// Defines LATIN-1 and miscellaneous keys.
     /// </summary>
-    [CLSCompliant(false)]
+
     internal enum XKey
     {
         /*
@@ -1338,15 +1338,15 @@ XF86VidModeGetGammaRampSize(
         [DllImport(XrandrLibrary)]
         public static extern void XRRFreeScreenConfigInfo(XRRScreenConfiguration config);
 
-        [DllImport(XrandrLibrary)]
+        [DllImport(XrandrLibrary)]//,CLSCompliant(false)]
         public static extern Status XRRSetScreenConfig(Display dpy, XRRScreenConfiguration config,
             Drawable draw, int size_index, ref Rotation rotation, Time timestamp);
 
-        [DllImport(XrandrLibrary)]
+        [DllImport(XrandrLibrary)]//, CLSCompliant(false)]
         public static extern Status XRRSetScreenConfigAndRate(Display dpy, XRRScreenConfiguration config,
             Drawable draw, int size_index, Rotation rotation, short rate, Time timestamp);
 
-        [DllImport(XrandrLibrary)]
+        [DllImport(XrandrLibrary)]//, CLSCompliant(false)]
         public static extern Rotation XRRConfigRotations(XRRScreenConfiguration config, ref Rotation current_rotation);
 
         [DllImport(XrandrLibrary)]
@@ -1356,10 +1356,10 @@ XF86VidModeGetGammaRampSize(
         [return: MarshalAs(UnmanagedType.LPStruct)]
         public static extern XRRScreenSize XRRConfigSizes(XRRScreenConfiguration config, int[] nsizes);
 
-        [DllImport(XrandrLibrary)]
+        [DllImport(XrandrLibrary)]//, CLSCompliant(false)]
         unsafe public static extern short* XRRConfigRates(XRRScreenConfiguration config, int size_index, int[] nrates);
 
-        [DllImport(XrandrLibrary)]
+        [DllImport(XrandrLibrary)]//, CLSCompliant(false)]
         public static extern SizeID XRRConfigCurrentConfiguration(XRRScreenConfiguration config, out Rotation rotation);
 
         [DllImport(XrandrLibrary)]
@@ -1389,7 +1389,7 @@ XF86VidModeGetGammaRampSize(
          * the following are always safe to call, even if RandR is
          * not implemented on a screen
          */
-        [DllImport(XrandrLibrary)]
+        [DllImport(XrandrLibrary)]//, CLSCompliant(false)]
         public static extern Rotation XRRRotations(Display dpy, int screen, ref Rotation current_rotation);
 
         [DllImport(XrandrLibrary)]
@@ -1491,7 +1491,7 @@ XF86VidModeGetGammaRampSize(
             }
         }
 
-        [DllImport(X11Library)]
+        [DllImport(X11Library)]//, CLSCompliant(false)]
         unsafe public static extern Pixmap XCreateBitmapFromData(Display display, Window d, byte* data, int width, int height);
 
         [DllImport("libX11", EntryPoint = "XAllocColor")]

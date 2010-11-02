@@ -203,7 +203,7 @@ namespace OpenMobile
         /// Checks whether type is a blittable value type.
         /// </summary>
         /// <param name="type">An instance of the type to check.</param>
-        [CLSCompliant(false)]
+
         public static bool Check<T>(T[][] type)
         {
             return BlittableValueType<T>.Check();

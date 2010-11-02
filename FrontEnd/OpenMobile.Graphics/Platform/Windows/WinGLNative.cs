@@ -94,7 +94,7 @@ namespace OpenMobile.Platform.Windows
 
         #region Contructors
         uint queryDisableAutoplay=0;
-        WinRawInput raw;
+
         public WinGLNative(int x, int y, int width, int height, string title, GameWindowFlags options, DisplayDevice device)
         {
             // This is the main window procedure callback. We need the callback in order to create the window, so
@@ -1052,9 +1052,9 @@ namespace OpenMobile.Platform.Windows
 
         public event EventHandler<EventArgs> Closed;
 
-        public event EventHandler<EventArgs> ClientSizeChanged;
+        //public event EventHandler<EventArgs> ClientSizeChanged;
 
-        public event EventHandler<EventArgs> WindowInfoChanged;
+        //public event EventHandler<EventArgs> WindowInfoChanged;
 
         public event EventHandler<EventArgs> WindowBorderChanged;
 

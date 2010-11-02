@@ -35,6 +35,7 @@ namespace OpenMobile.Media
         /// </summary>
         /// <param name="host"></param>
         /// <param name="list"></param>
+        /// <param name="dbname"></param>
         /// <returns></returns>
         public static bool loadArtists(IPluginHost host, OpenMobile.Controls.IList list,string dbname)
         {
@@ -65,6 +66,10 @@ namespace OpenMobile.Media
         /// <param name="host"></param>
         /// <param name="artist"></param>
         /// <param name="list"></param>
+        /// <param name="dbname"></param>
+        /// <param name="format"></param>
+        /// <param name="clear"></param>
+        /// <param name="noCover"></param>
         /// <returns></returns>
         public static bool loadAlbums(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
         {
@@ -103,9 +108,11 @@ namespace OpenMobile.Media
         /// Loads all songs from the given artist
         /// </summary>
         /// <param name="host"></param>
-        /// <param name="artist"></param>
         /// <param name="list"></param>
         /// <returns></returns>
+        /// <param name="dbname"></param>
+        /// <param name="format"></param>
+        /// <param name="noCover"></param>
         public static bool loadSongs(IPluginHost host, IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {
             if (dbname == "")
@@ -143,6 +150,8 @@ namespace OpenMobile.Media
         /// <param name="artist"></param>
         /// <param name="list"></param>
         /// <param name="format"></param>
+        /// <param name="dbname"></param>
+        /// <param name="noCover"></param>
         /// <returns></returns>
         public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {
@@ -156,6 +165,8 @@ namespace OpenMobile.Media
         /// <param name="list"></param>
         /// <param name="clear"></param>
         /// <param name="format"></param>
+        /// <param name="dbname"></param>
+        /// <param name="noCover"></param>
         /// <returns></returns>
         public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
         {
@@ -198,6 +209,9 @@ namespace OpenMobile.Media
         /// <param name="artist"></param>
         /// <param name="album"></param>
         /// <param name="list"></param>
+        /// <param name="dbname"></param>
+        /// <param name="format"></param>
+        /// <param name="noCover"></param>
         /// <returns></returns>
         public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {

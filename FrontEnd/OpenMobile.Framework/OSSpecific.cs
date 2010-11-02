@@ -27,25 +27,76 @@ using System.Runtime.InteropServices;
 
 namespace OpenMobile.Framework
 {
+    /// <summary>
+    /// Type of drive
+    /// </summary>
 	public enum eDriveType
 	{
+        /// <summary>
+        /// Unknown
+        /// </summary>
 		Unknown = 0,
+        /// <summary>
+        /// Reserved
+        /// </summary>
 		NoRootDirectory = 1,
+        /// <summary>
+        /// Removable storage
+        /// </summary>
 		Removable = 2,
+        /// <summary>
+        /// Internal
+        /// </summary>
 		Fixed = 3,
+        /// <summary>
+        /// Network drive
+        /// </summary>
 		Network = 4,
+        /// <summary>
+        /// CD/DVD/Blu-Ray
+        /// </summary>
 		CDRom = 5,
+        /// <summary>
+        /// Smart Phone
+        /// </summary>
 		Phone = 7,
+        /// <summary>
+        /// Apple Device (iPod)
+        /// </summary>
 		iPod = 8
 	}
+    /// <summary>
+    /// CPU Architecture
+    /// </summary>
 	public enum eArchType
 	{
+        /// <summary>
+        /// Unknown Architecture
+        /// </summary>
 		Unknown,
+        /// <summary>
+        /// x86/i386/i386/i586/i686
+        /// </summary>
 		x86,
+        /// <summary>
+        /// x86_64 and ia64
+        /// </summary>
 		x64,
+        /// <summary>
+        /// ARM
+        /// </summary>
 		ARM,
+        /// <summary>
+        /// MIPS
+        /// </summary>
 		MIPS,
+        /// <summary>
+        /// Power PC
+        /// </summary>
 		PowerPC,
+        /// <summary>
+        /// Sparc
+        /// </summary>
 		Sparc
 	}
 

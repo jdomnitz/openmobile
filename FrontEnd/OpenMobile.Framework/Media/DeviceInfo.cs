@@ -26,9 +26,17 @@ using OpenMobile.Plugin;
 
 namespace OpenMobile.Media
 {
+    /// <summary>
+    /// Retrieves information on available drives
+    /// </summary>
     public sealed class DeviceInfo
     {
         private static List<DeviceInfo> AllDevices = new List<DeviceInfo>();
+        /// <summary>
+        /// List all available devices
+        /// </summary>
+        /// <param name="theHost"></param>
+        /// <returns></returns>
         public static List<DeviceInfo> EnumerateDevices(IPluginHost theHost)
         {
             lock (AllDevices)
@@ -43,6 +51,11 @@ namespace OpenMobile.Media
                 return AllDevices;
             }
         }
+        /// <summary>
+        /// Get information for the given drive path
+        /// </summary>
+        /// <param name="drive"></param>
+        /// <returns></returns>
         public static DeviceInfo get(string drive)
         {
             return AllDevices.Find(p => p.path == drive);
