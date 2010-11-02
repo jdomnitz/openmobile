@@ -134,7 +134,10 @@ namespace OMDebug
 
         void theHost_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
         {
-            if ((function == eFunction.userInputReady) || (function == eFunction.gesture)||(function==eFunction.systemVolumeChanged))
+            if ((function == eFunction.userInputReady)
+                || (function == eFunction.gesture)
+                || (function == eFunction.multiTouchGesture)
+                ||(function==eFunction.systemVolumeChanged))
                 return; //Protect Users Privacy - Potentially contains password info
             log(function.ToString() + "(" + arg1 + "," + arg2 + "," + arg3 + ")");
         }

@@ -246,7 +246,8 @@ namespace OpenMobile.Platform.Windows
                     if (KeyPress != null)
                         KeyPress(this, key_press);
                     break;
-
+                case WindowMessage.GESTURE:
+                    return gestureDecoder(handle, message, wParam, lParam);
                 case WindowMessage.MOUSEMOVE:
                     Point point = new Point(
                         (short)((uint)lParam.ToInt32() & 0x0000FFFF),
@@ -448,6 +449,32 @@ namespace OpenMobile.Platform.Windows
             }
             if (message == (WindowMessage)queryDisableAutoplay)
                 return new IntPtr(1);
+            return Functions.DefWindowProc(handle, message, wParam, lParam);
+        }
+
+        private IntPtr gestureDecoder(IntPtr handle, WindowMessage message, IntPtr wParam, IntPtr lParam)
+        {
+            GESTUREINFO info = new GESTUREINFO();
+            info.cbSize = (uint)Marshal.SizeOf(info);
+            if (Functions.GetGestureInfo(lParam, info))
+            {
+                switch (info.dwID)
+                {
+                    case 3: //zoom
+                        if (Gesture != null)
+                            Gesture(this, new TouchEventArgs("Zoom", info.ptLocation,info.ullArguments,null));
+                        return IntPtr.Zero;
+                    case 4: //pan
+                        if (Gesture != null)
+                            Gesture(this, new TouchEventArgs("Pan", info.ptLocation, info.ullArguments, null));
+                        return IntPtr.Zero;
+                    case 5: //rotate
+                        double distance = ((info.ullArguments / 65535.0) * 4.0 * Math.PI) - 2.0 * Math.PI;
+                        if (Gesture != null)
+                            Gesture(this, new TouchEventArgs("Rotate", info.ptLocation, distance, null));
+                        return IntPtr.Zero;
+                }
+            }
             return Functions.DefWindowProc(handle, message, wParam, lParam);
         }
 
@@ -1038,6 +1065,8 @@ namespace OpenMobile.Platform.Windows
         public event EventHandler<EventArgs> MouseEnter;
 
         public event EventHandler<EventArgs> MouseLeave;
+
+        public event EventHandler<TouchEventArgs> Gesture;
 
         #endregion
 

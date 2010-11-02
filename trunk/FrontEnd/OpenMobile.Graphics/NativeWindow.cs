@@ -522,6 +522,7 @@ namespace OpenMobile
         /// </summary>
         public event EventHandler<EventArgs> WindowStateChanged;
 
+        public event EventHandler<TouchEventArgs> Gesture;
         #endregion
 
         #endregion
@@ -820,6 +821,7 @@ namespace OpenMobile
                     implementation.Resize += OnResizeInternal;
                     implementation.WindowBorderChanged += OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged += OnWindowStateChangedInternal;
+                    implementation.Gesture += Gesture;
                     events = true;
                 }
                 else if (events)
@@ -832,6 +834,7 @@ namespace OpenMobile
                     implementation.Resize -= OnResizeInternal;
                     implementation.WindowBorderChanged -= OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged -= OnWindowStateChangedInternal;
+                    implementation.Gesture -= Gesture;
                     events = false;
                 }
                 else

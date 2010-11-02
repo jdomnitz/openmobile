@@ -50,6 +50,7 @@ namespace OpenMobile
             this.Mouse.Move += new EventHandler<OpenMobile.Input.MouseMoveEventArgs>(InputRouter.dev_Move);
             this.Keyboard[0].KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
             this.Keyboard[0].KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
+            this.Gesture += new EventHandler<OpenMobile.Graphics.TouchEventArgs>(RenderingWindow_Gesture);
         }
         #endregion
         private System.Timers.Timer tmrClick;

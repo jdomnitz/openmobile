@@ -71,8 +71,36 @@ namespace OpenMobile.Graphics
         static extern int MessageBox(IntPtr hWnd, String text, String caption, int options);
     }
 
-    
-    
+    public class TouchEventArgs : EventArgs
+    {
+        string _name;
+        double _arg1;
+        string _arg2;
+        Point _pos;
+        public TouchEventArgs(string name, Point pos,double arg1, string arg2)
+        {
+            _name = name;
+            _arg1 = arg1;
+            _arg2 = arg2;
+            _pos = pos;
+        }
+        public Point Position
+        {
+            get { return _pos; }
+        }
+        public string Name
+        {
+            get { return _name; }
+        }
+        public double Arg1
+        {
+            get { return _arg1; }
+        }
+        public string Arg2
+        {
+            get { return _arg2; }
+        }
+    }
     public class KeyPressEventArgs : EventArgs
     {
         private bool handled;
