@@ -99,57 +99,59 @@ namespace BatterySupport
         }
 
         bool previouslyPluggedIn = true;
-        imageItem batteryImage;
+        imageItem batteryImage=new imageItem();
         void theHost_OnPowerChange(ePowerEvent type)
         {
-            if (type == ePowerEvent.SystemOnBattery)
+            lock (this)
             {
-                RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
-                batteryImage = theHost.getSkinImage("BatteryCharged", true);
-                batteryImage.image.persist = true;
-                System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
+                if (type == ePowerEvent.SystemOnBattery)
                 {
-                    OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
-                    gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
+                    RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
+                    batteryImage = theHost.getSkinImage("BatteryCharged", true);
+                    batteryImage.image.persist = true;
+                    System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
+                    {
+                        OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
+                        gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
+                    }
+                    g.Dispose();
+                    AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
+                    startWatching();
                 }
-                g.Dispose();
-                AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
-                startWatching();
-            }
-            else if (type == ePowerEvent.BatteryLow)
-            {
-                RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
-                batteryImage = theHost.getSkinImage("BatteryWarning", true);
-                batteryImage.image.persist = true;
-                System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
-                    OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
-                    gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
-                g.Dispose();
-                AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
-                startWatching();
-            }
-            else if (type == ePowerEvent.BatteryCritical)
-            {
-                RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
-                batteryImage = theHost.getSkinImage("BatteryCritical", true);
-                batteryImage.image.persist = true;
-                System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
-                    OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
-                    gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
-                g.Dispose();
-                AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
-                startWatching();
-            }
-            else if (type == ePowerEvent.SystemPluggedIn)
-            {
-                RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
-                if (batteryWatcher != null)
+                else if (type == ePowerEvent.BatteryLow)
                 {
-                    batteryWatcher.Abort();
-                    batteryWatcher = null;
+                    RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
+                    batteryImage = theHost.getSkinImage("BatteryWarning", true);
+                    batteryImage.image.persist = true;
+                    System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
+                    OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
+                    gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
+                    g.Dispose();
+                    AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
+                    startWatching();
+                }
+                else if (type == ePowerEvent.BatteryCritical)
+                {
+                    RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
+                    batteryImage = theHost.getSkinImage("BatteryCritical", true);
+                    batteryImage.image.persist = true;
+                    System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
+                    OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
+                    gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
+                    g.Dispose();
+                    AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
+                    startWatching();
+                }
+                else if (type == ePowerEvent.SystemPluggedIn)
+                {
+                    RemoveIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
+                    if (batteryWatcher != null)
+                    {
+                        batteryWatcher.Abort();
+                        batteryWatcher = null;
+                    }
                 }
             }
-
             // Added Action on Power Unplugged
             if (OnBatteryAction != "Nothing")
             {

@@ -169,9 +169,11 @@ namespace OpenMobile
             {
                 try
                 {
-                    theHost.sendMessage("OMDebug", "Plugin Manager", "Initializing "+pluginCollection[i].pluginName);
-                    if (pluginCollection[i]!=null)
-                        status[i]= pluginCollection[i].initialize(theHost);
+                    if (pluginCollection[i] != null)
+                    {
+                        theHost.sendMessage("OMDebug", "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
+                        status[i] = pluginCollection[i].initialize(theHost);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -235,7 +237,6 @@ namespace OpenMobile
                     theHost.GraphicsLevel = eGraphicsLevel.Minimal;
             }
             pluginCollection.TrimExcess();
-            ThreadPool.SetMaxThreads(50, 500);
             Application.Run();
         }
         static bool ErroredOut;
@@ -318,6 +319,7 @@ namespace OpenMobile
             for (int i = 0; i < pluginCollection.Count;i++ )
                 if (pluginCollection[i] != null)
                     pluginCollection[i].Dispose();
+            InputRouter.Finalize();
             Environment.Exit(0); //Force
         }
     }

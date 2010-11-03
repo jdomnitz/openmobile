@@ -103,6 +103,7 @@ namespace OpenMobile.Platform.Windows
     public static class Functions
     {
         #region Window functions
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll")]
         public static extern bool SetCursorPos(int X, int Y);
         #region SetWindowPos

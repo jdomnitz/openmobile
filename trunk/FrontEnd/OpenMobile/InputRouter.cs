@@ -54,6 +54,14 @@ namespace OpenMobile
                 return ret;
             }
         }
+        public static void Finalize()
+        {
+            if (driver != null)
+            {
+                driver.Dispose();
+                driver = null;
+            }
+        }
         public static void Initialize()
         {
             if (Configuration.RunningOnWindows)

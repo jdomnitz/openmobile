@@ -467,6 +467,7 @@ namespace OpenMobile.Framework
             public ushort processorLevel;
             public ushort processorRevision;
         }
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("kernel32.dll")]
         static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
 

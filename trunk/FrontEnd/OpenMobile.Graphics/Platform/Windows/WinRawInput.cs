@@ -250,6 +250,8 @@ namespace OpenMobile.Platform.Windows
                 {
                     keyboardDriver.Dispose();
                     mouseDriver.Dispose();
+                    if (Native != null)
+                        Native.Dispose();
                 }
 
                 disposed = true;
