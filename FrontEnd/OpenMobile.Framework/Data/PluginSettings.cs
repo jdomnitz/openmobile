@@ -57,6 +57,8 @@ namespace OpenMobile.Data
         {
             try
             {
+                if (asyncCon.State == System.Data.ConnectionState.Closed)
+                    asyncCon.Open();
                 using (SqliteCommand cmd = asyncCon.CreateCommand())
                 {
                     cmd.CommandText = "SELECT Value FROM PluginSettings WHERE Name='" + name + "'";

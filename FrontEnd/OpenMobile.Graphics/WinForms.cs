@@ -101,6 +101,23 @@ namespace OpenMobile.Graphics
             get { return _arg2; }
         }
     }
+    public class ResolutionChange : EventArgs
+    {
+        int _width, _height;
+        public ResolutionChange(int width, int height)
+        {
+            _width = width;
+            _height = height;
+        }
+        public int Width
+        {
+            get { return _width; }
+        }
+        public int Height
+        {
+            get { return _height; }
+        }
+    }
     public class KeyPressEventArgs : EventArgs
     {
         private bool handled;

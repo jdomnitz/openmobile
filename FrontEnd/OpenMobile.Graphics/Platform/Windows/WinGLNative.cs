@@ -226,6 +226,11 @@ namespace OpenMobile.Platform.Windows
 
                     if (new_state != windowState)
                     {
+                        if (new_state == WindowState.Maximized)
+                        {
+                            WindowState = WindowState.Fullscreen;
+                            break;
+                        }
                         windowState = new_state;
                         if (WindowStateChanged != null)
                             WindowStateChanged(this, EventArgs.Empty);
@@ -444,6 +449,12 @@ namespace OpenMobile.Platform.Windows
                     if (Closed != null)
                         Closed(this, EventArgs.Empty);
 
+                    break;
+                case WindowMessage.DISPLAYCHANGE:
+                    if (ResolutionChange != null)
+                    {
+                        ResolutionChange(this, new ResolutionChange((int)((uint)lParam.ToInt32() & 0x0000FFFF), (int)(((uint)lParam.ToInt32() & 0xFFFF0000) >> 16)));
+                    }
                     break;
                 #endregion
             }
@@ -1067,6 +1078,8 @@ namespace OpenMobile.Platform.Windows
         public event EventHandler<EventArgs> MouseLeave;
 
         public event EventHandler<TouchEventArgs> Gesture;
+
+        public event EventHandler<ResolutionChange> ResolutionChange;
 
         #endregion
 

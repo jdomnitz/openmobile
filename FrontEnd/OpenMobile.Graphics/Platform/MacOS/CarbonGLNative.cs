@@ -1095,6 +1095,7 @@ namespace OpenMobile.Platform.MacOS
         public event EventHandler<EventArgs> MouseEnter;
         public event EventHandler<EventArgs> MouseLeave;
         public event EventHandler<TouchEventArgs> Gesture;
+        public event EventHandler<ResolutionChange> ResolutionChange;
         #endregion
     }
 }
