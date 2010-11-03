@@ -22,6 +22,7 @@ using System;
 using System.Threading;
 using OpenMobile.Plugin;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace OpenMobile
 {
@@ -31,35 +32,114 @@ namespace OpenMobile
     /// </summary>
     public static class SandboxedThread
     {
+        private static List<Thread> threadPool = new List<Thread>();
+        private static Queue<Function> functions = new Queue<Function>();
+        private static Dictionary<int, EventWaitHandle> locks = new Dictionary<int, EventWaitHandle>();
+        static int availableThreads;
         public static void Asynchronous(Function function)
         {
-            new Thread(()=>
-                {
-                    try
-                    {
-                        function();
-                    }
-                    catch (Exception e)
-                    {
-                        handle(e);
-                    }
-                }).Start();
+            newAsync(function);
         }
-
+        private static void oldAsync(Function function)
+        {
+            new Thread(() =>
+            {
+                try
+                {
+                    function();
+                }
+                catch (Exception e)
+                {
+                    handle(e);
+                }
+            }).Start();
+        }
+        private static void newAsync(Function function)
+        {
+            functions.Enqueue(function);
+            if (availableThreads > 0)
+            {
+                lock (locks)
+                {
+                    for (int i = 0; i < threadPool.Count; i++)
+                    {
+                        if (threadPool[i].ThreadState == System.Threading.ThreadState.WaitSleepJoin)
+                        {
+                            #if DEBUG
+                            Debug.Print("Thread (" + threadPool[i].ManagedThreadId.ToString() + ")Resumed!");
+                            #endif
+                            locks[threadPool[i].ManagedThreadId].Set();
+                            return;
+                        }
+                    }
+                }
+            }
+            spawnThread();
+        }
+        private static void spawnThread()
+        {
+            Thread p = new Thread(() =>
+            {
+                int id = Thread.CurrentThread.ManagedThreadId;
+                availableThreads++;
+                while (locks[id] != null)
+                {
+                    availableThreads--;
+                    while (functions.Count > 0)
+                    {
+                        Function f = functions.Dequeue();
+                        try
+                        {
+                            f();
+                        }
+                        catch (Exception e)
+                        {
+                            handle(e);
+                        }
+                    }
+#if DEBUG
+                    Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ")Suspended!");
+#endif
+                    availableThreads++;
+                    locks[id].WaitOne(30000);
+                    if ((functions.Count == 0) && (availableThreads > 1))
+                        break;
+                }
+                availableThreads--;
+                lock (locks)
+                {
+                    threadPool.Remove(Thread.CurrentThread);
+                    locks.Remove(id);
+                }
+#if DEBUG
+                Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ")Died!");
+#endif
+            });
+            p.Name = "Thread Pool #" + threadPool.Count.ToString();
+            lock (locks)
+            {
+                locks.Add(p.ManagedThreadId, new EventWaitHandle(false, EventResetMode.AutoReset));
+            }
+            p.Start();
+#if DEBUG
+            Debug.Print("Thread (" + p.ManagedThreadId.ToString() + ")#" + locks.Count + " Started!");
+#endif
+            threadPool.Add(p);
+        }
         public static void handle(Exception e)
         {
             string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
             Core.theHost.sendMessage("OMDebug", e.Source, message);
             Debug.Print(message);
             int index = Core.pluginCollection.FindIndex(p => p.pluginName == e.Source);
-            IBasePlugin sample=null;
-            if (index>-1)
+            IBasePlugin sample = null;
+            if (index > -1)
                 sample = Core.pluginCollection[index];
             if (sample != null)
             {
                 if (Core.status != null)
                     Core.pluginCollection[index] = null;
-                else if (Core.RenderingWindows[0]!=null)
+                else if (Core.RenderingWindows[0] != null)
                     Core.pluginCollection.Remove(sample);
                 Core.theHost.raiseSystemEvent(eFunction.backgroundOperationStatus, sample.pluginName + " CRASHED!", "ERROR", "");
                 sample.Dispose();

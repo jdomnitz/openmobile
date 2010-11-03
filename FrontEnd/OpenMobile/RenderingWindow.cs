@@ -1076,11 +1076,11 @@ namespace OpenMobile
 
         private int xdistance(Rectangle r1, Rectangle r2)
         {
-            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 5*Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
+            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 8*Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
         }
         private int ydistance(Rectangle r1, Rectangle r2)
         {
-            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2)*5 + Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
+            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2)*8 + Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
         }
         private void RenderingWindow_MouseLeave(object sender, EventArgs e)
         {

@@ -147,6 +147,7 @@ namespace OpenMobile.Framework
         }
         #endregion
         #region PInvokes
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("setupapi.dll", SetLastError = true)]
         internal static extern bool SetupDiGetDeviceRegistryProperty(
             IntPtr DeviceInfoSet,
@@ -157,14 +158,17 @@ namespace OpenMobile.Framework
             uint PropertyBufferSize,
             out UInt32 RequiredSize
             );
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool CloseHandle(IntPtr hObject);
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true, CharSet = CharSet.Auto)]
         static extern bool DeviceIoControl(IntPtr hDevice, uint dwIoControlCode,
         IntPtr lpInBuffer, uint nInBufferSize,
         IntPtr lpOutBuffer, uint nOutBufferSize,
         out uint lpBytesReturned, IntPtr lpOverlapped);
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
   internal static extern IntPtr CreateFile(
         string lpFileName,
@@ -175,14 +179,19 @@ namespace OpenMobile.Framework
         uint dwFlagsAndAttributes,
         IntPtr hTemplateFile
         );
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("setupapi.dll", CharSet = CharSet.Auto)]
         static extern int CM_Get_Device_ID(UInt32 dnDevInst,IntPtr Buffer,int BufferLen,int ulFlags);
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("setupapi.dll")]
         static extern int CM_Get_Parent(out UInt32 pdnDevInst,UInt32 dnDevInst,int ulFlags);
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport(@"setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
         internal static extern Boolean SetupDiGetDeviceInterfaceDetail(IntPtr hDevInfo,ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData,ref SP_DEVICE_INTERFACE_DETAIL_DATA deviceInterfaceDetailData,UInt32 deviceInterfaceDetailDataSize,out UInt32 requiredSize,ref SP_DEVINFO_DATA deviceInfoData);
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport(@"setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
         internal static extern Boolean SetupDiEnumDeviceInterfaces(IntPtr hDevInfo, IntPtr devInfo, ref Guid interfaceClassGuid, UInt32 memberIndex, ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData);
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("setupapi.dll", CharSet = CharSet.Auto)]
         static extern IntPtr SetupDiGetClassDevs(ref Guid ClassGuid,IntPtr enumerator,IntPtr hwndParent,UInt32 Flags);
         #endregion
@@ -244,18 +253,23 @@ namespace OpenMobile.Framework
         }
         internal sealed class windowsEmbedder
         {
+            [System.Security.SuppressUnmanagedCodeSecurity]
             [DllImport("user32.dll")]
             public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
 
+            [System.Security.SuppressUnmanagedCodeSecurity]
             [DllImport("user32.dll")]
             public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
+            [System.Security.SuppressUnmanagedCodeSecurity]
             [DllImport("user32.dll")]
             public static extern IntPtr SetFocus(IntPtr hWnd);
 
+            [System.Security.SuppressUnmanagedCodeSecurity]
             [DllImport("user32.dll")]
             public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
+            [System.Security.SuppressUnmanagedCodeSecurity]
             [DllImport("user32.dll", SetLastError = true)]
             public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
