@@ -533,20 +533,25 @@ namespace OMPlayer
         }
     }
 
+    static string[] array;
     public string[] OutputDevices
     {
         get
         {
-            DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
-            List<string> lst = new List<string>();
-            for (int i = 0; i < d.Length; i++)
+            if (array == null)
             {
-                if (d[i].Name.Contains("DirectSound"))
+                DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
+                List<string> lst = new List<string>();
+                for (int i = 0; i < d.Length; i++)
                 {
-                    lst.Add(d[i].Name.Replace("DirectSound", "").Replace(":", "").Replace("  ", " "));
+                    if (d[i].Name.Contains("DirectSound"))
+                    {
+                        lst.Add(d[i].Name.Replace("DirectSound", "").Replace(":", "").Replace("  ", " "));
+                    }
                 }
+                array = lst.ToArray();
             }
-            return lst.ToArray();
+            return array;
         }
     }
 

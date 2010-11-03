@@ -1094,5 +1094,14 @@ namespace OpenMobile
             }
             tmrLongClick.Enabled = false;
         }
+        //TODO: Move this down to native window along with the screen variable
+        void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
+        {
+            DisplayDevice dev=DisplayDevice.AvailableDisplays[screen];
+            bool landscape=dev.Landscape;
+            dev.UpdateResolution(new DisplayResolution(dev.Bounds.X, dev.Bounds.Y, e.Width, e.Height, dev.BitsPerPixel, dev.RefreshRate));
+            if (landscape != dev.Landscape)
+                Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), dev.Landscape ? "Landscape" : "Portrait", "");
+        }
     }
 }

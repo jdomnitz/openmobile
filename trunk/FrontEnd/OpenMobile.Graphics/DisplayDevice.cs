@@ -195,7 +195,13 @@ namespace OpenMobile
                 return current_resolution;
             return resolution;
         }
-
+        public void UpdateResolution(DisplayResolution resolution)
+        {
+            current_resolution = resolution;
+            bounds.Height = resolution.Height;
+            bounds.Width = resolution.Width;
+            this.landscape = (current_resolution.Width > current_resolution.Height);
+        }
         #endregion
 
         #region public IList<DisplayResolution> AvailableResolutions

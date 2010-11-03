@@ -185,6 +185,8 @@ namespace OpenMobile
         /// Occurs when a multitouch gesture occurs
         /// </summary>
         event EventHandler<TouchEventArgs> Gesture;
+
+        event EventHandler<ResolutionChange> ResolutionChange;
         //event EventHandler<MouseEventArgs> MouseMove;
         //event EventHandler<MouseEventArgs> MouseWheel; 
         //event EventHandler<MouseEventArgs> MouseDown;

@@ -127,8 +127,11 @@ namespace OpenMobile.Platform.X11
                     // It seems that all X screens are equal to 0 is Xinerama is enabled, at least on Nvidia (verify?)
                     deviceToScreen.Add(dev, 0 /*screen.ScreenNumber*/);
                 }
+                return (devices.Count > 0);
             }
-            return (devices.Count>0);
+            else
+                return false;
+            
         }
 
         static bool QueryXRandR(List<DisplayDevice> devices)

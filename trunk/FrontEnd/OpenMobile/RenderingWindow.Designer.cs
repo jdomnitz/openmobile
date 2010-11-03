@@ -45,12 +45,12 @@ namespace OpenMobile
             this.Mouse.ButtonDown += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_ButtonDown);
             this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
             this.Closing += new EventHandler<System.ComponentModel.CancelEventArgs>(this.RenderingWindow_FormClosing);
-            this.WindowStateChanged += new System.EventHandler<System.EventArgs>(this.RenderingWindow_Resize); //TODO - Separate function
             this.Resize += new EventHandler<EventArgs>(this.RenderingWindow_Resize);
             this.Mouse.Move += new EventHandler<OpenMobile.Input.MouseMoveEventArgs>(InputRouter.dev_Move);
             this.Keyboard[0].KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
             this.Keyboard[0].KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
             this.Gesture += new EventHandler<OpenMobile.Graphics.TouchEventArgs>(RenderingWindow_Gesture);
+            this.ResolutionChange += new EventHandler<OpenMobile.Graphics.ResolutionChange>(RenderingWindow_ResolutionChange);
         }
         #endregion
         private System.Timers.Timer tmrClick;

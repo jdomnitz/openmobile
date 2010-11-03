@@ -329,21 +329,25 @@ namespace OMDVD
                 return "Justin Domnitz";
             }
         }
-
+        string[] devices;
         public string[] OutputDevices
         {
             get
             {
-                DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
-                List<string> lst = new List<string>();
-                for (int i = 0; i < d.Length; i++)
+                if (devices == null)
                 {
-                    if (d[i].Name.Contains("DirectSound"))
+                    DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
+                    List<string> lst = new List<string>();
+                    for (int i = 0; i < d.Length; i++)
                     {
-                        lst.Add(d[i].Name.Replace("DirectSound", "").Replace(":", ""));
+                        if (d[i].Name.Contains("DirectSound"))
+                        {
+                            lst.Add(d[i].Name.Replace("DirectSound", "").Replace(":", ""));
+                        }
                     }
+                    devices = lst.ToArray();
                 }
-                return lst.ToArray();
+                return devices;
             }
         }
 

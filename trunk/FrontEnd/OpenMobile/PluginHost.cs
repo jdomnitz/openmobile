@@ -182,7 +182,10 @@ namespace OpenMobile
             string[] devs;
             try
             {
-                devs = ((IAVPlayer)Core.pluginCollection.Find(p => typeof(IAVPlayer).IsInstanceOfType(p) == true)).OutputDevices;
+                IBasePlugin player = Core.pluginCollection.Find(p => typeof(IAVPlayer).IsInstanceOfType(p) == true);
+                if (player == null)
+                    return 0;
+                devs = ((IAVPlayer)player).OutputDevices;
             }
             catch (NullReferenceException) { return 0; }
             return Array.FindIndex(devs, p => p.Replace("  ", " ") == str) + 1;
@@ -454,7 +457,6 @@ namespace OpenMobile
                     raiseSystemEvent(eFunction.screenRemoved, "", "", "");
                 }
             }
-            //TODO - refresh screen resolutions and fire rotation message if necessary
         }
         #endregion
         public bool execute(eFunction function)
