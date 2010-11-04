@@ -32,9 +32,23 @@ namespace OpenMobile
     /// </summary>
     public static class SandboxedThread
     {
+        //State:
+        // -1 = Kill
+        //  0 = Working
+        //  1 = Sleeping
+        private struct ThreadState
+        {
+            public EventWaitHandle waitHandle;
+            public int state;
+            public ThreadState(int state)
+            {
+                waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+                this.state = state;
+            }
+        }
         private static List<Thread> threadPool = new List<Thread>();
         private static Queue<Function> functions = new Queue<Function>();
-        private static Dictionary<int, EventWaitHandle> locks = new Dictionary<int, EventWaitHandle>();
+        private static Dictionary<int, ThreadState> locks = new Dictionary<int, ThreadState>();
         static int availableThreads;
         public static void Asynchronous(Function function)
         {
@@ -61,14 +75,11 @@ namespace OpenMobile
             {
                 lock (locks)
                 {
-                    for (int i = 0; i < threadPool.Count; i++)
+                    foreach (ThreadState state in locks.Values)
                     {
-                        if (threadPool[i].ThreadState == System.Threading.ThreadState.WaitSleepJoin)
+                        if (state.state == 1)
                         {
-                            #if DEBUG
-                            Debug.Print("Thread (" + threadPool[i].ManagedThreadId.ToString() + ")Resumed!");
-                            #endif
-                            locks[threadPool[i].ManagedThreadId].Set();
+                            state.waitHandle.Set();
                             return;
                         }
                     }
@@ -81,9 +92,11 @@ namespace OpenMobile
             Thread p = new Thread(() =>
             {
                 int id = Thread.CurrentThread.ManagedThreadId;
+                ThreadState s = locks[id];
                 availableThreads++;
-                while (locks[id] != null)
+                while (locks[id].state >=0)
                 {
+
                     availableThreads--;
                     while (functions.Count > 0)
                     {
@@ -97,33 +110,37 @@ namespace OpenMobile
                             handle(e);
                         }
                     }
-#if DEBUG
-                    Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ")Suspended!");
-#endif
+                    s.state = 1;
+                    locks[id] = s;
+                    //Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ") Suspended!");
                     availableThreads++;
-                    locks[id].WaitOne(30000);
+                    locks[id].waitHandle.WaitOne(30000);
+                    //Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ")Resumed!");
+                    s.state = 0;
+                    locks[id] = s;
                     if ((functions.Count == 0) && (availableThreads > 1))
-                        break;
+                    {
+                        lock (locks)
+                        {
+                            s = locks[id];
+                            s.state --;
+                            locks[id] = s;
+                        }
+                        availableThreads--;
+                    }
                 }
-                availableThreads--;
                 lock (locks)
                 {
                     threadPool.Remove(Thread.CurrentThread);
                     locks.Remove(id);
                 }
-#if DEBUG
-                Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ")Died!");
-#endif
+                //Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ")Died!");
             });
-            p.Name = "Thread Pool #" + threadPool.Count.ToString();
+            //p.Name = "Thread Pool #" + threadPool.Count.ToString();
             lock (locks)
-            {
-                locks.Add(p.ManagedThreadId, new EventWaitHandle(false, EventResetMode.AutoReset));
-            }
+                locks.Add(p.ManagedThreadId, new ThreadState(0));
             p.Start();
-#if DEBUG
-            Debug.Print("Thread (" + p.ManagedThreadId.ToString() + ")#" + locks.Count + " Started!");
-#endif
+            //Debug.Print("Thread (" + p.ManagedThreadId.ToString() + ")#" + locks.Count + " Started!");
             threadPool.Add(p);
         }
         public static void handle(Exception e)

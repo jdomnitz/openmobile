@@ -36,6 +36,7 @@ namespace OpenMobile.Platform.X11
                 this.Add(XKey.Super_R, Key.WinRight);
                 this.Add(XKey.Meta_L, Key.WinLeft);
                 this.Add(XKey.Meta_R, Key.WinRight);
+                this.Add(XKey.ISO_Level3_Shift, Key.AltRight); // Normally AltGr
 
                 this.Add(XKey.Menu, Key.Menu);
                 this.Add(XKey.Tab, Key.Tab);
@@ -128,6 +129,14 @@ namespace OpenMobile.Platform.X11
                 this.Add(XKey.KP_Delete, Key.KeypadDecimal);
                 this.Add(XKey.KP_Enter, Key.KeypadEnter);
 
+                this.Add(XKey.XF86AudioNext, Key.TrackNext);
+                this.Add(XKey.XF86AudioPrev, Key.TrackPrevious);
+                this.Add(XKey.XF86AudioPlay, Key.PlayPause);
+                this.Add(XKey.XF86AudioStop, Key.Stop);
+                this.Add(XKey.XF86AudioPause, Key.PlayPause);
+                this.Add(XKey.XF86AudioLowerVolume, Key.VolumeDown);
+                this.Add(XKey.XF86AudioRaiseVolume, Key.VolumeUp);
+                this.Add(XKey.XF86AudioMute, Key.Mute);
             }
             catch (ArgumentException e)
             {

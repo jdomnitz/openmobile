@@ -170,7 +170,7 @@ namespace OpenMobile
                 for (int i = 0; i < deviceMapK.Length; i++)
                 {
                     string val = s.getSetting("Screen" + (i+1).ToString() + ".Keyboard");
-                    if (val == "Default Keyboard")
+                    if ((val == "Default Keyboard")||(val==""))
                         deviceMapK[i] = -1;
                     else
                     {
@@ -192,7 +192,7 @@ namespace OpenMobile
                 for (int i = 0; i < deviceMapM.Length; i++)
                 {
                     string val = s.getSetting("Screen" + (i + 1).ToString() + ".Mouse");
-                    if (val == "Default Mouse")
+                    if ((val == "Default Mouse")||(val==""))
                     {
                         deviceMapM[i] = -1;
                     }
