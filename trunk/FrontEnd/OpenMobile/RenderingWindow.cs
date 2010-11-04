@@ -603,7 +603,11 @@ namespace OpenMobile
                     lastClick = null;
                     if (typeof(IClickable).IsInstanceOfType(highlighted) == true)
                     {
-                        SandboxedThread.Asynchronous(delegate() { if (highlighted != null) ((IClickable)highlighted).clickMe(screen); });
+                        SandboxedThread.Asynchronous(delegate() 
+                        { 
+                            if (highlighted != null) 
+                                ((IClickable)highlighted).clickMe(screen); 
+                        });
                     }
                 }
             }
