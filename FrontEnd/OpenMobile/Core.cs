@@ -42,7 +42,6 @@ namespace OpenMobile
         public static GameWindowFlags Fullscreen;
         private static void loadMainMenu()
         {
-
             Assembly pluginAssembly = Assembly.Load("UI");
             //Modifications by Borte
             IHighLevel availablePlugin=null;

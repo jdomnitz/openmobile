@@ -22,6 +22,7 @@ using OpenMobile.Controls;
 using OpenMobile.Input;
 using OpenMobile.Data;
 using System;
+using System.IO;
 
 namespace OpenMobile
 {
@@ -161,8 +162,11 @@ namespace OpenMobile
         private static void mapKeyboards()
         {
             deviceMapK = new int[Core.theHost.ScreenCount];
+            bool create=!File.Exists(Path.Combine(Core.theHost.DataPath, "OMData"));
             using (PluginSettings s = new PluginSettings())
             {
+                if (create)
+                    s.createDB();
                 for (int i = 0; i < deviceMapK.Length; i++)
                 {
                     string val = s.getSetting("Screen" + (i+1).ToString() + ".Keyboard");
