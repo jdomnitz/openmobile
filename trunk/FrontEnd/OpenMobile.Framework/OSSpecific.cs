@@ -24,6 +24,7 @@ using System.IO;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace OpenMobile.Framework
 {
@@ -544,9 +545,17 @@ namespace OpenMobile.Framework
 		public static string getFramework ()
 		{
 			if (IsMono ())
-				return "Mono v" + Environment.Version.ToString ();
+				return getMonoVersion();
 			else
 				return Windows.getNetFramework ();
+		}
+		private static string getMonoVersion()
+		{
+			Type t = Type.GetType("Mono.Runtime");
+			if (t==null)
+				return "Mono v" + Environment.Version.ToString ();
+  			MethodInfo mi = t.GetMethod("GetDisplayName", BindingFlags.NonPublic |BindingFlags.Static );
+  			return "Mono v" +(string)mi.Invoke(null, null);
 		}
 		/// <summary>
 		/// Run a manged process using mono if necessary
