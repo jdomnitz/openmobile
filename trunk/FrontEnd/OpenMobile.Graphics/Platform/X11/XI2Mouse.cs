@@ -31,6 +31,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using OpenMobile.Input;
 using OpenMobile.Graphics;
+using System.Threading;
 
 namespace OpenMobile.Platform.X11
 {
@@ -62,21 +63,45 @@ namespace OpenMobile.Platform.X11
             {
                 Functions.XISelectEvents(window.Display, window.WindowHandle, mask);
             }
-            ProcessEvents();
+            new Thread(delegate(){ ProcessEvents();}).Start();
         }
         public void Initialize()
         {
-            int count;
-            XIDeviceInfo[] devs=Functions.XIQueryDevice(window.Display, 0, out count);
-            Debug.Print("Retrieved " + count + " devices");
+			window.Display=Functions.XOpenDisplay(IntPtr.Zero);
+            int count=4;
+			bool supported=IsSupported(window.Display);
+            IntPtr tmp= Functions.XIQueryDevice(window.Display,0,out count);
+			Functions.XIFreeDeviceInfo(tmp);
+            Debug.Print(count + " available devices");;
+			int dummy;
+			for(int i=0;i<count;i++)
+			{
+				IntPtr devPtr=Functions.XIQueryDevice(window.Display,i+2,out dummy);
+				XIDeviceInfo devs=(XIDeviceInfo) Marshal.PtrToStructure(devPtr,typeof(XIDeviceInfo));
+				if (devs.enabled)
+				{
+					if (devs.use==3)
+					{
+						MouseDevice dev=new MouseDevice();
+						dev.Description=devs.name;
+						dev.DeviceID=new IntPtr(i+2);
+						dev.Instance=mice.Count;
+						dev.NumberOfButtons=2;
+						if (!rawids.ContainsKey(i+2))
+						{
+							mice.Add(dev);
+							rawids.Add(i+2,mice.Count-1);
+						}
+					}
+				}
+				Functions.XIFreeDeviceInfo(devPtr);
+			}
+			Debug.Print("Done");
         }
         // Checks whether XInput2 is supported on the specified display.
         // If a display is not specified, the default display is used.
         internal static bool IsSupported(IntPtr display)
         {
-            if (display == IntPtr.Zero)
-                display = API.DefaultDisplay;
-
             using (new XLock(display))
             {
                 int major, ev, error;
@@ -118,8 +143,7 @@ namespace OpenMobile.Platform.X11
 
                         if (!rawids.ContainsKey(raw.deviceid))
                         {
-                            mice.Add(new MouseDevice());
-                            rawids.Add(raw.deviceid, mice.Count - 1);
+                            return;
                         }
                         MouseDevice state = mice[rawids[raw.deviceid]];
 
