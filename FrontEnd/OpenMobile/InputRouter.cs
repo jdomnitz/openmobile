@@ -62,7 +62,8 @@ namespace OpenMobile
 		{
 			if (Configuration.RunningOnWindows)
 				driver = new Platform.Windows.WinRawInput ();
-			
+			else if (Configuration.RunningOnX11)
+                		driver = new Platform.X11.X11RawInput();
 			mapKeyboards ();
 			if (driver != null) {
 				foreach (KeyboardDevice dev in driver.Keyboard) {

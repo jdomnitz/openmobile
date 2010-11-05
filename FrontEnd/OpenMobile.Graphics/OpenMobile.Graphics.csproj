@@ -65,6 +65,8 @@
     <Compile Include="Platform\Windows\WinRawInput.cs" />
     <Compile Include="Platform\Windows\WinRawKeyboard.cs" />
     <Compile Include="Platform\Windows\WinRawMouse.cs" />
+    <Compile Include="Platform\X11\X11RawInput.cs" />
+    <Compile Include="Platform\X11\XI2Mouse.cs" />
     <Compile Include="V1Graphics.cs" />
     <Compile Include="Graphics\Color4.cs" />
     <Compile Include="Graphics\ColorFormat.cs" />
