@@ -777,7 +777,11 @@ namespace OpenMobile
                 {
                     keyboardActive = true;
                     tmrClick.Enabled = true;
-                    SandboxedThread.Asynchronous(delegate() { lastClick.clickMe(screen); });
+                    SandboxedThread.Asynchronous(delegate() 
+                    {
+                        if (lastClick!=null)
+                            lastClick.clickMe(screen); 
+                    });
                     if ((lastClick!=null)&&(lastClick.FocusImage.image != null))
                     {
                         lastClick.Mode = eModeType.Highlighted;

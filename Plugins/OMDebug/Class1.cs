@@ -81,6 +81,7 @@ namespace OMDebug
             theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
             theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
+            theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
             while (Graphics.Version == null)
                 Thread.Sleep(10);
             writer.WriteLine("------------------Software-------------------");
@@ -106,6 +107,13 @@ namespace OMDebug
                     log(queued);
                 queue.Clear();
             }
+        }
+
+        bool theHost_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
+        {
+            if (arg.Key == OpenMobile.Input.Key.VolumeUp)
+                log("Volume Up!");
+            return false;
         }
         void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {

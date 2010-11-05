@@ -231,6 +231,8 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool writePlaylistToDB(IPluginHost theHost, string name, List<mediaInfo> playlist)
         {
+            if (playlist.Count == 0)
+                return false;
             object o;
             using (PluginSettings s = new PluginSettings())
                 theHost.getData(eGetData.GetMediaDatabase, s.getSetting("Default.MusicDatabase"), out o);

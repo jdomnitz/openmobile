@@ -459,6 +459,7 @@ namespace OpenMobile
             }
         }
         #endregion
+        bool closing=false;
         public bool execute(eFunction function)
         {
             switch (function)
@@ -466,11 +467,15 @@ namespace OpenMobile
                 case eFunction.closeProgram:
                     //Don't lock this to prevent deadlock
                     {
-                        RenderingWindow.closeRenderer();
-                        if (hal != null)
-                            hal.snd("44");
-                        savePlaylists();
-                        SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, "", "", ""); });
+                        if (!closing)
+                        {
+                            closing = true;
+                            RenderingWindow.closeRenderer();
+                            if (hal != null)
+                                hal.snd("44");
+                            savePlaylists();
+                            SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, "", "", ""); });
+                        }
                     }
                     return true;
                 case eFunction.restartProgram:
@@ -560,9 +565,10 @@ namespace OpenMobile
             using (PluginSettings s = new PluginSettings())
             {
                 bool res;
+                string dbname=s.getSetting("Default.MusicDatabase");
                 for (int i = 0; i < 8; i++)
                 {
-                    setPlaylist(Playlist.readPlaylistFromDB(this, "Current" + i.ToString()), i);
+                    setPlaylist(Playlist.readPlaylistFromDB(this, "Current" + i.ToString(),dbname), i);
                     if (bool.TryParse(s.getSetting("Media.Instance" + i.ToString() + ".Random"), out res))
                         setRandom(i, res);
                 }

@@ -854,10 +854,14 @@ namespace OMMediaDB
                 string path = null;
                 using (PluginSettings settings = new PluginSettings())
                 {
-                    if ((settings.getSetting("Music.AutoIndex") == "True") || (settings.getSetting("OpenMobile.FirstRun") == "True"))
+                    if (settings.getSetting("Music.AutoIndex") == "True")
                         path = settings.getSetting("Music.Path");
                     settings.setSetting("Default.MusicDatabase", "OMMediaDB");
-                    settings.setSetting("OpenMobile.FirstRun", "False");
+                    if (settings.getSetting("OpenMobile.FirstRun") == "True")
+                    {
+                        path = settings.getSetting("Music.Path");
+                        settings.setSetting("OpenMobile.FirstRun", "False");
+                    }
                 }
                 if ((path != null) && (path.Length > 0))
                     indexDirectory(path, true);
