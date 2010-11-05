@@ -76,7 +76,7 @@ namespace OpenMobile.Platform.X11
             Debug.Print("Initializing threaded X11: {0}.", has_threaded_x.ToString());
 
             defaultDisplay = Functions.XOpenDisplay(IntPtr.Zero);
-
+			
             if (defaultDisplay == IntPtr.Zero)
                 throw new PlatformException("Could not establish connection to the X-Server.");
 

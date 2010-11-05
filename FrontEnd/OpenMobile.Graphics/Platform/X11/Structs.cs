@@ -1657,15 +1657,17 @@ namespace OpenMobile.Platform.X11
 
    // XInput2 structures
 
+	[StructLayout(LayoutKind.Sequential)]
    struct XIDeviceInfo
    {
        public int deviceid;
-       public IntPtr name; // byte*
+	[MarshalAs(UnmanagedType.LPStr)]
+       public string name; // byte*
        public int use;
        public int attachment;
-       public Bool enabled;
+       public bool enabled;
        public int num_classes;
-       public IntPtr classes; // XIAnyClassInfo **
+       public IntPtr type;
    }
 
    struct XIAnyClassInfo

@@ -295,7 +295,7 @@ namespace OpenMobile.Platform.X11
         public extern static int XGetWindowProperty(IntPtr display, IntPtr window, IntPtr atom, IntPtr long_offset, IntPtr long_length, bool delete, IntPtr req_type, out IntPtr actual_type, out int actual_format, out IntPtr nitems, out IntPtr bytes_after, ref IntPtr prop);
 
         [DllImport("libX11", EntryPoint = "XSetInputFocus")]
-        public extern static int XSetInputFocus(IntPtr display, IntPtr window, RevertTo revert_to, IntPtr time);
+        public extern static int XSetInputFocus(IntPtr display, IntPtr window, RevertTo revert_to, Time time);
 
         [DllImport("libX11", EntryPoint = "XIconifyWindow")]
         public extern static int XIconifyWindow(IntPtr display, IntPtr window, int screen_number);
@@ -493,9 +493,12 @@ namespace OpenMobile.Platform.X11
         [DllImport("libXi")]
         static extern Status XIUngrabDevice(IntPtr display, int deviceid, Time time);
 
-        [DllImport("libXi")]
-        internal static extern XIDeviceInfo[] XIQueryDevice(Display display, int deviceid, out int deviceCount);
+        [DllImport("libXi", EntryPoint = "XIQueryDevice")]
+        internal static extern IntPtr XIQueryDevice(Display display, int deviceid, out int deviceCount);
 
+		[DllImport("libXi", EntryPoint = "XIFreeDeviceInfo")]
+        internal static extern IntPtr XIFreeDeviceInfo(IntPtr info);
+		
         static readonly IntPtr CopyFromParent = IntPtr.Zero;
 
         public static void SendNetWMMessage(X11WindowInfo window, IntPtr message_type, IntPtr l0, IntPtr l1, IntPtr l2)

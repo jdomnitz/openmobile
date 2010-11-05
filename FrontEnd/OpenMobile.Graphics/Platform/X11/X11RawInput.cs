@@ -1,6 +1,7 @@
 ﻿using OpenMobile.Input;
 using System;
 using OpenMobile.Platform.X11;
+using System.Collections.Generic;
 
 namespace OpenMobile.Platform.X11
 {
@@ -11,9 +12,9 @@ namespace OpenMobile.Platform.X11
         {
             mouseDriver.Initialize();
         }
-        public System.Collections.Generic.IList<KeyboardDevice> Keyboard
+        public IList<KeyboardDevice> Keyboard
         {
-            get { throw new System.NotImplementedException(); }
+            get { return new List<KeyboardDevice>() ; }
         }
 
         public System.Collections.Generic.IList<MouseDevice> Mouse
