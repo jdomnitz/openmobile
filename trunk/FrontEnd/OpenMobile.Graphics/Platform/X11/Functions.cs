@@ -93,7 +93,11 @@ namespace OpenMobile.Platform.X11
         public extern static Bool XCheckWindowEvent(Display display, Window w, EventMask event_mask, ref XEvent event_return);
         [DllImport("libX11")]
         public extern static Bool XCheckTypedWindowEvent(Display display, Window w, XEventName event_type, ref XEvent event_return);
-        
+
+        public delegate Bool EventPredicate(IntPtr display, ref XEvent e, IntPtr arg);
+        [DllImport("libX11")]
+        public extern static Bool XIfEvent(Display display, ref XEvent e, IntPtr predicate, IntPtr arg);
+
         [DllImport("libX11")]
         public extern static int XConnectionNumber(IntPtr diplay);
         [DllImport("libX11")]
@@ -324,7 +328,7 @@ namespace OpenMobile.Platform.X11
         public extern static int XQueryBestCursor(IntPtr display, IntPtr drawable, int width, int height, out int best_width, out int best_height);
 
         [DllImport("libX11", EntryPoint = "XQueryExtension")]
-        public extern static int XQueryExtension(IntPtr display, string extension_name, ref int major, ref int first_event, ref int first_error);
+        public extern static int XQueryExtension(IntPtr display, string extension_name, out int major, out int first_event, out int first_error);
 
         [DllImport("libX11", EntryPoint = "XWhitePixel")]
         public extern static IntPtr XWhitePixel(IntPtr display, int screen_no);
@@ -361,6 +365,12 @@ namespace OpenMobile.Platform.X11
 
         [DllImport("libX11", EntryPoint = "XSetErrorHandler")]
         public extern static IntPtr XSetErrorHandler(XErrorHandler error_handler);
+
+        [DllImport("libX11")]
+        public static extern int XGetEventData(IntPtr display, ref XGenericEventCookie cookie);
+
+        [DllImport("libX11")]
+        public static extern void XFreeEventData(IntPtr display, ref XGenericEventCookie cookie);
 
         [DllImport("libX11", EntryPoint = "XGetErrorText")]
         public extern static IntPtr XGetErrorText(IntPtr display, byte code, StringBuilder buffer, int length);
@@ -460,6 +470,31 @@ namespace OpenMobile.Platform.X11
 
         [DllImport("libX11")]
         public static extern int XRefreshKeyboardMapping(ref XMappingEvent event_map);
+
+        [DllImport("libXi")]
+        static extern int XISelectEvents(IntPtr dpy, Window win, [In] XIEventMask[] masks, int num_masks);
+        [DllImport("libXi")]
+        static extern int XISelectEvents(IntPtr dpy, Window win, [In] ref XIEventMask masks, int num_masks);
+
+        public static int XISelectEvents(IntPtr dpy, Window win, XIEventMask[] masks)
+        {
+            return XISelectEvents(dpy, win, masks, masks.Length);
+        }
+
+        public static int XISelectEvents(IntPtr dpy, Window win, XIEventMask mask)
+        {
+            return XISelectEvents(dpy, win, ref mask, 1);
+        }
+
+        [DllImport("libXi")]
+        static extern Status XIGrabDevice(IntPtr display, int deviceid, Window grab_window, Time time,
+            Cursor cursor, int grab_mode, int paired_device_mode, Bool owner_events, XIEventMask[] mask);
+
+        [DllImport("libXi")]
+        static extern Status XIUngrabDevice(IntPtr display, int deviceid, Time time);
+
+        [DllImport("libXi")]
+        internal static extern XIDeviceInfo[] XIQueryDevice(Display display, int deviceid, out int deviceCount);
 
         static readonly IntPtr CopyFromParent = IntPtr.Zero;
 

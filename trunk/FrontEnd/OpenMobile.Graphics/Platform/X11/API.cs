@@ -1294,7 +1294,6 @@ XF86VidModeGetGammaRampSize(
     }
 
     #endregion
-
     #endregion
 
     public static partial class Functions
