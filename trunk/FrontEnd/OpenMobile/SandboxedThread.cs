@@ -21,7 +21,9 @@
 using System;
 using System.Threading;
 using OpenMobile.Plugin;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.Collections.Generic;
 
 namespace OpenMobile
@@ -76,13 +78,11 @@ namespace OpenMobile
                 lock (locks)
                 {
                     foreach (ThreadState state in locks.Values)
-                    {
                         if (state.state == 1)
                         {
                             state.waitHandle.Set();
                             return;
                         }
-                    }
                 }
             }
             spawnThread();
@@ -111,11 +111,9 @@ namespace OpenMobile
                         }
                     }
                     s.state = 1;
-                    locks[id] = s;
-                    //Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ") Suspended!");
+                    locks[id] = s;;
                     availableThreads++;
                     locks[id].waitHandle.WaitOne(30000);
-                    //Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ")Resumed!");
                     s.state = 0;
                     locks[id] = s;
                     if ((functions.Count == 0) && (availableThreads > 1))
@@ -134,20 +132,19 @@ namespace OpenMobile
                     threadPool.Remove(Thread.CurrentThread);
                     locks.Remove(id);
                 }
-                //Debug.Print("Thread (" + Thread.CurrentThread.ManagedThreadId.ToString() + ")Died!");
             });
-            //p.Name = "Thread Pool #" + threadPool.Count.ToString();
             lock (locks)
                 locks.Add(p.ManagedThreadId, new ThreadState(0));
             p.Start();
-            //Debug.Print("Thread (" + p.ManagedThreadId.ToString() + ")#" + locks.Count + " Started!");
             threadPool.Add(p);
         }
         public static void handle(Exception e)
         {
             string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
             Core.theHost.sendMessage("OMDebug", e.Source, message);
+            #if DEBUG
             Debug.Print(message);
+            #endif
             int index = Core.pluginCollection.FindIndex(p => p.pluginName == e.Source);
             IBasePlugin sample = null;
             if (index > -1)
