@@ -63,7 +63,7 @@ namespace OpenMobile.Platform.X11
             {
                 Functions.XISelectEvents(window.Display, window.WindowHandle, mask);
             }
-            new Thread(delegate(){ ProcessEvents();}).Start();
+            //new Thread(delegate(){ ProcessEvents();}).Start();
         }
         public void Initialize()
         {
