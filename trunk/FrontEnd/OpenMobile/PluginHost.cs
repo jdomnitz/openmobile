@@ -693,6 +693,15 @@ namespace OpenMobile
                     return ((INavigation)plugin).findPOI(arg);
                 case eFunction.ExecuteTransition:
                     return execute(eFunction.ExecuteTransition, arg, "Crossfade");
+                case eFunction.CancelTransition:
+                    if (int.TryParse(arg, out ret))
+                    {
+                        lock (Core.RenderingWindows[ret])
+                        {
+                            Core.RenderingWindows[ret].Rollback();
+                        }
+                    }
+                    return false;
                 case eFunction.TransitionToPanel:
                     if (int.TryParse(arg, out ret))
                         return execute(eFunction.TransitionToPanel, arg, history.CurrentItem(ret).pluginName, "");
