@@ -210,7 +210,7 @@ namespace OpenMobile.Graphics
             float yrad = height / 2F;
             float xrad = width / 2F;
             startAngle = 360 - startAngle;
-            for (double t = startAngle; t >= (startAngle+sweepAngle); t=t-0.5)
+            for (double t = startAngle; t >= (startAngle-sweepAngle); t=t-0.5)
             {
                 double rad = t * DEG2RAD;
                 Raw.Vertex2(x + xrad + (xrad * Math.Cos(rad)), y + yrad + (yrad * Math.Sin(rad)));
