@@ -51,7 +51,7 @@ namespace OpenMobile
 				return ret;
 			}
 		}
-		public static void Finalize ()
+		public static void Dispose ()
 		{
 			if (driver != null) {
 				driver.Dispose ();

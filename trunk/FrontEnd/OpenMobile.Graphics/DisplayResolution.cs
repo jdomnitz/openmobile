@@ -84,7 +84,6 @@ namespace OpenMobile
         /// <summary>
         /// Gets a System.Drawing.Rectangle that contains the bounds of this display device.
         /// </summary>
-        [Obsolete("This property will return invalid results if a monitor changes resolution. Use DisplayDevice.Bounds instead.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public Rectangle Bounds
         {
