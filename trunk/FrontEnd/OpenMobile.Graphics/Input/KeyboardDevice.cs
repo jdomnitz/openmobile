@@ -23,7 +23,6 @@ namespace OpenMobile.Input
         //private IKeyboard keyboard;
         private bool[] keys = new bool[Enum.GetValues(typeof(Key)).Length];
         private string description;
-        private int numKeys, numFKeys, numLeds;
         private IntPtr devID;
         private int instance=-1;
         private bool repeat;
@@ -69,33 +68,6 @@ namespace OpenMobile.Input
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets an integer representing the number of keys on this KeyboardDevice.
-        /// </summary>
-        public int NumberOfKeys
-        {
-            get { return numKeys; }
-            internal set { numKeys = value; }
-        }
-
-        /// <summary>
-        /// Gets an integer representing the number of function keys (F-keys) on this KeyboardDevice.
-        /// </summary>
-        public int NumberOfFunctionKeys
-        {
-            get { return numFKeys; }
-            internal set { numFKeys = value; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating the number of led indicators on this KeyboardDevice.
-        /// </summary>
-        public int NumberOfLeds
-        {
-            get { return numLeds; }
-            internal set { numLeds = value; }
         }
 
         /// <summary>
@@ -187,7 +159,7 @@ namespace OpenMobile.Input
         public override int GetHashCode()
         {
             //return base.GetHashCode();
-            return (int)(numKeys ^ numFKeys ^ numLeds ^ devID.GetHashCode() ^ description.GetHashCode());
+            return (int)(devID.GetHashCode() ^ description.GetHashCode());
         }
 
         /// <summary>
@@ -197,8 +169,8 @@ namespace OpenMobile.Input
         public override string ToString()
         {
             //return base.ToString();
-            return String.Format("ID: {0} ({1}). Keys: {2}, Function keys: {3}, Leds: {4}",
-                DeviceID, Description, NumberOfKeys, NumberOfFunctionKeys, NumberOfLeds);
+            return String.Format("ID: {0} ({1}).",
+                DeviceID, Description);
         }
 
         #endregion

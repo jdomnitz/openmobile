@@ -44,7 +44,6 @@ namespace OpenMobile.Input
         int instance=-1;
         string description;
         IntPtr id;
-        int numButtons, numWheels;
         readonly bool[] button_state = new bool[Enum.GetValues(typeof(MouseButton)).Length];
         float wheel, last_wheel;
         Point pos = new Point(), last_pos = new Point();
@@ -86,32 +85,6 @@ namespace OpenMobile.Input
         #endregion
 
         #region --- Public Members ---
-
-        #region public int NumberOfButtons
-
-        /// <summary>
-        /// Gets an integer representing the number of buttons on this MouseDevice.
-        /// </summary>
-        public int NumberOfButtons
-        {
-            get { return numButtons; }
-            internal set { numButtons = value; }
-        }
-
-        #endregion
-
-        #region public int NumberOfWheels
-
-        /// <summary>
-        /// Gets an integer representing the number of wheels on this MouseDevice.
-        /// </summary>
-        public int NumberOfWheels
-        {
-            get { return numWheels; }
-            internal set { numWheels = value; }
-        }
-
-        #endregion
 
         #region public IntPtr DeviceID
 
@@ -385,7 +358,7 @@ namespace OpenMobile.Input
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return (int)(numButtons ^ numWheels ^ id.GetHashCode() ^ description.GetHashCode());
+            return (int)(id.GetHashCode() ^ description.GetHashCode());
         }
 
         /// <summary>
@@ -394,8 +367,8 @@ namespace OpenMobile.Input
         /// <returns>A <see cref="System.String"/> that describes this instance.</returns>
         public override string ToString()
         {
-            return String.Format("ID: {0} ({1}). Buttons: {2}, Wheels: {3}",
-                DeviceID, Description, NumberOfButtons, NumberOfWheels);
+            return String.Format("ID: {0} ({1}).",
+                DeviceID, Description);
         }
 
         #endregion

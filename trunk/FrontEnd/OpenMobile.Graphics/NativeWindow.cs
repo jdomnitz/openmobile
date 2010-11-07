@@ -52,6 +52,7 @@ namespace OpenMobile
 
         private bool disposed, events;
 
+        protected int screen = -1;
         #endregion
         public NativeWindow()
         {
@@ -824,7 +825,7 @@ namespace OpenMobile
                     implementation.WindowBorderChanged += OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged += OnWindowStateChangedInternal;
                     implementation.Gesture += Gesture;
-                    implementation.ResolutionChange += ResolutionChange;
+                    implementation.ResolutionChange+=raiseResolutionChange;
                     events = true;
                 }
                 else if (events)
@@ -838,7 +839,7 @@ namespace OpenMobile
                     implementation.WindowBorderChanged -= OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged -= OnWindowStateChangedInternal;
                     implementation.Gesture -= Gesture;
-                    implementation.ResolutionChange -= ResolutionChange;
+                    implementation.ResolutionChange -= raiseResolutionChange;
                     events = false;
                 }
                 else
@@ -847,7 +848,12 @@ namespace OpenMobile
                 }
             }
         }
-
+        private void raiseResolutionChange(object sender, ResolutionChange e)
+        {
+            ResolutionChange(sender, e);
+            DisplayDevice dev=DisplayDevice.AvailableDisplays[screen];
+            dev.UpdateResolution(new DisplayResolution(dev.Bounds.X, dev.Bounds.Y, e.Width, e.Height, dev.BitsPerPixel, dev.RefreshRate));
+        }
         #endregion
 
         #endregion

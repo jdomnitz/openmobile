@@ -46,7 +46,7 @@ namespace OpenMobile.Platform.Windows
         internal static readonly WinKeyMap KeyMap = new WinKeyMap();
         // ContextHandle instead of IntPtr for fast dictionary access
         readonly Dictionary<ContextHandle, int> rawids = new Dictionary<ContextHandle, int>();
-        private List<KeyboardDevice> keyboards_old = new List<KeyboardDevice>();
+        private List<KeyboardDevice> keyboards = new List<KeyboardDevice>();
         private IntPtr window;
         readonly object UpdateLock = new object();
 
@@ -59,14 +59,14 @@ namespace OpenMobile.Platform.Windows
 
         internal WinRawKeyboard(IntPtr windowHandle)
         {
-            Debug.WriteLine("Initializing keyboard driver (WinRawKeyboard).");
-            Debug.Indent();
+            //Debug.WriteLine("Initializing keyboard driver (WinRawKeyboard).");
+            //Debug.Indent();
 
             this.window = windowHandle;
 
             UpdateKeyboardList();
 
-            Debug.Unindent();
+            //Debug.Unindent();
         }
 
         #endregion
@@ -124,14 +124,14 @@ namespace OpenMobile.Platform.Windows
                     {
                         KeyboardDevice kb = new KeyboardDevice();
                         // Register the keyboard:
-                        RawInputDeviceInfo info = new RawInputDeviceInfo();
-                        int devInfoSize = API.RawInputDeviceInfoSize;
-                        Functions.GetRawInputDeviceInfo(ridl[i].Device, RawInputDeviceInfoEnum.DEVICEINFO,
-                                info, ref devInfoSize);
+                        //RawInputDeviceInfo info = new RawInputDeviceInfo();
+                        //int devInfoSize = API.RawInputDeviceInfoSize;
+                        //Functions.GetRawInputDeviceInfo(ridl[i].Device, RawInputDeviceInfoEnum.DEVICEINFO,
+                        //        info, ref devInfoSize);
 
-                        kb.NumberOfLeds = info.Device.Keyboard.NumberOfIndicators;
-                        kb.NumberOfFunctionKeys = info.Device.Keyboard.NumberOfFunctionKeys;
-                        kb.NumberOfKeys = info.Device.Keyboard.NumberOfKeysTotal;
+                        //kb.NumberOfLeds = info.Device.Keyboard.NumberOfIndicators;
+                        //kb.NumberOfFunctionKeys = info.Device.Keyboard.NumberOfFunctionKeys;
+                        //kb.NumberOfKeys = info.Device.Keyboard.NumberOfKeysTotal;
                         string[] parts = deviceDesc.Split(new char[] { ';' });
                         if (parts.Length == 2)
                             kb.Description = parts[1] + " (" + ridl[i].Device.ToString() + ")";
@@ -143,11 +143,11 @@ namespace OpenMobile.Platform.Windows
                         //if (!keyboards.Contains(kb))
                         //{
                         this.RegisterKeyboardDevice(kb);
-                        kb.Instance = keyboards_old.Count;
-                        keyboards_old.Add(kb);
+                        kb.Instance = keyboards.Count;
+                        keyboards.Add(kb);
                         //}
                         //keyboards.Add(new KeyboardState());
-                        rawids.Add(new ContextHandle(ridl[i].Device), keyboards_old.Count - 1);
+                        rawids.Add(new ContextHandle(ridl[i].Device), keyboards.Count - 1);
                     }
                 }
             }
@@ -205,7 +205,7 @@ namespace OpenMobile.Platform.Windows
             {
                 return false;
             }
-            keyboard = keyboards_old[rawids[handle]];
+            keyboard = keyboards[rawids[handle]];
 
             // Generic control, shift, alt keys may be sent instead of left/right.
             // It seems you have to explicitly register left/right events.
@@ -244,7 +244,7 @@ namespace OpenMobile.Platform.Windows
 
             lock (UpdateLock)
             {
-                keyboards_old[rawids[handle]] = keyboard;
+                keyboards[rawids[handle]] = keyboard;
                 return processed;
             }
         }
@@ -269,7 +269,7 @@ namespace OpenMobile.Platform.Windows
 
         public IList<KeyboardDevice> Keyboard
         {
-            get { return keyboards_old; }
+            get { return keyboards; }
         }
 
         #endregion
@@ -290,7 +290,7 @@ namespace OpenMobile.Platform.Windows
             {
                 if (manual)
                 {
-                    keyboards_old.Clear();
+                    keyboards.Clear();
                 }
                 disposed = true;
             }

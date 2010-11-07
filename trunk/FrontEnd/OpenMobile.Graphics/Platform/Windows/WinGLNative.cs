@@ -80,7 +80,6 @@ namespace OpenMobile.Platform.Windows
             Marshal.GetFunctionPointerForDelegate(new WindowProcedure(Functions.DefWindowProc));
 
         // Used for IInputDriver implementation
-        WinMMJoystick joystick_driver = new WinMMJoystick();
         KeyboardDevice keyboard = new KeyboardDevice();
         MouseDevice mouse = new MouseDevice();
         IList<KeyboardDevice> keyboards = new List<KeyboardDevice>(1);
@@ -119,13 +118,8 @@ namespace OpenMobile.Platform.Windows
             exists = true;
             
             keyboard.Description = "Default Keyboard";
-            keyboard.NumberOfFunctionKeys = 12;
-            keyboard.NumberOfKeys = 101;
-            keyboard.NumberOfLeds = 3;
 
             mouse.Description = "Default Mouse";
-            mouse.NumberOfButtons = 3;
-            mouse.NumberOfWheels = 1;
 
             keyboards.Add(keyboard);
             mice.Add(mouse);
@@ -1152,7 +1146,7 @@ namespace OpenMobile.Platform.Windows
 
         public IList<JoystickDevice> Joysticks
         {
-            get { return joystick_driver.Joysticks; }
+            get { return new List<JoystickDevice>(); } //joystick_driver.Joysticks; }
         }
 
         #endregion

@@ -33,7 +33,6 @@ namespace OpenMobile
     public partial class RenderingWindow : GameWindow
     {
         OMControl varHighlighted;
-        int screen = -1;
         private renderingParams rParam = new renderingParams();
         object painting = new object();
         private Point ThrowStart = new Point(-1, -1);
@@ -102,8 +101,6 @@ namespace OpenMobile
         {
             g = new OpenMobile.Graphics.Graphics(s);
             this.screen = s;
-            if (s == 0)
-                InputRouter.Initialize();
             this.tmrClick = new System.Timers.Timer(20);
             this.tmrLongClick = new System.Timers.Timer(500);
             this.tmrClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrClick_Tick);
@@ -119,6 +116,8 @@ namespace OpenMobile
             this.Mouse.Instance = (screen * -1) - 1;
             this.Mouse.SetBounds(DisplayDevice.AvailableDisplays[screen].Width, DisplayDevice.AvailableDisplays[screen].Height);
             InitializeComponent();
+            if (screen == 0)
+                InputRouter.Initialize();
             redraw += new voiddel(invokePaint);
             for (int i = 0; i < this.Keyboard.Count;i++ )
                 this.Keyboard[i].KeyRepeat = true;
@@ -1102,13 +1101,10 @@ namespace OpenMobile
             }
             tmrLongClick.Enabled = false;
         }
-        //TODO: Move this down to native window along with the screen variable
         void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
         {
             DisplayDevice dev=DisplayDevice.AvailableDisplays[screen];
-            bool landscape=dev.Landscape;
-            dev.UpdateResolution(new DisplayResolution(dev.Bounds.X, dev.Bounds.Y, e.Width, e.Height, dev.BitsPerPixel, dev.RefreshRate));
-            if (landscape != dev.Landscape)
+            if (dev.Landscape != dev.Landscape)
                 Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), dev.Landscape ? "Landscape" : "Portrait", "");
         }
         internal void Rollback()

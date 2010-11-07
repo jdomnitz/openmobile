@@ -72,13 +72,14 @@ namespace OpenMobile.Platform.Windows
         #region Public Members
 
         #region DeviceCount
-
+        
+        static int deviceCount = 0;
         public static int DeviceCount
         {
             get
             {
-                int deviceCount = 0;
-                Functions.GetRawInputDeviceList(null, ref deviceCount, API.RawInputDeviceListSize);
+                if (deviceCount==0)
+                    Functions.GetRawInputDeviceList(null, ref deviceCount, API.RawInputDeviceListSize);
                 return deviceCount;
             }
         }

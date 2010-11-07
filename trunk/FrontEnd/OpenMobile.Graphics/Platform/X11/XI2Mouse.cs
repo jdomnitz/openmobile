@@ -68,13 +68,11 @@ namespace OpenMobile.Platform.X11
 			if (IsSupported(Display))
 			{
 	            IntPtr tmp= Functions.XIQueryDevice(Display,0,out count);
-				Functions.XIFreeDeviceInfo(tmp);
-	            Debug.Print(count + " available devices");;
-				int dummy;
+                IntPtr[] ptrDev=new IntPtr[count];
+                Marshal.Copy(tmp, ptrDev, 0, count);
 				for(int i=0;i<count;i++)
 				{
-					IntPtr devPtr=Functions.XIQueryDevice(window.Display,i+2,out dummy);
-					XIDeviceInfo devs=(XIDeviceInfo) Marshal.PtrToStructure(devPtr,typeof(XIDeviceInfo));
+					XIDeviceInfo devs=(XIDeviceInfo) Marshal.PtrToStructure(ptrDev[i+2],typeof(XIDeviceInfo));
 					XIValuatorInfo xInfo=new XIValuatorInfo();
 					XIValuatorInfo yInfo=new XIValuatorInfo();
 					if (devs.num_classes>0)
@@ -109,7 +107,6 @@ namespace OpenMobile.Platform.X11
 							dev.Description=devs.name;
 							dev.DeviceID=new IntPtr(i+2);
 							dev.Instance=mice.Count;
-							dev.NumberOfButtons=2;
 							if (xInfo.label>0)
 							{
 								dev.minx=xInfo.min;
@@ -128,8 +125,8 @@ namespace OpenMobile.Platform.X11
 							}
 						}
 					}
-					Functions.XIFreeDeviceInfo(devPtr);
 				}
+                Functions.XIFreeDeviceInfo(tmp);
 				new Thread(delegate(){ ProcessEvents();}).Start();
 			}
         }
