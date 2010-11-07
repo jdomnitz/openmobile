@@ -51,10 +51,8 @@ namespace OpenMobile.Input
         MouseMoveEventArgs move_args = new MouseMoveEventArgs();
         MouseButtonEventArgs button_args = new MouseButtonEventArgs();
         MouseWheelEventArgs wheel_args = new MouseWheelEventArgs();
-#if COMPAT_REV1519
-        int wheel_last_accessed = 0;
-        Point pos_last_accessed = new Point();
-#endif
+		internal bool Absolute;
+		internal double minx=0,miny=0,maxx=0,maxy=0;
 
         #endregion
 

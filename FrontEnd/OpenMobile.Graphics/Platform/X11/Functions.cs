@@ -96,7 +96,7 @@ namespace OpenMobile.Platform.X11
 
         public delegate Bool EventPredicate(IntPtr display, ref XEvent e, IntPtr arg);
         [DllImport("libX11")]
-        public extern static Bool XIfEvent(Display display, ref XEvent e, IntPtr predicate, IntPtr arg);
+        public extern static Bool XCheckIfEvent(Display display, ref XEvent e, IntPtr predicate, IntPtr arg);
 
         [DllImport("libX11")]
         public extern static int XConnectionNumber(IntPtr diplay);
@@ -372,6 +372,9 @@ namespace OpenMobile.Platform.X11
         [DllImport("libX11")]
         public static extern void XFreeEventData(IntPtr display, ref XGenericEventCookie cookie);
 
+		[DllImport("libX11")]
+        public static extern string XGetAtomName(IntPtr display, uint atom);
+		
         [DllImport("libX11", EntryPoint = "XGetErrorText")]
         public extern static IntPtr XGetErrorText(IntPtr display, byte code, StringBuilder buffer, int length);
 

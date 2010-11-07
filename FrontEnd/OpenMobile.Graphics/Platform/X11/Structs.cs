@@ -1741,6 +1741,20 @@ namespace OpenMobile.Platform.X11
        public int effective;
    }
 
+	struct XIValuatorInfo
+	{
+	    public int type;
+	    public int sourceid;
+	    public int number;
+	    public uint label;
+	    public double min;
+	    public double max;
+	    public double val;
+	    public int resolution;
+	    public int mode;
+	}
+
+	
    struct XIValuatorState
    {
        public int mask_len;

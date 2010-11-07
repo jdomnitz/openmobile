@@ -42,9 +42,6 @@ namespace OpenMobile.Platform.X11
         readonly X11WindowInfo window;
         static int XIOpCode;
 
-        static readonly Functions.EventPredicate PredicateImpl = IsEventValid;
-        readonly IntPtr Predicate = Marshal.GetFunctionPointerForDelegate(PredicateImpl);
-
         public XI2Mouse()
         {
             Debug.WriteLine("Using XI2Mouse.");
@@ -58,45 +55,83 @@ namespace OpenMobile.Platform.X11
                 window.WindowHandle = window.RootWindow;
             }
 
-            using (XIEventMask mask = new XIEventMask(1, XIEventMasks.RawButtonPressMask |
+            using (XIEventMask mask = new XIEventMask(0, XIEventMasks.RawButtonPressMask |
                     XIEventMasks.RawButtonReleaseMask | XIEventMasks.RawMotionMask))
             {
                 Functions.XISelectEvents(window.Display, window.WindowHandle, mask);
             }
-            //new Thread(delegate(){ ProcessEvents();}).Start();
         }
         public void Initialize()
         {
-			window.Display=Functions.XOpenDisplay(IntPtr.Zero);
+			IntPtr Display=Functions.XOpenDisplay(IntPtr.Zero);
             int count=4;
-			bool supported=IsSupported(window.Display);
-            IntPtr tmp= Functions.XIQueryDevice(window.Display,0,out count);
-			Functions.XIFreeDeviceInfo(tmp);
-            Debug.Print(count + " available devices");;
-			int dummy;
-			for(int i=0;i<count;i++)
+			if (IsSupported(Display))
 			{
-				IntPtr devPtr=Functions.XIQueryDevice(window.Display,i+2,out dummy);
-				XIDeviceInfo devs=(XIDeviceInfo) Marshal.PtrToStructure(devPtr,typeof(XIDeviceInfo));
-				if (devs.enabled)
+	            IntPtr tmp= Functions.XIQueryDevice(Display,0,out count);
+				Functions.XIFreeDeviceInfo(tmp);
+	            Debug.Print(count + " available devices");;
+				int dummy;
+				for(int i=0;i<count;i++)
 				{
-					if (devs.use==3)
+					IntPtr devPtr=Functions.XIQueryDevice(window.Display,i+2,out dummy);
+					XIDeviceInfo devs=(XIDeviceInfo) Marshal.PtrToStructure(devPtr,typeof(XIDeviceInfo));
+					XIValuatorInfo xInfo=new XIValuatorInfo();
+					XIValuatorInfo yInfo=new XIValuatorInfo();
+					if (devs.num_classes>0)
 					{
-						MouseDevice dev=new MouseDevice();
-						dev.Description=devs.name;
-						dev.DeviceID=new IntPtr(i+2);
-						dev.Instance=mice.Count;
-						dev.NumberOfButtons=2;
-						if (!rawids.ContainsKey(i+2))
+						IntPtr[] classPtrs=new IntPtr[devs.num_classes];
+						Marshal.Copy(devs.type,classPtrs,0,devs.num_classes);
+						for(int j=0;j<devs.num_classes;j++)
 						{
-							mice.Add(dev);
-							rawids.Add(i+2,mice.Count-1);
+							XIAnyClassInfo info=(XIAnyClassInfo)Marshal.PtrToStructure(classPtrs[j],typeof(XIAnyClassInfo));
+							if (info.type==2)
+							{
+								XIValuatorInfo valInfo=(XIValuatorInfo)Marshal.PtrToStructure(classPtrs[j],typeof(XIValuatorInfo));
+								switch(Functions.XGetAtomName(Display,valInfo.label))
+								{
+								case "Rel X":
+								case "Abs X":	
+									xInfo=valInfo;
+									break;
+								case "Rel Y":
+								case "Abs Y":
+									yInfo=valInfo;
+									break;
+								}
+							}
 						}
 					}
+					if (devs.enabled)
+					{
+						if (devs.use==3)
+						{
+							MouseDevice dev=new MouseDevice();
+							dev.Description=devs.name;
+							dev.DeviceID=new IntPtr(i+2);
+							dev.Instance=mice.Count;
+							dev.NumberOfButtons=2;
+							if (xInfo.label>0)
+							{
+								dev.minx=xInfo.min;
+								dev.maxx=xInfo.max;
+								dev.Absolute=xInfo.mode!=0;
+							}
+							if (yInfo.label>0)
+							{
+								dev.miny=yInfo.min;
+								dev.maxy=yInfo.max;
+							}
+							if (!rawids.ContainsKey(i+2))
+							{
+								mice.Add(dev);
+								rawids.Add(i+2,mice.Count-1);
+							}
+						}
+					}
+					Functions.XIFreeDeviceInfo(devPtr);
 				}
-				Functions.XIFreeDeviceInfo(devPtr);
+				new Thread(delegate(){ ProcessEvents();}).Start();
 			}
-			Debug.Print("Done");
         }
         // Checks whether XInput2 is supported on the specified display.
         // If a display is not specified, the default display is used.
@@ -104,7 +139,8 @@ namespace OpenMobile.Platform.X11
         {
             using (new XLock(display))
             {
-                int major, ev, error;
+                int major=2;
+				int ev, error;
                 if (Functions.XQueryExtension(display, "XInputExtension", out major, out ev, out error) == 0)
                 {
                     return false;
@@ -130,76 +166,85 @@ namespace OpenMobile.Platform.X11
                 XEvent e = new XEvent();
                 XGenericEventCookie cookie;
 
-                using (new XLock(window.Display))
+                if (Functions.XNextEvent(window.Display, ref e)!=IntPtr.Zero)
+                    return;
+				if (e.GenericEvent.extension!=XIOpCode)
+					continue;
+                cookie = e.GenericEventCookie;
+                if (Functions.XGetEventData(window.Display, ref cookie) != 0)
                 {
-                    if (!Functions.XIfEvent(window.Display, ref e, Predicate, new IntPtr(XIOpCode)))
-                        return;
+                    XIRawEvent raw = (XIRawEvent)
+                        Marshal.PtrToStructure(cookie.data, typeof(XIRawEvent));
 
-                    cookie = e.GenericEventCookie;
-                    if (Functions.XGetEventData(window.Display, ref cookie) != 0)
+                    if (!rawids.ContainsKey(raw.deviceid))
                     {
-                        XIRawEvent raw = (XIRawEvent)
-                            Marshal.PtrToStructure(cookie.data, typeof(XIRawEvent));
-
-                        if (!rawids.ContainsKey(raw.deviceid))
-                        {
-                            return;
-                        }
-                        MouseDevice state = mice[rawids[raw.deviceid]];
-
-                        switch (raw.evtype)
-                        {
-                            case XIEventType.RawMotion:
-                                Point current=state.Location;
-                                if (IsBitSet(raw.valuators.mask, 0))
-                                    current.X += (int)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(raw.raw_values, 0));
-                                if (IsBitSet(raw.valuators.mask, 1))
-                                    current.Y += (int)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(raw.raw_values, 8));
-                                state.Position = current;
-                                break;
-
-                            case XIEventType.RawButtonPress:
-                                switch (raw.detail)
-                                {
-                                    case 1: state[MouseButton.Left]=true; break;
-                                    case 2: state[MouseButton.Middle]=true; break;
-                                    case 3: state[MouseButton.Right]=true; break;
-                                    case 4: state.WheelPrecise++; break;
-                                    case 5: state.WheelPrecise--; break;
-                                    case 6: state[MouseButton.Button1]=true; break;
-                                    case 7: state[MouseButton.Button2]=true; break;
-                                    case 8: state[MouseButton.Button3]=true; break;
-                                    case 9: state[MouseButton.Button4]=true; break;
-                                    case 10: state[MouseButton.Button5]=true; break;
-                                    case 11: state[MouseButton.Button6]=true; break;
-                                    case 12: state[MouseButton.Button7]=true; break;
-                                    case 13: state[MouseButton.Button8]=true; break;
-                                    case 14: state[MouseButton.Button9]=true; break;
-                                }
-                                break;
-
-                            case XIEventType.RawButtonRelease:
-                                switch (raw.detail)
-                                {
-                                    case 1: state[MouseButton.Left] = false; break;
-                                    case 2: state[MouseButton.Middle] = false; break;
-                                    case 3: state[MouseButton.Right] = false; break;
-                                    case 6: state[MouseButton.Button1] = false; break;
-                                    case 7: state[MouseButton.Button2] = false; break;
-                                    case 8: state[MouseButton.Button3] = false; break;
-                                    case 9: state[MouseButton.Button4] = false; break;
-                                    case 10: state[MouseButton.Button5] = false; break;
-                                    case 11: state[MouseButton.Button6] = false; break;
-                                    case 12: state[MouseButton.Button7] = false; break;
-                                    case 13: state[MouseButton.Button8] = false; break;
-                                    case 14: state[MouseButton.Button9] = false; break;
-                                }
-                                break;
-                        }
-                        mice[rawids[raw.deviceid]] = state;
+                        continue;
                     }
-                    Functions.XFreeEventData(window.Display, ref cookie);
+                    MouseDevice state = mice[rawids[raw.deviceid]];
+
+                    switch (raw.evtype)
+                    {
+                        case XIEventType.RawMotion:
+                            Point current=state.Location;
+							int x=0,y=0;
+                            if (IsBitSet(raw.valuators.mask, 0))
+                                x= (int)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(raw.raw_values, 0));
+                            if (IsBitSet(raw.valuators.mask, 1))
+                                y= (int)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(raw.raw_values, 8));
+                            if (state.Absolute)
+							{
+								if (state.minx!=state.miny)
+								{
+									x=(int)(((x-state.minx)/state.minx)*state.Width);
+									y=(int)(((y-state.miny)/state.miny)*state.Height);
+								}
+							}
+							current.X+=x;
+							current.Y+=y;
+							state.Position = current;
+                            break;
+
+                        case XIEventType.RawButtonPress:
+                            switch (raw.detail)
+                            {
+                                case 1: state[MouseButton.Left]=true; break;
+                                case 2: state[MouseButton.Middle]=true; break;
+                                case 3: state[MouseButton.Right]=true; break;
+                                case 4: state.WheelPrecise++; break;
+                                case 5: state.WheelPrecise--; break;
+                                case 6: state[MouseButton.Button1]=true; break;
+                                case 7: state[MouseButton.Button2]=true; break;
+                                case 8: state[MouseButton.Button3]=true; break;
+                                case 9: state[MouseButton.Button4]=true; break;
+                                case 10: state[MouseButton.Button5]=true; break;
+                                case 11: state[MouseButton.Button6]=true; break;
+                                case 12: state[MouseButton.Button7]=true; break;
+                                case 13: state[MouseButton.Button8]=true; break;
+                                case 14: state[MouseButton.Button9]=true; break;
+                            }
+                            break;
+
+                        case XIEventType.RawButtonRelease:
+                            switch (raw.detail)
+                            {
+                                case 1: state[MouseButton.Left] = false; break;
+                                case 2: state[MouseButton.Middle] = false; break;
+                                case 3: state[MouseButton.Right] = false; break;
+                                case 6: state[MouseButton.Button1] = false; break;
+                                case 7: state[MouseButton.Button2] = false; break;
+                                case 8: state[MouseButton.Button3] = false; break;
+                                case 9: state[MouseButton.Button4] = false; break;
+                                case 10: state[MouseButton.Button5] = false; break;
+                                case 11: state[MouseButton.Button6] = false; break;
+                                case 12: state[MouseButton.Button7] = false; break;
+                                case 13: state[MouseButton.Button8] = false; break;
+                                case 14: state[MouseButton.Button9] = false; break;
+                            }
+                            break;
+                    }
+                    mice[rawids[raw.deviceid]] = state;
                 }
+                Functions.XFreeEventData(window.Display, ref cookie);
             }
         }
 
