@@ -154,9 +154,9 @@ namespace OpenMobile.Graphics
             float yrad = height / 2F;
             float xrad = width / 2F;
             startAngle = 360 - startAngle;
-            float[] arr = new float[(int)((sweepAngle + 0.5) * 2)];
+            float[] arr = new float[(int)((sweepAngle + 0.5F) * 4)];
             int i = 0;
-            for (float t = startAngle; t >= (startAngle + sweepAngle); t = t - 0.5F)
+            for (float t = startAngle; t >= (startAngle - sweepAngle); t = t - 0.5F)
             {
                 float rad = OpenMobile.MathHelper.DegreesToRadians(t);
                 arr[i]=x + xrad + (float)(xrad * Math.Cos(rad));
