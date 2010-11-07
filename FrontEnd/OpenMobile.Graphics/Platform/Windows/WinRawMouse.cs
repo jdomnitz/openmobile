@@ -116,12 +116,10 @@ namespace OpenMobile.Platform.Windows
                                 int devInfoSize = API.RawInputDeviceInfoSize;
                                 Functions.GetRawInputDeviceInfo(dev.Device, RawInputDeviceInfoEnum.DEVICEINFO,
                                         info, ref devInfoSize);
-
                                 RegisterRawDevice(Window, deviceDesc);
                                 MouseDevice state = new MouseDevice();
                                 state.Description = deviceDesc + " (" + info.Device.Mouse.Id.ToString() + ")";
                                 state.DeviceID = new IntPtr(info.Device.Mouse.Id);
-                                state.NumberOfButtons = info.Device.Mouse.NumberOfButtons;
                                 state.Instance = mice.Count;
                                 mice.Add(state);
                                 rawids.Add(new ContextHandle(dev.Device), mice.Count - 1);

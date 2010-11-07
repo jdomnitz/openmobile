@@ -22,19 +22,12 @@ namespace OpenMobile.Platform.X11
     /// </summary>
     internal sealed class X11Input:IInputDriver
     {
-        X11Joystick joystick_driver = new X11Joystick();
-        //X11WindowInfo window;
         KeyboardDevice keyboard = new KeyboardDevice();
         MouseDevice mouse = new MouseDevice();
         List<KeyboardDevice> dummy_keyboard_list = new List<KeyboardDevice>(1);
         List<MouseDevice> dummy_mice_list = new List<MouseDevice>(1);
 
         X11KeyMap keymap = new X11KeyMap();
-        int firstKeyCode, lastKeyCode; // The smallest and largest KeyCode supported by the X server.
-        int keysyms_per_keycode;    // The number of KeySyms for each KeyCode.
-        IntPtr[] keysyms;
-
-        //bool disposed;
 
         #region --- Constructors ---
 
@@ -58,27 +51,13 @@ namespace OpenMobile.Platform.X11
             // Init mouse
             mouse.Description = "Default Mouse";
             mouse.DeviceID = IntPtr.Zero;
-            mouse.NumberOfButtons = 5;
-            mouse.NumberOfWheels = 1;
             dummy_mice_list.Add(mouse);
             
             using (new XLock(window.Display))
             {
                 // Init keyboard
-                API.DisplayKeycodes(window.Display, ref firstKeyCode, ref lastKeyCode);
-                Debug.Print("First keycode: {0}, last {1}", firstKeyCode, lastKeyCode);
-    
-                IntPtr keysym_ptr = API.GetKeyboardMapping(window.Display, (byte)firstKeyCode,
-                    lastKeyCode - firstKeyCode + 1, ref keysyms_per_keycode);
-                Debug.Print("{0} keysyms per keycode.", keysyms_per_keycode);
-    
-                keysyms = new IntPtr[(lastKeyCode - firstKeyCode + 1) * keysyms_per_keycode];
-                Marshal.PtrToStructure(keysym_ptr, keysyms);
-                API.Free(keysym_ptr);
-    
                 KeyboardDevice kb = new KeyboardDevice();
                 keyboard.Description = "Default Keyboard";
-                keyboard.NumberOfKeys = lastKeyCode - firstKeyCode + 1;
                 keyboard.DeviceID = IntPtr.Zero;
                 dummy_keyboard_list.Add(keyboard);
     
@@ -235,7 +214,7 @@ namespace OpenMobile.Platform.X11
 
         public IList<JoystickDevice> Joysticks
         {
-            get { return joystick_driver.Joysticks; }
+            get { return new List<JoystickDevice>();}// joystick_driver.Joysticks; }
         }
 
         #endregion

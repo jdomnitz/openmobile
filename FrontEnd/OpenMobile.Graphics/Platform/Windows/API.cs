@@ -80,7 +80,7 @@ namespace OpenMobile.Platform.Windows
         {
             RawInputHeaderSize = Marshal.SizeOf(typeof(RawInputHeader));
             RawInputSize = Marshal.SizeOf(typeof(RawInput));
-            RawMouseSize = Marshal.SizeOf(typeof(RawMouse));
+            //RawMouseSize = Marshal.SizeOf(typeof(RawMouse));
             RawInputDeviceSize = Marshal.SizeOf(typeof(RawInputDevice));
             RawInputDeviceListSize = Marshal.SizeOf(typeof(RawInputDeviceList));
             RawInputDeviceInfoSize = Marshal.SizeOf(typeof(RawInputDeviceInfo));
@@ -96,7 +96,7 @@ namespace OpenMobile.Platform.Windows
         internal static readonly int RawInputHeaderSize;
         internal static readonly int RawInputDeviceListSize;
         internal static readonly int RawInputDeviceInfoSize;
-        internal static readonly int RawMouseSize;
+        //internal static readonly int RawMouseSize;
         internal static readonly int WindowInfoSize;
     }
 
@@ -932,7 +932,7 @@ namespace OpenMobile.Platform.Windows
 
         #region Input functions
 
-        [DllImport("user32.dll", SetLastError=true)]
+        [DllImport("user32.dll", SetLastError=true),SuppressUnmanagedCodeSecurity]
         public static extern bool GetGestureInfo(IntPtr hGestureInfo, GESTUREINFO pGestureInfo);
 
         [DllImport("user32.dll", SetLastError=true)]
@@ -955,27 +955,6 @@ namespace OpenMobile.Platform.Windows
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
-
-        #region Async input
-
-        #region GetCursorPos
-
-        /// <summary>
-        /// Retrieves the cursor's position, in screen coordinates.
-        /// </summary>
-        /// <param name="point">Pointer to a POINT structure that receives the screen coordinates of the cursor.</param>
-        /// <returns>Returns nonzero if successful or zero otherwise. To get extended error information, call GetLastError.</returns>
-        /// <remarks>
-        /// <para>The cursor position is always specified in screen coordinates and is not affected by the mapping mode of the window that contains the cursor.</para>
-        /// <para>The calling process must have WINSTA_READATTRIBUTES access to the window station.</para>
-        /// <para>The input desktop must be the current desktop when you call GetCursorPos. Call OpenInputDesktop to determine whether the current desktop is the input desktop. If it is not, call SetThreadDesktop with the HDESK returned by OpenInputDesktop to switch to that desktop.</para>
-        /// </remarks>
-        [DllImport("user32.dll", SetLastError = true), SuppressUnmanagedCodeSecurity]
-        internal static extern BOOL GetCursorPos(ref Point point);
-
-        #endregion
-
-        #endregion
 
         #region Raw Input
 
@@ -1026,109 +1005,12 @@ namespace OpenMobile.Platform.Windows
         /// TRUE if the function succeeds; otherwise, FALSE. If the function fails, call GetLastError for more information.
         /// </returns>
 
-        [DllImport("user32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern BOOL RegisterRawInputDevices(
-            RawInputDevice[] RawInputDevices,
-            UINT NumDevices,
-            UINT Size
-        );
-
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll", SetLastError = true), SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern BOOL RegisterRawInputDevices(
             RawInputDevice[] RawInputDevices,
             INT NumDevices,
             INT Size
-        );
-
-        #endregion
-
-        #region GetRawInputBuffer
-
-        /// <summary>
-        /// Does a buffered read of the raw input data.
-        /// </summary>
-        /// <param name="Data">
-        /// Pointer to a buffer of RawInput structures that contain the raw input data.
-        /// If NULL, the minimum required buffer, in bytes, is returned in Size.
-        /// </param>
-        /// <param name="Size">Pointer to a variable that specifies the size, in bytes, of a RawInput structure.</param>
-        /// <param name="SizeHeader">Size, in bytes, of RawInputHeader.</param>
-        /// <returns>
-        /// If Data is NULL and the function is successful, the return value is zero.
-        /// If Data is not NULL and the function is successful, the return value is the number
-        /// of RawInput structures written to Data.
-        /// If an error occurs, the return value is (UINT)-1. Call GetLastError for the error code.
-        /// </returns>
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern UINT GetRawInputBuffer(
-            [Out] RawInput[] Data,
-            [In, Out] ref UINT Size,
-            [In] UINT SizeHeader
-        );
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern INT GetRawInputBuffer(
-            [Out] RawInput[] Data,
-            [In, Out] ref INT Size,
-            [In] INT SizeHeader
-        );
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern INT GetRawInputBuffer(
-            [Out] IntPtr Data,
-            [In, Out] ref INT Size,
-            [In] INT SizeHeader
-        );
-
-        #endregion
-
-        #region GetRegisteredRawInputDevices
-
-        /// <summary>
-        /// Gets the information about the raw input devices for the current application.
-        /// </summary>
-        /// <param name="RawInputDevices">
-        /// Pointer to an array of RawInputDevice structures for the application.
-        /// </param>
-        /// <param name="NumDevices">
-        /// Number of RawInputDevice structures in RawInputDevices.
-        /// </param>
-        /// <param name="cbSize">
-        /// Size, in bytes, of a RawInputDevice structure.
-        /// </param>
-        /// <returns>
-        /// <para>
-        /// If successful, the function returns a non-negative number that is
-        /// the number of RawInputDevice structures written to the buffer. 
-        /// </para>
-        /// <para>
-        /// If the pRawInputDevices buffer is too small or NULL, the function sets
-        /// the last error as ERROR_INSUFFICIENT_BUFFER, returns -1,
-        /// and sets NumDevices to the required number of devices.
-        /// </para>
-        /// <para>
-        /// If the function fails for any other reason, it returns -1. For more details, call GetLastError.
-        /// </para>
-        /// </returns>
-
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern UINT GetRegisteredRawInputDevices(
-            [Out] RawInput[] RawInputDevices,
-            [In, Out] ref UINT NumDevices,
-            UINT cbSize
-        );
-
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern INT GetRegisteredRawInputDevices(
-            [Out] RawInput[] RawInputDevices,
-            [In, Out] ref INT NumDevices,
-            INT cbSize
         );
 
         #endregion
@@ -1163,14 +1045,14 @@ namespace OpenMobile.Platform.Windows
         /// On any other error, the function returns (UINT) -1 and GetLastError returns the error indication.
         /// </returns>
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll", SetLastError = true), SuppressUnmanagedCodeSecurity]
         internal static extern UINT GetRawInputDeviceList(
             [In, Out] RawInputDeviceList[] RawInputDeviceList,
             [In, Out] ref UINT NumDevices,
             UINT Size
         );
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll", SetLastError = true),SuppressUnmanagedCodeSecurity]
         internal static extern INT GetRawInputDeviceList(
             [In, Out] RawInputDeviceList[] RawInputDeviceList,
             [In, Out] ref INT NumDevices,
@@ -1307,15 +1189,6 @@ namespace OpenMobile.Platform.Windows
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
-        internal static extern UINT GetRawInputDeviceInfo(
-            HANDLE Device,
-            [MarshalAs(UnmanagedType.U4)] RawInputDeviceInfoEnum Command,
-            [In, Out] RawInputDeviceInfo Data,
-            [In, Out] ref UINT Size
-        );
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
         internal static extern INT GetRawInputDeviceInfo(
             HANDLE Device,
             [MarshalAs(UnmanagedType.U4)] RawInputDeviceInfoEnum Command,
@@ -1394,16 +1267,6 @@ namespace OpenMobile.Platform.Windows
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
-        internal static extern UINT GetRawInputData(
-            HRAWINPUT RawInput,
-            GetRawInputDataEnum Command,
-            /*[MarshalAs(UnmanagedType.LPStruct)]*/ [Out] out RawInput Data,
-            [In, Out] ref UINT Size,
-            UINT SizeHeader
-        );
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
         internal static extern INT GetRawInputData(
             HRAWINPUT RawInput,
             GetRawInputDataEnum Command,
@@ -1425,14 +1288,6 @@ namespace OpenMobile.Platform.Windows
 
         #define NEXTRAWINPUTBLOCK(ptr) ((PRAWINPUT)RAWINPUT_ALIGN((ULONG_PTR)((PBYTE)(ptr) + (ptr)->header.dwSize)))
         */
-
-        internal static IntPtr NextRawInputStructure(IntPtr data)
-        {
-            unsafe
-            {
-                return RawInputAlign((IntPtr)(((byte*)data) + API.RawInputHeaderSize));
-            }
-        }
 
         private static IntPtr RawInputAlign(IntPtr data)
         {

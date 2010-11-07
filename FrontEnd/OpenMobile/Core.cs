@@ -306,7 +306,7 @@ namespace OpenMobile
                     return;
                 }
             }
-            Thread rapidMenu=new Thread(new ThreadStart(Core.initialize));
+            Thread rapidMenu=new Thread(Core.initialize);
             rapidMenu.Start();
             if (RenderingWindows.Count == 0)
                 throw new PlatformException("Unable to detect any monitors on this platform!");
