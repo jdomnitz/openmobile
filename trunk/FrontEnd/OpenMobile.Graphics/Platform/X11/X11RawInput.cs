@@ -7,21 +7,19 @@ namespace OpenMobile.Platform.X11
 {
     public sealed class X11RawInput : IInputDriver
     {
-        XI2Mouse mouseDriver = new XI2Mouse();
-		XI2Keyboard keyboardDriver=new XI2Keyboard();
+        XI2Driver driver=new XI2Driver();
         public X11RawInput()
         {
-            mouseDriver.Initialize();
-			keyboardDriver.Initialize();
+            driver.Initialize();
         }
         public IList<KeyboardDevice> Keyboard
         {
-            get { return keyboardDriver.Keyboard ; }
+            get { return driver.Keyboard ; }
         }
 
         public System.Collections.Generic.IList<MouseDevice> Mouse
         {
-            get { return mouseDriver.Mouse; }
+            get { return driver.Mouse; }
         }
 
         public System.Collections.Generic.IList<JoystickDevice> Joysticks
@@ -40,10 +38,7 @@ namespace OpenMobile.Platform.X11
             {
                 if (manual)
                 {
-                    keyboardDriver.Dispose();
-                    mouseDriver.Dispose();
-                    //if (Native != null)
-                    //    Native.Dispose();
+                    driver.Dispose();
                 }
 
                 disposed = true;
