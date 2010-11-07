@@ -689,9 +689,10 @@ namespace OpenMobile
             if ((int)sender != screen)
                 return;
             tmrLongClick.Enabled = false;
-            if ((lastClick != null) && (lastClick.DownImage.image != null))
+            OMButton ptrLast = lastClick;
+            if ((ptrLast != null) && (ptrLast.DownImage.image != null))
             {
-                lastClick.Mode = eModeType.Highlighted;
+                ptrLast.Mode = eModeType.Highlighted;
                 Invalidate();
             }
             if (highlighted != null)

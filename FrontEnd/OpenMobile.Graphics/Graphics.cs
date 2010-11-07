@@ -253,7 +253,7 @@ namespace OpenMobile.Graphics
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
                 g.ScaleTransform(scaleWidth, scaleHeight);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
                 renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
             }
             return new OImage(bmp);

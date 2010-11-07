@@ -71,7 +71,7 @@ namespace OpenMobile
             this.current_resolution = currentResolution;
             IsPrimary = primary;
             this.available_resolutions.AddRange(availableResolutions);
-            this.bounds = bounds == Rectangle.Empty ? currentResolution.Bounds : bounds;
+            this.bounds = (bounds == Rectangle.Empty) ? currentResolution.Bounds : bounds;
             this.landscape = (current_resolution.Width > current_resolution.Height);
             Debug.Print("DisplayDevice {0} ({1}) supports {2} resolutions.",
                 available_displays.Count, primary ? "primary" : "secondary", available_resolutions.Count);

@@ -97,9 +97,11 @@ namespace OpenMobile
 
         void t1_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu");
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Music");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Music"))
+            {
+                theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu");
+                theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            }
         }
 
         void b4_OnClick(OMControl sender, int screen)

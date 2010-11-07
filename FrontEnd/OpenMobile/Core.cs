@@ -318,7 +318,7 @@ namespace OpenMobile
             for (int i = 0; i < pluginCollection.Count;i++ )
                 if (pluginCollection[i] != null)
                     pluginCollection[i].Dispose();
-            InputRouter.Finalize();
+            InputRouter.Dispose();
             Environment.Exit(0); //Force
         }
     }
