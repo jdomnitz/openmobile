@@ -1111,5 +1111,20 @@ namespace OpenMobile
             if (landscape != dev.Landscape)
                 Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), dev.Landscape ? "Landscape" : "Portrait", "");
         }
+        internal void Rollback()
+        {
+            foreach (OMPanel panel in backgroundQueue)
+            {
+                if (panel.Mode == eModeType.transitioningOut)
+                    panel.Mode = eModeType.Normal;
+                for (int i = panel.controlCount - 1; i >= 0; i--)
+                {
+                    if (panel[i].Mode == eModeType.transitioningIn)
+                        panel[i].UpdateThisControl -= UpdateThisControl;
+                    panel[i].Mode = eModeType.Normal;
+                }
+            }
+            backgroundQueue.RemoveAll(p => p.Mode == eModeType.transitioningIn);
+        }
     }
 }

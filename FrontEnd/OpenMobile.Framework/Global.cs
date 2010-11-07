@@ -544,6 +544,12 @@ namespace OpenMobile
         /// </summary>
         None=0,
         /// <summary>
+        /// Rolls back and cancels a transition
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen</para>
+        /// </summary>
+        CancelTransition=1,
+        /// <summary>
         /// A data provider has completed an update
         /// <para>---------------------------------------</para>
         /// <para>Arg1: (Optional) Provider Name</para>

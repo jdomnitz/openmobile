@@ -586,14 +586,22 @@ namespace OpenMobile
                     {
                         case "M":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
-                            theHost.execute(eFunction.TransitionToPanel, arg1, "Media");
-                            theHost.execute(eFunction.TransitionToPanel, arg1, "NewMedia");
-                            theHost.execute(eFunction.ExecuteTransition, arg1);
+                            if (!theHost.execute(eFunction.TransitionToPanel, arg1, "NewMedia"))
+                            {
+                                if (!theHost.execute(eFunction.TransitionToPanel, arg1, "Media"))
+                                    theHost.execute(eFunction.CancelTransition, arg1);
+                                else
+                                    theHost.execute(eFunction.ExecuteTransition, arg1);
+                            }
+                            else
+                                theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
                         case "R":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
-                            theHost.execute(eFunction.TransitionToPanel, arg1, "Radio");
-                            theHost.execute(eFunction.ExecuteTransition, arg1);
+                            if(!theHost.execute(eFunction.TransitionToPanel, arg1, "Radio"))
+                                theHost.execute(eFunction.CancelTransition, arg1);
+                            else
+                                theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
                         case "H":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
@@ -602,8 +610,10 @@ namespace OpenMobile
                             break;
                         case "N":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
-                            theHost.execute(eFunction.TransitionToPanel, arg1, "Navigation");
-                            theHost.execute(eFunction.ExecuteTransition, arg1);
+                            if (!theHost.execute(eFunction.TransitionToPanel, arg1, "Navigation"))
+                                theHost.execute(eFunction.CancelTransition, arg1);
+                            else
+                                theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
                         case " ":
                             skipForwardButton_OnClick(null, int.Parse(arg1));
