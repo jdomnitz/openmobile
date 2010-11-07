@@ -1713,7 +1713,7 @@ namespace OpenMobile.Platform.X11
        public Time time;
        public int deviceid;
        public int sourceid;
-       public int detail;
+       public uint detail;
        public int flags;
        public XIValuatorState valuators;
        public IntPtr raw_values; // double        *

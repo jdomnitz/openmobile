@@ -557,6 +557,8 @@ XF86VidModeGetGammaRampSize(
         [DllImport(_dll_name, EntryPoint = "XLookupKeysym")]
         public static extern KeySym LookupKeysym(ref XKeyEvent key_event, int index);
 
+		[DllImport(_dll_name, EntryPoint = "XKeycodeToKeysym")]
+        public static extern KeySym XKeycodeToKeysym(Display display,uint keycode,int index);
     }
     #endregion
 
