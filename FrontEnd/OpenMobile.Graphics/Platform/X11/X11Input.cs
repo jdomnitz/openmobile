@@ -27,7 +27,7 @@ namespace OpenMobile.Platform.X11
         List<KeyboardDevice> dummy_keyboard_list = new List<KeyboardDevice>(1);
         List<MouseDevice> dummy_mice_list = new List<MouseDevice>(1);
 
-        X11KeyMap keymap = new X11KeyMap();
+        internal static X11KeyMap keymap = new X11KeyMap();
 
         #region --- Constructors ---
 
@@ -72,57 +72,6 @@ namespace OpenMobile.Platform.X11
             Debug.Unindent();
         }
 
-        #endregion
-
-        #region private void InternalPoll()
-#if false
-        private void InternalPoll()
-        {
-            X11.XEvent e = new XEvent();
-            try
-            {
-                while (!disposed)
-                {
-                    Functions.XMaskEvent(window.Display,
-                        EventMask.PointerMotionMask | EventMask.PointerMotionHintMask |
-                        EventMask.ButtonPressMask | EventMask.ButtonReleaseMask |
-                        EventMask.KeyPressMask | EventMask.KeyReleaseMask |
-                        EventMask.StructureNotifyMask, ref e);
-
-                    if (disposed)
-                        return;
-
-                    switch (e.type)
-                    {
-                        case XEventName.KeyPress:
-                        case XEventName.KeyRelease:
-                            keyboardDriver.ProcessKeyboardEvent(ref e.KeyEvent);
-                            break;
-
-                        case XEventName.ButtonPress:
-                        case XEventName.ButtonRelease:
-                            mouseDriver.ProcessButton(ref e.ButtonEvent);
-                            break;
-
-                        case XEventName.MotionNotify:
-                            mouseDriver.ProcessMotion(ref e.MotionEvent);
-                            break;
-
-                        case XEventName.DestroyNotify:
-                            Functions.XPutBackEvent(window.Display, ref e);
-                            Functions.XAutoRepeatOn(window.Display);
-                            return;
-                    }
-                }
-            }
-            catch (ThreadAbortException expt)
-            {
-                Functions.XUnmapWindow(window.Display, window.Handle);
-                Functions.XDestroyWindow(window.Display, window.Handle);
-                return;
-            }
-        }
-#endif
         #endregion
 
         #region internal void ProcessEvent(ref XEvent e)

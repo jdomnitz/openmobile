@@ -68,11 +68,12 @@ namespace OpenMobile.Platform.X11
 			if (IsSupported(Display))
 			{
 	            IntPtr tmp= Functions.XIQueryDevice(Display,0,out count);
-                IntPtr[] ptrDev=new IntPtr[count];
-                Marshal.Copy(tmp, ptrDev, 0, count);
-				for(int i=0;i<count;i++)
+				Functions.XIFreeDeviceInfo(tmp);
+				int dummy=0;
+				for(int i=2;i<count;i++)
 				{
-					XIDeviceInfo devs=(XIDeviceInfo) Marshal.PtrToStructure(ptrDev[i+2],typeof(XIDeviceInfo));
+					IntPtr devPtr=Functions.XIQueryDevice(Display,i,out dummy);
+					XIDeviceInfo devs=(XIDeviceInfo) Marshal.PtrToStructure(devPtr,typeof(XIDeviceInfo));
 					XIValuatorInfo xInfo=new XIValuatorInfo();
 					XIValuatorInfo yInfo=new XIValuatorInfo();
 					if (devs.num_classes>0)
@@ -105,7 +106,7 @@ namespace OpenMobile.Platform.X11
 						{
 							MouseDevice dev=new MouseDevice();
 							dev.Description=devs.name;
-							dev.DeviceID=new IntPtr(i+2);
+							dev.DeviceID=new IntPtr(i);
 							dev.Instance=mice.Count;
 							if (xInfo.label>0)
 							{
@@ -118,15 +119,15 @@ namespace OpenMobile.Platform.X11
 								dev.miny=yInfo.min;
 								dev.maxy=yInfo.max;
 							}
-							if (!rawids.ContainsKey(i+2))
+							if (!rawids.ContainsKey(i))
 							{
 								mice.Add(dev);
-								rawids.Add(i+2,mice.Count-1);
+								rawids.Add(i,mice.Count-1);
 							}
 						}
 					}
+					Functions.XIFreeDeviceInfo(devPtr);
 				}
-                Functions.XIFreeDeviceInfo(tmp);
 				new Thread(delegate(){ ProcessEvents();}).Start();
 			}
         }

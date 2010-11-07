@@ -8,13 +8,15 @@ namespace OpenMobile.Platform.X11
     public sealed class X11RawInput : IInputDriver
     {
         XI2Mouse mouseDriver = new XI2Mouse();
+		XI2Keyboard keyboardDriver=new XI2Keyboard();
         public X11RawInput()
         {
             mouseDriver.Initialize();
+			keyboardDriver.Initialize();
         }
         public IList<KeyboardDevice> Keyboard
         {
-            get { return new List<KeyboardDevice>() ; }
+            get { return keyboardDriver.Keyboard ; }
         }
 
         public System.Collections.Generic.IList<MouseDevice> Mouse
@@ -38,7 +40,7 @@ namespace OpenMobile.Platform.X11
             {
                 if (manual)
                 {
-                    //keyboardDriver.Dispose();
+                    keyboardDriver.Dispose();
                     mouseDriver.Dispose();
                     //if (Native != null)
                     //    Native.Dispose();
