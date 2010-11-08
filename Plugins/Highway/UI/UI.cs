@@ -142,7 +142,7 @@ namespace OpenMobile
             p.addControl(back);
             p.addControl(favorites);
             manager.loadPanel(p);
-            OMAnimatedLabel title = new OMAnimatedLabel(335, 37, 425, 32);
+            OMAnimatedLabel title = new OMAnimatedLabel(335, 34, 425, 40);
             title.Font = new Font(Font.Arial, 24);
             title.Format = eTextFormat.BoldGlow;
             title.TextAlignment = Alignment.TopLeft;
@@ -185,9 +185,13 @@ namespace OpenMobile
             int vol = ((VolumeBar)manager[screen, "volume"][1]).Value;
             if (vol == 0)
                 return;
+            
             theHost.execute(eFunction.setSystemVolume, (vol - 1).ToString(), theHost.instanceForScreen(screen).ToString());
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "UI", "volume");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+            if (volCount[screen] == 0)
+            {
+                theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "UI", "volume");
+                theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+            }
             volCount[screen] = 4;
         }
 
@@ -201,9 +205,13 @@ namespace OpenMobile
             int vol=((VolumeBar)manager[screen, "volume"][1]).Value;
             if (vol==100)
                 return;
-            theHost.execute(eFunction.setSystemVolume, (vol+1).ToString(), theHost.instanceForScreen(screen).ToString());
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "UI", "volume");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+            
+            theHost.execute(eFunction.setSystemVolume, (vol + 1).ToString(), theHost.instanceForScreen(screen).ToString());
+            if (volCount[screen] == 0)
+            {
+                theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "UI", "volume");
+                theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideRight");
+            }
             volCount[screen] = 4;
         }
 

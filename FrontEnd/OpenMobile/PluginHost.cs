@@ -1539,9 +1539,18 @@ namespace OpenMobile
                     item.name = imageName;
                     return item;
                 }
-                catch (Exception)
+                catch (ArgumentException)
                 {
-                    return new imageItem();
+                    try
+                    {
+                        imageItem item=new imageItem(OImage.FromFile(Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png")));
+                        item.name = imageName;
+                        return item;
+                    }
+                    catch (ArgumentException)
+                    {
+                        return new imageItem();
+                    }
                 }
             }
         }

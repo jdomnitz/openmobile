@@ -98,7 +98,7 @@ namespace OpenMobile.Threading
             {
                 if (taskThread == null)
                 {
-                    taskThread = new Thread(new ThreadStart(executeTask));
+                    taskThread = new Thread(executeTask);
                     taskThread.IsBackground = true;
                     taskThread.Priority = ThreadPriority.BelowNormal;
                     taskThread.Name = "OM Task Manager";
