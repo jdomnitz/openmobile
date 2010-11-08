@@ -29,19 +29,28 @@ namespace Music
 
         #endregion
 
+        //Level:
+        //0=Artists
+        //1=Albums
+        //2=Tracks
+        //3=Playlists
+        //4=Playlist Tracks
+        //5=Genres
+        //6=Genre Tracks
         #region IBasePlugin Members
         IPluginHost theHost;
         string[] dbName;
         int[] level;
         OpenMobile.OMListItem.subItemFormat format = new OMListItem.subItemFormat();
         OImage noCover;
-
+        List<string>[] Artists;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
             manager = new ScreenManager(theHost.ScreenCount);
             dbName = new string[theHost.ScreenCount];
             level = new int[theHost.ScreenCount];
+            Artists = new List<string>[theHost.ScreenCount];
             OMPanel p = new OMPanel("");
             imageItem mid = theHost.getSkinImage("MidButton");
             imageItem midHL = theHost.getSkinImage("MidButton_HL");
@@ -75,7 +84,7 @@ namespace Music
             genre.LeftAlign = true;
             genre.Icon = theHost.getSkinImage("Genre", true);
             genre.Text = "Genre";
-
+            genre.OnClick += new userInteraction(genre_OnClick);
             MidButton play = new MidButton(790, 126, 210, 95);
             play.Image = mid;
             play.DownImage = midSL;
@@ -108,12 +117,12 @@ namespace Music
             caption.Text = "All Artists";
             caption.Format = eTextFormat.BoldShadow;
             caption.Font = new Font(Font.GenericSansSerif, 26F);
-            OMList artistList = new OMList(225, 162, 563, 318);
+            OMList artistList = new OMList(227, 162, 563, 316);
             artistList.ListStyle = eListStyle.MultiList;
             artistList.ItemColor1 = artistList.ItemColor2= Color.Transparent;
             artistList.Font = new Font(Font.GenericSansSerif, 29F);
             artistList.OnClick += new userInteraction(artistList_OnClick);
-            OMList mainList = new OMList(225, 162, 563, 318);
+            OMList mainList = new OMList(227, 162, 563, 316);
             mainList.ListStyle = eListStyle.MultiList;
             mainList.ItemColor1 = artistList.ItemColor2 = Color.Transparent;
             mainList.Visible = false;
@@ -125,8 +134,15 @@ namespace Music
             noCover = theHost.getSkinImage("AlbumArt").image;
             using (PluginSettings settings = new PluginSettings())
                 for (int i = 0; i < theHost.ScreenCount; i++)
+                {
+                    Artists[i] = new List<string>();
                     dbName[i] = settings.getSetting("Default.MusicDatabase");
-            OpenMobile.Media.MediaLoader.loadArtists(theHost, artistList, dbName[0]);
+                }
+            OpenMobile.Threading.TaskManager.QueueTask(() =>
+            {
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                    loadArtists(i);
+            }, ePriority.High, "Load Artists");
             p.addControl(background);
             p.addControl(source);
             p.addControl(artists);
@@ -142,6 +158,36 @@ namespace Music
             p.addControl(mainList);
             manager.loadPanel(p);
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+        private void loadArtists(int screen)
+        {
+            object o;
+            theHost.getData(eGetData.GetMediaDatabase, dbName[screen], out  o);
+            if (o == null)
+                return;
+            lock (manager[screen][11])
+            {
+                Artists[screen].Clear();
+                using (IMediaDatabase db = (IMediaDatabase)o)
+                {
+                    db.beginGetArtists(false);
+                    mediaInfo info = db.getNextMedia();
+                    while (info != null)
+                    {
+                        Artists[screen].Add(info.Artist);
+                        info = db.getNextMedia();
+                    }
+                    db.endSearch();
+                }
+                ((OMList)manager[screen][11]).AddRange(Artists[screen]);
+            }
+        }
+        void genre_OnClick(OMControl sender, int screen)
+        {
+            level[screen] = 5;
+            OpenMobile.Media.MediaLoader.loadGenres(theHost, ((OMList)manager[screen][11]), dbName[screen]);
+            manager[screen][11].Visible = true;
+            manager[screen][12].Visible = false;
         }
 
         void play_OnClick(OMControl sender, int screen)
@@ -226,6 +272,9 @@ namespace Music
         {
             level[screen] = 0;
             ((OMLabel)manager[screen][10]).Text = "All Artists";
+            OMList l = (OMList)manager[screen][11];
+            l.Clear();
+            l.AddRange(Artists[screen]);
             manager[screen][11].Visible = true;
             manager[screen][12].Visible = false;
         }

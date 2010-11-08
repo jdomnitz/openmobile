@@ -453,7 +453,6 @@ namespace OpenMobile
                 }
                 else
                 {
-                    //screenCount = DisplayDevice.AvailableDisplays.Count;
                     raiseSystemEvent(eFunction.screenRemoved, "", "", "");
                 }
             }

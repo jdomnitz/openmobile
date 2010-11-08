@@ -166,10 +166,10 @@ namespace OpenMobile
         /// </summary>
         event EventHandler<EventArgs> WindowStateChanged;
 
-        /// <summary>
-        /// Occurs whenever a character is typed.
-        /// </summary>
-        event EventHandler<KeyPressEventArgs> KeyPress;
+        // <summary>
+        // Occurs whenever a character is typed.
+        // </summary>
+        //event EventHandler<KeyPressEventArgs> KeyPress;
 
         /// <summary>
         /// Occurs whenever the mouse cursor leaves the window <see cref="Bounds"/>.

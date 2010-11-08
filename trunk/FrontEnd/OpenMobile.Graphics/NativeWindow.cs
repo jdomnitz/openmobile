@@ -496,7 +496,7 @@ namespace OpenMobile
         /// <summary>
         /// Occurs whenever a character is typed.
         /// </summary>
-        public event EventHandler<KeyPressEventArgs> KeyPress;
+        //public event EventHandler<KeyPressEventArgs> KeyPress;
 
         /// <summary>
         /// Occurs whenever the mouse cursor enters the window <see cref="Bounds"/>.
@@ -634,14 +634,14 @@ namespace OpenMobile
 
         #region OnKeyPress
 
-        /// <summary>
-        /// Called when a character is typed.
-        /// </summary>
-        /// <param name="e">The <see cref="OpenMobile.KeyPressEventArgs"/> for this event.</param>
-        protected virtual void OnKeyPress(KeyPressEventArgs e)
-        {
-            if (KeyPress != null) KeyPress(this, e);
-        }
+        // <summary>
+        // Called when a character is typed.
+        // </summary>
+        // <param name="e">The <see cref="OpenMobile.KeyPressEventArgs"/> for this event.</param>
+        //protected virtual void OnKeyPress(KeyPressEventArgs e)
+        //{
+        //    if (KeyPress != null) KeyPress(this, e);
+        //}
 
         #endregion
 
@@ -764,11 +764,11 @@ namespace OpenMobile
 
         #endregion
 
-        #region OnKeyPressInternal
+        //#region OnKeyPressInternal
 
-        private void OnKeyPressInternal(object sender, KeyPressEventArgs e) { OnKeyPress(e); }
+        //private void OnKeyPressInternal(object sender, KeyPressEventArgs e) { OnKeyPress(e); }
 
-        #endregion
+        //#endregion
 
         #region OnMouseEnterInternal
 
@@ -818,7 +818,7 @@ namespace OpenMobile
                     }
                     implementation.Closed += OnClosedInternal;
                     implementation.Closing += OnClosingInternal;
-                    implementation.KeyPress += OnKeyPressInternal;
+                    //implementation.KeyPress += OnKeyPressInternal;
                     implementation.MouseEnter += OnMouseEnterInternal;
                     implementation.MouseLeave += OnMouseLeaveInternal;
                     implementation.Resize += OnResizeInternal;
@@ -832,7 +832,7 @@ namespace OpenMobile
                 {
                     implementation.Closed -= OnClosedInternal;
                     implementation.Closing -= OnClosingInternal;
-                    implementation.KeyPress -= OnKeyPressInternal;
+                    //implementation.KeyPress -= OnKeyPressInternal;
                     implementation.MouseEnter -= OnMouseEnterInternal;
                     implementation.MouseLeave -= OnMouseLeaveInternal;
                     implementation.Resize -= OnResizeInternal;

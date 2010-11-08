@@ -279,44 +279,59 @@ namespace OMHal
             StringBuilder buf = new StringBuilder();
             mciSendString("SET CDAudio door open", buf, 127, IntPtr.Zero);
         }
-        internal static void SetBrightness(int value)
+        internal static void SetBrightness(int instance, int value)
         {
             if ((!monitorOn) && (value != 0))
             {
                 monitorOn = true;
-                SwitchOnMonitor();
+                SwitchOnMonitor(instance);
             }
             if (value == 0)
             {
                 monitorOn = false;
-                SwitchOffMonitor();
+                SwitchOffMonitor(instance);
                 return;
             }
             if (value == 1) //round down
                 value = 0;
-            Set((byte)(value * 2.55));
+            Set(instance,(byte)(value * 2.55));
         }
         public delegate IntPtr getHandle();
         public static event getHandle OnHandleRequested;
-        private static void SwitchOffMonitor()
+        private static void SwitchOffMonitor(int instance)
         {
-            SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            if (instance == 0)
+                SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            else
+            {
+                OpenMobile.Platform.Windows.DeviceMode dev = new OpenMobile.Platform.Windows.DeviceMode();
+                dev.DeviceName=instance.ToString();
+                dev.PelsHeight=0;
+                dev.PelsWidth=0;
+                dev.Fields=OpenMobile.Platform.Windows.Constants.DM_POSITION;
+                OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (instance + 1).ToString(), dev, IntPtr.Zero, OpenMobile.Platform.Windows.ChangeDisplaySettingsEnum.Fullscreen, IntPtr.Zero);
+            }
         }
-        private static void SwitchOnMonitor()
+        private static void SwitchOnMonitor(int instance)
         {
-            SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+            if (instance == 0)
+                SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+            //else
+                //TODO
         }
-        private static void Set(byte targetBrightness)
+        private static void Set(int instance, byte targetBrightness)
         {
             ManagementScope scope = new ManagementScope(@"root\WMI");
             SelectQuery query = new SelectQuery("WmiMonitorBrightnessMethods");
             using(ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query))
             using (ManagementObjectCollection objects = searcher.Get())
             {
-                foreach (ManagementObject obj2 in objects)
+                int i=0;
+                foreach(ManagementObject obj2 in objects)
                 {
-                    obj2.InvokeMethod("WmiSetBrightness", new object[] { uint.MaxValue, targetBrightness });
-                    break;
+                    if (i==instance)
+                        obj2.InvokeMethod("WmiSetBrightness", new object[] { uint.MaxValue, targetBrightness });
+                    i++;
                 }
             }
         }
