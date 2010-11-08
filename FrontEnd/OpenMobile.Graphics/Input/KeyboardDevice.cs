@@ -25,7 +25,7 @@ namespace OpenMobile.Input
         private string description;
         private IntPtr devID;
         private int instance=-1;
-        private bool repeat;
+        private bool repeat=true;
         private KeyboardKeyEventArgs args = new KeyboardKeyEventArgs();
 
         #region --- Constructors ---
@@ -46,7 +46,7 @@ namespace OpenMobile.Input
             get { return keys[(int)key]; }
             internal set
             {
-                if (keys[(int)key] != value || KeyRepeat)
+                if (keys[(int)key] != value || repeat)
                 {
                     keys[(int)key] = value;
 
@@ -84,32 +84,6 @@ namespace OpenMobile.Input
             get { return instance; }
             internal set { instance = value; }
         }
-
-        #region public bool KeyRepeat
-
-        /// <summary>
-        /// Gets or sets a System.Boolean indicating key repeat status.
-        /// </summary>
-        /// <remarks>
-        /// If KeyRepeat is true, multiple KeyDown events will be generated while a key is being held.
-        /// Otherwise only one KeyDown event will be reported.
-        /// <para>
-        /// The rate of the generated KeyDown events is controlled by the Operating System. Usually,
-        /// one KeyDown event will be reported, followed by a small (250-1000ms) pause and several
-        /// more KeyDown events (6-30 events per second).
-        /// </para>
-        /// <para>
-        /// Set to true to handle text input (where keyboard repeat is desirable), but set to false
-        /// for game input.
-        /// </para>
-        /// </remarks>
-        public bool KeyRepeat
-        {
-            get { return repeat; }
-            set { repeat = value; }
-        }
-
-        #endregion
 
         #region KeyDown
 

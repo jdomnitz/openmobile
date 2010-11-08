@@ -65,7 +65,7 @@ namespace OpenMobile.Platform.MacOS
 
         static Dictionary<IntPtr, WeakReference> mWindows = new Dictionary<IntPtr, WeakReference>();
 
-		KeyPressEventArgs mKeyPressArgs = new KeyPressEventArgs((char)0);
+		//KeyPressEventArgs mKeyPressArgs = new KeyPressEventArgs((char)0);
 
 		bool mMouseIn = false;
 		//bool mIsActive = false;
@@ -363,18 +363,17 @@ namespace OpenMobile.Platform.MacOS
 				case KeyboardEventKind.RawKeyRepeat:
 				case KeyboardEventKind.RawKeyUp:
 					GetCharCodes(inEvent, out code, out charCode);
-					mKeyPressArgs.KeyChar = charCode;
+					//mKeyPressArgs.KeyChar = charCode;
 					break;
 			}
 
             switch (evt.KeyboardEventKind)
             {
                 case KeyboardEventKind.RawKeyRepeat:
-                    InputDriver.Keyboard[0].KeyRepeat = true;
                     goto case KeyboardEventKind.RawKeyDown;
 
                 case KeyboardEventKind.RawKeyDown:
-					OnKeyPress(mKeyPressArgs);
+					//OnKeyPress(mKeyPressArgs);
                     InputDriver.Keyboard[0][Keymap[code]] = true;
                     return OSStatus.NoError;
 
@@ -1044,11 +1043,11 @@ namespace OpenMobile.Platform.MacOS
 
 		#region --- Event wrappers ---
 
-		private void OnKeyPress(KeyPressEventArgs keyPressArgs)
-		{
-			if (KeyPress != null)
-				KeyPress(this, keyPressArgs);
-		}
+		//private void OnKeyPress(KeyPressEventArgs keyPressArgs)
+		//{
+		//	if (KeyPress != null)
+		//		KeyPress(this, keyPressArgs);
+		//}
 
 
 		private void OnWindowStateChanged()
@@ -1091,7 +1090,7 @@ namespace OpenMobile.Platform.MacOS
         //public event EventHandler<EventArgs> WindowInfoChanged;
         public event EventHandler<EventArgs> WindowBorderChanged;
         public event EventHandler<EventArgs> WindowStateChanged;
-        public event EventHandler<KeyPressEventArgs> KeyPress;
+        //public event EventHandler<KeyPressEventArgs> KeyPress;
         public event EventHandler<EventArgs> MouseEnter;
         public event EventHandler<EventArgs> MouseLeave;
         public event EventHandler<TouchEventArgs> Gesture;

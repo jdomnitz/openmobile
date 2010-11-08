@@ -31,6 +31,37 @@ namespace OpenMobile.Media
     public static class MediaLoader
     {
         /// <summary>
+        /// Loads a list of genres
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="list"></param>
+        /// <param name="dbname"></param>
+        /// <returns></returns>
+        public static bool loadGenres(IPluginHost host, OpenMobile.Controls.IList list, string dbname)
+        {
+            if (dbname == "")
+                return false;
+            object o;
+            host.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            if (o == null)
+                return false;
+            list.Clear();
+            using (IMediaDatabase db = (IMediaDatabase)o)
+            {
+                if (!db.beginGetGenres())
+                    return false;
+                mediaInfo info = db.getNextMedia();
+                while (info != null)
+                {
+                    list.Add(info.Genre);
+                    info = db.getNextMedia();
+                }
+                db.endSearch();
+            }
+            return true;
+        }
+        
+        /// <summary>
         /// Loads a list of artists
         /// </summary>
         /// <param name="host"></param>
@@ -58,7 +89,7 @@ namespace OpenMobile.Media
                 }
                 db.endSearch();
             }
-            return false;
+            return true;
         }
         /// <summary>
         /// Loads all albums from the given artist

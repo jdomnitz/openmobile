@@ -134,7 +134,7 @@ namespace OMHal
                     Specific.eject();
                     break;
                 case "40": //Set Monitor Brightness
-                    Specific.SetBrightness(int.Parse(arg2));
+                    Specific.SetBrightness(int.Parse(arg1), int.Parse(arg2));
                     break;
                 case "42":
                     if (int.TryParse(arg2, out ret))

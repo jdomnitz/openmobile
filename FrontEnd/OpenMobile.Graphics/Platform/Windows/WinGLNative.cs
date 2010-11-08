@@ -236,7 +236,7 @@ namespace OpenMobile.Platform.Windows
 
                 #region Input events
 
-                case WindowMessage.CHAR:
+                /*case WindowMessage.CHAR:
                     if (IntPtr.Size == 4)
                         key_press.KeyChar = (char)wParam.ToInt32();
                     else
@@ -244,7 +244,7 @@ namespace OpenMobile.Platform.Windows
 
                     if (KeyPress != null)
                         KeyPress(this, key_press);
-                    break;
+                    break;*/
                 case WindowMessage.GESTURE:
                     return gestureDecoder(handle, message, wParam, lParam);
                 case WindowMessage.MOUSEMOVE:
@@ -336,7 +336,7 @@ namespace OpenMobile.Platform.Windows
                             // may result in both keys being held down (but not always).
                             // The only reliably way to solve this was reported by BlueMonkMN at the forums: we should
                             // check the scancodes. It looks like GLFW does the same thing, so it should be reliable.
-                            if (ShiftRightScanCode != 0)
+                            if (ShiftRightScanCode != 0 && pressed)
                             {
                                 unchecked
                                 {
@@ -348,8 +348,7 @@ namespace OpenMobile.Platform.Windows
                             }
                             else
                             {
-                                // Should only fall here on Windows 9x and NT4.0-
-                                keyboard[Input.Key.ShiftLeft] = pressed;
+                                keyboard[Input.Key.ShiftLeft] = keyboard[Input.Key.ShiftRight] = pressed;
                             }
                             return IntPtr.Zero;
 
@@ -1065,7 +1064,7 @@ namespace OpenMobile.Platform.Windows
 
         public event EventHandler<EventArgs> WindowStateChanged;
 
-        public event EventHandler<OpenMobile.Graphics.KeyPressEventArgs> KeyPress;
+        //public event EventHandler<KeyPressEventArgs> KeyPress;
 
         public event EventHandler<EventArgs> MouseEnter;
 

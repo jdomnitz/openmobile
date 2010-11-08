@@ -763,7 +763,7 @@ namespace OpenMobile.Platform.X11
                         RefreshWindowBounds(ref e);
                         break;
 
-                    case XEventName.KeyPress:
+                    /*case XEventName.KeyPress:
                         driver.ProcessEvent(ref e);
                         int status = 0;
                         status = Functions.XLookupString(ref e.KeyEvent, ascii, ascii.Length, null, IntPtr.Zero);
@@ -779,7 +779,7 @@ namespace OpenMobile.Platform.X11
                             }
                         }
                         break;
-
+                    */
                     case XEventName.KeyRelease:
                         // Todo: raise KeyPress event. Use code from
                         // http://anonsvn.mono-project.com/viewvc/trunk/mcs/class/Managed.Windows.Forms/System.Windows.Forms/X11Keyboard.cs?view=markup
@@ -1275,7 +1275,7 @@ namespace OpenMobile.Platform.X11
 
         public event EventHandler<EventArgs> WindowStateChanged;
 
-        public event EventHandler<KeyPressEventArgs> KeyPress;
+        //public event EventHandler<KeyPressEventArgs> KeyPress;
 
         public event EventHandler<EventArgs> MouseEnter;
 

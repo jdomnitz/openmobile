@@ -119,8 +119,6 @@ namespace OpenMobile
             if (screen == 0)
                 InputRouter.Initialize();
             redraw += new voiddel(invokePaint);
-            for (int i = 0; i < this.Keyboard.Count;i++ )
-                this.Keyboard[i].KeyRepeat = true;
         }
         bool Identify = false;
         public void paintIdentity()

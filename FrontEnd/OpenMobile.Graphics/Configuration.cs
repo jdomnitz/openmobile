@@ -38,7 +38,7 @@ namespace OpenMobile
     /// <summary>Provides information about the underlying OS and runtime.</summary>
     public static class Configuration
     {
-        static bool runningOnWindows, runningOnUnix, runningOnX11, runningOnMacOS, runningOnLinux, runningOnEmbedded;
+        static bool runningOnWindows, runningOnUnix, runningOnX11, runningOnMacOS, runningOnLinux, runningOnEmbedded,tablet;
 
         #region --- Constructors ---
 
@@ -49,7 +49,10 @@ namespace OpenMobile
                 System.Environment.OSVersion.Platform == PlatformID.Win32S ||
                 System.Environment.OSVersion.Platform == PlatformID.Win32Windows ||
                 System.Environment.OSVersion.Platform == PlatformID.WinCE)
+            {
+                tablet = (Platform.Windows.Functions.GetSystemMetrics(86) != 0);
                 runningOnWindows = true;
+            }
             else if (System.Environment.OSVersion.Platform == PlatformID.Unix ||
                      System.Environment.OSVersion.Platform == (PlatformID)4)
             {
@@ -117,6 +120,13 @@ namespace OpenMobile
         public static bool RunningOnX11
         {
             get { return runningOnX11; }
+        }
+        /// <summary>
+        /// Gets a System.Boolean indicating whether OpenMobile is running on a tablet PC
+        /// </summary>
+        public static bool TabletPC
+        {
+            get { return tablet; }
         }
 
         /// <summary>

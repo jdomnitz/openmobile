@@ -145,6 +145,9 @@ namespace OpenMobile.Platform.Windows
         [DllImport("user32.dll", EntryPoint = "AdjustWindowRectEx", CallingConvention = CallingConvention.StdCall, SetLastError = true), SuppressUnmanagedCodeSecurity]
         internal static extern bool AdjustWindowRectEx(ref Win32Rectangle lpRect, WindowStyle dwStyle, bool bMenu, ExtendedWindowStyle dwExStyle);
 
+        [DllImport("user32.dll"),SuppressUnmanagedCodeSecurity]
+        public static extern int GetSystemMetrics(int smIndex);
+
         #endregion
 
         #region CreateWindowEx
@@ -1340,7 +1343,7 @@ namespace OpenMobile.Platform.Windows
 
     #region --- Constants ---
 
-        internal struct Constants
+        public struct Constants
         {
             // Found in winuser.h
             internal const int KEYBOARD_OVERRUN_MAKE_CODE = 0xFF;
@@ -1418,6 +1421,7 @@ namespace OpenMobile.Platform.Windows
             internal const int DM_PELSHEIGHT = 0x00100000;
             internal const int DM_DISPLAYFLAGS = 0x00200000;
             internal const int DM_DISPLAYFREQUENCY = 0x00400000;
+            public const int DM_POSITION = 0x00000020;
 
             // ChangeDisplaySettings results (found in winuser.h)
             internal const int DISP_CHANGE_SUCCESSFUL = 0;
@@ -1681,74 +1685,21 @@ namespace OpenMobile.Platform.Windows
     #endregion
 
     #region DeviceMode
-    /*
-    typedef struct _devicemode { 
-      BCHAR  dmDeviceName[CCHDEVICENAME]; 
-      WORD   dmSpecVersion; 
-      WORD   dmDriverVersion; 
-      WORD   dmSize; 
-      WORD   dmDriverExtra; 
-      DWORD  dmFields; 
-      union {
-        struct {
-          short dmOrientation;
-          short dmPaperSize;
-          short dmPaperLength;
-          short dmPaperWidth;
-          short dmScale; 
-          short dmCopies; 
-          short dmDefaultSource; 
-          short dmPrintQuality; 
-        };
-        POINTL dmPosition;
-        DWORD  dmDisplayOrientation;
-        DWORD  dmDisplayFixedOutput;
-      };
-
-      short  dmColor; 
-      short  dmDuplex; 
-      short  dmYResolution; 
-      short  dmTTOption; 
-      short  dmCollate; 
-      BYTE  dmFormName[CCHFORMNAME]; 
-      WORD  dmLogPixels; 
-      DWORD  dmBitsPerPel; 
-      DWORD  dmPelsWidth; 
-      DWORD  dmPelsHeight; 
-      union {
-        DWORD  dmDisplayFlags; 
-        DWORD  dmNup;
-      }
-      DWORD  dmDisplayFrequency; 
-    #if(WINVER >= 0x0400) 
-      DWORD  dmICMMethod;
-      DWORD  dmICMIntent;
-      DWORD  dmMediaType;
-      DWORD  dmDitherType;
-      DWORD  dmReserved1;
-      DWORD  dmReserved2;
-    #if (WINVER >= 0x0500) || (_WIN32_WINNT >= 0x0400)
-      DWORD  dmPanningWidth;
-      DWORD  dmPanningHeight;
-    #endif
-    #endif 
-    } DEVMODE; 
-    */
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     public class DeviceMode
     {
-        internal DeviceMode()
+        public DeviceMode()
         {
             Size = (short)Marshal.SizeOf(this);
         }
 
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        internal string DeviceName;
+        public string DeviceName;
         internal short SpecVersion;
         internal short DriverVersion;
         private short Size;
         internal short DriverExtra;
-        internal int Fields;
+        public int Fields;
 
         //internal short Orientation;
         //internal short PaperSize;
@@ -1772,8 +1723,8 @@ namespace OpenMobile.Platform.Windows
         internal string FormName;
         internal short LogPixels;
         internal int BitsPerPel;
-        internal int PelsWidth;
-        internal int PelsHeight;
+        public int PelsWidth;
+        public int PelsHeight;
         internal int DisplayFlags;
         internal int DisplayFrequency;
         internal int ICMMethod;
@@ -3620,6 +3571,7 @@ namespace OpenMobile.Platform.Windows
         SYSCHAR = 0x0106,
         SYSDEADCHAR = 0x0107,
         KEYLAST = 0x0108,
+        UNICHAR=0x0109,
         IME_STARTCOMPOSITION = 0x010D,
         IME_ENDCOMPOSITION = 0x010E,
         IME_COMPOSITION = 0x010F,

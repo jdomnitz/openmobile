@@ -251,6 +251,85 @@ namespace OpenMobile.Framework
                 servicePack = " SP" + servicePack;
             return "Microsoft .Net " + lst[lst.Length - 1] + servicePack;
         }
+        internal static string getOSVersion()
+        {
+            OSVERSIONINFOEX ex=new OSVERSIONINFOEX();
+            ex.dwOSVersionInfoSize = Marshal.SizeOf(ex);
+            GetVersionEx(ref ex);
+
+            string osVersion = "";
+            if (ex.wProductType == 1)
+            {
+                switch (ex.dwMajorVersion)
+                {
+                    case 5:
+                        if (ex.dwMinorVersion == 0)
+                            osVersion = "Windows 2000";
+                        else
+                            osVersion = "Windows XP";
+                        break;
+                    case 6:
+                        if (ex.dwMinorVersion == 0)
+                            osVersion = "Windows Vista";
+                        else
+                            osVersion = "Windows 7";
+                        break;
+                    case 7:
+                        if (ex.dwMinorVersion == 0)
+                            osVersion = "Windows 8";
+                        break;
+                }
+                if (Configuration.TabletPC)
+                    osVersion += " Tablet";
+                if ((ex.wSuiteMask & 0x40) == 0x40)
+                    osVersion += " Embedded";
+            }
+            else
+            {
+                switch (ex.dwMajorVersion)
+                {
+                    case 5:
+                        if ((ex.wSuiteMask & 0x8000) == 0x8000)
+                            osVersion = "Windows Home Server";
+                        else if (Platform.Windows.Functions.GetSystemMetrics(89) != 0)
+                            osVersion = "Windows Server 2003 R2";
+                        else
+                            osVersion = "Windows Server 2003";
+                        break;
+                    case 6:
+                        if (ex.dwMinorVersion == 0)
+                            osVersion = "Windows Server 2008";
+                        else
+                            osVersion = "Windows Server 2008 R2";
+                        break;
+                    case 7:
+                        if (ex.dwMinorVersion == 0)
+                            osVersion = "Windows Server 2012";
+                        break;
+                }
+            }
+            if (ex.wServicePackMajor>0)
+                osVersion += " SP" + ex.wServicePackMajor.ToString();
+            return osVersion;
+        }
+        [DllImport("kernel32"),System.Security.SuppressUnmanagedCodeSecurity]
+        static extern bool GetVersionEx(ref OSVERSIONINFOEX osvi);
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+        struct OSVERSIONINFOEX
+        {
+            public int dwOSVersionInfoSize;
+            public int dwMajorVersion;
+            public int dwMinorVersion;
+            public int dwBuildNumber;
+            public int dwPlatformId;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+            public byte[] szCSDVersion;
+            public UInt16 wServicePackMajor;
+            public UInt16 wServicePackMinor;
+            public UInt16 wSuiteMask;
+            public byte wProductType;
+            public byte wReserved;
+        }
         internal sealed class windowsEmbedder
         {
             [System.Security.SuppressUnmanagedCodeSecurity]

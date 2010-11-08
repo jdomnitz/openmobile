@@ -628,7 +628,7 @@ namespace OMMediaDB
             if (con.State != ConnectionState.Open)
                 con.Open();
             SqliteCommand command = con.CreateCommand();
-            command.CommandText = "SELECT Distinct Genres FROM tblSongs";
+            command.CommandText = "SELECT Distinct Genre FROM tblSongs";
             reader = command.ExecuteReader();
             field = eMediaField.Genre;
             return (reader != null);
