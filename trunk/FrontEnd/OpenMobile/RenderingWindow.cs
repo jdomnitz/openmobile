@@ -395,7 +395,6 @@ namespace OpenMobile
                         rParam.transitionTop = 0;
                         if (keyboardActive == true)
                         {
-                            keyboardActive = false;
                             lastClick.Mode = eModeType.Highlighted;
                         }
                         else
@@ -431,7 +430,6 @@ namespace OpenMobile
 
                     if (keyboardActive == true)
                     {
-                        keyboardActive = false;
                         lastClick.Mode = eModeType.Highlighted;
                     }
                     else
@@ -478,11 +476,17 @@ namespace OpenMobile
         internal void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
         {
             int scr = (int)sender;
-            if (scr==screen)
+            if (scr == screen)
+            {
+                keyboardActive = false;
                 MouseMove(e);
+            }
         }
+        //TODO: Ensure proper mouse is used to simulate this
         private void MouseMove(MouseMoveEventArgs e)
         {
+            if (keyboardActive)
+                return;
             bool done = false; //We found something that was selected
             if (rParam.currentMode == eModeType.Scrolling)
             {
@@ -654,6 +658,7 @@ namespace OpenMobile
         {
             if ((int)sender != screen)
                 return;
+            keyboardActive = false;
             if (highlighted != null)
             {
                 if ((rParam.currentMode == eModeType.Highlighted) && (typeof(OMButton).IsInstanceOfType(highlighted)))
