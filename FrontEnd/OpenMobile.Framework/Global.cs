@@ -221,7 +221,8 @@ namespace OpenMobile
         {
             this.text = text;
             this.subItem=subitm;
-            this.subitemFormat = new subItemFormat();
+            if (this.subItem != null)
+                this.subitemFormat = new subItemFormat();
         }
         /// <summary>
         /// Creates a new list item
@@ -244,7 +245,8 @@ namespace OpenMobile
             this.text = text;
             this.subItem = subitem;
             this.tag = tag;
-            this.subitemFormat = new subItemFormat();
+            if (this.subItem!=null)
+                this.subitemFormat = new subItemFormat();
         }
         /// <summary>
         /// Creates a new list item

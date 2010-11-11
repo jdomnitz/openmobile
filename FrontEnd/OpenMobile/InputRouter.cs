@@ -167,10 +167,13 @@ namespace OpenMobile
 					string val = s.getSetting ("Screen" + (i + 1).ToString () + ".Mouse");
 					if ((val == "Default Mouse") || (val == "")) {
 						deviceMapM[i] = -1;
+                        Core.RenderingWindows[i].currentMouse = Core.RenderingWindows[i].Mouse;
 					} else {
 						for (int j = 0; j < driver.Mouse.Count; j++)
-							if (driver.Mouse[j].Description == val) {
+							if (driver.Mouse[j].Description == val) 
+                            {
 								deviceMapM[i] = j;
+                                Core.RenderingWindows[i].currentMouse = driver.Mouse[j];
 								driver.Mouse[j].SetBounds (DisplayDevice.AvailableDisplays[i].Width, DisplayDevice.AvailableDisplays[i].Height);
 								break;
 							}

@@ -49,6 +49,7 @@ namespace OpenMobile
         private eGlobalTransition currentTransition;
         private bool transitioning = false;
         private bool keyboardActive;
+        public MouseDevice currentMouse;
         private List<Point> currentGesture;
         // Throw started (will be reset when throw starts) for thrown interface
         private bool ThrowStarted = false;
@@ -132,7 +133,7 @@ namespace OpenMobile
         public void invokePaint()
         {
             Invalidate();
-            MouseMove(new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+            MouseMove(new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
         }
 
         private void Invalidate()
@@ -215,7 +216,7 @@ namespace OpenMobile
         {
             Invalidate();
             if (resetHighlighted)
-                MouseMove(new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+                MouseMove(new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
         }
         public bool blockHome = false;
         public bool transitionOutEverything()
@@ -399,7 +400,7 @@ namespace OpenMobile
                         {
                             lastClick.Mode = eModeType.Normal;
                             //Recheck where the mouse is at
-                            MouseMove(new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+                            MouseMove(new OpenMobile.Input.MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
                         }
                         Invalidate();
                     }
@@ -433,7 +434,7 @@ namespace OpenMobile
                     else
                     {
                         //Recheck where the mouse is at
-                        MouseMove(new OpenMobile.Input.MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+                        MouseMove(new OpenMobile.Input.MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
                     }
                     tmrClick.Enabled = false;
                     lastClick = null;

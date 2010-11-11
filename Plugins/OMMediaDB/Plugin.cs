@@ -528,10 +528,10 @@ namespace OMMediaDB
                     order = " ORDER BY title";
                     break;
                 case eMediaField.Track:
-                    order = "ORDER BY track";
+                    order = " ORDER BY track";
                     break;
                 case eMediaField.Rating:
-                    order = "ORDER BY rating";
+                    order = " ORDER BY rating";
                     break;
             }
             SqliteCommand command = con.CreateCommand();

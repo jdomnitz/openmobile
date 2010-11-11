@@ -48,6 +48,8 @@ namespace OpenMobile.Controls
 
         protected void raiseUpdate(bool resetHighlighted)
         {
+            if (!visible)
+                return;
             if (UpdateThisControl != null)
                 UpdateThisControl(resetHighlighted);
         }

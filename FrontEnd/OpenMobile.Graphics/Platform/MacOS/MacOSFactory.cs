@@ -69,11 +69,6 @@ namespace OpenMobile.Platform.MacOS
         {
             return new MacOSGraphicsMode();
         }
-
-        public virtual OpenMobile.Input.IKeyboardDriver CreateKeyboardDriver()
-        {
-            throw new NotImplementedException();
-        }
         
         #endregion
     }

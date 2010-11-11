@@ -46,7 +46,5 @@ namespace OpenMobile.Platform
         GraphicsContext.GetCurrentContextDelegate CreateGetCurrentGraphicsContext();
         
         IGraphicsMode CreateGraphicsMode();
-        
-        OpenMobile.Input.IKeyboardDriver CreateKeyboardDriver();
     }
 }

@@ -1324,7 +1324,8 @@ namespace OpenMobile
                         {
                             Core.RenderingWindows[ret].transitionInPanel(panel);
                             raiseSystemEvent(eFunction.TransitionToPanel, arg1, arg2, arg3);
-                            history.Enqueue(ret, arg2, arg3, panel.Forgotten);
+                            if (!panel.UIPanel)
+                                history.Enqueue(ret, arg2, arg3, panel.Forgotten);
                         }
                         return true;
                     }
@@ -1385,6 +1386,12 @@ namespace OpenMobile
             }
             try
             {
+                if (to.StartsWith("Screen"))
+                {
+                    int screen;
+                    if ((to.Length > 6) && (int.TryParse(to.Substring(6), out screen)))
+                        to = history.CurrentItem(screen).pluginName;
+                }
                 IBasePlugin plugin = Core.pluginCollection.Find(i => i.pluginName == to);
                 {
                     if (plugin == null)

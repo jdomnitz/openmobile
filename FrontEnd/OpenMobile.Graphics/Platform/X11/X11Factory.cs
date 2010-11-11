@@ -78,11 +78,6 @@ namespace OpenMobile.Platform.X11
             return new X11GraphicsMode();
         }
 
-        public virtual OpenMobile.Input.IKeyboardDriver CreateKeyboardDriver()
-        {
-            throw new NotImplementedException();
-        }
-
         #endregion
     }
 }
