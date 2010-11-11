@@ -7,6 +7,7 @@ using OpenMobile;
 using OpenMobile.Graphics;
 using System.Threading;
 using UI;
+using OpenMobile.Data;
 
 namespace OpenMobile
 {
@@ -100,7 +101,7 @@ namespace OpenMobile
             stop.FocusImage = theHost.getSkinImage("Stop_HL");
             stop.DownImage = theHost.getSkinImage("Stop_Selected");
             stop.OnClick += new userInteraction(stop_OnClick);
-            OMButton play = new OMButton(393, 465, 204, 172);
+            OMButton play = new OMButton(393, 485, 204, 152);
             play.Image = theHost.getSkinImage("Play");
             play.FocusImage = theHost.getSkinImage("Play_HL");
             play.DownImage = theHost.getSkinImage("Play_Selected");
@@ -127,6 +128,7 @@ namespace OpenMobile
             OMButton favorites = new OMButton(899, 526, 112, 84);
             favorites.Image = theHost.getSkinImage("Favorites");
             favorites.FocusImage = theHost.getSkinImage("Favorites_HL");
+            favorites.OnLongClick += new userInteraction(favorites_OnLongClick);
             favorites.DownImage = theHost.getSkinImage("Favorites_Selected");
             p.addControl(topBar);
             p.addControl(bottomBar);
@@ -178,6 +180,11 @@ namespace OpenMobile
             volume.addControl(bar);
             manager.loadPanel(volume);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void favorites_OnLongClick(OMControl sender, int screen)
+        {
+            theHost.sendMessage("Screen" + screen, "Screen"+screen, "QueryFavorite");
         }
 
         void voldown_OnClick(OMControl sender, int screen)
@@ -517,9 +524,36 @@ namespace OpenMobile
 
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
+            if (message == "SetFavorite")
+            {
+                string fav = data as string;
+                if (string.IsNullOrEmpty(fav))
+                    return false;
+                string[] parts = fav.Split(new char[] { ';' });
+                if (parts.Length != 3)
+                    return false;
+                int screen;
+                if ((source.Length < 7) || (!int.TryParse(source.Substring(6), out screen)))
+                    return false;
+                setFavorite(screen, parts[0], parts[1], parts[2]);
+                return true;
+            }
             return false;
         }
-
+        public void setFavorite(int screen,string displayName,string icon, string favorite)
+        {
+            using (PluginSettings settings = new PluginSettings())
+            {
+                for (int i = 0; i < 7; i++)
+                    if ((settings.getSetting("Favorites.Screen"+screen.ToString()+".Num" + i.ToString() + ".Value") == "")||(i==6))
+                    {
+                        settings.setSetting("Favorites.Screen" + screen.ToString() + ".Num" + i.ToString() + "Value", favorite);
+                        settings.setSetting("Favorites.Screen" + screen.ToString() + ".Num" + i.ToString() + "Icon", icon);
+                        settings.setSetting("Favorites.Screen" + screen.ToString() + ".Num" + i.ToString() + "Display", displayName);
+                        break;
+                    }
+            }
+        }
         public void Dispose()
         {
             //

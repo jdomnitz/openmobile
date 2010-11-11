@@ -107,9 +107,9 @@ namespace OpenMobile.Platform.X11
         bool _decorations_hidden = false;
 
          // Keyboard input
-        readonly byte[] ascii = new byte[16];
-        readonly char[] chars = new char[16];
-        readonly KeyPressEventArgs KPEventArgs = new KeyPressEventArgs('\0');
+        //readonly byte[] ascii = new byte[16];
+        //readonly char[] chars = new char[16];
+        //readonly KeyPressEventArgs KPEventArgs = new KeyPressEventArgs('\0');
 
         #endregion
 

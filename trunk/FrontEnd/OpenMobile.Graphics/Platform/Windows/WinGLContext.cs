@@ -117,8 +117,6 @@ namespace OpenMobile.Platform.Windows
                                 attributes.ToArray()));
                         if (Handle == ContextHandle.Zero)
                             Debug.Print("failed. (Error: {0})", Marshal.GetLastWin32Error());
-                        else
-                            Debug.Print("success!");
                     }
                     catch (EntryPointNotFoundException e) { Debug.Print(e.ToString()); }
                     catch (NullReferenceException e) { Debug.Print(e.ToString()); }

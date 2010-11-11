@@ -87,7 +87,7 @@ namespace OpenMobile.Platform.Windows
         const long ExtendedBit = 1 << 24;           // Used to distinguish left and right control, alt and enter keys.
         static readonly uint ShiftRightScanCode = Functions.MapVirtualKey(VirtualKeys.RSHIFT, 0);         // Used to distinguish left and right shift keys.
 
-        OpenMobile.Graphics.KeyPressEventArgs key_press = new OpenMobile.Graphics.KeyPressEventArgs((char)0);
+        //OpenMobile.Graphics.KeyPressEventArgs key_press = new OpenMobile.Graphics.KeyPressEventArgs((char)0);
 
         #endregion
 
@@ -382,9 +382,10 @@ namespace OpenMobile.Platform.Windows
                             else
                             {
                                 Key key=WinRawKeyboard.KeyMap[(VirtualKeys)wParam];
-                                keyboard[key] = pressed;
                                 if (key == Key.CapsLock)
                                     keyboard[Key.CapsLock] = Console.CapsLock;
+                                else
+                                    keyboard[key] = pressed;
                             }
                             return IntPtr.Zero;
                     }

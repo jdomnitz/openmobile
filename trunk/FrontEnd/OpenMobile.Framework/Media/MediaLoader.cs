@@ -188,6 +188,52 @@ namespace OpenMobile.Media
         {
             return loadSongs(host, artist, list, format, true,dbname,noCover);
         }
+
+        /// <summary>
+        /// Loads all songs from the given artist
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="artist"></param>
+        /// <param name="list"></param>
+        /// <param name="clear"></param>
+        /// <param name="format"></param>
+        /// <param name="dbname"></param>
+        /// <param name="noCover"></param>
+        /// <returns></returns>
+        public static bool loadSongsByGenre(IPluginHost host, string genre, OpenMobile.Controls.IList list, OMListItem.subItemFormat format, bool clear, string dbname, OImage noCover)
+        {
+            if (dbname == "")
+                return false;
+            object o;
+            host.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            using (IMediaDatabase db = (IMediaDatabase)o)
+            {
+                try
+                {
+                    if (!db.beginGetSongsByGenre(genre, true, eMediaField.Title))
+                        return false;
+                }
+                catch (Mono.Data.Sqlite.SqliteException)
+                {
+                    return false;
+                }
+                mediaInfo info = db.getNextMedia();
+                if (clear)
+                    list.Clear();
+                while (info != null)
+                {
+                    if (info.coverArt == null)
+                        info.coverArt = noCover;
+                    if (info.Type == eMediaType.AudioCD)
+                        list.Add(new OMListItem(info.Name, info.Artist, info.coverArt, format, info.Location, info.TrackNumber.ToString()));
+                    else
+                        list.Add(new OMListItem(info.Name, info.Artist, info.coverArt, format, info.Location));
+                    info = db.getNextMedia();
+                }
+                db.endSearch();
+            }
+            return true;
+        }
         /// <summary>
         /// Loads all songs from the given artist
         /// </summary>
@@ -224,9 +270,9 @@ namespace OpenMobile.Media
                     if (info.coverArt == null)
                         info.coverArt = noCover;
                     if (info.Type==eMediaType.AudioCD)
-                        list.AddDistinct(new OMListItem(info.Name, info.Album, info.coverArt, format, info.Location,info.TrackNumber.ToString()));
+                        list.Add(new OMListItem(info.Name, info.Album, info.coverArt, format, info.Location,info.TrackNumber.ToString()));
                     else
-                        list.AddDistinct(new OMListItem(info.Name,info.Album, info.coverArt,format,info.Location));
+                        list.Add(new OMListItem(info.Name,info.Album, info.coverArt,format,info.Location));
                     info = db.getNextMedia();
                 }
                 db.endSearch();

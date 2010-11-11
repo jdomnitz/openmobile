@@ -169,17 +169,19 @@ namespace OpenMobile.Platform.Windows
 
             if (!Functions.RegisterRawInputDevices(rid, 1, API.RawInputDeviceSize))
             {
-                throw new ApplicationException(
+                Debug.Print(
                     String.Format(
                         "Raw input registration failed with error: {0}. Device: {1}",
                         Marshal.GetLastWin32Error(),
                         rid[0].ToString())
                 );
             }
+            #if DEBUG
             else
             {
                 Debug.Print("Registered keyboard {0}", kb.ToString());
             }
+            #endif
         }
 
         #endregion
@@ -234,9 +236,13 @@ namespace OpenMobile.Platform.Windows
                     }
                     else
                     {
-                        keyboard[KeyMap[rin.Data.Keyboard.VKey]] = pressed;
-                        if (KeyMap[rin.Data.Keyboard.VKey]== Key.CapsLock)
-                            keyboard[Key.CapsLock] = Console.CapsLock;
+                        if (KeyMap[rin.Data.Keyboard.VKey] == Key.CapsLock)
+                        {
+                            if(pressed)
+                                keyboard[Key.CapsLock] = !keyboard[Key.CapsLock];
+                        }
+                        else
+                            keyboard[KeyMap[rin.Data.Keyboard.VKey]] = pressed;
                         processed = true;
                     }
                     break;

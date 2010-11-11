@@ -120,10 +120,6 @@ namespace OpenMobile.Platform
             return default_implementation.CreateGraphicsMode();
         }
         
-        public OpenMobile.Input.IKeyboardDriver CreateKeyboardDriver()
-        {
-            return default_implementation.CreateKeyboardDriver();
-        }
         public static bool IsEmbedded
         {
             get { return _embedded; }
@@ -169,11 +165,6 @@ namespace OpenMobile.Platform
             }
 
             public IGraphicsMode CreateGraphicsMode()
-            {
-                throw new PlatformNotSupportedException(error_string);
-            }
-
-            public OpenMobile.Input.IKeyboardDriver CreateKeyboardDriver()
             {
                 throw new PlatformNotSupportedException(error_string);
             }
