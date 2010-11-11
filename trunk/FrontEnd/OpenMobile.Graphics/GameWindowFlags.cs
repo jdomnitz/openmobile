@@ -35,6 +35,7 @@ namespace OpenMobile
     [Flags]
     public enum GameWindowFlags
     {
+        Temporary=-1,
         /// <summary>
         /// Indicates default construction options.
         /// </summary>

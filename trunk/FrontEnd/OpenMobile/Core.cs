@@ -44,10 +44,12 @@ namespace OpenMobile
         {
             Assembly pluginAssembly = Assembly.Load("UI");
             //Modifications by Borte
-            IHighLevel availablePlugin=null;
+            IBasePlugin availablePlugin=null;
             try
             {
-                availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetTypes()[0]);
+                foreach(Type t in pluginAssembly.GetTypes())
+                    if(t.IsPublic)
+                        availablePlugin = (IBasePlugin)Activator.CreateInstance(t);
             }
             catch (Exception)
             {
@@ -55,7 +57,7 @@ namespace OpenMobile
             }
             if (availablePlugin == null)
             {
-                availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
+                availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
                 if (availablePlugin == null)
                     Application.ShowError(RenderingWindows[0].WindowHandle, "No UI Skin available!", "No skin available!");
             }
@@ -65,15 +67,17 @@ namespace OpenMobile
             
             pluginAssembly = Assembly.Load("MainMenu");
             //Modifications by Borte
-            IHighLevel mmPlugin=null;
+            IBasePlugin mmPlugin=null;
             try
             {
-                mmPlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetTypes()[0]);
+                foreach (Type t in pluginAssembly.GetTypes())
+                    if (t.IsPublic)
+                        mmPlugin = (IBasePlugin)Activator.CreateInstance(t);
             }
             catch { }
             if (mmPlugin == null)
             {
-                mmPlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.MainMenu"));
+                mmPlugin = (IBasePlugin)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.MainMenu"));
                 if (mmPlugin == null)
                     Application.ShowError(RenderingWindows[0].WindowHandle, "No Main Menu Skin available!", "No skin available!");
             }

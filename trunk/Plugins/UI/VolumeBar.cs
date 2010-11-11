@@ -25,7 +25,7 @@ using OpenMobile.Graphics;
 
 namespace OpenMobile.Controls
 {
-    internal class VolumeBar:OMProgress, IMouse,IThrow
+    internal sealed class VolumeBar:OMProgress, IMouse,IThrow
     {
         public userInteraction OnSliderMoved;
 
