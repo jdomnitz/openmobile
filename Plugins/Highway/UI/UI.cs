@@ -1,19 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using OpenMobile.Plugin;
-using OpenMobile.Framework;
+﻿/*********************************************************************************
+    This file is part of Open Mobile.
+
+    Open Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Open Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Open Mobile.  If not, see <http://www.gnu.org/licenses/>.
+ 
+    There is one additional restriction when using this framework regardless of modifications to it.
+    The About Panel or its contents must be easily accessible by the end users.
+    This is to ensure all project contributors are given due credit not only in the source code.
+*********************************************************************************/
+using System;
 using OpenMobile.Controls;
-using OpenMobile;
-using OpenMobile.Graphics;
-using System.Threading;
-using UI;
 using OpenMobile.Data;
+using OpenMobile.Framework;
+using OpenMobile.Graphics;
+using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
     public sealed class UI:IHighLevel
     {
-        public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)
+        public OMPanel loadPanel(string name, int screen)
         {
             if (name == "")
                 theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "UI", "background");
@@ -27,7 +43,7 @@ namespace OpenMobile
         IPluginHost theHost;
         ScreenManager manager;
         System.Timers.Timer tmr;
-        public OpenMobile.eLoadStatus initialize(IPluginHost host)
+        public eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
             volCount = new int[theHost.ScreenCount];
@@ -509,7 +525,7 @@ namespace OpenMobile
 
         public float pluginVersion
         {
-            get { throw new NotImplementedException(); }
+            get { return 0.5F; }
         }
 
         public string pluginDescription

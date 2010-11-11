@@ -64,21 +64,23 @@ namespace OpenMobile
         {
             implementation = Factory.Default.CreateNativeWindow(device.Bounds.X + (device.Bounds.Width - 720) / 2, device.Bounds.Y + (device.Bounds.Height - 450) / 2, 720, 450, "OpenMobile Native Window", GraphicsMode.Default,flags, DisplayDevice.Default);
             implementation.Visible = false;
-            
 
-            if (Environment.GetCommandLineArgs().Length > 1)
+            if (flags != GameWindowFlags.Temporary)
             {
-                if (Environment.GetCommandLineArgs()[1].ToLower().StartsWith("-size=") == true)
+                if (Environment.GetCommandLineArgs().Length > 1)
                 {
-                    string[] part = Environment.GetCommandLineArgs()[1].Substring(6).Split(new char[] { 'x' });
-                    try
+                    if (Environment.GetCommandLineArgs()[1].ToLower().StartsWith("-size=") == true)
                     {
-                        Size = new Size(int.Parse(part[0]), int.Parse(part[1]));
+                        string[] part = Environment.GetCommandLineArgs()[1].Substring(6).Split(new char[] { 'x' });
+                        try
+                        {
+                            Size = new Size(int.Parse(part[0]), int.Parse(part[1]));
+                        }
+                        catch (ArgumentException) { }
                     }
-                    catch (ArgumentException) {}
                 }
+                currentThread = Thread.CurrentThread;
             }
-            currentThread = Thread.CurrentThread;
         }
 
         Thread currentThread;

@@ -50,8 +50,9 @@ namespace OpenMobile.Platform.Windows
         {
             lock (SyncRoot)
             {
-                using (INativeWindow native = new NativeWindow())
+                using (NativeWindow native = new NativeWindow())
                 {
+                    native.NativeInitialize(GameWindowFlags.Temporary);
                     modes.AddRange(GetModesARB(native));
                     if (modes.Count == 0)
                         modes.AddRange(GetModesPFD(native));
