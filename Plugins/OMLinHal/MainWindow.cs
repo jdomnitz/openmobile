@@ -224,6 +224,10 @@ public partial class MainWindow : Gtk.Window
                 arg1 = parts[1];
             switch (parts[0])
             {
+				case "-1":
+					Thread.Sleep(250);
+					checkVolume(-1);
+					break;
                 case "3": //GetData - System Volume
 					int ret;
                     if (int.TryParse(arg1,out ret))
