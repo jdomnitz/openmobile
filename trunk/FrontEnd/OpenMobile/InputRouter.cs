@@ -210,6 +210,11 @@ namespace OpenMobile
 		public static void SourceDown (object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
 		{
 			KeyboardDevice dev = (KeyboardDevice)sender;
+			if (Configuration.RunningOnLinux)
+			{
+				if ((e.Key==Key.VolumeUp)||(e.Key==Key.VolumeDown)||(e.Key==Key.Mute))
+					Core.theHost.hal.snd("-1|Keyboard|VolumeChange");
+			}
 			for (int i = 0; i < deviceMapK.Length; i++) {
 				e.Screen = i;
 				if (deviceMapK[i] == dev.Instance)
