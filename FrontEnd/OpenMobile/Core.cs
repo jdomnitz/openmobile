@@ -44,12 +44,12 @@ namespace OpenMobile
         {
             Assembly pluginAssembly = Assembly.Load("UI");
             //Modifications by Borte
-            IBasePlugin availablePlugin=null;
+            IHighLevel availablePlugin=null;
             try
             {
                 foreach(Type t in pluginAssembly.GetTypes())
                     if(t.IsPublic)
-                        availablePlugin = (IBasePlugin)Activator.CreateInstance(t);
+                        availablePlugin = (IHighLevel)Activator.CreateInstance(t);
             }
             catch (Exception)
             {
@@ -57,7 +57,7 @@ namespace OpenMobile
             }
             if (availablePlugin == null)
             {
-                availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
+                availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
                 if (availablePlugin == null)
                     Application.ShowError(RenderingWindows[0].WindowHandle, "No UI Skin available!", "No skin available!");
             }
