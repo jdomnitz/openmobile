@@ -32,7 +32,12 @@ namespace OpenMobile.Graphics
             get
             {
                 if (v2)
-                    return "GreenNitrous v2";
+                {
+                    if (Platform.Factory.IsEmbedded)
+                        return "GreenNitrous v2 ES";
+                    else
+                        return "GreenNitrous v2";
+                }
                 else
                     return "GreenNitrous v1";
             }

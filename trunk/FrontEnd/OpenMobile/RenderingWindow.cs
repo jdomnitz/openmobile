@@ -828,7 +828,7 @@ namespace OpenMobile
             if ((this.WindowState == WindowState.Fullscreen) && (!defaultMouse))
             {
                 if (screen == 0)
-                    Mouse.ClipCursor(this.ClientRectangle);
+                    Mouse.TrapCursor();
                 Mouse.HideCursor(this.WindowInfo);
             }
             else
