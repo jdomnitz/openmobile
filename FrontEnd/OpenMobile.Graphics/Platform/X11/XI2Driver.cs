@@ -15,7 +15,7 @@ namespace OpenMobile.Platform.X11
         Dictionary<int, int> rawids = new Dictionary<int, int>(); // maps raw ids to mouse or keyboard ids
         readonly X11WindowInfo window;
         static int XIOpCode;
-
+        static bool XInputMissing;
         public XI2Driver()
         {
             using (new XLock(API.DefaultDisplay))
@@ -31,11 +31,20 @@ namespace OpenMobile.Platform.X11
                     XIEventMasks.RawButtonReleaseMask | XIEventMasks.RawMotionMask |
 			        XIEventMasks.RawKeyPressMask| XIEventMasks.RawKeyReleaseMask))
 		            {
-		                Functions.XISelectEvents(window.Display, window.WindowHandle, mask);
+                        try
+                        {
+                            Functions.XISelectEvents(window.Display, window.WindowHandle, mask);
+                        }
+                        catch (DllNotFoundException)
+                        {
+                            XInputMissing = true;
+                        }
 		            }
         }
         public void Initialize()
         {
+            if (XInputMissing)
+                return;
 			IntPtr Display=Functions.XOpenDisplay(IntPtr.Zero);
             int count=0;
 			if (IsSupported(Display))
