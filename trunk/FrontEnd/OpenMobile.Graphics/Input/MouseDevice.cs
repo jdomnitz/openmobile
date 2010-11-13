@@ -244,6 +244,16 @@ namespace OpenMobile.Input
             }
             #endif
         }
+        public void ClipCursor(Rectangle rect)
+        {
+            if (Configuration.RunningOnWindows)
+            {
+                OpenMobile.Platform.Windows.Win32Rectangle r = new OpenMobile.Platform.Windows.Win32Rectangle(rect.Width, rect.Height);
+                r.top = rect.Top;
+                r.left = rect.Left;
+                Platform.Windows.Functions.ClipCursor(ref r);
+            }
+        }
         internal void Reset()
         {
             for (int i = 0; i < 13; i++)
