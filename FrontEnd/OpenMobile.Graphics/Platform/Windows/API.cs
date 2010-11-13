@@ -102,7 +102,7 @@ namespace OpenMobile.Platform.Windows
     public static class Functions
     {
         #region Window functions
-        [System.Security.SuppressUnmanagedCodeSecurity]
+        [SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll")]
         public static extern bool SetCursorPos(int X, int Y);
         #region SetWindowPos
@@ -121,6 +121,8 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
+        [DllImport("user32.dll"),SuppressUnmanagedCodeSecurity]
+        public static extern bool ClipCursor(ref RECT lpRect);
         #region AdjustWindowRect
 
         /// <summary>

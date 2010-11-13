@@ -120,6 +120,9 @@ namespace OpenMobile
             if (screen == 0)
                 InputRouter.Initialize();
             redraw += new voiddel(invokePaint);
+            if (Configuration.RunningOnWindows)
+                if (options == GameWindowFlags.Fullscreen)
+                    OnWindowStateChanged(EventArgs.Empty);
         }
         bool Identify = false;
         public void paintIdentity()
@@ -823,7 +826,11 @@ namespace OpenMobile
             if (this.WindowState == WindowState.Maximized)
                 this.WindowState = WindowState.Fullscreen;
             if ((this.WindowState == WindowState.Fullscreen) && (!defaultMouse))
+            {
+                if (screen == 0)
+                    Mouse.ClipCursor(this.ClientRectangle);
                 Mouse.HideCursor(this.WindowInfo);
+            }
             else
                 Mouse.ShowCursor(this.WindowInfo);
             base.OnWindowStateChanged(e);

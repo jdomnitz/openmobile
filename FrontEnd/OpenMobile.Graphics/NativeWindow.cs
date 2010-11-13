@@ -44,7 +44,7 @@ namespace OpenMobile
     {
         #region --- Fields ---
 
-        private readonly GameWindowFlags options;
+        protected GameWindowFlags options;
 
         private readonly DisplayDevice device;
 
@@ -62,6 +62,7 @@ namespace OpenMobile
         #region --- Contructors ---
         public void NativeInitialize(GameWindowFlags flags)
         {
+            options = flags;
             implementation = Factory.Default.CreateNativeWindow(device.Bounds.X + (device.Bounds.Width - 720) / 2, device.Bounds.Y + (device.Bounds.Height - 450) / 2, 720, 450, "OpenMobile Native Window", GraphicsMode.Default,flags, DisplayDevice.Default);
             implementation.Visible = false;
 
