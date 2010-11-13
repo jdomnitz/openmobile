@@ -244,13 +244,11 @@ namespace OpenMobile.Input
             }
             #endif
         }
-        public void ClipCursor(Rectangle rect)
+        public void TrapCursor()
         {
             if (Configuration.RunningOnWindows)
             {
-                OpenMobile.Platform.Windows.Win32Rectangle r = new OpenMobile.Platform.Windows.Win32Rectangle(rect.Width, rect.Height);
-                r.top = rect.Top;
-                r.left = rect.Left;
+                OpenMobile.Platform.Windows.Win32Rectangle r = new OpenMobile.Platform.Windows.Win32Rectangle(1,1);
                 Platform.Windows.Functions.ClipCursor(ref r);
             }
         }
