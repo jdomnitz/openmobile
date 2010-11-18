@@ -132,6 +132,7 @@ namespace OpenMobile.Framework
                 theHost = host;
                 theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             }
+            #if WINDOWS
             if (Configuration.RunningOnWindows)
             {
                 try
@@ -158,8 +159,12 @@ namespace OpenMobile.Framework
                     return false;
                 }
             }
+            #endif
             #if LINUX
-            else if (Configuration.RunningOnX11)
+            #if WINDOWS
+            else 
+            #endif
+            if (Configuration.RunningOnX11)
             {
                 if (lastHandle == null)
                     lastHandle = new embedInfo[theHost.ScreenCount];
@@ -202,6 +207,7 @@ namespace OpenMobile.Framework
         {
             if (function == eFunction.RenderingWindowResized)
             {
+                #if WINDOWS
                 if (Configuration.RunningOnWindows)
                 {
                     int screen = int.Parse(arg1);
@@ -213,8 +219,12 @@ namespace OpenMobile.Framework
                     if (lastHandle[screen].handle != IntPtr.Zero)
                         Windows.windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(lastHandle[screen].position.X * scale.X + 1.0), (int)(lastHandle[screen].position.Y * scale.Y + 1.0), (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y), 0x20);
                 }
+                #endif
                 #if LINUX
-                else if (Configuration.RunningOnX11)
+                #if WINDOWS
+                else 
+                #endif
+                if (Configuration.RunningOnX11)
                 {
                     int screen = int.Parse(arg1);
                     object o;
@@ -240,6 +250,7 @@ namespace OpenMobile.Framework
             {
                 if (lastHandle[screen].handle == IntPtr.Zero)
                     return false;
+                #if WINDOWS
                 if (Configuration.RunningOnWindows)
                 {
                     try
@@ -254,8 +265,12 @@ namespace OpenMobile.Framework
                         return false;
                     }
                 }
+                #endif
                 #if LINUX
-                else if (Configuration.RunningOnX11)
+                #if WINDOWS
+                else 
+                #endif
+                if (Configuration.RunningOnX11)
                 {
                     OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
                     OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
@@ -292,12 +307,18 @@ namespace OpenMobile.Framework
         {
             if (osVersion != null)
                 return osVersion;
+            #if WINDOWS
             if (Configuration.RunningOnWindows)
             {
                 osVersion = Windows.getOSVersion();
                 return osVersion;
             }
-            else if (Configuration.RunningOnLinux)
+            #endif
+            #if LINUX
+            #if WINDOWS
+            else 
+            #endif
+            if (Configuration.RunningOnLinux)
             {
                 ProcessStartInfo info = new ProcessStartInfo("lsb_release", "-d");
                 info.RedirectStandardOutput = true;
@@ -329,6 +350,7 @@ namespace OpenMobile.Framework
                 }
                 return osVersion;
             }
+            #endif
             osVersion = getOS() + " " + Environment.OSVersion.Version.ToString();
             return osVersion;
         }
@@ -446,19 +468,27 @@ namespace OpenMobile.Framework
         static internal eDriveType getDriveType(string path)
         {
             //OSX - Untested
+            #if LINUX
             if ((Configuration.RunningOnWindows) || (Configuration.RunningOnMacOS))
+            #endif
             {
+                #if (OSX||WINDOWS)
                 DriveType type = new DriveInfo(path).DriveType;
                 if (type == DriveType.Ram)
                     return eDriveType.Fixed;
+                #if WINDOWS
                 if (Configuration.RunningOnWindows)
                     return Windows.detectType(path, type);
+                #endif
+                #endif
                 return (eDriveType)type;
             }
+            #if LINUX
             else
             {
                 return Linux.detectType(path);
             }
+            #endif
         }
 
         /// <summary>
@@ -468,7 +498,10 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         static internal string getVolumeLabel(string path)
         {
+            #if (WINDOWS||OSX)
+            #if LINUX
             if (!Configuration.RunningOnLinux)
+            #endif
             {
                 DriveInfo info = null;
                 foreach (DriveInfo i in DriveInfo.GetDrives())
@@ -480,8 +513,10 @@ namespace OpenMobile.Framework
                 {
                     if (info.DriveType == DriveType.CDRom)
                     {
+                        #if WINDOWS
                         if (Configuration.RunningOnWindows)
                             return Windows.getCDType(path, info);
+                        #endif
                         return "CD/DVD Drive (" + info.Name + ")";
                     }
                     else if (info.DriveType == DriveType.Removable)
@@ -500,10 +535,15 @@ namespace OpenMobile.Framework
                 }
                 return info.VolumeLabel + " (" + info.Name + ")";
             }
+            #endif
+            #if LINUX
+            #if (WINDOWS||OSX)
             else
+            #endif
             {
                 return Linux.getVolumeLabel(path);
             }
+            #endif
         }
         /// <summary>
         /// Is the program running on the Mono Framework
@@ -519,10 +559,14 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         public static string getFramework()
         {
+            #if (WINDOWS)
             if (IsMono())
+            #endif
                 return getMonoVersion();
+            #if WINDOWS
             else
                 return Windows.getNetFramework();
+            #endif
         }
         private static string getMonoVersion()
         {

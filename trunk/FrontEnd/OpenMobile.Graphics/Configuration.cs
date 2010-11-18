@@ -45,6 +45,7 @@ namespace OpenMobile
         // Detects the underlying OS and runtime.
         static Configuration()
         {
+            #if WINDOWS
             if (System.Environment.OSVersion.Platform == PlatformID.Win32NT ||
                 System.Environment.OSVersion.Platform == PlatformID.Win32S ||
                 System.Environment.OSVersion.Platform == PlatformID.Win32Windows ||
@@ -53,7 +54,12 @@ namespace OpenMobile
                 tablet = (Platform.Windows.Functions.GetSystemMetrics(86) != 0);
                 runningOnWindows = true;
             }
-            else if (System.Environment.OSVersion.Platform == PlatformID.Unix ||
+            #endif
+            #if (LINUX||OSX)
+            #if WINDOWS
+            else
+            #endif
+                if (System.Environment.OSVersion.Platform == PlatformID.Unix ||
                      System.Environment.OSVersion.Platform == (PlatformID)4)
             {
                 // Distinguish between Linux, Mac OS X and other Unix operating systems.
@@ -78,8 +84,9 @@ namespace OpenMobile
                         break;
                 }
             }
-            else
-                throw new PlatformNotSupportedException("Unknown platform. Please report this error at http://www.OpenTK.com.");
+            #endif
+            //else
+            //    throw new PlatformNotSupportedException("Unknown platform. Please report this error at http://www.OpenTK.com.");
 
             // Detect whether X is present.
             // It seems that this check will cause X to initialize itself on Mac OS X Leopard and newer.
