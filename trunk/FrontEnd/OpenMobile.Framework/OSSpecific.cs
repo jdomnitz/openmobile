@@ -468,11 +468,11 @@ namespace OpenMobile.Framework
         static internal eDriveType getDriveType(string path)
         {
             //OSX - Untested
+            #if (OSX||WINDOWS)            
             #if LINUX
             if ((Configuration.RunningOnWindows) || (Configuration.RunningOnMacOS))
             #endif
             {
-                #if (OSX||WINDOWS)
                 DriveType type = new DriveInfo(path).DriveType;
                 if (type == DriveType.Ram)
                     return eDriveType.Fixed;
@@ -480,11 +480,13 @@ namespace OpenMobile.Framework
                 if (Configuration.RunningOnWindows)
                     return Windows.detectType(path, type);
                 #endif
-                #endif
                 return (eDriveType)type;
             }
+            #endif
             #if LINUX
+            #if (OSX||WINDOWS) 
             else
+            #endif
             {
                 return Linux.detectType(path);
             }
