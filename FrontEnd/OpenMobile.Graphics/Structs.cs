@@ -1393,9 +1393,11 @@ namespace OpenMobile.Graphics
         {
             get
             {
+                #if OSX
                 if (Configuration.RunningOnMacOS)
                     return new Font("Helvetica");
                 else
+                #endif
                     return new Font("Trebuchet MS");
             }
         }

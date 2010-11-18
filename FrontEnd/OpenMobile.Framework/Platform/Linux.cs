@@ -18,6 +18,7 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
+#if LINUX
 using System.Diagnostics;
 using System.IO;
 
@@ -126,3 +127,4 @@ namespace OpenMobile.Framework
         }
     }
 }
+#endif

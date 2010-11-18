@@ -231,8 +231,8 @@ namespace OpenMobile.Input
             #if LINUX
             else if (Configuration.RunningOnX11)
             {
-                X11WindowInfo x11 = (X11WindowInfo)info;
-                using (new XLock(x11.Display))
+                Platform.X11.X11WindowInfo x11 = (Platform.X11.X11WindowInfo)info;
+                using (new Platform.X11.XLock(x11.Display))
                 {
                     Platform.X11.Functions.XUndefineCursor(x11.Display, x11.WindowHandle);
                 }
@@ -260,15 +260,20 @@ namespace OpenMobile.Input
         }
         public void HideCursor(IWindowInfo info)
         {
+            #if WINDOWS
             if (Configuration.RunningOnWindows)
                 Platform.Windows.Functions.ShowCursor(false);
+            #endif
             #if LINUX
-            else if (Configuration.RunningOnX11)
+            #if WINDOWS
+            else 
+            #endif
+                if (Configuration.RunningOnX11)
             {
-                X11WindowInfo window = (X11WindowInfo)info;
-                using (new XLock(window.Display))
+                Platform.X11.X11WindowInfo window = (Platform.X11.X11WindowInfo)info;
+                using (new Platform.X11.XLock(window.Display))
                 {
-                    XColor black, dummy;
+                    Platform.X11.XColor black, dummy;
                     IntPtr cmap = Platform.X11.Functions.XDefaultColormap(window.Display, window.Screen);
                     Platform.X11.Functions.XAllocNamedColor(window.Display, cmap, "black", out black, out dummy);
                     IntPtr bmp_empty = Platform.X11.Functions.XCreateBitmapFromData(window.Display,
@@ -282,7 +287,10 @@ namespace OpenMobile.Input
             }
             #endif
             #if OSX
-            else if (Configuration.RunningOnMacOS)
+            #if (WINDOWS||LINUX)
+            else 
+            #endif
+            if (Configuration.RunningOnMacOS)
             {
                 Platform.MacOS.Carbon.CG.CGDisplayHideCursor(IntPtr.Zero);
             }
