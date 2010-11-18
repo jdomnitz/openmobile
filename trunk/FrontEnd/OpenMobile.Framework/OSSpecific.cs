@@ -158,6 +158,7 @@ namespace OpenMobile.Framework
                     return false;
                 }
             }
+            #if LINUX
             else if (Configuration.RunningOnX11)
             {
                 if (lastHandle == null)
@@ -193,6 +194,7 @@ namespace OpenMobile.Framework
                     }
                 }
             }
+            #endif
             return false;
         }
 
@@ -211,6 +213,7 @@ namespace OpenMobile.Framework
                     if (lastHandle[screen].handle != IntPtr.Zero)
                         Windows.windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(lastHandle[screen].position.X * scale.X + 1.0), (int)(lastHandle[screen].position.Y * scale.Y + 1.0), (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y), 0x20);
                 }
+                #if LINUX
                 else if (Configuration.RunningOnX11)
                 {
                     int screen = int.Parse(arg1);
@@ -222,6 +225,7 @@ namespace OpenMobile.Framework
                     PointF scale = (PointF)o;
                     OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, lastHandle[screen].handle, (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y));
                 }
+                #endif
             }
         }
         /// <summary>
@@ -250,6 +254,7 @@ namespace OpenMobile.Framework
                         return false;
                     }
                 }
+                #if LINUX
                 else if (Configuration.RunningOnX11)
                 {
                     OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
@@ -257,6 +262,7 @@ namespace OpenMobile.Framework
                     lastHandle[screen].handle = IntPtr.Zero;
                     return true;
                 }
+                #endif
             }
             return false;
         }

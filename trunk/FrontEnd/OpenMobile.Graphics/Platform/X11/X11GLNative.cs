@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if LINUX
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -1471,3 +1471,4 @@ namespace OpenMobile.Platform.X11
         #endregion
     }
 }
+#endif

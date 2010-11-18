@@ -1,3 +1,4 @@
+#if LINUX
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -286,3 +287,4 @@ namespace OpenMobile.Platform.X11
         #endregion
     }
 }
+#endif

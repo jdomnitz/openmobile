@@ -5,7 +5,7 @@
  * See license.txt for licensing detailed licensing details.
  */
 #endregion
-
+#if LINUX
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -612,3 +612,4 @@ namespace OpenMobile.Platform.X11
         }
     }
 }
+#endif

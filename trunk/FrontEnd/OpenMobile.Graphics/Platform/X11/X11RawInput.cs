@@ -1,4 +1,5 @@
-﻿using OpenMobile.Input;
+﻿#if LINUX
+using OpenMobile.Input;
 using System;
 using OpenMobile.Platform.X11;
 using System.Collections.Generic;
@@ -46,3 +47,4 @@ namespace OpenMobile.Platform.X11
         }
     }
 }
+#endif

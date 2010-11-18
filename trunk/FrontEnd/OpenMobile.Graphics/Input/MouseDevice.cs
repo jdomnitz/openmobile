@@ -31,7 +31,6 @@ using System.Text;
 using OpenMobile.Graphics;
 using System.ComponentModel;
 using OpenMobile.Platform;
-using OpenMobile.Platform.X11;
 
 namespace OpenMobile.Input
 {
@@ -229,6 +228,7 @@ namespace OpenMobile.Input
         {
             if (Configuration.RunningOnWindows)
                 Platform.Windows.Functions.ShowCursor(true);
+            #if LINUX
             else if (Configuration.RunningOnX11)
             {
                 X11WindowInfo x11 = (X11WindowInfo)info;
@@ -237,6 +237,7 @@ namespace OpenMobile.Input
                     Platform.X11.Functions.XUndefineCursor(x11.Display, x11.WindowHandle);
                 }
             }
+            #endif
             #if OSX
             else if (Configuration.RunningOnMacOS)
             {
@@ -261,6 +262,7 @@ namespace OpenMobile.Input
         {
             if (Configuration.RunningOnWindows)
                 Platform.Windows.Functions.ShowCursor(false);
+            #if LINUX
             else if (Configuration.RunningOnX11)
             {
                 X11WindowInfo window = (X11WindowInfo)info;
@@ -278,6 +280,7 @@ namespace OpenMobile.Input
                     Platform.X11.Functions.XFreeCursor(window.Display, cursor_empty);
                 }
             }
+            #endif
             #if OSX
             else if (Configuration.RunningOnMacOS)
             {

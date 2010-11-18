@@ -85,21 +85,13 @@ namespace OpenMobile
             // It seems that this check will cause X to initialize itself on Mac OS X Leopard and newer.
             // We don't want that (we'll be using the native interfaces anyway), so we'll avoid this check
             // when we detect Mac OS X.
+            #if LINUX
             if ((!RunningOnMacOS)&&(!runningOnWindows))
             {
                 try { runningOnX11 = OpenMobile.Platform.X11.API.DefaultDisplay != IntPtr.Zero; }
                 catch { }
             }
-
-            // Detect the Mono runtime (code taken from http://mono.wikia.com/wiki/Detecting_if_program_is_running_in_Mono).
-            //Type t = Type.GetType("Mono.Runtime");
-            //if (t != null)
-            //    runningOnMono = true;
-            
-            //Debug.Print("Detected configuration: {0} / {1}",
-            //    RunningOnWindows ? "Windows" : RunningOnLinux ? "Linux" : RunningOnMacOS ? "MacOS" :
-            //    runningOnUnix ? "Unix" : RunningOnX11 ? "X11" : "Unknown Platform",
-            //    RunningOnMono ? "Mono" : ".Net");
+            #endif
             runningOnEmbedded = OpenMobile.Platform.Egl.Egl.IsSupported;
         }
 
