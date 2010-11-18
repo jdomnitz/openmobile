@@ -25,7 +25,7 @@
 
 
 // NOT COMPLETE
-
+#if LINUX
 using System;
 using System.ComponentModel;
 using System.Collections;
@@ -1831,3 +1831,4 @@ namespace OpenMobile.Platform.X11
        RawMotionMask = (1 << (int)XIEventType.RawMotion),
    }
 }
+#endif

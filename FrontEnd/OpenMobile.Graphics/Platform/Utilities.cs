@@ -171,7 +171,7 @@ namespace OpenMobile.Platform
         #endregion
 
         #region --- Creating a Graphics Context ---
-
+        #if LINUX
         #region CreateX11WindowInfo
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace OpenMobile.Platform
         }
 
         #endregion
-
+        #endif
         #region CreateWindowsWindowInfo
 
         /// <summary>

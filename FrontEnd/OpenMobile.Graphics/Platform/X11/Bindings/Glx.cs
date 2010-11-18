@@ -5,6 +5,7 @@
  */
 #endregion
 
+#if LINUX
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -388,3 +389,4 @@ namespace OpenMobile.Platform.X11
 }
 
 #pragma warning restore 1591
+#endif

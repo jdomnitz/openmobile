@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if LINUX
 using System;
 using System.Diagnostics;
 using OpenMobile.Graphics;
@@ -81,3 +81,4 @@ namespace OpenMobile.Platform.X11
         #endregion
     }
 }
+#endif

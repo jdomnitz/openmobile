@@ -4,7 +4,7 @@
  * See license.txt for license info
  */
 #endregion
-
+#if LINUX
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -1633,3 +1633,4 @@ XF86VidModeGetGammaRampSize(
 #pragma warning restore 0649
 #pragma warning restore 0169
 #pragma warning restore 0414
+#endif

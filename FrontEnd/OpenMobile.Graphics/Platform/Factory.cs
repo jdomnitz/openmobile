@@ -49,7 +49,9 @@ namespace OpenMobile.Platform
             #if OSX
             else if (Configuration.RunningOnMacOS) Default = new MacOS.MacOSFactory();
             #endif
+            #if LINUX
             else if (Configuration.RunningOnX11) Default = new X11.X11Factory();
+            #endif
             else Default = new UnsupportedPlatform();
 
             if (Configuration.RunningOnEmbedded)
@@ -58,7 +60,9 @@ namespace OpenMobile.Platform
                 #if OSX
                 else if (Configuration.RunningOnMacOS) Embedded = new Egl.EglMacPlatformFactory();
                 #endif
+                #if LINUX
                 else if (Configuration.RunningOnX11) Embedded = new Egl.EglX11PlatformFactory();
+                #endif
                 else Embedded = new UnsupportedPlatform();
             }
             else Embedded = new UnsupportedPlatform();
