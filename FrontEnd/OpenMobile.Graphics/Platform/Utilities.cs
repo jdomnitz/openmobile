@@ -197,6 +197,7 @@ namespace OpenMobile.Platform
 
         #endregion
         #endif
+#if WINDOWS
         #region CreateWindowsWindowInfo
 
         /// <summary>
@@ -210,6 +211,7 @@ namespace OpenMobile.Platform
         }
 
         #endregion
+#endif
 
 #if OSX
         #region CreateMacOSCarbonWindowInfo

@@ -155,8 +155,10 @@ namespace OpenMobile.Input
             set 
             {
                 pos=value;
+                #if WINDOWS
                 if (Configuration.RunningOnWindows)
                     Platform.Windows.Functions.SetCursorPos(pos.X, pos.Y);
+                #endif
                 //TODO - Other platforms
             }
         }
@@ -226,10 +228,15 @@ namespace OpenMobile.Input
         }
         public void ShowCursor(IWindowInfo info)
         {
+            #if WINDOWS
             if (Configuration.RunningOnWindows)
                 Platform.Windows.Functions.ShowCursor(true);
+            #endif
             #if LINUX
-            else if (Configuration.RunningOnX11)
+            #if WINDOWS
+            else 
+            #endif
+            if (Configuration.RunningOnX11)
             {
                 Platform.X11.X11WindowInfo x11 = (Platform.X11.X11WindowInfo)info;
                 using (new Platform.X11.XLock(x11.Display))
@@ -239,7 +246,10 @@ namespace OpenMobile.Input
             }
             #endif
             #if OSX
-            else if (Configuration.RunningOnMacOS)
+            #if (WINDOWS||LINUX)
+            else 
+            #endif
+            if (Configuration.RunningOnMacOS)
             {
                 Platform.MacOS.Carbon.CG.CGDisplayShowCursor(IntPtr.Zero);
             }
@@ -247,11 +257,13 @@ namespace OpenMobile.Input
         }
         public void TrapCursor()
         {
+            #if WINDOWS
             if (Configuration.RunningOnWindows)
             {
                 OpenMobile.Platform.Windows.Win32Rectangle r = new OpenMobile.Platform.Windows.Win32Rectangle(1,1);
                 Platform.Windows.Functions.ClipCursor(ref r);
             }
+            #endif
         }
         internal void Reset()
         {

@@ -25,7 +25,7 @@
 //
 // WARNING: Modified HEAVILY for use in the OpenMobile Project
 #endregion
-
+#if WINDOWS
 #region --- Using directives ---
 
 using System;
@@ -310,3 +310,4 @@ namespace OpenMobile.Platform.Windows
         #endregion
     }
 }
+#endif

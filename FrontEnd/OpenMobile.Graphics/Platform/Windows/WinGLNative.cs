@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if WINDOWS
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -1187,3 +1187,4 @@ namespace OpenMobile.Platform.Windows
         #endregion
     }
 }
+#endif

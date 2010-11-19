@@ -4,7 +4,7 @@
  * See license.txt for license info
  */
 #endregion
-
+#if WINDOWS
 #region --- Using Directives ---
 
 using System;
@@ -1282,16 +1282,6 @@ namespace OpenMobile.Platform.Windows
         #endregion
 
         #region IntPtr NextRawInputStructure(IntPtr data)
-
-        /* From winuser.h
-        #ifdef _WIN64
-        #define RAWINPUT_ALIGN(x)   (((x) + sizeof(QWORD) - 1) & ~(sizeof(QWORD) - 1))
-        #else   // _WIN64
-        #define RAWINPUT_ALIGN(x)   (((x) + sizeof(DWORD) - 1) & ~(sizeof(DWORD) - 1))
-        #endif  // _WIN64
-
-        #define NEXTRAWINPUTBLOCK(ptr) ((PRAWINPUT)RAWINPUT_ALIGN((ULONG_PTR)((PBYTE)(ptr) + (ptr)->header.dwSize)))
-        */
 
         private static IntPtr RawInputAlign(IntPtr data)
         {
@@ -4042,3 +4032,4 @@ namespace OpenMobile.Platform.Windows
 #pragma warning restore 0649
 #pragma warning restore 0169
 #pragma warning restore 0414
+#endif

@@ -6,7 +6,7 @@
  * Time: 6:43 ��
  */
 #endregion
-
+#if WINDOWS
 using System;
 using System.Runtime.InteropServices;
 using System.Reflection;
@@ -199,3 +199,4 @@ namespace OpenMobile.Platform.Windows
         #endregion
     }
 }
+#endif

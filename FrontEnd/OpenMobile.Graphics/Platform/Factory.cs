@@ -45,23 +45,39 @@ namespace OpenMobile.Platform
 
         static Factory()
         {
+            #if WINDOWS
             if (Configuration.RunningOnWindows) Default = new Windows.WinFactory();
+            #endif
             #if OSX
-            else if (Configuration.RunningOnMacOS) Default = new MacOS.MacOSFactory();
+            #if WINDOWS
+            else 
+            #endif
+            if (Configuration.RunningOnMacOS) Default = new MacOS.MacOSFactory();
             #endif
             #if LINUX
-            else if (Configuration.RunningOnX11) Default = new X11.X11Factory();
+            #if (WINDOWS||OSX)
+            else 
+            #endif
+            if (Configuration.RunningOnX11) Default = new X11.X11Factory();
             #endif
             else Default = new UnsupportedPlatform();
 
             if (Configuration.RunningOnEmbedded)
             {
+                #if WINDOWS
                 if (Configuration.RunningOnWindows) Embedded = new Egl.EglWinPlatformFactory();
+                #endif
                 #if OSX
-                else if (Configuration.RunningOnMacOS) Embedded = new Egl.EglMacPlatformFactory();
+                #if WINDOWS
+                else 
+                #endif
+                if (Configuration.RunningOnMacOS) Embedded = new Egl.EglMacPlatformFactory();
                 #endif
                 #if LINUX
-                else if (Configuration.RunningOnX11) Embedded = new Egl.EglX11PlatformFactory();
+                #if (WINDOWS||OSX)
+                else 
+                #endif
+                if (Configuration.RunningOnX11) Embedded = new Egl.EglX11PlatformFactory();
                 #endif
                 else Embedded = new UnsupportedPlatform();
             }

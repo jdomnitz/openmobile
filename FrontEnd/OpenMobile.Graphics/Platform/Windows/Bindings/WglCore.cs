@@ -1,3 +1,4 @@
+#if WINDOWS
 namespace OpenMobile.Platform.Windows
 {
     using System;
@@ -92,3 +93,4 @@ namespace OpenMobile.Platform.Windows
         }
     }
 }
+#endif
