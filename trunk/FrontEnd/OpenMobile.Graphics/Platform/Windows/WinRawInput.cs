@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if WINDOWS
 #region --- Using directives ---
 
 using System;
@@ -268,3 +268,4 @@ namespace OpenMobile.Platform.Windows
         #endregion
     }
 }
+#endif

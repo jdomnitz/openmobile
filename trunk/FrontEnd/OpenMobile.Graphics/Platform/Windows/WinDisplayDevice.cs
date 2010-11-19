@@ -5,7 +5,7 @@
  * See license.txt for licensing detailed licensing details.
  */
 #endregion
-
+#if WINDOWS
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -135,3 +135,4 @@ namespace OpenMobile.Platform.Windows
         #endregion
     }
 }
+#endif

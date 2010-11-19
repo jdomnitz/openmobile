@@ -4,7 +4,7 @@
  * See license.txt for license info
  */
 #endregion
-
+#if WINDOWS
 #region --- Using Directives ---
 
 using System;
@@ -382,3 +382,4 @@ namespace OpenMobile.Platform.Windows
         #endregion
     }
 }
+#endif

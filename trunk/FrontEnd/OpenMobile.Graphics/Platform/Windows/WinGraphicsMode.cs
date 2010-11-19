@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if WINDOWS
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -272,3 +272,4 @@ namespace OpenMobile.Platform.Windows
         #endregion
     }
 }
+#endif

@@ -60,13 +60,18 @@ namespace OpenMobile
 		}
 		public static void Initialize ()
 		{
+            #if WINDOWS
 			if (Configuration.RunningOnWindows)
 				driver = new Platform.Windows.WinRawInput ();
+            #endif
             #if LINUX
-			else if (Configuration.RunningOnX11)
+            #if WINDOWS
+            else 
+            #endif
+			if (Configuration.RunningOnX11)
                 driver= new Platform.X11.X11RawInput();
             #endif
-			mapKeyboards ();
+            mapKeyboards ();
 			if (driver != null) {
 				foreach (KeyboardDevice dev in driver.Keyboard) {
 					dev.KeyDown += new System.EventHandler<KeyboardKeyEventArgs> (SourceDown);

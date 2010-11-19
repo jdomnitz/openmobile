@@ -29,7 +29,6 @@ using System;
 
 using OpenMobile.Graphics;
 using System.Diagnostics;
-using OpenMobile.Platform.Windows;
 
 namespace OpenMobile.Platform.Egl
 {

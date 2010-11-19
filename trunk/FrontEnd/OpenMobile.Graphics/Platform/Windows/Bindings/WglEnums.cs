@@ -1,3 +1,4 @@
+#if WINDOWS
 namespace OpenMobile.Platform.Windows
 {
 #pragma warning disable 3019
@@ -516,3 +517,4 @@ namespace OpenMobile.Platform.Windows
     {
     }
 }
+#endif

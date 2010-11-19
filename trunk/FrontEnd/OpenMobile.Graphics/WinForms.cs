@@ -20,6 +20,7 @@ namespace OpenMobile.Graphics
         }
         public static void Run()
         {
+            #if WINDOWS
             int ret;
             if (Configuration.RunningOnWindows)
             {
@@ -39,6 +40,7 @@ namespace OpenMobile.Graphics
                     OpenMobile.Platform.Windows.Functions.DispatchMessage(ref msg);
                 }
             }
+            #endif
         }
         public static void ShowError(object window, string text, string title)
         {
