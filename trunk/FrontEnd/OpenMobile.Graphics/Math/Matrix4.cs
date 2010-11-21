@@ -565,8 +565,6 @@ namespace OpenMobile
                 throw new ArgumentOutOfRangeException("zNear");
             if (zFar <= 0)
                 throw new ArgumentOutOfRangeException("zFar");
-            if (zNear >= zFar)
-                throw new ArgumentOutOfRangeException("zNear");
             
             float yMax = zNear * (float)System.Math.Tan(0.5f * fovy);
             float yMin = -yMax;

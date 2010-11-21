@@ -193,12 +193,12 @@ namespace OpenMobile.Media
         /// Loads all songs from the given artist
         /// </summary>
         /// <param name="host"></param>
-        /// <param name="artist"></param>
         /// <param name="list"></param>
         /// <param name="clear"></param>
         /// <param name="format"></param>
         /// <param name="dbname"></param>
         /// <param name="noCover"></param>
+        /// <param name="genre"></param>
         /// <returns></returns>
         public static bool loadSongsByGenre(IPluginHost host, string genre, OpenMobile.Controls.IList list, OMListItem.subItemFormat format, bool clear, string dbname, OImage noCover)
         {

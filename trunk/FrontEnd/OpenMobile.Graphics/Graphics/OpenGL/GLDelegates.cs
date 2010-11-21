@@ -273,12 +273,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void BlendEquationEXT(OpenMobile.Graphics.OpenGL.ExtBlendMinmax mode);
             internal static BlendEquationEXT glBlendEquationEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BlendEquationi(UInt32 buf, OpenMobile.Graphics.OpenGL.ArbDrawBuffersBlend mode);
-            internal static BlendEquationi glBlendEquationi;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BlendEquationIndexedAMD(UInt32 buf, OpenMobile.Graphics.OpenGL.AmdDrawBuffersBlend mode);
-            internal static BlendEquationIndexedAMD glBlendEquationIndexedAMD;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void BlendEquationSeparate(OpenMobile.Graphics.OpenGL.BlendEquationMode modeRGB, OpenMobile.Graphics.OpenGL.BlendEquationMode modeAlpha);
             internal static BlendEquationSeparate glBlendEquationSeparate;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -288,29 +282,11 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void BlendEquationSeparatei(UInt32 buf, OpenMobile.Graphics.OpenGL.BlendEquationMode modeRGB, OpenMobile.Graphics.OpenGL.BlendEquationMode modeAlpha);
             internal static BlendEquationSeparatei glBlendEquationSeparatei;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BlendEquationSeparateIndexedAMD(UInt32 buf, OpenMobile.Graphics.OpenGL.AmdDrawBuffersBlend modeRGB, OpenMobile.Graphics.OpenGL.AmdDrawBuffersBlend modeAlpha);
-            internal static BlendEquationSeparateIndexedAMD glBlendEquationSeparateIndexedAMD;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void BlendFunc(OpenMobile.Graphics.OpenGL.BlendingFactorSrc sfactor, OpenMobile.Graphics.OpenGL.BlendingFactorDest dfactor);
             internal static BlendFunc glBlendFunc;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BlendFunci(UInt32 buf, OpenMobile.Graphics.OpenGL.ArbDrawBuffersBlend src, OpenMobile.Graphics.OpenGL.ArbDrawBuffersBlend dst);
-            internal static BlendFunci glBlendFunci;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BlendFuncIndexedAMD(UInt32 buf, OpenMobile.Graphics.OpenGL.AmdDrawBuffersBlend src, OpenMobile.Graphics.OpenGL.AmdDrawBuffersBlend dst);
-            internal static BlendFuncIndexedAMD glBlendFuncIndexedAMD;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void BlendFuncSeparate(OpenMobile.Graphics.OpenGL.BlendingFactorSrc sfactorRGB, OpenMobile.Graphics.OpenGL.BlendingFactorDest dfactorRGB, OpenMobile.Graphics.OpenGL.BlendingFactorSrc sfactorAlpha, OpenMobile.Graphics.OpenGL.BlendingFactorDest dfactorAlpha);
             internal static BlendFuncSeparate glBlendFuncSeparate;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BlendFuncSeparateEXT(OpenMobile.Graphics.OpenGL.ExtBlendFuncSeparate sfactorRGB, OpenMobile.Graphics.OpenGL.ExtBlendFuncSeparate dfactorRGB, OpenMobile.Graphics.OpenGL.ExtBlendFuncSeparate sfactorAlpha, OpenMobile.Graphics.OpenGL.ExtBlendFuncSeparate dfactorAlpha);
-            internal static BlendFuncSeparateEXT glBlendFuncSeparateEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BlendFuncSeparatei(UInt32 buf, OpenMobile.Graphics.OpenGL.ArbDrawBuffersBlend srcRGB, OpenMobile.Graphics.OpenGL.ArbDrawBuffersBlend dstRGB, OpenMobile.Graphics.OpenGL.ArbDrawBuffersBlend srcAlpha, OpenMobile.Graphics.OpenGL.ArbDrawBuffersBlend dstAlpha);
-            internal static BlendFuncSeparatei glBlendFuncSeparatei;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void BlendFuncSeparateIndexedAMD(UInt32 buf, OpenMobile.Graphics.OpenGL.AmdDrawBuffersBlend srcRGB, OpenMobile.Graphics.OpenGL.AmdDrawBuffersBlend dstRGB, OpenMobile.Graphics.OpenGL.AmdDrawBuffersBlend srcAlpha, OpenMobile.Graphics.OpenGL.AmdDrawBuffersBlend dstAlpha);
-            internal static BlendFuncSeparateIndexedAMD glBlendFuncSeparateIndexedAMD;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void BlendFuncSeparateINGR(OpenMobile.Graphics.OpenGL.All sfactorRGB, OpenMobile.Graphics.OpenGL.All dfactorRGB, OpenMobile.Graphics.OpenGL.All sfactorAlpha, OpenMobile.Graphics.OpenGL.All dfactorAlpha);
             internal static BlendFuncSeparateINGR glBlendFuncSeparateINGR;
@@ -921,9 +897,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate void Disablei(OpenMobile.Graphics.OpenGL.IndexedEnableCap target, UInt32 index);
             internal static Disablei glDisablei;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void DisableIndexedEXT(OpenMobile.Graphics.OpenGL.ExtDrawBuffers2 target, UInt32 index);
-            internal static DisableIndexedEXT glDisableIndexedEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void DisableVariantClientStateEXT(UInt32 id);
             internal static DisableVariantClientStateEXT glDisableVariantClientStateEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1025,9 +998,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Enablei(OpenMobile.Graphics.OpenGL.IndexedEnableCap target, UInt32 index);
             internal static Enablei glEnablei;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void EnableIndexedEXT(OpenMobile.Graphics.OpenGL.ExtDrawBuffers2 target, UInt32 index);
-            internal static EnableIndexedEXT glEnableIndexedEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void EnableVariantClientStateEXT(UInt32 id);
             internal static EnableVariantClientStateEXT glEnableVariantClientStateEXT;
@@ -1389,9 +1359,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void GetBooleani_v(OpenMobile.Graphics.OpenGL.GetIndexedPName target, UInt32 index, [OutAttribute] bool* data);
             internal unsafe static GetBooleani_v glGetBooleani_v;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetBooleanIndexedvEXT(OpenMobile.Graphics.OpenGL.ExtDrawBuffers2 target, UInt32 index, [OutAttribute] bool* data);
-            internal unsafe static GetBooleanIndexedvEXT glGetBooleanIndexedvEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetBooleanv(OpenMobile.Graphics.OpenGL.GetPName pname, [OutAttribute] bool* @params);
             internal unsafe static GetBooleanv glGetBooleanv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1547,9 +1514,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetIntegeri_v(OpenMobile.Graphics.OpenGL.GetIndexedPName target, UInt32 index, [OutAttribute] Int32* data);
             internal unsafe static GetIntegeri_v glGetIntegeri_v;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetIntegerIndexedvEXT(OpenMobile.Graphics.OpenGL.ExtDrawBuffers2 target, UInt32 index, [OutAttribute] Int32* data);
-            internal unsafe static GetIntegerIndexedvEXT glGetIntegerIndexedvEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetIntegerv(OpenMobile.Graphics.OpenGL.GetPName pname, [OutAttribute] Int32* @params);
             internal unsafe static GetIntegerv glGetIntegerv;
@@ -2007,12 +1971,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal delegate Int32 GetVaryingLocationNV(UInt32 program, String name);
             internal static GetVaryingLocationNV glGetVaryingLocationNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetVertexAttribArrayObjectfvATI(UInt32 index, OpenMobile.Graphics.OpenGL.AtiVertexAttribArrayObject pname, [OutAttribute] Single* @params);
-            internal unsafe static GetVertexAttribArrayObjectfvATI glGetVertexAttribArrayObjectfvATI;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void GetVertexAttribArrayObjectivATI(UInt32 index, OpenMobile.Graphics.OpenGL.AtiVertexAttribArrayObject pname, [OutAttribute] Int32* @params);
-            internal unsafe static GetVertexAttribArrayObjectivATI glGetVertexAttribArrayObjectivATI;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void GetVertexAttribdv(UInt32 index, OpenMobile.Graphics.OpenGL.VertexAttribParameter pname, [OutAttribute] Double* @params);
             internal unsafe static GetVertexAttribdv glGetVertexAttribdv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -2147,9 +2105,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate bool IsEnabledi(OpenMobile.Graphics.OpenGL.IndexedEnableCap target, UInt32 index);
             internal static IsEnabledi glIsEnabledi;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate bool IsEnabledIndexedEXT(OpenMobile.Graphics.OpenGL.ExtDrawBuffers2 target, UInt32 index);
-            internal static IsEnabledIndexedEXT glIsEnabledIndexedEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate bool IsFenceNV(UInt32 fence);
             internal static IsFenceNV glIsFenceNV;
@@ -3069,9 +3024,6 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void ProgramEnvParameterI4uivNV(OpenMobile.Graphics.OpenGL.NvGpuProgram4 target, UInt32 index, UInt32* @params);
             internal unsafe static ProgramEnvParameterI4uivNV glProgramEnvParameterI4uivNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ProgramEnvParameters4fvEXT(OpenMobile.Graphics.OpenGL.ExtGpuProgramParameters target, UInt32 index, Int32 count, Single* @params);
-            internal unsafe static ProgramEnvParameters4fvEXT glProgramEnvParameters4fvEXT;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void ProgramEnvParametersI4ivNV(OpenMobile.Graphics.OpenGL.NvGpuProgram4 target, UInt32 index, Int32 count, Int32* @params);
             internal unsafe static ProgramEnvParametersI4ivNV glProgramEnvParametersI4ivNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -3101,9 +3053,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void ProgramLocalParameterI4uivNV(OpenMobile.Graphics.OpenGL.NvGpuProgram4 target, UInt32 index, UInt32* @params);
             internal unsafe static ProgramLocalParameterI4uivNV glProgramLocalParameterI4uivNV;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void ProgramLocalParameters4fvEXT(OpenMobile.Graphics.OpenGL.ExtGpuProgramParameters target, UInt32 index, Int32 count, Single* @params);
-            internal unsafe static ProgramLocalParameters4fvEXT glProgramLocalParameters4fvEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void ProgramLocalParametersI4ivNV(OpenMobile.Graphics.OpenGL.NvGpuProgram4 target, UInt32 index, Int32 count, Int32* @params);
             internal unsafe static ProgramLocalParametersI4ivNV glProgramLocalParametersI4ivNV;
@@ -4637,9 +4586,6 @@ namespace OpenMobile.Graphics.OpenGL
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void VertexAttrib4usvARB(UInt32 index, UInt16* v);
             internal unsafe static VertexAttrib4usvARB glVertexAttrib4usvARB;
-            [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void VertexAttribArrayObjectATI(UInt32 index, Int32 size, OpenMobile.Graphics.OpenGL.AtiVertexAttribArrayObject type, bool normalized, Int32 stride, UInt32 buffer, UInt32 offset);
-            internal static VertexAttribArrayObjectATI glVertexAttribArrayObjectATI;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void VertexAttribDivisorARB(UInt32 index, UInt32 divisor);
             internal static VertexAttribDivisorARB glVertexAttribDivisorARB;
