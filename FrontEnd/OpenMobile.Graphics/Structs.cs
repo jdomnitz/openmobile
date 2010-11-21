@@ -1256,8 +1256,9 @@ namespace OpenMobile.Graphics
     {
         private float x;
         private float y;
+#pragma warning disable 0414
         static readonly PointF Empty;
-
+#pragma warning restore 0414
         public static bool operator ==(PointF left, PointF right)
         {
             return ((left.X == right.X) && (left.Y == right.Y));

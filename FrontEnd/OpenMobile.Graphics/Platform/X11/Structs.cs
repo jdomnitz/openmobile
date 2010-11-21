@@ -1669,7 +1669,7 @@ namespace OpenMobile.Platform.X11
        public int num_classes;
        public IntPtr type;
    }
-
+#pragma warning disable 0414,0649
    struct XIAnyClassInfo
    {
        public int type;
@@ -1787,7 +1787,7 @@ namespace OpenMobile.Platform.X11
            }
        }
    }
-
+#pragma warning restore 0414,0649
    enum XIEventType
    {
        DeviceChanged = 1,
