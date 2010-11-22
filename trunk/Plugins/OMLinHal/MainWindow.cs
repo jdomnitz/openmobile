@@ -9,6 +9,7 @@ using OpenMobile;
 using System.Threading;
 using System.Collections.Generic;
 using OpenMobile.Input;
+using System.IO;
 
 public partial class MainWindow : Gtk.Window
 {
@@ -62,7 +63,7 @@ public partial class MainWindow : Gtk.Window
 			}
 		}
 	}
-
+    static string DM;
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
 		system=Bus.System;
@@ -77,21 +78,51 @@ public partial class MainWindow : Gtk.Window
         }
         send = new UdpClient("127.0.0.1", 8550);
         receive.BeginReceive(recv, null);
-		sm=session.GetObject<SessionManager>("org.gnome.SessionManager",new ObjectPath("/org/gnome/SessionManager"));
-		up=system.GetObject<UPower>("org.freedesktop.UPower",new ObjectPath("/org/freedesktop/UPower"));
+        DM = detectDesktopManager();
+        if (DM == "gnome")
+        {
+            sm = session.GetObject<SessionManager>("org.gnome.SessionManager", new ObjectPath("/org/gnome/SessionManager"));
+            sm.SessionOver+=Shutdown;
+        }
+        else
+        {
+            //TODO
+        }
+        up = system.GetObject<UPower>("org.freedesktop.UPower", new ObjectPath("/org/freedesktop/UPower"));
 		up.Resuming+=Resuming;
 		up.Sleeping+=Suspending;
-		sm.SessionOver+=Shutdown;
-		bk=session.GetObject<Backlight>("org.gnome.PowerManager",new ObjectPath("/org/gnome/PowerManager/Backlight"));
-		disks=system.GetObject<UDisks>("org.freedesktop.UDisks",new ObjectPath("/org/freedesktop/UDisks"));
+
+        if (DM == "gnome")
+        {
+            bk = session.GetObject<Backlight>("org.gnome.PowerManager", new ObjectPath("/org/gnome/PowerManager/Backlight"));
+        }
+        else
+        {
+            //TODO
+        }
+        disks=system.GetObject<UDisks>("org.freedesktop.UDisks",new ObjectPath("/org/freedesktop/UDisks"));
 		disks.DeviceAdded+=added;
 		disks.DeviceChanged+=changed;
 		checkVolume(-1);
-		mediaKeys.keyPressed+=new MultimediaKeys.MultimediaKeysService.MediaPlayerKeyPressedHandler(handleKey);
-		mediaKeys.Initialize();
+        if (DM == "gnome")
+        {
+            mediaKeys.keyPressed += new MultimediaKeys.MultimediaKeysService.MediaPlayerKeyPressedHandler(handleKey);
+            mediaKeys.Initialize();
+        }
 		//disks.DeviceRemoved+=remove;
 	}
-	
+
+    private static string detectDesktopManager()
+    {
+        if (File.Exists("/usr/bin/gdm"))
+            return "gnome";
+        if (File.Exists("/usr/bin/kde"))
+            return "kde";
+        if (File.Exists("/usr/bin/lxdm"))
+            return "lxde";
+        return "unknown";
+    }
+
 	private void handleKey(string application,string key)
 	{
 		switch(key)
@@ -311,7 +342,8 @@ public partial class MainWindow : Gtk.Window
 							}catch(Exception){}
 						}
 					else
-                    	bk.SetBrightness(uint.Parse(arg1));
+                        if (bk!=null)
+                    	    bk.SetBrightness(uint.Parse(arg1));
                     break;
                 case "44": //Close Program
 					Application.Quit();
@@ -320,10 +352,12 @@ public partial class MainWindow : Gtk.Window
                     up.Hibernate();
                     break;
                 case "46": //Shutdown
-                    sm.RequestShutdown();
+                    if (sm!=null)
+                        sm.RequestShutdown();
                     break;
                 case "47": //Restart
-                    sm.RequestReboot();
+                    if (sm != null)
+                        sm.RequestReboot();
                     break;
                 case "48": //Standby
                     up.Suspend();
