@@ -1,16 +1,33 @@
-#region --- License ---
-/* Licensed under the MIT/X11 license.
- * Copyright (c) 2006-2008 the OpenTK team.
- * This notice may not be removed.
- * See license.txt for licensing detailed licensing details.
- */
+#region License
+//
+// The Open Toolkit Library License
+//
+// Copyright (c) 2006 - 2010 the Open Toolkit library.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights to 
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+//
 #endregion
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
-using System.Threading;
 using OpenMobile.Graphics;
 
 namespace OpenMobile
@@ -21,24 +38,20 @@ namespace OpenMobile
     /// </summary>
     public class DisplayDevice
     {
-        // TODO: Add support for refresh rate queries and switches.
-        // TODO: Check whether bits_per_pixel works correctly under Mono/X11.
         // TODO: Add properties that describe the 'usable' size of the Display, i.e. the maximized size without the taskbar etc.
         // TODO: Does not detect changes to primary device.
-        // TODO: Mono does not support System.Windows.Forms.Screen.BitsPerPixel -- find workaround!
 
-        #region --- Fields ---
+        #region Fields
 
+        bool primary;
+		bool landscape;
+        Rectangle bounds;
         DisplayResolution current_resolution = new DisplayResolution(), original_resolution;
         List<DisplayResolution> available_resolutions = new List<DisplayResolution>();
         IList<DisplayResolution> available_resolutions_readonly;
-        bool primary;
-        bool landscape;
 
-        Rectangle bounds;
+        internal object Id; // A platform-specific id for this monitor
 
-        static readonly List<DisplayDevice> available_displays = new List<DisplayDevice>();
-        static readonly IList<DisplayDevice> available_displays_readonly;
         static readonly object display_lock = new object();
         static DisplayDevice primary_display;
 
@@ -46,35 +59,29 @@ namespace OpenMobile
 
         #endregion
 
-        #region --- Constructors ---
+        #region Constructors
 
         static DisplayDevice()
         {
             implementation = Platform.Factory.Default.CreateDisplayDeviceDriver();
-            available_displays_readonly = available_displays.AsReadOnly();
         }
 
         internal DisplayDevice()
         {
-            lock (display_lock)
-            {
-                available_displays.Add(this);
-            }
-
             available_resolutions_readonly = available_resolutions.AsReadOnly();
         }
 
         internal DisplayDevice(DisplayResolution currentResolution, bool primary,
-            IEnumerable<DisplayResolution> availableResolutions, Rectangle bounds)
+            IEnumerable<DisplayResolution> availableResolutions, Rectangle bounds,
+            object id)
             : this()
         {
+#warning "Consolidate current resolution with bounds? Can they fall out of sync right now?"
             this.current_resolution = currentResolution;
             IsPrimary = primary;
             this.available_resolutions.AddRange(availableResolutions);
-            this.bounds = (bounds == Rectangle.Empty) ? currentResolution.Bounds : bounds;
-            this.landscape = (current_resolution.Width > current_resolution.Height);
-            Debug.Print("DisplayDevice {0} ({1}) supports {2} resolutions.",
-                available_displays.Count, primary ? "primary" : "secondary", available_resolutions.Count);
+            this.bounds = bounds == Rectangle.Empty ? currentResolution.Bounds : bounds;
+            this.Id = id;
         }
 
         #endregion
@@ -136,7 +143,7 @@ namespace OpenMobile
         }
 
         #endregion
-        /// <summary>
+		/// <summary>
         /// Returns true if the display is in landscape mode...false if the display is in portrait mode
         /// </summary>
         public bool Landscape
@@ -195,13 +202,7 @@ namespace OpenMobile
                 return current_resolution;
             return resolution;
         }
-        public void UpdateResolution(DisplayResolution resolution)
-        {
-            current_resolution = resolution;
-            bounds.Height = resolution.Height;
-            bounds.Width = resolution.Width;
-            this.landscape = (current_resolution.Width > current_resolution.Height);
-        }
+
         #endregion
 
         #region public IList<DisplayResolution> AvailableResolutions
@@ -293,10 +294,23 @@ namespace OpenMobile
 
         /// <summary>
         /// Gets the list of available <see cref="DisplayDevice"/> objects.
+        /// This function allocates memory.
         /// </summary>
+        [Obsolete("Use GetDisplay(DisplayIndex) instead.")]
         public static IList<DisplayDevice> AvailableDisplays
         {
-            get { return available_displays_readonly; }
+            get
+            {
+                List<DisplayDevice> displays = new List<DisplayDevice>();
+                for (int i = 0; i < 6; i++)
+                {
+                    DisplayDevice dev = GetDisplay(i);
+                    if (dev != null)
+                        displays.Add(dev);
+                }
+
+                return displays.AsReadOnly();
+            }
         }
 
         #endregion
@@ -304,7 +318,24 @@ namespace OpenMobile
         #region public static DisplayDevice Default
 
         /// <summary>Gets the default (primary) display of this system.</summary>
-        public static DisplayDevice Default { get { return primary_display; } }
+        public static DisplayDevice Default
+        {
+            get { return implementation.GetDisplay(-1); }
+        }
+
+        #endregion
+
+        #region GetDisplay
+
+        /// <summary>
+        /// Gets the <see cref="DisplayDevice"/> for the specified <see cref="DeviceIndex"/>.
+        /// </summary>
+        /// <param name="index">The <see cref="DeviceIndex"/> that defines the desired display.</param>
+        /// <returns>A <see cref="DisplayDevice"/> or null, if no device corresponds to the specified index.</returns>
+        public static DisplayDevice GetDisplay(int index)
+        {
+            return implementation.GetDisplay(index);
+        }
 
         #endregion
 
@@ -343,38 +374,6 @@ namespace OpenMobile
             return String.Format("{0}: {1} ({2} modes available)", IsPrimary ? "Primary" : "Secondary",
                 Bounds.ToString(), available_resolutions.Count);
         }
-
-        #endregion
-
-        #region public override bool Equals(object obj)
-
-        ///// <summary>Determines whether the specified DisplayDevices are equal.</summary>
-        ///// <param name="obj">The System.Object to check against.</param>
-        ///// <returns>True if the System.Object is an equal DisplayDevice; false otherwise.</returns>
-        //public override bool Equals(object obj)
-        //{
-        //    if (obj is DisplayDevice)
-        //    {
-        //        DisplayDevice dev = (DisplayDevice)obj;
-        //        return
-        //            IsPrimary == dev.IsPrimary &&
-        //            current_resolution == dev.current_resolution &&
-        //            available_resolutions.Count == dev.available_resolutions.Count;
-        //    }
-
-        //    return false;
-        //}
-
-        #endregion
-
-        #region public override int GetHashCode()
-
-        ///// <summary>Returns a unique hash representing this DisplayDevice.</summary>
-        ///// <returns>A System.Int32 that may serve as a hash code for this DisplayDevice.</returns>
-        ////public override int GetHashCode()
-        //{
-        //    return current_resolution.GetHashCode() ^ IsPrimary.GetHashCode() ^ available_resolutions.Count;
-        //}
 
         #endregion
 

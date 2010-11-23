@@ -103,7 +103,8 @@ namespace OpenMobile
                         Function f = functions.Dequeue();
                         try
                         {
-                            f();
+                            if (f!=null)
+                                f();
                         }
                         catch (Exception e)
                         {
