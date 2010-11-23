@@ -1,40 +1,67 @@
-#region --- License ---
-/* Licensed under the MIT/X11 license.
- * Copyright (c) 2006-2008 the OpenTK Team.
- * This notice may not be removed from any source distribution.
- * See license.txt for licensing detailed licensing details.
- */
+#region License
+//
+// The Open Toolkit Library License
+//
+// Copyright (c) 2006 - 2010 the Open Toolkit library.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights to 
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+//
 #endregion
 #if LINUX
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using OpenMobile.Graphics;
 using System.Runtime.InteropServices;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.Platform.X11
 {
-    internal class X11DisplayDevice : IDisplayDeviceDriver
+    sealed class X11DisplayDevice : IDisplayDeviceDriver
     {
-        static object display_lock = new object();
         // Store a mapping between resolutions and their respective
         // size_index (needed for XRRSetScreenConfig). The size_index
         // is simply the sequence number of the resolution as returned by
         // XRRSizes. This is done per available screen.
-        static List<Dictionary<DisplayResolution, int>> screenResolutionToIndex =
+        readonly List<Dictionary<DisplayResolution, int>> screenResolutionToIndex =
             new List<Dictionary<DisplayResolution, int>>();
         // Store a mapping between DisplayDevices and their default resolutions.
-        static Dictionary<DisplayDevice, int> deviceToDefaultResolution = new Dictionary<DisplayDevice, int>();
+        readonly Dictionary<DisplayDevice, int> deviceToDefaultResolution = new Dictionary<DisplayDevice, int>();
         // Store a mapping between DisplayDevices and X11 screens.
-        static Dictionary<DisplayDevice, int> deviceToScreen = new Dictionary<DisplayDevice, int>();
+        readonly Dictionary<DisplayDevice, int> deviceToScreen = new Dictionary<DisplayDevice, int>();
         // Keep the time when the config of each screen was last updated.
-        static List<IntPtr> lastConfigUpdate = new List<IntPtr>();
+        readonly List<IntPtr> lastConfigUpdate = new List<IntPtr>();
 
-        static bool xinerama_supported, xrandr_supported, xf86_supported;
-        
-        #region --- Constructors ---
+        bool xinerama_supported, xrandr_supported, xf86_supported;
 
-        static X11DisplayDevice()
+        #region Constructors
+
+        public X11DisplayDevice()
+        {
+            RefreshDisplayDevices();
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        void RefreshDisplayDevices()
         {
             using (new XLock(API.DefaultDisplay))
             {
@@ -79,31 +106,26 @@ namespace OpenMobile.Platform.X11
 
                     if (!xf86_supported)
                     {
-						Debug.Print("XF86 query failed, falling back to dummy device.");
-                        QueryBestGuess(devices);
+                        Debug.Print("XF86 query failed, no DisplayDevice support available.");
                     }
                 }
+
+                AvailableDevices.Clear();
+                AvailableDevices.AddRange(devices);
+                Primary = FindDefaultDevice(devices);
             }
         }
-		
-		static void QueryBestGuess(List<DisplayDevice> devices)
-		{
-			foreach(DisplayDevice device in devices)
-			{
-				device.BitsPerPixel=24;
-				device.Bounds=new Rectangle(0,0,800,600);
-				device.IsPrimary=true;
-				device.RefreshRate=60;
-			}
-		}
-		
-        internal X11DisplayDevice() { }
 
-        #endregion
+        static DisplayDevice FindDefaultDevice(IEnumerable<DisplayDevice> devices)
+        {
+            foreach (DisplayDevice dev in devices)
+                if (dev.IsPrimary)
+                    return dev;
 
-        #region --- Private Methods ---
+            throw new InvalidOperationException("No primary display found. Please file a bug at http://www.opentk.com");
+        }
 
-        static bool QueryXinerama(List<DisplayDevice> devices)
+        bool QueryXinerama(List<DisplayDevice> devices)
         {
             // Try to use Xinerama to obtain the geometry of all output devices.
             int event_base, error_base;
@@ -127,14 +149,11 @@ namespace OpenMobile.Platform.X11
                     // It seems that all X screens are equal to 0 is Xinerama is enabled, at least on Nvidia (verify?)
                     deviceToScreen.Add(dev, 0 /*screen.ScreenNumber*/);
                 }
-                return (devices.Count > 0);
             }
-            else
-                return false;
-            
+            return (devices.Count > 0);
         }
 
-        static bool QueryXRandR(List<DisplayDevice> devices)
+        bool QueryXRandR(List<DisplayDevice> devices)
         {
             // Get available resolutions. Then, for each resolution get all available rates.
             foreach (DisplayDevice dev in devices)
@@ -211,44 +230,52 @@ namespace OpenMobile.Platform.X11
             return true;
         }
 
-        static bool QueryXF86(List<DisplayDevice> devices)
+        bool QueryXF86(List<DisplayDevice> devices)
         {
             int major;
             int minor;
-			try{
-            if (!API.XF86VidModeQueryVersion(API.DefaultDisplay, out major, out minor))
-                return false;
-			}catch(DllNotFoundException)
-			{
-				return false;
-			}
-            int currentScreen = 0;
-            foreach(DisplayDevice dev in devices)
+
+            try
             {
-                Debug.Print("Using XF86 v" + major.ToString() + "." + minor.ToString());
+                if (!API.XF86VidModeQueryVersion(API.DefaultDisplay, out major, out minor))
+                    return false;
+            }
+            catch (DllNotFoundException)
+            {
+                return false;
+            }
+
+            int currentScreen = 0;
+            Debug.Print("Using XF86 v" + major.ToString() + "." + minor.ToString());
+
+            foreach (DisplayDevice dev in devices)
+            {
                 int count;
+
                 IntPtr srcArray;
                 API.XF86VidModeGetAllModeLines(API.DefaultDisplay, currentScreen, out count, out srcArray);
-                Debug.Print(count.ToString()+" modes detected on screen 0");
-                IntPtr[] array=new IntPtr[count];
+                Debug.Print(count.ToString() + " modes detected on screen " + currentScreen.ToString());
+                IntPtr[] array = new IntPtr[count];
                 Marshal.Copy(srcArray, array, 0, count);
                 API.XF86VidModeModeInfo Mode = new API.XF86VidModeModeInfo();
+
                 int x;
                 int y;
-                API.XF86VidModeGetViewPort(API.DefaultDisplay,currentScreen,out x,out y);
-				List<OpenMobile.DisplayResolution> resolutions=new List<OpenMobile.DisplayResolution>();
-                for(int i=0;i<count;i++)
+                API.XF86VidModeGetViewPort(API.DefaultDisplay, currentScreen, out x, out y);
+                List<DisplayResolution> resolutions = new List<DisplayResolution>();
+                for (int i = 0; i < count; i++)
                 {
-                    Mode=(API.XF86VidModeModeInfo)Marshal.PtrToStructure(array[i],typeof(API.XF86VidModeModeInfo));
-                    resolutions.Add(new DisplayResolution(x,y,Mode.hdisplay,Mode.vdisplay,24,(Mode.dotclock*1000F)/(Mode.vtotal*Mode.htotal)));
+                    Mode = (API.XF86VidModeModeInfo)Marshal.PtrToStructure(array[i], typeof(API.XF86VidModeModeInfo));
+                    resolutions.Add(new DisplayResolution(x, y, Mode.hdisplay, Mode.vdisplay, 24, (Mode.dotclock * 1000F) / (Mode.vtotal * Mode.htotal)));
                 }
-				dev.AvailableResolutions=resolutions;
+
+                dev.AvailableResolutions = resolutions;
                 int pixelClock;
                 API.XF86VidModeModeLine currentMode;
-                API.XF86VidModeGetModeLine(API.DefaultDisplay,currentScreen,out pixelClock,out currentMode);
-                dev.Bounds = new Rectangle(x, y, currentMode.hdisplay, (currentMode.vdisplay==0) ? currentMode.vsyncstart : currentMode.vdisplay);
+                API.XF86VidModeGetModeLine(API.DefaultDisplay, currentScreen, out pixelClock, out currentMode);
+                dev.Bounds = new Rectangle(x, y, currentMode.hdisplay, (currentMode.vdisplay == 0) ? currentMode.vsyncstart : currentMode.vdisplay);
                 dev.BitsPerPixel = FindCurrentDepth(currentScreen);
-                dev.RefreshRate = (pixelClock*1000F)/(currentMode.vtotal*currentMode.htotal);
+                dev.RefreshRate = (pixelClock * 1000F) / (currentMode.vtotal * currentMode.htotal);
                 currentScreen++;
             }
             return true;
@@ -293,14 +320,14 @@ namespace OpenMobile.Platform.X11
 
         #region private static int FindCurrentDepth(int screen)
 
-        private static int FindCurrentDepth(int screen)
+        static int FindCurrentDepth(int screen)
         {
             return (int)Functions.XDefaultDepth(API.DefaultDisplay, screen);
         }
 
         #endregion
 
-        static bool ChangeResolutionXRandR(DisplayDevice device, DisplayResolution resolution)
+        bool ChangeResolutionXRandR(DisplayDevice device, DisplayResolution resolution)
         {
             using (new XLock(API.DefaultDisplay))
             {
@@ -320,8 +347,28 @@ namespace OpenMobile.Platform.X11
                 Debug.Print("Changing size of screen {0} from {1} to {2}",
                     screen, current_resolution_index, new_resolution_index);
 
-                return 0 == Functions.XRRSetScreenConfigAndRate(API.DefaultDisplay, screen_config, root, new_resolution_index,
-                    current_rotation, (short)(resolution != null ? resolution.RefreshRate : 0), lastConfigUpdate[screen]);
+                int ret = 0;
+                short refresh_rate = (short)(resolution != null ? resolution.RefreshRate : 0);
+                if (refresh_rate > 0)
+                {
+                    ret = Functions.XRRSetScreenConfigAndRate(API.DefaultDisplay,
+                    screen_config, root, new_resolution_index, current_rotation,
+                    refresh_rate, IntPtr.Zero);
+                }
+                else
+                {
+                    ret = Functions.XRRSetScreenConfig(API.DefaultDisplay,
+                    screen_config, root, new_resolution_index, current_rotation,
+                    IntPtr.Zero);
+                }
+
+                if (ret != 0)
+                {
+                    Debug.Print("[Error] Change to resolution {0} failed with error {1}.",
+                        resolution, (ErrorCode)ret);
+                }
+
+                return ret == 0;
             }
         }
 
@@ -332,9 +379,9 @@ namespace OpenMobile.Platform.X11
 
         #endregion
 
-        #region --- IDisplayDeviceDriver Members ---
+        #region IDisplayDeviceDriver Members
 
-        public bool TryChangeResolution(DisplayDevice device, DisplayResolution resolution)
+        public sealed override bool TryChangeResolution(DisplayDevice device, DisplayResolution resolution)
         {
             // If resolution is null, restore the default resolution (new_resolution_index = 0).
 
@@ -352,8 +399,7 @@ namespace OpenMobile.Platform.X11
             }
         }
 
-
-        public bool TryRestoreResolution(DisplayDevice device)
+        public sealed override bool TryRestoreResolution(DisplayDevice device)
         {
             return TryChangeResolution(device, null);
         }
@@ -370,7 +416,7 @@ namespace OpenMobile.Platform.X11
             public static extern bool XineramaQueryExtension(IntPtr dpy, out int event_basep, out int error_basep);
 
             [DllImport(Xinerama)]
-            public static extern int XineramaQueryVersion (IntPtr dpy, out int major_versionp, out int minor_versionp);
+            public static extern int XineramaQueryVersion(IntPtr dpy, out int major_versionp, out int minor_versionp);
 
             [DllImport(Xinerama)]
             public static extern bool XineramaIsActive(IntPtr dpy);

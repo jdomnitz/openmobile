@@ -159,7 +159,11 @@ namespace OpenMobile.Input
                 if (Configuration.RunningOnWindows)
                     Platform.Windows.Functions.SetCursorPos(pos.X, pos.Y);
                 #endif
-                //TODO - Other platforms
+                #if LINUX
+                if(Configuration.RunningOnLinux)
+                    Platform.X11.Functions.XIWarpPointer(Platform.X11.API.DefaultDisplay,0,IntPtr.Zero,Platform.X11.API.RootWindow,0,0,0,0,pos.X,pos.Y);
+                #endif
+                //TODO - OSX
             }
         }
         #region public int Y

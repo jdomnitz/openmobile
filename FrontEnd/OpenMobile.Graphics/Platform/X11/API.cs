@@ -63,7 +63,7 @@ namespace OpenMobile.Platform.X11
 
         internal static Display DefaultDisplay { get { return defaultDisplay; } }
         static int DefaultScreen { get { return defaultScreen; } }
-        //internal static Window RootWindow { get { return rootWindow; } }
+        internal static Window RootWindow { get { return rootWindow; } }
         internal static int ScreenCount { get { return screenCount; } }
 
         internal static object Lock = new object();
@@ -1414,7 +1414,7 @@ XF86VidModeGetGammaRampSize(
 
         [DllImport(XrandrLibrary)]//,CLSCompliant(false)]
         public static extern Status XRRSetScreenConfig(Display dpy, XRRScreenConfiguration config,
-            Drawable draw, int size_index, ref Rotation rotation, Time timestamp);
+            Drawable draw, int size_index, Rotation rotation, Time timestamp);
 
         [DllImport(XrandrLibrary)]//, CLSCompliant(false)]
         public static extern Status XRRSetScreenConfigAndRate(Display dpy, XRRScreenConfiguration config,

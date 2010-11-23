@@ -26,7 +26,7 @@ namespace OpenMobile.Platform.Windows
 
             // Ensure core entry points are ready prior to accessing any method.
             // Resolves bug [#993]: "Possible bug in GraphicsContext.CreateDummyContext()" 
-            LoadAll();
+            // LoadAll();
         }
 
         #endregion
@@ -41,7 +41,7 @@ namespace OpenMobile.Platform.Windows
         private static Type importsClass;
 
         private static bool rebuildExtensionList = true;
-
+        static readonly object SyncRoot = new object();
         #endregion
 
         #region static Delegate LoadDelegate(string name, Type signature)
@@ -108,7 +108,10 @@ namespace OpenMobile.Platform.Windows
         /// </summary>
         public static void LoadAll()
         {
-            OpenMobile.Platform.Utilities.LoadExtensions(typeof(Wgl));
+            lock (SyncRoot)
+            {
+                OpenMobile.Platform.Utilities.LoadExtensions(typeof(Wgl));
+            }
         }
 
         #endregion

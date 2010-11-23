@@ -142,7 +142,7 @@ namespace OpenMobile.Platform.MacOS
 				IntPtr cgdevice = GetQuartzDevice(carbonWindow);
 
 				if (cgdevice == IntPtr.Zero)
-					cgdevice = QuartzDisplayDeviceDriver.MainDisplay;
+                    cgdevice = (IntPtr)DisplayDevice.Default.Id;
 
                 OSStatus status = Carbon.API.DMGetGDeviceByDisplayID(
                     cgdevice, out gdevice, false);
