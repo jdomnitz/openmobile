@@ -44,7 +44,7 @@ namespace OpenMobile
         #region Fields
 
         bool primary;
-		bool landscape;
+		bool landscape=true;
         Rectangle bounds;
         DisplayResolution current_resolution = new DisplayResolution();
 
@@ -159,23 +159,14 @@ namespace OpenMobile
         /// Gets the list of available <see cref="DisplayDevice"/> objects.
         /// This function allocates memory.
         /// </summary>
-        [Obsolete("Use GetDisplay(DisplayIndex) instead.")]
         public static IList<DisplayDevice> AvailableDisplays
         {
             get
             {
-                List<DisplayDevice> displays = new List<DisplayDevice>();
-                for (int i = 0; i < 6; i++)
-                {
-                    DisplayDevice dev = GetDisplay(i);
-                    if (dev != null)
-                        displays.Add(dev);
-                }
-
-                return displays.AsReadOnly();
+                return implementation.AvailableDevices;
             }
         }
-        public static void RefreshDisplays()
+        internal static void RefreshDisplays()
         {
             implementation.RefreshDisplayDevices();
         }
@@ -186,21 +177,7 @@ namespace OpenMobile
         /// <summary>Gets the default (primary) display of this system.</summary>
         public static DisplayDevice Default
         {
-            get { return implementation.GetDisplay(-1); }
-        }
-
-        #endregion
-
-        #region GetDisplay
-
-        /// <summary>
-        /// Gets the <see cref="DisplayDevice"/> for the specified <see cref="DeviceIndex"/>.
-        /// </summary>
-        /// <param name="index">The <see cref="DeviceIndex"/> that defines the desired display.</param>
-        /// <returns>A <see cref="DisplayDevice"/> or null, if no device corresponds to the specified index.</returns>
-        public static DisplayDevice GetDisplay(int index)
-        {
-            return implementation.GetDisplay(index);
+            get { return implementation.Primary; }
         }
 
         #endregion

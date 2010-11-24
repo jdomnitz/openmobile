@@ -52,7 +52,6 @@ namespace OpenMobile.Platform.Windows
 
         public override void RefreshDisplayDevices()
         {
-            DateTime start = DateTime.Now;
             lock (display_lock)
             {
                 AvailableDevices.Clear();
@@ -103,7 +102,6 @@ namespace OpenMobile.Platform.Windows
                         Primary = opentk_dev;
                 }
             }
-            Debug.Print("Displays enumerated in " + (DateTime.Now - start).Milliseconds.ToString() + "ms.");
         }
 
         #region HandleDisplaySettingsChanged

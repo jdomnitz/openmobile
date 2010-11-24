@@ -445,10 +445,7 @@ namespace OpenMobile.Platform.Windows
 
                     break;
                 case WindowMessage.DISPLAYCHANGE:
-                    if (ResolutionChange != null)
-                    {
-                        ResolutionChange(this, new ResolutionChange((int)((uint)lParam.ToInt32() & 0x0000FFFF), (int)(((uint)lParam.ToInt32() & 0xFFFF0000) >> 16)));
-                    }
+                    DisplayDevice.RefreshDisplays();
                     break;
                 #endregion
             }
