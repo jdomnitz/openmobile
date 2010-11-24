@@ -30,18 +30,9 @@ namespace OpenMobile.Platform
 {
     internal abstract class IDisplayDeviceDriver
     {
-        protected readonly List<DisplayDevice> AvailableDevices = new List<DisplayDevice>();
-        protected DisplayDevice Primary;
+        internal readonly List<DisplayDevice> AvailableDevices = new List<DisplayDevice>();
+        internal DisplayDevice Primary;
 
         public abstract void RefreshDisplayDevices();
-        public DisplayDevice GetDisplay(int index)
-        {
-            if (index == -1)
-                return Primary;
-            else if (index >= 0 && index < AvailableDevices.Count)
-                return AvailableDevices[index];
-            else
-                return null;
-        }
     }
 }
