@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Text;
 
 #if OSX
 namespace OpenMobile.Platform.MacOS
@@ -415,6 +414,22 @@ namespace OpenMobile.Platform.MacOS
                     return OSStatus.NoError;
 
                 case WindowEventKind.WindowBoundsChanged:
+                    if (Carbon.API.checkResize(inEvent))
+                    {
+                        IntPtr[] displays = new IntPtr[1];
+                        int displayCount;
+                        unsafe
+                        {
+                            fixed (IntPtr* displayPtr = displays)
+                            {
+                                CG.GetActiveDisplayList(1, displayPtr, out displayCount);
+                            }
+                        }
+                        int currentWidth = CG.DisplayPixelsWide(displays[0]);
+                        int currentHeight = CG.DisplayPixelsHigh(displays[0]);
+                        ResolutionChange(this, new ResolutionChange(currentWidth, currentHeight, (currentWidth >= currentHeight)));
+						DisplayDevice.RefreshDisplays();
+                    }
                     int thisWidth = Width;
                     int thisHeight = Height;
 

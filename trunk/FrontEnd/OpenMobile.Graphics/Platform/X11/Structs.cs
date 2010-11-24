@@ -369,6 +369,26 @@ namespace OpenMobile.Platform.X11
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    public struct XRRScreenChangeNotifyEvent
+    {
+        public int type;                /* event base */
+        public ulong serial;    /* # of last request processed by server */
+        public bool send_event;        /* true if this came from a SendEvent request */
+        public IntPtr display;        /* Display the event was read from */
+        public Window window;            /* window which selected for this event */
+        public Window root;            /* Root window for changed screen */
+        public Time timestamp;            /* when the screen change occurred */
+        public Time config_timestamp;    /* when the last configuration change */
+        public long size_index;
+        public int subpixel_order;
+        public int rotation;
+        public int width;
+        public int height;
+        public int mwidth;
+        public int mheight;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct XConfigureRequestEvent
     {
         public XEventName type;
@@ -643,6 +663,8 @@ namespace OpenMobile.Platform.X11
         public XGenericEvent GenericEvent;
         [FieldOffset(0)]
         public XGenericEventCookie GenericEventCookie;
+        [FieldOffset(0)]
+        public XRRScreenChangeNotifyEvent ScreenChangeEvent;
 
         //[MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValArray, SizeConst=24)]
         //[ FieldOffset(0) ] public int[] pad;
@@ -784,8 +806,8 @@ namespace OpenMobile.Platform.X11
         ColormapNotify = 32,
         ClientMessage = 33,
         MappingNotify = 34,
-
-        LASTEvent
+        LASTEvent,
+        ScreenChangeNotify=73,
     }
 
     [Flags]

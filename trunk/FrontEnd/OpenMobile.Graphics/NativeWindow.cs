@@ -854,9 +854,6 @@ namespace OpenMobile
         private void raiseResolutionChange(object sender, ResolutionChange e)
         {
             ResolutionChange(sender, e);
-            DisplayDevice dev=DisplayDevice.AvailableDisplays[screen];
-            //ToDo-refactor
-            //dev.UpdateResolution(new DisplayResolution(dev.Bounds.X, dev.Bounds.Y, e.Width, e.Height, dev.BitsPerPixel, dev.RefreshRate));
         }
         #endregion
 

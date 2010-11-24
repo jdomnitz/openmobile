@@ -106,10 +106,16 @@ namespace OpenMobile.Graphics
     public class ResolutionChange : EventArgs
     {
         int _width, _height;
-        public ResolutionChange(int width, int height)
+        bool _landscape;
+        public ResolutionChange(int width, int height,bool landscape)
         {
             _width = width;
             _height = height;
+            _landscape = landscape;
+        }
+        public bool Landscape
+        {
+            get { return _landscape;}
         }
         public int Width
         {

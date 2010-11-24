@@ -262,6 +262,8 @@ namespace OpenMobile.Platform.MacOS.Carbon
         KeyCode = 0x6b636f64,             // typeUInt32
         KeyMacCharCode = 0x6b636872,      // typechar
         KeyModifiers = 0x6b6d6f64,        // typeUInt32
+
+        Reason=0x7768793F,                //type UInt32
         
     }
     internal enum EventParamType : int
@@ -688,6 +690,25 @@ namespace OpenMobile.Platform.MacOS.Carbon
             }
 
             return (MouseButton)button;
+        }
+        static internal bool checkResize(IntPtr inEvent)
+        {
+            int code;
+            unsafe
+            {
+                int* codeAddr = &code;
+
+                OSStatus result = API.GetEventParameter(inEvent,
+                     EventParamName.Reason, EventParamType.typeUInt32, IntPtr.Zero,
+                     (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(UInt32)), IntPtr.Zero,
+                     (IntPtr)codeAddr);
+
+                if (result != OSStatus.NoError)
+                {
+                    return false;
+                }
+                return (code == 2);
+            }
         }
 		static internal int GetEventMouseWheelDelta(IntPtr inEvent)
 		{
