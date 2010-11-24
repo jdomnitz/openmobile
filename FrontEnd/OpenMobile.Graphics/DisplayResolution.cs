@@ -19,7 +19,6 @@ namespace OpenMobile
     {
         Rectangle bounds;
         int bits_per_pixel;
-        float refresh_rate;
 
         #region --- Constructors ---
 
@@ -28,17 +27,15 @@ namespace OpenMobile
         #region public DisplayResolution(int width, int height, int bitsPerPixel, float refreshRate)
 
         // Creates a new DisplayResolution object for the primary DisplayDevice.
-        public DisplayResolution(int x, int y, int width, int height, int bitsPerPixel, float refreshRate)
+        public DisplayResolution(int x, int y, int width, int height, int bitsPerPixel)
         {
             // Refresh rate may be zero, since this information may not be available on some platforms.
             if (width <= 0) throw new ArgumentOutOfRangeException("width", "Must be greater than zero.");
             if (height <= 0) throw new ArgumentOutOfRangeException("height", "Must be greater than zero.");
             if (bitsPerPixel <= 0) throw new ArgumentOutOfRangeException("bitsPerPixel", "Must be greater than zero.");
-            if (refreshRate < 0) throw new ArgumentOutOfRangeException("refreshRate", "Must be greater than, or equal to zero.");
 
             this.bounds = new Rectangle(x, y, width, height);
             this.bits_per_pixel = bitsPerPixel;
-            this.refresh_rate = refreshRate;
         }
 
         #endregion
@@ -125,19 +122,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region public float RefreshRate
-
-        /// <summary>
-        /// Gets a System.Single representing the vertical refresh rate of this display.
-        /// </summary>
-        public float RefreshRate
-        {
-            get { return refresh_rate; }
-            internal set { refresh_rate = value; }
-        }
-
-        #endregion
-
         #endregion
 
         #region --- Overrides ---
@@ -150,7 +134,7 @@ namespace OpenMobile
         /// <returns>A System.String representing this DisplayResolution.</returns>
         public override string ToString()
         {
-            return String.Format("{0}x{1}@{2}Hz", Bounds, bits_per_pixel, refresh_rate);
+            return String.Format("{0}x{1}", Bounds, bits_per_pixel);
         }
 
         #endregion
@@ -169,8 +153,7 @@ namespace OpenMobile
                 return
                     Width == res.Width &&
                     Height == res.Height &&
-                    BitsPerPixel == res.BitsPerPixel &&
-                    RefreshRate == res.RefreshRate;
+                    BitsPerPixel == res.BitsPerPixel;
             }
 
             return false;
@@ -184,7 +167,7 @@ namespace OpenMobile
         /// <returns>A System.Int32 that may serve as a hash code for this resolution.</returns>
         public override int GetHashCode()
         {
-            return Bounds.GetHashCode() ^ bits_per_pixel ^ refresh_rate.GetHashCode();
+            return Bounds.GetHashCode() ^ bits_per_pixel;
         }
 
         #endregion

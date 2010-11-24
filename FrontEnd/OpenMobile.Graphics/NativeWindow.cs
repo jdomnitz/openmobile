@@ -544,11 +544,11 @@ namespace OpenMobile
         {
             if (!IsDisposed)
             {
-                if ((options & GameWindowFlags.Fullscreen) != 0)
-                {
+                //if ((options & GameWindowFlags.Fullscreen) != 0)
+                //{
                     //if (WindowState == WindowState.Fullscreen) WindowState = WindowState.Normal; // TODO: Revise.
-                    device.RestoreResolution();
-                }
+                    //device.RestoreResolution();
+                //}
                 if (queuedInvokes.Count > 0)
                 {
                     for (int i = queuedInvokes.Count - 1; i >= 0; i--)
