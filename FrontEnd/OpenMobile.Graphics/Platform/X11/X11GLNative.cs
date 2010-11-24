@@ -825,7 +825,12 @@ namespace OpenMobile.Platform.X11
                         //    RefreshWindowBorders();
                         //}
                         break;
-                       
+                    case XEventName.ScreenChangeNotify:
+                        //TODO - Make sure this event is enabled
+                        if (ResolutionChange != null)
+                            ResolutionChange(this, new ResolutionChange(e.ScreenChangeEvent.height, e.ScreenChangeEvent.width, !(((e.ScreenChangeEvent.rotation & 2) == 2) || (e.ScreenChangeEvent.rotation & 8) == 8)));
+                        DisplayDevice.RefreshDisplays();
+                        break;
                     default:
                         //Debug.WriteLine(String.Format("{0} event was not handled", e.type));
                         break;

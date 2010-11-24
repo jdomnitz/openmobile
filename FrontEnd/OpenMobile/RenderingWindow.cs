@@ -1116,7 +1116,7 @@ namespace OpenMobile
         void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
         {
             DisplayDevice dev=DisplayDevice.AvailableDisplays[screen];
-            if (dev.Landscape != dev.Landscape)
+            if (e.Landscape != dev.Landscape)
                 Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), dev.Landscape ? "Landscape" : "Portrait", "");
         }
         internal void Rollback()

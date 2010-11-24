@@ -26,13 +26,12 @@
 #endregion
 #if WINDOWS
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using OpenMobile.Graphics;
 using OpenMobile.Input;
-using System.Collections.Generic;
-using System.IO;
 
 namespace OpenMobile.Platform.Windows
 {
@@ -445,6 +444,13 @@ namespace OpenMobile.Platform.Windows
 
                     break;
                 case WindowMessage.DISPLAYCHANGE:
+                    if (ResolutionChange!=null)
+                    {
+                        //TODO-fix issues with multiple screens here
+                        int height=(int)(((uint)lParam.ToInt32() & 0xFFFF0000) >> 16);
+                        int width=(int)((uint)lParam.ToInt32() & 0x0000FFFF);
+                        ResolutionChange(this,new ResolutionChange(width,height,(width>=height)));
+                    }
                     DisplayDevice.RefreshDisplays();
                     break;
                 #endregion
