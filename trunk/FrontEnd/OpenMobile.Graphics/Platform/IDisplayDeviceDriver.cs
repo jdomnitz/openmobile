@@ -33,8 +33,7 @@ namespace OpenMobile.Platform
         protected readonly List<DisplayDevice> AvailableDevices = new List<DisplayDevice>();
         protected DisplayDevice Primary;
 
-        public abstract bool TryChangeResolution(DisplayDevice device, DisplayResolution resolution);
-        public abstract bool TryRestoreResolution(DisplayDevice device);
+        public abstract void RefreshDisplayDevices();
         public DisplayDevice GetDisplay(int index)
         {
             if (index == -1)

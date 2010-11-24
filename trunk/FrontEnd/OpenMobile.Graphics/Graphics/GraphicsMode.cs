@@ -339,8 +339,10 @@ namespace OpenMobile.Graphics
                 {
                     if (defaultMode == null)
                     {
+                        #if DEBUG
                         Debug.Print("Creating default GraphicsMode ({0}, {1}, {2}, {3}, {4}, {5}, {6}).", DisplayDevice.Default.BitsPerPixel,
                                     16, 0, 2, 0, 2, false);
+                        #endif
                         defaultMode = new GraphicsMode(DisplayDevice.Default.BitsPerPixel, 16, 0, 0, 0, 2, false);
                     }
                     return defaultMode;

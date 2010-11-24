@@ -61,7 +61,7 @@ namespace OpenMobile.Platform.X11
 
         #region Private Methods
 
-        void RefreshDisplayDevices()
+        public override void RefreshDisplayDevices()
         {
             using (new XLock(API.DefaultDisplay))
             {
@@ -106,7 +106,8 @@ namespace OpenMobile.Platform.X11
 
                     if (!xf86_supported)
                     {
-                        Debug.Print("XF86 query failed, no DisplayDevice support available.");
+                        Debug.Print("XF86 query failed, creating dummy display.");
+                        QueryBestGuess(devices);
                     }
                 }
 
@@ -145,6 +146,7 @@ namespace OpenMobile.Platform.X11
                         dev.IsPrimary = true;
                         first = false;
                     }
+                    dev.BitsPerPixel = FindCurrentDepth(devices.Count);
                     devices.Add(dev);
                     // It seems that all X screens are equal to 0 is Xinerama is enabled, at least on Nvidia (verify?)
                     deviceToScreen.Add(dev, 0 /*screen.ScreenNumber*/);
@@ -179,32 +181,6 @@ namespace OpenMobile.Platform.X11
                         Debug.Print("[Warning] XRandR returned an invalid resolution ({0}) for display device {1}", size, screen);
                         continue;
                     }
-                    short[] rates = null;
-                    rates = Functions.XRRRates(API.DefaultDisplay, screen, resolution_count);
-
-                    // It seems that XRRRates returns 0 for modes that are larger than the screen
-                    // can support, as well as for all supported modes. On Ubuntu 7.10 the tool
-                    // "Screens and Graphics" does report these modes, though.
-                    foreach (short rate in rates)
-                    {
-                        // Note: some X servers (like Xming on Windows) do not report any rates other than 0.
-                        // If we only have 1 rate, add it even if it is 0.
-                        if (rate != 0 || rates.Length == 1)
-                            foreach (int depth in depths)
-                                available_res.Add(new DisplayResolution(0, 0, size.Width, size.Height, depth, (float)rate));
-                    }
-                    // Keep the index of this resolution - we will need it for resolution changes later.
-                    foreach (int depth in depths)
-                    {
-                        // Note that Xinerama may return multiple devices for a single screen. XRandR will
-                        // not distinguish between the two as far as resolutions are supported (since XRandR
-                        // operates on X screens, not display devices) - we need to be careful not to add the
-                        // same resolution twice!
-                        DisplayResolution res = new DisplayResolution(0, 0, size.Width, size.Height, depth, 0);
-                        if (!screenResolutionToIndex[screen].ContainsKey(res))
-                            screenResolutionToIndex[screen].Add(res, resolution_count);
-                    }
-
                     ++resolution_count;
                 }
 
@@ -212,17 +188,14 @@ namespace OpenMobile.Platform.X11
                 // The resolution of the current DisplayDevice is discovered through XRRConfigCurrentConfiguration.
                 // Its refresh rate is discovered by the FindCurrentRefreshRate call.
                 // Its depth is discovered by the FindCurrentDepth call.
-                float current_refresh_rate = FindCurrentRefreshRate(screen);
                 int current_depth = FindCurrentDepth(screen);
                 IntPtr screen_config = Functions.XRRGetScreenInfo(API.DefaultDisplay, Functions.XRootWindow(API.DefaultDisplay, screen));
                 ushort current_rotation;  // Not needed.
                 int current_resolution_index = Functions.XRRConfigCurrentConfiguration(screen_config, out current_rotation);
-
+                dev.Landscape=!(((current_rotation&2)==2)||((current_rotation&8)==8));
                 if (dev.Bounds == Rectangle.Empty)
                     dev.Bounds = new Rectangle(0, 0, available_res[current_resolution_index].Width, available_res[current_resolution_index].Height);
                 dev.BitsPerPixel = current_depth;
-                dev.RefreshRate = current_refresh_rate;
-                dev.AvailableResolutions = available_res;
 
                 deviceToDefaultResolution.Add(dev, current_resolution_index);
             }
@@ -250,35 +223,27 @@ namespace OpenMobile.Platform.X11
 
             foreach (DisplayDevice dev in devices)
             {
-                int count;
-
-                IntPtr srcArray;
-                API.XF86VidModeGetAllModeLines(API.DefaultDisplay, currentScreen, out count, out srcArray);
-                Debug.Print(count.ToString() + " modes detected on screen " + currentScreen.ToString());
-                IntPtr[] array = new IntPtr[count];
-                Marshal.Copy(srcArray, array, 0, count);
-                API.XF86VidModeModeInfo Mode = new API.XF86VidModeModeInfo();
-
                 int x;
                 int y;
                 API.XF86VidModeGetViewPort(API.DefaultDisplay, currentScreen, out x, out y);
-                List<DisplayResolution> resolutions = new List<DisplayResolution>();
-                for (int i = 0; i < count; i++)
-                {
-                    Mode = (API.XF86VidModeModeInfo)Marshal.PtrToStructure(array[i], typeof(API.XF86VidModeModeInfo));
-                    resolutions.Add(new DisplayResolution(x, y, Mode.hdisplay, Mode.vdisplay, 24, (Mode.dotclock * 1000F) / (Mode.vtotal * Mode.htotal)));
-                }
-
-                dev.AvailableResolutions = resolutions;
                 int pixelClock;
                 API.XF86VidModeModeLine currentMode;
                 API.XF86VidModeGetModeLine(API.DefaultDisplay, currentScreen, out pixelClock, out currentMode);
                 dev.Bounds = new Rectangle(x, y, currentMode.hdisplay, (currentMode.vdisplay == 0) ? currentMode.vsyncstart : currentMode.vdisplay);
                 dev.BitsPerPixel = FindCurrentDepth(currentScreen);
-                dev.RefreshRate = (pixelClock * 1000F) / (currentMode.vtotal * currentMode.htotal);
                 currentScreen++;
             }
             return true;
+        }
+
+        void QueryBestGuess(List<DisplayDevice> devices)
+        {
+            foreach (DisplayDevice device in devices)
+            {
+                device.BitsPerPixel = 24;
+                device.Bounds = new Rectangle(0, 0, 800, 600);
+                device.IsPrimary = true;
+            }
         }
 
         #region static int[] FindAvailableDepths(int screen)
@@ -303,21 +268,6 @@ namespace OpenMobile.Platform.X11
 
         #endregion
 
-        #region static float FindCurrentRefreshRate(int screen)
-
-        static float FindCurrentRefreshRate(int screen)
-        {
-            short rate = 0;
-            IntPtr screen_config = Functions.XRRGetScreenInfo(API.DefaultDisplay, Functions.XRootWindow(API.DefaultDisplay, screen));
-            ushort rotation = 0;
-            int size = Functions.XRRConfigCurrentConfiguration(screen_config, out rotation);
-            rate = Functions.XRRConfigCurrentRate(screen_config);
-            Functions.XRRFreeScreenConfigInfo(screen_config);
-            return (float)rate;
-        }
-
-        #endregion
-
         #region private static int FindCurrentDepth(int screen)
 
         static int FindCurrentDepth(int screen)
@@ -326,83 +276,6 @@ namespace OpenMobile.Platform.X11
         }
 
         #endregion
-
-        bool ChangeResolutionXRandR(DisplayDevice device, DisplayResolution resolution)
-        {
-            using (new XLock(API.DefaultDisplay))
-            {
-                int screen = deviceToScreen[device];
-                IntPtr root = Functions.XRootWindow(API.DefaultDisplay, screen);
-                IntPtr screen_config = Functions.XRRGetScreenInfo(API.DefaultDisplay, root);
-
-                ushort current_rotation;
-                int current_resolution_index = Functions.XRRConfigCurrentConfiguration(screen_config, out current_rotation);
-                int new_resolution_index;
-                if (resolution != null)
-                    new_resolution_index = screenResolutionToIndex[screen]
-                        [new DisplayResolution(0, 0, resolution.Width, resolution.Height, resolution.BitsPerPixel, 0)];
-                else
-                    new_resolution_index = deviceToDefaultResolution[device];
-
-                Debug.Print("Changing size of screen {0} from {1} to {2}",
-                    screen, current_resolution_index, new_resolution_index);
-
-                int ret = 0;
-                short refresh_rate = (short)(resolution != null ? resolution.RefreshRate : 0);
-                if (refresh_rate > 0)
-                {
-                    ret = Functions.XRRSetScreenConfigAndRate(API.DefaultDisplay,
-                    screen_config, root, new_resolution_index, current_rotation,
-                    refresh_rate, IntPtr.Zero);
-                }
-                else
-                {
-                    ret = Functions.XRRSetScreenConfig(API.DefaultDisplay,
-                    screen_config, root, new_resolution_index, current_rotation,
-                    IntPtr.Zero);
-                }
-
-                if (ret != 0)
-                {
-                    Debug.Print("[Error] Change to resolution {0} failed with error {1}.",
-                        resolution, (ErrorCode)ret);
-                }
-
-                return ret == 0;
-            }
-        }
-
-        static bool ChangeResolutionXF86(DisplayDevice device, DisplayResolution resolution)
-        {
-            return false;
-        }
-
-        #endregion
-
-        #region IDisplayDeviceDriver Members
-
-        public sealed override bool TryChangeResolution(DisplayDevice device, DisplayResolution resolution)
-        {
-            // If resolution is null, restore the default resolution (new_resolution_index = 0).
-
-            if (xrandr_supported)
-            {
-                return ChangeResolutionXRandR(device, resolution);
-            }
-            else if (xf86_supported)
-            {
-                return ChangeResolutionXF86(device, resolution);
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public sealed override bool TryRestoreResolution(DisplayDevice device)
-        {
-            return TryChangeResolution(device, null);
-        }
 
         #endregion
 

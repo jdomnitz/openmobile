@@ -40,6 +40,12 @@ namespace OpenMobile.Platform.MacOS
 
         public QuartzDisplayDeviceDriver()
         {
+            RefreshDisplayDevices();
+        }
+
+        public override void RefreshDisplayDevices()
+        {
+            AvailableDevices.Clear();
             lock (display_lock)
             {
                 // To minimize the need to add static methods to OpenTK.Graphics.DisplayDevice
@@ -92,19 +98,10 @@ namespace OpenMobile.Platform.MacOS
                         int width = (int)dict.GetNumberValue("Width");
                         int height = (int)dict.GetNumberValue("Height");
                         int bpp = (int)dict.GetNumberValue("BitsPerPixel");
-                        double freq = dict.GetNumberValue("RefreshRate");
                         bool current = currentMode.Ref == dict.Ref;
 
-                        //if (current) Debug.Write("  * ");
-                        //else Debug.Write("    ");
-
-                        //Debug.Print("Mode {0} is {1}x{2}x{3} @ {4}.", j, width, height, bpp, freq);
-
-                        DisplayResolution thisRes = new DisplayResolution(0, 0, width, height, bpp, (float)freq);
-                        opentk_dev_available_res.Add(thisRes);
-
                         if (current)
-                            opentk_dev_current_res = thisRes;
+                            opentk_dev_current_res = new DisplayResolution(0, 0, width, height, bpp); ;
 
                     }
 
@@ -114,7 +111,7 @@ namespace OpenMobile.Platform.MacOS
                     Debug.Print("Display {0} bounds: {1}", i, newRect);
 
                     DisplayDevice opentk_dev = new DisplayDevice(opentk_dev_current_res,
-                        primary, opentk_dev_available_res, newRect, currentDisplay);
+                        primary, newRect, currentDisplay);
 
                     AvailableDevices.Add(opentk_dev);
 
@@ -135,64 +132,6 @@ namespace OpenMobile.Platform.MacOS
 
         Dictionary<IntPtr, IntPtr> storedModes = new Dictionary<IntPtr, IntPtr>();
         List<IntPtr> displaysCaptured = new List<IntPtr>();
-
-        public sealed override bool TryChangeResolution(DisplayDevice device, DisplayResolution resolution)
-        {
-            IntPtr display = HandleTo(device);
-            IntPtr currentModePtr = CG.DisplayCurrentMode(display);
-
-            if (storedModes.ContainsKey(display) == false)
-            {
-                storedModes.Add(display, currentModePtr);
-            }
-
-            IntPtr displayModesPtr = CG.DisplayAvailableModes(display);
-            CFArray displayModes = new CFArray(displayModesPtr);
-
-            for (int j = 0; j < displayModes.Count; j++)
-            {
-                CFDictionary dict = new CFDictionary(displayModes[j]);
-
-                int width = (int)dict.GetNumberValue("Width");
-                int height = (int)dict.GetNumberValue("Height");
-                int bpp = (int)dict.GetNumberValue("BitsPerPixel");
-                double freq = dict.GetNumberValue("RefreshRate");
-
-                if (width == resolution.Width && height == resolution.Height && bpp == resolution.BitsPerPixel && System.Math.Abs(freq - resolution.RefreshRate) < 1e-6)
-                {
-                    if (displaysCaptured.Contains(display) == false)
-                    {
-                        CG.DisplayCapture(display);
-                    }
-
-                    Debug.Print("Changing resolution to {0}x{1}x{2}@{3}.", width, height, bpp, freq);
-
-                    CG.DisplaySwitchToMode(display, displayModes[j]);
-
-                    return true;
-                }
-
-            }
-            return false;
-        }
-
-        public sealed override bool TryRestoreResolution(DisplayDevice device)
-        {
-            IntPtr display = HandleTo(device);
-
-            if (storedModes.ContainsKey(display))
-            {
-                Debug.Print("Restoring resolution.");
-
-                CG.DisplaySwitchToMode(display, storedModes[display]);
-                CG.DisplayRelease(display);
-                displaysCaptured.Remove(display);
-
-                return true;
-            }
-
-            return false;
-        }
 
         #endregion
     }
