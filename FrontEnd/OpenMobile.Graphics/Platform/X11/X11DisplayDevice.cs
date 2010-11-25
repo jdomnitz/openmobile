@@ -190,7 +190,7 @@ namespace OpenMobile.Platform.X11
                 // Its depth is discovered by the FindCurrentDepth call.
                 int current_depth = FindCurrentDepth(screen);
                 IntPtr screen_config = Functions.XRRGetScreenInfo(API.DefaultDisplay, Functions.XRootWindow(API.DefaultDisplay, screen));
-                ushort current_rotation;  // Not needed.
+                ushort current_rotation;
                 int current_resolution_index = Functions.XRRConfigCurrentConfiguration(screen_config, out current_rotation);
                 dev.Landscape=!(((current_rotation&2)==2)||((current_rotation&8)==8));
                 if (dev.Bounds == Rectangle.Empty)

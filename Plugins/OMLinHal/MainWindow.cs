@@ -18,21 +18,28 @@ public partial class MainWindow : Gtk.Window
 	Bus system;
 	Bus session;
 	SessionManager sm;
+    ksmserver ksm;
 	UPower up;
 	Backlight bk;
+    PowerDevil pd;
 	UDisks disks; 
 	MultimediaKeys.MultimediaKeysService mediaKeys=new MultimediaKeys.MultimediaKeysService();
 	
 	void checkVolume (int instance)
 	{
+        
 		Process p=new Process();
-		ProcessStartInfo info=new ProcessStartInfo("pacmd","list-sinks volume");
-		info.WindowStyle=ProcessWindowStyle.Hidden;
-		info.UseShellExecute=false;
-		info.RedirectStandardOutput=true;
-		p.StartInfo=info;
-		p.Start();
-		p.WaitForExit();
+        try
+        {
+            ProcessStartInfo info = new ProcessStartInfo("pacmd", "list-sinks volume");
+            info.WindowStyle = ProcessWindowStyle.Hidden;
+            info.UseShellExecute = false;
+            info.RedirectStandardOutput = true;
+            p.StartInfo = info;
+            p.Start();
+            p.WaitForExit();
+        }
+        catch (Exception) { return; }
 		string response=p.StandardOutput.ReadToEnd();
 		string[] lines=response.Split(new char[]{'\r','\n','\t'});
 		int i=0;
@@ -79,37 +86,37 @@ public partial class MainWindow : Gtk.Window
         send = new UdpClient("127.0.0.1", 8550);
         receive.BeginReceive(recv, null);
         DM = detectDesktopManager();
-        if (DM == "gnome")
+        if ((DM == "gnome")||(DM=="lxde"))
         {
             sm = session.GetObject<SessionManager>("org.gnome.SessionManager", new ObjectPath("/org/gnome/SessionManager"));
             sm.SessionOver+=Shutdown;
         }
         else
         {
-            //TODO
+            ksm = session.GetObject<ksmserver>("org.kde.ksmserver", new ObjectPath("/KSMServer")); 
         }
         up = system.GetObject<UPower>("org.freedesktop.UPower", new ObjectPath("/org/freedesktop/UPower"));
 		up.Resuming+=Resuming;
 		up.Sleeping+=Suspending;
 
-        if (DM == "gnome")
+        if ((DM == "gnome")||(DM=="lxde"))
         {
             bk = session.GetObject<Backlight>("org.gnome.PowerManager", new ObjectPath("/org/gnome/PowerManager/Backlight"));
         }
         else
         {
-            //TODO
+            pd = session.GetObject<PowerDevil>("org.kde.powerdevil", new ObjectPath("/modules/powerdevil/"));
         }
         disks=system.GetObject<UDisks>("org.freedesktop.UDisks",new ObjectPath("/org/freedesktop/UDisks"));
 		disks.DeviceAdded+=added;
 		disks.DeviceChanged+=changed;
+        disks.DeviceRemoved+=remove;
 		checkVolume(-1);
         if (DM == "gnome")
         {
             mediaKeys.keyPressed += new MultimediaKeys.MultimediaKeysService.MediaPlayerKeyPressedHandler(handleKey);
             mediaKeys.Initialize();
         }
-		//disks.DeviceRemoved+=remove;
 	}
 
     private static string detectDesktopManager()
@@ -188,7 +195,8 @@ public partial class MainWindow : Gtk.Window
 	{
 		Properties p=system.GetObject<Properties>("org.freedesktop.UDisks",path);
 		string[] str=(string[])p.Get("org.freedesktop.UDisks.Device","DeviceMountPaths");
-		Debug.Print(str[0]);
+        if (str.Length>0)
+            raiseStorageEvent(eMediaType.DeviceRemoved, true, str[0]);
 	}
 	private void added(ObjectPath path)
 	{
@@ -256,8 +264,8 @@ public partial class MainWindow : Gtk.Window
             switch (parts[0])
             {
 				case "-1":
-					Thread.Sleep(250);
-					checkVolume(-1);
+			            Thread.Sleep(250);
+					    checkVolume(-1);
 					break;
                 case "3": //GetData - System Volume
 					int ret;
@@ -330,20 +338,31 @@ public partial class MainWindow : Gtk.Window
 					}
                     break;
                 case "40": //Set Monitor Brightness
-					if (arg1=="0")
-						try
-						{
-							Process.Start("gnome-screensaver-command","-a");
-						}catch(Exception)
-						{
-							try
-							{
-								Process.Start("qdbus","org.freedesktop.ScreenSaver /ScreenSaver Lock");	
-							}catch(Exception){}
-						}
-					else
-                        if (bk!=null)
-                    	    bk.SetBrightness(uint.Parse(arg1));
+                    if (arg1 == "0")
+                        if (DM == "kde")
+                        {
+                            pd.turnOffScreen();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                Process.Start("gnome-screensaver-command", "-a");
+                            }
+                            catch (Exception)
+                            {
+                                try
+                                {
+                                    Process.Start("qdbus", "org.freedesktop.ScreenSaver /ScreenSaver Lock");
+                                }
+                                catch (Exception) { }
+                            }
+                        }
+                    else
+                        if (bk != null)
+                            bk.SetBrightness(uint.Parse(arg1));
+                        else if (pd != null)
+                            pd.setBrightness(int.Parse(arg1));
                     break;
                 case "44": //Close Program
 					Application.Quit();
@@ -354,10 +373,14 @@ public partial class MainWindow : Gtk.Window
                 case "46": //Shutdown
                     if (sm!=null)
                         sm.RequestShutdown();
+                    else if(ksm!=null)
+                        ksm.logout(0, 2, 2);  
                     break;
                 case "47": //Restart
                     if (sm != null)
                         sm.RequestReboot();
+                    else if (ksm != null)
+                        ksm.logout(0, 1, 2);
                     break;
                 case "48": //Standby
                     up.Suspend();
