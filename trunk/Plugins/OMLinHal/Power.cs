@@ -9,6 +9,12 @@ public interface SessionManager
     event VoidCallback SessionOver;
 }
 
+[Interface("org.kde.KSMServerInterface")] //Session Bus
+public interface ksmserver
+{
+    void logout(int arg1, int arg2, int arg3);
+}
+
 [Interface("org.freedesktop.UPower")] //System Bus
 public interface UPower 
 {
@@ -22,4 +28,11 @@ public interface UPower
 public interface Backlight 
 {    
     void SetBrightness(uint percentage_brightness);
+}
+
+[Interface("org.kde.PowerDevil")]
+public interface PowerDevil
+{
+    void setBrightness(int percentage_brightness);
+    void turnOffScreen();
 }
