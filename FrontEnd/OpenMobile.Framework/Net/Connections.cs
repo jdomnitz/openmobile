@@ -81,14 +81,15 @@ namespace OpenMobile.Net
             connectionInfo info;
             foreach (IBasePlugin b in l.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))
             {
-                info = Array.Find<connectionInfo>(((INetwork)b).getAvailableNetworks(), p => p.UID == connectionID);
+                INetwork n = (INetwork)b;
+                info = Array.Find<connectionInfo>(n.getAvailableNetworks(), p => p.UID == connectionID);
                 if (info == null)
                     continue;
                 info.Credentials = credentials;
                 if (info != null)
                 {
                     lastNetworkID = connectionID;
-                    return ((INetwork)b).connect(info);
+                    return n.connect(info);
                 }
             }
             return false;
@@ -118,9 +119,10 @@ namespace OpenMobile.Net
             connectionInfo info;
             foreach (IBasePlugin b in l.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))
             {
-                info = Array.Find<connectionInfo>(((INetwork)b).getAvailableNetworks(), p => p.UID == connectionID);
+                INetwork n = (INetwork)b;
+                info = Array.Find<connectionInfo>(n.getAvailableNetworks(), p => p.UID == connectionID);
                 if (info != null)
-                    return ((INetwork)b).disconnect(info);
+                    return n.disconnect(info);
             }
             return false;
         }

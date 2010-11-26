@@ -209,7 +209,7 @@ namespace OpenMobile.Graphics
         {
             get
             {
-                return (name!="");
+                return !string.IsNullOrEmpty(name);
             }
         }
         public bool IsEmpty

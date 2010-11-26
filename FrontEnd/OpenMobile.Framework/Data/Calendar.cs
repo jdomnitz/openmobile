@@ -79,7 +79,7 @@ namespace OpenMobile.Data
         public void purgeOld()
         {
             //TODO
-            throw new NotImplementedException(); //ToDo
+            throw new NotImplementedException();
         }
 
         private SqliteConnection asyncCon;

@@ -146,47 +146,42 @@ namespace OpenMobile.Platform
         }
         class UnsupportedPlatform : IPlatformFactory
         {
-            #region Fields
-            
-            static readonly string error_string = "Please, refer to http://www.OpenTK.com for more information.";
-            
-            #endregion
             
             #region IPlatformFactory Members
 
             public INativeWindow CreateNativeWindow(int x, int y, int width, int height, string title, GraphicsMode mode, GameWindowFlags options, DisplayDevice device)
             {
-                throw new PlatformNotSupportedException(error_string);
+                throw new PlatformNotSupportedException();
             }
 
             public IDisplayDeviceDriver CreateDisplayDeviceDriver()
             {
-                throw new PlatformNotSupportedException(error_string);
+                throw new PlatformNotSupportedException();
             }
 
             public IGraphicsContext CreateGLContext(GraphicsMode mode, IWindowInfo window, IGraphicsContext shareContext, bool directRendering, int major, int minor, GraphicsContextFlags flags)
             {
-                throw new PlatformNotSupportedException(error_string);
+                throw new PlatformNotSupportedException();
             }
 
             public IGraphicsContext CreateGLContext(ContextHandle handle, IWindowInfo window, IGraphicsContext shareContext, bool directRendering, int major, int minor, GraphicsContextFlags flags)
             {
-                throw new PlatformNotSupportedException(error_string);
+                throw new PlatformNotSupportedException();
             }
 
             public IGraphicsContext CreateESContext(GraphicsMode mode, IWindowInfo window, IGraphicsContext shareContext, int major, int minor, GraphicsContextFlags flags)
             {
-                throw new PlatformNotSupportedException(error_string);
+                throw new PlatformNotSupportedException();
             }
 
             public GraphicsContext.GetCurrentContextDelegate CreateGetCurrentGraphicsContext()
             {
-                throw new PlatformNotSupportedException(error_string);
+                throw new PlatformNotSupportedException();
             }
 
             public IGraphicsMode CreateGraphicsMode()
             {
-                throw new PlatformNotSupportedException(error_string);
+                throw new PlatformNotSupportedException();
             }
             
             #endregion

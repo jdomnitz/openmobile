@@ -257,20 +257,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region --- IInputDevice Members ---
-
-        public string Description
-        {
-            get { throw new Exception("The method or operation is not implemented."); }
-        }
-
-        public Input.InputDeviceType DeviceType
-        {
-            get { return Input.InputDeviceType.Keyboard; }
-        }
-
-        #endregion
-
         #region --- IKeyboardDriver Members ---
 
         public IList<KeyboardDevice> Keyboard

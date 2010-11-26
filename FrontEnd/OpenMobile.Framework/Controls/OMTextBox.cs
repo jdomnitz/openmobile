@@ -141,7 +141,7 @@ namespace OpenMobile.Controls
                 catch (Exception) { };
             }
         }
-        private bool IsAlphabetic(string strToCheck)
+        private static bool IsAlphabetic(string strToCheck)
         {
             foreach (int chr in strToCheck)
                 if ((chr < 0x41 || chr > 0x5A && chr < 0x61 || chr > 0x7A) && (chr != 30))

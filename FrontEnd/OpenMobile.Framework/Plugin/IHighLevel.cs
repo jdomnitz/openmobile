@@ -42,7 +42,7 @@ namespace OpenMobile.Plugin
     /// Sets the inital transition the main menu should use when loaded
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class InitialTransition : Attribute
+    public sealed class InitialTransition : Attribute
     {
         private eGlobalTransition t;
         /// <summary>
@@ -67,7 +67,7 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Enables/Disables the window closing transition
     /// </summary>
-    public class FinalTransition : Attribute
+    public sealed class FinalTransition : Attribute
     {
         bool t;
         /// <summary>
@@ -92,7 +92,7 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Defines an icon to use to represent this plugin
     /// </summary>
-    public class SkinIcon : Attribute
+    public sealed class SkinIcon : Attribute
     {
         string name;
         /// <summary>

@@ -61,11 +61,6 @@ namespace OpenMobile.Platform.Windows
             // The easiest solution is to serialize all context construction - hence the big lock, below.
             lock (SyncRoot)
             {
-                if (window == null)
-                    throw new ArgumentNullException("window", "Must point to a valid window.");
-                if (window.WindowHandle == IntPtr.Zero)
-                    throw new ArgumentException("window", "Must be a valid window.");
-
                 Mode = format;
 
                 Debug.Print("OpenGL will be bound to handle: {0}", window.WindowHandle);
@@ -136,25 +131,12 @@ namespace OpenMobile.Platform.Windows
                 }
 
                 Debug.WriteLine(String.Format("success! (id: {0})", Handle));
-
-                if (sharedContext != null)
-                {
-                    Marshal.GetLastWin32Error();
-                    Debug.Write("Sharing state with context {0}: ", sharedContext.ToString());
-                    bool result = Wgl.Imports.ShareLists((sharedContext as IGraphicsContextInternal).Context.Handle, Handle.Handle);
-                    Debug.WriteLine(result ? "success!" : "failed with win32 error " + Marshal.GetLastWin32Error());
-                }
             }
         }
 
         public WinGLContext(ContextHandle handle, WinWindowInfo window, IGraphicsContext sharedContext,
             int major, int minor, GraphicsContextFlags flags)
         {
-            if (handle == ContextHandle.Zero)
-                throw new ArgumentException("handle");
-            if (window == null)
-                throw new ArgumentNullException("window");
-
             Handle = handle;
         }
 

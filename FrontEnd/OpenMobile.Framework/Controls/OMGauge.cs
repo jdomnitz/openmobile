@@ -75,7 +75,6 @@ namespace OpenMobile.Controls
         /// Mininum value on the scale
         /// </summary>
         [DefaultValue(0)]
-        [Description("Mininum value on the scale")]
         public float MinValue
         {
             get { return minValue; }
@@ -97,7 +96,6 @@ namespace OpenMobile.Controls
         /// Maximum value on the scale
         /// </summary>
         [DefaultValue(100)]
-        [Description("Maximum value on the scale")]
         public float MaxValue
         {
             get { return maxValue; }
@@ -119,7 +117,6 @@ namespace OpenMobile.Controls
         /// Gets or Sets the Threshold area from the Recommended Value. (1-99%)
         /// </summary>
         [DefaultValue(25)]
-        [Description("Gets or Sets the Threshold area from the Recommended Value. (1-99%)")]
         public float ThresholdPercent
         {
             get { return threshold; }
@@ -137,7 +134,6 @@ namespace OpenMobile.Controls
         /// Threshold value from which green area will be marked.
         /// </summary>
         [DefaultValue(25)]
-        [Description("Threshold value from which green area will be marked.")]
         public float RecommendedValue
         {
             get { return recommendedValue; }
@@ -169,7 +165,6 @@ namespace OpenMobile.Controls
         /// Value where the pointer will point to.
         /// </summary>
         [DefaultValue(0)]
-        [Description("Value where the pointer will point to.")]
         public float Value
         {
             get { return currentValue; }
@@ -203,7 +198,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Background color of the dial
         /// </summary>
-        [Description("Background color of the dial")]
         public Color DialColor
         {
             get { return dialColor; }
@@ -217,8 +211,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Glossiness strength. Range: 0-100
         /// </summary>
-        [DefaultValue(72)]
-        [Description("Glossiness strength. Range: 0-100")]
         public float Glossiness
         {
             get
@@ -239,8 +231,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Get or Sets the number of Divisions in the dial scale.
         /// </summary>
-        [DefaultValue(10)]
-        [Description("Get or Sets the number of Divisions in the dial scale.")]
         public int NoOfDivisions
         {
             get { return this.noOfDivisions; }
@@ -257,7 +247,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The back color of the gauge
         /// </summary>
-        [Description("The controls Background Color")]
         public Color BackColor
         {
             get
@@ -308,7 +297,6 @@ namespace OpenMobile.Controls
         /// Gets or Sets the number of Sub Divisions in the scale per Division.
         /// </summary>
         [DefaultValue(3)]
-        [Description("Gets or Sets the number of Sub Divisions in the scale per Division.")]
         public int NoOfSubDivisions
         {
             get { return this.noOfSubDivisions; }
@@ -414,21 +402,19 @@ namespace OpenMobile.Controls
         /// <param name="g"></param>
         private void DrawGloss(System.Drawing.Graphics g)
         {
-            /*
-            Rectangle glossRect = new Rectangle(
+            System.Drawing.RectangleF glossRect = new System.Drawing.RectangleF(
                x + (float)(width * 0.10),
                y + (float)(height * 0.07),
                (float)(width * 0.80),
                (float)(height * 0.7));
             LinearGradientBrush gradientBrush =
                 new LinearGradientBrush(glossRect,
-                Color.FromArgb((int)glossinessAlpha, Color.White),
-                Color.Transparent,
+                System.Drawing.Color.FromArgb((int)glossinessAlpha, System.Drawing.Color.White),
+                System.Drawing.Color.Transparent,
                 LinearGradientMode.Vertical);
             g.FillEllipse(gradientBrush, glossRect);
 
-            //TODO: Gradient from bottom
-            glossRect = new Rectangle(
+            glossRect = new System.Drawing.RectangleF(
                x + (float)(width * 0.25),
                y + (float)(height * 0.77),
                (float)(width * 0.50),
@@ -436,9 +422,9 @@ namespace OpenMobile.Controls
             int gloss = (int)(glossinessAlpha / 3);
             gradientBrush =
                 new LinearGradientBrush(glossRect,
-                Color.Transparent, Color.FromArgb(gloss, this.BackColor),
+                System.Drawing.Color.Transparent, System.Drawing.Color.FromArgb(gloss, BackColor.R,BackColor.G,BackColor.B),
                 LinearGradientMode.Vertical);
-            g.FillEllipse(gradientBrush, glossRect);*/
+            g.FillEllipse(gradientBrush, glossRect);
         }
 
         /// <summary>
@@ -451,13 +437,13 @@ namespace OpenMobile.Controls
         private void DrawCenterPoint(System.Drawing.Graphics g, Rectangle rect, int cX, int cY)
         {/*
             float shift = Width / 5;
-            RectangleF rectangle = new RectangleF(cX - (shift / 2), cY - (shift / 2), shift, shift);
-            LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Black, Color.FromArgb(100, this.dialColor), LinearGradientMode.Vertical);
+            System.Drawing.RectangleF rectangle = new System.Drawing.RectangleF(cX - (shift / 2), cY - (shift / 2), shift, shift);
+            LinearGradientBrush brush = new LinearGradientBrush(rect, System.Drawing.Color.Black, Color.FromArgb(100, this.dialColor), LinearGradientMode.Vertical);
             g.FillEllipse(brush, rectangle);
 
             shift = Width / 7;
-            rectangle = new RectangleF(cX - (shift / 2), cY - (shift / 2), shift, shift);
-            brush = new LinearGradientBrush(rect, Color.SlateGray, Color.Black, LinearGradientMode.ForwardDiagonal);
+            rectangle = new System.Drawing.RectangleF(cX - (shift / 2), cY - (shift / 2), shift, shift);
+            brush = new LinearGradientBrush(rect, Color.SlateGray, System.Drawing.Color.Black, LinearGradientMode.ForwardDiagonal);
             g.FillEllipse(brush, rectangle);*/
         }
 
@@ -823,7 +809,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The distance between the top edge of the control and the top edge of the user interface
         /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the top position of the control")]
         public override int Top
         {
             get

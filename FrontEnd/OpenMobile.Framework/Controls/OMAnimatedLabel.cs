@@ -444,9 +444,8 @@ namespace OpenMobile.Controls
         private int MeasureDisplayStringWidth(Graphics.Graphics graphics, string text,
                                             Font font)
         {
-            if (text == "")
+            if (string.IsNullOrEmpty(text))
                 return 0;
-            int newWidth = (int)Graphics.Graphics.MeasureString(text, font).Width;
             System.Drawing.StringFormat format = new System.Drawing.StringFormat();
             format.FormatFlags = System.Drawing.StringFormatFlags.MeasureTrailingSpaces;
             Rectangle rect = new Rectangle(0, 0, 1000, 1000);

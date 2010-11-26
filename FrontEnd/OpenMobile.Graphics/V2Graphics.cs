@@ -10,7 +10,6 @@ namespace OpenMobile.Graphics
     {
         #region private vars
         int screen;
-        static System.Drawing.Bitmap virtualG;
         static List<List<uint>> textures = new List<List<uint>>();
         public static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
         float wscale;
@@ -34,7 +33,6 @@ namespace OpenMobile.Graphics
                     for (int i = 0; i < DisplayDevice.AvailableDisplays.Count; i++)
                         textures.Add(new List<uint>());
             }
-            virtualG = new Bitmap(1000, 600);
         }
 
 

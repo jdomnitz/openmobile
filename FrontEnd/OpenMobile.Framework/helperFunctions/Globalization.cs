@@ -232,9 +232,9 @@ namespace OpenMobile.Framework
         public static string getLanguage()
         {
             string ret = System.Globalization.CultureInfo.CurrentCulture.NativeName;
-            if ((ret == null) || (ret == ""))
+            if (string.IsNullOrEmpty(ret))
                 return null;
-            return ret.Remove(ret.IndexOf(" ("));
+            return ret.Substring(0,ret.IndexOf(" ("));
         }
     }
 }

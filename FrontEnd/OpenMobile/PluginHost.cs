@@ -57,7 +57,7 @@ namespace OpenMobile
         historyCollection history = new historyCollection(screenCount);
         #endregion
 
-        private IBasePlugin getPluginByName(string name)
+        private static IBasePlugin getPluginByName(string name)
         {
             foreach (IBasePlugin c in Core.pluginCollection)
             {
@@ -68,7 +68,7 @@ namespace OpenMobile
             }
             return null;
         }
-        private eMediaType classifySource(string source)
+        private static eMediaType classifySource(string source)
         {
             if (source.StartsWith("bluetooth") == true)
                 return eMediaType.BluetoothResource;
@@ -145,7 +145,7 @@ namespace OpenMobile
             queued[instance].AddRange(source.GetRange(0, source.Count));
             if (queued[instance].Count > 0)
                 generateNext(instance);
-            SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, instance, ""); });
+            SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, instance, string.Empty); });
             return true;
         }
         public bool appendPlaylist(List<mediaInfo> source, int instance)
@@ -158,7 +158,7 @@ namespace OpenMobile
             queued[instance].AddRange(source.GetRange(0, source.Count));
             if (single)
                 generateNext(instance);
-            SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, instance, ""); });
+            SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, instance, string.Empty); });
             return true;
         }
         public int instanceForScreen(int screen)
@@ -172,12 +172,12 @@ namespace OpenMobile
             return instance[screen] - 1;
         }
 
-        private int getInstance(int screen)
+        private static int getInstance(int screen)
         {
             string str;
             using (PluginSettings settings = new PluginSettings())
                 str = settings.getSetting("Screen" + (screen + 1).ToString() + ".SoundCard");
-            if (str == "")
+            if (str.Length == 0)
                 return 0;
             string[] devs;
             try
@@ -200,7 +200,7 @@ namespace OpenMobile
                     using (PluginSettings s = new PluginSettings())
                     {
                         skinpath = s.getSetting("UI.Skin");
-                        if (skinpath == "")
+                        if (skinpath.Length == 0)
                         {
                             skinpath = "Default";
                             s.setSetting("UI.Skin", skinpath);
@@ -233,7 +233,7 @@ namespace OpenMobile
                 return pluginpath;
             }
         }
-        private OMPanel getPanelByName(string name, string panelName, int screen)
+        private static OMPanel getPanelByName(string name, string panelName, int screen)
         {
             if (name == "About")
                 return BuiltInComponents.AboutPanel();
@@ -397,7 +397,7 @@ namespace OpenMobile
         {
             for (int i = 0; i < ScreenCount; i++)
                 if (!DisplayDevice.AvailableDisplays[i].Landscape)
-                    raiseSystemEvent(eFunction.screenOrientationChanged, i.ToString(), "Portrait","");
+                    raiseSystemEvent(eFunction.screenOrientationChanged, i.ToString(), "Portrait",string.Empty);
             SandboxedThread.Asynchronous(loadPlaylists);
         }
         public void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
@@ -469,7 +469,7 @@ namespace OpenMobile
                         if (!closing)
                         {
                             closing = true;
-                            RenderingWindow.closeRenderer();
+                            RenderingWindow.CloseRenderer();
                             if (hal != null)
                                 hal.snd("44");
                             savePlaylists();
@@ -905,7 +905,7 @@ namespace OpenMobile
                     }
                     return false;
                 case eFunction.ejectDisc:
-                    if ((arg == null) || (arg == ""))
+                    if (string.IsNullOrEmpty(arg))
                         return false;
                     hal.snd("35|" + arg);
                     return true;
@@ -1162,7 +1162,7 @@ namespace OpenMobile
                 case eFunction.sendKeyPress:
                     if (int.TryParse(arg1, out ret) == true)
                     {
-                        if ((arg2 == null) || (arg2 == ""))
+                        if (string.IsNullOrEmpty(arg2))
                             return false;
                         return (InputRouter.SendKeyDown(ret, arg2) && InputRouter.SendKeyUp(ret, arg2));
                     }
@@ -1372,7 +1372,7 @@ namespace OpenMobile
             {
                 if (message == "Identify")
                     for (int i = 0; i < screenCount; i++)
-                        Core.RenderingWindows[i].paintIdentity();
+                        Core.RenderingWindows[i].PaintIdentity();
 				else if(message=="MakeCurrent")
 					Core.RenderingWindows[0].MakeCurrent();
 				else if(message=="KillCurrent")
@@ -1620,7 +1620,7 @@ namespace OpenMobile
                     data = ((IMediaDatabase)plugin).getNew();
                     break;
                 case eGetData.GetPlugins:
-                    if (name == "")
+                    if (string.IsNullOrEmpty(name))
                     {
                         data = Core.pluginCollection;
                         return;
@@ -1631,7 +1631,7 @@ namespace OpenMobile
                         return;
                     }
                 case eGetData.DataProviderStatus:
-                    if (name != "")
+                    if (!string.IsNullOrEmpty(name))
                     {
                         plugin = Core.pluginCollection.Find(p => p.pluginName == name);
                         if (plugin == null)
@@ -1773,7 +1773,7 @@ namespace OpenMobile
                 case eGetData.GetMediaStatus:
                     if (int.TryParse(param, out ret) == true)
                     {
-                        if (name == "")
+                        if (string.IsNullOrEmpty(name))
                         {
                             if (currentMediaPlayer[ret] == null)
                                 if (currentTunedContent[ret] == null)

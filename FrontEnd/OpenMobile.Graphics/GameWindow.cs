@@ -73,16 +73,12 @@ namespace OpenMobile
     {
         #region --- Fields ---
 
-        object exit_lock = new object();
-
         IGraphicsContext glContext;
 
         bool isExiting = false;
 
-        double render_period;
         double target_render_period=(1.0/35);
         double render_time;
-        VSyncMode vsync;
 
         Stopwatch render_watch = new Stopwatch();
         double next_render = 0.0;
@@ -101,7 +97,7 @@ namespace OpenMobile
                 Visible = true;
                 OpenMobile.Graphics.OpenGL.Raw.ClearColor(OpenMobile.Graphics.Color.Black);
                 SwapBuffers();
-                VSync = VSyncMode.On;
+                Context.VSync = true;
             }
             catch (Exception e)
             {
@@ -326,7 +322,7 @@ namespace OpenMobile
                 render_watch.Reset();
                 render_watch.Start();
                 
-                render_period = render_args.Time = time;
+                render_args.Time = time;
                 OnRenderFrameInternal(render_args);
                 render_time = render_watch.Elapsed.TotalMilliseconds;
                 //Debug.Print((1 / render_args.Time).ToString("0.00") + "fps");
@@ -429,23 +425,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region VSync
-
-        /// <summary>
-        /// Gets or sets the VSyncMode.
-        /// </summary>
-        public VSyncMode VSync
-        {
-            set
-            {
-                EnsureUndisposed();
-                GraphicsContext.Assert();
-                Context.VSync = (vsync = value) != VSyncMode.Off;
-            }
-        }
-
-        #endregion
-
         #region WindowState
 
         /// <summary>
@@ -519,16 +498,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region OnWindowInfoChanged
-
-        /// <summary>
-        /// Called when the WindowInfo for this GameWindow has changed.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnWindowInfoChanged(EventArgs e) { }
-
-        #endregion
-
         #region OnResize
 
         protected override void OnResize(EventArgs e)
@@ -572,42 +541,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region OnWindowInfoChangedInternal
-
-        private void OnWindowInfoChangedInternal(EventArgs e)
-        {
-            glContext.MakeCurrent(WindowInfo);
-
-            OnWindowInfoChanged(e);
-            glContext.MakeCurrent(null);
-        }
-
-        #endregion
-
         #endregion
     }
-
-    #region public enum VSyncMode
-
-    /// <summary>
-    /// Enumerates available VSync modes.
-    /// </summary>
-    public enum VSyncMode
-    {
-        /// <summary>
-        /// Vsync disabled.
-        /// </summary>
-        Off = 0,
-        /// <summary>
-        /// VSync enabled.
-        /// </summary>
-        On,
-        /// <summary>
-        /// VSync enabled, unless framerate falls below one half of target framerate.
-        /// If no target framerate is specified, this behaves exactly like <see cref="VSyncMode.On"/>.
-        /// </summary>
-        Adaptive,
-    }
-
-    #endregion
 }

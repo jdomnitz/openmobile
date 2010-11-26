@@ -40,9 +40,10 @@ namespace OpenMobile.Graphics
 	 	         /// <returns>True, if obj equals this instance; false otherwise.</returns>
 	 	         public override bool Equals(object obj)
 	 	         {
-	 	             if (obj is GraphicsMode)
+                     GraphicsMode mode = obj as GraphicsMode;
+	 	             if (mode!=null)
 	 	             {
-	 	                 return Equals((GraphicsMode)obj);
+	 	                 return Equals(mode);
 	 	             }
 	 	             return false;
 	 	         }

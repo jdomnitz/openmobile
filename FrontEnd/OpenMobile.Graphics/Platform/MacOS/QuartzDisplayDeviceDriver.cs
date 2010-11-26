@@ -87,7 +87,7 @@ namespace OpenMobile.Platform.MacOS
                     Debug.Print("Supports {0} display modes.", displayModes.Count);
 
                     DisplayResolution opentk_dev_current_res = null;
-                    List<DisplayResolution> opentk_dev_available_res = new List<DisplayResolution>();
+
                     IntPtr currentModePtr = CG.DisplayCurrentMode(currentDisplay);
                     CFDictionary currentMode = new CFDictionary(currentModePtr);
 

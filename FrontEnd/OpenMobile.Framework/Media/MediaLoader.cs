@@ -39,7 +39,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool loadGenres(IPluginHost host, OpenMobile.Controls.IList list, string dbname)
         {
-            if (dbname == "")
+            if (string.IsNullOrEmpty(dbname))
                 return false;
             object o;
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
@@ -70,7 +70,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool loadArtists(IPluginHost host, OpenMobile.Controls.IList list,string dbname)
         {
-            if (dbname == "")
+            if (string.IsNullOrEmpty(dbname))
                 return false;
             object o;
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
@@ -104,7 +104,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool loadAlbums(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
         {
-            if (dbname == "")
+            if (string.IsNullOrEmpty(dbname))
                 return false;
             object o;
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
@@ -146,7 +146,7 @@ namespace OpenMobile.Media
         /// <param name="noCover"></param>
         public static bool loadSongs(IPluginHost host, IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {
-            if (dbname == "")
+            if (string.IsNullOrEmpty(dbname))
                 return false;
             object o;
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
@@ -202,7 +202,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool loadSongsByGenre(IPluginHost host, string genre, OpenMobile.Controls.IList list, OMListItem.subItemFormat format, bool clear, string dbname, OImage noCover)
         {
-            if (dbname == "")
+            if (string.IsNullOrEmpty(dbname))
                 return false;
             object o;
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
@@ -247,7 +247,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
         {
-            if (dbname == "")
+            if (string.IsNullOrEmpty(dbname))
                 return false;
             object o;
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
@@ -292,7 +292,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {
-            if (dbname == "")
+            if (string.IsNullOrEmpty(dbname))
                 return false;
             object o;
             host.getData(eGetData.GetMediaDatabase, dbname, out  o);
