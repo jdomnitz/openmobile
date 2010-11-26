@@ -64,13 +64,13 @@ namespace OpenMobile.Data
                     cmd.CommandText = "SELECT Value FROM PluginSettings WHERE Name='" + name + "'";
                     object result = cmd.ExecuteScalar();
                     if (result == null)
-                        return "";
+                        return String.Empty;
                     return result.ToString();
                 }
             }
             catch (Exception)
             {
-                return "";
+                return String.Empty;
             }
         }
         /// <summary>

@@ -27,7 +27,7 @@ using IMAPI2.Interop;
 using Microsoft.Win32;
 namespace OpenMobile.Framework
 {
-    internal sealed class Windows
+    internal static class Windows
     {
         internal static eDriveType detectType(string path, DriveType type)
         {
@@ -243,11 +243,11 @@ namespace OpenMobile.Framework
             RegistryKey componentsKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Net Framework Setup\NDP\");
             string[] lst = componentsKey.GetSubKeyNames();
             object SP = componentsKey.OpenSubKey(lst[lst.Length - 1]).GetValue("SP");
-            string servicePack = "";
+            string servicePack = String.Empty;
             if (SP != null)
                 servicePack = SP.ToString();
-            if ((servicePack == "") || (servicePack == "0"))
-                servicePack = "";
+            if ((servicePack.Length == 0) || (servicePack == "0"))
+                servicePack = string.Empty;
             else
                 servicePack = " SP" + servicePack;
             return "Microsoft .Net " + lst[lst.Length - 1] + servicePack;
@@ -331,7 +331,7 @@ namespace OpenMobile.Framework
             public byte wProductType;
             public byte wReserved;
         }
-        internal sealed class windowsEmbedder
+        internal static class windowsEmbedder
         {
             [System.Security.SuppressUnmanagedCodeSecurity]
             [DllImport("user32.dll")]

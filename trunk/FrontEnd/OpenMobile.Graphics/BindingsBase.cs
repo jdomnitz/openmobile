@@ -164,28 +164,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region LoadEntryPoint
-
-        internal bool LoadEntryPoint(string function)
-        {
-            FieldInfo f = DelegatesClass.GetField(function, BindingFlags.Static | BindingFlags.NonPublic);
-            if (f == null)
-                return false;
-
-            Delegate old = f.GetValue(null) as Delegate;
-            Delegate @new = LoadDelegate(f.Name, f.FieldType);
-            lock (SyncRoot)
-            {
-                if (old.Target != @new.Target)
-                {
-                    f.SetValue(null, @new);
-                }
-            }
-            return @new != null;
-        }
-
-        #endregion
-
         #endregion
 
         #region Private Members

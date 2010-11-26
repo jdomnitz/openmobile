@@ -1023,7 +1023,6 @@ namespace OpenMobile.Platform.MacOS.Carbon
 
         internal static void ZoomWindowIdeal(IntPtr windowRef, WindowPartCode inPartCode, ref CarbonPoint toIdealSize)
         {
-            CarbonPoint pt = toIdealSize;
             OSStatus error ;
             IntPtr handle = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(CarbonPoint)));
             Marshal.StructureToPtr(toIdealSize, handle, false);

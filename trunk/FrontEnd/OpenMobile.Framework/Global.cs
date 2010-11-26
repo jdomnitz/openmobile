@@ -1941,7 +1941,7 @@ namespace OpenMobile
         /// <returns></returns>
         public override string ToString()
         {
-            if ((Street == "") && (Latitude != 0))
+            if (string.IsNullOrEmpty(Street) && (Latitude != 0))
                 return Latitude.ToString() + "," + Longitude.ToString();
             return Street+'\n'+City+", "+State;
         }

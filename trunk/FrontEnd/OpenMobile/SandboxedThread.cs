@@ -52,25 +52,8 @@ namespace OpenMobile
         private static Queue<Function> functions = new Queue<Function>();
         private static Dictionary<int, ThreadState> locks = new Dictionary<int, ThreadState>();
         static int availableThreads;
+
         public static void Asynchronous(Function function)
-        {
-            newAsync(function);
-        }
-        private static void oldAsync(Function function)
-        {
-            new Thread(() =>
-            {
-                try
-                {
-                    function();
-                }
-                catch (Exception e)
-                {
-                    handle(e);
-                }
-            }).Start();
-        }
-        private static void newAsync(Function function)
         {
             functions.Enqueue(function);
             if (availableThreads > 0)

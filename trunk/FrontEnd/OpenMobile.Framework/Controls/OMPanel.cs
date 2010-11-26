@@ -32,7 +32,6 @@ namespace OpenMobile.Controls
     {
         private List<OMControl> containedControls=new List<OMControl>();
         private imageItem background;
-        private bool doubleClickable;
 
         /// <summary>
         /// Returns the OMControl at the given index
@@ -60,11 +59,6 @@ namespace OpenMobile.Controls
             get
             {
                 return containedControls.Find(p => p.Name == s);
-            }
-            set
-            {
-                OMControl c = containedControls.Find(p => p.Name == s);
-                c = value;
             }
         }
         public void addRange(OMPanel source)
@@ -314,22 +308,6 @@ namespace OpenMobile.Controls
                 if (background == value)
                     return;
                 background = value;
-            }
-        }
-        /// <summary>
-        /// Can controls on this panel be double clicked (setting to false increases responsiveness)
-        /// </summary>
-        [Category("Panel")]
-        [Obsolete("Compatability Stub")]
-        public bool DoubleClickable
-        {
-            get
-            {
-                return doubleClickable;
-            }
-            set
-            {
-                doubleClickable = value;
             }
         }
         // Start of code added by Borte

@@ -74,6 +74,9 @@ namespace OpenMobile.Controls
             return -1;
         }
         internal OMPanel parent;
+        /// <summary>
+        /// The OMPanel that contains this control
+        /// </summary>
         public OMPanel Parent
         {
             get
@@ -108,7 +111,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The globally unique name for the control
         /// </summary>
-        [Description("The globally unique name for the control")]
         public string Name
         {
             get
@@ -124,7 +126,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Should the control be displayed
         /// </summary>
-        [Description("Should the control be displayed")]
         public bool Visible
         {
             get
@@ -143,7 +144,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The controls height in pixels
         /// </summary>
-        [Description("The controls height in pixels")]
         public virtual int Height
         {
             get { return height; }
@@ -152,7 +152,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The controls width in pixels
         /// </summary>
-        [Description("The controls width in pixels")]
         public virtual int Width
         {
             get { return width; }
@@ -161,7 +160,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Used to store additional information about a control
         /// </summary>
-        [Description("Used to store additional information about a control")]
         public object Tag
         {
             get
@@ -176,7 +174,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The distance between the top of the UI and the Top of the control
         /// </summary>
-        [Description("The distance between the top of the UI and the Top of the control")]
         public virtual int Top
         {
             get { return top; }
@@ -185,7 +182,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The distance between the left of the UI and the Left of the control
         /// </summary>
-        [Description("The distance between the Left of the UI and the Left of the control")]
         public virtual int Left
         {
             get { return left; }

@@ -66,24 +66,24 @@ namespace OpenMobile.Platform.Windows
                 int device_count = 0;
 
                 // Get available video adapters and enumerate all monitors
-                WindowsDisplayDevice dev1 = new WindowsDisplayDevice(), dev2 = new WindowsDisplayDevice();
-                while (Functions.EnumDisplayDevices(null, device_count++, dev1, 0))
+                WindowsDisplayDevice dev = new WindowsDisplayDevice();
+                while (Functions.EnumDisplayDevices(null, device_count++, dev, 0))
                 {
-                    if ((dev1.StateFlags & DisplayDeviceStateFlags.AttachedToDesktop) == DisplayDeviceStateFlags.None)
+                    if ((dev.StateFlags & DisplayDeviceStateFlags.AttachedToDesktop) == DisplayDeviceStateFlags.None)
                         continue;
 
                     DeviceMode monitor_mode = new DeviceMode();
                     bool landscape=false;
                     // The second function should only be executed when the first one fails
                     // (e.g. when the monitor is disabled)
-                    if (Functions.EnumDisplaySettingsEx(dev1.DeviceName.ToString(), DisplayModeSettingsEnum.CurrentSettings, monitor_mode, 0))
+                    if (Functions.EnumDisplaySettingsEx(dev.DeviceName.ToString(), DisplayModeSettingsEnum.CurrentSettings, monitor_mode, 0))
                     {
                         opentk_dev_current_res = new DisplayResolution(
                             monitor_mode.Position.X, monitor_mode.Position.Y,
                             monitor_mode.PelsWidth, monitor_mode.PelsHeight,
                             monitor_mode.BitsPerPel);
                         opentk_dev_primary =
-                            (dev1.StateFlags & DisplayDeviceStateFlags.PrimaryDevice) != DisplayDeviceStateFlags.None;
+                            (dev.StateFlags & DisplayDeviceStateFlags.PrimaryDevice) != DisplayDeviceStateFlags.None;
                         landscape = ((monitor_mode.DisplayOrientation == 0) || (monitor_mode.DisplayOrientation == 2));
                     }
 
@@ -94,7 +94,7 @@ namespace OpenMobile.Platform.Windows
                         opentk_dev_current_res,
                         opentk_dev_primary,
                         opentk_dev_current_res.Bounds,
-                        dev1.DeviceName);
+                        dev.DeviceName);
                     opentk_dev.Landscape = landscape;
                     AvailableDevices.Add(opentk_dev);
 
@@ -112,10 +112,6 @@ namespace OpenMobile.Platform.Windows
         }
 
         #endregion
-
-        ~WinDisplayDeviceDriver()
-        {
-        }
 
         #endregion
         #endregion

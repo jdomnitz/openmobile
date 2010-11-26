@@ -196,7 +196,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Placeholder method
         /// </summary>
-        [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public new string Text
         {

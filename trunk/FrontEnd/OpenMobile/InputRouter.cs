@@ -154,7 +154,7 @@ namespace OpenMobile
 					s.createDB ();
 				for (int i = 0; i < deviceMapK.Length; i++) {
 					string val = s.getSetting ("Screen" + (i + 1).ToString () + ".Keyboard");
-					if ((val == "Default Keyboard") || (val == ""))
+					if ((val == "Default Keyboard") || (val.Length == 0))
 						deviceMapK[i] = -1;
 					else {
 						for (int j = 0; j < driver.Keyboard.Count; j++)
@@ -172,7 +172,7 @@ namespace OpenMobile
 			using (PluginSettings s = new PluginSettings ()) {
 				for (int i = 0; i < deviceMapM.Length; i++) {
 					string val = s.getSetting ("Screen" + (i + 1).ToString () + ".Mouse");
-					if ((val == "Default Mouse") || (val == "")) {
+					if ((val == "Default Mouse") || (val.Length==0)) {
 						deviceMapM[i] = -1;
                         Core.RenderingWindows[i].currentMouse = Core.RenderingWindows[i].Mouse;
 					} else {

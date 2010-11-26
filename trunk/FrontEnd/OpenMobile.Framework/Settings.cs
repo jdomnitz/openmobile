@@ -82,7 +82,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// The actual value to be displayed (default) or the value to be set
         /// </summary>
-        public string[] DefaultValue = new string[1];
+        private string[] DefaultValue = new string[1];
         /// <summary>
         /// Options for a MultiChoice setting
         /// </summary>
@@ -107,6 +107,11 @@ namespace OpenMobile.Plugin
                 DefaultValue = new string[] { value };
             }
         }
+        /// <summary>
+        /// Gets a value for the given screen
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <returns></returns>
         public string getInstanceValue(int screen)
         {
             if ((DefaultValue == null) || (DefaultValue.Length == 0))
@@ -115,6 +120,11 @@ namespace OpenMobile.Plugin
                 return DefaultValue[0];
             return DefaultValue[screen];
         }
+        /// <summary>
+        /// Sets a value for the given screen
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="value"></param>
         public void setInstanceValue(int screen,string value)
         {
             if ((DefaultValue == null)||(screen < 0) || (screen > DefaultValue.Length - 1))

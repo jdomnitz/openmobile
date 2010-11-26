@@ -171,8 +171,6 @@ namespace OpenMobile.Platform.X11
                 // Add info for a new screen.
                 screenResolutionToIndex.Add(new Dictionary<DisplayResolution, int>());
 
-                int[] depths = FindAvailableDepths(screen);
-
                 int resolution_count = 0;
                 foreach (XRRScreenSize size in FindAvailableResolutions(screen))
                 {

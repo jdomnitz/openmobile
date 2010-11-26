@@ -37,10 +37,6 @@ namespace OpenMobile
         object painting = new object();
         private Point ThrowStart = new Point(-1, -1);
         OMButton lastClick;
-        public delegate IntPtr getVal();
-        public delegate void voiddel();
-        public voiddel hide;
-        public voiddel redraw;
         List<OMPanel> backgroundQueue = new List<OMPanel>();
         float heightScale = 1F;
         float widthScale = 1F;
@@ -84,9 +80,7 @@ namespace OpenMobile
         {
             Thread t = new Thread(delegate()
             {
-                NativeInitialize(flags);
-                InitializeRendering();
-                this.Run(1.0, 0.0);
+                Run(flags);
             });
             t.TrySetApartmentState(ApartmentState.STA);
             t.Start();
@@ -119,24 +113,18 @@ namespace OpenMobile
             InitializeComponent();
             if (screen == 0)
                 InputRouter.Initialize();
-            redraw += new voiddel(invokePaint);
             if (Configuration.RunningOnWindows)
                 if (options == GameWindowFlags.Fullscreen)
                     OnWindowStateChanged(EventArgs.Empty);
         }
         bool Identify = false;
-        public void paintIdentity()
+        public void PaintIdentity()
         {
             Identify = true;
             Invalidate();
             Thread.Sleep(1500);
             Identify = false;
             Invalidate();
-        }
-        public void invokePaint()
-        {
-            Invalidate();
-            MouseMove(new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
         }
 
         private void Invalidate()
@@ -351,16 +339,12 @@ namespace OpenMobile
                     else if (backgroundQueue[i].Mode == eModeType.transitioningOut)
                         modifyOut(g);
                     else
-                        modifyNeutral(g);
+                        g.ResetTransform(); //modify neutral
                     backgroundQueue[i].Render(g, rParam);
                 }
             }
         }
 
-        private void modifyNeutral(OpenMobile.Graphics.Graphics g)
-        {
-            g.ResetTransform();
-        }
         private void modifyOut(OpenMobile.Graphics.Graphics g)
         {
             //out=-
@@ -373,7 +357,7 @@ namespace OpenMobile
             g.ResetTransform();
             g.TranslateTransform(ofsetIn.X, ofsetIn.Y);
         }
-        private bool inBounds(Rectangle control, Rectangle bounds)
+        private static bool inBounds(Rectangle control, Rectangle bounds)
         {
             return ((control.X < (bounds.X + bounds.Width)) &&
               (bounds.X < (control.X + control.Width)) &&
@@ -484,7 +468,6 @@ namespace OpenMobile
                 MouseMove(e);
             }
         }
-        //TODO: Ensure proper mouse is used to simulate this
         private void MouseMove(MouseMoveEventArgs e)
         {
             if (keyboardActive)
@@ -773,7 +756,7 @@ namespace OpenMobile
                     if (screen == 0)
                         Core.theHost.execute(eFunction.closeProgram);
                     else
-                        closeMe();
+                        CloseMe();
                 }
             }
             else if (e.Key == Key.Enter)
@@ -800,7 +783,7 @@ namespace OpenMobile
                 ((IKey)highlighted).KeyUp(screen, e, widthScale, heightScale);
         }
 
-        public void closeMe()
+        public void CloseMe()
         {
             new Thread(delegate() { tmrClosing_Tick(null, null); }).Start();
         }
@@ -816,10 +799,10 @@ namespace OpenMobile
             gesture += ((e.Position.Y - this.Y) * heightScale).ToString();
             Core.theHost.execute(eFunction.multiTouchGesture, screen.ToString(), gesture);
         }
-        public static void closeRenderer()
+        public static void CloseRenderer()
         {
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
-                Core.RenderingWindows[i].closeMe();
+                Core.RenderingWindows[i].CloseMe();
         }
         protected override void OnWindowStateChanged(EventArgs e)
         {
@@ -961,7 +944,7 @@ namespace OpenMobile
                                     if ((backgroundQueue[j][i].Left < highlighted.Left) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                         if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
-                                            if (notCovered(backgroundQueue[j][i], 'l') == true)
+                                            if (notCovered(backgroundQueue[j][i]) == true)
                                             {
                                                 best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
                                                 b = backgroundQueue[j][i];
@@ -985,7 +968,7 @@ namespace OpenMobile
                                     if ((backgroundQueue[j][i].Left > highlighted.Left) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                         if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
-                                            if (notCovered(backgroundQueue[j][i], 'r') == true)
+                                            if (notCovered(backgroundQueue[j][i]) == true)
                                             {
                                                 best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
                                                 b = backgroundQueue[j][i];
@@ -1009,7 +992,7 @@ namespace OpenMobile
                                     if ((backgroundQueue[j][i].Top < highlighted.Top) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                         if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
-                                            if (notCovered(backgroundQueue[j][i], 'u') == true)
+                                            if (notCovered(backgroundQueue[j][i]) == true)
                                             {
                                                 best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
                                                 b = backgroundQueue[j][i];
@@ -1033,7 +1016,7 @@ namespace OpenMobile
                                     if ((backgroundQueue[j][i].Top > highlighted.Top) && (inBounds(backgroundQueue[j][i].toRegion(), OpenMobile.Graphics.Graphics.NoClip) == true))
                                         if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
                                         {
-                                            if (notCovered(backgroundQueue[j][i], 'd') == true)
+                                            if (notCovered(backgroundQueue[j][i]) == true)
                                             {
                                                 best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
                                                 b = backgroundQueue[j][i];
@@ -1070,7 +1053,7 @@ namespace OpenMobile
             }
         }
 
-        private bool notCovered(OMControl oMControl, char direction)
+        private bool notCovered(OMControl oMControl)
         {
             for (int h = backgroundQueue.Count - 1; h >= 0; h--)
             {
@@ -1093,11 +1076,11 @@ namespace OpenMobile
             return true;
         }
 
-        private int xdistance(Rectangle r1, Rectangle r2)
+        private static int xdistance(Rectangle r1, Rectangle r2)
         {
             return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 8*Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
         }
-        private int ydistance(Rectangle r1, Rectangle r2)
+        private static int ydistance(Rectangle r1, Rectangle r2)
         {
             return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2)*8 + Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
         }

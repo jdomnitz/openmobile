@@ -132,7 +132,7 @@ namespace OMMediaDB
         }
         private void parseDirectory(string location, bool subdirectories)
         {
-            if ((location==null)||(location == ""))
+            if (string.IsNullOrEmpty(location))
                 return;
             parse(location, subdirectories);
         }
@@ -265,9 +265,9 @@ namespace OMMediaDB
                 mediaInfo info = TagReader.getInfo(filepath);
                 if (info == null)
                     return;
-                if ((info.Album == null) || (info.Album == ""))
+                if (string.IsNullOrEmpty(info.Album))
                     info.Album = "Unknown Album";
-                if ((info.Artist == null) || (info.Artist == ""))
+                if (string.IsNullOrEmpty(info.Artist))
                     info.Artist = "Unknown Artist";
                 if ((info.Album == album)&&(info.Artist==artist))
                 {
@@ -328,7 +328,7 @@ namespace OMMediaDB
         {
             using (SqliteCommand command = bCon.CreateCommand())
             {
-                if ((info.Location == null) || (info.Location == ""))
+                if (string.IsNullOrEmpty(info.Location))
                     return;
                 StringBuilder s = new StringBuilder("BEGIN;INSERT INTO tblSongs(Title,URL,AlbumNum,Track,Rating,Genre,Lyrics)VALUES('");
                 s.Append(General.escape(info.Name));
@@ -635,8 +635,8 @@ namespace OMMediaDB
         }
         public bool setRating(mediaInfo info)
         {
-
-            throw new NotImplementedException();
+            //TODO
+            return false;
         }
         public mediaInfo getNextMedia()
         {
@@ -808,7 +808,7 @@ namespace OMMediaDB
 
         public float pluginVersion
         {
-            get { return 0.3F; }
+            get { return 0.9F; }
         }
 
         public string pluginDescription
@@ -818,11 +818,11 @@ namespace OMMediaDB
 
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public Plugin(){}
         public Plugin(IPluginHost host)

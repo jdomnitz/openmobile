@@ -66,11 +66,6 @@ namespace OpenMobile
                 string kernel_name = DetectUnixKernel();
                 switch (kernel_name)
                 {
-                    case null:
-                    case "":
-                        throw new PlatformNotSupportedException(
-                            "Unknown platform. Please file a bug report at http://www.OpenTK.com/node/add/project-issue/OpenTK");
-
                     case "Linux":
                         runningOnLinux = runningOnUnix = true;
                         break;
