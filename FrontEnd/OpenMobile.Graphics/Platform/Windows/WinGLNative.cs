@@ -1145,15 +1145,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region IJoystickDriver Members
-
-        public IList<JoystickDevice> Joysticks
-        {
-            get { return new List<JoystickDevice>(); } //joystick_driver.Joysticks; }
-        }
-
-        #endregion
-
         #region IDisposable Members
 
         public void Dispose()

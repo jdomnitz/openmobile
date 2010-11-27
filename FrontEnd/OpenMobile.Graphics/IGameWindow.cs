@@ -58,13 +58,8 @@ namespace OpenMobile.Platform
         event EventHandler<EventArgs> Load;
 
         /// <summary>
-        /// Occurs before the window is destroyed. 
-        /// </summary>
-        event EventHandler<EventArgs> Unload;
-
-        /// <summary>
         /// Occurs when it is time to render a frame.
         /// </summary>
-        event EventHandler<FrameEventArgs> RenderFrame;
+        event EventHandler<EventArgs> RenderFrame;
     }
 }

@@ -77,12 +77,10 @@ namespace OpenMobile
 
         bool isExiting = false;
 
-        double target_render_period=(1.0/35);
+        const double target_render_period=(1.0/35);
         double render_time;
 
         Stopwatch render_watch = new Stopwatch();
-        double next_render = 0.0;
-        FrameEventArgs render_args = new FrameEventArgs();
 
         #endregion
 
@@ -97,7 +95,7 @@ namespace OpenMobile
                 Visible = true;
                 OpenMobile.Graphics.OpenGL.Raw.ClearColor(OpenMobile.Graphics.Color.Black);
                 SwapBuffers();
-                Context.VSync = true;
+                glContext.VSync = true;
             }
             catch (Exception e)
             {
@@ -191,10 +189,7 @@ namespace OpenMobile
         {
             base.OnClosing(e);
             if (!e.Cancel)
-            {
                 isExiting = true;
-                OnUnloadInternal(EventArgs.Empty);
-            }
         }
 
 
@@ -209,19 +204,6 @@ namespace OpenMobile
         protected virtual void OnLoad(EventArgs e)
         {
             if (Load != null) Load(this, e);
-        }
-
-        #endregion
-
-        #region OnUnload
-
-        /// <summary>
-        /// Called after GameWindow.Exit was called, but before destroying the OpenGL context.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnUnload(EventArgs e)
-        {
-            if (Unload != null) Unload(this, e);
         }
 
         #endregion
@@ -266,69 +248,54 @@ namespace OpenMobile
         {
             EnsureUndisposed();
             Initialize();
-            try
-            {
-                Visible = true;   // Make sure the GameWindow is visible.
-                OnLoadInternal(EventArgs.Empty);
-                MakeCurrent();
-                OnResize(EventArgs.Empty);
-                
-                // On some platforms, ProcessEvents() does not return while the user is resizing or moving
-                // the window. We can avoid this issue by raising UpdateFrame and RenderFrame events
-                // whenever we encounter a size or move event.
-                //Move += DispatchRenderFrame;
-                //Resize += DispatchRenderFrame;
+            Visible = true;   // Make sure the GameWindow is visible.
+            OnLoadInternal(EventArgs.Empty);
+            MakeCurrent();
+            OnResize(EventArgs.Empty);
+            
+            // On some platforms, ProcessEvents() does not return while the user is resizing or moving
+            // the window. We can avoid this issue by raising UpdateFrame and RenderFrame events
+            // whenever we encounter a size or move event.
 
-                Debug.Print("Entering main loop.");
-                render_watch.Start();
-                while (true)
+            Debug.Print("Entering main loop.");
+            render_watch.Start();
+            while (true)
+            {
+                for (int i = 0; i < 29; i++)
                 {
-                    for (int i = 0; i < 29; i++)
-                    {
-                        ProcessEvents();
-                        if (refresh)
-                            break;
-                        Thread.Sleep(15);
-                    }
-                    refresh = false;
-                    if (Exists && !IsExiting)
-                        DispatchRenderFrame(this, EventArgs.Empty);
-                    else
-                        return;
-                    if (render_time<34)
-                        Thread.Sleep((int)(34-render_time));
+                    ProcessEvents();
+                    if (refresh)
+                        break;
+                    Thread.Sleep(15);
                 }
-            }
-            finally
-            {
-                //Move -= DispatchRenderFrame;
-                //Resize -= DispatchRenderFrame;
+                refresh = false;
+                if (Exists && !isExiting)
+                    DispatchRenderFrame();
+                else
+                    return;
+                if (render_time<34)
+                    Thread.Sleep((int)(34-render_time));
             }
         }
-        public void DispatchRenderFrame(object sender, EventArgs e)
+        public void DispatchRenderFrame()
         {
-            lock(render_watch)
-                RaiseRenderFrame(render_watch, ref next_render, render_args);
+            RaiseRenderFrame();
         }
 
-        void RaiseRenderFrame(Stopwatch render_watch, ref double next_render, FrameEventArgs render_args)
+        void RaiseRenderFrame()
         {
-            // Cap the maximum time drift to 1 second (e.g. when the process is suspended).
-            double time = render_watch.Elapsed.TotalSeconds;
-            double time_left = target_render_period - time;
-
-            if (time_left <= 0.0)
+            if ((target_render_period - render_watch.Elapsed.TotalSeconds) <= 0.0)
             {
                 render_watch.Reset();
                 render_watch.Start();
                 
-                render_args.Time = time;
-                OnRenderFrameInternal(render_args);
+                OnRenderFrameInternal();
                 render_time = render_watch.Elapsed.TotalMilliseconds;
-                //Debug.Print((1 / render_args.Time).ToString("0.00") + "fps");
             }
+            #if DEBUG
             else
                 Debug.Print(DateTime.Now.ToString()+"-Frame Dropped!");
+            #endif
         }
 
         #endregion
@@ -362,37 +329,6 @@ namespace OpenMobile
                 EnsureUndisposed();
                 return glContext;
             }
-        }
-
-        #endregion
-
-        #region IsExiting
-
-        /// <summary>
-        /// Gets a value indicating whether the shutdown sequence has been initiated
-        /// for this window, by calling GameWindow.Exit() or hitting the 'close' button.
-        /// If this property is true, it is no longer safe to use any OpenMobile.Input or
-        /// OpenMobile.Graphics.OpenGL functions or properties.
-        /// </summary>
-        public bool IsExiting
-        {
-            get
-            {
-                EnsureUndisposed();
-                return isExiting;
-            }
-        }
-
-        #endregion
-
-        #region Joysticks
-
-        /// <summary>
-        /// Gets a readonly IList containing all available OpenMobile.Input.JoystickDevices.
-        /// </summary>
-        public IList<JoystickDevice> Joysticks
-        {
-            get { return InputDriver.Joysticks; }
         }
 
         #endregion
@@ -459,12 +395,7 @@ namespace OpenMobile
         /// <summary>
         /// Occurs when it is time to render a frame.
         /// </summary>
-        public event EventHandler<FrameEventArgs> RenderFrame;
-
-        /// <summary>
-        /// Occurs before the window is destroyed.
-        /// </summary>
-        public event EventHandler<EventArgs> Unload;
+        public event EventHandler<EventArgs> RenderFrame;
 
         #endregion
 
@@ -491,7 +422,7 @@ namespace OpenMobile
         /// <remarks>
         /// Subscribe to the <see cref="RenderFrame"/> event instead of overriding this method.
         /// </remarks>
-        protected virtual void OnRenderFrame(FrameEventArgs e)
+        protected virtual void OnRenderFrame(EventArgs e)
         {
             if (RenderFrame != null) RenderFrame(this, e);
         }
@@ -523,21 +454,15 @@ namespace OpenMobile
 
         #region OnRenderFrameInternal
 
-        public void OnRenderFrameInternal(FrameEventArgs e)
+        public void OnRenderFrameInternal()
         {
             if (Exists && !isExiting)
             {
                 MakeCurrent(); //switch context
-                OnRenderFrame(e);
+                OnRenderFrame(EventArgs.Empty);
                 MakeCurrent(null); //release context
             }
         }
-
-        #endregion
-
-        #region OnUnloadInternal
-
-        private void OnUnloadInternal(EventArgs e) { OnUnload(e); }
 
         #endregion
 

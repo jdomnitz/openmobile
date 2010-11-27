@@ -95,7 +95,7 @@ namespace OpenMobile.Platform.X11
             // HACK: It seems that Catalyst 9.1 - 9.4 on Linux have problems with contexts created through
             // GLX_ARB_create_context, including hideous input lag, no vsync and other. Use legacy context
             // creation if the user doesn't request a 3.0+ context.
-            if ((major * 10 + minor >= 30) && Glx.Delegates.glXCreateContextAttribsARB != null)
+            if ((major >= 3) && Glx.Delegates.glXCreateContextAttribsARB != null)
             {
                 Debug.Write("Using GLX_ARB_create_context... ");
                 
