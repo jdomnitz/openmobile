@@ -159,15 +159,6 @@ namespace OpenMobile.Platform.X11
 
         #endregion
 
-        #region public IList<JoystickDevice> Joysticks
-
-        public IList<JoystickDevice> Joysticks
-        {
-            get { return new List<JoystickDevice>();}// joystick_driver.Joysticks; }
-        }
-
-        #endregion
-
         #endregion
 
         #region --- IDisposable Members ---

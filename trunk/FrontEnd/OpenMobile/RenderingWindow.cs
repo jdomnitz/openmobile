@@ -296,7 +296,7 @@ namespace OpenMobile
 
         #region Overrides
         OImage identity;
-        protected override void OnRenderFrame(FrameEventArgs e)
+        protected override void OnRenderFrame(EventArgs e)
         {
             //g.ResetClip();
             OnPaint();
@@ -825,7 +825,7 @@ namespace OpenMobile
             heightScale = (this.ClientRectangle.Height / 600F);
             widthScale = (this.ClientRectangle.Width / 1000F);
             totalScale = (float)Math.Sqrt(Math.Pow(heightScale, 2) + Math.Pow(widthScale, 2));
-            OnRenderFrameInternal(null);
+            OnRenderFrameInternal();
             Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
         }
         #endregion

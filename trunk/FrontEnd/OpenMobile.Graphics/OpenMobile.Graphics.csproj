@@ -59,7 +59,6 @@
     <Compile Include="DisplayDevice.cs" />
     <Compile Include="DisplayResolution.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="FrameEventArgs.cs" />
     <Compile Include="GameWindow.cs" />
     <Compile Include="GameWindowFlags.cs" />
     <Compile Include="Graphics.cs" />
@@ -101,10 +100,8 @@
     <Compile Include="IGraphics.cs" />
     <Compile Include="INativeWindow.cs" />
     <Compile Include="Input\IInputDevice.cs" />
-    <Compile Include="Input\IJoystickDriver.cs" />
     <Compile Include="Input\IKeyboardDriver.cs" />
     <Compile Include="Input\IMouseDriver.cs" />
-    <Compile Include="Input\JoystickDevice.cs" />
     <Compile Include="Input\Key.cs" />
     <Compile Include="Input\KeyboardDevice.cs" />
     <Compile Include="Input\KeyboardKeyEventArgs.cs" />

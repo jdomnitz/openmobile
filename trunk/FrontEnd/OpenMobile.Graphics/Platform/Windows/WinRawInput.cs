@@ -203,15 +203,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region IJoystickDriver Members
-
-        public IList<JoystickDevice> Joysticks
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        #endregion
-
         #endregion
 
         #region IInputDriver2 Members
@@ -224,11 +215,6 @@ namespace OpenMobile.Platform.Windows
         public IKeyboardDriver KeyboardDriver
         {
             get { return keyboardDriver; }
-        }
-
-        public IJoystickDriver JoystickDriver
-        {
-            get { return null; }//return joystickDriver; }
         }
 
         #endregion

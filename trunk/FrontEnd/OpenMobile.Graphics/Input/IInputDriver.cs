@@ -1,7 +1,7 @@
 ﻿using System;
 namespace OpenMobile.Input
 {
-    public interface IInputDriver : IKeyboardDriver, IMouseDriver, IJoystickDriver, IDisposable
+    public interface IInputDriver : IKeyboardDriver, IMouseDriver, IDisposable
     {
         //Stub
     }

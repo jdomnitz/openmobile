@@ -23,10 +23,6 @@ namespace OpenMobile.Platform.X11
             get { return driver.Mouse; }
         }
 
-        public System.Collections.Generic.IList<JoystickDevice> Joysticks
-        {
-            get { throw new System.NotImplementedException(); }
-        }
         bool disposed;
         public void Dispose()
         {

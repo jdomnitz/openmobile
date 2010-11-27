@@ -6,6 +6,7 @@ While openMobile is designed to be used on all major platforms in a compile once
 
 OpenMobile-Typical: The most common set of plugins used on windows (doesn't require any specific hardware or software)
 OpenMobile-Linux: The linux equivalent of OpenMobile-Typical.
+OpenMobile-OSX: The OSX equivalent of OpenMobile-Typical
 OpenMobile-Full: This is designed as a test build solution not for actual use.  This builds every plugin to ensure core changes do not break anything.
 
 II. Licensing:
