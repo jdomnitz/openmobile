@@ -59,6 +59,8 @@ namespace OpenMobile.Platform.X11
             }
         }
 
+		[DllImport("libX11", EntryPoint = "XkbGetIndicatorState")]
+		public static extern void XkbGetIndicatorState(Display display,uint devid,out uint state);
         [DllImport("libX11", EntryPoint = "XCloseDisplay")]
         public extern static int XCloseDisplay(IntPtr display);
         [DllImport("libX11", EntryPoint = "XSynchronize")]
