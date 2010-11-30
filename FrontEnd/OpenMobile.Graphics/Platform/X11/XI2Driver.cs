@@ -232,13 +232,18 @@ namespace OpenMobile.Platform.X11
 					case XIEventType.RawKeyRelease:
 						KeyboardDevice state2 = keyboards[rawids[raw.deviceid]];
 						IntPtr sym=API.XKeycodeToKeysym(window.Display,raw.detail,0);
+						Key key=X11Input.keymap[(XKey)sym];
 	                    switch (raw.evtype)
 	                    {
 							case XIEventType.RawKeyPress:
-								state2[X11Input.keymap[(XKey)sym]]=true;
+								if (key==Key.CapsLock)
+									state2[Key.CapsLock]=state2.CapsLock;
+								else
+									state2[key]=true;
 								break;
 							case XIEventType.RawKeyRelease:
-								state2[X11Input.keymap[(XKey)sym]]=false;
+								if (key!=Key.CapsLock)
+									state2[key]=false;
 								break;
 	                    }
 	                    keyboards[rawids[raw.deviceid]] = state2;

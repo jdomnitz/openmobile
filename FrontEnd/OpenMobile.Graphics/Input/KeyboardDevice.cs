@@ -72,7 +72,11 @@ namespace OpenMobile.Input
         public IntPtr DeviceID
         {
             get { return devID; }
-            internal set { devID = value; }
+            internal set
+			{
+				devID = value;
+				keys[(int)Key.CapsLock]=CapsLock;
+			}
         }
 
         public int Instance
@@ -120,6 +124,24 @@ namespace OpenMobile.Input
             get { return InputDeviceType.Keyboard; }
         }
 
+		public bool CapsLock
+		{
+			get
+			{	
+				#if LINUX
+				if (Configuration.RunningOnLinux)
+				{
+					uint state;
+					if (devID==IntPtr.Zero)
+						Platform.X11.Functions.XkbGetIndicatorState(Platform.X11.API.DefaultDisplay,0x0100,out state);
+					else
+						Platform.X11.Functions.XkbGetIndicatorState(Platform.X11.API.DefaultDisplay,(uint)devID,out state);
+					return (state&0x1)!=0;
+				}
+				#endif
+				return false;
+			}
+		}
         #endregion
 
         #region --- Public Methods ---
