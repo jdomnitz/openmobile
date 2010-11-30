@@ -113,6 +113,7 @@
     <Compile Include="Media\Playlist.cs" />
     <Compile Include="Net\RSS.cs" />
     <Compile Include="OSSpecific.cs" />
+    <Compile Include="Platform\IconExtractor.cs" />
     <Compile Include="Platform\imapi2Interop.cs" />
     <Compile Include="Platform\Linux.cs" />
     <Compile Include="Platform\Windows.cs" />

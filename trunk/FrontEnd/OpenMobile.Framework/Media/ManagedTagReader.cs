@@ -29,6 +29,7 @@ using OpenMobile.Net;
 using OpenMobile.Plugin;
 using OpenMobile.Data;
 using OpenMobile.Graphics;
+using OpenMobile.Framework;
 
 namespace OpenMobile.Media
 {
@@ -117,6 +118,22 @@ namespace OpenMobile.Media
                 }
                 return img;
             }
+            return null;
+        }
+        /// <summary>
+        /// Extracts a file icon or preview image from the requested file
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static OImage getFileThumbnail(string path,int size)
+        {
+            #if WINDOWS
+            if(Configuration.RunningOnWindows)
+            {
+                return IconExtractor.GetFileIcon(path, size);
+            }
+            #endif
             return null;
         }
         private static string cacheArtist;

@@ -487,11 +487,19 @@ namespace TagLib.Id3v2
 			};
 
         private static readonly ReadOnlyByteVector[,] version3_frames =
-            new ReadOnlyByteVector[3, 2] {
+            new ReadOnlyByteVector[12, 2] {
 				{ "TORY", "TDOR" },
 				{ "TYER", "TDRC" },
-				{ "XRVA", "RVA2" }
-
+				{ "XRVA", "RVA2" },
+                { "TT2\0", "TIT2" },
+                { "TRK\0", "TRCK" },
+                { "COM\0", "COMM" },
+                { "TEN\0", "TENC" },
+                { "TP1\0", "TPE1" },
+				{ "TP2\0", "TPE2" },
+				{ "TP3\0", "TPE3" },
+				{ "TP4\0", "TPE4" },
+                { "PIC\0", "APIC" },
 			};
 
         #endregion

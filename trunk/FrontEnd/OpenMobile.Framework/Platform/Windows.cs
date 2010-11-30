@@ -331,6 +331,7 @@ namespace OpenMobile.Framework
             public byte wProductType;
             public byte wReserved;
         }
+
         internal static class windowsEmbedder
         {
             [System.Security.SuppressUnmanagedCodeSecurity]

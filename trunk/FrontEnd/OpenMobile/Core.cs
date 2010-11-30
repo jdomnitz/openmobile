@@ -252,7 +252,7 @@ namespace OpenMobile
             if (theHost.hal!=null)
                 theHost.hal.close();
             string strEx = spewException(ex);
-            FileStream fs=File.OpenWrite(Path.Combine(theHost.DataPath, "AppCrash-"+DateTime.Now.Month.ToString()+"-"+DateTime.Now.Day.ToString()+".log"));
+            FileStream fs=File.OpenWrite(Path.Combine(theHost.DataPath, "AppCrash-"+DateTime.Now.Month.ToString()+"-"+DateTime.Now.Day.ToString()+"-"+DateTime.Now.Hour.ToString()+"-"+DateTime.Now.Second.ToString()+".log"));
             fs.Write(System.Text.ASCIIEncoding.ASCII.GetBytes(strEx), 0, strEx.Length);
             fs.Close();
             //ErrorReporting reporting=new ErrorReporting(strEx);
