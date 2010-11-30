@@ -137,7 +137,8 @@ namespace OpenMobile.Controls
                 if (visible == value)
                     return;
                 visible = value;
-                raiseUpdate(true);
+                if (UpdateThisControl != null)
+                    UpdateThisControl(true);
             }
         }
 
