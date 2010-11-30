@@ -247,10 +247,8 @@ namespace OpenMobile.Platform.Windows
                 case WindowMessage.GESTURE:
                     return gestureDecoder(handle, message, wParam, lParam);
                 case WindowMessage.MOUSEMOVE:
-                    Point point = new Point(
-                        (short)((uint)lParam.ToInt32() & 0x0000FFFF),
-                        (short)(((uint)lParam.ToInt32() & 0xFFFF0000) >> 16));
-                    mouse.Position = point;
+                    mouse.SetPosition((int)((uint)lParam.ToInt32() & 0x0000FFFF),
+                        (int)(((uint)lParam.ToInt32() & 0xFFFF0000) >> 16));
 
                     if (mouse_outside_window)
                     {
@@ -272,12 +270,6 @@ namespace OpenMobile.Platform.Windows
                         MouseLeave(this, EventArgs.Empty);
                     break;
 
-                case WindowMessage.MOUSEWHEEL:
-                    // This is due to inconsistent behavior of the WParam value on 64bit arch, whese
-                    // wparam = 0xffffffffff880000 or wparam = 0x00000000ff100000
-                    mouse.WheelPrecise += ((long)wParam << 32 >> 48) / 120.0f;
-                    break;
-
                 case WindowMessage.LBUTTONDOWN:
                     mouse[MouseButton.Left] = true;
                     break;
@@ -290,10 +282,6 @@ namespace OpenMobile.Platform.Windows
                     mouse[MouseButton.Right] = true;
                     break;
 
-                case WindowMessage.XBUTTONDOWN:
-                    mouse[((wParam.ToInt32() & 0xFFFF0000) >> 16) != (int)MouseKeys.XButton1 ? MouseButton.Button1 : MouseButton.Button2] = true;
-                    break;
-
                 case WindowMessage.LBUTTONUP:
                     mouse[MouseButton.Left] = false;
                     break;
@@ -304,10 +292,6 @@ namespace OpenMobile.Platform.Windows
 
                 case WindowMessage.RBUTTONUP:
                     mouse[MouseButton.Right] = false;
-                    break;
-
-                case WindowMessage.XBUTTONUP:
-                    mouse[((wParam.ToInt32() & 0xFFFF0000) >> 16) != (int)MouseKeys.XButton1 ? MouseButton.Button1 : MouseButton.Button2] = false;
                     break;
 
                 // Keyboard events:

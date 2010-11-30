@@ -151,19 +151,18 @@ namespace OpenMobile.Graphics
 
             float yrad = height / 2F;
             float xrad = width / 2F;
-            startAngle = 360 - startAngle;
             float[] arr = new float[(int)((sweepAngle + 0.5F) * 4)];
             int i = 0;
-            for (float t = startAngle; t >= (startAngle - sweepAngle); t = t - 0.5F)
+            for (float t = startAngle; t <= (startAngle + sweepAngle); t = t + 0.5F)
             {
-                float rad = OpenMobile.MathHelper.DegreesToRadians(t);
-                arr[i]=x + xrad + (float)(xrad * Math.Cos(rad));
-                arr[i+1]=y + yrad + (float)(yrad * Math.Sin(rad));
+                float rad = MathHelper.DegreesToRadians(t);
+                arr[i] = x + xrad + (float)(xrad * Math.Cos(rad));
+                arr[i + 1] = y + yrad + (float)(yrad * Math.Sin(rad));
                 i += 2;
             }
             Raw.EnableClientState(ArrayCap.VertexArray);
             Raw.VertexPointer(2, VertexPointerType.Float, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, arr.Length/2);
+            Raw.DrawArrays(BeginMode.LineStrip, 0, arr.Length / 2);
             Raw.DisableClientState(ArrayCap.VertexArray);
 
             Raw.Disable(EnableCap.LineSmooth);

@@ -83,7 +83,18 @@ namespace OpenMobile
                     availableThreads--;
                     while (functions.Count > 0)
                     {
-                        Function f = functions.Dequeue();
+                        Function f;
+                        lock (locks)
+                        {
+                            try
+                            {
+                                f = functions.Dequeue();
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                return; //race condition
+                            }
+                        }
                         try
                         {
                             if (f!=null)

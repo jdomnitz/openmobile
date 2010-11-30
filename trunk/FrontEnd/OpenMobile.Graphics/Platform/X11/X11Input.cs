@@ -100,39 +100,16 @@ namespace OpenMobile.Platform.X11
                     if      (e.ButtonEvent.button == 1) mouse[OpenMobile.Input.MouseButton.Left] = true;
                     else if (e.ButtonEvent.button == 2) mouse[OpenMobile.Input.MouseButton.Middle] = true;
                     else if (e.ButtonEvent.button == 3) mouse[OpenMobile.Input.MouseButton.Right] = true;
-                    else if (e.ButtonEvent.button == 4) mouse.Wheel++;
-                    else if (e.ButtonEvent.button == 5) mouse.Wheel--;
-                    else if (e.ButtonEvent.button == 6) mouse[OpenMobile.Input.MouseButton.Button1] = true;
-                    else if (e.ButtonEvent.button == 7) mouse[OpenMobile.Input.MouseButton.Button2] = true;
-                    else if (e.ButtonEvent.button == 8) mouse[OpenMobile.Input.MouseButton.Button3] = true;
-                    else if (e.ButtonEvent.button == 9) mouse[OpenMobile.Input.MouseButton.Button4] = true;
-                    else if (e.ButtonEvent.button == 10) mouse[OpenMobile.Input.MouseButton.Button5] = true;
-                    else if (e.ButtonEvent.button == 11) mouse[OpenMobile.Input.MouseButton.Button6] = true;
-                    else if (e.ButtonEvent.button == 12) mouse[OpenMobile.Input.MouseButton.Button7] = true;
-                    else if (e.ButtonEvent.button == 13) mouse[OpenMobile.Input.MouseButton.Button8] = true;
-                    else if (e.ButtonEvent.button == 14) mouse[OpenMobile.Input.MouseButton.Button9] = true;
-                    //if ((e.state & (int)X11.MouseMask.Button4Mask) != 0) m.Wheel++;
-                    //if ((e.state & (int)X11.MouseMask.Button5Mask) != 0) m.Wheel--;
-                    //Debug.Print("Button pressed: {0}", e.ButtonEvent.button);
                     break;
 
                 case XEventName.ButtonRelease:
                     if      (e.ButtonEvent.button == 1) mouse[OpenMobile.Input.MouseButton.Left] = false;
                     else if (e.ButtonEvent.button == 2) mouse[OpenMobile.Input.MouseButton.Middle] = false;
                     else if (e.ButtonEvent.button == 3) mouse[OpenMobile.Input.MouseButton.Right] = false;
-                    else if (e.ButtonEvent.button == 6) mouse[OpenMobile.Input.MouseButton.Button1] = false;
-                    else if (e.ButtonEvent.button == 7) mouse[OpenMobile.Input.MouseButton.Button2] = false;
-                    else if (e.ButtonEvent.button == 8) mouse[OpenMobile.Input.MouseButton.Button3] = false;
-                    else if (e.ButtonEvent.button == 9) mouse[OpenMobile.Input.MouseButton.Button4] = false;
-                    else if (e.ButtonEvent.button == 10) mouse[OpenMobile.Input.MouseButton.Button5] = false;
-                    else if (e.ButtonEvent.button == 11) mouse[OpenMobile.Input.MouseButton.Button6] = false;
-                    else if (e.ButtonEvent.button == 12) mouse[OpenMobile.Input.MouseButton.Button7] = false;
-                    else if (e.ButtonEvent.button == 13) mouse[OpenMobile.Input.MouseButton.Button8] = false;
-                    else if (e.ButtonEvent.button == 14) mouse[OpenMobile.Input.MouseButton.Button9] = false;
                     break;
 
                 case XEventName.MotionNotify:
-                    mouse.Position = new Point(e.MotionEvent.x, e.MotionEvent.y);
+                    mouse.SetPosition(e.MotionEvent.x, e.MotionEvent.y);
                     break;
             }
         }

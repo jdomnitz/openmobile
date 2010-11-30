@@ -103,6 +103,8 @@ namespace OpenMobile.Platform.Windows
                         // This is a mouse or a USB mouse device. In the latter case, discover if it really is a
                         // mouse device by qeurying the registry.
                         RegistryKey regkey = FindRegistryKey(name);
+                        if (regkey == null)
+                            continue;
                         string deviceDesc = (string)regkey.GetValue("DeviceDesc");
                         string deviceClass = (string)regkey.GetValue("Class");
                         deviceDesc = deviceDesc.Substring(deviceDesc.LastIndexOf(';') + 1);
@@ -139,6 +141,8 @@ namespace OpenMobile.Platform.Windows
             if (!rawids.ContainsKey(handle))
             {
                 RefreshDevices();
+                if (!rawids.ContainsKey(handle))
+                    return true;
             }
             mouse = mice[rawids[handle]];
 
@@ -148,18 +152,16 @@ namespace OpenMobile.Platform.Windows
             if ((raw.ButtonFlags & RawInputMouseState.RIGHT_BUTTON_UP) != 0) mouse[MouseButton.Right] = false;
             if ((raw.ButtonFlags & RawInputMouseState.MIDDLE_BUTTON_DOWN) != 0) mouse[MouseButton.Middle] = true;
             if ((raw.ButtonFlags & RawInputMouseState.MIDDLE_BUTTON_UP) != 0) mouse[MouseButton.Middle] = false;
-            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_4_DOWN) != 0) mouse[MouseButton.Button1] = true;
-            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_4_UP) != 0) mouse[MouseButton.Button1] = false;
-            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_5_DOWN) != 0) mouse[MouseButton.Button2] = true;
-            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_5_UP) != 0) mouse[MouseButton.Button2] = false;
+            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_4_DOWN) != 0) mouse[MouseButton.Left] = true;
+            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_4_UP) != 0) mouse[MouseButton.Left] = false;
+            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_5_DOWN) != 0) mouse[MouseButton.Right] = true;
+            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_5_UP) != 0) mouse[MouseButton.Right] = false;
 
-            if ((raw.ButtonFlags & RawInputMouseState.WHEEL) != 0)
-                mouse.WheelPrecise += (short)raw.ButtonData / 120.0f;
-            if ((raw.Flags & RawMouseFlags.MOUSE_MOVE_ABSOLUTE) != 0)
+            if ((raw.Flags & RawMouseFlags.MOUSE_MOVE_ABSOLUTE) == RawMouseFlags.MOUSE_MOVE_ABSOLUTE)
             {
                 raw.LastX = (int)((raw.LastX / 65535F) * mouse.Width);
                 raw.LastY = (int)((raw.LastY / 65535F) * mouse.Height);
-                mouse.Position = new OpenMobile.Graphics.Point(raw.LastX, raw.LastY);
+                mouse.SetPosition(raw.LastX, raw.LastY);
             }
             else
             {   // Seems like MOUSE_MOVE_RELATIVE is the default, unless otherwise noted.
@@ -170,7 +172,7 @@ namespace OpenMobile.Platform.Windows
                     rawx *= 2;
                 if (Math.Abs(rawy) >= 10)
                     rawy *= 2;
-                mouse.Position = new OpenMobile.Graphics.Point(mouse.X + rawx, mouse.Y + rawy);
+                mouse.SetPosition(mouse.X + rawx, mouse.Y + rawy);
             }
 
             lock (UpdateLock)
@@ -201,6 +203,8 @@ namespace OpenMobile.Platform.Windows
 
         static RegistryKey FindRegistryKey(string name)
         {
+            if ((name == null) || (name.Length < 5))
+                return null;
             // remove the \??\
             name = name.Substring(4);
 

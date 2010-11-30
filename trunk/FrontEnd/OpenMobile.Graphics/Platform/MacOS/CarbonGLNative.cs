@@ -536,11 +536,6 @@ namespace OpenMobile.Platform.MacOS
 					return OSStatus.NoError;
 
 				case MouseEventKind.WheelMoved:
-
-					int delta = API.GetEventMouseWheelDelta(inEvent) / 3;
-
-					InputDriver.Mouse[0].Wheel += delta;
-
 					return OSStatus.NoError;
 
                 case MouseEventKind.MouseMoved:
@@ -553,7 +548,7 @@ namespace OpenMobile.Platform.MacOS
 						if (mousePosInClient.X != InputDriver.Mouse[0].X ||
 							mousePosInClient.Y != InputDriver.Mouse[0].Y)
 						{
-							InputDriver.Mouse[0].Position = mousePosInClient;
+							InputDriver.Mouse[0].SetPosition(mousePosInClient.X,mousePosInClient.Y);
 						}
 					}
 					else
@@ -565,7 +560,7 @@ namespace OpenMobile.Platform.MacOS
 						if (mousePosInClient.X != InputDriver.Mouse[0].X ||
 							mousePosInClient.Y != InputDriver.Mouse[0].Y)
 						{
-							InputDriver.Mouse[0].Position = mousePosInClient;
+                            InputDriver.Mouse[0].SetPosition(mousePosInClient.X, mousePosInClient.Y);
 						}
 					}
 
