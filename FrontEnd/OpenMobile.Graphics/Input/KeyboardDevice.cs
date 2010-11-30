@@ -25,7 +25,6 @@ namespace OpenMobile.Input
         private string description;
         private IntPtr devID;
         private int instance=-1;
-        private bool repeat=true;
         private KeyboardKeyEventArgs args = new KeyboardKeyEventArgs();
 
         #region --- Constructors ---
@@ -46,8 +45,6 @@ namespace OpenMobile.Input
             get { return keys[(int)key]; }
             internal set
             {
-                if (keys[(int)key] != value || repeat)
-                {
                     keys[(int)key] = value;
 
                     if (value && KeyDown != null)
@@ -66,7 +63,6 @@ namespace OpenMobile.Input
                         args.CapsLock = keys[(int)Key.CapsLock];
                         KeyUp(this, args);
                     }
-                }
             }
         }
 
@@ -134,17 +130,6 @@ namespace OpenMobile.Input
         {
             //return base.GetHashCode();
             return (int)(devID.GetHashCode() ^ description.GetHashCode());
-        }
-
-        /// <summary>
-        /// Returns a System.String representing this KeyboardDevice.
-        /// </summary>
-        /// <returns>A System.String representing this KeyboardDevice.</returns>
-        public override string ToString()
-        {
-            //return base.ToString();
-            return String.Format("ID: {0} ({1}).",
-                DeviceID, Description);
         }
 
         #endregion

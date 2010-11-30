@@ -205,7 +205,7 @@ namespace OpenMobile.Platform.X11
 								}
 								current.X+=x;
 								current.Y+=y;
-								state.Position = current;
+								state.SetPosition(current.X,current.Y);
 	                            break;
 	
 	                        case XIEventType.RawButtonPress:
@@ -214,17 +214,6 @@ namespace OpenMobile.Platform.X11
 	                                case 1: state[MouseButton.Left]=true; break;
 	                                case 2: state[MouseButton.Middle]=true; break;
 	                                case 3: state[MouseButton.Right]=true; break;
-	                                case 4: state.WheelPrecise++; break;
-	                                case 5: state.WheelPrecise--; break;
-	                                case 6: state[MouseButton.Button1]=true; break;
-	                                case 7: state[MouseButton.Button2]=true; break;
-	                                case 8: state[MouseButton.Button3]=true; break;
-	                                case 9: state[MouseButton.Button4]=true; break;
-	                                case 10: state[MouseButton.Button5]=true; break;
-	                                case 11: state[MouseButton.Button6]=true; break;
-	                                case 12: state[MouseButton.Button7]=true; break;
-	                                case 13: state[MouseButton.Button8]=true; break;
-	                                case 14: state[MouseButton.Button9]=true; break;
 	                            }
 	                            break;
 	
@@ -234,15 +223,6 @@ namespace OpenMobile.Platform.X11
 	                                case 1: state[MouseButton.Left] = false; break;
 	                                case 2: state[MouseButton.Middle] = false; break;
 	                                case 3: state[MouseButton.Right] = false; break;
-	                                case 6: state[MouseButton.Button1] = false; break;
-	                                case 7: state[MouseButton.Button2] = false; break;
-	                                case 8: state[MouseButton.Button3] = false; break;
-	                                case 9: state[MouseButton.Button4] = false; break;
-	                                case 10: state[MouseButton.Button5] = false; break;
-	                                case 11: state[MouseButton.Button6] = false; break;
-	                                case 12: state[MouseButton.Button7] = false; break;
-	                                case 13: state[MouseButton.Button8] = false; break;
-	                                case 14: state[MouseButton.Button9] = false; break;
 	                            }
 	                            break;
 	                    }

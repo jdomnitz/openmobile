@@ -44,11 +44,9 @@ namespace OpenMobile.Input
         string description;
         IntPtr id;
         readonly bool[] button_state = new bool[Enum.GetValues(typeof(MouseButton)).Length];
-        float wheel, last_wheel;
-        Point pos = new Point(), last_pos = new Point();
+        Point last_pos = new Point();
         MouseMoveEventArgs move_args = new MouseMoveEventArgs();
         MouseButtonEventArgs button_args = new MouseButtonEventArgs();
-        MouseWheelEventArgs wheel_args = new MouseWheelEventArgs();
 		internal bool Absolute;
 		internal double minx=0,miny=0,maxx=0,maxy=0;
 
@@ -98,41 +96,6 @@ namespace OpenMobile.Input
 
         #endregion
 
-        #region public int Wheel
-
-        /// <summary>
-        /// Gets the absolute wheel position in integer units.
-        /// To support high-precision mice, it is recommended to use <see cref="WheelPrecise"/> instead.
-        /// </summary>
-        public int Wheel
-        {
-            get { return (int)Math.Round(wheel, MidpointRounding.AwayFromZero); }
-            internal set { WheelPrecise = value; }
-        }
-
-        /// <summary>
-        /// Gets the absolute wheel position in floating-point units.
-        /// </summary>
-        public float WheelPrecise
-        {
-            get { return wheel; }
-            internal set
-            {
-                wheel = value;
-
-                wheel_args.X = pos.X;
-                wheel_args.Y = pos.Y;
-                wheel_args.ValuePrecise = wheel;
-                wheel_args.DeltaPrecise = wheel - last_wheel;
-
-                WheelChanged(this, wheel_args);
-
-                last_wheel = wheel;
-            }
-        }
-
-        #endregion
-
         #region public int X
 
         /// <summary>
@@ -140,7 +103,7 @@ namespace OpenMobile.Input
         /// </summary>
         public int X
         {
-            get { return pos.X; }
+            get { return move_args.X; }
         }
 
         #endregion
@@ -151,17 +114,18 @@ namespace OpenMobile.Input
         }
         public Point Location
         {
-            get { return pos; }
+            get { return new Point(move_args.X,move_args.Y); }
             set 
             {
-                pos=value;
+                move_args.X = value.X;
+                move_args.Y = value.Y;
                 #if WINDOWS
                 if (Configuration.RunningOnWindows)
-                    Platform.Windows.Functions.SetCursorPos(pos.X, pos.Y);
+                    Platform.Windows.Functions.SetCursorPos(move_args.X, move_args.Y);
                 #endif
                 #if LINUX
                 if(Configuration.RunningOnLinux)
-                    Platform.X11.Functions.XIWarpPointer(Platform.X11.API.DefaultDisplay,0,IntPtr.Zero,Platform.X11.API.RootWindow,0,0,0,0,pos.X,pos.Y);
+                    Platform.X11.Functions.XIWarpPointer(Platform.X11.API.DefaultDisplay, 0, IntPtr.Zero, Platform.X11.API.RootWindow, 0, 0, 0, 0, move_args.X, move_args.Y);
                 #endif
                 //TODO - OSX
             }
@@ -173,7 +137,7 @@ namespace OpenMobile.Input
         /// </summary>
         public int Y
         {
-            get { return pos.Y; }
+            get { return move_args.Y; }
         }
 
         #endregion
@@ -198,8 +162,8 @@ namespace OpenMobile.Input
                     MouseClick(instance, button_args);
                 button_state[(int)button] = value;
 
-                button_args.X = pos.X;
-                button_args.Y = pos.Y;
+                button_args.X = move_args.X;
+                button_args.Y = move_args.Y;
                 button_args.Button = button;
                 button_args.IsPressed = value;
                 if (value && !previous_state)
@@ -271,8 +235,8 @@ namespace OpenMobile.Input
         }
         internal void Reset()
         {
-            for (int i = 0; i < 13; i++)
-                this[(MouseButton)i] = false;
+            for (int i = 0; i < button_state.Length; i++)
+                button_state[i] = false;
         }
         public void HideCursor(IWindowInfo info)
         {
@@ -318,40 +282,27 @@ namespace OpenMobile.Input
 
         #region internal Point Position
 
-        /// <summary>
-        /// Sets a System.Drawing.Point representing the absolute position of the pointer, in window pixel coordinates.
-        /// </summary>
-        internal Point Position
+        internal void SetPosition(int x, int y)
         {
-            set
-            {
-                pos = value;
-                if (pos.X < 0)
-                    pos.X = 0;
-                if (pos.Y < 0)
-                    pos.Y = 0;
-                if (pos.X > width)
-                    pos.X = width;
-                if (pos.Y > height)
-                    pos.Y = height;
-                move_args.X = pos.X;
-                move_args.Y = pos.Y;
-                move_args.XDelta = pos.X - last_pos.X;
-                move_args.YDelta = pos.Y - last_pos.Y;
-                move_args.Buttons=getButton(button_state);
-                Move(instance, move_args);
-                last_pos = pos;
-            }
-        }
-
-        private MouseButton getButton(bool[] button_state)
-        {
-            foreach (MouseButton b in Enum.GetValues(typeof(MouseButton)))
-            {
-                if ((b != MouseButton.None) && (button_state[(int)b]))
-                    return b; //TODO - Implement Simultaneous Buttons
-            }
-            return MouseButton.None;
+            if (x < 0)
+                x = 0;
+            if (y < 0)
+                y = 0;
+            if (x > width)
+                x = width;
+            if (y > height)
+                y = height;
+            move_args.X = x;
+            move_args.Y = y;
+            move_args.XDelta = x - last_pos.X;
+            move_args.YDelta = y - last_pos.Y;
+            if (button_state[0])
+                move_args.Buttons = MouseButton.Left;
+            else
+                move_args.Buttons = MouseButton.None;
+            Move(instance, move_args);
+            last_pos.X = move_args.X;
+            last_pos.Y = move_args.Y;
         }
 
         #endregion
@@ -379,11 +330,6 @@ namespace OpenMobile.Input
         /// Occurs when a button is released.
         /// </summary>
         public event EventHandler<MouseButtonEventArgs> MouseClick = delegate { };
-
-        /// <summary>
-        /// Occurs when one of the mouse wheels is moved.
-        /// </summary>
-        public event EventHandler<MouseWheelEventArgs> WheelChanged = delegate { };
 
         #region --- Overrides ---
 
@@ -675,84 +621,6 @@ namespace OpenMobile.Input
         /// Gets a System.Boolean representing the state of the mouse button for the event.
         /// </summary>
         public bool IsPressed { get { return pressed; } internal set { pressed = value; } }
-
-        #endregion
-    }
-
-    /// <summary>
-    /// Defines the event data for <see cref="MouseDevice.WheelChanged"/> events.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Do not cache instances of this type outside their event handler.
-    /// If necessary, you can clone an instance using the 
-    /// <see cref="MouseWheelEventArgs(MouseWheelEventArgs)"/> constructor.
-    /// </para>
-    /// </remarks>
-    public class MouseWheelEventArgs : MouseEventArgs
-    {
-        #region Fields
-
-        float value;
-        float delta;
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// Constructs a new <see cref="MouseWheelEventArgs"/> instance.
-        /// </summary>
-        public MouseWheelEventArgs() { }
-
-        /// <summary>
-        /// Constructs a new <see cref="MouseWheelEventArgs"/> instance.
-        /// </summary>
-        /// <param name="x">The X position.</param>
-        /// <param name="y">The Y position.</param>
-        /// <param name="value">The value of the wheel.</param>
-        /// <param name="delta">The change in value of the wheel for this event.</param>
-        public MouseWheelEventArgs(int x, int y, int value, int delta)
-            : base(x, y,MouseButton.None)
-        {
-            this.value = value;
-            this.delta = delta;
-        }
-
-        /// <summary>
-        /// Constructs a new <see cref="MouseWheelEventArgs"/> instance.
-        /// </summary>
-        /// <param name="args">The <see cref="MouseWheelEventArgs"/> instance to clone.</param>
-        public MouseWheelEventArgs(MouseWheelEventArgs args)
-            : this(args.X, args.Y, args.Value, args.Delta)
-        {
-        }
-
-        #endregion
-
-        #region Public Members
-
-        /// <summary>
-        /// Gets the value of the wheel in integer units.
-        /// To support high-precision mice, it is recommended to use <see cref="ValuePrecise"/> instead.
-        /// </summary>
-        public int Value { get { return (int)Math.Round(value, MidpointRounding.AwayFromZero); } }
-
-        /// <summary>
-        /// Gets the change in value of the wheel for this event in integer units.
-        /// To support high-precision mice, it is recommended to use <see cref="DeltaPrecise"/> instead.
-        /// </summary>
-        public int Delta { get { return (int)Math.Round(delta, MidpointRounding.AwayFromZero); } }
-
-        /// <summary>
-        /// Gets the precise value of the wheel in floating-point units.
-        /// </summary>
-        public float ValuePrecise { get { return value; } internal set { this.value = value; } }
-
-        /// <summary>
-        /// Gets the precise change in value of the wheel for this event in floating-point units.
-        /// </summary>
-        public float DeltaPrecise { get { return delta; } internal set { delta = value; } }
 
         #endregion
     }
