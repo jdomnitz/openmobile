@@ -41,13 +41,6 @@ namespace OpenMobile
         {
             if (manager == null)
                 return null;
-            if (Configuration.RunningOnWindows)
-            {
-                if (Console.CapsLock)
-                    setUppercase(screen);
-                else
-                    setLowercase(screen);
-            }
             if ((name == "") || (name == "OSK"))
             {
                 name = "OSK";

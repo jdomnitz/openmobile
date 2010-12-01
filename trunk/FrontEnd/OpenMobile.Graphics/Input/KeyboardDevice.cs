@@ -139,6 +139,16 @@ namespace OpenMobile.Input
 					return (state&0x1)!=0;
 				}
 				#endif
+                #if WINDOWS
+                #if LINUX
+                else 
+                #endif
+                    if (Configuration.RunningOnWindows)
+                    {
+                        if (devID == IntPtr.Zero)
+                            return Console.CapsLock;
+                    }
+                #endif
 				return false;
 			}
 		}
