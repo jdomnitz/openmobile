@@ -110,43 +110,26 @@ namespace OpenMobile.Platform.Windows
                     string id_03 = split[2];    // 3&13c0b0c5&0 (Protocol code)
                     // The final part is the class GUID and is not needed here
 
-                    string findme = string.Format(
-                        @"System\CurrentControlSet\Enum\{0}\{1}\{2}",
-                        id_01, id_02, id_03);
+                    string findme = string.Format(@"System\CurrentControlSet\Enum\{0}\{1}\{2}",id_01, id_02, id_03);
 
                     RegistryKey regkey = Registry.LocalMachine.OpenSubKey(findme);
 
-                    string deviceDesc =
-                        (string)regkey.GetValue("DeviceDesc");
-                    string deviceClass =
-                        (string)regkey.GetValue("Class");
+                    string deviceDesc = (string)regkey.GetValue("DeviceDesc");
+                    string deviceClass = (string)regkey.GetValue("Class");
                     if (!String.IsNullOrEmpty(deviceClass) && deviceClass.ToLower().Equals("keyboard"))
                     {
                         KeyboardDevice kb = new KeyboardDevice();
                         // Register the keyboard:
-                        //RawInputDeviceInfo info = new RawInputDeviceInfo();
-                        //int devInfoSize = API.RawInputDeviceInfoSize;
-                        //Functions.GetRawInputDeviceInfo(ridl[i].Device, RawInputDeviceInfoEnum.DEVICEINFO,
-                        //        info, ref devInfoSize);
-
-                        //kb.NumberOfLeds = info.Device.Keyboard.NumberOfIndicators;
-                        //kb.NumberOfFunctionKeys = info.Device.Keyboard.NumberOfFunctionKeys;
-                        //kb.NumberOfKeys = info.Device.Keyboard.NumberOfKeysTotal;
                         string[] parts = deviceDesc.Split(new char[] { ';' });
                         if (parts.Length == 2)
-                            kb.Description = parts[1] + " (" + ridl[i].Device.ToString() + ")";
+                            kb.Description = parts[1] + " (" + id_02.GetHashCode().ToString() + ")";
                         else
                             kb.Description = deviceDesc;
-                        //kb.DeviceID = (info.Device.Keyboard.Type << 32) + info.Device.Keyboard.SubType;
-                        kb.DeviceID = ridl[i].Device;
 
-                        //if (!keyboards.Contains(kb))
-                        //{
+                        kb.DeviceID = (IntPtr)id_02.GetHashCode();
                         this.RegisterKeyboardDevice(kb);
                         kb.Instance = keyboards.Count;
                         keyboards.Add(kb);
-                        //}
-                        //keyboards.Add(new KeyboardState());
                         rawids.Add(new ContextHandle(ridl[i].Device), keyboards.Count - 1);
                     }
                 }
