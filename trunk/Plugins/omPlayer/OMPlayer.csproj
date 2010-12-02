@@ -108,6 +108,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\DirectShowLib-2005.dll</HintPath>
     </Reference>
+    <Reference Include="MediaFoundation, Version=1.1.0.0, Culture=neutral, PublicKeyToken=36fa660e1d6ebf8d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\MediaFoundation.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -127,6 +131,8 @@
     <Compile Include="CDDB\Ripper\CDDriveEvents.cs" />
     <Compile Include="CDDB\Ripper\Win32Functions.cs" />
     <Compile Include="MainForm.cs">
+    </Compile>
+    <Compile Include="VistaPlayer.cs">
     </Compile>
   </ItemGroup>
   <ItemGroup>

@@ -662,7 +662,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string MusicBrainzArtistId {
 			get {return GetFirstField ("MUSICBRAINZ_ARTISTID");}
-			set {SetField ("MUSICBRAINZ_ARTISTID", value);}
 		}
 
 		/// <summary>
@@ -679,7 +678,6 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override string MusicBrainzReleaseId {
 			get {return GetFirstField ("MUSICBRAINZ_ALBUMID");}
-			set {SetField ("MUSICBRAINZ_ALBUMID", value);}
 		}
 
 		/// <summary>

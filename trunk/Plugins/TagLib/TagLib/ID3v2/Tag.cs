@@ -976,8 +976,6 @@ namespace TagLib.Id3v2
 
         #region Private Methods
 
-        // TODO: These should become public some day.
-
         /// <summary>
         ///    Gets the text value from a specified Text Information
         ///    Frame.
@@ -1076,67 +1074,6 @@ namespace TagLib.Id3v2
             return string.IsNullOrEmpty(result) ? null : result;
 
         }
-
-        /// <summary>
-        /// Creates and/or sets a UserTextInformationFrame (TXXX)  with the given
-        /// description and text.
-        /// </summary>
-        /// <param name="description">String containing the Description field for the
-        /// TXXX frame</param>
-        /// <param name="text">String containing the Text field for the TXXX frame</param>
-        private void SetUserTextAsString(string description, string text)
-        {
-
-            //Get the TXXX frame, create a new one if needed
-            UserTextInformationFrame frame = UserTextInformationFrame.Get(
-                this, description, true);
-
-            if (!string.IsNullOrEmpty(text))
-            {
-                frame.Text = text.Split(';');
-            }
-            else
-            {
-                //Text string is null or empty, delete the frame, prevent empties
-                RemoveFrame(frame);
-            }
-
-        }
-
-        /// <summary>
-        ///    Moves a specified frame so it is the first of its type in
-        ///    the tag.
-        /// </summary>
-        /// <param name="frame">
-        ///    A <see cref="Frame" /> object to make the first of its
-        ///    type.
-        /// </param>
-        private void MakeFirstOfType(Frame frame)
-        {
-            ByteVector type = frame.FrameId;
-            Frame swapping = null;
-            for (int i = 0; i < frame_list.Count; i++)
-            {
-                if (swapping == null)
-                {
-                    if (frame_list[i].FrameId.Equals(type))
-                        swapping = frame;
-                    else
-                        continue;
-                }
-
-                Frame tmp = frame_list[i];
-                frame_list[i] = swapping;
-                swapping = tmp;
-
-                if (swapping == frame)
-                    return;
-            }
-
-            if (swapping != null)
-                frame_list.Add(swapping);
-        }
-
         #endregion
 
 
@@ -1484,7 +1421,6 @@ namespace TagLib.Id3v2
         public override string MusicBrainzArtistId
         {
             get { return GetUserTextAsString("MusicBrainz Artist Id"); }
-            set { SetUserTextAsString("MusicBrainz Artist Id", value); }
         }
 
         /// <summary>
@@ -1502,7 +1438,6 @@ namespace TagLib.Id3v2
         public override string MusicBrainzReleaseId
         {
             get { return GetUserTextAsString("MusicBrainz Album Id"); }
-            set { SetUserTextAsString("MusicBrainz Album Id", value); }
         }
 
         /// <summary>
@@ -1520,7 +1455,6 @@ namespace TagLib.Id3v2
         public override string MusicBrainzDiscId
         {
             get { return GetUserTextAsString("MusicBrainz Disc Id"); }
-            set { SetUserTextAsString("MusicBrainz Disc Id", value); }
         }
 
         /// <summary>
@@ -1538,7 +1472,6 @@ namespace TagLib.Id3v2
         public override string MusicIpId
         {
             get { return GetUserTextAsString("MusicIP PUID"); }
-            set { SetUserTextAsString("MusicIP PUID", value); }
         }
 
         /// <summary>
@@ -1556,7 +1489,6 @@ namespace TagLib.Id3v2
         public override string AmazonId
         {
             get { return GetUserTextAsString("ASIN"); }
-            set { SetUserTextAsString("ASIN", value); }
         }
 
         /// <summary>

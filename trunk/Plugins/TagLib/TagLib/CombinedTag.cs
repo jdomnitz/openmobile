@@ -606,12 +606,6 @@ namespace TagLib {
 				
 				return null;
 			}
-			
-			set {
-				foreach (Tag tag in tags)
-					if (tag != null)
-						tag.MusicBrainzArtistId = value;
-			}
 		}
 
 		/// <summary>
@@ -643,12 +637,6 @@ namespace TagLib {
 				}
 				
 				return null;
-			}
-			
-			set {
-				foreach (Tag tag in tags)
-					if (tag != null)
-						tag.MusicBrainzReleaseId = value;
 			}
 		}
 
@@ -682,12 +670,6 @@ namespace TagLib {
 				
 				return null;
 			}
-			
-			set {
-				foreach (Tag tag in tags)
-					if (tag != null)
-						tag.MusicBrainzTrackId = value;
-			}
 		}
 
 		/// <summary>
@@ -719,12 +701,6 @@ namespace TagLib {
 				}
 				
 				return null;
-			}
-			
-			set {
-				foreach (Tag tag in tags)
-					if (tag != null)
-						tag.MusicBrainzDiscId = value;
 			}
 		}
 
@@ -795,12 +771,6 @@ namespace TagLib {
 				}
 				
 				return null;
-			}
-			
-			set {
-				foreach (Tag tag in tags)
-					if (tag != null)
-						tag.AmazonId = value;
 			}
 		}
 

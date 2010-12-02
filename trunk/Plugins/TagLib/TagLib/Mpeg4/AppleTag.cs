@@ -421,45 +421,6 @@ namespace TagLib.Mpeg4 {
 				return null;
 			}
 		}
-			
-		/// <summary>
-		/// Sets a specific strings in Dash (----) atom.  This method updates
-		/// and existing atom, or creates a new one.  If an empty datastring is
-		/// specified, the Dash box and its children are removed.
-		/// </summary>
-		/// <param name="meanstring">String specifying text for mean box</param>
-		/// <param name="namestring">String specifying text for name box</param>
-		/// <param name="datastring">String specifying text for data box</param>
-		public void SetDashBox(string meanstring, string namestring, string datastring)
-		{
-			AppleDataBox data_box = GetDashAtoms(meanstring, namestring);
-			
-			// If we did find a data_box and we have an empty datastring we should
-			// remove the entire dash box.
-			if (data_box != null && string.IsNullOrEmpty(datastring)) {
-				AppleAnnotationBox dash_box = GetParentDashBox(meanstring, namestring);
-				dash_box.ClearChildren();
-				ilst_box.RemoveChild(dash_box);
-				return;
-			}
-			
-			if (data_box != null) {
-				data_box.Text = datastring;
-			} else {
-				//Create the new boxes, should use 1 for text as a flag
-				AppleAdditionalInfoBox amean_box = new AppleAdditionalInfoBox(BoxType.Mean, 0, 1);
-				AppleAdditionalInfoBox aname_box = new AppleAdditionalInfoBox(BoxType.Name, 0, 1);
-				AppleDataBox adata_box = new AppleDataBox(BoxType.Data, 1);
-				amean_box.Text = meanstring;
-				aname_box.Text = namestring;
-				adata_box.Text = datastring;
-				AppleAnnotationBox whole_box = new AppleAnnotationBox(BoxType.DASH);
-				whole_box.AddChild(amean_box);
-				whole_box.AddChild(aname_box);
-				whole_box.AddChild(adata_box);
-				ilst_box.AddChild(whole_box);
-			}
-		}
 		
 		/// <summary>
 		/// Gets the AppleDataBox that corresponds to the specified mean and name values.
@@ -885,7 +846,6 @@ namespace TagLib.Mpeg4 {
 		/// </remarks>
 		public override string MusicBrainzArtistId {
 			get {return GetDashBox("com.apple.iTunes","MusicBrainz Artist Id");}
-			set {SetDashBox("com.apple.iTunes", "MusicBrainz Artist Id", value);}
 		}
 
 		/// <summary>
@@ -902,7 +862,6 @@ namespace TagLib.Mpeg4 {
 		/// </remarks>
 		public override string MusicBrainzReleaseId {
 			get {return GetDashBox("com.apple.iTunes","MusicBrainz Album Id");}
-			set {SetDashBox("com.apple.iTunes", "MusicBrainz Album Id",value);}
 		}
 
 		/// <summary>
@@ -919,7 +878,6 @@ namespace TagLib.Mpeg4 {
 		/// </remarks>
 		public override string MusicBrainzTrackId {
 		    get { return GetDashBox("com.apple.iTunes","MusicIP PUID");}
-		    set {SetDashBox("com.apple.iTunes", "MusicIP PUID", value);}
 		}
 
 		/// <summary>
@@ -936,7 +894,6 @@ namespace TagLib.Mpeg4 {
 		/// </remarks>
 		public override string MusicBrainzDiscId {
 			get {return GetDashBox("com.apple.iTunes","MusicBrainz Disc Id");}
-			set {SetDashBox("com.apple.iTunes", "MusicBrainz Disc Id",value);}
 		}
 
 		/// <summary>
@@ -953,7 +910,6 @@ namespace TagLib.Mpeg4 {
 		/// </remarks>
 		public override string MusicIpId {
 			get {return GetDashBox("com.apple.iTunes","MusicIP PUID");}
-			set {SetDashBox("com.apple.iTunes", "MusicIP PUID",value);}
 		}
 
 		/// <summary>
@@ -970,7 +926,6 @@ namespace TagLib.Mpeg4 {
 		/// </remarks>
 		public override string AmazonId {
 			get {return GetDashBox("com.apple.iTunes","ASIN");}
-			set {SetDashBox("com.apple.iTunes", "ASIN",value);}
 		}
 
 		/// <summary>

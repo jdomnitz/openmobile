@@ -379,7 +379,6 @@ namespace TagLib {
 		/// </remarks>
 		public virtual string MusicBrainzArtistId {
 			get { return null; }
-			set {}
 		}
 
 		/// <summary>
@@ -397,7 +396,6 @@ namespace TagLib {
 		/// </remarks>
 		public virtual string MusicBrainzReleaseId {
 			get { return null; }
-			set {}
 		}
 
 		/// <summary>
@@ -415,7 +413,6 @@ namespace TagLib {
 		/// </remarks>
 		public virtual string MusicBrainzTrackId {
 			get { return null; }
-			set {}
 		}
 
 		/// <summary>
@@ -434,7 +431,6 @@ namespace TagLib {
 		/// </remarks>
 		public virtual string MusicBrainzDiscId {
 			get { return null; }
-			set {}
 		}
 
 		/// <summary>
@@ -470,7 +466,6 @@ namespace TagLib {
 		/// </remarks>
 		public virtual string AmazonId {
 			get { return null; }
-			set {}
 		}
 
 		/// <summary>

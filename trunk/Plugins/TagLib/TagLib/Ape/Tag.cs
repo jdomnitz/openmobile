@@ -1006,7 +1006,6 @@ namespace TagLib.Ape {
 		/// </remarks>
 		public override string MusicBrainzArtistId {
 			get {return GetItemAsString ("MUSICBRAINZ_ARTISTID");}
-			set {SetValue ("MUSICBRAINZ_ARTISTID", value);}
 		}
 
 		/// <summary>
@@ -1024,7 +1023,6 @@ namespace TagLib.Ape {
 		/// </remarks>
 		public override string MusicBrainzReleaseId {
 			get {return GetItemAsString ("MUSICBRAINZ_ALBUMID");}
-			set {SetValue ("MUSICBRAINZ_ALBUMID", value);}
 		}
 
 		/// <summary>
@@ -1042,7 +1040,6 @@ namespace TagLib.Ape {
 		/// </remarks>
 		public override string MusicBrainzTrackId {
 			get {return GetItemAsString ("MUSICBRAINZ_TRACKID");}
-			set {SetValue ("MUSICBRAINZ_TRACKID", value);}
 		}
 
 		/// <summary>
@@ -1060,7 +1057,6 @@ namespace TagLib.Ape {
 		/// </remarks>
 		public override string MusicBrainzDiscId {
 			get {return GetItemAsString ("MUSICBRAINZ_DISCID");}
-			set {SetValue ("MUSICBRAINZ_DISCID", value);}
 		}
 
 		/// <summary>
@@ -1096,7 +1092,6 @@ namespace TagLib.Ape {
 		/// </remarks>
 		public override string AmazonId {
 			get {return GetItemAsString ("ASIN");}
-			set {SetValue ("ASIN", value);}
 		}
 
 		/// <summary>

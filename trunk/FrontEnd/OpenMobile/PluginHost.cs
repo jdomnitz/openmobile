@@ -1470,9 +1470,8 @@ namespace OpenMobile
             if (OnMediaEvent != null)
                 SandboxedThread.Asynchronous(delegate() { OnMediaEvent(e, instance, arg); });
             if (e == eFunction.nextMedia)
-                if (!execute(eFunction.nextMedia, instance.ToString()))
-                    if (!execute(eFunction.nextMedia, instance.ToString())) //skip a single bad song
-                        raiseMediaEvent(eFunction.Stop, instance, "");
+                while ((!execute(eFunction.nextMedia, instance.ToString()))&&(queued[instance].Count>1))
+                    Thread.Sleep(200);
         }
         public bool raiseKeyPressEvent(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
         {

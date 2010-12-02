@@ -517,7 +517,6 @@ namespace TagLib.Ogg
 				
 				return null;
 			}
-			set {if (tags.Count > 0) tags [0].MusicBrainzArtistId = value;}
 		}
 
 		/// <summary>
@@ -550,7 +549,6 @@ namespace TagLib.Ogg
 				
 				return null;
 			}
-			set {if (tags.Count > 0) tags [0].MusicBrainzReleaseId = value;}
 		}
 
 		/// <summary>
@@ -583,7 +581,6 @@ namespace TagLib.Ogg
 				
 				return null;
 			}
-			set {if (tags.Count > 0) tags [0].MusicBrainzTrackId = value;}
 		}
 
 		/// <summary>
@@ -616,7 +613,6 @@ namespace TagLib.Ogg
 				
 				return null;
 			}
-			set {if (tags.Count > 0) tags [0].MusicBrainzDiscId = value;}
 		}
 
 		/// <summary>
@@ -682,7 +678,6 @@ namespace TagLib.Ogg
 				
 				return null;
 			}
-			set {if (tags.Count > 0) tags [0].AmazonId = value;}
 		}
 
 		/// <summary>
