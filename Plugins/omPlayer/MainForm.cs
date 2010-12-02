@@ -248,6 +248,8 @@ namespace OMPlayer
     private event CreateNewPlayer OnPlayerRequested;
     public eLoadStatus initialize(IPluginHost host)
     {
+        if (Environment.OSVersion.Version.Major > 5) //Only if MF isn't available
+            return eLoadStatus.LoadFailedGracefulUnloadRequested;
         theHost = host;
         sink = new MessageProc();
         IntPtr tmp= sink.Handle;
@@ -757,7 +759,7 @@ namespace OMPlayer
             OnMediaEvent(eFunction.Play, instance, url);
             if (t == null)
             {
-                t = new Thread(new ThreadStart(waitForStop));
+                t = new Thread(waitForStop);
                 t.Name = instance.ToString();
                 t.Start();
             }

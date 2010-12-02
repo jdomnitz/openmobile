@@ -804,7 +804,6 @@ namespace TagLib.Asf {
 		/// </remarks>
 		public override string MusicBrainzArtistId {
 			get {return GetDescriptorString ("MusicBrainz/Artist Id");}
-			set {SetDescriptorString (value, "MusicBrainz/Artist Id");}
 		}
 
 		/// <summary>
@@ -823,7 +822,6 @@ namespace TagLib.Asf {
 		/// </remarks>
 		public override string MusicBrainzReleaseId {
 			get {return GetDescriptorString ("MusicBrainz/Album Id");}
-			set {SetDescriptorString (value, "MusicBrainz/Album Id");}
 		}
 
 		/// <summary>
@@ -842,7 +840,6 @@ namespace TagLib.Asf {
 		/// </remarks>
 		public override string MusicBrainzTrackId {
 			get {return GetDescriptorString ("MusicBrainz/Track Id");}
-			set {SetDescriptorString (value, "MusicBrainz/Track Id");}
 		}
 
 		/// <summary>
@@ -861,7 +858,6 @@ namespace TagLib.Asf {
 		/// </remarks>
 		public override string MusicBrainzDiscId {
 			get {return GetDescriptorString ("MusicBrainz/Disc Id");}
-			set {SetDescriptorString (value, "MusicBrainz/Disc Id");}
 		}
 
 		/// <summary>
