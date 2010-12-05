@@ -604,14 +604,22 @@ namespace OMRadio
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
             string newStation = input.getNumber(screen, "Radio");
             object o;
-            theHost.getData(eGetData.GetMediaStatus, "", out o);
-            if (o == null)
-                return;
-            stationInfo info = (stationInfo)o;
-            if (info.stationID.Contains(":"))
-            {
-                newStation = info.stationID.Substring(0,info.stationID.IndexOf(':')) + newStation;
+            theHost.getData(eGetData.GetMediaStatus, "",theHost.instanceForScreen(screen).ToString(), out o);
+            stationInfo info = o as stationInfo;
+            if ((info != null)&&(info.stationID!=null)&&(info.stationID.Contains(":")))
+            {   //this method is more reliable for undefined bands (ex pandora)
+                newStation = info.stationID.Substring(0, info.stationID.IndexOf(':')) + newStation;
                 theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), newStation);
+            }
+            else
+            {   //this method is plan b - if the radio hasn't tuned anything yet
+                theHost.getData(eGetData.GetTunedContentInfo, "", theHost.instanceForScreen(screen).ToString(), out o);
+                tunedContentInfo tc = o as tunedContentInfo;
+                if (tc != null)
+                {
+                    newStation = tc.band.ToString()+":" + newStation;
+                    theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), newStation);
+                }
             }
         }
 
@@ -757,11 +765,6 @@ namespace OMRadio
         {
             OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
             ((OMTextBox)sender).Text = input.getText(screen, this.pluginName, "");
-        }
-
-        void Button_RadioTuneTo_OnClick(OMControl sender, int screen)
-        {
-            theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), ((OMLabel)manager[screen]["TextBox_RadioTuneTo"]).Text);
         }
 
         void Button_RadioBand_OnClick(OMControl sender, int screen)

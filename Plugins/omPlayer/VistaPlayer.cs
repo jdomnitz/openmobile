@@ -589,6 +589,7 @@ namespace OMPlayer
             public bool play(string url)
             {
                 stop();
+                url = url.ToLower();
                 lock (this)
                 {
                     object o = sink.Invoke(OnPlay, new object[] { url });
@@ -617,6 +618,8 @@ namespace OMPlayer
                         nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
                     if (nowPlaying.coverArt == null)
                         nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
+                    if (nowPlaying.Length== 0)
+                        nowPlaying.Length = (int)streamDuration;
                 }
                 OnMediaEvent(eFunction.Play, instance, url);
                 if (t == null)
@@ -642,6 +645,7 @@ namespace OMPlayer
                 {
                     if (m_pVideoDisplay != null)
                         m_pVideoDisplay.SetVideoWindow(IntPtr.Zero);
+                    sink.Hide();
                     for (int i = 0; i < theHost.ScreenCount; i++)
                         if (theHost.instanceForScreen(i) == this.instance)
                             theHost.sendMessage("UI", "OMPlayer2", "HideMediaControls" + i.ToString());
@@ -660,7 +664,7 @@ namespace OMPlayer
                     {
                         IMFClock tmpClock;
                         session.GetClock(out tmpClock);
-                        clock = (IMFPresentationClock)tmpClock;
+                        clock = tmpClock as IMFPresentationClock;
                         if (clock == null)
                             return;
                     }
@@ -769,6 +773,13 @@ namespace OMPlayer
                         SafeRelease(pTopology);
                         return false;
                     }
+                    IMFAttributes att = pSourcePD as IMFAttributes;
+                    if (att != null)
+                    {
+                        streamDuration = 0;
+                        att.GetUINT64(MediaFoundation.MFAttributesClsid.MF_PD_DURATION, out streamDuration);
+                        streamDuration = streamDuration / 10000000;
+                    }
                     hr=pSourcePD.GetStreamDescriptorCount(out cSourceStreams);
                     if (hr != S_Ok)
                     {
@@ -792,7 +803,7 @@ namespace OMPlayer
                 }
                 return true;
             }
-
+            long streamDuration;
             private bool AddBranchToPartialTopology(IMFTopology pTopology, IMFPresentationDescriptor pSourcePD, int iStream)
             {
                 IMFStreamDescriptor pSourceSD = null;
