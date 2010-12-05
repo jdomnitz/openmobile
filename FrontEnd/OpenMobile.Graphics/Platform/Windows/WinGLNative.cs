@@ -450,20 +450,21 @@ namespace OpenMobile.Platform.Windows
             info.cbSize = (uint)Marshal.SizeOf(info);
             if (Functions.GetGestureInfo(lParam, info))
             {
+                bool complete = (info.dwFlags & 0x4) != 0;
                 switch (info.dwID)
                 {
                     case 3: //zoom
                         if (Gesture != null)
-                            Gesture(this, new TouchEventArgs("Zoom", info.ptLocation,info.ullArguments,null));
+                            Gesture(this, new TouchEventArgs("Zoom", info.ptLocation,info.ullArguments,null,complete));
                         return IntPtr.Zero;
                     case 4: //pan
                         if (Gesture != null)
-                            Gesture(this, new TouchEventArgs("Pan", info.ptLocation, info.ullArguments, null));
+                            Gesture(this, new TouchEventArgs("Pan", info.ptLocation, info.ullArguments, null,complete));
                         return IntPtr.Zero;
                     case 5: //rotate
                         double distance = ((info.ullArguments / 65535.0) * 4.0 * Math.PI) - 2.0 * Math.PI;
                         if (Gesture != null)
-                            Gesture(this, new TouchEventArgs("Rotate", info.ptLocation, distance, null));
+                            Gesture(this, new TouchEventArgs("Rotate", info.ptLocation, distance, null,complete));
                         return IntPtr.Zero;
                 }
             }

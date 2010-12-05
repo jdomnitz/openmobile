@@ -18,20 +18,21 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-using OpenMobile.Plugin;
-using OpenMobile;
-using System.Threading;
 using System;
-using MediaFoundation;
-using System.Windows.Forms;
-using OpenMobile.Data;
 using System.Collections.Generic;
-using OpenMobile.Media;
-using MediaFoundation.Misc;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows.Forms;
+using MediaFoundation;
 using MediaFoundation.EVR;
-using OpenMobile.Threading;
+using MediaFoundation.Misc;
+using OpenMobile;
+using OpenMobile.Data;
 using OpenMobile.Graphics;
+using OpenMobile.Media;
+using OpenMobile.Plugin;
+using OpenMobile.Threading;
+using System.Diagnostics;
 
 namespace OMPlayer
 {
@@ -40,7 +41,6 @@ namespace OMPlayer
         // Fields
         private AVPlayer[] player;
         private static IPluginHost theHost;
-        static int WM_Graph_Notify = 0x8001;
         static int WM_LBUTTONUP = 0x0202;
 
         static int crossfade = 0;
@@ -52,7 +52,7 @@ namespace OMPlayer
         {
             if (settings == null)
             {
-                settings = new Settings("OMPlayer Settings");
+                settings = new Settings("OMPlayer2 Settings");
                 using (PluginSettings s = new PluginSettings())
                 {
                     settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", "", "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.AutoResume")));
@@ -66,7 +66,13 @@ namespace OMPlayer
             }
             return settings;
         }
-
+        public static int getFirstScreen(int instance)
+        {
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                if (theHost.instanceForScreen(i) == instance)
+                    return i;
+            return 0;
+        }
         void changed(Setting s)
         {
             if (s.Name == "Music.CrossfadeDuration")
@@ -223,12 +229,12 @@ namespace OMPlayer
 
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            return false;
         }
         MessageProc sink;
         private delegate void CreateNewPlayer(int instance);
@@ -373,8 +379,28 @@ namespace OMPlayer
         public bool SetVideoVisible(int instance, bool visible)
         {
             checkInstance(instance);
-            //TODO
-            return false;
+            if (player[instance].m_pVideoDisplay == null)
+                return false;
+            IntPtr current;
+            player[instance].m_pVideoDisplay.GetVideoWindow(out current);
+            if (visible)
+                player[instance].m_pVideoDisplay.SetVideoWindow((IntPtr)theHost.UIHandle(getFirstScreen(instance)));
+            else
+                player[instance].m_pVideoDisplay.SetVideoWindow(IntPtr.Zero);
+            if (current == IntPtr.Zero)
+            {
+                if (visible)
+                    return true;
+                else
+                    return false;
+            }
+            else
+            {
+                if (visible)
+                    return false;
+                else
+                    return true;
+            }
         }
         public bool play(int instance)
         {
@@ -389,9 +415,7 @@ namespace OMPlayer
                 case eMediaType.BluetoothResource:
                 case eMediaType.BluRay:
                 case eMediaType.HDDVD:
-                case eMediaType.HTTPUrl:
                 case eMediaType.AppleDevice:
-                case eMediaType.RTSPUrl:
                 case eMediaType.Smartphone:
                 case eMediaType.MMSUrl:
                 case eMediaType.DVD:
@@ -422,20 +446,14 @@ namespace OMPlayer
         public bool setPlaybackSpeed(int instance, float speed)
         {
             checkInstance(instance);
-            if (player[instance].SetRate(speed) != 0)
+            if (!player[instance].SetRate(speed))
                 return false;
-            if (player[instance].currentPlaybackRate > 1.0)
-            {
+            if (speed > 1.0)
                 player[instance].currentState = ePlayerStatus.FastForwarding;
-            }
-            else if (player[instance].currentPlaybackRate < 1.0)
-            {
+            else if (speed < 1.0)
                 player[instance].currentState = ePlayerStatus.Rewinding;
-            }
             else if ((player[instance].currentState == ePlayerStatus.FastForwarding) || (player[instance].currentState == ePlayerStatus.Rewinding))
-            {
                 player[instance].currentState = ePlayerStatus.Playing;
-            }
             OnMediaEvent(eFunction.setPlaybackSpeed, instance, speed.ToString());
             return true;
         }
@@ -480,7 +498,7 @@ namespace OMPlayer
         {
             get
             {
-                //TODO
+				//TODO
                 return new string[] { "Default Device" };
             }
         }
@@ -522,9 +540,10 @@ namespace OMPlayer
             //MF
             IMFMediaSession session;
             IMFMediaSource m_pSource;
-            IMFVideoDisplayControl m_pVideoDisplay;
+            public IMFVideoDisplayControl m_pVideoDisplay;
             AutoResetEvent m_hCloseEvent;
             IMFRateControl m_rateControl;
+            IMFSimpleAudioVolume m_volume;
             //
             public float currentPlaybackRate = 1F;
             public ePlayerStatus currentState = ePlayerStatus.Stopped;
@@ -539,7 +558,7 @@ namespace OMPlayer
             private bool fullscreen = false;
             IntPtr drain = IntPtr.Zero;
             private delegate bool PositionCallback(float seconds);
-            private delegate int SpeedCallback(float rate);
+            private delegate bool SpeedCallback(float rate);
             private delegate bool VoidCallback();
             private delegate bool PlayCallback(string filename);
             private delegate void GetPositionCallback();
@@ -634,9 +653,8 @@ namespace OMPlayer
                 currentState = ePlayerStatus.Stopped;
                 if (isAudioOnly == false)
                 {
-                    //TODO
-                    //DsError.ThrowExceptionForHR(videoWindow.put_Visible(OABool.False));
-                    //DsError.ThrowExceptionForHR(videoWindow.put_Owner(IntPtr.Zero));
+                    if (m_pVideoDisplay != null)
+                        m_pVideoDisplay.SetVideoWindow(IntPtr.Zero);
                     for (int i = 0; i < theHost.ScreenCount; i++)
                         if (theHost.instanceForScreen(i) == this.instance)
                             theHost.sendMessage("UI", "OMPlayer2", "HideMediaControls" + i.ToString());
@@ -658,7 +676,14 @@ namespace OMPlayer
                         if (clock == null)
                             return;
                     }
-                    clock.GetTime(out time);
+                    try
+                    {
+                        clock.GetTime(out time);
+                    }
+                    catch (COMException)
+                    { 
+                        time = 0; 
+                    }
                     pos = time/10000000;
                 }
             }
@@ -694,112 +719,126 @@ namespace OMPlayer
             }
             private int ResizeVideo(int x,int y,int width, int height)
             {
-                int hr = S_Ok;
-                TRACE(string.Format("ResizeVideo: {0}x{1}", width, height));
-
                 if (m_pVideoDisplay != null)
                 {
-                    try
-                    {
-                        MFRect rcDest = new MFRect();
-                        MFVideoNormalizedRect nRect = new MFVideoNormalizedRect();
+                    MFRect rcDest = new MFRect();
+                    MFVideoNormalizedRect nRect = new MFVideoNormalizedRect();
 
-                        nRect.left = 0;
-                        nRect.right = 1;
-                        nRect.top = 0;
-                        nRect.bottom = 1;
-                        rcDest.left = x;
-                        rcDest.top = y;
-                        rcDest.right = width;
-                        rcDest.bottom = height;
+                    nRect.left = 0;
+                    nRect.right = 1;
+                    nRect.top = 0;
+                    nRect.bottom = 1;
+                    rcDest.left = x;
+                    rcDest.top = y;
+                    rcDest.right = width;
+                    rcDest.bottom = height;
 
-                        m_pVideoDisplay.SetVideoPosition(nRect, rcDest);
-                    }
-                    catch (Exception ce)
-                    {
-                        hr = Marshal.GetHRForException(ce);
-                    }
+                    return m_pVideoDisplay.SetVideoPosition(nRect, rcDest);
                 }
-
-                return hr;
+                return S_False;
             }
             public bool PlayMovieInWindow(string filename)
             {
                 try
                 {
                     // Create the media session.
-                    CreateSession();
+                    if (!CreateSession())
+                        return false;
 
                     // Create the media source.
-                    CreateMediaSource(filename);
+                    if (!CreateMediaSource(filename))
+                        return false;
 
                     IMFTopology pTopology;
                     // Create a partial topology.
-                    CreateTopologyFromSource(out pTopology);
+                    if (!CreateTopologyFromSource(out pTopology))
+                        return false;
 
                     // Set the topology on the media session.
-                    session.SetTopology(0, pTopology);
+                    if (session.SetTopology(0, pTopology)!=S_Ok)
+                        return false;
                 }
-                catch (Exception) { return false; }
+                catch (Exception e) { return false; }
                 currentState = ePlayerStatus.Playing;
                 return true;
             }
 
-            private void CreateTopologyFromSource(out IMFTopology ppTopology)
+            private bool CreateTopologyFromSource(out IMFTopology ppTopology)
             {
                 IMFTopology pTopology = null;
                 IMFPresentationDescriptor pSourcePD = null;
                 int cSourceStreams = 0;
-
+                int hr;
                 try
                 {
-                    MFExtern.MFCreateTopology(out pTopology);
-                    m_pSource.CreatePresentationDescriptor(out pSourcePD);
-                    pSourcePD.GetStreamDescriptorCount(out cSourceStreams);
+                    ppTopology = null;
+                    hr=MFExtern.MFCreateTopology(out pTopology);
+                    if (hr != S_Ok) return false;
+                    hr=m_pSource.CreatePresentationDescriptor(out pSourcePD);
+                    if (hr != S_Ok)
+                    {
+                        SafeRelease(pTopology);
+                        return false;
+                    }
+                    hr=pSourcePD.GetStreamDescriptorCount(out cSourceStreams);
+                    if (hr != S_Ok)
+                    {
+                        SafeRelease(pTopology);
+                        return false;
+                    }
                     for (int i = 0; i < cSourceStreams; i++)
-                        AddBranchToPartialTopology(pTopology, pSourcePD, i);
+                    {
+                        if (!AddBranchToPartialTopology(pTopology, pSourcePD, i))
+                        {
+                            SafeRelease(pTopology);
+                            return false;
+                        }
+                    }
                     ppTopology = pTopology;
-                }
-                catch
-                {
-                    SafeRelease(pTopology);
-                    throw;
+                    return true;
                 }
                 finally
                 {
                     SafeRelease(pSourcePD);
                 }
+                return true;
             }
 
-            private void AddBranchToPartialTopology(IMFTopology pTopology, IMFPresentationDescriptor pSourcePD, int iStream)
+            private bool AddBranchToPartialTopology(IMFTopology pTopology, IMFPresentationDescriptor pSourcePD, int iStream)
             {
                 IMFStreamDescriptor pSourceSD = null;
                 IMFTopologyNode pSourceNode = null;
                 IMFTopologyNode pOutputNode = null;
                 bool fSelected = false;
-
+                int hr;
                 try
                 {
                     // Get the stream descriptor for this stream.
-                    pSourcePD.GetStreamDescriptorByIndex(iStream, out fSelected, out pSourceSD);
-
+                    hr=pSourcePD.GetStreamDescriptorByIndex(iStream, out fSelected, out pSourceSD);
+                    if (hr != S_Ok) return false;
                     // Create the topology branch only if the stream is selected.
                     // Otherwise, do nothing.
                     if (fSelected)
                     {
                         // Create a source node for this stream.
-                        CreateSourceStreamNode(pSourcePD, pSourceSD, out pSourceNode);
+                        if (!CreateSourceStreamNode(pSourcePD, pSourceSD, out pSourceNode))
+                            return false;
 
                         // Create the output node for the renderer.
-                        CreateOutputNode(pSourceSD, out pOutputNode);
+                        if (!CreateOutputNode(pSourceSD, out pOutputNode))
+                            return false;
 
                         // Add both nodes to the topology.
-                        pTopology.AddNode(pSourceNode);
-                        pTopology.AddNode(pOutputNode);
-
+                        hr=pTopology.AddNode(pSourceNode);
+                        if (hr != S_Ok) return false;
+                        hr=pTopology.AddNode(pOutputNode);
+                        if (hr != S_Ok) return false;
                         // Connect the source node to the output node.
-                        pSourceNode.ConnectOutput(0, pOutputNode, 0);
+                        hr=pSourceNode.ConnectOutput(0, pOutputNode, 0);
+                        if (hr != S_Ok)
+                            return false;
                     }
+                    return true;
                 }
                 finally
                 {
@@ -810,62 +849,67 @@ namespace OMPlayer
                 }
             }
 
-            private void CreateOutputNode(IMFStreamDescriptor pSourceSD, out IMFTopologyNode ppNode)
+            private bool CreateOutputNode(IMFStreamDescriptor pSourceSD, out IMFTopologyNode ppNode)
             {
                 IMFTopologyNode pNode = null;
                 IMFMediaTypeHandler pHandler = null;
                 IMFActivate pRendererActivate = null;
 
                 Guid guidMajorType = Guid.Empty;
-                int hr = S_Ok;
+                int hr;
 
                 // Get the stream ID.
                 int streamID = 0;
 
                 try
                 {
-                    try
-                    {
-                        pSourceSD.GetStreamIdentifier(out streamID); // Just for debugging, ignore any failures.
-                    }
-                    catch
-                    {
-                        TRACE("IMFStreamDescriptor::GetStreamIdentifier" + hr.ToString());
-                    }
-
+                    ppNode = null;
+                    hr=pSourceSD.GetStreamIdentifier(out streamID); // Just for debugging, ignore any failures.
+                    if (hr != S_Ok) return false;
                     // Get the media type handler for the stream.
-                    pSourceSD.GetMediaTypeHandler(out pHandler);
-
+                    hr=pSourceSD.GetMediaTypeHandler(out pHandler);
+                    if (hr != S_Ok) return false;
                     // Get the major media type.
-                    pHandler.GetMajorType(out guidMajorType);
-
+                    hr=pHandler.GetMajorType(out guidMajorType);
+                    if (hr != S_Ok) return false;
                     // Create a downstream node.
-                    MFExtern.MFCreateTopologyNode(MFTopologyType.OutputNode, out pNode);
-
+                    hr=MFExtern.MFCreateTopologyNode(MFTopologyType.OutputNode, out pNode);
+                    if (hr != S_Ok) return false;
                     // Create an IMFActivate object for the renderer, based on the media type.
                     if (MFMediaType.Audio == guidMajorType)
+                    {
                         // Create the audio renderer.
-                        MFExtern.MFCreateAudioRendererActivate(out pRendererActivate);
+                        hr = MFExtern.MFCreateAudioRendererActivate(out pRendererActivate);
+                        if (hr != S_Ok)
+                        {
+                            SafeRelease(pNode);
+                            return false;
+                        }
+                    }
                     else if (MFMediaType.Video == guidMajorType)
                     {
                         // Create the video renderer.
                         IntPtr video = (IntPtr)VistaPlayer.theHost.UIHandle(getFirstScreen(instance));
-                        MFExtern.MFCreateVideoRendererActivate(video, out pRendererActivate);
+                        hr = MFExtern.MFCreateVideoRendererActivate(video, out pRendererActivate);
+                        if (hr != S_Ok)
+                        {
+                            SafeRelease(pNode);
+                            return false; 
+                        }
                     }
                     else
-                        throw new COMException("Unknown format", E_Fail);
+                        return false;
 
                     // Set the IActivate object on the output node.
-                    pNode.SetObject(pRendererActivate);
-
+                    hr=pNode.SetObject(pRendererActivate);
+                    if (hr != S_Ok)
+                    {
+                        SafeRelease(pNode);
+                        return false;
+                    }
                     // Return the IMFTopologyNode pointer to the caller.
                     ppNode = pNode;
-                }
-                catch
-                {
-                    // If we failed, release the pNode
-                    SafeRelease(pNode);
-                    throw;
+                    return true;
                 }
                 finally
                 {
@@ -875,37 +919,40 @@ namespace OMPlayer
                 }
             }
 
-            private void CreateSourceStreamNode(IMFPresentationDescriptor pSourcePD, IMFStreamDescriptor pSourceSD, out IMFTopologyNode ppNode)
+            private bool CreateSourceStreamNode(IMFPresentationDescriptor pSourcePD, IMFStreamDescriptor pSourceSD, out IMFTopologyNode ppNode)
             {
                 IMFTopologyNode pNode = null;
-
-                try
+                int hr;
+                ppNode = null;
+                // Create the source-stream node.
+                hr=MFExtern.MFCreateTopologyNode(MFTopologyType.SourcestreamNode, out pNode);
+                if (hr == S_Ok)
                 {
-                    // Create the source-stream node.
-                    MFExtern.MFCreateTopologyNode(MFTopologyType.SourcestreamNode, out pNode);
-
                     // Set attribute: Pointer to the media source.
-                    pNode.SetUnknown(MFAttributesClsid.MF_TOPONODE_SOURCE, m_pSource);
-
-                    // Set attribute: Pointer to the presentation descriptor.
-                    pNode.SetUnknown(MFAttributesClsid.MF_TOPONODE_PRESENTATION_DESCRIPTOR, pSourcePD);
-
-                    // Set attribute: Pointer to the stream descriptor.
-                    pNode.SetUnknown(MFAttributesClsid.MF_TOPONODE_STREAM_DESCRIPTOR, pSourceSD);
-
-                    // Return the IMFTopologyNode pointer to the caller.
-                    ppNode = pNode;
+                    hr = pNode.SetUnknown(MFAttributesClsid.MF_TOPONODE_SOURCE, m_pSource);
+                    if (hr == S_Ok)
+                    {
+                        // Set attribute: Pointer to the presentation descriptor.
+                        hr = pNode.SetUnknown(MFAttributesClsid.MF_TOPONODE_PRESENTATION_DESCRIPTOR, pSourcePD);
+                        if (hr == S_Ok)
+                        {
+                            // Set attribute: Pointer to the stream descriptor.
+                            hr = pNode.SetUnknown(MFAttributesClsid.MF_TOPONODE_STREAM_DESCRIPTOR, pSourceSD);
+                            if (hr == S_Ok)
+                            {
+                                // Return the IMFTopologyNode pointer to the caller.
+                                ppNode = pNode;
+                                return true;
+                            }
+                        }
+                    }
                 }
-                catch
-                {
-                    // If we failed, release the pnode
-                    SafeRelease(pNode);
-                    throw;
-                }
+                // If we failed, release the pnode
+                SafeRelease(pNode);
+                return false;
             }
-            bool pausable;
-            bool seekable;
-            private void CreateMediaSource(string filename)
+            
+            private bool CreateMediaSource(string filename)
             {
                 IMFSourceResolver pSourceResolver;
                 object pSource;
@@ -918,40 +965,46 @@ namespace OMPlayer
                     // Use the source resolver to create the media source.
                     MFObjectType ObjectType = MFObjectType.Invalid;
 
-                    pSourceResolver.CreateObjectFromURL(
+                    int hr=pSourceResolver.CreateObjectFromURL(
                             filename,                       // URL of the source.
                             MFResolution.MediaSource,   // Create a source object.
                             null,                       // Optional property store.
                             out ObjectType,             // Receives the created object type.
                             out pSource                 // Receives a pointer to the media source.
                         );
-
+                    if (hr != S_Ok)
+                        return false;
                     // Get the IMFMediaSource interface from the media source.
-                    m_pSource = (IMFMediaSource)pSource;
+                    m_pSource = pSource as IMFMediaSource;
                     object o;
                     MFExtern.MFGetService(session, MFServices.MF_RATE_CONTROL_SERVICE, typeof(IMFRateControl).GUID, out o);
-                    m_rateControl = (IMFRateControl)o;
+                    m_rateControl = o as IMFRateControl;
                 }
                 finally
                 {
                     // Clean up
                     Marshal.ReleaseComObject(pSourceResolver);
                 }
+                return true;
             }
 
-            private void CreateSession()
+            private bool CreateSession()
             {
                 CloseSession();
-                MFExtern.MFCreateMediaSession(null, out session);
-                session.BeginGetEvent(this, null);
+                int hr=MFExtern.MFCreateMediaSession(null, out session);
+                if (hr != S_Ok) return false;
+                hr=session.BeginGetEvent(this, null);
+                return (hr == S_Ok);
             }
-            void IMFAsyncCallback.GetParameters(out MFASync pdwFlags, out MFAsyncCallbackQueue pdwQueue)
+            int IMFAsyncCallback.GetParameters(out MFASync pdwFlags, out MFAsyncCallbackQueue pdwQueue)
             {
                 pdwFlags = MFASync.FastIOProcessingCallback;
                 pdwQueue = MFAsyncCallbackQueue.Standard;
+                return S_Ok;
             }
-            void IMFAsyncCallback.Invoke(IMFAsyncResult pResult)
+            int IMFAsyncCallback.Invoke(IMFAsyncResult pResult)
             {
+                int hr;
                 IMFMediaEvent pEvent = null;
                 MediaEventType meType = MediaEventType.MEUnknown;  // Event type
                 int hrStatus = 0;           // Event status
@@ -960,17 +1013,15 @@ namespace OMPlayer
                 try
                 {
                     // Get the event from the event queue.
-                    session.EndGetEvent(pResult, out pEvent);
-
+                    hr=session.EndGetEvent(pResult, out pEvent);
+                    MFError.ThrowExceptionForHR(hr);
                     // Get the event type.
-                    pEvent.GetType(out meType);
-
+                    hr=pEvent.GetType(out meType);
+                    MFError.ThrowExceptionForHR(hr);
                     // Get the event status. If the operation that triggered the event did
                     // not succeed, the status is a failure code.
-                    pEvent.GetStatus(out hrStatus);
-
-                    TRACE(string.Format("Media event: " + meType.ToString()));
-
+                    hr=pEvent.GetStatus(out hrStatus);
+                    MFError.ThrowExceptionForHR(hr);
                     // Check if the async operation succeeded.
                     if (Succeeded(hrStatus))
                     {
@@ -995,7 +1046,14 @@ namespace OMPlayer
                             case MediaEventType.MESessionStarted:
                                 OnSessionStarted(pEvent);
                                 break;
-
+                            case MediaEventType.MEAudioSessionDeviceRemoved:
+                            case MediaEventType.MEAudioSessionServerShutdown:
+                                stop();
+                                break;
+                            case MediaEventType.MESessionRateChanged:
+                                bool thin=true;
+                                m_rateControl.GetRate(ref thin, out currentPlaybackRate);
+                                break;
                             case MediaEventType.MESessionPaused:
                                 OnSessionPaused(pEvent);
                                 break;
@@ -1019,11 +1077,13 @@ namespace OMPlayer
                     // Request another event.
                     if ((meType != MediaEventType.MESessionClosed)&&(session!=null))
                     {
-                        session.BeginGetEvent(this, null);
+                        hr=session.BeginGetEvent(this, null);
+                        MFError.ThrowExceptionForHR(hr);
                     }
 
                     SafeRelease(pEvent);
                 }
+                return S_Ok; //<-this feels wrong
             }
 
             private void OnPresentationEnded(IMFMediaEvent pEvent)
@@ -1038,48 +1098,41 @@ namespace OMPlayer
             private void OnSessionStarted(IMFMediaEvent pEvent)
             {
                 currentState = ePlayerStatus.Playing;
+                clock = null;
+                if (m_volume == null)
+                {
+                    object o;
+                    MFExtern.MFGetService(session, MFServices.MR_POLICY_VOLUME_SERVICE, typeof(IMFSimpleAudioVolume).GUID, out o);
+                    m_volume = o as IMFSimpleAudioVolume;
+                }
             }
 
             private void OnTopologyReady(IMFMediaEvent pEvent)
             {
                 object o;
-                try
+                int hr=MFExtern.MFGetService(
+                    session,
+                    MFServices.MR_VIDEO_RENDER_SERVICE,
+                    typeof(IMFVideoDisplayControl).GUID,
+                    out o
+                    );
+                if (hr==S_Ok)
                 {
-                    MFExtern.MFGetService(
-                        session,
-                        MFServices.MR_VIDEO_RENDER_SERVICE,
-                        typeof(IMFVideoDisplayControl).GUID,
-                        out o
-                        );
-                    if (o != null)
-                    {
-                        isAudioOnly = false;
-                        m_pVideoDisplay = o as IMFVideoDisplayControl;
-                        Resize();
-                    }
-                    else
-                        isAudioOnly = true;
+                    isAudioOnly = false;
+                    m_pVideoDisplay = o as IMFVideoDisplayControl;
+                    //Resize();
                 }
-                catch (InvalidCastException)
-                {
-                    m_pVideoDisplay = null;
+                else
                     isAudioOnly = true;
-                }
-
-                try
-                {
-                    session.Start(Guid.Empty, new PropVariant());
-                }
-                catch (Exception ce)
-                {
-                    int hr = Marshal.GetHRForException(ce);
-                }
+                currentPlaybackRate = 1F;
+                session.Start(Guid.Empty, new PropVariant());
             }
 
             private void OnSessionClosed(IMFMediaEvent pEvent)
             {
                 currentState = ePlayerStatus.Stopped;
                 OnMediaEvent(eFunction.Stop, instance, "");
+                clock = null;
                 m_hCloseEvent.Set();
             }
 
@@ -1099,10 +1152,8 @@ namespace OMPlayer
 
                 if (session != null)
                 {
-                    session.Close();
-
-                    // Wait for the close operation to complete
-                    m_hCloseEvent.WaitOne(3000, true);
+                    if (session.Close()==S_Ok)
+                        m_hCloseEvent.WaitOne(3000, true);
                 }
 
                 // Complete shutdown operations
@@ -1119,6 +1170,12 @@ namespace OMPlayer
                     m_rateControl = null;
                 }
 
+                if (m_volume != null)
+                {
+                    SafeRelease(m_volume);
+                    m_volume = null;
+                }
+
                 if (session != null)
                 {
                     session.Shutdown();
@@ -1127,31 +1184,28 @@ namespace OMPlayer
                 }
             }
 
-            private int getFirstScreen(int instance)
-            {
-                for (int i = 0; i < theHost.ScreenCount; i++)
-                    if (theHost.instanceForScreen(i) == instance)
-                        return i;
-                return 0;
-            }
-            public int SetRate(float rate)
+            public bool SetRate(float rate)
             {
                 if (sink.InvokeRequired)
                 {
-                    return (int)sink.Invoke(OnSetRate, new object[] { rate });
+                    return (bool)sink.Invoke(OnSetRate, new object[] { rate });
                 }
                 else
                 {
-                    bool thin = true;
-                    m_rateControl.SetRate(thin, rate);
-                    m_rateControl.GetRate(ref thin, out currentPlaybackRate);
-                    return (rate == currentPlaybackRate)?-1:0;
+                    return (m_rateControl.SetRate(true, rate) == S_Ok);
                 }
             }
             public bool setVolume(int percent)
             {
-                return true;
-                //TODO
+                if (m_volume == null)
+                    return false;
+                if (m_volume.SetMasterVolume(percent / 100F) == S_Ok)
+                {
+                    currentVolume = percent;
+                    return true;
+                }
+                else
+                    return false;
             }
             private void waitForStop()
             {
@@ -1191,25 +1245,19 @@ namespace OMPlayer
             internal bool pause()
             {
                 if ((currentState == ePlayerStatus.Paused) || (currentState == ePlayerStatus.Stopped))
-                {
-                    session.Start(Guid.Empty,new PropVariant());
-                    return true;
-                }
+                    return (session.Start(Guid.Empty,new PropVariant())==S_Ok);
                 else
-                {
-                    session.Pause();
-                    return true;
-                }
+                    return (session.Pause()==S_Ok);
             }
 
             internal bool play()
             {
                 if (currentState==ePlayerStatus.Paused)
                 {
-                    session.Start(Guid.Empty, new PropVariant());
-                    return true;
+                    if (session.Start(Guid.Empty, new PropVariant()) == S_Ok)
+                        OnMediaEvent(eFunction.Play, instance, "");
                 }
-                else
+                else if(currentState==ePlayerStatus.Stopped)
                 {
                     if (!string.IsNullOrEmpty(nowPlaying.Location))
                         return theHost.execute(eFunction.Play, instance.ToString(), nowPlaying.Location);

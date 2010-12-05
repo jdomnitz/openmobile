@@ -790,7 +790,10 @@ namespace OpenMobile
 
         void RenderingWindow_Gesture(object sender, OpenMobile.Graphics.TouchEventArgs e)
         {
-            string gesture=e.Name+"|";
+            string gesture="";
+            if (e.GestureComplete)
+                gesture = "End";
+            gesture+=e.Name+"|";
             if (e.Name=="Rotate")
                 gesture+=e.Arg1.ToString()+"|";
             else
