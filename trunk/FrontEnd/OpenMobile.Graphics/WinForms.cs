@@ -79,12 +79,18 @@ namespace OpenMobile.Graphics
         double _arg1;
         string _arg2;
         Point _pos;
-        public TouchEventArgs(string name, Point pos,double arg1, string arg2)
+        bool _complete;
+        public TouchEventArgs(string name, Point pos,double arg1, string arg2,bool complete)
         {
             _name = name;
             _arg1 = arg1;
             _arg2 = arg2;
             _pos = pos;
+            _complete = complete;
+        }
+        public bool GestureComplete
+        {
+            get { return _complete; }
         }
         public Point Position
         {

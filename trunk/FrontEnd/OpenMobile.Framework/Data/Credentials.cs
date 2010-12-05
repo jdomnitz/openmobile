@@ -84,7 +84,7 @@ namespace OpenMobile.Data
         private static string uid;
         public static string getCredential(string credentialName)
         {
-            if (credentialName == null)
+            if (String.IsNullOrEmpty(credentialName))
                 return null;
             Open();
             lock (con)
@@ -141,6 +141,8 @@ namespace OpenMobile.Data
         public static void setCredential(string credentialName, string value)
         {
             if (value == null)
+                return;
+            if (String.IsNullOrEmpty(credentialName))
                 return;
             Open();
             lock (con)

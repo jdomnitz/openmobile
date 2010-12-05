@@ -561,12 +561,16 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         public static string getFramework()
         {
-            #if (WINDOWS)
+            #if (LINUX||OSX)
+            #if WINDOWS
             if (IsMono())
             #endif
                 return getMonoVersion();
+            #endif
             #if WINDOWS
+            #if (LINUX||OSX)
             else
+            #endif
                 return Windows.getNetFramework();
             #endif
         }

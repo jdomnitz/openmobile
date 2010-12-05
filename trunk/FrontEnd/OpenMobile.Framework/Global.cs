@@ -1002,10 +1002,14 @@ namespace OpenMobile
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen</para>
         /// <para>Arg2: Gesture</para>
-        /// <para>Possible Gestures:</para>
+        /// <para>---Possible Gestures:---</para>
         /// <para>Pan|Distance Between Fingers|Current Position</para>
         /// <para>Zoom|Distance Between Fingers|Center of gesture</para>
         /// <para>Rotate|Radians|Center of gesture</para>
+        /// <para>----Gesture Complete:---</para>
+        /// <para>EndPan|Distance Between Fingers|Current Position</para>
+        /// <para>EndZoom|Distance Between Fingers|Center of gesture</para>
+        /// <para>EndRotate|Radians|Center of gesture</para>
         /// <para>Arg3: Plugin (The name of the plugin with the top most panel)</para>
         /// </summary>
         multiTouchGesture=101,
