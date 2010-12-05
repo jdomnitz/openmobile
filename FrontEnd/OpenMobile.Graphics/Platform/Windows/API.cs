@@ -112,7 +112,7 @@ namespace OpenMobile.Platform.Windows
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool SetWindowPos(
+        public static extern bool SetWindowPos(
             IntPtr handle,
             IntPtr insertAfter,
             int x, int y, int cx, int cy,
@@ -683,7 +683,7 @@ namespace OpenMobile.Platform.Windows
         /// </list>
         /// </remarks>
         [DllImport("user32.dll", SetLastError = true), SuppressUnmanagedCodeSecurity]
-        internal static extern BOOL ShowWindow(HWND hWnd, ShowWindowCommand nCmdShow);
+        public static extern BOOL ShowWindow(HWND hWnd, ShowWindowCommand nCmdShow);
 
         #endregion
 
@@ -1872,7 +1872,7 @@ namespace OpenMobile.Platform.Windows
     #region internal enum SetWindowPosFlags
 
     [Flags]
-    internal enum SetWindowPosFlags : int
+    public enum SetWindowPosFlags : int
     {
         /// <summary>
         /// Retains the current size (ignores the cx and cy parameters).
@@ -2847,7 +2847,9 @@ namespace OpenMobile.Platform.Windows
         SWAP_LAYER_BUFFERS = 0x800,
         GENERIC_ACCELERATED = 0x1000,
         SUPPORT_DIRECTDRAW = 0x2000,
-
+        //-- Vista --
+        DIRECT3D_ACCELERATED = 0x4000,
+        SUPPORT_COMPOSITION=0x8000,
         // PixelFormatDescriptor flags for use in ChoosePixelFormat only
         DEPTH_DONTCARE = unchecked((int)0x20000000),
         DOUBLEBUFFER_DONTCARE = unchecked((int)0x40000000),
@@ -3718,7 +3720,7 @@ namespace OpenMobile.Platform.Windows
     /// <summary>
     /// ShowWindow() Commands
     /// </summary>
-    internal enum ShowWindowCommand
+    public enum ShowWindowCommand
     {
         /// <summary>
         /// Hides the window and activates another window.

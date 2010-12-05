@@ -829,6 +829,10 @@ namespace OpenMobile
             widthScale = (this.ClientRectangle.Width / 1000F);
             totalScale = (float)Math.Sqrt(Math.Pow(heightScale, 2) + Math.Pow(widthScale, 2));
             OnRenderFrameInternal();
+            SandboxedThread.Asynchronous(raiseResize);
+        }
+        private void raiseResize()
+        {
             Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
         }
         #endregion

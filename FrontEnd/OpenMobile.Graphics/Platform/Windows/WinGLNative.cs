@@ -129,7 +129,7 @@ namespace OpenMobile.Platform.Windows
         #region Private Members
 
         #region WindowProcedure
-
+        bool queueResize = false;
         IntPtr WindowProcedure(IntPtr handle, WindowMessage message, IntPtr wParam, IntPtr lParam)
         {
             switch (message)
@@ -149,6 +149,11 @@ namespace OpenMobile.Platform.Windows
                     // ExitingmModal size/move loop: the timer callback is no longer
                     // necessary.
                     StopTimer(handle);
+                    if ((queueResize) && (Resize != null))
+                    {
+                        Resize(this, EventArgs.Empty);
+                        queueResize = false;
+                    }
                     break;
 
                 case WindowMessage.ERASEBKGND:
@@ -180,8 +185,8 @@ namespace OpenMobile.Platform.Windows
                                     SetWindowPosFlags.NOZORDER | SetWindowPosFlags.NOOWNERZORDER |
                                     SetWindowPosFlags.NOACTIVATE | SetWindowPosFlags.NOSENDCHANGING);
 
-                                if (suppress_resize <= 0 && Resize != null)
-                                    Resize(this, EventArgs.Empty);
+                                if (suppress_resize <= 0)
+                                    queueResize=true;
                             }
                         }
                     }
@@ -227,6 +232,8 @@ namespace OpenMobile.Platform.Windows
                         windowState = new_state;
                         if (WindowStateChanged != null)
                             WindowStateChanged(this, EventArgs.Empty);
+                        if (Resize != null)
+                            Resize(this, EventArgs.Empty);
                     }
 
                     break;
@@ -234,16 +241,6 @@ namespace OpenMobile.Platform.Windows
                 #endregion
 
                 #region Input events
-
-                /*case WindowMessage.CHAR:
-                    if (IntPtr.Size == 4)
-                        key_press.KeyChar = (char)wParam.ToInt32();
-                    else
-                        key_press.KeyChar = (char)wParam.ToInt64();
-
-                    if (KeyPress != null)
-                        KeyPress(this, key_press);
-                    break;*/
                 case WindowMessage.GESTURE:
                     return gestureDecoder(handle, message, wParam, lParam);
                 case WindowMessage.MOUSEMOVE:
