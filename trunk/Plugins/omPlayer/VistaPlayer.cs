@@ -138,12 +138,12 @@ namespace OMPlayer
                     oldPlayer.instance = -1;
                     if (OnMediaEvent != null)
                         OnMediaEvent(function, instance, arg);
-                    for (int i = 10; i >= 0; i--)
+                    for (int i = 9; i >= 0; i--)
                     {
                         if (player[instance] != null)
                             player[instance].setVolume((10 - i) * 10);
                         oldPlayer.setVolume(i * 10);
-                        Thread.Sleep(crossfade / 10);
+                        Thread.Sleep(crossfade / 9);
                     }
                     oldPlayer.OnMediaEvent -= forwardEvent;
                     return;
@@ -532,7 +532,7 @@ namespace OMPlayer
             public IMFVideoDisplayControl m_pVideoDisplay;
             AutoResetEvent m_hCloseEvent;
             IMFRateControl m_rateControl;
-            IMFSimpleAudioVolume m_volume;
+            IMFAudioStreamVolume m_volume;
             //
             public float currentPlaybackRate = 1F;
             public ePlayerStatus currentState = ePlayerStatus.Stopped;
@@ -1107,8 +1107,8 @@ namespace OMPlayer
                 if (m_volume == null)
                 {
                     object o;
-                    MFExtern.MFGetService(session, MFServices.MR_POLICY_VOLUME_SERVICE, typeof(IMFSimpleAudioVolume).GUID, out o);
-                    m_volume = o as IMFSimpleAudioVolume;
+                    MFExtern.MFGetService(session, MFServices.MR_STREAM_VOLUME_SERVICE, typeof(IMFAudioStreamVolume).GUID, out o);
+                    m_volume = o as IMFAudioStreamVolume;
                 }
                 if (!isAudioOnly)
                 {
@@ -1210,32 +1210,57 @@ namespace OMPlayer
             {
                 if (m_volume == null)
                     return false;
-                if (m_volume.SetMasterVolume(percent / 100F) == S_Ok)
+                int count;
+                try
                 {
-                    currentVolume = percent;
-                    return true;
+                    if (m_volume.GetChannelCount(out count) != S_Ok)
+                        return false;
+                    if (count == 0)
+                        return false;
+                    float[] vols = new float[count];
+                    for (int i = 0; i < vols.Length; i++)
+                        vols[i] = percent / 100F;
+                    IntPtr volPtr;
+                    unsafe
+                    {
+                        fixed(float* vol = vols)
+                        volPtr = new IntPtr((void*)vol);
+                    }
+                    if (m_volume.SetAllVolumes(count, volPtr) == S_Ok)
+                    {
+                        currentVolume = percent;
+                        return true;
+                    }
+                    else
+                        return false;
                 }
-                else
+                catch
+                {
                     return false;
+                }
             }
             private void waitForStop()
             {
-                if (m_pSource != null)
+                try
                 {
-                    while (instance >= 0)
+                    if (m_pSource != null)
                     {
-                        Thread.Sleep(1000);
-                        if (m_pSource != null)
+                        while (instance >= 0)
                         {
-                            if (currentState!=ePlayerStatus.Stopped)
-                                sink.Invoke(OnGetPosition);
-                            if ((crossfade > 0) && (isAudioOnly) && ((int)pos == nowPlaying.Length - (crossfade / 1000)))
+                            Thread.Sleep(1000);
+                            if (m_pSource != null)
                             {
-                                OnMediaEvent(eFunction.nextMedia, instance, "");
+                                if (currentState != ePlayerStatus.Stopped)
+                                    sink.Invoke(OnGetPosition);
+                                if ((crossfade > 0) && (isAudioOnly) && ((int)pos == nowPlaying.Length - (crossfade / 1000)))
+                                {
+                                    OnMediaEvent(eFunction.nextMedia, instance, "");
+                                }
                             }
                         }
                     }
                 }
+                catch (Exception) { }
                 t = null;
             }
 
