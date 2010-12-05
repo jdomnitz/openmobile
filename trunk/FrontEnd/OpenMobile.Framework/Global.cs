@@ -1626,7 +1626,7 @@ namespace OpenMobile
         /// <summary>
         /// Satellite Radio
         /// </summary>
-        SiriusXM=5,
+        XM=5,
         /// <summary>
         /// Over the air TV
         /// </summary>
@@ -1638,7 +1638,11 @@ namespace OpenMobile
         /// <summary>
         /// Internet Radio
         /// </summary>
-        Internet=8
+        Internet=8,
+        /// <summary>
+        /// Satellite Radio
+        /// </summary>
+        Sirius=9
     }
 #pragma warning disable 0659
     /// <summary>
