@@ -39,7 +39,7 @@ namespace OMPlayer
     public sealed class VistaPlayer : IAVPlayer
     {
         // Fields
-        private AVPlayer[] player;
+        internal static AVPlayer[] player;
         private static IPluginHost theHost;
         static int WM_LBUTTONUP = 0x0202;
 
@@ -222,6 +222,8 @@ namespace OMPlayer
             else if (function == eFunction.RenderingWindowResized)
             {
                 int inst = theHost.instanceForScreen(int.Parse(arg1));
+                if (inst >= player.Length)
+                    return;
                 if (player[inst] != null)
                     player[inst].Resize();
             }
@@ -381,26 +383,13 @@ namespace OMPlayer
             checkInstance(instance);
             if (player[instance].m_pVideoDisplay == null)
                 return false;
-            IntPtr current;
-            player[instance].m_pVideoDisplay.GetVideoWindow(out current);
+            bool currentlyVisible=OpenMobile.Platform.Windows.Functions.IsWindowVisible(player[instance].drain);
+            if (visible==currentlyVisible)
+                return false;
             if (visible)
-                player[instance].m_pVideoDisplay.SetVideoWindow((IntPtr)theHost.UIHandle(getFirstScreen(instance)));
+                return OpenMobile.Platform.Windows.Functions.ShowWindow(player[instance].drain,OpenMobile.Platform.Windows.ShowWindowCommand.SHOW);
             else
-                player[instance].m_pVideoDisplay.SetVideoWindow(IntPtr.Zero);
-            if (current == IntPtr.Zero)
-            {
-                if (visible)
-                    return true;
-                else
-                    return false;
-            }
-            else
-            {
-                if (visible)
-                    return false;
-                else
-                    return true;
-            }
+                return OpenMobile.Platform.Windows.Functions.ShowWindow(player[instance].drain,OpenMobile.Platform.Windows.ShowWindowCommand.HIDE);
         }
         public bool play(int instance)
         {
@@ -556,7 +545,7 @@ namespace OMPlayer
             private Thread t;
             private MessageProc sink;
             private bool fullscreen = false;
-            IntPtr drain = IntPtr.Zero;
+            public IntPtr drain = IntPtr.Zero;
             private delegate bool PositionCallback(float seconds);
             private delegate bool SpeedCallback(float rate);
             private delegate bool VoidCallback();
@@ -649,8 +638,6 @@ namespace OMPlayer
                 }
                 if (session==null)
                     return false;
-                CloseSession();
-                currentState = ePlayerStatus.Stopped;
                 if (isAudioOnly == false)
                 {
                     if (m_pVideoDisplay != null)
@@ -659,7 +646,8 @@ namespace OMPlayer
                         if (theHost.instanceForScreen(i) == this.instance)
                             theHost.sendMessage("UI", "OMPlayer2", "HideMediaControls" + i.ToString());
                 }
-                isAudioOnly = true;
+                CloseSession();
+                currentState = ePlayerStatus.Stopped;
                 return true;
             }
             IMFPresentationClock clock;
@@ -719,20 +707,21 @@ namespace OMPlayer
             }
             private int ResizeVideo(int x,int y,int width, int height)
             {
+                MFRect rcDest = new MFRect();
+                rcDest.left = 0;
+                rcDest.top = 0;
+                rcDest.right = width;
+                rcDest.bottom = height;
+                if (!OpenMobile.Platform.Windows.Functions.SetWindowPos(drain, IntPtr.Zero, x, y, width, height, OpenMobile.Platform.Windows.SetWindowPosFlags.NOACTIVATE))
+                    return S_False;
                 if (m_pVideoDisplay != null)
                 {
-                    MFRect rcDest = new MFRect();
                     MFVideoNormalizedRect nRect = new MFVideoNormalizedRect();
 
                     nRect.left = 0;
                     nRect.right = 1;
                     nRect.top = 0;
                     nRect.bottom = 1;
-                    rcDest.left = x;
-                    rcDest.top = y;
-                    rcDest.right = width;
-                    rcDest.bottom = height;
-
                     return m_pVideoDisplay.SetVideoPosition(nRect, rcDest);
                 }
                 return S_False;
@@ -889,8 +878,11 @@ namespace OMPlayer
                     else if (MFMediaType.Video == guidMajorType)
                     {
                         // Create the video renderer.
-                        IntPtr video = (IntPtr)VistaPlayer.theHost.UIHandle(getFirstScreen(instance));
-                        hr = MFExtern.MFCreateVideoRendererActivate(video, out pRendererActivate);
+                        IntPtr rw = (IntPtr)VistaPlayer.theHost.UIHandle(getFirstScreen(instance));
+                        OpenMobile.Platform.Windows.Functions.SetParent(drain, rw);
+                        Resize();
+                        sink.Show();
+                        hr = MFExtern.MFCreateVideoRendererActivate(drain, out pRendererActivate);
                         if (hr != S_Ok)
                         {
                             SafeRelease(pNode);
@@ -1093,6 +1085,8 @@ namespace OMPlayer
                     SafeThread.Asynchronous(delegate() { OnMediaEvent(eFunction.nextMedia, instance, ""); }, VistaPlayer.theHost);
                 else
                     stop();
+                if (!isAudioOnly)
+                    OpenMobile.Platform.Windows.Functions.ShowWindow(drain, OpenMobile.Platform.Windows.ShowWindowCommand.HIDE);
             }
 
             private void OnSessionStarted(IMFMediaEvent pEvent)
@@ -1104,6 +1098,12 @@ namespace OMPlayer
                     object o;
                     MFExtern.MFGetService(session, MFServices.MR_POLICY_VOLUME_SERVICE, typeof(IMFSimpleAudioVolume).GUID, out o);
                     m_volume = o as IMFSimpleAudioVolume;
+                }
+                if (!isAudioOnly)
+                {
+                    for (int i = 0; i < theHost.ScreenCount; i++)
+                        if (theHost.instanceForScreen(i) == this.instance)
+                            theHost.sendMessage("UI", "OMPlayer2", "ShowMediaControls" + i.ToString());
                 }
             }
 
@@ -1120,7 +1120,7 @@ namespace OMPlayer
                 {
                     isAudioOnly = false;
                     m_pVideoDisplay = o as IMFVideoDisplayControl;
-                    //Resize();
+                    Resize();
                 }
                 else
                     isAudioOnly = true;
@@ -1268,6 +1268,12 @@ namespace OMPlayer
 
         public sealed class MessageProc : Form
         {
+            public MessageProc()
+            {
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.BackColor = System.Drawing.Color.Black;
+                OpenMobile.Platform.Windows.Functions.ShowCursor(false);
+            }
             public new delegate void Click();
             public new Click OnClick;
             protected override void WndProc(ref Message m)
