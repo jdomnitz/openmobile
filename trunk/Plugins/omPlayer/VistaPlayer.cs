@@ -33,7 +33,7 @@ using OpenMobile.Media;
 using OpenMobile.Plugin;
 using OpenMobile.Threading;
 using System.Diagnostics;
-using OSSpecificLib.CoreAudioApi;
+using VistaAudio.CoreAudioApi;
 
 namespace OMPlayer
 {

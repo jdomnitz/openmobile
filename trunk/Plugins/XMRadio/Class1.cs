@@ -83,7 +83,7 @@ namespace XMRadio
 
         public eTunedContentBand[] getSupportedBands(int instance)
         {
-            return new eTunedContentBand[]{eTunedContentBand.SiriusXM};
+            return new eTunedContentBand[]{eTunedContentBand.XM};
         }
 
         public bool setPowerState(int instance, bool powerState)
@@ -100,13 +100,13 @@ namespace XMRadio
 
         public bool setBand(int instance, eTunedContentBand band)
         {
-            return (band==eTunedContentBand.SiriusXM);
+            return (band==eTunedContentBand.XM);
         }
 
         public tunedContentInfo getStatus(int instance)
         {
             tunedContentInfo info = new tunedContentInfo();
-            info.band = eTunedContentBand.SiriusXM;
+            info.band = eTunedContentBand.XM;
             info.channels = 2;
             info.currentStation = getStationInfo(instance);
             if (router == null)

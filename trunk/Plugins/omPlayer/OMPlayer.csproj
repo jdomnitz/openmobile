@@ -105,14 +105,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DirectShowLib-2005, Version=2.0.0.0, Culture=neutral, PublicKeyToken=67e7b740cdfc2d3f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\DirectShowLib-2005.dll</HintPath>
-    </Reference>
-    <Reference Include="MediaFoundation, Version=1.1.0.0, Culture=neutral, PublicKeyToken=36fa660e1d6ebf8d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\MediaFoundation.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -120,6 +112,14 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="VistaAudio, Version=1.1.0.24056, Culture=neutral, PublicKeyToken=734135321ceb880a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\VistaAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsAudio, Version=2.1.0.24045, Culture=neutral, PublicKeyToken=5c1e0449be32c54f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\WindowsAudio.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CDDB.cs" />
@@ -132,18 +132,6 @@
     <Compile Include="CDDB\Ripper\CDDrive.cs" />
     <Compile Include="CDDB\Ripper\CDDriveEvents.cs" />
     <Compile Include="CDDB\Ripper\Win32Functions.cs" />
-    <Compile Include="CoreAudio\Interfaces\IMMDevice.cs" />
-    <Compile Include="CoreAudio\Interfaces\IMMDeviceCollection.cs" />
-    <Compile Include="CoreAudio\Interfaces\IMMDeviceEnumerator.cs" />
-    <Compile Include="CoreAudio\Interfaces\IPropertyStore.cs" />
-    <Compile Include="CoreAudio\Interfaces\Structs.cs" />
-    <Compile Include="CoreAudio\MMDevice.cs" />
-    <Compile Include="CoreAudio\MMDeviceCollection.cs" />
-    <Compile Include="CoreAudio\MMDeviceEnumerator.cs" />
-    <Compile Include="CoreAudio\PropertyStore.cs" />
-    <Compile Include="CoreAudio\PropertyStoreProperty.cs" />
-    <Compile Include="CoreAudio\PropVariant.cs" />
-    <Compile Include="CoreAudio\Structs.cs" />
     <Compile Include="MainForm.cs">
     </Compile>
     <Compile Include="VistaPlayer.cs">
