@@ -22,7 +22,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using OpenMobile;
-using OSSpecificLib.CoreAudioApi;
+using VistaAudio.CoreAudioApi;
 using System.Management;
 using WaveLib.AudioMixer;
 using System.Windows.Forms;

@@ -43,35 +43,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <Reference Include="VistaAudio, Version=1.1.0.24056, Culture=neutral, PublicKeyToken=734135321ceb880a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\omPlayer\VistaAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsAudio, Version=2.1.0.25839, Culture=neutral, PublicKeyToken=5c1e0449be32c54f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\omPlayer\WindowsAudio.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoreAudio\AudioEndpointVolume.cs" />
-    <Compile Include="CoreAudio\AudioEndpointVolumeCallback.cs" />
-    <Compile Include="CoreAudio\AudioEndpointVolumeNotificationDelegate.cs" />
-    <Compile Include="CoreAudio\AudioEndPointVolumeVolumeRange.cs" />
-    <Compile Include="CoreAudio\AudioVolumeNotificationData.cs" />
-    <Compile Include="CoreAudio\Interfaces\AUDIO_VOLUME_NOTIFICATION_DATA.cs" />
-    <Compile Include="CoreAudio\Interfaces\IAudioBass.cs" />
-    <Compile Include="CoreAudio\Interfaces\IAudioEndpointVolume.cs" />
-    <Compile Include="CoreAudio\Interfaces\IAudioEndpointVolumeCallback.cs" />
-    <Compile Include="CoreAudio\Interfaces\IMMDevice.cs" />
-    <Compile Include="CoreAudio\Interfaces\IMMDeviceCollection.cs" />
-    <Compile Include="CoreAudio\Interfaces\IMMDeviceEnumerator.cs" />
-    <Compile Include="CoreAudio\Interfaces\IMMEndpoint.cs" />
-    <Compile Include="CoreAudio\Interfaces\IPropertyStore.cs" />
-    <Compile Include="CoreAudio\Interfaces\Structs.cs" />
-    <Compile Include="CoreAudio\MMDevice.cs" />
-    <Compile Include="CoreAudio\MMDeviceCollection.cs" />
-    <Compile Include="CoreAudio\MMDeviceEnumerator.cs" />
-    <Compile Include="CoreAudio\PropertyStore.cs" />
-    <Compile Include="CoreAudio\PropertyStoreProperty.cs" />
-    <Compile Include="CoreAudio\PropVariant.cs" />
-    <Compile Include="CoreAudio\Structs.cs" />
     <Compile Include="DriveHandler.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -105,18 +88,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="XP Audio\AudioMixer\CallbackWindow.cs" />
-    <Compile Include="XP Audio\AudioMixer\Mixer.cs" />
-    <Compile Include="XP Audio\AudioMixer\MixerControl.cs" />
-    <Compile Include="XP Audio\AudioMixer\MixerControls.cs" />
-    <Compile Include="XP Audio\AudioMixer\MixerDetail.cs" />
-    <Compile Include="XP Audio\AudioMixer\MixerDetails.cs" />
-    <Compile Include="XP Audio\AudioMixer\MixerException.cs" />
-    <Compile Include="XP Audio\AudioMixer\MixerLine.cs" />
-    <Compile Include="XP Audio\AudioMixer\MixerLines.cs" />
-    <Compile Include="XP Audio\AudioMixer\MixerNative.cs" />
-    <Compile Include="XP Audio\AudioMixer\Mixers.cs" />
-    <Compile Include="XP Audio\WaveNative.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">
