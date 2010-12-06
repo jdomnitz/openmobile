@@ -553,6 +553,9 @@ namespace OpenMobile
                     {
                         if (b.Visible == true)
                         {
+                            if (typeof(INotClickable).IsInstanceOfType(b))
+                                if (!((INotClickable)b).IsPointClickable((int)(e.X / widthScale), (int)(e.Y / widthScale)))
+                                    continue;
                             rParam.currentMode = eModeType.Highlighted;
                             if ((b.Mode == eModeType.Normal))
                                 b.Mode = eModeType.Highlighted;

@@ -64,6 +64,7 @@
     <Compile Include="Controls\IKeyboard.cs" />
     <Compile Include="Controls\IList.cs" />
     <Compile Include="Controls\IMouse.cs" />
+    <Compile Include="Controls\INotClickable.cs" />
     <Compile Include="Controls\IThrow.cs" />
     <Compile Include="Controls\OMAnimatedLabel.cs" />
     <Compile Include="Controls\OMBasicShape.cs" />

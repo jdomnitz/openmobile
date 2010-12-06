@@ -167,7 +167,16 @@ namespace OpenMobile.Graphics
         {
             implementation.DrawPolygon(pen, points);
         }
-
+        public void PastePixels(IntPtr pixels, int x, int y, int width, int height)
+        {
+            Raw.DrawPixels(width, height, PixelFormat.Bgra, PixelType.UnsignedInt8888, pixels);
+        }
+        public IntPtr CopyPixels(int x, int y, int width, int height)
+        {
+            IntPtr ret=IntPtr.Zero;
+            Raw.ReadPixels(x, y, width, height, PixelFormat.Bgra, PixelType.UnsignedInt8888, ret);
+            return ret;
+        }
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
         {
             implementation.DrawRectangle(pen, x, y, width, height);
