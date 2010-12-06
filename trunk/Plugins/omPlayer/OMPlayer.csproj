@@ -131,6 +131,18 @@
     <Compile Include="CDDB\Ripper\CDDrive.cs" />
     <Compile Include="CDDB\Ripper\CDDriveEvents.cs" />
     <Compile Include="CDDB\Ripper\Win32Functions.cs" />
+    <Compile Include="CoreAudio\Interfaces\IMMDevice.cs" />
+    <Compile Include="CoreAudio\Interfaces\IMMDeviceCollection.cs" />
+    <Compile Include="CoreAudio\Interfaces\IMMDeviceEnumerator.cs" />
+    <Compile Include="CoreAudio\Interfaces\IPropertyStore.cs" />
+    <Compile Include="CoreAudio\Interfaces\Structs.cs" />
+    <Compile Include="CoreAudio\MMDevice.cs" />
+    <Compile Include="CoreAudio\MMDeviceCollection.cs" />
+    <Compile Include="CoreAudio\MMDeviceEnumerator.cs" />
+    <Compile Include="CoreAudio\PropertyStore.cs" />
+    <Compile Include="CoreAudio\PropertyStoreProperty.cs" />
+    <Compile Include="CoreAudio\PropVariant.cs" />
+    <Compile Include="CoreAudio\Structs.cs" />
     <Compile Include="MainForm.cs">
     </Compile>
     <Compile Include="VistaPlayer.cs">

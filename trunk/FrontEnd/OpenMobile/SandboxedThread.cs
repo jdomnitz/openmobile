@@ -140,7 +140,7 @@ namespace OpenMobile
             #if DEBUG
             Debug.Print(message);
             #endif
-            int index = Core.pluginCollection.FindIndex(p => p.pluginName == e.Source);
+            int index = Core.pluginCollection.FindIndex(p => ((p!=null)&&(p.pluginName == e.Source)));
             IBasePlugin sample = null;
             if (index > -1)
                 sample = Core.pluginCollection[index];

@@ -246,9 +246,11 @@ namespace OMPlayer
     MessageProc sink;
     private delegate void CreateNewPlayer(int instance);
     private event CreateNewPlayer OnPlayerRequested;
+    bool vistaMode = false;
     public eLoadStatus initialize(IPluginHost host)
     {
-        if (Environment.OSVersion.Version.Major > 5) //Only if MF isn't available
+        vistaMode=Environment.OSVersion.Version.Major > 5;
+        if (vistaMode) //Only if MF isn't available
             return eLoadStatus.LoadFailedGracefulUnloadRequested;
         theHost = host;
         sink = new MessageProc();
@@ -542,6 +544,10 @@ namespace OMPlayer
         {
             if (array == null)
             {
+                if (theHost == null)
+                    vistaMode = (Environment.OSVersion.Version.Major > 5);
+                if (vistaMode)
+                    return new string[0];
                 DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
                 List<string> lst = new List<string>();
                 for (int i = 0; i < d.Length; i++)

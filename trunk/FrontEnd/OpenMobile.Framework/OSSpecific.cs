@@ -535,7 +535,7 @@ namespace OpenMobile.Framework
                         return "Network Drive (" + info.Name + ")";
                     return info.Name;
                 }
-                return info.VolumeLabel + " (" + info.Name + ")";
+                return info.VolumeLabel.Replace('_',' ') + " (" + info.Name + ")";
             }
             #endif
             #if LINUX
