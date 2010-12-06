@@ -191,7 +191,11 @@ namespace OpenMobile
             {
                 foreach (IBasePlugin player in Core.pluginCollection.FindAll(p => typeof(IAVPlayer).IsInstanceOfType(p) == true))
                 {
-                    devs = ((IAVPlayer)player).OutputDevices;
+                    try
+                    {
+                        devs = ((IAVPlayer)player).OutputDevices;
+                    }
+                    catch (Exception) { }
                     if (devs.Length == 0)
                         continue;
                 }
