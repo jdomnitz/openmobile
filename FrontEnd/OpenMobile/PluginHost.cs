@@ -171,7 +171,7 @@ namespace OpenMobile
                 return 0;
             return instance[screen] - 1;
         }
-
+        static string[] devices;
         private static int getInstance(int screen)
         {
             string str;
@@ -179,18 +179,31 @@ namespace OpenMobile
                 str = settings.getSetting("Screen" + (screen + 1).ToString() + ".SoundCard");
             if (str.Length == 0)
                 return 0;
-            string[] devs;
+            if (devices == null)
+                if (!refreshDevices())
+                    return 0;
+            return Array.FindIndex(devices, p => p.Replace("  ", " ") == str) + 1;
+        }
+        private static bool refreshDevices()
+        {
+            string[] devs = new string[0];
             try
             {
-                IBasePlugin player = Core.pluginCollection.Find(p => typeof(IAVPlayer).IsInstanceOfType(p) == true);
-                if (player == null)
-                    return 0;
-                devs = ((IAVPlayer)player).OutputDevices;
+                foreach (IBasePlugin player in Core.pluginCollection.FindAll(p => typeof(IAVPlayer).IsInstanceOfType(p) == true))
+                {
+                    devs = ((IAVPlayer)player).OutputDevices;
+                    if (devs.Length == 0)
+                        continue;
+                }
             }
-            catch (NullReferenceException) { return 0; }
-            return Array.FindIndex(devs, p => p.Replace("  ", " ") == str) + 1;
+            catch (NullReferenceException e) { }
+            if (devs.Length > 0)
+            {
+                devices = devs;
+                return true;
+            }
+            return false;
         }
-
         public string SkinPath
         {
             get
@@ -657,16 +670,18 @@ namespace OpenMobile
                 screenCount = value;
             }
         }
+
         public int InstanceCount
         {
             get
             {
                 if (instanceCount == -1)
-                    try
-                    {
-                        instanceCount = ((IAVPlayer)Core.pluginCollection.Find(p => typeof(IAVPlayer).IsInstanceOfType(p) == true)).OutputDevices.Length;
-                    }
-                    catch (Exception) { return -1; }
+                {
+                    if (refreshDevices())
+                        instanceCount = devices.Length;
+                    else
+                        return -1;
+                }
                 return instanceCount;
             }
         }
@@ -1663,11 +1678,7 @@ namespace OpenMobile
                     data = cInf;
                     return;
                 case eGetData.GetAudioDevices:
-                    try
-                    {
-                        data = ((IAVPlayer)Core.pluginCollection.Find(p => typeof(IAVPlayer).IsInstanceOfType(p) == true)).OutputDevices;
-                    }
-                    catch (Exception) { }
+                    data= devices;
                     return;
                 case eGetData.GetAvailableSkins:
                     string[] ret = Directory.GetDirectories(Path.Combine(Application.StartupPath, "Skins"));

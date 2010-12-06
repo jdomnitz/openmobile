@@ -33,6 +33,7 @@ using OpenMobile.Media;
 using OpenMobile.Plugin;
 using OpenMobile.Threading;
 using System.Diagnostics;
+using OSSpecificLib.CoreAudioApi;
 
 namespace OMPlayer
 {
@@ -259,6 +260,7 @@ namespace OMPlayer
                 string cf = setting.getSetting("Music.CrossfadeDuration");
                 if (cf != "")
                     crossfade = int.Parse(cf);
+                array = OutputDevices;
                 if (setting.getSetting("Music.AutoResume") == "True")
                 {
                     OpenMobile.Threading.SafeThread.Asynchronous(delegate()
@@ -483,12 +485,20 @@ namespace OMPlayer
         }
 
         static string[] array;
+        static MMDeviceCollection devices;
         public string[] OutputDevices
         {
             get
             {
-				//TODO
-                return new string[] { "Default Device" };
+                if (array!=null)
+                    return array;
+                MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+                devices = enumerator.EnumerateAudioEndPoints(EDataFlow.eRender, EDeviceState.DEVICE_STATE_ACTIVE);
+                array = new string[devices.Count + 1];
+                array[0]="Default Device";
+                for (int i = 0; i < devices.Count; i++)
+                    array[i+1] = devices[i].Properties[PKEY.FriendlyName].Value.ToString();
+                return array;
             }
         }
 
@@ -885,6 +895,8 @@ namespace OMPlayer
                             SafeRelease(pNode);
                             return false;
                         }
+                        if ((instance>0)&&(instance<devices.Count))
+                            pRendererActivate.SetString(MediaFoundation.MFAttributesClsid.MF_AUDIO_RENDERER_ATTRIBUTE_ENDPOINT_ID, devices[instance].ID);
                     }
                     else if (MFMediaType.Video == guidMajorType)
                     {
