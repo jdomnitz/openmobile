@@ -895,8 +895,8 @@ namespace OMPlayer
                             SafeRelease(pNode);
                             return false;
                         }
-                        if ((instance>0)&&(instance<devices.Count))
-                            pRendererActivate.SetString(MediaFoundation.MFAttributesClsid.MF_AUDIO_RENDERER_ATTRIBUTE_ENDPOINT_ID, devices[instance].ID);
+                        if ((instance>0)&&(instance<=devices.Count))
+                            pRendererActivate.SetString(MediaFoundation.MFAttributesClsid.MF_AUDIO_RENDERER_ATTRIBUTE_ENDPOINT_ID, devices[instance-1].ID);
                     }
                     else if (MFMediaType.Video == guidMajorType)
                     {
