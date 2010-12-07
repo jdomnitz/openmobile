@@ -474,23 +474,23 @@ namespace OpenMobile.Controls
             for (int i = 0; i <= noOfParts; i++)
             {
                 //Draw Thick Line
-                x = (float)(cX + radius * Math.Cos(currentAngle));
-                y = (float)(cY + radius * Math.Sin(currentAngle));
-                x1 = (float)(cX + (radius - Width / 20) * Math.Cos(currentAngle));
-                y1 = (float)(cY + (radius - Width / 20) * Math.Sin(currentAngle));
+                x = (float)(cX + radius * System.Math.Cos(currentAngle));
+                y = (float)(cY + radius * System.Math.Sin(currentAngle));
+                x1 = (float)(cX + (radius - Width / 20) * System.Math.Cos(currentAngle));
+                y1 = (float)(cY + (radius - Width / 20) * System.Math.Sin(currentAngle));
                 g.DrawLine(thickPen, x, y, x1, y1);
 
                 //Draw Strings
                 System.Drawing.StringFormat format = new System.Drawing.StringFormat();
-                tx = (float)(cX + (radius - Width / 10) * Math.Cos(currentAngle));
-                ty = (float)(cY - shift + (radius - Width / 10) * Math.Sin(currentAngle));
+                tx = (float)(cX + (radius - Width / 10) * System.Math.Cos(currentAngle));
+                ty = (float)(cY - shift + (radius - Width / 10) * System.Math.Sin(currentAngle));
                 System.Drawing.Brush stringPen = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(ForeColor.A,ForeColor.R,ForeColor.G,ForeColor.B));
                 System.Drawing.StringFormat strFormat = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoClip);
                 strFormat.Alignment = System.Drawing.StringAlignment.Center;
                 System.Drawing.Font f = new System.Drawing.Font(font.Name, (float)(this.Width / 23), (System.Drawing.FontStyle)this.Font.Style);
                 g.DrawString(rulerValue.ToString() + "", f, stringPen, new System.Drawing.PointF(tx, ty), strFormat);
                 rulerValue += (float)((MaxValue - MinValue) / (noOfParts - 1));
-                rulerValue = (float)Math.Round(rulerValue, 2);
+                rulerValue = (float)System.Math.Round(rulerValue, 2);
 
                 //currentAngle += incr;
                 if (i == noOfParts - 1)
@@ -499,10 +499,10 @@ namespace OpenMobile.Controls
                 {
                     //Draw thin lines 
                     currentAngle += incr;
-                    x = (float)(cX + radius * Math.Cos(currentAngle));
-                    y = (float)(cY + radius * Math.Sin(currentAngle));
-                    x1 = (float)(cX + (radius - Width / 50) * Math.Cos(currentAngle));
-                    y1 = (float)(cY + (radius - Width / 50) * Math.Sin(currentAngle));
+                    x = (float)(cX + radius * System.Math.Cos(currentAngle));
+                    y = (float)(cY + radius * System.Math.Sin(currentAngle));
+                    x1 = (float)(cX + (radius - Width / 50) * System.Math.Cos(currentAngle));
+                    y1 = (float)(cY + (radius - Width / 50) * System.Math.Sin(currentAngle));
                     g.DrawLine(thinPen, x, y, x1, y1);
                 }
             }
@@ -515,7 +515,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public float GetRadian(float theta)
         {
-            return theta * (float)Math.PI / 180F;
+            return theta * (float)System.Math.PI / 180F;
         }
 
         /// <summary>

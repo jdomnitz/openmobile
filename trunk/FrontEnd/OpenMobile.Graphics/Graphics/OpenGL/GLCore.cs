@@ -30,6 +30,7 @@ namespace OpenMobile.Graphics.OpenGL
     using System;
     using System.Text;
     using System.Runtime.InteropServices;
+    using OpenMobile.Math;
     #pragma warning disable 3019
     #pragma warning disable 1591
 
@@ -404,10 +405,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void Color3fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor3hNV", ExactSpelling = true)]
-            internal extern static void Color3hNV(OpenMobile.Half red, OpenMobile.Half green, OpenMobile.Half blue);
+            internal extern static void Color3hNV(Half red, Half green, Half blue);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor3hvNV", ExactSpelling = true)]
-            internal extern static unsafe void Color3hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void Color3hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor3i", ExactSpelling = true)]
             internal extern static void Color3i(Int32 red, Int32 green, Int32 blue);
@@ -458,10 +459,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void Color4fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4hNV", ExactSpelling = true)]
-            internal extern static void Color4hNV(OpenMobile.Half red, OpenMobile.Half green, OpenMobile.Half blue, OpenMobile.Half alpha);
+            internal extern static void Color4hNV(Half red, Half green, Half blue, Half alpha);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4hvNV", ExactSpelling = true)]
-            internal extern static unsafe void Color4hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void Color4hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glColor4i", ExactSpelling = true)]
             internal extern static void Color4i(Int32 red, Int32 green, Int32 blue, Int32 alpha);
@@ -1142,10 +1143,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void FogCoordfvEXT(Single* coord);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFogCoordhNV", ExactSpelling = true)]
-            internal extern static void FogCoordhNV(OpenMobile.Half fog);
+            internal extern static void FogCoordhNV(Half fog);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFogCoordhvNV", ExactSpelling = true)]
-            internal extern static unsafe void FogCoordhvNV(OpenMobile.Half* fog);
+            internal extern static unsafe void FogCoordhvNV(Half* fog);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glFogCoordPointer", ExactSpelling = true)]
             internal extern static void FogCoordPointer(OpenMobile.Graphics.OpenGL.FogPointerType type, Int32 stride, IntPtr pointer);
@@ -2420,10 +2421,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void MultiTexCoord1fvARB(OpenMobile.Graphics.OpenGL.TextureUnit target, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord1hNV", ExactSpelling = true)]
-            internal extern static void MultiTexCoord1hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half s);
+            internal extern static void MultiTexCoord1hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half s);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord1hvNV", ExactSpelling = true)]
-            internal extern static unsafe void MultiTexCoord1hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half* v);
+            internal extern static unsafe void MultiTexCoord1hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord1i", ExactSpelling = true)]
             internal extern static void MultiTexCoord1i(OpenMobile.Graphics.OpenGL.TextureUnit target, Int32 s);
@@ -2474,10 +2475,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void MultiTexCoord2fvARB(OpenMobile.Graphics.OpenGL.TextureUnit target, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord2hNV", ExactSpelling = true)]
-            internal extern static void MultiTexCoord2hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half s, OpenMobile.Half t);
+            internal extern static void MultiTexCoord2hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half s, Half t);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord2hvNV", ExactSpelling = true)]
-            internal extern static unsafe void MultiTexCoord2hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half* v);
+            internal extern static unsafe void MultiTexCoord2hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord2i", ExactSpelling = true)]
             internal extern static void MultiTexCoord2i(OpenMobile.Graphics.OpenGL.TextureUnit target, Int32 s, Int32 t);
@@ -2528,10 +2529,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void MultiTexCoord3fvARB(OpenMobile.Graphics.OpenGL.TextureUnit target, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord3hNV", ExactSpelling = true)]
-            internal extern static void MultiTexCoord3hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r);
+            internal extern static void MultiTexCoord3hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half s, Half t, Half r);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord3hvNV", ExactSpelling = true)]
-            internal extern static unsafe void MultiTexCoord3hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half* v);
+            internal extern static unsafe void MultiTexCoord3hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord3i", ExactSpelling = true)]
             internal extern static void MultiTexCoord3i(OpenMobile.Graphics.OpenGL.TextureUnit target, Int32 s, Int32 t, Int32 r);
@@ -2582,10 +2583,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void MultiTexCoord4fvARB(OpenMobile.Graphics.OpenGL.TextureUnit target, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord4hNV", ExactSpelling = true)]
-            internal extern static void MultiTexCoord4hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r, OpenMobile.Half q);
+            internal extern static void MultiTexCoord4hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half s, Half t, Half r, Half q);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord4hvNV", ExactSpelling = true)]
-            internal extern static unsafe void MultiTexCoord4hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half* v);
+            internal extern static unsafe void MultiTexCoord4hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glMultiTexCoord4i", ExactSpelling = true)]
             internal extern static void MultiTexCoord4i(OpenMobile.Graphics.OpenGL.TextureUnit target, Int32 s, Int32 t, Int32 r, Int32 q);
@@ -2798,10 +2799,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void Normal3fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormal3hNV", ExactSpelling = true)]
-            internal extern static void Normal3hNV(OpenMobile.Half nx, OpenMobile.Half ny, OpenMobile.Half nz);
+            internal extern static void Normal3hNV(Half nx, Half ny, Half nz);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormal3hvNV", ExactSpelling = true)]
-            internal extern static unsafe void Normal3hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void Normal3hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glNormal3i", ExactSpelling = true)]
             internal extern static void Normal3i(Int32 nx, Int32 ny, Int32 nz);
@@ -3434,10 +3435,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void SecondaryColor3fvEXT(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSecondaryColor3hNV", ExactSpelling = true)]
-            internal extern static void SecondaryColor3hNV(OpenMobile.Half red, OpenMobile.Half green, OpenMobile.Half blue);
+            internal extern static void SecondaryColor3hNV(Half red, Half green, Half blue);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSecondaryColor3hvNV", ExactSpelling = true)]
-            internal extern static unsafe void SecondaryColor3hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void SecondaryColor3hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glSecondaryColor3i", ExactSpelling = true)]
             internal extern static void SecondaryColor3i(Int32 red, Int32 green, Int32 blue);
@@ -3653,10 +3654,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void TexCoord1fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord1hNV", ExactSpelling = true)]
-            internal extern static void TexCoord1hNV(OpenMobile.Half s);
+            internal extern static void TexCoord1hNV(Half s);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord1hvNV", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord1hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void TexCoord1hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord1i", ExactSpelling = true)]
             internal extern static void TexCoord1i(Int32 s);
@@ -3683,10 +3684,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void TexCoord2fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2hNV", ExactSpelling = true)]
-            internal extern static void TexCoord2hNV(OpenMobile.Half s, OpenMobile.Half t);
+            internal extern static void TexCoord2hNV(Half s, Half t);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2hvNV", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord2hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void TexCoord2hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord2i", ExactSpelling = true)]
             internal extern static void TexCoord2i(Int32 s, Int32 t);
@@ -3713,10 +3714,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void TexCoord3fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord3hNV", ExactSpelling = true)]
-            internal extern static void TexCoord3hNV(OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r);
+            internal extern static void TexCoord3hNV(Half s, Half t, Half r);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord3hvNV", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord3hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void TexCoord3hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord3i", ExactSpelling = true)]
             internal extern static void TexCoord3i(Int32 s, Int32 t, Int32 r);
@@ -3743,10 +3744,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void TexCoord4fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4hNV", ExactSpelling = true)]
-            internal extern static void TexCoord4hNV(OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r, OpenMobile.Half q);
+            internal extern static void TexCoord4hNV(Half s, Half t, Half r, Half q);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4hvNV", ExactSpelling = true)]
-            internal extern static unsafe void TexCoord4hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void TexCoord4hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glTexCoord4i", ExactSpelling = true)]
             internal extern static void TexCoord4i(Int32 s, Int32 t, Int32 r, Int32 q);
@@ -4193,10 +4194,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void Vertex2fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex2hNV", ExactSpelling = true)]
-            internal extern static void Vertex2hNV(OpenMobile.Half x, OpenMobile.Half y);
+            internal extern static void Vertex2hNV(Half x, Half y);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex2hvNV", ExactSpelling = true)]
-            internal extern static unsafe void Vertex2hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void Vertex2hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex2i", ExactSpelling = true)]
             internal extern static void Vertex2i(Int32 x, Int32 y);
@@ -4223,10 +4224,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void Vertex3fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex3hNV", ExactSpelling = true)]
-            internal extern static void Vertex3hNV(OpenMobile.Half x, OpenMobile.Half y, OpenMobile.Half z);
+            internal extern static void Vertex3hNV(Half x, Half y, Half z);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex3hvNV", ExactSpelling = true)]
-            internal extern static unsafe void Vertex3hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void Vertex3hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex3i", ExactSpelling = true)]
             internal extern static void Vertex3i(Int32 x, Int32 y, Int32 z);
@@ -4253,10 +4254,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void Vertex4fv(Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex4hNV", ExactSpelling = true)]
-            internal extern static void Vertex4hNV(OpenMobile.Half x, OpenMobile.Half y, OpenMobile.Half z, OpenMobile.Half w);
+            internal extern static void Vertex4hNV(Half x, Half y, Half z, Half w);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex4hvNV", ExactSpelling = true)]
-            internal extern static unsafe void Vertex4hvNV(OpenMobile.Half* v);
+            internal extern static unsafe void Vertex4hvNV(Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertex4i", ExactSpelling = true)]
             internal extern static void Vertex4i(Int32 x, Int32 y, Int32 z, Int32 w);
@@ -4310,10 +4311,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void VertexAttrib1fvNV(UInt32 index, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib1hNV", ExactSpelling = true)]
-            internal extern static void VertexAttrib1hNV(UInt32 index, OpenMobile.Half x);
+            internal extern static void VertexAttrib1hNV(UInt32 index, Half x);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib1hvNV", ExactSpelling = true)]
-            internal extern static unsafe void VertexAttrib1hvNV(UInt32 index, OpenMobile.Half* v);
+            internal extern static unsafe void VertexAttrib1hvNV(UInt32 index, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib1s", ExactSpelling = true)]
             internal extern static void VertexAttrib1s(UInt32 index, Int16 x);
@@ -4370,10 +4371,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void VertexAttrib2fvNV(UInt32 index, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib2hNV", ExactSpelling = true)]
-            internal extern static void VertexAttrib2hNV(UInt32 index, OpenMobile.Half x, OpenMobile.Half y);
+            internal extern static void VertexAttrib2hNV(UInt32 index, Half x, Half y);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib2hvNV", ExactSpelling = true)]
-            internal extern static unsafe void VertexAttrib2hvNV(UInt32 index, OpenMobile.Half* v);
+            internal extern static unsafe void VertexAttrib2hvNV(UInt32 index, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib2s", ExactSpelling = true)]
             internal extern static void VertexAttrib2s(UInt32 index, Int16 x, Int16 y);
@@ -4430,10 +4431,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void VertexAttrib3fvNV(UInt32 index, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib3hNV", ExactSpelling = true)]
-            internal extern static void VertexAttrib3hNV(UInt32 index, OpenMobile.Half x, OpenMobile.Half y, OpenMobile.Half z);
+            internal extern static void VertexAttrib3hNV(UInt32 index, Half x, Half y, Half z);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib3hvNV", ExactSpelling = true)]
-            internal extern static unsafe void VertexAttrib3hvNV(UInt32 index, OpenMobile.Half* v);
+            internal extern static unsafe void VertexAttrib3hvNV(UInt32 index, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib3s", ExactSpelling = true)]
             internal extern static void VertexAttrib3s(UInt32 index, Int16 x, Int16 y, Int16 z);
@@ -4496,10 +4497,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void VertexAttrib4fvNV(UInt32 index, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib4hNV", ExactSpelling = true)]
-            internal extern static void VertexAttrib4hNV(UInt32 index, OpenMobile.Half x, OpenMobile.Half y, OpenMobile.Half z, OpenMobile.Half w);
+            internal extern static void VertexAttrib4hNV(UInt32 index, Half x, Half y, Half z, Half w);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib4hvNV", ExactSpelling = true)]
-            internal extern static unsafe void VertexAttrib4hvNV(UInt32 index, OpenMobile.Half* v);
+            internal extern static unsafe void VertexAttrib4hvNV(UInt32 index, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttrib4iv", ExactSpelling = true)]
             internal extern static unsafe void VertexAttrib4iv(UInt32 index, Int32* v);
@@ -4736,7 +4737,7 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void VertexAttribs1fvNV(UInt32 index, Int32 count, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttribs1hvNV", ExactSpelling = true)]
-            internal extern static unsafe void VertexAttribs1hvNV(UInt32 index, Int32 n, OpenMobile.Half* v);
+            internal extern static unsafe void VertexAttribs1hvNV(UInt32 index, Int32 n, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttribs1svNV", ExactSpelling = true)]
             internal extern static unsafe void VertexAttribs1svNV(UInt32 index, Int32 count, Int16* v);
@@ -4748,7 +4749,7 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void VertexAttribs2fvNV(UInt32 index, Int32 count, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttribs2hvNV", ExactSpelling = true)]
-            internal extern static unsafe void VertexAttribs2hvNV(UInt32 index, Int32 n, OpenMobile.Half* v);
+            internal extern static unsafe void VertexAttribs2hvNV(UInt32 index, Int32 n, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttribs2svNV", ExactSpelling = true)]
             internal extern static unsafe void VertexAttribs2svNV(UInt32 index, Int32 count, Int16* v);
@@ -4760,7 +4761,7 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void VertexAttribs3fvNV(UInt32 index, Int32 count, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttribs3hvNV", ExactSpelling = true)]
-            internal extern static unsafe void VertexAttribs3hvNV(UInt32 index, Int32 n, OpenMobile.Half* v);
+            internal extern static unsafe void VertexAttribs3hvNV(UInt32 index, Int32 n, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttribs3svNV", ExactSpelling = true)]
             internal extern static unsafe void VertexAttribs3svNV(UInt32 index, Int32 count, Int16* v);
@@ -4772,7 +4773,7 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void VertexAttribs4fvNV(UInt32 index, Int32 count, Single* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttribs4hvNV", ExactSpelling = true)]
-            internal extern static unsafe void VertexAttribs4hvNV(UInt32 index, Int32 n, OpenMobile.Half* v);
+            internal extern static unsafe void VertexAttribs4hvNV(UInt32 index, Int32 n, Half* v);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexAttribs4svNV", ExactSpelling = true)]
             internal extern static unsafe void VertexAttribs4svNV(UInt32 index, Int32 count, Int16* v);
@@ -4901,10 +4902,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal extern static unsafe void VertexWeightfvEXT(Single* weight);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexWeighthNV", ExactSpelling = true)]
-            internal extern static void VertexWeighthNV(OpenMobile.Half weight);
+            internal extern static void VertexWeighthNV(Half weight);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexWeighthvNV", ExactSpelling = true)]
-            internal extern static unsafe void VertexWeighthvNV(OpenMobile.Half* weight);
+            internal extern static unsafe void VertexWeighthvNV(Half* weight);
             [System.Security.SuppressUnmanagedCodeSecurity()]
             [System.Runtime.InteropServices.DllImport(Raw.Library, EntryPoint = "glVertexWeightPointerEXT", ExactSpelling = true)]
             internal extern static void VertexWeightPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.ExtVertexWeighting type, Int32 stride, IntPtr pointer);

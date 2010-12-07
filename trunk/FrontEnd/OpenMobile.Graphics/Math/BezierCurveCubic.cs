@@ -9,10 +9,8 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace OpenMobile
+namespace OpenMobile.Math
 {
     /// <summary>
     /// Represents a cubic bezier curve with two anchor and two control points.

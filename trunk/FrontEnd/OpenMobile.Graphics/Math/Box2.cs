@@ -5,10 +5,8 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.InteropServices;
-namespace OpenMobile
+namespace OpenMobile.Math
 {
     /// <summary>
     /// Defines a 2d box (rectangle).

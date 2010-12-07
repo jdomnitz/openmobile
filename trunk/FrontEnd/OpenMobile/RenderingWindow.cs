@@ -500,7 +500,7 @@ namespace OpenMobile
                 {
                     if (currentGesture == null)
                     {
-                        if ((Math.Abs(e.X - ThrowStart.X) <= (int)(20 * widthScale)) && (Math.Abs(e.Y - ThrowStart.Y) <= (int)(20 * heightScale)))
+                        if ((System.Math.Abs(e.X - ThrowStart.X) <= (int)(20 * widthScale)) && (System.Math.Abs(e.Y - ThrowStart.Y) <= (int)(20 * heightScale)))
                             return;
                         currentGesture = new List<Point>();
                         rParam.currentMode = eModeType.gesturing;
@@ -523,7 +523,7 @@ namespace OpenMobile
                             catch (Exception ex) { SandboxedThread.handle(ex); }
                         if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                             if (ThrowStarted)
-                                if (Math.Abs(e.X - ThrowStart.X) > 3 || (Math.Abs(e.Y - ThrowStart.Y) > 3))
+                                if (System.Math.Abs(e.X - ThrowStart.X) > 3 || (System.Math.Abs(e.Y - ThrowStart.Y) > 3))
                                 {
                                     bool cancel = false;
                                     ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart, new PointF(widthScale, heightScale), ref cancel);
@@ -830,7 +830,7 @@ namespace OpenMobile
         {
             heightScale = (this.ClientRectangle.Height / 600F);
             widthScale = (this.ClientRectangle.Width / 1000F);
-            totalScale = (float)Math.Sqrt(Math.Pow(heightScale, 2) + Math.Pow(widthScale, 2));
+            totalScale = (float)System.Math.Sqrt(System.Math.Pow(heightScale, 2) + System.Math.Pow(widthScale, 2));
             OnRenderFrameInternal();
             SandboxedThread.Asynchronous(raiseResize);
         }
@@ -1088,11 +1088,11 @@ namespace OpenMobile
 
         private static int xdistance(Rectangle r1, Rectangle r2)
         {
-            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 8*Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
+            return (int)System.Math.Sqrt(System.Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 8 * System.Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
         }
         private static int ydistance(Rectangle r1, Rectangle r2)
         {
-            return (int)Math.Sqrt(Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2)*8 + Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
+            return (int)System.Math.Sqrt(System.Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) * 8 + System.Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
         }
         private void RenderingWindow_MouseLeave(object sender, EventArgs e)
         {

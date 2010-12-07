@@ -35,57 +35,7 @@ namespace OpenMobile.Net
         /// <returns></returns>
         public static rssFeed getItems(string URL)
         {
-            XmlDocument reader=new XmlDocument();
-            reader.Load(URL);
-            rssFeed ret = new rssFeed();
-            foreach(XmlNode n in reader.SelectSingleNode("/rss/channel").ChildNodes)
-            {
-                switch (n.Name)
-                {
-                    case "title":
-                        ret.title = n.InnerText;
-                        break;
-                    case "link":
-                        ret.link = n.InnerText;
-                        break;
-                    case "description":
-                        ret.description = n.InnerText;
-                        break;
-                    case "item":
-                        rssItem item = new rssItem();
-                        foreach (XmlNode i in n.ChildNodes)
-                        {
-                            switch (i.Name)
-                            {
-                                case "title":
-                                    item.title = i.InnerText;
-                                    break;
-                                case "link":
-                                    item.link = i.InnerText;
-                                    break;
-                                case "description":
-                                    item.description = i.InnerText;
-                                    break;
-                                case "guid":
-                                    item.GUID = i.InnerText;
-                                    break;
-                                case "author":
-                                    item.author = i.InnerText;
-                                    break;
-                                case "enclosure":
-                                    long x;
-                                    item.contentURL = i.Attributes["url"].Value;
-                                    item.contentType = i.Attributes["type"].Value;
-                                    if (long.TryParse(i.Attributes["length"].Value,out x) == true)
-                                        item.contentSize = x;
-                                    break;
-                            }
-                        }
-                        ret.Items.Add(item);
-                        break;
-                }
-            }
-            return ret;
+            return new rssFeed(URL);
         }
     }
     /// <summary>
@@ -112,9 +62,58 @@ namespace OpenMobile.Net
         /// <summary>
         /// Create a new RSS feed
         /// </summary>
-        public rssFeed()
+        public rssFeed(string url)
         {
+            XmlDocument reader = new XmlDocument();
+            reader.Load(url);
             Items = new List<rssItem>();
+            foreach (XmlNode n in reader.SelectSingleNode("/rss/channel").ChildNodes)
+            {
+                switch (n.Name)
+                {
+                    case "title":
+                        title = n.InnerText;
+                        break;
+                    case "link":
+                        link = n.InnerText;
+                        break;
+                    case "description":
+                        description = n.InnerText;
+                        break;
+                    case "item":
+                        rssItem item = new rssItem();
+                        foreach (XmlNode i in n.ChildNodes)
+                        {
+                            switch (i.Name)
+                            {
+                                case "title":
+                                    item.title = i.InnerText;
+                                    break;
+                                case "link":
+                                    item.link = i.InnerText;
+                                    break;
+                                case "description":
+                                    item.description = i.InnerText;
+                                    break;
+                                case "guid":
+                                    item.GUID = i.InnerText;
+                                    break;
+                                case "author":
+                                    item.author = i.InnerText;
+                                    break;
+                                case "enclosure":
+                                    long x;
+                                    item.contentURL = i.Attributes["url"].Value;
+                                    item.contentType = i.Attributes["type"].Value;
+                                    if (long.TryParse(i.Attributes["length"].Value, out x) == true)
+                                        item.contentSize = x;
+                                    break;
+                            }
+                        }
+                        Items.Add(item);
+                        break;
+                }
+            }
         }
     }
     /// <summary>

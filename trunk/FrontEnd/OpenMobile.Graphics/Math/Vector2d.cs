@@ -25,7 +25,7 @@ SOFTWARE.
 using System;
 using System.Runtime.InteropServices;
 
-namespace OpenMobile
+namespace OpenMobile.Math
 {
     /// <summary>Represents a 2D vector using two double-precision floating-point numbers.</summary>
     [Serializable]

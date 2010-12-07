@@ -35,12 +35,6 @@ namespace OpenMobile.Platform.X11
 {
     sealed class X11DisplayDevice : IDisplayDeviceDriver
     {
-        // Store a mapping between resolutions and their respective
-        // size_index (needed for XRRSetScreenConfig). The size_index
-        // is simply the sequence number of the resolution as returned by
-        // XRRSizes. This is done per available screen.
-        readonly List<Dictionary<DisplayResolution, int>> screenResolutionToIndex =
-            new List<Dictionary<DisplayResolution, int>>();
         // Store a mapping between DisplayDevices and their default resolutions.
         readonly Dictionary<DisplayDevice, int> deviceToDefaultResolution = new Dictionary<DisplayDevice, int>();
         // Store a mapping between DisplayDevices and X11 screens.
@@ -48,7 +42,7 @@ namespace OpenMobile.Platform.X11
         // Keep the time when the config of each screen was last updated.
         readonly List<IntPtr> lastConfigUpdate = new List<IntPtr>();
 
-        bool xinerama_supported, xrandr_supported, xf86_supported;
+        public bool xinerama_supported, xrandr_supported, xf86_supported;
 
         #region Constructors
 
@@ -84,6 +78,7 @@ namespace OpenMobile.Platform.X11
                     {
                         DisplayDevice dev = new DisplayDevice();
                         dev.IsPrimary = i == Functions.XDefaultScreen(API.DefaultDisplay);
+                        dev.Id = this;
                         devices.Add(dev);
                         deviceToScreen.Add(dev, i);
                     }
@@ -147,6 +142,8 @@ namespace OpenMobile.Platform.X11
                         first = false;
                     }
                     dev.BitsPerPixel = FindCurrentDepth(devices.Count);
+                    dev.Landscape = (screen.Width > screen.Height);
+                    dev.Id = this;
                     devices.Add(dev);
                     // It seems that all X screens are equal to 0 is Xinerama is enabled, at least on Nvidia (verify?)
                     deviceToScreen.Add(dev, 0 /*screen.ScreenNumber*/);
@@ -168,24 +165,6 @@ namespace OpenMobile.Platform.X11
 
                 List<DisplayResolution> available_res = new List<DisplayResolution>();
 
-                // Add info for a new screen.
-                screenResolutionToIndex.Add(new Dictionary<DisplayResolution, int>());
-
-                int resolution_count = 0;
-                foreach (XRRScreenSize size in FindAvailableResolutions(screen))
-                {
-                    if (size.Width == 0 || size.Height == 0)
-                    {
-                        Debug.Print("[Warning] XRandR returned an invalid resolution ({0}) for display device {1}", size, screen);
-                        continue;
-                    }
-                    ++resolution_count;
-                }
-
-
-                // The resolution of the current DisplayDevice is discovered through XRRConfigCurrentConfiguration.
-                // Its refresh rate is discovered by the FindCurrentRefreshRate call.
-                // Its depth is discovered by the FindCurrentDepth call.
                 int current_depth = FindCurrentDepth(screen);
                 IntPtr screen_config = Functions.XRRGetScreenInfo(API.DefaultDisplay, Functions.XRootWindow(API.DefaultDisplay, screen));
                 ushort current_rotation;
@@ -215,10 +194,8 @@ namespace OpenMobile.Platform.X11
             {
                 return false;
             }
-
+            
             int currentScreen = 0;
-            Debug.Print("Using XF86 v" + major.ToString() + "." + minor.ToString());
-
             foreach (DisplayDevice dev in devices)
             {
                 int x;
@@ -243,28 +220,6 @@ namespace OpenMobile.Platform.X11
                 device.IsPrimary = true;
             }
         }
-
-        #region static int[] FindAvailableDepths(int screen)
-
-        static int[] FindAvailableDepths(int screen)
-        {
-            return Functions.XListDepths(API.DefaultDisplay, screen);
-        }
-
-        #endregion
-
-        #region static XRRScreenSize[] FindAvailableResolutions(int screen)
-
-        static XRRScreenSize[] FindAvailableResolutions(int screen)
-        {
-            XRRScreenSize[] resolutions = null;
-            resolutions = Functions.XRRSizes(API.DefaultDisplay, screen);
-            if (resolutions == null)
-                throw new NotSupportedException("XRandR extensions not available.");
-            return resolutions;
-        }
-
-        #endregion
 
         #region private static int FindCurrentDepth(int screen)
 
@@ -314,7 +269,6 @@ namespace OpenMobile.Platform.X11
                 return screens;
             }
         }
-
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         struct XineramaScreenInfo
         {

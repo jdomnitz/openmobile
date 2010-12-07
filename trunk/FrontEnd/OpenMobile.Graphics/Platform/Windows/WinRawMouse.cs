@@ -168,9 +168,9 @@ namespace OpenMobile.Platform.Windows
                 int rawx = raw.LastX / 256;
                 int rawy = raw.LastY / 256;
                 //Apply pointer acceleration
-                if (Math.Abs(rawx) >= 10)
+                if (System.Math.Abs(rawx) >= 10)
                     rawx *= 2;
-                if (Math.Abs(rawy) >= 10)
+                if (System.Math.Abs(rawy) >= 10)
                     rawy *= 2;
                 mouse.SetPosition(mouse.X + rawx, mouse.Y + rawy);
             }

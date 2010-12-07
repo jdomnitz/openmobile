@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OpenMobile
+namespace OpenMobile.Math
 {
     /// <summary>
     /// Represents a bezier curve with as many points as you want.

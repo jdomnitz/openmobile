@@ -212,7 +212,7 @@ namespace OpenMobile.Graphics
             for (double t = startAngle; t <= (startAngle+sweepAngle); t=t+0.5)
             {
                 double rad = t * DEG2RAD;
-                Raw.Vertex2(x + xrad + (xrad * Math.Cos(rad)), y + yrad + (yrad * Math.Sin(rad)));
+                Raw.Vertex2(x + xrad + (xrad * System.Math.Cos(rad)), y + yrad + (yrad * System.Math.Sin(rad)));
             }
             Raw.End();
             Raw.Disable(EnableCap.LineSmooth);
@@ -224,7 +224,7 @@ namespace OpenMobile.Graphics
             DrawEllipse(pen, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        const float DEG2RAD = (float)(Math.PI / 180);
+        const float DEG2RAD = (float)(System.Math.PI / 180);
         public void DrawEllipse(Pen pen, int x, int y, int width, int height)
         {
             Raw.Color4(pen.Color);
@@ -238,7 +238,7 @@ namespace OpenMobile.Graphics
                 for (double t = 0; t < 360; t++)
                 {
                     double rad = t * DEG2RAD;
-                    Raw.Vertex2(x + xrad + (xrad * Math.Cos(rad)), y + yrad + (yrad * Math.Sin(rad)));
+                    Raw.Vertex2(x + xrad + (xrad * System.Math.Cos(rad)), y + yrad + (yrad * System.Math.Sin(rad)));
                 }
             }
             Raw.End();
@@ -564,36 +564,36 @@ namespace OpenMobile.Graphics
             float cX = x + radius, cY = y + radius;
             Raw.Begin(BeginMode.LineStrip);
             {
-                for (ang = Math.PI; ang <= (1.5 * Math.PI); ang = ang + 0.05)
+                for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY); //Top Left 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Left 
                 }
                 cX = x + width - radius;
             }
             Raw.End();
             Raw.Begin(BeginMode.LineStrip);
             {
-                for (ang = (1.5 * Math.PI); ang <= (2 * Math.PI); ang = ang + 0.05)
+                for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY); //Top Right 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Right 
                 }
             }
             Raw.End();
             Raw.Begin(BeginMode.LineStrip);
             {
                 cY = y + height - radius;
-                for (ang = 0; ang <= (0.5 * Math.PI); ang = ang + 0.05)
+                for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY); //Bottom Right 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Bottom Right 
                 }
             }
             Raw.End();
             Raw.Begin(BeginMode.LineStrip);
             {
                 cX = x + radius;
-                for (ang = (0.5 * Math.PI); ang <= Math.PI; ang = ang + 0.05)
+                for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY);//Bottom Left 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY);//Bottom Left 
                 }
             }
             Raw.End();
@@ -660,9 +660,9 @@ namespace OpenMobile.Graphics
             Raw.Begin(BeginMode.TriangleFan);
             {
                 Raw.Vertex2(cX, cY);
-                for (ang = Math.PI; ang <= (1.5 * Math.PI); ang = ang + 0.05)
+                for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY); //Top Left 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Left 
                 }
                 cX = x + width - radius; //bottom right
             }
@@ -670,9 +670,9 @@ namespace OpenMobile.Graphics
             Raw.Begin(BeginMode.TriangleFan);
             {
                 Raw.Vertex2(cX, cY);
-                for (ang = (1.5 * Math.PI); ang <= (2 * Math.PI); ang = ang + 0.05)
+                for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY); //Top Right 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Right 
                 }
             }
             Raw.End();
@@ -681,9 +681,9 @@ namespace OpenMobile.Graphics
             {
                 cY = y + height - radius; //top right
                 Raw.Vertex2(cX, cY);
-                for (ang = 0; ang <= (0.5 * Math.PI); ang = ang + 0.05)
+                for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY); //Bottom Right 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Bottom Right 
                 }
             }
             Raw.End();
@@ -691,9 +691,9 @@ namespace OpenMobile.Graphics
             {
                 cX = x + radius; //top left
                 Raw.Vertex2(cX, cY);
-                for (ang = (0.5 * Math.PI); ang <= Math.PI; ang = ang + 0.05)
+                for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY);//Bottom Left 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY);//Bottom Left 
                 }
             }
             Raw.End();
@@ -726,9 +726,9 @@ namespace OpenMobile.Graphics
             Raw.Begin(BeginMode.TriangleFan);
             {
                 Raw.Vertex2(cX, cY);
-                for (ang = Math.PI; ang <= (1.5 * Math.PI); ang = ang + 0.05)
+                for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY); //Top Left 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Left 
                 }
                 cX = x + width - radius;
             }
@@ -736,9 +736,9 @@ namespace OpenMobile.Graphics
             Raw.Begin(BeginMode.TriangleFan);
             {
                 Raw.Vertex2(cX, cY);
-                for (ang = (1.5 * Math.PI); ang <= (2 * Math.PI); ang = ang + 0.05)
+                for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY); //Top Right 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Right 
                 }
             }
             Raw.End();
@@ -746,9 +746,9 @@ namespace OpenMobile.Graphics
             {
                 cY = y + height - radius;
                 Raw.Vertex2(cX, cY);
-                for (ang = 0; ang <= (0.5 * Math.PI); ang = ang + 0.05)
+                for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY); //Bottom Right 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Bottom Right 
                 }
             }
             Raw.End();
@@ -756,9 +756,9 @@ namespace OpenMobile.Graphics
             {
                 cX = x + radius;
                 Raw.Vertex2(cX, cY);
-                for (ang = (0.5 * Math.PI); ang <= Math.PI; ang = ang + 0.05)
+                for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * Math.Cos(ang) + cX, radius * Math.Sin(ang) + cY);//Bottom Left 
+                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY);//Bottom Left 
                 }
             }
             Raw.End();
@@ -819,7 +819,7 @@ namespace OpenMobile.Graphics
                 {
                     Raw.Vertex2(x + (width / 2), y + (height / 2));
                     for (int angle = 0; angle < 360; angle++)
-                        Raw.Vertex2(x + (width / 2) + Math.Sin(angle) * (width / 2), y + (height / 2) + Math.Cos(angle) * (height / 2));
+                        Raw.Vertex2(x + (width / 2) + System.Math.Sin(angle) * (width / 2), y + (height / 2) + System.Math.Cos(angle) * (height / 2));
                 }
                 Raw.End();
             Raw.Disable(EnableCap.LineSmooth);

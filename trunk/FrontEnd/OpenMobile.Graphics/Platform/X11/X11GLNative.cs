@@ -197,7 +197,13 @@ namespace OpenMobile.Platform.X11
             RefreshWindowBounds(ref e);
 
             driver = new X11Input(window);
-
+            if (device.IsPrimary)
+            {
+                if (((X11DisplayDevice)device.Id).xrandr_supported)
+                {
+                    Functions.XRRSelectInput(window.Display, window.WindowHandle, 1);
+                }
+            }
             Debug.WriteLine(String.Format("X11GLNative window created successfully (id: {0}).", Handle));
             Debug.Unindent();
 
@@ -763,27 +769,7 @@ namespace OpenMobile.Platform.X11
                         RefreshWindowBounds(ref e);
                         break;
 
-                    /*case XEventName.KeyPress:
-                        driver.ProcessEvent(ref e);
-                        int status = 0;
-                        status = Functions.XLookupString(ref e.KeyEvent, ascii, ascii.Length, null, IntPtr.Zero);
-                        Encoding.Default.GetChars(ascii, 0, status, chars, 0);
-
-                        EventHandler<KeyPressEventArgs> key_press = KeyPress;
-                        if (key_press != null)
-                        {
-                            for (int i = 0; i < status; i++)
-                            {
-                                KPEventArgs.KeyChar = chars[i];
-                                key_press(this, KPEventArgs);
-                            }
-                        }
-                        break;
-                    */
-                    case XEventName.KeyRelease:
-                        // Todo: raise KeyPress event. Use code from
-                        // http://anonsvn.mono-project.com/viewvc/trunk/mcs/class/Managed.Windows.Forms/System.Windows.Forms/X11Keyboard.cs?view=markup
-                        
+                    case XEventName.KeyRelease:                    
                         driver.ProcessEvent(ref e);
                         break;
                         
@@ -820,13 +806,8 @@ namespace OpenMobile.Platform.X11
                                 WindowStateChanged(this, EventArgs.Empty);
                         }
 
-                        //if (e.PropertyEvent.atom == _atom_net_frame_extents)
-                        //{
-                        //    RefreshWindowBorders();
-                        //}
                         break;
                     case XEventName.ScreenChangeNotify:
-                        //TODO - Make sure this event is enabled
                         if (ResolutionChange != null)
                             ResolutionChange(this, new ResolutionChange(e.ScreenChangeEvent.height, e.ScreenChangeEvent.width, !(((e.ScreenChangeEvent.rotation & 2) == 2) || (e.ScreenChangeEvent.rotation & 8) == 8)));
                         DisplayDevice.RefreshDisplays();

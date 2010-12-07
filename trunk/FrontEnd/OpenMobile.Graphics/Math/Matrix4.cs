@@ -25,7 +25,7 @@ SOFTWARE.
 using System;
 using System.Runtime.InteropServices;
 
-namespace OpenMobile
+namespace OpenMobile.Math
 {
     /// <summary>
     /// Represents a 4x4 Matrix
@@ -557,7 +557,7 @@ namespace OpenMobile
         /// </exception>
         public static void CreatePerspectiveFieldOfView(float fovy, float aspect, float zNear, float zFar, out Matrix4 result)
         {
-            if (fovy <= 0 || fovy > Math.PI)
+            if (fovy <= 0 || fovy > System.Math.PI)
                 throw new ArgumentOutOfRangeException("fovy");
             if (aspect <= 0)
                 throw new ArgumentOutOfRangeException("aspect");

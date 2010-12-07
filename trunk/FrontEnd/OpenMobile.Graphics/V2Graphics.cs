@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using OpenMobile.Graphics.OpenGL;
 using System.Drawing.Imaging;
+using OpenMobile.Math;
 
 namespace OpenMobile.Graphics
 {
@@ -156,8 +157,8 @@ namespace OpenMobile.Graphics
             for (float t = startAngle; t <= (startAngle + sweepAngle); t = t + 0.5F)
             {
                 float rad = MathHelper.DegreesToRadians(t);
-                arr[i] = x + xrad + (float)(xrad * Math.Cos(rad));
-                arr[i + 1] = y + yrad + (float)(yrad * Math.Sin(rad));
+                arr[i] = x + xrad + (float)(xrad * System.Math.Cos(rad));
+                arr[i + 1] = y + yrad + (float)(yrad * System.Math.Sin(rad));
                 i += 2;
             }
             Raw.EnableClientState(ArrayCap.VertexArray);
@@ -186,9 +187,9 @@ namespace OpenMobile.Graphics
             float[] arr = new float[720];
             for (int t = 0; t < 360; t++)
             {
-                float rad = OpenMobile.MathHelper.DegreesToRadians(t);
-                arr[2*t]=x + xrad + (float)(xrad * Math.Cos(rad));
-                arr[(2*t)+1]=y + yrad + (float)(yrad * Math.Sin(rad));
+                float rad = MathHelper.DegreesToRadians(t);
+                arr[2*t]=x + xrad + (float)(xrad * System.Math.Cos(rad));
+                arr[(2*t)+1]=y + yrad + (float)(yrad * System.Math.Sin(rad));
             }
             Raw.EnableClientState(ArrayCap.VertexArray);
             Raw.VertexPointer(2, VertexPointerType.Float, 0, arr);
@@ -361,10 +362,10 @@ namespace OpenMobile.Graphics
             float cX = x + radius, cY = y + radius;
             arr = new int[64];
             int count = 0;
-            for (ang = Math.PI; ang <= (1.5 * Math.PI); ang = ang + 0.05)
+            for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
             {
-                arr[count] = (int)(radius * Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
@@ -372,30 +373,30 @@ namespace OpenMobile.Graphics
 
             cX = x + width - radius;
             count = 0;
-            for (ang = (1.5 * Math.PI); ang <= (2 * Math.PI); ang = ang + 0.05)
+            for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
             {
-                arr[count] = (int)(radius * Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
             Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
             cY = y + height - radius;
             count = 0;
-            for (ang = 0; ang <= (0.5 * Math.PI); ang = ang + 0.05)
+            for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
             {
-                arr[count] = (int)(radius * Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
             cX = x + radius;
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
             Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
             count = 0;
-            for (ang = (0.5 * Math.PI); ang <= Math.PI; ang = ang + 0.05)
+            for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
             {
-                arr[count] = (int)(radius * Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
@@ -421,8 +422,8 @@ namespace OpenMobile.Graphics
             arr[721]=y + (height / 2);
             for (int angle = 0; angle < 360; angle++)
             {
-                arr[angle*2]=(int)(x + (width / 2) + Math.Sin(angle) * (width / 2));
-                arr[(angle*2)+1]= (int)(y + (height / 2) + Math.Cos(angle) * (height / 2));
+                arr[angle*2]=(int)(x + (width / 2) + System.Math.Sin(angle) * (width / 2));
+                arr[(angle*2)+1]= (int)(y + (height / 2) + System.Math.Cos(angle) * (height / 2));
             }
             Raw.EnableClientState(ArrayCap.VertexArray);
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
@@ -512,10 +513,10 @@ namespace OpenMobile.Graphics
             arr[1] = (int)cY;
             int count = 2;
             Raw.Color4(brush.Color);
-            for (ang = Math.PI; ang <= (1.5 * Math.PI); ang = ang + 0.05)
+            for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
             {
-                arr[count] = (int)(radius * Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
@@ -526,10 +527,10 @@ namespace OpenMobile.Graphics
             arr[0] = (int)cX;
             arr[1] = (int)cY;
             count = 2;
-            for (ang = (1.5 * Math.PI); ang <= (2 * Math.PI); ang = ang + 0.05)
+            for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
             {
-                arr[count] = (int)(radius * Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
@@ -540,10 +541,10 @@ namespace OpenMobile.Graphics
             cY = y + height - radius;
             arr[1] = (int)cY;
             count = 2;
-            for (ang = 0; ang <= (0.5 * Math.PI); ang = ang + 0.05)
+            for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
             {
-                arr[count] = (int)(radius * Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
             cX = x + radius;
@@ -553,10 +554,10 @@ namespace OpenMobile.Graphics
             arr[0] = (int)cX;
             arr[1] = (int)cY;
             count = 2;
-            for (ang = (0.5 * Math.PI); ang <= Math.PI; ang = ang + 0.05)
+            for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
             {
-                arr[count] = (int)(radius * Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * Math.Sin(ang) + cY);
+                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
+                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
@@ -599,10 +600,10 @@ namespace OpenMobile.Graphics
             arr[0] = (int)cX;
             arr[1] = (int)cY;
             int count = 2;
-            for (ang = Math.PI; ang <= (1.5 * Math.PI); ang = ang + 0.05)
+            for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
             {
-                arr[count]=(int)(radius * Math.Cos(ang) + cX);
-                arr[count+1]=(int)(radius * Math.Sin(ang) + cY);
+                arr[count]=(int)(radius * System.Math.Cos(ang) + cX);
+                arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
                 count+=2;
             }
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
@@ -613,10 +614,10 @@ namespace OpenMobile.Graphics
             arr[0] = (int)cX;
             arr[1] = (int)cY;
             count = 2;
-            for (ang = (1.5 * Math.PI); ang <= (2 * Math.PI); ang = ang + 0.05)
+            for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
             {
-                arr[count]=(int)(radius * Math.Cos(ang) + cX);
-                arr[count+1]=(int)(radius * Math.Sin(ang) + cY);
+                arr[count]=(int)(radius * System.Math.Cos(ang) + cX);
+                arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
                 count+=2;
             }
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
@@ -626,10 +627,10 @@ namespace OpenMobile.Graphics
             cY = y + height - radius;
             arr[1] = (int)cY;
             count = 2;
-            for (ang = 0; ang <= (0.5 * Math.PI); ang = ang + 0.05)
+            for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
             {
-                arr[count]=(int)(radius * Math.Cos(ang) + cX);
-                arr[count+1]=(int)(radius * Math.Sin(ang) + cY);
+                arr[count]=(int)(radius * System.Math.Cos(ang) + cX);
+                arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
                 count+=2;
             }
             cX = x + radius;
@@ -639,10 +640,10 @@ namespace OpenMobile.Graphics
             arr[0] = (int)cX;
             arr[1] = (int)cY;
             count = 2;
-            for (ang = (0.5 * Math.PI); ang <= Math.PI; ang = ang + 0.05)
+            for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
             {
-                arr[count]=(int)(radius * Math.Cos(ang) + cX);
-                arr[count+1]=(int)(radius * Math.Sin(ang) + cY);
+                arr[count]=(int)(radius * System.Math.Cos(ang) + cX);
+                arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
                 count+=2;
             }
             Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);

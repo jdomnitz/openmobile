@@ -408,7 +408,7 @@ namespace OpenMobile.Graphics
                     {
                         for (int i = -3; i < 3; i++)
                             for (int j = -3; j < 3; j++)
-                                g.DrawString(text, currentFont, new SolidBrush(System.Drawing.Color.FromArgb(secondColor.A / (3 * (Math.Abs(i) + Math.Abs(j) + 1)), secondColor)), new RectangleF(x + i, y + j, w, h), sFormat);
+                                g.DrawString(text, currentFont, new SolidBrush(System.Drawing.Color.FromArgb(secondColor.A / (3 * (System.Math.Abs(i) + System.Math.Abs(j) + 1)), secondColor)), new RectangleF(x + i, y + j, w, h), sFormat);
                         g.DrawString(text, currentFont, new SolidBrush(color), new RectangleF(x, y, w, h), sFormat);
                     }
                 }

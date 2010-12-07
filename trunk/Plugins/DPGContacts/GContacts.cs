@@ -76,7 +76,6 @@ namespace DPGContacts
                 status = -1;
                 return;
             }
-
             StreamReader readStream = new StreamReader(responseStream, Encoding.UTF8);
             string result = readStream.ReadToEnd();
             string lastModified=lastUpdated.ToString("s");

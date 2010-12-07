@@ -30,6 +30,7 @@ namespace OpenMobile.Graphics.OpenGL
     using System;
     using System.Text;
     using System.Runtime.InteropServices;
+    using OpenMobile.Math;
     #pragma warning disable 0649
     #pragma warning disable 3019
     #pragma warning disable 1591
@@ -405,10 +406,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void Color3fv(Single* v);
             internal unsafe static Color3fv glColor3fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Color3hNV(OpenMobile.Half red, OpenMobile.Half green, OpenMobile.Half blue);
+            internal delegate void Color3hNV(Half red, Half green, Half blue);
             internal static Color3hNV glColor3hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Color3hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void Color3hvNV(Half* v);
             internal unsafe static Color3hvNV glColor3hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Color3i(Int32 red, Int32 green, Int32 blue);
@@ -459,10 +460,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void Color4fv(Single* v);
             internal unsafe static Color4fv glColor4fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Color4hNV(OpenMobile.Half red, OpenMobile.Half green, OpenMobile.Half blue, OpenMobile.Half alpha);
+            internal delegate void Color4hNV(Half red, Half green, Half blue, Half alpha);
             internal static Color4hNV glColor4hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Color4hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void Color4hvNV(Half* v);
             internal unsafe static Color4hvNV glColor4hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Color4i(Int32 red, Int32 green, Int32 blue, Int32 alpha);
@@ -1143,10 +1144,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void FogCoordfvEXT(Single* coord);
             internal unsafe static FogCoordfvEXT glFogCoordfvEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void FogCoordhNV(OpenMobile.Half fog);
+            internal delegate void FogCoordhNV(Half fog);
             internal static FogCoordhNV glFogCoordhNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void FogCoordhvNV(OpenMobile.Half* fog);
+            internal unsafe delegate void FogCoordhvNV(Half* fog);
             internal unsafe static FogCoordhvNV glFogCoordhvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void FogCoordPointer(OpenMobile.Graphics.OpenGL.FogPointerType type, Int32 stride, IntPtr pointer);
@@ -2421,10 +2422,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void MultiTexCoord1fvARB(OpenMobile.Graphics.OpenGL.TextureUnit target, Single* v);
             internal unsafe static MultiTexCoord1fvARB glMultiTexCoord1fvARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void MultiTexCoord1hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half s);
+            internal delegate void MultiTexCoord1hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half s);
             internal static MultiTexCoord1hNV glMultiTexCoord1hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MultiTexCoord1hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half* v);
+            internal unsafe delegate void MultiTexCoord1hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half* v);
             internal unsafe static MultiTexCoord1hvNV glMultiTexCoord1hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void MultiTexCoord1i(OpenMobile.Graphics.OpenGL.TextureUnit target, Int32 s);
@@ -2475,10 +2476,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void MultiTexCoord2fvARB(OpenMobile.Graphics.OpenGL.TextureUnit target, Single* v);
             internal unsafe static MultiTexCoord2fvARB glMultiTexCoord2fvARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void MultiTexCoord2hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half s, OpenMobile.Half t);
+            internal delegate void MultiTexCoord2hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half s, Half t);
             internal static MultiTexCoord2hNV glMultiTexCoord2hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MultiTexCoord2hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half* v);
+            internal unsafe delegate void MultiTexCoord2hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half* v);
             internal unsafe static MultiTexCoord2hvNV glMultiTexCoord2hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void MultiTexCoord2i(OpenMobile.Graphics.OpenGL.TextureUnit target, Int32 s, Int32 t);
@@ -2529,10 +2530,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void MultiTexCoord3fvARB(OpenMobile.Graphics.OpenGL.TextureUnit target, Single* v);
             internal unsafe static MultiTexCoord3fvARB glMultiTexCoord3fvARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void MultiTexCoord3hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r);
+            internal delegate void MultiTexCoord3hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half s, Half t, Half r);
             internal static MultiTexCoord3hNV glMultiTexCoord3hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MultiTexCoord3hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half* v);
+            internal unsafe delegate void MultiTexCoord3hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half* v);
             internal unsafe static MultiTexCoord3hvNV glMultiTexCoord3hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void MultiTexCoord3i(OpenMobile.Graphics.OpenGL.TextureUnit target, Int32 s, Int32 t, Int32 r);
@@ -2583,10 +2584,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void MultiTexCoord4fvARB(OpenMobile.Graphics.OpenGL.TextureUnit target, Single* v);
             internal unsafe static MultiTexCoord4fvARB glMultiTexCoord4fvARB;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void MultiTexCoord4hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r, OpenMobile.Half q);
+            internal delegate void MultiTexCoord4hNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half s, Half t, Half r, Half q);
             internal static MultiTexCoord4hNV glMultiTexCoord4hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void MultiTexCoord4hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, OpenMobile.Half* v);
+            internal unsafe delegate void MultiTexCoord4hvNV(OpenMobile.Graphics.OpenGL.TextureUnit target, Half* v);
             internal unsafe static MultiTexCoord4hvNV glMultiTexCoord4hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void MultiTexCoord4i(OpenMobile.Graphics.OpenGL.TextureUnit target, Int32 s, Int32 t, Int32 r, Int32 q);
@@ -3429,10 +3430,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void SecondaryColor3fvEXT(Single* v);
             internal unsafe static SecondaryColor3fvEXT glSecondaryColor3fvEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void SecondaryColor3hNV(OpenMobile.Half red, OpenMobile.Half green, OpenMobile.Half blue);
+            internal delegate void SecondaryColor3hNV(Half red, Half green, Half blue);
             internal static SecondaryColor3hNV glSecondaryColor3hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void SecondaryColor3hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void SecondaryColor3hvNV(Half* v);
             internal unsafe static SecondaryColor3hvNV glSecondaryColor3hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void SecondaryColor3i(Int32 red, Int32 green, Int32 blue);
@@ -3648,10 +3649,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void TexCoord1fv(Single* v);
             internal unsafe static TexCoord1fv glTexCoord1fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord1hNV(OpenMobile.Half s);
+            internal delegate void TexCoord1hNV(Half s);
             internal static TexCoord1hNV glTexCoord1hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord1hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void TexCoord1hvNV(Half* v);
             internal unsafe static TexCoord1hvNV glTexCoord1hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexCoord1i(Int32 s);
@@ -3678,10 +3679,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void TexCoord2fv(Single* v);
             internal unsafe static TexCoord2fv glTexCoord2fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord2hNV(OpenMobile.Half s, OpenMobile.Half t);
+            internal delegate void TexCoord2hNV(Half s, Half t);
             internal static TexCoord2hNV glTexCoord2hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord2hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void TexCoord2hvNV(Half* v);
             internal unsafe static TexCoord2hvNV glTexCoord2hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexCoord2i(Int32 s, Int32 t);
@@ -3708,10 +3709,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void TexCoord3fv(Single* v);
             internal unsafe static TexCoord3fv glTexCoord3fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord3hNV(OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r);
+            internal delegate void TexCoord3hNV(Half s, Half t, Half r);
             internal static TexCoord3hNV glTexCoord3hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord3hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void TexCoord3hvNV(Half* v);
             internal unsafe static TexCoord3hvNV glTexCoord3hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexCoord3i(Int32 s, Int32 t, Int32 r);
@@ -3738,10 +3739,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void TexCoord4fv(Single* v);
             internal unsafe static TexCoord4fv glTexCoord4fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void TexCoord4hNV(OpenMobile.Half s, OpenMobile.Half t, OpenMobile.Half r, OpenMobile.Half q);
+            internal delegate void TexCoord4hNV(Half s, Half t, Half r, Half q);
             internal static TexCoord4hNV glTexCoord4hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void TexCoord4hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void TexCoord4hvNV(Half* v);
             internal unsafe static TexCoord4hvNV glTexCoord4hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void TexCoord4i(Int32 s, Int32 t, Int32 r, Int32 q);
@@ -4188,10 +4189,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void Vertex2fv(Single* v);
             internal unsafe static Vertex2fv glVertex2fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Vertex2hNV(OpenMobile.Half x, OpenMobile.Half y);
+            internal delegate void Vertex2hNV(Half x, Half y);
             internal static Vertex2hNV glVertex2hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Vertex2hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void Vertex2hvNV(Half* v);
             internal unsafe static Vertex2hvNV glVertex2hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Vertex2i(Int32 x, Int32 y);
@@ -4218,10 +4219,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void Vertex3fv(Single* v);
             internal unsafe static Vertex3fv glVertex3fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Vertex3hNV(OpenMobile.Half x, OpenMobile.Half y, OpenMobile.Half z);
+            internal delegate void Vertex3hNV(Half x, Half y, Half z);
             internal static Vertex3hNV glVertex3hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Vertex3hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void Vertex3hvNV(Half* v);
             internal unsafe static Vertex3hvNV glVertex3hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Vertex3i(Int32 x, Int32 y, Int32 z);
@@ -4248,10 +4249,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void Vertex4fv(Single* v);
             internal unsafe static Vertex4fv glVertex4fv;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void Vertex4hNV(OpenMobile.Half x, OpenMobile.Half y, OpenMobile.Half z, OpenMobile.Half w);
+            internal delegate void Vertex4hNV(Half x, Half y, Half z, Half w);
             internal static Vertex4hNV glVertex4hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void Vertex4hvNV(OpenMobile.Half* v);
+            internal unsafe delegate void Vertex4hvNV(Half* v);
             internal unsafe static Vertex4hvNV glVertex4hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void Vertex4i(Int32 x, Int32 y, Int32 z, Int32 w);
@@ -4305,10 +4306,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void VertexAttrib1fvNV(UInt32 index, Single* v);
             internal unsafe static VertexAttrib1fvNV glVertexAttrib1fvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void VertexAttrib1hNV(UInt32 index, OpenMobile.Half x);
+            internal delegate void VertexAttrib1hNV(UInt32 index, Half x);
             internal static VertexAttrib1hNV glVertexAttrib1hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void VertexAttrib1hvNV(UInt32 index, OpenMobile.Half* v);
+            internal unsafe delegate void VertexAttrib1hvNV(UInt32 index, Half* v);
             internal unsafe static VertexAttrib1hvNV glVertexAttrib1hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void VertexAttrib1s(UInt32 index, Int16 x);
@@ -4365,10 +4366,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void VertexAttrib2fvNV(UInt32 index, Single* v);
             internal unsafe static VertexAttrib2fvNV glVertexAttrib2fvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void VertexAttrib2hNV(UInt32 index, OpenMobile.Half x, OpenMobile.Half y);
+            internal delegate void VertexAttrib2hNV(UInt32 index, Half x, Half y);
             internal static VertexAttrib2hNV glVertexAttrib2hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void VertexAttrib2hvNV(UInt32 index, OpenMobile.Half* v);
+            internal unsafe delegate void VertexAttrib2hvNV(UInt32 index, Half* v);
             internal unsafe static VertexAttrib2hvNV glVertexAttrib2hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void VertexAttrib2s(UInt32 index, Int16 x, Int16 y);
@@ -4425,10 +4426,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void VertexAttrib3fvNV(UInt32 index, Single* v);
             internal unsafe static VertexAttrib3fvNV glVertexAttrib3fvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void VertexAttrib3hNV(UInt32 index, OpenMobile.Half x, OpenMobile.Half y, OpenMobile.Half z);
+            internal delegate void VertexAttrib3hNV(UInt32 index, Half x, Half y, Half z);
             internal static VertexAttrib3hNV glVertexAttrib3hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void VertexAttrib3hvNV(UInt32 index, OpenMobile.Half* v);
+            internal unsafe delegate void VertexAttrib3hvNV(UInt32 index, Half* v);
             internal unsafe static VertexAttrib3hvNV glVertexAttrib3hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void VertexAttrib3s(UInt32 index, Int16 x, Int16 y, Int16 z);
@@ -4491,10 +4492,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void VertexAttrib4fvNV(UInt32 index, Single* v);
             internal unsafe static VertexAttrib4fvNV glVertexAttrib4fvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void VertexAttrib4hNV(UInt32 index, OpenMobile.Half x, OpenMobile.Half y, OpenMobile.Half z, OpenMobile.Half w);
+            internal delegate void VertexAttrib4hNV(UInt32 index, Half x, Half y, Half z, Half w);
             internal static VertexAttrib4hNV glVertexAttrib4hNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void VertexAttrib4hvNV(UInt32 index, OpenMobile.Half* v);
+            internal unsafe delegate void VertexAttrib4hvNV(UInt32 index, Half* v);
             internal unsafe static VertexAttrib4hvNV glVertexAttrib4hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void VertexAttrib4iv(UInt32 index, Int32* v);
@@ -4731,7 +4732,7 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void VertexAttribs1fvNV(UInt32 index, Int32 count, Single* v);
             internal unsafe static VertexAttribs1fvNV glVertexAttribs1fvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void VertexAttribs1hvNV(UInt32 index, Int32 n, OpenMobile.Half* v);
+            internal unsafe delegate void VertexAttribs1hvNV(UInt32 index, Int32 n, Half* v);
             internal unsafe static VertexAttribs1hvNV glVertexAttribs1hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void VertexAttribs1svNV(UInt32 index, Int32 count, Int16* v);
@@ -4743,7 +4744,7 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void VertexAttribs2fvNV(UInt32 index, Int32 count, Single* v);
             internal unsafe static VertexAttribs2fvNV glVertexAttribs2fvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void VertexAttribs2hvNV(UInt32 index, Int32 n, OpenMobile.Half* v);
+            internal unsafe delegate void VertexAttribs2hvNV(UInt32 index, Int32 n, Half* v);
             internal unsafe static VertexAttribs2hvNV glVertexAttribs2hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void VertexAttribs2svNV(UInt32 index, Int32 count, Int16* v);
@@ -4755,7 +4756,7 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void VertexAttribs3fvNV(UInt32 index, Int32 count, Single* v);
             internal unsafe static VertexAttribs3fvNV glVertexAttribs3fvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void VertexAttribs3hvNV(UInt32 index, Int32 n, OpenMobile.Half* v);
+            internal unsafe delegate void VertexAttribs3hvNV(UInt32 index, Int32 n, Half* v);
             internal unsafe static VertexAttribs3hvNV glVertexAttribs3hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void VertexAttribs3svNV(UInt32 index, Int32 count, Int16* v);
@@ -4767,7 +4768,7 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void VertexAttribs4fvNV(UInt32 index, Int32 count, Single* v);
             internal unsafe static VertexAttribs4fvNV glVertexAttribs4fvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void VertexAttribs4hvNV(UInt32 index, Int32 n, OpenMobile.Half* v);
+            internal unsafe delegate void VertexAttribs4hvNV(UInt32 index, Int32 n, Half* v);
             internal unsafe static VertexAttribs4hvNV glVertexAttribs4hvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal unsafe delegate void VertexAttribs4svNV(UInt32 index, Int32 count, Int16* v);
@@ -4896,10 +4897,10 @@ namespace OpenMobile.Graphics.OpenGL
             internal unsafe delegate void VertexWeightfvEXT(Single* weight);
             internal unsafe static VertexWeightfvEXT glVertexWeightfvEXT;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal delegate void VertexWeighthNV(OpenMobile.Half weight);
+            internal delegate void VertexWeighthNV(Half weight);
             internal static VertexWeighthNV glVertexWeighthNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
-            internal unsafe delegate void VertexWeighthvNV(OpenMobile.Half* weight);
+            internal unsafe delegate void VertexWeighthvNV(Half* weight);
             internal unsafe static VertexWeighthvNV glVertexWeighthvNV;
             [System.Security.SuppressUnmanagedCodeSecurity()]
             internal delegate void VertexWeightPointerEXT(Int32 size, OpenMobile.Graphics.OpenGL.ExtVertexWeighting type, Int32 stride, IntPtr pointer);
