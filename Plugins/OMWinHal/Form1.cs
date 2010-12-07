@@ -195,61 +195,30 @@ namespace OMHal
         }
         public void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
-            if (e.Mode == PowerModes.Resume)
+            try
             {
-                try
-                {
+                if (e.Mode == PowerModes.Resume)
                     raisePowerEvent(ePowerEvent.SystemResumed);
-                }
-                catch (Exception) { }
-            }
-            else if (e.Mode == PowerModes.Suspend)
-            {
-                try
-                {
+                else if (e.Mode == PowerModes.Suspend)
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
-                }
-                catch (Exception) { }
-            }
-            else
-            {
-                if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
-                {
-                    try
-                    {
-                        if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Low)
-                        {
-                            raisePowerEvent(ePowerEvent.BatteryLow);
-                        }
-                        else if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Critical)
-                        {
-                            raisePowerEvent(ePowerEvent.BatteryCritical);
-                        }
-                        else
-                        {
-                            raisePowerEvent(ePowerEvent.SystemOnBattery);
-                        }
-                    }
-                    catch (Exception) { }
-                }
-                else if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Online)
-                {
-                    try
-                    {
-                        raisePowerEvent(ePowerEvent.SystemPluggedIn);
-                    }
-                    catch (Exception) { }
-                }
                 else
                 {
-                    try
+                    if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
                     {
-                        raisePowerEvent(ePowerEvent.Unknown);
+                        if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Low)
+                            raisePowerEvent(ePowerEvent.BatteryLow);
+                        else if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.Critical)
+                            raisePowerEvent(ePowerEvent.BatteryCritical);
+                        else
+                            raisePowerEvent(ePowerEvent.SystemOnBattery);
                     }
-                    catch (Exception) { }
+                    else if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Online)
+                        raisePowerEvent(ePowerEvent.SystemPluggedIn);
+                    else
+                        raisePowerEvent(ePowerEvent.Unknown);
                 }
-
             }
+            catch (Exception) { }
         }
 
         private void raisePowerEvent(ePowerEvent ePowerEvent)

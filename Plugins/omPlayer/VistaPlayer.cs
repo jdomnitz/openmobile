@@ -414,13 +414,14 @@ namespace OMPlayer
             }
             try
             {
+                url = url.ToLower();
                 if (url.EndsWith(".m4p"))
                 {
                     using (PluginSettings s = new PluginSettings())
                         if (s.getSetting("Music.PlayProtected") != "True")
                             return false;
                 }
-                if (url.EndsWith(".IFO"))
+                if (url.EndsWith(".ifo"))
                 {
                     theHost.execute(eFunction.Play, instance.ToString(), System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(url)));
                     return false;
@@ -599,7 +600,6 @@ namespace OMPlayer
             public bool play(string url)
             {
                 stop();
-                url = url.ToLower();
                 lock (this)
                 {
                     object o = sink.Invoke(OnPlay, new object[] { url });

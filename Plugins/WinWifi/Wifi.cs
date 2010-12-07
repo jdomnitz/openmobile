@@ -26,6 +26,7 @@ using OpenMobile.Plugin;
 using System.Text;
 using System.Xml;
 using OpenMobile.Data;
+using System.ComponentModel;
 
 namespace WinWifi
 {
@@ -369,24 +370,34 @@ namespace WinWifi
         }
         void Wifi_WlanNotification(Wlan.WlanNotificationData notifyData)
         {
-            if (notifyData.NotificationCode.ToString() == "NetworkAvailable")
-                raiseWirelessEvent(eWirelessEvent.WirelessNetworksAvailable, "");
-            else if (notifyData.NotificationCode.ToString() == "SignalQualityChange")
-                raiseWirelessEvent(eWirelessEvent.WirelessSignalStrengthChanged, client.Interfaces[0].CurrentConnection.wlanAssociationAttributes.wlanSignalQuality.ToString());
+            try
+            {
+                if (client.Interfaces[0].InterfaceState == Wlan.WlanInterfaceState.NotReady)
+                    return;
+                if (notifyData.NotificationCode.ToString() == "NetworkAvailable")
+                    raiseWirelessEvent(eWirelessEvent.WirelessNetworksAvailable, "");
+                else if (notifyData.NotificationCode.ToString() == "SignalQualityChange")
+                    raiseWirelessEvent(eWirelessEvent.WirelessSignalStrengthChanged, client.Interfaces[0].CurrentConnection.wlanAssociationAttributes.wlanSignalQuality.ToString());
+            }
+            catch (Win32Exception) { }
         }
 
         void Wifi_WlanConnectionNotification(Wlan.WlanNotificationData notifyData, Wlan.WlanConnectionNotificationData connNotifyData)
         {
-            if (notifyData.NotificationCode.ToString() == "ConnectionStart")
-                raiseWirelessEvent(eWirelessEvent.ConnectingToWirelessNetwork, connNotifyData.profileName);
-            else if (notifyData.NotificationCode.ToString() == "Connected")
+            try
             {
-                raiseWirelessEvent(eWirelessEvent.ConnectedToWirelessNetwork, connNotifyData.profileName);
-                if (OpenMobile.Net.Network.checkForInternet() == OpenMobile.Net.Network.connectionStatus.LoginRequired)
-                    raiseWirelessEvent(eWirelessEvent.WirelessNetworkRequiresLogin, connNotifyData.profileName);
+                if (notifyData.NotificationCode.ToString() == "ConnectionStart")
+                    raiseWirelessEvent(eWirelessEvent.ConnectingToWirelessNetwork, connNotifyData.profileName);
+                else if (notifyData.NotificationCode.ToString() == "Connected")
+                {
+                    raiseWirelessEvent(eWirelessEvent.ConnectedToWirelessNetwork, connNotifyData.profileName);
+                    if (OpenMobile.Net.Network.checkForInternet() == OpenMobile.Net.Network.connectionStatus.LoginRequired)
+                        raiseWirelessEvent(eWirelessEvent.WirelessNetworkRequiresLogin, connNotifyData.profileName);
+                }
+                else if (notifyData.NotificationCode.ToString() == "Disconnected")
+                    raiseWirelessEvent(eWirelessEvent.DisconnectedFromWirelessNetwork, "");
             }
-            else if (notifyData.NotificationCode.ToString() == "Disconnected")
-                raiseWirelessEvent(eWirelessEvent.DisconnectedFromWirelessNetwork, "");
+            catch (Win32Exception) { }
         }
 
         #region IBasePlugin Members
