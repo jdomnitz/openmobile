@@ -2144,7 +2144,7 @@ namespace OpenMobile
             string[] toDirectories = toPath.Split(
                 System.IO.Path.DirectorySeparatorChar);
 
-            int length = Math.Min(
+            int length = System.Math.Min(
                 fromDirectories.Length,
                 toDirectories.Length);
 

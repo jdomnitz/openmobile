@@ -27,7 +27,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace OpenMobile
+namespace OpenMobile.Math
 {
     /// <summary>
     /// 4-component Vector of the Half type. Occupies 8 Byte total.

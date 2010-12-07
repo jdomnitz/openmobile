@@ -152,7 +152,7 @@ namespace OpenMobile
             for (int index = 1; index < numpoints; index++)
             {
                 length[index] = length[index - 1] +
-                        (float)Math.Sqrt((letterxNorm[index] - letterxNorm[index - 1]) * (letterxNorm[index] - letterxNorm[index - 1]) +
+                        (float)System.Math.Sqrt((letterxNorm[index] - letterxNorm[index - 1]) * (letterxNorm[index] - letterxNorm[index - 1]) +
                                         (letteryNorm[index] - letteryNorm[index - 1]) * (letteryNorm[index] - letteryNorm[index - 1]));
             }
 
@@ -278,7 +278,7 @@ namespace OpenMobile
             float distance = 0.0F;
             for (int i = 0; i < subDivisionMax; i++)
             {
-                distance = (float)((double)distance + Math.Sqrt((stdx[stdIndex, i] - charX[i]) * (stdx[stdIndex, i] - charX[i]) + (stdy[stdIndex, i] - charY[i]) * (stdy[stdIndex, i] - charY[i])));
+                distance = (float)((double)distance + System.Math.Sqrt((stdx[stdIndex, i] - charX[i]) * (stdx[stdIndex, i] - charX[i]) + (stdy[stdIndex, i] - charY[i]) * (stdy[stdIndex, i] - charY[i])));
             }
 
             return distance;
@@ -323,7 +323,7 @@ namespace OpenMobile
                 resulty = "top";
             }
 
-            if (Math.Abs(vx) > Math.Abs(vy))
+            if (System.Math.Abs(vx) > System.Math.Abs(vy))
             {
                 return resultx + resulty;
             }

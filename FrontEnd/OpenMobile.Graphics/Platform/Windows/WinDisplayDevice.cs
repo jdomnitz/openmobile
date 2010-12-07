@@ -60,58 +60,49 @@ namespace OpenMobile.Platform.Windows
                 // and construct the device when every needed detail is available.
                 // The main DisplayDevice constructor adds the newly constructed device
                 // to the list of available devices.
-                DisplayDevice opentk_dev;
-                DisplayResolution opentk_dev_current_res = null;
-                bool opentk_dev_primary = false;
+                DisplayDevice dev;
+                DisplayResolution dev_current_res = null;
+                bool dev_primary = false;
                 int device_count = 0;
 
                 // Get available video adapters and enumerate all monitors
-                WindowsDisplayDevice dev = new WindowsDisplayDevice();
-                while (Functions.EnumDisplayDevices(null, device_count++, dev, 0))
+                WindowsDisplayDevice win_dev = new WindowsDisplayDevice();
+                while (Functions.EnumDisplayDevices(null, device_count++, win_dev, 0))
                 {
-                    if ((dev.StateFlags & DisplayDeviceStateFlags.AttachedToDesktop) == DisplayDeviceStateFlags.None)
+                    if ((win_dev.StateFlags & DisplayDeviceStateFlags.AttachedToDesktop) == DisplayDeviceStateFlags.None)
                         continue;
 
                     DeviceMode monitor_mode = new DeviceMode();
                     bool landscape=false;
                     // The second function should only be executed when the first one fails
                     // (e.g. when the monitor is disabled)
-                    if (Functions.EnumDisplaySettingsEx(dev.DeviceName.ToString(), DisplayModeSettingsEnum.CurrentSettings, monitor_mode, 0))
+                    if (Functions.EnumDisplaySettingsEx(win_dev.DeviceName.ToString(), DisplayModeSettingsEnum.CurrentSettings, monitor_mode, 0))
                     {
-                        opentk_dev_current_res = new DisplayResolution(
+                        dev_current_res = new DisplayResolution(
                             monitor_mode.Position.X, monitor_mode.Position.Y,
                             monitor_mode.PelsWidth, monitor_mode.PelsHeight,
                             monitor_mode.BitsPerPel);
-                        opentk_dev_primary =
-                            (dev.StateFlags & DisplayDeviceStateFlags.PrimaryDevice) != DisplayDeviceStateFlags.None;
+                        dev_primary =
+                            (win_dev.StateFlags & DisplayDeviceStateFlags.PrimaryDevice) != DisplayDeviceStateFlags.None;
                         landscape = ((monitor_mode.DisplayOrientation == 0) || (monitor_mode.DisplayOrientation == 2));
                     }
 
                     // Construct the OpenTK DisplayDevice through the accumulated parameters.
                     // The constructor will automatically add the DisplayDevice to the list
                     // of available devices.
-                    opentk_dev = new DisplayDevice(
-                        opentk_dev_current_res,
-                        opentk_dev_primary,
-                        opentk_dev_current_res.Bounds,
-                        dev.DeviceName);
-                    opentk_dev.Landscape = landscape;
-                    AvailableDevices.Add(opentk_dev);
+                    dev = new DisplayDevice(
+                        dev_current_res,
+                        dev_primary,
+                        dev_current_res.Bounds,
+                        win_dev.DeviceName);
+                    dev.Landscape = landscape;
+                    AvailableDevices.Add(dev);
 
-                    if (opentk_dev_primary)
-                        Primary = opentk_dev;
+                    if (dev_primary)
+                        Primary = dev;
                 }
             }
         }
-
-        #region HandleDisplaySettingsChanged
-
-        void HandleDisplaySettingsChanged(object sender, EventArgs e)
-        {
-            RefreshDisplayDevices();
-        }
-
-        #endregion
 
         #endregion
         #endregion

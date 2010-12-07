@@ -232,13 +232,13 @@ namespace OpenMobile
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
             OpenMobile.Threading.TaskManager.Enable(Core.theHost); //Start executing background tasks
             SystemEvents.DisplaySettingsChanged+=new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);
-            if (OpenMobile.Net.Network.IsAvailable==true)
-                theHost.raiseSystemEvent(eFunction.connectedToInternet, "", "", "");
             using (PluginSettings settings = new PluginSettings())
             {
                 if (settings.getSetting("UI.MinGraphics") == "True")
                     theHost.GraphicsLevel = eGraphicsLevel.Minimal;
             }
+            if (OpenMobile.Net.Network.IsAvailable)
+                theHost.raiseSystemEvent(eFunction.connectedToInternet, "", "", "");
             pluginCollection.TrimExcess();
             Application.Run();
         }

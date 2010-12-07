@@ -459,7 +459,7 @@ namespace OpenMobile.Platform.Windows
                             Gesture(this, new TouchEventArgs("Pan", info.ptLocation, info.ullArguments, null,complete));
                         return IntPtr.Zero;
                     case 5: //rotate
-                        double distance = ((info.ullArguments / 65535.0) * 4.0 * Math.PI) - 2.0 * Math.PI;
+                        double distance = ((info.ullArguments / 65535.0) * 4.0 * System.Math.PI) - 2.0 * System.Math.PI;
                         if (Gesture != null)
                             Gesture(this, new TouchEventArgs("Rotate", info.ptLocation, distance, null,complete));
                         return IntPtr.Zero;

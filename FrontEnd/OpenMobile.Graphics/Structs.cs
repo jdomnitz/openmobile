@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 namespace OpenMobile.Graphics
 {
+    using Math = System.Math;
     public enum Gradient:byte
     {
         None=0,

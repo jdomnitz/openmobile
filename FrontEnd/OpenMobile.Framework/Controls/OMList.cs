@@ -806,10 +806,10 @@ namespace OpenMobile.Controls
         {
             throwtmr.Enabled = false;
             thrown = 0;
-            if (Math.Abs(RelativeDistance.Y) > 3)
+            if (System.Math.Abs(RelativeDistance.Y) > 3)
                 thrown = RelativeDistance.Y;
             moved += RelativeDistance.Y;
-            if (Math.Abs(TotalDistance.Y) > 3)
+            if (System.Math.Abs(TotalDistance.Y) > 3)
             {
                 if (selectedIndex >= 0)
                     items[selectedIndex].textTex = items[selectedIndex].subitemTex = null;

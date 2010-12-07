@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using OpenMobile.Math;
 
 namespace OpenMobile.Graphics.ES20
 {

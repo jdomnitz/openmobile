@@ -26,7 +26,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 
-namespace OpenMobile
+namespace OpenMobile.Math
 {
     /// <summary>
     /// Represents a double-precision Quaternion.
