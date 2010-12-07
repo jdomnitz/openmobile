@@ -247,11 +247,12 @@ namespace OMPlayer
     private delegate void CreateNewPlayer(int instance);
     private event CreateNewPlayer OnPlayerRequested;
     bool vistaMode = false;
+    bool sevenMode = false;
     public eLoadStatus initialize(IPluginHost host)
     {
         vistaMode=Environment.OSVersion.Version.Major > 5;
-        if (vistaMode) //Only if MF isn't available
-            return eLoadStatus.LoadFailedGracefulUnloadRequested;
+        if (vistaMode)
+            sevenMode = (Environment.OSVersion.Version.Minor == 1);
         theHost = host;
         sink = new MessageProc();
         IntPtr tmp= sink.Handle;
@@ -266,31 +267,34 @@ namespace OMPlayer
             string cf = setting.getSetting("Music.CrossfadeDuration");
             if (cf != "")
                 crossfade = int.Parse(cf);
-            if (setting.getSetting("Music.AutoResume") == "True")
+            if (!vistaMode)
             {
-                OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+                if (setting.getSetting("Music.AutoResume") == "True")
                 {
-                for (int i = 0; i < theHost.ScreenCount; i++)
-                {
-                    int k = theHost.instanceForScreen(i);
-                    host.execute(eFunction.loadAVPlayer, k.ToString(), "OMPlayer");
-                    checkInstance(k);
-                    player[k].currentVolume = 0;
-                    string lastUrl = setting.getSetting("Music.Instance" + k.ToString() + ".LastPlayingURL");
-                    play(k, lastUrl, eMediaType.Local);
-                    theHost.execute(eFunction.setPlaylistPosition, k.ToString(), lastUrl);
-                    player[k].currentVolume = 100;
-                    if (player[k].mediaPosition == null)
-                        return;
-                    if (double.TryParse(setting.getSetting("Music.Instance" + k.ToString() + ".LastPlayingPosition"), out player[k].pos) == true)
+                    OpenMobile.Threading.SafeThread.Asynchronous(delegate()
                     {
-                        if (player[k].pos > 1)
-                            player[k].pos -= 1;
-                        player[k].mediaPosition.put_CurrentPosition(player[k].pos);
-                    }
+                        for (int i = 0; i < theHost.ScreenCount; i++)
+                        {
+                            int k = theHost.instanceForScreen(i);
+                            host.execute(eFunction.loadAVPlayer, k.ToString(), "OMPlayer");
+                            checkInstance(k);
+                            player[k].currentVolume = 0;
+                            string lastUrl = setting.getSetting("Music.Instance" + k.ToString() + ".LastPlayingURL");
+                            play(k, lastUrl, eMediaType.Local);
+                            theHost.execute(eFunction.setPlaylistPosition, k.ToString(), lastUrl);
+                            player[k].currentVolume = 100;
+                            if (player[k].mediaPosition == null)
+                                return;
+                            if (double.TryParse(setting.getSetting("Music.Instance" + k.ToString() + ".LastPlayingPosition"), out player[k].pos) == true)
+                            {
+                                if (player[k].pos > 1)
+                                    player[k].pos -= 1;
+                                player[k].mediaPosition.put_CurrentPosition(player[k].pos);
+                            }
+                        }
+                        fadeIn();
+                    }, theHost);
                 }
-                fadeIn(); 
-                },theHost);
             }
         }
         return eLoadStatus.LoadSuccessful;
@@ -456,16 +460,25 @@ namespace OMPlayer
         }
         try
         {
+            url = url.ToLower();
             if (url.EndsWith(".m4p"))
             {
                 using (PluginSettings s = new PluginSettings())
                     if (s.getSetting("Music.PlayProtected") != "True")
                         return false;
             }
-            if (url.EndsWith(".IFO"))
+            if (url.EndsWith(".ifo"))
             {
                 theHost.execute(eFunction.Play, instance.ToString(), System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(url)));
                 return false;
+            }
+            if (vistaMode)
+            {
+                if ((url.EndsWith("mp3")) || (url.EndsWith("wmv")) || (url.EndsWith("wma")))
+                    return false;
+                if (sevenMode)
+                    if ((url.EndsWith("mp4")) || (url.EndsWith("m4a"))||(url.EndsWith("avi"))||(url.EndsWith("mkv"))||(url.EndsWith("mov")))
+                        return false;
             }
             checkInstance(instance);
             return player[instance].play(url);

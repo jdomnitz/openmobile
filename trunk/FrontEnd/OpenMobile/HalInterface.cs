@@ -59,7 +59,8 @@ namespace OpenMobile
             {
                 try
                 {
-                    send.Send(ASCIIEncoding.ASCII.GetBytes(text), text.Length);
+                    if (!isDisposed)
+                        send.Send(ASCIIEncoding.ASCII.GetBytes(text), text.Length);
                 }
                 catch (System.Net.Sockets.SocketException e)
                 {
@@ -109,7 +110,8 @@ namespace OpenMobile
                 catch (System.Net.Sockets.SocketException) { } //unknown xp bug on startup
                 finally
                 {
-                    receive.BeginReceive(recv, null);
+                    if (!isDisposed)
+                        receive.BeginReceive(recv, null);
                 }
             }
             internal void close()
