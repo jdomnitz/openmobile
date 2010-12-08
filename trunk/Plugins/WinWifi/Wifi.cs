@@ -20,13 +20,13 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
-using NativeWifi;
-using OpenMobile;
-using OpenMobile.Plugin;
+using System.ComponentModel;
 using System.Text;
 using System.Xml;
+using NativeWifi;
+using OpenMobile;
 using OpenMobile.Data;
-using System.ComponentModel;
+using OpenMobile.Plugin;
 
 namespace WinWifi
 {

@@ -21,12 +21,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Xml;
+using OpenMobile.Data;
 using OpenMobile.Net;
 using OpenMobile.Plugin;
-using System.Threading;
-using OpenMobile.Data;
-using OpenMobile.Framework;
 
 namespace OpenMobile.Media
 {

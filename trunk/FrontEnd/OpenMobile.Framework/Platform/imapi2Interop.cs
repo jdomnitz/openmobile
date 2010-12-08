@@ -6,12 +6,9 @@
 //
 using System;
 using System.Collections;
-using System.Diagnostics;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Threading;
 
 namespace IMAPI2.Interop
 {
@@ -187,8 +184,7 @@ namespace IMAPI2.Interop
 
         private void Cleanup()
         {
-            Monitor.Enter(this);
-            try
+            lock(this)
             {
                 foreach (DiscMaster2_SinkHelper helper in m_aEventSinkHelpers.Values)
                 {
@@ -197,14 +193,6 @@ namespace IMAPI2.Interop
 
                 m_aEventSinkHelpers.Clear();
                 Marshal.ReleaseComObject(m_connectionPoint);
-            }
-            catch (SynchronizationLockException)
-            {
-                return;
-            }
-            finally
-            {
-                Monitor.Exit(this);
             }
         }
     }

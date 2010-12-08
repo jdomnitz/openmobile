@@ -1,12 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using OpenMobile;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
-using System.Diagnostics;
-using System.Threading;
-using System.Collections.Generic;
 
 namespace OMDebug
 {

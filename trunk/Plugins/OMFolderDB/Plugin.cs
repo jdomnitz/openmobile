@@ -147,7 +147,7 @@ namespace OMFolderDB
         private void makeItSo(string location, bool subdirectories)
         {
             //Phase 1 - Find out what needs to be indexed
-            Thread Worker = new Thread(new ThreadStart(getURLList));
+            Thread Worker = new Thread(getURLList);
             Worker.Priority = ThreadPriority.BelowNormal;
             Worker.IsBackground = true;
             Worker.Start();

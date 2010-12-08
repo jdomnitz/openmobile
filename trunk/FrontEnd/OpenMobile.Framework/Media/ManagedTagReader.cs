@@ -21,15 +21,15 @@
 using System;
 using System.Drawing;
 using System.IO;
-using TagLib;
 using System.Net;
-using System.Xml;
 using System.Threading;
+using System.Xml;
+using OpenMobile.Data;
+using OpenMobile.Framework;
+using OpenMobile.Graphics;
 using OpenMobile.Net;
 using OpenMobile.Plugin;
-using OpenMobile.Data;
-using OpenMobile.Graphics;
-using OpenMobile.Framework;
+using TagLib;
 
 namespace OpenMobile.Media
 {
@@ -139,6 +139,7 @@ namespace OpenMobile.Media
         private static string cacheArtist;
         private static string cacheAlbum;
         private static OImage cacheArt;
+        private static DateTime lastCheck;
         /// <summary>
         /// Retrieves metadata from LastFM
         /// </summary>
@@ -158,7 +159,9 @@ namespace OpenMobile.Media
             cacheAlbum = album;
             cacheArtist = artist;
             cacheArt = null;
-            Thread.Sleep(200); //prevent TOS violation
+            TimeSpan ts = DateTime.Now - lastCheck;
+            if (ts.TotalSeconds<205)
+                Thread.Sleep(205-unchecked((int)ts.TotalSeconds)); //prevent TOS violation
             XmlDocument reader = new XmlDocument();
             if (album == "Unknown Album")
                 return null;
@@ -167,6 +170,7 @@ namespace OpenMobile.Media
             try
             {
                 reader.Load("http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=280b54c321127c4647d05ead85cf5fdc&artist=" + Network.urlEncode(artist) + "&album=" + Network.urlEncode(album));
+                lastCheck = DateTime.Now;
             }
             catch (WebException) { return null; }
             catch (XmlException) { return null; }

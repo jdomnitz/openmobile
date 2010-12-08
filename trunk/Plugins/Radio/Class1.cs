@@ -18,18 +18,14 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-using System;
-using OpenMobile.Graphics;
-using System.Timers;
+using System.Collections.Generic;
 using System.Threading;
 using OpenMobile;
 using OpenMobile.Controls;
-using OpenMobile.Framework;
-using OpenMobile.Plugin;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
 using OpenMobile.Data;
+using OpenMobile.Framework;
+using OpenMobile.Graphics;
+using OpenMobile.Plugin;
 
 namespace OMRadio
 {
