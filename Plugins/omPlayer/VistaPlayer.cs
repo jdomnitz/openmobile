@@ -587,7 +587,10 @@ namespace OMPlayer
             {
                 if (session == null)
                     return false;
-                session.Start(Guid.Empty, new PropVariant((long)(10000000 * seconds)));
+                if (session.Start(Guid.Empty, new PropVariant((long)(10000000 * seconds))) != S_Ok)
+                    return false;
+                if (this.currentState == ePlayerStatus.Paused)
+                    session.Pause();
                 return true;
             }
 

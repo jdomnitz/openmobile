@@ -788,7 +788,7 @@ namespace OpenMobile
 
         public void CloseMe()
         {
-            new Thread(delegate() { tmrClosing_Tick(null, null); }).Start();
+            SandboxedThread.Asynchronous(delegate() { tmrClosing_Tick(null, null); });
         }
 
         void RenderingWindow_Gesture(object sender, OpenMobile.Graphics.TouchEventArgs e)
@@ -1110,7 +1110,7 @@ namespace OpenMobile
         {
             DisplayDevice dev=DisplayDevice.AvailableDisplays[screen];
             if (e.Landscape != dev.Landscape)
-                Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), dev.Landscape ? "Landscape" : "Portrait", "");
+                Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", "");
         }
         internal void Rollback()
         {

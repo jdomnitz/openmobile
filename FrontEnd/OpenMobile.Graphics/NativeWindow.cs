@@ -828,7 +828,7 @@ namespace OpenMobile
                     implementation.WindowBorderChanged += OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged += OnWindowStateChangedInternal;
                     implementation.Gesture += Gesture;
-                    implementation.ResolutionChange+=raiseResolutionChange;
+                    implementation.ResolutionChange+=ResolutionChange;
                     events = true;
                 }
                 else if (events)
@@ -842,7 +842,7 @@ namespace OpenMobile
                     implementation.WindowBorderChanged -= OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged -= OnWindowStateChangedInternal;
                     implementation.Gesture -= Gesture;
-                    implementation.ResolutionChange -= raiseResolutionChange;
+                    implementation.ResolutionChange -= ResolutionChange;
                     events = false;
                 }
                 else
@@ -850,10 +850,6 @@ namespace OpenMobile
                     throw new InvalidOperationException("Event propagation is already disabled.");
                 }
             }
-        }
-        private void raiseResolutionChange(object sender, ResolutionChange e)
-        {
-            ResolutionChange(sender, e);
         }
         #endregion
 

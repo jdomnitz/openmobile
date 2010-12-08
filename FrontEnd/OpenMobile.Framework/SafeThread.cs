@@ -21,6 +21,9 @@
 using System;
 using System.Threading;
 using OpenMobile.Plugin;
+using System.Diagnostics;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace OpenMobile.Threading
 {
@@ -29,6 +32,23 @@ namespace OpenMobile.Threading
     /// </summary>
     public static class SafeThread
     {
+        //State:
+        // -1 = Kill
+        //  0 = Working
+        //  1 = Sleeping
+        static IPluginHost theHost;
+        static int availableThreads;
+        private class ThreadState
+        {
+            public EventWaitHandle waitHandle;
+            public int state;
+            public ThreadState()
+            {
+                waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+            }
+        }
+        private static Queue<Function> functions = new Queue<Function>();
+        private static Dictionary<int, ThreadState> locks = new Dictionary<int, ThreadState>();
         /// <summary>
         /// Creates a new asynchronous safe thread
         /// </summary>
@@ -36,18 +56,22 @@ namespace OpenMobile.Threading
         /// <param name="host"></param>
         public static void Asynchronous(Function function,IPluginHost host)
         {
-            new Thread(delegate()
+            if (theHost == null)
+                theHost = host;
+            functions.Enqueue(function);
+            if (availableThreads > 0)
+            {
+                lock (locks)
                 {
-                    try
-                    {
-                        function();
-                    }
-                    catch (Exception e)
-                    {
-                        if (host != null)
-                            host.sendMessage("SandboxedThread", "SafeThread", "", ref e);
-                    }
-                }).Start();
+                    foreach (ThreadState state in locks.Values)
+                        if (state.state == 1)
+                        {
+                            state.waitHandle.Set();
+                            return;
+                        }
+                }
+            }
+            spawnThread();
         }
         /// <summary>
         /// Creates a new asynchronous safe thread
@@ -57,18 +81,64 @@ namespace OpenMobile.Threading
         /// <param name="host"></param>
         public static void Asynchronous(Delegate function,object[] args, IPluginHost host)
         {
-            new Thread(delegate()
+            Asynchronous(delegate { function.DynamicInvoke(args); }, host);
+        }
+        private static void spawnThread()
+        {
+            Thread p = new Thread(() =>
             {
-                try
+                int id = Thread.CurrentThread.ManagedThreadId;
+                ThreadState s = locks[id];
+                availableThreads++;
+                while (locks[id].state >= 0)
                 {
-                    function.DynamicInvoke(args);
+                    availableThreads--;
+                    while (functions.Count > 0)
+                    {
+                        Function f;
+                        lock (locks)
+                        {
+                            try
+                            {
+                                f = functions.Dequeue();
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                return; //race condition
+                            }
+                        }
+                        try
+                        {
+                            if (f != null)
+                                f();
+                        }
+                        catch (Exception e)
+                        {
+                            if (theHost!=null)
+                                theHost.sendMessage("SandboxedThread", "SafeThread", "", ref e);
+                        }
+                    }
+                    s.state = 1;
+                    availableThreads++;
+                    s.waitHandle.WaitOne(30000);
+                    s.state = 0;
+                    if ((functions.Count == 0) && (availableThreads > 1))
+                    {
+                        lock (locks)
+                        {
+                            s.state--;
+                        }
+                        availableThreads--;
+                    }
                 }
-                catch (Exception e)
+                lock (locks)
                 {
-                    if (host != null)
-                        host.sendMessage("SandboxedThread", "SafeThread", "", ref e);
+                    locks.Remove(id);
                 }
-            }).Start();
+            });
+            lock (locks)
+                locks.Add(p.ManagedThreadId, new ThreadState());
+            p.Start();
         }
     }
 }

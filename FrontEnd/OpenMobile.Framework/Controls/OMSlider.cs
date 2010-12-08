@@ -18,11 +18,9 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-using System;
 using System.ComponentModel;
-using System.Threading;
 using OpenMobile.Graphics;
-using OpenMobile;
+using OpenMobile.Threading;
 
 namespace OpenMobile.Controls
 {
@@ -85,14 +83,6 @@ namespace OpenMobile.Controls
         /// </summary>
         public event slidermoved OnSliderMoved;
 
-        /// <summary>
-        /// Raises the OnSliderMoved event
-        /// </summary>
-        private void sliderMoved(int screen)
-        {
-            if (OnSliderMoved!=null)
-                OnSliderMoved(this,screen);
-        }
         /// <summary>
         /// The width of the image on top of the slider track
         /// </summary>
@@ -255,12 +245,9 @@ namespace OpenMobile.Controls
                 sliderPosition = (sliderWidth / 2);
             if ((sliderPosition + (sliderWidth / 2)) > Width)
                 sliderPosition = Width - (SliderWidth / 2);
-            ThreadPool.QueueUserWorkItem(new WaitCallback(raiseSliderEvent),screen);
+            SafeThread.Asynchronous(delegate() { if (OnSliderMoved != null) OnSliderMoved(this, screen); }, null);
         }
-        void raiseSliderEvent(object state)
-        {
-            sliderMoved((int)state);
-        }
+
         /// <summary>
         /// The throw has started
         /// </summary>

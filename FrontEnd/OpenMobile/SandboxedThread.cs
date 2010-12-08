@@ -25,113 +25,18 @@ using OpenMobile.Plugin;
 using System.Diagnostics;
 #endif
 using System.Collections.Generic;
+using OpenMobile.Threading;
 
 namespace OpenMobile
 {
-    public delegate void Function();
     /// <summary>
     /// Provides a thread which is sandboxed to prevent crashing the rest of the framework when an error occurs
     /// </summary>
     public static class SandboxedThread
     {
-        //State:
-        // -1 = Kill
-        //  0 = Working
-        //  1 = Sleeping
-        private struct ThreadState
-        {
-            public EventWaitHandle waitHandle;
-            public int state;
-            public ThreadState(int state)
-            {
-                waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
-                this.state = state;
-            }
-        }
-        private static List<Thread> threadPool = new List<Thread>();
-        private static Queue<Function> functions = new Queue<Function>();
-        private static Dictionary<int, ThreadState> locks = new Dictionary<int, ThreadState>();
-        static int availableThreads;
-
         public static void Asynchronous(Function function)
         {
-            functions.Enqueue(function);
-            if (availableThreads > 0)
-            {
-                lock (locks)
-                {
-                    foreach (ThreadState state in locks.Values)
-                        if (state.state == 1)
-                        {
-                            state.waitHandle.Set();
-                            return;
-                        }
-                }
-            }
-            spawnThread();
-        }
-        private static void spawnThread()
-        {
-            Thread p = new Thread(() =>
-            {
-                int id = Thread.CurrentThread.ManagedThreadId;
-                ThreadState s = locks[id];
-                availableThreads++;
-                while (locks[id].state >=0)
-                {
-
-                    availableThreads--;
-                    while (functions.Count > 0)
-                    {
-                        Function f;
-                        lock (locks)
-                        {
-                            try
-                            {
-                                f = functions.Dequeue();
-                            }
-                            catch (InvalidOperationException)
-                            {
-                                return; //race condition
-                            }
-                        }
-                        try
-                        {
-                            if (f!=null)
-                                f();
-                        }
-                        catch (Exception e)
-                        {
-                            handle(e);
-                        }
-                    }
-                    s.state = 1;
-                    locks[id] = s;;
-                    availableThreads++;
-                    locks[id].waitHandle.WaitOne(30000);
-                    s.state = 0;
-                    locks[id] = s;
-                    if ((functions.Count == 0) && (availableThreads > 1))
-                    {
-                        lock (locks)
-                        {
-                            s = locks[id];
-                            s.state --;
-                            locks[id] = s;
-                        }
-                        availableThreads--;
-                    }
-                }
-                lock (locks)
-                {
-                    threadPool.Remove(Thread.CurrentThread);
-                    locks.Remove(id);
-                }
-            });
-            lock (locks)
-                locks.Add(p.ManagedThreadId, new ThreadState(0));
-            p.Start();
-            threadPool.Add(p);
+            SafeThread.Asynchronous(function, Core.theHost);
         }
         public static void handle(Exception e)
         {

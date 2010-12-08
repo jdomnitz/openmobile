@@ -29,9 +29,7 @@ namespace OpenMobile
     {
         public static void AnalyzeAsync(string path, bool justInserted)
         {
-            Thread t = new Thread(new ThreadStart(delegate { AnalyzeWorker(path, justInserted); }));
-            t.Priority = ThreadPriority.BelowNormal;
-            t.Start();
+            SandboxedThread.Asynchronous(delegate { AnalyzeWorker(path, justInserted); });
         }
 
         private static void AnalyzeWorker(string path, bool justInserted)

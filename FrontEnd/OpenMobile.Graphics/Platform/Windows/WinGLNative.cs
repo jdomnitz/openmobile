@@ -425,14 +425,14 @@ namespace OpenMobile.Platform.Windows
 
                     break;
                 case WindowMessage.DISPLAYCHANGE:
-                    if (ResolutionChange!=null)
+                    if (ResolutionChange != null)
                     {
                         //TODO-fix issues with multiple screens here
-                        int height=(int)(((uint)lParam.ToInt32() & 0xFFFF0000) >> 16);
-                        int width=(int)((uint)lParam.ToInt32() & 0x0000FFFF);
-                        ResolutionChange(this,new ResolutionChange(width,height,(width>=height)));
+                        int height = (int)(((uint)lParam.ToInt32() & 0xFFFF0000) >> 16);
+                        int width = (int)((uint)lParam.ToInt32() & 0x0000FFFF);
+                        ResolutionChange(this, new ResolutionChange(width, height, (width >= height)));
+                        DisplayDevice.RefreshDisplays();
                     }
-                    DisplayDevice.RefreshDisplays();
                     break;
                 #endregion
             }
