@@ -1,10 +1,11 @@
-﻿using OpenMobile.Plugin;
-using Microsoft.DirectX.DirectInput;
-using System.Threading;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using Microsoft.DirectX.DirectInput;
 using OpenMobile;
 using OpenMobile.Data;
+using OpenMobile.Plugin;
+using OpenMobile.Threading;
 
 namespace GamepadSupport
 {
@@ -28,7 +29,7 @@ namespace GamepadSupport
             }
             if (joysticks.Count > 0)
             {
-                new Thread(new ThreadStart(mainLoop)).Start();
+                SafeThread.Asynchronous(mainLoop,theHost);
                 return OpenMobile.eLoadStatus.LoadSuccessful;
             }
             return eLoadStatus.LoadFailedGracefulUnloadRequested;

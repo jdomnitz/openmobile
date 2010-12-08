@@ -18,7 +18,6 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using OpenMobile;
@@ -93,7 +92,7 @@ namespace NewMedia
             Down.DownImage = theHost.getSkinImage("DownArrowIcon_Selected");
             Down.FocusImage = theHost.getSkinImage("DownArrowIcon_Highlighted");
             Down.Transition = eButtonTransition.None;
-            OMLabel Title = new OMLabel(250, 111, 500, 50);
+            OMLabel Title = new OMLabel(183, 111, 635, 50);
             Title.Font = new Font(Font.GenericSansSerif, 26F);
             Title.Text = "Select an Artist";
             OMButton PlaySelected = new OMButton(830, 165, 150, 150);

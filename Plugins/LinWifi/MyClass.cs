@@ -3,8 +3,9 @@ using NDesk.DBus;
 using System.Collections.Generic;
 using OpenMobile.Plugin;
 using OpenMobile;
-using System.Threading;
+using OpenMobile.Threading;
 using OpenMobile.Data;
+using System.Threading;
 namespace LinWifi
 {
 	public class LinWifi:INetwork
@@ -64,7 +65,6 @@ namespace LinWifi
 			}
 			return eConnectionStatus.Error;
 		}
-		Thread t;
 		public eLoadStatus initialize (IPluginHost host)
 		{
 			b=NDesk.DBus.Bus.System;
@@ -73,8 +73,7 @@ namespace LinWifi
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting("Default.Wifi", "LinWifi");
 			checkNetworks();
-			t=new Thread(delegate(){while(true) b.Iterate();});
-			t.Start();
+			SafeThread.Asynchronous(delegate(){while(true) b.Iterate();},host);
 			return eLoadStatus.LoadSuccessful;
 		}
 		private void checkNetworks()

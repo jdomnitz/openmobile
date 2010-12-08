@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 
 namespace NativeWifi
@@ -800,19 +799,6 @@ namespace NativeWifi
                     Wlan.WlanFreeMemory(ifaceList);
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets a string that describes a specified reason code.
-        /// </summary>
-        /// <param name="reasonCode">The reason code.</param>
-        /// <returns>The string.</returns>
-        public string GetStringForReasonCode(Wlan.WlanReasonCode reasonCode)
-        {
-            StringBuilder sb = new StringBuilder(1024); // the 1024 size here is arbitrary; the WlanReasonCodeToString docs fail to specify a recommended size
-            Wlan.ThrowIfError(
-                Wlan.WlanReasonCodeToString(reasonCode, sb.Capacity, sb, IntPtr.Zero));
-            return sb.ToString();
         }
     }
 }

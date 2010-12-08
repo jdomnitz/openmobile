@@ -888,7 +888,8 @@ namespace OpenMobile
                             ff.DownImage = imageItem.NONE;
                         }
                 }
-            }else if(function==eFunction.unloadTunedContent)
+            }
+            else if(function==eFunction.unloadTunedContent)
             {
                 if (arg == "Pandora")
                 {

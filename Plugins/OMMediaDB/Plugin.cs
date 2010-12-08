@@ -21,14 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Mono.Data.Sqlite;
-using System.Drawing;
-using OpenMobile.Graphics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using Mono.Data.Sqlite;
 using OpenMobile;
 using OpenMobile.Data;
+using OpenMobile.Graphics;
 using OpenMobile.helperFunctions;
 using OpenMobile.Media;
 using OpenMobile.Plugin;

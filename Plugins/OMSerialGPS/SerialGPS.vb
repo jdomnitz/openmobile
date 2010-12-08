@@ -187,7 +187,7 @@ Public Class OMSerialGPS
                 Return m_GPRMC.Bearing
 
             Case Is = PIDs.Speed
-                Return OpenMobile.Framework.Math.Calculation.convertSpeed(m_GPRMC.Speed, Math.speedTypes.knots, Math.speedTypes.kilometersPerHour)
+                Return OpenMobile.Framework.Math.Calculation.convertSpeed(m_GPRMC.Speed, Framework.Math.speedTypes.knots, Framework.Math.speedTypes.kilometersPerHour)
 
             Case Is = PIDs.HorzDilution
                 Return m_GPGGA.HorzDilution
