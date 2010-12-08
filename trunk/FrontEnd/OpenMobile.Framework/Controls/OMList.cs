@@ -20,13 +20,10 @@
 *********************************************************************************/
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing.Drawing2D;
-using System.Threading;
 using System.Timers;
-using System;
 using OpenMobile.Graphics;
-using OpenMobile;
 using OpenMobile.Input;
+using OpenMobile.Threading;
 
 namespace OpenMobile.Controls
 {
@@ -92,10 +89,6 @@ namespace OpenMobile.Controls
                 index = -1;
             Select(index, true, this.containingScreen());
         }
-        void raiseSelect(object state)
-        {
-            SelectedIndexChanged(this, (int)state);
-        }
         public void Select(int index, bool moveToSelectedItem, int screen)
         {
             if ((index < -1) || (index >= items.Count))
@@ -110,7 +103,7 @@ namespace OpenMobile.Controls
 
             // Trigger event
             if (SelectedIndexChanged != null)
-                ThreadPool.QueueUserWorkItem(new WaitCallback(raiseSelect),screen);
+                SafeThread.Asynchronous(delegate() { if (SelectedIndexChanged != null) SelectedIndexChanged(this, screen); }, null);
             //   ^ This still isn't ideal...we really should not be queuing all those tasks..only the one when scrolling finishes
 
             if ((listHeight == 0) && (index != -1))
@@ -884,7 +877,7 @@ namespace OpenMobile.Controls
 
             // Throw event
             if (HighlightedIndexChanged != null)
-                new Thread(delegate() { HighlightedIndexChanged(this, this.containingScreen()); }).Start();
+                SafeThread.Asynchronous(delegate() { HighlightedIndexChanged(this, this.containingScreen()); },null);
         }
         private int lastSelected = -1;
         public virtual void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)

@@ -174,7 +174,14 @@ namespace BatterySupport
         }
         private void startWatching()
         {
-            batteryWatcher = new Thread(delegate() { updateBattery(); });
+            batteryWatcher = new Thread(delegate()
+                {
+                    try
+                    {
+                        updateBattery();
+                    }
+                    catch (Exception) { }
+                });
             batteryWatcher.Start();
         }
         int lastBatt;
