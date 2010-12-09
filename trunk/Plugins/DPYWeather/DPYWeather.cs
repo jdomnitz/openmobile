@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Xml;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
+using OpenMobile;
 
 namespace DPYWeather
 {
@@ -59,9 +60,9 @@ namespace DPYWeather
                 refreshData();
         }
 
-        void host_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
+        void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
         {
-            if (function == OpenMobile.eFunction.connectedToInternet)
+            if ((function == eFunction.connectedToInternet)||(function==eFunction.hourChanged))
                 refreshData();
         }
 
@@ -220,7 +221,7 @@ namespace DPYWeather
             return false;
         }
 
-        public static void processItems()
+        public void processItems()
         {
             status = 2;
             try
@@ -229,6 +230,7 @@ namespace DPYWeather
                 if (items.Count < 3)
                 {
                     status = -1;
+                    theHost.execute(eFunction.dataUpdated, "DPYWeather");
                     return;
                 }
                 OpenMobile.Data.Weather.weather current = items[0];
@@ -255,8 +257,13 @@ namespace DPYWeather
                 status = 1;
                 using (PluginSettings setting = new PluginSettings())
                     setting.setSetting("Plugins.DPYWeather.LastUpdate", DateTime.Now.ToString());
+                theHost.execute(eFunction.dataUpdated, "DPYWeather");
             }
-            catch (Exception) { status = -1; }
+            catch (Exception)
+            { 
+                status = -1;
+                theHost.execute(eFunction.dataUpdated, "DPYWeather");
+            }
         }
         private static string updateLocation = "";
         public bool refreshData(string arg)
@@ -287,6 +294,7 @@ namespace DPYWeather
                 loc = settings.getSetting("Data.DefaultLocation");
             if (loc != "")
                 return refreshData(loc);
+            status = -1;
             return false;
         }
         private static int status = 0;
