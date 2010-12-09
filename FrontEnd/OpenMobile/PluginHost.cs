@@ -315,6 +315,7 @@ namespace OpenMobile
                 videoPosition = value;
             }
         }
+        Timer tmr;
         public PluginHost()
         {
             queued = new List<mediaInfo>[8];
@@ -331,6 +332,20 @@ namespace OpenMobile
             InputRouter.OnHighlightedChanged += new userInteraction(InputRouter_OnHighlightedChanged);
             Credentials.OnAuthorizationRequested += new Credentials.Authorization(Credentials_OnAuthorizationRequested);
             Credentials.Open();
+            tmr = new Timer(tmr_time, null, 60000, 60000);
+        }
+        DateTime current;
+        void tmr_time(object state)
+        {
+            if (current == DateTime.MinValue)
+                current = DateTime.Now;
+            if (current.Hour != DateTime.Now.Hour)
+            {
+                raiseSystemEvent(eFunction.hourChanged, "", "", "");
+                if (current.Day != DateTime.Now.Day)
+                    raiseSystemEvent(eFunction.dateChanged, "", "", "");
+                current = DateTime.Now;
+            }
         }
         EventWaitHandle secure = new EventWaitHandle(false, EventResetMode.AutoReset);
         bool Credentials_OnAuthorizationRequested(string pluginName, string requestedAccess)

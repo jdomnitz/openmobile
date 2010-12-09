@@ -275,7 +275,7 @@ namespace DPGContacts
 
         void host_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
         {
-            if (function == eFunction.connectedToInternet)
+            if ((function == eFunction.connectedToInternet)||(function==eFunction.hourChanged))
             {
                 refreshData();
             }

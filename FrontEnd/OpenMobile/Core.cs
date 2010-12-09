@@ -85,7 +85,7 @@ namespace OpenMobile
             pluginCollection.Add(mmPlugin);
             mmPlugin.initialize(theHost);
             var a=mmPlugin.GetType().GetCustomAttributes(typeof(InitialTransition),false);
-            new Thread(() =>
+            SandboxedThread.Asynchronous(() =>
             {
                 for (int i = 0; i < RenderingWindows.Count; i++)
                 {
@@ -97,7 +97,7 @@ namespace OpenMobile
                     else
                         RenderingWindows[i].executeTransition(((InitialTransition)a[0]).Transition);
                 }
-            }).Start();
+            });
             object[] b = mmPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
             if (b.Length > 0)
                 exitTransition=((FinalTransition)b[0]).Transition;

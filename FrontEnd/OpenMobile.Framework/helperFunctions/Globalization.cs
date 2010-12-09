@@ -19,6 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using OpenMobile.Framework.Math;
+using System;
 
 namespace OpenMobile.Framework
 {
@@ -235,6 +236,34 @@ namespace OpenMobile.Framework
             if (string.IsNullOrEmpty(ret))
                 return null;
             return ret.Substring(0,ret.IndexOf(" ("));
+        }
+        /// <summary>
+        /// Converts local time to UTC time
+        /// </summary>
+        /// <param name="local"></param>
+        /// <returns></returns>
+        public static DateTime localTimeToUTC(DateTime local)
+        {
+            return local.ToUniversalTime();
+        }
+        /// <summary>
+        /// Converts UTC time to local time
+        /// </summary>
+        /// <param name="utc"></param>
+        /// <returns></returns>
+        public static DateTime UTCToLocalTime(DateTime utc)
+        {
+            return DateTime.SpecifyKind(utc, DateTimeKind.Utc).ToLocalTime();
+        }
+        /// <summary>
+        /// Returns true if the current locale uses a 12 hour clock
+        /// </summary>
+        public static bool TwelveHourClock
+        {
+            get
+            {
+                return System.Globalization.DateTimeFormatInfo.CurrentInfo.ShortTimePattern.StartsWith("h");
+            }
         }
     }
 }

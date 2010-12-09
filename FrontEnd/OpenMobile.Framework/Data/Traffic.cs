@@ -23,6 +23,8 @@ using System;
 using OpenMobile;
 using System.Text;
 using OpenMobile.helperFunctions;
+using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace OpenMobile.Data
 {
@@ -129,7 +131,7 @@ namespace OpenMobile.Data
             con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
             con.Open();
         }
-        public bool createTable()
+        private bool createTable()
         {
             using(SqliteCommand cmd = new SqliteCommand(con))
             {
@@ -187,7 +189,15 @@ namespace OpenMobile.Data
                 return false;
             }
         }
-
+        public List<TrafficItem> readTraffic(string location)
+        {
+            //TODO
+            return new List<TrafficItem>();
+        }
+        public List<TrafficItem> readTraffic(float latitude, float longitude, float distance)
+        {
+            throw new NotImplementedException();
+        }
         public void Dispose()
         {
             con.Dispose();

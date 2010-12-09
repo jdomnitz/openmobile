@@ -82,6 +82,11 @@ namespace OpenMobile.Data
         private static List<string> blockedHashes = new List<string>();
         private static List<string> allowedHashes = new List<string>();
         private static string uid;
+        /// <summary>
+        /// Retrieves the given credential
+        /// </summary>
+        /// <param name="credentialName"></param>
+        /// <returns></returns>
         public static string getCredential(string credentialName)
         {
             if (String.IsNullOrEmpty(credentialName))
@@ -138,6 +143,11 @@ namespace OpenMobile.Data
                 return true;
             return false;
         }
+        /// <summary>
+        /// Sets the given credential to the given value
+        /// </summary>
+        /// <param name="credentialName"></param>
+        /// <param name="value"></param>
         public static void setCredential(string credentialName, string value)
         {
             if (value == null)

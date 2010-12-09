@@ -564,6 +564,10 @@ namespace OpenMobile
         /// </summary>
         TransitionFromAny=3,
         /// <summary>
+        /// Occurs each time the hour changed
+        /// </summary>
+        hourChanged=4,
+        /// <summary>
         /// Load a panel and prepare to transition to it
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
@@ -571,7 +575,10 @@ namespace OpenMobile
         /// <para>Arg3: (Optional) Panel Name</para>
         /// </summary>
         TransitionToPanel=5,
-        //TransitionToSettings=6,
+        /// <summary>
+        /// Occurs at the start of a new day
+        /// </summary>
+        dateChanged=6,
         /// <summary>
         /// Transition between the previously specified panels
         /// <para>---------------------------------------</para>
@@ -612,7 +619,7 @@ namespace OpenMobile
         /// Set the playback position of the current media
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
-        /// <para>Arg2: Position [Miliseconds]</para>
+        /// <para>Arg2: Position [Seconds]</para>
         /// </summary>
         setPosition=13,
         /// <summary>
