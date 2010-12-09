@@ -335,8 +335,7 @@ namespace OMHal
                 }
             }
         }
-
-        public static void Shutdown(bool restart)
+        private static void getPrivledge()
         {
             bool ok;
             TokPriv1Luid tp;
@@ -349,7 +348,11 @@ namespace OMHal
             tp.Luid = 0;
             tp.Attr = 0x2;
             LookupPrivilegeValue(null, "SeShutdownPrivilege", ref tp.Luid);
-            AdjustTokenPrivileges(htok, false, ref tp, 0, IntPtr.Zero,IntPtr.Zero);
+            AdjustTokenPrivileges(htok, false, ref tp, 0, IntPtr.Zero, IntPtr.Zero);
+        }
+        public static void Shutdown(bool restart)
+        {
+            getPrivledge();
             if (restart)
                 ExitWindowsEx(0x12, 0x80000000);
             else
@@ -382,5 +385,27 @@ namespace OMHal
         private static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
         [DllImport("winmm.dll")]
         static extern Int32 mciSendString(string command, StringBuilder buffer, int bufferSize, IntPtr hwndCallback);
+        [DllImport("Powrprof.dll", SetLastError = true)]
+        static extern bool SetSuspendState(bool hibernate, bool forceCritical, bool disableWakeEvent);
+        [DllImport("powrprof.dll")]
+        static extern bool IsPwrHibernateAllowed();
+        [DllImport("powrprof.dll")]
+        static extern bool IsPwrSuspendAllowed();
+
+        internal static void Hibernate()
+        {
+            getPrivledge();
+            if (IsPwrHibernateAllowed())
+                SetSuspendState(true, false, false);
+        }
+
+        internal static void Suspend()
+        {
+            getPrivledge();
+            if ((IsPwrSuspendAllowed()) && (SetSuspendState(false, false, false)))
+                return;
+            else if (IsPwrHibernateAllowed())
+                SetSuspendState(true, false, false);
+        }
     }
 }

@@ -151,7 +151,7 @@ namespace OMHal
                     Environment.Exit(0);
                     break;
                 case "45":
-                    Application.SetSuspendState(PowerState.Hibernate, false, false);
+                    Specific.Hibernate();
                     break;
                 case "46": //Shutdown
                     Specific.Shutdown(false);
@@ -160,7 +160,7 @@ namespace OMHal
                     Specific.Shutdown(true);
                     break;
                 case "48":
-                    Application.SetSuspendState(PowerState.Suspend, false, false);
+                    Specific.Suspend();
                     break;
                 case "66":
                     Specific.setSubVolume(int.Parse(arg1), int.Parse(arg2));

@@ -123,6 +123,8 @@ namespace OpenMobile.Platform.Windows
 
         [DllImport("user32.dll"),SuppressUnmanagedCodeSecurity]
         public static extern bool ClipCursor(ref RECT lpRect);
+        [DllImport("user32.dll"), SuppressUnmanagedCodeSecurity]
+        public static extern bool ClipCursor(IntPtr lpRect);
         #region AdjustWindowRect
 
         /// <summary>
@@ -854,6 +856,9 @@ namespace OpenMobile.Platform.Windows
         #endregion
 
         #region Display settings
+
+        [DllImport("kernel32.dll"),SuppressUnmanagedCodeSecurity]
+        internal static extern uint SetThreadExecutionState(uint esFlags);
 
         #region ChangeDisplaySettings
 

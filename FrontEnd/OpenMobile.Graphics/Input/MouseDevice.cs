@@ -233,6 +233,15 @@ namespace OpenMobile.Input
             }
             #endif
         }
+        public void UntrapCursor()
+        {
+            #if WINDOWS
+            if (Configuration.RunningOnWindows)
+            {
+                Platform.Windows.Functions.ClipCursor(IntPtr.Zero);
+            }
+            #endif
+        }
         internal void Reset()
         {
             for (int i = 0; i < button_state.Length; i++)
