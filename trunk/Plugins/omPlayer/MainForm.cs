@@ -474,7 +474,7 @@ namespace OMPlayer
             }
             if (vistaMode)
             {
-                if ((url.EndsWith("mp3")) || (url.EndsWith("wmv")) || (url.EndsWith("wma")))
+                if ((url.EndsWith("mp3")) || (url.EndsWith("wmv")) || (url.EndsWith("wma")) || (url.EndsWith("asf")))
                     return false;
                 if (sevenMode)
                     if ((url.EndsWith("mp4")) || (url.EndsWith("m4a"))||(url.EndsWith("avi"))||(url.EndsWith("mkv"))||(url.EndsWith("mov")))
@@ -914,8 +914,11 @@ namespace OMPlayer
             currentState = ePlayerStatus.Transitioning;
             graphBuilder = (IGraphBuilder) new FilterGraph();
             IBaseFilter source = null;
-            hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance), null, "OutputDevice", out source);
+            if (instance>0)
+                hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance), null, "OutputDevice", out source);
             hr = graphBuilder.RenderFile(filename, null);
+            if (hr == 262744)
+                theHost.sendMessage("OMDebug", "OMPlayer", "Failed to render audio for: " + filename);
             if (hr < 0)
                 return false;
             mediaControl = (IMediaControl) graphBuilder;

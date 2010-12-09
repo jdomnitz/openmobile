@@ -122,6 +122,7 @@ namespace OpenMobile.Platform.Windows
 
             keyboards.Add(keyboard);
             mice.Add(mouse);
+            Functions.SetThreadExecutionState(0x80000002);
         }
 
         #endregion

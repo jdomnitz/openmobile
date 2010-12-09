@@ -821,7 +821,11 @@ namespace OpenMobile
                 Mouse.HideCursor(this.WindowInfo);
             }
             else
+            {
+                if ((screen == 0)&& (!defaultMouse))
+                    Mouse.UntrapCursor();
                 Mouse.ShowCursor(this.WindowInfo);
+            }
             base.OnWindowStateChanged(e);
         }
         public bool defaultMouse = false;
