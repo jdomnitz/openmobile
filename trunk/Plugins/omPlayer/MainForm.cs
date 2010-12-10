@@ -50,6 +50,8 @@ namespace OMPlayer
     {
         if (settings == null)
         {
+            if (vistaMode)
+                return null;
             settings = new Settings("OMPlayer Settings");
             using (PluginSettings s = new PluginSettings())
             {

@@ -365,16 +365,25 @@ namespace PandoraPlayer
         {
             if (client != null)
             {
-                client.PlayPause();
-                paused = !paused;
+                if (paused)
+                {
+                    paused = false;
+                    client.Play();
+                    raiseMediaEvent(eFunction.Play, instance.ToString());
+                    return true;
+                }
+                else if (client.Pause())
+                {
+                    paused = true;
+                    raiseMediaEvent(eFunction.Pause, instance.ToString());
+                    return true;
+                }
             }
-            if (!paused)
-                raiseMediaEvent(eFunction.Play, instance.ToString());
-            return paused;
+            return false;
         }
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            return false;
         }
         IPluginHost theHost;
         Settings settings;
