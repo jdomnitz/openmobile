@@ -160,13 +160,10 @@ namespace OpenMobile.Platform.Windows
         public override void MakeCurrent(IWindowInfo window)
         {
             bool success;
-
             if (window != null)
             {
-                if (((WinWindowInfo)window).WindowHandle == IntPtr.Zero)
-                    throw new ArgumentException("window", "Must point to a valid window.");
-
-                success = Wgl.Imports.MakeCurrent(((WinWindowInfo)window).DeviceContext, Handle.Handle);
+                WinWindowInfo win = window as WinWindowInfo;
+                success = Wgl.Imports.MakeCurrent(win.DeviceContext, Handle.Handle);
             }
             else
                 success = Wgl.Imports.MakeCurrent(IntPtr.Zero, IntPtr.Zero);

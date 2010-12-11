@@ -46,12 +46,12 @@ namespace OpenMobile.Platform.X11
                 throw new ArgumentNullException("window");
 
             Mode = mode;
-
-            // Do not move this lower, as almost everything requires the Display
-            // property to be correctly set.
-            Display = ((X11WindowInfo)window).Display;
             
             currentWindow = (X11WindowInfo)window;
+            // Do not move this lower, as almost everything requires the Display
+            // property to be correctly set.
+            Display = currentWindow.Display;
+            
             currentWindow.VisualInfo = SelectVisual(mode, currentWindow);
             
             ContextHandle shareHandle = shared != null ?
@@ -240,23 +240,6 @@ namespace OpenMobile.Platform.X11
 
         #endregion
 
-        bool SupportsExtension(X11WindowInfo window, string e)
-        {
-            if (window == null)
-                throw new ArgumentNullException("window");
-            if (e == null)
-                throw new ArgumentNullException("e");
-            if (window.Display != Display)
-                throw new InvalidOperationException();
-
-            string extensions = null;
-            using (new XLock(Display))
-            {
-                extensions = Glx.QueryExtensionsString(Display, window.Screen);
-            }
-            return !String.IsNullOrEmpty(extensions) && extensions.Contains(e);
-        }
-
         #endregion
 
         #region --- IGraphicsContext Members ---
@@ -280,52 +263,29 @@ namespace OpenMobile.Platform.X11
 
         public override void MakeCurrent(IWindowInfo window)
         {
-            if (window == currentWindow && IsCurrent)
+            if (window == currentWindow && (IsCurrent||currentWindow==null))
                 return;
-
-            if (window != null && ((X11WindowInfo)window).Display != Display)
-                throw new InvalidOperationException("MakeCurrent() may only be called on windows originating from the same display that spawned this GL context.");
 
             if (window == null)
             {
-                Debug.Write(String.Format("Releasing context {0} from thread {1} (Display: {2})... ",
-                        Handle, System.Threading.Thread.CurrentThread.ManagedThreadId, Display));
-
-                bool result;
                 using (new XLock(Display))
                 {
-                    result = Glx.MakeCurrent(Display, IntPtr.Zero, IntPtr.Zero);
-                    if (result)
-                    {
+                    if(Glx.MakeCurrent(Display, IntPtr.Zero, IntPtr.Zero))
                         currentWindow = null;
-                    }
                 }
-                Debug.Print("{0}", result ? "done!" : "failed.");
             }
             else
             {
                 X11WindowInfo w = (X11WindowInfo)window;
-                bool result;
-
-                Debug.Write(String.Format("Making context {0} current on thread {1} (Display: {2}, Screen: {3}, Window: {4})... ",
-                        Handle, System.Threading.Thread.CurrentThread.ManagedThreadId, Display, w.Screen, w.WindowHandle));
 
                 if (Display == IntPtr.Zero || w.WindowHandle == IntPtr.Zero || Handle == ContextHandle.Zero)
                     throw new InvalidOperationException("Invalid display, window or context.");
 
                 using (new XLock(Display))
                 {
-                    result = Glx.MakeCurrent(Display, w.WindowHandle, Handle);
-                    if (result)
-                    {
+                    if (Glx.MakeCurrent(Display, w.WindowHandle, Handle))
                         currentWindow = w;
-                    }
                 }
-
-                if (!result)
-                    throw new GraphicsContextException("Failed to make context current.");
-                else
-                    Debug.WriteLine("done!");
             }
 
             currentWindow = (X11WindowInfo)window;

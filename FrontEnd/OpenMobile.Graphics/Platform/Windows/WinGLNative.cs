@@ -568,7 +568,7 @@ namespace OpenMobile.Platform.Windows
                 wc.ClassName = ClassName;
                 wc.Icon = IntPtr.Zero;
                 wc.IconSm = IntPtr.Zero;
-                wc.Cursor = Functions.LoadCursor(CursorName.Arrow);
+                wc.Cursor = Functions.LoadCursor(32512);
                 ushort atom = Functions.RegisterClassEx(ref wc);
 
                 if (atom == 0)

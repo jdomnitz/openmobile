@@ -471,7 +471,7 @@ namespace iPodDB
         }
         public bool setRating(mediaInfo info)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public mediaInfo getNextMedia()
         {
@@ -543,7 +543,7 @@ namespace iPodDB
 
         public bool beginNaturalSearch(string query)
         {
-            throw new NotImplementedException();
+            return false;
         }
         int currentplaylist;
         public bool beginGetPlaylist(string name)

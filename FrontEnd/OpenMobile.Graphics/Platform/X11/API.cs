@@ -62,7 +62,6 @@ namespace OpenMobile.Platform.X11
         static int screenCount;
 
         internal static Display DefaultDisplay { get { return defaultDisplay; } }
-        static int DefaultScreen { get { return defaultScreen; } }
         internal static Window RootWindow { get { return rootWindow; } }
         internal static int ScreenCount { get { return screenCount; } }
 
@@ -88,205 +87,6 @@ namespace OpenMobile.Platform.X11
 
             //AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
         }
-
-        static void CurrentDomain_ProcessExit(object sender, EventArgs e)
-        {
-            if (defaultDisplay != IntPtr.Zero)
-            {
-                Functions.XCloseDisplay(defaultDisplay);
-                defaultDisplay = IntPtr.Zero;
-                defaultScreen = 0;
-                rootWindow = IntPtr.Zero;
-            }
-        }
-
-        // Display management
-        //[DllImport(_dll_name, EntryPoint = "XOpenDisplay")]
-        //extern public static IntPtr OpenDisplay([MarshalAs(UnmanagedType.LPTStr)] string display_name);
-
-        //[DllImport(_dll_name, EntryPoint = "XCloseDisplay")]
-        //extern public static void CloseDisplay(Display display);
-
-        //[DllImport(_dll_name, EntryPoint = "XCreateColormap")]
-        //extern public static IntPtr CreateColormap(Display display, Window window, IntPtr visual, int alloc);
-
-        #region Window handling
-
-        [DllImport(_dll_name, EntryPoint = "XCreateSimpleWindow")]
-        public extern static Window CreateSimpleWindow(
-            Display display,
-            Window parent,
-            int x, int y,
-            int width, int height,
-            int border_width,
-            long border,
-            long background
-        );
-
-        [DllImport(_dll_name, EntryPoint = "XResizeWindow")]
-        public extern static int XResizeWindow(Display display, Window window, int width, int height);
-
-        [DllImport(_dll_name, EntryPoint = "XDestroyWindow")]
-        public extern static void DestroyWindow(Display display, Window window);
-
-        [DllImport(_dll_name, EntryPoint = "XMapWindow")]
-        extern public static void MapWindow(Display display, Window window);
-
-        [DllImport(_dll_name, EntryPoint = "XMapRaised")]
-        extern public static void MapRaised(Display display, Window window);
-
-        #endregion
-
-        [DllImport(_dll_name, EntryPoint = "XDefaultVisual")]
-        extern public static IntPtr DefaultVisual(Display display, int screen_number);
-
-        #region XFree
-
-        /// <summary>
-        /// Frees the memory used by an X structure. Only use on unmanaged structures!
-        /// </summary>
-        /// <param name="buffer">A pointer to the structure that will be freed.</param>
-        [DllImport(_dll_name, EntryPoint = "XFree")]
-        extern public static void Free(IntPtr buffer);
-
-        #endregion
-
-        #region Event queue management
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport(_dll_name, EntryPoint = "XEventsQueued")]
-        extern public static int EventsQueued(Display display, int mode);
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport(_dll_name, EntryPoint = "XPending")]
-        extern public static int Pending(Display display);
-
-        //[System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport(_dll_name, EntryPoint = "XNextEvent")]
-        extern public static void NextEvent(
-            Display display,
-            [MarshalAs(UnmanagedType.AsAny)][In, Out]object e);
-
-        [DllImport(_dll_name, EntryPoint = "XNextEvent")]
-        extern public static void NextEvent(Display display, [In, Out] IntPtr e);
-
-        [DllImport(_dll_name, EntryPoint = "XPeekEvent")]
-        extern public static void PeekEvent(
-            Display display,
-            [MarshalAs(UnmanagedType.AsAny)][In, Out]object event_return
-        );
-
-        [DllImport(_dll_name, EntryPoint = "XPeekEvent")]
-        extern public static void PeekEvent(Display display, [In, Out]XEvent event_return);
-
-        [DllImport(_dll_name, EntryPoint = "XSendEvent")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        extern public static bool SendEvent(Display display, Window window, bool propagate,
-            [MarshalAs(UnmanagedType.SysInt)]EventMask event_mask, ref XEvent event_send);
-
-        /// <summary>
-        /// The XSelectInput() function requests that the X server report the events associated
-        /// with the specified event mask.
-        /// </summary>
-        /// <param name="display">Specifies the connection to the X server.</param>
-        /// <param name="w">Specifies the window whose events you are interested in.</param>
-        /// <param name="event_mask">Specifies the event mask.</param>
-        /// <remarks>
-        /// Initially, X will not report any of these events.
-        /// Events are reported relative to a window.
-        /// If a window is not interested in a device event,
-        /// it usually propagates to the closest ancestor that is interested,
-        /// unless the do_not_propagate mask prohibits it.
-        /// Setting the event-mask attribute of a window overrides any previous call for the same window but not for other clients. Multiple clients can select for the same events on the same window with the following restrictions: 
-        /// <para>Multiple clients can select events on the same window because their event masks are disjoint. When the X server generates an event, it reports it to all interested clients. </para>
-        /// <para>Only one client at a time can select CirculateRequest, ConfigureRequest, or MapRequest events, which are associated with the event mask SubstructureRedirectMask. </para>
-        /// <para>Only one client at a time can select a ResizeRequest event, which is associated with the event mask ResizeRedirectMask. </para>
-        /// <para>Only one client at a time can select a ButtonPress event, which is associated with the event mask ButtonPressMask. </para>
-        /// <para>The server reports the event to all interested clients. </para>
-        /// <para>XSelectInput() can generate a BadWindow error.</para>
-        /// </remarks>
-        [DllImport(_dll_name, EntryPoint = "XSelectInput")]
-        public static extern void SelectInput(Display display, Window w, EventMask event_mask);
-
-        /// <summary>
-        /// When the predicate procedure finds a match, XCheckIfEvent() copies the matched event into the client-supplied XEvent structure and returns True. (This event is removed from the queue.) If the predicate procedure finds no match, XCheckIfEvent() returns False, and the output buffer will have been flushed. All earlier events stored in the queue are not discarded.
-        /// </summary>
-        /// <param name="display">Specifies the connection to the X server.</param>
-        /// <param name="event_return">Returns a copy of the matched event's associated structure.</param>
-        /// <param name="predicate">Specifies the procedure that is to be called to determine if the next event in the queue matches what you want</param>
-        /// <param name="arg">Specifies the user-supplied argument that will be passed to the predicate procedure.</param>
-        /// <returns>true if the predicate returns true for some event, false otherwise</returns>
-        [DllImport(_dll_name, EntryPoint = "XCheckIfEvent")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool CheckIfEvent(Display display, ref XEvent event_return,
-            /*[MarshalAs(UnmanagedType.FunctionPtr)] */ CheckEventPredicate predicate, /*XPointer*/ IntPtr arg);
-
-        [DllImport(_dll_name, EntryPoint = "XIfEvent")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool IfEvent(Display display, ref XEvent event_return,
-            /*[MarshalAs(UnmanagedType.FunctionPtr)] */ CheckEventPredicate predicate, /*XPointer*/ IntPtr arg);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate bool CheckEventPredicate(Display display, ref XEvent @event, IntPtr arg);
-
-        [DllImport(_dll_name, EntryPoint = "XCheckMaskEvent")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool CheckMaskEvent(Display display, EventMask event_mask, ref XEvent event_return);
-
-        #endregion
-
-        #region Pointer and Keyboard functions
-
-        [DllImport(_dll_name, EntryPoint = "XGrabPointer")]
-        extern public static ErrorCodes GrabPointer(Display display, IntPtr grab_window,
-            bool owner_events, int event_mask, GrabMode pointer_mode, GrabMode keyboard_mode,
-            IntPtr confine_to, IntPtr cursor, int time);
-
-        [DllImport(_dll_name, EntryPoint = "XUngrabPointer")]
-        extern public static ErrorCodes UngrabPointer(Display display, int time);
-
-        [DllImport(_dll_name, EntryPoint = "XGrabKeyboard")]
-        extern public static ErrorCodes GrabKeyboard(Display display, IntPtr grab_window,
-            bool owner_events, GrabMode pointer_mode, GrabMode keyboard_mode, int time);
-
-        [DllImport(_dll_name, EntryPoint = "XUngrabKeyboard")]
-        extern public static void UngrabKeyboard(Display display, int time);
-
-        /// <summary>
-        /// The XGetKeyboardMapping() function returns the symbols for the specified number of KeyCodes starting with first_keycode.
-        /// </summary>
-        /// <param name="display">Specifies the connection to the X server.</param>
-        /// <param name="first_keycode">Specifies the first KeyCode that is to be returned.</param>
-        /// <param name="keycode_count">Specifies the number of KeyCodes that are to be returned</param>
-        /// <param name="keysyms_per_keycode_return">Returns the number of KeySyms per KeyCode.</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// <para>The value specified in first_keycode must be greater than or equal to min_keycode as returned by XDisplayKeycodes(), or a BadValue error results. In addition, the following expression must be less than or equal to max_keycode as returned by XDisplayKeycodes(): </para>
-        /// <para>first_keycode + keycode_count - 1 </para>
-        /// <para>If this is not the case, a BadValue error results. The number of elements in the KeySyms list is: </para>
-        /// <para>keycode_count * keysyms_per_keycode_return </para>
-        /// <para>KeySym number N, counting from zero, for KeyCode K has the following index in the list, counting from zero: </para>
-        /// <para> (K - first_code) * keysyms_per_code_return + N </para>
-        /// <para>The X server arbitrarily chooses the keysyms_per_keycode_return value to be large enough to report all requested symbols. A special KeySym value of NoSymbol is used to fill in unused elements for individual KeyCodes. To free the storage returned by XGetKeyboardMapping(), use XFree(). </para>
-        /// <para>XGetKeyboardMapping() can generate a BadValue error.</para>
-        /// <para>Diagnostics:</para>
-        /// <para>BadValue:    Some numeric value falls outside the range of values accepted by the request. Unless a specific range is specified for an argument, the full range defined by the argument's type is accepted. Any argument defined as a set of alternatives can generate this error.</para>
-        /// </remarks>
-        [DllImport(_dll_name, EntryPoint = "XGetKeyboardMapping")]
-        public static extern KeySym GetKeyboardMapping(Display display, KeyCode first_keycode, int keycode_count,
-            ref int keysyms_per_keycode_return);
-
-        /// <summary>
-        /// The XDisplayKeycodes() function returns the min-keycodes and max-keycodes supported by the specified display.
-        /// </summary>
-        /// <param name="display">Specifies the connection to the X server.</param>
-        /// <param name="min_keycodes_return">Returns the minimum number of KeyCodes</param>
-        /// <param name="max_keycodes_return">Returns the maximum number of KeyCodes.</param>
-        /// <remarks> The minimum number of KeyCodes returned is never less than 8, and the maximum number of KeyCodes returned is never greater than 255. Not all KeyCodes in this range are required to have corresponding keys.</remarks>
-        [DllImport(_dll_name, EntryPoint = "XDisplayKeycodes")]
-        public static extern void DisplayKeycodes(Display display, ref int min_keycodes_return, ref int max_keycodes_return);
-
-        #endregion
 
         #region Xf86VidMode internal structures
 
@@ -427,53 +227,10 @@ namespace OpenMobile.Platform.X11
         #region libXxf86vm Functions
 
         [DllImport(_dll_name_vid)]
-        extern public static bool XF86VidModeQueryExtension(
-            Display display,
-            out int event_base_return,
-            out int error_base_return);
-        /*
-        [DllImport(_dll_name_vid)]
-        extern public static bool XF86VidModeSwitchMode(
-            Display display,
-            int screen,
-            int zoom);
-        */
-
-        [DllImport(_dll_name_vid)]
-        extern public static bool XF86VidModeSwitchToMode(
-            Display display,
-            int screen,
-            IntPtr
-            /*XF86VidModeModeInfo* */ modeline);
-
-
-        [DllImport(_dll_name_vid)]
         extern public static bool XF86VidModeQueryVersion(
             Display display,
             out int major_version_return,
             out int minor_version_return);
-
-        [DllImport(_dll_name_vid)]
-        extern public static bool XF86VidModeGetAllModeLines(
-            Display display,
-            int screen,
-            out int modecount_return,
-            /*XF86VidModeModeInfo***  <-- yes, that's three *'s. */
-            out IntPtr modesinfo);
-
-        [DllImport(_dll_name_vid)]
-        extern public static bool XF86VidModeSetViewPort(
-            Display display,
-            int screen,
-            int x,
-            int y);
-
-        [DllImport(_dll_name_vid)]
-        extern public static bool XF86VidModeGetViewPort(
-            Display display,
-            int screen,
-            out int x_return,
-            out int y_return);
 
         [DllImport(_dll_name_vid)]
         extern public static bool XF86VidModeGetModeLine(
@@ -481,76 +238,13 @@ namespace OpenMobile.Platform.X11
             int screen,
             out int dotclock_return,
             out XF86VidModeModeLine modeline);
-        /*
-Bool XF86VidModeSetClientVersion(
-    Display *display);
 
-Bool XF86VidModeDeleteModeLine(
-    Display *display,
-    int screen,
-    XF86VidModeModeInfo *modeline);
-
-Bool XF86VidModeModModeLine(
-    Display *display,
-    int screen,
-    XF86VidModeModeLine *modeline);
-
-Status XF86VidModeValidateModeLine(
-    Display *display,
-    int screen,
-    XF86VidModeModeLine *modeline);
-
-
-Bool XF86VidModeLockModeSwitch(
-    Display *display,
-    int screen,
-    int lock);
-
-Bool XF86VidModeGetMonitor(
-    Display *display,
-    int screen,
-    XF86VidModeMonitor *monitor);
-
-
-XF86VidModeGetDotClocks(
-    Display *display,
-    int screen,
-    int *flags return,
-    int *number of clocks return,
-    int *max dot clock return,
-    int **clocks return);
-
-XF86VidModeGetGamma(
-    Display *display,
-    int screen,
-    XF86VidModeGamma *Gamma);
-
-XF86VidModeSetGamma(
-    Display *display,
-    int screen,
-    XF86VidModeGamma *Gamma);
-
-XF86VidModeGetGammaRamp(
-    Display *display,
-    int screen,
-    int size,
-    unsigned short *red array,
-    unsigned short *green array,
-    unsigned short *blue array);
-
-XF86VidModeSetGammaRamp(
-    Display *display,
-    int screen,
-    int size,
-    unsigned short *red array,
-    unsigned short *green array,
-    unsigned short *blue array);
-
-XF86VidModeGetGammaRampSize(
-    Display *display,
-    int screen,
-    int *size);
-         * */
+        [DllImport(_dll_name_vid)]
+        extern public static bool XF86VidModeGetViewPort(
+            Display display,
+            int screen,
+            out int x_return,
+            out int y_return);
 
         #endregion
 
@@ -1332,18 +1026,6 @@ XF86VidModeGetGammaRampSize(
         public extern static Window XCreateWindow(Display display, Window parent,
             int x, int y, int width, int height, int border_width, int depth,
             int @class, IntPtr visual, UIntPtr valuemask, ref XSetWindowAttributes attributes);
-
-        #endregion
-
-        #region XChangeWindowAttributes
-
-        [DllImport(X11Library)]
-        internal static extern void XChangeWindowAttributes(Display display, Window w, UIntPtr valuemask, ref XSetWindowAttributes attributes);
-
-        internal static void XChangeWindowAttributes(Display display, Window w, SetWindowValuemask valuemask, ref XSetWindowAttributes attributes)
-        {
-            XChangeWindowAttributes(display, w, (UIntPtr)valuemask, ref attributes);
-        }
 
         #endregion
 

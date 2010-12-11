@@ -230,9 +230,7 @@ namespace OpenMobile.Platform.X11
         [DllImport("libX11", EntryPoint = "XLookupColor")]//, CLSCompliant(false)]
         public extern static int XLookupColor(IntPtr display, IntPtr Colormap, string Coloranem, ref XColor exact_def_color, ref XColor screen_def_color);
 
-        [DllImport("libX11", EntryPoint = "XAllocColor")]//, CLSCompliant(false)]
-        public extern static int XAllocColor(IntPtr display, IntPtr Colormap, ref XColor colorcell_def);
-
+        
         [DllImport("libX11", EntryPoint = "XSetTransientForHint")]
         public extern static int XSetTransientForHint(IntPtr display, IntPtr window, IntPtr prop_window);
 
@@ -490,13 +488,6 @@ namespace OpenMobile.Platform.X11
         {
             return XISelectEvents(dpy, win, ref mask, 1);
         }
-
-        [DllImport("libXi")]
-        static extern Status XIGrabDevice(IntPtr display, int deviceid, Window grab_window, Time time,
-            Cursor cursor, int grab_mode, int paired_device_mode, Bool owner_events, XIEventMask[] mask);
-
-        [DllImport("libXi")]
-        static extern Status XIUngrabDevice(IntPtr display, int deviceid, Time time);
         [DllImport("libXi")]
         public static extern Bool XIWarpPointer(Display display,int deviceid, Window src_w, Window dest_w,double src_x, double src_y, int src_width, int src_height,double dest_x, double dest_y);
         [DllImport("libXi", EntryPoint = "XIQueryDevice")]
@@ -568,7 +559,6 @@ namespace OpenMobile.Platform.X11
         { 
             int width = image.Width;
             int height = image.Height;
-            int size = width * height; 
 
             System.Drawing.Imaging.BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, width, height),
                 System.Drawing.Imaging.ImageLockMode.ReadOnly,

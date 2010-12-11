@@ -76,7 +76,7 @@ namespace OpenMobile.Platform.Windows
                     bool landscape=false;
                     // The second function should only be executed when the first one fails
                     // (e.g. when the monitor is disabled)
-                    if (Functions.EnumDisplaySettingsEx(win_dev.DeviceName.ToString(), DisplayModeSettingsEnum.CurrentSettings, monitor_mode, 0))
+                    if (Functions.EnumDisplaySettingsEx(win_dev.DeviceName.ToString(), -1, monitor_mode, 0))
                     {
                         dev_current_res = new DisplayResolution(
                             monitor_mode.Position.X, monitor_mode.Position.Y,

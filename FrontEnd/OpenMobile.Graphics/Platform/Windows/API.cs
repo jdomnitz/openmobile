@@ -8,10 +8,9 @@
 #region --- Using Directives ---
 
 using System;
-using OpenMobile.Graphics;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Security;
+using OpenMobile.Graphics;
 
 #endregion
 
@@ -23,47 +22,38 @@ namespace OpenMobile.Platform.Windows
 {
     #region Type aliases
 
-    using HWND = System.IntPtr;
-    using HINSTANCE = System.IntPtr;
-    using HMENU = System.IntPtr;
-    using HICON = System.IntPtr;
+    using ATOM = System.Int32;
+    using BOOL = System.Boolean;
+    using BYTE = System.Byte;
+    using COLORREF = System.Int32;
+    using DWORD = System.Int32;
+    using DWORD_PTR = System.IntPtr;
+    using HANDLE = System.IntPtr;
     using HBRUSH = System.IntPtr;
     using HCURSOR = System.IntPtr;
-
-    using LRESULT = System.IntPtr;
-    using LPVOID = System.IntPtr;
-    using LPCTSTR = System.String;
-
-    using WPARAM = System.IntPtr;
-    using LPARAM = System.IntPtr;
-    using HANDLE = System.IntPtr;
+    using HICON = System.IntPtr;
+    using HINSTANCE = System.IntPtr;
+    using HMENU = System.IntPtr;
     using HRAWINPUT = System.IntPtr;
-
-    using BYTE = System.Byte;
-    using SHORT = System.Int16;
-    using USHORT = System.UInt16;
-    using LONG = System.Int32;
-    using ULONG = System.UInt32;
-    using WORD = System.Int16;
-    using DWORD = System.Int32;
-    using BOOL = System.Boolean;
+    using HWND = System.IntPtr;
     using INT = System.Int32;
-    using UINT = System.UInt32;
+    using LONG = System.Int32;
     using LONG_PTR = System.IntPtr;
-    using ATOM = System.Int32;
-
-    using COLORREF = System.Int32;
-    using RECT = OpenMobile.Platform.Windows.Win32Rectangle;
-    using WNDPROC = System.IntPtr;
+    using LPARAM = System.IntPtr;
+    using LPCTSTR = System.String;
     using LPDEVMODE = DeviceMode;
-
-    using HRESULT = System.IntPtr;
-    using HMONITOR = System.IntPtr;
-
-    using DWORD_PTR = System.IntPtr;
-    using UINT_PTR = System.UIntPtr;
-
+    using LPVOID = System.IntPtr;
+    using LRESULT = System.IntPtr;
+    using RECT = OpenMobile.Platform.Windows.Win32Rectangle;
+    using SHORT = System.Int16;
     using TIMERPROC = Functions.TimerProc;
+    using UINT = System.UInt32;
+    using UINT_PTR = System.UIntPtr;
+    using ULONG = System.UInt32;
+    using USHORT = System.UInt16;
+    using WNDPROC = System.IntPtr;
+    using WORD = System.Int16;
+    using WPARAM = System.IntPtr;
 
     #endregion
 
@@ -227,17 +217,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region GetClassInfoEx
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        internal static extern BOOL GetClassInfoEx(HINSTANCE hinst,
-            [MarshalAs(UnmanagedType.LPTStr)] LPCTSTR lpszClass, ref ExtendedWindowClass lpwcx);
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        internal static extern BOOL GetClassInfoEx(HINSTANCE hinst, UIntPtr lpszClass, ref ExtendedWindowClass lpwcx);
-
-        #endregion
-
         #region CallWindowProc
 
 #if RELEASE
@@ -346,7 +325,7 @@ namespace OpenMobile.Platform.Windows
         /// <param name="flags">Not used</param>
         /// <returns>True if there is a message pending.</returns>
         [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("User32.dll")]//, CLSCompliant(false)]
+        [DllImport("User32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool PeekMessage(ref MSG msg, IntPtr hWnd, int messageFilterMin, int messageFilterMax, int flags);
 
@@ -397,13 +376,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region PostQuitMessage
-
-        [DllImport("User32.dll", CharSet = CharSet.Auto)]
-        internal static extern void PostQuitMessage(int exitCode);
-
-        #endregion
-
         #region DispatchMessage
 
 #if RELEASE
@@ -424,37 +396,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region GetQueueStatus
-
-        /// <summary>
-        /// Indicates the type of messages found in the calling thread's message queue.
-        /// </summary>
-        /// <param name="flags"></param>
-        /// <returns>
-        /// The high-order word of the return value indicates the types of messages currently in the queue.
-        /// The low-order word indicates the types of messages that have been added to the queue and that are still
-        /// in the queue since the last call to the GetQueueStatus, GetMessage, or PeekMessage function.
-        /// </returns>
-        /// <remarks>
-        /// The presence of a QS_ flag in the return value does not guarantee that
-        /// a subsequent call to the GetMessage or PeekMessage function will return a message.
-        /// GetMessage and PeekMessage perform some internal filtering that may cause the message
-        /// to be processed internally. For this reason, the return value from GetQueueStatus
-        /// should be considered only a hint as to whether GetMessage or PeekMessage should be called. 
-        /// <para>
-        /// The QS_ALLPOSTMESSAGE and QS_POSTMESSAGE flags differ in when they are cleared.
-        /// QS_POSTMESSAGE is cleared when you call GetMessage or PeekMessage, whether or not you are filtering messages.
-        /// QS_ALLPOSTMESSAGE is cleared when you call GetMessage or PeekMessage without filtering messages
-        /// (wMsgFilterMin and wMsgFilterMax are 0). This can be useful when you call PeekMessage multiple times
-        /// to get messages in different ranges.
-        /// </para>
-        /// </remarks>
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("User32.dll", CharSet = CharSet.Auto)]
-        internal static extern DWORD GetQueueStatus([MarshalAs(UnmanagedType.U4)] QueueStatusFlags flags);
-
-        #endregion
-
         #region DefWindowProc
 
         [DllImport("User32.dll", CharSet = CharSet.Auto)]
@@ -465,19 +406,6 @@ namespace OpenMobile.Platform.Windows
         #endregion
 
         #region Timing
-
-        #region TimeBeginPeriod
-
-        /// <summary>
-        /// Sets the timing resolution of the GetTime (?) method.
-        /// </summary>
-        /// <param name="period">Timing resolution in msec (?)</param>
-        /// <returns>(?)</returns>
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("winmm.dll")]
-        internal static extern IntPtr TimeBeginPeriod(int period);
-
-        #endregion
 
         #region QueryPerformanceFrequency
 
@@ -520,13 +448,6 @@ namespace OpenMobile.Platform.Windows
         /// <returns></returns>
         [DllImport("user32.dll")]
         internal static extern IntPtr GetDC(IntPtr hwnd);
-
-        #endregion
-
-        #region GetWindowDC
-
-        [DllImport("user32.dll")]
-        internal static extern IntPtr GetWindowDC(IntPtr hwnd);
 
         #endregion
 
@@ -578,19 +499,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region GetProcAddress
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="handle"></param>
-        /// <param name="funcname"></param>
-        /// <returns></returns>
-        [DllImport("kernel32.dll")]
-        internal static extern IntPtr GetProcAddress(IntPtr handle, string funcname);
-
-        #endregion
-
         #endregion
 
         #region DLL handling
@@ -639,27 +547,7 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region GetAsyncKeyState
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern SHORT GetAsyncKeyState(VirtualKeys vKey);
-
-        #endregion
-
-        #region GetKeyState
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern SHORT GetKeyState(VirtualKeys vKey);
-
-        #endregion
-
         #region MapVirtualKey
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern UINT MapVirtualKey(UINT uCode, MapVirtualKeyType uMapType);
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll", SetLastError = true)]
@@ -711,65 +599,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region GetWindowText
-
-        /// <summary>
-        /// The GetWindowText function copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied. However, GetWindowText cannot retrieve the text of a control in another application.
-        /// </summary>
-        /// <param name="hWnd">[in] Handle to the window or control containing the text.</param>
-        /// <param name="lpString">[out] Pointer to the buffer that will receive the text. If the string is as long or longer than the buffer, the string is truncated and terminated with a NULL character.</param>
-        /// <param name="nMaxCount">[in] Specifies the maximum number of characters to copy to the buffer, including the NULL character. If the text exceeds this limit, it is truncated.</param>
-        /// <returns>
-        /// If the function succeeds, the return value is the length, in characters, of the copied string, not including the terminating NULL character. If the window has no title bar or text, if the title bar is empty, or if the window or control handle is invalid, the return value is zero. To get extended error information, call GetLastError.
-        /// <para>This function cannot retrieve the text of an edit control in another application.</para>
-        /// </returns>
-        /// <remarks>
-        /// <para>If the target window is owned by the current process, GetWindowText causes a WM_GETTEXT message to be sent to the specified window or control. If the target window is owned by another process and has a caption, GetWindowText retrieves the window caption text. If the window does not have a caption, the return value is a null string. This behavior is by design. It allows applications to call GetWindowText without becoming unresponsive if the process that owns the target window is not responding. However, if the target window is not responding and it belongs to the calling application, GetWindowText will cause the calling application to become unresponsive.</para>
-        /// <para>To retrieve the text of a control in another process, send a WM_GETTEXT message directly instead of calling GetWindowText.</para>
-        /// <para>Windows 95/98/Me: GetWindowTextW is supported by the Microsoft Layer for Unicode (MSLU). To use this, you must add certain files to your application, as outlined in Microsoft Layer for Unicode on Windows 95/98/Me</para>
-        /// </remarks>
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        internal static extern int GetWindowText(HWND hWnd, [MarshalAs(UnmanagedType.LPTStr), In, Out] StringBuilder lpString, int nMaxCount);
-
-        #endregion
-
-        #region ScreenToClient
-
-        /// <summary>
-        /// Converts the screen coordinates of a specified point on the screen to client-area coordinates.
-        /// </summary>
-        /// <param name="hWnd">Handle to the window whose client area will be used for the conversion.</param>
-        /// <param name="point">Pointer to a POINT structure that specifies the screen coordinates to be converted.</param>
-        /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. Windows NT/2000/XP: To get extended error information, call GetLastError.</returns>
-        /// <remarks>
-        /// <para>The function uses the window identified by the hWnd parameter and the screen coordinates given in the POINT structure to compute client coordinates. It then replaces the screen coordinates with the client coordinates. The new coordinates are relative to the upper-left corner of the specified window's client area. </para>
-        /// <para>The ScreenToClient function assumes the specified point is in screen coordinates. </para>
-        /// <para>All coordinates are in device units.</para>
-        /// <para>Do not use ScreenToClient when in a mirroring situation, that is, when changing from left-to-right layout to right-to-left layout. Instead, use MapWindowPoints. For more information, see "Window Layout and Mirroring" in Window Features.</para>
-        /// </remarks>
-        [DllImport("user32.dll", SetLastError = true), SuppressUnmanagedCodeSecurity]
-        //internal static extern BOOL ScreenToClient(HWND hWnd, ref POINT point);
-        internal static extern BOOL ScreenToClient(HWND hWnd, ref Point point);
-
-        #endregion
-
-        #region ClientToScreen
-
-        /// <summary>
-        /// Converts the client-area coordinates of a specified point to screen coordinates.
-        /// </summary>
-        /// <param name="hWnd">Handle to the window whose client area will be used for the conversion.</param>
-        /// <param name="point">Pointer to a POINT structure that contains the client coordinates to be converted. The new screen coordinates are copied into this structure if the function succeeds.</param>
-        /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. Windows NT/2000/XP: To get extended error information, call GetLastError.</returns>
-        /// <remarks>
-        /// <para>The ClientToScreen function replaces the client-area coordinates in the POINT structure with the screen coordinates. The screen coordinates are relative to the upper-left corner of the screen. Note, a screen-coordinate point that is above the window's client area has a negative y-coordinate. Similarly, a screen coordinate to the left of a client area has a negative x-coordinate.</para>
-        /// <para>All coordinates are device coordinates.</para>
-        /// </remarks>
-        [DllImport("user32.dll", SetLastError = true), SuppressUnmanagedCodeSecurity]
-        internal static extern BOOL ClientToScreen(HWND hWnd, ref Point point);
-
-        #endregion
-
         #region GetClientRect
 
         /// <summary>
@@ -811,13 +640,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region GetFocus
-
-        [DllImport("user32.dll")]
-        public static extern HWND GetFocus();
-
-        #endregion
-
         #region IsWindowVisible
 
         [DllImport("user32.dll")]
@@ -825,24 +647,14 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region LoadIcon
-
-        [DllImport("user32.dll")]
-        public static extern HICON LoadIcon(HINSTANCE hInstance, LPCTSTR lpIconName);
-
-        #endregion
-
         #region LoadCursor
-
-        [DllImport("user32.dll")]
-        public static extern HCURSOR LoadCursor(HINSTANCE hInstance, LPCTSTR lpCursorName);
 
         [DllImport("user32.dll")]
         public static extern HCURSOR LoadCursor(HINSTANCE hInstance, IntPtr lpCursorName);
 
-        public static HCURSOR LoadCursor(CursorName lpCursorName)
+        public static HCURSOR LoadCursor(int lpCursorName)
         {
-            return LoadCursor(IntPtr.Zero, new IntPtr((int)lpCursorName));
+            return LoadCursor(IntPtr.Zero, new IntPtr(lpCursorName));
         }
 
         #endregion
@@ -860,28 +672,11 @@ namespace OpenMobile.Platform.Windows
         [DllImport("kernel32.dll"),SuppressUnmanagedCodeSecurity]
         internal static extern uint SetThreadExecutionState(uint esFlags);
 
-        #region ChangeDisplaySettings
-
-        /// <summary>
-        /// The ChangeDisplaySettings function changes the settings of the default display device to the specified graphics mode.
-        /// </summary>
-        /// <param name="device_mode">[in] Pointer to a DEVMODE structure that describes the new graphics mode. If lpDevMode is NULL, all the values currently in the registry will be used for the display setting. Passing NULL for the lpDevMode parameter and 0 for the dwFlags parameter is the easiest way to return to the default mode after a dynamic mode change.</param>
-        /// <param name="flags">[in] Indicates how the graphics mode should be changed.</param>
-        /// <returns></returns>
-        /// <remarks>To change the settings of a specified display device, use the ChangeDisplaySettingsEx function.
-        /// <para>To ensure that the DEVMODE structure passed to ChangeDisplaySettings is valid and contains only values supported by the display driver, use the DEVMODE returned by the EnumDisplaySettings function.</para>
-        /// <para>When the display mode is changed dynamically, the WM_DISPLAYCHANGE message is sent to all running applications.</para>
-        /// </remarks>
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern int ChangeDisplaySettings(DeviceMode device_mode, ChangeDisplaySettingsEnum flags);
-
-        #endregion int ChangeDisplaySettings
-
         #region ChangeDisplaySettingsEx
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern LONG ChangeDisplaySettingsEx([MarshalAs(UnmanagedType.LPTStr)] LPCTSTR lpszDeviceName,
-            LPDEVMODE lpDevMode, HWND hwnd, ChangeDisplaySettingsEnum dwflags, LPVOID lParam);
+            LPDEVMODE lpDevMode, HWND hwnd, int dwflags, LPVOID lParam);
 
         #endregion
 
@@ -894,46 +689,11 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region EnumDisplaySettings
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern BOOL EnumDisplaySettings([MarshalAs(UnmanagedType.LPTStr)] string device_name,
-            int graphics_mode, [In, Out] DeviceMode device_mode);
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern BOOL EnumDisplaySettings([MarshalAs(UnmanagedType.LPTStr)] string device_name,
-             DisplayModeSettingsEnum graphics_mode, [In, Out] DeviceMode device_mode);
-
-        #endregion
-
         #region EnumDisplaySettingsEx
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern BOOL EnumDisplaySettingsEx([MarshalAs(UnmanagedType.LPTStr)] LPCTSTR lpszDeviceName, DisplayModeSettingsEnum iModeNum,
+        public static extern BOOL EnumDisplaySettingsEx([MarshalAs(UnmanagedType.LPTStr)] LPCTSTR lpszDeviceName, int iModeNum,
             [In, Out] DeviceMode lpDevMode, DWORD dwFlags);
-
-        #endregion
-
-        #region GetMonitorInfo
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern BOOL GetMonitorInfo(IntPtr hMonitor, ref MonitorInfo lpmi);
-
-        #endregion
-
-        #region MonitorFromPoint
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern HMONITOR MonitorFromPoint(POINT pt, MonitorFrom dwFlags);
-
-        #endregion
-
-        #region MonitorFromWindow
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern HMONITOR MonitorFromWindow(HWND hwnd, MonitorFrom dwFlags);
 
         #endregion
 
@@ -947,15 +707,6 @@ namespace OpenMobile.Platform.Windows
         [DllImport("user32.dll", SetLastError=true)]
         public static extern BOOL TrackMouseEvent(ref TrackMouseEventStructure lpEventTrack);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
-        public static extern bool ReleaseCapture();
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-        public static extern IntPtr SetCapture(IntPtr hwnd);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-        public static extern IntPtr GetCapture();
-
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern IntPtr SetFocus(IntPtr hwnd);
 
@@ -966,35 +717,6 @@ namespace OpenMobile.Platform.Windows
         public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
 
         #region Raw Input
-
-        #region DefRawInputProc
-
-        /// <summary>
-        /// calls the default raw input procedure to provide default processing for
-        /// any raw input messages that an application does not process.
-        /// This function ensures that every message is processed.
-        /// DefRawInputProc is called with the same parameters received by the window procedure.
-        /// </summary>
-        /// <param name="RawInput">Pointer to an array of RawInput structures.</param>
-        /// <param name="Input">Number of RawInput structures pointed to by paRawInput.</param>
-        /// <param name="SizeHeader">Size, in bytes, of the RawInputHeader structure.</param>
-        /// <returns>If successful, the function returns S_OK. Otherwise it returns an error value.</returns>
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern LRESULT DefRawInputProc(RawInput[] RawInput, INT Input, UINT SizeHeader);
-
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        unsafe internal static extern LRESULT DefRawInputProc(ref RawInput RawInput, INT Input, UINT SizeHeader);
-
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        unsafe internal static extern LRESULT DefRawInputProc(IntPtr RawInput, INT Input, UINT SizeHeader);
-
-        #endregion
 
         #region RegisterRawInputDevices
 
@@ -1054,58 +776,9 @@ namespace OpenMobile.Platform.Windows
         /// On any other error, the function returns (UINT) -1 and GetLastError returns the error indication.
         /// </returns>
 
-        [DllImport("user32.dll", SetLastError = true), SuppressUnmanagedCodeSecurity]
-        internal static extern UINT GetRawInputDeviceList(
-            [In, Out] RawInputDeviceList[] RawInputDeviceList,
-            [In, Out] ref UINT NumDevices,
-            UINT Size
-        );
-
         [DllImport("user32.dll", SetLastError = true),SuppressUnmanagedCodeSecurity]
         internal static extern INT GetRawInputDeviceList(
             [In, Out] RawInputDeviceList[] RawInputDeviceList,
-            [In, Out] ref INT NumDevices,
-            INT Size
-        );
-
-        /// <summary>
-        /// Enumerates the raw input devices attached to the system.
-        /// </summary>
-        /// <param name="RawInputDeviceList">
-        /// ointer to buffer that holds an array of RawInputDeviceList structures
-        /// for the devices attached to the system.
-        /// If NULL, the number of devices are returned in NumDevices.
-        /// </param>
-        /// <param name="NumDevices">
-        /// Pointer to a variable. If RawInputDeviceList is NULL, it specifies the number
-        /// of devices attached to the system. Otherwise, it contains the size, in bytes,
-        /// of the preallocated buffer pointed to by pRawInputDeviceList.
-        /// However, if NumDevices is smaller than needed to contain RawInputDeviceList structures,
-        /// the required buffer size is returned here.
-        /// </param>
-        /// <param name="Size">
-        /// Size of a RawInputDeviceList structure.
-        /// </param>
-        /// <returns>
-        /// If the function is successful, the return value is the number of devices stored in the buffer
-        /// pointed to by RawInputDeviceList.
-        /// If RawInputDeviceList is NULL, the return value is zero. 
-        /// If NumDevices is smaller than needed to contain all the RawInputDeviceList structures,
-        /// the return value is (UINT) -1 and the required buffer is returned in NumDevices.
-        /// Calling GetLastError returns ERROR_INSUFFICIENT_BUFFER.
-        /// On any other error, the function returns (UINT) -1 and GetLastError returns the error indication.
-        /// </returns>
-
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern UINT GetRawInputDeviceList(
-            [In, Out] IntPtr RawInputDeviceList,
-            [In, Out] ref UINT NumDevices,
-            UINT Size
-        );
-
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern INT GetRawInputDeviceList(
-            [In, Out] IntPtr RawInputDeviceList,
             [In, Out] ref INT NumDevices,
             INT Size
         );
@@ -1153,15 +826,6 @@ namespace OpenMobile.Platform.Windows
             [MarshalAs(UnmanagedType.U4)] RawInputDeviceInfoEnum Command,
             [In, Out] LPVOID Data,
             [In, Out] ref UINT Size
-        );
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern INT GetRawInputDeviceInfo(
-            HANDLE Device,
-            [MarshalAs(UnmanagedType.U4)] RawInputDeviceInfoEnum Command,
-            [In, Out] LPVOID Data,
-            [In, Out] ref INT Size
         );
 
         /// <summary>
@@ -1303,17 +967,6 @@ namespace OpenMobile.Platform.Windows
 
         #endregion
 
-        #region GDI functions
-
-        #region GetStockObject
-
-        [DllImport("gdi32.dll", SetLastError = true)]
-        internal static extern IntPtr GetStockObject(int index);
-
-        #endregion
-
-        #endregion
-
         #region Timer Functions
 
         [DllImport("user32.dll", SetLastError=true)]
@@ -1342,9 +995,6 @@ namespace OpenMobile.Platform.Windows
 
         public struct Constants
         {
-            // Found in winuser.h
-            internal const int KEYBOARD_OVERRUN_MAKE_CODE = 0xFF;
-
             // WM_ACTIVATE state values (found in winuser.h)
             internal const int WA_INACTIVE    = 0;
             internal const int WA_ACTIVE      = 1;
@@ -1419,11 +1069,6 @@ namespace OpenMobile.Platform.Windows
             internal const int DM_DISPLAYFLAGS = 0x00200000;
             internal const int DM_DISPLAYFREQUENCY = 0x00400000;
             public const int DM_POSITION = 0x00000020;
-
-            // ChangeDisplaySettings results (found in winuser.h)
-            internal const int DISP_CHANGE_SUCCESSFUL = 0;
-            internal const int DISP_CHANGE_RESTART = 1;
-            internal const int DISP_CHANGE_FAILED = -1;
 
             // (found in winuser.h)
             internal const int ENUM_REGISTRY_SETTINGS = -2;
@@ -2062,8 +1707,6 @@ namespace OpenMobile.Platform.Windows
         internal RawMouse Mouse;
         [FieldOffset(0)]
         internal RawKeyboard Keyboard;
-        [FieldOffset(0)]
-        internal RawHID HID;
     }
 
     #endregion
@@ -2206,94 +1849,6 @@ namespace OpenMobile.Platform.Windows
 
     #endregion
 
-    #region RawMouse (second try)
-#if false
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct RawMouse
-    {
-        byte b00, b01, b02, b03, b04, b05, b06, b07,
-             b08, b09, b10, b11, b12, b13, b14, b15,
-             b16, b17, b18, b19, b20, b21, b22, b23;
-
-        unsafe private byte* this[int i] { get { fixed (byte* ptr = &b00) { return ptr + i; } } }
-
-        /// <summary>
-        /// Mouse state. This member can be any reasonable combination of the following. 
-        /// MOUSE_ATTRIBUTES_CHANGED
-        /// Mouse attributes changed; application needs to query the mouse attributes.
-        /// MOUSE_MOVE_RELATIVE
-        /// Mouse movement data is relative to the last mouse position.
-        /// MOUSE_MOVE_ABSOLUTE
-        /// Mouse movement data is based on absolute position.
-        /// MOUSE_VIRTUAL_DESKTOP
-        /// Mouse coordinates are mapped to the virtual desktop (for a multiple monitor system).
-        /// </summary>
-        internal RawMouseFlags Flags { get { unsafe { return *(RawMouseFlags*)this[0]; } } } 
-
-        /// <summary>
-        /// Transition state of the mouse buttons.
-        /// </summary>
-        internal RawInputMouseState ButtonFlags { get { unsafe { return *(RawInputMouseState*)this[4]; } } }
-
-        /// <summary>
-        /// If usButtonFlags is RI_MOUSE_WHEEL, this member is a signed value that specifies the wheel delta.
-        /// </summary>
-        internal USHORT ButtonData { get { unsafe { return *(USHORT*)this[6]; } } }
-
-        /// <summary>
-        /// Raw state of the mouse buttons.
-        /// </summary>
-        internal ULONG RawButtons { get { unsafe { return *(ULONG*)this[8]; } } }
-
-        /// <summary>
-        /// Motion in the X direction. This is signed relative motion or absolute motion, depending on the value of usFlags.
-        /// </summary>
-        internal LONG LastX { get { unsafe { return *(LONG*)this[12]; } } }
-
-        /// <summary>
-        /// Motion in the Y direction. This is signed relative motion or absolute motion, depending on the value of usFlags.
-        /// </summary>
-        internal LONG LastY { get { unsafe { return *(LONG*)this[16]; } } }
-
-        /// <summary>
-        /// Device-specific additional information for the event.
-        /// </summary>
-        internal ULONG ExtraInformation { get { unsafe { return *(ULONG*)this[20]; } } }
-    }
-#endif
-    #endregion
-
-    #region RawHID
-
-    /// \internal
-    /// <summary>
-    /// The RawHID structure describes the format of the raw input
-    /// from a Human Interface Device (HID).
-    /// </summary>
-    /// <remarks>
-    /// Each WM_INPUT can indicate several inputs, but all of the inputs
-    /// come from the same HID. The size of the bRawData array is
-    /// dwSizeHid * dwCount.
-    /// </remarks>
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct RawHID
-    {
-        /// <summary>
-        /// Size, in bytes, of each HID input in bRawData.
-        /// </summary>
-        internal DWORD SizeHid;
-        /// <summary>
-        /// Number of HID inputs in bRawData.
-        /// </summary>
-        internal DWORD Count;
-        /// <summary>
-        /// Raw input data as an array of bytes.
-        /// </summary>
-        internal BYTE RawData;
-    }
-
-    #endregion
-
     #region RawInputDeviceInfo
 
     /// \internal
@@ -2318,45 +1873,8 @@ namespace OpenMobile.Platform.Windows
             [FieldOffset(0)]
             internal RawInputMouseDeviceInfo Mouse;
             [FieldOffset(0)]
-            internal RawInputKeyboardDeviceInfo Keyboard;
-            [FieldOffset(0)]
-            internal RawInputHIDDeviceInfo HID; 
+            internal RawInputKeyboardDeviceInfo Keyboard; 
         };
-    }
-
-    #endregion
-
-    #region RawInputHIDDeviceInfo
-
-    /// \internal
-    /// <summary>
-    /// Defines the raw input data coming from the specified Human Interface Device (HID).
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct RawInputHIDDeviceInfo
-    {
-        /// <summary>
-        /// Vendor ID for the HID.
-        /// </summary>
-        internal DWORD VendorId;
-        /// <summary>
-        /// Product ID for the HID.
-        /// </summary>
-        internal DWORD ProductId;
-        /// <summary>
-        /// Version number for the HID.
-        /// </summary>
-        internal DWORD VersionNumber;
-        /// <summary>
-        /// Top-level collection Usage Page for the device.
-        /// </summary>
-        //internal USHORT UsagePage;
-        internal SHORT UsagePage;
-        /// <summary>
-        /// Top-level collection Usage for the device.
-        /// </summary>
-        //internal USHORT Usage;
-        internal SHORT Usage;
     }
 
     #endregion
@@ -2583,19 +2101,6 @@ namespace OpenMobile.Platform.Windows
 
     #endregion
 
-    #region NcCalculateSize
-
-    [StructLayout(LayoutKind.Sequential, Pack=1)]
-    internal struct NcCalculateSize
-    {
-        public Win32Rectangle NewBounds;
-        public Win32Rectangle OldBounds;
-        public Win32Rectangle OldClientRectangle;
-        unsafe public WindowPosition* Position;
-    }
-
-    #endregion
-
     #region ShFileInfo
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -2661,32 +2166,6 @@ namespace OpenMobile.Platform.Windows
 
     #endregion
 
-    #region NcCalcSizeOptions
-
-    internal enum NcCalcSizeOptions
-    {
-        ALIGNTOP = 0x10,
-        ALIGNRIGHT = 0x80,
-        ALIGNLEFT = 0x20,
-        ALIGNBOTTOM = 0x40,
-        HREDRAW = 0x100,
-        VREDRAW = 0x200,
-        REDRAW = (HREDRAW | VREDRAW),
-        VALIDRECTS = 0x400
-    }
-
-    #endregion
-
-    #region internal enum DisplayModeSettingsEnum
-
-    public enum DisplayModeSettingsEnum
-    {
-        CurrentSettings = -1,
-        RegistrySettings = -2
-    }
-
-    #endregion
-
     #region internal enum DisplayDeviceStateFlags
 
     [Flags]
@@ -2706,19 +2185,6 @@ namespace OpenMobile.Platform.Windows
         // Child device state
         Active            = 0x00000001,
         Attached          = 0x00000002,
-    }
-
-    #endregion
-
-    #region internal enum ChangeDisplaySettingsEnum
-
-    [Flags]
-    public enum ChangeDisplaySettingsEnum
-    {
-        // ChangeDisplaySettings types (found in winuser.h)
-        UpdateRegistry = 0x00000001,
-        Test = 0x00000002,
-        Fullscreen = 0x00000004,
     }
 
     #endregion
@@ -2868,18 +2334,6 @@ namespace OpenMobile.Platform.Windows
     {
         RGBA = 0,
         INDEXED = 1
-    }
-
-    #endregion
-
-    #region WindowPlacementOptions enum
-
-    internal enum WindowPlacementOptions
-    {
-        TOP = 0,
-        BOTTOM = 1,
-        TOPMOST = -1,
-        NOTOPMOST = -2
     }
 
     #endregion
@@ -3364,82 +2818,6 @@ namespace OpenMobile.Platform.Windows
 
     #endregion
 
-    #region QueueStatusFlags
-
-    /// \internal
-    /// <summary>
-    /// Queue status flags for GetQueueStatus() and MsgWaitForMultipleObjects()
-    /// </summary>
-    [Flags]
-    internal enum QueueStatusFlags
-    {
-        /// <summary>
-        /// A WM_KEYUP, WM_KEYDOWN, WM_SYSKEYUP, or WM_SYSKEYDOWN message is in the queue.
-        /// </summary>
-        KEY            = 0x0001,
-        /// <summary>
-        /// A WM_MOUSEMOVE message is in the queue.
-        /// </summary>
-        MOUSEMOVE      = 0x0002,
-        /// <summary>
-        /// A mouse-button message (WM_LBUTTONUP, WM_RBUTTONDOWN, and so on).
-        /// </summary>
-        MOUSEBUTTON    = 0x0004,
-        /// <summary>
-        /// A posted message (other than those listed here) is in the queue.
-        /// </summary>
-        POSTMESSAGE    = 0x0008,
-        /// <summary>
-        /// A WM_TIMER message is in the queue.
-        /// </summary>
-        TIMER          = 0x0010,
-        /// <summary>
-        /// A WM_PAINT message is in the queue.
-        /// </summary>
-        PAINT          = 0x0020,
-        /// <summary>
-        /// A message sent by another thread or application is in the queue.
-        /// </summary>
-        SENDMESSAGE    = 0x0040,
-        /// <summary>
-        /// A WM_HOTKEY message is in the queue.
-        /// </summary>
-        HOTKEY         = 0x0080,
-        /// <summary>
-        /// A posted message (other than those listed here) is in the queue.
-        /// </summary>
-        ALLPOSTMESSAGE = 0x0100,
-        /// <summary>
-        /// A raw input message is in the queue. For more information, see Raw Input.
-        /// Windows XP and higher only.
-        /// </summary>
-        RAWINPUT       = 0x0400,
-        /// <summary>
-        /// A WM_MOUSEMOVE message or mouse-button message (WM_LBUTTONUP, WM_RBUTTONDOWN, and so on).
-        /// </summary>
-        MOUSE          = MOUSEMOVE | MOUSEBUTTON,
-        /// <summary>
-        /// An input message is in the queue. This is composed of KEY, MOUSE and RAWINPUT.
-        /// Windows XP and higher only.
-        /// </summary>
-        INPUT          = MOUSE | KEY | RAWINPUT,
-        /// <summary>
-        /// An input message is in the queue. This is composed of QS_KEY and QS_MOUSE.
-        /// Windows 2000 and earlier.
-        /// </summary>
-        INPUT_LEGACY   = MOUSE | KEY,
-        /// <summary>
-        /// An input, WM_TIMER, WM_PAINT, WM_HOTKEY, or posted message is in the queue.
-        /// </summary>
-        ALLEVENTS      = INPUT | POSTMESSAGE | TIMER | PAINT | HOTKEY,
-        /// <summary>
-        /// Any message is in the queue.
-        /// </summary>
-        ALLINPUT       = INPUT | POSTMESSAGE | TIMER | PAINT | HOTKEY | SENDMESSAGE
-    }
-
-    #endregion
-
     #region WindowMessage
 
     public enum WindowMessage : uint
@@ -3789,53 +3167,6 @@ namespace OpenMobile.Platform.Windows
 
     #endregion
 
-    #region ShowWindowMessageIdentifiers
-
-    /// <summary>
-    /// Identifiers for the WM_SHOWWINDOW message
-    /// </summary>
-    internal enum ShowWindowMessageIdentifiers
-    {
-        PARENTCLOSING = 1,
-        OTHERZOOM = 2,
-        PARENTOPENING = 3,
-        OTHERUNZOOM = 4,
-    }
-
-    #endregion
-
-    #region GDI charset
-
-    /// <summary>
-    /// Enumerates the available character sets.
-    /// </summary>
-    internal enum GdiCharset
-    {
-        Ansi = 0,
-        Default = 1,
-        Symbol = 2,
-        ShiftJIS = 128,
-        Hangeul = 129,
-        Hangul = 129,
-        GB2312 = 134,
-        ChineseBig5 = 136,
-        OEM = 255,
-        //#if(WINVER >= 0x0400)
-        Johab = 130,
-        Hebrew = 177,
-        Arabic = 178,
-        Greek = 161,
-        Turkish = 162,
-        Vietnamese = 163,
-        Thai = 222,
-        EastEurope = 238,
-        Russian = 204,
-        Mac = 77,
-        Baltic = 186,
-    }
-
-    #endregion
-
     #region MapVirtualKeyType
 
     internal enum MapVirtualKeyType
@@ -3849,27 +3180,6 @@ namespace OpenMobile.Platform.Windows
         /// <summary>Windows NT/2000/XP: uCode is a scan code and is translated into a virtual-key code that distinguishes between left- and right-hand keys. If there is no translation, the function returns 0.</summary>
         ScanCodeToVirtualKeyExtended = 3,
         VirtualKeyToScanCodeExtended = 4,
-    }
-
-    #endregion
-
-    #region DwmWindowAttribute
-
-    public enum DwmWindowAttribute
-    {
-        NCRENDERING_ENABLED = 1,
-        NCRENDERING_POLICY,
-        TRANSITIONS_FORCEDISABLED,
-        ALLOW_NCPAINT,
-        CAPTION_BUTTON_BOUNDS,
-        NONCLIENT_RTL_LAYOUT,
-        FORCE_ICONIC_REPRESENTATION,
-        FLIP3D_POLICY,
-        EXTENDED_FRAME_BOUNDS,
-        HAS_ICONIC_BITMAP,
-        DISALLOW_PEEK,
-        EXCLUDED_FROM_PEEK,
-        LAST
     }
 
     #endregion
@@ -3919,26 +3229,6 @@ namespace OpenMobile.Platform.Windows
 
     #endregion
 
-    #region MonitorFrom
-
-    public enum MonitorFrom
-    {
-        Null = 0,
-        Primary = 1,
-        Nearest = 2,
-    }
-
-    #endregion
-
-    #region CursorName
-
-    public enum CursorName : int
-    {
-        Arrow = 32512
-    }
-
-    #endregion
-
     #region TrackMouseEventFlags
 
     [Flags]
@@ -3965,18 +3255,6 @@ namespace OpenMobile.Platform.Windows
         public UInt64 ullArguments;
         public UINT cbExtraArgs;
     }
-
-    #region MouseActivate
-
-    enum MouseActivate
-    {
-        ACTIVATE = 1,
-        ACTIVATEANDEAT = 2,
-        NOACTIVATE = 3,
-        NOACTIVATEANDEAT = 4,
-    }
-
-    #endregion
 
     #endregion
 
