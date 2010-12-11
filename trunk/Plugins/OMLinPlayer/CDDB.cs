@@ -59,12 +59,12 @@ namespace OMLinPlayer
 
         public bool beginGetSongsByGenre(string genre, bool covers, eMediaField sortBy)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool beginGetSongsByRating(string genre, bool covers, eMediaField sortBy)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool beginGetSongsByAlbum(string artist, string album, bool covers, eMediaField sortBy)
@@ -77,17 +77,17 @@ namespace OMLinPlayer
 
         public bool beginGetSongsByLyrics(string phrase, bool covers, eMediaField sortBy)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool beginGetGenres()
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool setRating(OpenMobile.mediaInfo info)
         {
-            throw new NotImplementedException();
+            return false;
         }
         List<mediaInfo> media=new List<mediaInfo>();
         List<mediaInfo> ret = new List<mediaInfo>();
@@ -115,7 +115,7 @@ namespace OMLinPlayer
 
         public bool beginNaturalSearch(string query)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public IMediaDatabase getNew()
@@ -168,17 +168,17 @@ namespace OMLinPlayer
 
         public bool beginGetPlaylist(string name)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public mediaInfo getNextPlaylistItem()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public bool writePlaylist(List<string> URLs, string name, bool append)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool removePlaylist(string name)

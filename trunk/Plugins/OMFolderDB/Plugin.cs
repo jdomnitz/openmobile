@@ -60,7 +60,19 @@ namespace OMFolderDB
         private void changed(Setting s)
         {
             using (PluginSettings settings = new PluginSettings())
+            {
+                if (s.Name == "Music.AutoIndex")
+                {
+                    if (settings.getSetting("Music.AutoIndex") != s.Value)
+                        if (s.Value == "True")
+                            this.indexDirectory(settings.getSetting("Music.Path"), true);
+                }
+                else if (s.Name == "Music.Path")
+                {
+                    this.indexDirectory(s.Value, true);
+                }
                 settings.setSetting(s.Name, s.Value);
+            }
         }
         public void Dispose()
         {
@@ -615,15 +627,20 @@ namespace OMFolderDB
             if (con.State != ConnectionState.Open)
                 con.Open();
             SqliteCommand command = con.CreateCommand();
-            command.CommandText = "SELECT Distinct Genres FROM tblSongs";
+            command.CommandText = "SELECT Distinct Genre FROM tblSongs";
             reader = command.ExecuteReader();
             field = eMediaField.Genre;
             return (reader != null);
         }
         public bool setRating(mediaInfo info)
         {
-
-            throw new NotImplementedException();
+            if (con == null)
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
+            if (con.State != ConnectionState.Open)
+                con.Open();
+            SqliteCommand command = con.CreateCommand();
+            command.CommandText = "UPDATE tblSongs SET Rating='"+info.Rating.ToString()+"' WHERE URL='"+General.escape(info.Location)+"';";
+            return (command.ExecuteNonQuery() > 0);
         }
         public mediaInfo getNextMedia()
         {
@@ -689,7 +706,7 @@ namespace OMFolderDB
 
         public bool beginNaturalSearch(string query)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool beginGetPlaylist(string name)
@@ -742,7 +759,7 @@ namespace OMFolderDB
             StringBuilder query = new StringBuilder("BEGIN;");
             {
                 query.Append("DELETE FROM Playlists WHERE Name='");
-                query.Append(name);
+                query.Append(General.escape(name));
                 query.Append("';");
                 query.Append("END;");
             }
@@ -781,7 +798,7 @@ namespace OMFolderDB
 
         public string pluginName
         {
-            get { return "OMMediaDB"; }
+            get { return "OMFolderDB"; }
         }
 
         public float pluginVersion
@@ -796,11 +813,11 @@ namespace OMFolderDB
 
         public bool incomingMessage(string message, string source)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public Plugin(){}
         public Plugin(IPluginHost host)
@@ -813,20 +830,37 @@ namespace OMFolderDB
         public eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
+            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             alreadyIndexed = new Queue<string>();
             toBeIndexed = new List<string>();
-            string path=null;
-            using(PluginSettings settings=new PluginSettings())
-            {
-                if (settings.getSetting("Music.AutoIndex") == "True")
-                    path = settings.getSetting("Music.Path");
-                settings.setSetting("Default.MusicDatabase", "OMMediaDB");
-            }
-            if ((path!=null)&&(path.Length>0))
-                indexDirectory(path, true);
             if (File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2")) == false)
+            {
+                using (PluginSettings settings = new PluginSettings())
+	 	            settings.setSetting("Default.MusicDatabase", "OMFolderDB");
                 createDB();
+            }
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.pluginLoadingComplete)
+            {
+                string path = null;
+                using (PluginSettings settings = new PluginSettings())
+                {
+                    if (settings.getSetting("Music.AutoIndex") == "True")
+                        path = settings.getSetting("Music.Path");
+                    settings.setSetting("Default.MusicDatabase", "OMFolderDB");
+                    if (settings.getSetting("OpenMobile.FirstRun") == "True")
+                    {
+                        path = settings.getSetting("Music.Path");
+                        settings.setSetting("OpenMobile.FirstRun", "False");
+                    }
+                }
+                if ((path != null) && (path.Length > 0))
+                    indexDirectory(path, true);
+            }
         }
 
         private void createDB()

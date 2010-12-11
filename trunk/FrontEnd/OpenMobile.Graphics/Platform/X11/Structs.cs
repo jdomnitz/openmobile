@@ -665,42 +665,8 @@ namespace OpenMobile.Platform.X11
         public XGenericEventCookie GenericEventCookie;
         [FieldOffset(0)]
         public XRRScreenChangeNotifyEvent ScreenChangeEvent;
-
-        //[MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValArray, SizeConst=24)]
-        //[ FieldOffset(0) ] public int[] pad;
         [FieldOffset(0)]
         public XEventPad Pad;
-        public override string ToString()
-        {
-            switch (type)
-            {
-                case XEventName.PropertyNotify:
-                    return ToString(PropertyEvent);
-                case XEventName.ResizeRequest:
-                    return ToString(ResizeRequestEvent);
-                case XEventName.ConfigureNotify:
-                    return ToString(ConfigureEvent);
-                default:
-                    return type.ToString();
-            }
-        }
-
-        public static string ToString(object ev)
-        {
-            string result = string.Empty;
-            Type type = ev.GetType();
-            System.Reflection.FieldInfo[] fields = type.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance);
-            for (int i = 0; i < fields.Length; i++)
-            {
-                if (result != string.Empty)
-                {
-                    result += ", ";
-                }
-                object value = fields[i].GetValue(ev);
-                result += fields[i].Name + "=" + (value == null ? "<null>" : value.ToString());
-            }
-            return type.Name + " (" + result + ")";
-        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -749,11 +715,6 @@ namespace OpenMobile.Platform.X11
         public IntPtr do_not_propagate_mask;
         public bool override_direct;
         public IntPtr screen;
-
-        public override string ToString()
-        {
-            return XEvent.ToString(this);
-        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

@@ -401,8 +401,10 @@ namespace OpenMobile.Platform.MacOS
         
         public override void MakeCurrent(IWindowInfo window)
         {
-            if (Agl.aglSetCurrentContext(Handle.Handle) == false)
-                MyAGLReportError("aglSetCurrentContext");
+            if (window == null)
+                Agl.aglSetCurrentContext(IntPtr.Zero);
+            else
+                Agl.aglSetCurrentContext(Handle.Handle);
         }
 
         public override bool IsCurrent

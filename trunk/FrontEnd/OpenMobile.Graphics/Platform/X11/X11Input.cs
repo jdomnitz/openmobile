@@ -56,7 +56,6 @@ namespace OpenMobile.Platform.X11
             using (new XLock(window.Display))
             {
                 // Init keyboard
-                KeyboardDevice kb = new KeyboardDevice();
                 keyboard.Description = "Default Keyboard";
                 keyboard.DeviceID = IntPtr.Zero;
                 dummy_keyboard_list.Add(keyboard);

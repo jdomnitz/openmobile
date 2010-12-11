@@ -389,14 +389,6 @@ namespace OpenMobile.Platform.X11
         {
             get
             {                
-                //IntPtr actual_atom;
-                //int actual_format;
-                //IntPtr nitems;
-                //IntPtr bytes_after;
-                IntPtr prop = IntPtr.Zero;
-                //IntPtr atom;
-                //XWindowAttributes attributes;
-
                 using (new XLock(window.Display))
                 {
                     // Test if decorations have been disabled through Motif.
@@ -466,27 +458,6 @@ namespace OpenMobile.Platform.X11
                                               ref hints, Marshal.SizeOf(hints) / IntPtr.Size);
                     return true;
                 }
-                return false;
-            }
-        }
-
-        #endregion
-
-        #region bool DisableGnomeDecorations()
-
-        bool DisableGnomeDecorations()
-        {
-            using (new XLock(window.Display))
-            {
-                IntPtr atom = Functions.XInternAtom(this.window.Display, Constants.XA_WIN_HINTS, true);
-                if (atom != IntPtr.Zero)
-                {
-                    IntPtr hints = IntPtr.Zero;
-                    Functions.XChangeProperty(this.window.Display, this.Handle, atom, atom, 32, PropertyMode.Replace,
-                                              ref hints, Marshal.SizeOf(hints) / IntPtr.Size);
-                    return true;
-                }
-    
                 return false;
             }
         }
@@ -716,17 +687,11 @@ namespace OpenMobile.Platform.X11
                 switch (e.type)
                 {
                     case XEventName.MapNotify:
-                        {
-                            bool previous_visible = visible;
-                            visible = true;
-                        }
+                        visible = true;
                         return;
 
                     case XEventName.UnmapNotify:
-                        {
-                            bool previous_visible = visible;
-                            visible = false;
-                        }
+                        visible = false;
                         break;
 
                     case XEventName.CreateNotify:

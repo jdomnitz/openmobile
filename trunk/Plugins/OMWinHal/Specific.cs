@@ -309,7 +309,7 @@ namespace OMHal
                 dev.PelsHeight=0;
                 dev.PelsWidth=0;
                 dev.Fields=OpenMobile.Platform.Windows.Constants.DM_POSITION;
-                OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (instance + 1).ToString(), dev, IntPtr.Zero, OpenMobile.Platform.Windows.ChangeDisplaySettingsEnum.Fullscreen, IntPtr.Zero);
+                OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (instance + 1).ToString(), dev, IntPtr.Zero,0x4, IntPtr.Zero);
             }
         }
         private static void SwitchOnMonitor(int instance)

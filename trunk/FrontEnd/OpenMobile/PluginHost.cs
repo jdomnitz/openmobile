@@ -182,7 +182,7 @@ namespace OpenMobile
             if (devices == null)
                 if (!refreshDevices())
                     return 0;
-            return Array.FindIndex(devices, p => p.Replace("  ", " ") == str) + 1;
+            return Array.FindIndex(devices, p => (p!=null)&&(p.Replace("  ", " ") == str)) + 1;
         }
         private static bool refreshDevices()
         {

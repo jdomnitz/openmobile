@@ -362,7 +362,7 @@ namespace OpenMobile.Graphics
         {
             System.Drawing.Color color = System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
             System.Drawing.Color secondColor = System.Drawing.Color.FromArgb(sC.A, sC.R, sC.G, sC.B);
-            if ((text == null) || (text == ""))
+            if (string.IsNullOrEmpty(text))
                 return;
             FontStyle f = FontStyle.Regular;
             if ((format == eTextFormat.Bold) || (format == eTextFormat.BoldShadow) || (format == eTextFormat.BoldGlow))

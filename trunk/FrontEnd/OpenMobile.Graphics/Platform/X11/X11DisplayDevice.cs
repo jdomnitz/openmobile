@@ -242,9 +242,6 @@ namespace OpenMobile.Platform.X11
             public static extern bool XineramaQueryExtension(IntPtr dpy, out int event_basep, out int error_basep);
 
             [DllImport(Xinerama)]
-            public static extern int XineramaQueryVersion(IntPtr dpy, out int major_versionp, out int minor_versionp);
-
-            [DllImport(Xinerama)]
             public static extern bool XineramaIsActive(IntPtr dpy);
 
             [DllImport(Xinerama)]

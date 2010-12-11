@@ -634,8 +634,13 @@ namespace OMMediaDB
         }
         public bool setRating(mediaInfo info)
         {
-            //TODO
-            return false;
+            if (con == null)
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
+            if (con.State != ConnectionState.Open)
+                con.Open();
+            SqliteCommand command = con.CreateCommand();
+            command.CommandText = "UPDATE tblSongs SET Rating='" + info.Rating.ToString() + "' WHERE URL='" + General.escape(info.Location) + "';";
+            return (command.ExecuteNonQuery() > 0);
         }
         public mediaInfo getNextMedia()
         {
@@ -708,7 +713,7 @@ namespace OMMediaDB
 
         public bool beginNaturalSearch(string query)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool beginGetPlaylist(string name)

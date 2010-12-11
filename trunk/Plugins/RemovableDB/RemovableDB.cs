@@ -517,7 +517,7 @@ namespace RemovableDB
         }
         public bool setRating(mediaInfo info)
         {
-            throw new NotImplementedException();
+            return false;
         }
         public mediaInfo getNextMedia()
         {
@@ -584,7 +584,7 @@ namespace RemovableDB
 
         public bool beginNaturalSearch(string query)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public bool beginGetPlaylist(string name)
