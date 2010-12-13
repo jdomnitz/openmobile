@@ -45,6 +45,8 @@ namespace OpenMobile
             #if DEBUG
             Debug.Print(message);
             #endif
+            if (e.Source == "OpenMobile")
+                return;
             int index = Core.pluginCollection.FindIndex(p => ((p!=null)&&(p.pluginName == e.Source)));
             IBasePlugin sample = null;
             if (index > -1)

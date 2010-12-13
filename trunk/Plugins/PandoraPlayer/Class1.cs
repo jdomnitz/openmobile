@@ -42,7 +42,7 @@ namespace PandoraPlayer
                     return false;
                 if (station.StartsWith("Pandora:") == false)
                     return false;
-                if (tuning == true)
+                if (tuning)
                     return false;
                 tuning = true;
                 new Thread(delegate()
@@ -181,16 +181,20 @@ namespace PandoraPlayer
         bool stationsAvailable;
         void client_StationsAvailable(object o, StringEventArgs e)
         {
+            initializing = false;
             stationsAvailable = true;
             raiseMediaEvent(eFunction.stationListUpdated, "");
         }
-
+        bool initializing = false;
         private void initialize()
         {
             client.username = Credentials.getCredential("Pandora Username");
             client.password = Credentials.getCredential("Pandora Password");
             if ((client.password != null) && (client.username != null))
+            {
+                initializing = true;
                 client.startWorker();
+            }
             else
                 error = true;
         }
@@ -218,9 +222,9 @@ namespace PandoraPlayer
                     {
                         Graphics g = Graphics.FromImage(currentSong.coverArt.image);
                         imageItem p = theHost.getSkinImage("Pandora");
-                        if (p != null)
+                        if (p.image != null)
                         {
-                            g.DrawImage(theHost.getSkinImage("Pandora").image.image, new Rectangle(currentSong.coverArt.Width - 30, currentSong.coverArt.Height - 30, 30, 30));
+                            g.DrawImage(p.image.image, new Rectangle(currentSong.coverArt.Width - 30, currentSong.coverArt.Height - 30, 30, 30));
                         }
                         g.Dispose();
                     }

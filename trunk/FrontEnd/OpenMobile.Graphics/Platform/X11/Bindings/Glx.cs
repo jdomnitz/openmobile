@@ -263,20 +263,6 @@ namespace OpenMobile.Platform.X11
 
         [DllImport(Library, EntryPoint = "glXIsDirect")]
         public static extern bool IsDirect(IntPtr dpy, IntPtr context);
-        
-        [DllImport(Library, EntryPoint = "glXQueryExtension")]
-        public static extern bool QueryExtension(IntPtr dpy, ref int errorBase, ref int eventBase);
-
-        [DllImport(Library, EntryPoint = "glXQueryExtensionsString")]
-        static extern IntPtr QueryExtensionsStringInternal(IntPtr dpy, int screen);
-
-        public static string QueryExtensionsString(IntPtr dpy, int screen)
-        {
-            return Marshal.PtrToStringAnsi(QueryExtensionsStringInternal(dpy, screen));
-        }
-
-        [DllImport(Library, EntryPoint = "glXCreateContext")]
-        public static extern IntPtr CreateContext(IntPtr dpy, IntPtr vis, IntPtr shareList, bool direct);
 
         [DllImport(Library, EntryPoint = "glXCreateContext")]
         public static extern IntPtr CreateContext(IntPtr dpy, ref XVisualInfo vis, IntPtr shareList, bool direct);
@@ -314,9 +300,6 @@ namespace OpenMobile.Platform.X11
         [DllImport(Library, EntryPoint = "glXChooseVisual")]
         public extern static IntPtr ChooseVisual(IntPtr dpy, int screen, IntPtr attriblist);
 
-        [DllImport(Library, EntryPoint = "glXChooseVisual")]
-        public extern static IntPtr ChooseVisual(IntPtr dpy, int screen, ref int attriblist);
-
         public static IntPtr ChooseVisual(IntPtr dpy, int screen, int[] attriblist)
         {
             unsafe
@@ -351,11 +334,6 @@ namespace OpenMobile.Platform.X11
         public partial class Arb
         {
             #region CreateContextAttribs
-
-            unsafe public static IntPtr CreateContextAttribs(IntPtr display, IntPtr fbconfig, IntPtr share_context, bool direct, int* attribs)
-            {
-                return Delegates.glXCreateContextAttribsARB(display, fbconfig, share_context, direct, attribs);
-            }
 
             public static IntPtr CreateContextAttribs(IntPtr display, IntPtr fbconfig, IntPtr share_context, bool direct, int[] attribs)
             {

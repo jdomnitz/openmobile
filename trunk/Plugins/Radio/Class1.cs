@@ -650,9 +650,12 @@ namespace OMRadio
         {
             if (StationListSource == StationListSources.Live)
             {
+                OMList list = (OMList)sender;
+                if (list.Tag == null)
+                    return;
                 System.Media.SystemSounds.Beep.Play();
                 Message(screen, "Preset saved", 1000);
-                stationInfo station = new stationInfo(((OMList)sender).SelectedItem.text, (string)((OMList)sender).SelectedItem.tag);
+                stationInfo station = new stationInfo(list.SelectedItem.text, (string)list.SelectedItem.tag);
                 SaveToPresets(theHost.instanceForScreen(screen), station);
             }
 
@@ -746,10 +749,12 @@ namespace OMRadio
         void List_RadioStations_OnClick(OMControl sender, int screen)
         {
             OMList List = (OMList)sender;
+            if (List.SelectedItem.tag == null)
+                return;
             for (int i = 0; i < theHost.ScreenCount; i++)
-                ((OMLabel)manager[i]["Radio_StationName"]).Text = "Tuning . . .";
-            if (List.SelectedItem.tag != null)
-                theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), (string)List.SelectedItem.tag);
+                if (theHost.instanceForScreen(i)==theHost.instanceForScreen(screen))
+                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "Tuning . . .";
+            theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), (string)List.SelectedItem.tag);
         }
 
         void Button_RadioAutoScan_OnClick(OMControl sender, int screen)
@@ -777,10 +782,15 @@ namespace OMRadio
             {
                 UpdateStationInfo(instance);
             }
-
-            if (function == eFunction.stationListUpdated)
+            else if (function == eFunction.stationListUpdated)
             {
                 UpdateStationList(instance);
+            }
+            else if (function == eFunction.unloadTunedContent)
+            {
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                    if (theHost.instanceForScreen(i) == instance)
+                        killStationInfo(i);
             }
         }
 
@@ -880,6 +890,24 @@ namespace OMRadio
 
             }
         }
+        private void killStationInfo(int screen)
+        {
+            ((OMLabel)manager[screen]["Radio_StationSignal"]).Text = string.Empty;
+            ((OMLabel)manager[screen]["Radio_StationGenre"]).Text = string.Empty;
+            ((OMLabel)manager[screen]["Radio_StationBitRate"]).Text = string.Empty;
+            ((OMLabel)manager[screen]["Radio_StationText"]).Text = string.Empty;
+            OMList list = (OMList)manager[screen]["List_RadioStations"];
+            if (list.Count > 0)
+            {
+                list.SelectedIndex = -1;
+                ((OMLabel)manager[screen]["Radio_StationName"]).Text = "Select a Station";
+            }
+            else
+                ((OMLabel)manager[screen]["Radio_StationName"]).Text = "Select source...";
+            ((OMLabel)manager[screen]["Radio_Status"]).Text = string.Empty;
+            ((OMLabel)manager[screen]["Radio_Band"]).Text = string.Empty;
+            ((OMLabel)manager[screen]["Radio_StationHD"]).Text = string.Empty;
+        }
         private bool UpdateStationList(int instance)
         {
             object o = new object();
@@ -921,9 +949,15 @@ namespace OMRadio
                         LoadPresets(instance);
                         Stations = Presets.ToArray();
                     }
-
-                    foreach (stationInfo station in Stations)
-                        List.Add(new OMListItem(station.stationName, (object)station.stationID));
+                    if (Stations.Length == 0)
+                    {
+                        List.Add(new OMListItem("Loading . . ."));
+                    }
+                    else
+                    {
+                        foreach (stationInfo station in Stations)
+                            List.Add(new OMListItem(station.stationName, (object)station.stationID));
+                    }
                 }
             }
             return true;

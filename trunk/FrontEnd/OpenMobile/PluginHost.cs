@@ -187,20 +187,16 @@ namespace OpenMobile
         private static bool refreshDevices()
         {
             string[] devs = new string[0];
-            try
+            foreach (IBasePlugin player in Core.pluginCollection.FindAll(p => typeof(IAVPlayer).IsInstanceOfType(p) == true))
             {
-                foreach (IBasePlugin player in Core.pluginCollection.FindAll(p => typeof(IAVPlayer).IsInstanceOfType(p) == true))
+                try
                 {
-                    try
-                    {
-                        devs = ((IAVPlayer)player).OutputDevices;
-                    }
-                    catch (Exception) { }
-                    if (devs.Length == 0)
-                        continue;
+                    devs = ((IAVPlayer)player).OutputDevices;
                 }
+                catch (Exception) { }
+                if (devs.Length == 0)
+                    continue;
             }
-            catch (NullReferenceException e) { }
             if (devs.Length > 0)
             {
                 devices = devs;
@@ -983,6 +979,13 @@ namespace OpenMobile
                     if (int.TryParse(arg, out ret))
                     {
                         Core.RenderingWindows[ret].WindowState = WindowState.Minimized;
+                        return true;
+                    }
+                    return false;
+                case eFunction.loadPlugin:
+                    if (Core.loadPlugin(arg))
+                    {
+                        raiseSystemEvent(eFunction.loadPlugin, arg, "", "");
                         return true;
                     }
                     return false;
