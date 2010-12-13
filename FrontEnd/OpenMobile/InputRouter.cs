@@ -206,8 +206,12 @@ namespace OpenMobile
 			if (e.Screen == -1) {
 				for (int i = 0; i < Core.RenderingWindows.Count; i++)
 					Core.RenderingWindows[i].RenderingWindow_KeyUp (sender, e);
-			} else if (e.Screen < Core.RenderingWindows.Count)
-				Core.RenderingWindows[e.Screen].RenderingWindow_KeyUp (sender, e);
+            }
+            else if (e.Screen < Core.RenderingWindows.Count)
+            {
+                if (Core.RenderingWindows[e.Screen].WindowState != WindowState.Minimized)
+                    Core.RenderingWindows[e.Screen].RenderingWindow_KeyUp(sender, e);
+            }
 		}
 		static internal void raiseHighlightChanged (OMControl sender, int screen)
 		{
@@ -217,11 +221,13 @@ namespace OpenMobile
 		public static void SourceDown (object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
 		{
 			KeyboardDevice dev = (KeyboardDevice)sender;
+            #if LINUX
 			if (Configuration.RunningOnLinux)
 			{
 				if ((e.Key==Key.VolumeUp)||(e.Key==Key.VolumeDown)||(e.Key==Key.Mute))
 					Core.theHost.hal.snd("-1|Keyboard|VolumeChange");
 			}
+            #endif
 			for (int i = 0; i < deviceMapK.Length; i++) {
 				e.Screen = i;
 				if (deviceMapK[i] == dev.Instance)
@@ -233,11 +239,16 @@ namespace OpenMobile
 			if (Core.theHost.raiseKeyPressEvent (eKeypressType.KeyDown, e) == true)
 				return;
 			//If an app handles it first don't show the UI
-			if (e.Screen == -1) {
-				for (int i = 0; i < Core.RenderingWindows.Count; i++)
-					Core.RenderingWindows[i].RenderingWindow_KeyDown (sender, e);
-			} else
-				Core.RenderingWindows[e.Screen].RenderingWindow_KeyDown (sender, e);
+            if (e.Screen == -1)
+            {
+                for (int i = 0; i < Core.RenderingWindows.Count; i++)
+                    Core.RenderingWindows[i].RenderingWindow_KeyDown(sender, e);
+            }
+            else
+            {
+                if (Core.RenderingWindows[e.Screen].WindowState!=WindowState.Minimized)
+                    Core.RenderingWindows[e.Screen].RenderingWindow_KeyDown(sender, e);
+            }
 		}
 		public static bool SendKeyUp (int screen, string Key)
 		{

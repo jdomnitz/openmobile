@@ -137,7 +137,7 @@ namespace OpenMobile.Platform.Windows
             Debug.WriteLine("Retrieving PFD pixel formats... ");
             PixelFormatDescriptor pfd = new PixelFormatDescriptor();
             pfd.Size = API.PixelFormatDescriptorSize;
-            pfd.Version = API.PixelFormatDescriptorVersion;
+            pfd.Version = 1;
             pfd.Flags =
                 PixelFormatDescriptorFlags.SUPPORT_OPENGL |
                 PixelFormatDescriptorFlags.DRAW_TO_WINDOW;

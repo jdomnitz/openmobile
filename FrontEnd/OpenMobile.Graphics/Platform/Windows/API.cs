@@ -73,13 +73,11 @@ namespace OpenMobile.Platform.Windows
             RawInputDeviceSize = Marshal.SizeOf(typeof(RawInputDevice));
             RawInputDeviceListSize = Marshal.SizeOf(typeof(RawInputDeviceList));
             RawInputDeviceInfoSize = Marshal.SizeOf(typeof(RawInputDeviceInfo));
-            PixelFormatDescriptorVersion = 1;
             PixelFormatDescriptorSize = (short)Marshal.SizeOf(typeof(PixelFormatDescriptor));
             WindowInfoSize = Marshal.SizeOf(typeof(WindowInfo));
         }
 
         internal static readonly short PixelFormatDescriptorSize;
-        internal static readonly short PixelFormatDescriptorVersion;
         internal static readonly int RawInputSize;
         internal static readonly int RawInputDeviceSize;
         internal static readonly int RawInputHeaderSize;

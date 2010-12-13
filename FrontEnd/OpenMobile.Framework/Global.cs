@@ -997,6 +997,12 @@ namespace OpenMobile
         /// </summary>
         scanBand = 83,
         /// <summary>
+        /// Load a plugin from the given path
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Path</para>
+        /// </summary>
+        loadPlugin=84,
+        /// <summary>
         /// A gesture has been recognized
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen</para>

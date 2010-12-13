@@ -112,8 +112,14 @@ namespace OpenMobile
                 try
                 {
                     loadAndCheck(file);
-                }catch(Exception)
-                {}
+                }catch(Exception e)
+                {
+                    string ex = spewException(e);
+                    theHost.sendMessage("OMDebug", "Plugin Loader", ex);
+                    #if DEBUG
+                    Debug.Print(ex);
+                    #endif
+                }
             }
             foreach (string file in Directory.GetFiles(theHost.SkinPath, "*.dll"))
             {
@@ -121,8 +127,14 @@ namespace OpenMobile
                 {
                     loadAndCheck(file);
                 }
-                catch (Exception)
-                { }
+                catch (Exception e)
+                {
+                    string ex = spewException(e);
+                    theHost.sendMessage("OMDebug", "Plugin Loader", ex);
+                    #if DEBUG
+                    Debug.Print(ex);
+                    #endif
+                }
             }
         }
         private static void loadAndCheck(string file)
@@ -324,6 +336,30 @@ namespace OpenMobile
                     pluginCollection[i].Dispose();
             InputRouter.Dispose();
             Environment.Exit(0); //Force
+        }
+
+        internal static bool loadPlugin(string arg)
+        {
+            int count = pluginCollection.Count;
+            loadAndCheck(arg);
+            if (pluginCollection.Count == count + 1)
+            {
+                eLoadStatus status;
+                try
+                {
+                    status = pluginCollection[count].initialize(theHost);
+                    if (status == eLoadStatus.LoadSuccessful)
+                        return true;
+                }
+                catch (Exception e)
+                {
+                    string ex = spewException(e);
+                    theHost.sendMessage("OMDebug", "Plugin Manager", ex);
+                    Debug.Print(ex);
+                }
+                pluginCollection.RemoveAt(count);
+            }
+            return false;
         }
     }
 }
