@@ -26,6 +26,7 @@ using OpenMobile.Data;
 using OpenMobile.Framework;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
+using OpenMobile.Threading;
 
 namespace OMRadio
 {
@@ -73,8 +74,7 @@ namespace OMRadio
                             for (int i = 0; i < theHost.ScreenCount; i++)
                                 ((OMLabel)manager[i]["Radio_StationName"]).Text = "Loading " + Source;
 
-                            Thread th = new Thread(AutoLoadSource);
-                            th.Start(new string[] { screen.ToString(), Source });
+                            SafeThread.Asynchronous(delegate(){AutoLoadSource(screen,Source);},theHost);
                         }
                     }
                 }
@@ -167,12 +167,8 @@ namespace OMRadio
 
         }
 
-        private void AutoLoadSource(object data)
+        private void AutoLoadSource(int screen,string Source)
         {
-            string[] Data = (string[])data;
-            int screen = int.Parse(Data[0]);
-            string Source = Data[1];
-
             if (theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), Source))
                 UpdateStationList(theHost.instanceForScreen(screen));
             else

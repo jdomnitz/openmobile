@@ -248,7 +248,6 @@ namespace OpenMobile
         {
             EnsureUndisposed();
             Initialize();
-            Visible = true;   // Make sure the GameWindow is visible.
             OnLoadInternal(EventArgs.Empty);
             MakeCurrent();
             OnResize(EventArgs.Empty);

@@ -202,7 +202,7 @@ namespace OpenMobile
 		{
 			if (Core.theHost.raiseKeyPressEvent (eKeypressType.KeyUp, e) == true)
 				return;
-			//If an app handles it first don't show the UI
+			//If an app handles it first don't tell the UI
 			if (e.Screen == -1) {
 				for (int i = 0; i < Core.RenderingWindows.Count; i++)
 					Core.RenderingWindows[i].RenderingWindow_KeyUp (sender, e);
@@ -238,7 +238,7 @@ namespace OpenMobile
 		{
 			if (Core.theHost.raiseKeyPressEvent (eKeypressType.KeyDown, e) == true)
 				return;
-			//If an app handles it first don't show the UI
+			//If an app handles it first don't tell the UI
             if (e.Screen == -1)
             {
                 for (int i = 0; i < Core.RenderingWindows.Count; i++)

@@ -902,6 +902,7 @@ namespace OMPlayer
                     }
                     else if (MFMediaType.Video == guidMajorType)
                     {
+                        OnMediaEvent(eFunction.VideoPlaybackStarting, instance, "");
                         // Create the video renderer.
                         IntPtr rw = (IntPtr)VistaPlayer.theHost.UIHandle(getFirstScreen(instance));
                         OpenMobile.Platform.Windows.Functions.SetParent(drain, rw);
@@ -1141,7 +1142,7 @@ namespace OMPlayer
                     typeof(IMFVideoDisplayControl).GUID,
                     out o
                     );
-                if (hr==S_Ok)
+                if (hr == S_Ok)
                 {
                     isAudioOnly = false;
                     m_pVideoDisplay = o as IMFVideoDisplayControl;

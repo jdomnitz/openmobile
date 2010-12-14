@@ -18,15 +18,15 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
+using Client;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
-using Client;
 using OpenMobile;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
-using System.Diagnostics;
+using OpenMobile.Threading;
 
 namespace PandoraPlayer
 {
@@ -45,7 +45,7 @@ namespace PandoraPlayer
                 if (tuning)
                     return false;
                 tuning = true;
-                new Thread(delegate()
+                SafeThread.Asynchronous(delegate()
                 {
                     for (int i = 0; i < 100; i++)
                         if ((!loggedIn) || (stationsAvailable))
@@ -53,7 +53,7 @@ namespace PandoraPlayer
                     station = station.Substring(8);
                     client.ChangeStation(station);
                     client.GetPlaylist();
-                }).Start();
+                },theHost);
                 return true;
             }
         }
@@ -176,7 +176,6 @@ namespace PandoraPlayer
         {
             if (theHost != null)
                 theHost.sendMessage("OMDebug", "Pandora", e.Value);
-            Debug.Print(e.Value);
         }
         bool stationsAvailable;
         void client_StationsAvailable(object o, StringEventArgs e)
