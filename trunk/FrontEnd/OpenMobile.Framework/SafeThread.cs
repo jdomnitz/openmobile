@@ -38,6 +38,11 @@ namespace OpenMobile.Threading
         //  1 = Sleeping
         static IPluginHost theHost;
         static int availableThreads;
+        static int maxThreads;
+        static SafeThread()
+        {
+            maxThreads = 25 * Environment.ProcessorCount;
+        }
         private class ThreadState
         {
             public EventWaitHandle waitHandle;
@@ -85,27 +90,27 @@ namespace OpenMobile.Threading
         }
         private static void spawnThread()
         {
+            if (locks.Count >= maxThreads)
+                return; //max thread count
             Thread p = new Thread(() =>
             {
+                Function f;
                 int id = Thread.CurrentThread.ManagedThreadId;
                 ThreadState s = locks[id];
                 availableThreads++;
-                while (locks[id].state >= 0)
+                while (s.state >= 0)
                 {
                     availableThreads--;
                     while (functions.Count > 0)
                     {
-                        Function f;
-                        lock (locks)
+                        try
                         {
-                            try
-                            {
-                                f = functions.Dequeue();
-                            }
-                            catch (InvalidOperationException)
-                            {
-                                return; //race condition
-                            }
+                            f = functions.Dequeue();
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            locks.Remove(id);
+                            return; //race condition
                         }
                         try
                         {
@@ -125,16 +130,12 @@ namespace OpenMobile.Threading
                     if ((functions.Count == 0) && (availableThreads > 1))
                     {
                         lock (locks)
-                        {
                             s.state--;
-                        }
                         availableThreads--;
                     }
                 }
                 lock (locks)
-                {
                     locks.Remove(id);
-                }
             });
             lock (locks)
                 locks.Add(p.ManagedThreadId, new ThreadState());

@@ -934,6 +934,7 @@ namespace OMPlayer
             CheckVisibility();
             if (!isAudioOnly)
             {
+                OnMediaEvent(eFunction.VideoPlaybackStarting, instance, "");
                 DsError.ThrowExceptionForHR(videoWindow.put_Owner((IntPtr)OMPlayer.theHost.UIHandle(getFirstScreen(instance))));
                 DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
                 DsError.ThrowExceptionForHR(Resize());

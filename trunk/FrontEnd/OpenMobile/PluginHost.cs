@@ -1339,6 +1339,7 @@ namespace OpenMobile
                 execute(eFunction.unloadAVPlayer, ret.ToString());
             else
                 execute(eFunction.loadAVPlayer, ret.ToString(), tmp.pluginName);
+            raiseMediaEvent(eFunction.playbackFailed, ret, arg2);
             return false;
         }
         public bool execute(eFunction function, string arg1, string arg2, string arg3)

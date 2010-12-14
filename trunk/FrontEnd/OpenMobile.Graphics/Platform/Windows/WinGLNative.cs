@@ -986,7 +986,6 @@ namespace OpenMobile.Platform.Windows
                 // To ensure maximized/minimized windows work correctly, reset state to normal,
                 // change the border, then go back to maximized/minimized.
                 WindowState state = WindowState;
-                //ResetWindowState();
 
                 WindowStyle style = WindowStyle.ClipChildren | WindowStyle.ClipSiblings;
 

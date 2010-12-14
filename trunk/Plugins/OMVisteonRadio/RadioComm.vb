@@ -22,6 +22,7 @@ Imports OpenMobile.Controls
 Imports OpenMobile.Plugin
 Imports OpenMobile.Framework
 Imports HDRadioComm
+Imports OpenMobile.Threading
 
 Public Class RadioComm
     Implements OpenMobile.Plugin.ITunedContent
@@ -44,16 +45,9 @@ Public Class RadioComm
     Public Event MediaEvent(ByVal [function] As OpenMobile.eFunction, ByVal instance As Integer, ByVal arg As String) Implements OpenMobile.Plugin.IPlayer.OnMediaEvent
 
     Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements OpenMobile.Plugin.IBasePlugin.initialize
-        Try
-            m_Host = host
-
-            Dim Thrd As New System.Threading.Thread(AddressOf BackgroundLoad)
-            Thrd.Start()
-
-            Return eLoadStatus.LoadSuccessful
-        Catch ex As Exception
-            m_Host.sendMessage("OMDebug", ex.Source, ex.ToString)
-        End Try
+        m_Host = host
+        SafeThread.Asynchronous(AddressOf BackgroundLoad, host)
+        Return eLoadStatus.LoadSuccessful
     End Function
 
     Private Sub BackgroundLoad()
@@ -351,8 +345,7 @@ Public Class RadioComm
             m_IsScanning = False
         Else
             m_IsScanning = True
-            Dim Thrd As New System.Threading.Thread(AddressOf Scan)
-            Thrd.Start()
+            SafeThread.Asynchronous(AddressOf Scan, m_Host)
         End If
         Return True
     End Function

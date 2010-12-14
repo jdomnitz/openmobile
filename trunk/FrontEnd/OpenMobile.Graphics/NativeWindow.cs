@@ -111,7 +111,25 @@ namespace OpenMobile
         /// </summary>
         public void ProcessEvents()
         {
-            ProcessEvents(false);
+            if (IsDisposed)
+                return;
+            if (!events)
+                Events = true;
+            implementation.ProcessEvents();
+            if (queuedInvokes.Count > 0)
+            {
+                for (int i = queuedInvokes.Count - 1; i >= 0; i--)
+                {
+                    Delegate d = queuedInvokes[i];
+                    try
+                    {
+                        if (d != null)
+                            d.Method.Invoke(d.Target, null);
+                    }
+                    catch (TargetInvocationException) { }
+                    queuedInvokes.RemoveAt(i);
+                }
+            }
         }
 
         #endregion
@@ -715,31 +733,6 @@ namespace OpenMobile
 
         #region ProcessEvents
         public List<Delegate> queuedInvokes = new List<Delegate>();
-        /// <summary>
-        /// Processes operating system events until the NativeWindow becomes idle.
-        /// </summary>
-        /// <param name="retainEvents">If true, the state of underlying system event propagation will be preserved, otherwise event propagation will be enabled if it has not been already.</param>
-        protected void ProcessEvents(bool retainEvents)
-        {
-            if (IsDisposed)
-                return;
-            if (!retainEvents && !events) Events = true;
-            implementation.ProcessEvents();
-            if (queuedInvokes.Count > 0)
-            {
-                for (int i = queuedInvokes.Count-1; i >=0; i--)
-                {
-                    Delegate d = queuedInvokes[i];
-                    try
-                    {
-                        if (d!=null)
-                            d.Method.Invoke(d.Target, null);
-                    }
-                    catch (TargetInvocationException) { }
-                    queuedInvokes.RemoveAt(i);
-                }
-            }
-        }
 
         #endregion
 
