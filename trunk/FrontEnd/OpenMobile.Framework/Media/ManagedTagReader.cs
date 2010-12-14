@@ -134,6 +134,12 @@ namespace OpenMobile.Media
                 return IconExtractor.GetFileIcon(path, size);
             }
             #endif
+			#if LINUX
+			if(Configuration.RunningOnLinux)
+			{
+				return GnomeIcon.GetFileIcon(path);
+			}
+			#endif
             return null;
         }
         private static string cacheArtist;
