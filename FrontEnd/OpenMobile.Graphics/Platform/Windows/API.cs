@@ -674,7 +674,10 @@ namespace OpenMobile.Platform.Windows
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern LONG ChangeDisplaySettingsEx([MarshalAs(UnmanagedType.LPTStr)] LPCTSTR lpszDeviceName,
-            LPDEVMODE lpDevMode, HWND hwnd, int dwflags, LPVOID lParam);
+            LPDEVMODE lpDevMode, HWND hwnd, int dwflags, _VIDEOPARAMETERS lParam);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern LONG ChangeDisplaySettingsEx([MarshalAs(UnmanagedType.LPTStr)] LPCTSTR lpszDeviceName,
+            LPDEVMODE lpDevMode, HWND hwnd, int dwflags, IntPtr lParam);
 
         #endregion
 
@@ -1377,6 +1380,34 @@ namespace OpenMobile.Platform.Windows
         internal int PanningHeight;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public class _VIDEOPARAMETERS
+    {
+        public Guid guid;
+        uint dwOffset;
+        public uint dwCommand;
+        public uint dwFlags;
+        uint dwMode;
+        uint dwTVStandard;
+        uint dwAvailableModes;
+        uint dwAvailableTVStandard;
+        uint dwFlickerFilter;
+        uint dwOverScanX;
+        uint dwOverScanY;
+        uint dwMaxUnscaledX;
+        uint dwMaxUnscaledY;
+        uint dwPositionX;
+        uint dwPositionY;
+        public uint dwBrightness;
+        uint dwContrast;
+        uint dwCPType;
+        uint dwCPCommand;
+        uint dwCPStandard;
+        uint dwCPKey;
+        uint bCP_APSTriggerBits;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        public byte[] bOEMCopyProtection;
+    }
     #endregion DeviceMode class
 
     #region DisplayDevice
