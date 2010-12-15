@@ -1260,8 +1260,11 @@ namespace OpenMobile
                     {
                         if ((ret < 0) || (ret >= screenCount))
                             return false;
-                        if (int.TryParse(arg2, out ret) == false)
+                        int ret2;
+                        if (int.TryParse(arg2, out ret2) == false)
                             return false;
+                        if ((ret2 == 0) && ((Environment.OSVersion.Version.Major < 6)||ret>0))
+                            Core.RenderingWindows[ret].fadeOut();
                         hal.snd("40|" + arg1 + "|" + arg2);
                         return true;
                     }

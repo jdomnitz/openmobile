@@ -79,6 +79,7 @@ namespace TagLib.Mpeg4 {
 		public static readonly ReadOnlyByteVector Stbl = "stbl";
 		public static readonly ReadOnlyByteVector Stco = "stco";
 		public static readonly ReadOnlyByteVector Stsd = "stsd";
+        public static readonly ReadOnlyByteVector Text = "text";
 		public static readonly ReadOnlyByteVector Tmpo = "tmpo";
 		public static readonly ReadOnlyByteVector Trak = "trak";
 		public static readonly ReadOnlyByteVector Trkn = "trkn";

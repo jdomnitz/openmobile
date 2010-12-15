@@ -53,7 +53,7 @@ namespace OpenMobile.Media
             catch (UnsupportedFormatException)
             {
                 mediaInfo i = new mediaInfo(filename);
-                i.Name = Path.GetFileNameWithoutExtension(filename);
+                i.Name = Path.GetFileNameWithoutExtension(filename).Replace('_',' ');
                 return i;
             }
             catch (Exception) {

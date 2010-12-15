@@ -1353,7 +1353,7 @@ namespace OpenMobile.Platform.Windows
         //internal short DefaultSource;
         //internal short PrintQuality;
 
-        internal POINT Position;
+        public POINT Position;
         internal DWORD DisplayOrientation;
         internal DWORD DisplayFixedOutput;
 
@@ -1419,13 +1419,13 @@ namespace OpenMobile.Platform.Windows
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     public class WindowsDisplayDevice
     {
-        internal WindowsDisplayDevice()
+        public WindowsDisplayDevice()
         {
             size = (short)Marshal.SizeOf(this);
         }
         readonly DWORD size;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        internal string DeviceName;
+        public string DeviceName;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         internal string DeviceString;
         internal DisplayDeviceStateFlags StateFlags;    // DWORD
@@ -3317,23 +3317,18 @@ namespace OpenMobile.Platform.Windows
     [StructLayout(LayoutKind.Sequential)]
     public struct POINT
     {
-        internal int X;
-        internal int Y;
+        public int X;
+        public int Y;
 
-        internal POINT(int x, int y)
+        public POINT(int x, int y)
         {
             this.X = x;
             this.Y = y;
         }
 
-        internal Point ToPoint()
+        public Point ToPoint()
         {
             return new Point(X, Y);
-        }
-
-        public override string ToString()
-        {
-            return "Point {" + X.ToString() + ", " + Y.ToString() + ")";
         }
     }
 
