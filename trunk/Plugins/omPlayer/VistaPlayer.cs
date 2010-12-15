@@ -271,6 +271,8 @@ namespace OMPlayer
                             checkInstance(k);
                             player[k].currentVolume = 0;
                             string lastUrl = setting.getSetting("Music.Instance" + k.ToString() + ".LastPlayingURL");
+                            if (lastUrl.Length == 0)
+                                return;
                             play(k, lastUrl, eMediaType.Local);
                             theHost.execute(eFunction.setPlaylistPosition, k.ToString(), lastUrl);
                             player[k].currentVolume = 100;
@@ -384,13 +386,26 @@ namespace OMPlayer
             checkInstance(instance);
             if (player[instance].m_pVideoDisplay == null)
                 return false;
-            bool currentlyVisible=OpenMobile.Platform.Windows.Functions.IsWindowVisible(player[instance].drain);
-            if (visible==currentlyVisible)
+            bool currentlyVisible = OpenMobile.Platform.Windows.Functions.IsWindowVisible(player[instance].drain);
+            if (visible == currentlyVisible)
                 return false;
             if (visible)
-                return OpenMobile.Platform.Windows.Functions.ShowWindow(player[instance].drain,OpenMobile.Platform.Windows.ShowWindowCommand.SHOW);
-            else
-                return OpenMobile.Platform.Windows.Functions.ShowWindow(player[instance].drain,OpenMobile.Platform.Windows.ShowWindowCommand.HIDE);
+            {
+                if (visible && !player[instance].fullscreen)
+                {
+                    player[instance].fullscreen = true;
+                    player[instance].Resize();
+                    return true;
+                }
+                OnMediaEvent(eFunction.showVideoWindow, instance, "");
+                return OpenMobile.Platform.Windows.Functions.ShowWindow(player[instance].drain, OpenMobile.Platform.Windows.ShowWindowCommand.SHOW);
+            }
+            else if (OpenMobile.Platform.Windows.Functions.ShowWindow(player[instance].drain, OpenMobile.Platform.Windows.ShowWindowCommand.HIDE))
+            {
+                OnMediaEvent(eFunction.hideVideoWindow, instance, "");
+                return true;
+            }
+            return false;
         }
         public bool play(int instance)
         {
@@ -409,6 +424,7 @@ namespace OMPlayer
                 case eMediaType.Smartphone:
                 case eMediaType.MMSUrl:
                 case eMediaType.DVD:
+                case eMediaType.AudioCD:
                     return false;
             }
             try
@@ -554,7 +570,7 @@ namespace OMPlayer
             public double pos = -1.0;
             private Thread t;
             private MessageProc sink;
-            private bool fullscreen = false;
+            public bool fullscreen = false;
             public IntPtr drain = IntPtr.Zero;
             private delegate bool PositionCallback(float seconds);
             private delegate bool SpeedCallback(float rate);
@@ -609,30 +625,18 @@ namespace OMPlayer
                         return false;
                 }
                 pos = 0;
-                if (url.EndsWith(".cda") == true)
-                {
-                    nowPlaying = CDDB.getSongInfo(theHost, url);
-                    if (nowPlaying == null)
-                        nowPlaying = new mediaInfo();
-                    if (nowPlaying.coverArt == null)
-                        nowPlaying.coverArt = theHost.getSkinImage("Discs|AudioCD").image;
-                    nowPlaying.Type = eMediaType.AudioCD;
-                }
-                else
-                {
-                    nowPlaying = TagReader.getInfo(url);
-                    if (nowPlaying == null)
-                        nowPlaying = new mediaInfo(url);
-                    nowPlaying.Type = eMediaType.Local;
-                    if (nowPlaying.coverArt == null)
-                        nowPlaying.coverArt = TagReader.getCoverFromDB(nowPlaying.Artist, nowPlaying.Album, theHost);
-                    if (nowPlaying.coverArt == null)
-                        nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
-                    if (nowPlaying.coverArt == null)
-                        nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
-                    if (nowPlaying.Length== 0)
-                        nowPlaying.Length = (int)streamDuration;
-                }
+                nowPlaying = TagReader.getInfo(url);
+                if (nowPlaying == null)
+                    nowPlaying = new mediaInfo(url);
+                nowPlaying.Type = eMediaType.Local;
+                if (nowPlaying.coverArt == null)
+                    nowPlaying.coverArt = TagReader.getCoverFromDB(nowPlaying.Artist, nowPlaying.Album, theHost);
+                if (nowPlaying.coverArt == null)
+                    nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
+                if (nowPlaying.coverArt == null)
+                    nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
+                if (nowPlaying.Length== 0)
+                    nowPlaying.Length = (int)streamDuration;
                 OnMediaEvent(eFunction.Play, instance, url);
                 if (t == null)
                 {
@@ -658,9 +662,7 @@ namespace OMPlayer
                     if (m_pVideoDisplay != null)
                         m_pVideoDisplay.SetVideoWindow(IntPtr.Zero);
                     sink.Hide();
-                    for (int i = 0; i < theHost.ScreenCount; i++)
-                        if (theHost.instanceForScreen(i) == this.instance)
-                            theHost.sendMessage("UI", "OMPlayer2", "HideMediaControls" + i.ToString());
+                    OnMediaEvent(eFunction.hideVideoWindow, instance, "");
                 }
                 CloseSession();
                 currentState = ePlayerStatus.Stopped;
@@ -902,7 +904,7 @@ namespace OMPlayer
                     }
                     else if (MFMediaType.Video == guidMajorType)
                     {
-                        OnMediaEvent(eFunction.VideoPlaybackStarting, instance, "");
+                        OnMediaEvent(eFunction.showVideoWindow, instance, "");
                         // Create the video renderer.
                         IntPtr rw = (IntPtr)VistaPlayer.theHost.UIHandle(getFirstScreen(instance));
                         OpenMobile.Platform.Windows.Functions.SetParent(drain, rw);
@@ -1125,12 +1127,6 @@ namespace OMPlayer
                     MFExtern.MFGetService(session, MFServices.MR_STREAM_VOLUME_SERVICE, typeof(IMFAudioStreamVolume).GUID, out o);
                     m_volume = o as IMFAudioStreamVolume;
                 }
-                if (!isAudioOnly)
-                {
-                    for (int i = 0; i < theHost.ScreenCount; i++)
-                        if (theHost.instanceForScreen(i) == this.instance)
-                            theHost.sendMessage("UI", "OMPlayer2", "ShowMediaControls" + i.ToString());
-                }
             }
 
             private void OnTopologyReady(IMFMediaEvent pEvent)
@@ -1332,10 +1328,8 @@ namespace OMPlayer
                 if (m.Msg == WM_LBUTTONUP)
                 {
                     OnClick();
-                    return;
                 }
-                else
-                    base.WndProc(ref m);
+                base.WndProc(ref m);
             }
         }
     }

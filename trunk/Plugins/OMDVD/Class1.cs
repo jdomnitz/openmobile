@@ -199,15 +199,18 @@ namespace OMDVD
             if (player[instance].videoWindow == null)
                 return false;
             if (visible == false)
-                return (player[instance].videoWindow.put_Visible(OABool.False) == 0);
-            else
-                if ((player[instance].currentState != ePlayerStatus.Ready) && (player[instance].currentState == ePlayerStatus.Stopped))
+            {
+                if (player[instance].videoWindow.put_Visible(OABool.False) == 0)
                 {
-                    for (int i = 0; i < theHost.ScreenCount; i++)
-                        if (theHost.instanceForScreen(i) == instance)
-                            theHost.sendMessage("UI", "OMPlayer", "ShowMediaControls" + i.ToString());
-                    return (player[instance].videoWindow.put_Visible(OABool.True) == 0);
+                    OnMediaEvent(eFunction.hideVideoWindow, instance, "");
+                    return true;
                 }
+            }
+            else if ((player[instance].currentState != ePlayerStatus.Ready) && (player[instance].currentState == ePlayerStatus.Stopped))
+            {
+                OnMediaEvent(eFunction.showVideoWindow, instance, "");
+                return (player[instance].videoWindow.put_Visible(OABool.True) == 0);
+            }
             return false;
         }
         public bool play(int instance)
@@ -517,6 +520,7 @@ namespace OMDVD
                 catch (Exception) { }
                 videoWindow.put_Visible(OABool.False);
                 videoWindow.put_Owner(IntPtr.Zero);
+                OnMediaEvent(eFunction.hideVideoWindow, instance, "");
                 OnMediaEvent(eFunction.Stop, instance, "");
                 return true;
             }
@@ -624,13 +628,17 @@ namespace OMDVD
                 int hr = dvdgraph.RenderDvdVideoVolume(path + "VIDEO_TS", DirectShowLib.Dvd.AMDvdGraphFlags.HWDecPrefer, out status);
                 if (hr != 0)
                     return false;
+                OnMediaEvent(eFunction.showVideoWindow, instance, "");
                 object o;
                 dvdgraph.GetDvdInterface(typeof(IVideoWindow).GUID, out o);
                 videoWindow = (IVideoWindow)o;
                 dvdgraph.GetDvdInterface(typeof(IAMLine21Decoder).GUID, out o);
-                hr = ((IAMLine21Decoder)o).SetServiceState(AMLine21CCState.Off);
-                if (hr != 0)
-                    return false;
+                if (o != null)
+                {
+                    hr = ((IAMLine21Decoder)o).SetServiceState(AMLine21CCState.Off);
+                    if (hr != 0)
+                        return false;
+                }
                 dvdgraph.GetDvdInterface(typeof(DirectShowLib.Dvd.IDvdControl2).GUID, out o);
                 dvdctrl = (IDvdControl2)o;
                 hr = dvdgraph.GetFiltergraph(out graphBuilder);

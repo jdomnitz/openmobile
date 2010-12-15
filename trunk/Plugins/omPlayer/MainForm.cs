@@ -238,12 +238,12 @@ namespace OMPlayer
 
     public bool incomingMessage(string message, string source)
     {
-        throw new NotImplementedException();
+        return false;
     }
 
     public bool incomingMessage<T>(string message, string source, ref T data)
     {
-        throw new NotImplementedException();
+        return false;
     }
     MessageProc sink;
     private delegate void CreateNewPlayer(int instance);
@@ -417,15 +417,24 @@ namespace OMPlayer
         if (player[instance].videoWindow == null)
             return false;
         if (visible == false)
-            return (player[instance].videoWindow.put_Visible(OABool.False)==0);
-        else
-            if ((player[instance].currentState != ePlayerStatus.Ready) && (player[instance].currentState != ePlayerStatus.Stopped))
+        {
+            if (player[instance].videoWindow.put_Visible(OABool.False) == 0)
             {
-                for (int i = 0; i < theHost.ScreenCount; i++)
-                    if (theHost.instanceForScreen(i) == instance)
-                        theHost.sendMessage("UI", "OMPlayer", "ShowMediaControls" + i.ToString());
-                return (player[instance].videoWindow.put_Visible(OABool.True) == 0);
+                OnMediaEvent(eFunction.hideVideoWindow, instance, "");
+                return true;
             }
+        }
+        else if ((player[instance].currentState != ePlayerStatus.Ready) && (player[instance].currentState != ePlayerStatus.Stopped))
+        {
+            if (!player[instance].fullscreen)
+            {
+                player[instance].fullscreen = true;
+                player[instance].Resize();
+                return true;
+            }
+            OnMediaEvent(eFunction.showVideoWindow, instance, "");
+            return (player[instance].videoWindow.put_Visible(OABool.True) == 0);
+        }
         return false;
     }
     public bool play(int instance)
@@ -630,7 +639,7 @@ namespace OMPlayer
         public IVideoWindow videoWindow = null;
         private Thread t;
         private MessageProc sink;
-        private bool fullscreen = false;
+        public bool fullscreen = false;
         IntPtr drain = IntPtr.Zero;
         private delegate bool PositionCallback(float seconds);
         private delegate int SpeedCallback(double rate);
@@ -813,9 +822,7 @@ namespace OMPlayer
             {
                 DsError.ThrowExceptionForHR(videoWindow.put_Visible(OABool.False));
                 DsError.ThrowExceptionForHR(videoWindow.put_Owner(IntPtr.Zero));
-                for (int i = 0; i < theHost.ScreenCount; i++)
-                    if (theHost.instanceForScreen(i) == this.instance)
-                        theHost.sendMessage("UI", "OMPlayer", "HideMediaControls" + i.ToString());
+                OnMediaEvent(eFunction.hideVideoWindow, instance, "");
             }
             isAudioOnly = true;
             return true;
@@ -934,14 +941,11 @@ namespace OMPlayer
             CheckVisibility();
             if (!isAudioOnly)
             {
-                OnMediaEvent(eFunction.VideoPlaybackStarting, instance, "");
+                OnMediaEvent(eFunction.showVideoWindow, instance, "");
                 DsError.ThrowExceptionForHR(videoWindow.put_Owner((IntPtr)OMPlayer.theHost.UIHandle(getFirstScreen(instance))));
                 DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
                 DsError.ThrowExceptionForHR(Resize());
                 DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(drain));
-                for(int i=0;i<theHost.ScreenCount;i++)
-                    if (theHost.instanceForScreen(i)==this.instance)
-                        theHost.sendMessage("UI", "OMPlayer", "ShowMediaControls"+i.ToString());
             }
             currentPlaybackRate = 1.0;
             if (mediaControl.Run()<0)

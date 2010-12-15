@@ -32,6 +32,7 @@ namespace OpenMobile
 {
     public partial class RenderingWindow : GameWindow
     {
+        public bool VideoPlaying;
         OMControl varHighlighted;
         private renderingParams rParam = new renderingParams();
         object painting = new object();

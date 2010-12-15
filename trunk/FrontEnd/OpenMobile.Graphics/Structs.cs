@@ -1747,6 +1747,14 @@ namespace OpenMobile.Graphics
         public int Y;
         public int Width;
         public int Height;
+        public bool Contains(Point p)
+        {
+            if ((p.X < X) || p.Y < Y)
+                return false;
+            if ((p.X > X + Width) || (p.Y > Y + Height))
+                return false;
+            return true;
+        }
 
         public int Left
         {

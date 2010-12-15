@@ -91,14 +91,20 @@ namespace OpenMobile
 
 		static internal void dev_Move (object sender, MouseMoveEventArgs e)
 		{
-			if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen) {
+			if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen) 
+            {
 				for (int i = 0; i < deviceMapM.Length; i++) {
-					if (deviceMapM[i] == (int)sender) {
+					if (deviceMapM[i] == (int)sender) 
+                    {
+                        if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.VideoPosition.Contains(e.Location))
+                            return;
 						Core.RenderingWindows[i].defaultMouse = (deviceMapM[i] == -1);
 						Core.RenderingWindows[i].RenderingWindow_MouseMove (i, e);
 					}
 				}
-			} else if ((int)sender < 0) {
+			} 
+            else if ((int)sender < 0) 
+            {
 				int i = ((int)sender + 1) * -1;
 				Core.RenderingWindows[i].defaultMouse = (deviceMapM[i] == -1);
 				Core.RenderingWindows[i].RenderingWindow_MouseMove (i, e);
@@ -108,9 +114,17 @@ namespace OpenMobile
 		static internal void dev_MouseClick (object sender, MouseButtonEventArgs e)
 		{
 			if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen) {
-				for (int i = 0; i < deviceMapM.Length; i++) {
-					if (deviceMapM[i] == (int)sender)
-						Core.RenderingWindows[i].RenderingWindow_MouseClick (i, e);
+				for (int i = 0; i < deviceMapM.Length; i++)
+                {
+                    if (deviceMapM[i] == (int)sender)
+                    {
+                        if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.VideoPosition.Contains(e.Location))
+                        {
+                            Core.theHost.execute(eFunction.showVideoWindow, Core.theHost.instanceForScreen(i).ToString());
+                            return;
+                        }
+                        Core.RenderingWindows[i].RenderingWindow_MouseClick(i, e);
+                    }
 				}
 			} else if ((int)sender < 0) {
 				int i = ((int)sender + 1) * -1;
@@ -133,12 +147,20 @@ namespace OpenMobile
 
 		static internal void dev_ButtonDown (object sender, MouseButtonEventArgs e)
 		{
-			if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen) {
-				for (int i = 0; i < deviceMapM.Length; i++) {
-					if (deviceMapM[i] == (int)sender)
-						Core.RenderingWindows[i].RenderingWindow_MouseDown (i, e);
+			if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen)
+            {
+				for (int i = 0; i < deviceMapM.Length; i++)
+                {
+                    if (deviceMapM[i] == (int)sender)
+                    {
+                        if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.VideoPosition.Contains(e.Location))
+                            return;
+                        Core.RenderingWindows[i].RenderingWindow_MouseDown(i, e);
+                    }
 				}
-			} else if ((int)sender < 0) {
+			}
+            else if ((int)sender < 0) 
+            {
 				int i = ((int)sender + 1) * -1;
 				Core.RenderingWindows[i].RenderingWindow_MouseDown (i, e);
 			}
