@@ -754,8 +754,10 @@ namespace TagLib.Ogg
 		///    current instance or an empty array if none are present.
 		/// </value>
 		/// <remarks>
-		///    <para>This property is implemented using the COVERART
-		///    field.</para>
+		///    <para>This property is implemented using the METADATA_BLOCK_PICTURE
+		///    field. However, the old COVERART field is still supported when reading
+		///    the tags but will be converted to the METADATA_BLOCK_PICTURE when
+		///    saving the tags.</para>
 		/// </remarks>
 		public override IPicture [] Pictures {
 			get {

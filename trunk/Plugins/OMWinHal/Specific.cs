@@ -40,7 +40,7 @@ namespace OMHal
         private static OperatingSystem os = System.Environment.OSVersion;
         const int SC_MONITORPOWER = 0xF170;
         const int WM_SYSCOMMAND = 0x0112;
-        private static bool monitorOn = true;
+        private static bool[] monitorOn = new bool[10]{true,true,true,true,true,true,true,true,true,true};
         /// <summary>
         /// Gets the system volume
         /// </summary>
@@ -280,22 +280,22 @@ namespace OMHal
             StringBuilder buf = new StringBuilder();
             mciSendString("SET CDAudio door open", buf, 127, IntPtr.Zero);
         }
-        internal static void SetBrightness(int instance, int value)
+        internal static void SetBrightness(int screen, int value)
         {
-            if ((!monitorOn) && (value != 0))
+            if ((!monitorOn[screen]) && (value != 0))
             {
-                monitorOn = true;
-                SwitchOnMonitor(instance);
+                monitorOn[screen] = true;
+                SwitchOnMonitor(screen);
             }
             if (value == 0)
             {
-                monitorOn = false;
-                SwitchOffMonitor(instance);
+                monitorOn[screen] = false;
+                SwitchOffMonitor(screen);
                 return;
             }
             if (value == 1) //round down
                 value = 0;
-            Set(instance,value);
+            Set(screen,value);
         }
         public delegate IntPtr getHandle();
         public static event getHandle OnHandleRequested;
@@ -313,12 +313,30 @@ namespace OMHal
                 OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), dev, IntPtr.Zero,0x4, null);
             }
         }
-        private static void SwitchOnMonitor(int instance)
+        private static void SwitchOnMonitor(int screen)
         {
-            if (instance == 0)
+            if (screen == 0)
                 SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, -1);
-            //else
-                //TODO
+            else
+            {
+                OpenMobile.Platform.Windows.DeviceMode dev = new OpenMobile.Platform.Windows.DeviceMode();
+                dev.DeviceName = screen.ToString();
+                dev.Position = new POINT(getSize(screen - 1), 0);
+                dev.Fields = OpenMobile.Platform.Windows.Constants.DM_POSITION;
+                OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), dev, IntPtr.Zero, 0x4, null);
+            }
+        }
+
+        private static int getSize(int screen)
+        {
+            WindowsDisplayDevice win_dev = new WindowsDisplayDevice();
+            Functions.EnumDisplayDevices(null, screen, win_dev, 0);
+            DeviceMode monitor_mode = new DeviceMode();
+            if (Functions.EnumDisplaySettingsEx(win_dev.DeviceName.ToString(), -1, monitor_mode, 0))
+            {
+                return monitor_mode.Position.X + monitor_mode.PelsWidth + 1;
+            }
+            return 0;
         }
         private static void Set(int screen, int targetBrightness)
         {

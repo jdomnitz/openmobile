@@ -297,6 +297,7 @@ namespace OpenMobile
 
         #region Overrides
         OImage identity;
+        int dimmer;
         protected override void OnRenderFrame(EventArgs e)
         {
             //g.ResetClip();
@@ -313,10 +314,24 @@ namespace OpenMobile
                     g.DrawImage(identity, 0, 0, 1000, 600);
                 }
             }
+            if (dimmer > 0)
+            {
+                g.FillRectangle(new Brush(Color.FromArgb(dimmer, Color.Black)),0,0,1000,600);
+            }
             SwapBuffers(); //show the new image before potentially lagging
             g.Finish();
         }
-
+        public void fadeOut()
+        {
+            for (dimmer = 1; dimmer < 250; dimmer+=5)
+            {
+                Invalidate();
+                Thread.Sleep(30);
+            }
+            dimmer = 255;
+            Invalidate();
+            SandboxedThread.Asynchronous(delegate() { Thread.Sleep(1000); dimmer = 0; });
+        }
         private void RenderGesture()
         {
             foreach (Point p in currentGesture)
