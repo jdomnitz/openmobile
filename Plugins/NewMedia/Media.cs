@@ -441,7 +441,7 @@ namespace NewMedia
                 if (l.SelectedIndex >= 0)
                 {
                     theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l.SelectedItem.tag.ToString());
-                    theHost.setPlaylist(new List<mediaInfo>() { new mediaInfo(l.SelectedItem.tag.ToString()) }, theHost.instanceForScreen(screen));
+                    theHost.setPlaylist(new List<mediaInfo>() { new mediaInfo(l.SelectedItem==null ? null : l.SelectedItem.tag.ToString()) }, theHost.instanceForScreen(screen));
                 }
                 else
                 {

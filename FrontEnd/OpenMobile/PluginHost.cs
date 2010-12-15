@@ -1479,11 +1479,14 @@ namespace OpenMobile
                 if (suspending)
                     return; //Already going
                 suspending = true;
+                if (OnPowerChange != null)
+                    OnPowerChange(e);
+                return;
             }
             else if (e == ePowerEvent.SystemResumed)
                 suspending = false;
             if (OnPowerChange != null)
-                OnPowerChange(e);
+                SandboxedThread.Asynchronous(delegate() { OnPowerChange(e); });
         }
         private void raiseNavigationEvent(eNavigationEvent type, string arg)
         {
@@ -1510,6 +1513,18 @@ namespace OpenMobile
             if (e == eFunction.nextMedia)
                 while ((!execute(eFunction.nextMedia, instance.ToString()))&&(queued[instance].Count>1))
                     Thread.Sleep(200);
+            else if (e == eFunction.showVideoWindow)
+            {
+                for(int i=0;i<screenCount;i++)
+                    if (instanceForScreen(i)==instance)
+                        Core.RenderingWindows[i].VideoPlaying = true;
+            }
+            else if (e == eFunction.hideVideoWindow)
+            {
+                for (int i = 0; i < screenCount; i++)
+                    if (instanceForScreen(i) == instance)
+                        Core.RenderingWindows[i].VideoPlaying = false;
+            }
         }
         public bool raiseKeyPressEvent(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
         {

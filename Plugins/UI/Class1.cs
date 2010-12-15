@@ -65,32 +65,6 @@ namespace OpenMobile
 
         public bool incomingMessage(string message, string source)
         {
-            if (message.StartsWith("ShowMediaControls"))
-            {
-                int screen;
-                if (int.TryParse(message.Substring(17),out screen)==true)
-                    if (manager[screen][2].Top == 533)
-                    {
-                        timerForward = false;
-                        manager[screen][28].Visible = false;
-                        manager[screen][29].Visible = false;
-                        moveMediaBar(screen);
-                    }
-                return true;
-            }
-            else if (message.StartsWith("HideMediaControls"))
-            {
-                int screen;
-                if (int.TryParse(message.Substring(17), out screen) == true)
-                    if (manager[screen][2].Top == 397)
-                    {
-                        timerForward = true;
-                        moveMediaBar(screen);
-                        manager[screen][28].Visible = true;
-                        manager[screen][29].Visible = true;
-                    }
-                return true;
-            }
             return false;
         }
         public bool incomingMessage<T>(string message,string source, ref T data)
@@ -1033,6 +1007,37 @@ namespace OpenMobile
                         }
                     }
                 }
+            }
+            else if (function == eFunction.hideVideoWindow)
+            {
+
+                for(int screen=0;screen<theHost.ScreenCount;screen++)
+                    if (theHost.instanceForScreen(screen) == instance)
+                    {
+                        if (manager[screen][2].Top == 397)
+                        {
+                            timerForward = true;
+                            moveMediaBar(screen);
+                            manager[screen][28].Visible = true;
+                            manager[screen][29].Visible = true;
+                        }
+                        return;
+                    }
+            }
+            else if (function == eFunction.showVideoWindow)
+            {
+                for(int screen=0;screen<theHost.ScreenCount;screen++)
+                    if (theHost.instanceForScreen(screen) == instance)
+                    {
+                        if (manager[screen][2].Top == 533)
+                        {
+                            timerForward = false;
+                            manager[screen][28].Visible = false;
+                            manager[screen][29].Visible = false;
+                            moveMediaBar(screen);
+                        }
+                        return;
+                    }
             }
         }
 

@@ -596,11 +596,12 @@ namespace OpenMobile
         TransitionFromPanel=8,
         //Media Events
         /// <summary>
-        /// Event raised just before video begins to play
+        /// Occurs when openMobile is unable to playback a media location
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
+        /// <para>Arg2: Location</para>
         /// </summary>
-        VideoPlaybackStarting=9,
+        playbackFailed = 9,
         /// <summary>
         /// Play the current media
         /// <para>---------------------------------------</para>
@@ -975,13 +976,6 @@ namespace OpenMobile
         /// <para>Arg2: Orientation ["Landscape"/"Portrait"]</para>
         /// </summary>
         screenOrientationChanged=72,
-        /// <summary>
-        /// Occurs when openMobile is unable to playback a media location
-        /// <para>---------------------------------------</para>
-        /// <para>Arg1: Instance Number</para>
-        /// <para>Arg2: Location</para>
-        /// </summary>
-        playbackFailed=73,
         /// <summary>
         /// Go back to the previous panel
         /// <para>---------------------------------------</para>
