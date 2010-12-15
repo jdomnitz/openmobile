@@ -23,9 +23,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using OpenMobile;
 using VistaAudio.CoreAudioApi;
-using System.Management;
 using WaveLib.AudioMixer;
-using System.Windows.Forms;
+using OpenMobile.Platform.Windows;
+using System.Collections.Generic;
 
 namespace OMHal
 {
@@ -247,6 +247,7 @@ namespace OMHal
                         Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(i).ToString(), i.ToString(), "");
                 }
                 catch (Exception) { }
+                initMonitors();
                 return (device!=null);
             }
         }
@@ -294,22 +295,22 @@ namespace OMHal
             }
             if (value == 1) //round down
                 value = 0;
-            Set(instance,(byte)(value * 2.55));
+            Set(instance,value);
         }
         public delegate IntPtr getHandle();
         public static event getHandle OnHandleRequested;
-        private static void SwitchOffMonitor(int instance)
+        private static void SwitchOffMonitor(int screen)
         {
-            if (instance == 0)
+            if (screen == 0)
                 SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, 2);
             else
             {
                 OpenMobile.Platform.Windows.DeviceMode dev = new OpenMobile.Platform.Windows.DeviceMode();
-                dev.DeviceName=instance.ToString();
+                dev.DeviceName=screen.ToString();
                 dev.PelsHeight=0;
                 dev.PelsWidth=0;
                 dev.Fields=OpenMobile.Platform.Windows.Constants.DM_POSITION;
-                OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (instance + 1).ToString(), dev, IntPtr.Zero,0x4, IntPtr.Zero);
+                OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), dev, IntPtr.Zero,0x4, null);
             }
         }
         private static void SwitchOnMonitor(int instance)
@@ -319,21 +320,113 @@ namespace OMHal
             //else
                 //TODO
         }
-        private static void Set(int instance, byte targetBrightness)
+        private static void Set(int screen, int targetBrightness)
         {
-            ManagementScope scope = new ManagementScope(@"root\WMI");
-            SelectQuery query = new SelectQuery("WmiMonitorBrightnessMethods");
-            using(ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query))
-            using (ManagementObjectCollection objects = searcher.Get())
+            if (os.Version.Major < 6)
             {
-                int i=0;
-                foreach(ManagementObject obj2 in objects)
+                if (screen > 0)
                 {
-                    if (i==instance)
-                        obj2.InvokeMethod("WmiSetBrightness", new object[] { uint.MaxValue, targetBrightness });
-                    i++;
+                    OpenMobile.Platform.Windows._VIDEOPARAMETERS par = new OpenMobile.Platform.Windows._VIDEOPARAMETERS();
+                    par.guid = new Guid("02C62061-1097-11d1-920F-00A024DF156E");
+                    par.dwCommand = 0x2;
+                    par.dwFlags = 0x0040;
+                    par.dwBrightness = (uint)targetBrightness;
+                    IntPtr vp = Marshal.AllocHGlobal(Marshal.SizeOf(par));
+                    try
+                    {
+                        Marshal.StructureToPtr(par, vp, false);
+                        OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), null, IntPtr.Zero, 0x20, vp);
+                    }
+                    finally
+                    {
+                        Marshal.FreeHGlobal(vp);
+                    }
+                }
+                else
+                {
+                    planB(screen, targetBrightness);
                 }
             }
+            else
+            {
+                uint min, current, max;
+                if (screen >= monitors.Count) screen = 0;
+                if ((monitors.Count == 0) || !GetMonitorBrightness(monitors[screen], out min, out current, out max))
+                {
+                    planB(screen, targetBrightness);
+                    return;
+                }
+                SetMonitorBrightness(monitors[screen], (uint)((targetBrightness / 100.0) * (max - min)) + min);
+            }
+        }
+
+        private static void planB(int screen, int brightness)
+        {
+            IntPtr dev = CreateFile(@"\\.\LCD", 0x80000000, 0x7, IntPtr.Zero, 0x3, 0, IntPtr.Zero);
+            try
+            {
+                BRIGHTNESS br = new BRIGHTNESS();
+                br.ucACBrightness = (byte)brightness;
+                br.ucDCBrightness = (byte)brightness;
+                IntPtr outbuf = new IntPtr();
+                int bytes;
+                DeviceIoControl(dev, 0x23049C, ref br, Marshal.SizeOf(br), outbuf, 0, out bytes, IntPtr.Zero);
+            }
+            finally
+            {
+                CloseHandle(dev);
+            }
+        }
+        public struct BRIGHTNESS
+        {
+            public byte ucDisplayPolicy;
+            public byte ucACBrightness;
+            public byte ucDCBrightness;
+        }
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool CloseHandle(IntPtr hObject);
+        [DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool DeviceIoControl(
+                IntPtr hDevice,
+                uint dwIoControlCode,
+                ref BRIGHTNESS InBuffer,
+                int nInBufferSize,
+                IntPtr OutBuffer,
+                int nOutBufferSize,
+                out int pBytesReturned,
+                IntPtr lpOverlapped);
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        public static extern IntPtr CreateFile(
+              string lpFileName,
+              uint dwDesiredAccess,
+              uint dwShareMode,
+              IntPtr SecurityAttributes,
+              uint dwCreationDisposition,
+              uint dwFlagsAndAttributes,
+              IntPtr hTemplateFile
+              );
+        static List<IntPtr> monitors = new List<IntPtr>();
+        delegate bool monitorAdded(IntPtr hmon, IntPtr arg2, IntPtr arg3, IntPtr arg4);
+        private static void initMonitors()
+        {
+            EnumDisplayMonitors(IntPtr.Zero,IntPtr.Zero,Added,IntPtr.Zero);
+        }
+
+        private static bool Added(IntPtr hmon, IntPtr arg2, IntPtr arg3, IntPtr arg4)
+        {
+            uint size;
+            if ((!GetNumberOfPhysicalMonitorsFromHMONITOR(hmon, out size))||(size==0))
+                return false;
+            Monitor[] mons = new Monitor[size];
+            if (!GetPhysicalMonitorsFromHMONITOR(hmon, size,mons))
+                return false;
+           // Marshal.PtrToStructure(monPtr, mons);
+            foreach (Monitor monitor in mons)
+            {
+                monitors.Add(monitor.hPhysicalMonitor);
+            }
+            bool success=DestroyPhysicalMonitors(size, mons);
+            return true;
         }
         private static void getPrivledge()
         {
@@ -366,7 +459,13 @@ namespace OMHal
             public long Luid;
             public int Attr;
         }
-
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct Monitor
+        {
+            public IntPtr hPhysicalMonitor;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string szPhysicalMonitorDescription;
+        }
         [DllImport("kernel32.dll", ExactSpelling = true)]
         internal static extern IntPtr GetCurrentProcess();
         [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
@@ -380,6 +479,16 @@ namespace OMHal
         ref TokPriv1Luid newst, int len, IntPtr prev, IntPtr relen);
         [DllImport("user32.dll", ExactSpelling = true, SetLastError = true)]
         internal static extern bool ExitWindowsEx(uint flg, uint rea);
+        [DllImport("dxva2.dll")]
+        static extern bool SetMonitorBrightness(IntPtr hMonitor,uint dwNewBrightness);
+        [DllImport("dxva2.dll",SetLastError=true)]
+        static extern bool GetMonitorBrightness(IntPtr hMonitor, out uint pdwMinimumBrightness, out uint pdwCurrentBrightness, out uint pdwMaximumBrightness);
+        [DllImport("dxva2.dll")]
+        static extern bool GetNumberOfPhysicalMonitorsFromHMONITOR(IntPtr hMonitor,out uint pdwNumberOfPhysicalMonitors);
+        [DllImport("dxva2.dll")]
+        static extern bool GetPhysicalMonitorsFromHMONITOR(IntPtr hMonitor,uint dwPhysicalMonitorArraySize,[Out] Monitor[] pPhysicalMonitorArray);
+        [DllImport("dxva2.dll")]
+        static extern bool DestroyPhysicalMonitors(uint dwPhysicalMonitorArraySize,Monitor[] pPhysicalMonitorArray);
 
         [DllImport("user32.dll")]
         private static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
@@ -391,6 +500,8 @@ namespace OMHal
         static extern bool IsPwrHibernateAllowed();
         [DllImport("powrprof.dll")]
         static extern bool IsPwrSuspendAllowed();
+        [DllImport("user32.dll")]
+        static extern bool EnumDisplayMonitors(IntPtr hdc,IntPtr lprcClip, monitorAdded lpfnEnum,IntPtr dwData);
 
         internal static void Hibernate()
         {
