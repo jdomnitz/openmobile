@@ -190,6 +190,12 @@ namespace OpenMobile.Framework
                         if (o == null)
                             return false;
                         PointF scale = (PointF)o;
+						IntPtr _atom_net_wm_state = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE", false);
+						IntPtr _atom_net_wm_state_maximized_horizontal = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_HORZ", false);
+                		IntPtr _atom_net_wm_state_maximized_vertical = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_VERT", false);
+						OpenMobile.Platform.X11.X11WindowInfo winInf=new OpenMobile.Platform.X11.X11WindowInfo(window,info);
+						OpenMobile.Platform.X11.Functions.SendNetWMMessage(winInf, _atom_net_wm_state, new IntPtr(0), _atom_net_wm_state_maximized_horizontal, _atom_net_wm_state_maximized_vertical);
+						OpenMobile.Platform.X11.Functions.XRaiseWindow(info.Display, window);
                         OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, window, (int)(position.Width * scale.X), (int)(position.Height * scale.Y));
                         OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, window, info.WindowHandle, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
                         OpenMobile.Platform.X11.Functions.XMoveWindow(info.Display, window, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
