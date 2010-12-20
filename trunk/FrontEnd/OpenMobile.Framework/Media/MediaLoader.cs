@@ -51,6 +51,8 @@ namespace OpenMobile.Media
                 if (!db.beginGetGenres())
                     return false;
                 mediaInfo info = db.getNextMedia();
+                if ((info!=null)&&(info.Genre.Length==0))
+                    info = db.getNextMedia();
                 while (info != null)
                 {
                     list.Add(info.Genre);
