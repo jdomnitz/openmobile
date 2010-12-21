@@ -59,9 +59,7 @@ namespace OpenMobile.Framework
                 extract.GetLocation(thePath, 1024, ref tmp1, ref _size, colorDepth, ref flags);
                 extract.Extract(ref bmp);
             }
-            catch (Exception ex)
-            {
-            }
+            catch (Exception){}
 
 
             //Free the global memory we allocated for the path string

@@ -40,7 +40,7 @@ namespace OpenMobile.Controls
             width = w;
             height = h;
         }
-        public imageItem Top
+        public new imageItem Top
         {
             set
             {

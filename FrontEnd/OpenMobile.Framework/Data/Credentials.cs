@@ -28,10 +28,23 @@ using OpenMobile.helperFunctions;
 
 namespace OpenMobile.Data
 {
+    /// <summary>
+    /// Stores secure user credentials
+    /// </summary>
     public static class Credentials
     {
         private static SqliteConnection con;
+        /// <summary>
+        /// Reserved
+        /// </summary>
+        /// <param name="pluginName"></param>
+        /// <param name="requestedAccess"></param>
+        /// <returns></returns>
         public delegate bool Authorization(string pluginName,string requestedAccess);
+        /// <summary>
+        /// Reserved
+        /// </summary>
+        [Browsable(false),EditorBrowsable(EditorBrowsableState.Never)]
         public static event Authorization OnAuthorizationRequested;
         private static void createDB()
         {
@@ -48,7 +61,7 @@ namespace OpenMobile.Data
         /// <summary>
         /// Used internally
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never),Browsable(false)]
         public static void Open()
         {
             try

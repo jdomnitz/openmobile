@@ -61,6 +61,10 @@ namespace OpenMobile.Controls
                 return containedControls.Find(p => p.Name == s);
             }
         }
+        /// <summary>
+        /// Add all controls from an existing panel
+        /// </summary>
+        /// <param name="source"></param>
         public void addRange(OMPanel source)
         {
             foreach (OMControl c in source.containedControls)
@@ -146,7 +150,15 @@ namespace OpenMobile.Controls
         {
             return containedControls.Find(p => p.Name == name);
         }
+        /// <summary>
+        /// The current mode of the panel (used for transitions)
+        /// </summary>
         public eModeType Mode = eModeType.Normal;
+        /// <summary>
+        /// Render the panel to the given graphics context
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
         public void Render(Graphics.Graphics g, renderingParams e)
         {
             float tmp = 1F;
@@ -171,8 +183,13 @@ namespace OpenMobile.Controls
                 if (containedControls[i].Visible)
                     containedControls[i].Render(g, e);
         }
+        /// <summary>
+        /// The panel priority (used to set panel layer)
+        /// </summary>
         public ePriority Priority=ePriority.Normal;
-
+        /// <summary>
+        /// If true, transitionFromAll does not effect this panel
+        /// </summary>
         public bool UIPanel;
         /// <summary>
         /// Removes the given control from this panel

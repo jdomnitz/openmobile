@@ -35,9 +35,21 @@ namespace OpenMobile.Controls
         /// Button Clicked
         /// </summary>
         public event userInteraction OnClick;
+        /// <summary>
+        /// Back color 1
+        /// </summary>
         protected Color backColor1=Color.Blue;
+        /// <summary>
+        /// Back color 2 (gradient)
+        /// </summary>
         protected Color backColor2=Color.DarkBlue;
+        /// <summary>
+        /// Border color
+        /// </summary>
         protected Color borderColor=Color.Black;
+        /// <summary>
+        /// Border width
+        /// </summary>
         protected float borderWidth=3F;
         /// <summary>
         /// Fires the buttons OnClick event
@@ -51,6 +63,9 @@ namespace OpenMobile.Controls
             catch (Exception) { };//If no one has hooked the click event
         }
         private string title;
+        /// <summary>
+        /// The message box title
+        /// </summary>
         public string Title
         {
             set
@@ -66,6 +81,9 @@ namespace OpenMobile.Controls
             }
         }
         float letterHeight;
+        /// <summary>
+        /// The message text to display
+        /// </summary>
         public override string Text
         {
             get
@@ -100,12 +118,20 @@ namespace OpenMobile.Controls
                 return "Message Box";
             }
         }
-
+        /// <summary>
+        /// Creates a new OMMessage box
+        /// </summary>
         public OMMessageBox()
         {
             textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
         }
-
+        /// <summary>
+        /// Creates a new OMMessageBox
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
         public OMMessageBox(int left,int top,int width,int height)
         {
             Left = left;

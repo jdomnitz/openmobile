@@ -42,6 +42,9 @@ namespace OpenMobile.Controls
         /// Occurs when the list index changes
         /// </summary>
         public event IndexChangedDelegate SelectedIndexChanged;
+        /// <summary>
+        /// Occurs when the highlighted item changes
+        /// </summary>
         public event IndexChangedDelegate HighlightedIndexChanged;
         protected int selectedIndex = -1;
         protected List<OMListItem> items;
@@ -89,6 +92,12 @@ namespace OpenMobile.Controls
                 index = -1;
             Select(index, true, this.containingScreen());
         }
+        /// <summary>
+        /// Select an item in the list
+        /// </summary>
+        /// <param name="index">List index to select</param>
+        /// <param name="moveToSelectedItem">Scroll list so selected item is visible</param>
+        /// <param name="screen"></param>
         public void Select(int index, bool moveToSelectedItem, int screen)
         {
             if ((index < -1) || (index >= items.Count))
@@ -178,10 +187,16 @@ namespace OpenMobile.Controls
 
         private int targetWidth;
         private int targetHeight;
+        /// <summary>
+        /// Reserved
+        /// </summary>
         public int TargetWidth
         {
             set { targetWidth = value; }
         }
+        /// <summary>
+        /// Reserved
+        /// </summary>
         public int TargetHeight
         {
             set { targetHeight = value; }
@@ -232,7 +247,9 @@ namespace OpenMobile.Controls
                 return items.Count;
             }
         }
-
+        /// <summary>
+        /// The index of the currently selected item (-1 for none)
+        /// </summary>
         public int SelectedIndex
         {
             get
@@ -246,21 +263,29 @@ namespace OpenMobile.Controls
                 Select(value);
             }
         }
-
+        /// <summary>
+        /// The currently selected item (null for none)
+        /// </summary>
         public OMListItem SelectedItem
         {
 
             get
             {
+                if (selectedIndex < 0)
+                    return null;
                 return this[selectedIndex];
             }
         }
-
+        /// <summary>
+        /// The currently highlighted item (null for none)
+        /// </summary>
         public OMListItem HighlightedItem
         {
 
             get
             {
+                if (highlightedIndex < 0)
+                    return null;
                 return this[highlightedIndex];
             }
 
@@ -498,6 +523,9 @@ namespace OpenMobile.Controls
             set { selectedItemColor2 = value; }
         }
         private bool scrollbars;
+        /// <summary>
+        /// Display scrollbars
+        /// </summary>
         public bool Scrollbars
         {
             get { return scrollbars; }
@@ -814,7 +842,13 @@ namespace OpenMobile.Controls
         #endregion
 
         #region IMouse Members
-
+        /// <summary>
+        /// The mouse has been moved
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
         public virtual void MouseMove(int screen, MouseMoveEventArgs e, float WidthScale, float HeightScale)
         {
             if (listHeight > 0) //<-Just in case
@@ -880,6 +914,13 @@ namespace OpenMobile.Controls
                 SafeThread.Asynchronous(delegate() { HighlightedIndexChanged(this, this.containingScreen()); },null);
         }
         private int lastSelected = -1;
+        /// <summary>
+        /// The mouse has been pressed
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
         public virtual void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             throwtmr.Enabled = false;
@@ -891,7 +932,13 @@ namespace OpenMobile.Controls
             if (clickSelect)
                 mode = eModeType.Scrolling;
         }
-
+        /// <summary>
+        /// The mouse has been released
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
         public virtual void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             //
@@ -900,7 +947,12 @@ namespace OpenMobile.Controls
         #endregion
 
         #region IKeyboard Members
+
         bool focused=true;
+        /// <summary>
+        /// Set keyboard focus
+        /// </summary>
+        /// <param name="screen"></param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void KeyboardEnter(int screen)
         {
@@ -910,6 +962,10 @@ namespace OpenMobile.Controls
             if (selectedIndex == -1)
                 Select(0,false,screen);
         }
+        /// <summary>
+        /// Lose keyboard focus
+        /// </summary>
+        /// <param name="screen"></param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void KeyboardExit(int screen)
         {

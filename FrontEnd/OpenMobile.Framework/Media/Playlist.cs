@@ -325,6 +325,13 @@ namespace OpenMobile.Media
                 dbName = s.getSetting("Default.MusicDatabase");
             return readPlaylistFromDB(theHost, name, dbName);
         }
+        /// <summary>
+        /// Reads the given playlist from the database
+        /// </summary>
+        /// <param name="theHost"></param>
+        /// <param name="name"></param>
+        /// <param name="dbName"></param>
+        /// <returns></returns>
         public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name,string dbName)
         {
             object o=null;

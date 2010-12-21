@@ -9,8 +9,17 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMCheckbox : OMLabel, IClickable, IHighlightable
     {
+        /// <summary>
+        /// Occurs when the control is clicked
+        /// </summary>
         public event userInteraction OnClick;
+        /// <summary>
+        /// Is the checkbox checked
+        /// </summary>
         protected bool isChecked;
+        /// <summary>
+        /// The text color when highlighted
+        /// </summary>
         protected Color highlightColor=Color.Blue;
 
         /// <summary>

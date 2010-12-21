@@ -67,7 +67,13 @@ namespace OpenMobile.Controls
     {
         HomemadeTimer t;
         private int currentLetter;
+        /// <summary>
+        /// Only animate once
+        /// </summary>
         protected bool singleAnimation;
+        /// <summary>
+        /// the font to use for the effects
+        /// </summary>
         protected Font effectFont;
         /// <summary>
         /// A label used for rendering various text effects
@@ -256,6 +262,9 @@ namespace OpenMobile.Controls
                 textTexture = null;
             }
         }
+        /// <summary>
+        /// The text displayed in the label
+        /// </summary>
         public override string Text
         {
             get
@@ -458,7 +467,7 @@ namespace OpenMobile.Controls
             return (int)(rect.Right - (Font.Size / 4.5));
         }
     }
-    public sealed class HomemadeTimer : IDisposable
+    internal sealed class HomemadeTimer : IDisposable
     {
         public event ElapsedEventHandler Elapsed;
         public double Interval;

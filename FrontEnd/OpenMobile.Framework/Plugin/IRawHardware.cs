@@ -23,21 +23,57 @@ using System;
 using System.Collections.Generic;
 namespace OpenMobile.Plugin
 {
+    /// <summary>
+    /// The type of sensor
+    /// </summary>
     [Flags]
     public enum eSensorType
     {
+        /// <summary>
+        /// Unknown Sensor
+        /// </summary>
         Unknown=0,
+        /// <summary>
+        /// Device receives data from the PC
+        /// </summary>
         deviceReceivesData=1,
+        /// <summary>
+        /// Device supplies data to the PC
+        /// </summary>
         deviceSuppliesData=2,
+        /// <summary>
+        /// Reserved
+        /// </summary>
         Other=4,
+        /// <summary>
+        /// All types
+        /// </summary>
         All=0xFF
     }
+    /// <summary>
+    /// Represents a sensor
+    /// </summary>
     public struct Sensor
     {
+        /// <summary>
+        /// Sensor Name
+        /// </summary>
         public string Name;
+        /// <summary>
+        /// Sensor PID (masked so its globally unique)
+        /// </summary>
         public int PID;
+        /// <summary>
+        /// Sensor Type
+        /// </summary>
         public eSensorType Type;
 
+        /// <summary>
+        /// Creates a new sensor object
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="PID"></param>
+        /// <param name="Type"></param>
         public Sensor(string Name, int PID, eSensorType Type)
         {
             this.Name = Name;
@@ -75,25 +111,40 @@ namespace OpenMobile.Plugin
         }
         
         private int myMask;
+        /// <summary>
+        /// Generates a new PID mask
+        /// </summary>
         protected void InitPIDMask()
         {
             myMask = generateMask();
         }
+        /// <summary>
+        /// Masks a PID using the previously generated mask
+        /// </summary>
+        /// <param name="PID"></param>
+        /// <returns></returns>
         protected int MaskPID(int PID)
         {
             return ApplyMask(PID, myMask);
         }
+        /// <summary>
+        /// Removes a PID mask
+        /// </summary>
+        /// <param name="maskedPID"></param>
+        /// <returns></returns>
         protected int UnmaskPID(int maskedPID)
         {
             return RemoveMask(maskedPID, myMask);
         }
-
+        /// <summary>
+        /// Checks if this plugin supported a PID
+        /// </summary>
+        /// <param name="PID"></param>
+        /// <returns></returns>
         public bool TestPID(int PID)
         {
             return CheckPID(PID, myMask);
         }
-
-        
         
         /// <summary>
         /// List available sensors of the given type
@@ -128,15 +179,56 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <returns></returns>
         public abstract string firmwareVersion { get; }
+        /// <summary>
+        /// Initializes the plugin
+        /// </summary>
+        /// <param name="host"></param>
+        /// <returns></returns>
         public abstract eLoadStatus initialize(IPluginHost host);
+        /// <summary>
+        /// Load a settings object for the plugin
+        /// </summary>
+        /// <returns></returns>
         public abstract Settings loadSettings();
+        /// <summary>
+        /// Authors Name
+        /// </summary>
         public abstract string authorName { get; }
+        /// <summary>
+        /// Authors Email
+        /// </summary>
         public abstract string authorEmail { get; }
+        /// <summary>
+        /// Plugin Name (must mathc filename)
+        /// </summary>
         public abstract string pluginName{get;}
+        /// <summary>
+        /// Plugin Version
+        /// </summary>
         public abstract float pluginVersion{get;}
+        /// <summary>
+        /// Plugin Description
+        /// </summary>
         public abstract string pluginDescription{get;}
+        /// <summary>
+        /// An inter-plugin message has been received
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public abstract bool incomingMessage(string message, string source);
+        /// <summary>
+        /// An inter-plugin message has been received
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="message"></param>
+        /// <param name="source"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public abstract bool incomingMessage<T>(string message, string source, ref T data);
+        /// <summary>
+        /// Clean up and dispose resources
+        /// </summary>
         public abstract void Dispose();
     }
 }

@@ -120,12 +120,17 @@ namespace OpenMobile.Data
             Direction = eDirection.NotSet;
         }
     }
-
+    /// <summary>
+    /// Stores traffic information
+    /// </summary>
     public class Traffic:IDisposable
     {
         private SqliteConnection con;
         //private SqliteDataReader asyncReader;
         private bool tableCreated;
+        /// <summary>
+        /// Stores traffic information
+        /// </summary>
         public Traffic()
         {
             con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
@@ -144,7 +149,11 @@ namespace OpenMobile.Data
                 return true;
             }
         }
-
+        /// <summary>
+        /// Writes a traffic item to the database
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public bool writeTraffic(TrafficItem item)
         {
             using (SqliteCommand cmd = new SqliteCommand(con))
@@ -189,15 +198,30 @@ namespace OpenMobile.Data
                 return false;
             }
         }
+        /// <summary>
+        /// Returns all traffic matching the given location
+        /// </summary>
+        /// <param name="location"></param>
+        /// <returns></returns>
         public List<TrafficItem> readTraffic(string location)
         {
             //TODO
             return new List<TrafficItem>();
         }
+        /// <summary>
+        /// Gets all traffic events within a certain area
+        /// </summary>
+        /// <param name="latitude">Latitude</param>
+        /// <param name="longitude">Longitude</param>
+        /// <param name="distance">Distance (KM)</param>
+        /// <returns></returns>
         public List<TrafficItem> readTraffic(float latitude, float longitude, float distance)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Cleans up all resources
+        /// </summary>
         public void Dispose()
         {
             con.Dispose();

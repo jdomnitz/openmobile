@@ -765,7 +765,7 @@ namespace OMPlayer
                     if (session.SetTopology(0, pTopology)!=S_Ok)
                         return false;
                 }
-                catch (Exception e) { return false; }
+                catch (Exception) { return false; }
                 currentState = ePlayerStatus.Playing;
                 return true;
             }
@@ -815,7 +815,6 @@ namespace OMPlayer
                 {
                     SafeRelease(pSourcePD);
                 }
-                return true;
             }
             long streamDuration;
             private bool AddBranchToPartialTopology(IMFTopology pTopology, IMFPresentationDescriptor pSourcePD, int iStream)

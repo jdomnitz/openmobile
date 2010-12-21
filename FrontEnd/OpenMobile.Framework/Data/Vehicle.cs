@@ -26,14 +26,32 @@ namespace OpenMobile.Data
     /// </summary>
     public static class Vehicle
     {
+        /// <summary>
+        /// The vehicle identification number
+        /// </summary>
         public static string VIN;
+        /// <summary>
+        /// The current driver (used for multi-user systems)
+        /// </summary>
         public static string Driver;
+        /// <summary>
+        /// The Fuel Type (INCOMPLETE)
+        /// </summary>
         public static int FuelType;
+        /// <summary>
+        /// The current vehicle milage
+        /// </summary>
         public static int Mileage;
+        /// <summary>
+        /// Loads Vehicle Information
+        /// </summary>
         public static void LoadData()
         {
             //TODO
         }
+        /// <summary>
+        /// Stores Vehicle Infomation
+        /// </summary>
         public static void SaveData()
         {
             //TODO

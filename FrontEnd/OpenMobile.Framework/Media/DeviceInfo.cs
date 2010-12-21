@@ -225,13 +225,37 @@ namespace OpenMobile.Media
             this.path = path;
             VolumeLabel = label;
         }
+        /// <summary>
+        /// The device path
+        /// </summary>
         public string path;
+        /// <summary>
+        /// Folders which contain music
+        /// </summary>
         public string[] MusicFolders;
+        /// <summary>
+        /// Folders which contain Playlists
+        /// </summary>
         public string[] PlaylistFolders;
+        /// <summary>
+        /// Folders which contain movies or video
+        /// </summary>
         public string[] VideoFolders;
+        /// <summary>
+        /// Folders which contain Pictures
+        /// </summary>
         public string[] PictureFolders;
+        /// <summary>
+        /// The type of device
+        /// </summary>
         public eDriveType DriveType;
+        /// <summary>
+        /// Is it the system drive
+        /// </summary>
         public bool systemDrive;
+        /// <summary>
+        /// The Volume Label
+        /// </summary>
         public string VolumeLabel;
     }
 }

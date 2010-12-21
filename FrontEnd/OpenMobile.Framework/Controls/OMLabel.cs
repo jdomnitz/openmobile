@@ -28,7 +28,6 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A label for displaying text
     /// </summary>
-    [DefaultPropertyAttribute("Name")]
     public class OMLabel:OMControl
     {
         // Comment by Borte: access modefier changed to protected to allow more access when this control is inherited
@@ -42,7 +41,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the color of the text
         /// </summary>
-        [CategoryAttribute("Text"), DescriptionAttribute("Sets the color of the text")]
         public Color Color
         {
             get
@@ -88,7 +86,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the Glow or Outline color of the text
         /// </summary>
-        [CategoryAttribute("Text"), DescriptionAttribute("Sets the Glow or Outline color of the text")]
         public virtual Color OutlineColor
         {
             get
@@ -107,7 +104,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the Font of the text (Note: Size and Font Name only)
         /// </summary>
-        [CategoryAttribute("Text"), DescriptionAttribute("Sets the font of the text")]
         public Font Font
         {
             get
@@ -137,7 +133,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The text displayed in the label
         /// </summary>
-        [CategoryAttribute("Text"), DescriptionAttribute("Sets the text to display")]
         public virtual string Text
         {
             get
@@ -159,7 +154,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the format of the displayed text
         /// </summary>
-        [CategoryAttribute("Text"), DescriptionAttribute("Sets the format of the displayed text")]
         public virtual OpenMobile.Graphics.eTextFormat Format
         {
             get
@@ -177,7 +171,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the alignment of the displayed text
         /// </summary>
-        [CategoryAttribute("Text"), DescriptionAttribute("Sets the alignment of the displayed text")]
         public virtual OpenMobile.Graphics.Alignment TextAlignment
         {
             get
