@@ -138,8 +138,16 @@ namespace ControlDemo
                 case "Dial Number":
                     theHost.execute(eFunction.dialNumber, lastPath);
                     break;
-                case "View Slide Show":
-                    if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Slideshow", lastPath))
+                case "View Pictures":
+                    DeviceInfo info2 = DeviceInfo.get(lastPath);
+                    string picPath=string.Empty;
+                    for (int i = 0; i < info2.PictureFolders.Length; i++)
+                    {
+                        picPath = info2.PictureFolders[i];
+                        if (Directory.Exists(picPath)&& Directory.GetFiles(picPath).Length > 0)
+                            break;
+                    }
+                    if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Slideshow", picPath))
                         theHost.execute(eFunction.ExecuteTransition, screen.ToString());
                     break;
             }
@@ -226,7 +234,7 @@ namespace ControlDemo
                     ((OMLabel)p[1]).Text = "Camera";
                     ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|Camera", true);
                     itm = theHost.getSkinImage("Discs|Slideshow", true);
-                    List3.Add(new OMListItem("View Slide Show", itm.image));
+                    List3.Add(new OMListItem("View Pictures", itm.image));
                     itm = theHost.getSkinImage("Discs|Add", true);
                     List3.Add(new OMListItem("Copy Photos to Disk", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);

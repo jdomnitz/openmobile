@@ -29,17 +29,18 @@ namespace OpenMobile.Framework
 {
     internal static class Windows
     {
+        static Guid disk=new Guid("53F56307-B6BF-11D0-94F2-00A0C91EFB8B");
         internal static eDriveType detectType(string path, DriveType type)
         {
             if ((type == DriveType.Network) || (type == DriveType.CDRom))
                 return (eDriveType)type;
-            Guid disk=new Guid("53F56307-B6BF-11D0-94F2-00A0C91EFB8B");
+            
             try
             {
                 IntPtr ptrDevs = SetupDiGetClassDevs(ref disk, IntPtr.Zero, IntPtr.Zero, 0x12);
                 SP_DEVICE_INTERFACE_DATA interf = new SP_DEVICE_INTERFACE_DATA();
                 interf.cbSize = (uint)Marshal.SizeOf(interf);
-                int deviceNumber = GetInstanceNumber("\\\\.\\" + path);
+                int deviceNumber = GetInstanceNumber("\\\\.\\" + path.Substring(0,2));
                 bool success = true;
                 uint i = 0;
                 while (success)
@@ -94,7 +95,7 @@ namespace OpenMobile.Framework
         {
             int ret = -1;
             IntPtr file= CreateFile(drive,0,0,IntPtr.Zero,3,0,IntPtr.Zero);
-            if (file==IntPtr.Zero)
+            if ((long)file<=0)
                 return ret;
             try
             {
