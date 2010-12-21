@@ -68,22 +68,42 @@ namespace OpenMobile.helperFunctions
             {
                 return getText(screen, pluginname, new string[] { panelName });
             }
+            /// <summary>
+            /// Loads the On Screen Keyboard and then returns the text entered
+            /// </summary>
+            /// <returns></returns>
             public string getPassword(int screen, string pluginname, string defaultValue)
             {
                 return getPassword(screen, pluginname, new string[] { ""},defaultValue);
             }
+            /// <summary>
+            /// Loads the On Screen Keyboard and then returns the text entered
+            /// </summary>
+            /// <returns></returns>
             public string getText(int screen, string pluginname, string panelName, string defaultValue)
             {
                 return getText(screen, pluginname, new string[]{panelName}, defaultValue);
             }
+            /// <summary>
+            /// Loads the On Screen Keyboard and then returns the text entered
+            /// </summary>
+            /// <returns></returns>
             public string getPassword(int screen, string pluginname, string panelName, string defaultValue)
             {
                 return getPassword(screen, pluginname, new string[] { panelName }, defaultValue);
             }
+            /// <summary>
+            /// Loads the On Screen Keyboard and then returns the text entered
+            /// </summary>
+            /// <returns></returns>
             public string getText(int screen,string pluginname,string[] panelNames)
             {
                 return getText(screen, pluginname, panelNames,"OSK");
             }
+            /// <summary>
+            /// Loads the On Screen Keyboard and then returns the text entered
+            /// </summary>
+            /// <returns></returns>
             public string getPassword(int screen, string pluginname, string[] panelNames, string defaultValue)
             {
                 SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);
@@ -107,6 +127,10 @@ namespace OpenMobile.helperFunctions
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
             }
+            /// <summary>
+            /// Loads the On Screen Keyboard and then returns the text entered
+            /// </summary>
+            /// <returns></returns>
             public string getText(int screen,string pluginname,string[] panelNames,string defaultValue)
             {
                 SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);

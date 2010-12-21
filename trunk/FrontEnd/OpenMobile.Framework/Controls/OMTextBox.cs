@@ -30,7 +30,13 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMTextBox : OMLabel, IClickable, IHighlightable
     {
+        /// <summary>
+        /// Sets various textbox options
+        /// </summary>
         protected textboxFlags flags;
+        /// <summary>
+        /// The background color of the textbox
+        /// </summary>
         protected Color background = Color.White;
         /// <summary>
         /// Sets textbox option.  Note: multiple flags are allowed

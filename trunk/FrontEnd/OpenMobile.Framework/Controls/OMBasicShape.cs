@@ -193,6 +193,9 @@ namespace OpenMobile.Controls
                 borderSize = value;
             }
         }
+        /// <summary>
+        /// The controls height in OM units
+        /// </summary>
         public override int Height
         {
             get
@@ -206,6 +209,9 @@ namespace OpenMobile.Controls
                 raiseUpdate(true);
             }
         }
+        /// <summary>
+        /// The controls width in OM units
+        /// </summary>
         public override int Width
         {
             get
@@ -219,6 +225,9 @@ namespace OpenMobile.Controls
                 raiseUpdate(true);
             }
         }
+        /// <summary>
+        /// The distance between the left of the UI and the Left of the control
+        /// </summary>
         public override int Left
         {
             get
@@ -232,6 +241,9 @@ namespace OpenMobile.Controls
                 raiseUpdate(true);
             }
         }
+        /// <summary>
+        /// The distance between the top of the UI and the Top of the control
+        /// </summary>
         public override int Top
         {
             get

@@ -20,9 +20,20 @@
 *********************************************************************************/
 namespace OpenMobile.Controls
 {
+    /// <summary>
+    /// Used for controls which react specially to keyboard input
+    /// </summary>
     public interface IKeyboard
     {
+        /// <summary>
+        /// Occurs when keyboard focus is set to the control
+        /// </summary>
+        /// <param name="screen"></param>
         void KeyboardEnter(int screen);
+        /// <summary>
+        /// Occurs when keyboard focus leaves the control
+        /// </summary>
+        /// <param name="screen"></param>
         void KeyboardExit(int screen);
     }
 }

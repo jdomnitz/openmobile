@@ -176,6 +176,9 @@ namespace OpenMobile.Controls
             }
         }
         imageItem sliderTrackFull;
+        /// <summary>
+        /// The background image for the slider
+        /// </summary>
         public imageItem SliderTrackFull
         {
             get

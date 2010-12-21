@@ -119,7 +119,6 @@ namespace OpenMobile.Platform.X11
                         attributes.Add(minor);
                         if (flags != 0)
                         {
-#warning "This is not entirely correct: Embedded is not a valid flag! We need to add a GetARBContextFlags(GraphicsContextFlags) method."
                             attributes.Add((int)ArbCreateContext.Flags);
                             attributes.Add((int)flags);
                         }

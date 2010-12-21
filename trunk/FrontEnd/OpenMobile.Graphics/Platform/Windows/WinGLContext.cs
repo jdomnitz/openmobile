@@ -95,7 +95,6 @@ namespace OpenMobile.Platform.Windows
                         if (flags != 0)
                         {
                             attributes.Add((int)ArbCreateContext.Flags);
-#warning "This is not entirely correct: Embedded is not a valid flag! We need to add a GetARBContextFlags(GraphicsContextFlags) method."
                             attributes.Add((int)flags);
                         }
                         // According to the docs, " <attribList> specifies a list of attributes for the context.

@@ -147,6 +147,9 @@ namespace OpenMobile.Controls
             }
         }
         private int bufferSize = 0;
+        /// <summary>
+        /// The size of a moving average buffer to use (0=disabled)
+        /// </summary>
         public int BufferSize
         {
             get

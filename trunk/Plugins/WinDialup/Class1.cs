@@ -31,8 +31,9 @@ namespace WinDialup
     public class Class1:INetwork
     {
         #region INetwork Members
-
+#pragma warning disable 0067
         public event WirelessEvent OnWirelessEvent;
+#pragma warning restore 0067
         private IntPtr conPtr=IntPtr.Zero;
 
         public connectionInfo[] getAvailableNetworks()

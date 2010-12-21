@@ -36,16 +36,34 @@ namespace OpenMobile.Controls
     /// </summary>
     public abstract class OMControl : ICloneable
     {
+        /// <summary>
+        /// The rendering mode of the control
+        /// </summary>
         protected eModeType mode;
+        /// <summary>
+        /// Is the control visible
+        /// </summary>
         protected bool visible = true;
+        /// <summary>
+        /// A control specific object
+        /// </summary>
         protected object tag;
+        /// <summary>
+        /// The control name
+        /// </summary>
         protected string name;
+        /// <summary>
+        /// Control location and size
+        /// </summary>
         protected int height, width, top, left;
         /// <summary>
         /// Forces the renderer to redraw this control
         /// </summary>
         public event refreshNeeded UpdateThisControl;
-
+        /// <summary>
+        /// Requests the control be redrawn
+        /// </summary>
+        /// <param name="resetHighlighted"></param>
         protected void raiseUpdate(bool resetHighlighted)
         {
             if (!visible)
@@ -143,7 +161,7 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// The controls height in pixels
+        /// The controls height in OM units
         /// </summary>
         public virtual int Height
         {
@@ -151,7 +169,7 @@ namespace OpenMobile.Controls
             set { height = value; raiseUpdate(true); }
         }
         /// <summary>
-        /// The controls width in pixels
+        /// The controls width in OM units
         /// </summary>
         public virtual int Width
         {
