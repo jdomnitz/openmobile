@@ -143,22 +143,22 @@ namespace NewMedia
             OMLabel label1 = new OMLabel(2, 150, 175, 50);
             label1.Visible = false;
             label1.Font = f;
-            OMButton source2 = new OMButton(37, 175, 100, 100);
+            OMButton source2 = new OMButton(37, 170, 100, 100);
             source2.Visible = false;
             source2.OnClick += new userInteraction(source_OnClick);
-            OMLabel label2 = new OMLabel(2, 250, 175, 50);
+            OMLabel label2 = new OMLabel(2, 245, 175, 50);
             label2.Visible = false;
             label2.Font = f;
-            OMButton source3 = new OMButton(37, 275, 100, 100);
+            OMButton source3 = new OMButton(37, 260, 100, 100);
             source3.Visible = false;
             source3.OnClick += new userInteraction(source_OnClick);
-            OMLabel label3 = new OMLabel(2, 350, 175, 50);
+            OMLabel label3 = new OMLabel(2, 335, 175, 50);
             label3.Visible = false;
             label3.Font = f;
-            OMButton source4 = new OMButton(37, 375, 100, 100);
+            OMButton source4 = new OMButton(37, 355, 100, 100);
             source4.Visible = false;
             source4.OnClick += new userInteraction(source_OnClick);
-            OMLabel label4 = new OMLabel(2, 450, 175, 50);
+            OMLabel label4 = new OMLabel(2, 430, 175, 50);
             label4.Visible = false;
             label4.Font = f;
             p.addControl(Background);
@@ -253,9 +253,9 @@ namespace NewMedia
         {
             if (sender.Parent[13].Top == 100)
             {
-                sender.Parent[13].Top = 100 + (100 * sources.Count);
-                sender.Parent[15].Top = 85 + (100 * sources.Count);
-                sender.Parent[11].Height = 6 + (100 * sources.Count);
+                sender.Parent[13].Top = 100 + (93 * sources.Count);
+                sender.Parent[15].Top = 85 + (93 * sources.Count);
+                sender.Parent[11].Height = 6 + (93 * sources.Count);
                 for (int i = 0; i < sources.Count; i++)
                     sender.Parent[16 + i].Visible = true;
                 for (int i = 0; i < sources.Count; i++)

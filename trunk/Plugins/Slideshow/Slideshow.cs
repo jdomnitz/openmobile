@@ -72,6 +72,7 @@ namespace Slideshow
                 if (pos[screen] == allImages[screen].Count)
                     pos[screen] = 0;
             }
+            transitioning[screen] = false;
         }
         bool[] transitioning;
         private void transition(string image,int num,int screen)
@@ -80,7 +81,15 @@ namespace Slideshow
                 return;
             transitioning[screen] = true;
             int transitionType = OpenMobile.Framework.Math.Calculation.RandomNumber(0, 4);
-            ((OMButton)manager[screen][num]).Image = new imageItem(OImage.FromFile(image));
+            try
+            {
+                ((OMButton)manager[screen][num]).Image = new imageItem(OImage.FromFile(image));
+            }
+            catch (System.Exception)
+            {
+                transitioning[screen] = false;
+                return;
+            }
             for (int i = 1; i <= 10; i++)
             {
                 switch(transitionType)
