@@ -162,12 +162,18 @@ namespace BatterySupport
                 else if(previouslyPluggedIn == true && type != ePowerEvent.SleepOrHibernatePending)
                 {
                     previouslyPluggedIn = false;
-                    if (OnBatteryAction == "Hibernate")
-                        theHost.execute(eFunction.hibernate);
-                    else if (OnBatteryAction == "Suspend")
-                        theHost.execute(eFunction.standby);
-                    else if (OnBatteryAction == "Shutdown")
-                        theHost.execute(eFunction.shutdown);
+
+                    //Added to let the laptop survive cranking
+                    System.Threading.Thread.Sleep(3000);
+                    if (!previouslyPluggedIn )
+                    {
+                        if (OnBatteryAction == "Hibernate")
+                           theHost.execute(eFunction.hibernate);
+                        else if (OnBatteryAction == "Suspend")
+                            theHost.execute(eFunction.standby);
+                        else if (OnBatteryAction == "Shutdown")
+                            theHost.execute(eFunction.shutdown);
+                    }
                 }
             }
 
