@@ -104,7 +104,7 @@ namespace OpenMobile.Platform.X11
         bool exists;
         bool isExiting;
 
-        bool _decorations_hidden = false;
+        bool _decorations_hidden;
 
          // Keyboard input
         //readonly byte[] ascii = new byte[16];
@@ -216,32 +216,19 @@ namespace OpenMobile.Platform.X11
         /// </summary>
         public X11GLNative()
         {
-            try
+            // Open a display connection to the X server, and obtain the screen and root window.
+            window.Display = Functions.XOpenDisplay(IntPtr.Zero);
+            //window.Display = API.DefaultDisplay;
+            if (window.Display == IntPtr.Zero)
+                throw new Exception("Could not open connection to X");
+
+            using (new XLock(window.Display))
             {
-                Debug.Print("Creating X11GLNative window.");
-                Debug.Indent();
-
-                // Open a display connection to the X server, and obtain the screen and root window.
-                window.Display = Functions.XOpenDisplay(IntPtr.Zero);
-                //window.Display = API.DefaultDisplay;
-                if (window.Display == IntPtr.Zero)
-                    throw new Exception("Could not open connection to X");
-
-                using (new XLock(window.Display))
-                {
-                    window.Screen = Functions.XDefaultScreen(window.Display); //API.DefaultScreen;
-                    window.RootWindow = Functions.XRootWindow(window.Display, window.Screen); // API.RootWindow;
-                }
-
-                Debug.Print("Display: {0}, Screen {1}, Root window: {2}", window.Display, window.Screen,
-                            window.RootWindow);
-                
-                RegisterAtoms(window);
+                window.Screen = Functions.XDefaultScreen(window.Display); //API.DefaultScreen;
+                window.RootWindow = Functions.XRootWindow(window.Display, window.Screen); // API.RootWindow;
             }
-            finally
-            {
-                Debug.Unindent();
-            }
+            
+            RegisterAtoms(window);
         }
 
         #endregion

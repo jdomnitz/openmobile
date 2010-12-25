@@ -75,7 +75,7 @@ namespace OpenMobile
 
         IGraphicsContext glContext;
 
-        bool isExiting = false;
+        bool isExiting;
 
         const double target_render_period=(1.0/35);
         double render_time;

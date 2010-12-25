@@ -318,31 +318,6 @@ namespace OpenMobile.Platform.X11
 
     #endregion
 
-    #region unsafe internal struct Screen
-
-    unsafe public struct Screen
-    {
-        XExtData ext_data;    /* hook for extension to hang buffer */
-        IntPtr display;     /* back pointer to display structure */ /* _XDisplay */
-        Window root;        /* Root window id. */
-        int width, height;    /* width and height of screen */
-        int mwidth, mheight;    /* width and height of  in millimeters */
-        int ndepths;        /* number of depths possible */
-        //Depth *depths;        /* list of allowable depths on the screen */
-        int root_depth;        /* bits per pixel */
-        //Visual* root_visual;    /* root visual */
-        IntPtr default_gc;        /* GC for the root root visual */   // GC
-        Colormap cmap;        /* default color map */
-        UIntPtr white_pixel;    // unsigned long
-        UIntPtr black_pixel;    /* White and Black pixel values */  // unsigned long
-        int max_maps, min_maps;    /* max and min color maps */
-        int backing_store;    /* Never, WhenMapped, Always */
-        Bool save_unders;
-        long root_input_mask;    /* initial root input mask */
-    }
-
-    #endregion
-
     #region unsafe internal class XExtData
 
     unsafe internal class XExtData
@@ -1126,9 +1101,6 @@ namespace OpenMobile.Platform.X11
 
         [DllImport(XrandrLibrary)]
         public static extern XRRScreenConfiguration XRRScreenConfig(Display dpy, int screen);
-
-        [DllImport(XrandrLibrary)]
-        public static extern XRRScreenConfiguration XRRConfig(ref Screen screen);
 
         [DllImport(XrandrLibrary)]
         public static extern void XRRSelectInput(Display dpy, Window window, int mask);
