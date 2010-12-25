@@ -1109,10 +1109,6 @@ namespace OpenMobile.Graphics
         {
             return new OImage(new Bitmap(stream,useEmbeddedColorManagement));
         }
-        public static OImage FromStream(System.IO.Stream stream, bool useEmbeddedColorManagement,bool validateImageData)
-        {
-            return new OImage(new Bitmap(stream, useEmbeddedColorManagement));
-        }
         ~OImage()
         {
             Dispose();

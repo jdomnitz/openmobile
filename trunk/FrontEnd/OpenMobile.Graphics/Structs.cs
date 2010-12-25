@@ -155,6 +155,8 @@ namespace OpenMobile.Graphics
         }
         public override bool Equals(object obj)
         {
+            if (!(obj is Color))
+                return false;
             Color right = (Color)obj;
             return ((this.A == right.A) && (this.b == right.B) && (this.G == right.G) && (this.R == right.R));
         }
@@ -1243,7 +1245,7 @@ namespace OpenMobile.Graphics
         }
         public override string ToString()
         {
-            return name+"("+a.ToString()+','+r.ToString()+','+g.ToString()+','+b.ToString()+')';
+            return name+"("+a.ToString()+","+r.ToString()+","+g.ToString()+","+b.ToString()+")";
         }
         static Color()
         {

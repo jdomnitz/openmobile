@@ -153,7 +153,7 @@ namespace OpenMobile.Net
                 using (WebClient client = new WebClient())
                 {
                     MemoryStream stream = new MemoryStream(client.DownloadData(URL));
-                    return OImage.FromStream(stream, false, true);
+                    return OImage.FromStream(stream, false);
                 }
             }
             catch (WebException) { return null; }

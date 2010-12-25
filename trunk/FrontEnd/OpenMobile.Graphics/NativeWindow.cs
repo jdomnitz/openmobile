@@ -56,8 +56,8 @@ namespace OpenMobile
         #endregion
         public NativeWindow()
         {
-            this.options = GameWindowFlags.Default;
-            this.device = DisplayDevice.Default;
+            //this.options = GameWindowFlags.Default;
+            //this.device = DisplayDevice.Default;
         }
         #region --- Contructors ---
         public void NativeInitialize(GameWindowFlags flags)
