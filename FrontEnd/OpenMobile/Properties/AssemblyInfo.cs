@@ -11,7 +11,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("OpenMobile")]
-[assembly: AssemblyCopyright("Copyright © OpenMobile 2010")]
+[assembly: AssemblyCopyright("Copyright © OpenMobile 2011")]
 [assembly: AssemblyTrademark("All code protected by GPLv3")]
 [assembly: AssemblyCulture("")]
 

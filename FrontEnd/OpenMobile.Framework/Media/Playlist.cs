@@ -230,6 +230,8 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool writePlaylistToDB(IPluginHost theHost, string name, List<mediaInfo> playlist)
         {
+            if (theHost == null)
+                return false;
             if (playlist.Count == 0)
                 return false;
             object o;
@@ -249,6 +251,8 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool deletePlaylistFromDB(IPluginHost theHost, string name)
         {
+            if (theHost == null)
+                return false;
             object o;
             using (PluginSettings s = new PluginSettings())
                 theHost.getData(eGetData.GetMediaDatabase, s.getSetting("Default.MusicDatabase"), out o);
@@ -285,7 +289,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static List<string> listPlaylistsFromDB(IPluginHost theHost)
         {
-            string dbName = "";
+            string dbName = String.Empty;
             using (PluginSettings s = new PluginSettings())
                 dbName = s.getSetting("Default.MusicDatabase");
             return listPlaylistsFromDB(theHost, dbName);
@@ -298,6 +302,8 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static List<string> listPlaylistsFromDB(IPluginHost theHost,string dbName)
         {
+            if (theHost == null)
+                return new List<string>();
             object o = null;
             for (int i = 0; ((i < 35) && (o == null)); i++)
             {
@@ -320,7 +326,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name)
         {
-            string dbName = "";
+            string dbName = String.Empty;
             using (PluginSettings s = new PluginSettings())
                 dbName = s.getSetting("Default.MusicDatabase");
             return readPlaylistFromDB(theHost, name, dbName);

@@ -809,7 +809,7 @@ namespace OpenMobile
 
         void RenderingWindow_Gesture(object sender, OpenMobile.Graphics.TouchEventArgs e)
         {
-            string gesture="";
+            string gesture = String.Empty;
             if (e.GestureComplete)
                 gesture = "End";
             gesture+=e.Name+"|";
@@ -856,7 +856,7 @@ namespace OpenMobile
         }
         private void raiseResize()
         {
-            Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), "", "");
+            Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), String.Empty, String.Empty);
         }
         #endregion
         private void transition_Tick()
@@ -1130,7 +1130,7 @@ namespace OpenMobile
         {
             DisplayDevice dev=DisplayDevice.AvailableDisplays[screen];
             if (e.Landscape != dev.Landscape)
-                Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", "");
+                Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", String.Empty);
         }
         internal void Rollback()
         {

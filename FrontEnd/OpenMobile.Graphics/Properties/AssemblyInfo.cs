@@ -11,7 +11,7 @@ using System;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("OpenMobile.Graphics")]
-[assembly: AssemblyCopyright("Copyright OpenMobile and OpenTK ©2010")]
+[assembly: AssemblyCopyright("Copyright OpenMobile and OpenTK ©2011")]
 [assembly: AssemblyTrademark("Based off the OpenTK Project")]
 [assembly: AssemblyCulture("")]
 

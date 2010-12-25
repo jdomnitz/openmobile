@@ -143,7 +143,7 @@ namespace OpenMobile.Framework
                     lastHandle[screen].handle = p[0].MainWindowHandle;
                     lastHandle[screen].position = position;
                     object o;
-                    theHost.getData(eGetData.GetScaleFactors, "", screen.ToString(), out o);
+                    theHost.getData(eGetData.GetScaleFactors, String.Empty, screen.ToString(), out o);
                     if (o == null)
                         return false;
                     PointF scale = (PointF)o;
@@ -186,7 +186,7 @@ namespace OpenMobile.Framework
                     if (localName.ToLower().Contains(name))
                     {
                         object o;
-                        theHost.getData(eGetData.GetScaleFactors, "", screen.ToString(), out o);
+                        theHost.getData(eGetData.GetScaleFactors, String.Empty, screen.ToString(), out o);
                         if (o == null)
                             return false;
                         PointF scale = (PointF)o;
@@ -218,7 +218,7 @@ namespace OpenMobile.Framework
                 {
                     int screen = int.Parse(arg1);
                     object o;
-                    theHost.getData(eGetData.GetScaleFactors, "", arg1, out o);
+                    theHost.getData(eGetData.GetScaleFactors, String.Empty, arg1, out o);
                     if (o == null)
                         return;
                     PointF scale = (PointF)o;
@@ -234,7 +234,7 @@ namespace OpenMobile.Framework
                 {
                     int screen = int.Parse(arg1);
                     object o;
-                    theHost.getData(eGetData.GetScaleFactors, "", arg1, out o);
+                    theHost.getData(eGetData.GetScaleFactors, String.Empty, arg1, out o);
                     if (o == null)
                         return;
                     OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
@@ -334,7 +334,7 @@ namespace OpenMobile.Framework
                 {
                     Process p = Process.Start(info);
                     StreamReader reader = p.StandardOutput;
-                    osVersion = reader.ReadLine().Replace("Description:", "").Trim();
+                    osVersion = reader.ReadLine().Replace("Description:", String.Empty).Trim();
                 }
                 catch (Exception)
                 {
@@ -601,7 +601,7 @@ namespace OpenMobile.Framework
             try
             {
                 if (IsMono() == true)
-                    p = Process.Start("mono", ('\"' + path + "\" " + param).Trim());
+                    p = Process.Start("mono", ("\"" + path + "\" " + param).Trim());
                 else
                     p = Process.Start(path, param);
                 if (wait)

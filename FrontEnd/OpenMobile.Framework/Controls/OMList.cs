@@ -18,6 +18,7 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Timers;
@@ -209,7 +210,7 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return "";
+                return String.Empty;
             }
         }
 

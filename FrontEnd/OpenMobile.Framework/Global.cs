@@ -440,7 +440,9 @@ namespace OpenMobile
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            return (this == (imageItem)obj);
+            if (obj is imageItem)
+                return (this == (imageItem)obj);
+            return false;
         }
         /// <summary>
         /// Serves as a hash function for a particular type
@@ -1726,7 +1728,10 @@ namespace OpenMobile
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            return (((connectionInfo)obj).UID == this.UID);
+            connectionInfo tmp = obj as connectionInfo;
+            if (tmp == null)
+                return false;
+            return (tmp.UID == this.UID);
         }
     }
     /// <summary>
@@ -1857,12 +1862,12 @@ namespace OpenMobile
         /// </summary>
         public Location()
         {
-            Name="";
-            Street="";
-            City="";
-            State="";
-            Country="";
-            Zip="";
+            Name=String.Empty;
+            Street = String.Empty;
+            City = String.Empty;
+            State = String.Empty;
+            Country = String.Empty;
+            Zip = String.Empty;
         }
         /// <summary>
         /// Creates a new Address from the given string
@@ -1879,12 +1884,12 @@ namespace OpenMobile
             }
             else
             {
-                Street = "";
-                City = "";
-                State = "";
+                Street = String.Empty;
+                City = String.Empty;
+                State = String.Empty;
             }
-            Country = "";
-            Zip = "";
+            Country = String.Empty;
+            Zip = String.Empty;
         }
         /// <summary>
         /// Creates a new Address for the given coordinates
@@ -1907,8 +1912,8 @@ namespace OpenMobile
             Street = street;
             City = city;
             State = state;
-            Country = "";
-            Zip = "";
+            Country = String.Empty;
+            Zip = String.Empty;
         }
         /// <summary>
         /// Creates a new Address
@@ -1934,6 +1939,11 @@ namespace OpenMobile
         /// <returns></returns>
         public static bool TryParse(string address, out Location result)
         {
+            if (address == null)
+            {
+                result = null;
+                return false;
+            }
             result = null;
             string[] args = address.Split(new char[] { ',','\n' },StringSplitOptions.RemoveEmptyEntries);
             if (args.Length == 3)
@@ -1970,7 +1980,7 @@ namespace OpenMobile
         {
             if (string.IsNullOrEmpty(Street) && (Latitude != 0))
                 return Latitude.ToString() + "," + Longitude.ToString();
-            return Street+'\n'+City+", "+State;
+            return Street+"\n"+City+", "+State;
         }
     }
     /// <summary>
@@ -2062,8 +2072,8 @@ namespace OpenMobile
         /// <exception cref="ArgumentNullException">ArgumentNullException</exception>
         public static string Combine(string part1, string part2,string part3)
         {
-            if ((part1 == null) ||(part2==null)|| (part3 == null))
-                throw new ArgumentNullException();
+            if (part3 == null)
+                return Combine(part1,part2);
             char ds = System.IO.Path.DirectorySeparatorChar;
             char ads=System.IO.Path.AltDirectorySeparatorChar;
 

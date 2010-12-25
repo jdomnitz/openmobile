@@ -64,7 +64,7 @@ namespace OpenMobile.helperFunctions
         public static string AESDecrypt(string CipherText, string salt)
         {
             if (CipherText == null)
-                return "";
+                return String.Empty;
             byte[] SaltValueBytes = Encoding.ASCII.GetBytes(salt);
             byte[] InitialVectorBytes = Encoding.ASCII.GetBytes("DOMNITZSOLUTIONS");
             byte[] CipherTextBytes = Convert.FromBase64String(CipherText);
@@ -80,9 +80,10 @@ namespace OpenMobile.helperFunctions
             try
             {
                 ByteCount = cryptoStream.Read(PlainTextBytes, 0, PlainTextBytes.Length);
-            }catch(CryptographicException){return "";}
+            }
+            catch (CryptographicException) { return String.Empty; }
             if (ByteCount == 0)
-                return "";
+                return String.Empty;
             MemStream.Close();
             cryptoStream.Close();
             return Encoding.UTF8.GetString(PlainTextBytes, 0, ByteCount);
@@ -96,7 +97,7 @@ namespace OpenMobile.helperFunctions
         {
             MD5 client = MD5.Create();
             byte[] md5 = client.ComputeHash(System.Text.ASCIIEncoding.ASCII.GetBytes(value));
-            string ret = "";
+            string ret = String.Empty;
             foreach (byte b in md5)
                 ret += b.ToString("X2");
             return ret;

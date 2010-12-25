@@ -80,7 +80,7 @@ namespace OpenMobile.Controls
         /// </summary>
         public OMAnimatedLabel()
         {
-            Text = "";
+            Text = String.Empty;
             init();
         }
         /// <summary>
@@ -96,7 +96,7 @@ namespace OpenMobile.Controls
             this.Top = y;
             this.Width = w;
             this.Height = h;
-            Text = "";
+            Text = String.Empty;
             init();
         }
         /// <summary>
@@ -274,7 +274,7 @@ namespace OpenMobile.Controls
             set
             {
                 if (value == null)
-                    value = "";
+                    value = String.Empty;
                 lock (this)
                 {
                     if (value == base.text)

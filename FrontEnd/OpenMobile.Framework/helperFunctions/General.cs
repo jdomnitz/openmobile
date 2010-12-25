@@ -58,7 +58,7 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string getText(int screen, string pluginname)
             {
-                return getText(screen, pluginname, "");
+                return getText(screen, pluginname, String.Empty);
             }
             /// <summary>
             /// Loads the On Screen Keyboard and then returns the text entered
@@ -74,7 +74,7 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string getPassword(int screen, string pluginname, string defaultValue)
             {
-                return getPassword(screen, pluginname, new string[] { ""},defaultValue);
+                return getPassword(screen, pluginname, new string[] { String.Empty }, defaultValue);
             }
             /// <summary>
             /// Loads the On Screen Keyboard and then returns the text entered
@@ -161,7 +161,7 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string getNumber(int screen, string pluginname)
             {
-                return getNumber(screen, pluginname, "");
+                return getNumber(screen, pluginname, String.Empty);
             }
 
             /// <summary>
@@ -240,7 +240,7 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string getFile(int screen, string pluginName, string panelName)
             {
-                return getFile(screen, pluginName, panelName, "");
+                return getFile(screen, pluginName, panelName, String.Empty);
             }
             /// <summary>
             /// Loads a file selection plugin
@@ -315,6 +315,8 @@ namespace OpenMobile.helperFunctions
         /// <returns></returns>
         public static byte[] HexStringToByteArray(string Hex)
         {
+            if (Hex==null)
+                return new byte[0];
             byte[] Bytes = new byte[Hex.Length / 2];
             int[] HexValue = new int[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
                                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x0B, 0x0C, 0x0D,
@@ -336,7 +338,7 @@ namespace OpenMobile.helperFunctions
         public static string escape(string s)
         {
             if (s == null)
-                return "";
+                return String.Empty;
             return s.Replace("'", "''");
         }
         /// <summary>
@@ -348,7 +350,7 @@ namespace OpenMobile.helperFunctions
         public static List<string> getPluginsOfType(Type t, IPluginHost host)
         {
             object o=new object();
-            host.getData(eGetData.GetPlugins, "", out o);
+            host.getData(eGetData.GetPlugins, String.Empty, out o);
             if (o == null)
                 return null;
             List<string> ret = new List<string>();
@@ -368,7 +370,7 @@ namespace OpenMobile.helperFunctions
         /// <returns></returns>
         public static eFunction stringToFunction(string functionName)
         {
-            if ((functionName == null) || (functionName.Length == 0))
+            if (string.IsNullOrEmpty(functionName))
                 return eFunction.None;
             try
             {

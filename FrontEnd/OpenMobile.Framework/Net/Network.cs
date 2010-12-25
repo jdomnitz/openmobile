@@ -65,6 +65,8 @@ namespace OpenMobile.Net
         /// <returns></returns>
         public static string urlEncode(string source)
         {
+            if (source == null)
+                return string.Empty;
             StringBuilder ret = new StringBuilder();
             for (int i = 0; i < source.Length; i++)
             {

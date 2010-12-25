@@ -104,7 +104,7 @@ namespace OpenMobile
                     maxy = lettery[index];
             }
 
-            String s = "";
+            String s = String.Empty;
             if ((maxx - minx) + (maxy - miny) < 0)
             {
                 s = "dot";

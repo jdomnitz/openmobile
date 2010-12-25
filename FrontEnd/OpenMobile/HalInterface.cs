@@ -37,7 +37,7 @@ namespace OpenMobile
                 #if WINDOWS
 			    if (Configuration.RunningOnWindows)
 			    {
-                    if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")), "OMHal.exe"), "", false))
+                    if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", String.Empty)), "OMHal.exe"), String.Empty, false))
                         Core.theHost.sendMessage("OMDebug", "HalInterface", "Unable to start HAL!");
 			    }
                 #endif
@@ -47,7 +47,7 @@ namespace OpenMobile
                 #endif
                 if(Configuration.RunningOnLinux)
 			    {
-				    if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:", "")), "OMHal.exe"), "", false))
+                    if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:", String.Empty)), "OMHal.exe"), String.Empty, false))
                         Core.theHost.sendMessage("OMDebug", "HalInterface", "Unable to start HAL!");
 			    }
                 #endif
@@ -71,7 +71,7 @@ namespace OpenMobile
             {
                 string[] parts=message.Split(new char[]{'|'});
                 int i = int.Parse(parts[0]);
-                string arg1="",arg2="",arg3="";
+                string arg1 = String.Empty, arg2 = String.Empty, arg3 = String.Empty;
                 if (parts.Length>3)
                     arg3=parts[3];
                 if (parts.Length>2)

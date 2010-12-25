@@ -29,7 +29,7 @@ namespace OpenMobile.Net
     /// </summary>
     public static class Connections
     {
-        private static string lastNetworkID="";
+        private static string lastNetworkID = String.Empty;
         /// <summary>
         /// Connects to a network
         /// </summary>
@@ -38,7 +38,7 @@ namespace OpenMobile.Net
         public static bool connect(IPluginHost host)
         {
             object o = new object();
-            host.getData(eGetData.GetAvailableNetworks, "", out o);
+            host.getData(eGetData.GetAvailableNetworks, String.Empty, out o);
             if (o==null)
                 return false;
             List<connectionInfo> info = (List<connectionInfo>)o;
@@ -74,7 +74,7 @@ namespace OpenMobile.Net
         public static bool connect(IPluginHost host,string connectionID,string credentials)
         {
             object o = new object();
-            host.getData(eGetData.GetPlugins, "", out o);
+            host.getData(eGetData.GetPlugins, String.Empty, out o);
             if (o == null)
                 return false;
             List<IBasePlugin> l = (List<IBasePlugin>)o;
@@ -114,7 +114,7 @@ namespace OpenMobile.Net
         public static bool disconnect(IPluginHost host, string connectionID)
         {
             object o = new object();
-            host.getData(eGetData.GetPlugins, "", out o);
+            host.getData(eGetData.GetPlugins, String.Empty, out o);
             List<IBasePlugin> l = (List<IBasePlugin>)o;
             connectionInfo info;
             foreach (IBasePlugin b in l.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))

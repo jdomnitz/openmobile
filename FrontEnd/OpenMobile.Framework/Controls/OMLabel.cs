@@ -31,7 +31,7 @@ namespace OpenMobile.Controls
     public class OMLabel:OMControl
     {
         // Comment by Borte: access modefier changed to protected to allow more access when this control is inherited
-        protected string text="";
+        protected string text = String.Empty;
         protected OpenMobile.Graphics.eTextFormat textFormat = OpenMobile.Graphics.eTextFormat.Normal;
         protected OpenMobile.Graphics.Alignment textAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
         protected Color color = Color.White;

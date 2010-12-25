@@ -128,7 +128,7 @@ namespace OpenMobile.Data
             if (asyncCon == null)
                 asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
             cmd = asyncCon.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Tasks WHERE ID='"+ID+"'";
+            cmd.CommandText = "SELECT * FROM Tasks WHERE ID='"+ID.ToString()+"'";
             asyncCon.Open();
             asyncReader = cmd.ExecuteReader();
             return true;
@@ -180,6 +180,8 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool write(task t)
         {
+            if (t == null)
+                return false;
             StringBuilder query;
             if (t.ID!=-1)
             {
