@@ -100,7 +100,9 @@ namespace OpenMobile
             /// <returns></returns>
             public override bool Equals(object obj)
             {
-                UIIcon icn = (UIIcon)obj;
+                UIIcon icn = obj as UIIcon;
+                if (icn == null)
+                    return false;
                 if (icn.tag == tag)
                     if (icn.priority == priority)
                         if (icn.plugin == plugin)

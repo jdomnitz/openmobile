@@ -18,9 +18,10 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
+using System;
 using OpenMobile.Controls;
-using OpenMobile.Plugin;
 using OpenMobile.Data;
+using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
@@ -76,7 +77,7 @@ namespace OpenMobile
         {
             theHost = host;
             Settings gl = new Settings("General Settings");
-            Setting graphics=new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", "", "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
+            Setting graphics = new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", String.Empty, "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
             using (PluginSettings settings = new PluginSettings())
             {

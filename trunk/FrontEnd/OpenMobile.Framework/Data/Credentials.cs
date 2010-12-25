@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Mono.Data.Sqlite;
 using OpenMobile.helperFunctions;
 
@@ -68,7 +69,7 @@ namespace OpenMobile.Data
             {
                 if (uid==null)
                 {
-                    uid = "";
+                    uid = String.Empty;
                     for (int i = 0; i < Environment.UserName.Length; i++)
                         uid += (char)(Environment.UserName[i] << Environment.ProcessorCount);
                 }
@@ -100,6 +101,7 @@ namespace OpenMobile.Data
         /// </summary>
         /// <param name="credentialName"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static string getCredential(string credentialName)
         {
             if (String.IsNullOrEmpty(credentialName))
@@ -161,6 +163,7 @@ namespace OpenMobile.Data
         /// </summary>
         /// <param name="credentialName"></param>
         /// <param name="value"></param>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void setCredential(string credentialName, string value)
         {
             if (value == null)

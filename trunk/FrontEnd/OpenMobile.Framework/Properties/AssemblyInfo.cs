@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("OpenMobile")]
 [assembly: AssemblyProduct("OpenMobile.Framework")]
-[assembly: AssemblyCopyright("Copyright ©  2010")]
+[assembly: AssemblyCopyright("Copyright ©  2011")]
 [assembly: AssemblyTrademark("All code protected by GPLv3")]
 [assembly: AssemblyCulture("")]
 

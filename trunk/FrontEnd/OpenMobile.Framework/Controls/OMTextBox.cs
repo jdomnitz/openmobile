@@ -134,7 +134,7 @@ namespace OpenMobile.Controls
                     if (IsAlphabetic(value) == false)
                         return;
                 }
-                if (((flags & textboxFlags.Password) == textboxFlags.Password)&&(value!=null)&&((text!="")||((value!=null)&&(value.Length==1)))&&((text!=null)&&(value.Contains(text))))
+                if (((flags & textboxFlags.Password) == textboxFlags.Password)&&(value!=null)&&((text!="")||((value.Length==1)))&&((text!=null)&&(value.Contains(text))))
                     count = 6;
                 textTexture = null;
                 text = value;
@@ -239,7 +239,7 @@ namespace OpenMobile.Controls
                             if (count > 1)
                                 tempStr += text[text.Length - 1];
                             else
-                                tempStr += '*';
+                                tempStr += "*";
                             count--;
                         }
                         textTexture = g.GenerateStringTexture(tempStr, this.Font, Color.FromArgb((int)(tmp * Color.A), this.Color), this.Left, this.Top, this.Width + 5, this.Height, f);

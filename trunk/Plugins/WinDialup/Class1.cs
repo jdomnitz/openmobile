@@ -113,7 +113,7 @@ namespace WinDialup
 
         public string authorEmail
         {
-            get { return ""; }
+            get { return String.Empty; }
         }
 
         public string pluginName
@@ -123,7 +123,7 @@ namespace WinDialup
 
         public float pluginVersion
         {
-            get { return 0.1F; }
+            get { return 0.9F; }
         }
 
         public string pluginDescription

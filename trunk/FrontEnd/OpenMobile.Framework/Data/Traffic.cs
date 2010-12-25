@@ -111,8 +111,8 @@ namespace OpenMobile.Data
         {
             Location = new Location();
             Location.Name = location;
-            Title = "";
-            Description = "";
+            Title = String.Empty;
+            Description = String.Empty;
             Start = DateTime.MinValue;
             End = DateTime.MinValue;
             Type = eTrafficType.Unknown;

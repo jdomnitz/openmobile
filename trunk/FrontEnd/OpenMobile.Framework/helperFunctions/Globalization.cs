@@ -105,7 +105,7 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         public static string removePhoneLocalization(string number)
         {
-            string ret="";
+            string ret = String.Empty;
             for(int i=0;i<number.Length;i++)
                 switch (number[i])
                 {
@@ -135,7 +135,7 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         public static string formatPhoneNumber(string number)
         {
-            string ret = "";
+            string ret = String.Empty;
             bool prefix = false;
             if (number[0] == '+')
             {

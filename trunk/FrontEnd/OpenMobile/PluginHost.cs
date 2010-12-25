@@ -320,7 +320,7 @@ namespace OpenMobile
             currentPosition = new int[8];
             nextPosition = new int[8];
             for (int i = 0; i < screenCount; i++)
-                history.Enqueue(i, "MainMenu", "", false);
+                history.Enqueue(i, "MainMenu", String.Empty, false);
             for (int i = 0; i < 8; i++)
                 queued[i] = new List<mediaInfo>();
             if (Directory.Exists(DataPath) == false)
@@ -337,9 +337,9 @@ namespace OpenMobile
                 current = DateTime.Now;
             if (current.Hour != DateTime.Now.Hour)
             {
-                raiseSystemEvent(eFunction.hourChanged, "", "", "");
+                raiseSystemEvent(eFunction.hourChanged, String.Empty, String.Empty, String.Empty);
                 if (current.Day != DateTime.Now.Day)
-                    raiseSystemEvent(eFunction.dateChanged, "", "", "");
+                    raiseSystemEvent(eFunction.dateChanged, String.Empty, String.Empty, String.Empty);
                 current = DateTime.Now;
             }
         }
@@ -439,7 +439,7 @@ namespace OpenMobile
                         if (ipAddress != i.ToString())
                         {
                             ipAddress = i.ToString();
-                            raiseSystemEvent(eFunction.networkConnectionsAvailable, ipAddress, "", "");
+                            raiseSystemEvent(eFunction.networkConnectionsAvailable, ipAddress, String.Empty, String.Empty);
                         }
             }
         }
@@ -451,9 +451,9 @@ namespace OpenMobile
                 internetAccess = e.IsAvailable;
                 if (internetAccess == true)
                     if (OpenMobile.Net.Network.checkForInternet() == OpenMobile.Net.Network.connectionStatus.InternetAccess)
-                        raiseSystemEvent(eFunction.connectedToInternet, "", "", "");
+                        raiseSystemEvent(eFunction.connectedToInternet, String.Empty, String.Empty, String.Empty);
                     else
-                        raiseSystemEvent(eFunction.disconnectedFromInternet, "", "", "");
+                        raiseSystemEvent(eFunction.disconnectedFromInternet, String.Empty, String.Empty, String.Empty);
             }
         }
 
@@ -476,12 +476,12 @@ namespace OpenMobile
             {
                 if (screenCount < DisplayDevice.AvailableDisplays.Count)
                 {
-                    raiseSystemEvent(eFunction.screenAdded, "", "", "");
+                    raiseSystemEvent(eFunction.screenAdded, String.Empty, String.Empty, String.Empty);
                     execute(eFunction.restartProgram);
                 }
                 else
                 {
-                    raiseSystemEvent(eFunction.screenRemoved, "", "", "");
+                    raiseSystemEvent(eFunction.screenRemoved, String.Empty, String.Empty, String.Empty);
                 }
             }
         }
@@ -501,7 +501,7 @@ namespace OpenMobile
                             if (hal != null)
                                 hal.snd("44");
                             savePlaylists();
-                            SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, "", "", ""); });
+                            SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty); });
                         }
                     }
                     return true;
@@ -509,7 +509,7 @@ namespace OpenMobile
                     try
                     {
                         savePlaylists();
-                        raiseSystemEvent(eFunction.closeProgram, "", "", "");
+                        raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
                         hal.close();
                     }
                     catch (Exception) { }
@@ -526,7 +526,7 @@ namespace OpenMobile
                     Environment.Exit(0);
                     return true;
                 case eFunction.stopListeningForSpeech:
-                    raiseSystemEvent(eFunction.stopListeningForSpeech, "", "", "");
+                    raiseSystemEvent(eFunction.stopListeningForSpeech, String.Empty, String.Empty, String.Empty);
                     return true;
                 case eFunction.listenForSpeech:
                     string s;
@@ -708,7 +708,7 @@ namespace OpenMobile
             switch (function)
             {
                 case eFunction.promptDialNumber:
-                    raiseSystemEvent(eFunction.promptDialNumber, arg, "", "");
+                    raiseSystemEvent(eFunction.promptDialNumber, arg, String.Empty, String.Empty);
                     return true;
                 case eFunction.showNavPanel:
                     plugin = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
@@ -733,7 +733,7 @@ namespace OpenMobile
                     return false;
                 case eFunction.TransitionToPanel:
                     if (int.TryParse(arg, out ret))
-                        return execute(eFunction.TransitionToPanel, arg, history.CurrentItem(ret).pluginName, "");
+                        return execute(eFunction.TransitionToPanel, arg, history.CurrentItem(ret).pluginName, String.Empty);
                     return false;
                 case eFunction.TransitionFromPanel:
                     if (int.TryParse(arg, out ret))
@@ -888,10 +888,10 @@ namespace OpenMobile
                     else
                         return false;
                 case eFunction.dataUpdated:
-                    raiseSystemEvent(eFunction.dataUpdated, arg, "", "");
+                    raiseSystemEvent(eFunction.dataUpdated, arg, String.Empty, String.Empty);
                     return true;
                 case eFunction.backgroundOperationStatus:
-                    raiseSystemEvent(eFunction.backgroundOperationStatus, arg, "", "");
+                    raiseSystemEvent(eFunction.backgroundOperationStatus, arg, String.Empty, String.Empty);
                     return true;
                 case eFunction.resetDevice:
                     plugin = Core.pluginCollection.Find(q => typeof(IRawHardware).IsInstanceOfType(q) && (q.pluginName == arg));
@@ -930,7 +930,7 @@ namespace OpenMobile
                                 return false;
                         }
                         history.setDisabled(ret, false);
-                        raiseSystemEvent(eFunction.TransitionFromAny, arg, "", "");
+                        raiseSystemEvent(eFunction.TransitionFromAny, arg, String.Empty, String.Empty);
                         return true;
                     }
                     return false;
@@ -949,7 +949,7 @@ namespace OpenMobile
                         if (!((Location.TryParse(arg, out adr) == true) && ((INavigation)plugin).navigateTo(adr)))
                             return false;
                     }
-                    raiseSystemEvent(eFunction.navigateToAddress, arg, "", "");
+                    raiseSystemEvent(eFunction.navigateToAddress, arg, String.Empty, String.Empty);
                     return true;
                 case eFunction.blockGoBack:
                     if (int.TryParse(arg, out ret) == true)
@@ -973,7 +973,7 @@ namespace OpenMobile
                     }
                     return false;
                 case eFunction.settingsChanged:
-                    raiseSystemEvent(eFunction.settingsChanged, arg, "", "");
+                    raiseSystemEvent(eFunction.settingsChanged, arg, String.Empty, String.Empty);
                     return true;
                 case eFunction.minimize:
                     if (int.TryParse(arg, out ret))
@@ -985,7 +985,7 @@ namespace OpenMobile
                 case eFunction.loadPlugin:
                     if (Core.loadPlugin(arg))
                     {
-                        raiseSystemEvent(eFunction.loadPlugin, arg, "", "");
+                        raiseSystemEvent(eFunction.loadPlugin, arg, String.Empty, String.Empty);
                         return true;
                     }
                     return false;
@@ -998,9 +998,9 @@ namespace OpenMobile
             switch (function)
             {
                 case eFunction.TransitionToPanel:
-                    return execute(eFunction.TransitionToPanel, arg1, arg2, "");
+                    return execute(eFunction.TransitionToPanel, arg1, arg2, String.Empty);
                 case eFunction.TransitionFromPanel:
-                    return execute(eFunction.TransitionFromPanel, arg1, arg2, "");
+                    return execute(eFunction.TransitionFromPanel, arg1, arg2, String.Empty);
                 case eFunction.ExecuteTransition:
                     eGlobalTransition effect;
 
@@ -1021,7 +1021,7 @@ namespace OpenMobile
                         {
                             Core.RenderingWindows[ret].executeTransition(effect);
                         }
-                        raiseSystemEvent(eFunction.ExecuteTransition, arg1, effect.ToString(), "");
+                        raiseSystemEvent(eFunction.ExecuteTransition, arg1, effect.ToString(), String.Empty);
                         return true;
                     }
                     return false;
@@ -1030,7 +1030,7 @@ namespace OpenMobile
                     {
                         if (history.getDisabled(ret) == true)
                         {
-                            raiseSystemEvent(eFunction.goBack, arg1, "", "");
+                            raiseSystemEvent(eFunction.goBack, arg1, String.Empty, String.Empty);
                             return false;
                         }
                         if ((history.Count(ret)==0)||(history.Peek(ret).pluginName == null))
@@ -1054,7 +1054,7 @@ namespace OpenMobile
                     }
                     return false;
                 case eFunction.userInputReady:
-                    raiseSystemEvent(eFunction.userInputReady, arg1, arg2, "");
+                    raiseSystemEvent(eFunction.userInputReady, arg1, arg2, String.Empty);
                     return true;
                 case eFunction.refreshData:
                     return ((IDataProvider)getPluginByName(arg1)).refreshData(arg2);
@@ -1194,7 +1194,7 @@ namespace OpenMobile
                     }
                     return false;
                 case eFunction.backgroundOperationStatus:
-                    SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.backgroundOperationStatus, arg1, arg2, ""); });
+                    SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.backgroundOperationStatus, arg1, arg2, String.Empty); });
                     return true;
                 case eFunction.sendKeyPress:
                     if (int.TryParse(arg1, out ret) == true)
@@ -1230,7 +1230,7 @@ namespace OpenMobile
                         if ((ret < 0) || (ret >= instanceCount))
                             return false;
                         hal.snd("34|" + arg1 + "|" + arg2);
-                        raiseSystemEvent(eFunction.systemVolumeChanged, arg1, arg2, "");
+                        raiseSystemEvent(eFunction.systemVolumeChanged, arg1, arg2, String.Empty);
                         return true;
                     }
                     return false;
@@ -1291,7 +1291,7 @@ namespace OpenMobile
                             if ((ret2 < 0) || (ret2 >= instanceCount))
                                 return false;
                             instance[ret] = ret2 + 1;
-                            raiseSystemEvent(eFunction.impersonateInstanceForScreen, arg1, arg2, "");
+                            raiseSystemEvent(eFunction.impersonateInstanceForScreen, arg1, arg2, String.Empty);
                         }
                     }
                     return false;
@@ -1724,7 +1724,7 @@ namespace OpenMobile
                 case eGetData.GetAvailableSkins:
                     string[] ret = Directory.GetDirectories(Path.Combine(Application.StartupPath, "Skins"));
                     for (int i = 0; i < ret.Length; i++)
-                        ret[i] = ret[i].Replace(Path.Combine(Application.StartupPath, "Skins", ""), "");
+                        ret[i] = ret[i].Replace(Path.Combine(Application.StartupPath, "Skins", String.Empty), String.Empty);
                     data = ret;
                     return;
                 case eGetData.GetAvailableSensors:

@@ -89,9 +89,9 @@ namespace OpenMobile
             {
                 for (int i = 0; i < RenderingWindows.Count; i++)
                 {
-                    RenderingWindows[i].transitionInPanel(availablePlugin.loadPanel("", i));
+                    RenderingWindows[i].transitionInPanel(availablePlugin.loadPanel(String.Empty, i));
                     RenderingWindows[i].executeTransition(eGlobalTransition.None);
-                    theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", "");
+                    theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", String.Empty);
                     if (a.Length == 0)
                         RenderingWindows[i].executeTransition(eGlobalTransition.None);
                     else
@@ -238,7 +238,7 @@ namespace OpenMobile
             theHost.hal = new HalInterface();
             theHost.load(); //Stagger I/O
             getEmReady();
-            theHost.raiseSystemEvent(eFunction.pluginLoadingComplete,"","","");
+            theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);
 			theHost.hal.snd("32");
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(theHost.NetworkChange_NetworkAvailabilityChanged);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
@@ -250,7 +250,7 @@ namespace OpenMobile
                     theHost.GraphicsLevel = eGraphicsLevel.Minimal;
             }
             if (OpenMobile.Net.Network.IsAvailable)
-                theHost.raiseSystemEvent(eFunction.connectedToInternet, "", "", "");
+                theHost.raiseSystemEvent(eFunction.connectedToInternet, String.Empty, String.Empty, String.Empty);
             pluginCollection.TrimExcess();
             Application.Run();
         }

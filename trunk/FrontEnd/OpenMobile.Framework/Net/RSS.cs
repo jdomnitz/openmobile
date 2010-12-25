@@ -26,7 +26,7 @@ namespace OpenMobile.Net
     /// <summary>
     /// An RSS Feed Reader
     /// </summary>
-    public sealed class RSS
+    public static class RSS
     {
         /// <summary>
         /// Reads the given URL into an rssFeed class

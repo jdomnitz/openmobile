@@ -55,12 +55,12 @@ namespace OMPlayer
                 settings = new Settings("OMPlayer2 Settings");
                 using (PluginSettings s = new PluginSettings())
                 {
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", "", "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.AutoResume")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.PlayProtected", "", "Attempt to play protected files", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.PlayProtected")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", String.Empty, "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.AutoResume")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.PlayProtected", String.Empty, "Attempt to play protected files", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.PlayProtected")));
                     List<string> crossfadeo = new List<string>(new string[] { "None", "1 Second", "2 Seconds", "3 Seconds", "4 Seconds", "5 Seconds" });
-                    List<string> crossfadev = new List<string>(new string[] { "", "1000", "2000", "3000", "4000", "5000" });
+                    List<string> crossfadev = new List<string>(new string[] { String.Empty, "1000", "2000", "3000", "4000", "5000" });
                     settings.Add(new Setting(SettingTypes.MultiChoice, "Music.CrossfadeDuration", "Crossfade", "Crossfade between songs", crossfadeo, crossfadev, s.getSetting("Music.CrossfadeDuration")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.MediaKeys", "", "Respond to media keys", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.MediaKeys")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.MediaKeys", String.Empty, "Respond to media keys", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.MediaKeys")));
                 }
                 settings.OnSettingChanged += new SettingChanged(changed);
             }
@@ -77,7 +77,7 @@ namespace OMPlayer
         {
             if (s.Name == "Music.CrossfadeDuration")
             {
-                if (s.Value != "")
+                if (!string.IsNullOrEmpty(s.Value))
                     crossfade = int.Parse(s.Value);
             }
             using (PluginSettings setting = new PluginSettings())
@@ -903,7 +903,7 @@ namespace OMPlayer
                     }
                     else if (MFMediaType.Video == guidMajorType)
                     {
-                        OnMediaEvent(eFunction.showVideoWindow, instance, "");
+                        OnMediaEvent(eFunction.showVideoWindow, instance, String.Empty);
                         // Create the video renderer.
                         IntPtr rw = (IntPtr)VistaPlayer.theHost.UIHandle(getFirstScreen(instance));
                         OpenMobile.Platform.Windows.Functions.SetParent(drain, rw);
@@ -1109,7 +1109,7 @@ namespace OMPlayer
             {
                 currentState = ePlayerStatus.Transitioning;
                 if (crossfade == 0) //blocking events causes problems
-                    SafeThread.Asynchronous(delegate() { OnMediaEvent(eFunction.nextMedia, instance, ""); }, VistaPlayer.theHost);
+                    SafeThread.Asynchronous(delegate() { OnMediaEvent(eFunction.nextMedia, instance, String.Empty); }, VistaPlayer.theHost);
                 else
                     stop();
                 if (!isAudioOnly)
@@ -1152,7 +1152,7 @@ namespace OMPlayer
             private void OnSessionClosed(IMFMediaEvent pEvent)
             {
                 currentState = ePlayerStatus.Stopped;
-                OnMediaEvent(eFunction.Stop, instance, "");
+                OnMediaEvent(eFunction.Stop, instance, String.Empty);
                 clock = null;
                 m_hCloseEvent.Set();
             }
@@ -1160,7 +1160,7 @@ namespace OMPlayer
             private void OnSessionPaused(IMFMediaEvent pEvent)
             {
                 currentState = ePlayerStatus.Paused;
-                OnMediaEvent(eFunction.Pause, instance, "");
+                OnMediaEvent(eFunction.Pause, instance, String.Empty);
             }
 
             public void CloseSession()
@@ -1264,7 +1264,7 @@ namespace OMPlayer
                                     sink.Invoke(OnGetPosition);
                                 if ((crossfade > 0) && (isAudioOnly) && ((int)pos == nowPlaying.Length - (crossfade / 1000)))
                                 {
-                                    OnMediaEvent(eFunction.nextMedia, instance, "");
+                                    OnMediaEvent(eFunction.nextMedia, instance, String.Empty);
                                 }
                             }
                         }
@@ -1301,7 +1301,7 @@ namespace OMPlayer
                 if (currentState==ePlayerStatus.Paused)
                 {
                     if (session.Start(Guid.Empty, new PropVariant()) == S_Ok)
-                        OnMediaEvent(eFunction.Play, instance, "");
+                        OnMediaEvent(eFunction.Play, instance, String.Empty);
                 }
                 else if(currentState==ePlayerStatus.Stopped)
                 {

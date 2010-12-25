@@ -36,7 +36,7 @@ namespace OpenMobile.Media
     /// <summary>
     /// Reads tags from files
     /// </summary>
-    public class TagReader
+    public static class TagReader
     {
         /// <summary>
         /// Reads tags from the given file
@@ -156,9 +156,9 @@ namespace OpenMobile.Media
         {
             if (Net.Network.IsAvailable==false)
                 return null;
-            if ((artist==null)||(artist.Length==0))
+            if (string.IsNullOrEmpty(artist))
                 return null;
-            if ((album==null)||(album.Length==0))
+            if (string.IsNullOrEmpty(album))
                 return null;
             if ((artist == cacheArtist) && (album == cacheAlbum))
                 return cacheArt;
@@ -218,6 +218,8 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static OImage getCoverFromDB(string artist, string album, IPluginHost pluginHost,string dbName)
         {
+            if (pluginHost == null)
+                return null;
             object o = new object();
             pluginHost.getData(eGetData.GetMediaDatabase, dbName, out o);
             if (o == null)

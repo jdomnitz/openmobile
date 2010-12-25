@@ -491,7 +491,7 @@ namespace OpenMobile.Controls
                 System.Drawing.StringFormat strFormat = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoClip);
                 strFormat.Alignment = System.Drawing.StringAlignment.Center;
                 System.Drawing.Font f = new System.Drawing.Font(font.Name, (float)(this.Width / 23), (System.Drawing.FontStyle)this.Font.Style);
-                g.DrawString(rulerValue.ToString() + "", f, stringPen, new System.Drawing.PointF(tx, ty), strFormat);
+                g.DrawString(rulerValue.ToString(), f, stringPen, new System.Drawing.PointF(tx, ty), strFormat);
                 rulerValue += (float)((MaxValue - MinValue) / (noOfParts - 1));
                 rulerValue = (float)System.Math.Round(rulerValue, 2);
 
