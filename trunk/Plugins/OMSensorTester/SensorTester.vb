@@ -66,7 +66,7 @@ Public Class SensorTester
     End Function
 
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
-
+        Return Nothing
     End Function
 
     Public ReadOnly Property pluginDescription() As String Implements OpenMobile.Plugin.IBasePlugin.pluginDescription

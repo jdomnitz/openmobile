@@ -29,12 +29,33 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMSlider:OMControl,IThrow
     {
+        /// <summary>
+        /// height of the slider bar
+        /// </summary>
         protected int sliderHeight=25;
+        /// <summary>
+        /// width of the slider bar
+        /// </summary>
         protected int sliderWidth;
+        /// <summary>
+        /// Slider position (OM units)
+        /// </summary>
         protected int sliderPosition = 0;
+        /// <summary>
+        /// slider bar image
+        /// </summary>
         protected imageItem sliderBar;
+        /// <summary>
+        /// slider track image
+        /// </summary>
         protected imageItem slider;
+        /// <summary>
+        /// minimum value
+        /// </summary>
         protected int minimum = 0;
+        /// <summary>
+        /// maximum value
+        /// </summary>
         protected int maximum = 100;
         /// <summary>
         /// Create a new OMSlider

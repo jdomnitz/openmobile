@@ -51,9 +51,12 @@ namespace OpenMobile.Controls
     public class OMBasicShape:OMControl
     {
         // Start of code added by Borte
+        /// <summary>
+        /// Sets the corner radius of a rounded rectangle
+        /// </summary>
         protected int cornerRadius = 10;
         /// <summary>
-        /// Sets the corner radius of a rounded rectangle (Added by Borte)
+        /// Sets the corner radius of a rounded rectangle
         /// </summary>
         public int CornerRadius
         {
@@ -124,9 +127,21 @@ namespace OpenMobile.Controls
                     break;
             }
         }
+        /// <summary>
+        /// The shape to draw
+        /// </summary>
         protected shapes shape;
+        /// <summary>
+        /// The fill color of the Shape
+        /// </summary>
         protected Color fillColor;
+        /// <summary>
+        /// The width in pixels of a border (0 for no border)
+        /// </summary>
         protected float borderSize = 0;
+        /// <summary>
+        /// The color of the border
+        /// </summary>
         protected Color borderColor;
         /// <summary>
         /// The shape to draw

@@ -1218,9 +1218,9 @@ namespace OpenMobile.Platform.X11
         public event EventHandler<EventArgs> MouseEnter;
 
         public event EventHandler<EventArgs> MouseLeave;
-
+#pragma warning disable 0067
         public event EventHandler<TouchEventArgs> Gesture;
-
+#pragma warning restore 0067
         public event EventHandler<ResolutionChange> ResolutionChange;
         #endregion
 

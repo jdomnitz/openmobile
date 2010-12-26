@@ -17,7 +17,7 @@ namespace OMLinPlayer
         {
             get { return "CDDB"; }
         }
-        string type;
+        
         public bool beginGetArtists(bool covers)
         {
             foreach (mediaInfo info in media)

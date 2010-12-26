@@ -286,6 +286,16 @@ namespace OpenMobile
             {
                 return vehicleInMotion;
             }
+            set
+            {
+                if (vehicleInMotion == value)
+                    return;
+                vehicleInMotion = value;
+                if (value)
+                    raiseSystemEvent(eFunction.vehicleMoving, string.Empty, string.Empty, string.Empty);
+                else
+                    raiseSystemEvent(eFunction.vehicleStopped, string.Empty, string.Empty, string.Empty);
+            }
         }
         private Location _location = new Location();
         public Location CurrentLocation

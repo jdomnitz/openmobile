@@ -31,11 +31,29 @@ namespace OpenMobile.Controls
     public class OMLabel:OMControl
     {
         // Comment by Borte: access modefier changed to protected to allow more access when this control is inherited
+        /// <summary>
+        /// Label Text
+        /// </summary>
         protected string text = String.Empty;
+        /// <summary>
+        /// Format for the labels text
+        /// </summary>
         protected OpenMobile.Graphics.eTextFormat textFormat = OpenMobile.Graphics.eTextFormat.Normal;
+        /// <summary>
+        /// Text alignment
+        /// </summary>
         protected OpenMobile.Graphics.Alignment textAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
+        /// <summary>
+        /// Sets the color of the text
+        /// </summary>
         protected Color color = Color.White;
+        /// <summary>
+        /// Sets the font of the text
+        /// </summary>
         protected Font font = new Font(Font.GenericSansSerif, 18F);
+        /// <summary>
+        /// Outline color of the text
+        /// </summary>
         protected Color outlineColor = Color.Black;
 
         /// <summary>
@@ -129,6 +147,9 @@ namespace OpenMobile.Controls
                 return "Label";
             }
         }
+        /// <summary>
+        /// Texture for text
+        /// </summary>
         protected OImage textTexture;
         /// <summary>
         /// The text displayed in the label

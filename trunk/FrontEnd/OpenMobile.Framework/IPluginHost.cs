@@ -129,7 +129,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// If the vehicle is in motion returns true (returns false if unknown)
         /// </summary>
-        bool VehicleInMotion { get; }
+        bool VehicleInMotion { get; set; }
         /// <summary>
         /// Gets/Sets the location video should be played (based on the 1000x600 default scale)
         /// </summary>

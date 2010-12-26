@@ -52,12 +52,29 @@ namespace OpenMobile.Controls
         /// Button double clicked
         /// </summary>
         public event userInteraction OnDoubleClick;
-
+        /// <summary>
+        /// Highlighted Image
+        /// </summary>
         protected imageItem focusImage;
+        /// <summary>
+        /// Button Image
+        /// </summary>
         protected imageItem image;
+        /// <summary>
+        /// Clicked Image
+        /// </summary>
         protected imageItem downImage;
+        /// <summary>
+        /// Opacity
+        /// </summary>
         protected byte transparency = 100;
+        /// <summary>
+        /// Button Orientation
+        /// </summary>
         protected eAngle orientation;
+        /// <summary>
+        /// Button Clicked Transition
+        /// </summary>
         protected eButtonTransition transition = eButtonTransition.BoxOut;
 
         /// <summary>
