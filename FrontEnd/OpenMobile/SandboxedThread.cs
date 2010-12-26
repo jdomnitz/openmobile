@@ -38,7 +38,7 @@ namespace OpenMobile
         {
             SafeThread.Asynchronous(function, Core.theHost);
         }
-        public static void handle(Exception e)
+        public static void Handle(Exception e)
         {
             string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
             Core.theHost.sendMessage("OMDebug", e.Source, message);
@@ -57,7 +57,7 @@ namespace OpenMobile
                     Core.pluginCollection[index] = null;
                 else if (Core.RenderingWindows[0] != null)
                     Core.pluginCollection.Remove(sample);
-                Core.theHost.raiseSystemEvent(eFunction.backgroundOperationStatus, sample.pluginName + " CRASHED!", "ERROR", "");
+                Core.theHost.raiseSystemEvent(eFunction.backgroundOperationStatus, sample.pluginName + " CRASHED!", "ERROR", String.Empty);
                 sample.Dispose();
             }
         }

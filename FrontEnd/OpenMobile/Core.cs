@@ -89,13 +89,13 @@ namespace OpenMobile
             {
                 for (int i = 0; i < RenderingWindows.Count; i++)
                 {
-                    RenderingWindows[i].transitionInPanel(availablePlugin.loadPanel(String.Empty, i));
-                    RenderingWindows[i].executeTransition(eGlobalTransition.None);
+                    RenderingWindows[i].TransitionInPanel(availablePlugin.loadPanel(String.Empty, i));
+                    RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", String.Empty);
                     if (a.Length == 0)
-                        RenderingWindows[i].executeTransition(eGlobalTransition.None);
+                        RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
                     else
-                        RenderingWindows[i].executeTransition(((InitialTransition)a[0]).Transition);
+                        RenderingWindows[i].ExecuteTransition(((InitialTransition)a[0]).Transition);
                 }
             });
             object[] b = mmPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
@@ -236,7 +236,7 @@ namespace OpenMobile
             loadMainMenu();
             loadEmUp();
             theHost.hal = new HalInterface();
-            theHost.load(); //Stagger I/O
+            theHost.Load(); //Stagger I/O
             getEmReady();
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);
 			theHost.hal.snd("32");
@@ -284,7 +284,7 @@ namespace OpenMobile
             return err;
         }
         [STAThread]
-        public static void Main()
+        private static void Main()
         {
             // Added by Borte to be able to set amount of screens with startup parameter
             foreach (string arg in Environment.GetCommandLineArgs())
