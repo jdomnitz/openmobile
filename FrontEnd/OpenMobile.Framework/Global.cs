@@ -1011,6 +1011,14 @@ namespace OpenMobile
         /// </summary>
         loadPlugin=84,
         /// <summary>
+        /// Occurs when the vehicle is in motion
+        /// </summary>
+        vehicleMoving=85,
+        /// <summary>
+        /// Occurs when a vehicle comes to a complete stop
+        /// </summary>
+        vehicleStopped=86,
+        /// <summary>
         /// A gesture has been recognized
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen</para>

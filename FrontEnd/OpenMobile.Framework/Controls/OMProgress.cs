@@ -31,18 +31,38 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMProgress : OMControl
     {
+        /// <summary>
+        /// progress value
+        /// </summary>
         protected int value = 0;
+        /// <summary>
+        /// minimum value
+        /// </summary>
         protected int minimum = 0;
+        /// <summary>
+        /// maximum value
+        /// </summary>
         protected int maximum = 100;
+        /// <summary>
+        /// vertical progress bar
+        /// </summary>
         protected bool vertical;
+        /// <summary>
+        /// Represents the first of two colors for the progress bars gradient
+        /// </summary>
         protected Color firstColor = Color.DarkRed;
+        /// <summary>
+        /// Represents the second of two colors for the progress bars gradient
+        /// </summary>
         protected Color secondColor = Color.Red;
+        /// <summary>
+        /// Background color
+        /// </summary>
         protected Color backColor = Color.FromArgb(180, Color.White);
 
         /// <summary>
         /// The background color of the progress bar
         /// </summary>
-        [Category("Progress Bar"), Description("The background color of the progress bar")]
         public Color BackgroundColor
         {
             get
@@ -96,7 +116,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// A number between the minimum and the maximum value
         /// </summary>
-        [Category("Progress Bar"), Description("An integer between the minimum and maximum value")]
         public int Value
         {
             get
@@ -115,7 +134,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The value at which the progress bar displays 100%
         /// </summary>
-        [Category("Progress Bar"), Description("The value at which the progress bar displays 100%")]
         public int Maximum
         {
             get
@@ -134,7 +152,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The value at which the progress bar displays 0%
         /// </summary>
-        [Category("Progress Bar"), Description("The value at which the progress bar displays 0%")]
         public int Minimum
         {
             get
@@ -149,7 +166,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Represents the first of two colors for the progress bars gradient
         /// </summary>
-        [Category("Progress Bar"), Description("Represents the first of two colors for the progress bar's gradient or the color of a solid background.")]
         public Color FirstColor
         {
             get
@@ -165,7 +181,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Represents the second of two colors for the progress bars gradient
         /// </summary>
-        [Category("Progress Bar"), Description("Represents the second of two colors for the progress bar's gradient.")]
         public Color SecondColor
         {
             get

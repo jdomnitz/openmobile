@@ -47,25 +47,79 @@ namespace OpenMobile.Controls
         /// Occurs when the highlighted item changes
         /// </summary>
         public event IndexChangedDelegate HighlightedIndexChanged;
+        /// <summary>
+        /// The index of the selected item
+        /// </summary>
         protected int selectedIndex = -1;
+        /// <summary>
+        /// the internal list of items
+        /// </summary>
         protected List<OMListItem> items;
         System.Timers.Timer throwtmr;
+        /// <summary>
+        /// Item background color
+        /// </summary>
         protected Color itemColor1 = Color.DarkSlateGray;
+        /// <summary>
+        /// item background color 2 (for gradiants)
+        /// </summary>
         protected Color itemColor2 = Color.Black;
+        /// <summary>
+        /// text highlighted color
+        /// </summary>
         protected Color highlightColor = Color.Black;
+        /// <summary>
+        /// text highlighted color outline
+        /// </summary>
         protected Color highlightColorOutline = Color.White;
+        /// <summary>
+        /// selected item background color
+        /// </summary>
         protected Color selectedItemColor1 = Color.Silver;
+        /// <summary>
+        /// selected item background color 2 (for gradiants)
+        /// </summary>
         protected Color selectedItemColor2 = Color.Gray;
+        /// <summary>
+        /// background color
+        /// </summary>
         protected Color background = Color.Transparent;
-        protected bool selectQueued = false;
+        private bool selectQueued;
+        /// <summary>
+        /// height of the list (OM units)
+        /// </summary>
         protected int listHeight;
+        /// <summary>
+        /// list vertical ofset
+        /// </summary>
         protected int moved;
+        /// <summary>
+        /// Start of the list (OM units)
+        /// </summary>
         protected int listStart;
+        /// <summary>
+        /// list acceleration
+        /// </summary>
         protected int thrown;
+        /// <summary>
+        /// text ofset
+        /// </summary>
         protected int listViewItemOffset;
-        protected bool showSelectedItemOnlyOnFocus = false;
+        /// <summary>
+        /// Used for keyboard navigation
+        /// </summary>
+        protected bool showSelectedItemOnlyOnFocus;
+        /// <summary>
+        /// Index of the currently highlighted item
+        /// </summary>
         protected int highlightedIndex = -1;
+        /// <summary>
+        /// list selection follows highlighted list item
+        /// </summary>
         protected bool selectFollowsHighlight;
+        /// <summary>
+        /// list style
+        /// </summary>
         protected eListStyle style;
 
         /// <summary>
