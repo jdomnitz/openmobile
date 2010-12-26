@@ -30,8 +30,8 @@ namespace OpenMobile
         {
             System.Net.Sockets.UdpClient receive;
             System.Net.Sockets.UdpClient send;
-            public string[] volume = null;
-            private bool isDisposed = false;
+            public string[] volume;
+            private bool isDisposed;
             public HalInterface()
             {
                 #if WINDOWS

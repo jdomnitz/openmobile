@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using OpenMobile.Controls;
 using OpenMobile.Graphics;
@@ -44,15 +45,18 @@ namespace OpenMobile
         Point ofsetIn = new Point(0, 0);
         Point ofsetOut = new Point(0, 0);
         private eGlobalTransition currentTransition;
-        private bool transitioning = false;
+        private bool transitioning;
         private bool keyboardActive;
         public MouseDevice currentMouse;
         private List<Point> currentGesture;
         // Throw started (will be reset when throw starts) for thrown interface
-        private bool ThrowStarted = false;
+        private bool ThrowStarted;
         // Relative mouse moved distance for thrown interface
         private Point ThrowRelativeDistance = new Point(-1, -1);
-        private int tick = 0;
+        private int tick;
+        bool Identify;
+        public bool blockHome;
+
         public PointF ScaleFactors
         {
             get
@@ -102,6 +106,8 @@ namespace OpenMobile
             this.tmrClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrClick_Tick);
             this.tmrLongClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrLongClick_Tick);
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public void InitializeRendering()
         {
             if ((this.WindowState == WindowState.Fullscreen)&&(screen==0))
@@ -118,7 +124,7 @@ namespace OpenMobile
                 if (options == GameWindowFlags.Fullscreen)
                     OnWindowStateChanged(EventArgs.Empty);
         }
-        bool Identify = false;
+
         public void PaintIdentity()
         {
             Identify = true;
@@ -169,7 +175,7 @@ namespace OpenMobile
         // End of code added by Borte
 
         #region ControlManagement
-        public void transitionInPanel(OMPanel newP)
+        public void TransitionInPanel(OMPanel newP)
         {
             OMControl c;
             bool exists = backgroundQueue.Contains(newP);
@@ -210,8 +216,8 @@ namespace OpenMobile
             if (resetHighlighted)
                 MouseMove(new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
         }
-        public bool blockHome = false;
-        public bool transitionOutEverything()
+
+        public bool TransitionOutEverything()
         {
             if (blockHome)
                 return false;
@@ -229,7 +235,7 @@ namespace OpenMobile
             rParam.globalTransitionOut = 1;
             return true;
         }
-        public void transitionOutPanel(OMPanel oldP)
+        public void TransitionOutPanel(OMPanel oldP)
         {
             if (highlighted != null)
                 highlighted.Mode = eModeType.Normal;
@@ -244,7 +250,7 @@ namespace OpenMobile
             rParam.globalTransitionIn = 0;
             rParam.globalTransitionOut = 1;
         }
-        public void executeTransition(eGlobalTransition transType)
+        public void ExecuteTransition(eGlobalTransition transType)
         {
             while (!this.Visible)
                 Thread.Sleep(10);
@@ -321,7 +327,7 @@ namespace OpenMobile
             SwapBuffers(); //show the new image before potentially lagging
             g.Finish();
         }
-        public void fadeOut()
+        public void FadeOut()
         {
             for (dimmer = 1; dimmer < 250; dimmer+=5)
             {
@@ -536,7 +542,7 @@ namespace OpenMobile
                             {
                                 ((IMouse)highlighted).MouseMove(screen, e, widthScale, heightScale);
                             }
-                            catch (Exception ex) { SandboxedThread.handle(ex); }
+                            catch (Exception ex) { SandboxedThread.Handle(ex); }
                         if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                             if (ThrowStarted)
                                 if (System.Math.Abs(e.X - ThrowStart.X) > 3 || (System.Math.Abs(e.Y - ThrowStart.Y) > 3))
@@ -619,31 +625,7 @@ namespace OpenMobile
                 }
             }
         }
-#if false
-        private void RenderingWindow_MouseDoubleClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
-        {
-            tmrLongClick.Enabled = false;
-            if (highlighted != null)
-            {
-                if (rParam.currentMode == eModeType.Highlighted)
-                {
-                    if (typeof(OMButton).IsInstanceOfType(highlighted))
-                    {
-                        if (lastClick != null)
-                        {
-                            tmrClick.Enabled = true;
-                            lastClick.Mode = eModeType.Clicked;
-                            SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.clickMe(screen); });
-                        }
-                    }
-                    else if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted) == true))
-                    {
-                        SandboxedThread.Asynchronous(delegate() { (highlighted as IClickable).clickMe(screen); });
-                    }
-                }
-            }
-        }
-#endif
+
         private void tmrLongClick_Tick(object sender, EventArgs e)
         {
             tmrLongClick.Enabled = false;
@@ -721,7 +703,7 @@ namespace OpenMobile
             {
                 if (currentGesture.Count > 0)
                 {
-                    AlphaRecognizer rec = new AlphaRecognizer();
+                    Recognizer rec = new Recognizer();
                     rec.Initialize();
                     for (int i = 0; i < currentGesture.Count; i++)
                         rec.AddPoint(currentGesture[i], false);
@@ -844,7 +826,7 @@ namespace OpenMobile
             }
             base.OnWindowStateChanged(e);
         }
-        public bool defaultMouse = false;
+        public bool defaultMouse;
         float totalScale = 1F;
         private void RenderingWindow_Resize(object sender, EventArgs e)
         {

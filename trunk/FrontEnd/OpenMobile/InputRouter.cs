@@ -23,6 +23,7 @@ using OpenMobile.Input;
 using OpenMobile.Data;
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace OpenMobile
 {
@@ -33,10 +34,11 @@ namespace OpenMobile
 			get {
 				if (driver == null)
 					return new string[] { "Default Keyboard" };
-				string[] ret = new string[driver.Keyboard.Count + 1];
+                IList<KeyboardDevice> keybs = driver.Keyboard;
+				string[] ret = new string[keybs.Count + 1];
 				ret[0] = "Default Keyboard";
-				for (int i = 0; i < driver.Keyboard.Count; i++)
-					ret[i + 1] = driver.Keyboard[i].Description;
+				for (int i = 0; i < keybs.Count; i++)
+					ret[i + 1] = keybs[i].Description;
 				return ret;
 			}
 		}
@@ -44,10 +46,11 @@ namespace OpenMobile
 			get {
 				if (driver == null)
 					return new string[] { "Default Mouse" };
-				string[] ret = new string[driver.Mouse.Count + 1];
+                IList<MouseDevice> mice = driver.Mouse;
+				string[] ret = new string[mice.Count + 1];
 				ret[0] = "Default Mouse";
-				for (int i = 0; i < driver.Mouse.Count; i++)
-					ret[i + 1] = driver.Mouse[i].Description;
+				for (int i = 0; i < mice.Count; i++)
+					ret[i + 1] = mice[i].Description;
 				return ret;
 			}
 		}
@@ -55,7 +58,6 @@ namespace OpenMobile
 		{
 			if (driver != null) {
 				driver.Dispose ();
-				driver = null;
 			}
 		}
 		public static void Initialize ()

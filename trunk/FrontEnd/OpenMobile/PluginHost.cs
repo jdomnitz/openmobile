@@ -50,10 +50,11 @@ namespace OpenMobile
         private int[] currentPosition;
         private int[] nextPosition;
         public HalInterface hal;
-        private bool vehicleInMotion = false;
+        private bool vehicleInMotion;
         private eGraphicsLevel level;
         private Rectangle videoPosition;
-        private bool suspending = false;
+        private bool suspending;
+        private bool closing;
         historyCollection history = new historyCollection(screenCount);
         #endregion
 
@@ -140,6 +141,8 @@ namespace OpenMobile
         {
             if ((instance < 0) || (instance >= 8))
                 return false;
+            if (source == null)
+                return false;
             currentPosition[instance] = -1;
             queued[instance].Clear();
             queued[instance].AddRange(source.GetRange(0, source.Count));
@@ -225,7 +228,7 @@ namespace OpenMobile
             }
             set
             {
-                skinpath = skinpath = Path.Combine(Application.StartupPath, "Skins", value);
+                skinpath = Path.Combine(Application.StartupPath, "Skins", value);
             }
         }
         public string DataPath
@@ -387,8 +390,8 @@ namespace OpenMobile
             {
                 lock (Core.RenderingWindows[i])
                 {
-                    Core.RenderingWindows[i].transitionInPanel(security);
-                    Core.RenderingWindows[i].executeTransition(eGlobalTransition.None);
+                    Core.RenderingWindows[i].TransitionInPanel(security);
+                    Core.RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
                     history.setDisabled(i, true);
                     Core.RenderingWindows[i].blockHome = true;
                 }
@@ -398,8 +401,8 @@ namespace OpenMobile
             {
                 lock (Core.RenderingWindows[i])
                 {
-                    Core.RenderingWindows[i].transitionOutPanel(security);
-                    Core.RenderingWindows[i].executeTransition(eGlobalTransition.None);
+                    Core.RenderingWindows[i].TransitionOutPanel(security);
+                    Core.RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
                     history.setDisabled(i, false);
                     Core.RenderingWindows[i].blockHome = false;
                 }
@@ -421,7 +424,7 @@ namespace OpenMobile
             if (OnHighlightedChanged != null)
                 OnHighlightedChanged(sender, screen);
         }
-        public void load()
+        public void Load()
         {
             for (int i = 0; i < ScreenCount; i++)
                 if (!DisplayDevice.AvailableDisplays[i].Landscape)
@@ -466,7 +469,7 @@ namespace OpenMobile
                 if (type == eMediaType.NotSet)
                     StorageAnalyzer.AnalyzeAsync(arg, justInserted);
             }
-            catch (Exception e) { SandboxedThread.handle(e); }
+            catch (Exception e) { SandboxedThread.Handle(e); }
         }
 
         #region Power Events
@@ -486,7 +489,6 @@ namespace OpenMobile
             }
         }
         #endregion
-        bool closing=false;
         public bool execute(eFunction function)
         {
             switch (function)
@@ -926,7 +928,7 @@ namespace OpenMobile
                             return false;
                         lock (Core.RenderingWindows[ret])
                         {
-                            if (!Core.RenderingWindows[ret].transitionOutEverything())
+                            if (!Core.RenderingWindows[ret].TransitionOutEverything())
                                 return false;
                         }
                         history.setDisabled(ret, false);
@@ -994,7 +996,7 @@ namespace OpenMobile
         }
         public bool execute(eFunction function, string arg1, string arg2)
         {
-            int ret;
+            int ret, ret2;
             switch (function)
             {
                 case eFunction.TransitionToPanel:
@@ -1006,12 +1008,14 @@ namespace OpenMobile
 
                     if (level == eGraphicsLevel.Minimal)
                         effect = eGlobalTransition.None;
+                    else if (string.IsNullOrEmpty(arg2))
+                        effect = eGlobalTransition.None;
                     else
                         try
                         {
                             effect = (eGlobalTransition)Enum.Parse(typeof(eGlobalTransition), arg2);
                         }
-                        catch (Exception)
+                        catch (ArgumentException)
                         {
                             effect = eGlobalTransition.None;
                         }
@@ -1019,7 +1023,7 @@ namespace OpenMobile
                     {
                         lock (Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[ret].executeTransition(effect);
+                            Core.RenderingWindows[ret].ExecuteTransition(effect);
                         }
                         raiseSystemEvent(eFunction.ExecuteTransition, arg1, effect.ToString(), String.Empty);
                         return true;
@@ -1045,7 +1049,7 @@ namespace OpenMobile
                             return false;
                         lock (Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[ret].transitionInPanel(k);
+                            Core.RenderingWindows[ret].TransitionInPanel(k);
                         }
                         raiseSystemEvent(eFunction.TransitionToPanel, arg1, history.Peek(ret).pluginName, history.Peek(ret).panelName);
                         history.Dequeue(ret);
@@ -1104,7 +1108,6 @@ namespace OpenMobile
                     {
                         if ((ret < 0) || (ret >= 8))
                             return false;
-                        int ret2;
                         if (int.TryParse(arg2, out ret2) == true)
                         {
                             if (queued[ret].Count > ret2)
@@ -1141,7 +1144,9 @@ namespace OpenMobile
                         {
                             if (currentMediaPlayer[ret] == null)
                                 return false;
-                            return currentMediaPlayer[ret].setPosition(ret, float.Parse(arg2));
+                            float pos;
+                            if(float.TryParse(arg2,out pos))
+                                return currentMediaPlayer[ret].setPosition(ret, pos);
                         }
                         return false;
                     }
@@ -1153,7 +1158,9 @@ namespace OpenMobile
                         {
                             if (currentMediaPlayer[ret] == null)
                                 return false;
-                            return currentMediaPlayer[ret].setPlaybackSpeed(ret, float.Parse(arg2));
+                            float speed;
+                            if (float.TryParse(arg2,out speed))
+                                return currentMediaPlayer[ret].setPlaybackSpeed(ret, speed);
                         }
                         return false;
                     }
@@ -1166,16 +1173,14 @@ namespace OpenMobile
                             if (currentTunedContent[ret] == null)
                                 return false;
                             raiseMediaEvent(eFunction.setPlayerVolume, ret, arg2);
-                            return currentTunedContent[ret].setVolume(ret, int.Parse(arg2));
+                            if(int.TryParse(arg2,out ret2))
+                                return currentTunedContent[ret].setVolume(ret, ret2);
                         }
                         else
                         {
                             raiseMediaEvent(eFunction.setPlayerVolume, ret, arg2);
-                            try
-                            {
-                                return currentMediaPlayer[ret].setVolume(ret, int.Parse(arg2));
-                            }
-                            catch (Exception) { return false; }
+                            if (int.TryParse(arg2,out ret2))
+                                return currentMediaPlayer[ret].setVolume(ret, ret2);
                         }
                     }
                     return false;
@@ -1239,9 +1244,9 @@ namespace OpenMobile
                     {
                         if ((ret < -2) || (ret > 100))
                             return false;
-                        if (int.TryParse(arg2, out ret) == false)
+                        if (int.TryParse(arg2, out ret2) == false)
                             return false;
-                        if ((ret < 0) || (ret >= instanceCount))
+                        if ((ret2 < 0) || (ret2 >= instanceCount))
                             return false;
                         hal.snd("66|" + arg1 + "|" + arg2);
                         return true;
@@ -1260,11 +1265,10 @@ namespace OpenMobile
                     {
                         if ((ret < 0) || (ret >= screenCount))
                             return false;
-                        int ret2;
                         if (int.TryParse(arg2, out ret2) == false)
                             return false;
                         if ((ret2 == 0) && ((Environment.OSVersion.Version.Major < 6)||ret>0))
-                            Core.RenderingWindows[ret].fadeOut();
+                            Core.RenderingWindows[ret].FadeOut();
                         hal.snd("40|" + arg1 + "|" + arg2);
                         return true;
                     }
@@ -1274,7 +1278,7 @@ namespace OpenMobile
                     {
                         if ((ret < 0) || (ret >= instanceCount))
                             return false;
-                        if (int.TryParse(arg2, out ret) == false)
+                        if (int.TryParse(arg2, out ret2) == false)
                             return false;
                         hal.snd("42|" + arg1 + "|" + arg2);
                         return true;
@@ -1285,7 +1289,6 @@ namespace OpenMobile
                     {
                         if ((ret < 0) || (ret >= screenCount))
                             return false;
-                        int ret2;
                         if (int.TryParse(arg2, out ret2))
                         {
                             if ((ret2 < 0) || (ret2 >= instanceCount))
@@ -1363,7 +1366,7 @@ namespace OpenMobile
                             panel.Priority = ePriority.Urgent;
                         lock (Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[ret].transitionInPanel(panel);
+                            Core.RenderingWindows[ret].TransitionInPanel(panel);
                             raiseSystemEvent(eFunction.TransitionToPanel, arg1, arg2, arg3);
                             if (!panel.UIPanel)
                                 history.Enqueue(ret, arg2, arg3, panel.Forgotten);
@@ -1379,7 +1382,7 @@ namespace OpenMobile
                             return false;
                         lock (Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[ret].transitionOutPanel(panel);
+                            Core.RenderingWindows[ret].TransitionOutPanel(panel);
                         }
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg1, arg2, arg3);
                         return true;
@@ -1449,7 +1452,7 @@ namespace OpenMobile
         {
             if (to == "SandboxedThread")
             {
-                SandboxedThread.handle(data as Exception);
+                SandboxedThread.Handle(data as Exception);
                 return true;
             }
             try
@@ -1473,7 +1476,7 @@ namespace OpenMobile
                 if (OnSystemEvent != null)
                     OnSystemEvent(e, arg1, arg2, arg3);
             }
-            catch (Exception error) { SandboxedThread.handle(error); }
+            catch (Exception error) { SandboxedThread.Handle(error); }
         }
         public void raisePowerEvent(ePowerEvent e)
         {
@@ -1482,8 +1485,15 @@ namespace OpenMobile
                 if (suspending)
                     return; //Already going
                 suspending = true;
-                if (OnPowerChange != null)
-                    OnPowerChange(e);
+                try
+                {
+                    if (OnPowerChange != null)
+                        OnPowerChange(e);
+                }
+                catch (Exception error)
+                {
+                    SandboxedThread.Handle(error);
+                }
                 return;
             }
             else if (e == ePowerEvent.SystemResumed)
@@ -1498,7 +1508,7 @@ namespace OpenMobile
                 if (OnNavigationEvent!=null)
                     OnNavigationEvent(type, arg);
             }
-            catch (Exception e) { SandboxedThread.handle(e); }
+            catch (Exception e) { SandboxedThread.Handle(e); }
         }
         public void raiseWirelessEvent(eWirelessEvent type, string arg)
         {
@@ -1507,7 +1517,7 @@ namespace OpenMobile
                 if (OnWirelessEvent != null)
                     OnWirelessEvent(type, arg);
             }
-            catch (Exception e) { SandboxedThread.handle(e); }
+            catch (Exception e) { SandboxedThread.Handle(e); }
         }
         private void raiseMediaEvent(eFunction e, int instance, string arg)
         {
@@ -1536,7 +1546,7 @@ namespace OpenMobile
                 if (OnKeyPress != null)
                     return OnKeyPress(type, arg);
             }
-            catch (Exception e) { SandboxedThread.handle(e); }
+            catch (Exception e) { SandboxedThread.Handle(e); }
             return false;
         }
 
@@ -1666,13 +1676,15 @@ namespace OpenMobile
                     plugin = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
                     if (plugin == null)
                         return;
-                    data = ((INavigation)plugin).getMap;
+                    if (plugin is INavigation)
+                        data = ((INavigation)plugin).getMap;
                     return;
                 case eGetData.GetMediaDatabase:
                     plugin = Core.pluginCollection.Find(t => t.pluginName == name);
                     if (plugin == null)
                         return;
-                    data = ((IMediaDatabase)plugin).getNew();
+                    if (plugin is IMediaDatabase)
+                        data = ((IMediaDatabase)plugin).getNew();
                     break;
                 case eGetData.GetPlugins:
                     if (string.IsNullOrEmpty(name))
@@ -1691,7 +1703,8 @@ namespace OpenMobile
                         plugin = Core.pluginCollection.Find(p => p.pluginName == name);
                         if (plugin == null)
                             return;
-                        data = ((IDataProvider)plugin).updaterStatus();
+                        if (plugin is IDataProvider)
+                            data = ((IDataProvider)plugin).updaterStatus();
                     }
                     break;
                 case eGetData.GetSystemVolume:
@@ -1701,13 +1714,15 @@ namespace OpenMobile
                     plugin = Core.pluginCollection.Find(p => p.pluginName == name);
                     if (plugin == null)
                         return;
-                    data = ((IRawHardware)plugin).firmwareVersion;
+                    if (plugin is IRawHardware)
+                        data = ((IRawHardware)plugin).firmwareVersion;
                     return;
                 case eGetData.GetDeviceInfo:
                     plugin = Core.pluginCollection.Find(p => p.pluginName == name);
                     if (plugin == null)
                         return;
-                    data = ((IRawHardware)plugin).deviceInfo;
+                    if (plugin is IRawHardware)
+                        data = ((IRawHardware)plugin).deviceInfo;
                     return;
                 case eGetData.GetAvailableNetworks:
                     List<connectionInfo> cInf = new List<connectionInfo>();
@@ -1799,7 +1814,8 @@ namespace OpenMobile
                         {
                             if (hal.volume[0] == param)
                             {
-                                data = int.Parse(hal.volume[1]);
+                                if(int.TryParse(hal.volume[1],out ret))
+                                    data = ret;
                                 hal.volume = null;
                             }
                         }
