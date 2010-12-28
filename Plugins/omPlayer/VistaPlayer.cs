@@ -513,7 +513,13 @@ namespace OMPlayer
                 array = new string[devices.Count + 1];
                 array[0]="Default Device";
                 for (int i = 0; i < devices.Count; i++)
-                    array[i+1] = devices[i].Properties[PKEY.FriendlyName].Value.ToString();
+                {
+                    PropertyStoreProperty prop = devices[i].Properties[PKEY.FriendlyName];
+                    if (prop == null)
+                        array[i + 1] = "Unknown Device";
+                    else
+                        array[i + 1] = prop.Value.ToString();
+                }
                 return array;
             }
         }
