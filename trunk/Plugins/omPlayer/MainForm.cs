@@ -566,23 +566,22 @@ namespace OMPlayer
     {
         get
         {
-            if (array == null)
+            if (array != null)
+                return array;
+            if (theHost == null)
+                vistaMode = (Environment.OSVersion.Version.Major > 5);
+            if (vistaMode)
+                return new string[0];
+            DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
+            List<string> lst = new List<string>();
+            for (int i = 0; i < d.Length; i++)
             {
-                if (theHost == null)
-                    vistaMode = (Environment.OSVersion.Version.Major > 5);
-                if (vistaMode)
-                    return new string[0];
-                DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
-                List<string> lst = new List<string>();
-                for (int i = 0; i < d.Length; i++)
+                if (d[i].Name.Contains("DirectSound"))
                 {
-                    if (d[i].Name.Contains("DirectSound"))
-                    {
-                        lst.Add(d[i].Name.Replace("DirectSound", "").Replace(":", "").Replace("  ", " "));
-                    }
+                    lst.Add(d[i].Name.Replace("DirectSound", "").Replace(":", "").Replace("  ", " "));
                 }
-                array = lst.ToArray();
             }
+            array = lst.ToArray();
             return array;
         }
     }

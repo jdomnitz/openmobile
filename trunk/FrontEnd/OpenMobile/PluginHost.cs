@@ -196,7 +196,11 @@ namespace OpenMobile
                 {
                     devs = ((IAVPlayer)player).OutputDevices;
                 }
-                catch (Exception) { }
+                catch (Exception e)
+                {
+                    string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
+                    Core.theHost.sendMessage("OMDebug", e.Source, message);
+                }
                 if (devs.Length == 0)
                     continue;
             }
