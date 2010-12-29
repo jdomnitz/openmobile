@@ -201,13 +201,11 @@ namespace OpenMobile
                     string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
                     Core.theHost.sendMessage("OMDebug", e.Source, message);
                 }
-                if (devs.Length == 0)
-                    continue;
-            }
-            if (devs.Length > 0)
-            {
-                devices = devs;
-                return true;
+                if (devs.Length > 0)
+                {
+                    devices = devs;
+                    return true;
+                }
             }
             return false;
         }
