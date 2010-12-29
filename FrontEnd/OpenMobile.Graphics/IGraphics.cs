@@ -22,6 +22,7 @@ namespace OpenMobile.Graphics
         void DrawLine(Pen pen, int x1, int y1, int x2, int y2);
         void DrawLine(Pen pen, Point pt1, Point pt2);
         void DrawLine(Pen pen, float x1, float y1, float x2, float y2);
+        void DrawLine(Pen pen, Point[] points);
         void DrawPolygon(Pen pen, Point[] points);
         void DrawRectangle(Pen pen, int x, int y, int width, int height);
         void DrawRectangle(Pen pen, Rectangle rect);

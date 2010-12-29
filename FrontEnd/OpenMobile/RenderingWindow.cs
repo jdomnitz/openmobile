@@ -341,7 +341,9 @@ namespace OpenMobile
         private void RenderGesture()
         {
             foreach (Point p in currentGesture)
-                g.FillEllipse(new Brush(Color.Red), new Rectangle((int)((p.X - 10) / widthScale), (int)((p.Y - 10) / heightScale), 20, 20));
+                g.FillEllipse(new Brush(Color.Red), new Rectangle((p.X - 10), (p.Y - 10), 20, 20));
+            if (currentGesture.Count>1)
+                g.DrawLine(new Pen(Color.Red,18F), currentGesture.ToArray());
         }
         protected override void OnResize(EventArgs e)
         {
@@ -527,7 +529,7 @@ namespace OpenMobile
                         currentGesture = new List<Point>();
                         rParam.currentMode = eModeType.gesturing;
                     }
-                    currentGesture.Add(e.Location);
+                    currentGesture.Add(new Point(e.Location.X/widthScale,e.Location.Y/heightScale));
                     Invalidate();
                     if (lastClick != null)
                         lastClick.Mode = eModeType.Highlighted;
@@ -1106,6 +1108,7 @@ namespace OpenMobile
                 if ((highlighted != null) && typeof(IThrow).IsInstanceOfType(highlighted))
                     ((IThrow)highlighted).MouseThrowEnd(screen, Point.Empty);
             }
+            currentGesture = null;
             tmrLongClick.Enabled = false;
         }
         void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
