@@ -291,7 +291,17 @@ namespace OpenMobile.Graphics
         {
             DrawImage(image, X, Y, Width, Height, transparency, eAngle.Normal);
         }
-
+        public void DrawLine(Pen pen, Point[] points)
+        {
+            Raw.LineWidth(pen.Width);
+            Raw.Enable(EnableCap.LineSmooth);
+            Raw.Color4(pen.Color);
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.VertexPointer<Point>(2,VertexPointerType.Int, 0, points);
+            Raw.DrawArrays(BeginMode.LineStrip, 0, points.Length);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+            Raw.Disable(EnableCap.LineSmooth);
+        }
         public void DrawLine(Pen pen, int x1, int y1, int x2, int y2)
         {
             Raw.LineWidth(pen.Width);

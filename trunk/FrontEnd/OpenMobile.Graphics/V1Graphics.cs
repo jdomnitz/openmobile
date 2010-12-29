@@ -458,6 +458,17 @@ namespace OpenMobile.Graphics
             Raw.End();
             Raw.Disable(EnableCap.Texture2D);
         }
+        public void DrawLine(Pen pen, Point[] points)
+        {
+            Raw.Color4(pen.Color);
+            Raw.LineWidth(pen.Width);
+            Raw.Enable(EnableCap.LineSmooth);
+            Raw.Begin(BeginMode.LineStrip);
+            foreach (Point p in points)
+                Raw.Vertex2(p.X, p.Y);
+            Raw.End();
+            Raw.Disable(EnableCap.LineSmooth);
+        }
         public void DrawLine(Pen pen, Point pt1, Point pt2)
         {
             DrawLine(pen, pt1.X, pt1.Y, pt2.X, pt2.Y);

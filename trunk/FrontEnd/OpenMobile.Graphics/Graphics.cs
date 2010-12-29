@@ -163,6 +163,11 @@ namespace OpenMobile.Graphics
             implementation.DrawLine(pen, x1, y1, x2, y2);
         }
 
+        public void DrawLine(Pen pen, Point[] points)
+        {
+            implementation.DrawLine(pen, points);
+        }
+
         public void DrawPolygon(Pen pen, Point[] points)
         {
             implementation.DrawPolygon(pen, points);
