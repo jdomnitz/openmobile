@@ -138,16 +138,6 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Returns the type of control
-        /// </summary>
-        public static string TypeName
-        {
-            get
-            {
-                return "Label";
-            }
-        }
-        /// <summary>
         /// Texture for text
         /// </summary>
         protected OImage textTexture;

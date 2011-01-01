@@ -49,10 +49,6 @@ namespace OpenMobile.Controls
         /// </summary>
         public event userInteraction OnLongClick;
         /// <summary>
-        /// Button double clicked
-        /// </summary>
-        public event userInteraction OnDoubleClick;
-        /// <summary>
         /// Highlighted Image
         /// </summary>
         protected imageItem focusImage;
@@ -100,17 +96,6 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Returns the type of control
-        /// </summary>
-        public static new string TypeName
-        {
-            get
-            {
-                return "Button";
-            }
-        }
-
-        /// <summary>
         /// Fires the buttons OnClick event
         /// </summary>
         public void clickMe(int screen)
@@ -119,14 +104,6 @@ namespace OpenMobile.Controls
                 OnClick(this, screen);
         }
 
-        /// <summary>
-        /// Fires the OnDoubleClick Event
-        /// </summary>
-        public void doubleClickMe(int screen)
-        {
-                if (OnDoubleClick != null)
-                    OnDoubleClick(this, screen);
-        }
         /// <summary>
         /// Fires the OnLongClick event
         /// </summary>

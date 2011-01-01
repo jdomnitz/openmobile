@@ -36,10 +36,6 @@ namespace OpenMobile.Controls
         /// </summary>
         void clickMe(int screen);
         /// <summary>
-        /// Fires the OnDoubleClick Event
-        /// </summary>
-        void doubleClickMe(int screen);
-        /// <summary>
         /// Fires the OnLongClick event
         /// </summary>
         void longClickMe(int screen);

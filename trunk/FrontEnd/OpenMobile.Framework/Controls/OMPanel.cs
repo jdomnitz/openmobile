@@ -245,23 +245,12 @@ namespace OpenMobile.Controls
             }
         }
 
-        /// <summary>
-        /// Returns the type of control
-        /// </summary>
-        public static string TypeName
-        {
-            get
-            {
-                return "Panel";
-            }
-        }
         private Color color1=Color.DarkBlue;
         private Color color2=Color.MediumSlateBlue;
         
         /// <summary>
         /// The panels background color
         /// </summary>
-        [Category("Panel")]
         public Color BackgroundColor1
         {
             get
@@ -278,7 +267,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The second color in a background gradiant
         /// </summary>
-        [Category("Panel")]
         public Color BackgroundColor2
         {
             get
@@ -297,7 +285,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the type of background drawn for this panel
         /// </summary>
-        [Category("Panel")]
         public backgroundStyle BackgroundType
         {
             get
@@ -313,7 +300,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The background image rendered behind the controls
         /// </summary>
-        [Category("Panel")]
         public imageItem BackgroundImage
         {
             get 

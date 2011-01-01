@@ -210,16 +210,6 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Returns the type of control
-        /// </summary>
-        public static new string TypeName
-        {
-            get
-            {
-                return "List";
-            }
-        }
-        /// <summary>
         /// Clears the list
         /// </summary>
         public void Clear()
@@ -787,10 +777,6 @@ namespace OpenMobile.Controls
         /// </summary>
         public event userInteraction OnLongClick;
         /// <summary>
-        /// Button double clicked
-        /// </summary>
-        public event userInteraction OnDoubleClick;
-        /// <summary>
         /// Raise the click event
         /// </summary>
         /// <param name="screen"></param>
@@ -804,20 +790,9 @@ namespace OpenMobile.Controls
             if (OnClick != null)
                 OnClick(this, screen);
         }
+
         /// <summary>
-        /// Raise the double click event
-        /// </summary>
-        /// <param name="screen"></param>
-        public void doubleClickMe(int screen)
-        {
-            if (clickSelect == true)
-                if ((selectedIndex != lastSelected) || (mode == eModeType.Scrolling))
-                    return;
-            if (OnDoubleClick != null)
-                OnDoubleClick(this, screen);
-        }
-        /// <summary>
-        /// Raise the double click event
+        /// Raise the long click event
         /// </summary>
         /// <param name="screen"></param>
         public void longClickMe(int screen)
