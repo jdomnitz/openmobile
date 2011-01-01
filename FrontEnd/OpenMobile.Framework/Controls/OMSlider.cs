@@ -226,16 +226,6 @@ namespace OpenMobile.Controls
                 slider = value;
             }
         }
-        /// <summary>
-        /// The type of control
-        /// </summary>
-        public static string TypeName
-        {
-            get
-            {
-                return "Slider";
-            }
-        }
 
         /// <summary>
         /// Draws the slider to the User Interface

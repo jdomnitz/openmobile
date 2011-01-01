@@ -93,17 +93,6 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Returns the type of control
-        /// </summary>
-        public static string TypeName
-        {
-            get
-            {
-                return "Image";
-            }
-        }
-
-        /// <summary>
         /// Draws the control
         /// </summary>
         /// <param name="g">The UI's graphics object</param>

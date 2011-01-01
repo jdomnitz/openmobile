@@ -353,16 +353,7 @@ namespace OpenMobile.Controls
         int veilLeft = 0;
         OImage[] charTex;
         OImage currentLetterTex;
-        /// <summary>
-        /// The type of control
-        /// </summary>
-        public static new string TypeName
-        {
-            get
-            {
-                return "Animated Label";
-            }
-        }
+
         /// <summary>
         /// Draws the control
         /// </summary>

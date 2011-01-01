@@ -100,24 +100,10 @@ namespace OpenMobile.Controls
             }
         }
         /// <summary>
-        /// Fires the OnDoubleClick Event
-        /// </summary>
-        public void doubleClickMe(int screen) { }
-        /// <summary>
         /// Fires the OnLongClick event
         /// </summary>
         public void longClickMe(int screen) { }
 
-        /// <summary>
-        /// Returns the type of control
-        /// </summary>
-        public static new string TypeName
-        {
-            get
-            {
-                return "Message Box";
-            }
-        }
         /// <summary>
         /// Creates a new OMMessage box
         /// </summary>

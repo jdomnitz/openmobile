@@ -91,23 +91,7 @@ namespace OpenMobile.Controls
         public void longClickMe(int screen)
         {
         }
-        /// <summary>
-        /// Fires the OnDoubleClick Event
-        /// </summary>
-        public void doubleClickMe(int screen)
-        {
-        }
 
-        /// <summary>
-        /// Returns the type of control
-        /// </summary>
-        public static new string TypeName
-        {
-            get
-            {
-                return "Checkbox";
-            }
-        }
         private bool genHighlight;
         /// <summary>
         /// Draws the control

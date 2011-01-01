@@ -272,15 +272,5 @@ namespace OpenMobile.Controls
                 raiseUpdate(true);
             }
         }
-        /// <summary>
-        /// Returns the type of control
-        /// </summary>
-        public static string TypeName
-        {
-            get
-            {
-                return "Basic Shape";
-            }
-        }
     }
 }

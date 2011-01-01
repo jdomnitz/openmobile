@@ -616,7 +616,8 @@ namespace OMDVD
                     if (o == null)
                         return -1;
                     PointF sf = (PointF)o;
-                    return videoWindow.SetWindowPosition((int)(theHost.VideoPosition.Left * sf.X), (int)(theHost.VideoPosition.Top * sf.Y), (int)(theHost.VideoPosition.Width * sf.X), (int)(theHost.VideoPosition.Height * sf.Y));
+                    Rectangle pos = theHost.GetVideoPosition(instance);
+                    return videoWindow.SetWindowPosition((int)(pos.Left * sf.X), (int)(pos.Top * sf.Y), (int)(pos.Width * sf.X), (int)(pos.Height * sf.Y));
                 }
             }
 

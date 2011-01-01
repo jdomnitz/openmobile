@@ -23,17 +23,47 @@ using OpenMobile.Graphics;
 using System;
 namespace OpenMobile.Controls
 {
+    /// <summary>
+    /// Contains and Renders a collection of OMControls
+    /// </summary>
     public class OMScrollingContainer:OMControl,IMouse,IThrow,IClickable
     {
+        /// <summary>
+        /// the collection of controls
+        /// </summary>
         protected List<OMControl> Controls = new List<OMControl>();
+        /// <summary>
+        /// The control area
+        /// </summary>
         protected Rectangle area = new Rectangle();
+        /// <summary>
+        /// the vertical ofset
+        /// </summary>
         protected int scrolly;
+        /// <summary>
+        /// the scrollbar width
+        /// </summary>
         protected int scrollwidth;
-        protected Point[] up;
-        protected Point[] down;
+        private Point[] up;
+        private Point[] down;
+        /// <summary>
+        /// The scrollbar top ofset
+        /// </summary>
         protected int scrolltop;
+        /// <summary>
+        /// the scroll bar height
+        /// </summary>
         protected int scrollheight;
+        /// <summary>
+        /// The currently highlighted control
+        /// </summary>
+        protected OMControl highlighted;
 
+
+
+        /// <summary>
+        /// Width of the scrollbar (0 for none)
+        /// </summary>
         public int ScrollBarWidth
         {
             get
@@ -54,6 +84,13 @@ namespace OpenMobile.Controls
                 updateScroll();
             }
         }
+        /// <summary>
+        /// Create a new OMScrollingContainer
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
         public OMScrollingContainer(int x, int y, int w, int h)
         {
             area.X = left = x;
@@ -61,10 +98,18 @@ namespace OpenMobile.Controls
             area.Width = width = w;
             area.Height = height = h;
         }
+        /// <summary>
+        /// Find a control matching the given predicate
+        /// </summary>
+        /// <param name="match"></param>
+        /// <returns></returns>
         public OMControl Find(Predicate<OMControl> match)
         {
             return Controls.Find(match);
         }
+        /// <summary>
+        /// The area that controls occupy
+        /// </summary>
         public Rectangle ControlArea
         {
             get
@@ -76,6 +121,9 @@ namespace OpenMobile.Controls
                 area = value;
             }
         }
+        /// <summary>
+        /// The OMPanel that contains this control
+        /// </summary>
         public override OMPanel Parent
         {
             get
@@ -89,16 +137,29 @@ namespace OpenMobile.Controls
                     c.Parent = parent;
             }
         }
+        /// <summary>
+        /// Add a new control to the collection
+        /// </summary>
+        /// <param name="control"></param>
         public void Add(OMControl control)
         {
             control.Parent = this.parent;
             control.UpdateThisControl += raiseUpdate;
             Controls.Add(control);
         }
+        /// <summary>
+        /// Remove a control from the collection
+        /// </summary>
+        /// <param name="control"></param>
         public void Remove(OMControl control)
         {
             Controls.Remove(control);
         }
+        /// <summary>
+        /// Gets/Sets the given control
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public OMControl this[int index]
         {
             get
@@ -110,6 +171,11 @@ namespace OpenMobile.Controls
                 Controls[index] = value;
             }
         }
+        /// <summary>
+        /// Gets a control by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public OMControl this[string name]
         {
             get
@@ -117,6 +183,11 @@ namespace OpenMobile.Controls
                 return Controls.Find(p => p.Name == name);
             }
         }
+        /// <summary>
+        /// Draw the control
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
         public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
         {
             g.SetClip(this.toRegion());
@@ -139,7 +210,13 @@ namespace OpenMobile.Controls
 
 
         #region IMouse Members
-        protected OMControl highlighted;
+        /// <summary>
+        /// Mouse Moved
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
         public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale)
         {
             Point loc = e.Location;
@@ -166,7 +243,13 @@ namespace OpenMobile.Controls
             }
             highlighted = null;
         }
-
+        /// <summary>
+        /// Mouse Down
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
         public void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             Point loc = e.Location;
@@ -183,7 +266,13 @@ namespace OpenMobile.Controls
                 }
             }
         }
-
+        /// <summary>
+        /// Mouse Up
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
         public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             Point loc = e.Location;
@@ -204,7 +293,12 @@ namespace OpenMobile.Controls
         #endregion
 
         #region IThrow Members
-
+        /// <summary>
+        /// Mouse Throw
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="TotalDistance"></param>
+        /// <param name="RelativeDistance"></param>
         public void MouseThrow(int screen, OpenMobile.Graphics.Point TotalDistance, OpenMobile.Graphics.Point RelativeDistance)
         {
             if (area.Height <= height)
@@ -226,11 +320,23 @@ namespace OpenMobile.Controls
                 scrolltop = top+scrollwidth + 3 + (int)((scrolly / (float)area.Height) * factor);
             }
         }
+        /// <summary>
+        /// Mouse Throw Start
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="StartLocation"></param>
+        /// <param name="scaleFactors"></param>
+        /// <param name="Cancel"></param>
         public void MouseThrowStart(int screen, OpenMobile.Graphics.Point StartLocation, OpenMobile.Graphics.PointF scaleFactors, ref bool Cancel)
         {
             //
         }
 
+        /// <summary>
+        /// Mouse Throw End
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="EndLocation"></param>
         public void MouseThrowEnd(int screen, OpenMobile.Graphics.Point EndLocation)
         {
             //
@@ -239,7 +345,10 @@ namespace OpenMobile.Controls
         #endregion
 
         #region IClickable Members
-
+        /// <summary>
+        /// Clicked
+        /// </summary>
+        /// <param name="screen"></param>
         public void clickMe(int screen)
         {
             if (highlighted != null)
@@ -247,11 +356,10 @@ namespace OpenMobile.Controls
                     ((IClickable)highlighted).clickMe(screen);
         }
 
-        public void doubleClickMe(int screen)
-        {
-            //
-        }
-
+        /// <summary>
+        /// Long Clicked
+        /// </summary>
+        /// <param name="screen"></param>
         public void longClickMe(int screen)
         {
             if (highlighted != null)

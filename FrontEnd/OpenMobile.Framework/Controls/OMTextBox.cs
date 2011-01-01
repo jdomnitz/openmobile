@@ -90,23 +90,10 @@ namespace OpenMobile.Controls
                 OnClick(this, screen);
         }
         /// <summary>
-        /// Fires the OnDoubleClick Event
-        /// </summary>
-        public void doubleClickMe(int screen) { }
-        /// <summary>
         /// Fires the OnLongClick event
         /// </summary>
         public void longClickMe(int screen) { }
-        /// <summary>
-        /// Returns the type of control
-        /// </summary>
-        public static new string TypeName
-        {
-            get
-            {
-                return "Textbox";
-            }
-        }
+
         private int count;
         /// <summary>
         /// The text contained by the textbox
