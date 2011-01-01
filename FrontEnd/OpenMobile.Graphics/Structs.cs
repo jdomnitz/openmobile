@@ -1661,6 +1661,18 @@ namespace OpenMobile.Graphics
         {
             Empty = new Point();
         }
+
+        public void Scale(float XScale, float YScale)
+        {
+            this.x = (int)(x / XScale);
+            this.Y = (int)(Y / YScale);
+        }
+
+        public void Translate(int x, int y)
+        {
+            this.x += x;
+            this.y += y;
+        }
     }
 
     public struct Size

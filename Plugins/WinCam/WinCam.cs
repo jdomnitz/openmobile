@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using OpenMobile.Graphics;
+using OpenMobile.Data;
 
 namespace WinCam
 {
@@ -26,6 +27,8 @@ namespace WinCam
                 s.Dispose();
             }
             streams[instance].Clear();
+            if (OnMediaEvent != null)
+                OnMediaEvent(eFunction.hideVideoWindow, instance, "");
             if (OnMediaEvent != null)
                 OnMediaEvent(eFunction.Stop, instance,"");
             return true;
@@ -58,9 +61,17 @@ namespace WinCam
                 if (o==null)
                     return false;
                 scale=(PointF)o;
-                Rectangle r = theHost.VideoPosition;
+                Rectangle r = theHost.GetVideoPosition(instance);
+                string hardware=string.Empty;
+                using (PluginSettings s = new PluginSettings())
+                    hardware = s.getSetting("WinCam.Source" + cam.ToString() + ".Source");
+                cam = getCam(hardware);
+                if (cam == -1)
+                    cam = 0;
                 if (!streams[instance][0].start(cam, (int)(r.X*scale.X), (int)(r.Y*scale.Y), (int)(r.Width*scale.X), (int)(r.Height*scale.Y)))
                     return false;
+                if (OnMediaEvent != null)
+                    OnMediaEvent(eFunction.showVideoWindow, instance, "");
                 info = new mediaInfo(url);
                 info.Type = eMediaType.LiveCamera;
                 info.Name = "Camera " + (cam+1).ToString();
@@ -153,8 +164,14 @@ namespace WinCam
         {
             if (streams == null)
                 return false;
-            if (streams.Length >= instance)
+            if (streams.Length <= instance)
                 return false;
+            if (visible)
+                if (OnMediaEvent!=null)
+                    OnMediaEvent(eFunction.showVideoWindow, instance, "");
+            else
+                if (OnMediaEvent != null)
+                    OnMediaEvent(eFunction.hideVideoWindow, instance, "");
             foreach (stream s in streams[instance])
                 s.visible(visible);
             return true;
@@ -179,18 +196,29 @@ namespace WinCam
             if (settings == null)
             {
                 settings = new Settings("Camera Settings");
-                List<string> cams=new List<string>(getcams());
-                settings.Add(new Setting(SettingTypes.MultiChoice,"WinCam.Source1.Source",null,"Camera 1 Source",cams,cams));
-                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Source", null, "Camera 2 Source", cams, cams));
-                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Source", null, "Camera 3 Source", cams, cams));
-                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Source", null, "Camera 4 Source", cams, cams));
-                List<string> choices = new List<string>(new string[] { "None", "Flip Vertically", "Flip Horizontally", "Flip Both" });
-                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Flip", null, "Source 1 Flip", choices, choices));
-                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Flip", null, "Source 2 Flip", choices, choices));
-                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Flip", null, "Source 3 Flip", choices, choices));
-                settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Flip", null, "Source 4 Flip", choices, choices));
+                List<string> cams = new List<string>(getcams());
+                using (PluginSettings s = new PluginSettings())
+                {
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Source", null, "Camera 1 Source", cams, cams, s.getSetting("WinCam.Source1.Source")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Source", null, "Camera 2 Source", cams, cams, s.getSetting("WinCam.Source2.Source")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Source", null, "Camera 3 Source", cams, cams, s.getSetting("WinCam.Source3.Source")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Source", null, "Camera 4 Source", cams, cams, s.getSetting("WinCam.Source4.Source")));
+                    List<string> choices = new List<string>(new string[] { "None", "Flip Vertically", "Flip Horizontally", "Flip Both" });
+                    List<string> values = new List<string>(new string[] { "", "Vertical", "Horizontal", "Both" });
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Flip", null, "Source 1 Flip", choices, values, s.getSetting("WinCam.Source1.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Flip", null, "Source 2 Flip", choices, values, s.getSetting("WinCam.Source2.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Flip", null, "Source 3 Flip", choices, values, s.getSetting("WinCam.Source3.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Flip", null, "Source 4 Flip", choices, values, s.getSetting("WinCam.Source4.Flip")));
+                    settings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
+                }
             }
             return settings;
+        }
+
+        void settings_OnSettingChanged(Setting setting)
+        {
+            using (PluginSettings s = new PluginSettings())
+                s.setSetting(setting.Name, setting.Value);
         }
 
         public string authorName
@@ -253,7 +281,7 @@ namespace WinCam
             IMediaControl control;
             int instance;
             event DelStart go;
-            public bool scale;
+            public bool scale=true;
             public stream(int inst)
             {
                 instance = inst;
@@ -277,9 +305,22 @@ namespace WinCam
                 for(int i=0;i<theHost.ScreenCount;i++)
                     if(instance==theHost.instanceForScreen(i))
                         window.put_Owner((IntPtr)theHost.UIHandle(i));
-                hr = window.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren);
+                hr = window.put_WindowStyle(WindowStyle.Child);
                 control = (IMediaControl)graph;
                 hr=control.Run();
+                using(PluginSettings s=new PluginSettings())
+                switch(s.getSetting("WinCam.Source"+(instance+1).ToString()+".Flip"))
+                {
+                    case "Vertical":
+                        vcontrol.SetMode(outputPin, VideoControlFlags.FlipVertical);
+                        break;
+                    case "Horizontal":
+                        vcontrol.SetMode(outputPin, VideoControlFlags.FlipHorizontal);
+                        break;
+                    case "Both":
+                        vcontrol.SetMode(outputPin, VideoControlFlags.FlipVertical|VideoControlFlags.FlipHorizontal);
+                        break;
+                }
                 if (scale)
                 {
                     int testx;
