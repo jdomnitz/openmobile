@@ -27,7 +27,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A slider bar control
     /// </summary>
-    public class OMSlider:OMControl,IThrow
+    public class OMSlider:OMControl,IThrow,IMouse
     {
         /// <summary>
         /// height of the slider bar
@@ -281,7 +281,7 @@ namespace OpenMobile.Controls
         /// <param name="sf"></param>
         public void MouseThrowStart(int screen, Point StartLocation,PointF sf, ref bool Cancel)
         {
-            
+            dragged = true;
         }
         /// <summary>
         /// The throw has ended
@@ -290,7 +290,67 @@ namespace OpenMobile.Controls
         /// <param name="EndLocation"></param>
         public void MouseThrowEnd(int screen, Point EndLocation)
         {
-            
+            dragged=false;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Is the slider being dragged
+        /// </summary>
+        public bool Dragging
+        {
+            get
+            {
+                return dragged;
+            }
+        }
+
+        #region IMouse Members
+        /// <summary>
+        /// The slider is being dragged
+        /// </summary>
+        protected bool dragged;
+        /// <summary>
+        /// Not Used
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
+        public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale)
+        {
+            //
+        }
+        /// <summary>
+        /// Not Used
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
+        public void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        {
+            //
+        }
+        /// <summary>
+        /// Mouse Up
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
+       public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        {
+            if (!dragged)
+            {
+                sliderPosition = (int)(e.X/WidthScale)-left;
+                if ((sliderPosition - (sliderWidth / 2)) < 0)
+                    sliderPosition = (sliderWidth / 2);
+                if ((sliderPosition + (sliderWidth / 2)) > Width)
+                    sliderPosition = Width - (SliderWidth / 2);
+                SafeThread.Asynchronous(delegate() { if (OnSliderMoved != null) OnSliderMoved(this, screen); }, null);
+            }
         }
 
         #endregion

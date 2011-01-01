@@ -321,7 +321,8 @@ namespace OpenMobile.Graphics
             lock (virtualG)
             {
                 System.Drawing.Graphics gr = System.Drawing.Graphics.FromImage(virtualG);
-                return gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, (System.Drawing.FontStyle)ft.Style));
+                System.Drawing.SizeF ret=gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, (System.Drawing.FontStyle)ft.Style));
+                return new SizeF(ret.Width,ret.Height);
             }
         }
         public static SizeF MeasureString(String str, Font ft, eTextFormat format)
@@ -342,7 +343,8 @@ namespace OpenMobile.Graphics
             lock (virtualG)
             {
                 System.Drawing.Graphics gr = System.Drawing.Graphics.FromImage(virtualG);
-                return gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, style));
+                System.Drawing.SizeF ret = gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, style));
+                return new SizeF(ret.Width, ret.Height);
             }
         }
         public static SizeF MeasureString(String str, Font ft, int width)
@@ -350,7 +352,8 @@ namespace OpenMobile.Graphics
             lock (virtualG)
             {
                 System.Drawing.Graphics gr = System.Drawing.Graphics.FromImage(virtualG);
-                return gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, (System.Drawing.FontStyle)ft.Style), width);
+                System.Drawing.SizeF ret = gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, (System.Drawing.FontStyle)ft.Style), width);
+                return new SizeF(ret.Width, ret.Height);
             }
         }
         public static Rectangle MeasureCharacterRanges(string text, Font font, Rectangle rect, StringFormat format)

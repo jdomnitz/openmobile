@@ -2,7 +2,7 @@
 namespace OpenMobile.Controls
 {
     /// <summary>
-    /// Any control implementing this interface will not be clickable
+    /// Allows a control to let certain clicks fall through
     /// </summary>
     public interface INotClickable
     {

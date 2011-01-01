@@ -52,7 +52,7 @@ namespace OpenMobile
         public HalInterface hal;
         private bool vehicleInMotion;
         private eGraphicsLevel level;
-        private Rectangle videoPosition;
+        private Rectangle[] videoPosition;
         private bool suspending;
         private bool closing;
         historyCollection history = new historyCollection(screenCount);
@@ -315,16 +315,20 @@ namespace OpenMobile
                     raiseNavigationEvent(eNavigationEvent.LocationChanged, _location.ToString());
             }
         }
-        public Rectangle VideoPosition
+        public void SetVideoPosition(int instance,Rectangle videoArea)
         {
-            get
-            {
-                return videoPosition;
-            }
-            set
-            {
-                videoPosition = value;
-            }
+            if ((instance < 0) || (instance >= instanceCount))
+                return;
+            if (videoPosition[instance] == videoArea)
+                return;
+            videoPosition[instance] = videoArea;
+            raiseSystemEvent(eFunction.videoAreaChanged, instance.ToString(), String.Empty, String.Empty);
+        }
+        public Rectangle GetVideoPosition(int instance)
+        {
+            if ((instance < 0) || (instance >= instanceCount))
+                return Rectangle.Empty;
+            return videoPosition[instance];
         }
         Timer tmr;
         public PluginHost()
@@ -710,6 +714,7 @@ namespace OpenMobile
                         instanceCount = devices.Length;
                     else
                         return -1;
+                    videoPosition = new Rectangle[instanceCount];
                 }
                 return instanceCount;
             }

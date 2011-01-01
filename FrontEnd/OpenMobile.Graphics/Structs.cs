@@ -1662,6 +1662,7 @@ namespace OpenMobile.Graphics
             Empty = new Point();
         }
     }
+
     public struct Size
     {
         public static readonly Size Empty;
@@ -1739,6 +1740,80 @@ namespace OpenMobile.Graphics
         static Size()
         {
             Empty = new Size();
+        }
+    }
+
+    public struct SizeF
+    {
+        public static readonly SizeF Empty;
+        private float width;
+        private float height;
+        public SizeF(Point pt)
+        {
+            this.width = pt.X;
+            this.height = pt.Y;
+        }
+
+        public SizeF(float width, float height)
+        {
+            this.width = width;
+            this.height = height;
+        }
+        public static bool operator ==(SizeF s1, SizeF s2)
+        {
+            return ((s1.Width == s2.Width) && (s1.Height == s2.Height));
+        }
+
+        public static bool operator !=(SizeF s1, SizeF s2)
+        {
+            return !(s1 == s2);
+        }
+
+        public bool IsEmpty
+        {
+            get
+            {
+                return ((this.width == 0) && (this.height == 0));
+            }
+        }
+        public float Width
+        {
+            get
+            {
+                return this.width;
+            }
+            set
+            {
+                this.width = value;
+            }
+        }
+        public float Height
+        {
+            get
+            {
+                return this.height;
+            }
+            set
+            {
+                this.height = value;
+            }
+        }
+        public override bool Equals(object obj)
+        {
+            if (!(obj is SizeF))
+                return false;
+            SizeF size = (SizeF)obj;
+            return ((size.width == this.width) && (size.height == this.height));
+        }
+
+        public override string ToString()
+        {
+            return ("{Width=" + this.width.ToString() + ", Height=" + this.height.ToString() + "}");
+        }
+
+        static SizeF()
+        {
+            Empty = new SizeF();
         }
     }
 

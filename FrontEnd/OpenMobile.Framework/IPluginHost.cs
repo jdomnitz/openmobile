@@ -131,9 +131,13 @@ namespace OpenMobile.Plugin
         /// </summary>
         bool VehicleInMotion { get; set; }
         /// <summary>
-        /// Gets/Sets the location video should be played (based on the 1000x600 default scale)
+        /// Sets the location video should be played (based on the 1000x600 default scale)
         /// </summary>
-        Rectangle VideoPosition { get; set; }
+        void SetVideoPosition(int instance,Rectangle videoArea);
+        /// <summary>
+        /// Gets the location video should be played (based on the 1000x600 default scale)
+        /// </summary>
+        Rectangle GetVideoPosition(int instance);
         /// <summary>
         /// Sets the graphics level the application and plugins should use (represents the computers video performance)
         /// </summary>

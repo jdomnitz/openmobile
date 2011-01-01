@@ -245,8 +245,27 @@ namespace OMSettings
                     ret.Add(rdesc);
                     ofset += 60;
                     break;
+                case SettingTypes.Button:
+                    OMButton button = new OMButton(220, ofset, 600, 50);
+                    button.Text = s.Description;
+                    button.Font = new Font(Font.GenericSansSerif, 24F);
+                    button.Width=(int)(Graphics.MeasureString(button.Text, button.Font).Width+0.5F)+20;
+                    button.Name = title;
+                    button.Tag = s.Name;
+                    button.OnClick += new userInteraction(button_OnClick);
+                    button.Image = theHost.getSkinImage("Full");
+                    button.FocusImage = theHost.getSkinImage("Full.Highlighted");
+                    ofset += 70;
+                    ret.Add(button);
+                    break;
             }
             return ret;
+        }
+
+        void button_OnClick(OMControl sender, int screen)
+        {
+            Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
+            collection.changeSetting(s);
         }
 
         void range_OnSliderMoved(OMSlider sender, int screen)
