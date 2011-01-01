@@ -91,15 +91,22 @@ namespace OpenMobile.Controls
             }
             return -1;
         }
-        internal OMPanel parent;
         /// <summary>
         /// The OMPanel that contains this control
         /// </summary>
-        public OMPanel Parent
+        protected OMPanel parent;
+        /// <summary>
+        /// The OMPanel that contains this control
+        /// </summary>
+        public virtual OMPanel Parent
         {
             get
             {
                 return parent;
+            }
+            internal set
+            {
+                parent = value;
             }
         }
         private int container = -1;

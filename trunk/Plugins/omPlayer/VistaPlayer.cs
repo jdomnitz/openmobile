@@ -219,9 +219,17 @@ namespace OMPlayer
                 saveState();
                 fadeout();
             }
-            else if ((function == eFunction.RenderingWindowResized)||(function==eFunction.videoAreaChanged))
+            else if (function == eFunction.RenderingWindowResized)
             {
                 int inst = theHost.instanceForScreen(int.Parse(arg1));
+                if (inst >= player.Length)
+                    return;
+                if (player[inst] != null)
+                    player[inst].Resize();
+            }
+            else if (function == eFunction.videoAreaChanged)
+            {
+                int inst = int.Parse(arg1);
                 if (inst >= player.Length)
                     return;
                 if (player[inst] != null)
