@@ -98,7 +98,7 @@ namespace OpenMobile
 				for (int i = 0; i < deviceMapM.Length; i++) {
 					if (deviceMapM[i] == (int)sender) 
                     {
-                        if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.VideoPosition.Contains(e.Location))
+                        if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(Core.theHost.instanceForScreen(i)).Contains(e.Location))
                             return;
 						Core.RenderingWindows[i].defaultMouse = (deviceMapM[i] == -1);
 						Core.RenderingWindows[i].RenderingWindow_MouseMove (i, e);
@@ -120,7 +120,7 @@ namespace OpenMobile
                 {
                     if (deviceMapM[i] == (int)sender)
                     {
-                        if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.VideoPosition.Contains(e.Location))
+                        if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(Core.theHost.instanceForScreen(i)).Contains(e.Location))
                         {
                             Core.theHost.execute(eFunction.showVideoWindow, Core.theHost.instanceForScreen(i).ToString());
                             return;
@@ -155,7 +155,7 @@ namespace OpenMobile
                 {
                     if (deviceMapM[i] == (int)sender)
                     {
-                        if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.VideoPosition.Contains(e.Location))
+                        if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(Core.theHost.instanceForScreen(i)).Contains(e.Location))
                             return;
                         Core.RenderingWindows[i].RenderingWindow_MouseDown(i, e);
                     }

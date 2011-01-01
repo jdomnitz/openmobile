@@ -320,7 +320,6 @@ namespace OpenMobile
             manager.loadPanel(background);
             theHost.OnMediaEvent += theHost_OnMediaEvent;
             theHost.OnSystemEvent += theHost_OnSystemEvent;
-            theHost.VideoPosition = new Rectangle(0, 100, 1000, 368);
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -361,7 +360,7 @@ namespace OpenMobile
                         volTmr_Elapsed(null, null);
                     return;
                 }
-
+                theHost.SetVideoPosition(theHost.instanceForScreen(screen), new Rectangle(136, 100, 864, 368));
                 manager[screen][26].Visible = true;
                 volTmr = new System.Timers.Timer(2500);
                 volTmr.Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
@@ -386,13 +385,14 @@ namespace OpenMobile
                 {
                     if (volScreen >= 0)
                     {
-                        manager[volScreen][26].Top = -(51 * i);
+                        btn.Parent[26].Top = -(51 * i);
                         btn.Top = 511 - (int)(51.1 * i);
                         Thread.Sleep(50);
                     }
                 }
-                if (volScreen>=0)
-                    manager[volScreen][26].Visible = false;
+                if (btn!=null)
+                    btn.Parent[26].Visible = false;
+                theHost.SetVideoPosition(theHost.instanceForScreen(volScreen), new Rectangle(0, 100, 1000, 368));
             }
             volScreen = -1;
             if (volTmr != null)
@@ -612,6 +612,8 @@ namespace OpenMobile
             {
                 using (PluginSettings settings = new PluginSettings())
                     showVolumeChanges = (settings.getSetting("UI.VolumeChangesVisible") == "True");
+                for (int i = 0; i < theHost.InstanceCount; i++)
+                    theHost.SetVideoPosition(i, new Rectangle(0, 100, 1000, 368));
             }
         }
 

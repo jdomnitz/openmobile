@@ -39,6 +39,7 @@ namespace NewMedia
         int[] level;
         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
         static OImage noCover;
+        bool sortByTrack;
         public eLoadStatus initialize(OpenMobile.Plugin.IPluginHost host)
         {
             theHost = host;
@@ -206,7 +207,7 @@ namespace NewMedia
         void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
         {
             if (function == eFunction.backgroundOperationStatus)
-                if (arg1 == "Indexing Complete!")
+                if ((arg1 == "Indexing Complete!")||(arg1=="Database Cleared!"))
                 {
                     loadArtists();
                 }
@@ -835,7 +836,7 @@ namespace NewMedia
                 l.Clear();
             l.Add("Loading . . .");
             l.ListItemOffset = 80;
-            MediaLoader.loadSongs(theHost, artist, l, format, dbname[screen],noCover);
+            MediaLoader.loadSongs(theHost, artist, l, format, dbname[screen], noCover, sortByTrack ? eMediaField.Track : eMediaField.Title);
         }
         private void showTracks(int screen, string artist, string album)
         {
@@ -846,7 +847,7 @@ namespace NewMedia
                 l.Clear();
             l.Add("Loading . . .");
             l.ListItemOffset = 80;
-            MediaLoader.loadSongs(theHost, artist, album, l, format, dbname[screen],noCover);
+            MediaLoader.loadSongs(theHost, artist, album, l, format, dbname[screen],noCover,sortByTrack ? eMediaField.Track:eMediaField.Title);
         }
 
         void Playlists_OnClick(OMControl sender, int screen)
@@ -981,10 +982,25 @@ namespace NewMedia
                 return null;
             return manager[screen];
         }
-
+        Settings settings;
         public Settings loadSettings()
         {
-            return null;
+            if (settings == null)
+            {
+                settings = new Settings("Music");
+                settings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
+                using (PluginSettings s = new PluginSettings())
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.SortByTrack", "", "Sort by track #", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.SortByTrack")));
+                sortByTrack = (settings[0].Value == "True");
+            }
+            return settings;
+        }
+
+        void settings_OnSettingChanged(Setting setting)
+        {
+            using (PluginSettings s = new PluginSettings())
+                s.setSetting(setting.Name, setting.Value);
+            sortByTrack = (settings[0].Value == "True");
         }
 
         public string authorName

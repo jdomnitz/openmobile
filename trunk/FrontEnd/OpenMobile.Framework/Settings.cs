@@ -55,7 +55,11 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Any setting which requires a user to select from a range of values (ex: 1-100)
         /// </summary>
-        Range
+        Range,
+        /// <summary>
+        /// Represents a button (when clicked raises an OnSettingChanged event with a null value)
+        /// </summary>
+        Button
     }
 
     /// <summary>
@@ -263,6 +267,18 @@ namespace OpenMobile.Plugin
         public Settings(string title)
         {
             Title = title;
+        }
+        /// <summary>
+        /// Returns the setting matching the given name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Setting this[string name]
+        {
+            get
+            {
+                return this.Find(p => p.Name == name);
+            }
         }
     }
 }

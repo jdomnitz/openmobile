@@ -108,7 +108,7 @@ namespace OpenMobile.Media
         /// <param name="clear"></param>
         /// <param name="noCover"></param>
         /// <returns></returns>
-        public static bool loadAlbums(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
+        public static bool loadAlbums(IPluginHost host, string artist, IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
         {
             if (string.IsNullOrEmpty(dbname))
                 return false;
@@ -194,9 +194,24 @@ namespace OpenMobile.Media
         /// <param name="dbname"></param>
         /// <param name="noCover"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
+        public static bool loadSongs(IPluginHost host, string artist, IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {
-            return loadSongs(host, artist, list, format, true,dbname,noCover);
+            return loadSongs(host, artist, list, format, true,dbname,noCover,eMediaField.Title);
+        }
+        /// <summary>
+        /// Loads all songs from the given artist
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="artist"></param>
+        /// <param name="list"></param>
+        /// <param name="format"></param>
+        /// <param name="dbname"></param>
+        /// <param name="noCover"></param>
+        /// <param name="sort"></param>
+        /// <returns></returns>
+        public static bool loadSongs(IPluginHost host, string artist, IList list, OMListItem.subItemFormat format, string dbname, OImage noCover,eMediaField sort)
+        {
+            return loadSongs(host, artist, list, format, true, dbname, noCover,sort);
         }
 
         /// <summary>
@@ -255,7 +270,23 @@ namespace OpenMobile.Media
         /// <param name="dbname"></param>
         /// <param name="noCover"></param>
         /// <returns></returns>
-        public static bool loadSongs(IPluginHost host, string artist, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
+        public static bool loadSongs(IPluginHost host, string artist, IList list,OMListItem.subItemFormat format,bool clear,string dbname,OImage noCover)
+        {
+            return loadSongs(host, artist, list, format, clear, dbname, noCover, eMediaField.Title);
+        }
+        /// <summary>
+        /// Loads all songs from the given artist
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="artist"></param>
+        /// <param name="list"></param>
+        /// <param name="format"></param>
+        /// <param name="clear"></param>
+        /// <param name="dbname"></param>
+        /// <param name="noCover"></param>
+        /// <param name="sort"></param>
+        /// <returns></returns>
+        public static bool loadSongs(IPluginHost host, string artist, IList list, OMListItem.subItemFormat format, bool clear, string dbname, OImage noCover, eMediaField sort)
         {
             if (string.IsNullOrEmpty(dbname))
                 return false;
@@ -267,7 +298,7 @@ namespace OpenMobile.Media
             {
                 try
                 {
-                    if (!db.beginGetSongsByArtist(artist, true, eMediaField.Title))
+                    if (!db.beginGetSongsByArtist(artist, true, sort))
                         return false;
                 }
                 catch (Mono.Data.Sqlite.SqliteException)
@@ -304,6 +335,22 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list,OMListItem.subItemFormat format,string dbname,OImage noCover)
         {
+            return loadSongs(host, artist, album, list, format, dbname, noCover, eMediaField.Title);
+        }
+        /// <summary>
+        /// Loads all songs from the given artist and album
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="artist"></param>
+        /// <param name="album"></param>
+        /// <param name="list"></param>
+        /// <param name="format"></param>
+        /// <param name="dbname"></param>
+        /// <param name="noCover"></param>
+        /// <param name="sort"></param>
+        /// <returns></returns>
+        public static bool loadSongs(IPluginHost host, string artist, string album, OpenMobile.Controls.IList list, OMListItem.subItemFormat format, string dbname, OImage noCover,eMediaField sort)
+        {
             if (string.IsNullOrEmpty(dbname))
                 return false;
             if ((host == null) || (list == null))
@@ -314,7 +361,7 @@ namespace OpenMobile.Media
                 return false;
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                if (!db.beginGetSongsByAlbum(artist, album, true, eMediaField.Title))
+                if (!db.beginGetSongsByAlbum(artist, album, true, sort))
                     return false;
                 list.Clear();
                 mediaInfo info = db.getNextMedia();

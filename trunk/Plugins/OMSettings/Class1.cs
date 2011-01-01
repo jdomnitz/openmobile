@@ -463,6 +463,8 @@ namespace OMSettings
                 Exception ex = e;
                 theHost.sendMessage("SandboxedThread", "OMSettings", "", ref ex);
             }
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                lstplugins[i].Sort();
         }
 
         void lstplugins_OnClick(OMControl sender, int screen)

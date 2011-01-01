@@ -51,6 +51,8 @@ namespace OMMediaDB
                 {
                     s.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoIndex", "", "Index New Music on Every Startup", Setting.BooleanList, Setting.BooleanList, settings.getSetting("Music.AutoIndex")));
                     s.Add(new Setting(SettingTypes.Folder, "Music.Path", "", "Music Path", settings.getSetting("Music.Path")));
+                    s.Add(new Setting(SettingTypes.Button,"ClearDB","","Clear Database"));
+                    s.Add(new Setting(SettingTypes.Button, "Index", "", "Index Music Now"));
                     s.OnSettingChanged += new SettingChanged(changed);
                 }
             }
@@ -60,17 +62,16 @@ namespace OMMediaDB
         {
             using (PluginSettings settings = new PluginSettings())
             {
-                if (s.Name == "Music.AutoIndex")
+                if ((s.Name == "Music.AutoIndex")|| (s.Name == "Music.Path"))
+                    settings.setSetting(s.Name, s.Value);
+                else if (s.Name == "ClearDB")
                 {
-                    if (settings.getSetting("Music.AutoIndex") != s.Value)
-                        if (s.Value == "True")
-                            this.indexDirectory(settings.getSetting("Music.Path"), true);
+                    this.clearIndex();
                 }
-                else if (s.Name == "Music.Path")
+                else if (s.Name == "Index")
                 {
-                    this.indexDirectory(s.Value, true);
+                    this.indexDirectory(settings.getSetting("Music.Path"), true);
                 }
-                settings.setSetting(s.Name, s.Value);
             }
         }
         public void Dispose()
@@ -105,10 +106,13 @@ namespace OMMediaDB
             {
                 if (bCon.State != ConnectionState.Open)
                     bCon.Open();
+                bool status;
                 using (SqliteCommand cmd = new SqliteCommand("DELETE FROM tblSongs; DELETE FROM tblAlbum", bCon))
                 {
-                    return (cmd.ExecuteNonQuery() > 0);
+                    status= (cmd.ExecuteNonQuery() > 0);
                 }
+                theHost.execute(eFunction.backgroundOperationStatus, "Database Cleared!");
+                return status;
             }
         }
         public List<string> listPlaylists()
@@ -211,7 +215,7 @@ namespace OMMediaDB
                 return;
             }
             if (lastURL == currentURL)
-                theHost.execute(eFunction.backgroundOperationStatus, "FAILURE:" + System.IO.Path.GetFileName(currentURL));
+                theHost.execute(eFunction.backgroundOperationStatus, "SLOW:" + System.IO.Path.GetFileName(currentURL));
             else
                 theHost.execute(eFunction.backgroundOperationStatus, (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count)-lastCount) / 2).ToString() + " songs/sec)");
             lastURL = currentURL;
@@ -469,13 +473,27 @@ namespace OMMediaDB
                 con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
+            string order = "";
+            switch (sortBy)
+            {
+                case eMediaField.Title:
+                    order = " ORDER BY title";
+                    break;
+                case eMediaField.Track:
+                    order = " ORDER BY track";
+                    break;
+                case eMediaField.Rating:
+                    order = " ORDER BY rating";
+                    break;
+            }
             lock (con)
             {
                 SqliteCommand command = con.CreateCommand();
                 if (covers == false)
-                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum ORDER BY title";
+                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum";
                 else
-                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum ORDER BY title";
+                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum";
+                command.CommandText += order;
                 reader = command.ExecuteReader();
             }
             field = eMediaField.Title;
@@ -495,10 +513,10 @@ namespace OMMediaDB
                     order = " ORDER BY title";
                     break;
                 case eMediaField.Track:
-                    order = "ORDER BY track";
+                    order = " ORDER BY track";
                     break;
                 case eMediaField.Rating:
-                    order = "ORDER BY rating";
+                    order = " ORDER BY rating";
                     break;
             }
             lock (con)
@@ -556,10 +574,10 @@ namespace OMMediaDB
                     order = " ORDER BY title";
                     break;
                 case eMediaField.Track:
-                    order = "ORDER BY track";
+                    order = " ORDER BY track";
                     break;
                 case eMediaField.Rating:
-                    order = "ORDER BY rating";
+                    order = " ORDER BY rating";
                     break;
             }
             SqliteCommand command = con.CreateCommand();
@@ -578,13 +596,27 @@ namespace OMMediaDB
                 con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
             if (con.State != ConnectionState.Open)
                 con.Open();
+            string order = "";
+            switch (sortBy)
+            {
+                case eMediaField.Title:
+                    order = " ORDER BY title";
+                    break;
+                case eMediaField.Track:
+                    order = " ORDER BY track";
+                    break;
+                case eMediaField.Rating:
+                    order = " ORDER BY rating";
+                    break;
+            }
             lock (con)
             {
                 SqliteCommand command = con.CreateCommand();
                 if (covers == false)
-                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Artist='" + General.escape(artist) + "' AND Album='" + General.escape(album) + "' ORDER BY title";
+                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Artist='" + General.escape(artist) + "' AND Album='" + General.escape(album) + "'";
                 else
-                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Artist='" + General.escape(artist) + "' AND Album='" + General.escape(album) + "' ORDER BY title";
+                    command.CommandText = "SELECT Artist,Rating,Album,Title,URL,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE Artist='" + General.escape(artist) + "' AND Album='" + General.escape(album) + "'";
+                command.CommandText += order;
                 reader = command.ExecuteReader();
             }
             field = eMediaField.Title;
@@ -605,10 +637,10 @@ namespace OMMediaDB
                     order = " ORDER BY title";
                     break;
                 case eMediaField.Track:
-                    order = "ORDER BY track";
+                    order = " ORDER BY track";
                     break;
                 case eMediaField.Rating:
-                    order = "ORDER BY rating";
+                    order = " ORDER BY rating";
                     break;
             }
             if (covers == false)

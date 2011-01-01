@@ -1019,6 +1019,12 @@ namespace OpenMobile
         /// </summary>
         vehicleStopped=86,
         /// <summary>
+        /// Occurs when the VideoPosition property changes
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Instance</para>
+        /// </summary>
+        videoAreaChanged=87,
+        /// <summary>
         /// A gesture has been recognized
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen</para>

@@ -219,7 +219,7 @@ namespace OMPlayer
                 saveState();
                 fadeout();
             }
-            else if (function == eFunction.RenderingWindowResized)
+            else if ((function == eFunction.RenderingWindowResized)||(function==eFunction.videoAreaChanged))
             {
                 int inst = theHost.instanceForScreen(int.Parse(arg1));
                 if (inst >= player.Length)
@@ -726,7 +726,8 @@ namespace OMPlayer
                     if (o == null)
                         return -1;
                     PointF sf = (PointF)o;
-                    return ResizeVideo((int)(theHost.VideoPosition.Left * sf.X), (int)(theHost.VideoPosition.Top * sf.Y), (int)(theHost.VideoPosition.Width * sf.X), (int)(theHost.VideoPosition.Height * sf.Y));
+                    Rectangle pos = theHost.GetVideoPosition(instance);
+                    return ResizeVideo((int)(pos.Left * sf.X), (int)(pos.Top * sf.Y), (int)(pos.Width * sf.X), (int)(pos.Height * sf.Y));
                 }
             }
             private int ResizeVideo(int x,int y,int width, int height)
