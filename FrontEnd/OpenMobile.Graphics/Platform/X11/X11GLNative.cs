@@ -131,7 +131,7 @@ namespace OpenMobile.Platform.X11
             using (new XLock(window.Display))
             {
                 if (!mode.Index.HasValue)
-                    throw new GraphicsModeException("Invalid or unsupported GraphicsMode.");
+                    throw new Exception("Invalid or unsupported GraphicsMode.");
 
                 info.VisualID = mode.Index.Value;
                 int dummy;

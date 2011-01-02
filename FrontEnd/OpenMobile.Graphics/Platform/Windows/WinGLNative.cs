@@ -572,7 +572,7 @@ namespace OpenMobile.Platform.Windows
                 ushort atom = Functions.RegisterClassEx(ref wc);
 
                 if (atom == 0)
-                    throw new PlatformException(String.Format("Failed to register window class. Error: {0}", Marshal.GetLastWin32Error()));
+                    throw new Exception(String.Format("Failed to register window class. Error: {0}", Marshal.GetLastWin32Error()));
 
                 class_registered = true;
             }
@@ -584,7 +584,7 @@ namespace OpenMobile.Platform.Windows
                 parentHandle, IntPtr.Zero, Instance, IntPtr.Zero);
 
             if (handle == IntPtr.Zero)
-                throw new PlatformException(String.Format("Failed to create window. Error: {0}", Marshal.GetLastWin32Error()));
+                throw new Exception(String.Format("Failed to create window. Error: {0}", Marshal.GetLastWin32Error()));
             Functions.SetLayeredWindowAttributes(handle, 0, 255, 2);
             return handle;
         }
@@ -1077,7 +1077,7 @@ namespace OpenMobile.Platform.Windows
                 ret = Functions.GetMessage(ref msg, window.WindowHandle, 0, 0);
                 if (ret == -1)
                 {
-                    throw new PlatformException(String.Format(
+                    throw new Exception(String.Format(
                         "An error happened while processing the message queue. Windows error: {0}",
                         Marshal.GetLastWin32Error()));
                 }

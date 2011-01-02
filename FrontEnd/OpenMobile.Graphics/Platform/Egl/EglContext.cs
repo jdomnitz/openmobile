@@ -56,13 +56,13 @@ namespace OpenMobile.Platform.Egl
 
             int dummy_major, dummy_minor;
             if (!Egl.Initialize(window.Display, out dummy_major, out dummy_minor))
-                throw new GraphicsContextException(String.Format("Failed to initialize EGL, error {0}.", Egl.GetError()));
+                throw new Exception(String.Format("Failed to initialize EGL, error {0}.", Egl.GetError()));
 
             WindowInfo = window;
 
             Mode = new EglGraphicsMode().SelectGraphicsMode(mode.ColorFormat, mode.Depth, mode.Stencil, mode.Samples, mode.AccumulatorFormat, mode.Buffers, mode.Stereo);
             if (!Mode.Index.HasValue)
-                throw new GraphicsModeException("Invalid or unsupported GraphicsMode.");
+                throw new Exception("Invalid or unsupported GraphicsMode.");
             IntPtr config = Mode.Index.Value;
 
             if (window.Surface == IntPtr.Zero)

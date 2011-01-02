@@ -69,7 +69,7 @@ namespace OpenMobile
     /// parameters that
     /// specify the logic update rate, and the render update rate.
     /// </remarks>
-    public class GameWindow : NativeWindow, IGameWindow, IDisposable
+    public class GameWindow : NativeWindow, IDisposable
     {
         #region --- Fields ---
 

@@ -255,7 +255,7 @@ namespace OpenMobile.Platform.Egl
         {
             IntPtr ptr = eglCreateContext(dpy, config, share_context, attrib_list);
             if (ptr == IntPtr.Zero)
-                throw new GraphicsContextException(String.Format("Failed to create EGL context, error: {0}.", Egl.GetError()));
+                throw new Exception(String.Format("Failed to create EGL context, error: {0}.", Egl.GetError()));
             return ptr;
         }
 

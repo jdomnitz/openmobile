@@ -34,8 +34,13 @@ namespace OMPluginSample
         private IPluginHost theHost;
         private Settings settings;
 
-        #region IHighLevel Members
-
+        /// <summary>
+        /// loadPanel is called everytime a panel is loaded or unloaded.
+        /// It should return the panel containing your controls.
+        /// </summary>
+        /// <param name="name">The name of the panel (or an empty string for the default panel)</param>
+        /// <param name="screen">The screen number requesting a panel</param>
+        /// <returns></returns>
         public OMPanel loadPanel(string name, int screen)
         {
             if (manager == null)
@@ -45,7 +50,8 @@ namespace OMPluginSample
 
         public Settings loadSettings()
         {
-            if ((settings == null)&&(theHost!=null))
+            //If a plugin does not expose settings null may be returned
+            if (settings == null)
             {
                 settings = new Settings("PluginSample settings");
                 using (PluginSettings setting = new PluginSettings())
@@ -54,21 +60,26 @@ namespace OMPluginSample
                 }
                 settings.OnSettingChanged += new SettingChanged(Setting_Changed);
             }
+            //Settings collections are automatically laid out by the framework
             return settings;
         }
 
         private void Setting_Changed(Setting s)
         {
+            //When a setting changes you should update your plugin with
+            //the new setting information
+
+            //Then the setting should be saved to the database
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting(s.Name, s.Value);
         }
-
+        /// <summary>
+        /// The name that will be displayed on a main menu button
+        /// </summary>
         public string displayName
         {
             get { return "OMPluginSample"; }
         }
-
-        #endregion
 
         #region IBasePlugin Members
 
@@ -107,8 +118,9 @@ namespace OMPluginSample
             OMPanel panelMain = new OMPanel("");
             theHost = host;
 
-
+            //NOTE: OM uses a 1000x600 scale for all controls and measurements
             OMButton Button_Sample = new OMButton(150, 200, 250, 100);
+            //Each control has a wide array of properties to configure how it looks and acts
             Button_Sample.Name = "Button_Sample";
             Button_Sample.Image = theHost.getSkinImage("Full");
             Button_Sample.FocusImage = theHost.getSkinImage("Full.Highlighted");
@@ -152,8 +164,11 @@ namespace OMPluginSample
             Label_Setting.Text = "Setting value";
             panelMain.addControl(Label_Setting);
 
+            //Screen managers take care of ensuring your panel is multi-monitor safe
             manager = new ScreenManager(theHost.ScreenCount);
             manager.loadPanel(panelMain);
+            //Should something go wrong during initialization
+            //you can return an error otherwise return Successful
             return eLoadStatus.LoadSuccessful;
         }
 

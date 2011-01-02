@@ -77,7 +77,7 @@ namespace OpenMobile.Platform.X11
             defaultDisplay = Functions.XOpenDisplay(IntPtr.Zero);
 			
             if (defaultDisplay == IntPtr.Zero)
-                throw new PlatformException("Could not establish connection to the X-Server.");
+                throw new Exception("Could not establish connection to the X-Server.");
 
             using (new XLock(defaultDisplay))
             {
