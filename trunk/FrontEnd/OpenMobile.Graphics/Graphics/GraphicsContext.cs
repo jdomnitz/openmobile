@@ -140,7 +140,7 @@ namespace OpenMobile.Graphics
                 }
                 else if (available_contexts.ContainsKey(handle))
                 {
-                    throw new GraphicsContextException("Context already exists.");
+                    throw new Exception("Context already exists.");
                 }
                 else
                 {
@@ -193,7 +193,9 @@ namespace OpenMobile.Graphics
         public static void Assert()
         {
             if (GraphicsContext.CurrentContext == null)
-                throw new GraphicsContextMissingException();
+                throw new Exception(String.Format(
+                "No context is current in the calling thread (ThreadId: {0}).",
+                System.Threading.Thread.CurrentThread.ManagedThreadId));
         }
 
         #endregion
@@ -367,7 +369,7 @@ namespace OpenMobile.Graphics
         public void LoadAll()
         {
             if (GraphicsContext.CurrentContext != this)
-                throw new GraphicsContextException();
+                throw new Exception("Graphics context not current");
 
             implementation.LoadAll();
         }

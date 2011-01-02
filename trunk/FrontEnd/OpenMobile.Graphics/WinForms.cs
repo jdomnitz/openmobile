@@ -31,7 +31,7 @@ namespace OpenMobile.Graphics
                     ret = OpenMobile.Platform.Windows.Functions.GetMessage(ref msg, IntPtr.Zero, 0, 0);
                     if (ret == -1)
                     {
-                        throw new PlatformException(String.Format(
+                        throw new Exception(String.Format(
                             "An error happened while processing the message queue. Windows error: {0}",
                             Marshal.GetLastWin32Error()));
                     }

@@ -176,7 +176,7 @@ namespace OpenMobile.Platform.X11
             if (Handle != ContextHandle.Zero)
                 Debug.Print("Context created (id: {0}).", Handle);
             else
-                throw new GraphicsContextException("Failed to create OpenGL context. Glx.CreateContext call returned 0.");
+                throw new Exception("Failed to create OpenGL context. Glx.CreateContext call returned 0.");
 
             using (new XLock(Display))
             {
@@ -228,7 +228,7 @@ namespace OpenMobile.Platform.X11
             {
                 IntPtr vs = Functions.XGetVisualInfo(Display, XVisualInfoMask.ID | XVisualInfoMask.Screen, ref info, out items);
                 if (items == 0)
-                    throw new GraphicsModeException(String.Format("Invalid GraphicsMode specified ({0}).", mode));
+                    throw new Exception(String.Format("Invalid GraphicsMode specified ({0}).", mode));
 
                 info = (XVisualInfo)Marshal.PtrToStructure(vs, typeof(XVisualInfo));
                 Functions.XFree(vs);

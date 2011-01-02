@@ -146,7 +146,7 @@ namespace OpenMobile.Platform.MacOS
             IntPtr pixelformat = Agl.aglChoosePixelFormat(IntPtr.Zero, 0, attribs.ToArray());
             if (pixelformat == IntPtr.Zero)
             {
-                throw new GraphicsModeException(String.Format(
+                throw new Exception(String.Format(
                     "[Error] Failed to select GraphicsMode, error {0}.", Agl.GetError()));
             }
             return pixelformat;

@@ -1844,7 +1844,13 @@ namespace OpenMobile.Graphics
                 return false;
             return true;
         }
-
+        public bool Contains(Rectangle r)
+        {
+            return ((r.X < (X + Width)) &&
+              (X < (r.X + r.Width)) &&
+              (r.Y < (Y + Height)) &&
+              (Y < r.Y + r.Height));
+        }
         public int Left
         {
             get { return X; }

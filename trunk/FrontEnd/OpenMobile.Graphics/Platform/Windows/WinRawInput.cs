@@ -169,7 +169,7 @@ namespace OpenMobile.Platform.Windows
                 int ret = Functions.GetMessage(ref msg, Parent.WindowHandle, 0, 0);
                 if (ret == -1)
                 {
-                    throw new PlatformException(String.Format(
+                    throw new Exception(String.Format(
                         "An error happened while processing the message queue. Windows error: {0}",
                         Marshal.GetLastWin32Error()));
                 }

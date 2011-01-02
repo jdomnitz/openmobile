@@ -61,17 +61,17 @@ namespace OpenMobile.Platform.Egl
             IntPtr display = Egl.GetDisplay(IntPtr.Zero);
             int major, minor;
             if (!Egl.Initialize(display, out major, out minor))
-                throw new GraphicsModeException(String.Format("Failed to initialize display connection, error {0}", Egl.GetError()));
+                throw new Exception(String.Format("Failed to initialize display connection, error {0}", Egl.GetError()));
 
             int num_configs;
             if (!Egl.GetConfigs(display, null, 0, out num_configs))
             {
-                throw new GraphicsModeException(String.Format("Failed to retrieve GraphicsMode configurations, error {0}", Egl.GetError()));
+                throw new Exception(String.Format("Failed to retrieve GraphicsMode configurations, error {0}", Egl.GetError()));
             }
 
             if (!Egl.ChooseConfig(display, attribList, configs, configs.Length, out num_configs))
             {
-                throw new GraphicsModeException(String.Format("Failed to retrieve GraphicsMode, error {0}", Egl.GetError()));
+                throw new Exception(String.Format("Failed to retrieve GraphicsMode, error {0}", Egl.GetError()));
             }
 
             // See what we really got

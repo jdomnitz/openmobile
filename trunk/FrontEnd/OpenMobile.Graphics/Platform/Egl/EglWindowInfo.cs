@@ -75,7 +75,7 @@ namespace OpenMobile.Platform.Egl
             Surface = Egl.CreateWindowSurface(Display, config, Handle, null);
             int error = Egl.GetError();
             if (error != Egl.SUCCESS)
-                throw new GraphicsContextException(String.Format("[Error] Failed to create EGL window surface, error {0}.", error));
+                throw new Exception(String.Format("[Error] Failed to create EGL window surface, error {0}.", error));
         }
 
         //public void CreatePixmapSurface(EGLConfig config)

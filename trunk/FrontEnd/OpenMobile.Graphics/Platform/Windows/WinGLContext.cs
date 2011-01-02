@@ -124,7 +124,7 @@ namespace OpenMobile.Platform.Windows
                     if (Handle == ContextHandle.Zero)
                         Handle = new ContextHandle(Wgl.Imports.CreateContext(window.DeviceContext));
                     if (Handle == ContextHandle.Zero)
-                        throw new GraphicsContextException(
+                        throw new Exception(
                             String.Format("Context creation failed. Wgl.CreateContext() error: {0}.",
                                 Marshal.GetLastWin32Error()));
                 }
@@ -148,7 +148,7 @@ namespace OpenMobile.Platform.Windows
         public override void SwapBuffers()
         {
             if (!Functions.SwapBuffers(Wgl.GetCurrentDC()))
-                throw new GraphicsContextException(String.Format(
+                throw new Exception(String.Format(
                     "Failed to swap buffers for context {0} current. Error: {1}", this, Marshal.GetLastWin32Error()));
         }
 
@@ -168,7 +168,7 @@ namespace OpenMobile.Platform.Windows
                 success = Wgl.Imports.MakeCurrent(IntPtr.Zero, IntPtr.Zero);
 
             if (!success)
-                throw new GraphicsContextException(String.Format(
+                throw new Exception(String.Format(
                     "Failed to make context {0} current. Error: {1}", this, Marshal.GetLastWin32Error()));
 
         }
@@ -247,7 +247,7 @@ namespace OpenMobile.Platform.Windows
         void SetGraphicsModePFD(GraphicsMode mode, WinWindowInfo window)
         {
             if (!mode.Index.HasValue)
-                throw new GraphicsModeException("Invalid or unsupported GraphicsMode.");
+                throw new Exception("Invalid or unsupported GraphicsMode.");
 
             if (window == null) throw new ArgumentNullException("window", "Must point to a valid window.");
 
@@ -256,7 +256,7 @@ namespace OpenMobile.Platform.Windows
                 API.PixelFormatDescriptorSize, ref pfd);
             Debug.WriteLine(mode.Index.ToString());
             if (!Functions.SetPixelFormat(window.DeviceContext, (int)mode.Index.Value, ref pfd))
-                throw new GraphicsContextException(String.Format(
+                throw new Exception(String.Format(
                     "Requested GraphicsMode not available. SetPixelFormat error: {0}", Marshal.GetLastWin32Error()));
         }
         #endregion

@@ -58,7 +58,9 @@ namespace OpenMobile.Graphics.ES20
         public ErrorHelper(IGraphicsContext context)
         {
             if (context == null)
-                throw new GraphicsContextMissingException();
+                throw new Exception(String.Format(
+                "No context is current in the calling thread (ThreadId: {0}).",
+                System.Threading.Thread.CurrentThread.ManagedThreadId));
 
             Context = (GraphicsContext)context;
             lock (SyncRoot)
@@ -115,7 +117,7 @@ namespace OpenMobile.Graphics.ES20
                     }
                     sb.Remove(sb.Length - 2, 2); // Remove the last comma
 
-                    throw new GraphicsErrorException(sb.ToString());
+                    throw new Exception(sb.ToString());
                 }
             }
         }

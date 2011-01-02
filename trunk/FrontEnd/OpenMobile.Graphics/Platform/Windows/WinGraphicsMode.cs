@@ -57,7 +57,7 @@ namespace OpenMobile.Platform.Windows
                     if (modes.Count == 0)
                         modes.AddRange(GetModesPFD(native));
                     if (modes.Count == 0)
-                        throw new GraphicsModeException(
+                        throw new Exception(
                             "No GraphicsMode available. This should never happen, please report a bug at http://www.opentk.com");
                 }
                 modes.Sort(new GraphicsModeComparer());

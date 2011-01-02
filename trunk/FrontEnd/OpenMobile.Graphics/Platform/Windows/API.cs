@@ -248,7 +248,7 @@ namespace OpenMobile.Platform.Windows
             {
                 int error = Marshal.GetLastWin32Error();
                 if (error != 0)
-                    throw new PlatformException(String.Format("Failed to modify window border. Error: {0}", error));
+                    throw new Exception(String.Format("Failed to modify window border. Error: {0}", error));
             }
 
             return retval;
