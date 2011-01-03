@@ -71,7 +71,7 @@ namespace Brightness_Control
                     if ((DateTime.Now < sunset) && (DateTime.Now.Date < sunrise.Date))
                     {
                         if (rise.TotalHours >= 23)
-                            rampBrightness(i, 0, 50);
+                            rampBrightness(i, 1, 50);
                         else if(rise.TotalHours==22)
                             rampBrightness(i, 50, 100);
                     }
@@ -80,7 +80,7 @@ namespace Brightness_Control
                         if (set.TotalHours == 0)
                             rampBrightness(i, 100, 50);
                         else if(set.TotalHours==-1)
-                            rampBrightness(i, 50, 0);
+                            rampBrightness(i, 50, 1);
                     }
                 }
         }
@@ -117,7 +117,7 @@ namespace Brightness_Control
                     settings.Add(new Setting(SettingTypes.MultiChoice, "BrightnessControl.Sun", "", "Automatically dim at sunset", Setting.BooleanList, Setting.BooleanList, s.getAllInstances("BrightnessControl.Sun",theHost.ScreenCount)));
                     settings.Add(new Setting(SettingTypes.MultiChoice, "BrightnessControl.Ambient", "", "Automatically dim with ambient lighting", Setting.BooleanList, Setting.BooleanList, s.getAllInstances("BrightnessControl.Ambient",theHost.ScreenCount)));
                     List<string> range=new List<string>();
-                    range.Add("0");
+                    range.Add("1");
                     range.Add("100");
                     settings.Add(new Setting(SettingTypes.Range, "BrightnessControl.Level", "Level", "Current Brightness %value%%",null , range, s.getAllInstances("BrightnessControl.Level",theHost.ScreenCount)));
                     settings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
