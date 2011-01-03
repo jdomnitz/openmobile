@@ -254,9 +254,6 @@ namespace OpenMobile.Platform.Windows
                         // re-entered the window.
                         mouse_outside_window = false;
                         EnableMouseTracking();
-
-                        if (MouseEnter != null)
-                            MouseEnter(this, EventArgs.Empty);
                     }
                     break;
 
@@ -420,10 +417,6 @@ namespace OpenMobile.Platform.Windows
                     Functions.UnregisterClass(ClassName, Instance);
                     window.Dispose();
                     child_window.Dispose();
-
-                    if (Closed != null)
-                        Closed(this, EventArgs.Empty);
-
                     break;
                 case WindowMessage.DISPLAYCHANGE:
                     if (ResolutionChange != null)
@@ -1026,9 +1019,6 @@ namespace OpenMobile.Platform.Windows
                     Visible = true;
 
                 WindowState = state;
-
-                if (WindowBorderChanged != null)
-                    WindowBorderChanged(this, EventArgs.Empty);
             }
         }
 
@@ -1040,19 +1030,17 @@ namespace OpenMobile.Platform.Windows
 
         public event EventHandler<System.ComponentModel.CancelEventArgs> Closing;
 
-        public event EventHandler<EventArgs> Closed;
-
         //public event EventHandler<EventArgs> ClientSizeChanged;
 
         //public event EventHandler<EventArgs> WindowInfoChanged;
 
-        public event EventHandler<EventArgs> WindowBorderChanged;
+        //public event EventHandler<EventArgs> WindowBorderChanged;
 
         public event EventHandler<EventArgs> WindowStateChanged;
 
         //public event EventHandler<KeyPressEventArgs> KeyPress;
 
-        public event EventHandler<EventArgs> MouseEnter;
+        //public event EventHandler<EventArgs> MouseEnter;
 
         public event EventHandler<EventArgs> MouseLeave;
 

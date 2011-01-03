@@ -134,7 +134,7 @@ namespace OMDir
             right.ListStyle = eListStyle.DroidStyleImage;
             right.Background = Color.FromArgb(180, Color.LightGray);
             right.ItemColor1 = Color.FromArgb(0, 0, 16);
-            right.ClickToSelect = true;
+            //right.ClickToSelect = true;
             OMList left = new OMList(15, 150, 470, 375);
             left.Font = right.Font;
             left.OnClick += new userInteraction(left_OnClick);

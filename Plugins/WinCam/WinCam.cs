@@ -172,8 +172,9 @@ namespace WinCam
             else
                 if (OnMediaEvent != null)
                     OnMediaEvent(eFunction.hideVideoWindow, instance, "");
-            foreach (stream s in streams[instance])
-                s.visible(visible);
+            for (int i = 0; i < streams[instance].Count;i++ )
+               if (streams[instance][i]!=null)
+                    streams[instance][i].visible(visible);
             return true;
         }
 
@@ -197,17 +198,17 @@ namespace WinCam
             {
                 settings = new Settings("Camera Settings");
                 List<string> cams = new List<string>(getcams());
+                List<string> choices = new List<string>(new string[] { "None", "Flip Vertically", "Flip Horizontally", "Flip Both" });
+                List<string> values = new List<string>(new string[] { "", "Vertical", "Horizontal", "Both" });
                 using (PluginSettings s = new PluginSettings())
                 {
                     settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Source", null, "Camera 1 Source", cams, cams, s.getSetting("WinCam.Source1.Source")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Source", null, "Camera 2 Source", cams, cams, s.getSetting("WinCam.Source2.Source")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Source", null, "Camera 3 Source", cams, cams, s.getSetting("WinCam.Source3.Source")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Source", null, "Camera 4 Source", cams, cams, s.getSetting("WinCam.Source4.Source")));
-                    List<string> choices = new List<string>(new string[] { "None", "Flip Vertically", "Flip Horizontally", "Flip Both" });
-                    List<string> values = new List<string>(new string[] { "", "Vertical", "Horizontal", "Both" });
                     settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Flip", null, "Source 1 Flip", choices, values, s.getSetting("WinCam.Source1.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Source", null, "Camera 2 Source", cams, cams, s.getSetting("WinCam.Source2.Source")));
                     settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Flip", null, "Source 2 Flip", choices, values, s.getSetting("WinCam.Source2.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Source", null, "Camera 3 Source", cams, cams, s.getSetting("WinCam.Source3.Source")));
                     settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Flip", null, "Source 3 Flip", choices, values, s.getSetting("WinCam.Source3.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Source", null, "Camera 4 Source", cams, cams, s.getSetting("WinCam.Source4.Source")));
                     settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Flip", null, "Source 4 Flip", choices, values, s.getSetting("WinCam.Source4.Flip")));
                     settings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
                 }
@@ -368,18 +369,11 @@ namespace WinCam
         public sealed class MessageProc : Form
         {
             public delegate void eventOccured(int instance);
-            public new delegate void Click();
-            public new Click OnClick;
             public eventOccured OnEvent;
             protected override void WndProc(ref Message m)
             {
                 if (m.Msg == WM_Graph_Notify)
                     OnEvent((int)m.LParam);
-                else if (m.Msg == WM_LBUTTONUP)
-                {
-                    OnClick();
-                    return;
-                }
                 else
                     base.WndProc(ref m);
             }
