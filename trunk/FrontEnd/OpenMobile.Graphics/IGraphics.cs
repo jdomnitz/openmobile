@@ -36,7 +36,6 @@ namespace OpenMobile.Graphics
         void FillRectangle(Brush brush, Rectangle rect);
         void FillRoundRectangle(Brush brush, int x, int y, int width, int height, int radius);
         void FillRoundRectangle(Brush brush, Rectangle rect, int radius);
-        void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius);
         void Finish();
         OImage GenerateStringTexture(string s, Font font, Color color, int Left, int Top, int Width, int Height, System.Drawing.StringFormat format);
         OImage GenerateTextTexture(int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color color, Color secondColor);
