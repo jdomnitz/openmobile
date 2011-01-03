@@ -118,7 +118,10 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (area == value)
+                    return;
                 area = value;
+                updateScroll();
             }
         }
         /// <summary>
@@ -145,7 +148,8 @@ namespace OpenMobile.Controls
         {
             control.Parent = this.parent;
             control.UpdateThisControl += raiseUpdate;
-            Controls.Add(control);
+            lock(Controls)
+                Controls.Add(control);
         }
         /// <summary>
         /// Remove a control from the collection
@@ -153,7 +157,8 @@ namespace OpenMobile.Controls
         /// <param name="control"></param>
         public void Remove(OMControl control)
         {
-            Controls.Remove(control);
+            lock (Controls)
+                Controls.Remove(control);
         }
         /// <summary>
         /// Gets/Sets the given control
@@ -192,8 +197,12 @@ namespace OpenMobile.Controls
         {
             g.SetClip(this.toRegion());
             g.TranslateTransform(left, top-scrolly);
-            foreach (OMControl c in Controls)
-                c.Render(g, e);
+            lock (Controls)
+            {
+                foreach (OMControl c in Controls)
+                    if (c.Visible)
+                        c.Render(g, e);
+            }
             g.TranslateTransform(-left, -top+scrolly);
             if (scrollwidth > 0)
             {

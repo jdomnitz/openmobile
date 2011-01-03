@@ -490,10 +490,16 @@ namespace OpenMobile.Graphics
         {
             if (brush.Gradient == Gradient.None)
                 FillSolidRoundRectangle(brush.Color, x, y, width, height, radius);
-            else //if(brush.Gradient==Gradient.Horizontal)
-                FillVertRoundRectangle(brush, x, y, width, height, radius);
+            else if (brush.Gradient == Gradient.Horizontal)
+                FillHorizRoundRectangle(brush, x, y, width, height, radius);
+            else
+                FillVertRoundRectangle(brush, x, y, width, height, radius);   
         }
-
+        private void FillHorizRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
+        {
+            //TODO-Implement
+            FillSolidRoundRectangle(brush.Color, x, y, width, height, radius);
+        }
         private void FillVertRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
         {
             double ang = 0;
@@ -585,7 +591,7 @@ namespace OpenMobile.Graphics
                 FillRoundRectangle(brush, rect.X, rect.Y, rect.Width, rect.Height, radius);
         }
 
-        public void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
+        private void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
         {
             double ang = 0;
             Raw.Color4(color);

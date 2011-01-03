@@ -135,6 +135,9 @@ namespace OpenMobile.Media
             }
             #endif
 			#if LINUX
+            #if WINDOWS
+            else 
+            #endif
 			if(Configuration.RunningOnLinux)
 			{
 				return GnomeIcon.GetFileIcon(path);

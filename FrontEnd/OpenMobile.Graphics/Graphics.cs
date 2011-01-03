@@ -242,11 +242,6 @@ namespace OpenMobile.Graphics
             implementation.FillRoundRectangle(brush, rect, radius);
         }
 
-        public void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
-        {
-            implementation.FillSolidRoundRectangle(color, x, y, width, height, radius);
-        }
-
         public void Finish()
         {
             implementation.Finish();

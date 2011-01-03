@@ -711,7 +711,7 @@ namespace OpenMobile.Graphics
             Raw.Disable(EnableCap.LineSmooth);
             Raw.Disable(EnableCap.PointSmooth);
         }
-        public void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
+        private void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
         {
             double ang = 0;
             Raw.Color4(color);

@@ -743,10 +743,9 @@ namespace OpenMobile.Controls
                 g.Clip = r; //Reset the clip size for the rest of the controls
                 if ((scrollbars)&&(count<items.Count))
                 {
-                    int nheight = (int)(height * ((float)(height / listHeight) / items.Count));
-                    //TODO - Actually calculate ntop correctly
-                    int ntop = Top - (int)((moved*((float)items.Count-count+1)/items.Count));
-                    g.FillRoundRectangle(new Brush(color), left + width - 3, ntop, 6, nheight, 3);
+                    float nheight = height*((float)height) / (listHeight * items.Count);
+                    float ntop = top+height * ((float)-moved) / (listHeight * items.Count);
+                    g.FillRoundRectangle(new Brush(color), left + width - 3, (int)ntop, 6, (int)nheight, 5);
                 }
             }
         }
