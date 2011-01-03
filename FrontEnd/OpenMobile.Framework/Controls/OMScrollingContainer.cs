@@ -58,7 +58,7 @@ namespace OpenMobile.Controls
         /// The currently highlighted control
         /// </summary>
         protected OMControl highlighted;
-
+        private bool ignoreScroll;
 
 
         /// <summary>
@@ -228,6 +228,8 @@ namespace OpenMobile.Controls
         /// <param name="HeightScale"></param>
         public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale)
         {
+            if (ignoreScroll)
+                return;
             Point loc = e.Location;
             loc.Scale(WidthScale, HeightScale);
             loc.Translate(-left, -top+scrolly);
@@ -310,6 +312,11 @@ namespace OpenMobile.Controls
         /// <param name="RelativeDistance"></param>
         public void MouseThrow(int screen, OpenMobile.Graphics.Point TotalDistance, OpenMobile.Graphics.Point RelativeDistance)
         {
+            if (ignoreScroll)
+            {
+                ((IThrow)highlighted).MouseThrow(screen, TotalDistance, RelativeDistance);
+                return;
+            }
             if (area.Height <= height)
                 return;
             scrolly -= RelativeDistance.Y;
@@ -338,7 +345,14 @@ namespace OpenMobile.Controls
         /// <param name="Cancel"></param>
         public void MouseThrowStart(int screen, OpenMobile.Graphics.Point StartLocation, OpenMobile.Graphics.PointF scaleFactors, ref bool Cancel)
         {
-            //
+            if (highlighted != null)
+                ignoreScroll = (typeof(IThrow).IsInstanceOfType(highlighted));
+            else
+                ignoreScroll = false;
+            if (ignoreScroll)
+                ((IThrow)highlighted).MouseThrowStart(screen, StartLocation, scaleFactors, ref Cancel);
+            if (Cancel)
+                ignoreScroll = false;
         }
 
         /// <summary>
@@ -348,7 +362,12 @@ namespace OpenMobile.Controls
         /// <param name="EndLocation"></param>
         public void MouseThrowEnd(int screen, OpenMobile.Graphics.Point EndLocation)
         {
-            //
+            if (ignoreScroll)
+                ((IThrow)highlighted).MouseThrowEnd(screen, EndLocation);
+            ignoreScroll = false;
+            if (highlighted != null)
+                highlighted.Mode = eModeType.Normal;
+            highlighted = null;
         }
 
         #endregion

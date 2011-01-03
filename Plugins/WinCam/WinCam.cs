@@ -215,7 +215,7 @@ namespace WinCam
             return settings;
         }
 
-        void settings_OnSettingChanged(Setting setting)
+        void settings_OnSettingChanged(int screen,Setting setting)
         {
             using (PluginSettings s = new PluginSettings())
                 s.setSetting(setting.Name, setting.Value);

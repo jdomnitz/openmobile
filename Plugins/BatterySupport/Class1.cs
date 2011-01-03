@@ -46,7 +46,7 @@ namespace BatterySupport
             return batSettings;
         }
 
-        void Changed(Setting setting)
+        void Changed(int screen,Setting setting)
         {
             using (PluginSettings s = new PluginSettings())
                 s.setSetting(setting.Name, setting.Value);

@@ -209,7 +209,7 @@ namespace OMRadio
             return settings;
         }
 
-        private void Setting_Changed(Setting s)
+        private void Setting_Changed(int screen,Setting s)
         {
             using (PluginSettings settings = new PluginSettings())
                 settings.setSetting(s.Name, s.Value);

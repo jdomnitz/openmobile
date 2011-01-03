@@ -90,7 +90,7 @@ namespace OpenMobile
             return gl;
         }
 
-        static void SettingsChanged(Setting setting)
+        static void SettingsChanged(int screen,Setting setting)
         {
             using (PluginSettings s = new PluginSettings())
             {

@@ -290,7 +290,7 @@ namespace PandoraPlayer
 
         public bool setVolume(int instance, int percent)
         {
-            if (settings.Count == 3)
+            if ((settings!=null)&&(settings.Count == 3))
                 settings[2].Value = percent.ToString();
             if (client == null)
                 return false;
@@ -403,7 +403,7 @@ namespace PandoraPlayer
             if (function == eFunction.closeProgram)
                 fadeOut();
         }
-        void changed(Setting s)
+        void changed(int screen,Setting s)
         {
             if (s.Name == "Pandora.Volume")
             {

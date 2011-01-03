@@ -73,7 +73,7 @@ namespace OMPlayer
                     return i;
             return 0;
         }
-        void changed(Setting s)
+        void changed(int screen,Setting s)
         {
             if (s.Name == "Music.CrossfadeDuration")
             {

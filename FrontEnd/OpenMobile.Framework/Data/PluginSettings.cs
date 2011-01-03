@@ -93,7 +93,33 @@ namespace OpenMobile.Data
                 return (rowsAffected > 0);
             }
         }
-
+        /// <summary>
+        /// Gets an array of values (saved using screen notation)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="screenCount"></param>
+        /// <returns></returns>
+        public string[] getAllInstances(string name, int screenCount)
+        {
+            string[] ret=new string[screenCount];
+            for (int i = 0; i < screenCount; i++)
+                ret[i] = getSetting(name + ".Screen" + (i + 1).ToString());
+            return ret;
+        }
+        /// <summary>
+        /// Sets an array of values (saved using screen notation)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public bool setAllInstances(string name, string[] values)
+        {
+            if (values == null)
+                return false;
+            for (int i = 0; i < values.Length; i++)
+                setSetting(name + ".Screen" + (i + 1).ToString(), values[i]);
+            return true;
+        }
         #region IDisposable Members
 
         /// <summary>

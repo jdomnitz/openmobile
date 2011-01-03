@@ -132,7 +132,7 @@ Public Class OMSerialGPS
         Return m_Settings
     End Function
 
-    Private Sub Changed(ByVal St As Setting)
+    Private Sub Changed(ByVal screen As Integer, ByVal St As Setting)
         Dim PlugSet As New OpenMobile.Data.PluginSettings
         PlugSet.setSetting(St.Name, St.Value)
     End Sub

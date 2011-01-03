@@ -79,7 +79,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The image to be rendered
         /// </summary>
-        [Category("Image"), Description("The image to be rendered")]
         public imageItem Image
         {
             get

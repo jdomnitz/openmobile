@@ -27,6 +27,7 @@ using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using OpenMobile.Data;
 using OpenMobile.Media;
+using OpenMobile.Threading;
 
 namespace OMDir
 {
@@ -142,7 +143,7 @@ namespace OMDir
             left.Background = right.Background;
             left.ItemColor1 = right.ItemColor1;
             folder = theHost.getSkinImage("Folder", true).image;
-            loadRoot(left);
+            SafeThread.Asynchronous(delegate() { loadRoot(left); }, theHost);
             OMBasicShape border = new OMBasicShape(10, 146, 975, 383);
             border.BorderColor = Color.Silver;
             border.BorderSize = 4F;

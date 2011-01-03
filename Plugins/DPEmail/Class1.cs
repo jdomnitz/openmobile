@@ -225,7 +225,7 @@ namespace DPEmail
             return settings;
         }
 
-        void settings_OnSettingChanged(Setting setting)
+        void settings_OnSettingChanged(int screen,Setting setting)
         {
             if (setting.Name == "Email.Username")
             {
@@ -266,22 +266,22 @@ namespace DPEmail
                             s.Value = "3";
                             break;
                     }
-                    settings.changeSetting(s);
+                    settings.changeSetting(0,s);
                 }
                 else if (s.Name == "Email.InboundServer")
                 {
                     s.Value = info.inboundHost;
-                    settings.changeSetting(s);
+                    settings.changeSetting(0,s);
                 }
                 else if (s.Name == "Email.OutboundServer")
                 {
                     s.Value = info.outboundHost;
-                    settings.changeSetting(s);
+                    settings.changeSetting(0,s);
                 }
                 else if (s.Name == "Email.SecureSMTP")
                 {
                     s.Value = (info.outboundPort == 465).ToString();
-                    settings.changeSetting(s);
+                    settings.changeSetting(0,s);
                 }
             }
         }

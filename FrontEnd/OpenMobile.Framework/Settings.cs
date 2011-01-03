@@ -86,7 +86,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// The actual value to be displayed (default) or the value to be set
         /// </summary>
-        private string[] DefaultValue = new string[1];
+        private string[] CurrentValues = new string[1];
         /// <summary>
         /// Options for a MultiChoice setting
         /// </summary>
@@ -96,19 +96,32 @@ namespace OpenMobile.Plugin
         /// </summary>
         public List<string> Values = null;
         /// <summary>
+        /// The actual value to be displayed (screen specific)
+        /// </summary>
+        public string[] CurrentValue
+        {
+            get
+            {
+                if (CurrentValues == null)
+                    return new string[0];
+                else
+                    return CurrentValues;
+            }
+        }
+        /// <summary>
         /// The actual value to be displayed (default) or the value to be set
         /// </summary>
         public string Value
         {
             get
             {
-                if ((DefaultValue == null) || (DefaultValue.Length == 0))
+                if ((CurrentValues == null) || (CurrentValues.Length == 0))
                     return null;
-                return DefaultValue[0];
+                return CurrentValues[0];
             }
             set
             {
-                DefaultValue = new string[] { value };
+                CurrentValues = new string[] { value };
             }
         }
         /// <summary>
@@ -118,11 +131,11 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         public string getInstanceValue(int screen)
         {
-            if ((DefaultValue == null) || (DefaultValue.Length == 0))
+            if ((CurrentValues == null) || (CurrentValues.Length == 0))
                 return null;
-            if ((screen<0)||(screen>DefaultValue.Length-1))
-                return DefaultValue[0];
-            return DefaultValue[screen];
+            if ((screen<0)||(screen>CurrentValues.Length-1))
+                return CurrentValues[0];
+            return CurrentValues[screen];
         }
         /// <summary>
         /// Sets a value for the given screen
@@ -131,9 +144,19 @@ namespace OpenMobile.Plugin
         /// <param name="value"></param>
         public void setInstanceValue(int screen,string value)
         {
-            if ((DefaultValue == null)||(screen < 0) || (screen > DefaultValue.Length - 1))
+            if (screen < 0)
                 return;
-            DefaultValue[screen]=value;
+            if ((CurrentValues == null)||(CurrentValues.Length==0))
+                CurrentValues = new string[1];
+            if (screen >= CurrentValues.Length)
+                if (CurrentValues.Length == 1)
+                {
+                    CurrentValues[0] = value;
+                    return;
+                }
+                else
+                    Array.Resize<string>(ref CurrentValues, screen + 1);
+            CurrentValues[screen]=value;
         }
         /// <summary>
         /// Creates a new Text, Numeric, File or Folder Setting
@@ -197,8 +220,8 @@ namespace OpenMobile.Plugin
         /// <param name="Description"></param>
         /// <param name="Options"></param>
         /// <param name="Values"></param>
-        /// <param name="defaultValue"></param>
-        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values,string defaultValue)
+        /// <param name="currentValue"></param>
+        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values,string currentValue)
         {
             this.Type = Type;
             this.Name = Name;
@@ -206,7 +229,7 @@ namespace OpenMobile.Plugin
             this.Description = Description;
             this.Options = Options;
             this.Values = Values;
-            this.Value = defaultValue;
+            this.Value = currentValue;
         }
         /// <summary>
         /// Creates a new MultiChoice or Range setting
@@ -217,8 +240,8 @@ namespace OpenMobile.Plugin
         /// <param name="Description"></param>
         /// <param name="Options"></param>
         /// <param name="Values"></param>
-        /// <param name="defaultValue"></param>
-        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values, string[] defaultValue)
+        /// <param name="currentValues"></param>
+        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values, string[] currentValues)
         {
             this.Type = Type;
             this.Name = Name;
@@ -226,7 +249,7 @@ namespace OpenMobile.Plugin
             this.Description = Description;
             this.Options = Options;
             this.Values = Values;
-            this.DefaultValue = defaultValue;
+            this.CurrentValues = currentValues;
         }
         /// <summary>
         /// A List containing True and False
@@ -237,7 +260,8 @@ namespace OpenMobile.Plugin
     /// A setting has changed
     /// </summary>
     /// <param name="setting"></param>
-    public delegate void SettingChanged(Setting setting);
+    /// <param name="screen"></param>
+    public delegate void SettingChanged(int screen,Setting setting);
     /// <summary>
     /// A collection of Settings
     /// </summary>
@@ -251,10 +275,11 @@ namespace OpenMobile.Plugin
         /// Raises the OnSettingChanged event
         /// </summary>
         /// <param name="setting"></param>
-        public void changeSetting(Setting setting)
+        /// <param name="screen"></param>
+        public void changeSetting(int screen,Setting setting)
         {
             if (OnSettingChanged != null)
-                OnSettingChanged(setting);
+                OnSettingChanged(screen,setting);
         }
         /// <summary>
         /// The title for this settings collection
