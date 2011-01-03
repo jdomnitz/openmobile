@@ -916,7 +916,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Returns the index of the item under the mouse
         /// </summary>
-        [Category("List"), Description("Returns the index of the item under the mouse")]
         public int HighlightedIndex
         {
             get

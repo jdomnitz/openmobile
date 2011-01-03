@@ -49,7 +49,7 @@ namespace OpenMobile.Framework.Math
         {
             lock (mLock)    // lock for thread safety
             {
-                DateTime date = DateTime.Now;
+                DateTime date = riseTime;
                 double zone = -(int)Math.Round(TimeZone.CurrentTimeZone.GetUtcOffset(date).TotalSeconds / 3600);
                 double jd = GetJulianDay(date) - 2451545;  // Julian day relative to Jan 1.5, 2000
 

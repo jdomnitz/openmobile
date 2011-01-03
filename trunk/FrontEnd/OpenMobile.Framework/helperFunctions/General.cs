@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using OpenMobile.Plugin;
+using System.Xml;
 
 namespace OpenMobile.helperFunctions
 {
@@ -30,6 +31,69 @@ namespace OpenMobile.helperFunctions
     /// </summary>
     public static class General
     {
+        /// <summary>
+        /// Translates a place name, location name or address string into a full Location
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static Location lookupLocation(string name)
+        {
+            Location ret=new Location();
+            XmlDocument doc = new XmlDocument();
+            doc.Load(@"http://where.yahooapis.com/geocode?q=" + name);
+            ret.Name = name;
+            foreach(XmlNode n in doc.DocumentElement.ChildNodes)
+            {
+                switch (n.Name)
+                {
+                    case "Error":
+                        if (n.InnerText != "0")
+                            return ret;
+                        break;
+                    case "Found":
+                        if (n.InnerText != "1")
+                            return ret;
+                        break;
+                    case "Result":
+                        foreach (XmlNode n2 in n.ChildNodes)
+                        {
+                            switch (n2.Name)
+                            {
+                                case "latitude":
+                                    if (!string.IsNullOrEmpty(n2.InnerText))
+                                        ret.Latitude = float.Parse(n2.InnerText);
+                                    break;
+                                case "longitude":
+                                    if (!string.IsNullOrEmpty(n2.InnerText))
+                                        ret.Longitude = float.Parse(n2.InnerText);
+                                    break;
+                                case "house":
+                                    ret.Street = n2.InnerText +" "+ ret.Street;
+                                    break;
+                                case "street":
+                                    ret.Street += n2.InnerText;
+                                    break;
+                                case "postal":
+                                    ret.Zip = n2.InnerText;
+                                    break;
+                                case "city":
+                                    ret.City = n2.InnerText;
+                                    break;
+                                case "state":
+                                    ret.State = n2.InnerText;
+                                    break;
+                                case "country":
+                                    ret.Country = n2.InnerText;
+                                    break;
+                            }
+                        }
+                        break;
+                }
+            }
+            ret.Street = ret.Street.Trim();
+            return ret;
+        }
+
         /// <summary>
         /// Synchronously get keyboard input from the On Screen Keyboard
         /// </summary>

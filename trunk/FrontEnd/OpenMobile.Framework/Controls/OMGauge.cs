@@ -316,7 +316,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Gets or Sets the Text to be displayed in the dial
         /// </summary>
-        [Description("Gets or Sets the Text to be displayed in the dial")]
         public string DialText
         {
             get { return this.dialText; }
@@ -774,7 +773,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The controls height in pixels
         /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the height of the control")]
         public override int Height
         {
             get
@@ -793,7 +791,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The controls width in pixels
         /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the width of the control")]
         public override int Width
         {
             get
@@ -829,7 +826,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The distance between the left edge of the control and the left edge of the user interface
         /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the left position of the control")]
         public override int Left
         {
             get

@@ -107,7 +107,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The width of the image on top of the slider track
         /// </summary>
-        [Description("The width of the image on top of the slider track")]
         public int SliderWidth
         {
             get
@@ -122,7 +121,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The height of the slider bar image
         /// </summary>
-        [Description("The height of the slider bar image")]
         public int SliderBarHeight
         {
             get
@@ -137,7 +135,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The minimum slider value
         /// </summary>
-        [Category("Slider"),Description("The minimum slider value")]
         public int Minimum
         {
             get
@@ -152,7 +149,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The maximum slider value
         /// </summary>
-        [Category("Slider"),Description("The maximum slider value")]
         public int Maximum
         {
             get
@@ -167,7 +163,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The value of the slider
         /// </summary>
-        [Category("Slider"),Description("The value of the slider")]
         public int Value
         {
             get

@@ -25,7 +25,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The color the text should turn when the checkbox is highlighted
         /// </summary>
-        [Category("Checkbox"), Description("Is the checkbox checked")]
         public Color HighlightColor
         {
             get
@@ -41,7 +40,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The value of the checkbox
         /// </summary>
-        [Category("Checkbox"),Description("Is the checkbox checked")]
         public bool Checked
         {
             get

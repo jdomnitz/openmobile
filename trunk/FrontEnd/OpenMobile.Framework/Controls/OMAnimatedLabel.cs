@@ -228,7 +228,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The speed of the effect (step speed in ms)
         /// </summary>
-        [Category("Animation"), Description("The speed of the effect (step speed in ms)")]
         public int TickSpeed
         {
             get
@@ -246,7 +245,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The effect to loop continuously
         /// </summary>
-        [Category("Animation"), Description("The effect to loop continuously")]
         public eAnimation ContiuousAnimation
         {
             get
@@ -298,7 +296,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Effect specific-second font
         /// </summary>
-        [Description("Effect specific-second font"), Category("Text")]
         public Font EffectFont
         {
             get

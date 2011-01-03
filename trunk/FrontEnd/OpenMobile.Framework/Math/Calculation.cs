@@ -542,6 +542,11 @@ namespace OpenMobile.Framework.Math
             DateTime ss = DateTime.Now;
             SunTimes s = new SunTimes();
             s.CalculateSunRiseSetTimes(latitude, longitude, ref sr, ref ss);
+            if (sr < DateTime.Now)//suns already up today
+            {
+                sr = DateTime.Now.AddDays(1);
+                s.CalculateSunRiseSetTimes(latitude, longitude, ref sr, ref ss);
+            }
             return sr;
         }
         /// <summary>

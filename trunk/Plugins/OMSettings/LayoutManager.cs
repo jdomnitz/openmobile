@@ -64,20 +64,23 @@ namespace OMSettings
             return ret;
         }
 
-        void collection_OnSettingChanged(Setting setting)
+        void collection_OnSettingChanged(int screen,Setting setting)
         {
             OMControl c = controls.Find(s => ((s.Tag != null) && (s.Tag.ToString() == setting.Name)));
             if (typeof(OMCheckbox).IsInstanceOfType(c))
-                ((OMCheckbox)c).Checked = bool.Parse(setting.Value);
+                ((OMCheckbox)c).Checked = bool.Parse(setting.getInstanceValue(screen));
             else if (typeof(OMTextBox).IsInstanceOfType(c))
             {
                 if (setting.Type == SettingTypes.MultiChoice)
-                    ((OMTextBox)c).Text = setting.Options[setting.Values.FindIndex(p => p == setting.Value)];
+                {
+                    string query = setting.getInstanceValue(screen);
+                    ((OMTextBox)c).Text = setting.Options[setting.Values.FindIndex(p => p == query)];
+                }
                 else
-                    ((OMTextBox)c).Text = setting.Value;
+                    ((OMTextBox)c).Text = setting.getInstanceValue(screen);
             }
             else if (typeof(OMSlider).IsInstanceOfType(c))
-                ((OMSlider)c).Value = int.Parse(setting.Value);
+                ((OMSlider)c).Value = int.Parse(setting.getInstanceValue(screen));
         }
         List<OMControl> controls = new List<OMControl>();
         List<OMControl> generate(Setting s,string title)
@@ -88,7 +91,7 @@ namespace OMSettings
                 case SettingTypes.MultiChoice:
                     if (s.Values == Setting.BooleanList)
                     {
-                        OMCheckbox cursor = new OMCheckbox(220, ofset, 600, 50);
+                        OMCheckbox cursor = new OMCheckbox(220, ofset, 700, 50);
                         cursor.Text = s.Description;
                         cursor.Font = new Font(Font.GenericSansSerif, 24F);
                         cursor.OutlineColor = Color.Red;
@@ -246,7 +249,9 @@ namespace OMSettings
                     if (!int.TryParse(s.Values[1], out val))
                         break;
                     range.Maximum = val;
-                    if (!int.TryParse(s.Value, out val))
+                    if ((s.Value == string.Empty))
+                        val = 0;
+                    else if (!int.TryParse(s.Value, out val))
                         break;
                     range.Value = val;
                     range.Tag = s.Name;
@@ -287,17 +292,17 @@ namespace OMSettings
         void button_OnClick(OMControl sender, int screen)
         {
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
-            collection.changeSetting(s);
+            collection.changeSetting(screen,s);
         }
 
         void range_OnSliderMoved(OMSlider sender, int screen)
         {
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
-            s.Value = ((OMSlider)sender).Value.ToString();
+            s.setInstanceValue(screen,((OMSlider)sender).Value.ToString());
             OMLabel lbl = (OMLabel)((OMScrollingContainer)sender.Parent[0])["dsc" + s.Name];
             if (lbl!=null)
-                lbl.Text = s.Description.Replace("%value%", s.Value);
-            collection.changeSetting(s);
+                lbl.Text = s.Description.Replace("%value%", s.getInstanceValue(screen));
+            collection.changeSetting(screen,s);
         }
 
         void file_OnClick(OMControl sender, int screen)
@@ -305,8 +310,8 @@ namespace OMSettings
             OpenMobile.helperFunctions.General.getFilePath path = new OpenMobile.helperFunctions.General.getFilePath(theHost);
             ((OMTextBox)sender).Text = path.getFile(screen, "OMSettings", sender.Name);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
-            s.Value = ((OMTextBox)sender).Text;
-            collection.changeSetting(s);
+            s.setInstanceValue(screen, ((OMTextBox)sender).Text);
+            collection.changeSetting(screen,s);
         }
 
         void folder_OnClick(OMControl sender, int screen)
@@ -314,15 +319,15 @@ namespace OMSettings
             OpenMobile.helperFunctions.General.getFilePath path = new OpenMobile.helperFunctions.General.getFilePath(theHost);
             ((OMTextBox)sender).Text = path.getFolder(screen, "OMSettings", sender.Name);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
-            s.Value = ((OMTextBox)sender).Text;
-            collection.changeSetting(s);
+            s.setInstanceValue(screen,((OMTextBox)sender).Text);
+            collection.changeSetting(screen,s);
         }
 
         void cursor_OnClick(OMControl sender, int screen)
         {
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
-            s.Value = ((OMCheckbox)sender).Checked.ToString();
-            collection.changeSetting(s);
+            s.setInstanceValue(screen, ((OMCheckbox)sender).Checked.ToString());
+            collection.changeSetting(screen,s);
         }
 
         void text_OnClick(OMControl sender, int screen)
@@ -334,8 +339,8 @@ namespace OMSettings
             else
                 tb.Text = input.getText(screen, "OMSettings", sender.Parent.Name,tb.Text);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
-            s.Value = tb.Text;
-            collection.changeSetting(s);
+            s.setInstanceValue(screen, tb.Text);
+            collection.changeSetting(screen,s);
         }
         void Save_OnClick(OMControl sender, int screen)
         {
@@ -349,8 +354,8 @@ namespace OMSettings
             if (index >= setting.Options.Count - 1)
                 return;
             tb.Text = setting.Options[index+1];
-            setting.Value = setting.Values[index+1];
-            collection.changeSetting(setting);
+            setting.setInstanceValue(screen, setting.Values[index+1]);
+            collection.changeSetting(screen,setting);
         }
         void scrollLeft_OnClick(OMControl sender, int screen)
         {
@@ -360,8 +365,8 @@ namespace OMSettings
             if (index <= 0)
                 return;
             tb.Text = setting.Options[index - 1];
-            setting.Value = setting.Values[index - 1];
-            collection.changeSetting(setting);
+            setting.setInstanceValue(screen,setting.Values[index - 1]);
+            collection.changeSetting(screen,setting);
         }
     }
 }

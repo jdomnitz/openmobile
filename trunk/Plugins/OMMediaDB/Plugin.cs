@@ -58,7 +58,7 @@ namespace OMMediaDB
             }
             return s;
         }
-        private void changed(Setting s)
+        private void changed(int screen,Setting s)
         {
             using (PluginSettings settings = new PluginSettings())
             {

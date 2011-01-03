@@ -68,7 +68,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Controls the background color of the textbox
         /// </summary>
-        [CategoryAttribute("General"), DescriptionAttribute("Sets the Background Color")]
         public Color BackgroundColor
         {
             get
@@ -98,7 +97,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The text contained by the textbox
         /// </summary>
-        [CategoryAttribute("Text"), DescriptionAttribute("Sets the text to display")]
         public override string Text
         {
             get

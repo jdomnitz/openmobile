@@ -83,7 +83,7 @@ namespace UASControl
             return _settings;
         }
 
-        void _settings_OnSettingChanged(Setting setting)
+        void _settings_OnSettingChanged(int screen,Setting setting)
         {
             using(PluginSettings s=new PluginSettings())
                 s.setSetting(setting.Name,setting.Value);
