@@ -58,7 +58,10 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static DeviceInfo get(string drive)
         {
-            return AllDevices.Find(p => p.path == drive);
+            DeviceInfo ret= AllDevices.Find(p => p.path == drive);
+            if (ret == null)
+                return new DeviceInfo(drive, null, null, null, null, eDriveType.Unknown, false, null);
+            return ret;
         }
         static void theHost_OnStorageEvent(eMediaType type, bool justInserted, string arg)
         {

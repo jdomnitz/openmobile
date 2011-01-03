@@ -587,9 +587,7 @@ namespace OpenMobile.Platform.MacOS
 			{
 				mMouseIn = thisIn;
 
-				if (mMouseIn)
-					OnMouseEnter();
-				else
+				if (!mMouseIn)
 					OnMouseLeave();
 			}
 		}
@@ -1045,9 +1043,6 @@ namespace OpenMobile.Platform.MacOS
 					API.ChangeWindowAttributes(window.WindowRef, WindowAttributes.NoAttributes,
 											   WindowAttributes.Resizable | WindowAttributes.FullZoom);
 				}
-
-				if (WindowBorderChanged != null)
-					WindowBorderChanged(this, EventArgs.Empty);
 			}
 		}
 
@@ -1086,22 +1081,16 @@ namespace OpenMobile.Platform.MacOS
             InputDriver.Mouse[0].Reset();
 		}
 
-		private void OnMouseEnter()
-		{
-			if (MouseEnter != null)
-				MouseEnter(this, EventArgs.Empty);
-		}
-
 		#endregion
         public event EventHandler<EventArgs> Resize;
         public event EventHandler<CancelEventArgs> Closing;
         public event EventHandler<EventArgs> Closed;
         //public event EventHandler<EventArgs> ClientSizeChanged;
         //public event EventHandler<EventArgs> WindowInfoChanged;
-        public event EventHandler<EventArgs> WindowBorderChanged;
+        //public event EventHandler<EventArgs> WindowBorderChanged;
         public event EventHandler<EventArgs> WindowStateChanged;
         //public event EventHandler<KeyPressEventArgs> KeyPress;
-        public event EventHandler<EventArgs> MouseEnter;
+        //public event EventHandler<EventArgs> MouseEnter;
         public event EventHandler<EventArgs> MouseLeave;
 #pragma warning disable 0067
         public event EventHandler<TouchEventArgs> Gesture;

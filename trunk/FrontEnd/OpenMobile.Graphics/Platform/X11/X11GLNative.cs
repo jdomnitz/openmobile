@@ -711,10 +711,6 @@ namespace OpenMobile.Platform.X11
                     case XEventName.DestroyNotify:
                         Debug.WriteLine("Window destroyed");
                         exists = false;
-
-                        if (Closed != null)
-                            Closed(this, EventArgs.Empty);
-
                         return;
 
                     case XEventName.ConfigureNotify:
@@ -735,11 +731,6 @@ namespace OpenMobile.Platform.X11
                         if (MouseLeave != null)
                             MouseLeave(this, EventArgs.Empty);
                         InputDriver.Mouse[0].Reset();
-                        break;
-
-                    case XEventName.EnterNotify:
-                        if (MouseEnter != null)
-                            MouseEnter(this, EventArgs.Empty);
                         break;
 
                     case XEventName.MappingNotify:
@@ -1191,9 +1182,6 @@ namespace OpenMobile.Platform.X11
 
                         break;
                 }
-
-                if (WindowBorderChanged != null)
-                    WindowBorderChanged(this, EventArgs.Empty);
             }
         }
 
@@ -1207,15 +1195,13 @@ namespace OpenMobile.Platform.X11
 
         public event EventHandler<System.ComponentModel.CancelEventArgs> Closing;
 
-        public event EventHandler<EventArgs> Closed;
-
-        public event EventHandler<EventArgs> WindowBorderChanged;
+        //public event EventHandler<EventArgs> WindowBorderChanged;
 
         public event EventHandler<EventArgs> WindowStateChanged;
 
         //public event EventHandler<KeyPressEventArgs> KeyPress;
 
-        public event EventHandler<EventArgs> MouseEnter;
+        //public event EventHandler<EventArgs> MouseEnter;
 
         public event EventHandler<EventArgs> MouseLeave;
 #pragma warning disable 0067

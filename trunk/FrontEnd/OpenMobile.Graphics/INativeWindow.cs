@@ -152,16 +152,6 @@ namespace OpenMobile
         event EventHandler<CancelEventArgs> Closing;
 
         /// <summary>
-        /// Occurs after the window has closed. 
-        /// </summary>
-        event EventHandler<EventArgs> Closed;
-
-        /// <summary>
-        /// Occurs when the <see cref="WindowBorder"/> property of the window changes.
-        /// </summary>
-        event EventHandler<EventArgs> WindowBorderChanged;
-
-        /// <summary>
         /// Occurs when the <see cref="WindowState"/> property of the window changes.
         /// </summary>
         event EventHandler<EventArgs> WindowStateChanged;
@@ -175,11 +165,6 @@ namespace OpenMobile
         /// Occurs whenever the mouse cursor leaves the window <see cref="Bounds"/>.
         /// </summary>
         event EventHandler<EventArgs> MouseLeave;
-
-        /// <summary>
-        /// Occurs whenever the mouse cursor enters the window <see cref="Bounds"/>.
-        /// </summary>
-        event EventHandler<EventArgs> MouseEnter;
 
         /// <summary>
         /// Occurs when a multitouch gesture occurs

@@ -80,11 +80,8 @@ namespace OpenMobile
                         catch (ArgumentException) { }
                     }
                 }
-                currentThread = Thread.CurrentThread;
             }
         }
-
-        Thread currentThread;
         #endregion
 
         #region --- INativeWindow Members ---
@@ -116,20 +113,6 @@ namespace OpenMobile
             if (!events)
                 Events = true;
             implementation.ProcessEvents();
-            if (queuedInvokes.Count > 0)
-            {
-                for (int i = queuedInvokes.Count - 1; i >= 0; i--)
-                {
-                    Delegate d = queuedInvokes[i];
-                    try
-                    {
-                        if (d != null)
-                            d.Method.Invoke(d.Target, null);
-                    }
-                    catch (TargetInvocationException) { }
-                    queuedInvokes.RemoveAt(i);
-                }
-            }
         }
 
         #endregion
@@ -370,17 +353,7 @@ namespace OpenMobile
                 implementation.Opacity=value;
             }
         }
-        public void Invoke(Delegate function)
-        {
-            queuedInvokes.Add(function);
-        }
-        public bool InvokeRequired
-        {
-            get
-            {
-                return (Thread.CurrentThread != currentThread);
-            }
-        }
+        
         #region Width
 
         /// <summary>
@@ -503,26 +476,10 @@ namespace OpenMobile
         #endregion
 
         #region Events
-
-        /// <summary>
-        /// Occurs after the window has closed.
-        /// </summary>
-        public event EventHandler<EventArgs> Closed;
-
         /// <summary>
         /// Occurs when the window is about to close.
         /// </summary>
         public event EventHandler<CancelEventArgs> Closing;
-
-        /// <summary>
-        /// Occurs whenever a character is typed.
-        /// </summary>
-        //public event EventHandler<KeyPressEventArgs> KeyPress;
-
-        /// <summary>
-        /// Occurs whenever the mouse cursor enters the window <see cref="Bounds"/>.
-        /// </summary>
-        public event EventHandler<EventArgs> MouseEnter;
         
         /// <summary>
         /// Occurs whenever the mouse cursor leaves the window <see cref="Bounds"/>.
@@ -533,11 +490,6 @@ namespace OpenMobile
         /// Occurs whenever the window is resized.
         /// </summary>
         public event EventHandler<EventArgs> Resize;
-
-        /// <summary>
-        /// Occurs when the <see cref="WindowBorder"/> property of the window changes.
-        /// </summary>
-        public event EventHandler<EventArgs> WindowBorderChanged;
 
         /// <summary>
         /// Occurs when the <see cref="WindowState"/> property of the window changes.
@@ -562,25 +514,12 @@ namespace OpenMobile
         {
             if (!IsDisposed)
             {
+                Events = false;
                 //if ((options & GameWindowFlags.Fullscreen) != 0)
                 //{
                     //if (WindowState == WindowState.Fullscreen) WindowState = WindowState.Normal; // TODO: Revise.
                     //device.RestoreResolution();
                 //}
-                if (queuedInvokes.Count > 0)
-                {
-                    for (int i = queuedInvokes.Count - 1; i >= 0; i--)
-                    {
-                        Delegate d = queuedInvokes[i];
-                        try
-                        {
-                            if (d != null)
-                                d.Method.Invoke(d.Target, null);
-                        }
-                        catch (TargetInvocationException) { }
-                        queuedInvokes.RemoveAt(i);
-                    }
-                }
                 implementation.Dispose();
                 GC.SuppressFinalize(this);
 
@@ -625,19 +564,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region OnClosed
-
-        /// <summary>
-        /// Called when the NativeWindow has closed.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnClosed(EventArgs e)
-        {
-            if (Closed != null) Closed(this, e);
-        }
-
-        #endregion
-
         #region OnClosing
 
         /// <summary>
@@ -649,32 +575,6 @@ namespace OpenMobile
         protected virtual void OnClosing(CancelEventArgs e)
         {
             if (Closing != null) Closing(this, e);
-        }
-
-        #endregion
-
-        #region OnKeyPress
-
-        // <summary>
-        // Called when a character is typed.
-        // </summary>
-        // <param name="e">The <see cref="OpenMobile.KeyPressEventArgs"/> for this event.</param>
-        //protected virtual void OnKeyPress(KeyPressEventArgs e)
-        //{
-        //    if (KeyPress != null) KeyPress(this, e);
-        //}
-
-        #endregion
-
-        #region OnMouseEnter
-
-        /// <summary>
-        /// Called whenever the mouse cursor reenters the window <see cref="Bounds"/>.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnMouseEnter(EventArgs e)
-        {
-            if (MouseEnter != null) MouseEnter(this, e);
         }
 
         #endregion
@@ -705,19 +605,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region OnWindowBorderChanged
-
-        /// <summary>
-        /// Called when the WindowBorder of this NativeWindow has changed.
-        /// </summary>
-        /// <param name="e">Not used.</param>
-        protected virtual void OnWindowBorderChanged(EventArgs e)
-        {
-            if (WindowBorderChanged != null) WindowBorderChanged(this, e);
-        }
-
-        #endregion
-
         #region OnWindowStateChanged
 
         /// <summary>
@@ -731,11 +618,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region ProcessEvents
-        public List<Delegate> queuedInvokes = new List<Delegate>();
-
-        #endregion
-
         #endregion
 
         #endregion
@@ -744,31 +626,9 @@ namespace OpenMobile
 
         #region Methods
 
-        #region OnClosedInternal
-
-        private void OnClosedInternal(object sender, EventArgs e)
-        {
-            OnClosed(e);
-            Events = false;
-        }
-
-        #endregion
-
         #region OnClosingInternal
 
         private void OnClosingInternal(object sender, CancelEventArgs e) { OnClosing(e); }
-
-        #endregion
-
-        //#region OnKeyPressInternal
-
-        //private void OnKeyPressInternal(object sender, KeyPressEventArgs e) { OnKeyPress(e); }
-
-        //#endregion
-
-        #region OnMouseEnterInternal
-
-        private void OnMouseEnterInternal(object sender, EventArgs e) { OnMouseEnter(e); }
 
         #endregion
 
@@ -781,12 +641,6 @@ namespace OpenMobile
         #region OnResizeInternal
 
         private void OnResizeInternal(object sender, EventArgs e) { OnResize(e); }
-
-        #endregion
-
-        #region OnWindowBorderChangedInternal
-
-        private void OnWindowBorderChangedInternal(object sender, EventArgs e) { OnWindowBorderChanged(e); }
 
         #endregion
 
@@ -812,13 +666,9 @@ namespace OpenMobile
                     {
                         throw new InvalidOperationException("Event propagation is already enabled.");
                     }
-                    implementation.Closed += OnClosedInternal;
                     implementation.Closing += OnClosingInternal;
-                    //implementation.KeyPress += OnKeyPressInternal;
-                    implementation.MouseEnter += OnMouseEnterInternal;
                     implementation.MouseLeave += OnMouseLeaveInternal;
                     implementation.Resize += OnResizeInternal;
-                    implementation.WindowBorderChanged += OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged += OnWindowStateChangedInternal;
                     implementation.Gesture += Gesture;
                     implementation.ResolutionChange+=ResolutionChange;
@@ -826,21 +676,13 @@ namespace OpenMobile
                 }
                 else if (events)
                 {
-                    implementation.Closed -= OnClosedInternal;
                     implementation.Closing -= OnClosingInternal;
-                    //implementation.KeyPress -= OnKeyPressInternal;
-                    implementation.MouseEnter -= OnMouseEnterInternal;
                     implementation.MouseLeave -= OnMouseLeaveInternal;
                     implementation.Resize -= OnResizeInternal;
-                    implementation.WindowBorderChanged -= OnWindowBorderChangedInternal;
                     implementation.WindowStateChanged -= OnWindowStateChangedInternal;
                     implementation.Gesture -= Gesture;
                     implementation.ResolutionChange -= ResolutionChange;
                     events = false;
-                }
-                else
-                {
-                    throw new InvalidOperationException("Event propagation is already disabled.");
                 }
             }
         }
