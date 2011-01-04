@@ -214,7 +214,7 @@ namespace OpenMobile
         {
             Invalidate();
             if (resetHighlighted)
-                MouseMove(new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
+                MouseMove();
         }
 
         public bool TransitionOutEverything()
@@ -403,7 +403,7 @@ namespace OpenMobile
                         {
                             lastClick.Mode = eModeType.Normal;
                             //Recheck where the mouse is at
-                            MouseMove(new OpenMobile.Input.MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
+                            MouseMove();
                         }
                         Invalidate();
                     }
@@ -437,7 +437,7 @@ namespace OpenMobile
                     else
                     {
                         //Recheck where the mouse is at
-                        MouseMove(new OpenMobile.Input.MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
+                        MouseMove();
                     }
                     tmrClick.Enabled = false;
                     lastClick = null;
@@ -483,6 +483,13 @@ namespace OpenMobile
                 keyboardActive = false;
                 MouseMove(e);
             }
+        }
+        private void MouseMove()
+        {
+            if (WindowState==WindowState.Fullscreen)
+                MouseMove(new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
+            else
+                MouseMove(new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
         }
         private void MouseMove(MouseMoveEventArgs e)
         {

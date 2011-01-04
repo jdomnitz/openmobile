@@ -22,6 +22,8 @@ namespace WinCam
         {
             if ((streams == null) || (streams.Length <= instance))
                 return false;
+            if (streams[instance] == null)
+                return false;
             foreach (stream s in streams[instance])
             {
                 s.Dispose();
@@ -172,9 +174,12 @@ namespace WinCam
             else
                 if (OnMediaEvent != null)
                     OnMediaEvent(eFunction.hideVideoWindow, instance, "");
-            for (int i = 0; i < streams[instance].Count;i++ )
-               if (streams[instance][i]!=null)
-                    streams[instance][i].visible(visible);
+            if (streams[instance] != null)
+            {
+                for (int i = 0; i < streams[instance].Count; i++)
+                    if (streams[instance][i] != null)
+                        streams[instance][i].visible(visible);
+            }
             return true;
         }
 
