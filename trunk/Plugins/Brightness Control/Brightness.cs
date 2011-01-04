@@ -38,10 +38,15 @@ namespace Brightness_Control
             theHost = host;
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
+            TaskManager.QueueTask(loadBrightness, ePriority.Low, "Calculate Screen Brightness");
             TaskManager.QueueTask(updateBrightness, ePriority.Low, "Calculate Sunset");
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
-
+        private void loadBrightness()
+        {
+            for (int i = 0; i < theHost.ScreenCount; i++)
+                getBrightness(i);
+        }
         void theHost_OnPowerChange(ePowerEvent type)
         {
             if (type == ePowerEvent.SystemResumed)
@@ -71,24 +76,52 @@ namespace Brightness_Control
                     if ((DateTime.Now < sunset) && (DateTime.Now.Date < sunrise.Date))
                     {
                         if (rise.TotalHours >= 23)
-                            rampBrightness(i, 1, 50);
+                            rampBrightness(i, 50);
                         else if(rise.TotalHours==22)
-                            rampBrightness(i, 50, 100);
+                            rampBrightness(i, 100);
+                        else
+                            setBrightness(i, 100);
                     }
                     else
                     {
                         if (set.TotalHours == 0)
-                            rampBrightness(i, 100, 50);
+                            rampBrightness(i, 50);
                         else if(set.TotalHours==-1)
-                            rampBrightness(i, 50, 1);
+                            rampBrightness(i, 1);
+                        else
+                            setBrightness(i, 1);
                     }
                 }
         }
-        private void rampBrightness(int screen, int start, int end)
+        private void getBrightness(int screen)
         {
+            object o;
+            theHost.getData(eGetData.GetScreenBrightness, "", screen.ToString(), out o);
+            if (o!=null)
+                if ((settings != null) && (settings.Count >= 3))
+                {
+                    settings[2].setInstanceValue(screen, ((int)o).ToString());
+                    settings.changeSetting(settings[2]);
+                }
+        }
+        private void setBrightness(int screen, int value)
+        {
+            if ((settings != null) && (settings.Count >= 3))
+            {
+                settings[2].setInstanceValue(screen, value.ToString());
+                settings.changeSetting(screen, settings[2]);
+            }
+            else
+                theHost.execute(eFunction.setMonitorBrightness, screen.ToString(), value.ToString());
+        }
+        private void rampBrightness(int screen, int end)
+        {
+            int start=0;
+            if ((settings != null) && (settings.Count >= 3))
+                int.TryParse(settings[2].Value, out start);
             for (int i = start; i < end; i++)
             {
-                theHost.execute(eFunction.setMonitorBrightness, screen.ToString(), i.ToString());
+                setBrightness(screen, i);
                 Thread.Sleep(100);
             }
         }

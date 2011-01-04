@@ -338,6 +338,22 @@ namespace OMHal
             }
             return 0;
         }
+        public static int GetBrightness(int screen)
+        {
+            IntPtr dev = CreateFile(@"\\.\LCD", 0x80000000, 0x7, IntPtr.Zero, 0x3, 0, IntPtr.Zero);
+            try
+            {
+                BRIGHTNESS br = new BRIGHTNESS();
+                IntPtr inbuf = new IntPtr();
+                int bytes;
+                bool success = DeviceIoControl(dev, 0x230498, inbuf, 0, ref br, Marshal.SizeOf(br), out bytes, IntPtr.Zero);
+                return (int)br.ucACBrightness;
+            }
+            finally
+            {
+                CloseHandle(dev);
+            }
+        }
         private static void Set(int screen, int targetBrightness)
         {
             if (os.Version.Major < 6)
@@ -410,6 +426,16 @@ namespace OMHal
                 ref BRIGHTNESS InBuffer,
                 int nInBufferSize,
                 IntPtr OutBuffer,
+                int nOutBufferSize,
+                out int pBytesReturned,
+                IntPtr lpOverlapped);
+        [DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool DeviceIoControl(
+                IntPtr hDevice,
+                uint dwIoControlCode,
+                IntPtr InBuffer,
+                int nInBufferSize,
+                ref BRIGHTNESS OutBuffer,
                 int nOutBufferSize,
                 out int pBytesReturned,
                 IntPtr lpOverlapped);

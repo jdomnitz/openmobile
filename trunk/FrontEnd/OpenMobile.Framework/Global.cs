@@ -1457,6 +1457,8 @@ namespace OpenMobile
         GetMediaPosition=2,
         /// <summary>
         /// Gets the volume (0-100) [int]
+        /// <para>----------------------------------------------------</para>
+        /// <para>Param: Instance [int]</para>
         /// </summary>
         GetSystemVolume=3,
         /// <summary>
@@ -1562,7 +1564,13 @@ namespace OpenMobile
         /// <summary>
         /// Gets a list of available mice
         /// </summary>
-        GetAvailableMice = 25
+        GetAvailableMice = 25,
+        /// <summary>
+        /// Gets the screen brightness
+        /// <para>----------------------------------------------------</para>
+        /// <para>Param: Screen [int]</para>
+        /// </summary>
+        GetScreenBrightness=26
     }
     /// <summary>
     /// Information on Tuned Content

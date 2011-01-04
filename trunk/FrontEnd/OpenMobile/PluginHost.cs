@@ -1838,6 +1838,24 @@ namespace OpenMobile
                         }
                     }
                     return;
+                case eGetData.GetScreenBrightness:
+                    hal.snd("1|" + param);
+                    bool resp = true;
+                    while (resp == true)
+                    {
+                        Thread.Sleep(5);
+                        resp = (hal.brightness == null);
+                        if (resp == false)
+                        {
+                            if (hal.brightness[0] == param)
+                            {
+                                if (int.TryParse(hal.brightness[1], out ret))
+                                    data = ret;
+                                hal.brightness = null;
+                            }
+                        }
+                    }
+                    return;
                 case eGetData.GetScaleFactors:
                     if (int.TryParse(param, out ret) == true)
                     {

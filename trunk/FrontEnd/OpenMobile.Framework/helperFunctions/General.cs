@@ -40,7 +40,8 @@ namespace OpenMobile.helperFunctions
         {
             Location ret=new Location();
             XmlDocument doc = new XmlDocument();
-            doc.Load(@"http://where.yahooapis.com/geocode?q=" + name);
+            string locale = System.Globalization.CultureInfo.CurrentCulture.Name;
+            doc.Load(@"http://where.yahooapis.com/geocode?q=" + Net.Network.urlEncode(name)+"&locale="+locale);
             ret.Name = name;
             foreach(XmlNode n in doc.DocumentElement.ChildNodes)
             {
