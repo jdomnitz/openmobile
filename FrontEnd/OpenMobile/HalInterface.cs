@@ -31,6 +31,7 @@ namespace OpenMobile
             System.Net.Sockets.UdpClient receive;
             System.Net.Sockets.UdpClient send;
             public string[] volume;
+            public string[] brightness;
             private bool isDisposed;
             public HalInterface()
             {
@@ -80,7 +81,9 @@ namespace OpenMobile
                     arg1=parts[1];
                 if (i >= 0)
                 {
-                    if (i == 3)
+                    if (i == 1)
+                        brightness = new string[] { arg1, arg2 };
+                    else if (i == 3)
                         volume = new string[] { arg1, arg2 };
                     else if (i == 200)
                         Core.theHost.execute(eFunction.navigateToAddress, arg1);

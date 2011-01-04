@@ -66,6 +66,7 @@ namespace OMSettings
 
         void collection_OnSettingChanged(int screen,Setting setting)
         {
+            //TODO - Major bug here-only updates first screen
             OMControl c = controls.Find(s => ((s.Tag != null) && (s.Tag.ToString() == setting.Name)));
             if (typeof(OMCheckbox).IsInstanceOfType(c))
                 ((OMCheckbox)c).Checked = bool.Parse(setting.getInstanceValue(screen));

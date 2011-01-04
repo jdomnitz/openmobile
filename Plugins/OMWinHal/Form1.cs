@@ -97,6 +97,13 @@ namespace OMHal
                 arg1 = parts[1];
             switch (parts[0])
             {
+                case "1":
+                    if (int.TryParse(arg1, out ret))
+                    {
+                        if (ret >= 0)
+                            sendIt("1|" + arg1 + "|" + Specific.GetBrightness(ret));
+                    }
+                    break;
                 case "3": //GetData - System Volume
                     if (int.TryParse(arg1,out ret)){
                         if(ret>=0)
