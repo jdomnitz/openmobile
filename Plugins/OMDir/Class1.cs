@@ -330,8 +330,11 @@ namespace OMDir
             string source = OpenMobile.Path.Combine(r.Tag.ToString(), r[r.SelectedIndex].text);
             if (System.IO.Path.HasExtension(source) == true)
             {
-                theHost.execute(eFunction.userInputReady, screen.ToString(), "Dir", source);
-                return;
+                if (System.IO.Path.GetExtension(source).Length < 6)
+                {
+                    theHost.execute(eFunction.userInputReady, screen.ToString(), "Dir", source);
+                    return;
+                }
             }
             l.Clear();
             DirectoryInfo fInfo = new DirectoryInfo(r.Tag.ToString());
