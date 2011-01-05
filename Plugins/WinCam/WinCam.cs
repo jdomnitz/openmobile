@@ -207,14 +207,14 @@ namespace WinCam
                 List<string> values = new List<string>(new string[] { "", "Vertical", "Horizontal", "Both" });
                 using (PluginSettings s = new PluginSettings())
                 {
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Source", null, "Camera 1 Source", cams, cams, s.getSetting("WinCam.Source1.Source")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Flip", null, "Source 1 Flip", choices, values, s.getSetting("WinCam.Source1.Flip")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Source", null, "Camera 2 Source", cams, cams, s.getSetting("WinCam.Source2.Source")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Flip", null, "Source 2 Flip", choices, values, s.getSetting("WinCam.Source2.Flip")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Source", null, "Camera 3 Source", cams, cams, s.getSetting("WinCam.Source3.Source")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Flip", null, "Source 3 Flip", choices, values, s.getSetting("WinCam.Source3.Flip")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Source", null, "Camera 4 Source", cams, cams, s.getSetting("WinCam.Source4.Source")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Flip", null, "Source 4 Flip", choices, values, s.getSetting("WinCam.Source4.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Source","Source", "Camera 1 Source", cams, cams, s.getSetting("WinCam.Source1.Source")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source1.Flip", "Flip", "Source 1 Flip", choices, values, s.getSetting("WinCam.Source1.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Source", "Source", "Camera 2 Source", cams, cams, s.getSetting("WinCam.Source2.Source")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source2.Flip", "Flip", "Source 2 Flip", choices, values, s.getSetting("WinCam.Source2.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Source", "Source", "Camera 3 Source", cams, cams, s.getSetting("WinCam.Source3.Source")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source3.Flip", "Flip", "Source 3 Flip", choices, values, s.getSetting("WinCam.Source3.Flip")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Source", "Source", "Camera 4 Source", cams, cams, s.getSetting("WinCam.Source4.Source")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "WinCam.Source4.Flip", "Flip", "Source 4 Flip", choices, values, s.getSetting("WinCam.Source4.Flip")));
                     settings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
                 }
             }
