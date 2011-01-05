@@ -440,6 +440,7 @@ namespace OMRadio
             List_RadioStations.Name = "List_RadioStations";
             List_RadioStations.Font = new Font(Font.GenericSansSerif, 30F);
             List_RadioStations.Add("No channels available");
+            List_RadioStations.Scrollbars = true;
             List_RadioStations.TextAlignment = Alignment.CenterLeft;
             List_RadioStations.OnClick += new userInteraction(List_RadioStations_OnClick);
             List_RadioStations.OnLongClick += new userInteraction(List_RadioStations_OnLongClick);

@@ -21,12 +21,13 @@
 using System.Collections.Generic;
 using OpenMobile.Graphics;
 using System;
+using OpenMobile.Input;
 namespace OpenMobile.Controls
 {
     /// <summary>
     /// Contains and Renders a collection of OMControls
     /// </summary>
-    public class OMScrollingContainer:OMControl,IMouse,IThrow,IClickable
+    public class OMScrollingContainer:OMControl,IMouse,IThrow,IClickable,IKey,IKeyboard,IHighlightable
     {
         /// <summary>
         /// the collection of controls
@@ -82,6 +83,24 @@ namespace OpenMobile.Controls
                 down[2] = new Point(left + width - value, height - value+top);
                 scrollwidth = value;
                 updateScroll();
+            }
+        }
+
+        public override eModeType Mode
+        {
+            get
+            {
+                return base.Mode;
+            }
+            set
+            {
+                if (value == eModeType.Normal)
+                    if (highlighted != null)
+                    {
+                        highlighted.Mode = eModeType.Normal;
+                        highlighted = null;
+                    }
+                base.Mode = value;
             }
         }
         /// <summary>
@@ -270,6 +289,8 @@ namespace OpenMobile.Controls
             {
                 if (Controls[i].toRegion().Contains(loc))
                 {
+                    if (highlighted != null)
+                        highlighted.Mode = eModeType.Normal;
                     highlighted = Controls[i];
                     if (typeof(IMouse).IsInstanceOfType(highlighted))
                         ((IMouse)highlighted).MouseDown(screen,e,WidthScale,HeightScale);
@@ -293,6 +314,8 @@ namespace OpenMobile.Controls
             {
                 if (Controls[i].toRegion().Contains(loc))
                 {
+                    if (highlighted != null)
+                        highlighted.Mode = eModeType.Normal;
                     highlighted = Controls[i];
                     if (typeof(IMouse).IsInstanceOfType(highlighted))
                         ((IMouse)highlighted).MouseUp(screen, e, WidthScale, HeightScale);
@@ -395,6 +418,155 @@ namespace OpenMobile.Controls
                     ((IClickable)highlighted).longClickMe(screen);
         }
 
+        #endregion
+
+        #region IKeyboard Members
+        private bool keyboardFocus;
+        public void KeyboardEnter(int screen)
+        {
+            keyboardFocus = true;
+        }
+
+        public void KeyboardExit(int screen)
+        {
+            keyboardFocus = false;
+        }
+
+        #endregion
+
+        #region IKey Members
+
+        public bool KeyDown(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
+        {
+            if (typeof(IKey).IsInstanceOfType(highlighted) == true)
+                if (((IKey)highlighted).KeyDown(screen, e, WidthScale, HeightScale))
+                    return true;
+            if (keyboardNavigate(e.Key, screen))
+                return true;
+            if (highlighted != null)
+                highlighted.Mode = eModeType.Normal;
+            highlighted = null;
+            return false;
+        }
+
+        public bool KeyUp(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
+        {
+            if (typeof(IKey).IsInstanceOfType(highlighted) == true)
+                if (((IKey)highlighted).KeyUp(screen, e, WidthScale, HeightScale))
+                    return true;
+            return false;
+        }
+        private bool keyboardNavigate(Key direction,int screen)
+        {
+            int best=1000;
+            OMControl b = null;
+            if (highlighted == null)
+                if (Controls.Count == 0)
+                    return false;
+                else
+                    highlighted = Controls[0];
+            if (direction == Key.Left)
+            {
+                for (int i = 0; i < Controls.Count; i++)
+                    if (typeof(IHighlightable).IsInstanceOfType(Controls[i]))
+                        if ((Controls[i].Left < highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(Controls[i].toRegion()) == true))
+                            if (xdistance(highlighted.toRegion(), Controls[i].toRegion()) < best)
+                            {
+                                best = xdistance(highlighted.toRegion(), Controls[i].toRegion());
+                                b = Controls[i];
+                            }
+                if (b == null)
+                    return false;
+                b.Mode = eModeType.Highlighted;
+                if (highlighted!=null)
+                    highlighted.Mode = eModeType.Normal;
+                if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                    ((IKeyboard)highlighted).KeyboardExit(screen);
+                highlighted = b;
+                if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                    ((IKeyboard)highlighted).KeyboardEnter(screen);
+                raiseUpdate(false);
+                return true;
+            }
+            else if (direction == Key.Right)
+            {
+                for (int i = 0; i < Controls.Count; i++)
+                    if (typeof(IHighlightable).IsInstanceOfType(Controls[i]))
+                        if ((Controls[i].Left > highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(Controls[i].toRegion()) == true))
+                            if (xdistance(highlighted.toRegion(), Controls[i].toRegion()) < best)
+                            {
+                                best = xdistance(highlighted.toRegion(), Controls[i].toRegion());
+                                b = Controls[i];
+                            }
+                if (b == null)
+                    return false;
+                b.Mode = eModeType.Highlighted;
+                if (highlighted != null)
+                    highlighted.Mode = eModeType.Normal;
+                if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                    ((IKeyboard)highlighted).KeyboardExit(screen);
+                highlighted = b;
+                if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                    ((IKeyboard)highlighted).KeyboardEnter(screen);
+                raiseUpdate(false);
+                return true;
+            }
+            else if (direction == Key.Up)
+            {
+                for (int i = 0; i < Controls.Count; i++)
+                    if (typeof(IHighlightable).IsInstanceOfType(Controls[i]))
+                        if ((Controls[i].Top < highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(Controls[i].toRegion()) == true))
+                            if (ydistance(highlighted.toRegion(), Controls[i].toRegion()) < best)
+                            {
+                                best = ydistance(highlighted.toRegion(), Controls[i].toRegion());
+                                b = Controls[i];
+                            }
+                if (b == null)
+                    return false;
+                b.Mode = eModeType.Highlighted;
+                if (highlighted != null)
+                    highlighted.Mode = eModeType.Normal;
+                if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                    ((IKeyboard)highlighted).KeyboardExit(screen);
+                highlighted = b;
+                if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                    ((IKeyboard)highlighted).KeyboardEnter(screen);
+                raiseUpdate(false);
+                return true;
+            }
+            else if (direction == Key.Down)
+            {
+                for (int i = 0; i < Controls.Count; i++)
+                    if (typeof(IHighlightable).IsInstanceOfType(Controls[i]))
+                        if ((Controls[i].Top > highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(Controls[i].toRegion()) == true))
+                            if (ydistance(highlighted.toRegion(), Controls[i].toRegion()) < best)
+                            {
+                                best = ydistance(highlighted.toRegion(), Controls[i].toRegion());
+                                b = Controls[i];
+                            }
+                if (b == null)
+                    return false;
+                b.Mode = eModeType.Highlighted;
+                if (highlighted != null)
+                    highlighted.Mode = eModeType.Normal;
+                if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                    ((IKeyboard)highlighted).KeyboardExit(screen);
+                highlighted = b;
+                if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                    ((IKeyboard)highlighted).KeyboardEnter(screen);
+                raiseUpdate(false);
+                return true;
+            }
+            return false;
+        }
+        private static int xdistance(Rectangle r1, Rectangle r2)
+        {
+            return (int)System.Math.Sqrt(System.Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 8 * System.Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
+        }
+        private static int ydistance(Rectangle r1, Rectangle r2)
+        {
+            return (int)System.Math.Sqrt(System.Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) * 8 + System.Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
+        }
         #endregion
     }
 }

@@ -917,152 +917,159 @@ namespace OpenMobile
         }
         public void RenderingWindow_KeyDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
-            if (highlighted == null)
+            try
             {
-                if ((e.Key == Key.Left) || (e.Key == Key.Right) || (e.Key == Key.Up) || (e.Key == Key.Down))
+                if (highlighted == null)
                 {
-                    int top = 601;
-                    int left = 1001;
+                    if ((e.Key == Key.Left) || (e.Key == Key.Right) || (e.Key == Key.Up) || (e.Key == Key.Down))
+                    {
+                        int top = 601;
+                        int left = 1001;
+                        OMControl b = null;
+                        for (int j = 0; j < backgroundQueue.Count; j++)
+                            for (int i = 0; i < backgroundQueue[j].controlCount; i++)
+                                //Modified by Borte
+                                if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
+                                    if ((backgroundQueue[j][i].Left < left) && (backgroundQueue[j][i].Top < top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
+                                    {
+                                        b = backgroundQueue[j][i];
+                                        top = b.Top;
+                                        left = b.Left;
+                                    }
+                        if (b == null)
+                            return;
+                        b.Mode = eModeType.Highlighted;
+                        highlighted = b;
+                        Invalidate();
+                    }
+                }
+                else
+                {
+                    if (typeof(IKey).IsInstanceOfType(highlighted) == true)
+                        if (((IKey)highlighted).KeyDown(screen, e, widthScale, heightScale))
+                            return;
+                    int best = 1000;
                     OMControl b = null;
-                    for (int j = 0; j < backgroundQueue.Count; j++)
-                        for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                            //Modified by Borte
-                            if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                if ((backgroundQueue[j][i].Left < left) && (backgroundQueue[j][i].Top < top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                {
-                                    b = backgroundQueue[j][i];
-                                    top = b.Top;
-                                    left = b.Left;
-                                }
-                    if (b == null)
-                        return;
-                    b.Mode = eModeType.Highlighted;
-                    highlighted = b;
-                    Invalidate();
+                    switch (e.Key)
+                    {
+                        case Key.Left:
+                            for (int j = 0; j < backgroundQueue.Count; j++)
+                                for (int i = 0; i < backgroundQueue[j].controlCount; i++)
+                                    if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
+                                        if ((backgroundQueue[j][i].Left < highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
+                                            if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
+                                            {
+                                                if (notCovered(backgroundQueue[j][i]) == true)
+                                                {
+                                                    best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
+                                                    b = backgroundQueue[j][i];
+                                                }
+                                            }
+                            if (b == null)
+                                break;
+                            b.Mode = eModeType.Highlighted;
+                            highlighted.Mode = eModeType.Normal;
+                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                                ((IKeyboard)highlighted).KeyboardExit(screen);
+                            highlighted = b;
+                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                                ((IKeyboard)highlighted).KeyboardEnter(screen);
+                            Invalidate();
+                            break;
+                        case Key.Right:
+                            for (int j = 0; j < backgroundQueue.Count; j++)
+                                for (int i = 0; i < backgroundQueue[j].controlCount; i++)
+                                    if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
+                                        if ((backgroundQueue[j][i].Left > highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
+                                            if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
+                                            {
+                                                if (notCovered(backgroundQueue[j][i]) == true)
+                                                {
+                                                    best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
+                                                    b = backgroundQueue[j][i];
+                                                }
+                                            }
+                            if (b == null)
+                                break;
+                            b.Mode = eModeType.Highlighted;
+                            highlighted.Mode = eModeType.Normal;
+                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                                ((IKeyboard)highlighted).KeyboardExit(screen);
+                            highlighted = b;
+                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                                ((IKeyboard)highlighted).KeyboardEnter(screen);
+                            Invalidate();
+                            break;
+                        case Key.Up:
+                            for (int j = 0; j < backgroundQueue.Count; j++)
+                                for (int i = 0; i < backgroundQueue[j].controlCount; i++)
+                                    if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
+                                        if ((backgroundQueue[j][i].Top < highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
+                                            if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
+                                            {
+                                                if (notCovered(backgroundQueue[j][i]) == true)
+                                                {
+                                                    best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
+                                                    b = backgroundQueue[j][i];
+                                                }
+                                            }
+                            if (b == null)
+                                break;
+                            b.Mode = eModeType.Highlighted;
+                            highlighted.Mode = eModeType.Normal;
+                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                                ((IKeyboard)highlighted).KeyboardExit(screen);
+                            highlighted = b;
+                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                                ((IKeyboard)highlighted).KeyboardEnter(screen);
+                            Invalidate();
+                            break;
+                        case Key.Down:
+                            for (int j = 0; j < backgroundQueue.Count; j++)
+                                for (int i = 0; i < backgroundQueue[j].controlCount; i++)
+                                    if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
+                                        if ((backgroundQueue[j][i].Top > highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
+                                            if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
+                                            {
+                                                if (notCovered(backgroundQueue[j][i]) == true)
+                                                {
+                                                    best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
+                                                    b = backgroundQueue[j][i];
+                                                }
+                                            }
+                            if (b == null)
+                                break;
+                            b.Mode = eModeType.Highlighted;
+                            highlighted.Mode = eModeType.Normal;
+                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                                ((IKeyboard)highlighted).KeyboardExit(screen);
+                            highlighted = b;
+                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
+                                ((IKeyboard)highlighted).KeyboardEnter(screen);
+                            Invalidate();
+                            break;
+                        case Key.Enter:
+                            if (typeof(OMButton).IsInstanceOfType(highlighted))
+                            {
+                                lastClick = (OMButton)highlighted;
+                                if (lastClick.Mode == eModeType.transitioningOut)
+                                    lastClick.Mode = eModeType.ClickedAndTransitioningOut;
+                                else
+                                    lastClick.Mode = eModeType.Clicked;
+                                tmrLongClick.Enabled = true;
+                                Invalidate();
+                            }
+                            else if (typeof(IClickable).IsInstanceOfType(highlighted))
+                            {
+                                SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).clickMe(screen); });
+                            }
+                            break;
+                    }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                if (typeof(IKey).IsInstanceOfType(highlighted) == true)
-                    if (((IKey)highlighted).KeyDown(screen, e, widthScale, heightScale))
-                        return;
-                int best = 1000;
-                OMControl b = null;
-                switch (e.Key)
-                {
-                    case Key.Left:
-                        for (int j = 0; j < backgroundQueue.Count; j++)
-                            for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                    if ((backgroundQueue[j][i].Left < highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                        if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
-                                        {
-                                            if (notCovered(backgroundQueue[j][i]) == true)
-                                            {
-                                                best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
-                                                b = backgroundQueue[j][i];
-                                            }
-                                        }
-                        if (b == null)
-                            break;
-                        b.Mode = eModeType.Highlighted;
-                        highlighted.Mode = eModeType.Normal;
-                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                            ((IKeyboard)highlighted).KeyboardExit(screen);
-                        highlighted = b;
-                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                            ((IKeyboard)highlighted).KeyboardEnter(screen);
-                        Invalidate();
-                        break;
-                    case Key.Right:
-                        for (int j = 0; j < backgroundQueue.Count; j++)
-                            for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                    if ((backgroundQueue[j][i].Left > highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                        if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
-                                        {
-                                            if (notCovered(backgroundQueue[j][i]) == true)
-                                            {
-                                                best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
-                                                b = backgroundQueue[j][i];
-                                            }
-                                        }
-                        if (b == null)
-                            break;
-                        b.Mode = eModeType.Highlighted;
-                        highlighted.Mode = eModeType.Normal;
-                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                            ((IKeyboard)highlighted).KeyboardExit(screen);
-                        highlighted = b;
-                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                            ((IKeyboard)highlighted).KeyboardEnter(screen);
-                        Invalidate();
-                        break;
-                    case Key.Up:
-                        for (int j = 0; j < backgroundQueue.Count; j++)
-                            for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                    if ((backgroundQueue[j][i].Top < highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                        if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
-                                        {
-                                            if (notCovered(backgroundQueue[j][i]) == true)
-                                            {
-                                                best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
-                                                b = backgroundQueue[j][i];
-                                            }
-                                        }
-                        if (b == null)
-                            break;
-                        b.Mode = eModeType.Highlighted;
-                        highlighted.Mode = eModeType.Normal;
-                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                            ((IKeyboard)highlighted).KeyboardExit(screen);
-                        highlighted = b;
-                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                            ((IKeyboard)highlighted).KeyboardEnter(screen);
-                        Invalidate();
-                        break;
-                    case Key.Down:
-                        for (int j = 0; j < backgroundQueue.Count; j++)
-                            for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                    if ((backgroundQueue[j][i].Top > highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                        if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
-                                        {
-                                            if (notCovered(backgroundQueue[j][i]) == true)
-                                            {
-                                                best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
-                                                b = backgroundQueue[j][i];
-                                            }
-                                        }
-                        if (b == null)
-                            break;
-                        b.Mode = eModeType.Highlighted;
-                        highlighted.Mode = eModeType.Normal;
-                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                            ((IKeyboard)highlighted).KeyboardExit(screen);
-                        highlighted = b;
-                        if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                            ((IKeyboard)highlighted).KeyboardEnter(screen);
-                        Invalidate();
-                        break;
-                    case Key.Enter:
-                        if (typeof(OMButton).IsInstanceOfType(highlighted))
-                        {
-                            lastClick = (OMButton)highlighted;
-                            if (lastClick.Mode == eModeType.transitioningOut)
-                                lastClick.Mode = eModeType.ClickedAndTransitioningOut;
-                            else
-                                lastClick.Mode = eModeType.Clicked;
-                            tmrLongClick.Enabled = true;
-                            Invalidate();
-                        }
-                        else if (typeof(IClickable).IsInstanceOfType(highlighted))
-                        {
-                            SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).clickMe(screen); });
-                        }
-                        break;
-                }
+                SandboxedThread.Handle(ex);
             }
         }
 

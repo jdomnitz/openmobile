@@ -306,8 +306,9 @@ namespace OMSettings
             #endregion
             #region general
             LayoutManager generalLayout = new LayoutManager();
-            OMPanel general = generalLayout.layout(theHost, BuiltInComponents.GlobalSettings(host));
-            manager.loadPanel(general);
+            OMPanel[] general = generalLayout.layout(theHost, BuiltInComponents.GlobalSettings(host));
+            for(int i=0;i<general.Length;i++)
+                manager.loadSharedPanel(general[i],i);
             #endregion
             #region data
             OMPanel data = new OMPanel("data");
@@ -368,6 +369,7 @@ namespace OMSettings
             lstplugins.SelectedItemColor1 = Color.DarkBlue;
             lstplugins.OnClick += new userInteraction(lstplugins_OnClick);
             lstplugins.Add(new OMListItem("Loading . . .","",format));
+            lstplugins.Scrollbars = true;
             hardware.addControl(lstplugins);
             manager.loadPanel(hardware);
             #endregion
@@ -439,7 +441,7 @@ namespace OMSettings
             foreach (IBasePlugin b in plugins)
             {
                 LayoutManager lm = new LayoutManager();
-                OMPanel panel;
+                OMPanel[] panel;
                 try
                 {
                     panel = lm.layout(theHost, b.loadSettings());
@@ -452,10 +454,12 @@ namespace OMSettings
                 }
                 if (panel != null)
                 {
-                    panel.Name = b.pluginName + " Settings";
-                    for(int i=0;i<theHost.ScreenCount;i++)
+                    for (int i = 0; i < theHost.ScreenCount; i++)
+                    {
                         lstplugins[i].Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
-                    manager.loadPanel(panel);
+                        panel[i].Name = b.pluginName + " Settings";
+                        manager.loadSharedPanel(panel[i],i);
+                    }
                 }
             }
             foreach (Exception e in problems)
