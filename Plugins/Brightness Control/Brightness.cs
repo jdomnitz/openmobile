@@ -101,7 +101,7 @@ namespace Brightness_Control
                 if ((settings != null) && (settings.Count >= 3))
                 {
                     settings[2].setInstanceValue(screen, ((int)o).ToString());
-                    settings.changeSetting(settings[2]);
+                    settings.changeSetting(screen,settings[2]);
                 }
         }
         private void setBrightness(int screen, int value)
