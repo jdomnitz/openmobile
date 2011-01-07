@@ -179,10 +179,10 @@ namespace OpenMobile
         {
             OMControl c;
             bool exists = backgroundQueue.Contains(newP);
+            newP.UpdateThisControl += UpdateThisControl;
             for (int i = 0; i < newP.controlCount; i++)
             {
                 c = newP.getControl(i);
-                c.UpdateThisControl += UpdateThisControl;
                 if ((c.Mode == eModeType.ClickedAndTransitioningOut) || (c.Mode == eModeType.transitioningOut)||(exists))
                     c.Mode = eModeType.transitionLock;
                 else
@@ -276,11 +276,12 @@ namespace OpenMobile
             foreach (OMPanel panel in backgroundQueue)
             {
                 if (panel.Mode == eModeType.transitioningOut)
+                {
                     panel.Mode = eModeType.Highlighted;
+                    panel.UpdateThisControl -= UpdateThisControl;
+                }
                 for (int i = panel.controlCount - 1; i >= 0; i--)
                 {
-                    if (panel.Mode == eModeType.transitioningOut)
-                        panel[i].UpdateThisControl -= UpdateThisControl;
                     panel[i].Mode = eModeType.Normal;
                 }
             }
