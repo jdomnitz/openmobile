@@ -52,7 +52,7 @@ namespace Solitaire
         }
         private Card genCard(bool isback)
         {
-            Card c = new Card(15, 130, 100, 130);
+            Card c = new Card(25, 110, 100, 130);
             c.OnDrop += new userInteraction(card_OnDrop);
             string rank = deck.Draw();
             c.Tag = rank;
