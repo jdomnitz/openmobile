@@ -57,29 +57,50 @@ namespace OpenMobile.Graphics
                     fixImage(ref img);
                 }
                 BitmapData data;
-                if (img.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+                switch (img.PixelFormat)
                 {
-                    try
-                    {
-                        data = img.LockBits(new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
-                        ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                    }
-                    catch (InvalidOperationException) { return false; }
-                    Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-                                    OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-                    img.UnlockBits(data);
-                }
-                else if (img.PixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb)
-                {
-                    try
-                    {
-                        data = img.LockBits(new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
-                        ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                    }
-                    catch (InvalidOperationException) { return false; }
-                    Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
-                                    OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
-                    img.UnlockBits(data);
+                    case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
+                        try
+                        {
+                            data = img.LockBits(new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
+                            ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        }
+                        catch (InvalidOperationException) { return false; }
+                        Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                                        OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                        img.UnlockBits(data);
+                        break;
+                    case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
+                        try
+                        {
+                            data = img.LockBits(new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
+                            ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                        }
+                        catch (InvalidOperationException) { return false; }
+                        Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
+                                        OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                        img.UnlockBits(data);
+                        break;
+                    case System.Drawing.Imaging.PixelFormat.Format8bppIndexed:
+                    case System.Drawing.Imaging.PixelFormat.Format4bppIndexed:
+                    case System.Drawing.Imaging.PixelFormat.Format16bppRgb555:
+                    case System.Drawing.Imaging.PixelFormat.Format16bppRgb565:
+                        Bitmap tmp = new Bitmap(img.Width, img.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                        try
+                        {
+                            if (img.HorizontalResolution==tmp.HorizontalResolution)
+                                System.Drawing.Graphics.FromImage(tmp).DrawImageUnscaled(img, 0, 0);
+                            else
+                                System.Drawing.Graphics.FromImage(tmp).DrawImage(img, 0, 0,img.Width,img.Height);
+                            data = tmp.LockBits(new System.Drawing.Rectangle(0, 0, tmp.Width, tmp.Height),
+                            ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                        }
+                        catch (InvalidOperationException) { return false; }
+                        Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
+                                        OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                        tmp.UnlockBits(data);
+                        tmp.Dispose();
+                        break;
                 }
             }
             if (kill)
@@ -465,10 +486,35 @@ namespace OpenMobile.Graphics
 
         public void FillRectangle(Brush brush, float x, float y, float width, float height)
         {
-            //TODO-Gradient
-            FillRectangleSolid(brush.Color, x, y, width, height);
+            if (brush.Gradient == Gradient.Horizontal)
+                FillHorizRectange(brush, x, y, width, height);
+            else if (brush.Gradient == Gradient.Vertical)
+                FillVertRectange(brush, x, y, width, height);
+            else
+                FillRectangleSolid(brush.Color, x, y, width, height);
         }
-
+        private void FillHorizRectange(Brush b, float x, float y, float width, float height)
+        {
+            float[] ar = new float[] { x, y, x + width, y, x, y + height, x + width, y + height };
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.EnableClientState(ArrayCap.ColorArray);
+            Raw.ColorPointer(4, ColorPointerType.UnsignedByte, 0, new byte[] { b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A, b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A });
+            Raw.VertexPointer(2, VertexPointerType.Float, 0, ar);
+            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
+            Raw.DisableClientState(ArrayCap.ColorArray);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+        }
+        private void FillVertRectange(Brush b, float x, float y, float width, float height)
+        {
+            float[] ar = new float[] { x, y, x + width, y, x, y + height, x + width, y + height };
+            Raw.EnableClientState(ArrayCap.VertexArray);
+            Raw.EnableClientState(ArrayCap.ColorArray);
+            Raw.ColorPointer(4, ColorPointerType.UnsignedByte, 0, new byte[] { b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A });
+            Raw.VertexPointer(2, VertexPointerType.Float, 0, ar);
+            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
+            Raw.DisableClientState(ArrayCap.ColorArray);
+            Raw.DisableClientState(ArrayCap.VertexArray);
+        }
         private void FillRectangleSolid(Color c, float x, float y, float width, float height)
         {
             float[] ar = new float[] { x, y, x + width, y, x, y + height, x + width, y + height };
