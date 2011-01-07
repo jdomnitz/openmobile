@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using OpenMobile.Graphics;
 using System;
+using System.Reflection;
 
 namespace OpenMobile.Controls
 {
@@ -32,6 +33,7 @@ namespace OpenMobile.Controls
     {
         private List<OMControl> containedControls=new List<OMControl>();
         private imageItem background;
+        public event refreshNeeded UpdateThisControl;
 
         /// <summary>
         /// Returns the OMControl at the given index
@@ -87,8 +89,17 @@ namespace OpenMobile.Controls
         {
             if (changeParent)
                 control.Parent = this;
+            control.UpdateThisControl +=raiseUpdate;
             containedControls.Add(control);
+            raiseUpdate(false);
         }
+
+        private void raiseUpdate(bool refreshNeeded)
+        {
+            if (UpdateThisControl != null)
+                UpdateThisControl(refreshNeeded);
+        }
+
         /// <summary>
         /// Adds a control to the top of the container
         /// </summary>
@@ -96,7 +107,9 @@ namespace OpenMobile.Controls
         public void insertControl(OMControl control)
         {
             control.Parent = this;
+            control.UpdateThisControl += raiseUpdate;
             containedControls.Insert(0,control);
+            raiseUpdate(false);
         }
 
         /// <summary>
@@ -197,6 +210,7 @@ namespace OpenMobile.Controls
         /// <param name="control"></param>
         public void Remove(OMControl control)
         {
+            control.UpdateThisControl -= UpdateThisControl;
             containedControls.Remove(control);
         }
         /// <summary>
@@ -365,7 +379,12 @@ namespace OpenMobile.Controls
         /// <param name="name">Name of control to remove</param>
         public void Remove(string name)
         {
-            containedControls.RemoveAll(c => c.Name == name);
+            List<OMControl> controls = containedControls.FindAll(c => c.Name == name);
+            foreach (OMControl c in controls)
+            {
+                c.UpdateThisControl -= raiseUpdate;
+                Remove(c);
+            }
         }
         /// <summary>
         /// Create a new panel
@@ -476,6 +495,33 @@ namespace OpenMobile.Controls
             }
             return false;
         }
+        internal bool hooked()
+        {
+            return UpdateThisControl != null;
+        }
+        private int container = -1;
+        internal int containingScreen()
+        {
+            if (container != -1)
+                return container;
+            if (UpdateThisControl != null)
+            {
+                object UI = UpdateThisControl.GetInvocationList()[0].Target;
+                PropertyInfo info = UI.GetType().GetProperty("Screen");
+                container = (int)info.GetValue(UI, null);
+                return container;
+            }
+            return -1;
+        }
         //***
+
+        public void clear()
+        {
+            for (int i = containedControls.Count - 1; i >= 0; i--)
+            {
+                containedControls[i].UpdateThisControl -= raiseUpdate;
+                containedControls.RemoveAt(i);
+            }
+        }
     }
 }

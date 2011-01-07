@@ -360,6 +360,16 @@ namespace OpenMobile.Framework
             osVersion = getOS() + " " + Environment.OSVersion.Version.ToString();
             return osVersion;
         }
+        public static string getMachineSerial()
+        {
+            #if WINDOWS
+            if (Configuration.RunningOnWindows)
+            {
+                return Windows.GetVolumeSerial();
+            }
+            #endif
+            return null;
+        }
         /// <summary>
         /// Returns the current system Architecture
         /// </summary>

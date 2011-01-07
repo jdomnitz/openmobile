@@ -80,16 +80,9 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public int containingScreen()
         {
-            if (container != -1)
-                return container;
-            if (UpdateThisControl != null)
-            {
-                object UI = UpdateThisControl.GetInvocationList()[0].Target;
-                PropertyInfo info = UI.GetType().GetProperty("Screen");
-                container = (int)info.GetValue(UI, null);
-                return container;
-            }
-            return -1;
+            if (parent == null)
+                return -1;
+            return parent.containingScreen();
         }
         /// <summary>
         /// The OMPanel that contains this control
@@ -109,14 +102,13 @@ namespace OpenMobile.Controls
                 parent = value;
             }
         }
-        private int container = -1;
         /// <summary>
         /// If the control has been attached to a user interface (aka is currently loaded)
         /// </summary>
         /// <returns></returns>
         public bool hooked()
         {
-            return (UpdateThisControl != null);
+            return parent.hooked();
         }
         /// <summary>
         /// The rendering mode of the control
