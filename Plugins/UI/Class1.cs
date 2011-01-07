@@ -312,8 +312,8 @@ namespace OpenMobile
             manager.loadPanel(p);
             OMPanel background = new OMPanel("background");
             background.BackgroundType = backgroundStyle.Gradiant;
-            background.BackgroundColor1 = Color.FromArgb(0, 0, 4);
-            background.BackgroundColor2 = Color.FromArgb(0, 0, 20);
+            background.BackgroundColor1 = Color.FromArgb(0, 0, 20);
+            background.BackgroundColor2 = Color.FromArgb(0, 0, 4);
             background.Priority = ePriority.Low;
             background.UIPanel = true;
             background.Forgotten = true;
