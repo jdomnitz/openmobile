@@ -63,7 +63,8 @@ namespace OpenMobile.Threading
         {
             if (theHost == null)
                 theHost = host;
-            functions.Enqueue(function);
+            lock (functions)
+                functions.Enqueue(function);
             if (availableThreads > 0)
             {
                 lock (locks)

@@ -566,32 +566,35 @@ namespace OpenMobile
         }
         private bool checkControl(OpenMobile.Input.MouseMoveEventArgs e)
         {
-            OMControl b;
-            for (int i = backgroundQueue.Count - 1; i >= 0; i--)
+            try
             {
-                for (int j = backgroundQueue[i].controlCount - 1; j >= 0; j--)
+                OMControl b;
+                for (int i = backgroundQueue.Count - 1; i >= 0; i--)
                 {
-                    b = backgroundQueue[i][j];
-                    //Note potential drawing error with updated rectangle
-                    if ((e.X > (b.Left * widthScale)) && (e.Y > (b.Top * heightScale)) && (e.X < ((b.Left + b.Width) * widthScale)) && (e.Y < ((b.Top + b.Height) * heightScale)))
+                    for (int j = backgroundQueue[i].controlCount - 1; j >= 0; j--)
                     {
-                        if (b.Visible == true)
+                        b = backgroundQueue[i][j];
+                        if ((e.X > (b.Left * widthScale)) && (e.Y > (b.Top * heightScale)) && (e.X < ((b.Left + b.Width) * widthScale)) && (e.Y < ((b.Top + b.Height) * heightScale)))
                         {
-                            if (typeof(INotClickable).IsInstanceOfType(b))
-                                if (!((INotClickable)b).IsPointClickable((int)(e.X / widthScale), (int)(e.Y / widthScale)))
-                                    continue;
-                            rParam.currentMode = eModeType.Highlighted;
-                            if ((b.Mode == eModeType.Normal))
-                                b.Mode = eModeType.Highlighted;
-                            if (b == highlighted)
+                            if (b.Visible == true)
+                            {
+                                if (typeof(INotClickable).IsInstanceOfType(b))
+                                    if (!((INotClickable)b).IsPointClickable((int)(e.X / widthScale), (int)(e.Y / widthScale)))
+                                        continue;
+                                rParam.currentMode = eModeType.Highlighted;
+                                if ((b.Mode == eModeType.Normal))
+                                    b.Mode = eModeType.Highlighted;
+                                if (b == highlighted)
+                                    return true;
+                                highlighted = b;
+                                Invalidate();
                                 return true;
-                            highlighted = b;
-                            Invalidate();
-                            return true;
+                            }
                         }
                     }
                 }
             }
+            catch (Exception) { }
             return false;
         }
         internal void RenderingWindow_MouseClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
