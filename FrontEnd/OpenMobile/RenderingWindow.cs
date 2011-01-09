@@ -110,13 +110,28 @@ namespace OpenMobile
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void InitializeRendering()
         {
+            
+            // Check for specific startup screen
+            int StartupScreen = 0;
+            foreach (string arg in Environment.GetCommandLineArgs())
+            {
+                if (arg.ToLower().StartsWith("-startupscreen=") == true)
+                {
+                    try
+                    {
+                        StartupScreen = int.Parse(arg.Substring(15));
+                    }
+                    catch (ArgumentException) { break; }
+                }
+            }
+            
             if ((this.WindowState == WindowState.Fullscreen)&&(screen==0))
                 Mouse.Location = this.Location;
             if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
-                this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[screen].Bounds.Location, this.Size);
+                this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[StartupScreen>0 ? StartupScreen : screen].Bounds.Location, this.Size);
             this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
             this.Mouse.Instance = (screen * -1) - 1;
-            this.Mouse.SetBounds(DisplayDevice.AvailableDisplays[screen].Width, DisplayDevice.AvailableDisplays[screen].Height);
+            this.Mouse.SetBounds(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Width, DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Height);
             InitializeComponent();
             if (screen == 0)
                 InputRouter.Initialize();
@@ -727,7 +742,7 @@ namespace OpenMobile
         #region OtherUIEvents
         protected override void OnLoad(EventArgs e)
         {
-            g.Initialize(screen);
+            g.Initialize(screen, this.Size);
             if (screen == 0)
             {
                 if ((Graphics.Graphics.Renderer == "GDI Generic") || (Graphics.Graphics.Renderer == "Software Rasterizer"))
