@@ -306,6 +306,11 @@ namespace OpenMobile
                 {
                     theHost.SkinPath = arg.Substring(10);
                 }
+                // Specific startup screen is given, restrict amount of possible screens
+                else if (arg.ToLower().StartsWith("-startupscreen=") == true)
+                {
+                    theHost.ScreenCount = 1;
+                }
             }
             // Initialize screens
             RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
