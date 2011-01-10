@@ -21,6 +21,8 @@ public sealed class Deck
     public string Draw()
     {
         int index = cards.Count - 1;
+        if (index == -1)
+            return null;
         string ret = cards[index];
         cards.RemoveAt(index);
         return ret;
@@ -38,10 +40,12 @@ public sealed class Deck
             cards[n] = value;
         }
     }
-    private int getValue(char val)
+    public int getValue(char val)
     {
         switch (val)
         {
+            case ' ':
+                return 1;
             case '2':
                 return 2;
             case '3':
@@ -124,5 +128,17 @@ public sealed class Deck
             if (matches[i] == 2)
                 count++;
         return count;
+    }
+
+    public void putBack(string p)
+    {
+        cards.Add(p);
+    }
+    public int Count
+    {
+        get
+        {
+            return cards.Count;
+        }
     }
 }

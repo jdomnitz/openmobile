@@ -1,6 +1,7 @@
 ﻿using OpenMobile.Controls;
 using OpenMobile;
 using OpenMobile.Graphics;
+using OpenMobile.Threading;
 
 public sealed class Card : OMControl, IClickable, IThrow
 {
@@ -23,6 +24,27 @@ public sealed class Card : OMControl, IClickable, IThrow
         get
         {
             return _anchor;
+        }
+    }
+    Card _child;
+    public Card DragChild
+    {
+        set 
+        {
+            if(_child!=null)
+                _child._parent = null;
+            _child = value;
+            if (value != null)
+                _child._parent = this;
+        }
+        get { return _child; }
+    }
+    private Card _parent;
+    public Card DragParent
+    {
+        get
+        {
+            return _parent;
         }
     }
     public imageItem Image
@@ -74,7 +96,10 @@ public sealed class Card : OMControl, IClickable, IThrow
         {
             this.top += RelativeDistance.Y;
             this.left += RelativeDistance.X;
-            raiseUpdate(false);
+            if (_child == null)
+                raiseUpdate(false);
+            else
+                _child.MouseThrow(screen, TotalDistance, RelativeDistance);
         }
     }
 
@@ -84,6 +109,8 @@ public sealed class Card : OMControl, IClickable, IThrow
         if (!Cancel)
             parent.MoveControlToFront(this);
         _anchor = new Point(left, top);
+        if (_child != null)
+            _child.MouseThrowStart(screen, StartLocation, scaleFactors, ref Cancel);
     }
 
     public void MouseThrowEnd(int screen, OpenMobile.Graphics.Point EndLocation)
@@ -92,6 +119,8 @@ public sealed class Card : OMControl, IClickable, IThrow
             if (OnDrop != null)
                 OnDrop(this, screen);
         _anchor = new Point(left, top);
+        if (_child != null)
+            _child.MouseThrowEnd(screen, EndLocation);
     }
 
     #endregion

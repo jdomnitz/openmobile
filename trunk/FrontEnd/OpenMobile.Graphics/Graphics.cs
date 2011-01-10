@@ -279,7 +279,7 @@ namespace OpenMobile.Graphics
         private float scaleHeight;
         private float scaleWidth;
         private float dpi=1F;
-        public void Initialize(int screen, Size ScreenSize)
+        public void Initialize(int screen)
         {
             version = Raw.GetString(StringName.Version);
             if (Platform.Factory.IsEmbedded)
@@ -297,10 +297,8 @@ namespace OpenMobile.Graphics
                 implementation = new V2Graphics(screen);
             else
                 implementation = new V1Graphics(screen);
-            //scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
-            //scaleWidth = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
-            scaleHeight = (ScreenSize.Height / 600F);
-            scaleWidth = (ScreenSize.Width / 1000F);
+            scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
+            scaleWidth = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
             if (Configuration.RunningOnWindows)
             {
                 IntPtr dc = GetDC(IntPtr.Zero);
