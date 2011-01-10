@@ -87,6 +87,8 @@ namespace OpenMobile.Controls
         /// <param name="changeParent"></param>
         public void addControl(OMControl control, bool changeParent)
         {
+            if (control == null)
+                return;
             if (changeParent)
                 control.Parent = this;
             control.UpdateThisControl +=raiseUpdate;
@@ -522,6 +524,14 @@ namespace OpenMobile.Controls
                 containedControls[i].UpdateThisControl -= raiseUpdate;
                 containedControls.RemoveAt(i);
             }
+        }
+
+        public OMControl controlAtPoint(Point p)
+        {
+            for (int i = containedControls.Count - 1; i >= 0;i--)
+                if (containedControls[i].toRegion().Contains(p))
+                    return containedControls[i];
+            return null;
         }
     }
 }

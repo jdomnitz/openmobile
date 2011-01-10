@@ -742,7 +742,7 @@ namespace OpenMobile
         #region OtherUIEvents
         protected override void OnLoad(EventArgs e)
         {
-            g.Initialize(screen, this.Size);
+            g.Initialize(screen);
             if (screen == 0)
             {
                 if ((Graphics.Graphics.Renderer == "GDI Generic") || (Graphics.Graphics.Renderer == "Software Rasterizer"))
