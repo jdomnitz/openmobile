@@ -81,10 +81,15 @@ namespace OpenMobile.Platform
                 #endif
                 else Embedded = new UnsupportedPlatform();
             }
-            else Embedded = new UnsupportedPlatform();
-            _embedded=Default is UnsupportedPlatform;
-            if (_embedded && !(Embedded is UnsupportedPlatform))
+            else
+                Embedded = new UnsupportedPlatform();
+
+            //_embedded=Default is UnsupportedPlatform;
+            if (!(Embedded is UnsupportedPlatform))
+            {
+                _embedded = true;
                 Default = Embedded;
+            }
             else
                 _embedded = false;
         }

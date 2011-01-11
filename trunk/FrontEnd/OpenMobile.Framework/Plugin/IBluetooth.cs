@@ -69,10 +69,5 @@ namespace OpenMobile.Plugin
         /// <param name="toPhone"></param>
         /// <returns>True if successful</returns>
         bool transferAudio(bool toPhone);
-        /// <summary>
-        /// Syncs the phonebook with the contacts database
-        /// </summary>
-        void syncPhonebook();
-        //***INCOMPLETE DRAFT***
     }
 }

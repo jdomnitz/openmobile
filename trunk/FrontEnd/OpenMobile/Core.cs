@@ -158,6 +158,8 @@ namespace OpenMobile
                             IBasePlugin availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginType);
 							if (typeof(INetwork).IsInstanceOfType(availablePlugin))
 								((INetwork)availablePlugin).OnWirelessEvent+=theHost.raiseWirelessEvent;
+                            if (typeof(IBluetooth).IsInstanceOfType(availablePlugin))
+                                ((IBluetooth)availablePlugin).OnWirelessEvent += theHost.raiseWirelessEvent;
                             pluginCollection.Add(availablePlugin);
                         }
                     }
