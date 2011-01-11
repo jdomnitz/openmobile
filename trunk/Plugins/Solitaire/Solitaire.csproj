@@ -46,10 +46,6 @@
       <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
       <Name>OpenMobile.Graphics</Name>
     </ProjectReference>
-    <ProjectReference Include="..\libGame\libGame.csproj">
-      <Project>{C36DD639-E354-4D44-ACD9-0B9EB3BA56A4}</Project>
-      <Name>libGame</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
