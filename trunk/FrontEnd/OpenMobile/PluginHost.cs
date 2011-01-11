@@ -528,7 +528,8 @@ namespace OpenMobile
                     {
                         savePlaylists();
                         raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
-                        hal.close();
+                        if (hal!=null)
+                            hal.close();
                     }
                     catch (Exception) { }
                     try
