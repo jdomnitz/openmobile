@@ -173,16 +173,20 @@ namespace OpenMobile
 		{
 			deviceMapK = new int[Core.theHost.ScreenCount];
 			bool create = !File.Exists (Path.Combine (Core.theHost.DataPath, "OMData"));
-			using (PluginSettings s = new PluginSettings ()) {
+			using (PluginSettings s = new PluginSettings ()) 
+            {
 				if (create)
 					s.createDB ();
-				for (int i = 0; i < deviceMapK.Length; i++) {
+				for (int i = 0; i < deviceMapK.Length; i++) 
+                {
 					string val = s.getSetting ("Screen" + (i + 1).ToString () + ".Keyboard");
 					if ((val == "Default Keyboard") || (val.Length == 0))
 						deviceMapK[i] = -1;
-					else {
+					else
+                    {
 						for (int j = 0; j < driver.Keyboard.Count; j++)
-							if (driver.Keyboard[j].Description == val) {
+							if (driver.Keyboard[j].Description == val) 
+                            {
 								deviceMapK[i] = j;
 								break;
 							}
