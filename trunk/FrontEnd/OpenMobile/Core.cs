@@ -139,10 +139,9 @@ namespace OpenMobile
         }
         private static void loadAndCheck(string file)
         {
-            if (file.EndsWith("UI.dll") || file.EndsWith("MainMenu.dll"))
+            if ((Path.GetFileName(file) == "UI.dll") || (Path.GetFileName(file) == "MainMenu.dll"))
                 return;
             string last = Path.GetFileNameWithoutExtension(file);
-            AppDomain.CurrentDomain.SetupInformation.PrivateBinPath= Path.Combine(theHost.PluginPath, last);
             Assembly pluginAssembly = Assembly.Load(last);
             foreach (Type pluginType in pluginAssembly.GetTypes())
             {
@@ -169,11 +168,24 @@ namespace OpenMobile
 
         static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            string loc = Path.Combine(theHost.PluginPath, args.Name + ".dll");
+            string name = args.Name;
+            int comma = name.IndexOf(',');
+            if (comma >= 0)
+                name = name.Substring(0, comma);
+            string loc = Path.Combine(theHost.PluginPath, name + ".dll");
             if (File.Exists(loc))
                 return Assembly.LoadFrom(loc);
             else
-                return Assembly.LoadFrom(Path.Combine(theHost.SkinPath, args.Name + ".dll"));
+                loc = Path.Combine(theHost.SkinPath, name + ".dll");
+            if (File.Exists(loc))
+                return Assembly.LoadFrom(loc);
+            foreach(string folder in Directory.GetDirectories(theHost.PluginPath))
+            {
+                loc = Path.Combine(folder, name + ".dll");
+                if (File.Exists(loc))
+                    return Assembly.LoadFrom(loc);
+            }
+            return null;
         }
         public static eLoadStatus[] status;
         /// <summary>
