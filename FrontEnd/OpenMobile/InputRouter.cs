@@ -196,10 +196,14 @@ namespace OpenMobile
 			using (PluginSettings s = new PluginSettings ()) {
 				for (int i = 0; i < deviceMapM.Length; i++) {
 					string val = s.getSetting ("Screen" + (i + 1).ToString () + ".Mouse");
-					if ((val == "Default Mouse") || (val.Length==0)) {
+					if ((val == "Default Mouse") || (val.Length==0)) 
+                    {
 						deviceMapM[i] = -1;
                         Core.RenderingWindows[i].currentMouse = Core.RenderingWindows[i].Mouse;
-					} else {
+                        Core.RenderingWindows[i].defaultMouse = true; 
+					} 
+                    else 
+                    {
 						for (int j = 0; j < driver.Mouse.Count; j++)
 							if (driver.Mouse[j].Description == val) 
                             {

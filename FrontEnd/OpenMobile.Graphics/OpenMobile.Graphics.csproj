@@ -66,6 +66,8 @@
     <Compile Include="Graphics.cs" />
     <Compile Include="Graphics\GraphicsModeComparer.cs" />
     <Compile Include="Input\IInputDriver.cs" />
+    <Compile Include="OAnimatedImage.cs" />
+    <Compile Include="OImage.cs" />
     <Compile Include="Platform\Windows\WinRawInput.cs" />
     <Compile Include="Platform\Windows\WinRawKeyboard.cs" />
     <Compile Include="Platform\Windows\WinRawMouse.cs" />
