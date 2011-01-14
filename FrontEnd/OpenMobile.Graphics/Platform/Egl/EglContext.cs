@@ -68,7 +68,7 @@ namespace OpenMobile.Platform.Egl
             if (window.Surface == IntPtr.Zero)
                 window.CreateWindowSurface(config);
 
-            int[] attrib_list = new int[] { Egl.CONTEXT_CLIENT_VERSION, major, Egl.NONE };
+            int[] attrib_list = new int[] { Egl.CONTEXT_CLIENT_VERSION, 1, Egl.NONE };
             HandleAsEGLContext = Egl.CreateContext(window.Display, config, shared != null ? shared.HandleAsEGLContext : IntPtr.Zero, attrib_list);
 
             MakeCurrent(window);

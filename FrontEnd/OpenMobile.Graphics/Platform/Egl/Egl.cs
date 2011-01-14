@@ -191,7 +191,7 @@ namespace OpenMobile.Platform.Egl
 
         [DllImportAttribute("libEGL.dll", EntryPoint = "eglChooseConfig")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool ChooseConfig(EGLDisplay dpy, int[] attrib_list, [In, Out] EGLConfig[] configs, int config_size, out int num_config);
+        public static extern bool ChooseConfig(EGLDisplay dpy, int[] attrib_list, EGLConfig[] configs, int config_size, out int num_config);
 
         [DllImportAttribute("libEGL.dll", EntryPoint = "eglGetConfigAttrib")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
