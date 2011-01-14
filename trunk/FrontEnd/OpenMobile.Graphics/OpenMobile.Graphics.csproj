@@ -40,7 +40,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug-Fast|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug-Fast\</OutputPath>
-    <DefineConstants>TRACE;OSX</DefineConstants>
+    <DefineConstants>TRACE;WINDOWS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -59,11 +59,18 @@
     <Compile Include="BindingsBase.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="ContextHandle.cs" />
+    <Compile Include="ESGraphics.cs" />
     <Compile Include="DisplayDevice.cs" />
     <Compile Include="DisplayResolution.cs" />
     <Compile Include="GameWindow.cs" />
     <Compile Include="GameWindowFlags.cs" />
     <Compile Include="Graphics.cs" />
+    <Compile Include="Graphics\ES11\Core.cs" />
+    <Compile Include="Graphics\ES11\Delegates.cs" />
+    <Compile Include="Graphics\ES11\Enums.cs" />
+    <Compile Include="Graphics\ES11\ErrorHelper.cs" />
+    <Compile Include="Graphics\ES11\ES.cs" />
+    <Compile Include="Graphics\ES11\Helper.cs" />
     <Compile Include="Graphics\GraphicsModeComparer.cs" />
     <Compile Include="Input\IInputDriver.cs" />
     <Compile Include="OAnimatedImage.cs" />
@@ -75,12 +82,6 @@
     <Compile Include="V1Graphics.cs" />
     <Compile Include="Graphics\Color4.cs" />
     <Compile Include="Graphics\ColorFormat.cs" />
-    <Compile Include="Graphics\ES20\Core.cs" />
-    <Compile Include="Graphics\ES20\Delegates.cs" />
-    <Compile Include="Graphics\ES20\Enums.cs" />
-    <Compile Include="Graphics\ES20\ErrorHelper.cs" />
-    <Compile Include="Graphics\ES20\ES.cs" />
-    <Compile Include="Graphics\ES20\Helper.cs" />
     <Compile Include="Graphics\GraphicsBindingsBase.cs" />
     <Compile Include="Graphics\GraphicsContext.cs" />
     <Compile Include="Graphics\GraphicsContextBase.cs" />

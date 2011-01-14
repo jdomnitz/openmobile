@@ -42,17 +42,17 @@ namespace OpenMobile.Platform.Egl
             int[] attribList = new int[] 
             { 
                 //Egl.SURFACE_TYPE, Egl.WINDOW_BIT,
-
+                Egl.RENDERABLE_TYPE, Egl.OPENGL_ES_BIT,
                 Egl.RED_SIZE, color.Red, 
                 Egl.GREEN_SIZE, color.Green, 
                 Egl.BLUE_SIZE, color.Blue,
-                Egl.ALPHA_SIZE, color.Alpha,
+                //Egl.ALPHA_SIZE, color.Alpha,
 
-                Egl.DEPTH_SIZE, depth > 0 ? depth : 0,
-                Egl.STENCIL_SIZE, stencil > 0 ? stencil : 0,
+                Egl.DEPTH_SIZE,  0,
+                //Egl.STENCIL_SIZE, stencil > 0 ? stencil : 0,
 
                 //Egl.SAMPLE_BUFFERS, samples > 0 ? 1 : 0,
-                Egl.SAMPLES, samples > 0 ? samples : 0,
+                //Egl.SAMPLES, samples > 0 ? samples : 0,
 
                 Egl.NONE,
             };
@@ -64,25 +64,20 @@ namespace OpenMobile.Platform.Egl
                 throw new Exception(String.Format("Failed to initialize display connection, error {0}", Egl.GetError()));
 
             int num_configs;
-            if (!Egl.GetConfigs(display, null, 0, out num_configs))
+            if (!Egl.ChooseConfig(display,attribList, configs, 1, out num_configs))
             {
                 throw new Exception(String.Format("Failed to retrieve GraphicsMode configurations, error {0}", Egl.GetError()));
             }
-
-            if (!Egl.ChooseConfig(display, attribList, configs, configs.Length, out num_configs))
-            {
-                throw new Exception(String.Format("Failed to retrieve GraphicsMode, error {0}", Egl.GetError()));
-            }
-
+            int r, g, b, a, d;
             // See what we really got
             IntPtr active_config = configs[0];
-            int r, g, b, a;
+
             Egl.GetConfigAttrib(display, active_config, Egl.RED_SIZE, out r);
             Egl.GetConfigAttrib(display, active_config, Egl.GREEN_SIZE, out g);
             Egl.GetConfigAttrib(display, active_config, Egl.BLUE_SIZE, out b);
             Egl.GetConfigAttrib(display, active_config, Egl.ALPHA_SIZE, out a);
-            int d, s;
             Egl.GetConfigAttrib(display, active_config, Egl.DEPTH_SIZE, out d);
+            int s;
             Egl.GetConfigAttrib(display, active_config, Egl.STENCIL_SIZE, out s);
             int sample_buffers;
             Egl.GetConfigAttrib(display, active_config, Egl.SAMPLES, out sample_buffers);

@@ -281,22 +281,31 @@ namespace OpenMobile.Graphics
         private float dpi=1F;
         public void Initialize(int screen)
         {
-            version = Raw.GetString(StringName.Version);
             if (Platform.Factory.IsEmbedded)
-                v2 = true;
-            else if (version.Length < 3)
-                v2 = false;
-            else if (version[0] >= '2') //2.0 or higher
-                v2 = true;
-            else if (version.Substring(0,3) == "1.5") //1.5 with npots support
             {
-                string[] extensions = Raw.GetString(StringName.Extensions).Split(new char[] { ' ' });
-                v2 = (Array.Exists(extensions, t => t == "GL_ARB_texture_non_power_of_two"));
+                version = ES11.Raw.GetString(OpenMobile.Graphics.ES11.StringName.Version);
+                v2 = true;
+                implementation = new ESGraphics(screen);
+                renderer = ES11.Raw.GetString(OpenMobile.Graphics.ES11.StringName.Renderer);
             }
-            if (v2)
-                implementation = new V2Graphics(screen);
             else
-                implementation = new V1Graphics(screen);
+            {
+                version = Raw.GetString(StringName.Version);
+                if (version.Length < 3)
+                    v2 = false;
+                else if (version[0] >= '2') //2.0 or higher
+                    v2 = true;
+                else if (version.Substring(0, 3) == "1.5") //1.5 with npots support
+                {
+                    string[] extensions = Raw.GetString(StringName.Extensions).Split(new char[] { ' ' });
+                    v2 = (Array.Exists(extensions, t => t == "GL_ARB_texture_non_power_of_two"));
+                }
+                if (v2)
+                    implementation = new V2Graphics(screen);
+                else
+                    implementation = new V1Graphics(screen);
+                renderer = Raw.GetString(StringName.Renderer);
+            }
             scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
             scaleWidth = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
             if (Configuration.RunningOnWindows)
@@ -304,7 +313,6 @@ namespace OpenMobile.Graphics
                 IntPtr dc = GetDC(IntPtr.Zero);
                 dpi = GetDeviceCaps(dc, 88) / 96F;
             }
-            renderer = Raw.GetString(StringName.Renderer);
             implementation.Initialize(screen);
         }
         [DllImport("user32.dll")]

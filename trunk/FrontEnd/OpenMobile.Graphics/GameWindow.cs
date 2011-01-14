@@ -93,7 +93,8 @@ namespace OpenMobile
                 glContext.MakeCurrent(WindowInfo);
                 (glContext as IGraphicsContextInternal).LoadAll();
                 Visible = true;
-                OpenMobile.Graphics.OpenGL.Raw.ClearColor(OpenMobile.Graphics.Color.Black);
+                if (!Platform.Factory.IsEmbedded)
+                    OpenMobile.Graphics.OpenGL.Raw.ClearColor(OpenMobile.Graphics.Color.Black);
                 SwapBuffers();
                 glContext.VSync = true;
             }
