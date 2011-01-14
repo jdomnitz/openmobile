@@ -42,7 +42,7 @@ namespace OpenMobile.Platform.Egl
             int[] attribList = new int[] 
             { 
                 //Egl.SURFACE_TYPE, Egl.WINDOW_BIT,
-                Egl.RENDERABLE_TYPE, Egl.OPENGL_ES_BIT,
+                Egl.RENDERABLE_TYPE, Egl.OPENGL_ES_BIT | Egl.OPENGL_ES2_BIT,
                 Egl.RED_SIZE, color.Red, 
                 Egl.GREEN_SIZE, color.Green, 
                 Egl.BLUE_SIZE, color.Blue,
