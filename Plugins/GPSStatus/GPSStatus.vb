@@ -60,7 +60,7 @@ Public Class GPSStatus
         Lat.Name = "GPSStatus_Lat"
         Lat.TextAlignment = Alignment.CenterLeft
         Lat.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Lat.Tag = "Latitude"
+        Lat.Tag = "GPS.Latitude"
         Pan.addControl(Lat)
         m_Output.Add(Lat)
 
@@ -76,7 +76,7 @@ Public Class GPSStatus
         Lng.Name = "GPSStatus_Long"
         Lng.TextAlignment = Alignment.CenterLeft
         Lng.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Lng.Tag = "Longitude"
+        Lng.Tag = "GPS.Longitude"
         Pan.addControl(Lng)
         m_Output.Add(Lng)
 
@@ -92,7 +92,7 @@ Public Class GPSStatus
         Speed.Name = "GPSStatus_Speed"
         Speed.TextAlignment = Alignment.CenterLeft
         Speed.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Speed.Tag = "Speed"
+        Speed.Tag = "GPS.Speed"
         Pan.addControl(Speed)
         m_Output.Add(Speed)
 
@@ -108,7 +108,7 @@ Public Class GPSStatus
         Alt.Name = "GPSStatus_Alt"
         Alt.TextAlignment = Alignment.CenterLeft
         Alt.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Alt.Tag = "Altitude"
+        Alt.Tag = "GPS.Altitude"
         Pan.addControl(Alt)
         m_Output.Add(Alt)
 
@@ -124,7 +124,7 @@ Public Class GPSStatus
         Bearing.Name = "GPSStatus_Bearing"
         Bearing.TextAlignment = Alignment.CenterLeft
         Bearing.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Bearing.Tag = "Bearing"
+        Bearing.Tag = "GPS.Bearing"
         Pan.addControl(Bearing)
         m_Output.Add(Bearing)
 
@@ -140,7 +140,7 @@ Public Class GPSStatus
         Zip.Name = "GPSStatus_ZipCode"
         Zip.TextAlignment = Alignment.CenterLeft
         Zip.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Zip.Tag = "ZipCode"
+        Zip.Tag = "GPS.ZipCode"
         Pan.addControl(Zip)
         m_Output.Add(Zip)
 
@@ -156,12 +156,12 @@ Public Class GPSStatus
         City.Name = "GPSStatus_City"
         City.TextAlignment = Alignment.CenterLeft
         City.Font = New Font(Font.GenericSansSerif, 24.0F)
-        City.Tag = "City"
+        City.Tag = "GPS.City"
         Pan.addControl(City)
         m_Output.Add(City)
 
         m_Manager = New ScreenManager(m_Host.ScreenCount)
-        m_Manager.loadPanel(Pan)
+        m_Manager.loadSharedPanel(Pan)
 
         Return eLoadStatus.LoadSuccessful
 
