@@ -50,6 +50,75 @@ namespace OpenMobile.Plugin
         /// </summary>
         All=0xFF
     }
+
+    /// <summary>
+    /// Data type sensor returns
+    /// </summary>
+    [Flags]
+    public enum eSensorDataType
+    {
+        /// <summary>
+        /// Raw data
+        /// </summary>
+        raw=0,
+        /// <summary>
+        /// Temperature
+        /// </summary>
+        degreesC,
+        /// <summary>
+        /// Degrees
+        /// </summary>
+        degrees,
+        /// <summary>
+        /// Percentage
+        /// </summary>
+        percent,
+        /// <summary>
+        /// Meters
+        /// </summary>
+        meters,
+        /// <summary>
+        /// Kilometers
+        /// </summary>
+        kilometers,
+        /// <summary>
+        /// Voltage
+        /// </summary>
+        volts,
+        /// <summary>
+        /// Amperage
+        /// </summary>
+        Amps,
+        /// <summary>
+        /// Kilometers per hour
+        /// </summary>
+        kph,
+        /// <summary>
+        /// G Force
+        /// </summary>
+        Gs,
+        /// <summary>
+        /// Pressure 
+        /// </summary>
+        psi,
+        /// <summary>
+        /// Rotations Per Minute
+        /// </summary>
+        RPM,
+        /// <summary>
+        /// Bytes of data
+        /// </summary>
+        bytes,
+        /// <summary>
+        /// Transfer rate
+        /// </summary>
+        bytespersec,
+        /// <summary>
+        /// Binary On/Off as 1/0
+        /// </summary>
+        binary 
+    }
+
     /// <summary>
     /// Represents a sensor
     /// </summary>
@@ -67,6 +136,14 @@ namespace OpenMobile.Plugin
         /// Sensor Type
         /// </summary>
         public eSensorType Type;
+        /// <summary>
+        /// Abbreviated name
+        /// </summary>
+        public string ShortName;
+        /// <summary>
+        /// Sensor return data type
+        /// </summary>
+        public eSensorDataType DataType;
 
         /// <summary>
         /// Creates a new sensor object
@@ -74,11 +151,24 @@ namespace OpenMobile.Plugin
         /// <param name="Name"></param>
         /// <param name="PID"></param>
         /// <param name="Type"></param>
-        public Sensor(string Name, int PID, eSensorType Type)
+        public Sensor(string Name, int PID, eSensorType Type) : this(Name, PID, Type, "", eSensorDataType.raw)
+        {
+        }
+                /// <summary>
+        /// Creates a new sensor object
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="PID"></param>
+        /// <param name="Type"></param>
+        /// <param name="ShortName"></param>
+        /// <param name="DataType"></param>
+        public Sensor(string Name, int PID, eSensorType Type, string ShortName, eSensorDataType DataType)
         {
             this.Name = Name;
             this.PID = PID;
             this.Type = Type;
+            this.ShortName = ShortName;
+            this.DataType = DataType; 
         }
     }
     /// <summary>

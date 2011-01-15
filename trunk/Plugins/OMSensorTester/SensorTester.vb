@@ -54,7 +54,7 @@ Public Class SensorTester
 
             For Each Sen As Sensor In Sensors
                 If Sen.Type = eSensorType.deviceSuppliesData Then
-                    List.Add(New OMListItem(Sen.Name & "-" & m_Host.getSensorValue(Sen.PID).ToString))
+                    List.Add(New OMListItem(Sen.Name & "-" & GetVal(Sen)))
                 End If
             Next
 
@@ -63,6 +63,76 @@ Public Class SensorTester
         m_Host.setSensorValue(100101, 1)
 
         Return Pan
+    End Function
+
+    Private Function GetVal(ByVal Sen As Sensor) As String
+        Dim Val As String = m_Host.getSensorValue(Sen.PID).ToString
+
+        Select Case Sen.DataType
+            Case Is = eSensorDataType.Amps
+                Return Val & "Amps"
+
+            Case Is = eSensorDataType.binary
+                If Val = "1" Then
+                    Return "On"
+                End If
+                Return "Off"
+
+            Case Is = eSensorDataType.bytes
+                Dim dec As Double = Val
+                If dec > 1099511627776 Then
+                    Return (dec / 1099511627776).ToString("#.#") & "TB"
+                End If
+                If dec > 1073741824 Then
+                    Return (dec / 1073741824).ToString("#.#") & "GB"
+                End If
+                If dec > 1048576 Then
+                    Return (dec / 1048576).ToString("#.#") & "MB"
+                End If
+                If dec > 1024 Then
+                    Return (dec / 1024).ToString("#.#") & "KB"
+                End If
+                Return Val & "B"
+
+            Case Is = eSensorDataType.bytespersec
+                Dim dec As Double = Val
+                If dec > 1048576 Then
+                    Return (dec / 1048576).ToString("#.#") & "Mbps"
+                End If
+                If dec > 1024 Then
+                    Return (dec / 1024).ToString("#.#") & "Kbps"
+                End If
+                Return Val & "Bps"
+
+            Case Is = eSensorDataType.degrees
+                Return Val & "°"
+
+            Case Is = eSensorDataType.degreesC
+                Return Val & "°"
+
+            Case Is = eSensorDataType.Gs
+                Return Val & "Gs"
+
+            Case Is = eSensorDataType.kilometers
+                Return Val & "km"
+
+            Case Is = eSensorDataType.kph
+                Return Val & "kph"
+
+            Case Is = eSensorDataType.meters
+                Return Val & "m"
+
+            Case Is = eSensorDataType.percent
+                Return Val & "%"
+
+            Case Is = eSensorDataType.psi
+                Return Val & "psi"
+
+            Case Is = eSensorDataType.volts
+                Return Val & "V"
+        End Select
+
+        Return Val
     End Function
 
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings

@@ -41,10 +41,10 @@ namespace SystemSensors
                 case 1:
                     if (freeRamCounter==null)
                         freeRamCounter = new PerformanceCounter("Memory", "Available MBytes");
-                    return freeRamCounter.NextValue();
+                    return freeRamCounter.NextValue() * 1048576;
                 case 2:
                     if (Configuration.RunningOnWindows)
-                        return (int)(getUsedPhysicalMemory()/1048576);
+                        return (int)(getUsedPhysicalMemory());
                     return null;
                 case 3:
                     if (Configuration.RunningOnWindows)
@@ -53,7 +53,7 @@ namespace SystemSensors
                 case 4:
                     if (currentProcess == null)
                         currentProcess = Process.GetCurrentProcess();
-                    return currentProcess.WorkingSet64 / 1048576;
+                    return currentProcess.WorkingSet64 ;
             }
             return null;
         }
@@ -145,11 +145,11 @@ namespace SystemSensors
         public override OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             InitPIDMask();
-            Sensor CPU = new Sensor("System.CPUUsage", MaskPID(0), eSensorType.deviceSuppliesData);
-            Sensor FreeMemory = new Sensor("System.PhysicalMemoryFree", MaskPID(1), eSensorType.deviceSuppliesData);
-            Sensor UsedMemory = new Sensor("System.PhysicalMemoryUsed", MaskPID(2), eSensorType.deviceSuppliesData);
-            Sensor UsedMemoryPercent = new Sensor("System.MemoryUsedPercent", MaskPID(3), eSensorType.deviceSuppliesData);
-            Sensor ProcessMemory = new Sensor("System.ProcessMemoryUsed", MaskPID(4), eSensorType.deviceSuppliesData);
+            Sensor CPU = new Sensor("System.CPUUsage", MaskPID(0), eSensorType.deviceSuppliesData, "CPU", eSensorDataType.percent );
+            Sensor FreeMemory = new Sensor("System.PhysicalMemoryFree", MaskPID(1), eSensorType.deviceSuppliesData, "FMem", eSensorDataType.bytes );
+            Sensor UsedMemory = new Sensor("System.PhysicalMemoryUsed", MaskPID(2), eSensorType.deviceSuppliesData, "UMem", eSensorDataType.bytes );
+            Sensor UsedMemoryPercent = new Sensor("System.MemoryUsedPercent", MaskPID(3), eSensorType.deviceSuppliesData, "Mem", eSensorDataType.percent );
+            Sensor ProcessMemory = new Sensor("System.ProcessMemoryUsed", MaskPID(4), eSensorType.deviceSuppliesData, "UMem", eSensorDataType.bytes);
             sensors.Add(CPU);
             sensors.Add(FreeMemory);
             sensors.Add(UsedMemory);

@@ -80,6 +80,7 @@ Public Class OMSerialGPS
         InitPIDMask()
         LoadGPSSettings()
 
+
         m_Loader.RunWorkerAsync()
         Return eLoadStatus.LoadSuccessful
     End Function
@@ -156,10 +157,26 @@ Public Class OMSerialGPS
         If Not m_Sensors Is Nothing Then
             Return m_Sensors
         End If
+
         m_Sensors = New Generic.List(Of Sensor)
-        For Each Sen In PIDs.GetValues(GetType(PIDs))
-            m_Sensors.Add(New Sensor(Sen.ToString, MyBase.MaskPID(Sen), eSensorType.deviceSuppliesData))
-        Next
+        m_Sensors.Add(New Sensor("GPS." & PIDs.Fix.ToString, MyBase.MaskPID(PIDs.Fix), eSensorType.deviceSuppliesData, "Fix", eSensorDataType.binary))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.Longitude.ToString, MyBase.MaskPID(PIDs.Longitude), eSensorType.deviceSuppliesData, "Lng", eSensorDataType.degrees))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.Latitude.ToString, MyBase.MaskPID(PIDs.Latitude), eSensorType.deviceSuppliesData, "Lat", eSensorDataType.degrees))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.FixQuality.ToString, MyBase.MaskPID(PIDs.FixQuality), eSensorType.deviceSuppliesData, "Qual", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.NumberOfSats.ToString, MyBase.MaskPID(PIDs.NumberOfSats), eSensorType.deviceSuppliesData, "Sats", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.Altitude.ToString, MyBase.MaskPID(PIDs.Altitude), eSensorType.deviceSuppliesData, "Alt", eSensorDataType.meters))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.Bearing.ToString, MyBase.MaskPID(PIDs.Bearing), eSensorType.deviceSuppliesData, "Dir", eSensorDataType.degrees))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.Speed.ToString, MyBase.MaskPID(PIDs.Speed), eSensorType.deviceSuppliesData, "Spd", eSensorDataType.kph))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.HorzDilution.ToString, MyBase.MaskPID(PIDs.HorzDilution), eSensorType.deviceSuppliesData, "Horz", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.PDOP.ToString, MyBase.MaskPID(PIDs.PDOP), eSensorType.deviceSuppliesData, "PDOP", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.HDOP.ToString, MyBase.MaskPID(PIDs.HDOP), eSensorType.deviceSuppliesData, "HDOP", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.VDOP.ToString, MyBase.MaskPID(PIDs.VDOP), eSensorType.deviceSuppliesData, "VDOP", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.SatList.ToString, MyBase.MaskPID(PIDs.SatList), eSensorType.deviceSuppliesData, "Lst", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.ZipCode.ToString, MyBase.MaskPID(PIDs.ZipCode), eSensorType.deviceSuppliesData, "Zip", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.City.ToString, MyBase.MaskPID(PIDs.City), eSensorType.deviceSuppliesData, "City", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.StateCode.ToString, MyBase.MaskPID(PIDs.StateCode), eSensorType.deviceSuppliesData, "St", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("GPS." & PIDs.State.ToString, MyBase.MaskPID(PIDs.State), eSensorType.deviceSuppliesData, "St", eSensorDataType.raw))
+
         Return m_Sensors
     End Function
 
