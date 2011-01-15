@@ -42,7 +42,7 @@ namespace OpenMobile.Platform.Egl
             int[] attribList = new int[] 
             { 
                 //Egl.SURFACE_TYPE, Egl.WINDOW_BIT,
-                Egl.RENDERABLE_TYPE, Egl.OPENGL_ES_BIT | Egl.OPENGL_ES2_BIT,
+                Egl.RENDERABLE_TYPE, Egl.OPENGL_ES_BIT | Egl.OPENGL_ES2_BIT | Egl.OPENGL_BIT,
                 Egl.RED_SIZE, color.Red, 
                 Egl.GREEN_SIZE, color.Green, 
                 Egl.BLUE_SIZE, color.Blue,
@@ -64,9 +64,10 @@ namespace OpenMobile.Platform.Egl
                 throw new Exception(String.Format("Failed to initialize display connection, error {0}", Egl.GetError()));
 
             int num_configs;
-            if (!Egl.ChooseConfig(display,attribList, configs, 1, out num_configs))
+            if ((!Egl.ChooseConfig(display,attribList, configs, 1, out num_configs))||(num_configs==0))
             {
-                throw new Exception(String.Format("Failed to retrieve GraphicsMode configurations, error {0}", Egl.GetError()));
+                Egl.GetConfigs(display, null, 0, out num_configs);
+                throw new Exception(String.Format("Failed to retrieve GraphicsMode configurations, error {0}, {1} configs available", Egl.GetError(),num_configs));
             }
             int r, g, b, a, d;
             // See what we really got
