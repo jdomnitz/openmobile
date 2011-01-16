@@ -112,6 +112,22 @@ namespace OpenMobile.Framework
             }
         }
         /// <summary>
+        /// Load a panel array containing screen specific versions of a panel
+        /// <para>Note: All panels must have the same name</para>
+        /// </summary>
+        /// <param name="source"></param>
+        public void loadPanel(OMPanel[] source)
+        {
+            if (source == null)
+                return;
+            if (source.Length != screens)
+                return;
+            lock (this)
+            {
+                panels.Add(source);
+            }
+        }
+        /// <summary>
         /// Loads a panel thats shared between all screens instead of being screen-independent
         /// </summary>
         /// <param name="source"></param>

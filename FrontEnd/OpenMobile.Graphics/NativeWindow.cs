@@ -56,7 +56,6 @@ namespace OpenMobile
         #endregion
         public NativeWindow()
         {
-            //this.options = GameWindowFlags.Default;
             this.device = DisplayDevice.Default;
         }
         #region --- Contructors ---
@@ -131,12 +130,10 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.Bounds;
             }
             set
             {
-                EnsureUndisposed();
                 implementation.Bounds = value;
             }
         }
@@ -161,12 +158,10 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.ClientRectangle;
             }
             set
             {
-                EnsureUndisposed();
                 implementation.ClientRectangle = value;
             }
         }
@@ -182,12 +177,10 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.ClientSize;
             }
             set
             {
-                EnsureUndisposed();
                 implementation.ClientSize = value;
             }
         }
@@ -218,12 +211,10 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.Height;
             }
             set
             {
-                EnsureUndisposed();
                 implementation.Height = value;
             }
         }
@@ -239,7 +230,6 @@ namespace OpenMobile
         {
             set
             {
-                EnsureUndisposed();
                 implementation.Icon = value;
             }
         }
@@ -248,15 +238,10 @@ namespace OpenMobile
 
         #region InputDriver
 
-        /// <summary>
-        /// This property is deprecated.
-        /// </summary>
-        [Obsolete]
         public IInputDriver InputDriver
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.InputDriver;
             }
         }
@@ -272,12 +257,10 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.Location;
             }
             set
             {
-                EnsureUndisposed();
                 implementation.Location = value;
             }
         }
@@ -293,12 +276,10 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.Size;
             }
             set
             {
-                EnsureUndisposed();
                 implementation.Size = value;
             }
         }
@@ -314,7 +295,6 @@ namespace OpenMobile
         {
             set
             {
-                EnsureUndisposed();
                 implementation.Title = value;
             }
         }
@@ -336,7 +316,6 @@ namespace OpenMobile
             }
             set
             {
-                EnsureUndisposed();
                 implementation.Visible = value;
             }
         }
@@ -363,12 +342,10 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.Width;
             }
             set
             {
-                EnsureUndisposed();
                 implementation.Width = value;
             }
         }
@@ -403,7 +380,6 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.WindowInfo;
             }
         }
@@ -440,12 +416,10 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.X;
             }
             set
             {
-                EnsureUndisposed();
                 implementation.X = value;
             }
         }
@@ -461,12 +435,10 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return implementation.Y;
             }
             set
             {
-                EnsureUndisposed();
                 implementation.Y = value;
             }
         }

@@ -27,6 +27,13 @@ namespace OpenMobile.Graphics
                 return version;
             }
         }
+        public int MaxTextureSize
+        {
+            get
+            {
+                return implementation.MaxTextureSize;
+            }
+        }
         public static string GraphicsEngine
         {
             get

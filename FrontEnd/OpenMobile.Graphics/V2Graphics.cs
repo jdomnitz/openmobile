@@ -761,7 +761,6 @@ namespace OpenMobile.Graphics
             Raw.Disable(EnableCap.DepthTest);
             Raw.Disable(EnableCap.Multisample);
             Raw.Enable(EnableCap.Blend);
-            Raw.Disable(EnableCap.Dither); //Necessary?
             Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             Raw.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             Raw.MatrixMode(MatrixMode.Projection);
@@ -773,6 +772,14 @@ namespace OpenMobile.Graphics
             normalTex = new int[] { 0, 1, 1, 1, 0, 0, 1, 0 };
             vertTex = new int[] { 0, 0, 1, 0, 0, 1, 1, 1 };
             horizTex = new int[] { 1, 1, 0, 1, 1, 0, 0, 0 };
+        }
+
+        public int MaxTextureSize
+        {
+            get
+            {
+                return maxTextureSize;
+            }
         }
 
         public void renderText(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)
