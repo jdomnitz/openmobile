@@ -82,7 +82,7 @@ namespace OpenMobile.Framework
                 {
                     if ((screen < 0) || (screen >= screens))
                         throw new IndexOutOfRangeException();
-                    OMPanel[] p = panels.Find(x => ((x!=null)&&(x[0].Name == name)));
+                    OMPanel[] p = panels.Find(x => ((x[screen]!=null)&&(x[screen].Name == name)));
                     if (p == null)
                         return null;
                     else
