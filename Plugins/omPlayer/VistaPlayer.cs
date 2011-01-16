@@ -481,6 +481,8 @@ namespace OMPlayer
 
         public bool setVolume(int instance, int percent)
         {
+            if ((percent>100)||(percent<-2))
+                return false;
             checkInstance(instance);
             return player[instance].setVolume(percent);
         }
@@ -1233,8 +1235,26 @@ namespace OMPlayer
             }
             public bool setVolume(int percent)
             {
+                bool negate = false;
                 if (m_volume == null)
                     return false;
+                if (percent == -1)
+                {
+                    if (currentVolume < 0)
+                        return false;
+                    else
+                    {
+                        negate = true;
+                        percent = 0;
+                    }
+                }
+                else if (percent == -2)
+                {
+                    if (currentVolume < 0)
+                        percent = currentVolume * -1;
+                    else
+                        return false;
+                }
                 int count;
                 try
                 {
@@ -1253,7 +1273,10 @@ namespace OMPlayer
                     }
                     if (m_volume.SetAllVolumes(count, volPtr) == S_Ok)
                     {
-                        currentVolume = percent;
+                        if (negate)
+                            currentVolume *= -1;
+                        else
+                            currentVolume = percent;
                         return true;
                     }
                     else

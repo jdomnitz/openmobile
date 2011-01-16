@@ -42,7 +42,7 @@ namespace OpenMobile.Framework
         [Obsolete("BROKEN-Render Actual Controls")]
         public static OImage generate(string pluginName, IPluginHost host)
         {
-            if (cache==null)
+            /*if (cache==null)
                 cache=new List<imageItem>();
             object b;
             host.getData(eGetData.GetPlugins, pluginName,out b);
@@ -69,7 +69,8 @@ namespace OpenMobile.Framework
             }
             g.Dispose();
             cache.Add(new imageItem(img, pluginName));
-            return img;
+            return img;*/
+            return null;
         }
     }
 }

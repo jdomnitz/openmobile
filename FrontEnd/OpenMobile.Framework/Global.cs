@@ -641,7 +641,8 @@ namespace OpenMobile
         /// Set the playback volume of the current media
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
-        /// <para>Arg2: Volume [Int -1(mute) to 100]</para>
+        /// <para>Arg2: Volume [Int 0 to 100]</para>
+        /// <para>Note: -1 should mute, -2 should unmute</para>
         /// </summary>
         setPlayerVolume=15,
         /// <summary>

@@ -761,6 +761,7 @@ namespace OpenMobile.Graphics
             Raw.Disable(EnableCap.Multisample);
             Raw.Enable(EnableCap.Blend);
             Raw.Disable(EnableCap.Dither); //Necessary?
+            Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             Raw.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             Raw.MatrixMode(MatrixMode.Projection);
             Raw.LoadIdentity();
