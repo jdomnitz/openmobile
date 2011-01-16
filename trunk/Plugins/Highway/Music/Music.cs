@@ -423,6 +423,8 @@ namespace Music
                     {
                         if (l.Count == 0)
                             return;
+                        if (l[0].text == "Loading . . .")
+                            return;
                         List<string> ret = getSongs(l[0].subItem, l[0].text, screen);
                         if (ret.Count > 0)
                         {
@@ -441,6 +443,8 @@ namespace Music
                     }
                     else
                     {
+                        if (l.SelectedItem.tag == null)
+                            return;
                         List<string> ret = getSongs(l[l.SelectedIndex].subItem, l[l.SelectedIndex].text, screen);
                         if (ret.Count > 0)
                         {
@@ -463,6 +467,8 @@ namespace Music
                     {
                         if (l.Count == 0)
                             return;
+                        if (l[0].text == "Loading . . .")
+                            return;
                         int index=0;
                         if (theHost.getRandom(theHost.instanceForScreen(screen)))
                         {
@@ -481,6 +487,8 @@ namespace Music
                     }
                     else
                     {
+                        if (l.SelectedItem.tag == null)
+                            return;
                         theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l.SelectedItem.tag.ToString());
                         List<mediaInfo> playlist = new List<mediaInfo>();
                         playlist.Add(new mediaInfo(l.SelectedItem.tag.ToString()));
@@ -492,6 +500,8 @@ namespace Music
                     if (l.SelectedIndex < 0) //play all
                     {
                         if (l.Count == 0)
+                            return;
+                        if (l[0].text == "Loading . . .")
                             return;
                         int index = 0;
                         if (theHost.getRandom(theHost.instanceForScreen(screen)))
@@ -511,6 +521,8 @@ namespace Music
                     }
                     else
                     {
+                        if (l.SelectedItem.tag == null)
+                            return;
                         theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l.SelectedItem.tag.ToString());
                         List<mediaInfo> playlist = new List<mediaInfo>();
                         for (int i = 0; i < l.Count; i++)

@@ -588,6 +588,8 @@ namespace OpenMobile
                 {
                     for (int j = backgroundQueue[i].controlCount - 1; j >= 0; j--)
                     {
+                        if (backgroundQueue.Count <= i)
+                            continue;
                         b = backgroundQueue[i][j];
                         if ((e.X > (b.Left * widthScale)) && (e.Y > (b.Top * heightScale)) && (e.X < ((b.Left + b.Width) * widthScale)) && (e.Y < ((b.Top + b.Height) * heightScale)))
                         {
