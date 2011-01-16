@@ -533,5 +533,12 @@ namespace OpenMobile.Controls
                     return containedControls[i];
             return null;
         }
+
+        public override string ToString()
+        {
+            if (this.name == null)
+                return "";
+            return this.name;
+        }
     }
 }
