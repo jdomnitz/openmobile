@@ -421,6 +421,8 @@ namespace NewMedia
             {
                 if (l.Count == 0)
                     return;
+                if (l[0].text == "Loading . . .")
+                    return;
                 int index = 0;
                 if (l.SelectedIndex >= 0)
                     index=l.SelectedIndex;
@@ -441,8 +443,10 @@ namespace NewMedia
             {
                 if (l.SelectedIndex >= 0)
                 {
+                    if ((l.SelectedItem == null) || (l.SelectedItem.tag == null))
+                        return;
                     theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l.SelectedItem.tag.ToString());
-                    theHost.setPlaylist(new List<mediaInfo>() { new mediaInfo(l.SelectedItem==null ? null : l.SelectedItem.tag.ToString()) }, theHost.instanceForScreen(screen));
+                    theHost.setPlaylist(new List<mediaInfo>() { new mediaInfo(l.SelectedItem.tag.ToString()) }, theHost.instanceForScreen(screen));
                 }
                 else
                 {
@@ -450,11 +454,15 @@ namespace NewMedia
                         return;
                     if (theHost.getRandom(theHost.instanceForScreen(screen)))
                     {
-                        int random=OpenMobile.Framework.Math.Calculation.RandomNumber(0, l.Count - 1);
+                        int random = OpenMobile.Framework.Math.Calculation.RandomNumber(0, l.Count - 1);
                         theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l[random].tag.ToString());
                     }
                     else
+                    {
+                        if (l[0].tag == null)
+                            return;
                         theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), l[0].tag.ToString());
+                    }
                     List<string> queue = new List<string>();
                     for (int i = 0; i < l.Count; i++)
                         queue.Add(l[i].tag.ToString());
@@ -466,6 +474,8 @@ namespace NewMedia
                 if (l.SelectedIndex < 0)
                 {
                     if (l.Count == 0)
+                        return;
+                    if (l[0].text == "Loading . . .")
                         return;
                     List<string> ret = getSongs(l[0].subItem, l[0].text,screen);
                     if (ret.Count > 0)
@@ -502,6 +512,8 @@ namespace NewMedia
             else if (level[screen] == 0)
             {
                 if (l.Count == 0)
+                    return;
+                if (l[0].text == "Loading . . .")
                     return;
                 List<string> ret = getSongs(l[0].text,screen);
                 if (ret.Count > 0)
@@ -694,7 +706,7 @@ namespace NewMedia
             abortJob[screen] = true;
             lock (manager[screen][12])
                 l.Clear();
-            l.Add("Loading...");
+            l.Add("Loading . . .");
             l.ListItemOffset = 80;
             lock (manager[screen][12])
             {

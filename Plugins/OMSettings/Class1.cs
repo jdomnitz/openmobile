@@ -308,7 +308,7 @@ namespace OMSettings
             LayoutManager generalLayout = new LayoutManager();
             OMPanel[] general = generalLayout.layout(theHost, BuiltInComponents.GlobalSettings(host));
             for(int i=0;i<general.Length;i++)
-                manager.loadSharedPanel(general[i],i);
+                manager.loadSinglePanel(general[i],i);
             #endregion
             #region data
             OMPanel data = new OMPanel("data");
@@ -433,11 +433,13 @@ namespace OMSettings
             OMListItem.subItemFormat format = new OMListItem.subItemFormat();
             format.color = Color.FromArgb(140, Color.White);
             OMList[] lstplugins = new OMList[theHost.ScreenCount];
+            //Get a reference to the list of plugins on each screen
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
                 lstplugins[i] = (OMList)manager[i, "Plugins"][0];
                 lstplugins[i].Clear();
             }
+            //now load the settings for each plugin and add a menu item to the plugin lists
             foreach (IBasePlugin b in plugins)
             {
                 LayoutManager lm = new LayoutManager();
@@ -446,6 +448,8 @@ namespace OMSettings
                 {
                     panel = lm.layout(theHost, b.loadSettings());
                 }
+                //only allow a not implemented exception or null as a result
+                //anything else is an error
                 catch (NotImplementedException) { continue; }
                 catch (Exception e)
                 {
@@ -454,11 +458,12 @@ namespace OMSettings
                 }
                 if (panel != null)
                 {
+                    OMListItem item = new OMListItem(b.pluginName + " Settings", b.pluginDescription, format);
                     for (int i = 0; i < theHost.ScreenCount; i++)
                     {
-                        lstplugins[i].Add(new OMListItem(b.pluginName + " Settings", b.pluginDescription, format));
-                        panel[i].Name = b.pluginName + " Settings";
-                        manager.loadSharedPanel(panel[i],i);
+                        lstplugins[i].Add(item);
+                        panel[i].Name = item.text;
+                        manager.loadSinglePanel(panel[i],i);
                     }
                 }
             }

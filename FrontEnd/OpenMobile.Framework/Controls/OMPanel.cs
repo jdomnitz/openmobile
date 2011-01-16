@@ -360,7 +360,7 @@ namespace OpenMobile.Controls
                 forgotten = value;
             }
         }
-        private string name;
+        private string name=string.Empty;
         /// <summary>
         /// The name for this panel
         /// </summary>
