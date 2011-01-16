@@ -307,8 +307,7 @@ namespace OMSettings
             #region general
             LayoutManager generalLayout = new LayoutManager();
             OMPanel[] general = generalLayout.layout(theHost, BuiltInComponents.GlobalSettings(host));
-            for(int i=0;i<general.Length;i++)
-                manager.loadSinglePanel(general[i],i);
+            manager.loadPanel(general);
             #endregion
             #region data
             OMPanel data = new OMPanel("data");
@@ -459,12 +458,12 @@ namespace OMSettings
                 if (panel != null)
                 {
                     OMListItem item = new OMListItem(b.pluginName + " Settings", b.pluginDescription, format);
-                    for (int i = 0; i < theHost.ScreenCount; i++)
+                    for (int i = 0; i < panel.Length; i++)
                     {
                         lstplugins[i].Add(item);
                         panel[i].Name = item.text;
-                        manager.loadSinglePanel(panel[i],i);
                     }
+                    manager.loadPanel(panel);
                 }
             }
             foreach (Exception e in problems)

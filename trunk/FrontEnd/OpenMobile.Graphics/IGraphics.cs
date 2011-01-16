@@ -48,5 +48,6 @@ namespace OpenMobile.Graphics
         void SetClipFast(int x, int y, int width, int height);
         void TranslateTransform(float dx, float dy);
         void TranslateTransform(float dx, float dy, float dz);
+        int MaxTextureSize { get; }
     }
 }

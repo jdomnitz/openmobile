@@ -326,7 +326,6 @@ namespace OpenMobile
         {
             get
             {
-                EnsureUndisposed();
                 return glContext;
             }
         }

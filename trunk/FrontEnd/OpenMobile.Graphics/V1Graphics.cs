@@ -186,7 +186,6 @@ namespace OpenMobile.Graphics
         {
             Raw.Disable(EnableCap.DepthTest);
             Raw.Enable(EnableCap.Blend);
-            Raw.Disable(EnableCap.Dither); //Necessary?
             Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             Raw.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             Raw.MatrixMode(MatrixMode.Projection);
@@ -208,6 +207,13 @@ namespace OpenMobile.Graphics
             }catch(Exception){}
             #endif
             Raw.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
+        }
+        public int MaxTextureSize
+        {
+            get
+            {
+                return maxTextureSize;
+            }
         }
         public void Clear(Color color)
         {
