@@ -130,6 +130,8 @@ namespace OMDVD
         public int getVolume(int instance)
         {
             checkInstance(instance);
+            if (player[instance].currentVolume < 0)
+                return -1;
             return player[instance].currentVolume;
         }
         private void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
@@ -292,12 +294,22 @@ namespace OMDVD
                 if ((percent >= 0) && (percent <= 100))
                 {
                     player[instance].currentVolume = percent;
-                    return (player[instance].basicAudio.put_Volume((100 - player[instance].currentVolume) * -100) == 0);
+                    return (player[instance].basicAudio.put_Volume((int)(2000 * Math.Log10(Math.Pow((percent / 100.0), 2)))) == 0);
                 }
-                if (percent == -1)
+                else if (percent == -1)
                 {
-                    player[instance].currentVolume = 0;
-                    return (player[instance].basicAudio.put_Volume((100 - player[instance].currentVolume) * -100) == 0);
+                    if (player[instance].currentVolume < 0)
+                        return false;
+                    player[instance].currentVolume -= -1; ;
+                    return (player[instance].basicAudio.put_Volume(-10000) == 0);
+                }
+                else if (percent == -2)
+                {
+                    if (player[instance].currentVolume < 0)
+                    {
+                        player[instance].currentVolume -= -1; ;
+                        return (player[instance].basicAudio.put_Volume((int)(2000 * Math.Log10(Math.Pow((percent / 100.0), 2)))) == 0);
+                    }
                 }
             }
             return false;

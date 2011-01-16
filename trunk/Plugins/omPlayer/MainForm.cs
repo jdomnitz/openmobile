@@ -996,20 +996,25 @@ namespace OMPlayer
                     currentVolume = percent;
                     return (basicAudio.put_Volume((int)(2000 * Math.Log10(Math.Pow((percent / 100.0), 2)))) == 0);
                 }
-                else if ((percent == 0)||(percent==-1))
+                else if ((percent == 0) || (percent == -1))
                 {
                     if (percent == -1)
                     {
                         if (currentVolume > 0)
                             currentVolume *= -1;
                         else
-                        {
-                            currentVolume *= -1;
-                            return (basicAudio.put_Volume((int)(2000 * Math.Log10(Math.Pow((percent / 100.0), 2)))) == 0);
-                        }
+                            return false;
                     }
                     return (basicAudio.put_Volume(-10000) == 0);
-                } 
+                }
+                else if (percent == -2)
+                {
+                    if (currentVolume < 0)
+                    {
+                        currentVolume *= -1;
+                        return (basicAudio.put_Volume((int)(2000 * Math.Log10(Math.Pow((currentVolume / 100.0), 2)))) == 0);
+                    }
+                }
             }
             return false;
         }
