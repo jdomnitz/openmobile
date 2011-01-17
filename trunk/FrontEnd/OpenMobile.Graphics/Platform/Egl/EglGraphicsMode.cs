@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if LINUX
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -65,11 +65,7 @@ namespace OpenMobile.Platform.Egl
 
             int num_configs;
             if ((!Egl.ChooseConfig(display, attribList, configs, 1, out num_configs)) || (num_configs == 0))
-            {
-                attribList[1] = Egl.OPENGL_ES_BIT | Egl.OPENVG_BIT;
-                if ((!Egl.ChooseConfig(display, attribList, configs, 1, out num_configs)) || (num_configs == 0))
-                    configs[0]=manuallySelectGraphicsMode(display);
-            }
+                configs[0] = manuallySelectGraphicsMode(display);
             int r, g, b, a, d;
             // See what we really got
             IntPtr active_config = configs[0];
@@ -122,3 +118,4 @@ namespace OpenMobile.Platform.Egl
         #endregion
     }
 }
+#endif

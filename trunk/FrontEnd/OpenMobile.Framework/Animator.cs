@@ -9,6 +9,8 @@ namespace OpenMobile
     {
         public static void Move(OMControl control, int X,int Y)
         {
+            if (control == null)
+                return;
             int xsteps = System.Math.Abs((control.Left - X) / 50);
             int ysteps = System.Math.Abs((control.Top - Y) / 50);
             Move(control, X, Y, (xsteps > ysteps) ? xsteps : ysteps, 50);

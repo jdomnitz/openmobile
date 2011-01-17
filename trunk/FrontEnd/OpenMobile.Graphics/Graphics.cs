@@ -288,6 +288,7 @@ namespace OpenMobile.Graphics
         private float dpi=1F;
         public void Initialize(int screen)
         {
+            #if LINUX
             if (Platform.Factory.IsEmbedded)
             {
                 version = ES11.Raw.GetString(OpenMobile.Graphics.ES11.StringName.Version);
@@ -296,6 +297,7 @@ namespace OpenMobile.Graphics
                 renderer = ES11.Raw.GetString(OpenMobile.Graphics.ES11.StringName.Renderer);
             }
             else
+            #endif
             {
                 version = Raw.GetString(StringName.Version);
                 if (version.Length < 3)

@@ -124,7 +124,7 @@ namespace OpenMobile
         int volScreen = -1;
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel p = new OMPanel("");
+            OMPanel p = new OMPanel();
             theHost = host;
             manager = new ScreenManager(host.ScreenCount);
             tick.BeginInit();

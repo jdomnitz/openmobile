@@ -93,8 +93,8 @@ namespace OpenMobile
                 try { runningOnX11 = OpenMobile.Platform.X11.API.DefaultDisplay != IntPtr.Zero; }
                 catch { }
             }
-            #endif
             runningOnEmbedded = OpenMobile.Platform.Egl.Egl.IsSupported;
+            #endif
         }
 
         #endregion

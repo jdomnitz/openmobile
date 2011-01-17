@@ -444,6 +444,7 @@ namespace OpenMobile.Platform.Windows
         /// </summary>
         /// <param name="hwnd"></param>
         /// <returns></returns>
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll")]
         internal static extern IntPtr GetDC(IntPtr hwnd);
 
@@ -457,6 +458,7 @@ namespace OpenMobile.Platform.Windows
         /// <param name="hwnd"></param>
         /// <param name="DC"></param>
         /// <returns></returns>
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool ReleaseDC(IntPtr hwnd, IntPtr DC);
@@ -464,12 +466,13 @@ namespace OpenMobile.Platform.Windows
         #endregion
 
         #region ChoosePixelFormat
-
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("gdi32.dll")]
         internal static extern int ChoosePixelFormat(IntPtr dc, ref PixelFormatDescriptor pfd);
 
         #endregion
 
+        [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("gdi32.dll")]
         internal static extern int DescribePixelFormat(IntPtr deviceContext, int pixel, int pfdSize, ref PixelFormatDescriptor pixelFormat);
 

@@ -60,7 +60,7 @@ namespace OpenMobile
             background.BackgroundType = backgroundStyle.Image;
             background.BackgroundImage = theHost.getSkinImage("Backgrounds|Highway 1", true);
             manager.loadSharedPanel(background);
-            OMPanel p = new OMPanel("");
+            OMPanel p = new OMPanel();
             OMPanel media = new OMPanel("media");
             p.Priority = ePriority.High;
             p.UIPanel = true;

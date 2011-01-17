@@ -256,7 +256,7 @@ namespace OMRadio
 
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel panelMain = new OMPanel("");
+            OMPanel panelMain = new OMPanel();
             theHost = host;
             theHost.OnMediaEvent += new MediaEvent(theHost_OnMediaEvent);
 

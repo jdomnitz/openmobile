@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if LINUX
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -73,9 +73,8 @@ namespace OpenMobile.Platform.Egl
         public void CreateWindowSurface(IntPtr config)
         {
             Surface = Egl.CreateWindowSurface(Display, config, Handle, null);
-            int error = Egl.GetError();
-            if (error != Egl.SUCCESS)
-                throw new Exception(String.Format("[Error] Failed to create EGL window surface, error {0}.", error));
+            if (Surface==IntPtr.Zero)
+                throw new Exception(String.Format("[Error] Failed to create EGL window surface, error {0}.", Egl.GetError()));
         }
 
         //public void CreatePixmapSurface(EGLConfig config)
@@ -129,3 +128,4 @@ namespace OpenMobile.Platform.Egl
         #endregion
     }
 }
+#endif

@@ -64,22 +64,14 @@ namespace OpenMobile.Platform
 
             if (Configuration.RunningOnEmbedded)
             {
-                #if WINDOWS
+                #if false
                 if (Configuration.RunningOnWindows) Embedded = new Egl.EglWinPlatformFactory();
                 #endif
-                #if OSX
-                #if WINDOWS
-                else 
-                #endif
-                if (Configuration.RunningOnMacOS) Embedded = new Egl.EglMacPlatformFactory();
-                #endif
                 #if LINUX
-                #if (WINDOWS||OSX)
+                if (Configuration.RunningOnX11) Embedded = new Egl.EglX11PlatformFactory();
                 else 
                 #endif
-                if (Configuration.RunningOnX11) Embedded = new Egl.EglX11PlatformFactory();
-                #endif
-                else Embedded = new UnsupportedPlatform();
+                Embedded = new UnsupportedPlatform();
             }
             else
                 Embedded = new UnsupportedPlatform();

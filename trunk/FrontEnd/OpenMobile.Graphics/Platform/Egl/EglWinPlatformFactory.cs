@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-#if WINDOWS
+#if false
 using System;
 using System.Collections.Generic;
 using System.Text;

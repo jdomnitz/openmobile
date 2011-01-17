@@ -132,7 +132,6 @@
     <Compile Include="Platform\Egl\Egl.cs" />
     <Compile Include="Platform\Egl\EglContext.cs" />
     <Compile Include="Platform\Egl\EglGraphicsMode.cs" />
-    <Compile Include="Platform\Egl\EglMacPlatformFactory.cs" />
     <Compile Include="Platform\Egl\EglWindowInfo.cs" />
     <Compile Include="Platform\Egl\EglWinPlatformFactory.cs" />
     <Compile Include="Platform\Egl\EglX11PlatformFactory.cs" />
