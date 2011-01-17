@@ -12,13 +12,13 @@ namespace OpenMobile.Platform.Windows
         public static 
         IntPtr CreateContext(IntPtr hDc)
         {
-            return Delegates.wglCreateContext((IntPtr)hDc);
+            return Delegates.wglCreateContext(hDc);
         }
 
         public static 
         Boolean DeleteContext(IntPtr oldContext)
         {
-            return Delegates.wglDeleteContext((IntPtr)oldContext);
+            return Delegates.wglDeleteContext(oldContext);
         }
 
         public static 
@@ -30,19 +30,19 @@ namespace OpenMobile.Platform.Windows
         public static 
         Boolean MakeCurrent(IntPtr hDc, IntPtr newContext)
         {
-            return Delegates.wglMakeCurrent((IntPtr)hDc, (IntPtr)newContext);
+            return Delegates.wglMakeCurrent(hDc, newContext);
         }
 
         public static 
         Boolean CopyContext(IntPtr hglrcSrc, IntPtr hglrcDst, UInt32 mask)
         {
-            return Delegates.wglCopyContext((IntPtr)hglrcSrc, (IntPtr)hglrcDst, (UInt32)mask);
+            return Delegates.wglCopyContext(hglrcSrc, hglrcDst, mask);
         }
 
         public static 
         Boolean CopyContext(IntPtr hglrcSrc, IntPtr hglrcDst, Int32 mask)
         {
-            return Delegates.wglCopyContext((IntPtr)hglrcSrc, (IntPtr)hglrcDst, (UInt32)mask);
+            return Delegates.wglCopyContext(hglrcSrc, hglrcDst, (UInt32)mask);
         }
 
         public static 
@@ -52,7 +52,7 @@ namespace OpenMobile.Platform.Windows
             {
                 fixed (PixelFormatDescriptor* pPfd_ptr = pPfd)
                 {
-                    return Delegates.wglChoosePixelFormat((IntPtr)hDc, (PixelFormatDescriptor*)pPfd_ptr);
+                    return Delegates.wglChoosePixelFormat(hDc, (PixelFormatDescriptor*)pPfd_ptr);
                 }
             }
         }
@@ -64,7 +64,7 @@ namespace OpenMobile.Platform.Windows
             {
                 fixed (PixelFormatDescriptor* pPfd_ptr = &pPfd)
                 {
-                    return Delegates.wglChoosePixelFormat((IntPtr)hDc, (PixelFormatDescriptor*)pPfd_ptr);
+                    return Delegates.wglChoosePixelFormat(hDc, (PixelFormatDescriptor*)pPfd_ptr);
                 }
             }
         }
@@ -73,7 +73,7 @@ namespace OpenMobile.Platform.Windows
         public static 
         unsafe int ChoosePixelFormat(IntPtr hDc, PixelFormatDescriptor* pPfd)
         {
-            return Delegates.wglChoosePixelFormat((IntPtr)hDc, (PixelFormatDescriptor*)pPfd);
+            return Delegates.wglChoosePixelFormat(hDc, pPfd);
         }
 
 
@@ -84,7 +84,7 @@ namespace OpenMobile.Platform.Windows
             {
                 fixed (PixelFormatDescriptor* ppfd_ptr = ppfd)
                 {
-                    return Delegates.wglDescribePixelFormat((IntPtr)hdc, (int)ipfd, (UInt32)cjpfd, (PixelFormatDescriptor*)ppfd_ptr);
+                    return Delegates.wglDescribePixelFormat(hdc, ipfd, cjpfd, (PixelFormatDescriptor*)ppfd_ptr);
                 }
             }
         }
@@ -96,7 +96,7 @@ namespace OpenMobile.Platform.Windows
             {
                 fixed (PixelFormatDescriptor* ppfd_ptr = ppfd)
                 {
-                    return Delegates.wglDescribePixelFormat((IntPtr)hdc, (int)ipfd, (UInt32)cjpfd, (PixelFormatDescriptor*)ppfd_ptr);
+                    return Delegates.wglDescribePixelFormat(hdc, ipfd, (UInt32)cjpfd, (PixelFormatDescriptor*)ppfd_ptr);
                 }
             }
         }
@@ -109,7 +109,7 @@ namespace OpenMobile.Platform.Windows
             {
                 fixed (PixelFormatDescriptor* ppfd_ptr = &ppfd)
                 {
-                    return Delegates.wglDescribePixelFormat((IntPtr)hdc, (int)ipfd, (UInt32)cjpfd, (PixelFormatDescriptor*)ppfd_ptr);
+                    return Delegates.wglDescribePixelFormat(hdc, ipfd, cjpfd, (PixelFormatDescriptor*)ppfd_ptr);
                 }
             }
         }
@@ -121,7 +121,7 @@ namespace OpenMobile.Platform.Windows
             {
                 fixed (PixelFormatDescriptor* ppfd_ptr = &ppfd)
                 {
-                    return Delegates.wglDescribePixelFormat((IntPtr)hdc, (int)ipfd, (UInt32)cjpfd, (PixelFormatDescriptor*)ppfd_ptr);
+                    return Delegates.wglDescribePixelFormat(hdc, ipfd, (UInt32)cjpfd, (PixelFormatDescriptor*)ppfd_ptr);
                 }
             }
         }

@@ -295,6 +295,18 @@ namespace OpenMobile
             err += ("\r\nSource: " + e.Source);
             err += ("\r\nStack Trace: \r\n" + e.StackTrace);
             err += ("\r\n");
+            int failsafe = 0;
+            while (e.InnerException != null)
+            {
+                e = e.InnerException;
+                err += ("Inner Exception: " + e.Message);
+                err += ("\r\nSource: " + e.Source);
+                err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+                err += ("\r\n");
+                failsafe++;
+                if (failsafe == 4)
+                    break;
+            }
             return err;
         }
         [STAThread]
