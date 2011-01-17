@@ -39,7 +39,7 @@ namespace OpenMobile.Platform.Windows
     {
         #region Fields
 
-        readonly List<GraphicsMode> modes = new List<GraphicsMode>();
+        List<GraphicsMode> modes = new List<GraphicsMode>();
         static readonly object SyncRoot = new object();
 
         #endregion
