@@ -54,7 +54,7 @@ namespace Music
             level = new int[theHost.ScreenCount];
             abortJob = new bool[theHost.ScreenCount];
             Artists = new List<string>[theHost.ScreenCount];
-            OMPanel p = new OMPanel("");
+            OMPanel p = new OMPanel();
             imageItem mid = theHost.getSkinImage("MidButton");
             imageItem midHL = theHost.getSkinImage("MidButton_HL");
             imageItem midSL = theHost.getSkinImage("MidButton_Selected"); 

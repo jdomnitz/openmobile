@@ -60,7 +60,7 @@ namespace Networking
             theHost = host;
             manager = new ScreenManager(theHost.ScreenCount);
             host.OnWirelessEvent += new WirelessEvent(host_OnWirelessEvent);
-            OMPanel p = new OMPanel("");
+            OMPanel p = new OMPanel();
             OMBasicShape border=new OMBasicShape(20,110,620,410);
             border.CornerRadius=15;
             border.Shape=shapes.RoundedRectangle;

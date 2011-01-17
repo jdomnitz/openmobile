@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if LINUX
 using System;
 
 namespace OpenMobile.Graphics.ES11
@@ -1428,3 +1428,4 @@ namespace OpenMobile.Graphics.ES11
     }
 
 }
+#endif

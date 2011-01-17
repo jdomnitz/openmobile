@@ -49,7 +49,7 @@ public sealed class MainMenu : IHighLevel
         //Heres where the magic happens
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel mainPanel = new OMPanel("");
+            OMPanel mainPanel = new OMPanel();
 
             //We save a reference to the plugin host for use later
             theHost = host;

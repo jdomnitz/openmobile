@@ -360,7 +360,7 @@ namespace OpenMobile.Controls
                 forgotten = value;
             }
         }
-        private string name=string.Empty;
+        private string name;
         /// <summary>
         /// The name for this panel
         /// </summary>
@@ -393,6 +393,7 @@ namespace OpenMobile.Controls
         /// </summary>
         public OMPanel()
         {
+            this.name = string.Empty;
         }
         /// <summary>
         /// Create a new panel with an given name

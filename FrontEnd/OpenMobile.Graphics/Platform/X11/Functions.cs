@@ -218,7 +218,7 @@ namespace OpenMobile.Platform.X11
         [DllImport("libX11", EntryPoint = "XDefaultVisual")]
         public extern static IntPtr XDefaultVisual(IntPtr display, int screen_number);
 
-        [DllImport("libX11", EntryPoint = "XDefaultDepth")]//, CLSCompliant(false)]
+        [DllImport("libX11", EntryPoint = "XDefaultDepth")]
         public extern static uint XDefaultDepth(IntPtr display, int screen_number);
 
         [DllImport("libX11", EntryPoint = "XDefaultScreen")]

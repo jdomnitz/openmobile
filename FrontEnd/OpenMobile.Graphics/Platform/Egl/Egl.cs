@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 #endregion
-
+#if LINUX
 using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
@@ -313,3 +313,4 @@ namespace OpenMobile.Platform.Egl
     }
 #pragma warning restore 0169
 }
+#endif

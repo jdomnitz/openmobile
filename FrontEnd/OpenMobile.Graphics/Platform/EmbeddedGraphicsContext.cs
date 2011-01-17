@@ -27,7 +27,7 @@
 
 using System;
 using OpenMobile.Graphics;
-
+#if LINUX
 namespace OpenMobile.Platform
 {
     // Provides the foundation for all desktop IGraphicsContext implementations.
@@ -39,3 +39,4 @@ namespace OpenMobile.Platform
         }
     }
 }
+#endif

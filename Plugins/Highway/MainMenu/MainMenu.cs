@@ -50,7 +50,7 @@ namespace OpenMobile
         {
             theHost=host;
             manager = new ScreenManager(theHost.ScreenCount);
-            OMPanel p = new OMPanel("");
+            OMPanel p = new OMPanel();
             MainMenuButton t1 = new MainMenuButton(146, 143);
             t1.Image = theHost.getSkinImage("HomeButton");
             t1.FocusImage = theHost.getSkinImage("HomeButton_HL");
