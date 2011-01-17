@@ -46,7 +46,7 @@ namespace OpenMobile.Platform.Egl
                 Egl.RED_SIZE, color.Red, 
                 Egl.GREEN_SIZE, color.Green, 
                 Egl.BLUE_SIZE, color.Blue,
-                //Egl.ALPHA_SIZE, color.Alpha,
+                Egl.ALPHA_SIZE, color.Alpha,
 
                 //Egl.DEPTH_SIZE,  0,
                 //Egl.STENCIL_SIZE, stencil > 0 ? stencil : 0,
@@ -68,10 +68,7 @@ namespace OpenMobile.Platform.Egl
             {
                 attribList[1] = Egl.OPENGL_ES_BIT | Egl.OPENVG_BIT;
                 if ((!Egl.ChooseConfig(display, attribList, configs, 1, out num_configs)) || (num_configs == 0))
-                {
-                    Egl.GetConfigs(display, null, 0, out num_configs);
-                    throw new Exception(String.Format("Failed to retrieve GraphicsMode configurations, error {0}, {1} configs available", Egl.GetError(), num_configs));
-                }
+                    configs[0]=manuallySelectGraphicsMode(display);
             }
             int r, g, b, a, d;
             // See what we really got
@@ -89,6 +86,37 @@ namespace OpenMobile.Platform.Egl
             Egl.GetConfigAttrib(display, active_config, Egl.SAMPLES, out samples);
 
             return new GraphicsMode(active_config, new ColorFormat(r, g, b, a), d, s, sample_buffers > 0 ? samples : 0, 0, 2, false);
+        }
+
+        private IntPtr manuallySelectGraphicsMode(IntPtr display)
+        {
+            int num_configs;
+            if (!Egl.GetConfigs(display, null, 0, out num_configs)||(num_configs==0))
+                throw new Exception(String.Format("Failed to retrieve GraphicsMode configurations, error {0}", Egl.GetError()));
+            IntPtr[] tmp = new IntPtr[num_configs];
+            IntPtr fallback=IntPtr.Zero;
+            Egl.GetConfigs(display, tmp, tmp.Length, out num_configs);
+            int r, g, b, a;
+            foreach (IntPtr config in tmp)
+            {
+                Egl.GetConfigAttrib(display, config, Egl.RED_SIZE, out r);
+                if (r < 8)
+                    continue;
+                Egl.GetConfigAttrib(display, config, Egl.GREEN_SIZE, out g);
+                if (g < 8)
+                    continue;
+                Egl.GetConfigAttrib(display, config, Egl.BLUE_SIZE, out b);
+                if (b < 8)
+                    continue;
+                fallback = config;
+                Egl.GetConfigAttrib(display, config, Egl.ALPHA_SIZE, out a);
+                if (a >= 8)
+                    return config;
+            }
+            if (fallback == IntPtr.Zero)
+                return tmp[0];
+            else
+                return fallback;
         }
 
         #endregion
