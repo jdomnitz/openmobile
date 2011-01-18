@@ -32,11 +32,11 @@ using OpenMobile.Graphics;
 
 namespace OpenMobile.Platform.Egl
 {
-    class EglGraphicsMode : IGraphicsMode
+    class EglGraphicsMode //: IGraphicsMode
     {
         #region IGraphicsMode Members
 
-        public GraphicsMode SelectGraphicsMode(ColorFormat color, int depth, int stencil, int samples, ColorFormat accum, int buffers, bool stereo)
+        public GraphicsMode SelectGraphicsMode(IntPtr display, ColorFormat color, int depth, int stencil, int samples, ColorFormat accum, int buffers, bool stereo)
         {
             IntPtr[] configs = new IntPtr[1];
             int[] attribList = new int[] 
@@ -56,12 +56,6 @@ namespace OpenMobile.Platform.Egl
 
                 Egl.NONE,
             };
-
-            // Todo: what if we don't wish to use the default display?
-            IntPtr display = Egl.GetDisplay(IntPtr.Zero);
-            int major, minor;
-            if (!Egl.Initialize(display, out major, out minor))
-                throw new Exception(String.Format("Failed to initialize display connection, error {0}", Egl.GetError()));
 
             int num_configs;
             if ((!Egl.ChooseConfig(display, attribList, configs, 1, out num_configs)) || (num_configs == 0))

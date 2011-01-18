@@ -526,7 +526,11 @@ namespace OpenMobile.Controls
                 containedControls.RemoveAt(i);
             }
         }
-
+        /// <summary>
+        /// Hit test the panel and return the resulting control
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
         public OMControl controlAtPoint(Point p)
         {
             for (int i = containedControls.Count - 1; i >= 0;i--)
@@ -534,7 +538,10 @@ namespace OpenMobile.Controls
                     return containedControls[i];
             return null;
         }
-
+        /// <summary>
+        /// Returns the panel name
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             if (this.name == null)

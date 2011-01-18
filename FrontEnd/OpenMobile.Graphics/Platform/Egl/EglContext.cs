@@ -60,7 +60,7 @@ namespace OpenMobile.Platform.Egl
 
             WindowInfo = window;
 
-            Mode = new EglGraphicsMode().SelectGraphicsMode(mode.ColorFormat, mode.Depth, mode.Stencil, mode.Samples, mode.AccumulatorFormat, mode.Buffers, mode.Stereo);
+            Mode = new EglGraphicsMode().SelectGraphicsMode(window.Display, mode.ColorFormat, mode.Depth, mode.Stencil, mode.Samples, mode.AccumulatorFormat, mode.Buffers, mode.Stereo);
             if (!Mode.Index.HasValue)
                 throw new Exception("Invalid or unsupported GraphicsMode.");
             IntPtr config = Mode.Index.Value;
