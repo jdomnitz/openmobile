@@ -32,7 +32,6 @@ namespace OpenMobile.Framework
     /// </summary>
     public static class Widget
     {
-        private static List<imageItem> cache;
         /// <summary>
         /// Generate a widget image
         /// </summary>
