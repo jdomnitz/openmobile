@@ -46,89 +46,89 @@ namespace OpenMobile.Platform.X11
         {
             if (XInputMissing)
                 return;
-            try
+            IntPtr Display = Functions.XOpenDisplay(IntPtr.Zero);
+            int count = 0;
+            if (IsSupported(Display))
             {
-                IntPtr Display = Functions.XOpenDisplay(IntPtr.Zero);
-                int count = 0;
-                if (IsSupported(Display))
+                IntPtr tmp = Functions.XIQueryDevice(Display, 0, out count);
+				count *= 28;
+				byte[] buf=new byte[count];
+				Marshal.Copy(tmp,buf,0,count);
+                Functions.XIFreeDeviceInfo(tmp);
+                int dummy = 0;
+                for (int pos = 0; pos < count; pos+=28)
                 {
-                    IntPtr tmp = Functions.XIQueryDevice(Display, 0, out count);
-                    Functions.XIFreeDeviceInfo(tmp);
-                    int dummy = 0;
-                    for (int i = 2; i < count + 2; i++)
+					int i=buf[pos];
+                    IntPtr devPtr = Functions.XIQueryDevice(Display, i, out dummy);
+                    XIDeviceInfo devs = (XIDeviceInfo)Marshal.PtrToStructure(devPtr, typeof(XIDeviceInfo));
+                    XIValuatorInfo xInfo = new XIValuatorInfo();
+                    XIValuatorInfo yInfo = new XIValuatorInfo();
+                    if (devs.num_classes > 0)
                     {
-                        IntPtr devPtr = Functions.XIQueryDevice(Display, i, out dummy);
-                        XIDeviceInfo devs = (XIDeviceInfo)Marshal.PtrToStructure(devPtr, typeof(XIDeviceInfo));
-                        XIValuatorInfo xInfo = new XIValuatorInfo();
-                        XIValuatorInfo yInfo = new XIValuatorInfo();
-                        if (devs.num_classes > 0)
+                        IntPtr[] classPtrs = new IntPtr[devs.num_classes];
+                        Marshal.Copy(devs.type, classPtrs, 0, devs.num_classes);
+                        for (int j = 0; j < devs.num_classes; j++)
                         {
-                            IntPtr[] classPtrs = new IntPtr[devs.num_classes];
-                            Marshal.Copy(devs.type, classPtrs, 0, devs.num_classes);
-                            for (int j = 0; j < devs.num_classes; j++)
+                            XIAnyClassInfo info = (XIAnyClassInfo)Marshal.PtrToStructure(classPtrs[j], typeof(XIAnyClassInfo));
+                            if (info.type == 2)
                             {
-                                XIAnyClassInfo info = (XIAnyClassInfo)Marshal.PtrToStructure(classPtrs[j], typeof(XIAnyClassInfo));
-                                if (info.type == 2)
+                                XIValuatorInfo valInfo = (XIValuatorInfo)Marshal.PtrToStructure(classPtrs[j], typeof(XIValuatorInfo));
+                                switch (Functions.XGetAtomName(Display, valInfo.label))
                                 {
-                                    XIValuatorInfo valInfo = (XIValuatorInfo)Marshal.PtrToStructure(classPtrs[j], typeof(XIValuatorInfo));
-                                    switch (Functions.XGetAtomName(Display, valInfo.label))
-                                    {
-                                        case "Rel X":
-                                        case "Abs X":
-                                            xInfo = valInfo;
-                                            break;
-                                        case "Rel Y":
-                                        case "Abs Y":
-                                            yInfo = valInfo;
-                                            break;
-                                    }
+                                    case "Rel X":
+                                    case "Abs X":
+                                        xInfo = valInfo;
+                                        break;
+                                    case "Rel Y":
+                                    case "Abs Y":
+                                        yInfo = valInfo;
+                                        break;
                                 }
                             }
                         }
-                        if (devs.enabled)
-                        {
-                            if (devs.use == 3)
-                            {
-                                MouseDevice dev = new MouseDevice();
-                                dev.Description = devs.name;
-                                dev.DeviceID = new IntPtr(i);
-                                dev.Instance = mice.Count;
-                                if (xInfo.label > 0)
-                                {
-                                    dev.minx = xInfo.min;
-                                    dev.maxx = xInfo.max;
-                                    dev.Absolute = xInfo.mode != 0;
-                                }
-                                if (yInfo.label > 0)
-                                {
-                                    dev.miny = yInfo.min;
-                                    dev.maxy = yInfo.max;
-                                }
-                                if (!rawids.ContainsKey(i))
-                                {
-                                    mice.Add(dev);
-                                    rawids.Add(i, mice.Count - 1);
-                                }
-                            }
-                            else if (devs.use == 4)
-                            {
-                                KeyboardDevice dev = new KeyboardDevice();
-                                dev.Description = devs.name;
-                                dev.DeviceID = new IntPtr(i);
-                                dev.Instance = keyboards.Count;
-                                if (!rawids.ContainsKey(i))
-                                {
-                                    keyboards.Add(dev);
-                                    rawids.Add(i, keyboards.Count - 1);
-                                }
-                            }
-                        }
-                        Functions.XIFreeDeviceInfo(devPtr);
                     }
-                    new Thread(delegate() { ProcessEvents(); }).Start();
+                    if (devs.enabled)
+                    {
+                        if (devs.use == 3)
+                        {
+                            MouseDevice dev = new MouseDevice();
+                            dev.Description = devs.name;
+                            dev.DeviceID = new IntPtr(i);
+                            dev.Instance = mice.Count;
+                            if (xInfo.label > 0)
+                            {
+                                dev.minx = xInfo.min;
+                                dev.maxx = xInfo.max;
+                                dev.Absolute = xInfo.mode != 0;
+                            }
+                            if (yInfo.label > 0)
+                            {
+                                dev.miny = yInfo.min;
+                                dev.maxy = yInfo.max;
+                            }
+                            if (!rawids.ContainsKey(i))
+                            {
+                                mice.Add(dev);
+                                rawids.Add(i, mice.Count - 1);
+                            }
+                        }
+                        else if (devs.use == 4)
+                        {
+                            KeyboardDevice dev = new KeyboardDevice();
+                            dev.Description = devs.name;
+                            dev.DeviceID = new IntPtr(i);
+                            dev.Instance = keyboards.Count;
+                            if (!rawids.ContainsKey(i))
+                            {
+                                keyboards.Add(dev);
+                                rawids.Add(i, keyboards.Count - 1);
+                            }
+                        }
+                    }
+                    Functions.XIFreeDeviceInfo(devPtr);
                 }
+                new Thread(delegate() { ProcessEvents(); }).Start();
             }
-            catch (Exception) { return; } //fallback to default device
         }
         // Checks whether XInput2 is supported on the specified display.
         // If a display is not specified, the default display is used.
