@@ -33,6 +33,9 @@ namespace OpenMobile.Controls
     {
         private List<OMControl> containedControls=new List<OMControl>();
         private imageItem background;
+        /// <summary>
+        /// Request a screen refresh
+        /// </summary>
         public event refreshNeeded UpdateThisControl;
 
         /// <summary>
@@ -517,7 +520,9 @@ namespace OpenMobile.Controls
             return -1;
         }
         //***
-
+        /// <summary>
+        /// Clear all contained controls
+        /// </summary>
         public void clear()
         {
             for (int i = containedControls.Count - 1; i >= 0; i--)

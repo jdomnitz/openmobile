@@ -85,7 +85,9 @@ namespace OpenMobile.Controls
                 updateScroll();
             }
         }
-
+        /// <summary>
+        /// Controls drawing mode
+        /// </summary>
         public override eModeType Mode
         {
             get
@@ -422,11 +424,18 @@ namespace OpenMobile.Controls
 
         #region IKeyboard Members
         private bool keyboardFocus;
+        /// <summary>
+        /// We have keyboard focus
+        /// </summary>
+        /// <param name="screen"></param>
         public void KeyboardEnter(int screen)
         {
             keyboardFocus = true;
         }
-
+        /// <summary>
+        /// We lost keyboard focus
+        /// </summary>
+        /// <param name="screen"></param>
         public void KeyboardExit(int screen)
         {
             keyboardFocus = false;
@@ -435,7 +444,14 @@ namespace OpenMobile.Controls
         #endregion
 
         #region IKey Members
-
+        /// <summary>
+        /// Key pressed
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
+        /// <returns></returns>
         public bool KeyDown(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
         {
             if (typeof(IKey).IsInstanceOfType(highlighted) == true)
@@ -448,7 +464,14 @@ namespace OpenMobile.Controls
             highlighted = null;
             return false;
         }
-
+        /// <summary>
+        /// Key released
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="e"></param>
+        /// <param name="WidthScale"></param>
+        /// <param name="HeightScale"></param>
+        /// <returns></returns>
         public bool KeyUp(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
         {
             if (typeof(IKey).IsInstanceOfType(highlighted) == true)

@@ -360,6 +360,10 @@ namespace OpenMobile.Framework
             osVersion = getOS() + " " + Environment.OSVersion.Version.ToString();
             return osVersion;
         }
+        /// <summary>
+        /// Retrieves a unique id for this computer
+        /// </summary>
+        /// <returns></returns>
         public static string getMachineSerial()
         {
             #if WINDOWS

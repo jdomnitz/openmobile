@@ -5,8 +5,17 @@ using System.Threading;
 
 namespace OpenMobile
 {
+    /// <summary>
+    /// Animates controls
+    /// </summary>
     public static class Animator
     {
+        /// <summary>
+        /// Slide the control to the given position
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
         public static void Move(OMControl control, int X,int Y)
         {
             if (control == null)
@@ -15,6 +24,14 @@ namespace OpenMobile
             int ysteps = System.Math.Abs((control.Top - Y) / 50);
             Move(control, X, Y, (xsteps > ysteps) ? xsteps : ysteps, 50);
         }
+        /// <summary>
+        /// Slide the control to the given position
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
+        /// <param name="steps"></param>
+        /// <param name="stepSpeed"></param>
         public static void Move(OMControl control, int X,int Y, int steps, int stepSpeed)
         {
             SafeThread.Asynchronous(delegate()
