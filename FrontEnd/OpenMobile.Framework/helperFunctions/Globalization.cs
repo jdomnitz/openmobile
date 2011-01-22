@@ -58,9 +58,9 @@ namespace OpenMobile.Framework
                 else
                     return System.Math.Round(temp) + " °F";
             else if (celsius == true)
-                return System.Math.Round(Calculation.CtoF(temp))+" °F";
+                return System.Math.Round(Calculation.CtoF(temp)) + " °F";
             else
-                return Calculation.FtoC(temp)+" °C";
+                return Calculation.FtoC(temp) + " °C";
         }
         /// <summary>
         /// Converts to the local unit of distance measurement
@@ -76,7 +76,7 @@ namespace OpenMobile.Framework
                 else
                     return distance + " mi.";
             else if (kilometers == true)
-                return Calculation.convertDistance(distance,distanceTypes.kilometers,distanceTypes.miles) + " mi.";
+                return Calculation.convertDistance(distance, distanceTypes.kilometers, distanceTypes.miles) + " mi.";
             else
                 return Calculation.convertDistance(distance, distanceTypes.miles, distanceTypes.kilometers) + " km.";
         }
@@ -94,7 +94,7 @@ namespace OpenMobile.Framework
                 else
                     return speed + "mph";
             else if (kph == true)
-                return Calculation.convertSpeed(speed,speedTypes.kilometersPerHour,speedTypes.milesPerHour).ToString("0") + "mph";
+                return Calculation.convertSpeed(speed, speedTypes.kilometersPerHour, speedTypes.milesPerHour).ToString("0") + "mph";
             else
                 return Calculation.convertSpeed(speed, speedTypes.milesPerHour, speedTypes.kilometersPerHour).ToString("0") + "kph";
         }
@@ -106,7 +106,7 @@ namespace OpenMobile.Framework
         public static string removePhoneLocalization(string number)
         {
             string ret = String.Empty;
-            for(int i=0;i<number.Length;i++)
+            for (int i = 0; i < number.Length; i++)
                 switch (number[i])
                 {
                     case '0':
@@ -150,33 +150,33 @@ namespace OpenMobile.Framework
                         return long.Parse(removePhoneLocalization(number)).ToString("###-####");
                     else if (number.Length == 10)
                         return long.Parse(removePhoneLocalization(number)).ToString("(###) ###-####");
-                    else if ((number.Length==11)||(number.Length==13))
+                    else if ((number.Length == 11) || (number.Length == 13))
                         return long.Parse(removePhoneLocalization(number)).ToString("+### (###) ###-####");
                     break;
                 case "MX":
-                    if (number.Length==10)
-                        if ((number.StartsWith("55"))||(number.StartsWith("33"))||(number.StartsWith("81")))
+                    if (number.Length == 10)
+                        if ((number.StartsWith("55")) || (number.StartsWith("33")) || (number.StartsWith("81")))
                             return long.Parse(removePhoneLocalization(number)).ToString("(##) ####-####");
                         else
                             return long.Parse(removePhoneLocalization(number)).ToString("(###) ###-####");
                     else
                         return long.Parse(removePhoneLocalization(number)).ToString("+### (###) ###-####");
                 case "GB":
-                    if (number.Length==10)
+                    if (number.Length == 10)
                         return long.Parse(removePhoneLocalization(number)).ToString("(#####) #####");
                     else if (number.Length == 11)
                         return long.Parse(removePhoneLocalization(number)).ToString("(#####) ######");
                     break;
                 case "ES":
-                    if (number.Length==9)
+                    if (number.Length == 9)
                         return long.Parse(removePhoneLocalization(number)).ToString("## ### ## ##");
-                    else if(number.Length==11)
+                    else if (number.Length == 11)
                         return long.Parse(removePhoneLocalization(number)).ToString("+## ## ### ####");
                     break;
                 case "PL":
                     if (number.Length >= 9)
                     {
-                        ret= long.Parse(removePhoneLocalization(number)).ToString("## ## ### ## ##").Trim();
+                        ret = long.Parse(removePhoneLocalization(number)).ToString("## ## ### ## ##").Trim();
                         if (prefix == true)
                             return '+' + ret;
                         else
@@ -184,30 +184,30 @@ namespace OpenMobile.Framework
                     }
                     break;
                 case "NO":
-                    if (number.StartsWith("4")||number.StartsWith("9"))
+                    if (number.StartsWith("4") || number.StartsWith("9"))
                         return long.Parse(removePhoneLocalization(number)).ToString("### ## ###");
                     else
                         return long.Parse(removePhoneLocalization(number)).ToString("## ## ## ##");
                 case "FR":
-                    if (prefix==true)
-                        return '+'+long.Parse(removePhoneLocalization(number)).ToString("### ### ### ###");
+                    if (prefix == true)
+                        return '+' + long.Parse(removePhoneLocalization(number)).ToString("### ### ### ###");
                     else
                         return long.Parse(removePhoneLocalization(number)).ToString("0# ## ## ## ##");
                 case "RU":
-                    if (number.Length==5)
+                    if (number.Length == 5)
                         return long.Parse(removePhoneLocalization(number)).ToString("#-##-##");
-                    else if(number.Length==6)
+                    else if (number.Length == 6)
                         return long.Parse(removePhoneLocalization(number)).ToString("##-##-##");
-                    else if(number.Length==7)
+                    else if (number.Length == 7)
                         return long.Parse(removePhoneLocalization(number)).ToString("###-##-##");
-                    else if(number.Length==10)
+                    else if (number.Length == 10)
                         return long.Parse(removePhoneLocalization(number)).ToString("###.###-##-##");
                     else
                         return long.Parse(removePhoneLocalization(number)).ToString("##.###.###-##-##");
                 case "IN":
                     return long.Parse(removePhoneLocalization(number)).ToString("###-########");
                 case "CN":
-                    if (number.Length==11)
+                    if (number.Length == 11)
                         return long.Parse(removePhoneLocalization(number)).ToString("###-####-####");
                     else
                         return long.Parse(removePhoneLocalization(number)).ToString("####-####");
@@ -218,7 +218,7 @@ namespace OpenMobile.Framework
                         return long.Parse(removePhoneLocalization(number)).ToString("(##) #### ####");
                 case "ZA":
                 case "CH":
-                    if ((number.Length == 9)||(number.Length == 10))
+                    if ((number.Length == 9) || (number.Length == 10))
                         return long.Parse(removePhoneLocalization(number)).ToString("### ### ####");
                     break;
             }
@@ -235,7 +235,7 @@ namespace OpenMobile.Framework
             string ret = System.Globalization.CultureInfo.CurrentCulture.NativeName;
             if (string.IsNullOrEmpty(ret))
                 return null;
-            return ret.Substring(0,ret.IndexOf(" ("));
+            return ret.Substring(0, ret.IndexOf(" ("));
         }
         /// <summary>
         /// Converts local time to UTC time

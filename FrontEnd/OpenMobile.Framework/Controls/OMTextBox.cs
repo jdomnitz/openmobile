@@ -119,7 +119,7 @@ namespace OpenMobile.Controls
                     if (IsAlphabetic(value) == false)
                         return;
                 }
-                if (((flags & textboxFlags.Password) == textboxFlags.Password)&&(value!=null)&&((text!="")||((value.Length==1)))&&((text!=null)&&(value.Contains(text))))
+                if (((flags & textboxFlags.Password) == textboxFlags.Password) && (value != null) && ((text != "") || ((value.Length == 1))) && ((text != null) && (value.Contains(text))))
                     count = 6;
                 textTexture = null;
                 text = value;
@@ -215,10 +215,10 @@ namespace OpenMobile.Controls
                         f.Trimming = System.Drawing.StringTrimming.EllipsisCharacter;
                     else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
                         f.Trimming = System.Drawing.StringTrimming.Word;
-                    if ((textTexture == null)||(count>0))
+                    if ((textTexture == null) || (count > 0))
                     {
                         string tempStr = text;
-                        if (((this.flags & textboxFlags.Password) == textboxFlags.Password)&&(text.Length>0))
+                        if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (text.Length > 0))
                         {
                             tempStr = new String('*', text.Length - 1);
                             if (count > 1)

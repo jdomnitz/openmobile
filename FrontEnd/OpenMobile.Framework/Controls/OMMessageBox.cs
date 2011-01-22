@@ -29,7 +29,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Provides a basic message box control
     /// </summary>
-    public class OMMessageBox:OMLabel,IClickable
+    public class OMMessageBox : OMLabel, IClickable
     {
         /// <summary>
         /// Button Clicked
@@ -38,19 +38,19 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Back color 1
         /// </summary>
-        protected Color backColor1=Color.Blue;
+        protected Color backColor1 = Color.Blue;
         /// <summary>
         /// Back color 2 (gradient)
         /// </summary>
-        protected Color backColor2=Color.DarkBlue;
+        protected Color backColor2 = Color.DarkBlue;
         /// <summary>
         /// Border color
         /// </summary>
-        protected Color borderColor=Color.Black;
+        protected Color borderColor = Color.Black;
         /// <summary>
         /// Border width
         /// </summary>
-        protected float borderWidth=3F;
+        protected float borderWidth = 3F;
         /// <summary>
         /// Fires the buttons OnClick event
         /// </summary>
@@ -75,9 +75,9 @@ namespace OpenMobile.Controls
                 title = value;
                 textTexture = null;
             }
-            get 
+            get
             {
-                return title; 
+                return title;
             }
         }
         float letterHeight;
@@ -118,7 +118,7 @@ namespace OpenMobile.Controls
         /// <param name="top"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public OMMessageBox(int left,int top,int width,int height)
+        public OMMessageBox(int left, int top, int width, int height)
         {
             Left = left;
             Top = top;
@@ -141,11 +141,11 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionOut;
             height += (int)letterHeight;
             Rectangle r = new Rectangle(this.Left, top, this.Width, height);
-            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), Gradient.Vertical), r,20);
+            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), Gradient.Vertical), r, 20);
             g.DrawRoundRectangle(new Pen(borderColor, borderWidth), r, 20);
-            if (textTexture==null)
-                g.GenerateTextTexture(this.Left, top, this.Width, (int)letterHeight, title,this.Font, this.Format, this.TextAlignment, this.Color,this.OutlineColor);
-            g.DrawImage(textTexture, left, top, width, height,tmp);
+            if (textTexture == null)
+                g.GenerateTextTexture(this.Left, top, this.Width, (int)letterHeight, title, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+            g.DrawImage(textTexture, left, top, width, height, tmp);
             top += (int)letterHeight;
             height -= (int)letterHeight;
             base.Render(g, e);

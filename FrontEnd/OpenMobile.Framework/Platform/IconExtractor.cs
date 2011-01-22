@@ -59,7 +59,7 @@ namespace OpenMobile.Framework
                 extract.GetLocation(thePath, 1024, ref tmp1, ref _size, colorDepth, ref flags);
                 extract.Extract(ref bmp);
             }
-            catch (Exception){}
+            catch (Exception) { }
 
 
             //Free the global memory we allocated for the path string
@@ -153,7 +153,7 @@ namespace OpenMobile.Framework
             {
                 SHFILEINFO info = new SHFILEINFO();
                 SHGetFileInfo(path, 0, ref info, (uint)Marshal.SizeOf(info), 0x104);
-                if (info.hIcon!=IntPtr.Zero)
+                if (info.hIcon != IntPtr.Zero)
                     img = Bitmap.FromHicon(info.hIcon);
             }
             return new OImage(img);

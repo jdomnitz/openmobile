@@ -33,7 +33,7 @@ namespace OpenMobile
 
         private static void AnalyzeWorker(string path, bool justInserted)
         {
-            Core.theHost.RaiseStorageEvent(Analyze(path),justInserted, path);
+            Core.theHost.RaiseStorageEvent(Analyze(path), justInserted, path);
         }
 
         public static eMediaType Analyze(string path)
@@ -70,9 +70,11 @@ namespace OpenMobile
                 if (OpenMobile.Media.DeviceInfo.get(path).DriveType == eDriveType.Phone)
                     return eMediaType.Smartphone;
                 if (OpenMobile.Media.DeviceInfo.get(path).DriveType == eDriveType.CDRom)
-					return eMediaType.AudioCD;
+                    return eMediaType.AudioCD;
                 return eMediaType.LocalHardware;
-            }catch(Exception){
+            }
+            catch (Exception)
+            {
                 return eMediaType.LocalHardware;
             };
         }

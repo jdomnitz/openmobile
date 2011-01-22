@@ -26,7 +26,7 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Represents the type of setting to be displayed/set
     /// </summary>
-    public enum SettingTypes 
+    public enum SettingTypes
     {
         /// <summary>
         /// Any type of string based setting
@@ -133,7 +133,7 @@ namespace OpenMobile.Plugin
         {
             if ((CurrentValues == null) || (CurrentValues.Length == 0))
                 return null;
-            if ((screen<0)||(screen>CurrentValues.Length-1))
+            if ((screen < 0) || (screen > CurrentValues.Length - 1))
                 return CurrentValues[0];
             return CurrentValues[screen];
         }
@@ -142,11 +142,11 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="value"></param>
-        public void setInstanceValue(int screen,string value)
+        public void setInstanceValue(int screen, string value)
         {
             if (screen < 0)
                 return;
-            if ((CurrentValues == null)||(CurrentValues.Length==0))
+            if ((CurrentValues == null) || (CurrentValues.Length == 0))
                 CurrentValues = new string[1];
             if (screen >= CurrentValues.Length)
                 if (CurrentValues.Length == 1)
@@ -156,7 +156,7 @@ namespace OpenMobile.Plugin
                 }
                 else
                     Array.Resize<string>(ref CurrentValues, screen + 1);
-            CurrentValues[screen]=value;
+            CurrentValues[screen] = value;
         }
         /// <summary>
         /// Creates a new Text, Numeric, File or Folder Setting
@@ -168,7 +168,7 @@ namespace OpenMobile.Plugin
         /// <exception cref="ArgumentException"></exception>
         public Setting(SettingTypes Type, string Name, string Header, string Description)
         {
-            if ((Type == SettingTypes.MultiChoice)||(Type==SettingTypes.Range))
+            if ((Type == SettingTypes.MultiChoice) || (Type == SettingTypes.Range))
                 throw new ArgumentException("MutiChoice requires Options and Values");
             this.Type = Type;
             this.Name = Name;
@@ -183,7 +183,7 @@ namespace OpenMobile.Plugin
         /// <param name="Header"></param>
         /// <param name="Description"></param>
         /// <param name="Value"></param>
-        public Setting(SettingTypes Type, string Name, string Header, string Description,string Value)
+        public Setting(SettingTypes Type, string Name, string Header, string Description, string Value)
         {
             if ((Type == SettingTypes.MultiChoice) || (Type == SettingTypes.Range))
                 throw new ArgumentException("MutiChoice requires Options and Values");
@@ -221,7 +221,7 @@ namespace OpenMobile.Plugin
         /// <param name="Options"></param>
         /// <param name="Values"></param>
         /// <param name="currentValue"></param>
-        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values,string currentValue)
+        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, List<string> Values, string currentValue)
         {
             this.Type = Type;
             this.Name = Name;
@@ -261,11 +261,11 @@ namespace OpenMobile.Plugin
     /// </summary>
     /// <param name="setting"></param>
     /// <param name="screen"></param>
-    public delegate void SettingChanged(int screen,Setting setting);
+    public delegate void SettingChanged(int screen, Setting setting);
     /// <summary>
     /// A collection of Settings
     /// </summary>
-    public sealed class Settings:List<Setting>
+    public sealed class Settings : List<Setting>
     {
         /// <summary>
         /// Occurs when a setting inside the collection is changed
@@ -276,10 +276,10 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="setting"></param>
         /// <param name="screen"></param>
-        public void changeSetting(int screen,Setting setting)
+        public void changeSetting(int screen, Setting setting)
         {
             if (OnSettingChanged != null)
-                OnSettingChanged(screen,setting);
+                OnSettingChanged(screen, setting);
         }
         /// <summary>
         /// The title for this settings collection

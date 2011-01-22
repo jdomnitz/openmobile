@@ -38,12 +38,12 @@ namespace OpenMobile.helperFunctions
         /// <returns></returns>
         public static Location lookupLocation(string name)
         {
-            Location ret=new Location();
+            Location ret = new Location();
             XmlDocument doc = new XmlDocument();
             string locale = System.Globalization.CultureInfo.CurrentCulture.Name;
-            doc.Load(@"http://where.yahooapis.com/geocode?q=" + Net.Network.urlEncode(name)+"&locale="+locale);
+            doc.Load(@"http://where.yahooapis.com/geocode?q=" + Net.Network.urlEncode(name) + "&locale=" + locale);
             ret.Name = name;
-            foreach(XmlNode n in doc.DocumentElement.ChildNodes)
+            foreach (XmlNode n in doc.DocumentElement.ChildNodes)
             {
                 switch (n.Name)
                 {
@@ -69,7 +69,7 @@ namespace OpenMobile.helperFunctions
                                         ret.Longitude = float.Parse(n2.InnerText);
                                     break;
                                 case "house":
-                                    ret.Street = n2.InnerText +" "+ ret.Street;
+                                    ret.Street = n2.InnerText + " " + ret.Street;
                                     break;
                                 case "street":
                                     ret.Street += n2.InnerText;
@@ -129,7 +129,7 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
-            public string getText(int screen,string pluginname,string panelName)
+            public string getText(int screen, string pluginname, string panelName)
             {
                 return getText(screen, pluginname, new string[] { panelName });
             }
@@ -147,7 +147,7 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string getText(int screen, string pluginname, string panelName, string defaultValue)
             {
-                return getText(screen, pluginname, new string[]{panelName}, defaultValue);
+                return getText(screen, pluginname, new string[] { panelName }, defaultValue);
             }
             /// <summary>
             /// Loads the On Screen Keyboard and then returns the text entered
@@ -161,9 +161,9 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
-            public string getText(int screen,string pluginname,string[] panelNames)
+            public string getText(int screen, string pluginname, string[] panelNames)
             {
-                return getText(screen, pluginname, panelNames,"OSK");
+                return getText(screen, pluginname, panelNames, "OSK");
             }
             /// <summary>
             /// Loads the On Screen Keyboard and then returns the text entered
@@ -171,23 +171,23 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string getPassword(int screen, string pluginname, string[] panelNames, string defaultValue)
             {
-                SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);
+                SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
                 this.screen = screen;
-                
+
                 bool error = false;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
-                error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "PASSWORD|"+defaultValue);
+                error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "PASSWORD|" + defaultValue);
                 wait.Reset();
                 armed = true;
-                host.execute(eFunction.ExecuteTransition,screen.ToString());
+                host.execute(eFunction.ExecuteTransition, screen.ToString());
                 if (!error)
                     wait.WaitOne();
                 host.OnSystemEvent -= ev;
                 if (bail)
                     return null;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
-                foreach(string panelName in panelNames)
+                foreach (string panelName in panelNames)
                     host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
@@ -196,9 +196,9 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
-            public string getText(int screen,string pluginname,string[] panelNames,string defaultValue)
+            public string getText(int screen, string pluginname, string[] panelNames, string defaultValue)
             {
-                SystemEvent ev=new SystemEvent(theHost_OnSystemEvent);
+                SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
                 host.OnSystemEvent += ev;
                 this.screen = screen;
                 bool error = false;
@@ -206,14 +206,14 @@ namespace OpenMobile.helperFunctions
                 error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", defaultValue);
                 wait.Reset();
                 armed = true;
-                host.execute(eFunction.ExecuteTransition,screen.ToString());
+                host.execute(eFunction.ExecuteTransition, screen.ToString());
                 if (!error)
                     wait.WaitOne();
                 host.OnSystemEvent -= ev;
                 if (bail)
                     return null;
                 host.execute(eFunction.TransitionFromAny, screen.ToString());
-                foreach(string panelName in panelNames)
+                foreach (string panelName in panelNames)
                     host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
@@ -244,7 +244,7 @@ namespace OpenMobile.helperFunctions
                 {
                     return null;
                 }
-                host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname,panelName);
+                host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname, panelName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 wait.WaitOne();
                 host.OnSystemEvent -= ev;
@@ -255,7 +255,7 @@ namespace OpenMobile.helperFunctions
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
             }
-            void theHost_OnSystemEvent(eFunction function, string arg1, string arg2,string arg3)
+            void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
             {
                 if (function == eFunction.userInputReady)
                 {
@@ -268,7 +268,7 @@ namespace OpenMobile.helperFunctions
                         }
                     }
                 }
-                else if ((function == eFunction.TransitionFromAny)&&(int.Parse(arg1)==screen))
+                else if ((function == eFunction.TransitionFromAny) && (int.Parse(arg1) == screen))
                 {
                     if (armed)
                     {
@@ -286,7 +286,7 @@ namespace OpenMobile.helperFunctions
             string thePath = null;
             IPluginHost host;
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
-            int screen=-1;
+            int screen = -1;
 
             /// <summary>
             /// Initializes the Directory Browser class
@@ -311,7 +311,7 @@ namespace OpenMobile.helperFunctions
             /// Loads a file selection plugin
             /// </summary>
             /// <returns></returns>
-            public string getFile(int screen,string pluginName,string panelName,string startPath)
+            public string getFile(int screen, string pluginName, string panelName, string startPath)
             {
                 if (host == null)
                     return null;
@@ -319,11 +319,11 @@ namespace OpenMobile.helperFunctions
                 host.OnSystemEvent += ev;
                 wait.Reset();
                 this.screen = screen;
-                if (host.execute(eFunction.TransitionToPanel, screen.ToString(), "OMDir",startPath) == false)
+                if (host.execute(eFunction.TransitionToPanel, screen.ToString(), "OMDir", startPath) == false)
                 {
                     return null;
                 }
-                host.execute(eFunction.TransitionFromPanel, screen.ToString(),pluginName);
+                host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginName);
                 host.execute(eFunction.ExecuteTransition, screen.ToString());
                 wait.WaitOne();
                 host.OnSystemEvent -= ev;
@@ -337,7 +337,7 @@ namespace OpenMobile.helperFunctions
             /// <param name="pluginName"></param>
             /// <param name="panelName"></param>
             /// <returns></returns>
-            public string getFolder(int screen, string pluginName,string panelName)
+            public string getFolder(int screen, string pluginName, string panelName)
             {
                 if (host == null)
                     return null;
@@ -345,7 +345,7 @@ namespace OpenMobile.helperFunctions
                 host.OnSystemEvent += ev;
                 wait.Reset();
                 this.screen = screen;
-                if (host.execute(eFunction.TransitionToPanel, screen.ToString(), "OMDir","Folder") == false)
+                if (host.execute(eFunction.TransitionToPanel, screen.ToString(), "OMDir", "Folder") == false)
                 {
                     return null;
                 }
@@ -380,7 +380,7 @@ namespace OpenMobile.helperFunctions
         /// <returns></returns>
         public static byte[] HexStringToByteArray(string Hex)
         {
-            if (Hex==null)
+            if (Hex == null)
                 return new byte[0];
             byte[] Bytes = new byte[Hex.Length / 2];
             int[] HexValue = new int[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
@@ -414,7 +414,7 @@ namespace OpenMobile.helperFunctions
         /// <returns></returns>
         public static List<string> getPluginsOfType(Type t, IPluginHost host)
         {
-            object o=new object();
+            object o = new object();
             host.getData(eGetData.GetPlugins, String.Empty, out o);
             if (o == null)
                 return null;

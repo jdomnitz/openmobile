@@ -29,7 +29,7 @@ namespace OpenMobile.Data
     /// <summary>
     /// For storing Messages
     /// </summary>
-    public sealed class Messages:IDisposable
+    public sealed class Messages : IDisposable
     {
         /// <summary>
         /// A new message delegate
@@ -45,7 +45,8 @@ namespace OpenMobile.Data
         /// Message Flags
         /// </summary>
         [Flags]
-        public enum flags {
+        public enum flags
+        {
             /// <summary>
             /// No Flags
             /// </summary>
@@ -69,23 +70,23 @@ namespace OpenMobile.Data
             /// <summary>
             /// Message is an SMS/MMS
             /// </summary>
-            SMS=16,
+            SMS = 16,
             /// <summary>
             /// SPAM/Junk
             /// </summary>
-            Spam=32,
+            Spam = 32,
             /// <summary>
             /// Message is an outbound message (may or may not be sent)
             /// </summary>
-            Outbound=64,
+            Outbound = 64,
             /// <summary>
             /// Message has been sent (should be combined with outbound)
             /// </summary>
-            Sent=128,
+            Sent = 128,
             /// <summary>
             /// Message is a Draft (not yet sent)
             /// </summary>
-            Draft=256
+            Draft = 256
         };
         /// <summary>
         /// A message
@@ -194,14 +195,15 @@ namespace OpenMobile.Data
         /// <returns>Was the call successful</returns>
         public bool beginReadMessages()
         {
-            try{
+            try
+            {
                 Open();
                 asyncCmd = asyncCon.CreateCommand();
                 asyncCmd.CommandText = "SELECT * FROM Message";
                 asyncReader = asyncCmd.ExecuteReader();
                 return true;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return false;
             }
@@ -217,7 +219,7 @@ namespace OpenMobile.Data
             {
                 Open();
                 asyncCmd = asyncCon.CreateCommand();
-                asyncCmd.CommandText = "SELECT * FROM Message WHERE ID='"+guid+"'";
+                asyncCmd.CommandText = "SELECT * FROM Message WHERE ID='" + guid + "'";
                 asyncReader = asyncCmd.ExecuteReader();
             }
             catch (Exception)
@@ -232,7 +234,8 @@ namespace OpenMobile.Data
         /// </summary>
         /// <param name="storeAlso">Also keep a copy in memory</param>
         /// <returns>A message or null if out of messages</returns>
-        public message readNext(bool storeAlso){
+        public message readNext(bool storeAlso)
+        {
             if (asyncReader.Read() == false)
                 return new message();
             message info = new message();
@@ -260,7 +263,7 @@ namespace OpenMobile.Data
         /// </summary>
         public void Close()
         {
-            if (asyncReader!=null)
+            if (asyncReader != null)
                 asyncReader.Dispose();
             if (asyncCon != null)
                 asyncCon.Dispose();
@@ -280,7 +283,7 @@ namespace OpenMobile.Data
         {
             if (asyncCmd == null)
                 return false;
-            if (((m.messageFlags & flags.Outbound) == flags.Outbound)&&((m.messageFlags & flags.Sent) != flags.Sent))
+            if (((m.messageFlags & flags.Outbound) == flags.Outbound) && ((m.messageFlags & flags.Sent) != flags.Sent))
                 if (newOutboundMessage != null)
                     newOutboundMessage(m);
             StringBuilder query = new StringBuilder("INSERT OR REPLACE INTO Message (");
@@ -309,14 +312,14 @@ namespace OpenMobile.Data
                 query.Append("','");
                 query.Append(General.escape(m.toName));
                 query.Append("','");
-                StringBuilder sb=new StringBuilder();
-                if (m.attachment!=null)
-                    foreach(string s in m.attachment)
+                StringBuilder sb = new StringBuilder();
+                if (m.attachment != null)
+                    foreach (string s in m.attachment)
                     {
                         sb.Append(s);
                         sb.Append('|');
                     }
-                query.Append(General.escape((sb.Length==0) ? "":sb.ToString(0,sb.Length-1)));
+                query.Append(General.escape((sb.Length == 0) ? "" : sb.ToString(0, sb.Length - 1)));
                 query.Append("')");
             }
             asyncCmd.CommandText = query.ToString();

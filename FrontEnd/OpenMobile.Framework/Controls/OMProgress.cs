@@ -205,12 +205,12 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionIn;
             else if (Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
-            g.FillRectangle(new Brush(Color.FromArgb((int)(backColor.A * tmp), backColor)),left,top,width,height);
+            g.FillRectangle(new Brush(Color.FromArgb((int)(backColor.A * tmp), backColor)), left, top, width, height);
             if (vertical == false)
-                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * firstColor.A), firstColor), Color.FromArgb((int)(tmp * secondColor.A), secondColor), Gradient.Horizontal), left,top,(int)(width * ((float)value / maximum)),height);
+                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * firstColor.A), firstColor), Color.FromArgb((int)(tmp * secondColor.A), secondColor), Gradient.Horizontal), left, top, (int)(width * ((float)value / maximum)), height);
             else
                 g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * secondColor.A), secondColor), Color.FromArgb((int)(tmp * firstColor.A), firstColor), Gradient.Vertical), left, top + height - (int)(height * ((float)value / maximum)), width, (int)(height * ((float)value / maximum)));
-            g.DrawRectangle(new Pen(Color.FromArgb((int)(tmp * 255), Color.Black), 1.5F), left,top,width,height);
+            g.DrawRectangle(new Pen(Color.FromArgb((int)(tmp * 255), Color.Black), 1.5F), left, top, width, height);
         }
     }
 }

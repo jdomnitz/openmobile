@@ -87,7 +87,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Returns the index of the currently selected item
         /// </summary>
-        int SelectedIndex{get;set;}
+        int SelectedIndex { get; set; }
         /// <summary>
         /// Sorts the list alphabetically
         /// </summary>

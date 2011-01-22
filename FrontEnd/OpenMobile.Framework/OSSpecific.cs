@@ -84,6 +84,10 @@ namespace OpenMobile.Framework
         /// </summary>
         x64,
         /// <summary>
+        /// 128bit support planned in win8/9
+        /// </summary>
+        x128,
+        /// <summary>
         /// ARM
         /// </summary>
         ARM,
@@ -132,7 +136,7 @@ namespace OpenMobile.Framework
                 theHost = host;
                 theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             }
-            #if WINDOWS
+#if WINDOWS
             if (Configuration.RunningOnWindows)
             {
                 try
@@ -159,53 +163,53 @@ namespace OpenMobile.Framework
                     return false;
                 }
             }
-            #endif
-            #if LINUX
-            #if WINDOWS
-            else 
-            #endif
-            if (Configuration.RunningOnX11)
-            {
-                if (lastHandle == null)
-                    lastHandle = new embedInfo[theHost.ScreenCount];
-                OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
-                IntPtr tmp1; IntPtr tmp2;
-                int count;
-                IntPtr w;
-                OpenMobile.Platform.X11.Functions.XQueryTree(info.Display, info.RootWindow, out tmp1, out tmp2, out w, out count);
-                name = name.ToLower();
-                IntPtr[] windows = new IntPtr[count];
-                Marshal.Copy(w, windows, 0, count);
-                foreach (IntPtr window in windows)
+#endif
+#if LINUX
+#if WINDOWS
+            else
+#endif
+                if (Configuration.RunningOnX11)
                 {
-                    IntPtr windowName = new IntPtr();
-                    OpenMobile.Platform.X11.Functions.XFetchName(info.Display, window, ref windowName);
-                    if (windowName == IntPtr.Zero)
-                        continue;
-                    string localName = Marshal.PtrToStringAuto(windowName);
-                    if (localName.ToLower().Contains(name))
+                    if (lastHandle == null)
+                        lastHandle = new embedInfo[theHost.ScreenCount];
+                    OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
+                    IntPtr tmp1; IntPtr tmp2;
+                    int count;
+                    IntPtr w;
+                    OpenMobile.Platform.X11.Functions.XQueryTree(info.Display, info.RootWindow, out tmp1, out tmp2, out w, out count);
+                    name = name.ToLower();
+                    IntPtr[] windows = new IntPtr[count];
+                    Marshal.Copy(w, windows, 0, count);
+                    foreach (IntPtr window in windows)
                     {
-                        object o;
-                        theHost.getData(eGetData.GetScaleFactors, String.Empty, screen.ToString(), out o);
-                        if (o == null)
-                            return false;
-                        PointF scale = (PointF)o;
-						IntPtr _atom_net_wm_state = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE", false);
-						IntPtr _atom_net_wm_state_maximized_horizontal = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_HORZ", false);
-                		IntPtr _atom_net_wm_state_maximized_vertical = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_VERT", false);
-						OpenMobile.Platform.X11.X11WindowInfo winInf=new OpenMobile.Platform.X11.X11WindowInfo(window,info);
-						OpenMobile.Platform.X11.Functions.SendNetWMMessage(winInf, _atom_net_wm_state, new IntPtr(0), _atom_net_wm_state_maximized_horizontal, _atom_net_wm_state_maximized_vertical);
-						OpenMobile.Platform.X11.Functions.XRaiseWindow(info.Display, window);
-                        OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, window, (int)(position.Width * scale.X), (int)(position.Height * scale.Y));
-                        OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, window, info.WindowHandle, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
-                        OpenMobile.Platform.X11.Functions.XMoveWindow(info.Display, window, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
-                        lastHandle[screen].handle = window;
-                        lastHandle[screen].position = position;
-                        return true;
+                        IntPtr windowName = new IntPtr();
+                        OpenMobile.Platform.X11.Functions.XFetchName(info.Display, window, ref windowName);
+                        if (windowName == IntPtr.Zero)
+                            continue;
+                        string localName = Marshal.PtrToStringAuto(windowName);
+                        if (localName.ToLower().Contains(name))
+                        {
+                            object o;
+                            theHost.getData(eGetData.GetScaleFactors, String.Empty, screen.ToString(), out o);
+                            if (o == null)
+                                return false;
+                            PointF scale = (PointF)o;
+                            IntPtr _atom_net_wm_state = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE", false);
+                            IntPtr _atom_net_wm_state_maximized_horizontal = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_HORZ", false);
+                            IntPtr _atom_net_wm_state_maximized_vertical = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_VERT", false);
+                            OpenMobile.Platform.X11.X11WindowInfo winInf = new OpenMobile.Platform.X11.X11WindowInfo(window, info);
+                            OpenMobile.Platform.X11.Functions.SendNetWMMessage(winInf, _atom_net_wm_state, new IntPtr(0), _atom_net_wm_state_maximized_horizontal, _atom_net_wm_state_maximized_vertical);
+                            OpenMobile.Platform.X11.Functions.XRaiseWindow(info.Display, window);
+                            OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, window, (int)(position.Width * scale.X), (int)(position.Height * scale.Y));
+                            OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, window, info.WindowHandle, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
+                            OpenMobile.Platform.X11.Functions.XMoveWindow(info.Display, window, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
+                            lastHandle[screen].handle = window;
+                            lastHandle[screen].position = position;
+                            return true;
+                        }
                     }
                 }
-            }
-            #endif
+#endif
             return false;
         }
 
@@ -213,7 +217,7 @@ namespace OpenMobile.Framework
         {
             if (function == eFunction.RenderingWindowResized)
             {
-                #if WINDOWS
+#if WINDOWS
                 if (Configuration.RunningOnWindows)
                 {
                     int screen = int.Parse(arg1);
@@ -225,23 +229,23 @@ namespace OpenMobile.Framework
                     if (lastHandle[screen].handle != IntPtr.Zero)
                         Windows.windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(lastHandle[screen].position.X * scale.X + 1.0), (int)(lastHandle[screen].position.Y * scale.Y + 1.0), (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y), 0x20);
                 }
-                #endif
-                #if LINUX
-                #if WINDOWS
-                else 
-                #endif
-                if (Configuration.RunningOnX11)
-                {
-                    int screen = int.Parse(arg1);
-                    object o;
-                    theHost.getData(eGetData.GetScaleFactors, String.Empty, arg1, out o);
-                    if (o == null)
-                        return;
-                    OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
-                    PointF scale = (PointF)o;
-                    OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, lastHandle[screen].handle, (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y));
-                }
-                #endif
+#endif
+#if LINUX
+#if WINDOWS
+                else
+#endif
+                    if (Configuration.RunningOnX11)
+                    {
+                        int screen = int.Parse(arg1);
+                        object o;
+                        theHost.getData(eGetData.GetScaleFactors, String.Empty, arg1, out o);
+                        if (o == null)
+                            return;
+                        OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
+                        PointF scale = (PointF)o;
+                        OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, lastHandle[screen].handle, (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y));
+                    }
+#endif
             }
         }
         /// <summary>
@@ -256,7 +260,7 @@ namespace OpenMobile.Framework
             {
                 if (lastHandle[screen].handle == IntPtr.Zero)
                     return false;
-                #if WINDOWS
+#if WINDOWS
                 if (Configuration.RunningOnWindows)
                 {
                     try
@@ -271,19 +275,19 @@ namespace OpenMobile.Framework
                         return false;
                     }
                 }
-                #endif
-                #if LINUX
-                #if WINDOWS
-                else 
-                #endif
-                if (Configuration.RunningOnX11)
-                {
-                    OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
-                    OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
-                    lastHandle[screen].handle = IntPtr.Zero;
-                    return true;
-                }
-                #endif
+#endif
+#if LINUX
+#if WINDOWS
+                else
+#endif
+                    if (Configuration.RunningOnX11)
+                    {
+                        OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
+                        OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
+                        lastHandle[screen].handle = IntPtr.Zero;
+                        return true;
+                    }
+#endif
             }
             return false;
         }
@@ -313,50 +317,50 @@ namespace OpenMobile.Framework
         {
             if (osVersion != null)
                 return osVersion;
-            #if WINDOWS
+#if WINDOWS
             if (Configuration.RunningOnWindows)
             {
                 osVersion = Windows.getOSVersion();
                 return osVersion;
             }
-            #endif
-            #if LINUX
-            #if WINDOWS
-            else 
-            #endif
-            if (Configuration.RunningOnLinux)
-            {
-                ProcessStartInfo info = new ProcessStartInfo("lsb_release", "-d");
-                info.RedirectStandardOutput = true;
-                info.UseShellExecute = false;
-                info.WindowStyle = ProcessWindowStyle.Hidden;
-                try
+#endif
+#if LINUX
+#if WINDOWS
+            else
+#endif
+                if (Configuration.RunningOnLinux)
                 {
-                    Process p = Process.Start(info);
-                    StreamReader reader = p.StandardOutput;
-                    osVersion = reader.ReadLine().Replace("Description:", String.Empty).Trim();
-                }
-                catch (Exception)
-                {
+                    ProcessStartInfo info = new ProcessStartInfo("lsb_release", "-d");
+                    info.RedirectStandardOutput = true;
+                    info.UseShellExecute = false;
+                    info.WindowStyle = ProcessWindowStyle.Hidden;
                     try
                     {
-                        DirectoryInfo di = new DirectoryInfo("/etc/");
-                        FileInfo[] files = di.GetFiles("*release");
-                        if (files.Length == 0)
-                            files = di.GetFiles("*version");
-                        if (files.Length > 0)
-                            osVersion = File.ReadAllText(files[0].FullName).TrimEnd(new char[] { ' ', '\r', '\n' });
-                        else
-                            osVersion = "Unknown Linux";
+                        Process p = Process.Start(info);
+                        StreamReader reader = p.StandardOutput;
+                        osVersion = reader.ReadLine().Replace("Description:", String.Empty).Trim();
                     }
                     catch (Exception)
                     {
-                        osVersion = "Unknown Linux";
+                        try
+                        {
+                            DirectoryInfo di = new DirectoryInfo("/etc/");
+                            FileInfo[] files = di.GetFiles("*release");
+                            if (files.Length == 0)
+                                files = di.GetFiles("*version");
+                            if (files.Length > 0)
+                                osVersion = File.ReadAllText(files[0].FullName).TrimEnd(new char[] { ' ', '\r', '\n' });
+                            else
+                                osVersion = "Unknown Linux";
+                        }
+                        catch (Exception)
+                        {
+                            osVersion = "Unknown Linux";
+                        }
                     }
+                    return osVersion;
                 }
-                return osVersion;
-            }
-            #endif
+#endif
             osVersion = getOS() + " " + Environment.OSVersion.Version.ToString();
             return osVersion;
         }
@@ -366,12 +370,12 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         public static string getMachineSerial()
         {
-            #if WINDOWS
+#if WINDOWS
             if (Configuration.RunningOnWindows)
             {
                 return Windows.GetVolumeSerial();
             }
-            #endif
+#endif
             return null;
         }
         /// <summary>
@@ -488,29 +492,29 @@ namespace OpenMobile.Framework
         static internal eDriveType getDriveType(string path)
         {
             //OSX - Untested
-            #if (OSX||WINDOWS)            
-            #if LINUX
+#if (OSX||WINDOWS)
+#if LINUX
             if ((Configuration.RunningOnWindows) || (Configuration.RunningOnMacOS))
-            #endif
+#endif
             {
                 DriveType type = new DriveInfo(path).DriveType;
                 if (type == DriveType.Ram)
                     return eDriveType.Fixed;
-                #if WINDOWS
+#if WINDOWS
                 if (Configuration.RunningOnWindows)
                     return Windows.detectType(path, type);
-                #endif
+#endif
                 return (eDriveType)type;
             }
-            #endif
-            #if LINUX
-            #if (OSX||WINDOWS) 
+#endif
+#if LINUX
+#if (OSX||WINDOWS)
             else
-            #endif
+#endif
             {
                 return Linux.detectType(path);
             }
-            #endif
+#endif
         }
 
         /// <summary>
@@ -520,10 +524,10 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         static internal string getVolumeLabel(string path)
         {
-            #if (WINDOWS||OSX)
-            #if LINUX
+#if (WINDOWS||OSX)
+#if LINUX
             if (!Configuration.RunningOnLinux)
-            #endif
+#endif
             {
                 DriveInfo info = null;
                 foreach (DriveInfo i in DriveInfo.GetDrives())
@@ -535,10 +539,10 @@ namespace OpenMobile.Framework
                 {
                     if (info.DriveType == DriveType.CDRom)
                     {
-                        #if WINDOWS
+#if WINDOWS
                         if (Configuration.RunningOnWindows)
                             return Windows.getCDType(path, info);
-                        #endif
+#endif
                         return "CD/DVD Drive (" + info.Name + ")";
                     }
                     else if (info.DriveType == DriveType.Removable)
@@ -555,17 +559,17 @@ namespace OpenMobile.Framework
                         return "Network Drive (" + info.Name + ")";
                     return info.Name;
                 }
-                return info.VolumeLabel.Replace('_',' ') + " (" + info.Name + ")";
+                return info.VolumeLabel.Replace('_', ' ') + " (" + info.Name + ")";
             }
-            #endif
-            #if LINUX
-            #if (WINDOWS||OSX)
+#endif
+#if LINUX
+#if (WINDOWS||OSX)
             else
-            #endif
+#endif
             {
                 return Linux.getVolumeLabel(path);
             }
-            #endif
+#endif
         }
         /// <summary>
         /// Is the program running on the Mono Framework
@@ -581,18 +585,18 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         public static string getFramework()
         {
-            #if (LINUX||OSX)
-            #if WINDOWS
+#if (LINUX||OSX)
+#if WINDOWS
             if (IsMono())
-            #endif
+#endif
                 return getMonoVersion();
-            #endif
-            #if WINDOWS
-            #if (LINUX||OSX)
+#endif
+#if WINDOWS
+#if (LINUX||OSX)
             else
-            #endif
+#endif
                 return Windows.getNetFramework();
-            #endif
+#endif
         }
         private static string getMonoVersion()
         {

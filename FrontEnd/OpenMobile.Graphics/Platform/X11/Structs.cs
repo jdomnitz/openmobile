@@ -768,7 +768,7 @@ namespace OpenMobile.Platform.X11
         ClientMessage = 33,
         MappingNotify = 34,
         LASTEvent,
-        ScreenChangeNotify=73,
+        ScreenChangeNotify = 73,
     }
 
     [Flags]
@@ -1039,7 +1039,7 @@ namespace OpenMobile.Platform.X11
         //BackingStore    (1L<<6)
         //BackingPlanes    (1L<<7)
         //BackingPixel    (1L<<8)
-        OverrideRedirect = 1<<9,
+        OverrideRedirect = 1 << 9,
     }
 
     public enum StackMode
@@ -1632,186 +1632,186 @@ namespace OpenMobile.Platform.X11
         ActivateAccelerator = 14
     }
 
-   public enum ImageFormat
+    public enum ImageFormat
     {
         XYPixmap = 1,
         ZPixmap
     }
 
-   // XInput2 structures
+    // XInput2 structures
 
-	[StructLayout(LayoutKind.Sequential)]
-   struct XIDeviceInfo
-   {
-       public int deviceid;
-	[MarshalAs(UnmanagedType.LPStr)]
-       public string name; // byte*
-       public int use;
-       public int attachment;
-       public bool enabled;
-       public int num_classes;
-       public IntPtr type;
-   }
+    [StructLayout(LayoutKind.Sequential)]
+    struct XIDeviceInfo
+    {
+        public int deviceid;
+        [MarshalAs(UnmanagedType.LPStr)]
+        public string name; // byte*
+        public int use;
+        public int attachment;
+        public bool enabled;
+        public int num_classes;
+        public IntPtr type;
+    }
 #pragma warning disable 0414,0649
-   struct XIAnyClassInfo
-   {
-       public int type;
-       public int sourceid;
-   }
+    struct XIAnyClassInfo
+    {
+        public int type;
+        public int sourceid;
+    }
 
-   struct XIDeviceEvent
-   {
-       public int type;         /* GenericEvent */
-       public IntPtr serial;       /* # of last request processed by server */
-       public bool send_event;   /* true if this came from a SendEvent request */
-       public IntPtr display;     /* Display the event was read from */
-       public int extension;    /* XI extension offset */
-       public XIEventType evtype;
-       public Time time;
-       public int deviceid;
-       public int sourceid;
-       public int detail;
-       public Window root;
-       public Window @event;
-       public Window child;
-       public double root_x;
-       public double root_y;
-       public double event_x;
-       public double event_y;
-       public int flags;
-       public XIButtonState buttons;
-       public XIValuatorState valuators;
-       public XIModifierState mods;
-       public XIGroupState @group;
-   }
+    struct XIDeviceEvent
+    {
+        public int type;         /* GenericEvent */
+        public IntPtr serial;       /* # of last request processed by server */
+        public bool send_event;   /* true if this came from a SendEvent request */
+        public IntPtr display;     /* Display the event was read from */
+        public int extension;    /* XI extension offset */
+        public XIEventType evtype;
+        public Time time;
+        public int deviceid;
+        public int sourceid;
+        public int detail;
+        public Window root;
+        public Window @event;
+        public Window child;
+        public double root_x;
+        public double root_y;
+        public double event_x;
+        public double event_y;
+        public int flags;
+        public XIButtonState buttons;
+        public XIValuatorState valuators;
+        public XIModifierState mods;
+        public XIGroupState @group;
+    }
 
-   struct XIRawEvent
-   {
-       public int type;         /* GenericEvent */
-       public IntPtr serial;       /* # of last request processed by server */
-       public Bool send_event;   /* true if this came from a SendEvent request */
-       public IntPtr display;     /* Display the event was read from */
-       public int extension;    /* XI extension offset */
-       public XIEventType evtype;       /* XI_RawKeyPress, XI_RawKeyRelease, etc. */
-       public Time time;
-       public int deviceid;
-       public int sourceid;
-       public uint detail;
-       public int flags;
-       public XIValuatorState valuators;
-       public IntPtr raw_values; // double        *
-   }
+    struct XIRawEvent
+    {
+        public int type;         /* GenericEvent */
+        public IntPtr serial;       /* # of last request processed by server */
+        public Bool send_event;   /* true if this came from a SendEvent request */
+        public IntPtr display;     /* Display the event was read from */
+        public int extension;    /* XI extension offset */
+        public XIEventType evtype;       /* XI_RawKeyPress, XI_RawKeyRelease, etc. */
+        public Time time;
+        public int deviceid;
+        public int sourceid;
+        public uint detail;
+        public int flags;
+        public XIValuatorState valuators;
+        public IntPtr raw_values; // double        *
+    }
 
-   struct XIButtonState
-   {
-       public int mask_len;
-       public IntPtr mask; // byte*
-   }
+    struct XIButtonState
+    {
+        public int mask_len;
+        public IntPtr mask; // byte*
+    }
 
-   struct XIModifierState
-   {
-       public int @base;
-       public int latched;
-       public int locked;
-       public int effective;
-   }
+    struct XIModifierState
+    {
+        public int @base;
+        public int latched;
+        public int locked;
+        public int effective;
+    }
 
-   struct XIGroupState
-   {
-       public int @base;
-       public int latched;
-       public int locked;
-       public int effective;
-   }
+    struct XIGroupState
+    {
+        public int @base;
+        public int latched;
+        public int locked;
+        public int effective;
+    }
 
-	struct XIValuatorInfo
-	{
-	    public int type;
-	    public int sourceid;
-	    public int number;
-	    public uint label;
-	    public double min;
-	    public double max;
-	    public double val;
-	    public int resolution;
-	    public int mode;
-	}
+    struct XIValuatorInfo
+    {
+        public int type;
+        public int sourceid;
+        public int number;
+        public uint label;
+        public double min;
+        public double max;
+        public double val;
+        public int resolution;
+        public int mode;
+    }
 
-	
-   struct XIValuatorState
-   {
-       public int mask_len;
-       public IntPtr mask; // byte*
-       public IntPtr values; // double*
-   }
 
-   public struct XIEventMask : IDisposable
-   {
-       public int deviceid; // 0 = XIAllDevices, 1 = XIAllMasterDevices
-       int mask_len;
-       unsafe XIEventMasks* mask;
+    struct XIValuatorState
+    {
+        public int mask_len;
+        public IntPtr mask; // byte*
+        public IntPtr values; // double*
+    }
 
-       public XIEventMask(int id, XIEventMasks m)
-       {
-           deviceid = id;
-           mask_len = sizeof(XIEventMasks);
-           unsafe
-           {
-               mask = (XIEventMasks*)Marshal.AllocHGlobal(mask_len);
-               *mask = m;
-           }
-       }
+    public struct XIEventMask : IDisposable
+    {
+        public int deviceid; // 0 = XIAllDevices, 1 = XIAllMasterDevices
+        int mask_len;
+        unsafe XIEventMasks* mask;
 
-       public void Dispose()
-       {
-           unsafe
-           {
-               Marshal.FreeHGlobal(new IntPtr((void*)mask));
-           }
-       }
-   }
+        public XIEventMask(int id, XIEventMasks m)
+        {
+            deviceid = id;
+            mask_len = sizeof(XIEventMasks);
+            unsafe
+            {
+                mask = (XIEventMasks*)Marshal.AllocHGlobal(mask_len);
+                *mask = m;
+            }
+        }
+
+        public void Dispose()
+        {
+            unsafe
+            {
+                Marshal.FreeHGlobal(new IntPtr((void*)mask));
+            }
+        }
+    }
 #pragma warning restore 0414,0649
-   enum XIEventType
-   {
-       DeviceChanged = 1,
-       KeyPress,
-       KeyRelease,
-       ButtonPress,
-       ButtonRelease,
-       Motion,
-       Enter,
-       Leave,
-       FocusIn,
-       FocusOut,
-       HierarchyChanged,
-       PropertyEvent,
-       RawKeyPress,
-       RawKeyRelease,
-       RawButtonPress,
-       RawButtonRelease,
-       RawMotion,
-       LastEvent = RawMotion
-   }
+    enum XIEventType
+    {
+        DeviceChanged = 1,
+        KeyPress,
+        KeyRelease,
+        ButtonPress,
+        ButtonRelease,
+        Motion,
+        Enter,
+        Leave,
+        FocusIn,
+        FocusOut,
+        HierarchyChanged,
+        PropertyEvent,
+        RawKeyPress,
+        RawKeyRelease,
+        RawButtonPress,
+        RawButtonRelease,
+        RawMotion,
+        LastEvent = RawMotion
+    }
 
-   public enum XIEventMasks
-   {
-       DeviceChangedMask = (1 << (int)XIEventType.DeviceChanged),
-       KeyPressMask = (1 << (int)XIEventType.KeyPress),
-       KeyReleaseMask = (1 << (int)XIEventType.KeyRelease),
-       ButtonPressMask = (1 << (int)XIEventType.ButtonPress),
-       ButtonReleaseMask = (1 << (int)XIEventType.ButtonRelease),
-       MotionMask = (1 << (int)XIEventType.Motion),
-       EnterMask = (1 << (int)XIEventType.Enter),
-       LeaveMask = (1 << (int)XIEventType.Leave),
-       FocusInMask = (1 << (int)XIEventType.FocusIn),
-       FocusOutMask = (1 << (int)XIEventType.FocusOut),
-       HierarchyChangedMask = (1 << (int)XIEventType.HierarchyChanged),
-       PropertyEventMask = (1 << (int)XIEventType.PropertyEvent),
-       RawKeyPressMask = (1 << (int)XIEventType.RawKeyPress),
-       RawKeyReleaseMask = (1 << (int)XIEventType.RawKeyRelease),
-       RawButtonPressMask = (1 << (int)XIEventType.RawButtonPress),
-       RawButtonReleaseMask = (1 << (int)XIEventType.RawButtonRelease),
-       RawMotionMask = (1 << (int)XIEventType.RawMotion),
-   }
+    public enum XIEventMasks
+    {
+        DeviceChangedMask = (1 << (int)XIEventType.DeviceChanged),
+        KeyPressMask = (1 << (int)XIEventType.KeyPress),
+        KeyReleaseMask = (1 << (int)XIEventType.KeyRelease),
+        ButtonPressMask = (1 << (int)XIEventType.ButtonPress),
+        ButtonReleaseMask = (1 << (int)XIEventType.ButtonRelease),
+        MotionMask = (1 << (int)XIEventType.Motion),
+        EnterMask = (1 << (int)XIEventType.Enter),
+        LeaveMask = (1 << (int)XIEventType.Leave),
+        FocusInMask = (1 << (int)XIEventType.FocusIn),
+        FocusOutMask = (1 << (int)XIEventType.FocusOut),
+        HierarchyChangedMask = (1 << (int)XIEventType.HierarchyChanged),
+        PropertyEventMask = (1 << (int)XIEventType.PropertyEvent),
+        RawKeyPressMask = (1 << (int)XIEventType.RawKeyPress),
+        RawKeyReleaseMask = (1 << (int)XIEventType.RawKeyRelease),
+        RawButtonPressMask = (1 << (int)XIEventType.RawButtonPress),
+        RawButtonReleaseMask = (1 << (int)XIEventType.RawButtonRelease),
+        RawMotionMask = (1 << (int)XIEventType.RawMotion),
+    }
 }
 #endif

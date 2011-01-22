@@ -62,7 +62,7 @@ namespace OpenMobile
             {
                 about = new OMPanel("About");
                 OMLabel description = new OMLabel(30, 55, 940, 540);
-                description.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap|OpenMobile.Graphics.Alignment.TopCenter;
+                description.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap | OpenMobile.Graphics.Alignment.TopCenter;
                 description.Text = AboutText;
                 about.addControl(description);
             }
@@ -81,16 +81,16 @@ namespace OpenMobile
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
             using (PluginSettings settings = new PluginSettings())
             {
-                graphics.Value=settings.getSetting("UI.MinGraphics");
+                graphics.Value = settings.getSetting("UI.MinGraphics");
                 volume.Value = settings.getSetting("UI.VolumeChangesVisible");
             }
             gl.Add(graphics);
             gl.Add(volume);
-            gl.OnSettingChanged+=new SettingChanged(SettingsChanged);
+            gl.OnSettingChanged += new SettingChanged(SettingsChanged);
             return gl;
         }
 
-        static void SettingsChanged(int screen,Setting setting)
+        static void SettingsChanged(int screen, Setting setting)
         {
             using (PluginSettings s = new PluginSettings())
             {
@@ -117,7 +117,7 @@ namespace OpenMobile
         /// <returns></returns>
         public static Settings getZoneSettings(int instance)
         {
-            return new Settings("Zone "+(instance+1).ToString()+" Settings"); //Not Yet Implemented
+            return new Settings("Zone " + (instance + 1).ToString() + " Settings"); //Not Yet Implemented
         }
     }
 }

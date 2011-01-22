@@ -70,7 +70,7 @@ namespace OpenMobile.Data
     /// <summary>
     /// Weather data
     /// </summary>
-    public sealed class Weather:IDisposable
+    public sealed class Weather : IDisposable
     {
         /// <summary>
         /// Weather Conditions
@@ -80,7 +80,7 @@ namespace OpenMobile.Data
             /// <summary>
             /// Default Value
             /// </summary>
-            NotSet=0,
+            NotSet = 0,
             /// <summary>
             /// Clear Skies
             /// </summary>
@@ -243,11 +243,11 @@ namespace OpenMobile.Data
         /// <param name="day"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException">ArgumentException</exception>
-        public weather readWeather(string location,DateTime day)
+        public weather readWeather(string location, DateTime day)
         {
             SqliteCommand cmd = con.CreateCommand();
             cmd.CommandText = "SELECT * FROM Weather WHERE Code='" + location + "'";
-            if (day!=DateTime.MinValue)
+            if (day != DateTime.MinValue)
                 cmd.CommandText += " AND Date='" + day.ToUniversalTime().ToString() + "'";
             SqliteDataReader reader = cmd.ExecuteReader();
             if (reader.Read() == false)
@@ -258,16 +258,16 @@ namespace OpenMobile.Data
                 w.dewPoint = reader.GetFloat(reader.GetOrdinal("dewPoint"));
                 w.highTemp = reader.GetFloat(reader.GetOrdinal("highTemp"));
                 w.lowTemp = reader.GetFloat(reader.GetOrdinal("lowTemp"));
-                w.temp= reader.GetFloat(reader.GetOrdinal("Temp"));
+                w.temp = reader.GetFloat(reader.GetOrdinal("Temp"));
                 w.dewPoint = reader.GetFloat(reader.GetOrdinal("dewPoint"));
                 w.humidity = reader.GetInt32(reader.GetOrdinal("Humidity"));
                 w.UVIndex = reader.GetInt32(reader.GetOrdinal("UVIndex"));
                 w.windDirection = (eDirection)Enum.Parse(typeof(eDirection), reader.GetString(reader.GetOrdinal("windDirection")));
                 w.windSpeed = reader.GetFloat(reader.GetOrdinal("windSpeed"));
-                w.precipitationPercent=reader.GetInt32(reader.GetOrdinal("precip"));
+                w.precipitationPercent = reader.GetInt32(reader.GetOrdinal("precip"));
                 w.location = location;
                 w.feelsLike = reader.GetFloat(reader.GetOrdinal("feelsLike"));
-                w.date =DateTime.Parse(reader["Date"].ToString()).ToLocalTime();
+                w.date = DateTime.Parse(reader["Date"].ToString()).ToLocalTime();
                 w.contrib = reader["contrib"].ToString();
             }
             reader.Close();
@@ -335,7 +335,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public static void PurgeOld()
         {
-            using(Weather w = new Weather())
+            using (Weather w = new Weather())
                 w.purgeOld();
         }
         /// <summary>
@@ -345,7 +345,7 @@ namespace OpenMobile.Data
         public bool purgeOld()
         {
             SqliteCommand cmd = con.CreateCommand();
-            cmd.CommandText = "DELETE FROM Weather WHERE Date<'" + DateTime.Today+"'";
+            cmd.CommandText = "DELETE FROM Weather WHERE Date<'" + DateTime.Today + "'";
             cmd.ExecuteNonQuery();
             return true;
         }

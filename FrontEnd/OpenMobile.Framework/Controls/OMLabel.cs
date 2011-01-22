@@ -28,7 +28,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A label for displaying text
     /// </summary>
-    public class OMLabel:OMControl
+    public class OMLabel : OMControl
     {
         // Comment by Borte: access modefier changed to protected to allow more access when this control is inherited
         /// <summary>
@@ -76,7 +76,7 @@ namespace OpenMobile.Controls
         /// </summary>
         public OMLabel()
         {
-            height=100;
+            height = 100;
             width = 130;
         }
         /// <summary>
@@ -159,7 +159,7 @@ namespace OpenMobile.Controls
                 {
                     textTexture = null;
                 }
-                
+
             }
         }
         /// <summary>
@@ -209,9 +209,9 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionIn;
             else if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
-            if (textTexture==null)
-                textTexture=g.GenerateTextTexture(left, top, width, height, text, font, textFormat, textAlignment, color, outlineColor);
-            g.DrawImage(textTexture, left, top, width, height,tmp);
+            if (textTexture == null)
+                textTexture = g.GenerateTextTexture(left, top, width, height, text, font, textFormat, textAlignment, color, outlineColor);
+            g.DrawImage(textTexture, left, top, width, height, tmp);
         }
     }
 }

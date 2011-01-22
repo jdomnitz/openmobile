@@ -27,7 +27,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Contains and Renders a collection of OMControls
     /// </summary>
-    public class OMScrollingContainer:OMControl,IMouse,IThrow,IClickable,IKey,IKeyboard,IHighlightable
+    public class OMScrollingContainer : OMControl, IMouse, IThrow, IClickable, IKey, IKeyboard, IHighlightable
     {
         /// <summary>
         /// the collection of controls
@@ -75,12 +75,12 @@ namespace OpenMobile.Controls
             {
                 up = new Point[3];
                 down = new Point[3];
-                up[0] = new Point(left+width - value/2, top);
-                up[1] = new Point(left + width, value+top);
-                up[2] = new Point(left + width - value, value+top);
-                down[0] = new Point(left + width - value / 2, height+top);
-                down[1] = new Point(left + width, height - value+top);
-                down[2] = new Point(left + width - value, height - value+top);
+                up[0] = new Point(left + width - value / 2, top);
+                up[1] = new Point(left + width, value + top);
+                up[2] = new Point(left + width - value, value + top);
+                down[0] = new Point(left + width - value / 2, height + top);
+                down[1] = new Point(left + width, height - value + top);
+                down[2] = new Point(left + width - value, height - value + top);
                 scrollwidth = value;
                 updateScroll();
             }
@@ -169,7 +169,7 @@ namespace OpenMobile.Controls
         {
             control.Parent = this.parent;
             control.UpdateThisControl += raiseUpdate;
-            lock(Controls)
+            lock (Controls)
                 Controls.Add(control);
         }
         /// <summary>
@@ -217,21 +217,21 @@ namespace OpenMobile.Controls
         public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
         {
             g.SetClip(this.toRegion());
-            g.TranslateTransform(left, top-scrolly);
+            g.TranslateTransform(left, top - scrolly);
             lock (Controls)
             {
                 foreach (OMControl c in Controls)
                     if (c.Visible)
                         c.Render(g, e);
             }
-            g.TranslateTransform(-left, -top+scrolly);
+            g.TranslateTransform(-left, -top + scrolly);
             if (scrollwidth > 0)
             {
                 if (area.Height > height)
                 {
-                    Brush white=new Brush(Color.White);
+                    Brush white = new Brush(Color.White);
                     g.FillPolygon(white, up);
-                    g.FillRoundRectangle(white, left+width - scrollwidth, scrolltop, scrollwidth, scrollheight, 7);
+                    g.FillRoundRectangle(white, left + width - scrollwidth, scrolltop, scrollwidth, scrollheight, 7);
                     g.FillPolygon(white, down);
                 }
             }
@@ -253,7 +253,7 @@ namespace OpenMobile.Controls
                 return;
             Point loc = e.Location;
             loc.Scale(WidthScale, HeightScale);
-            loc.Translate(-left, -top+scrolly);
+            loc.Translate(-left, -top + scrolly);
             for (int i = 0; i < Controls.Count; i++)
             {
                 if (Controls[i].toRegion().Contains(loc))
@@ -286,7 +286,7 @@ namespace OpenMobile.Controls
         {
             Point loc = e.Location;
             loc.Scale(WidthScale, HeightScale);
-            loc.Translate(-left, -top+scrolly);
+            loc.Translate(-left, -top + scrolly);
             for (int i = 0; i < Controls.Count; i++)
             {
                 if (Controls[i].toRegion().Contains(loc))
@@ -295,7 +295,7 @@ namespace OpenMobile.Controls
                         highlighted.Mode = eModeType.Normal;
                     highlighted = Controls[i];
                     if (typeof(IMouse).IsInstanceOfType(highlighted))
-                        ((IMouse)highlighted).MouseDown(screen,e,WidthScale,HeightScale);
+                        ((IMouse)highlighted).MouseDown(screen, e, WidthScale, HeightScale);
                     break;
                 }
             }
@@ -311,7 +311,7 @@ namespace OpenMobile.Controls
         {
             Point loc = e.Location;
             loc.Scale(WidthScale, HeightScale);
-            loc.Translate(-left, -top+scrolly);
+            loc.Translate(-left, -top + scrolly);
             for (int i = 0; i < Controls.Count; i++)
             {
                 if (Controls[i].toRegion().Contains(loc))
@@ -345,7 +345,7 @@ namespace OpenMobile.Controls
             if (area.Height <= height)
                 return;
             scrolly -= RelativeDistance.Y;
-            if (scrolly > (area.Height-height))
+            if (scrolly > (area.Height - height))
                 scrolly = (area.Height - height);
             if (scrolly < 0)
                 scrolly = 0;
@@ -358,7 +358,7 @@ namespace OpenMobile.Controls
             {
                 int factor = (height - 6 - 2 * scrollwidth);
                 scrollheight = (int)((height / (float)area.Height) * factor);
-                scrolltop = top+scrollwidth + 3 + (int)((scrolly / (float)area.Height) * factor);
+                scrolltop = top + scrollwidth + 3 + (int)((scrolly / (float)area.Height) * factor);
             }
         }
         /// <summary>
@@ -479,9 +479,9 @@ namespace OpenMobile.Controls
                     return true;
             return false;
         }
-        private bool keyboardNavigate(Key direction,int screen)
+        private bool keyboardNavigate(Key direction, int screen)
         {
-            int best=1000;
+            int best = 1000;
             OMControl b = null;
             if (highlighted == null)
                 if (Controls.Count == 0)
@@ -501,7 +501,7 @@ namespace OpenMobile.Controls
                 if (b == null)
                     return false;
                 b.Mode = eModeType.Highlighted;
-                if (highlighted!=null)
+                if (highlighted != null)
                     highlighted.Mode = eModeType.Normal;
                 if (typeof(IKeyboard).IsInstanceOfType(highlighted))
                     ((IKeyboard)highlighted).KeyboardExit(screen);

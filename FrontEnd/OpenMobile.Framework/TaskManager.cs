@@ -59,7 +59,7 @@ namespace OpenMobile.Threading
             /// <param name="function"></param>
             /// <param name="Priority"></param>
             /// <param name="name"></param>
-            public taskItem(Function function, ePriority Priority,string name)
+            public taskItem(Function function, ePriority Priority, string name)
             {
                 this.function = function;
                 this.Priority = Priority;
@@ -71,7 +71,7 @@ namespace OpenMobile.Threading
         /// </summary>
         public static List<taskItem> Tasks = new List<taskItem>();
         static Thread taskThread;
-        static EventWaitHandle enabled=new EventWaitHandle(false,EventResetMode.ManualReset);
+        static EventWaitHandle enabled = new EventWaitHandle(false, EventResetMode.ManualReset);
         /// <summary>
         /// Add a BackgroundTask to the task list
         /// </summary>
@@ -89,11 +89,11 @@ namespace OpenMobile.Threading
         /// <param name="task"></param>
         /// <param name="taskPriority"></param>
         /// <param name="taskName"></param>
-        public static void QueueTask(Function task,ePriority taskPriority,string taskName)
+        public static void QueueTask(Function task, ePriority taskPriority, string taskName)
         {
-            Tasks.Add(new taskItem(task, taskPriority,taskName));
+            Tasks.Add(new taskItem(task, taskPriority, taskName));
             sync.Set();
-            lock(Tasks)//No particular reason other then its a mutual object to provide thread safety
+            lock (Tasks)//No particular reason other then its a mutual object to provide thread safety
             {
                 if (taskThread == null)
                 {
@@ -147,10 +147,10 @@ namespace OpenMobile.Threading
                 }
                 catch
                 {
-                    if (theHost!=null)
-                        theHost.sendMessage("OMDebug","TaskManager","Task Died: "+current.TaskName);
+                    if (theHost != null)
+                        theHost.sendMessage("OMDebug", "TaskManager", "Task Died: " + current.TaskName);
                 }
-                if (Tasks.Count>0)
+                if (Tasks.Count > 0)
                     sync.Set();
             }
         }

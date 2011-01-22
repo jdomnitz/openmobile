@@ -26,29 +26,29 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Available Shapes
     /// </summary>
-    public enum shapes:byte
+    public enum shapes : byte
     {
         /// <summary>
         /// Draws a Rectangle (or Square)
         /// </summary>
-        Rectangle=0,
+        Rectangle = 0,
         /// <summary>
         /// Draws a Triangle
         /// </summary>
-        Triangle=1,
+        Triangle = 1,
         /// <summary>
         /// Draws an Oval/Ellipse/Circle
         /// </summary>
-        Oval=2,
+        Oval = 2,
         /// <summary>
         /// Draws a Rounded Rectangle
         /// </summary>
-        RoundedRectangle=3
+        RoundedRectangle = 3
     }
     /// <summary>
     /// Allows drawing of basic shapes
     /// </summary>
-    public class OMBasicShape:OMControl
+    public class OMBasicShape : OMControl
     {
         // Start of code added by Borte
         /// <summary>
@@ -100,15 +100,15 @@ namespace OpenMobile.Controls
 
             Brush Fill = new Brush(Color.FromArgb((int)(tmp * fillColor.A), fillColor));
             if (borderSize > 0)
-                BorderPen= new Pen(Color.FromArgb((int)(tmp * borderColor.A), borderColor), borderSize);
+                BorderPen = new Pen(Color.FromArgb((int)(tmp * borderColor.A), borderColor), borderSize);
             // End of code added by Borte
 
             switch (shape)
             {
                 case shapes.Rectangle:
-                    g.FillRectangle(Fill, left,top,width,height);
+                    g.FillRectangle(Fill, left, top, width, height);
                     if (borderSize > 0)
-                        g.DrawRectangle(BorderPen, left,top,width,height);
+                        g.DrawRectangle(BorderPen, left, top, width, height);
                     break;
                 case shapes.Triangle:
                     g.FillPolygon(Fill, triPoint);
@@ -116,9 +116,9 @@ namespace OpenMobile.Controls
                         g.DrawPolygon(BorderPen, triPoint);
                     break;
                 case shapes.Oval:
-                    g.FillEllipse(Fill, left,top,width,height);
+                    g.FillEllipse(Fill, left, top, width, height);
                     if (borderSize > 0)
-                        g.DrawEllipse(BorderPen, left,top,width,height);
+                        g.DrawEllipse(BorderPen, left, top, width, height);
                     break;
                 case shapes.RoundedRectangle:
                     g.FillRoundRectangle(Fill, left, top, width, height, cornerRadius);
@@ -158,7 +158,7 @@ namespace OpenMobile.Controls
                 genTriangle();
             }
         }
-        Point[] triPoint=new Point[0];
+        Point[] triPoint = new Point[0];
         private void genTriangle()
         {
             if (shape == shapes.Triangle)

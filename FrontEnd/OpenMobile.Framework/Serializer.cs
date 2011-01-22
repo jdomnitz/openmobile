@@ -40,10 +40,10 @@ namespace OpenMobile.Framework
         /// <param name="file">The File</param>
         /// <param name="host">The Plugin Host</param>
         /// <returns></returns>
-        public static OMPanel[] deserializePanel(string file,IPluginHost host)
+        public static OMPanel[] deserializePanel(string file, IPluginHost host)
         {
             FileStream f = File.OpenRead(file);
-            OMPanel[] p=deserializePanel(f, host);
+            OMPanel[] p = deserializePanel(f, host);
             f.Close();
             return p;
         }
@@ -55,7 +55,7 @@ namespace OpenMobile.Framework
         public static OMPanel[] deserializePanel(Stream s, IPluginHost host)
         {
             List<OMPanel> panels = new List<OMPanel>();
-            OMPanel p=null;
+            OMPanel p = null;
             XmlTextReader reader = new XmlTextReader(s);
             while (reader.NodeType != XmlNodeType.Element)
                 reader.Read();
@@ -77,7 +77,7 @@ namespace OpenMobile.Framework
                 {
                     info = t.GetProperty(reader.Name);
                 }
-                else if ((reader.NodeType == XmlNodeType.Text) && (reader.Depth == 3)&&(info!=null))
+                else if ((reader.NodeType == XmlNodeType.Text) && (reader.Depth == 3) && (info != null))
                 {
                     if (info.CanWrite == true)
                     {
@@ -95,9 +95,9 @@ namespace OpenMobile.Framework
                             info.SetValue(o, double.Parse(reader.Value), null);
                         else if (info.PropertyType == typeof(Color))
                         {
-                            string[] c=reader.Value.Split(new char[]{','});
-                            if (c.Length==1)
-                                info.SetValue(o,Color.FromName(c[0]),null);
+                            string[] c = reader.Value.Split(new char[] { ',' });
+                            if (c.Length == 1)
+                                info.SetValue(o, Color.FromName(c[0]), null);
                             else
                                 info.SetValue(o, Color.FromArgb(int.Parse(c[0]), int.Parse(c[1]), int.Parse(c[2]), int.Parse(c[3])), null);
                         }

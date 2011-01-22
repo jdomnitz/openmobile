@@ -100,7 +100,7 @@ namespace OpenMobile.Controls
         {
             if (image.image == null)
             {
-                if (image==imageItem.MISSING)
+                if (image == imageItem.MISSING)
                     g.FillRectangle(new Brush(Color.Black), left, top, width, height);
             }
             else

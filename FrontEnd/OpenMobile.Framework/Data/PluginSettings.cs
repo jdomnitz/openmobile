@@ -29,7 +29,7 @@ namespace OpenMobile.Data
     /// <summary>
     /// Stores and retrieves settings from the database
     /// </summary>
-    public sealed class PluginSettings:IDisposable
+    public sealed class PluginSettings : IDisposable
     {
         SqliteConnection asyncCon;
         /// <summary>
@@ -101,7 +101,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public string[] getAllInstances(string name, int screenCount)
         {
-            string[] ret=new string[screenCount];
+            string[] ret = new string[screenCount];
             for (int i = 0; i < screenCount; i++)
                 ret[i] = getSetting(name + ".Screen" + (i + 1).ToString());
             return ret;

@@ -20,7 +20,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The text color when highlighted
         /// </summary>
-        protected Color highlightColor=Color.Blue;
+        protected Color highlightColor = Color.Blue;
 
         /// <summary>
         /// The color the text should turn when the checkbox is highlighted
@@ -96,7 +96,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public override void Render(Graphics.Graphics g,renderingParams e)
+        public override void Render(Graphics.Graphics g, renderingParams e)
         {
             float tmp = 1;
             if (this.Mode == eModeType.transitioningIn)
@@ -108,17 +108,17 @@ namespace OpenMobile.Controls
                 if ((textTexture == null) || (genHighlight != (Mode == eModeType.Highlighted)))
                 {
                     if (Mode == eModeType.Highlighted)
-                        textTexture= g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, highlightColor, this.OutlineColor);
+                        textTexture = g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, highlightColor, this.OutlineColor);
                     else
-                        textTexture=g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, this.Color, this.OutlineColor);
+                        textTexture = g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, this.Color, this.OutlineColor);
                     genHighlight = (Mode == eModeType.Highlighted);
                 }
-                g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height,tmp);
-                g.DrawRoundRectangle(new Pen(defaultBrush, 3.0F), this.Left, this.Top, this.Height, this.Height,5);
+                g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, tmp);
+                g.DrawRoundRectangle(new Pen(defaultBrush, 3.0F), this.Left, this.Top, this.Height, this.Height, 5);
                 if (this.isChecked == true)
                 {
-                    g.DrawLine(new Pen(defaultBrush, 4.0F),this.Left+6, this.Top+6, this.Left + this.Height-6, this.Top + this.Height-6);
-                    g.DrawLine(new Pen(defaultBrush, 4.0F), this.Left+6, this.Top + this.Height-6, this.Left + this.Height-6, this.Top+6);
+                    g.DrawLine(new Pen(defaultBrush, 4.0F), this.Left + 6, this.Top + 6, this.Left + this.Height - 6, this.Top + this.Height - 6);
+                    g.DrawLine(new Pen(defaultBrush, 4.0F), this.Left + 6, this.Top + this.Height - 6, this.Left + this.Height - 6, this.Top + 6);
                     g.DrawLine(new Pen(defaultBrush, 2.0F), this.Left + 5, this.Top + 5, this.Left + this.Height - 5, this.Top + this.Height - 5);
                     g.DrawLine(new Pen(defaultBrush, 2.0F), this.Left + 5, this.Top + this.Height - 5, this.Left + this.Height - 5, this.Top + 5);
                 }

@@ -87,7 +87,7 @@ namespace OpenMobile.Data
     /// <summary>
     /// Contacts
     /// </summary>
-    public sealed class Contacts:IDisposable
+    public sealed class Contacts : IDisposable
     {
         private SqliteConnection asyncCon;
         private SqliteCommand cmd;
@@ -199,7 +199,7 @@ namespace OpenMobile.Data
         /// <summary>
         /// Closes the database connections and disposes resources
         /// </summary>
-        public void  Dispose()
+        public void Dispose()
         {
             close();
             GC.SuppressFinalize(this);

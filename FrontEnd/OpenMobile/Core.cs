@@ -44,11 +44,11 @@ namespace OpenMobile
         {
             Assembly pluginAssembly = Assembly.Load("UI");
             //Modifications by Borte
-            IHighLevel availablePlugin=null;
+            IHighLevel availablePlugin = null;
             try
             {
-                foreach(Type t in pluginAssembly.GetTypes())
-                    if(t.IsPublic)
+                foreach (Type t in pluginAssembly.GetTypes())
+                    if (t.IsPublic)
                         availablePlugin = (IHighLevel)Activator.CreateInstance(t);
             }
             catch (Exception)
@@ -64,10 +64,10 @@ namespace OpenMobile
             //End Modifications by Borte
             pluginCollection.Add(availablePlugin);
             availablePlugin.initialize(theHost);
-            
+
             pluginAssembly = Assembly.Load("MainMenu");
             //Modifications by Borte
-            IBasePlugin mmPlugin=null;
+            IBasePlugin mmPlugin = null;
             try
             {
                 foreach (Type t in pluginAssembly.GetTypes())
@@ -84,7 +84,7 @@ namespace OpenMobile
             //End Modifications by Borte
             pluginCollection.Add(mmPlugin);
             mmPlugin.initialize(theHost);
-            var a=mmPlugin.GetType().GetCustomAttributes(typeof(InitialTransition),false);
+            var a = mmPlugin.GetType().GetCustomAttributes(typeof(InitialTransition), false);
             SandboxedThread.Asynchronous(() =>
             {
                 for (int i = 0; i < RenderingWindows.Count; i++)
@@ -100,25 +100,26 @@ namespace OpenMobile
             });
             object[] b = mmPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
             if (b.Length > 0)
-                exitTransition=((FinalTransition)b[0]).Transition;
+                exitTransition = ((FinalTransition)b[0]).Transition;
         }
         /// <summary>
         /// Load each of the plugins into the plugin's array (pluginCollection)
         /// </summary>
         private static void loadEmUp()
         {
-            foreach (string file in Directory.GetFiles(theHost.PluginPath,"*.dll"))
+            foreach (string file in Directory.GetFiles(theHost.PluginPath, "*.dll"))
             {
                 try
                 {
                     loadAndCheck(file);
-                }catch(Exception e)
+                }
+                catch (Exception e)
                 {
                     string ex = spewException(e);
                     theHost.sendMessage("OMDebug", "Plugin Loader", ex);
-                    #if DEBUG
+#if DEBUG
                     Debug.Print(ex);
-                    #endif
+#endif
                 }
             }
             foreach (string file in Directory.GetFiles(theHost.SkinPath, "*.dll"))
@@ -131,9 +132,9 @@ namespace OpenMobile
                 {
                     string ex = spewException(e);
                     theHost.sendMessage("OMDebug", "Plugin Loader", ex);
-                    #if DEBUG
+#if DEBUG
                     Debug.Print(ex);
-                    #endif
+#endif
                 }
             }
         }
@@ -155,8 +156,8 @@ namespace OpenMobile
                         if (typeInterface != null)
                         {
                             IBasePlugin availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginType);
-							if (typeof(INetwork).IsInstanceOfType(availablePlugin))
-								((INetwork)availablePlugin).OnWirelessEvent+=theHost.raiseWirelessEvent;
+                            if (typeof(INetwork).IsInstanceOfType(availablePlugin))
+                                ((INetwork)availablePlugin).OnWirelessEvent += theHost.raiseWirelessEvent;
                             if (typeof(IBluetooth).IsInstanceOfType(availablePlugin))
                                 ((IBluetooth)availablePlugin).OnWirelessEvent += theHost.raiseWirelessEvent;
                             pluginCollection.Add(availablePlugin);
@@ -179,7 +180,7 @@ namespace OpenMobile
                 loc = Path.Combine(theHost.SkinPath, name + ".dll");
             if (File.Exists(loc))
                 return Assembly.LoadFrom(loc);
-            foreach(string folder in Directory.GetDirectories(theHost.PluginPath))
+            foreach (string folder in Directory.GetDirectories(theHost.PluginPath))
             {
                 loc = Path.Combine(folder, name + ".dll");
                 if (File.Exists(loc))
@@ -194,7 +195,7 @@ namespace OpenMobile
         private static void getEmReady()
         {
             status = new eLoadStatus[pluginCollection.Count];
-            for (int i = 2; i < pluginCollection.Count;i++ ) //Try to initialize the plugins
+            for (int i = 2; i < pluginCollection.Count; i++) //Try to initialize the plugins
             {
                 try
                 {
@@ -208,36 +209,36 @@ namespace OpenMobile
                 {
                     status[i] = eLoadStatus.LoadFailedUnloadRequested;
                     string ex = spewException(e);
-                    theHost.sendMessage("OMDebug","Plugin Manager",ex);
+                    theHost.sendMessage("OMDebug", "Plugin Manager", ex);
                     Debug.Print(ex);
                 }
             }
-            for(int i=2;i<pluginCollection.Count;i++) //Give them all a second chance if they need it
+            for (int i = 2; i < pluginCollection.Count; i++) //Give them all a second chance if they need it
                 try
                 {
-                    if (status[i]==eLoadStatus.LoadFailedRetryRequested)
+                    if (status[i] == eLoadStatus.LoadFailedRetryRequested)
                         status[i] = pluginCollection[i].initialize(theHost);
                 }
                 catch (Exception e)
-                { 
+                {
                     status[i] = eLoadStatus.LoadFailedUnloadRequested;
                     string ex = spewException(e);
                     theHost.sendMessage("OMDebug", "Plugin Manager", ex);
                     Debug.Print(ex);
                 }
-            for(int i=2;i<pluginCollection.Count;i++) //and then two strikes their out...kill anything that still can't initialize
+            for (int i = 2; i < pluginCollection.Count; i++) //and then two strikes their out...kill anything that still can't initialize
                 if ((status[i] == eLoadStatus.LoadFailedRetryRequested) || (status[i] == eLoadStatus.LoadFailedUnloadRequested) || (status[i] == eLoadStatus.LoadFailedGracefulUnloadRequested))
                 {
                     try
                     {
                         pluginCollection[i].Dispose();
                         if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
-                            theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName+" CRASHED!");
+                            theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName + " CRASHED!");
                     }
                     catch (Exception) { }
-                    pluginCollection[i]=null;
+                    pluginCollection[i] = null;
                 }
-            status=null;
+            status = null;
             pluginCollection.RemoveAll(p => p == null);
         }
 
@@ -253,11 +254,11 @@ namespace OpenMobile
             theHost.Load(); //Stagger I/O
             getEmReady();
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);
-			theHost.hal.snd("32");
+            theHost.hal.snd("32");
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(theHost.NetworkChange_NetworkAvailabilityChanged);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
             OpenMobile.Threading.TaskManager.Enable(Core.theHost); //Start executing background tasks
-            SystemEvents.DisplaySettingsChanged+=new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);
+            SystemEvents.DisplaySettingsChanged += new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);
             using (PluginSettings settings = new PluginSettings())
             {
                 if (settings.getSetting("UI.MinGraphics") == "True")
@@ -275,15 +276,15 @@ namespace OpenMobile
                 return;
             ErroredOut = true;
             Exception ex = (Exception)e.ExceptionObject;
-            if (theHost.hal!=null)
+            if (theHost.hal != null)
                 theHost.hal.close();
             string strEx = spewException(ex);
-            FileStream fs=File.OpenWrite(Path.Combine(theHost.DataPath, "AppCrash-"+DateTime.Now.Month.ToString()+"-"+DateTime.Now.Day.ToString()+"-"+DateTime.Now.Hour.ToString()+"-"+DateTime.Now.Second.ToString()+".log"));
+            FileStream fs = File.OpenWrite(Path.Combine(theHost.DataPath, "AppCrash-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Second.ToString() + ".log"));
             fs.Write(System.Text.ASCIIEncoding.ASCII.GetBytes(strEx), 0, strEx.Length);
             fs.Close();
             //ErrorReporting reporting=new ErrorReporting(strEx);
             //reporting.ShowDialog(System.Windows.Forms.Form.FromHandle(RenderingWindows[0].getHandle()));
-            if ((DateTime.Now- Process.GetCurrentProcess().StartTime).TotalMinutes>3) //Prevent Loops
+            if ((DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMinutes > 3) //Prevent Loops
                 theHost.execute(eFunction.restartProgram);
             Environment.Exit(0);
         }
@@ -323,7 +324,7 @@ namespace OpenMobile
                     }
                     catch (ArgumentException) { break; }
                 }
-                else if (arg.ToLower()=="-fullscreen")
+                else if (arg.ToLower() == "-fullscreen")
                 {
                     Fullscreen = GameWindowFlags.Fullscreen;
                 }
@@ -348,21 +349,21 @@ namespace OpenMobile
                     settings.createDB();
                 if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
                 {
-                    Application.ShowError(IntPtr.Zero,"A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.","Database Missing!");
+                    Application.ShowError(IntPtr.Zero, "A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.", "Database Missing!");
                     Environment.Exit(0);
                     return;
                 }
             }
-            Thread rapidMenu=new Thread(Core.initialize);
+            Thread rapidMenu = new Thread(Core.initialize);
             rapidMenu.Start();
             if (RenderingWindows.Count == 0)
                 throw new Exception("Unable to detect any monitors on this platform!");
-            for (int i = 1; i<RenderingWindows.Count; i++)
+            for (int i = 1; i < RenderingWindows.Count; i++)
                 RenderingWindows[i].RunAsync(Fullscreen);
             RenderingWindows[0].Run(Fullscreen);
             for (int i = 0; i < RenderingWindows.Count; i++)
                 RenderingWindows[i].Dispose();
-            for (int i = 0; i < pluginCollection.Count;i++ )
+            for (int i = 0; i < pluginCollection.Count; i++)
                 if (pluginCollection[i] != null)
                     pluginCollection[i].Dispose();
             InputRouter.Dispose();

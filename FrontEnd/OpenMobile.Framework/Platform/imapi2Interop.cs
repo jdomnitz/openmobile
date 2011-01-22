@@ -65,18 +65,18 @@ namespace IMAPI2.Interop
     /// </summary>
     [ComImport]
     [Guid("27354131-7F64-5B0F-8F00-5D77AFBE261E")]
-    [TypeLibType(TypeLibTypeFlags.FNonExtensible|TypeLibTypeFlags.FOleAutomation|TypeLibTypeFlags.FDispatchable)]
+    [TypeLibType(TypeLibTypeFlags.FNonExtensible | TypeLibTypeFlags.FOleAutomation | TypeLibTypeFlags.FDispatchable)]
     internal interface DDiscMaster2Events
     {
         // A device was added to the system
         [DispId(0x100)]     // DISPID_DDISCMASTER2EVENTS_DEVICEADDED
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-        void NotifyDeviceAdded([In, MarshalAs(UnmanagedType.IDispatch)] object sender,  string uniqueId);
+        void NotifyDeviceAdded([In, MarshalAs(UnmanagedType.IDispatch)] object sender, string uniqueId);
 
         // A device was removed from the system
         [DispId(0x101)]     // DISPID_DDISCMASTER2EVENTS_DEVICEREMOVED
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-        void NotifyDeviceRemoved([In, MarshalAs(UnmanagedType.IDispatch)] object sender,  string uniqueId);
+        void NotifyDeviceRemoved([In, MarshalAs(UnmanagedType.IDispatch)] object sender, string uniqueId);
     }
 
 
@@ -184,7 +184,7 @@ namespace IMAPI2.Interop
 
         private void Cleanup()
         {
-            lock(this)
+            lock (this)
             {
                 foreach (DiscMaster2_SinkHelper helper in m_aEventSinkHelpers.Values)
                 {
@@ -198,10 +198,10 @@ namespace IMAPI2.Interop
     }
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    internal delegate void DiscMaster2_NotifyDeviceAddedEventHandler([In, MarshalAs(UnmanagedType.IDispatch)]object sender,  string uniqueId);
+    internal delegate void DiscMaster2_NotifyDeviceAddedEventHandler([In, MarshalAs(UnmanagedType.IDispatch)]object sender, string uniqueId);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    internal delegate void DiscMaster2_NotifyDeviceRemovedEventHandler([In, MarshalAs(UnmanagedType.IDispatch)]object sender,  string uniqueId);
+    internal delegate void DiscMaster2_NotifyDeviceRemovedEventHandler([In, MarshalAs(UnmanagedType.IDispatch)]object sender, string uniqueId);
 
     [ClassInterface(ClassInterfaceType.None)]
     [TypeLibType(TypeLibTypeFlags.FHidden)]
@@ -429,7 +429,7 @@ namespace IMAPI2.Interop
     [Guid("2735412D-7F64-5B0F-8F00-5D77AFBE261E")]
     [TypeLibType(TypeLibTypeFlags.FCanCreate)]
     [ClassInterface(ClassInterfaceType.None)]
-    internal class MsftDiscRecorder2Class 
+    internal class MsftDiscRecorder2Class
     {
     }
 }

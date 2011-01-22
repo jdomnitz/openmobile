@@ -77,7 +77,7 @@ namespace OpenMobile
 
         bool isExiting;
 
-        const double target_render_period=(1.0/35);
+        const double target_render_period = (1.0 / 35);
         double render_time;
 
         Stopwatch render_watch = new Stopwatch();
@@ -89,7 +89,7 @@ namespace OpenMobile
         {
             try
             {
-                glContext = new GraphicsContext(GraphicsMode.Default,WindowInfo);
+                glContext = new GraphicsContext(GraphicsMode.Default, WindowInfo);
                 glContext.MakeCurrent(WindowInfo);
                 (glContext as IGraphicsContextInternal).LoadAll();
                 Visible = true;
@@ -231,7 +231,7 @@ namespace OpenMobile
             OnLoadInternal(EventArgs.Empty);
             MakeCurrent();
             OnResize(EventArgs.Empty);
-            
+
             // On some platforms, ProcessEvents() does not return while the user is resizing or moving
             // the window. We can avoid this issue by raising UpdateFrame and RenderFrame events
             // whenever we encounter a size or move event.
@@ -251,8 +251,8 @@ namespace OpenMobile
                     DispatchRenderFrame();
                 else
                     return;
-                if (render_time<34)
-                    Thread.Sleep((int)(34-render_time));
+                if (render_time < 34)
+                    Thread.Sleep((int)(34 - render_time));
             }
         }
         public void DispatchRenderFrame()
@@ -266,14 +266,14 @@ namespace OpenMobile
             {
                 render_watch.Reset();
                 render_watch.Start();
-                
+
                 OnRenderFrameInternal();
                 render_time = render_watch.Elapsed.TotalMilliseconds;
             }
-            #if DEBUG
+			#if DEBUG
             else
-                Debug.Print(DateTime.Now.ToString()+"-Frame Dropped!");
-            #endif
+                Debug.Print(DateTime.Now.ToString() + "-Frame Dropped!");
+			#endif
         }
 
         #endregion
