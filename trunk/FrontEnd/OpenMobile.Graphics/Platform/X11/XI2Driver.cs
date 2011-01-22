@@ -51,7 +51,10 @@ namespace OpenMobile.Platform.X11
             if (IsSupported(Display))
             {
                 IntPtr tmp = Functions.XIQueryDevice(Display, 0, out count);
-				count *= 28;
+                if (IntPtr.Size == 4)
+                    count *= 28;
+                else
+                    count *= 36;
 				byte[] buf=new byte[count];
 				Marshal.Copy(tmp,buf,0,count);
                 Functions.XIFreeDeviceInfo(tmp);

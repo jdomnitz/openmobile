@@ -102,6 +102,7 @@ namespace OpenMobile
             {
                 Debug.Print(e.ToString());
                 base.Dispose();
+                Application.ShowError(WindowHandle, "OpenGL could not be initialized on this system.  Please ensure you have proper video drivers installed.", "OpenGL Support Failed");
                 throw;
             }
         }
@@ -209,28 +210,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region public void Run()
-
-        /// <summary>
-        /// Enters the game loop of the GameWindow using the maximum update rate.
-        /// </summary>
-        /// <seealso cref="Run(double)"/>
-        public void Run()
-        {
-            Run(0.0, 0.0);
-        }
-
-        #endregion
-
-        #region public void Run(double updateFrequency)
-
-        /// <summary>
-        /// Enters the game loop of the GameWindow using the specified update rate.
-        /// maximum possible render frequency.
-        /// </summary>
-
-        #endregion
-
         #region public void Run(double updates_per_second, double frames_per_second)
         public bool refresh;
         /// <summary>
@@ -257,7 +236,6 @@ namespace OpenMobile
             // the window. We can avoid this issue by raising UpdateFrame and RenderFrame events
             // whenever we encounter a size or move event.
 
-            Debug.Print("Entering main loop.");
             render_watch.Start();
             while (true)
             {
