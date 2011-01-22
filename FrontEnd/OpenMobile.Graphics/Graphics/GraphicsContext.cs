@@ -83,7 +83,7 @@ namespace OpenMobile.Graphics
                         Debug.Print("GraphicsContextFlags: {0}", flags);
                         Debug.Print("Requested version: {0}.{1}", major, minor);
                     #endif
-                    IGraphicsContext shareContext = shareContext = FindSharedContext();
+                    IGraphicsContext shareContext = FindSharedContext();
                     
                     IPlatformFactory factory = null;
                     switch ((flags & GraphicsContextFlags.Embedded) == GraphicsContextFlags.Embedded)
@@ -104,56 +104,6 @@ namespace OpenMobile.Graphics
                 {
                     Debug.Unindent();
                 }
-            }
-        }
-
-        /// <summary>
-        /// Constructs a new GraphicsContext from a pre-existing context created outside of OpenMobile.
-        /// </summary>
-        /// <param name="handle">The handle of the existing context. This must be a valid, unique handle that is not known to OpenMobile.</param>
-        /// <param name="window">The window this context is bound to. This must be a valid window obtained through Utilities.CreateWindowInfo.</param>
-        /// <exception cref="GraphicsContextException">Occurs if handle is identical to a context already registered with OpenMobile.</exception>
-        public GraphicsContext(ContextHandle handle, IWindowInfo window)
-            : this(handle, window, null, 3, 0, GraphicsContextFlags.Default)
-        { }
-
-        /// <summary>
-        /// Constructs a new GraphicsContext from a pre-existing context created outside of OpenMobile.
-        /// </summary>
-        /// <param name="handle">The handle of the existing context. This must be a valid, unique handle that is not known to OpenMobile.</param>
-        /// <param name="window">The window this context is bound to. This must be a valid window obtained through Utilities.CreateWindowInfo.</param>
-        /// <param name="shareContext">A different context that shares resources with this instance, if any.
-        /// Pass null if the context is not shared or if this is the first GraphicsContext instruct you construct.</param>
-        /// <param name="major">The major version of the context (e.g. "2" for "2.1").</param>
-        /// <param name="minor">The minor version of the context (e.g. "1" for "2.1").</param>
-        /// <param name="flags">A bitwise combination of <see cref="GraphicsContextFlags"/> that describe this context.</param>
-        /// <exception cref="GraphicsContextException">Occurs if handle is identical to a context already registered with OpenMobile.</exception>
-        public GraphicsContext(ContextHandle handle, IWindowInfo window, IGraphicsContext shareContext, int major, int minor, GraphicsContextFlags flags)
-        {
-            lock (SyncRoot)
-            {
-                IsExternal = true;
-
-                if (handle == ContextHandle.Zero)
-                {
-                    return;//implementation = new OpenMobile.Platform.Dummy.DummyGLContext(handle);
-                }
-                else if (available_contexts.ContainsKey(handle))
-                {
-                    throw new Exception("Context already exists.");
-                }
-                else
-                {
-                    switch ((flags & GraphicsContextFlags.Embedded) == GraphicsContextFlags.Embedded)
-                    {
-                        case false: implementation = Factory.Default.CreateGLContext(handle, window, shareContext, direct_rendering, major, minor, flags); break;
-                        case true: implementation = Factory.Embedded.CreateGLContext(handle, window, shareContext, direct_rendering, major, minor, flags); break;
-                    }
-                }
-
-                available_contexts.Add((implementation as IGraphicsContextInternal).Context, new WeakReference(this));
-
-                (this as IGraphicsContextInternal).LoadAll();
             }
         }
 

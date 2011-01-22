@@ -72,13 +72,6 @@ namespace OpenMobile.Graphics
 
         #endregion
 
-        #region internal GraphicsMode(GraphicsMode mode)
-
-        internal GraphicsMode(GraphicsMode mode)
-            : this(mode.ColorFormat, mode.Depth, mode.Stencil, mode.Samples, mode.AccumulatorFormat, mode.Buffers, mode.Stereo) { }
-
-        #endregion
-
         #region internal GraphicsMode(IntPtr? index, ColorFormat color, int depth, int stencil, int samples, ColorFormat accum, int buffers, bool stereo)
 
         internal GraphicsMode(IntPtr? index, ColorFormat color, int depth, int stencil, int samples, ColorFormat accum,
@@ -98,90 +91,6 @@ namespace OpenMobile.Graphics
             this.Buffers = buffers;
             this.Stereo = stereo;
         }
-
-        #endregion
-
-        #region public GraphicsMode()
-
-        /// <summary>Constructs a new GraphicsMode with sensible default parameters.</summary>
-        public GraphicsMode()
-            : this(Default)
-        { }
-
-        #endregion
-
-        #region public GraphicsMode(ColorFormat color)
-
-        /// <summary>Constructs a new GraphicsMode with the specified parameters.</summary>
-        /// <param name="color">The ColorFormat of the color buffer.</param>
-        public GraphicsMode(ColorFormat color)
-            : this(color, Default.Depth, Default.Stencil, Default.Samples, Default.AccumulatorFormat, Default.Buffers, Default.Stereo)
-        { }
-
-        #endregion
-
-        #region public GraphicsMode(ColorFormat color, int depth)
-
-        /// <summary>Constructs a new GraphicsMode with the specified parameters.</summary>
-        /// <param name="color">The ColorFormat of the color buffer.</param>
-        /// <param name="depth">The number of bits in the depth buffer.</param>
-        public GraphicsMode(ColorFormat color, int depth)
-            : this(color, depth, Default.Stencil, Default.Samples, Default.AccumulatorFormat, Default.Buffers, Default.Stereo)
-        { }
-
-        #endregion
-
-        #region public GraphicsMode(ColorFormat color, int depth, int stencil)
-
-        /// <summary>Constructs a new GraphicsMode with the specified parameters.</summary>
-        /// <param name="color">The ColorFormat of the color buffer.</param>
-        /// <param name="depth">The number of bits in the depth buffer.</param>
-        /// <param name="stencil">The number of bits in the stencil buffer.</param>
-        public GraphicsMode(ColorFormat color, int depth, int stencil)
-            : this(color, depth, stencil, Default.Samples, Default.AccumulatorFormat, Default.Buffers, Default.Stereo)
-        { }
-
-        #endregion
-
-        #region public GraphicsMode(ColorFormat color, int depth, int stencil, int samples)
-
-        /// <summary>Constructs a new GraphicsMode with the specified parameters.</summary>
-        /// <param name="color">The ColorFormat of the color buffer.</param>
-        /// <param name="depth">The number of bits in the depth buffer.</param>
-        /// <param name="stencil">The number of bits in the stencil buffer.</param>
-        /// <param name="samples">The number of samples for FSAA.</param>
-        public GraphicsMode(ColorFormat color, int depth, int stencil, int samples)
-            : this(color, depth, stencil, samples, Default.AccumulatorFormat, Default.Buffers, Default.Stereo)
-        { }
-
-        #endregion
-
-        #region public GraphicsMode(ColorFormat color, int depth, int stencil, int samples, ColorFormat accum)
-
-        /// <summary>Constructs a new GraphicsMode with the specified parameters.</summary>
-        /// <param name="color">The ColorFormat of the color buffer.</param>
-        /// <param name="depth">The number of bits in the depth buffer.</param>
-        /// <param name="stencil">The number of bits in the stencil buffer.</param>
-        /// <param name="samples">The number of samples for FSAA.</param>
-        /// <param name="accum">The ColorFormat of the accumilliary buffer.</param>
-        public GraphicsMode(ColorFormat color, int depth, int stencil, int samples, ColorFormat accum)
-            : this(color, depth, stencil, samples, accum, Default.Buffers, Default.Stereo)
-        { }
-
-        #endregion
-
-        #region public GraphicsMode(ColorFormat color, int depth, int stencil, int samples, ColorFormat accum, int buffers)
-
-        /// <summary>Constructs a new GraphicsMode with the specified parameters.</summary>
-        /// <param name="color">The ColorFormat of the color buffer.</param>
-        /// <param name="depth">The number of bits in the depth buffer.</param>
-        /// <param name="stencil">The number of bits in the stencil buffer.</param>
-        /// <param name="samples">The number of samples for FSAA.</param>
-        /// <param name="accum">The ColorFormat of the accumilliary buffer.</param>
-        /// <param name="buffers">The number of render buffers. Typical values include one (single-), two (double-) or three (triple-buffering).</param>
-        public GraphicsMode(ColorFormat color, int depth, int stencil, int samples, ColorFormat accum, int buffers)
-            : this(color, depth, stencil, samples, accum, buffers, Default.Stereo)
-        { }
 
         #endregion
 
