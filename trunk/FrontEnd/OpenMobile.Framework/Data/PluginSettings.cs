@@ -23,6 +23,7 @@ using Mono.Data.Sqlite;
 using OpenMobile.helperFunctions;
 using System.Resources;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace OpenMobile.Data
 {
@@ -120,6 +121,40 @@ namespace OpenMobile.Data
                 setSetting(name + ".Screen" + (i + 1).ToString(), values[i]);
             return true;
         }
+
+        /// <summary>
+        /// Gets all the settings with a given prefix
+        /// </summary>
+        /// <param name="prefix"></param>
+        /// <returns></returns>
+        public Dictionary<String, String> getAllPluginSettings(string prefix)
+        {
+            try
+            {
+                Dictionary<String, String> Dic = new Dictionary<String, String>();
+
+                if (asyncCon.State == System.Data.ConnectionState.Closed)
+                    asyncCon.Open();
+                using (SqliteCommand cmd = asyncCon.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Name, Value FROM PluginSettings WHERE Name like '" + prefix + "%'";
+                    SqliteDataReader rdr = cmd.ExecuteReader();
+
+                    while (rdr.Read())
+                        Dic.Add(rdr.GetString(0), rdr.GetString(1));
+
+                    rdr.Close();
+                }
+
+                return Dic;
+            }
+            catch (Exception)
+            {
+                return new Dictionary<String, String>();
+            }
+        }
+
+
         #region IDisposable Members
 
         /// <summary>
