@@ -75,7 +75,12 @@ namespace OpenMobile.helperFunctions
                                     ret.Street += n2.InnerText;
                                     break;
                                 case "postal":
-                                    ret.Zip = n2.InnerText;
+                                    if (ret.Zip == "")
+                                        ret.Zip = n2.InnerText;
+                                    break;
+                                case "uzip":
+                                    if (ret.Zip == "")
+                                        ret.Zip = n2.InnerText;
                                     break;
                                 case "city":
                                     ret.City = n2.InnerText;
