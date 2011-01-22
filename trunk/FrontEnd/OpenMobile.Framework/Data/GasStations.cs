@@ -64,15 +64,15 @@ namespace OpenMobile.Data
             /// </summary>
             public string priceDiesel;
             /// <summary>
-            /// Zipcode
+            /// Postal Code
             /// </summary>
-            public string zipcode;
+            public string postalCode;
             /// <summary>
             /// Date Added
             /// </summary>
             public DateTime dateAdded;
         }
-
+        private bool disposed;
         /// <summary>
         /// Remove all items older then 4 days from the database
         /// </summary>
@@ -93,16 +93,16 @@ namespace OpenMobile.Data
         /// <summary>
         /// Begins an asynchronous connection to the Message database
         /// </summary>
-        /// <param name="zipcode">Zipcode to search in</param>
+        /// <param name="postalCode">Postal code to search in</param>
         /// <returns>Was the call successful</returns>
-        public bool beginRead(string zipcode)
+        public bool beginRead(string postalCode)
         {
             try
             {
                 if (asyncCon == null)
                     asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
                 asyncCmd = asyncCon.CreateCommand();
-                asyncCmd.CommandText = "SELECT Zip,dateAdded,Location,Name,priceDiesel,priceRegular,pricePlus,pricePremium,priceUltimate FROM gasRegions JOIN gasStations ON StationID=GUID WHERE Zip=" + zipcode;
+                asyncCmd.CommandText = "SELECT Zip,dateAdded,Location,Name,priceDiesel,priceRegular,pricePlus,pricePremium,priceUltimate FROM gasRegions JOIN gasStations ON StationID=GUID WHERE Zip=" + postalCode;
                 asyncCon.Open();
                 asyncReader = asyncCmd.ExecuteReader();
             }
@@ -147,7 +147,7 @@ namespace OpenMobile.Data
             info.pricePremium = asyncReader["pricePremium"].ToString();
             info.priceUltimate = asyncReader["priceUltimate"].ToString();
             info.dateAdded = DateTime.Parse(asyncReader["dateAdded"].ToString());
-            info.zipcode = asyncReader["Zip"].ToString();
+            info.postalCode = asyncReader["Zip"].ToString();
             if (storeAlso == true)
                 Collections.gasStations.Add(info);
             return info;
@@ -214,18 +214,30 @@ namespace OpenMobile.Data
                 return false;
             if (guid == -1)
             {
-                asyncCmd.CommandText = "INSERT INTO gasRegions (Zip, StationID)VALUES('" + station.zipcode + "',(SELECT GUID FROM gasStations WHERE Location='" + station.location + "'))";
+                asyncCmd.CommandText = "INSERT INTO gasRegions (Zip, StationID)VALUES('" + station.postalCode + "',(SELECT GUID FROM gasStations WHERE Location='" + station.location + "'))";
                 asyncCmd.ExecuteNonQuery();
             }
             return true;
         }
         /// <summary>
+        /// Failsafe if dispose isn't called
+        /// </summary>
+        ~GasStations()
+        {
+            if (!disposed)
+                Dispose();
+        }
+
+        /// <summary>
         /// Closes the connection and unloads the class
         /// </summary>
         public void Dispose()
         {
+            if (disposed)
+                return;
             Close();
             GC.SuppressFinalize(this);
+            disposed = true;
         }
     }
 }

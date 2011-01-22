@@ -170,19 +170,10 @@ namespace DPGContacts
                     OpenMobile.Threading.TaskManager.QueueTask(getContacts, OpenMobile.ePriority.Normal,"Sync Google Contacts");
                     return true;
                 }
-                else
-                {
-                    status = 1;
-                    theHost.execute(eFunction.dataUpdated, "DPGContacts");
-                    return false;
-                }
             }
-            else
-            {
-                status = -1;
-                theHost.execute(eFunction.dataUpdated, "DPGContacts");
-                return false;
-            }
+            status = -1;
+            theHost.execute(eFunction.dataUpdated, "DPGContacts");
+            return false;
         }
 
         public DateTime lastUpdated

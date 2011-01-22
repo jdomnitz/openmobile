@@ -240,7 +240,8 @@ namespace DPGWeather
                 {
                     if ((DateTime.Now - lastUpdated) < TimeSpan.FromMinutes(30))
                     {
-                        status = 1;
+                        status = -1;
+                        theHost.execute(eFunction.dataUpdated, "DPGWeather");
                         return false;
                     }
                 }
@@ -252,7 +253,7 @@ namespace DPGWeather
             else
             {
                 status = -1;
-                theHost.execute(eFunction.dataUpdated, "DPGContacts");
+                theHost.execute(eFunction.dataUpdated, "DPGWeather");
                 return false;
             }
         }

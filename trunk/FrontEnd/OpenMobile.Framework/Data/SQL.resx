@@ -126,7 +126,7 @@ CREATE TABLE PluginSettings (Name TEXT, Value TEXT);
 CREATE TABLE Tasks (Category NUMERIC, Description TEXT, ID INTEGER PRIMARY KEY, Importance NUMERIC, State NUMERIC, Title TEXT);
 CREATE TABLE Vehicle (gasType NUMERIC, Mileage NUMERIC, Vin TEXT);
 CREATE TABLE Weather (Conditions NUMERIC, Date Julian, dewPoint NUMERIC, feelsLike NUMERIC, highTemp NUMERIC, Humidity NUMERIC, lowTemp NUMERIC, Temp NUMERIC, UVIndex NUMERIC, windDirection NUMERIC, windSpeed NUMERIC, precip NUMERIC, Code TEXT, contrib TEXT);
-CREATE TABLE gasRegions (StationID NUMERIC, Zip NUMERIC);
+CREATE TABLE gasRegions (StationID NUMERIC, Zip TEXT);
 CREATE TABLE gasStations (dateAdded Julian, GUID INTEGER PRIMARY KEY, Location TEXT, Name TEXT, priceDiesel NUMERIC, priceUltimate NUMERIC, pricePlus NUMERIC, pricePremium NUMERIC, priceRegular NUMERIC);
 CREATE TABLE Traffic (startDate Julian, endDate Julian, title TEXT, description TEXT, type INTEGER, severity INTEGER, direction INTEGER, longitude NUMERIC, latitude NUMERIC, location TEXT);
 COMMIT;</value>
