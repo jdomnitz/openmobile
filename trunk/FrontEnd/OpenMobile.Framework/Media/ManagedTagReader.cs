@@ -53,10 +53,11 @@ namespace OpenMobile.Media
             catch (UnsupportedFormatException)
             {
                 mediaInfo i = new mediaInfo(filename);
-                i.Name = Path.GetFileNameWithoutExtension(filename).Replace('_',' ');
+                i.Name = Path.GetFileNameWithoutExtension(filename).Replace('_', ' ');
                 return i;
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 return null;
             }
             Tag t = f.Tag;
@@ -65,8 +66,8 @@ namespace OpenMobile.Media
             info.Artist = t.JoinedAlbumArtists;
             if (string.IsNullOrEmpty(info.Artist))
                 info.Artist = t.JoinedPerformers;
-            if (info.Artist!=null)
-                info.Artist=info.Artist.Trim().TrimEnd(new char[] { ',' });
+            if (info.Artist != null)
+                info.Artist = info.Artist.Trim().TrimEnd(new char[] { ',' });
             if (t.Pictures.Length > 0)
             {
                 MemoryStream m = new MemoryStream(t.Pictures[0].Data.Data);
@@ -92,7 +93,7 @@ namespace OpenMobile.Media
             info.Location = filename;
             info.Name = t.Title;
             info.Lyrics = t.Lyrics;
-            info.Length=(int)f.Properties.Duration.TotalSeconds;
+            info.Length = (int)f.Properties.Duration.TotalSeconds;
             info.TrackNumber = (int)t.Track;
             return info;
         }
@@ -126,23 +127,23 @@ namespace OpenMobile.Media
         /// <param name="path"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public static OImage getFileThumbnail(string path,int size)
+        public static OImage getFileThumbnail(string path, int size)
         {
-            #if WINDOWS
-            if(Configuration.RunningOnWindows)
+#if WINDOWS
+            if (Configuration.RunningOnWindows)
             {
                 return IconExtractor.GetFileIcon(path, size);
             }
-            #endif
-			#if LINUX
-            #if WINDOWS
-            else 
-            #endif
-			if(Configuration.RunningOnLinux)
-			{
-				return GnomeIcon.GetFileIcon(path);
-			}
-			#endif
+#endif
+#if LINUX
+#if WINDOWS
+            else
+#endif
+                if (Configuration.RunningOnLinux)
+                {
+                    return GnomeIcon.GetFileIcon(path);
+                }
+#endif
             return null;
         }
         private static string cacheArtist;
@@ -157,7 +158,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static OImage getLastFMImage(string artist, string album)
         {
-            if (Net.Network.IsAvailable==false)
+            if (Net.Network.IsAvailable == false)
                 return null;
             if (string.IsNullOrEmpty(artist))
                 return null;
@@ -169,8 +170,8 @@ namespace OpenMobile.Media
             cacheArtist = artist;
             cacheArt = null;
             TimeSpan ts = DateTime.Now - lastCheck;
-            if (ts.TotalSeconds<205)
-                Thread.Sleep(205-unchecked((int)ts.TotalSeconds)); //prevent TOS violation
+            if (ts.TotalSeconds < 205)
+                Thread.Sleep(205 - unchecked((int)ts.TotalSeconds)); //prevent TOS violation
             XmlDocument reader = new XmlDocument();
             if (album == "Unknown Album")
                 return null;
@@ -219,7 +220,7 @@ namespace OpenMobile.Media
         /// <param name="pluginHost"></param>
         /// <param name="dbName"></param>
         /// <returns></returns>
-        public static OImage getCoverFromDB(string artist, string album, IPluginHost pluginHost,string dbName)
+        public static OImage getCoverFromDB(string artist, string album, IPluginHost pluginHost, string dbName)
         {
             if (pluginHost == null)
                 return null;
@@ -229,7 +230,7 @@ namespace OpenMobile.Media
                 return null;
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetSongsByAlbum(artist, album, true,eMediaField.Title);
+                db.beginGetSongsByAlbum(artist, album, true, eMediaField.Title);
                 mediaInfo result = db.getNextMedia();
                 if (result == null)
                     return null;

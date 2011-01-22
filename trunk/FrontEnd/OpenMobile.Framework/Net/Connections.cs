@@ -39,7 +39,7 @@ namespace OpenMobile.Net
         {
             object o = new object();
             host.getData(eGetData.GetAvailableNetworks, String.Empty, out o);
-            if (o==null)
+            if (o == null)
                 return false;
             List<connectionInfo> info = (List<connectionInfo>)o;
             int speed = 0;
@@ -60,7 +60,7 @@ namespace OpenMobile.Net
         /// <param name="host"></param>
         /// <param name="connectionID"></param>
         /// <returns></returns>
-        public static bool connect(IPluginHost host,string connectionID)
+        public static bool connect(IPluginHost host, string connectionID)
         {
             return connect(host, connectionID, null);
         }
@@ -71,7 +71,7 @@ namespace OpenMobile.Net
         /// <param name="connectionID"></param>
         /// <param name="credentials"></param>
         /// <returns></returns>
-        public static bool connect(IPluginHost host,string connectionID,string credentials)
+        public static bool connect(IPluginHost host, string connectionID, string credentials)
         {
             object o = new object();
             host.getData(eGetData.GetPlugins, String.Empty, out o);

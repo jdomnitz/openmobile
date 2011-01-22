@@ -110,7 +110,7 @@ namespace OpenMobile
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void InitializeRendering()
         {
-            
+
             // Check for specific startup screen
             int StartupScreen = 0;
             foreach (string arg in Environment.GetCommandLineArgs())
@@ -124,11 +124,11 @@ namespace OpenMobile
                     catch (ArgumentException) { break; }
                 }
             }
-            
-            if ((this.WindowState == WindowState.Fullscreen)&&(screen==0))
+
+            if ((this.WindowState == WindowState.Fullscreen) && (screen == 0))
                 Mouse.Location = this.Location;
             if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
-                this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[StartupScreen>0 ? StartupScreen : screen].Bounds.Location, this.Size);
+                this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Bounds.Location, this.Size);
             this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
             this.Mouse.Instance = (screen * -1) - 1;
             this.Mouse.SetBounds(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Width, DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Height);
@@ -198,7 +198,7 @@ namespace OpenMobile
             for (int i = 0; i < newP.controlCount; i++)
             {
                 c = newP.getControl(i);
-                if ((c.Mode == eModeType.ClickedAndTransitioningOut) || (c.Mode == eModeType.transitioningOut)||(exists))
+                if ((c.Mode == eModeType.ClickedAndTransitioningOut) || (c.Mode == eModeType.transitioningOut) || (exists))
                     c.Mode = eModeType.transitionLock;
                 else
                     c.Mode = eModeType.transitioningIn;
@@ -338,14 +338,14 @@ namespace OpenMobile
             }
             if (dimmer > 0)
             {
-                g.FillRectangle(new Brush(Color.FromArgb(dimmer, Color.Black)),0,0,1000,600);
+                g.FillRectangle(new Brush(Color.FromArgb(dimmer, Color.Black)), 0, 0, 1000, 600);
             }
             SwapBuffers(); //show the new image before potentially lagging
             g.Finish();
         }
         public void FadeOut()
         {
-            for (dimmer = 1; dimmer < 250; dimmer+=5)
+            for (dimmer = 1; dimmer < 250; dimmer += 5)
             {
                 Invalidate();
                 Thread.Sleep(30);
@@ -358,8 +358,8 @@ namespace OpenMobile
         {
             foreach (Point p in currentGesture)
                 g.FillEllipse(new Brush(Color.Red), new Rectangle((p.X - 10), (p.Y - 10), 20, 20));
-            if (currentGesture.Count>1)
-                g.DrawLine(new Pen(Color.Red,18F), currentGesture.ToArray());
+            if (currentGesture.Count > 1)
+                g.DrawLine(new Pen(Color.Red, 18F), currentGesture.ToArray());
         }
         protected override void OnResize(EventArgs e)
         {
@@ -502,7 +502,7 @@ namespace OpenMobile
         }
         private void MouseMove()
         {
-            if (WindowState==WindowState.Fullscreen)
+            if (WindowState == WindowState.Fullscreen)
                 MouseMove(new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
             else
                 MouseMove(new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
@@ -514,7 +514,7 @@ namespace OpenMobile
             bool done = false; //We found something that was selected
             if (rParam.currentMode == eModeType.Scrolling)
             {
-                if (e.Buttons==MouseButton.Left)
+                if (e.Buttons == MouseButton.Left)
                 {
                     if (highlighted != null)
                     {
@@ -535,7 +535,7 @@ namespace OpenMobile
             }
             else
             {
-                if ((e.Buttons==MouseButton.Left) && (!ThrowStarted))
+                if ((e.Buttons == MouseButton.Left) && (!ThrowStarted))
                 {
                     if (currentGesture == null)
                     {
@@ -544,7 +544,7 @@ namespace OpenMobile
                         currentGesture = new List<Point>();
                         rParam.currentMode = eModeType.gesturing;
                     }
-                    currentGesture.Add(new Point(e.Location.X/widthScale,e.Location.Y/heightScale));
+                    currentGesture.Add(new Point(e.Location.X / widthScale, e.Location.Y / heightScale));
                     Invalidate();
                     if (lastClick != null)
                         lastClick.Mode = eModeType.Highlighted;
@@ -638,10 +638,10 @@ namespace OpenMobile
                     lastClick = null;
                     if (typeof(IClickable).IsInstanceOfType(highlighted) == true)
                     {
-                        SandboxedThread.Asynchronous(delegate() 
-                        { 
-                            if (highlighted != null) 
-                                ((IClickable)highlighted).clickMe(screen); 
+                        SandboxedThread.Asynchronous(delegate()
+                        {
+                            if (highlighted != null)
+                                ((IClickable)highlighted).clickMe(screen);
                         });
                     }
                 }
@@ -729,7 +729,7 @@ namespace OpenMobile
                     rec.Initialize();
                     for (int i = 0; i < currentGesture.Count; i++)
                         rec.AddPoint(currentGesture[i], false);
-					Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
+                    Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
                     rParam.currentMode = eModeType.Highlighted;
                     MouseMove(new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
                 }
@@ -790,12 +790,12 @@ namespace OpenMobile
                 {
                     keyboardActive = true;
                     tmrClick.Enabled = true;
-                    SandboxedThread.Asynchronous(delegate() 
+                    SandboxedThread.Asynchronous(delegate()
                     {
-                        if (lastClick!=null)
-                            lastClick.clickMe(screen); 
+                        if (lastClick != null)
+                            lastClick.clickMe(screen);
                     });
-                    if ((lastClick!=null)&&(lastClick.FocusImage.image != null))
+                    if ((lastClick != null) && (lastClick.FocusImage.image != null))
                     {
                         lastClick.Mode = eModeType.Highlighted;
                         Invalidate();
@@ -816,12 +816,12 @@ namespace OpenMobile
             string gesture = String.Empty;
             if (e.GestureComplete)
                 gesture = "End";
-            gesture+=e.Name+"|";
-            if (e.Name=="Rotate")
-                gesture+=e.Arg1.ToString()+"|";
+            gesture += e.Name + "|";
+            if (e.Name == "Rotate")
+                gesture += e.Arg1.ToString() + "|";
             else
-                gesture=(e.Arg1*totalScale).ToString("0.00")+"|";
-            gesture += ((e.Position.X - this.X) * widthScale).ToString()+",";
+                gesture = (e.Arg1 * totalScale).ToString("0.00") + "|";
+            gesture += ((e.Position.X - this.X) * widthScale).ToString() + ",";
             gesture += ((e.Position.Y - this.Y) * heightScale).ToString();
             Core.theHost.execute(eFunction.multiTouchGesture, screen.ToString(), gesture);
         }
@@ -842,7 +842,7 @@ namespace OpenMobile
             }
             else
             {
-                if ((screen == 0)&& (!defaultMouse))
+                if ((screen == 0) && (!defaultMouse))
                     Mouse.UntrapCursor();
                 Mouse.ShowCursor(this.WindowInfo);
             }
@@ -1102,9 +1102,9 @@ namespace OpenMobile
                 {
                     if (backgroundQueue[h][i].Visible == false)
                         continue;
-                    if ((oMControl.Left >= backgroundQueue[h][i].Left) && (oMControl.Top >= backgroundQueue[h][i].Top) && ((oMControl.Left+oMControl.Width) <= (backgroundQueue[h][i].Left + backgroundQueue[h][i].Width)) && ((oMControl.Top+oMControl.Height) <= (backgroundQueue[h][i].Top + backgroundQueue[h][i].Height)))
+                    if ((oMControl.Left >= backgroundQueue[h][i].Left) && (oMControl.Top >= backgroundQueue[h][i].Top) && ((oMControl.Left + oMControl.Width) <= (backgroundQueue[h][i].Left + backgroundQueue[h][i].Width)) && ((oMControl.Top + oMControl.Height) <= (backgroundQueue[h][i].Top + backgroundQueue[h][i].Height)))
                     {
-                        
+
                         if (backgroundQueue[h][i] == oMControl)
                             return true;
                         else
@@ -1140,7 +1140,7 @@ namespace OpenMobile
         }
         void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
         {
-            DisplayDevice dev=DisplayDevice.AvailableDisplays[screen];
+            DisplayDevice dev = DisplayDevice.AvailableDisplays[screen];
             if (e.Landscape != dev.Landscape)
                 Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", String.Empty);
         }

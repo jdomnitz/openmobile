@@ -59,7 +59,7 @@ namespace OpenMobile.Threading
         /// </summary>
         /// <param name="function"></param>
         /// <param name="host"></param>
-        public static void Asynchronous(Function function,IPluginHost host)
+        public static void Asynchronous(Function function, IPluginHost host)
         {
             if (theHost == null)
                 theHost = host;
@@ -85,7 +85,7 @@ namespace OpenMobile.Threading
         /// <param name="function"></param>
         /// <param name="args"></param>
         /// <param name="host"></param>
-        public static void Asynchronous(Delegate function,object[] args, IPluginHost host)
+        public static void Asynchronous(Delegate function, object[] args, IPluginHost host)
         {
             Asynchronous(delegate { function.DynamicInvoke(args); }, host);
         }
@@ -120,7 +120,7 @@ namespace OpenMobile.Threading
                         }
                         catch (Exception e)
                         {
-                            if (theHost!=null)
+                            if (theHost != null)
                                 theHost.sendMessage("SandboxedThread", "SafeThread", "", ref e);
                         }
                     }

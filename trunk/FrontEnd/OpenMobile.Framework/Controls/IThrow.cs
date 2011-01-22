@@ -45,7 +45,7 @@ namespace OpenMobile.Controls
         /// <param name="StartLocation">The point that was clicked</param>
         /// <param name="Cancel">If true cancels the throw operation</param>
         /// <param name="scaleFactors"></param>
-        void MouseThrowStart(int screen, Point StartLocation,PointF scaleFactors, ref bool Cancel);
+        void MouseThrowStart(int screen, Point StartLocation, PointF scaleFactors, ref bool Cancel);
 
         /// <summary>
         /// Throw is ended

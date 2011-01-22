@@ -28,12 +28,12 @@ namespace OpenMobile.Data
     /// <summary>
     /// Tasks (To Do)
     /// </summary>
-    public sealed class Tasks:IDisposable
+    public sealed class Tasks : IDisposable
     {
         private SqliteConnection asyncCon;
         private SqliteCommand cmd;
         private SqliteDataReader asyncReader;
-        
+
         /// <summary>
         /// State of the task
         /// </summary>
@@ -43,23 +43,23 @@ namespace OpenMobile.Data
             /// <summary>
             /// Not Set
             /// </summary>
-            NotSet=0,
+            NotSet = 0,
             /// <summary>
             /// Remind
             /// </summary>
-            Remind=1,
+            Remind = 1,
             /// <summary>
             /// Event is in the past
             /// </summary>
-            Past=2,
+            Past = 2,
             /// <summary>
             /// Task Complete
             /// </summary>
-            Completed=4,
+            Completed = 4,
             /// <summary>
             /// Hide the task
             /// </summary>
-            Hide=8
+            Hide = 8
         }
         /// <summary>
         /// A task
@@ -74,15 +74,15 @@ namespace OpenMobile.Data
             /// Task Description
             /// </summary>
             public string Description;
-            int id=-1;
+            int id = -1;
             /// <summary>
             /// Task ID (set by database)
             /// </summary>
-            public int ID { get{return id;} }
+            public int ID { get { return id; } }
             /// <summary>
             /// Task Importance
             /// </summary>
-            public ePriority Importance=ePriority.Normal;
+            public ePriority Importance = ePriority.Normal;
             /// <summary>
             /// Task Title
             /// </summary>
@@ -128,7 +128,7 @@ namespace OpenMobile.Data
             if (asyncCon == null)
                 asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
             cmd = asyncCon.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Tasks WHERE ID='"+ID.ToString()+"'";
+            cmd.CommandText = "SELECT * FROM Tasks WHERE ID='" + ID.ToString() + "'";
             asyncCon.Open();
             asyncReader = cmd.ExecuteReader();
             return true;
@@ -139,7 +139,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public task readNext()
         {
-            if ((asyncReader==null)||(asyncReader.Read()==false))
+            if ((asyncReader == null) || (asyncReader.Read() == false))
                 return new task();
             int ID = asyncReader.GetInt32(asyncReader.GetOrdinal("ID"));
             task ret = new task(ID);
@@ -171,7 +171,7 @@ namespace OpenMobile.Data
             if (asyncCon == null)
                 return false;
             cmd.CommandText = "DELETE FROM Tasks WHERE ID='" + ID + "'";
-            return (cmd.ExecuteNonQuery() ==1);
+            return (cmd.ExecuteNonQuery() == 1);
         }
         /// <summary>
         /// Write the given task.  Called after beingWrite
@@ -183,7 +183,7 @@ namespace OpenMobile.Data
             if (t == null)
                 return false;
             StringBuilder query;
-            if (t.ID!=-1)
+            if (t.ID != -1)
             {
                 query = new StringBuilder("DELETE FROM Tasks WHERE ID='");
                 query.Append(t.ID);
@@ -203,7 +203,7 @@ namespace OpenMobile.Data
                 query.Append((int)t.State);
                 query.Append("','");
                 query.Append(General.escape(t.Title));
-                if (t.ID>=0)
+                if (t.ID >= 0)
                 {
                     query.Append("','");
                     query.Append(t.ID);

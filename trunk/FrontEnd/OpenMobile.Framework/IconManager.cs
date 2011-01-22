@@ -73,11 +73,11 @@ namespace OpenMobile
             /// <param name="i"></param>
             /// <param name="p"></param>
             /// <param name="f"></param>
-            public UIIcon(imageItem i,ePriority p,bool f)
+            public UIIcon(imageItem i, ePriority p, bool f)
             {
-                image=i;
-                priority=p;
-                full=f;
+                image = i;
+                priority = p;
+                full = f;
             }
             /// <summary>
             /// Create a new UI Icon
@@ -86,7 +86,7 @@ namespace OpenMobile
             /// <param name="p"></param>
             /// <param name="f"></param>
             /// <param name="plugin"></param>
-            public UIIcon(imageItem i, ePriority p, bool f,string plugin)
+            public UIIcon(imageItem i, ePriority p, bool f, string plugin)
             {
                 image = i;
                 priority = p;
@@ -150,7 +150,7 @@ namespace OpenMobile
                 if (icons[i].full == full)
                 {
                     num++;
-                    if (num==number)
+                    if (num == number)
                         return icons[i];
                 }
             }

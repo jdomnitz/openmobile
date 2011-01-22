@@ -58,7 +58,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static DeviceInfo get(string drive)
         {
-            DeviceInfo ret= AllDevices.Find(p => p.path == drive);
+            DeviceInfo ret = AllDevices.Find(p => p.path == drive);
             if (ret == null)
                 return new DeviceInfo(drive, null, null, null, null, eDriveType.Unknown, false, null);
             return ret;
@@ -67,7 +67,7 @@ namespace OpenMobile.Media
         {
             if (type == eMediaType.DeviceRemoved)
                 AllDevices.RemoveAll(p => p.path == arg);
-            else if(type==eMediaType.NotSet)
+            else if (type == eMediaType.NotSet)
             {
                 AllDevices.RemoveAll(p => p.path == arg);
                 AllDevices.Add(getDeviceInfo(arg));

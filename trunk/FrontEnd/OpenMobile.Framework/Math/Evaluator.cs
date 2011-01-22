@@ -61,12 +61,12 @@ namespace OpenMobile.Framework.Math
 
         private string breakitup(string expression)
         {
-            string prefix="";
-            string inside="";
+            string prefix = "";
+            string inside = "";
             if (expression[0] != '(')
                 prefix = expression.Substring(0, expression.IndexOf('('));
-            inside=findInside(expression.Substring(prefix.Length+1));
-            return prefix+ evaluateStep(inside)+expression.Substring(prefix.Length+inside.Length+2);
+            inside = findInside(expression.Substring(prefix.Length + 1));
+            return prefix + evaluateStep(inside) + expression.Substring(prefix.Length + inside.Length + 2);
         }
 
         private string findInside(string p)
@@ -92,7 +92,7 @@ namespace OpenMobile.Framework.Math
             //Convert functions to operators
             expression = expression.Replace("SIN", "S").Replace("COS", "C").Replace("TAN", "T").Replace("SEC", "F");
             expression = expression.Replace("CSC", "G").Replace("COT", "H").Replace("LOG", "D").Replace("LN", "E");
-            return expression.Replace("ABS", "A").Replace("SQRT", "B").Replace("SIGN", "I").Replace("<<","L").Replace(">>","R");
+            return expression.Replace("ABS", "A").Replace("SQRT", "B").Replace("SIGN", "I").Replace("<<", "L").Replace(">>", "R");
         }
 
         //Is the character an operator
@@ -122,10 +122,10 @@ namespace OpenMobile.Framework.Math
                 return s;
             //Take care of minus signs
             if (s[0] == '-')
-                s = '~'+s.Substring(1);
+                s = '~' + s.Substring(1);
             s = s.Replace("*-", "*~").Replace("--", "+").Replace("/-", "/~").Replace("+-", "+~").Replace("^-", "^~");
             //Split the string into numbers and operations
-            List<string> args=new List<string>(s.Split(new char[]{'+','-','*','/','^'},StringSplitOptions.RemoveEmptyEntries));
+            List<string> args = new List<string>(s.Split(new char[] { '+', '-', '*', '/', '^' }, StringSplitOptions.RemoveEmptyEntries));
             List<char> op = new List<char>();
             foreach (char c in s)
             {
@@ -149,7 +149,7 @@ namespace OpenMobile.Framework.Math
             {
                 args[i] = args[i].Replace('~', '-');
             }
-            
+
             //Solve any functions that can be
             for (int i = 0; i < args.Count; i++)
             {
@@ -168,16 +168,16 @@ namespace OpenMobile.Framework.Math
                         args[i] = Math.Log(Convert.ToDouble(args[i].Substring(1))).ToString();
                         break;
                     case 'E': //Natural Log - Ln()
-                        args[i] = Math.Log(Convert.ToDouble(args[i].Substring(1)),Math.E).ToString();
+                        args[i] = Math.Log(Convert.ToDouble(args[i].Substring(1)), Math.E).ToString();
                         break;
                     case 'F': //Sec
-                        args[i] = (1/Math.Cos(Convert.ToDouble(args[i].Substring(1)))).ToString();
+                        args[i] = (1 / Math.Cos(Convert.ToDouble(args[i].Substring(1)))).ToString();
                         break;
                     case 'G': //CSC()
-                        args[i] = (1/Math.Sin(Convert.ToDouble(args[i].Substring(1)))).ToString();
+                        args[i] = (1 / Math.Sin(Convert.ToDouble(args[i].Substring(1)))).ToString();
                         break;
                     case 'H': //COT()
-                        args[i] = (1/Math.Tan(Convert.ToDouble(args[i].Substring(1)))).ToString();
+                        args[i] = (1 / Math.Tan(Convert.ToDouble(args[i].Substring(1)))).ToString();
                         break;
                     case 'I': //The sign of the number
                         args[i] = Math.Sign(Convert.ToDouble(args[i].Substring(1))).ToString();
@@ -191,7 +191,7 @@ namespace OpenMobile.Framework.Math
                 }
                 if (args[i].Contains("L") == true)
                 { //Bit Shift Left
-                    string[] parts=args[i].Split(new char[]{'L'});
+                    string[] parts = args[i].Split(new char[] { 'L' });
                     args[i] = (Convert.ToInt32(parts[0]) << Convert.ToInt32(parts[1])).ToString();
                 }
                 if (args[i].Contains("R") == true)
@@ -204,7 +204,7 @@ namespace OpenMobile.Framework.Math
             //Order of operations says to do exponents first
             for (int i = 0; i < op.Count; i++)
             {
-                if (op[i]=='^')
+                if (op[i] == '^')
                 {
                     args[i] = Math.Pow(Convert.ToDouble(args[i]), Convert.ToDouble(args[i + 1])).ToString();
                     args.RemoveAt(i + 1);
@@ -214,16 +214,16 @@ namespace OpenMobile.Framework.Math
             }
 
             //Followed by multiplication and division
-            for (int i = 0; i < op.Count;i++)
+            for (int i = 0; i < op.Count; i++)
             {
-                if (op[i]== '*')
+                if (op[i] == '*')
                 {
                     args[i] = (Convert.ToDouble(args[i]) * Convert.ToDouble(args[i + 1])).ToString();
                     args.RemoveAt(i + 1);
                     op.RemoveAt(i);
                     i = i - 1;
                 }
-                else if (op[i]=='/')
+                else if (op[i] == '/')
                 {
                     args[i] = (Convert.ToDouble(args[i]) / Convert.ToDouble(args[i + 1])).ToString();
                     args.RemoveAt(i + 1);
@@ -234,13 +234,14 @@ namespace OpenMobile.Framework.Math
             //Followed by addition or subtraction
             for (int i = 0; i < op.Count; i++)
             {
-                if (op[i]== '+'){
+                if (op[i] == '+')
+                {
                     args[i] = (Convert.ToDouble(args[i]) + Convert.ToDouble(args[i + 1])).ToString();
                     args.RemoveAt(i + 1);
                     op.RemoveAt(i);
                     i = i - 1;
                 }
-                else if(op[i]== '-')
+                else if (op[i] == '-')
                 {
                     args[i] = (Convert.ToDouble(args[i]) - Convert.ToDouble(args[i + 1])).ToString();
                     args.RemoveAt(i + 1);
@@ -248,7 +249,7 @@ namespace OpenMobile.Framework.Math
                     i = i - 1;
                 }
             }
-                return ' ' + args[0] + ' ';
+            return ' ' + args[0] + ' ';
         }
     }
 }

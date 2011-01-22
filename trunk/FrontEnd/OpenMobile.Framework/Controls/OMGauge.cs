@@ -424,7 +424,7 @@ namespace OpenMobile.Controls
             int gloss = (int)(glossinessAlpha / 3);
             gradientBrush =
                 new LinearGradientBrush(glossRect,
-                System.Drawing.Color.Transparent, System.Drawing.Color.FromArgb(gloss, BackColor.R,BackColor.G,BackColor.B),
+                System.Drawing.Color.Transparent, System.Drawing.Color.FromArgb(gloss, BackColor.R, BackColor.G, BackColor.B),
                 LinearGradientMode.Vertical);
             g.FillEllipse(gradientBrush, glossRect);
         }
@@ -486,7 +486,7 @@ namespace OpenMobile.Controls
                 System.Drawing.StringFormat format = new System.Drawing.StringFormat();
                 tx = (float)(cX + (radius - Width / 10) * System.Math.Cos(currentAngle));
                 ty = (float)(cY - shift + (radius - Width / 10) * System.Math.Sin(currentAngle));
-                System.Drawing.Brush stringPen = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(ForeColor.A,ForeColor.R,ForeColor.G,ForeColor.B));
+                System.Drawing.Brush stringPen = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(ForeColor.A, ForeColor.R, ForeColor.G, ForeColor.B));
                 System.Drawing.StringFormat strFormat = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoClip);
                 strFormat.Alignment = System.Drawing.StringAlignment.Center;
                 System.Drawing.Font f = new System.Drawing.Font(font.Name, (float)(this.Width / 23), (System.Drawing.FontStyle)this.Font.Style);
@@ -902,7 +902,7 @@ namespace OpenMobile.Controls
             g.DrawImage(backgroundImg, controlLeft, controlTop, controlWidth, controlHeight);
 
             //Draw Digital Value
-            Rectangle digiFRect = new Rectangle(this.Left+this.Width / 2 - this.width / 7,this.Top+ (int)(this.height / 1.18), this.width / 4, this.Height / 12);
+            Rectangle digiFRect = new Rectangle(this.Left + this.Width / 2 - this.width / 7, this.Top + (int)(this.height / 1.18), this.width / 4, this.Height / 12);
             g.FillRectangle(new Brush(Color.FromArgb(30, Color.Gray)), (this.Left + (float)this.Width / 2F - (float)this.width / 5F), (this.Top + (float)this.height / 1.2F), ((float)this.width / 2.5F), ((float)this.Height / 9F));
             DisplayNumber(g, this.currentValue, digiFRect);
 

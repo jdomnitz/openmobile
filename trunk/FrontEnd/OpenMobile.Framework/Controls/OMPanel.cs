@@ -31,7 +31,7 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMPanel
     {
-        private List<OMControl> containedControls=new List<OMControl>();
+        private List<OMControl> containedControls = new List<OMControl>();
         private imageItem background;
         /// <summary>
         /// Request a screen refresh
@@ -94,7 +94,7 @@ namespace OpenMobile.Controls
                 return;
             if (changeParent)
                 control.Parent = this;
-            control.UpdateThisControl +=raiseUpdate;
+            control.UpdateThisControl += raiseUpdate;
             containedControls.Add(control);
             raiseUpdate(false);
         }
@@ -113,7 +113,7 @@ namespace OpenMobile.Controls
         {
             control.Parent = this;
             control.UpdateThisControl += raiseUpdate;
-            containedControls.Insert(0,control);
+            containedControls.Insert(0, control);
             raiseUpdate(false);
         }
 
@@ -187,14 +187,14 @@ namespace OpenMobile.Controls
             switch (BackgroundType)
             {
                 case backgroundStyle.Gradiant:
-                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp*BackgroundColor1.A),BackgroundColor1), Color.FromArgb((int)(tmp*BackgroundColor2.A),BackgroundColor2), Gradient.Vertical), 0, 0, 1000, 600);
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * BackgroundColor1.A), BackgroundColor1), Color.FromArgb((int)(tmp * BackgroundColor2.A), BackgroundColor2), Gradient.Vertical), 0, 0, 1000, 600);
                     break;
                 case backgroundStyle.SolidColor:
-                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp*BackgroundColor1.A), BackgroundColor1)),0,0,1000,600);
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * BackgroundColor1.A), BackgroundColor1)), 0, 0, 1000, 600);
                     break;
                 case backgroundStyle.Image:
                     if (BackgroundImage.image != null)
-                        g.DrawImage(BackgroundImage.image, new Rectangle(0, 0, 1000, 600), 0, 0, BackgroundImage.image.Width, BackgroundImage.image.Height,tmp);
+                        g.DrawImage(BackgroundImage.image, new Rectangle(0, 0, 1000, 600), 0, 0, BackgroundImage.image.Width, BackgroundImage.image.Height, tmp);
                     break;
             }
             for (int i = 0; i < containedControls.Count; i++)
@@ -204,7 +204,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The panel priority (used to set panel layer)
         /// </summary>
-        public ePriority Priority=ePriority.Normal;
+        public ePriority Priority = ePriority.Normal;
         /// <summary>
         /// If true, transitionFromAll does not effect this panel
         /// </summary>
@@ -224,9 +224,9 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public OMPanel Clone()
         {
-            OMPanel two= (OMPanel)this.MemberwiseClone();
+            OMPanel two = (OMPanel)this.MemberwiseClone();
             two.containedControls = new List<OMControl>(this.containedControls.Capacity);
-            for (int i=0;i<containedControls.Count;i++)
+            for (int i = 0; i < containedControls.Count; i++)
             {
                 two.addControl((OMControl)this.containedControls[i].Clone());
                 two[two.controlCount - 1].Parent = two;
@@ -245,10 +245,12 @@ namespace OpenMobile.Controls
         /// <returns>The requested control</returns>
         public OMControl getControl(int index)
         {
-            if ((index>=0)&&(index < containedControls.Count))
+            if ((index >= 0) && (index < containedControls.Count))
             {
                 return containedControls[index];
-            }else{
+            }
+            else
+            {
                 return null;
             }
         }
@@ -264,9 +266,9 @@ namespace OpenMobile.Controls
             }
         }
 
-        private Color color1=Color.DarkBlue;
-        private Color color2=Color.MediumSlateBlue;
-        
+        private Color color1 = Color.DarkBlue;
+        private Color color2 = Color.MediumSlateBlue;
+
         /// <summary>
         /// The panels background color
         /// </summary>
@@ -321,7 +323,7 @@ namespace OpenMobile.Controls
         /// </summary>
         public imageItem BackgroundImage
         {
-            get 
+            get
             {
                 return background;
             }
@@ -538,7 +540,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public OMControl controlAtPoint(Point p)
         {
-            for (int i = containedControls.Count - 1; i >= 0;i--)
+            for (int i = containedControls.Count - 1; i >= 0; i--)
                 if (containedControls[i].toRegion().Contains(p))
                     return containedControls[i];
             return null;

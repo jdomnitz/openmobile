@@ -27,100 +27,100 @@ using System.Reflection;
 namespace OpenMobile
 {
     public sealed class HalInterface
+    {
+        System.Net.Sockets.UdpClient receive;
+        System.Net.Sockets.UdpClient send;
+        public string[] volume;
+        public string[] brightness;
+        private bool isDisposed;
+        public HalInterface()
         {
-            System.Net.Sockets.UdpClient receive;
-            System.Net.Sockets.UdpClient send;
-            public string[] volume;
-            public string[] brightness;
-            private bool isDisposed;
-            public HalInterface()
+#if WINDOWS
+            if (Configuration.RunningOnWindows)
             {
-                #if WINDOWS
-			    if (Configuration.RunningOnWindows)
-			    {
-                    if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", String.Empty)), "OMHal.exe"), String.Empty, false))
-                        Core.theHost.sendMessage("OMDebug", "HalInterface", "Unable to start HAL!");
-			    }
-                #endif
-                #if LINUX
-                #if WINDOWS
-			    else 
-                #endif
-                if(Configuration.RunningOnLinux)
-			    {
+                if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", String.Empty)), "OMHal.exe"), String.Empty, false))
+                    Core.theHost.sendMessage("OMDebug", "HalInterface", "Unable to start HAL!");
+            }
+#endif
+#if LINUX
+#if WINDOWS
+            else
+#endif
+                if (Configuration.RunningOnLinux)
+                {
                     if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:", String.Empty)), "OMHal.exe"), String.Empty, false))
                         Core.theHost.sendMessage("OMDebug", "HalInterface", "Unable to start HAL!");
-			    }
-                #endif
-                receive = new System.Net.Sockets.UdpClient(8550);
-                receive.BeginReceive(recv, null);
-                send = new System.Net.Sockets.UdpClient("127.0.0.1", 8549);
+                }
+#endif
+            receive = new System.Net.Sockets.UdpClient(8550);
+            receive.BeginReceive(recv, null);
+            send = new System.Net.Sockets.UdpClient("127.0.0.1", 8549);
+        }
+        public void snd(string text)
+        {
+            try
+            {
+                if (!isDisposed)
+                    send.Send(ASCIIEncoding.ASCII.GetBytes(text), text.Length);
             }
-            public void snd(string text)
+            catch (System.Net.Sockets.SocketException e)
             {
-                try
-                {
-                    if (!isDisposed)
-                        send.Send(ASCIIEncoding.ASCII.GetBytes(text), text.Length);
-                }
-                catch (System.Net.Sockets.SocketException e)
-                {
-                    Core.theHost.sendMessage("OMDebug", "HalInterface", e.Message);
-                }
-            }
-            void parse(string message)
-            {
-                string[] parts=message.Split(new char[]{'|'});
-                int i = int.Parse(parts[0]);
-                string arg1 = String.Empty, arg2 = String.Empty, arg3 = String.Empty;
-                if (parts.Length>3)
-                    arg3=parts[3];
-                if (parts.Length>2)
-                    arg2=parts[2];
-                if (parts.Length>1)
-                    arg1=parts[1];
-                if (i >= 0)
-                {
-                    if (i == 1)
-                        brightness = new string[] { arg1, arg2 };
-                    else if (i == 3)
-                        volume = new string[] { arg1, arg2 };
-                    else if (i == 200)
-                        Core.theHost.execute(eFunction.navigateToAddress, arg1);
-                    else if (i == 300)
-                        Core.theHost.raiseSystemEvent(eFunction.promptDialNumber, arg1, arg2, arg3);
-                    else
-                        Core.theHost.raiseSystemEvent((eFunction)Enum.Parse(typeof(eFunction), parts[0]), arg1, arg2, arg3);
-                }
-                else if (i == -1)
-                    Core.theHost.sendMessage(arg1, "OMHal", arg2);
-                else if(i == -2)
-                    Core.theHost.raisePowerEvent((ePowerEvent)Enum.Parse(typeof(ePowerEvent),arg1));
-                else if (i == -3)
-                    Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1),bool.Parse(arg2),arg3);
-            	else if (i == -4)
-					Core.theHost.raiseKeyPressEvent((eKeypressType)Enum.Parse(typeof(eKeypressType), arg1),new KeyboardKeyEventArgs((Key)Enum.Parse(typeof(Key), arg2)));
-			}
-            void recv(IAsyncResult res)
-            {
-                if (isDisposed)
-                    return;
-                IPEndPoint remote = new IPEndPoint(IPAddress.Any, 8549);
-                try
-                {
-                    parse(ASCIIEncoding.ASCII.GetString(receive.EndReceive(res, ref remote)));
-                }
-                catch (System.Net.Sockets.SocketException) { } //unknown xp bug on startup
-                finally
-                {
-                    if (!isDisposed)
-                        receive.BeginReceive(recv, null);
-                }
-            }
-            internal void close()
-            {
-                isDisposed = true;
-                receive.Close();
+                Core.theHost.sendMessage("OMDebug", "HalInterface", e.Message);
             }
         }
+        void parse(string message)
+        {
+            string[] parts = message.Split(new char[] { '|' });
+            int i = int.Parse(parts[0]);
+            string arg1 = String.Empty, arg2 = String.Empty, arg3 = String.Empty;
+            if (parts.Length > 3)
+                arg3 = parts[3];
+            if (parts.Length > 2)
+                arg2 = parts[2];
+            if (parts.Length > 1)
+                arg1 = parts[1];
+            if (i >= 0)
+            {
+                if (i == 1)
+                    brightness = new string[] { arg1, arg2 };
+                else if (i == 3)
+                    volume = new string[] { arg1, arg2 };
+                else if (i == 200)
+                    Core.theHost.execute(eFunction.navigateToAddress, arg1);
+                else if (i == 300)
+                    Core.theHost.raiseSystemEvent(eFunction.promptDialNumber, arg1, arg2, arg3);
+                else
+                    Core.theHost.raiseSystemEvent((eFunction)Enum.Parse(typeof(eFunction), parts[0]), arg1, arg2, arg3);
+            }
+            else if (i == -1)
+                Core.theHost.sendMessage(arg1, "OMHal", arg2);
+            else if (i == -2)
+                Core.theHost.raisePowerEvent((ePowerEvent)Enum.Parse(typeof(ePowerEvent), arg1));
+            else if (i == -3)
+                Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1), bool.Parse(arg2), arg3);
+            else if (i == -4)
+                Core.theHost.raiseKeyPressEvent((eKeypressType)Enum.Parse(typeof(eKeypressType), arg1), new KeyboardKeyEventArgs((Key)Enum.Parse(typeof(Key), arg2)));
+        }
+        void recv(IAsyncResult res)
+        {
+            if (isDisposed)
+                return;
+            IPEndPoint remote = new IPEndPoint(IPAddress.Any, 8549);
+            try
+            {
+                parse(ASCIIEncoding.ASCII.GetString(receive.EndReceive(res, ref remote)));
+            }
+            catch (System.Net.Sockets.SocketException) { } //unknown xp bug on startup
+            finally
+            {
+                if (!isDisposed)
+                    receive.BeginReceive(recv, null);
+            }
+        }
+        internal void close()
+        {
+            isDisposed = true;
+            receive.Close();
+        }
     }
+}

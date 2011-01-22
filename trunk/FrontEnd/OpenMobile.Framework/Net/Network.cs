@@ -35,7 +35,7 @@ namespace OpenMobile.Net
         /// <summary>
         /// The hostname of the local computer
         /// </summary>
-        public static string hostname=System.Net.Dns.GetHostName();
+        public static string hostname = System.Net.Dns.GetHostName();
         /// <summary>
         /// The Local IP Address of this computer
         /// </summary>
@@ -50,7 +50,7 @@ namespace OpenMobile.Net
             get
             {
                 if (available == 0)
-                    return (checkForInternet()==connectionStatus.InternetAccess);
+                    return (checkForInternet() == connectionStatus.InternetAccess);
                 else if (available == 2)
                     return true;
                 else
@@ -104,7 +104,7 @@ namespace OpenMobile.Net
         /// <param name="saveToPath">Can be relative or absolute</param>
         /// <param name="specialHeader"></param>
         /// <returns></returns>
-        public static bool downloadFile(string url, string saveToPath,string specialHeader)
+        public static bool downloadFile(string url, string saveToPath, string specialHeader)
         {
             try
             {
@@ -167,15 +167,15 @@ namespace OpenMobile.Net
             /// <summary>
             /// No internet access available
             /// </summary>
-            NoInternet=0,
+            NoInternet = 0,
             /// <summary>
             /// Internet access is being redirected...Most likely for a wifi login
             /// </summary>
-            LoginRequired=1,
+            LoginRequired = 1,
             /// <summary>
             /// Internet Access is available
             /// </summary>
-            InternetAccess=2
+            InternetAccess = 2
         }
         /// <summary>
         /// Checks the current network internet connection for internet access
@@ -193,7 +193,7 @@ namespace OpenMobile.Net
             }
             catch (System.Net.WebException)
             {
-                available=1;
+                available = 1;
                 return connectionStatus.NoInternet;
             }
             if (response.Headers["Server"] != "gws")
@@ -204,7 +204,7 @@ namespace OpenMobile.Net
             else
             {
                 response.Close();
-                available=2;
+                available = 2;
                 return connectionStatus.InternetAccess;
             }
         }

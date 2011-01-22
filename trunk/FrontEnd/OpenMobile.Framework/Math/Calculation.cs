@@ -166,7 +166,7 @@ namespace OpenMobile.Framework.Math
         /// <summary>
         /// Miles/US Gallon
         /// </summary>
-        milesPerGallonUS, 
+        milesPerGallonUS,
         /*
         /// <summary>
         /// KM/US Gallon
@@ -306,13 +306,13 @@ namespace OpenMobile.Framework.Math
                     value = value * 0.219969157;
                     break;
                 case fuelConsumptionTypes.milesPerGallonUS:
-                    value = value*0.425143707;
+                    value = value * 0.425143707;
                     break;
                 case fuelConsumptionTypes.milesPerLiter:
                     value = value * 1.609344;
                     break;
                 case fuelConsumptionTypes.litersPer100miles:
-                    value = 160.9344/value;
+                    value = 160.9344 / value;
                     break;
                 case fuelConsumptionTypes.gallonsUKPer100km:
                     value = 21.9969157 / value;
@@ -416,7 +416,7 @@ namespace OpenMobile.Framework.Math
                     value = value / 3.2808399;
                     break;
                 case distanceTypes.miles:
-                    value=value*1609.344;
+                    value = value * 1609.344;
                     break;
             }
             switch (target)
@@ -448,14 +448,14 @@ namespace OpenMobile.Framework.Math
         /// <returns></returns>
         public static double convertBytes(double value, byteTypes source, byteTypes target)
         {
-            if (source==target)
+            if (source == target)
                 return value;
             switch (source)
             {
                 case byteTypes.bytes:
                     break;
                 case byteTypes.kilobytes:
-                    value=value * 1024;
+                    value = value * 1024;
                     break;
                 case byteTypes.megabytes:
                     value = value * 1048576;
@@ -467,12 +467,12 @@ namespace OpenMobile.Framework.Math
                     value = value * 1099511627776;
                     break;
             }
-            switch(target)
+            switch (target)
             {
                 case byteTypes.bytes:
                     return value;
                 case byteTypes.kilobytes:
-                    return value/1024;
+                    return value / 1024;
                 case byteTypes.megabytes:
                     return value / 1048576;
                 case byteTypes.gigabytes:
@@ -481,7 +481,7 @@ namespace OpenMobile.Framework.Math
                     return value / 1099511627776;
 
             }
-          }
+        }
         /// <summary>
         /// Converts a size in the given unit of measure to the best unit for display.
         /// </summary>
@@ -536,7 +536,7 @@ namespace OpenMobile.Framework.Math
         /// <param name="longitude"></param>
         /// <param name="latitude"></param>
         /// <returns></returns>
-        public static DateTime getSunrise(double longitude,double latitude)
+        public static DateTime getSunrise(double longitude, double latitude)
         {
             DateTime sr = DateTime.Now;
             DateTime ss = DateTime.Now;

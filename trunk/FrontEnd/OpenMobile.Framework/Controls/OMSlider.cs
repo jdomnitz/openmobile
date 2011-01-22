@@ -27,12 +27,12 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A slider bar control
     /// </summary>
-    public class OMSlider:OMControl,IThrow,IMouse
+    public class OMSlider : OMControl, IThrow, IMouse
     {
         /// <summary>
         /// height of the slider bar
         /// </summary>
-        protected int sliderHeight=25;
+        protected int sliderHeight = 25;
         /// <summary>
         /// width of the slider bar
         /// </summary>
@@ -86,19 +86,19 @@ namespace OpenMobile.Controls
         /// <param name="h"></param>
         /// <param name="sHeight"></param>
         /// <param name="sWidth"></param>
-        public OMSlider(int x, int y, int w, int h,int sHeight,int sWidth)
+        public OMSlider(int x, int y, int w, int h, int sHeight, int sWidth)
         {
             left = x;
             top = y;
             width = w;
             sliderHeight = h;
-            height=sHeight;
+            height = sHeight;
             sliderWidth = sWidth;
         }
         /// <summary>
         /// Occurs when the slider value changes
         /// </summary>
-        public delegate void slidermoved(OMSlider sender,int screen);
+        public delegate void slidermoved(OMSlider sender, int screen);
         /// <summary>
         /// Occurs when the slider value changes
         /// </summary>
@@ -167,13 +167,13 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return (int)((((sliderPosition - (sliderWidth / 2))/ (float)(width - sliderWidth)) * (maximum-minimum)) + minimum);
+                return (int)((((sliderPosition - (sliderWidth / 2)) / (float)(width - sliderWidth)) * (maximum - minimum)) + minimum);
             }
             set
             {
                 if ((value >= minimum) && (value <= maximum))
                 {
-                    sliderPosition = (int)(((value - minimum) / (float)(maximum-minimum)) * (width - sliderWidth)) + (sliderWidth / 2);
+                    sliderPosition = (int)(((value - minimum) / (float)(maximum - minimum)) * (width - sliderWidth)) + (sliderWidth / 2);
                 }
             }
         }
@@ -186,7 +186,7 @@ namespace OpenMobile.Controls
             {
                 return sliderBar;
             }
-            set 
+            set
             {
                 sliderBar = value;
             }
@@ -216,7 +216,7 @@ namespace OpenMobile.Controls
             {
                 return slider;
             }
-            set 
+            set
             {
                 slider = value;
             }
@@ -233,8 +233,8 @@ namespace OpenMobile.Controls
             if (sliderTrackFull.image != null)
             {
                 Rectangle clip = g.Clip;
-                g.SetClipFast(left,top, sliderPosition, height);
-                g.DrawImage(sliderTrackFull.image, left-2, top, width+4, height);
+                g.SetClipFast(left, top, sliderPosition, height);
+                g.DrawImage(sliderTrackFull.image, left - 2, top, width + 4, height);
                 g.Clip = clip;
             }
             g.DrawImage(slider.image, left + sliderPosition - (sliderHeight / 2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight);
@@ -264,7 +264,7 @@ namespace OpenMobile.Controls
         /// <param name="StartLocation"></param>
         /// <param name="Cancel"></param>
         /// <param name="sf"></param>
-        public void MouseThrowStart(int screen, Point StartLocation,PointF sf, ref bool Cancel)
+        public void MouseThrowStart(int screen, Point StartLocation, PointF sf, ref bool Cancel)
         {
             dragged = true;
         }
@@ -275,7 +275,7 @@ namespace OpenMobile.Controls
         /// <param name="EndLocation"></param>
         public void MouseThrowEnd(int screen, Point EndLocation)
         {
-            dragged=false;
+            dragged = false;
         }
 
         #endregion
@@ -325,11 +325,11 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
-       public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
         {
             if (!dragged)
             {
-                sliderPosition = (int)(e.X/WidthScale)-left;
+                sliderPosition = (int)(e.X / WidthScale) - left;
                 if ((sliderPosition - (sliderWidth / 2)) < 0)
                     sliderPosition = (sliderWidth / 2);
                 if ((sliderPosition + (sliderWidth / 2)) > Width)

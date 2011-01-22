@@ -85,7 +85,7 @@ namespace OpenMobile
                 return eMediaType.MMSUrl;
             if (source.ToLower().StartsWith("cam") == true)
                 return eMediaType.LiveCamera;
-			if (source.ToLower().StartsWith("cdda:") == true)
+            if (source.ToLower().StartsWith("cdda:") == true)
                 return eMediaType.AudioCD;
             if (source.Contains(".") == true) //Check if its a file
             {
@@ -121,7 +121,7 @@ namespace OpenMobile
                     nextPosition[instance] = currentPosition[instance] + 1;
                 if (nextPosition[instance] == queued[instance].Count)
                     nextPosition[instance] = 0;
-                if ((queued[instance].Count>nextPosition[instance])&& (getPlayingMedia(instance).Location == queued[instance][nextPosition[instance]].Location))
+                if ((queued[instance].Count > nextPosition[instance]) && (getPlayingMedia(instance).Location == queued[instance][nextPosition[instance]].Location))
                 {
                     nextPosition[instance]++;
                     if (nextPosition[instance] == queued[instance].Count)
@@ -185,7 +185,7 @@ namespace OpenMobile
             if (devices == null)
                 if (!refreshDevices())
                     return 0;
-            return Array.FindIndex(devices, p => (p!=null)&&(p.Replace("  ", " ") == str)) + 1;
+            return Array.FindIndex(devices, p => (p != null) && (p.Replace("  ", " ") == str)) + 1;
         }
         private static bool refreshDevices()
         {
@@ -311,11 +311,11 @@ namespace OpenMobile
                 if (value == null)
                     return;
                 _location = value;
-                if ((_location == null) || (_location.City != value.City)||(_location.Street!=value.Street)||(_location.Zip!=value.Zip))
+                if ((_location == null) || (_location.City != value.City) || (_location.Street != value.Street) || (_location.Zip != value.Zip))
                     raiseNavigationEvent(eNavigationEvent.LocationChanged, _location.ToString());
             }
         }
-        public void SetVideoPosition(int instance,Rectangle videoArea)
+        public void SetVideoPosition(int instance, Rectangle videoArea)
         {
             if ((instance < 0) || (instance >= instanceCount))
                 return;
@@ -380,7 +380,7 @@ namespace OpenMobile
             img.Image = Core.theHost.getSkinImage("Lock");
             security.addControl(img);
             OMLabel label = new OMLabel(250, 200, 500, 115);
-            label.Text = pluginName + " is requesting access to the credentials cache to access your " + requestedAccess+".";
+            label.Text = pluginName + " is requesting access to the credentials cache to access your " + requestedAccess + ".";
             label.TextAlignment = Alignment.WordWrapTC;
             label.Font = new Font(Font.Arial, 22F);
             security.addControl(label);
@@ -402,7 +402,7 @@ namespace OpenMobile
             deny.Text = "Deny";
             deny.OnClick += security_OnClick;
             security.addControl(deny);
-            for(int i=0;i<ScreenCount;i++)
+            for (int i = 0; i < ScreenCount; i++)
             {
                 lock (Core.RenderingWindows[i])
                 {
@@ -423,7 +423,7 @@ namespace OpenMobile
                     Core.RenderingWindows[i].blockHome = false;
                 }
             }
-            if ((accept.Tag!=null)&&(accept.Tag.ToString() == "True"))
+            if ((accept.Tag != null) && (accept.Tag.ToString() == "True"))
                 return true;
             else
                 return false;
@@ -444,7 +444,7 @@ namespace OpenMobile
         {
             for (int i = 0; i < ScreenCount; i++)
                 if (!DisplayDevice.AvailableDisplays[i].Landscape)
-                    raiseSystemEvent(eFunction.screenOrientationChanged, i.ToString(), "Portrait",string.Empty);
+                    raiseSystemEvent(eFunction.screenOrientationChanged, i.ToString(), "Portrait", string.Empty);
             SandboxedThread.Asynchronous(loadPlaylists);
         }
         public void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
@@ -528,7 +528,7 @@ namespace OpenMobile
                     {
                         savePlaylists();
                         raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
-                        if (hal!=null)
+                        if (hal != null)
                             hal.close();
                     }
                     catch (Exception) { }
@@ -589,7 +589,7 @@ namespace OpenMobile
                         result = result & execute(eFunction.refreshData, p.pluginName);
                     }
                     return result;
-                    
+
             }
             return false;
         }
@@ -611,10 +611,10 @@ namespace OpenMobile
             using (PluginSettings s = new PluginSettings())
             {
                 bool res;
-                string dbname=s.getSetting("Default.MusicDatabase");
+                string dbname = s.getSetting("Default.MusicDatabase");
                 for (int i = 0; i < 8; i++)
                 {
-                    setPlaylist(Playlist.readPlaylistFromDB(this, "Current" + i.ToString(),dbname), i);
+                    setPlaylist(Playlist.readPlaylistFromDB(this, "Current" + i.ToString(), dbname), i);
                     if (bool.TryParse(s.getSetting("Media.Instance" + i.ToString() + ".Random"), out res))
                         setRandom(i, res);
                 }
@@ -1055,11 +1055,11 @@ namespace OpenMobile
                             raiseSystemEvent(eFunction.goBack, arg1, String.Empty, String.Empty);
                             return false;
                         }
-                        if ((history.Count(ret)==0)||(history.Peek(ret).pluginName == null))
+                        if ((history.Count(ret) == 0) || (history.Peek(ret).pluginName == null))
                             return false;
                         execute(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
-                        while((history.Count(ret)>1)&&(history.Peek(ret).Equals(history.CurrentItem(ret))))
+                        while ((history.Count(ret) > 1) && (history.Peek(ret).Equals(history.CurrentItem(ret))))
                             history.Dequeue(ret);
                         //This part is done manually to prevent adding it to the history
                         OMPanel k = getPanelByName(history.Peek(ret).pluginName, history.Peek(ret).panelName, ret);
@@ -1163,7 +1163,7 @@ namespace OpenMobile
                             if (currentMediaPlayer[ret] == null)
                                 return false;
                             float pos;
-                            if(float.TryParse(arg2,out pos))
+                            if (float.TryParse(arg2, out pos))
                                 return currentMediaPlayer[ret].setPosition(ret, pos);
                         }
                         return false;
@@ -1177,7 +1177,7 @@ namespace OpenMobile
                             if (currentMediaPlayer[ret] == null)
                                 return false;
                             float speed;
-                            if (float.TryParse(arg2,out speed))
+                            if (float.TryParse(arg2, out speed))
                                 return currentMediaPlayer[ret].setPlaybackSpeed(ret, speed);
                         }
                         return false;
@@ -1191,13 +1191,13 @@ namespace OpenMobile
                             if (currentTunedContent[ret] == null)
                                 return false;
                             raiseMediaEvent(eFunction.setPlayerVolume, ret, arg2);
-                            if(int.TryParse(arg2,out ret2))
+                            if (int.TryParse(arg2, out ret2))
                                 return currentTunedContent[ret].setVolume(ret, ret2);
                         }
                         else
                         {
                             raiseMediaEvent(eFunction.setPlayerVolume, ret, arg2);
-                            if (int.TryParse(arg2,out ret2))
+                            if (int.TryParse(arg2, out ret2))
                                 return currentMediaPlayer[ret].setVolume(ret, ret2);
                         }
                     }
@@ -1242,7 +1242,7 @@ namespace OpenMobile
                     }
                     return false;
                 case eFunction.connectToInternet:
-                    return Net.Connections.connect(this, arg1,arg2);
+                    return Net.Connections.connect(this, arg1, arg2);
                 case eFunction.setSystemVolume:
                     if (int.TryParse(arg1, out ret) == true)
                     {
@@ -1285,7 +1285,7 @@ namespace OpenMobile
                             return false;
                         if (int.TryParse(arg2, out ret2) == false)
                             return false;
-                        if ((ret2 == 0) && ((Environment.OSVersion.Version.Major < 6)||ret>0))
+                        if ((ret2 == 0) && ((Environment.OSVersion.Version.Major < 6) || ret > 0))
                             Core.RenderingWindows[ret].FadeOut();
                         hal.snd("40|" + arg1 + "|" + arg2);
                         return true;
@@ -1332,7 +1332,7 @@ namespace OpenMobile
                 {
                     execute(eFunction.unloadTunedContent, ret.ToString());
                     execute(eFunction.loadTunedContent, ret.ToString(), plugins[i].pluginName);
-                    if ((currentTunedContent[ret]!=null)&&(currentTunedContent[ret].tuneTo(ret, arg2) == true))
+                    if ((currentTunedContent[ret] != null) && (currentTunedContent[ret].tuneTo(ret, arg2) == true))
                         return true;
                 }
             }
@@ -1435,10 +1435,10 @@ namespace OpenMobile
                 if (message == "Identify")
                     for (int i = 0; i < screenCount; i++)
                         Core.RenderingWindows[i].PaintIdentity();
-				else if(message=="MakeCurrent")
-					Core.RenderingWindows[0].MakeCurrent();
-				else if(message=="KillCurrent")
-					Core.RenderingWindows[0].MakeCurrent(null);
+                else if (message == "MakeCurrent")
+                    Core.RenderingWindows[0].MakeCurrent();
+                else if (message == "KillCurrent")
+                    Core.RenderingWindows[0].MakeCurrent(null);
                 return true;
             }
             else if (to == "OMHal")
@@ -1523,7 +1523,7 @@ namespace OpenMobile
         {
             try
             {
-                if (OnNavigationEvent!=null)
+                if (OnNavigationEvent != null)
                     OnNavigationEvent(type, arg);
             }
             catch (Exception e) { SandboxedThread.Handle(e); }
@@ -1542,12 +1542,12 @@ namespace OpenMobile
             if (OnMediaEvent != null)
                 SandboxedThread.Asynchronous(delegate() { OnMediaEvent(e, instance, arg); });
             if (e == eFunction.nextMedia)
-                while ((!execute(eFunction.nextMedia, instance.ToString()))&&(queued[instance].Count>1))
+                while ((!execute(eFunction.nextMedia, instance.ToString())) && (queued[instance].Count > 1))
                     Thread.Sleep(200);
             else if (e == eFunction.showVideoWindow)
             {
-                for(int i=0;i<screenCount;i++)
-                    if (instanceForScreen(i)==instance)
+                for (int i = 0; i < screenCount; i++)
+                    if (instanceForScreen(i) == instance)
                         Core.RenderingWindows[i].VideoPlaying = true;
             }
             else if (e == eFunction.hideVideoWindow)
@@ -1632,7 +1632,7 @@ namespace OpenMobile
                 {
                     try
                     {
-                        imageItem item=new imageItem(OImage.FromFile(Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png")));
+                        imageItem item = new imageItem(OImage.FromFile(Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png")));
                         item.name = imageName;
                         return item;
                     }
@@ -1752,7 +1752,7 @@ namespace OpenMobile
                     data = cInf;
                     return;
                 case eGetData.GetAudioDevices:
-                    data= devices;
+                    data = devices;
                     return;
                 case eGetData.GetAvailableSkins:
                     string[] ret = Directory.GetDirectories(Path.Combine(Application.StartupPath, "Skins"));
@@ -1832,7 +1832,7 @@ namespace OpenMobile
                         {
                             if (hal.volume[0] == param)
                             {
-                                if(int.TryParse(hal.volume[1],out ret))
+                                if (int.TryParse(hal.volume[1], out ret))
                                     data = ret;
                                 hal.volume = null;
                             }

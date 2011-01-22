@@ -31,7 +31,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A listbox control
     /// </summary>
-    public class OMList : OMLabel, IClickable, IHighlightable, IKey, IList, IThrow, IMouse,IKeyboard
+    public class OMList : OMLabel, IClickable, IHighlightable, IKey, IList, IThrow, IMouse, IKeyboard
     {
         /// <summary>
         /// Occurs when the list index changes
@@ -157,9 +157,9 @@ namespace OpenMobile.Controls
         {
             if ((index < -1) || (index >= items.Count))
                 return;
-            if ((selectedIndex >= 0)&&(selectedIndex<items.Count))
+            if ((selectedIndex >= 0) && (selectedIndex < items.Count))
                 items[selectedIndex].subitemTex = items[selectedIndex].textTex = null;
-            if (index>=0)
+            if (index >= 0)
                 items[index].textTex = items[index].subitemTex = null;
             selectedIndex = index;
             if (!selectFollowsHighlight)    // this is already done in the highlight function if selectFollowsHighilight is true
@@ -334,7 +334,7 @@ namespace OpenMobile.Controls
                 return this[highlightedIndex];
             }
 
-        } 
+        }
         /// <summary>
         /// Only add this item if it does not already exist
         /// </summary>
@@ -504,7 +504,7 @@ namespace OpenMobile.Controls
             set
             {
                 style = value;
-                if ((style == eListStyle.MultiList)||(style==eListStyle.MultiListText))
+                if ((style == eListStyle.MultiList) || (style == eListStyle.MultiListText))
                     textAlignment = OpenMobile.Graphics.Alignment.TopLeft;
             }
         }
@@ -586,7 +586,7 @@ namespace OpenMobile.Controls
         {
             lock (g)
             {
-                if ((width == 0)||(height==0))
+                if ((width == 0) || (height == 0))
                     return;
                 float tmp = 1;
                 if (this.Mode == eModeType.transitioningIn)
@@ -594,12 +594,12 @@ namespace OpenMobile.Controls
                 else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                     tmp = e.globalTransitionOut;
                 Rectangle r = g.Clip; //Save the drawing size
-                g.Clip=this.toRegion(); //But only draw out control
+                g.Clip = this.toRegion(); //But only draw out control
                 if (background != Color.Transparent)
-                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)),Left + 1, Top + 1, Width - 2, Height - 2);
-                
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)), Left + 1, Top + 1, Width - 2, Height - 2);
+
                 int minListHeight = (int)(Graphics.Graphics.MeasureString("A", Font).Height + 0.5); //Round up
-                if (((style == eListStyle.MultiList)||(style==eListStyle.MultiListText)) && (items.Count > 0)&&(items[0].subitemFormat!=null))
+                if (((style == eListStyle.MultiList) || (style == eListStyle.MultiListText)) && (items.Count > 0) && (items[0].subitemFormat != null))
                     minListHeight += (int)(Graphics.Graphics.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
                 if (listHeight < minListHeight)
                     listHeight = minListHeight;
@@ -630,14 +630,14 @@ namespace OpenMobile.Controls
 
                 for (int i = listStart; i <= (count + listStart + 1); i++)
                 {
-                    if ((width == 0)||(height==0)||(listHeight==0)) //Failsafe -> 1/100 chance that the width changes during rendering
+                    if ((width == 0) || (height == 0) || (listHeight == 0)) //Failsafe -> 1/100 chance that the width changes during rendering
                         return;
                     Rectangle rect = new Rectangle(Left, Top + (moved % listHeight) + ((i - listStart) * listHeight), this.Width, listHeight);
                     switch (style)
                     {
                         case eListStyle.RoundedImageList:
                         case eListStyle.RoundedTextList:
-                            if ((selectedIndex == i)&&(focused))
+                            if ((selectedIndex == i) && (focused))
                                 g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), Gradient.Vertical), rect, 10);
                             else
                                 g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), Gradient.Vertical), rect, 10);
@@ -652,7 +652,7 @@ namespace OpenMobile.Controls
                         case eListStyle.TransparentImageList:
                         case eListStyle.TransparentTextList:
                             if ((selectedIndex == i) && (focused))
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A),selectedItemColor1)), rect);
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), rect);
                             break;
                         case eListStyle.DroidStyleImage:
                         case eListStyle.DroidStyleText:
@@ -667,19 +667,19 @@ namespace OpenMobile.Controls
                             if (i > 0)
                             {
                                 int t = ((rect.Top % 2) == 0) ? 1 : 0;
-                                g.DrawLine(new Pen(Color.FromArgb((int)(tmp*background.A), background), 2F), rect.Left, rect.Top-t, rect.Left + rect.Width, rect.Top-t);
+                                g.DrawLine(new Pen(Color.FromArgb((int)(tmp * background.A), background), 2F), rect.Left, rect.Top - t, rect.Left + rect.Width, rect.Top - t);
                             }
                             if ((selectedIndex == i) && (focused))
                                 g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), rect.Left, rect.Top, rect.Width, rect.Height);
                             else
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)),rect.Left, rect.Top, rect.Width, rect.Height);
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), rect.Left, rect.Top, rect.Width, rect.Height);
                             break;
                     }
                     if ((i < items.Count) && (i >= 0))
                     {
                         using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
                         {
-                            if ((ListStyle == eListStyle.MultiList)||(ListStyle==eListStyle.MultiListText))
+                            if ((ListStyle == eListStyle.MultiList) || (ListStyle == eListStyle.MultiListText))
                             {
                                 if (items[i].subitemFormat != null)
                                 {
@@ -720,7 +720,7 @@ namespace OpenMobile.Controls
                             }
                             else
                             {
-                                if ((i<items.Count)&&(items[i].textTex == null))
+                                if ((i < items.Count) && (items[i].textTex == null))
                                 {
                                     if (targetWidth == 0)
                                         targetWidth = width;
@@ -731,20 +731,20 @@ namespace OpenMobile.Controls
                                     else
                                         items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
                                 }
-                                g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height,tmp);
+                                g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, tmp);
                             }
                         }
                         if (listViewItemOffset == 0)
                             continue;
                         if ((items.Count > i) && (items[i].image != null)) //rare thread collision
-                            g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height-5, rect.Height - imgSze, tmp);
+                            g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height - 5, rect.Height - imgSze, tmp);
                     }
                 }
                 g.Clip = r; //Reset the clip size for the rest of the controls
-                if ((scrollbars)&&(count<items.Count))
+                if ((scrollbars) && (count < items.Count))
                 {
-                    float nheight = height*((float)height) / (listHeight * items.Count);
-                    float ntop = top+height * ((float)-moved) / (listHeight * items.Count);
+                    float nheight = height * ((float)height) / (listHeight * items.Count);
+                    float ntop = top + height * ((float)-moved) / (listHeight * items.Count);
                     g.FillRoundRectangle(new Brush(color), left + width - 5, (int)ntop, 10, (int)nheight, 6);
                 }
             }
@@ -939,7 +939,7 @@ namespace OpenMobile.Controls
 
             // Throw event
             if (HighlightedIndexChanged != null)
-                SafeThread.Asynchronous(delegate() { HighlightedIndexChanged(this, this.containingScreen()); },null);
+                SafeThread.Asynchronous(delegate() { HighlightedIndexChanged(this, this.containingScreen()); }, null);
         }
         private int lastSelected = -1;
         /// <summary>
@@ -976,7 +976,7 @@ namespace OpenMobile.Controls
 
         #region IKeyboard Members
 
-        bool focused=true;
+        bool focused = true;
         /// <summary>
         /// Set keyboard focus
         /// </summary>
@@ -985,10 +985,10 @@ namespace OpenMobile.Controls
         public void KeyboardEnter(int screen)
         {
             focused = true;
-            if (selectedIndex>-1)
+            if (selectedIndex > -1)
                 items[selectedIndex].textTex = null;
             if (selectedIndex == -1)
-                Select(0,false,screen);
+                Select(0, false, screen);
         }
         /// <summary>
         /// Lose keyboard focus

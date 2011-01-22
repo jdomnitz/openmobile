@@ -30,7 +30,7 @@ namespace OpenMobile
     /// <summary>
     /// The rendering mode
     /// </summary>
-    public enum eModeType:byte
+    public enum eModeType : byte
     {
         /// <summary>
         /// Normal
@@ -47,7 +47,7 @@ namespace OpenMobile
         /// <summary>
         /// Clicked and Transitioning Out
         /// </summary>
-        ClickedAndTransitioningOut=3,
+        ClickedAndTransitioningOut = 3,
         /// <summary>
         /// Used by the skin designer
         /// </summary>
@@ -71,16 +71,16 @@ namespace OpenMobile
         /// <summary>
         /// Waiting for other controls to transition
         /// </summary>
-        transitionLock=9, //When the same control is loaded and unloaded - do nothing
+        transitionLock = 9, //When the same control is loaded and unloaded - do nothing
         /// <summary>
         /// A gesture is being drawn
         /// </summary>
-        gesturing=10
+        gesturing = 10
     };
     /// <summary>
     /// The style list to render
     /// </summary>
-    public enum eListStyle:byte
+    public enum eListStyle : byte
     {
         /// <summary>
         /// A text only list
@@ -101,32 +101,32 @@ namespace OpenMobile
         /// <summary>
         /// A Text list with a transparent background
         /// </summary>
-        TransparentTextList=4,
+        TransparentTextList = 4,
         /// <summary>
         /// A text and image list with a transparent background
         /// </summary>
-        TransparentImageList=5,
+        TransparentImageList = 5,
         /// <summary>
         /// A custom text list style
         /// </summary>
-        DroidStyleText=6,
+        DroidStyleText = 6,
         /// <summary>
         /// A custom text and image style
         /// </summary>
-        DroidStyleImage=7,
+        DroidStyleImage = 7,
         /// <summary>
         /// A custom text list style with subitem support
         /// </summary>
-        MultiListText=8,
+        MultiListText = 8,
         /// <summary>
         /// A custom text list style with subitem support
         /// </summary>
-        MultiList=9
+        MultiList = 9
     }
     /// <summary>
     /// An item in an OMList
     /// </summary>
-    public sealed class OMListItem:IComparable
+    public sealed class OMListItem : IComparable
     {
         /// <summary>
         /// Format information for a list subitem
@@ -207,7 +207,7 @@ namespace OpenMobile
         /// </summary>
         /// <param name="text"></param>
         /// <param name="image"></param>
-        public OMListItem(string text,OImage image)
+        public OMListItem(string text, OImage image)
         {
             this.text = text;
             this.image = image;
@@ -220,7 +220,7 @@ namespace OpenMobile
         public OMListItem(string text, string subitm)
         {
             this.text = text;
-            this.subItem=subitm;
+            this.subItem = subitm;
             if (this.subItem != null)
                 this.subitemFormat = new subItemFormat();
         }
@@ -245,7 +245,7 @@ namespace OpenMobile
             this.text = text;
             this.subItem = subitem;
             this.tag = tag;
-            if (this.subItem!=null)
+            if (this.subItem != null)
                 this.subitemFormat = new subItemFormat();
         }
         /// <summary>
@@ -309,7 +309,7 @@ namespace OpenMobile
         /// <param name="img"></param>
         /// <param name="subitemFormat"></param>
         /// <param name="tag"></param>
-        public OMListItem(string text, string subitem, OImage img, subItemFormat subitemFormat,object tag)//Added by Borte
+        public OMListItem(string text, string subitem, OImage img, subItemFormat subitemFormat, object tag)//Added by Borte
         {
             this.text = text;
             this.subItem = subitem;
@@ -326,7 +326,7 @@ namespace OpenMobile
         /// <param name="subitemFormat"></param>
         /// <param name="tag"></param>
         /// <param name="sort"></param>
-        public OMListItem(string text, string subitem, OImage img, subItemFormat subitemFormat, object tag,string sort)
+        public OMListItem(string text, string subitem, OImage img, subItemFormat subitemFormat, object tag, string sort)
         {
             this.text = text;
             this.subItem = subitem;
@@ -351,8 +351,8 @@ namespace OpenMobile
 
         #endregion
     }
-    
-    
+
+
     /// <summary>
     /// An Open Mobile representation of an image
     /// </summary>
@@ -464,7 +464,7 @@ namespace OpenMobile
     /// <summary>
     /// The button click transition
     /// </summary>
-    public enum eButtonTransition:byte
+    public enum eButtonTransition : byte
     {
         /// <summary>
         /// None
@@ -477,26 +477,26 @@ namespace OpenMobile
         /// <summary>
         /// Move forward into the screen
         /// </summary>
-        IntoScreen=2
-        };
+        IntoScreen = 2
+    };
 
     /// <summary>
     /// The type of transition between panels
     /// </summary>
-    public enum eGlobalTransition:short
+    public enum eGlobalTransition : short
     {
         /// <summary>
         /// Panel A is unloaded and Panel B is loaded (more efficient then the load and unload functions)
         /// </summary>
-        None=0,
+        None = 0,
         /// <summary>
         /// Panel A fades out while Panel B fades in
         /// </summary>
-        Crossfade=1,
+        Crossfade = 1,
         /// <summary>
         /// Panel A slides up and off the screen, Panel B slides up and onto the screen
         /// </summary>
-        SlideUp=2,
+        SlideUp = 2,
         /// <summary>
         /// Panel A slides up and off the screen, Panel B slides up and onto the screen
         /// </summary>
@@ -512,11 +512,11 @@ namespace OpenMobile
         /// <summary>
         /// Panel A fades out while Panel B fades in (twice as fast as a regular crossfade)
         /// </summary>
-        CrossfadeFast=6,
+        CrossfadeFast = 6,
         /// <summary>
         /// Cube Right
         /// </summary>
-        CubeRight=7
+        CubeRight = 7
     }
 
     /// <summary>
@@ -527,48 +527,48 @@ namespace OpenMobile
         /// <summary>
         /// Unknown
         /// </summary>
-        Unknown=0,
+        Unknown = 0,
         /// <summary>
         /// Key was released
         /// </summary>
-        KeyUp=1,
+        KeyUp = 1,
         /// <summary>
         /// Key was pressed
         /// </summary>
-        KeyDown=2
+        KeyDown = 2
     }
 
     /// <summary>
     /// Gloabl Functions
     /// </summary>
-    public enum eFunction:short
+    public enum eFunction : short
     {
         /// <summary>
         /// Unknown Function or Function Handled
         /// </summary>
-        None=0,
+        None = 0,
         /// <summary>
         /// Rolls back and cancels a transition
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen</para>
         /// </summary>
-        CancelTransition=1,
+        CancelTransition = 1,
         /// <summary>
         /// A data provider has completed an update
         /// <para>---------------------------------------</para>
         /// <para>Arg1: (Optional) Provider Name</para>
         /// </summary>
-        dataUpdated=2,
+        dataUpdated = 2,
         /// <summary>
         /// Unloads all loaded panels except the UI
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// </summary>
-        TransitionFromAny=3,
+        TransitionFromAny = 3,
         /// <summary>
         /// Occurs each time the hour changed
         /// </summary>
-        hourChanged=4,
+        hourChanged = 4,
         /// <summary>
         /// Load a panel and prepare to transition to it
         /// <para>---------------------------------------</para>
@@ -576,18 +576,18 @@ namespace OpenMobile
         /// <para>Arg2: Plugin Name</para>
         /// <para>Arg3: (Optional) Panel Name</para>
         /// </summary>
-        TransitionToPanel=5,
+        TransitionToPanel = 5,
         /// <summary>
         /// Occurs at the start of a new day
         /// </summary>
-        dateChanged=6,
+        dateChanged = 6,
         /// <summary>
         /// Transition between the previously specified panels
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// <para>Arg2: <i>(Optional)</i> <seealso cref="eGlobalTransition"/> Transition Name(Default: Crossfade)</para>
         /// </summary>
-        ExecuteTransition=7,
+        ExecuteTransition = 7,
         /// <summary>
         /// The panel to transition from
         /// <para>---------------------------------------</para>
@@ -595,7 +595,7 @@ namespace OpenMobile
         /// <para>Arg2: (Optional) Plugin Name</para>
         /// <para>Arg3: (Optional) Panel Name</para>
         /// </summary>
-        TransitionFromPanel=8,
+        TransitionFromPanel = 8,
         //Media Events
         /// <summary>
         /// Occurs when openMobile is unable to playback a media location
@@ -610,33 +610,33 @@ namespace OpenMobile
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: (Optional) File URL</para>
         /// </summary>
-        Play=10,
+        Play = 10,
         /// <summary>
         /// Pause the current media
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        Pause=11,
+        Pause = 11,
         /// <summary>
         /// Stop the currently playing media
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        Stop=12,
+        Stop = 12,
         /// <summary>
         /// Set the playback position of the current media
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: Position [Seconds]</para>
         /// </summary>
-        setPosition=13,
+        setPosition = 13,
         /// <summary>
         /// Set the playback speed of the current media
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: Speed [Float]</para>
         /// </summary>
-        setPlaybackSpeed=14,
+        setPlaybackSpeed = 14,
         /// <summary>
         /// Set the playback volume of the current media
         /// <para>---------------------------------------</para>
@@ -644,58 +644,58 @@ namespace OpenMobile
         /// <para>Arg2: Volume [Int 0 to 100]</para>
         /// <para>Note: -1 should mute, -2 should unmute</para>
         /// </summary>
-        setPlayerVolume=15,
+        setPlayerVolume = 15,
         /// <summary>
         /// Play the next media
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        nextMedia=16,
+        nextMedia = 16,
         /// <summary>
         /// Play the previous media
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        previousMedia=17,
+        previousMedia = 17,
         /// <summary>
         /// Load an A/V Player plugin
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: Plugin Name</para>
         /// </summary>
-        loadAVPlayer=18,
+        loadAVPlayer = 18,
         /// <summary>
         /// Load a Tuned Content plugin
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: Plugin Name</para>
         /// </summary>
-        loadTunedContent=19,
+        loadTunedContent = 19,
         /// <summary>
         /// Unload the current AV Player plugin
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        unloadAVPlayer=20,
+        unloadAVPlayer = 20,
         /// <summary>
         /// Unload the current Tuned Content plugin
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        unloadTunedContent=21,
+        unloadTunedContent = 21,
         /// <summary>
         /// Occurs whenever the system volume changes
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Volume [int -1(mute) to 100]</para>
         /// <para>Arg2: Instance</para>
         /// </summary>
-        systemVolumeChanged=22,
+        systemVolumeChanged = 22,
         /// <summary>
         /// The playlist has been modified
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance</para>
         /// </summary>
-        playlistChanged=23,
+        playlistChanged = 23,
         //Data Provider
         /// <summary>
         /// Refresh a data providers data
@@ -704,32 +704,32 @@ namespace OpenMobile
         /// <para>Arg2: (Optional)Plugin Specific First Arg</para>
         /// <para>Arg3: (Optional)Plugin Specific Second Arg</para>
         /// </summary>
-        refreshData=24,
+        refreshData = 24,
         //Network
         /// <summary>
         /// Connect to the internet
         /// <para>-----------------------------</para>
         /// <para>Arg1: (Optional) Network UID</para>
         /// </summary>
-        connectToInternet=25,
+        connectToInternet = 25,
         /// <summary>
         /// Disconnect from the internet
         /// <para>-----------------------------</para>
         /// <para>Arg1: (Optional) Network UID</para>
         /// </summary>
-        disconnectFromInternet=26,
+        disconnectFromInternet = 26,
         /// <summary>
         /// Occurs when a valid internet connection is detected
         /// </summary>
-        connectedToInternet=27,
+        connectedToInternet = 27,
         /// <summary>
         /// Occurs when an internet connection is disconnected/lost
         /// </summary>
-        disconnectedFromInternet=28,
+        disconnectedFromInternet = 28,
         /// <summary>
         /// Occurs when network connections are available
         /// </summary>
-        networkConnectionsAvailable=29,
+        networkConnectionsAvailable = 29,
         //Miscellaneous
         /// <summary>
         /// Reset a hardware device
@@ -737,7 +737,7 @@ namespace OpenMobile
         /// <para>Arg1: Plugin Name</para>
         /// <para>Arg2: (Optional) Device Name</para>
         /// </summary>
-        resetDevice=30,
+        resetDevice = 30,
         /// <summary>
         /// Plugin specific. Triggered as a system event.
         /// <para>---------------------------------------</para>
@@ -745,18 +745,18 @@ namespace OpenMobile
         /// <para>Arg2: Plugin Name</para>
         /// <para>Arg3: Data</para>
         /// </summary>
-        userInputReady=31,
+        userInputReady = 31,
         /// <summary>
         /// Raised when the core has finished loading and initializing all plugins
         /// </summary>
-        pluginLoadingComplete=32,
+        pluginLoadingComplete = 32,
         /// <summary>
         /// A status update on a background operation
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Status Message</para>
         /// <para>Arg2: (Optional) Status Source</para>
         /// </summary>
-        backgroundOperationStatus=33,
+        backgroundOperationStatus = 33,
         /// <summary>
         /// Sets the system volume
         /// <para>---------------------------------------</para>
@@ -764,86 +764,86 @@ namespace OpenMobile
         /// <para>Note: -2 May be used as unmute</para>
         /// <para>Arg2: (Optional) Instance</para>
         /// </summary>
-        setSystemVolume=34,
+        setSystemVolume = 34,
         /// <summary>
         /// Ejects a CD/DVD/Blu-Ray disc
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Drive Path</para>
         /// </summary>
-        ejectDisc=35,
+        ejectDisc = 35,
         /// <summary>
         /// Hide the video rendering window
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        hideVideoWindow=36,
+        hideVideoWindow = 36,
         /// <summary>
         /// Show the video rendering window
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        showVideoWindow=37,
+        showVideoWindow = 37,
         /// <summary>
         /// Blocks the GoBack function from executing...useful for notifications
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// </summary>
-        blockGoBack=38,
+        blockGoBack = 38,
         /// <summary>
         /// Unblocks the GoBack function from executing
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// </summary>
-        unblockGoBack=39,
+        unblockGoBack = 39,
         /// <summary>
         /// Sets the brightness of the given screen.
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// <para>Arg2: Brightness [1-100] [0=Monitor Off]</para>
         /// </summary>
-        setMonitorBrightness=40,
+        setMonitorBrightness = 40,
         /// <summary>
         /// Occurs when a TunedContent plugin updates its station list
         /// </summary>
-        stationListUpdated=41,
+        stationListUpdated = 41,
         /// <summary>
         /// Sets the system volume balance
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: Balance [0-100] [0=Left,50=Even]</para>
         /// </summary>
-        setSystemBalance=42,
+        setSystemBalance = 42,
         /// <summary>
         /// Restart this application
         /// </summary>
-        restartProgram=43,
+        restartProgram = 43,
         /// <summary>
         /// Close this program
         /// </summary>
-        closeProgram=44,
+        closeProgram = 44,
         /// <summary>
         /// Hibernate the computer
         /// </summary>
-        hibernate=45,
+        hibernate = 45,
         /// <summary>
         /// Shutdown the computer
         /// </summary>
-        shutdown=46,
+        shutdown = 46,
         /// <summary>
         /// Restart the computer
         /// </summary>
-        restart=47,
+        restart = 47,
         /// <summary>
         /// Force the computer to enter low power mode
         /// </summary>
-        standby=48,
+        standby = 48,
         //SpeechRecognition
         /// <summary>
         /// Load a speech recognition context
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Context Name</para>
         /// </summary>
-        loadSpeechContext=49,
+        loadSpeechContext = 49,
         /// <summary>
         /// Unload a speech recognition context
         /// <para>---------------------------------------</para>
@@ -856,49 +856,49 @@ namespace OpenMobile
         /// <para>Arg1: Context Name</para>
         /// <para>Arg2: Recognition String</para>
         /// </summary>
-        addSpeechContext=51,
+        addSpeechContext = 51,
         /// <summary>
         /// Listen for a speech command
         /// </summary>
-        listenForSpeech=52,
+        listenForSpeech = 52,
         /// <summary>
         /// Stop listening for speech commands
         /// Also occurs as an event when speech recognition times out
         /// </summary>
-        stopListeningForSpeech=53,
+        stopListeningForSpeech = 53,
         /// <summary>
         /// Speak the indicated text
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Text To Speak</para>
         /// </summary>
-        Speak=54,
+        Speak = 54,
         /// <summary>
         /// Stop speaking and purge all queued speech from the buffer
         /// </summary>
-        StopSpeaking=55,
+        StopSpeaking = 55,
         /// <summary>
         /// Occurs when the rendering window is resized (useful for embedded forms and video windows)
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// </summary>
-        RenderingWindowResized=56,
+        RenderingWindowResized = 56,
         /// <summary>
         /// Occurs when the play order is changed to/from Random
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: "Enabled"/"Disabled"</para>
         /// </summary>
-        RandomChanged=57,
+        RandomChanged = 57,
         /// <summary>
         /// Occurs when siganl strength, status, # of channels, etc changes
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        tunerDataUpdated=58,
+        tunerDataUpdated = 58,
         /// <summary>
         /// Minimize the rendering window
         /// </summary>
-        minimize=59,
+        minimize = 59,
         //Tuned Content
         /// <summary>
         /// Tune to the given statioin
@@ -906,19 +906,19 @@ namespace OpenMobile
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: Plugin Specific</para>
         /// </summary>
-        tuneTo=60,
+        tuneTo = 60,
         /// <summary>
         /// Scan forward (Tuned Content)
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        scanForward=61,
+        scanForward = 61,
         /// <summary>
         /// Scan backward (Tuned Content)
         ///<para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// </summary>
-        scanBackward=62,
+        scanBackward = 62,
         /// <summary>
         /// Step Forward (Tuned Content)
         /// <para>---------------------------------------</para>
@@ -934,14 +934,14 @@ namespace OpenMobile
         /// <summary>
         /// Clear the panel (go back) history
         /// </summary>
-        clearHistory=65,
+        clearHistory = 65,
         /// <summary>
         /// Set subwoofer channel volume
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: Volume</para>
         /// </summary>
-        setSubVolume=66,
+        setSubVolume = 66,
         /// <summary>
         /// Sends a keypress to the target UI window
         /// Possible keys: Up, Down, Left, Right, Enter, ScrollUp, ScrollDown
@@ -949,56 +949,56 @@ namespace OpenMobile
         /// <para>Arg1: Screen Number</para>
         /// <para>Arg2: Key</para>
         /// </summary>
-        sendKeyPress=67,
+        sendKeyPress = 67,
         /// <summary>
         /// Occurs when a new monitor is detected by the system
         /// </summary>
-        screenAdded=68,
+        screenAdded = 68,
         /// <summary>
         /// Occurs when a monitor is removed from the system
         /// </summary>
-        screenRemoved=69,
+        screenRemoved = 69,
         /// <summary>
         /// Set the Band of a Tuned Content plugin
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance Number</para>
         /// <para>Arg2: tunedContentBand</para>
         /// </summary>
-        setBand=70,
+        setBand = 70,
         /// <summary>
         /// Manually sets the instance for a given zone
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// <para>Arg2: Instance Number</para>
         /// </summary>
-        impersonateInstanceForScreen=71,
+        impersonateInstanceForScreen = 71,
         /// <summary>
         /// Alerts skins that the screen orientation has changed
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// <para>Arg2: Orientation ["Landscape"/"Portrait"]</para>
         /// </summary>
-        screenOrientationChanged=72,
+        screenOrientationChanged = 72,
         /// <summary>
         /// Go back to the previous panel
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
         /// <para>Arg2: (Optional) TransitionType</para>
         /// </summary>
-        goBack=80,
+        goBack = 80,
         /// <summary>
         /// Occurs when important settings have changed (used to trigger a settings refresh)
         /// <para>---------------------------------------</para>
         /// <para>Arg1: (Optional) Type (Plugin Specific)</para>
         /// </summary>
-        settingsChanged=81,
+        settingsChanged = 81,
         /// <summary>
         /// Used to manually change the current position in a playlist
         /// <para>---------------------------------------</para>
         /// <para>Arg1: The instance [int]</para>
         /// <para>Arg2: The position [int]</para>
         /// </summary>
-        setPlaylistPosition=82,
+        setPlaylistPosition = 82,
         /// <summary>
         /// Scan complete band (Tuned Content)
         /// <para>---------------------------------------</para>
@@ -1010,21 +1010,21 @@ namespace OpenMobile
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Path</para>
         /// </summary>
-        loadPlugin=84,
+        loadPlugin = 84,
         /// <summary>
         /// Occurs when the vehicle is in motion
         /// </summary>
-        vehicleMoving=85,
+        vehicleMoving = 85,
         /// <summary>
         /// Occurs when a vehicle comes to a complete stop
         /// </summary>
-        vehicleStopped=86,
+        vehicleStopped = 86,
         /// <summary>
         /// Occurs when the VideoPosition property changes
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Instance</para>
         /// </summary>
-        videoAreaChanged=87,
+        videoAreaChanged = 87,
         /// <summary>
         /// A gesture has been recognized
         /// <para>---------------------------------------</para>
@@ -1032,7 +1032,7 @@ namespace OpenMobile
         /// <para>Arg2: Character</para>
         /// <para>Arg3: Plugin (The name of the plugin with the top most panel)</para>
         /// </summary>
-        gesture=100,
+        gesture = 100,
         /// <summary>
         /// A multi-touch gesture has been recognized
         /// <para>---------------------------------------</para>
@@ -1048,21 +1048,21 @@ namespace OpenMobile
         /// <para>EndRotate|Radians|Center of gesture</para>
         /// <para>Arg3: Plugin (The name of the plugin with the top most panel)</para>
         /// </summary>
-        multiTouchGesture=101,
+        multiTouchGesture = 101,
         /// <summary>
         /// Instructs the navigation engine to construct a route to the given address
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Address</para>
         /// <para>Arg2: (Optional) Routing Type (Plugin Specific)</para>
         /// </summary>
-        navigateToAddress=200,
+        navigateToAddress = 200,
         /// <summary>
         /// Instructs the navigation engine to construct a route to the given point of interest
         /// <para>---------------------------------------</para>
         /// <para>Arg1: POI Name</para>
         /// <para>Arg2: (Optional) location to search from (default is current)</para>
         /// </summary>
-        navigateToPOI=201,
+        navigateToPOI = 201,
         ///// <summary>
         ///// Occurs when the navigation engine calculates a route
         ///// </summary>
@@ -1070,54 +1070,54 @@ namespace OpenMobile
         /// <summary>
         /// Occurs when a turn is approaching (distince dependent on road type)
         /// </summary>
-        turnApproaching=203,
+        turnApproaching = 203,
         /// <summary>
         /// Shows the requested nav page (plugin specific)
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Nav Page</para>
         /// </summary>
-        showNavPanel=204,
+        showNavPanel = 204,
         /// <summary>
         /// Dials the given number
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Phone Number (without seperators)</para>
         /// <para>Arg2: (Optional) Display Name</para>
         /// </summary>
-        dialNumber=300,
+        dialNumber = 300,
         /// <summary>
         /// Prompts the user to dial the given number
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Phone Number (without seperators)</para>
         /// <para>Arg2: (Optional) Display Name</para>
         /// </summary>
-        promptDialNumber=301
-        
+        promptDialNumber = 301
+
     }
     /// <summary>
     /// The status of a plugins initialization
     /// </summary>
-    public enum eLoadStatus:byte
+    public enum eLoadStatus : byte
     {
         /// <summary>
         /// Everything went OK.  Plugin is initialized
         /// </summary>
-        LoadSuccessful=0,
+        LoadSuccessful = 0,
         /// <summary>
         /// Plugin requires default settings to continue.  Load default settings panel and then re-initialize when the user has set the settings.
         /// </summary>
-        SettingsRequired=1,
+        SettingsRequired = 1,
         /// <summary>
         /// A required dependency is not loaded yet or something needs to be retried.  Load the rest of the plugins and then retry the initialization.
         /// </summary>
-        LoadFailedRetryRequested=2,
+        LoadFailedRetryRequested = 2,
         /// <summary>
         /// Load failed but this was not the result of a crash.  Plugin will be unloaded.
         /// </summary>
-        LoadFailedGracefulUnloadRequested=3,
+        LoadFailedGracefulUnloadRequested = 3,
         /// <summary>
         /// Load failed or an unknown error occured.  Plugin will be unloaded. (Occurs automatically if an uncaught error is thrown)
         /// </summary>
-        LoadFailedUnloadRequested=10
+        LoadFailedUnloadRequested = 10
     }
 
     /// <summary>
@@ -1128,112 +1128,112 @@ namespace OpenMobile
         /// <summary>
         /// Unknown event
         /// </summary>
-        Unknown=0,
+        Unknown = 0,
         /// <summary>
         /// System is shutting down
         /// </summary>
-        ShutdownPending=1,
+        ShutdownPending = 1,
         /// <summary>
         /// System is retarting
         /// </summary>
-        LogoffPending=2,
+        LogoffPending = 2,
         /// <summary>
         /// System is going to sleep
         /// </summary>
-        SleepOrHibernatePending=3,
+        SleepOrHibernatePending = 3,
         /// <summary>
         /// System is resuming from sleep or hibernate
         /// </summary>
-        SystemResumed=4,
+        SystemResumed = 4,
         /// <summary>
         /// System battery low
         /// </summary>
-        BatteryLow=5,
+        BatteryLow = 5,
         /// <summary>
         /// System battery critical
         /// </summary>
-        BatteryCritical=6,
+        BatteryCritical = 6,
         /// <summary>
         /// System running on battery
         /// </summary>
-        SystemOnBattery=7,
+        SystemOnBattery = 7,
         /// <summary>
         /// System running on AC Power
         /// </summary>
-        SystemPluggedIn=8
+        SystemPluggedIn = 8
     }
     /// <summary>
     /// Various Wireless Events (Bluetooth, WiFi, etc.)
     /// </summary>
-    public enum eWirelessEvent:byte
+    public enum eWirelessEvent : byte
     {
         /// <summary>
         /// An unknown or handled event
         /// </summary>
-        Unknown=0,
+        Unknown = 0,
         /// <summary>
         /// Wireless networks are detected and in-range
         /// </summary>
-        WirelessNetworksAvailable=1,
+        WirelessNetworksAvailable = 1,
         /// <summary>
         /// Connecting to a wireless connection
         /// <para>-------------------------------------------</para>
         /// <para>Arg: Network Name</para>
         /// </summary>
-        ConnectingToWirelessNetwork=2,
+        ConnectingToWirelessNetwork = 2,
         /// <summary>
         /// A successful connection has been established to a wireless connection
         /// <para>-------------------------------------------</para>
         /// <para>Arg: Network Name</para>
         /// </summary>
-        ConnectedToWirelessNetwork=3,
+        ConnectedToWirelessNetwork = 3,
         /// <summary>
         /// Wireless (wifi) signal strength has changed
         /// <para>-------------------------------------------</para>
         /// <para>Arg: Signal Value (0-100)</para>
         /// </summary>
-        WirelessSignalStrengthChanged=4,
+        WirelessSignalStrengthChanged = 4,
         /// <summary>
         /// The network connection has been established but an internet connection
         /// requires Access Point credentials be entered in the web browser
         /// </summary>
-        WirelessNetworkRequiresLogin=5,
+        WirelessNetworkRequiresLogin = 5,
         /// <summary>
         /// Disconnected from the wireless network
         /// </summary>
-        DisconnectedFromWirelessNetwork=6,
+        DisconnectedFromWirelessNetwork = 6,
         /// <summary>
         /// Bluetooth devices are detected and within the connection range
         /// </summary>
-        BluetoothDevicesInRange=10,
+        BluetoothDevicesInRange = 10,
         /// <summary>
         /// A successful connection has been made to a bluetooth internet connection (DUN, PAN, etc)
         /// </summary>
-        ConnectedToBluetoothInternet=11,
+        ConnectedToBluetoothInternet = 11,
         /// <summary>
         /// The bluetooth connected device's (phone's) signal strength
         /// <para>-------------------------------------------</para>
         /// <para>Arg: Signal Value (0-100) (0=No Signal,-1=not supported)</para>
         /// </summary>
-        BluetoothSignalStrengthChanged=12,
+        BluetoothSignalStrengthChanged = 12,
         /// <summary>
         /// Bluetooth Battery Level
         /// <para>--------------------------------------------</para>
         /// <para>Arg: Battery Level (0-10) (0=Battery info not supported)</para>
         /// </summary>
-        BluetoothBatteryLevelChanged=13,
+        BluetoothBatteryLevelChanged = 13,
         /// <summary>
         /// A bluetooth pairing request has been received
         /// <para>--------------------------------------------</para>
         /// <para>Arg: Device Name</para>
         /// </summary>
-        BluetoothPairingRequest=14,
+        BluetoothPairingRequest = 14,
         /// <summary>
         /// A bluetooth device has been successfully paired
         /// <para>-------------------------------------------</para>
         /// <para>Arg: Device Name</para>
         /// </summary>
-        BluetoothDeviceConnected=15,
+        BluetoothDeviceConnected = 15,
         /// <summary>
         /// A call is incoming
         /// <para>-------------------------------------------</para>
@@ -1241,124 +1241,124 @@ namespace OpenMobile
         /// <para>Line1: Caller Name (Either from contacts or callerID; May be blank if Unknown)</para>
         /// <para>Line2: Phone Number (May be blank if Unknown)</para>
         /// </summary>
-        BluetoothIncomingCall=16,
+        BluetoothIncomingCall = 16,
         /// <summary>
         /// An SMS message has been received
         /// <para>-------------------------------------------</para>
         /// <para>Arg: MessageID (Contents be retrieved from database)</para>
         /// </summary>
-        BluetoothSMSReceived=17,
+        BluetoothSMSReceived = 17,
         /// <summary>
         /// A Pairing Password is available
         /// <para>-------------------------------------------</para>
         /// <para>Arg: Pairing Password</para>
         /// </summary>
-        PairingPasswordAvailable=18
+        PairingPasswordAvailable = 18
     }
 
     /// <summary>
     /// Type of media
     /// </summary>
-    public enum eMediaType:short
+    public enum eMediaType : short
     {
         /// <summary>
         /// A device has been removed
         /// </summary>
-        DeviceRemoved=-1,
+        DeviceRemoved = -1,
         /// <summary>
         /// Unknown Type/Not Set
         /// </summary>
-        NotSet	=	0,
+        NotSet = 0,
         /// <summary>
         /// A local file
         /// </summary>
-        Local	=	1,
+        Local = 1,
         /// <summary>
         /// A network file
         /// </summary>
-        Network	=	2,
+        Network = 2,
         /// <summary>
         /// Attached devices
         /// </summary>
-        LocalHardware	=	3,
+        LocalHardware = 3,
         /// <summary>
         /// An Audio CD
         /// </summary>
-        AudioCD	=	4,
+        AudioCD = 4,
         /// <summary>
         /// A DVD
         /// </summary>
-        DVD	=	5,
+        DVD = 5,
         /// <summary>
         /// A Blu-Ray Disc
         /// </summary>
-        BluRay	=	6,
+        BluRay = 6,
         /// <summary>
         /// An HD-DVD
         /// </summary>
-        HDDVD	=	7,
+        HDDVD = 7,
         /// <summary>
         /// A URL (Streaming media)
         /// </summary>
-        HTTPUrl	=	8,
+        HTTPUrl = 8,
         /// <summary>
         /// An RTP URL (Streaming media)
         /// </summary>
-        RTSPUrl	=	9,
+        RTSPUrl = 9,
         /// <summary>
         /// A YouTube video
         /// </summary>
-        YouTube	=	10,
+        YouTube = 10,
         /// <summary>
         /// An iPod
         /// </summary>
-        AppleDevice	=	11,
+        AppleDevice = 11,
         /// <summary>
         /// A bluetooth audio device
         /// </summary>
-        BluetoothResource	=	12,
+        BluetoothResource = 12,
         /// <summary>
         /// An openDrive device
         /// </summary>
-        OpenDrive 	=	13,
+        OpenDrive = 13,
         /// <summary>
         /// Digital Camera
         /// </summary>
-        Camera	=	14,
+        Camera = 14,
         /// <summary>
         /// Reserved for future use
         /// </summary>
-        Reserved	=	15,
+        Reserved = 15,
         /// <summary>
         /// Multimedia Streaming Protocol
         /// </summary>
-        MMSUrl=16,
+        MMSUrl = 16,
         /// <summary>
         /// Radio
         /// </summary>
-        Radio=17,
+        Radio = 17,
         /// <summary>
         /// Internet Radio
         /// </summary>
-        InternetRadio=18,
+        InternetRadio = 18,
         /// <summary>
         /// One or more live camera streams
         /// </summary>
-        LiveCamera=19,
+        LiveCamera = 19,
         /// <summary>
         /// Smartphone
         /// </summary>
-        Smartphone=20,
+        Smartphone = 20,
         /// <summary>
         /// Other
         /// </summary>
-        Other	=	25
+        Other = 25
     }
     /// <summary>
     /// Textbox Options
     /// </summary>
     [Flags]
-    public enum textboxFlags:byte
+    public enum textboxFlags : byte
     {
         /// <summary>
         /// None Set
@@ -1392,7 +1392,7 @@ namespace OpenMobile
     /// <summary>
     /// The style of background for an OMPanel
     /// </summary>
-    public enum backgroundStyle:byte
+    public enum backgroundStyle : byte
     {
         /// <summary>
         /// No Background (use the layer underneath)
@@ -1409,37 +1409,37 @@ namespace OpenMobile
         /// <summary>
         /// Use BackgroundColor1
         /// </summary>
-        SolidColor=3
+        SolidColor = 3
     }
     /// <summary>
     /// Priority
     /// </summary>
-    public enum ePriority:byte
+    public enum ePriority : byte
     {
         /// <summary>
         /// Low Priority
         /// </summary>
-        Low=0,
+        Low = 0,
         /// <summary>
         /// Medium-Low Priority
         /// </summary>
-        MediumLow=1,
+        MediumLow = 1,
         /// <summary>
         /// Normal Priority
         /// </summary>
-        Normal=2,
+        Normal = 2,
         /// <summary>
         /// Medium-High Priority
         /// </summary>
-        MediumHigh=3,
+        MediumHigh = 3,
         /// <summary>
         /// High Priority
         /// </summary>
-        High=4,
+        High = 4,
         /// <summary>
         /// Urgent Priority
         /// </summary>
-        Urgent=5
+        Urgent = 5
     }
     /// <summary>
     /// The type of data to retrieve
@@ -1449,91 +1449,91 @@ namespace OpenMobile
         /// <summary>
         /// Get the updater status of the data provider
         /// </summary>
-        DataProviderStatus=1,
+        DataProviderStatus = 1,
         /// <summary>
         /// Get the position (in seconds) of the currently playing media [float]
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetMediaPosition=2,
+        GetMediaPosition = 2,
         /// <summary>
         /// Gets the volume (0-100) [int]
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetSystemVolume=3,
+        GetSystemVolume = 3,
         /// <summary>
         /// Gets an array of availble networks [string[]]
         /// </summary>
-        GetAvailableNetworks=4,
+        GetAvailableNetworks = 4,
         /// <summary>
         /// Gets the device info string from a raw hardware plugin
         /// </summary>
-        GetDeviceInfo=5,
+        GetDeviceInfo = 5,
         /// <summary>
         /// Gets the firmware info string from a raw hardware plugin
         /// </summary>
-        GetFirmwareInfo=6,
+        GetFirmwareInfo = 6,
         /// <summary>
         /// Gets the TunedContentInfo from the currently loaded tunedcontent plugin
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetTunedContentInfo=7,
+        GetTunedContentInfo = 7,
         /// <summary>
         /// Gets the status of the currently loaded media player [ePlayerStatus]
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetMediaStatus=8,
+        GetMediaStatus = 8,
         /// <summary>
         /// Returns an IMediaDatabase object
         /// </summary>
-        GetMediaDatabase=9,
+        GetMediaDatabase = 9,
         /// <summary>
         /// Returns the loaded plugin collection. [List(IBasePlugin)]
         /// </summary>
-        GetPlugins=10,
+        GetPlugins = 10,
         /// <summary>
         /// Get the playback speed [float] of the currently playing media
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetPlaybackSpeed=11,
+        GetPlaybackSpeed = 11,
         /// <summary>
         /// Returns a list of audio devices [string[]]available on the system
         /// </summary>
-        GetAudioDevices=12,
+        GetAudioDevices = 12,
         /// <summary>
         /// Gets the height and width scale factors [Point]
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Screen [int]</para>
         /// </summary>
-        GetScaleFactors=13,
+        GetScaleFactors = 13,
         /// <summary>
         /// Returns the OMControl that draws a map
         /// </summary>
-        GetMap=14,
+        GetMap = 14,
         /// <summary>
         /// Returns a string[] listing available navigation panels
         /// </summary>
-        GetAvailableNavPanels=15,
+        GetAvailableNavPanels = 15,
         /// <summary>
         /// Returns the current GPS position [Position].  May be 0,0 if no GPS signal is available.
         /// </summary>
-        GetCurrentPosition=16,
+        GetCurrentPosition = 16,
         /// <summary>
         /// Returns the nearest Address [Location]
         /// </summary>
-        GetNearestAddress=17,
+        GetNearestAddress = 17,
         /// <summary>
         /// Returns the route destination [Location].  Will return null if no route calculated
         /// </summary>
-        GetDestination=18,
+        GetDestination = 18,
         /// <summary>
         /// Returns a [string[]] containing all of the available skins
         /// </summary>
-        GetAvailableSkins=19,
+        GetAvailableSkins = 19,
         /// <summary>
         /// Gets station list from the currently loaded tunedcontent plugin
         /// <para>----------------------------------------------------</para>
@@ -1551,7 +1551,7 @@ namespace OpenMobile
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
-        GetPlayerVolume=22,
+        GetPlayerVolume = 22,
         /// <summary>
         /// Gets the list of available sensors
         /// <para>----------------------------------------------------</para>
@@ -1561,7 +1561,7 @@ namespace OpenMobile
         /// <summary>
         /// Gets a list of available keyboards
         /// </summary>
-        GetAvailableKeyboards=24,
+        GetAvailableKeyboards = 24,
         /// <summary>
         /// Gets a list of available mice
         /// </summary>
@@ -1571,7 +1571,7 @@ namespace OpenMobile
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Screen [int]</para>
         /// </summary>
-        GetScreenBrightness=26
+        GetScreenBrightness = 26
     }
     /// <summary>
     /// Information on Tuned Content
@@ -1606,7 +1606,7 @@ namespace OpenMobile
     /// <summary>
     /// The current status of the Tuned Content Plugin
     /// </summary>
-    public enum eTunedContentStatus:byte
+    public enum eTunedContentStatus : byte
     {
         /// <summary>
         /// Unknown
@@ -1627,11 +1627,11 @@ namespace OpenMobile
         /// <summary>
         /// Powering Up/Initializing
         /// </summary>
-        Initializing=4,
+        Initializing = 4,
         /// <summary>
         /// Powered Off
         /// </summary>
-        PoweredOff=5,
+        PoweredOff = 5,
         /// <summary>
         /// An error has occured
         /// </summary>
@@ -1645,7 +1645,7 @@ namespace OpenMobile
     /// <summary>
     /// Type of Tuned Content
     /// </summary>
-    public enum eTunedContentBand:byte
+    public enum eTunedContentBand : byte
     {
         /// <summary>
         /// None or Unknown
@@ -1666,27 +1666,27 @@ namespace OpenMobile
         /// <summary>
         /// HD Radio
         /// </summary>
-        HD=4,
+        HD = 4,
         /// <summary>
         /// Satellite Radio
         /// </summary>
-        XM=5,
+        XM = 5,
         /// <summary>
         /// Over the air TV
         /// </summary>
-        OTATV=6,
+        OTATV = 6,
         /// <summary>
         /// Everything else
         /// </summary>
-        Other=7,
+        Other = 7,
         /// <summary>
         /// Internet Radio
         /// </summary>
-        Internet=8,
+        Internet = 8,
         /// <summary>
         /// Satellite Radio
         /// </summary>
-        Sirius=9
+        Sirius = 9
     }
 #pragma warning disable 0659
     /// <summary>
@@ -1725,7 +1725,7 @@ namespace OpenMobile
         /// <summary>
         /// Plugin Specific (describes the connection)
         /// </summary>
-        public string ConnectionType="";
+        public string ConnectionType = "";
         /// <summary>
         /// Creates a new connection info
         /// </summary>
@@ -1735,7 +1735,7 @@ namespace OpenMobile
         /// <param name="signal"></param>
         /// <param name="passwordRequired"></param>
         /// <param name="type"></param>
-        public connectionInfo(string name, string id, int speed, uint signal,string type,ePassType passwordRequired)
+        public connectionInfo(string name, string id, int speed, uint signal, string type, ePassType passwordRequired)
         {
             NetworkName = name;
             UID = id;
@@ -1760,24 +1760,24 @@ namespace OpenMobile
     /// <summary>
     /// Password Type
     /// </summary>
-    public enum ePassType:byte
+    public enum ePassType : byte
     {
         /// <summary>
         /// None
         /// </summary>
-        None=0,
+        None = 0,
         /// <summary>
         /// Single string shared key
         /// </summary>
-        SharedKey=1,
+        SharedKey = 1,
         /// <summary>
         /// Username and Password
         /// </summary>
-        UserPass=2,
+        UserPass = 2,
         /// <summary>
         /// Username, Password and Domain
         /// </summary>
-        UserPassDomain=3
+        UserPassDomain = 3
     }
 
     /// <summary>
@@ -1788,29 +1788,29 @@ namespace OpenMobile
         /// <summary>
         /// Unknown Navigation Event
         /// </summary>
-        Unknown=0,
+        Unknown = 0,
         /// <summary>
         /// Occurs when the GPS Fix changes
         /// <para>---------------------------------------</para>
         /// <para>Arg: No GPS, No Signal, 2D Fix, 3D Fix</para>
         /// </summary>
-        GPSStatusChange=1,
+        GPSStatusChange = 1,
         /// <summary>
         /// Route has changed
         /// <para>---------------------------------------</para>
         /// <para>Arg: Navigation Started, Navigation Cancelled, Waypoint Added, Detouring</para>
         /// </summary>
-        RouteChanged=2,
+        RouteChanged = 2,
         /// <summary>
         /// A turn is approaching...query the nextTurn parameter for more info
         /// </summary>
-        TurnApproaching=3,
+        TurnApproaching = 3,
         /// <summary>
         /// Occurs when the current town/city changes.  Useful for refreshing data for the new location
         /// <para>---------------------------------------</para>
         /// <para>Arg: City/Town Name</para>
         /// </summary>
-        LocationChanged=4
+        LocationChanged = 4
     }
     /// <summary>
     /// Represents a GPS Position
@@ -1846,7 +1846,7 @@ namespace OpenMobile
     /// <summary>
     /// Represents a Navigation Address
     /// </summary>
-    public class Location:ICloneable
+    public class Location : ICloneable
     {
         /// <summary>
         /// The name of the location
@@ -1885,7 +1885,7 @@ namespace OpenMobile
         /// </summary>
         public Location()
         {
-            Name=String.Empty;
+            Name = String.Empty;
             Street = String.Empty;
             City = String.Empty;
             State = String.Empty;
@@ -1946,7 +1946,7 @@ namespace OpenMobile
         /// <param name="state"></param>
         /// <param name="zip"></param>
         /// <param name="country"></param>
-        public Location(string street, string city, string state,string zip,string country)
+        public Location(string street, string city, string state, string zip, string country)
         {
             Street = street;
             City = city;
@@ -1968,7 +1968,7 @@ namespace OpenMobile
                 return false;
             }
             result = null;
-            string[] args = address.Split(new char[] { ',','\n' },StringSplitOptions.RemoveEmptyEntries);
+            string[] args = address.Split(new char[] { ',', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (args.Length == 3)
             {
                 result = new Location(args[0], args[1].Trim(), args[2].Trim());
@@ -2003,13 +2003,13 @@ namespace OpenMobile
         {
             if (string.IsNullOrEmpty(Street) && (Latitude != 0))
                 return Latitude.ToString() + "," + Longitude.ToString();
-            return Street+"\n"+City+", "+State;
+            return Street + "\n" + City + ", " + State;
         }
     }
     /// <summary>
     /// A/V Player statue
     /// </summary>
-    public enum ePlayerStatus:byte
+    public enum ePlayerStatus : byte
     {
         /// <summary>
         /// Unknown
@@ -2074,7 +2074,7 @@ namespace OpenMobile
         /// <exception cref="ArgumentNullException">ArgumentNullException</exception>
         public static string Combine(string part1, string part2)
         {
-            if ((part1==null)||(part2==null))
+            if ((part1 == null) || (part2 == null))
                 throw new ArgumentNullException();
             if (part1.Length == 0)
                 return part2;
@@ -2083,7 +2083,7 @@ namespace OpenMobile
             char ds = System.IO.Path.DirectorySeparatorChar;
             if (part1[part1.Length - 1] == ds)
                 return part1 + part2;
-            return part1 +ds+ part2;
+            return part1 + ds + part2;
         }
         /// <summary>
         /// Combines three path strings
@@ -2093,23 +2093,23 @@ namespace OpenMobile
         /// <param name="part3"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">ArgumentNullException</exception>
-        public static string Combine(string part1, string part2,string part3)
+        public static string Combine(string part1, string part2, string part3)
         {
             if (part3 == null)
-                return Combine(part1,part2);
+                return Combine(part1, part2);
             char ds = System.IO.Path.DirectorySeparatorChar;
-            char ads=System.IO.Path.AltDirectorySeparatorChar;
+            char ads = System.IO.Path.AltDirectorySeparatorChar;
 
             if ((part1[part1.Length - 1] == ds) || (part1[part1.Length - 1] == ads) || (part1[part1.Length - 1] == System.IO.Path.VolumeSeparatorChar))
-                if ((part2[part2.Length - 1] == ds)||(part1[part1.Length - 1]==ads))
+                if ((part2[part2.Length - 1] == ds) || (part1[part1.Length - 1] == ads))
                     return part1 + part2 + part3;
                 else
                     return part1 + part2 + ds + part3;
             else
-                if ((part2[part2.Length - 1] == ds)||(part1[part1.Length - 1]==ads))
-                    return part1 +ds+ part2 + part3;
+                if ((part2[part2.Length - 1] == ds) || (part1[part1.Length - 1] == ads))
+                    return part1 + ds + part2 + part3;
                 else
-                    return part1 +ds+ part2 + ds + part3;
+                    return part1 + ds + part2 + ds + part3;
         }
         /// <summary>
         /// Extracts a filename from a path
@@ -2145,7 +2145,7 @@ namespace OpenMobile
             {
                 int length = file.Length;
                 int num2 = length;
-                int ext=0;
+                int ext = 0;
                 while (--num2 >= 0)
                 {
                     char ch = file[num2];
@@ -2271,11 +2271,11 @@ namespace OpenMobile
         /// <summary>
         /// Length in seconds
         /// </summary>
-        public int Length=-1;
+        public int Length = -1;
         /// <summary>
         /// Rating 0-5.  -1 for not set.
         /// </summary>
-        public int Rating=-1;
+        public int Rating = -1;
         /// <summary>
         /// Optional - The cover art for the selected media
         /// </summary>
@@ -2370,6 +2370,6 @@ namespace OpenMobile
         /// <summary>
         /// The current rendering mode of the rendering window
         /// </summary>
-        public eModeType currentMode=eModeType.Normal;
+        public eModeType currentMode = eModeType.Normal;
     }
 }

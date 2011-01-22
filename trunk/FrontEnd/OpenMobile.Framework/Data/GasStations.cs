@@ -28,7 +28,7 @@ namespace OpenMobile.Data
     /// <summary>
     /// Gas Stations and Fuel Prices
     /// </summary>
-    public sealed class GasStations:IDisposable
+    public sealed class GasStations : IDisposable
     {
         /// <summary>
         /// Gas Station Information
@@ -86,9 +86,9 @@ namespace OpenMobile.Data
             cmd.CommandText = "DELETE FROM gasStations WHERE dateAdded<date('now','-4 days')";
             cmd.ExecuteNonQuery();
         }
-         SqliteConnection asyncCon;
-         SqliteCommand asyncCmd;
-         SqliteDataReader asyncReader;
+        SqliteConnection asyncCon;
+        SqliteCommand asyncCmd;
+        SqliteDataReader asyncReader;
 
         /// <summary>
         /// Begins an asynchronous connection to the Message database
@@ -97,14 +97,16 @@ namespace OpenMobile.Data
         /// <returns>Was the call successful</returns>
         public bool beginRead(string zipcode)
         {
-            try{
+            try
+            {
                 if (asyncCon == null)
                     asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;");
                 asyncCmd = asyncCon.CreateCommand();
                 asyncCmd.CommandText = "SELECT Zip,dateAdded,Location,Name,priceDiesel,priceRegular,pricePlus,pricePremium,priceUltimate FROM gasRegions JOIN gasStations ON StationID=GUID WHERE Zip=" + zipcode;
                 asyncCon.Open();
                 asyncReader = asyncCmd.ExecuteReader();
-            }catch(Exception)
+            }
+            catch (Exception)
             {
                 return false;
             }
@@ -117,9 +119,9 @@ namespace OpenMobile.Data
         {
             try
             {
-                if (asyncReader!=null)
+                if (asyncReader != null)
                     asyncReader.Close();
-                if (asyncCon!=null)
+                if (asyncCon != null)
                     asyncCon.Close();
                 asyncReader = null;
                 asyncCon = null;
@@ -179,7 +181,7 @@ namespace OpenMobile.Data
             asyncCmd.CommandText = "SELECT guid from gasStations WHERE Location='" + station.location + "'";
             object result = asyncCmd.ExecuteScalar();
             long guid = -1;
-            if (result!=null)
+            if (result != null)
                 guid = (long)asyncCmd.ExecuteScalar();
             StringBuilder query;
             if (guid != -1)
@@ -210,9 +212,9 @@ namespace OpenMobile.Data
             asyncCmd.CommandText = query.ToString();
             if (asyncCmd.ExecuteNonQuery() == 0)
                 return false;
-            if (guid==-1)
+            if (guid == -1)
             {
-                asyncCmd.CommandText = "INSERT INTO gasRegions (Zip, StationID)VALUES('"+station.zipcode+"',(SELECT GUID FROM gasStations WHERE Location='"+station.location+"'))";
+                asyncCmd.CommandText = "INSERT INTO gasRegions (Zip, StationID)VALUES('" + station.zipcode + "',(SELECT GUID FROM gasStations WHERE Location='" + station.location + "'))";
                 asyncCmd.ExecuteNonQuery();
             }
             return true;

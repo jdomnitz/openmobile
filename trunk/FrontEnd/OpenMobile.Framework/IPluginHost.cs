@@ -133,7 +133,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Sets the location video should be played (based on the 1000x600 default scale)
         /// </summary>
-        void SetVideoPosition(int instance,Rectangle videoArea);
+        void SetVideoPosition(int instance, Rectangle videoArea);
         /// <summary>
         /// Gets the location video should be played (based on the 1000x600 default scale)
         /// </summary>

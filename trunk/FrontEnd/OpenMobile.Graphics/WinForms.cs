@@ -44,7 +44,7 @@ namespace OpenMobile.Graphics
             {
                 Thread.Sleep(0);
                 OpenMobile.Platform.Windows.MSG msg = new OpenMobile.Platform.Windows.MSG();
-                while (msg.Message!=Platform.Windows.WindowMessage.CLOSE)
+                while (msg.Message != Platform.Windows.WindowMessage.CLOSE)
                 {
                     ret = OpenMobile.Platform.Windows.Functions.GetMessage(ref msg, IntPtr.Zero, 0, 0);
                     if (ret == -1)
@@ -68,23 +68,26 @@ namespace OpenMobile.Graphics
             }
             else if (Configuration.RunningOnLinux)
             {
-				if (File.Exists("/usr/bin/zenity"))
-				{
-	                try
-					{
-						Process p=Process.Start("zenity","--error --text='"+text+"' --title='"+title+"'");
-						p.WaitForExit();
-					}
-					catch(Exception){}
-				}else if (File.Exists("/usr/bin/kdialog"))
-				{
-					 try
-					{
-						Process p=Process.Start("kdialog","--caption '"+title+"' --error '"+text+"'");
-						p.WaitForExit();
-					}
-					catch(Exception){}
-				}
+                #if LINUX
+                if (File.Exists("/usr/bin/zenity"))
+                {
+                    try
+                    {
+                        Process p = Process.Start("zenity", "--error --text='" + text + "' --title='" + title + "'");
+                        p.WaitForExit();
+                    }
+                    catch (Exception) { }
+                }
+                else if (File.Exists("/usr/bin/kdialog"))
+                {
+                    try
+                    {
+                        Process p = Process.Start("kdialog", "--caption '" + title + "' --error '" + text + "'");
+                        p.WaitForExit();
+                    }
+                    catch (Exception) { }
+                }
+                #endif
             }
         }
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
@@ -98,7 +101,7 @@ namespace OpenMobile.Graphics
         string _arg2;
         Point _pos;
         bool _complete;
-        public TouchEventArgs(string name, Point pos,double arg1, string arg2,bool complete)
+        public TouchEventArgs(string name, Point pos, double arg1, string arg2, bool complete)
         {
             _name = name;
             _arg1 = arg1;
@@ -131,7 +134,7 @@ namespace OpenMobile.Graphics
     {
         int _width, _height;
         bool _landscape;
-        public ResolutionChange(int width, int height,bool landscape)
+        public ResolutionChange(int width, int height, bool landscape)
         {
             _width = width;
             _height = height;
@@ -139,7 +142,7 @@ namespace OpenMobile.Graphics
         }
         public bool Landscape
         {
-            get { return _landscape;}
+            get { return _landscape; }
         }
         public int Width
         {
@@ -160,10 +163,10 @@ namespace OpenMobile.Graphics
         }
         public bool Handled
         {
-            get{ return handled; }
+            get { return handled; }
             set { handled = value; }
         }
-        public char KeyChar 
+        public char KeyChar
         {
             get { return keychar; }
             set { keychar = value; }

@@ -36,35 +36,35 @@ namespace OpenMobile.Data
         /// <summary>
         /// Unknown
         /// </summary>
-        Unknown=0,
+        Unknown = 0,
         /// <summary>
         /// Construction
         /// </summary>
-        Construction=1,
+        Construction = 1,
         /// <summary>
         /// Accident
         /// </summary>
-        Accident=2,
+        Accident = 2,
         /// <summary>
         /// Lane Closure
         /// </summary>
-        LaneClosure=3,
+        LaneClosure = 3,
         /// <summary>
         /// Road Closure
         /// </summary>
-        RoadClosure=4,
+        RoadClosure = 4,
         /// <summary>
         /// Traffic/Congestion
         /// </summary>
-        Traffic=5,
+        Traffic = 5,
         /// <summary>
         /// Local Event
         /// </summary>
-        Event=6,
+        Event = 6,
         /// <summary>
         /// Other
         /// </summary>
-        Other=10
+        Other = 10
     }
     /// <summary>
     /// A traffic incident
@@ -123,7 +123,7 @@ namespace OpenMobile.Data
     /// <summary>
     /// Stores traffic information
     /// </summary>
-    public class Traffic:IDisposable
+    public class Traffic : IDisposable
     {
         private SqliteConnection con;
         //private SqliteDataReader asyncReader;
@@ -138,7 +138,7 @@ namespace OpenMobile.Data
         }
         private bool createTable()
         {
-            using(SqliteCommand cmd = new SqliteCommand(con))
+            using (SqliteCommand cmd = new SqliteCommand(con))
             {
                 cmd.CommandText = "CREATE TABLE Traffic (startDate Julian, endDate Julian, title TEXT, description TEXT, type INTEGER, severity INTEGER, direction INTEGER, longitude NUMERIC, latitude NUMERIC, location TEXT);";
                 try
@@ -158,7 +158,7 @@ namespace OpenMobile.Data
         {
             using (SqliteCommand cmd = new SqliteCommand(con))
             {
-                StringBuilder query=new StringBuilder("INSERT INTO Traffic (startDate, endDate, title, description, type, severity, direction, longitude, latitude, location)VALUES('");
+                StringBuilder query = new StringBuilder("INSERT INTO Traffic (startDate, endDate, title, description, type, severity, direction, longitude, latitude, location)VALUES('");
                 query.Append(item.Start.ToString());
                 query.Append("','");
                 query.Append(item.End.ToString());
@@ -191,7 +191,7 @@ namespace OpenMobile.Data
                         if (tableCreated)
                             return false;
                         tableCreated = true;
-                        if(createTable())
+                        if (createTable())
                             return (cmd.ExecuteNonQuery() != 0);
                     }
                 }

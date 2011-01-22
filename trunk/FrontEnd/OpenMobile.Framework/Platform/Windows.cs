@@ -30,18 +30,18 @@ namespace OpenMobile.Framework
 {
     internal static class Windows
     {
-        static Guid disk=new Guid("53F56307-B6BF-11D0-94F2-00A0C91EFB8B");
+        static Guid disk = new Guid("53F56307-B6BF-11D0-94F2-00A0C91EFB8B");
         internal static eDriveType detectType(string path, DriveType type)
         {
             if ((type == DriveType.Network) || (type == DriveType.CDRom))
                 return (eDriveType)type;
-            
+
             try
             {
                 IntPtr ptrDevs = SetupDiGetClassDevs(ref disk, IntPtr.Zero, IntPtr.Zero, 0x12);
                 SP_DEVICE_INTERFACE_DATA interf = new SP_DEVICE_INTERFACE_DATA();
                 interf.cbSize = (uint)Marshal.SizeOf(interf);
-                int deviceNumber = GetInstanceNumber("\\\\.\\" + path.Substring(0,2));
+                int deviceNumber = GetInstanceNumber("\\\\.\\" + path.Substring(0, 2));
                 bool success = true;
                 uint i = 0;
                 while (success)
@@ -95,8 +95,8 @@ namespace OpenMobile.Framework
         private static int GetInstanceNumber(string drive)
         {
             int ret = -1;
-            IntPtr file= CreateFile(drive,0,0,IntPtr.Zero,3,0,IntPtr.Zero);
-            if ((long)file<=0)
+            IntPtr file = CreateFile(drive, 0, 0, IntPtr.Zero, 3, 0, IntPtr.Zero);
+            if ((long)file <= 0)
                 return ret;
             try
             {
@@ -173,32 +173,32 @@ namespace OpenMobile.Framework
         out uint lpBytesReturned, IntPtr lpOverlapped);
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
-  internal static extern IntPtr CreateFile(
-        string lpFileName,
-        uint dwDesiredAccess,
-        uint dwShareMode,
-        IntPtr SecurityAttributes,
-        uint dwCreationDisposition,
-        uint dwFlagsAndAttributes,
-        IntPtr hTemplateFile
-        );
+        internal static extern IntPtr CreateFile(
+              string lpFileName,
+              uint dwDesiredAccess,
+              uint dwShareMode,
+              IntPtr SecurityAttributes,
+              uint dwCreationDisposition,
+              uint dwFlagsAndAttributes,
+              IntPtr hTemplateFile
+              );
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("setupapi.dll", CharSet = CharSet.Auto)]
-        static extern int CM_Get_Device_ID(UInt32 dnDevInst,IntPtr Buffer,int BufferLen,int ulFlags);
+        static extern int CM_Get_Device_ID(UInt32 dnDevInst, IntPtr Buffer, int BufferLen, int ulFlags);
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("setupapi.dll")]
-        static extern int CM_Get_Parent(out UInt32 pdnDevInst,UInt32 dnDevInst,int ulFlags);
+        static extern int CM_Get_Parent(out UInt32 pdnDevInst, UInt32 dnDevInst, int ulFlags);
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport(@"setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        internal static extern Boolean SetupDiGetDeviceInterfaceDetail(IntPtr hDevInfo,ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData,ref SP_DEVICE_INTERFACE_DETAIL_DATA deviceInterfaceDetailData,UInt32 deviceInterfaceDetailDataSize,out UInt32 requiredSize,ref SP_DEVINFO_DATA deviceInfoData);
+        internal static extern Boolean SetupDiGetDeviceInterfaceDetail(IntPtr hDevInfo, ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData, ref SP_DEVICE_INTERFACE_DETAIL_DATA deviceInterfaceDetailData, UInt32 deviceInterfaceDetailDataSize, out UInt32 requiredSize, ref SP_DEVINFO_DATA deviceInfoData);
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport(@"setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
         internal static extern Boolean SetupDiEnumDeviceInterfaces(IntPtr hDevInfo, IntPtr devInfo, ref Guid interfaceClassGuid, UInt32 memberIndex, ref SP_DEVICE_INTERFACE_DATA deviceInterfaceData);
         [System.Security.SuppressUnmanagedCodeSecurity]
         [DllImport("setupapi.dll", CharSet = CharSet.Auto)]
-        static extern IntPtr SetupDiGetClassDevs(ref Guid ClassGuid,IntPtr enumerator,IntPtr hwndParent,UInt32 Flags);
+        static extern IntPtr SetupDiGetClassDevs(ref Guid ClassGuid, IntPtr enumerator, IntPtr hwndParent, UInt32 Flags);
         #endregion
-        internal static string getCDType(string path,DriveInfo info)
+        internal static string getCDType(string path, DriveInfo info)
         {
             try
             {
@@ -266,7 +266,7 @@ namespace OpenMobile.Framework
         }
         internal static string getOSVersion()
         {
-            OSVERSIONINFOEX ex=new OSVERSIONINFOEX();
+            OSVERSIONINFOEX ex = new OSVERSIONINFOEX();
             ex.dwOSVersionInfoSize = Marshal.SizeOf(ex);
             GetVersionEx(ref ex);
 
@@ -321,11 +321,11 @@ namespace OpenMobile.Framework
                         break;
                 }
             }
-            if (ex.wServicePackMajor>0)
+            if (ex.wServicePackMajor > 0)
                 osVersion += " SP" + ex.wServicePackMajor.ToString();
             return osVersion;
         }
-        [DllImport("kernel32"),System.Security.SuppressUnmanagedCodeSecurity]
+        [DllImport("kernel32"), System.Security.SuppressUnmanagedCodeSecurity]
         static extern bool GetVersionEx(ref OSVERSIONINFOEX osvi);
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         struct OSVERSIONINFOEX

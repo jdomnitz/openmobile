@@ -71,7 +71,7 @@ namespace OpenMobile.Data
     /// <summary>
     /// Calendar
     /// </summary>
-    public sealed class Calendar:IDisposable
+    public sealed class Calendar : IDisposable
     {
         /// <summary>
         /// Removes past events
@@ -126,9 +126,9 @@ namespace OpenMobile.Data
         /// </summary>
         public void Close()
         {
-            if (asyncReader!=null)
+            if (asyncReader != null)
                 asyncReader.Close();
-            if (asyncCon!=null)
+            if (asyncCon != null)
                 asyncCon.Dispose();
             asyncReader = null;
             asyncCon = null;

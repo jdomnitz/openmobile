@@ -84,9 +84,9 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static bool writePlaylist(string location, ePlaylistType type, List<mediaInfo> playlist)
         {
-            switch(type)
+            switch (type)
             {
-            
+
                 case ePlaylistType.PLS:
                     return writePLS(location, playlist);
                 case ePlaylistType.M3U:
@@ -106,9 +106,9 @@ namespace OpenMobile.Media
             string folder = Directory.GetParent(location).FullName;
             try
             {
-                XmlWriterSettings settings=new XmlWriterSettings();
+                XmlWriterSettings settings = new XmlWriterSettings();
                 settings.ConformanceLevel = ConformanceLevel.Fragment;
-                XmlWriter writer = XmlWriter.Create(location,settings);
+                XmlWriter writer = XmlWriter.Create(location, settings);
                 writer.WriteRaw("<?wpl version=\"1.0\"?>");
                 writer.WriteStartElement("smil");
                 writer.WriteStartElement("head");
@@ -128,7 +128,7 @@ namespace OpenMobile.Media
                 for (int i = 0; i < playlist.Count; i++)
                 {
                     writer.WriteStartElement("media");
-                    writer.WriteAttributeString("src", Path.getRelativePath(folder,playlist[i].Location));
+                    writer.WriteAttributeString("src", Path.getRelativePath(folder, playlist[i].Location));
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -154,10 +154,10 @@ namespace OpenMobile.Media
                 for (int i = 0; i < playlist.Count; i++)
                 {
                     writer.WriteStartElement("track");
-                    if (playlist[i].Name!=null)
+                    if (playlist[i].Name != null)
                         writer.WriteElementString("title", playlist[i].Name);
                     if (playlist[i].Artist != null)
-                    writer.WriteElementString("creator", playlist[i].Artist);
+                        writer.WriteElementString("creator", playlist[i].Artist);
                     if (playlist[i].Album != null)
                         writer.WriteElementString("album", playlist[i].Album);
                     writer.WriteElementString("location", "file://" + Path.getRelativePath(folder, playlist[i].Location));
@@ -184,9 +184,9 @@ namespace OpenMobile.Media
                 {
                     writer.Write("#EXTINF:");
                     writer.Write(((playlist[i].Length == 0) ? -1 : playlist[i].Length).ToString());
-                    if (playlist[i].Name!=null)
-                        writer.WriteLine(","+playlist[i].Artist+" - "+playlist[i].Name);
-                    writer.WriteLine(Path.getRelativePath(folder,playlist[i].Location));
+                    if (playlist[i].Name != null)
+                        writer.WriteLine("," + playlist[i].Artist + " - " + playlist[i].Name);
+                    writer.WriteLine(Path.getRelativePath(folder, playlist[i].Location));
                     writer.WriteLine(string.Empty);
                 }
                 f.Close();
@@ -206,10 +206,10 @@ namespace OpenMobile.Media
                 writer.WriteLine("[playlist]\r\n");
                 for (int i = 0; i < p.Count; i++)
                 {
-                    writer.WriteLine("File" + (i + 1).ToString() + "=" + Path.getRelativePath(folder,p[i].Location));
-                    if (p[i].Name!=null)
+                    writer.WriteLine("File" + (i + 1).ToString() + "=" + Path.getRelativePath(folder, p[i].Location));
+                    if (p[i].Name != null)
                         writer.WriteLine("Title" + (i + 1).ToString() + "=" + p[i].Name);
-                    if (p[i].Length>0)
+                    if (p[i].Length > 0)
                         writer.WriteLine("Length" + (i + 1).ToString() + "=" + p[i].Length.ToString());
                     writer.WriteLine(string.Empty);
                 }
@@ -240,7 +240,7 @@ namespace OpenMobile.Media
             if (o == null)
                 return false;
             IMediaDatabase db = (IMediaDatabase)o;
-            return db.writePlaylist(playlist.ConvertAll<string>(convertMediaInfo),name,false);
+            return db.writePlaylist(playlist.ConvertAll<string>(convertMediaInfo), name, false);
         }
 
         /// <summary>
@@ -274,8 +274,8 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static List<string> listPlaylists(string directory)
         {
-            List<string> ret=new List<string>();
-            string[] filter = new string[] { "*.m3u", "*.wpl", "*.pls", "*.asx", "*.wax", "*.wvx", "*.xspf","*.pcast" };
+            List<string> ret = new List<string>();
+            string[] filter = new string[] { "*.m3u", "*.wpl", "*.pls", "*.asx", "*.wax", "*.wvx", "*.xspf", "*.pcast" };
             for (int i = 0; i < filter.Length; i++)
                 ret.AddRange(Directory.GetFiles(directory, filter[i]));
             ret.Sort();
@@ -300,7 +300,7 @@ namespace OpenMobile.Media
         /// <param name="theHost"></param>
         /// <param name="dbName"></param>
         /// <returns></returns>
-        public static List<string> listPlaylistsFromDB(IPluginHost theHost,string dbName)
+        public static List<string> listPlaylistsFromDB(IPluginHost theHost, string dbName)
         {
             if (theHost == null)
                 return new List<string>();
@@ -338,11 +338,11 @@ namespace OpenMobile.Media
         /// <param name="name"></param>
         /// <param name="dbName"></param>
         /// <returns></returns>
-        public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name,string dbName)
+        public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name, string dbName)
         {
-            object o=null;
+            object o = null;
             List<mediaInfo> playlist = new List<mediaInfo>();
-            for (int i = 0; ((i < 35)&&(o==null)); i++)
+            for (int i = 0; ((i < 35) && (o == null)); i++)
             {
                 theHost.getData(eGetData.GetMediaDatabase, dbName, out o);
                 if (i > 0)
@@ -353,7 +353,7 @@ namespace OpenMobile.Media
             IMediaDatabase db = (IMediaDatabase)o;
             if (db.beginGetPlaylist(name) == false)
                 return playlist;
-            mediaInfo url=db.getNextPlaylistItem();
+            mediaInfo url = db.getNextPlaylistItem();
             while (url != null)
             {
                 playlist.Add(url);
@@ -370,8 +370,8 @@ namespace OpenMobile.Media
         public static List<mediaInfo> readPlaylist(string location)
         {
             string ext = location.ToLower(); //linux is case sensative so dont alter location
-            
-            switch(ext.Substring(ext.Length-4,4))
+
+            switch (ext.Substring(ext.Length - 4, 4))
             {
                 case ".m3u":
                     return readM3U(location);
@@ -427,7 +427,7 @@ namespace OpenMobile.Media
             {
                 mediaInfo info = new mediaInfo();
                 foreach (XmlNode n in node.ChildNodes)
-                    switch(n.Name.ToLower())
+                    switch (n.Name.ToLower())
                     {
                         case "title":
                             info.Name = n.InnerText;
@@ -462,7 +462,7 @@ namespace OpenMobile.Media
             XmlNodeList nodes = reader.DocumentElement.SelectNodes("/asx/entry");
             foreach (XmlNode node in nodes)
             {
-                mediaInfo info=new mediaInfo();
+                mediaInfo info = new mediaInfo();
                 foreach (XmlNode n in node.ChildNodes)
                     if (n.Name.ToLower() == "title")
                         info.Name = n.InnerText;
@@ -482,7 +482,7 @@ namespace OpenMobile.Media
             XmlNodeList nodes = reader.DocumentElement.SelectNodes("/smil/body/seq");
             foreach (XmlNode node in nodes[0].ChildNodes)
             {
-                string s=node.Attributes["src"].Value;
+                string s = node.Attributes["src"].Value;
                 if (System.IO.Path.IsPathRooted(s) == true)
                 {
                     playlist.Add(new mediaInfo(s));
@@ -499,8 +499,8 @@ namespace OpenMobile.Media
         private static List<mediaInfo> readM3U(string location)
         {
             List<mediaInfo> playlist = new List<mediaInfo>();
-            StreamReader reader=new StreamReader(location);
-            while(reader.EndOfStream==false)
+            StreamReader reader = new StreamReader(location);
+            while (reader.EndOfStream == false)
             {
                 string str = reader.ReadLine();
                 if (str.StartsWith("#") == false)
@@ -519,7 +519,7 @@ namespace OpenMobile.Media
                 string str = reader.ReadLine();
                 if (str.StartsWith("File") == true)
                 {
-                    str = str.Substring(str.IndexOf('=')+1);
+                    str = str.Substring(str.IndexOf('=') + 1);
                     playlist.Add(new mediaInfo(System.IO.Path.GetFullPath(str)));
                 }
             }
