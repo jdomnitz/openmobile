@@ -936,6 +936,8 @@ namespace OpenMobile
             }
             Invalidate();
         }
+        int best;
+        OMControl b;
         public void RenderingWindow_KeyDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             try
@@ -949,7 +951,6 @@ namespace OpenMobile
                         OMControl b = null;
                         for (int j = 0; j < backgroundQueue.Count; j++)
                             for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                //Modified by Borte
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
                                     if ((backgroundQueue[j][i].Left < left) && (backgroundQueue[j][i].Top < top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
                                     {
@@ -969,23 +970,15 @@ namespace OpenMobile
                     if (typeof(IKey).IsInstanceOfType(highlighted) == true)
                         if (((IKey)highlighted).KeyDown(screen, e, widthScale, heightScale))
                             return;
-                    int best = 1000;
-                    OMControl b = null;
+                    best = 1000;
+                    b = null;
                     switch (e.Key)
                     {
                         case Key.Left:
                             for (int j = 0; j < backgroundQueue.Count; j++)
                                 for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                     if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                        if ((backgroundQueue[j][i].Left < highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                            if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
-                                            {
-                                                if (notCovered(backgroundQueue[j][i]) == true)
-                                                {
-                                                    best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
-                                                    b = backgroundQueue[j][i];
-                                                }
-                                            }
+                                        checkLeft(backgroundQueue[j][i],highlighted.toRegion(),0,0);
                             if (b == null)
                                 break;
                             b.Mode = eModeType.Highlighted;
@@ -1001,15 +994,7 @@ namespace OpenMobile
                             for (int j = 0; j < backgroundQueue.Count; j++)
                                 for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                     if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                        if ((backgroundQueue[j][i].Left > highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                            if (xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
-                                            {
-                                                if (notCovered(backgroundQueue[j][i]) == true)
-                                                {
-                                                    best = xdistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
-                                                    b = backgroundQueue[j][i];
-                                                }
-                                            }
+                                        checkRight(backgroundQueue[j][i],highlighted.toRegion(),0,0);
                             if (b == null)
                                 break;
                             b.Mode = eModeType.Highlighted;
@@ -1025,15 +1010,7 @@ namespace OpenMobile
                             for (int j = 0; j < backgroundQueue.Count; j++)
                                 for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                     if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                        if ((backgroundQueue[j][i].Top < highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                            if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
-                                            {
-                                                if (notCovered(backgroundQueue[j][i]) == true)
-                                                {
-                                                    best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
-                                                    b = backgroundQueue[j][i];
-                                                }
-                                            }
+                                        checkUp(backgroundQueue[j][i],highlighted.toRegion(), 0,0);
                             if (b == null)
                                 break;
                             b.Mode = eModeType.Highlighted;
@@ -1049,15 +1026,7 @@ namespace OpenMobile
                             for (int j = 0; j < backgroundQueue.Count; j++)
                                 for (int i = 0; i < backgroundQueue[j].controlCount; i++)
                                     if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                        if ((backgroundQueue[j][i].Top > highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                            if (ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion()) < best)
-                                            {
-                                                if (notCovered(backgroundQueue[j][i]) == true)
-                                                {
-                                                    best = ydistance(highlighted.toRegion(), backgroundQueue[j][i].toRegion());
-                                                    b = backgroundQueue[j][i];
-                                                }
-                                            }
+                                        checkDown(backgroundQueue[j][i],highlighted.toRegion(),0,0);
                             if (b == null)
                                 break;
                             b.Mode = eModeType.Highlighted;
@@ -1094,7 +1063,124 @@ namespace OpenMobile
             }
         }
 
-        private bool notCovered(OMControl oMControl)
+        private void checkRight(OMControl control,Rectangle highlighted,int ofsetX,int ofsetY)
+        {
+            if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
+            {
+                OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
+                if (container.Contains(this.highlighted))
+                {
+                    highlighted.X += container.ofsetX;
+                    highlighted.Y += container.ofsetY;
+                }
+                for (int i = 0; i < container.controlCount; i++)
+                    checkRight(container[i], highlighted, container.ofsetX, container.ofsetY);
+            }
+            else if (((control.Left+ofsetX) > highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(control.toRegion()) == true))
+            {
+                Rectangle region = control.toRegion();
+                region.X += ofsetX;
+                region.Y += ofsetY;
+                highlighted.X += (highlighted.Width / 2);
+                if (xdistance(highlighted, region) < best)
+                {
+                    if (notCovered(control,ofsetX,ofsetY) == true)
+                    {
+                        best = xdistance(highlighted, region);
+                        b = control;
+                    }
+                }
+            }
+        }
+
+        private void checkDown(OMControl control,Rectangle highlighted, int ofsetx,int ofsety)
+        {
+            if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
+            {
+                OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
+                if (container.Contains(this.highlighted))
+                {
+                    highlighted.X += container.ofsetX;
+                    highlighted.Y += container.ofsetY;
+                }
+                for (int i = 0; i < container.controlCount; i++)
+                    checkDown(container[i],highlighted, container.ofsetX, container.ofsetY);
+            }
+            else if ((control.Top + ofsety > highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(control.toRegion()) == true))
+            {
+                Rectangle region = control.toRegion();
+                region.Y += ofsety;
+                region.X += ofsetx;
+                if (ydistance(highlighted, region) < best)
+                {
+                    if (notCovered(control,ofsetx,ofsety) == true)
+                    {
+                        best = ydistance(highlighted, region);
+                        b = control;
+                    }
+                }
+            }
+        }
+
+        private void checkUp(OMControl control,Rectangle highlighted, int ofsetx,int ofsety)
+        {
+            if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
+            {
+                OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
+                if (container.Contains(this.highlighted))
+                {
+                    highlighted.X += container.ofsetX;
+                    highlighted.Y += container.ofsetY;
+                }
+                for (int i = 0; i < container.controlCount; i++)
+                    checkUp(container[i], highlighted, container.ofsetX, container.ofsetY);
+            }
+            else if ((control.Top + ofsety < highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(control.toRegion()) == true))
+            {
+                Rectangle region = control.toRegion();
+                region.X += ofsetx;
+                region.Y += ofsety;
+                if (ydistance(highlighted, region) < best)
+                {
+                    if (notCovered(control,ofsetx,ofsety) == true)
+                    {
+                        best = ydistance(highlighted, region);
+                        b = control;
+                    }
+                }
+            }
+        }
+
+        private void checkLeft(OMControl control,Rectangle highlighted,int ofsetX,int ofsetY)
+        {
+            if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
+            {
+                OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
+                if (container.Contains(this.highlighted))
+                {
+                    highlighted.X += container.ofsetX;
+                    highlighted.Y += container.ofsetY;
+                }
+                for (int i = 0; i < container.controlCount; i++)
+                    checkLeft(container[i], highlighted, container.ofsetX, container.ofsetY);
+            }
+            else if (((control.Left + ofsetX) < highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(control.toRegion()) == true))
+            {
+                Rectangle region = control.toRegion();
+                region.X += ofsetX;
+                region.Y += ofsetY;
+                if (xdistance(highlighted, region) < best)
+                {
+                    if (notCovered(control,ofsetX,ofsetY) == true)
+                    {
+                        best = xdistance(highlighted, region);
+                        b = control;
+                    }
+                }
+            }
+        }
+
+        private bool notCovered(OMControl oMControl,int ofsetx,int ofsety)
         {
             for (int h = backgroundQueue.Count - 1; h >= 0; h--)
             {
@@ -1102,10 +1188,11 @@ namespace OpenMobile
                 {
                     if (backgroundQueue[h][i].Visible == false)
                         continue;
-                    if ((oMControl.Left >= backgroundQueue[h][i].Left) && (oMControl.Top >= backgroundQueue[h][i].Top) && ((oMControl.Left + oMControl.Width) <= (backgroundQueue[h][i].Left + backgroundQueue[h][i].Width)) && ((oMControl.Top + oMControl.Height) <= (backgroundQueue[h][i].Top + backgroundQueue[h][i].Height)))
+                    if (((oMControl.Left + ofsetx) >= backgroundQueue[h][i].Left) && ((oMControl.Top + ofsety) >= backgroundQueue[h][i].Top) && ((oMControl.Left + oMControl.Width + ofsetx) <= (backgroundQueue[h][i].Left + backgroundQueue[h][i].Width)) && ((oMControl.Top + oMControl.Height + ofsety) <= (backgroundQueue[h][i].Top + backgroundQueue[h][i].Height)))
                     {
-
                         if (backgroundQueue[h][i] == oMControl)
+                            return true;
+                        else if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(backgroundQueue[h][i]))
                             return true;
                         else
                             return false;

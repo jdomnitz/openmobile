@@ -64,7 +64,7 @@ namespace OMPluginSample
             return settings;
         }
 
-        private void Setting_Changed(Setting s)
+        private void Setting_Changed(int scr,Setting s)
         {
             //When a setting changes you should update your plugin with
             //the new setting information
