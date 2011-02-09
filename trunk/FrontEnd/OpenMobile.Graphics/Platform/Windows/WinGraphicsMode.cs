@@ -141,24 +141,26 @@ namespace OpenMobile.Platform.Windows
             pfd.Flags =
                 PixelFormatDescriptorFlags.SUPPORT_OPENGL |
                 PixelFormatDescriptorFlags.DRAW_TO_WINDOW;
-
-            int pixel = 0;
-            while (DescribePixelFormat(deviceContext, ++pixel, API.PixelFormatDescriptorSize, ref pfd) != 0)
+            foreach (bool generic_allowed in new bool[] { false, true })
             {
-                // Ignore non-accelerated formats.
-                if ((pfd.Flags & PixelFormatDescriptorFlags.GENERIC_FORMAT) != 0)
-                    continue;
+                int pixel = 0;
+                while (DescribePixelFormat(deviceContext, ++pixel, API.PixelFormatDescriptorSize, ref pfd) != 0)
+                {
+                    // Ignore non-accelerated formats unless thats the only option
+                    if (!generic_allowed && (pfd.Flags & PixelFormatDescriptorFlags.GENERIC_FORMAT) != 0)
+                        continue;
 
-                GraphicsMode fmt = new GraphicsMode((IntPtr)pixel,
-                    new ColorFormat(pfd.RedBits, pfd.GreenBits, pfd.BlueBits, pfd.AlphaBits),
-                    pfd.DepthBits,
-                    pfd.StencilBits,
-                    0,
-                    new ColorFormat(pfd.AccumBits),
-                    (pfd.Flags & PixelFormatDescriptorFlags.DOUBLEBUFFER) != 0 ? 2 : 1,
-                    (pfd.Flags & PixelFormatDescriptorFlags.STEREO) != 0);
+                    GraphicsMode fmt = new GraphicsMode((IntPtr)pixel,
+                        new ColorFormat(pfd.RedBits, pfd.GreenBits, pfd.BlueBits, pfd.AlphaBits),
+                        pfd.DepthBits,
+                        pfd.StencilBits,
+                        0,
+                        new ColorFormat(pfd.AccumBits),
+                        (pfd.Flags & PixelFormatDescriptorFlags.DOUBLEBUFFER) != 0 ? 2 : 1,
+                        (pfd.Flags & PixelFormatDescriptorFlags.STEREO) != 0);
 
-                yield return fmt;
+                    yield return fmt;
+                }
             }
         }
 
