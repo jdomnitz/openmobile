@@ -94,6 +94,7 @@ Public Class EmbedApp2
         m_Process = Process.Start(m_Exe)
         'Give it some time to load before embedding it
         System.Threading.Thread.Sleep(m_Delay * 1000)
+        m_WindowName = m_Process.ProcessName
     End Sub
 
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
@@ -114,7 +115,7 @@ Public Class EmbedApp2
         Return m_Settings
     End Function
 
-    Private Sub Changed(ByVal St As Setting)
+    Private Sub Changed(ByVal screen As Integer, ByVal St As Setting)
         Using PlugSet As New OpenMobile.Data.PluginSettings
 
             PlugSet.setSetting(St.Name, St.Value)
