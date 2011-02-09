@@ -33,6 +33,8 @@ Public Class RadioComm
     Private m_ComPort As Integer = 0
     Private m_SourceDevice As Integer = 0
     Private m_Fade As Boolean = True
+    Private m_RouteVolume As Integer = 100
+
     Private WithEvents m_Audio As AudioRouter.AudioManager
 
     Private WithEvents m_Settings As Settings
@@ -111,6 +113,12 @@ Public Class RadioComm
 
             m_Settings.Add(New Setting(SettingTypes.MultiChoice, "OMVisteonRadio.FadeAudio", "Fade", "Fade Audio", Setting.BooleanList, Setting.BooleanList, m_Fade))
 
+            Dim Range As New Generic.List(Of String)
+            Range.Add("0")
+            Range.Add("100")
+            m_Settings.Add(New Setting(SettingTypes.Range, "OMVisteonRadio.AudioVolume", "Input Vol", "(0-100%)", Nothing, Range, m_RouteVolume))
+
+
             AddHandler m_Settings.OnSettingChanged, AddressOf Changed
         End If
 
@@ -125,23 +133,20 @@ Public Class RadioComm
     End Sub
 
     Private Sub LoadRadioSettings()
-        Dim Settings As New OpenMobile.Data.PluginSettings
-        If String.IsNullOrEmpty(Settings.getSetting("OMVisteonRadio.ComPort")) Then
-            SetDefaultSettings()
-        End If
-        m_ComPort = Settings.getSetting("OMVisteonRadio.ComPort")
-        m_SourceDevice = Settings.getSetting("OMVisteonRadio.SourceDevice")
-        m_Fade = Settings.getSetting("OMVisteonRadio.FadeAudio")
-        Settings.Dispose()
+        m_ComPort = GetSetting("OMVisteonRadio.ComPort", 0)
+        m_SourceDevice = GetSetting("OMVisteonRadio.SourceDevice", 0)
+        m_Fade = GetSetting("OMVisteonRadio.FadeAudio", True)
+        m_RouteVolume = GetSetting("OMVisteonRadio.AudioVolume", 100)
     End Sub
 
-    Private Sub SetDefaultSettings()
+    Private Function GetSetting(ByVal Name As String, ByVal DefaultValue As String) As String
         Using Settings As New OpenMobile.Data.PluginSettings
-            Settings.setSetting("OMVisteonRadio.ComPort", 0)
-            Settings.setSetting("OMVisteonRadio.SourceDevice", 0)
-            Settings.setSetting("OMVisteonRadio.FadeAudio", True)
+            If String.IsNullOrEmpty(Settings.getSetting(Name)) Then
+                Settings.setSetting(Name, DefaultValue)
+            End If
+            Return Settings.getSetting(Name)
         End Using
-    End Sub
+    End Function
 
     Public Function setPowerState(ByVal instance As Integer, ByVal powerState As Boolean) As Boolean Implements OpenMobile.Plugin.ITunedContent.setPowerState
         Try
@@ -149,6 +154,7 @@ Public Class RadioComm
             If m_Audio Is Nothing Then
                 Return False
             End If
+            m_Audio.setVolume(instance, m_RouteVolume)
             m_Audio.setZonePower(instance, powerState)
 
             If powerState Then
@@ -201,7 +207,7 @@ Public Class RadioComm
                 If Not m_Audio Is Nothing Then
                     m_Audio.Resume()
                 End If
-
+        
             Case Is = ePowerEvent.SleepOrHibernatePending
                 If Not m_Audio Is Nothing Then
                     m_Audio.Suspend()
@@ -374,7 +380,7 @@ Public Class RadioComm
         If band = eTunedContentBand.AM Then
             Return tuneTo(instance, "AM:53000")
         ElseIf band = eTunedContentBand.FM OrElse band = eTunedContentBand.HD Then
-            Return tuneTo(instance, "FM:87500")
+            Return tuneTo(instance, "FM:88100")
         End If
     End Function
 
