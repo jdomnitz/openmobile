@@ -17,10 +17,14 @@
 '    There is one additional restriction when using this framework regardless of modifications to it.
 '    The About Panel or its contents must be easily accessible by the end users.
 '    This is to ensure all project contributors are given due credit not only in the source code.
+
+'    Copyright 2010-2011 Jonathan Heizer jheizer@gmail.com
 '*********************************************************************************
+
 Imports OpenMobile
 Imports OpenMobile.Framework
 Imports OpenMobile.Plugin
+Imports OpenMobile.Threading
 Imports System.IO.Ports
 
 Public Class SerialAmpControl
@@ -30,6 +34,7 @@ Public Class SerialAmpControl
     Private m_Port As SerialPort
     Private m_ComPort As String
     Private m_Line As String = "DTR"
+    Private m_Delay As String = "0"
     Private WithEvents m_Settings As Settings
 
     Public Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean Implements OpenMobile.Plugin.IBasePlugin.incomingMessage
@@ -45,7 +50,7 @@ Public Class SerialAmpControl
         If Not m_ComPort = "-1" Then
             m_Host = host
             m_Port = New SerialPort(m_ComPort)
-            TurnOn()
+            SafeThread.Asynchronous(AddressOf TurnOn, host)
         End If
     End Function
 
@@ -54,6 +59,8 @@ Public Class SerialAmpControl
             If Not m_Port.IsOpen Then
                 m_Port.Open()
             End If
+
+            System.Threading.Thread.Sleep(Double.Parse(m_Delay) * 1000)
 
             If m_Line = "DTR" Then
                 m_Port.DtrEnable = True
@@ -91,6 +98,15 @@ Public Class SerialAmpControl
             LineOptions.Add("RTS")
             m_Settings.Add(New Setting(SettingTypes.MultiChoice, "SerialAmpControl.Line", "Line", "Line to Trigger", LineOptions, LineOptions, m_Line))
 
+            Dim DelayOptions As New Generic.List(Of String)
+            DelayOptions.Add("0")
+            DelayOptions.Add(".5")
+            DelayOptions.Add("1")
+            DelayOptions.Add("1.5")
+            DelayOptions.Add("2")
+            DelayOptions.Add("2.5")
+            m_Settings.Add(New Setting(SettingTypes.MultiChoice, "SerialAmpControl.StartupDelay", "Delay", "Turn On Delay (seconds)", DelayOptions, DelayOptions, m_Delay))
+
             AddHandler m_Settings.OnSettingChanged, AddressOf Changed
         End If
 
@@ -104,21 +120,19 @@ Public Class SerialAmpControl
     End Sub
 
     Private Sub LoadPortSettings()
-        Dim Settings As New OpenMobile.Data.PluginSettings
-        If String.IsNullOrEmpty(Settings.getSetting("SerialAmpControl.ComPort")) Then
-            SetDefaultSettings()
-        End If
-        m_ComPort = Settings.getSetting("SerialAmpControl.ComPort")
-        m_Line = Settings.getSetting("SerialAmpControl.Line")
-        Settings.Dispose()
+        m_ComPort = GetSetting("SerialAmpControl.ComPort", "-1")
+        m_Line = GetSetting("SerialAmpControl.Line", "DTR")
+        m_Delay = GetSetting("SerialAmpControl.StartupDelay", "0")
     End Sub
 
-    Private Sub SetDefaultSettings()
-        Dim Settings As New OpenMobile.Data.PluginSettings
-        Settings.setSetting("SerialAmpControl.ComPort", "-1")
-        Settings.setSetting("SerialAmpControl.Line", "DTR")
-        Settings.Dispose()
-    End Sub
+    Private Function GetSetting(ByVal Name As String, ByVal DefaultValue As String) As String
+        Using Settings As New OpenMobile.Data.PluginSettings
+            If String.IsNullOrEmpty(Settings.getSetting(Name)) Then
+                Settings.setSetting(Name, DefaultValue)
+            End If
+            Return Settings.getSetting(Name)
+        End Using
+    End Function
 
     Private Sub m_Host_OnPowerChange(ByVal type As OpenMobile.ePowerEvent) Handles m_Host.OnPowerChange
         Select Case type
@@ -168,6 +182,7 @@ Public Class SerialAmpControl
                 If Not m_Port Is Nothing Then
                     If m_Port.IsOpen Then
                         m_Port.DtrEnable = False
+                        m_Port.RtsEnable = False
                         m_Port.Close()
                     End If
                 End If
