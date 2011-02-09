@@ -20,6 +20,7 @@
 Imports OpenMobile
 Imports OpenMobile.Framework
 Imports OpenMobile.Plugin
+Imports OpenMobile.Threading
 Imports System.Data
 Imports Mono.Data.Sqlite
 
@@ -53,8 +54,6 @@ Public Class OMSerialGPS
 
     Private WithEvents m_GPS As SerialGPS.NMEAParser
 
-    Private WithEvents m_Loader As New System.ComponentModel.BackgroundWorker
-
     Private m_Icon As OpenMobile.Graphics.OImage
     Private m_IconShowing As Boolean = False
 
@@ -81,11 +80,11 @@ Public Class OMSerialGPS
         LoadGPSSettings()
 
 
-        m_Loader.RunWorkerAsync()
+        SafeThread.Asynchronous(AddressOf BackgroundInit, m_Host)
         Return eLoadStatus.LoadSuccessful
     End Function
 
-    Private Sub m_Loader_DoWork(ByVal sender As Object, ByVal e As System.ComponentModel.DoWorkEventArgs) Handles m_Loader.DoWork
+    Private Sub BackgroundInit()
         Try
             AutoDetectGPS()
 
