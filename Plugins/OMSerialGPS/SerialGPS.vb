@@ -159,6 +159,11 @@ Public Class OMSerialGPS
         End If
 
         m_Sensors = New Generic.List(Of Sensor)
+
+        'If Not m_GPS.GPSConnected Then
+        '    Return m_Sensors
+        'End If
+
         m_Sensors.Add(New Sensor("GPS." & PIDs.Fix.ToString, MyBase.MaskPID(PIDs.Fix), eSensorType.deviceSuppliesData, "Fix", eSensorDataType.binary))
         m_Sensors.Add(New Sensor("GPS." & PIDs.Longitude.ToString, MyBase.MaskPID(PIDs.Longitude), eSensorType.deviceSuppliesData, "Lng", eSensorDataType.degrees))
         m_Sensors.Add(New Sensor("GPS." & PIDs.Latitude.ToString, MyBase.MaskPID(PIDs.Latitude), eSensorType.deviceSuppliesData, "Lat", eSensorDataType.degrees))
@@ -181,6 +186,7 @@ Public Class OMSerialGPS
     End Function
 
     Public Overrides Function getValue(ByVal PID As Integer) As Object
+        Return ""
         Select Case DirectCast(MyBase.UnmaskPID(PID), PIDs)
             Case Is = PIDs.Fix
                 Return m_GPRMC.SatFix
