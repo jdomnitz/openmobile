@@ -69,6 +69,7 @@ Public Class ExternalNav
         m_Process = Process.Start(m_Exe)
         'Give it some time to load before moving it
         System.Threading.Thread.Sleep(m_Delay * 1000)
+        m_WindowName = m_Process.ProcessName
     End Sub
 
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
