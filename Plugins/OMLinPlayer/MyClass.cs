@@ -75,19 +75,22 @@ namespace OMLinPlayer
 		}
 
 		MainLoop loop;
-		public bool play (int instance, string url, OpenMobile.eMediaType type)
-		{
+        public bool play(int instance, string location, OpenMobile.eMediaType type)
+        {
+            // Bugfixes provided by Kevin (kross@mp3car)
 			error=false;
 			stop(instance);
+            string url;
 			switch(type)
 			{
 				case eMediaType.Local:
-					url="file://"+url;
+                    url = "file://" + location;
 					break;
 				case eMediaType.DVD:
 					url="dvd://";
 					break;
 				case eMediaType.AudioCD:
+                    url = location;
 					break;
 				default:
 					return false;
@@ -105,9 +108,9 @@ namespace OMLinPlayer
 			player.SetState(State.Playing);
 			if (type==eMediaType.Local)
 			{
-				nowPlaying=TagReader.getInfo(url);
+                nowPlaying = TagReader.getInfo(location);
 				if (nowPlaying == null)
-	                nowPlaying = new mediaInfo(url);
+                    nowPlaying = new mediaInfo(location);
 	            nowPlaying.Type = eMediaType.Local;
 	            if (nowPlaying.coverArt == null)
 	                nowPlaying.coverArt = TagReader.getCoverFromDB(nowPlaying.Artist, nowPlaying.Album, theHost);
@@ -115,7 +118,7 @@ namespace OMLinPlayer
 	                nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
 	            if (nowPlaying.coverArt == null)
 	                nowPlaying.coverArt = TagReader.getLastFMImage(nowPlaying.Artist, nowPlaying.Album);
-				if (nowPlaying.Length==0)
+                if (nowPlaying.Length <= 0)
 					setDuration();
 			}else
 			{
@@ -128,7 +131,7 @@ namespace OMLinPlayer
 				}
 				if (nowPlaying==null)
 					nowPlaying=new mediaInfo(url);
-				if (nowPlaying.Length==0)
+                if (nowPlaying.Length <= 0)
 					setDuration();
 				if (string.IsNullOrEmpty(nowPlaying.Name))
 					nowPlaying.Name=url;

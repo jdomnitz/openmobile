@@ -28,6 +28,7 @@ using OpenMobile.Plugin;
 namespace OpenMobile
 {
     public sealed class UI:IHighLevel
+    // Several bugfixes provided by Kevin (kross@mp3car)
     {
         public OMPanel loadPanel(string name, int screen)
         {
@@ -92,9 +93,9 @@ namespace OpenMobile
             voldown.OnClick += new userInteraction(voldown_OnClick);
             voldown.Transition = eButtonTransition.None;
             OMButton volup = new OMButton(-11, 525, 112, 84);
-            volup.Image = theHost.getSkinImage("VolUp");
-            volup.FocusImage = theHost.getSkinImage("VolUp_HL");
-            volup.DownImage = theHost.getSkinImage("VolUp_Selected");
+            volup.Image = theHost.getSkinImage("VolUP");
+            volup.FocusImage = theHost.getSkinImage("VolUP_HL");
+            volup.DownImage = theHost.getSkinImage("VolUP_Selected");
             volup.OnClick += new userInteraction(volup_OnClick);
             volup.Transition = eButtonTransition.None;
             OMButton mute = new OMButton(180, 477, 178, 146);
@@ -206,10 +207,10 @@ namespace OpenMobile
         void voldown_OnClick(OMControl sender, int screen)
         {
             int vol = ((VolumeBar)manager[screen, "volume"][1]).Value;
-            if (vol == 0)
-                return;
-            
-            theHost.execute(eFunction.setSystemVolume, (vol - 1).ToString(), theHost.instanceForScreen(screen).ToString());
+
+            if (vol > 0)
+                theHost.execute(eFunction.setSystemVolume, (vol - 1).ToString(), theHost.instanceForScreen(screen).ToString());
+
             if (volCount[screen] == 0)
             {
                 theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "UI", "volume");
@@ -220,16 +221,17 @@ namespace OpenMobile
 
         void bar_OnSliderMoved(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.setSystemVolume, ((VolumeBar)sender).Value.ToString());
+            volCount[screen] = 4;
+            theHost.execute(eFunction.setSystemVolume, ((VolumeBar)sender).Value.ToString(), theHost.instanceForScreen(screen).ToString());
         }
 
         void volup_OnClick(OMControl sender, int screen)
         {
             int vol=((VolumeBar)manager[screen, "volume"][1]).Value;
-            if (vol==100)
-                return;
+    
+            if (vol<100)
+                theHost.execute(eFunction.setSystemVolume, (vol + 1).ToString(), theHost.instanceForScreen(screen).ToString());
             
-            theHost.execute(eFunction.setSystemVolume, (vol + 1).ToString(), theHost.instanceForScreen(screen).ToString());
             if (volCount[screen] == 0)
             {
                 theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "UI", "volume");

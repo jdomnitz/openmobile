@@ -23,7 +23,7 @@ using OpenMobile.Input;
 
 namespace OpenMobile.Controls
 {
-    internal sealed class VolumeBar:OMProgress,IMouse
+    internal sealed class VolumeBar:OMProgress,IMouse,IThrow
     {
         imageItem bottom;
         imageItem overlay;
@@ -82,6 +82,25 @@ namespace OpenMobile.Controls
         }
 
         public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        {
+            //
+        }
+
+        #endregion
+
+        #region IThrow Members
+        // Bugfix provided by Kevin (kross@mp3car) (disable gesture)
+        public void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
+        {
+            //
+        }
+
+        public void MouseThrowStart(int screen, Point StartLocation, PointF scaleFactors, ref bool Cancel)
+        {
+            Cancel = true;
+        }
+
+        public void MouseThrowEnd(int screen, Point EndLocation)
         {
             //
         }
