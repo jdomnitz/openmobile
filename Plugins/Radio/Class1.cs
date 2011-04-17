@@ -647,12 +647,12 @@ namespace OMRadio
         {
             if (StationListSource == StationListSources.Live)
             {
-                OMList list = (OMList)sender;
-                if (list.Tag == null)
+                OMList List = (OMList)sender;
+                if (List.SelectedItem.tag == null)
                     return;
                 System.Media.SystemSounds.Beep.Play();
                 Message(screen, "Preset saved", 1000);
-                stationInfo station = new stationInfo(list.SelectedItem.text, (string)list.SelectedItem.tag);
+                stationInfo station = new stationInfo(List.SelectedItem.text, (string)List.SelectedItem.tag);
                 SaveToPresets(theHost.instanceForScreen(screen), station);
             }
 
@@ -857,6 +857,9 @@ namespace OMRadio
                 switch (info.currentStation.signal)
                 {
                     default:
+                        ((OMLabel)manager[i]["Radio_StationSignal"]).Text = "";
+                        break;
+                    case 0:
                         ((OMLabel)manager[i]["Radio_StationSignal"]).Text = "No signal!";
                         break;
                     case 1:
@@ -1081,11 +1084,11 @@ namespace OMRadio
         private void DumpPresetListToDB(string band)
         {
             // Dump preset list to database
-            for (int i = 0; i < Presets.Count; i++)
+            using (PluginSettings setting = new PluginSettings())
             {
-                string DataName = "TunedContent." + band + ".Preset" + i.ToString();
-                using (PluginSettings setting = new PluginSettings())
+                for (int i = 0; i < Presets.Count; i++)
                 {
+                    string DataName = "TunedContent." + band + ".Preset" + i.ToString();
                     setting.setSetting(DataName + ".StationName", Presets[i].stationName);
                     setting.setSetting(DataName + ".StationID", Presets[i].stationID);
                 }

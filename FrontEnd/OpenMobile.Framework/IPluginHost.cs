@@ -311,5 +311,18 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="PID">Sensor PID</param>
         object getSensorValue(int PID);
+        /// <summary>
+        /// Sends a message to the debug log
+        /// </summary>
+        /// <param name="from">The name of the source plugin</param>
+        /// <param name="message">The message</param>
+        /// <returns></returns>
+        bool DebugMsg(string from, string message);
+        /// <summary>
+        /// Sends a message to the debug log (with automatic source detection)
+        /// </summary>
+        /// <param name="message">The message</param>
+        /// <returns></returns>
+        bool DebugMsg(string message);
     }
 }

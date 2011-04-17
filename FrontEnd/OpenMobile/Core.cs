@@ -339,6 +339,10 @@ namespace OpenMobile
                     theHost.ScreenCount = 1;
                 }
             }
+
+            // Map host reference to be availabe to framework components
+            BuiltInComponents.Host = theHost;
+
             // Initialize screens
             RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
             for (int i = 0; i < RenderingWindows.Capacity; i++)

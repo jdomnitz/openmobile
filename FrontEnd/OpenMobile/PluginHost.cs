@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Threading;
+using System.Reflection;
 using Microsoft.Win32;
 using OpenMobile.Controls;
 using OpenMobile.Data;
@@ -257,11 +258,16 @@ namespace OpenMobile
                 return BuiltInComponents.AboutPanel();
             try
             {
+                OMPanel p = null;
                 IBasePlugin plugin = getPluginByName(name);
                 if (plugin != null)
-                    return ((IHighLevel)plugin).loadPanel(panelName, screen);
-                else
-                    return null;
+                    p = ((IHighLevel)plugin).loadPanel(panelName, screen);
+
+                // Look for panel from the default panels collection in the framework if no other panel is found
+                if (p == null)
+                    p = BuiltInComponents.Panels[0, panelName];
+
+                return p;
             }
             catch (NotImplementedException) { return null; }
         }
@@ -1057,6 +1063,7 @@ namespace OpenMobile
                         }
                         if ((history.Count(ret) == 0) || (history.Peek(ret).pluginName == null))
                             return false;
+                        raiseSystemEvent(eFunction.goBack, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
                         execute(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
                         while ((history.Count(ret) > 1) && (history.Peek(ret).Equals(history.CurrentItem(ret))))
@@ -1969,6 +1976,16 @@ namespace OpenMobile
                 if (g.TestPID(PID))
                     return g.getValue(PID);
             return null;
+        }
+
+        public bool DebugMsg(string from, string message)
+        {
+            return sendMessage("OMDebug", from, message);
+        }
+        public bool DebugMsg(string message)
+        {
+            MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();
+            return DebugMsg(mb.DeclaringType.FullName + "." + mb.Name, message);
         }
 
     }
