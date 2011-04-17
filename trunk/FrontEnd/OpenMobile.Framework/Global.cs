@@ -136,36 +136,113 @@ namespace OpenMobile
             /// <summary>
             /// Text Formatting
             /// </summary>
-            public OpenMobile.Graphics.eTextFormat textFormat = OpenMobile.Graphics.eTextFormat.Normal;
+            public OpenMobile.Graphics.eTextFormat textFormat
+            {
+                get { return _textFormat; }
+                set
+                {
+                    _textFormat = value;
+                    subitemTex = null;
+                }
+            }
+            private OpenMobile.Graphics.eTextFormat _textFormat = OpenMobile.Graphics.eTextFormat.Normal;
+
             /// <summary>
             /// The text alignment
             /// </summary>
-            public OpenMobile.Graphics.Alignment textAlignment = OpenMobile.Graphics.Alignment.BottomLeft;
+            public OpenMobile.Graphics.Alignment textAlignment
+            {
+                get { return _textAlignment; }
+                set
+                {
+                    _textAlignment = value;
+                    subitemTex = null;
+                }
+            }
+            private OpenMobile.Graphics.Alignment _textAlignment = OpenMobile.Graphics.Alignment.BottomLeft;
             /// <summary>
             /// The ForeColor
             /// </summary>
-            public Color color = Color.White;
+            public Color color
+            {
+                get { return _color; }
+                set
+                {
+                    _color = value;
+                    subitemTex = null;
+                }
+            }
+            private Color _color = Color.White;
             /// <summary>
             /// The color when highlighted
             /// </summary>
-            public Color highlightColor = Color.White;
+            public Color highlightColor
+            {
+                get { return _highlightColor; }
+                set
+                {
+                    _highlightColor = value;
+                    subitemTex = null;
+                }
+            }
+            private Color _highlightColor = Color.White;
             /// <summary>
             /// The Text Font
             /// </summary>
-            public Font font = new Font(Font.GenericSansSerif, 18F);
+            public Font font
+            {
+                get { return _font; }
+                set
+                {
+                    _font = value;
+                    subitemTex = null;
+                }
+            }
+            private Font _font = new Font(Font.GenericSansSerif, 18F);
             /// <summary>
             /// The outline/secondary color
             /// </summary>
-            public Color outlineColor = Color.Black;
+            public Color outlineColor
+            {
+                get { return _outlineColor; }
+                set
+                {
+                    _outlineColor = value;
+                    subitemTex = null;
+                }
+            }
+            private Color _outlineColor = Color.Black;
             /// <summary>
             /// The horizontal ofset of the item's text
             /// </summary>
-            public int Offset = 0;
+            public int Offset
+            {
+                get { return _Offset; }
+                set
+                {
+                    _Offset = value;
+                    subitemTex = null;
+                }
+            }
+            public int _Offset = 0;
+            /// <summary>
+            /// sub item texture
+            /// </summary>
+            internal OImage subitemTex;
         }
         /// <summary>
         /// The text to display
         /// </summary>
-        public string text;
+        public string text
+        {
+            get { return _text; }
+            set
+            {
+                _text = value;
+                textTex = null; // Reset text texture so control gets redrawn
+            }
+        }
+        private string _text;
         /// <summary>
         /// Text texture
         /// </summary>
@@ -173,27 +250,68 @@ namespace OpenMobile
         /// <summary>
         /// The icon
         /// </summary>
-        public OImage image;
+        public OImage image
+        {
+            get { return _image; }
+            set
+            {
+                _image = value;
+                textTex = null; // Reset text texture so control gets redrawn
+            }
+        }
+        private OImage _image;
         /// <summary>
         /// An optional subitem for the list
         /// </summary>
-        public string subItem;
-        /// <summary>
-        /// sub item texture
-        /// </summary>
-        internal OImage subitemTex;
+        public string subItem
+        {
+            get { return _subItem; }
+            set
+            {
+                _subItem = value;
+                textTex = null; // Reset text texture so control gets redrawn
+            }
+        }
+        private string _subItem;
         /// <summary>
         /// An optional subitem format for the list
         /// </summary>
-        public subItemFormat subitemFormat;
+        public subItemFormat subitemFormat
+        {
+            get { return _subitemFormat; }
+            set
+            {
+                _subitemFormat = value;
+                textTex = null; // Reset text texture so control gets redrawn
+            }
+        }
+        private subItemFormat _subitemFormat;
         /// <summary>
         /// An optional tag for the list item
         /// </summary>
-        public object tag; //Added by Borte
+        public object tag
+        {
+            get { return _tag; }
+            set
+            {
+                _tag = value;
+                textTex = null; // Reset text texture so control gets redrawn
+            }
+        }
+        private object _tag; //Added by Borte
         /// <summary>
         /// A tag to sort by (defaults to text if not set)
         /// </summary>
-        public string sort;
+        public string sort
+        {
+            get { return _sort; }
+            set
+            {
+                _sort = value;
+                textTex = null; // Reset text texture so control gets redrawn
+            }
+        }
+        private string _sort;
         /// <summary>
         /// Creates a new list item
         /// </summary>
@@ -335,6 +453,7 @@ namespace OpenMobile
             this.tag = tag;
             this.sort = sort;
         }
+
         #region IComparable Members
         /// <summary>
         /// Compare list items

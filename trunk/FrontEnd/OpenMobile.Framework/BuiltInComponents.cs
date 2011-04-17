@@ -31,6 +31,18 @@ namespace OpenMobile
     public static class BuiltInComponents
     {
         /// <summary>
+        /// A screenmanager for panels created and handled by the framework
+        /// NB! Panels from the framework is always common for all screens
+        /// </summary>
+        public static OpenMobile.Framework.ScreenManager Panels = new OpenMobile.Framework.ScreenManager(1);
+
+        /// <summary>
+        /// A reference to the pluginhost to use for the framework.
+        /// NB! This reference is not valid unless it's initialized from the core at startup
+        /// </summary>
+        public static IPluginHost Host = null;
+
+        /// <summary>
         /// The copyright information to be displayed on the about screen
         /// </summary>
         public static string AboutText

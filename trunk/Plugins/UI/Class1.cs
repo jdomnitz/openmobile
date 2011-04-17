@@ -65,7 +65,13 @@ namespace OpenMobile
 
         public bool incomingMessage(string message, string source)
         {
-            return false;
+            for (int i = 0; i < theHost.ScreenCount; i++)
+            {
+                OMPanel p = manager[i];
+                OMAnimatedLabel title = ((OMAnimatedLabel)p[6]);
+                title.Transition(eAnimation.UnveilRight, message, 50);
+            }
+            return true;
         }
         public bool incomingMessage<T>(string message,string source, ref T data)
         {

@@ -158,9 +158,17 @@ namespace OpenMobile.Controls
             if ((index < -1) || (index >= items.Count))
                 return;
             if ((selectedIndex >= 0) && (selectedIndex < items.Count))
-                items[selectedIndex].subitemTex = items[selectedIndex].textTex = null;
+            {
+                items[selectedIndex].textTex = null;
+                if (items[index].subitemFormat != null)
+                    items[selectedIndex].subitemFormat.subitemTex = null;
+            }
             if (index >= 0)
-                items[index].textTex = items[index].subitemTex = null;
+            {
+                items[index].textTex = null;
+                if (items[index].subitemFormat != null)
+                    items[index].subitemFormat.subitemTex = null;
+            }
             selectedIndex = index;
             if (!selectFollowsHighlight)    // this is already done in the highlight function if selectFollowsHighilight is true
                 highlightedIndex = selectedIndex;
@@ -688,18 +696,18 @@ namespace OpenMobile.Controls
                                         if (items[i].textTex == null)
                                             items[i].textTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, highlightColor, highlightColor);
                                         g.DrawImage(items[i].textTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
-                                        if (items[i].subitemTex == null)
-                                            items[i].subitemTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
-                                        g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
+                                        if (items[i].subitemFormat.subitemTex == null)
+                                            items[i].subitemFormat.subitemTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
+                                        g.DrawImage(items[i].subitemFormat.subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
                                     }
                                     else
                                     {
                                         if (items[i].textTex == null)
                                             items[i].textTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, color, color);
                                         g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
-                                        if (items[i].subitemTex == null)
-                                            items[i].subitemTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.color, items[i].subitemFormat.color);
-                                        g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
+                                        if (items[i].subitemFormat.subitemTex == null)
+                                            items[i].subitemFormat.subitemTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.color, items[i].subitemFormat.color);
+                                        g.DrawImage(items[i].subitemFormat.subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
                                     }
                                 }
                                 else
@@ -862,7 +870,11 @@ namespace OpenMobile.Controls
             if (System.Math.Abs(TotalDistance.Y) > 3)
             {
                 if (selectedIndex >= 0)
-                    items[selectedIndex].textTex = items[selectedIndex].subitemTex = null;
+                {
+                    items[selectedIndex].textTex = null;
+                    if (items[selectedIndex].subitemFormat != null)
+                        items[selectedIndex].subitemFormat.subitemTex = null;
+                }
                 selectedIndex = -1;
                 raiseUpdate(false);
             }
@@ -1001,7 +1013,8 @@ namespace OpenMobile.Controls
             if (selectedIndex > -1)
             {
                 items[selectedIndex].textTex = null;
-                items[selectedIndex].subitemTex = null;
+                if (items[selectedIndex].subitemFormat != null)
+                    items[selectedIndex].subitemFormat.subitemTex = null;
             }
         }
 

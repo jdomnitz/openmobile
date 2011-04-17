@@ -70,12 +70,29 @@ namespace ControlDemo
         p.addControl(label5);
         p.addControl(button);
         p.addControl(gauge);
+
+        OMButton btnDialog = new OMButton(450, 400, 200, 50);
+        btnDialog.Name = "btnDialog";
+        btnDialog.Text = "Dialog";
+        btnDialog.Image = imageItem.MISSING;
+        btnDialog.OnClick += new userInteraction(btnDialog_OnClick);
+        p.addControl(btnDialog);
+
         System.Timers.Timer t = new System.Timers.Timer(100);
         t.Elapsed += new ElapsedEventHandler(t_Elapsed);
         t.Enabled = true;
         manager = new ScreenManager(theHost.ScreenCount);
         manager.loadPanel(p);
         return eLoadStatus.LoadSuccessful;
+    }
+
+    void btnDialog_OnClick(OMControl sender, int screen)
+    {
+        OpenMobile.helperFunctions.General.Dialog dialog = new OpenMobile.helperFunctions.General.Dialog(this.pluginName, sender.Parent.Name);
+        dialog.Header = "Radio message";
+        dialog.Text = "Is this awesome?";
+        dialog.Icon = OpenMobile.helperFunctions.General.Dialog.Icons.Checkmark;
+        theHost.sendMessage("UI", "", "MsgBox result: " + dialog.ShowMsgBox(screen).ToString());
     }
 
     void t_Elapsed(object sender, ElapsedEventArgs e)
