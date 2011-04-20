@@ -28,18 +28,36 @@ using OpenMobile.Plugin;
 using OpenMobile.Data;
 using OpenMobile.Media;
 using OpenMobile.Threading;
-using System.Threading;
-using OpenMobile.helperFunctions;
-using System.Collections.Generic;
 
-namespace OMDialog
+namespace OMDir
 {
-    public class Dialog : IHighLevel
+    public class Dir : IHighLevel
     {
+        ScreenManager manager;
         IPluginHost theHost;
+        int[] type;
+        OImage folder;
+
         public OpenMobile.Controls.OMPanel loadPanel(string name, int screen)
         {
-            return null;
+            if (manager == null)
+                return null;
+            if (name == "Folder")
+            {
+                ((OMLabel)manager[screen][2]).Text = "Select a Folder";
+                type[screen] = 1;  //Type=0: Select File; Type=1: Select Folder; Multi-Select Files=2;
+            }
+            else
+            {
+                ((OMLabel)manager[screen][2]).Text = "Select a File";
+                type[screen] = 0;
+            }
+            if ((name != "Folder") && (name != ""))
+            {
+                if (Directory.Exists(name))
+                    loadPath(screen, name);
+            }
+            return manager[screen];
         }
 
         public Settings loadSettings()
@@ -49,187 +67,338 @@ namespace OMDialog
         #region Attributes
         public string displayName
         {
-            get { return "Dialogs"; }
+            get { return "File Picker"; }
         }
+
         public string authorName
         {
-            get { return "Bjørn Morten Orderløkken"; }
+            get { return "Justin Domnitz"; }
         }
+
         public string authorEmail
         {
-            get { return "Boorte@gmail.com"; }
+            get { return ""; }
         }
+
         public string pluginName
         {
-            get { return "OMDialog"; }
+            get { return "OMDir"; }
         }
+
         public float pluginVersion
         {
             get { return 0.1F; }
         }
+
         public string pluginDescription
         {
-            get { return "Dialogs for the framework"; }
+            get { return "Provides File/Folder Selection for the framework"; }
         }
         #endregion
         public bool incomingMessage(string message, string source)
         {
             throw new NotImplementedException();
         }
+
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
-            // Convert input data to local data object
-            OMPanel Panel = (OMPanel)Convert.ChangeType(data, typeof(T));
-
-            // Extract dialog data
-            OpenMobile.helperFunctions.General.Dialog.DialogData DT = ((OpenMobile.helperFunctions.General.Dialog.DialogData)Panel.Tag);
-
-            /* Buttons has to be named according to this:
-             *  Dialog_Button_Cancel    : Cancel button
-             *  Dialog_Button_Yes       : Yes button
-             *  Dialog_Button_No        : No button
-             *  Dialog_Button_OK        : OK button
-             *  Dialog_Button_Abort     : Abort button
-             *  Dialog_Button_Retry     : Retry button
-             *  Dialog_Button_Ignore    : Ignore button
-             * 
-             * Labels has to be named like this:
-             *  Dialog_Label_Header     : Dialog header
-             *  Dialog_Label_Text       : Dialog text
-            */
-
-            // What type of dialog is this?
-            switch (message.ToLower())
-            {
-                case "messagebox":
-                    {
-                        #region Create messagebox panel
-
-                        OMBasicShape Shape_AccessBlock2 = new OMBasicShape(0, 0, 1000, 600);
-                        Shape_AccessBlock2.Name = "Dialog_Shape_AccessBlock";
-                        Shape_AccessBlock2.Shape = shapes.Rectangle;
-                        Shape_AccessBlock2.FillColor = Color.FromArgb(150, Color.Black);
-                        Panel.addControl(Shape_AccessBlock2);
-                        OMButton Button_Cancel2 = new OMButton(0, 0, 1000, 600);
-                        Button_Cancel2.Name = "Dialog_Button_Cancel";
-                        Panel.addControl(Button_Cancel2);
-
-                        OMBasicShape Shape_Border2 = new OMBasicShape(DT.Left, DT.Top, DT.Width, DT.Height);
-                        Shape_Border2.Name = "Dialog_Shape_Border";
-                        Shape_Border2.Shape = shapes.RoundedRectangle;
-                        Shape_Border2.FillColor = Color.FromArgb(58, 58, 58);
-                        Shape_Border2.BorderColor = Color.Gray;
-                        Shape_Border2.BorderSize = 2;
-                        Panel.addControl(Shape_Border2);
-
-                        OMLabel Label_Header2 = new OMLabel(Shape_Border2.Left + 5, Shape_Border2.Top + 5, Shape_Border2.Width - 10, 30);
-                        Label_Header2.Name = "Dialog_Label_Header";
-                        Panel.addControl(Label_Header2);
-
-                        OMBasicShape Shape_Line2 = new OMBasicShape(Shape_Border2.Left, Label_Header2.Top + Label_Header2.Height, Shape_Border2.Width, 2);
-                        Shape_Line2.Name = "Dialog_Shape_Line";
-                        Shape_Line2.Shape = shapes.Rectangle;
-                        Shape_Line2.FillColor = Color.Gray;
-                        Shape_Line2.BorderColor = Color.Transparent;
-                        Panel.addControl(Shape_Line2);
-
-                        OMBasicShape Shape_Background2 = new OMBasicShape(Shape_Border2.Left + (int)Shape_Border2.BorderSize, Shape_Line2.Top + Shape_Line2.Height, Shape_Border2.Width - ((int)Shape_Border2.BorderSize * 2), 205);
-                        Shape_Background2.Name = "Dialog_Shape_Background";
-                        Shape_Background2.Shape = shapes.Rectangle;
-                        Shape_Background2.FillColor = Color.Black;
-                        Panel.addControl(Shape_Background2);
-                        OMBasicShape Shape_Background_Lower2 = new OMBasicShape(Shape_Background2.Left, Shape_Background2.Top + Shape_Background2.Height - 13, Shape_Background2.Width, 20);
-                        Shape_Background_Lower2.Name = "Dialog_Shape_Background_Lower";
-                        Shape_Background_Lower2.Shape = shapes.RoundedRectangle;
-                        Shape_Background_Lower2.FillColor = Color.Black;
-                        Panel.addControl(Shape_Background_Lower2);
-
-                        OMImage Image_Icon = new OMImage();
-                        Image_Icon.Left = Shape_Border2.Left + 20;
-                        Image_Icon.Top = Shape_Background2.Top + 20;
-                        Image_Icon.Width = 0;
-                        Image_Icon.Height = 0;
-                        if (DT.Icon != General.Dialog.Icons.None)
-                        {
-                            Image_Icon.Width = 100;
-                            Image_Icon.Height = 100;
-
-                            switch (DT.Icon)
-                            {
-                                case General.Dialog.Icons.Error:
-                                    Image_Icon.Image = theHost.getSkinImage("Error");
-                                    break;
-                                case General.Dialog.Icons.Exclamation:
-                                    Image_Icon.Image = theHost.getSkinImage("Exclamation");
-                                    break;
-                                case General.Dialog.Icons.Question:
-                                    Image_Icon.Image = theHost.getSkinImage("questionMark");
-                                    break;
-                                case General.Dialog.Icons.Checkmark:
-                                    Image_Icon.Image = theHost.getSkinImage("Checkmark");
-                                    break;
-                                case General.Dialog.Icons.Information:
-                                    Image_Icon.Image = theHost.getSkinImage("Information");
-                                    break;
-                                case General.Dialog.Icons.Custom:
-                                    Image_Icon.Image = theHost.getSkinImage(DT.CustomIcon);
-                                    break;                                    
-                                default:
-                                    break;
-                            }
-                            Panel.addControl(Image_Icon);
-                           
-                        }
-
-                        OMLabel Label_Text = new OMLabel();
-                        Label_Text.Left = Image_Icon.Left + Image_Icon.Width + 5;
-                        Label_Text.Top = Shape_Background2.Top + 5;
-                        Label_Text.Width = Shape_Border2.Width - (Label_Text.Left - Shape_Border2.Left) - 10;
-                        Label_Text.Height = 135;
-                        Label_Text.Name = "Dialog_Label_Text";
-                        Label_Text.Text = "";
-                        Label_Text.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap | Alignment.CenterCenter;
-                        Panel.addControl(Label_Text);
-
-                        OMButton Button_Yes = new OMButton(Shape_Border2.Left + Shape_Border2.Width - 320, Shape_Border2.Top + Shape_Border2.Height - 80, 150, 70);
-                        Button_Yes.Name = "Dialog_Button_Yes";
-                        Button_Yes.Image = theHost.getSkinImage("Full");
-                        Button_Yes.FocusImage = theHost.getSkinImage("Full.Highlighted");
-                        Button_Yes.Transition = eButtonTransition.None;
-                        Button_Yes.Text = "Yes";
-                        Panel.addControl(Button_Yes);
-
-                        OMButton Button_No = new OMButton(Button_Yes.Left + Button_Yes.Width + 10, Button_Yes.Top, Button_Yes.Width, Button_Yes.Height);
-                        Button_No.Name = "Dialog_Button_No";
-                        Button_No.Image = theHost.getSkinImage("Full");
-                        Button_No.FocusImage = theHost.getSkinImage("Full.Highlighted");
-                        Button_No.Transition = eButtonTransition.None;
-                        Button_No.Text = "No";
-                        Panel.addControl(Button_No);
-
-                        //Panel.Forgotten = true;
-                        //Panel.Priority = ePriority.High;
-                        
-                        #endregion
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            // Return data
-            data = (T)Convert.ChangeType(Panel, typeof(T));
-            return true;
+            throw new NotImplementedException();
         }
 
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
+            theHost.OnStorageEvent += new StorageEvent(on_storageEvent);
+            OMPanel p = new OMPanel();
+            manager = new ScreenManager(theHost.ScreenCount);
+            OMLabel caption = new OMLabel(275, 95, 400, 60);
+            caption.OutlineColor = Color.FromArgb(120, Color.PowderBlue);
+            caption.Font = new Font(Font.GenericSansSerif, 34F);
+            caption.Format = eTextFormat.Glow;
+            OMButton top = new OMButton(795, 101, 180, 40);
+            top.Text = "Up One Level";
+            top.Image = theHost.getSkinImage("Full");
+            top.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            top.OnClick += new userInteraction(top_OnClick);
+            top.Transition = eButtonTransition.None;
+            top.Visible = false;
+            OMButton select = new OMButton(20, 101, 230, 40);
+            select.Text = "Select this Folder";
+            select.Image = top.Image;
+            select.FocusImage = top.FocusImage;
+            select.OnClick += new userInteraction(select_OnClick);
+            select.Visible = false;
+            OMList right = new OMList(510, 150, 470, 375);
+            right.Font = new Font(Font.GenericSansSerif, 28F);
+            right.OnClick += new userInteraction(right_OnClick);
+            right.ListStyle = eListStyle.DroidStyleImage;
+            right.Background = Color.FromArgb(180, Color.LightGray);
+            right.ItemColor1 = Color.FromArgb(0, 0, 16);
+            //right.ClickToSelect = true;
+            OMList left = new OMList(15, 150, 470, 375);
+            left.Font = right.Font;
+            left.OnClick += new userInteraction(left_OnClick);
+            left.SelectedIndexChanged += new OMList.IndexChangedDelegate(left_SelectedIndexChanged);
+            left.ListStyle = eListStyle.DroidStyleImage;
+            left.Background = right.Background;
+            left.ItemColor1 = right.ItemColor1;
+            folder = theHost.getSkinImage("Folder", true).image;
+            SafeThread.Asynchronous(delegate() { loadRoot(left); }, theHost);
+            OMBasicShape border = new OMBasicShape(10, 146, 975, 383);
+            border.BorderColor = Color.Silver;
+            border.BorderSize = 4F;
+            border.CornerRadius = 10;
+            border.FillColor = right.ItemColor1;
+            border.Shape = shapes.RoundedRectangle;
+            OMBasicShape back = new OMBasicShape(0, 0, 1000, 600);
+            back.Shape = shapes.Rectangle;
+            back.FillColor = Color.Black;
+            p.addControl(back);
+            p.addControl(border);
+            p.addControl(caption);
+            p.addControl(left);
+            p.addControl(right);
+            p.addControl(top);
+            p.addControl(select);
+            manager.loadPanel(p);
+            type = new int[theHost.ScreenCount];
+            using (PluginSettings settings = new PluginSettings())
+                settings.setSetting("Default.DirectoryBrowser", "OMDir");
             return eLoadStatus.LoadSuccessful;
+        }
+
+        private void on_storageEvent(eMediaType type, bool justInserted, string path)
+        {
+            if ((type == eMediaType.NotSet)||(type==eMediaType.DeviceRemoved))
+            {
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                {
+                    OMList l = (OMList)manager[i][3];
+                    if ((l.Tag == null) || (l.Tag.ToString().Length == 0))
+                    {
+                        l.Clear();
+                        loadRoot(l);
+                    }
+                }
+            }
+        }
+
+        void top_OnClick(object sender, int screen)
+        {
+            OMList l = (OMList)manager[screen][3];
+            OMList r = (OMList)manager[screen][4];
+            if (l.Tag == null)
+                return;
+            r.Tag = l.Tag;
+            l.Clear();
+            if (System.IO.Path.GetPathRoot(l.Tag.ToString()) == l.Tag.ToString())
+            {
+                l.Tag = "";
+                loadRoot(l);
+                ((OMButton)manager[screen][5]).Visible = false;
+            }
+            else
+            {
+                l.Tag = Directory.GetParent(l.Tag.ToString()).FullName;
+                DirectoryInfo fInfo = new DirectoryInfo(l.Tag.ToString());
+                foreach (DirectoryInfo s in fInfo.GetDirectories())
+                    if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                        l.Add(new OMListItem(s.Name, folder));
+            }
+            l.Select(l.indexOf(new DirectoryInfo(r.Tag.ToString()).Name));
+            left_OnClick(l, screen); //refresh the right screen
+        }
+
+        void select_OnClick(object sender, int screen)
+        {
+            OMList l = (OMList)manager[screen][3];
+            theHost.execute(eFunction.userInputReady, screen.ToString(), "Dir", translateLocal(l));
+        }
+
+        private string translateLocal(OMList l)
+        {
+            string source = "";
+            if (l.Tag == null)
+            {
+                //source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
+                source = l[l.SelectedIndex].text;
+                switch (source)
+                {
+                    case "Desktop":
+                        return Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                    case "Documents":
+                        return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    case "Pictures":
+                        return Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                    case "Music":
+                        return Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+                    case "Videos":
+                        return Environment.GetFolderPath(Environment.SpecialFolder.MyMusic).Replace("Music", "Videos");
+                }
+                if (l[l.SelectedIndex].subItem != null)
+                    return l[l.SelectedIndex].subItem;
+            }
+            else
+            {
+                if (l[l.SelectedIndex] == null)
+                    return "";
+                if (l.Tag.ToString() == "")
+                {
+                    foreach(DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
+                        if (info.VolumeLabel==l[l.SelectedIndex].text)
+                            source=info.path;
+                }
+                else
+                    source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);
+                if (l.Tag.ToString() == "")
+                    l.Tag = null;
+            }
+            return source;
+        }
+
+        void left_SelectedIndexChanged(OMList sender, int screen)
+        {
+            if (sender.SelectedIndex != -1)
+                if ((screen >= 0) && (type[screen] == 1))
+                    ((OMButton)manager[screen][6]).Visible = true;
+        }
+        private void loadRoot(OMList l)
+        {
+            l.Add(new OMListItem("Desktop", folder));
+            l.Add(new OMListItem("Documents", folder));
+            l.Add(new OMListItem("Pictures", folder));
+            l.Add(new OMListItem("Music", folder));
+            l.Add(new OMListItem("Videos", folder));
+            foreach (DeviceInfo drive in DeviceInfo.EnumerateDevices(theHost))
+            {
+                switch (drive.DriveType)
+                {
+                    case eDriveType.CDRom:
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Drives|CD-ROM Drive").image));
+                        break;
+                    case eDriveType.Fixed:
+                    case eDriveType.Unknown:
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Drives|Local Drive").image));
+                        break;
+                    case eDriveType.Network:
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Drives|Network Drive").image));
+                        break;
+                    case eDriveType.Removable:
+                    case eDriveType.iPod:
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Drives|Removable Drive").image));
+                        break;
+                    case eDriveType.Phone:
+                        l.Add(new OMListItem(drive.VolumeLabel, drive.path, theHost.getSkinImage("Discs|Phone").image));
+                        break;
+                }
+            }
+        }
+
+        private void loadPath(int screen, string path)
+        {
+            OMList l = (OMList)manager[screen][3];
+            OMList r = (OMList)manager[screen][4];
+            r.Tag = path;
+            l.Clear();
+            if (System.IO.Path.GetPathRoot(path) == path)
+            {
+                l.Tag = "";
+                loadRoot(l);
+                ((OMButton)manager[screen][5]).Visible = false;
+            }
+            else
+            {
+                l.Tag = Directory.GetParent(path).FullName;
+                DirectoryInfo fInfo = new DirectoryInfo(path);
+                foreach (DirectoryInfo s in fInfo.GetDirectories())
+                    if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                        l.Add(new OMListItem(s.Name, folder));
+            }
+            DeviceInfo info = DeviceInfo.get(path);
+            if (info == null)
+                l.Select(l.indexOf(new DirectoryInfo(path).Name));
+            else
+                l.Select(l.indexOf(info.VolumeLabel));
+            left_OnClick(l, screen); //refresh the right screen
+        }
+        void right_OnClick(object sender, int screen)
+        {
+            OMList r = (OMList)manager[screen][4];
+            OMList l = ((OMList)manager[screen][3]);
+            if (r.SelectedIndex == -1)
+                return;
+            string source = OpenMobile.Path.Combine(r.Tag.ToString(), r[r.SelectedIndex].text);
+            if (System.IO.Path.HasExtension(source) == true)
+            {
+                if (System.IO.Path.GetExtension(source).Length < 6)
+                {
+                    theHost.execute(eFunction.userInputReady, screen.ToString(), "Dir", source);
+                    return;
+                }
+            }
+            l.Clear();
+            DirectoryInfo fInfo = new DirectoryInfo(r.Tag.ToString());
+            foreach (DirectoryInfo s in fInfo.GetDirectories())
+                if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                    l.Add(new OMListItem(s.Name, folder));
+            l.Select(r.SelectedIndex);
+            l.Tag = r.Tag;
+            r.Clear();
+            r.Tag = source;
+            DirectoryInfo info = new DirectoryInfo(source);
+            try
+            {
+                foreach (DirectoryInfo s in info.GetDirectories())
+                    if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                        r.Add(new OMListItem(s.Name, folder));
+            }
+            catch (Exception) { }
+            try
+            {
+                if (type[screen] == 0)
+                {
+                    foreach (FileInfo s in info.GetFiles())
+                        if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                            r.Add(s.Name);
+                }
+            }
+            catch (Exception) { }
+            ((OMButton)manager[screen][5]).Visible = true;
+        }
+
+        void left_OnClick(object sender, int screen)
+        {
+            OMList r = (OMList)manager[screen][4];
+            OMList l = ((OMList)manager[screen][3]);
+            r.Clear();
+            string source = translateLocal(l);
+            if (source == "")
+                return;
+            r.Tag = source;
+            DirectoryInfo info = new DirectoryInfo(source);
+            try
+            {
+                foreach (DirectoryInfo s in info.GetDirectories())
+                    if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                        r.Add(new OMListItem(s.Name, folder));
+            }
+            catch (Exception) { }
+            try
+            {
+                if (type[screen] == 0)
+                {
+                    foreach (FileInfo s in info.GetFiles())
+                        if ((s.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                            r.Add(s.Name);
+                }
+            }
+            catch (Exception) { }
         }
 
         public void Dispose()
         {
+            if (manager != null)
+                manager.Dispose();
             GC.SuppressFinalize(this);
         }
     }
