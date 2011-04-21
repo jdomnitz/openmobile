@@ -13,7 +13,8 @@ using System.IO;
 
 public partial class MainWindow : Gtk.Window
 {
-	static UdpClient receive;
+    // Bugfixes provided by Kevin (kross@mp3car)
+    static UdpClient receive;
 	static UdpClient send;
 	Bus system;
 	Bus session;
@@ -24,52 +25,135 @@ public partial class MainWindow : Gtk.Window
     PowerDevil pd;
 	UDisks disks; 
 	MultimediaKeys.MultimediaKeysService mediaKeys=new MultimediaKeys.MultimediaKeysService();
-	
-	void checkVolume (int instance)
+
+    int getVolume(int instance)
 	{
         
-		Process p=new Process();
-        try
+        String strDevice = "hw:" + instance; // Could be "default", or hw:X where X is the soundcard number
+        UIntPtr mixer;
+        if(ASound.snd_mixer_open(out mixer, 0) != 0)
+            return -1;
+        if(ASound.snd_mixer_attach(mixer, strDevice) != 0)
         {
-            ProcessStartInfo info = new ProcessStartInfo("pacmd", "list-sinks volume");
-            info.WindowStyle = ProcessWindowStyle.Hidden;
-            info.UseShellExecute = false;
-            info.RedirectStandardOutput = true;
-            p.StartInfo = info;
-            p.Start();
-            p.WaitForExit();
+            ASound.snd_mixer_close(mixer);
+            return -1;
         }
-        catch (Exception) { return; }
-		string response=p.StandardOutput.ReadToEnd();
-		string[] lines=response.Split(new char[]{'\r','\n','\t'});
-		int i=0;
-		string vol="0";
-		foreach(string line in lines)
-		{
-			if (line.StartsWith("volume:"))
-			{
-				vol=line.Substring(11,3).Trim();
-			}
-			else if(line.StartsWith("muted:"))
-			{
-				if (line.Contains("yes"))
-				{
-					if (instance!=i)
-						raiseSystemEvent(eFunction.systemVolumeChanged,"-1",i.ToString(),"");
-					else
-						sendIt("3|"+i.ToString()+"|-1");
-				}
-				else
-				{
-					if (instance!=i)
-						raiseSystemEvent(eFunction.systemVolumeChanged,vol,i.ToString(),"");
-					else
-						sendIt("3|"+i.ToString()+"|"+vol);
-					i++;
-				}
-			}
-		}
-	}
+        if(ASound.snd_mixer_selem_register(mixer, (UIntPtr)0, (UIntPtr)0) != 0)
+        {
+            ASound.snd_mixer_detach(mixer, strDevice);
+            ASound.snd_mixer_close(mixer);
+            return -1;
+        }
+        if(ASound.snd_mixer_load(mixer) != 0)
+        {
+            ASound.snd_mixer_detach(mixer, strDevice);
+            ASound.snd_mixer_close(mixer);
+            return -1;
+        }
+
+        UIntPtr mixerelem = ASound.snd_mixer_first_elem(mixer);
+
+        while (mixerelem != (UIntPtr)0)
+        {
+            String name = ASound.snd_mixer_selem_get_name(mixerelem);
+            if (name.ToLower().Equals("master"))
+                break;
+            mixerelem = ASound.snd_mixer_elem_next(mixerelem);
+        }
+
+        int volumePercent = 0;
+        if(mixerelem != (UIntPtr)0)
+        {
+            Int32 playbackSwitch;
+            ASound.snd_mixer_selem_get_playback_switch(mixerelem, 0, out playbackSwitch);
+
+            bool bMuted = (playbackSwitch == 0);
+            if(bMuted)
+            {
+                volumePercent = -1;
+            }
+            else
+            {
+                IntPtr min, max;
+                ASound.snd_mixer_selem_get_playback_volume_range(mixerelem, out min, out max);
+
+                IntPtr volume;
+                ASound.snd_mixer_selem_get_playback_volume(mixerelem, 0, out volume);
+
+                volumePercent = (int)volume * 100 / (int)max;
+            }
+        }
+        ASound.snd_mixer_detach(mixer, strDevice);
+        ASound.snd_mixer_close(mixer);
+
+        return volumePercent;
+ 	}
+
+   void checkAllVolume()
+    {
+        Int32 card = -1;
+        while(ASound.snd_card_next(ref card) == 0)
+        {
+            raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(card).ToString(), card.ToString(), "");
+        }
+    }
+
+   void setVolume (int instance, int volumePercent)
+    {
+        String strDevice = "hw:" + instance; // Could be "default", or hw:X where X is the soundcard number
+
+        UIntPtr mixer;
+        if(ASound.snd_mixer_open(out mixer, 0) != 0)
+            return;
+        if(ASound.snd_mixer_attach(mixer, strDevice) != 0)
+        {
+            ASound.snd_mixer_close(mixer);
+            return;
+        }
+        if(ASound.snd_mixer_selem_register(mixer, (UIntPtr)0, (UIntPtr)0) != 0)
+        {
+            ASound.snd_mixer_detach(mixer, strDevice);
+            ASound.snd_mixer_close(mixer);
+            return;
+        }
+        if(ASound.snd_mixer_load(mixer) != 0)
+        {
+            ASound.snd_mixer_detach(mixer, strDevice);
+            ASound.snd_mixer_close(mixer);
+            return;
+        }
+
+        UIntPtr mixerelem = ASound.snd_mixer_first_elem(mixer);
+
+        while (mixerelem != (UIntPtr)0)
+        {
+            String name = ASound.snd_mixer_selem_get_name(mixerelem);
+            if (name.ToLower().Equals("master"))
+                break;
+            mixerelem = ASound.snd_mixer_elem_next(mixerelem);
+        }
+
+        if(mixerelem != (UIntPtr)0)
+        {
+            if(volumePercent < 0)
+            {
+                ASound.snd_mixer_selem_set_playback_switch_all(mixerelem, 0);
+            }
+            else
+            {
+                ASound.snd_mixer_selem_set_playback_switch_all(mixerelem, 1);
+
+                IntPtr min, max;
+                ASound.snd_mixer_selem_get_playback_volume_range(mixerelem, out min, out max);
+
+                IntPtr volume = (IntPtr)((int)max * volumePercent / 100);
+                ASound.snd_mixer_selem_set_playback_volume_all(mixerelem, volume);
+            }
+        }
+        ASound.snd_mixer_detach(mixer, strDevice);
+        ASound.snd_mixer_close(mixer);
+    }
+
     static string DM;
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
@@ -111,7 +195,7 @@ public partial class MainWindow : Gtk.Window
 		disks.DeviceAdded+=added;
 		disks.DeviceChanged+=changed;
         disks.DeviceRemoved+=remove;
-		checkVolume(-1);
+		checkAllVolume();
         if (DM == "gnome")
         {
             mediaKeys.keyPressed += new MultimediaKeys.MultimediaKeysService.MediaPlayerKeyPressedHandler(handleKey);
@@ -265,16 +349,21 @@ public partial class MainWindow : Gtk.Window
             {
 				case "-1":
 			            Thread.Sleep(250);
-					    checkVolume(-1);
+					    checkAllVolume();
 					break;
                 case "3": //GetData - System Volume
-					int ret;
-                    if (int.TryParse(arg1,out ret))
-					{
-                        if(ret>=0)
-							checkVolume(ret);
-					}
-                    break;
+                  int instance;
+                    if (int.TryParse(arg1,out instance) && instance >= 0)
+                    {
+                        try
+                        {
+                            sendIt("3|" + arg1 + "|" + getVolume(instance));
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                     break;
 				case "32": //Plugins Loaded
 					foreach(ObjectPath path in disks.EnumerateDevices())
 					{
@@ -303,25 +392,8 @@ public partial class MainWindow : Gtk.Window
                     if (int.TryParse(arg2,out val))
 						if (int.TryParse(arg1,out val))
 						{
-							Process p=new Process();
-							ProcessStartInfo info;
-							if (val==-1)
-								info=new ProcessStartInfo("pacmd","set-sink-mute "+arg2+" true");
-							else
-								info=new ProcessStartInfo("pacmd","set-sink-mute "+arg2+" false");
-							info.WindowStyle=ProcessWindowStyle.Hidden;
-							Process q=new Process();
-							q.StartInfo=info;
-							q.Start();
-							if (val==-2)
-								checkVolume(-1);
-							if(val<0)
-								return;
-							info=new ProcessStartInfo("pacmd","set-sink-volume "+arg2+" "+((int)(val*655.35)).ToString());
-							info.WindowStyle=ProcessWindowStyle.Hidden;
-							p.StartInfo=info;
-							p.Start();
-						}
+                            setVolume(int.Parse(arg2), val);
+                        }
                     break;
                 case "35": //Eject Disc
                     if (removables.ContainsValue(arg1))
