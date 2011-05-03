@@ -30,6 +30,7 @@ using OpenMobile.Threading;
 
 namespace OMRadio
 {
+    [SkinIcon("*»")]
     public class OMRadio : IHighLevel
     {
         private ScreenManager manager;

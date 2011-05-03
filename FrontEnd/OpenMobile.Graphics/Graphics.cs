@@ -270,11 +270,13 @@ namespace OpenMobile.Graphics
         {
             if ((w <= 0) || (h <= 0))
                 return null;
-            System.Drawing.Bitmap bmp = new Bitmap((int)(w * scaleWidth), (int)(h * scaleHeight));
+
+            System.Drawing.Bitmap bmp = new Bitmap((int)(w * (scaleWidth == 0F ? 1F : scaleWidth)), (int)(h * (scaleHeight == 0F ? 1F : scaleHeight)));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
-                g.ScaleTransform(scaleWidth, scaleHeight);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+                if ((scaleWidth > 0F) & (scaleHeight > 0F))
+                    g.ScaleTransform(scaleWidth, scaleHeight);
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;//.ClearTypeGridFit;
                 renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
             }
             return new OImage(bmp);
@@ -409,7 +411,7 @@ namespace OpenMobile.Graphics
                         sFormat.Trimming = StringTrimming.EllipsisWord;
                     GraphicsPath path = new GraphicsPath(FillMode.Winding);
                     path.AddString(text, new System.Drawing.Font(font.Name, 1F).FontFamily, (int)f, (font.Size + 6)/dpi, new RectangleF(x, y, w, h), sFormat);
-					g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.SmoothingMode = SmoothingMode.HighQuality;
                     g.DrawPath(new System.Drawing.Pen(secondColor, 3), path);
                     g.FillPath(new SolidBrush(color), path);
                 }
@@ -418,6 +420,7 @@ namespace OpenMobile.Graphics
             {
                 using (StringFormat sFormat = new StringFormat())
                 {
+                    g.SmoothingMode = SmoothingMode.HighQuality;
                     sFormat.Alignment = (StringAlignment)((float)alignment % 10);
                     sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
                     if (((int)alignment & 100) == 100)
@@ -437,6 +440,7 @@ namespace OpenMobile.Graphics
             {
                 using (StringFormat sFormat = new StringFormat())
                 {
+                    g.SmoothingMode = SmoothingMode.HighQuality;
                     sFormat.Alignment = (StringAlignment)((float)alignment % 10);
                     sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
                     if (((int)alignment & 100) == 100)
@@ -447,7 +451,7 @@ namespace OpenMobile.Graphics
                     using (SolidBrush defaultBrush = new SolidBrush(color))
                     {
                         if (((int)alignment & 10000) != 10000)
-                            sFormat.FormatFlags = StringFormatFlags.NoWrap; // Added by Borte to block automatic wrapping of text (should this be a parameter that can be controled from the outside?)
+                            sFormat.FormatFlags = StringFormatFlags.NoWrap; 
                         if (((int)format % 2) == 1)
                             g.DrawString(text, currentFont, new SolidBrush(secondColor), new RectangleF(x + 1, y + 2, w, h), sFormat);
                         g.DrawString(text, currentFont, defaultBrush, new RectangleF(x, y, w, h), sFormat);

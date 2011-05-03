@@ -114,6 +114,20 @@ namespace OpenMobile.Graphics
         {
             return new OImage(new Bitmap(stream, useEmbeddedColorManagement));
         }
+        public static OImage FromWebdingsFont(int w, int h, string s, Color color)
+        {
+            return FromWebdingsFont(w, h, s, eTextFormat.Normal, Alignment.CenterCenter, color, color);
+        }
+        public static OImage FromWebdingsFont(int w, int h, string s, eTextFormat format, Alignment alignment, Color color, Color secondColor)
+        {
+            return FromFont(w, h, s, new Font(OpenMobile.Graphics.Font.Webdings, h*0.65F), format, alignment, color, secondColor);
+        }
+        public static OImage FromFont(int w, int h, string s, Font font, eTextFormat format, Alignment alignment, Color color, Color secondColor)
+        {
+            OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
+            return gr.GenerateTextTexture(0, 0, w, h, s, font, format, alignment, color, secondColor);
+        }
+
         ~OImage()
         {
             Dispose();

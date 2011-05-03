@@ -69,7 +69,7 @@ namespace OpenMobile.Controls
         /// <param name="top"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public OMImage(short left, short top, short width, short height)
+        public OMImage(int left, int top, int width, int height)
         {
             this.top = top;
             this.left = left;

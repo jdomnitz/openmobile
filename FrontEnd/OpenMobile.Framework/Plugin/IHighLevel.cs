@@ -67,6 +67,7 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Enables/Disables the window closing transition
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
     public sealed class FinalTransition : Attribute
     {
         bool t;
@@ -90,8 +91,11 @@ namespace OpenMobile.Plugin
         }
     }
     /// <summary>
-    /// Defines an icon to use to represent this plugin
+    /// Defines an icon to use to represent this plugin.
+    /// If the icon name is written with * as first character then the next 
+    /// characters will generate the corresponding symbol from the Webdings font instead of using an image
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
     public sealed class SkinIcon : Attribute
     {
         string name;
@@ -111,6 +115,52 @@ namespace OpenMobile.Plugin
             get
             {
                 return name;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Pluginlevels
+    /// </summary>
+    [Flags]
+    public enum PluginLevels:byte
+    {
+        /// <summary>
+        /// Pluginlevel normal
+        /// </summary>
+        Normal=1,
+        /// <summary>
+        /// Pluginlevel system
+        /// </summary>
+        System=2,
+        /// <summary>
+        /// Pluginlevel user input provider
+        /// </summary>
+        UserInput=4
+    }
+    /// <summary>
+    /// Defines the plugin level
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class PluginLevel : Attribute
+    {
+        PluginLevels type = PluginLevels.Normal;
+        /// <summary>
+        /// Defines the level of this plugin
+        /// </summary>
+        /// <param name="type"></param>
+        public PluginLevel(PluginLevels type)
+        {
+            this.type = type;
+        }
+        /// <summary>
+        /// Defines the type of this plugin
+        /// </summary>
+        public PluginLevels TypeOfPlugin
+        {
+            get
+            {
+                return type;
             }
         }
     }

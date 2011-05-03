@@ -31,6 +31,8 @@ using OpenMobile.Threading;
 
 namespace OMDir
 {
+    [SkinIcon("*`")]
+    [PluginLevel(PluginLevels.System)]
     public class Dir : IHighLevel
     {
         ScreenManager manager;

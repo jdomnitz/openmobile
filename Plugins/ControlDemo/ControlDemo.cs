@@ -31,7 +31,8 @@ using System.Runtime.InteropServices;
 
 namespace ControlDemo
 {
-    public sealed class ControlDemo: IHighLevel
+    [SkinIcon("*#")]
+    public sealed class ControlDemo : IHighLevel
     {
 
     #region IHighLevel Members
@@ -88,11 +89,14 @@ namespace ControlDemo
 
     void btnDialog_OnClick(OMControl sender, int screen)
     {
-        OpenMobile.helperFunctions.General.Dialog dialog = new OpenMobile.helperFunctions.General.Dialog(this.pluginName, sender.Parent.Name);
+        OpenMobile.helperFunctions.Forms.Dialog dialog = new OpenMobile.helperFunctions.Forms.Dialog(this.pluginName, sender.Parent.Name);
         dialog.Header = "Radio message";
         dialog.Text = "Is this awesome?";
-        dialog.Icon = OpenMobile.helperFunctions.General.Dialog.Icons.Checkmark;
-        theHost.sendMessage("UI", "", "MsgBox result: " + dialog.ShowMsgBox(screen).ToString());
+        dialog.Icon = OpenMobile.helperFunctions.Forms.Dialog.Icons.Checkmark;
+        dialog.Button = OpenMobile.helperFunctions.Forms.Dialog.Buttons.Yes |                         
+                            OpenMobile.helperFunctions.Forms.Dialog.Buttons.No;
+
+        theHost.sendMessage("UI", "", "{" + screen + "}MsgBox result: " + dialog.ShowMsgBox(screen).ToString());
     }
 
     void t_Elapsed(object sender, ElapsedEventArgs e)

@@ -24,7 +24,8 @@ using OpenMobile.Data;
 
 namespace Skin_Switcher
 {
-    public class Class1:IHighLevel
+    [SkinIcon("*^")]
+    public class Class1 : IHighLevel
     {
 
         #region IHighLevel Members
@@ -67,12 +68,12 @@ namespace Skin_Switcher
 
         public string authorName
         {
-            get { throw new NotImplementedException(); }
+            get { return ""; }
         }
 
         public string authorEmail
         {
-            get { throw new NotImplementedException(); }
+            get { return ""; }
         }
 
         public string pluginName
@@ -87,7 +88,7 @@ namespace Skin_Switcher
 
         public string pluginDescription
         {
-            get { throw new NotImplementedException(); }
+            get { return "Default <-> Highway skin"; }
         }
 
         public bool incomingMessage(string message, string source)

@@ -31,7 +31,8 @@ using OpenMobile.Input;
 
 namespace OpenMobile
 {   //All High Level plugins should implement the IHighLevel interface
-    public sealed class MainClass:IHighLevel
+    [PluginLevel(PluginLevels.UserInput)]
+    public sealed class MainClass : IHighLevel
     {
         //Here we create the panel that we will load the controls onto (like a windows form)
         ScreenManager manager;
