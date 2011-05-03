@@ -29,7 +29,8 @@ using OpenMobile.Plugin;
 
 namespace OMSettings
 {
-    public class Settings:IHighLevel
+    [SkinIcon("*'")]
+    public class Settings : IHighLevel
     {
         ScreenManager manager;
         IPluginHost theHost;

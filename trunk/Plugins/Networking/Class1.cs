@@ -30,7 +30,8 @@ using System.Collections.Generic;
 using OpenMobile.Data;
 namespace Networking
 {
-    public sealed class Class1:IHighLevel
+    [SkinIcon("*Â")]
+    public sealed class Class1 : IHighLevel
     {
         IPluginHost theHost;
         #region IHighLevel Members

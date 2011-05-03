@@ -34,6 +34,8 @@ using System.Collections.Generic;
 
 namespace OMDialog
 {
+    [SkinIcon("*2")]
+    [PluginLevel(PluginLevels.System)]
     public class Dialog : IHighLevel
     {
         IPluginHost theHost;
@@ -82,7 +84,7 @@ namespace OMDialog
             OMPanel Panel = (OMPanel)Convert.ChangeType(data, typeof(T));
 
             // Extract dialog data
-            OpenMobile.helperFunctions.General.Dialog.DialogData DT = ((OpenMobile.helperFunctions.General.Dialog.DialogData)Panel.Tag);
+            OpenMobile.helperFunctions.Forms.Dialog.DialogData DT = ((OpenMobile.helperFunctions.Forms.Dialog.DialogData)Panel.Tag);
 
             /* Buttons has to be named according to this:
              *  Dialog_Button_Cancel    : Cancel button
@@ -111,7 +113,7 @@ namespace OMDialog
                         Shape_AccessBlock2.FillColor = Color.FromArgb(150, Color.Black);
                         Panel.addControl(Shape_AccessBlock2);
                         OMButton Button_Cancel2 = new OMButton(0, 0, 1000, 600);
-                        Button_Cancel2.Name = "Dialog_Button_Cancel";
+                        Button_Cancel2.Name = "Dialog_Button_None";
                         Panel.addControl(Button_Cancel2);
 
                         OMBasicShape Shape_Border2 = new OMBasicShape(DT.Left, DT.Top, DT.Width, DT.Height);
@@ -149,29 +151,29 @@ namespace OMDialog
                         Image_Icon.Top = Shape_Background2.Top + 20;
                         Image_Icon.Width = 0;
                         Image_Icon.Height = 0;
-                        if (DT.Icon != General.Dialog.Icons.None)
+                        if (DT.Icon != Forms.Dialog.Icons.None)
                         {
                             Image_Icon.Width = 100;
                             Image_Icon.Height = 100;
 
                             switch (DT.Icon)
                             {
-                                case General.Dialog.Icons.Error:
+                                case Forms.Dialog.Icons.Error:
                                     Image_Icon.Image = theHost.getSkinImage("Error");
                                     break;
-                                case General.Dialog.Icons.Exclamation:
+                                case Forms.Dialog.Icons.Exclamation:
                                     Image_Icon.Image = theHost.getSkinImage("Exclamation");
                                     break;
-                                case General.Dialog.Icons.Question:
+                                case Forms.Dialog.Icons.Question:
                                     Image_Icon.Image = theHost.getSkinImage("questionMark");
                                     break;
-                                case General.Dialog.Icons.Checkmark:
+                                case Forms.Dialog.Icons.Checkmark:
                                     Image_Icon.Image = theHost.getSkinImage("Checkmark");
                                     break;
-                                case General.Dialog.Icons.Information:
+                                case Forms.Dialog.Icons.Information:
                                     Image_Icon.Image = theHost.getSkinImage("Information");
                                     break;
-                                case General.Dialog.Icons.Custom:
+                                case Forms.Dialog.Icons.Custom:
                                     Image_Icon.Image = theHost.getSkinImage(DT.CustomIcon);
                                     break;                                    
                                 default:
@@ -191,21 +193,57 @@ namespace OMDialog
                         Label_Text.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap | Alignment.CenterCenter;
                         Panel.addControl(Label_Text);
 
-                        OMButton Button_Yes = new OMButton(Shape_Border2.Left + Shape_Border2.Width - 320, Shape_Border2.Top + Shape_Border2.Height - 80, 150, 70);
-                        Button_Yes.Name = "Dialog_Button_Yes";
-                        Button_Yes.Image = theHost.getSkinImage("Full");
-                        Button_Yes.FocusImage = theHost.getSkinImage("Full.Highlighted");
-                        Button_Yes.Transition = eButtonTransition.None;
-                        Button_Yes.Text = "Yes";
-                        Panel.addControl(Button_Yes);
+                        #region Assign buttons
 
-                        OMButton Button_No = new OMButton(Button_Yes.Left + Button_Yes.Width + 10, Button_Yes.Top, Button_Yes.Width, Button_Yes.Height);
-                        Button_No.Name = "Dialog_Button_No";
-                        Button_No.Image = theHost.getSkinImage("Full");
-                        Button_No.FocusImage = theHost.getSkinImage("Full.Highlighted");
-                        Button_No.Transition = eButtonTransition.None;
-                        Button_No.Text = "No";
-                        Panel.addControl(Button_No);
+                        int ButtonCount = General.BitCount((uint)DT.Button);
+                        int ButtonWidth = 150;
+                        if (ButtonCount > 0)
+                        {   // Calculate width of buttons
+                            ButtonWidth = (Shape_Border2.Width - 10) / ButtonCount;
+                            if (ButtonWidth > 150)
+                                ButtonWidth = 150;
+                        }
+
+                        OMButton[] Buttons = new OMButton[ButtonCount];
+                        Buttons[0] = new OMButton();
+                        Buttons[0].Height = 70;
+                        Buttons[0].Width = ButtonWidth;
+                        Buttons[0].Left = Shape_Border2.Left + Shape_Border2.Width - Buttons[0].Width-5;
+                        Buttons[0].Top = Shape_Border2.Top + Shape_Border2.Height - 80;
+                        Buttons[0].Image = theHost.getSkinImage("Full");
+                        Buttons[0].FocusImage = theHost.getSkinImage("Full.Highlighted");
+                        Buttons[0].Transition = eButtonTransition.None;
+                        Panel.addControl(Buttons[0]);
+
+                        for (int i = 1; i < Buttons.Length; i++)
+                        {
+                            Buttons[i] = new OMButton();
+                            Buttons[i].Top = Buttons[0].Top;
+                            Buttons[i].Width = Buttons[0].Width;
+                            Buttons[i].Left = Buttons[0].Left - (Buttons[0].Width*i);
+                            Buttons[i].Height = Buttons[0].Height;
+                            Buttons[i].Image = Buttons[0].Image;
+                            Buttons[i].FocusImage = Buttons[0].FocusImage;
+                            Buttons[i].Transition = Buttons[0].Transition;
+                            Panel.addControl(Buttons[i]);
+                        }
+
+                        // Configure button function and text
+                        int Btn = 0;
+                        foreach (Forms.Dialog.Buttons b in Enum.GetValues(typeof(Forms.Dialog.Buttons)))
+                        {
+                            if (b != Forms.Dialog.Buttons.None)
+                            {
+                                if ((DT.Button & b) == b)
+                                {   // Bit is set, update button
+                                    Buttons[Btn].Text = b.ToString();   // Set text
+                                    Buttons[Btn].Name = "Dialog_Button_" + b.ToString();    // Set name of button (name indicates dialog result)
+                                    Btn++;
+                                }
+                            }
+                        }
+
+                        #endregion
 
                         Panel.Forgotten = true;
                         //Panel.Priority = ePriority.High;

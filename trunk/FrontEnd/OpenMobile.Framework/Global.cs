@@ -133,6 +133,8 @@ namespace OpenMobile
         /// </summary>
         public sealed class subItemFormat
         {
+            public bool Changed { get; set; }
+
             /// <summary>
             /// Text Formatting
             /// </summary>
@@ -142,7 +144,8 @@ namespace OpenMobile
                 set
                 {
                     _textFormat = value;
-                    subitemTex = null;
+                    //subitemTex = null;
+                    Changed = true;
                 }
             }
             private OpenMobile.Graphics.eTextFormat _textFormat = OpenMobile.Graphics.eTextFormat.Normal;
@@ -156,7 +159,8 @@ namespace OpenMobile
                 set
                 {
                     _textAlignment = value;
-                    subitemTex = null;
+                    //subitemTex = null;
+                    Changed = true;
                 }
             }
             private OpenMobile.Graphics.Alignment _textAlignment = OpenMobile.Graphics.Alignment.BottomLeft;
@@ -169,7 +173,8 @@ namespace OpenMobile
                 set
                 {
                     _color = value;
-                    subitemTex = null;
+                    //subitemTex = null;
+                    Changed = true;
                 }
             }
             private Color _color = Color.White;
@@ -182,7 +187,8 @@ namespace OpenMobile
                 set
                 {
                     _highlightColor = value;
-                    subitemTex = null;
+                    //subitemTex = null;
+                    Changed = true;
                 }
             }
             private Color _highlightColor = Color.White;
@@ -195,7 +201,8 @@ namespace OpenMobile
                 set
                 {
                     _font = value;
-                    subitemTex = null;
+                    //subitemTex = null;
+                    Changed = true;
                 }
             }
             private Font _font = new Font(Font.GenericSansSerif, 18F);
@@ -208,7 +215,8 @@ namespace OpenMobile
                 set
                 {
                     _outlineColor = value;
-                    subitemTex = null;
+                    //subitemTex = null;
+                    Changed = true;
                 }
             }
             private Color _outlineColor = Color.Black;
@@ -221,14 +229,11 @@ namespace OpenMobile
                 set
                 {
                     _Offset = value;
-                    subitemTex = null;
+                    //subitemTex = null;
+                    Changed = true;
                 }
             }
-            public int _Offset = 0;
-            /// <summary>
-            /// sub item texture
-            /// </summary>
-            internal OImage subitemTex;
+            private int _Offset = 0;
         }
         /// <summary>
         /// The text to display
@@ -240,13 +245,45 @@ namespace OpenMobile
             {
                 _text = value;
                 textTex = null; // Reset text texture so control gets redrawn
+                subitemTex = null; // Reset text texture so control gets redrawn
             }
         }
         private string _text;
+
+        private OImage _textTex;
         /// <summary>
         /// Text texture
         /// </summary>
-        internal OImage textTex;
+        internal OImage textTex
+        {
+            get { return _textTex; }
+            set
+            {
+                _textTex = value;
+                if (_textTex == null)
+                    _subitemTex = null; 
+            }
+        }
+
+        private OImage _subitemTex;
+        /// <summary>
+        /// sub item texture
+        /// </summary>
+        internal OImage subitemTex
+        {
+            get { return _subitemTex; }
+            set
+            {
+                _subitemTex = value;
+                if (_subitemTex == null)
+                    _textTex = null;
+                else
+                {
+                    if (subitemFormat != null)
+                        subitemFormat.Changed = false;
+                }
+            }
+        }
         /// <summary>
         /// The icon
         /// </summary>
@@ -257,6 +294,7 @@ namespace OpenMobile
             {
                 _image = value;
                 textTex = null; // Reset text texture so control gets redrawn
+                subitemTex = null; // Reset text texture so control gets redrawn
             }
         }
         private OImage _image;
@@ -270,6 +308,7 @@ namespace OpenMobile
             {
                 _subItem = value;
                 textTex = null; // Reset text texture so control gets redrawn
+                subitemTex = null; // Reset text texture so control gets redrawn
             }
         }
         private string _subItem;
@@ -283,6 +322,7 @@ namespace OpenMobile
             {
                 _subitemFormat = value;
                 textTex = null; // Reset text texture so control gets redrawn
+                subitemTex = null; // Reset text texture so control gets redrawn
             }
         }
         private subItemFormat _subitemFormat;
@@ -296,6 +336,7 @@ namespace OpenMobile
             {
                 _tag = value;
                 textTex = null; // Reset text texture so control gets redrawn
+                subitemTex = null; // Reset text texture so control gets redrawn
             }
         }
         private object _tag; //Added by Borte
@@ -309,6 +350,7 @@ namespace OpenMobile
             {
                 _sort = value;
                 textTex = null; // Reset text texture so control gets redrawn
+                subitemTex = null; // Reset text texture so control gets redrawn
             }
         }
         private string _sort;
@@ -334,11 +376,11 @@ namespace OpenMobile
         /// Creates a new list item
         /// </summary>
         /// <param name="text"></param>
-        /// <param name="subitm"></param>
-        public OMListItem(string text, string subitm)
+        /// <param name="subitem"></param>
+        public OMListItem(string text, string subitem)
         {
             this.text = text;
-            this.subItem = subitm;
+            this.subItem = subitem;
             if (this.subItem != null)
                 this.subitemFormat = new subItemFormat();
         }

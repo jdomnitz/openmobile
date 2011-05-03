@@ -29,7 +29,8 @@ using OpenMobile.Threading;
 
 namespace OMContacts
 {
-    public class Contacts:IHighLevel
+    [SkinIcon("*\u0094")]
+    public class Contacts : IHighLevel
     {
         ScreenManager manager;
         IPluginHost theHost;

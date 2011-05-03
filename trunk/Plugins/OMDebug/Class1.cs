@@ -67,6 +67,7 @@ namespace OMDebug
         int time;
         public eLoadStatus initialize(IPluginHost host)
         {
+            time = Environment.TickCount;
             theHost = host;
             writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
@@ -96,7 +97,6 @@ namespace OMDebug
             writer.WriteLine("Graphics Card: " + Graphics.Renderer);
             writer.WriteLine("Embedded:" + Configuration.RunningOnEmbedded);
             writer.WriteLine("----------------Inital Assemblies-------------");
-            time = Environment.TickCount;
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
                 log("LOADED (" + a.GetName() + ")");
             writer.WriteLine("---------------------------------------------");

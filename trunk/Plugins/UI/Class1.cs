@@ -29,7 +29,8 @@ using OpenMobile.Data;
 
 namespace OpenMobile
 {
-    public sealed class UI:IHighLevel
+    [PluginLevel(PluginLevels.System)]
+    public sealed class UI : IHighLevel
     {
         private IPluginHost theHost;
         private System.Timers.Timer tick = new System.Timers.Timer();
@@ -65,9 +66,29 @@ namespace OpenMobile
 
         public bool incomingMessage(string message, string source)
         {
-            for (int i = 0; i < theHost.ScreenCount; i++)
-            {
-                OMPanel p = manager[i];
+            // Extract screen number (if any). Must be written as {0} in the first three caracthers in the string
+            // where 0 is the screen number, missing command means send to all screens.
+            string Command = message.Substring(0, 3);
+            int Screen = -1;
+            if ((Command.Contains("{")) && (Command.Contains("}")))
+            {   // Screen exists extract info
+                Screen = int.Parse(Command.Substring(1, 1)); 
+                // Remove command from orginal message
+                message = message.Substring(3, message.Length - 3);
+            }
+
+            if (Screen == -1)
+            {   // Global message
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                {
+                    OMPanel p = manager[i];
+                    OMAnimatedLabel title = ((OMAnimatedLabel)p[6]);
+                    title.Transition(eAnimation.UnveilRight, message, 50);
+                }
+            }
+            else
+            {   // Screen spesific message
+                OMPanel p = manager[Screen];
                 OMAnimatedLabel title = ((OMAnimatedLabel)p[6]);
                 title.Transition(eAnimation.UnveilRight, message, 50);
             }

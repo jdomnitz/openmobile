@@ -26,7 +26,8 @@ using OpenMobile.Plugin;
 
 namespace Video
 {
-    public class Video:IHighLevel
+    [SkinIcon("*·")]
+    public class Video : IHighLevel
     {
         #region IHighLevel Members
 

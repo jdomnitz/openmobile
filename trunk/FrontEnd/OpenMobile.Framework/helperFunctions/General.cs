@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Threading;
 using OpenMobile.Plugin;
 using OpenMobile.Controls;
+using OpenMobile.Graphics;
 using System.Xml;
 
 namespace OpenMobile.helperFunctions
@@ -381,10 +382,242 @@ namespace OpenMobile.helperFunctions
         }
 
         /// <summary>
+        /// Convert a string of bytes represented in hex into a byte array
+        /// </summary>
+        /// <param name="Hex"></param>
+        /// <returns></returns>
+        public static byte[] HexStringToByteArray(string Hex)
+        {
+            if (Hex == null)
+                return new byte[0];
+            byte[] Bytes = new byte[Hex.Length / 2];
+            int[] HexValue = new int[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
+                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x0B, 0x0C, 0x0D,
+                                 0x0E, 0x0F };
+
+            for (int x = 0, i = 0; i < Hex.Length; i += 2, x += 1)
+            {
+                Bytes[x] = (byte)(HexValue[Char.ToUpper(Hex[i + 0]) - '0'] << 4 |
+                                  HexValue[Char.ToUpper(Hex[i + 1]) - '0']);
+            }
+
+            return Bytes;
+        }
+        /// <summary>
+        /// Escapes a string for sending to an SQL Database
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static string escape(string s)
+        {
+            if (s == null)
+                return String.Empty;
+            return s.Replace("'", "''");
+        }
+        /// <summary>
+        /// Returns a List of plugins matching the given type
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="host"></param>
+        /// <returns></returns>
+        public static List<string> getPluginsOfType(Type t, IPluginHost host)
+        {
+            object o = new object();
+            host.getData(eGetData.GetPlugins, String.Empty, out o);
+            if (o == null)
+                return null;
+            List<string> ret = new List<string>();
+            foreach (IBasePlugin b in (List<IBasePlugin>)o)
+            {
+                if (t.IsInstanceOfType(b))
+                {
+                    ret.Add(b.pluginName);
+                }
+            }
+            return ret;
+        }
+        /// <summary>
+        /// Returns a List of plugins names matching the given type
+        /// </summary>
+        /// <param name="PluginLevel"></param>
+        /// <returns></returns>
+        public static List<T> getPluginsOfType<T>(PluginLevels PluginLevel)
+        {
+            object o = new object();
+            BuiltInComponents.Host.getData(eGetData.GetPlugins, String.Empty, out o);
+            if (o == null)
+                return null;
+            List<T> ret = new List<T>();
+            PluginLevels Level = PluginLevels.Normal;
+            foreach (IBasePlugin b in (List<IBasePlugin>)o)
+            {
+                if (typeof(T).IsInstanceOfType(b))
+                {
+                    // Check plugin level attribute flags
+                    PluginLevel[] a = (PluginLevel[])b.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                    Level = PluginLevels.Normal; // Default
+                    if (a.Length > 0)
+                        Level = a[0].TypeOfPlugin;
+                    if ((Level | PluginLevel) == PluginLevel)
+                        ret.Add((T)b);
+                }
+            }
+            return ret;
+        }
+        /// <summary>
+        /// Returns a List of plugins names matching the given type
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="host"></param>
+        /// <returns></returns>
+        public static List<string> getPluginsNameOfType(Type t, IPluginHost host,PluginLevels PluginLevel)
+        {
+            object o = new object();
+            host.getData(eGetData.GetPlugins, String.Empty, out o);
+            if (o == null)
+                return null;
+            List<string> ret = new List<string>();
+            PluginLevels Level = PluginLevels.Normal;
+            foreach (IBasePlugin b in (List<IBasePlugin>)o)
+            {
+                if (t.IsInstanceOfType(b))
+                {
+                    // Check plugin level attribute flags
+                    PluginLevel[] a = (PluginLevel[])b.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                    Level = PluginLevels.Normal; // Default
+                    if (a.Length > 0)
+                        Level = a[0].TypeOfPlugin;
+                    if ((Level | PluginLevel) == PluginLevel)
+                        ret.Add(b.pluginName);
+                }
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Returns a List of plugins display names (only normal type plugins)
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="host"></param>
+        /// <returns></returns>
+        public static List<string> getPluginsDisplayName()
+        {
+            return getPluginsDisplayName(PluginLevels.Normal);
+        }
+        /// <summary>
+        /// Returns a List of plugins display names matching the given plugin level
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="host"></param>
+        /// <returns></returns>
+        public static List<string> getPluginsDisplayName(PluginLevels PluginLevel)
+        {
+            object o = new object();
+            BuiltInComponents.Host.getData(eGetData.GetPlugins, String.Empty, out o);
+            if (o == null)
+                return null;
+            List<string> ret = new List<string>();
+            PluginLevels Level = PluginLevels.Normal;
+            Type t = typeof(IHighLevel);
+            foreach (IBasePlugin b in (List<IBasePlugin>)o)
+            {
+                if (t.IsInstanceOfType(b))
+                {
+                    // Check plugin level attribute flags
+                    PluginLevel[] a = (PluginLevel[])b.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                    Level = PluginLevels.Normal; // Default
+                    if (a.Length > 0)
+                        Level = a[0].TypeOfPlugin;
+                    if ((Level | PluginLevel) == PluginLevel)
+                        ret.Add(((IHighLevel)b).displayName);
+                }
+            }
+            return ret;
+        }
+
+        public static OImage GetPluginIcon(string PluginName)
+        {
+            return GetPluginIcon(PluginName, eTextFormat.Normal, Color.White, Color.White);
+        }
+        public static OImage GetPluginIcon(string PluginName, eTextFormat SymbolFormat, Color color, Color secondColor)
+        {
+            object o = new object();
+            BuiltInComponents.Host.getData(eGetData.GetPlugins, PluginName, out o);
+            if (o == null)
+                return null;
+            return GetPluginIcon((IBasePlugin)o, SymbolFormat, color, secondColor);
+        }
+        public static OImage GetPluginIcon(IBasePlugin Plugin)
+        {
+            return GetPluginIcon(Plugin, eTextFormat.Normal, Color.White, Color.White);
+        }
+        public static OImage GetPluginIcon(IBasePlugin Plugin, eTextFormat SymbolFormat, Color color, Color secondColor)
+        {
+            string Icon = "";
+            PluginLevel[] c = (PluginLevel[])Plugin.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+            SkinIcon[] a = (SkinIcon[])Plugin.GetType().GetCustomAttributes(typeof(SkinIcon), false);
+            if (a.Length > 0)
+            {   // Icon name is provided    
+                Icon = a[0].SkinImageName;
+
+                // If first character in name is * then this is a request to use a symbol font instead (Webdings)
+                if (Icon.Substring(0, 1) == "*")
+                {   // Use symbol font
+                    Icon = Icon.Substring(1, Icon.Length - 1);
+                    return OImage.FromWebdingsFont(100, 100, Icon, SymbolFormat, Alignment.CenterCenter, color, secondColor);
+                }
+                else
+                {   // Get image from file
+                    return BuiltInComponents.Host.getSkinImage(Icon).image;
+                }
+            }
+            else
+            {   // No icon specified
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Convert a string representation of an eFunction into an eFunction
+        /// </summary>
+        /// <param name="functionName"></param>
+        /// <returns></returns>
+        public static eFunction stringToFunction(string functionName)
+        {
+            if (string.IsNullOrEmpty(functionName))
+                return eFunction.None;
+            try
+            {
+                return (eFunction)Enum.Parse(typeof(eFunction), functionName, true);
+            }
+            catch (System.ArgumentException)
+            {
+                return eFunction.None;
+            }
+        }
+
+        public static int BitCount(uint x)
+        {
+            int b = 0;
+            if (x > 1)
+                b = 1;
+            while ((x &= (x - 1)) != 0)
+                b++;
+            return b;
+        }
+    }
+
+    /// <summary>
+    /// Form handling/generation functions
+    /// </summary>
+    public static class Forms
+    {
+        /// <summary>
         /// The equivalent of a dialog with options for message box and so on...
         /// </summary>
         public class Dialog
         {
+            // NB! The definition of this enum must match the definition of Buttons (values are transfered in code)
             /// <summary>
             /// Default return values for messagebox
             /// </summary>
@@ -424,6 +657,47 @@ namespace OpenMobile.helperFunctions
                 No
             }
 
+            // NB! The definition of this enum must match the definition of dialogresults (values are transfered in code)
+            /// <summary>
+            /// Dialog buttons 
+            /// </summary>
+            [Flags]
+            public enum Buttons : byte
+            {
+                /// <summary>
+                /// Button none
+                /// </summary>
+                None = 0,
+                /// <summary>
+                /// Button Abort
+                /// </summary>
+                Abort = 1,
+                /// <summary>
+                /// Button Retry
+                /// </summary>
+                Retry = 2,
+                /// <summary>
+                /// Button Ignore
+                /// </summary>
+                Ignore = 4,
+                /// <summary>
+                /// Button Cancel
+                /// </summary>
+                Cancel = 8,
+                /// <summary>
+                /// Button No
+                /// </summary>
+                No = 16,
+                /// <summary>
+                /// Button Yes
+                /// </summary>
+                Yes = 32,
+                /// <summary>
+                /// Button OK
+                /// </summary>
+                OK = 64
+            }
+
             public enum Icons
             {
                 None,
@@ -442,6 +716,7 @@ namespace OpenMobile.helperFunctions
                 public int Height { get; set; }
                 public int Width { get; set; }
                 public Icons Icon { get; set; }
+                public Buttons Button { get; set; }
                 public string CustomIcon { get; set; }
             }
 
@@ -461,6 +736,7 @@ namespace OpenMobile.helperFunctions
             public int Height { get; set; }
             public int Width { get; set; }
             public Icons Icon { get; set; }
+            public Buttons Button { get; set; }
             public string CustomIcon { get; set; }
 
             #region Constructors
@@ -523,7 +799,7 @@ namespace OpenMobile.helperFunctions
 
                 // Pack paneldata into tag property
                 DialogData DT = new DialogData();
-                DT.Left = Left; DT.Top = Top; DT.Height = Height; DT.Width = Width; DT.Icon = Icon; DT.CustomIcon = CustomIcon;
+                DT.Left = Left; DT.Top = Top; DT.Height = Height; DT.Width = Width; DT.Icon = Icon; DT.CustomIcon = CustomIcon; DT.Button = Button;
                 Panel.Tag = DT;
 
                 if (!BuiltInComponents.Host.sendMessage<OMPanel>(DialogHandler, "OpenMobile.helperFunctions.Dialog", "MessageBox", ref Panel))
@@ -657,79 +933,6 @@ namespace OpenMobile.helperFunctions
                 }
             }
         }
-
-        /// <summary>
-        /// Convert a string of bytes represented in hex into a byte array
-        /// </summary>
-        /// <param name="Hex"></param>
-        /// <returns></returns>
-        public static byte[] HexStringToByteArray(string Hex)
-        {
-            if (Hex == null)
-                return new byte[0];
-            byte[] Bytes = new byte[Hex.Length / 2];
-            int[] HexValue = new int[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
-                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x0B, 0x0C, 0x0D,
-                                 0x0E, 0x0F };
-
-            for (int x = 0, i = 0; i < Hex.Length; i += 2, x += 1)
-            {
-                Bytes[x] = (byte)(HexValue[Char.ToUpper(Hex[i + 0]) - '0'] << 4 |
-                                  HexValue[Char.ToUpper(Hex[i + 1]) - '0']);
-            }
-
-            return Bytes;
-        }
-        /// <summary>
-        /// Escapes a string for sending to an SQL Database
-        /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
-        public static string escape(string s)
-        {
-            if (s == null)
-                return String.Empty;
-            return s.Replace("'", "''");
-        }
-        /// <summary>
-        /// Returns a List of plugins matching the given type
-        /// </summary>
-        /// <param name="t"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        public static List<string> getPluginsOfType(Type t, IPluginHost host)
-        {
-            object o = new object();
-            host.getData(eGetData.GetPlugins, String.Empty, out o);
-            if (o == null)
-                return null;
-            List<string> ret = new List<string>();
-            foreach (IBasePlugin b in (List<IBasePlugin>)o)
-            {
-                if (t.IsInstanceOfType(b))
-                {
-                    ret.Add(b.pluginName);
-                }
-            }
-            return ret;
-        }
-        /// <summary>
-        /// Convert a string representation of an eFunction into an eFunction
-        /// </summary>
-        /// <param name="functionName"></param>
-        /// <returns></returns>
-        public static eFunction stringToFunction(string functionName)
-        {
-            if (string.IsNullOrEmpty(functionName))
-                return eFunction.None;
-            try
-            {
-                return (eFunction)Enum.Parse(typeof(eFunction), functionName, true);
-            }
-            catch (System.ArgumentException)
-            {
-                return eFunction.None;
-            }
-        }
     }
+
 }
