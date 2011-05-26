@@ -27,10 +27,11 @@ using OpenMobile.Framework;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 using OpenMobile.Threading;
+using OpenMobile.helperFunctions.Forms;
 
 namespace OMRadio
 {
-    [SkinIcon("*»")]
+    [SkinIcon("Icons|Radio white")] //"*»"
     public class OMRadio : IHighLevel
     {
         private ScreenManager manager;
@@ -602,7 +603,7 @@ namespace OMRadio
             stationInfo info = o as stationInfo;
             if ((info != null)&&(info.stationID!=null)&&(info.stationID.Contains(":")))
             {   //this method is more reliable for undefined bands (ex pandora)
-                newStation = info.stationID.Substring(0, info.stationID.IndexOf(':')) + newStation;
+                newStation = info.stationID.Substring(0, info.stationID.IndexOf(':') + 1) + newStation;
                 theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), newStation);
             }
             else
@@ -611,7 +612,7 @@ namespace OMRadio
                 tunedContentInfo tc = o as tunedContentInfo;
                 if (tc != null)
                 {
-                    newStation = tc.band.ToString()+":" + newStation;
+                    newStation = tc.band.ToString() + ":" + newStation;
                     theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), newStation);
                 }
             }
@@ -704,10 +705,28 @@ namespace OMRadio
                             for (int i = 0; i < theHost.ScreenCount; i++)
                                 ((OMLabel)manager[i]["Radio_StationName"]).Text = "Loading " + SelectedItemTag;
 
-                            theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag);
-                            if (UpdateStationList(theHost.instanceForScreen(screen)))
-                                for (int i = 0; i < theHost.ScreenCount; i++)
-                                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
+                            dialog d = new dialog(this.pluginName, "");
+                            d.Header = "Loading";
+                            d.Text = "Please wait, loading " + SelectedItemTag;
+                            d.Icon = OpenMobile.helperFunctions.Forms.icons.Busy;
+                            d.ShowMsgBoxNonBlocking(screen,250);
+                            if (theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag))
+                            {
+                                d.Close();
+                                if (UpdateStationList(theHost.instanceForScreen(screen)))
+                                    for (int i = 0; i < theHost.ScreenCount; i++)
+                                        ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
+                            }
+                            else
+                            {
+                                d.Close();
+                                d = new dialog(this.pluginName, "");
+                                d.Header = "Load failed";
+                                d.Text = "Loading " + SelectedItemTag + " failed!";
+                                d.Icon = icons.Error;
+                                d.Button = buttons.OK;
+                                d.ShowMsgBox(screen);
+                            }
                         }
                     }
                     break;

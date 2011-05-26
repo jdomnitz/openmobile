@@ -28,6 +28,7 @@ using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using OpenMobile.helperFunctions.Panels;
 
 namespace ControlDemo
 {
@@ -40,7 +41,7 @@ namespace ControlDemo
     IPluginHost theHost;
     public eLoadStatus initialize(IPluginHost host)
     {
-        OMPanel p = new OMPanel();
+        OMPanel p = new OMPanel("");
         theHost = host;
         OMAnimatedLabel label1 = new OMAnimatedLabel(50, 100, 200, 30);
         label1.Text = "This is an example of scrolling text how well does it work";
@@ -79,25 +80,53 @@ namespace ControlDemo
         btnDialog.OnClick += new userInteraction(btnDialog_OnClick);
         p.addControl(btnDialog);
 
+        OMImage AnimatedImage = new OMImage();
+        AnimatedImage.Name = "Ani";
+        AnimatedImage.Left = 600;
+        AnimatedImage.Top = 150;
+        AnimatedImage.Image = theHost.getSkinImage("OM");
+        AnimatedImage.Width = AnimatedImage.Image.image.Width;
+        AnimatedImage.Height = AnimatedImage.Image.image.Height;
+        AnimatedImage.Animate = AnimatedImage.CanAnimate;   // Activate animation if possible
+        p.addControl(AnimatedImage);
+
         System.Timers.Timer t = new System.Timers.Timer(100);
         t.Elapsed += new ElapsedEventHandler(t_Elapsed);
         t.Enabled = true;
         manager = new ScreenManager(theHost.ScreenCount);
         manager.loadPanel(p);
+
+        eventMonitor em = new eventMonitor(this.pluginName, p.Name);
+        em.EnteringPanel += new eventMonitor.Event(Entering);
+        em.LeavingPanel += new eventMonitor.Event(Leaving);
+
         return eLoadStatus.LoadSuccessful;
     }
 
+    int frame;
     void btnDialog_OnClick(OMControl sender, int screen)
     {
-        OpenMobile.helperFunctions.Forms.Dialog dialog = new OpenMobile.helperFunctions.Forms.Dialog(this.pluginName, sender.Parent.Name);
+        OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this.pluginName, sender.Parent.Name);
         dialog.Header = "Radio message";
         dialog.Text = "Is this awesome?";
-        dialog.Icon = OpenMobile.helperFunctions.Forms.Dialog.Icons.Checkmark;
-        dialog.Button = OpenMobile.helperFunctions.Forms.Dialog.Buttons.Yes |                         
-                            OpenMobile.helperFunctions.Forms.Dialog.Buttons.No;
+        dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Busy;
+        dialog.Button = OpenMobile.helperFunctions.Forms.buttons.Yes |
+                            OpenMobile.helperFunctions.Forms.buttons.No;
 
         theHost.sendMessage("UI", "", "{" + screen + "}MsgBox result: " + dialog.ShowMsgBox(screen).ToString());
     }
+
+    private void Entering(int screen, string name)
+    {
+        theHost.sendMessage("UI", "", "{" + screen + "}Entering panel " + name);
+        //aimg.OnRedraw += Animator;
+    }
+    private void Leaving(int screen, string name)
+    {
+        theHost.sendMessage("UI", "", "{" + screen + "}Leaving panel " + name);
+        //aimg.OnRedraw -= Animator;
+    }
+
 
     void t_Elapsed(object sender, ElapsedEventArgs e)
     {
@@ -115,7 +144,7 @@ namespace ControlDemo
 
     public OMPanel loadPanel(string name,int screen)
     {
-        return manager[screen];
+        return manager[screen, name];
     }
     public Settings loadSettings()
     {

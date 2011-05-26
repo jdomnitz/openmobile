@@ -31,7 +31,7 @@ using OpenMobile.Threading;
 
 namespace NewMedia
 {
-    [SkinIcon("*\u00AF")]    // "*¯"
+    [SkinIcon("Icons|Music white")]    // "*\u00AF"
     public class NewMedia : IHighLevel
     {
         ScreenManager manager;

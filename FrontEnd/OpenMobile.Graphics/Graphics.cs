@@ -281,8 +281,19 @@ namespace OpenMobile.Graphics
             }
             return new OImage(bmp);
         }
+
+        private int _screen;
+        /// <summary>
+        /// Screen number this graphics object belongs to
+        /// </summary>
+        public int screen
+        {
+            get { return _screen; }
+        }
+
         public Graphics(int screen)
         {
+            _screen = screen;
             virtualG = new Bitmap(1000, 600);
         }
         private float scaleHeight;
