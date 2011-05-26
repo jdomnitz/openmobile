@@ -265,7 +265,7 @@ namespace OpenMobile
 
                 // Look for panel from the default panels collection in the framework if no other panel is found
                 if (p == null)
-                    p = BuiltInComponents.Panels[0, panelName];
+                    p = BuiltInComponents.Panels[screen, panelName];
 
                 return p;
             }
@@ -1065,7 +1065,7 @@ namespace OpenMobile
                             return false;
                         raiseSystemEvent(eFunction.goBack, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
                         execute(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
-                        raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
+                        //raiseSystemEvent(eFunction.TransitionFromPanel, arg1, history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName);
                         while ((history.Count(ret) > 1) && (history.Peek(ret).Equals(history.CurrentItem(ret))))
                             history.Dequeue(ret);
                         //This part is done manually to prevent adding it to the history

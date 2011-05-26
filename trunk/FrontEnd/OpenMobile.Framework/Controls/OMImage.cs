@@ -87,7 +87,17 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (image == value)
+                    return;
+
                 image = value;
+                // Activate animation if not already disabled
+                if (Animate)
+                    _ShowAnimation = this.CanAnimate;
+                else
+                    _ShowAnimation = false;
+
+                raiseUpdate(false);
             }
         }
 
@@ -105,6 +115,24 @@ namespace OpenMobile.Controls
             }
             else
             {
+                // Enable animation?
+                if (_ShowAnimation)
+                {
+                    #region Animation
+
+                    if (aimg == null)
+                    {   // Create animation object
+                        aimg = new OAnimatedImage(image.image.image);
+                        aimg.OnRedraw += new OAnimatedImage.redraw(aimg_OnRedraw);
+                    }
+                    else
+                    {   // Get current frame from animation
+                        image.image = aimg.getFrame();
+                    }
+
+                    #endregion
+                }
+
                 float alpha = 1;
                 if (this.Mode == eModeType.transitioningIn)
                     alpha = e.globalTransitionIn;
@@ -162,6 +190,60 @@ namespace OpenMobile.Controls
                 drawmode = value;
             }
         }
-        // End of code added by Borte
+
+        #region Animiation
+
+        private OAnimatedImage aimg = null;
+        
+        /// <summary>
+        /// Can the image in this control animate?
+        /// </summary>
+        public bool CanAnimate
+        {
+            get
+            {
+                if ((image == null) || (image.image == null))
+                    return false;
+                return image.image.CanAnimate;
+            }
+        }
+
+        private bool _ShowAnimation = false;
+        private bool _Animate = true;
+        /// <summary>
+        /// Enable image animation
+        /// </summary>
+        public bool Animate
+        {
+            get
+            {
+                return _Animate;
+            }
+            set
+            {
+                if (!CanAnimate)
+                {
+                    _Animate = false;
+                    return;
+                }
+                _Animate = value;
+                _ShowAnimation = value;
+            }
+        }
+
+        private void aimg_OnRedraw(OAnimatedImage image)
+        {   // Trigg a refresh of this object when animation timer fires
+            raiseUpdate(false);
+        }
+
+        #endregion
+
+        ~OMImage()
+        {
+            // Stop any animation threads
+            if (aimg != null)
+                aimg.OnRedraw -= new OAnimatedImage.redraw(aimg_OnRedraw);
+        }
+
     }
 }

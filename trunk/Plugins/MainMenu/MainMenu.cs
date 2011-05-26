@@ -33,14 +33,15 @@ using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using System.Diagnostics;
 using OpenMobile.Media;
-using OpenMobile.helperFunctions;
+using OpenMobile.helperFunctions.Forms;
+using OpenMobile.helperFunctions.Plugins;
 
 namespace OpenMobile
 {
 
     //All High Level plugins should implement IHighLevel
     [InitialTransition(eGlobalTransition.SlideDown)]
-    [PluginLevel(PluginLevels.System)]
+    [PluginLevel(PluginLevels.MainMenu | PluginLevels.System)]
     public sealed class MainMenu : IHighLevel
     {
         #region IHighLevel Members
@@ -52,10 +53,11 @@ namespace OpenMobile
         //Heres where the magic happens
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel mainPanel = new OMPanel();
-
             //We save a reference to the plugin host for use later
             theHost = host;
+
+            screens = new ScreenManager(theHost.ScreenCount);
+
             imageItem mainMenu = theHost.getSkinImage("menuButton");
             imageItem mainMenuFocus = theHost.getSkinImage("menuButtonHighlighted");
 
@@ -63,147 +65,145 @@ namespace OpenMobile
 
             //Lets load some settings
             PluginSettings settings = new PluginSettings();
-            if (settings.getSetting("MainMenu.MainMenu11.Plugin") == "")
-                createDefaultSettings(settings);
             //Main Menu Controls are named by adding the row and column number to the end
 
-
-            OMButton[] MainMenuButtons = new OMButton[9];
-
-            #region Row 1
-
-            MainMenuButtons[0] = new OMButton(25, 116);
-            MainMenuButtons[0].Image = mainMenu;
-            MainMenuButtons[0].FocusImage = mainMenuFocus;
-            MainMenuButtons[0].Name = "MainMenu.MainMenu11";
-            MainMenuButtons[0].Mode = eModeType.Highlighted;
-            MainMenuButtons[0].OnLongClick += new userInteraction(OnLongClick);
-            MainMenuButtons[0].Tag = settings.getSetting("MainMenu.MainMenu11.Plugin");
-            MainMenuButtons[0].Text = settings.getSetting("MainMenu.MainMenu11.Display");
-            MainMenuButtons[0].OnClick += new userInteraction(MainMenu_OnClick);
-            mainPanel.addControl(MainMenuButtons[0]);
-
-            MainMenuButtons[1] = new OMButton(353, 116);
-            MainMenuButtons[1].Image = mainMenu;
-            MainMenuButtons[1].FocusImage = mainMenuFocus;
-            MainMenuButtons[1].Name = "MainMenu.MainMenu12";
-            MainMenuButtons[1].OnLongClick += new userInteraction(OnLongClick);
-            MainMenuButtons[1].OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenuButtons[1].Tag = settings.getSetting("MainMenu.MainMenu12.Plugin");
-            MainMenuButtons[1].Text = settings.getSetting("MainMenu.MainMenu12.Display");
-            mainPanel.addControl(MainMenuButtons[1]);
-
-            MainMenuButtons[2] = new OMButton(680, 116);
-            MainMenuButtons[2].OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenuButtons[2].Image = mainMenu;
-            MainMenuButtons[2].FocusImage = mainMenuFocus;
-            MainMenuButtons[2].OnLongClick += new userInteraction(OnLongClick);
-            MainMenuButtons[2].Name = "MainMenu.MainMenu13";
-            MainMenuButtons[2].Tag = settings.getSetting("MainMenu.MainMenu13.Plugin");
-            MainMenuButtons[2].Text = settings.getSetting("MainMenu.MainMenu13.Display");
-            mainPanel.addControl(MainMenuButtons[2]);
-
-
-            #endregion
-
-            #region Row 2
-
-            MainMenuButtons[3] = new OMButton(25, 260);
-            MainMenuButtons[3].Image = mainMenu;
-            MainMenuButtons[3].FocusImage = mainMenuFocus;
-            MainMenuButtons[3].Name = "MainMenu.MainMenu21";
-            MainMenuButtons[3].OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenuButtons[3].OnLongClick += new userInteraction(OnLongClick);
-            MainMenuButtons[3].Tag = settings.getSetting("MainMenu.MainMenu21.Plugin");
-            MainMenuButtons[3].Text = settings.getSetting("MainMenu.MainMenu21.Display");
-            mainPanel.addControl(MainMenuButtons[3]);
-
-            MainMenuButtons[4] = new OMButton(353, 260);
-            MainMenuButtons[4].Image = mainMenu;
-            MainMenuButtons[4].FocusImage = mainMenuFocus;
-            MainMenuButtons[4].Name = "MainMenu.MainMenu22";
-            MainMenuButtons[4].OnLongClick += new userInteraction(OnLongClick);
-            MainMenuButtons[4].OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenuButtons[4].Tag = settings.getSetting("MainMenu.MainMenu22.Plugin");
-            MainMenuButtons[4].Text = settings.getSetting("MainMenu.MainMenu22.Display");
-            mainPanel.addControl(MainMenuButtons[4]);
-
-            MainMenuButtons[5] = new OMButton(680, 260);
-            MainMenuButtons[5].Image = mainMenu;
-            MainMenuButtons[5].OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenuButtons[5].FocusImage = mainMenuFocus;
-            MainMenuButtons[5].OnLongClick += new userInteraction(OnLongClick);
-            MainMenuButtons[5].Tag = settings.getSetting("MainMenu.MainMenu23.Plugin");
-            MainMenuButtons[5].Text = settings.getSetting("MainMenu.MainMenu23.Display");
-            MainMenuButtons[5].Name = "MainMenu.MainMenu23";
-            mainPanel.addControl(MainMenuButtons[5]);
-
-            #endregion
-
-            #region Row 3
-
-            MainMenuButtons[6] = new OMButton(25, 400);
-            MainMenuButtons[6].OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenuButtons[6].Image = mainMenu;
-            MainMenuButtons[6].FocusImage = mainMenuFocus;
-            MainMenuButtons[6].Name = "MainMenu.MainMenu31";
-            MainMenuButtons[6].OnLongClick += new userInteraction(OnLongClick);
-            MainMenuButtons[6].Tag = settings.getSetting("MainMenu.MainMenu31.Plugin");
-            MainMenuButtons[6].Text = settings.getSetting("MainMenu.MainMenu31.Display");
-            mainPanel.addControl(MainMenuButtons[6]);
-
-            MainMenuButtons[7] = new OMButton(353, 400);
-            MainMenuButtons[7].OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenuButtons[7].Image = mainMenu;
-            MainMenuButtons[7].FocusImage = mainMenuFocus;
-            MainMenuButtons[7].Name = "MainMenu.MainMenu32";
-            MainMenuButtons[7].OnLongClick += new userInteraction(OnLongClick);
-            MainMenuButtons[7].Tag = settings.getSetting("MainMenu.MainMenu32.Plugin");
-            MainMenuButtons[7].Text = settings.getSetting("MainMenu.MainMenu32.Display");
-            mainPanel.addControl(MainMenuButtons[7]);
-
-            MainMenuButtons[8] = new OMButton(680, 400);
-            MainMenuButtons[8].Image = mainMenu;
-            MainMenuButtons[8].OnClick += new userInteraction(MainMenu_OnClick);
-            MainMenuButtons[8].FocusImage = mainMenuFocus;
-            MainMenuButtons[8].Tag = settings.getSetting("MainMenu.MainMenu33.Plugin");
-            MainMenuButtons[8].Text = settings.getSetting("MainMenu.MainMenu33.Display");
-            MainMenuButtons[8].Name = "MainMenu.MainMenu33";
-            MainMenuButtons[8].OnLongClick += new userInteraction(OnLongClick);
-            mainPanel.addControl(MainMenuButtons[8]);
-
-            #endregion
-
-            // Add icons
-            string Identifier = "MainMenu.MainMenu1";
-            int Count = 1;
-            for (int i = 0; i < MainMenuButtons.Length; i++)
+            for (int screen = 0; screen < theHost.ScreenCount; screen++)
             {
-                // Set row identifier
-                if (i == 3) { Identifier = "MainMenu.MainMenu2"; Count = 1; }
-                if (i == 6) { Identifier = "MainMenu.MainMenu3"; Count = 1; }
+                if (settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu1.Plugin") == "")
+                    createDefaultSettings(settings, screen);
+                
+                OMPanel mainPanel = new OMPanel();
+                OMButton[] MainMenuButtons = new OMButton[9];
 
-                OMImage MainMenu_Icon = new OMImage(MainMenuButtons[i].Left + 10, MainMenuButtons[i].Top, 75, 75);
-                MainMenu_Icon.Top = (MainMenuButtons[i].Top + (MainMenuButtons[i].Height / 2)) - (MainMenu_Icon.Height / 2);
-                MainMenu_Icon.Name = Identifier + (Count).ToString() + "_Icon";
-                mainPanel.addControl(MainMenu_Icon);
-                Count++;
+                #region Row 1
+
+                MainMenuButtons[0] = new OMButton(25, 116);
+                MainMenuButtons[0].Image = mainMenu;
+                MainMenuButtons[0].FocusImage = mainMenuFocus;
+                MainMenuButtons[0].Name = "MainMenu." + screen.ToString() + ".MainMenu1";
+                MainMenuButtons[0].Mode = eModeType.Highlighted;
+                MainMenuButtons[0].OnLongClick += new userInteraction(OnLongClick);
+                MainMenuButtons[0].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu1.Plugin");
+                MainMenuButtons[0].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu1.Display");
+                MainMenuButtons[0].OnClick += new userInteraction(MainMenu_OnClick);
+                mainPanel.addControl(MainMenuButtons[0]);
+
+                MainMenuButtons[1] = new OMButton(353, 116);
+                MainMenuButtons[1].Image = mainMenu;
+                MainMenuButtons[1].FocusImage = mainMenuFocus;
+                MainMenuButtons[1].Name = "MainMenu." + screen.ToString() + ".MainMenu2";
+                MainMenuButtons[1].OnLongClick += new userInteraction(OnLongClick);
+                MainMenuButtons[1].OnClick += new userInteraction(MainMenu_OnClick);
+                MainMenuButtons[1].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu2.Plugin");
+                MainMenuButtons[1].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu2.Display");
+                mainPanel.addControl(MainMenuButtons[1]);
+
+                MainMenuButtons[2] = new OMButton(680, 116);
+                MainMenuButtons[2].OnClick += new userInteraction(MainMenu_OnClick);
+                MainMenuButtons[2].Image = mainMenu;
+                MainMenuButtons[2].FocusImage = mainMenuFocus;
+                MainMenuButtons[2].OnLongClick += new userInteraction(OnLongClick);
+                MainMenuButtons[2].Name = "MainMenu." + screen.ToString() + ".MainMenu3";
+                MainMenuButtons[2].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu3.Plugin");
+                MainMenuButtons[2].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu3.Display");
+                mainPanel.addControl(MainMenuButtons[2]);
+
+
+                #endregion
+
+                #region Row 2
+
+                MainMenuButtons[3] = new OMButton(25, 260);
+                MainMenuButtons[3].Image = mainMenu;
+                MainMenuButtons[3].FocusImage = mainMenuFocus;
+                MainMenuButtons[3].Name = "MainMenu." + screen.ToString() + ".MainMenu4";
+                MainMenuButtons[3].OnClick += new userInteraction(MainMenu_OnClick);
+                MainMenuButtons[3].OnLongClick += new userInteraction(OnLongClick);
+                MainMenuButtons[3].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu4.Plugin");
+                MainMenuButtons[3].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu4.Display");
+                mainPanel.addControl(MainMenuButtons[3]);
+
+                MainMenuButtons[4] = new OMButton(353, 260);
+                MainMenuButtons[4].Image = mainMenu;
+                MainMenuButtons[4].FocusImage = mainMenuFocus;
+                MainMenuButtons[4].Name = "MainMenu." + screen.ToString() + ".MainMenu5";
+                MainMenuButtons[4].OnLongClick += new userInteraction(OnLongClick);
+                MainMenuButtons[4].OnClick += new userInteraction(MainMenu_OnClick);
+                MainMenuButtons[4].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu5.Plugin");
+                MainMenuButtons[4].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu5.Display");
+                mainPanel.addControl(MainMenuButtons[4]);
+
+                MainMenuButtons[5] = new OMButton(680, 260);
+                MainMenuButtons[5].Image = mainMenu;
+                MainMenuButtons[5].OnClick += new userInteraction(MainMenu_OnClick);
+                MainMenuButtons[5].FocusImage = mainMenuFocus;
+                MainMenuButtons[5].OnLongClick += new userInteraction(OnLongClick);
+                MainMenuButtons[5].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu6.Plugin");
+                MainMenuButtons[5].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu6.Display");
+                MainMenuButtons[5].Name = "MainMenu." + screen.ToString() + ".MainMenu6";
+                mainPanel.addControl(MainMenuButtons[5]);
+
+                #endregion
+
+                #region Row 3
+
+                MainMenuButtons[6] = new OMButton(25, 400);
+                MainMenuButtons[6].OnClick += new userInteraction(MainMenu_OnClick);
+                MainMenuButtons[6].Image = mainMenu;
+                MainMenuButtons[6].FocusImage = mainMenuFocus;
+                MainMenuButtons[6].Name = "MainMenu." + screen.ToString() + ".MainMenu7";
+                MainMenuButtons[6].OnLongClick += new userInteraction(OnLongClick);
+                MainMenuButtons[6].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu7.Plugin");
+                MainMenuButtons[6].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu7.Display");
+                mainPanel.addControl(MainMenuButtons[6]);
+
+                MainMenuButtons[7] = new OMButton(353, 400);
+                MainMenuButtons[7].OnClick += new userInteraction(MainMenu_OnClick);
+                MainMenuButtons[7].Image = mainMenu;
+                MainMenuButtons[7].FocusImage = mainMenuFocus;
+                MainMenuButtons[7].Name = "MainMenu." + screen.ToString() + ".MainMenu8";
+                MainMenuButtons[7].OnLongClick += new userInteraction(OnLongClick);
+                MainMenuButtons[7].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu8.Plugin");
+                MainMenuButtons[7].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu8.Display");
+                mainPanel.addControl(MainMenuButtons[7]);
+
+                MainMenuButtons[8] = new OMButton(680, 400);
+                MainMenuButtons[8].Image = mainMenu;
+                MainMenuButtons[8].OnClick += new userInteraction(MainMenu_OnClick);
+                MainMenuButtons[8].FocusImage = mainMenuFocus;
+                MainMenuButtons[8].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu9.Plugin");
+                MainMenuButtons[8].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu9.Display");
+                MainMenuButtons[8].Name = "MainMenu." + screen.ToString() + ".MainMenu9";
+                MainMenuButtons[8].OnLongClick += new userInteraction(OnLongClick);
+                mainPanel.addControl(MainMenuButtons[8]);
+
+                #endregion
+
+                #region Button Icons
+
+                // Add icons
+                string Identifier = "MainMenu." + screen.ToString() + ".MainMenu";
+                int Count = 1;
+                for (int i = 0; i < MainMenuButtons.Length; i++)
+                {
+                    // Set row identifier
+                    //if (i == 3) { Identifier = "MainMenu." + screen.ToString() + ".MainMenu2"; Count = 1; }
+                    //if (i == 6) { Identifier = "MainMenu." + screen.ToString() + ".MainMenu3"; Count = 1; }
+
+                    OMImage MainMenu_Icon = new OMImage(MainMenuButtons[i].Left + 30, MainMenuButtons[i].Top, 40, 40);
+                    MainMenu_Icon.Top = (MainMenuButtons[i].Top + (MainMenuButtons[i].Height / 2)) - (MainMenu_Icon.Height / 2);
+                    MainMenu_Icon.Name = Identifier + (Count).ToString() + "_Icon";
+                    mainPanel.addControl(MainMenu_Icon);
+                    Count++;
+                }
+
+                #endregion
+                
+                //screens.loadPanel(mainPanel);
+                screens.loadSinglePanel(mainPanel, screen);
             }
 
-
-
-
             settings.Dispose();
-
-            /*
-            OMImage SymTest = new OMImage(680, 400, (short)MainMenu33.Height, (short)MainMenu33.Height);
-            SymTest.Name = "SymTest";
-            SymTest.Image = new imageItem(OImage.FromWebdingsFont(SymTest.Width, SymTest.Height, "ü", eTextFormat.Glow, Alignment.CenterCenter, Color.Blue, Color.Red));
-            mainPanel.addControl(SymTest);
-            */
-
-            screens = new ScreenManager(theHost.ScreenCount);
-            screens.loadPanel(mainPanel);
 
             #endregion
 
@@ -376,7 +376,6 @@ namespace OpenMobile
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
             theHost.execute(eFunction.minimize,screen.ToString());
         }
-
         void Restart_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.restart);
@@ -419,21 +418,18 @@ namespace OpenMobile
         {
             theHost.execute(eFunction.closeProgram);
         }
-
         void Sleep_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
             theHost.execute(eFunction.standby);
         }
-
         void Hibernate_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
             theHost.execute(eFunction.hibernate);
         }
-
         void Shutdown_OnClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.shutdown);
@@ -445,15 +441,12 @@ namespace OpenMobile
             {
                 using (PluginSettings setting = new PluginSettings())
                 {
-                    if (theList[theList.SelectedIndex].text == "Not Set")
+                    if (theList[theList.SelectedIndex].text.Trim() == "Not Set")
                         theList[theList.SelectedIndex].text = "";
                     setting.setSetting(currentlySetting + ".Plugin", ((string)theList[theList.SelectedIndex].tag));
                     setting.setSetting(currentlySetting + ".Display", theList[theList.SelectedIndex].text);
-                    for (int i = 0; i < theHost.ScreenCount; i++)
-                    {
-                        screens[i][currentlySetting].Tag = ((string)theList[theList.SelectedIndex].tag);
-                        ((OMButton)screens[i][currentlySetting]).Text = theList[theList.SelectedIndex].text;
-                    }
+                    screens[screen][currentlySetting].Tag = ((string)theList[theList.SelectedIndex].tag);
+                    ((OMButton)screens[screen][currentlySetting]).Text = theList[theList.SelectedIndex].text;
                 }
             }
             currentlySetting = "";
@@ -462,26 +455,23 @@ namespace OpenMobile
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"MainMenu");
             theHost.execute(eFunction.ExecuteTransition,screen.ToString(),"None");
         }
-        private void createDefaultSettings(PluginSettings settings)
+
+        private void createDefaultSettings(PluginSettings settings, int screen)
         {
-            settings.setSetting("MainMenu.MainMenu11.Plugin", "NewMedia");;
-            settings.setSetting("MainMenu.MainMenu12.Plugin", "About");
-            settings.setSetting("MainMenu.MainMenu13.Plugin", "OMSettings");
-            settings.setSetting("MainMenu.MainMenu22.Plugin", "Exit");
-            
-            settings.setSetting("MainMenu.MainMenu11.Display", "Music");
-            settings.setSetting("MainMenu.MainMenu12.Display", "About");
-            settings.setSetting("MainMenu.MainMenu13.Display", "Settings");
-            settings.setSetting("MainMenu.MainMenu22.Display", "Exit");
-            foreach(DeviceInfo device in DeviceInfo.EnumerateDevices(theHost))
-                if (device.systemDrive)
-                {
-                    if (device.MusicFolders.Length > 0)
-                    {
-                        settings.setSetting("Music.Path", device.MusicFolders[0]);
-                        settings.setSetting("OpenMobile.FirstRun", "True");
-                    }
-                }
+            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu1.Plugin", "NewMedia"); ;
+            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu1.Display", "Music");
+
+            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu2.Plugin", "About");
+            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu2.Display", "About");
+
+            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu3.Plugin", "OMSettings");
+            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu3.Display", "Settings");
+
+            if (screen == 0)
+            {   // Exit button is by default only on screen zero (main screen)
+                settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu5.Plugin", "Exit");
+                settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu5.Display", "Exit");
+            }
         }
 
         void cancel_OnClick(OMControl sender, int screen)
@@ -498,11 +488,11 @@ namespace OpenMobile
             // Is settings already in action
             if (currentlySetting != "")
             {
-                Forms.Dialog dialog = new Forms.Dialog(this.pluginName, sender.Parent.Name);
+                dialog dialog = new dialog(this.pluginName, sender.Parent.Name);
                 dialog.Header = "Button assignment";
                 dialog.Text = "Settings is already active on another screen!\nPlease close this first.";
-                dialog.Icon = Forms.Dialog.Icons.Exclamation;
-                dialog.Button = Forms.Dialog.Buttons.OK;
+                dialog.Icon = icons.Exclamation;
+                dialog.Button = buttons.OK;
                 dialog.ShowMsgBox(screen).ToString();
                 return;
             }
@@ -515,14 +505,13 @@ namespace OpenMobile
 
         private void MainMenu_UpdateIcons(int screen)
         {   // Loop trough all button and update icons
-            for (int i = 1; i <= 3; i++)
+            for (int i = 1; i <= 9; i++)
             {
-                for (int i2 = 1; i2 <= 3; i2++)
-                {
-                    OMButton Button = ((OMButton)screens[screen, ""]["MainMenu.MainMenu" + i.ToString() + i2.ToString()]);
-                    OMImage Icon = ((OMImage)screens[screen, ""]["MainMenu.MainMenu" + i.ToString() + i2.ToString() + "_Icon"]);
-                    Icon.Image = new imageItem(helperFunctions.General.GetPluginIcon((string)Button.Tag, eTextFormat.Normal, Color.Gray, Color.Gray));
-                }
+                OMButton Button = ((OMButton)screens[screen, ""]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString()]);
+                OMImage Icon = ((OMImage)screens[screen, ""]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString() + "_Icon"]);
+                if (Button.Tag != null)
+                    if ((string)Button.Tag != "")
+                        Icon.Image = new imageItem(plugin.GetPluginIcon((string)Button.Tag, eTextFormat.Normal, Color.Gray, Color.Gray));
             }
         }
 
@@ -554,7 +543,7 @@ namespace OpenMobile
                 list.Add(item3);
                 if (ActiveItem == item3.text) SelectedIndex = 2; // Is this the selected item
 
-                List<IHighLevel> plugins = helperFunctions.General.getPluginsOfType<IHighLevel>(PluginLevels.Normal);
+                List<IHighLevel> plugins = plugin.getPluginsOfType<IHighLevel>(PluginLevels.Normal);
                 plugins.Sort((a, b) => a.displayName.CompareTo(b.displayName));
                 for (int i = 0; i < plugins.Count; i++)
                 {
@@ -565,7 +554,7 @@ namespace OpenMobile
 
                     OMListItem ListItem = new OMListItem(" " + b.displayName, "  " + (b.pluginDescription != "" ? b.pluginDescription : b.pluginName), subItemformat);
                     ListItem.tag = b.pluginName;
-                    ListItem.image = helperFunctions.General.GetPluginIcon(b, eTextFormat.Normal, Color.Gray, Color.Gray);
+                    ListItem.image = plugin.GetPluginIcon(b, eTextFormat.Normal, Color.Gray, Color.Gray);
                     list.Add(ListItem);
 
                     // Is this the selected item

@@ -64,6 +64,12 @@ namespace OpenMobile.Framework
                         if (panels[0] == null)
                             return null;
                     }
+                    // Try to find first panel with data for requested screen
+                    for (int i = 0; i < panels[0].Length; i++)
+                    {
+                        if (panels[i][screen] != null)
+                            return panels[i][screen];
+                    }
                     return panels[0][screen];
                 }
             }
@@ -144,7 +150,7 @@ namespace OpenMobile.Framework
             }
         }
         /// <summary>
-        /// Loads a panel thats shared between all screens instead of being screen-independent
+        /// Loads a panel that belongs to a specific screen
         /// </summary>
         /// <param name="source"></param>
         /// <param name="screen"></param>

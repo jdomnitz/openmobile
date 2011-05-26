@@ -40,6 +40,7 @@ namespace OpenMobile
         public static List<IBasePlugin> pluginCollection = new List<IBasePlugin>();
         public static bool exitTransition = true;
         public static GameWindowFlags Fullscreen;
+
         private static void loadMainMenu()
         {
             Assembly pluginAssembly = Assembly.Load("UI");

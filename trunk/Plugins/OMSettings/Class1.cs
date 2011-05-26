@@ -255,18 +255,6 @@ namespace OMSettings
             zone.addControl(Label3);
             zone.addControl(Textbox4);
             manager.loadPanel(zone);
-            object o;
-            theHost.getData(eGetData.GetAudioDevices, "", out o);
-            if (o!=null)
-                devices=new List<string>((string[])o);
-            o = new object();
-            theHost.getData(eGetData.GetAvailableKeyboards, "", out o);
-            if (o != null)
-                keyboards = (string[])o;
-            o = new object();
-            theHost.getData(eGetData.GetAvailableMice, "", out o);
-            if (o != null)
-                mice = (string[])o;
             #endregion
             #region personal
             OMPanel personal = new OMPanel("personal");
@@ -374,6 +362,22 @@ namespace OMSettings
             manager.loadPanel(hardware);
             #endregion
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void UpdateDeviceData()
+        {
+            object o;
+            theHost.getData(eGetData.GetAudioDevices, "", out o);
+            if (o != null)
+                devices = new List<string>((string[])o);
+            o = new object();
+            theHost.getData(eGetData.GetAvailableKeyboards, "", out o);
+            if (o != null)
+                keyboards = (string[])o;
+            o = new object();
+            theHost.getData(eGetData.GetAvailableMice, "", out o);
+            if (o != null)
+                mice = (string[])o;
         }
 
         void right3_OnClick(OMControl sender, int screen)
@@ -676,6 +680,10 @@ namespace OMSettings
         {
             if (manager == null)
                 return null;
+            // Initialize panel data
+            if (name == "zone")
+                UpdateDeviceData();
+
             switch (name)
             {
                 case "":

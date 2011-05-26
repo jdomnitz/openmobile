@@ -414,168 +414,6 @@ namespace OpenMobile.helperFunctions
                 return String.Empty;
             return s.Replace("'", "''");
         }
-        /// <summary>
-        /// Returns a List of plugins matching the given type
-        /// </summary>
-        /// <param name="t"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        public static List<string> getPluginsOfType(Type t, IPluginHost host)
-        {
-            object o = new object();
-            host.getData(eGetData.GetPlugins, String.Empty, out o);
-            if (o == null)
-                return null;
-            List<string> ret = new List<string>();
-            foreach (IBasePlugin b in (List<IBasePlugin>)o)
-            {
-                if (t.IsInstanceOfType(b))
-                {
-                    ret.Add(b.pluginName);
-                }
-            }
-            return ret;
-        }
-        /// <summary>
-        /// Returns a List of plugins names matching the given type
-        /// </summary>
-        /// <param name="PluginLevel"></param>
-        /// <returns></returns>
-        public static List<T> getPluginsOfType<T>(PluginLevels PluginLevel)
-        {
-            object o = new object();
-            BuiltInComponents.Host.getData(eGetData.GetPlugins, String.Empty, out o);
-            if (o == null)
-                return null;
-            List<T> ret = new List<T>();
-            PluginLevels Level = PluginLevels.Normal;
-            foreach (IBasePlugin b in (List<IBasePlugin>)o)
-            {
-                if (typeof(T).IsInstanceOfType(b))
-                {
-                    // Check plugin level attribute flags
-                    PluginLevel[] a = (PluginLevel[])b.GetType().GetCustomAttributes(typeof(PluginLevel), false);
-                    Level = PluginLevels.Normal; // Default
-                    if (a.Length > 0)
-                        Level = a[0].TypeOfPlugin;
-                    if ((Level | PluginLevel) == PluginLevel)
-                        ret.Add((T)b);
-                }
-            }
-            return ret;
-        }
-        /// <summary>
-        /// Returns a List of plugins names matching the given type
-        /// </summary>
-        /// <param name="t"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        public static List<string> getPluginsNameOfType(Type t, IPluginHost host,PluginLevels PluginLevel)
-        {
-            object o = new object();
-            host.getData(eGetData.GetPlugins, String.Empty, out o);
-            if (o == null)
-                return null;
-            List<string> ret = new List<string>();
-            PluginLevels Level = PluginLevels.Normal;
-            foreach (IBasePlugin b in (List<IBasePlugin>)o)
-            {
-                if (t.IsInstanceOfType(b))
-                {
-                    // Check plugin level attribute flags
-                    PluginLevel[] a = (PluginLevel[])b.GetType().GetCustomAttributes(typeof(PluginLevel), false);
-                    Level = PluginLevels.Normal; // Default
-                    if (a.Length > 0)
-                        Level = a[0].TypeOfPlugin;
-                    if ((Level | PluginLevel) == PluginLevel)
-                        ret.Add(b.pluginName);
-                }
-            }
-            return ret;
-        }
-
-        /// <summary>
-        /// Returns a List of plugins display names (only normal type plugins)
-        /// </summary>
-        /// <param name="t"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        public static List<string> getPluginsDisplayName()
-        {
-            return getPluginsDisplayName(PluginLevels.Normal);
-        }
-        /// <summary>
-        /// Returns a List of plugins display names matching the given plugin level
-        /// </summary>
-        /// <param name="t"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        public static List<string> getPluginsDisplayName(PluginLevels PluginLevel)
-        {
-            object o = new object();
-            BuiltInComponents.Host.getData(eGetData.GetPlugins, String.Empty, out o);
-            if (o == null)
-                return null;
-            List<string> ret = new List<string>();
-            PluginLevels Level = PluginLevels.Normal;
-            Type t = typeof(IHighLevel);
-            foreach (IBasePlugin b in (List<IBasePlugin>)o)
-            {
-                if (t.IsInstanceOfType(b))
-                {
-                    // Check plugin level attribute flags
-                    PluginLevel[] a = (PluginLevel[])b.GetType().GetCustomAttributes(typeof(PluginLevel), false);
-                    Level = PluginLevels.Normal; // Default
-                    if (a.Length > 0)
-                        Level = a[0].TypeOfPlugin;
-                    if ((Level | PluginLevel) == PluginLevel)
-                        ret.Add(((IHighLevel)b).displayName);
-                }
-            }
-            return ret;
-        }
-
-        public static OImage GetPluginIcon(string PluginName)
-        {
-            return GetPluginIcon(PluginName, eTextFormat.Normal, Color.White, Color.White);
-        }
-        public static OImage GetPluginIcon(string PluginName, eTextFormat SymbolFormat, Color color, Color secondColor)
-        {
-            object o = new object();
-            BuiltInComponents.Host.getData(eGetData.GetPlugins, PluginName, out o);
-            if (o == null)
-                return null;
-            return GetPluginIcon((IBasePlugin)o, SymbolFormat, color, secondColor);
-        }
-        public static OImage GetPluginIcon(IBasePlugin Plugin)
-        {
-            return GetPluginIcon(Plugin, eTextFormat.Normal, Color.White, Color.White);
-        }
-        public static OImage GetPluginIcon(IBasePlugin Plugin, eTextFormat SymbolFormat, Color color, Color secondColor)
-        {
-            string Icon = "";
-            PluginLevel[] c = (PluginLevel[])Plugin.GetType().GetCustomAttributes(typeof(PluginLevel), false);
-            SkinIcon[] a = (SkinIcon[])Plugin.GetType().GetCustomAttributes(typeof(SkinIcon), false);
-            if (a.Length > 0)
-            {   // Icon name is provided    
-                Icon = a[0].SkinImageName;
-
-                // If first character in name is * then this is a request to use a symbol font instead (Webdings)
-                if (Icon.Substring(0, 1) == "*")
-                {   // Use symbol font
-                    Icon = Icon.Substring(1, Icon.Length - 1);
-                    return OImage.FromWebdingsFont(100, 100, Icon, SymbolFormat, Alignment.CenterCenter, color, secondColor);
-                }
-                else
-                {   // Get image from file
-                    return BuiltInComponents.Host.getSkinImage(Icon).image;
-                }
-            }
-            else
-            {   // No icon specified
-                return null;
-            }
-        }
 
         /// <summary>
         /// Convert a string representation of an eFunction into an eFunction
@@ -596,138 +434,341 @@ namespace OpenMobile.helperFunctions
             }
         }
 
-        public static int BitCount(uint x)
+    }
+
+    /// <summary>
+    /// Bit access methods
+    /// </summary>
+    namespace BitAccess
+    {
+        public static class bit
         {
-            int b = 0;
-            if (x > 1)
-                b = 1;
-            while ((x &= (x - 1)) != 0)
-                b++;
-            return b;
+            /// <summary>
+            /// Returns the amount of bit set in a uint
+            /// </summary>
+            /// <param name="x">value to count bits in</param>
+            /// <returns>amount of bit set</returns>
+            public static int Count(uint x)
+            {
+                int b = 0;
+                if (x > 1)
+                    b = 1;
+                while ((x &= (x - 1)) != 0)
+                    b++;
+                return b;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Plugin methods
+    /// </summary>
+    namespace Plugins
+    {
+        static public class plugin
+        {
+            /// <summary>
+            /// Returns a List of plugins matching the given type
+            /// </summary>
+            /// <param name="t"></param>
+            /// <param name="host"></param>
+            /// <returns>List of plugin names</returns>
+            public static List<string> getPluginsOfType(Type t, IPluginHost host)
+            {
+                object o = new object();
+                host.getData(eGetData.GetPlugins, String.Empty, out o);
+                if (o == null)
+                    return null;
+                List<string> ret = new List<string>();
+                foreach (IBasePlugin b in (List<IBasePlugin>)o)
+                {
+                    if (t.IsInstanceOfType(b))
+                    {
+                        ret.Add(b.pluginName);
+                    }
+                }
+                return ret;
+            }
+            /// <summary>
+            /// Returns a List of plugins names matching the given type
+            /// </summary>
+            /// <param name="PluginLevel"></param>
+            /// <returns>List of plugins</returns>
+            public static List<T> getPluginsOfType<T>(PluginLevels PluginLevel)
+            {
+                object o = new object();
+                BuiltInComponents.Host.getData(eGetData.GetPlugins, String.Empty, out o);
+                if (o == null)
+                    return null;
+                List<T> ret = new List<T>();
+                PluginLevels Level = PluginLevels.Normal;
+                foreach (IBasePlugin b in (List<IBasePlugin>)o)
+                {
+                    if (typeof(T).IsInstanceOfType(b))
+                    {
+                        // Check plugin level attribute flags
+                        PluginLevel[] a = (PluginLevel[])b.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                        Level = PluginLevels.Normal; // Default
+                        if (a.Length > 0)
+                            Level = a[0].TypeOfPlugin;
+                        if ((Level | PluginLevel) == PluginLevel)
+                            ret.Add((T)b);
+                    }
+                }
+                return ret;
+            }
+            /// <summary>
+            /// Returns a List of plugins names matching the given type
+            /// </summary>
+            /// <param name="t"></param>
+            /// <param name="host"></param>
+            /// <returns>List of plugin names</returns>
+            public static List<string> getPluginsNameOfType(Type t, IPluginHost host, PluginLevels PluginLevel)
+            {
+                object o = new object();
+                host.getData(eGetData.GetPlugins, String.Empty, out o);
+                if (o == null)
+                    return null;
+                List<string> ret = new List<string>();
+                PluginLevels Level = PluginLevels.Normal;
+                foreach (IBasePlugin b in (List<IBasePlugin>)o)
+                {
+                    if (t.IsInstanceOfType(b))
+                    {
+                        // Check plugin level attribute flags
+                        PluginLevel[] a = (PluginLevel[])b.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                        Level = PluginLevels.Normal; // Default
+                        if (a.Length > 0)
+                            Level = a[0].TypeOfPlugin;
+                        if ((Level | PluginLevel) == PluginLevel)
+                            ret.Add(b.pluginName);
+                    }
+                }
+                return ret;
+            }
+
+            /// <summary>
+            /// Returns a List of plugins display names (only normal type plugins)
+            /// </summary>
+            /// <returns>List of plugin names</returns>
+            public static List<string> getPluginsDisplayName()
+            {
+                return getPluginsDisplayName(PluginLevels.Normal);
+            }
+            /// <summary>
+            /// Returns a List of plugins display names matching the given plugin level
+            /// </summary>
+            /// <param name="PluginLevel">Level/type of plugin to get</param>
+            /// <returns>List of plugin names</returns>
+            public static List<string> getPluginsDisplayName(PluginLevels PluginLevel)
+            {
+                object o = new object();
+                BuiltInComponents.Host.getData(eGetData.GetPlugins, String.Empty, out o);
+                if (o == null)
+                    return null;
+                List<string> ret = new List<string>();
+                PluginLevels Level = PluginLevels.Normal;
+                Type t = typeof(IHighLevel);
+                foreach (IBasePlugin b in (List<IBasePlugin>)o)
+                {
+                    if (t.IsInstanceOfType(b))
+                    {
+                        // Check plugin level attribute flags
+                        PluginLevel[] a = (PluginLevel[])b.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                        Level = PluginLevels.Normal; // Default
+                        if (a.Length > 0)
+                            Level = a[0].TypeOfPlugin;
+                        if ((Level | PluginLevel) == PluginLevel)
+                            ret.Add(((IHighLevel)b).displayName);
+                    }
+                }
+                return ret;
+            }
+
+            /// <summary>
+            /// Get icon for plugin (Either image or generated from font)
+            /// </summary>
+            /// <param name="PluginName">Name of plugin</param>
+            /// <returns>Icon</returns>
+            public static OImage GetPluginIcon(string PluginName)
+            {
+                return GetPluginIcon(PluginName, eTextFormat.Normal, Color.White, Color.White);
+            }
+            /// <summary>
+            /// Get icon for plugin (Either image or generated from font)
+            /// </summary>
+            /// <param name="PluginName">Name of plugin</param>
+            /// <param name="SymbolFormat">String format paramters for autogeneration of icon</param>
+            /// <param name="color">Color to create the icon in</param>
+            /// <param name="secondColor">Color to use for format effects</param>
+            /// <returns>Icon</returns>
+            public static OImage GetPluginIcon(string PluginName, eTextFormat SymbolFormat, Color color, Color secondColor)
+            {
+                object o = new object();
+                BuiltInComponents.Host.getData(eGetData.GetPlugins, PluginName, out o);
+                if (o == null)
+                    return null;
+                return GetPluginIcon((IBasePlugin)o, SymbolFormat, color, secondColor);
+            }
+            /// <summary>
+            /// Get icon for plugin (Either image or generated from font)
+            /// </summary>
+            /// <param name="Plugin">Plugin reference</param>
+            /// <returns>Icon</returns>
+            public static OImage GetPluginIcon(IBasePlugin Plugin)
+            {
+                return GetPluginIcon(Plugin, eTextFormat.Normal, Color.White, Color.White);
+            }
+            /// <summary>
+            /// Get icon for plugin (Either image or generated from font)
+            /// </summary>
+            /// <param name="Plugin">Plugin reference</param>
+            /// <param name="SymbolFormat">String format paramters for autogeneration of icon</param>
+            /// <param name="color">Color to create the icon in</param>
+            /// <param name="secondColor">Color to use for format effects</param>
+            /// <returns>Icon</returns>
+            public static OImage GetPluginIcon(IBasePlugin Plugin, eTextFormat SymbolFormat, Color color, Color secondColor)
+            {
+                string Icon = "";
+                PluginLevel[] c = (PluginLevel[])Plugin.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                SkinIcon[] a = (SkinIcon[])Plugin.GetType().GetCustomAttributes(typeof(SkinIcon), false);
+                if (a.Length > 0)
+                {   // Icon name is provided    
+                    Icon = a[0].SkinImageName;
+
+                    // If first character in name is * then this is a request to use a symbol font instead (Webdings)
+                    if (Icon.Substring(0, 1) == "*")
+                    {   // Use symbol font
+                        Icon = Icon.Substring(1, Icon.Length - 1);
+                        return OImage.FromWebdingsFont(100, 100, Icon, SymbolFormat, Alignment.CenterCenter, color, secondColor);
+                    }
+                    else
+                    {   // Get image from file
+                        OImage i = BuiltInComponents.Host.getSkinImage(Icon).image;
+                        i.Overlay(color);//Color.FromArgb(10,0,0));
+                        return i; //BuiltInComponents.Host.getSkinImage(Icon).image;
+                    }
+                }
+                else
+                {   // No icon specified
+                    return null;
+                }
+            }
         }
     }
 
     /// <summary>
     /// Form handling/generation functions
     /// </summary>
-    public static class Forms
+    namespace Forms
     {
+        /// <summary>
+        /// Dialog buttons and return values
+        /// </summary>
+        [Flags]
+        public enum buttons : byte
+        {
+            /// <summary>
+            /// Button none
+            /// </summary>
+            None = 0,
+            /// <summary>
+            /// Button Abort
+            /// </summary>
+            Abort = 1,
+            /// <summary>
+            /// Button Retry
+            /// </summary>
+            Retry = 2,
+            /// <summary>
+            /// Button Ignore
+            /// </summary>
+            Ignore = 4,
+            /// <summary>
+            /// Button Cancel
+            /// </summary>
+            Cancel = 8,
+            /// <summary>
+            /// Button No
+            /// </summary>
+            No = 16,
+            /// <summary>
+            /// Button Yes
+            /// </summary>
+            Yes = 32,
+            /// <summary>
+            /// Button OK
+            /// </summary>
+            OK = 64
+        }
+
+        /// <summary>
+        /// Icons for built in forms
+        /// </summary>
+        public enum icons
+        {
+            /// <summary>
+            /// No icon
+            /// </summary>
+            None,
+            /// <summary>
+            /// Error icon
+            /// </summary>
+            Error,
+            /// <summary>
+            /// Exclamation icon
+            /// </summary>
+            Exclamation,
+            /// <summary>
+            /// Questionmark
+            /// </summary>
+            Question,
+            /// <summary>
+            /// Checkmark
+            /// </summary>
+            Checkmark,
+            /// <summary>
+            /// Information icon
+            /// </summary>
+            Information,
+            /// <summary>
+            /// Custom icon: Specify icon to use in property CustomIcon
+            /// </summary>
+            Custom,
+            /// <summary>
+            /// Animated icon: Busy / Wait 
+            /// </summary>
+            Busy
+        }
+
         /// <summary>
         /// The equivalent of a dialog with options for message box and so on...
         /// </summary>
-        public class Dialog
+        public class dialog
         {
-            // NB! The definition of this enum must match the definition of Buttons (values are transfered in code)
-            /// <summary>
-            /// Default return values for messagebox
-            /// </summary>
-            public enum DialogResult
-            {
-                /// <summary>
-                /// No button was pressed
-                /// </summary>
-                None,
-                /// <summary>
-                /// OK button was pressed
-                /// </summary>
-                OK,
-                /// <summary>
-                /// Cancel button was pressed
-                /// </summary>
-                Cancel,
-                /// <summary>
-                /// Abort button was pressed
-                /// </summary>
-                Abort,
-                /// <summary>
-                /// Retry button was pressed
-                /// </summary>
-                Retry,
-                /// <summary>
-                /// Ignore button was pressed
-                /// </summary>
-                Ignore,
-                /// <summary>
-                /// Yes button was pressed
-                /// </summary>
-                Yes,
-                /// <summary>
-                /// No button was pressed
-                /// </summary>
-                No
-            }
-
-            // NB! The definition of this enum must match the definition of dialogresults (values are transfered in code)
-            /// <summary>
-            /// Dialog buttons 
-            /// </summary>
-            [Flags]
-            public enum Buttons : byte
-            {
-                /// <summary>
-                /// Button none
-                /// </summary>
-                None = 0,
-                /// <summary>
-                /// Button Abort
-                /// </summary>
-                Abort = 1,
-                /// <summary>
-                /// Button Retry
-                /// </summary>
-                Retry = 2,
-                /// <summary>
-                /// Button Ignore
-                /// </summary>
-                Ignore = 4,
-                /// <summary>
-                /// Button Cancel
-                /// </summary>
-                Cancel = 8,
-                /// <summary>
-                /// Button No
-                /// </summary>
-                No = 16,
-                /// <summary>
-                /// Button Yes
-                /// </summary>
-                Yes = 32,
-                /// <summary>
-                /// Button OK
-                /// </summary>
-                OK = 64
-            }
-
-            public enum Icons
-            {
-                None,
-                Error,
-                Exclamation,
-                Question,
-                Checkmark,
-                Information,
-                Custom
-            }
-
             public class DialogData
             {
+                public string Header { get; set; }
+                public string Text { get; set; }
                 public int Left { get; set; }
                 public int Top { get; set; }
                 public int Height { get; set; }
                 public int Width { get; set; }
-                public Icons Icon { get; set; }
-                public Buttons Button { get; set; }
+                public icons Icon { get; set; }
+                public buttons Button { get; set; }
                 public string CustomIcon { get; set; }
+                public OpenMobile.Framework.ScreenManager Manager { get; set; }
             }
 
             private string DialogHandler = "OMDialog";
             private string OwnerPlugin, OwnerPanel, OwnerScreen;
             private EventWaitHandle ButtonPress = new EventWaitHandle(false, EventResetMode.ManualReset);
-            private DialogResult Result = DialogResult.None;
+            private buttons Result = buttons.None;
             private string PanelName = "";
             private List<string> ActiveDialogs = new List<string>();
             private bool ReOpenDialog = false;
             private bool OpenAtExecute = false;
+            private bool Visible = true;
 
             public string Header { get; set; }
             public string Text { get; set; }
@@ -735,19 +776,16 @@ namespace OpenMobile.helperFunctions
             public int Top { get; set; }
             public int Height { get; set; }
             public int Width { get; set; }
-            public Icons Icon { get; set; }
-            public Buttons Button { get; set; }
+            public icons Icon { get; set; }
+            public buttons Button { get; set; }
             public string CustomIcon { get; set; }
 
             #region Constructors
 
             private void InitData()
             {
-                Left = 250;
-                Top = 175;
-                Width = 500;
-                Height = 250;
-                Icon = Icons.None;
+                // Default dialog data
+                Icon = icons.None;
                 CustomIcon = "";
             }
 
@@ -756,7 +794,7 @@ namespace OpenMobile.helperFunctions
             /// </summary>
             /// <param name="Plugin"></param>
             /// <param name="Panel"></param>
-            public Dialog()
+            public dialog()
             {
                 InitData();
             }
@@ -765,7 +803,7 @@ namespace OpenMobile.helperFunctions
             /// </summary>
             /// <param name="Plugin"></param>
             /// <param name="Panel"></param>
-            public Dialog(string Plugin, string Panel)
+            public dialog(string Plugin, string Panel)
             {
                 OwnerPlugin = Plugin;
                 OwnerPanel = Panel;
@@ -777,7 +815,7 @@ namespace OpenMobile.helperFunctions
             /// <param name="DialogHandler">Name of plugin that should provide the dialog panel</param>
             /// <param name="Plugin"></param>
             /// <param name="Panel"></param>
-            public Dialog(string DialogHandler, string Plugin, string Panel)
+            public dialog(string DialogHandler, string Plugin, string Panel)
             {
                 OwnerPlugin = Plugin;
                 OwnerPanel = Panel;
@@ -786,35 +824,72 @@ namespace OpenMobile.helperFunctions
             #endregion
 
             /// <summary>
+            /// Show a non thread blocking messagebox 
+            /// </summary>
+            /// <param name="screen">Screen number to show on</param>
+            /// <param name="Delay">Delay (MS) before showing dialog (will not show if close is called within timeframe)</param>
+            public void ShowMsgBoxNonBlocking(int screen, int Delay)
+            {
+                Visible = true;
+                Thread t = new Thread(
+                    delegate()
+                    {
+                        Thread.Sleep(Delay);
+                        if (Visible)
+                            ShowMsgBox(screen);
+                    });
+                t.IsBackground = true;
+                t.Start();
+            }
+            /// <summary>
+            /// Show a non thread blocking messagebox 
+            /// </summary>
+            /// <param name="screen"></param>
+            public void ShowMsgBoxNonBlocking(int screen)
+            {
+                Visible = true;
+                Thread t = new Thread(
+                    delegate()
+                    {
+                        ShowMsgBox(screen);
+                    });
+                t.IsBackground = true;
+                t.Start();
+            }
+                /// <summary>
             /// Show a messagebox style dialog
             /// </summary>
-            public DialogResult ShowMsgBox(int screen)
+            public buttons ShowMsgBox(int screen)
             {
+                Visible = true;
+                
                 // Errorcheck
                 if (BuiltInComponents.Host == null)
                     throw new Exception("Core error; BuiltInComponents.Host not initialized");
 
                 OMPanel Panel = new OMPanel();
+
+                // Set panel name
+                PanelName = Panel.Name = this.GetHashCode().ToString();
+                
                 OwnerScreen = screen.ToString();
 
                 // Pack paneldata into tag property
                 DialogData DT = new DialogData();
-                DT.Left = Left; DT.Top = Top; DT.Height = Height; DT.Width = Width; DT.Icon = Icon; DT.CustomIcon = CustomIcon; DT.Button = Button;
+                DT.Left = Left; DT.Top = Top; DT.Height = Height; DT.Width = Width; DT.Icon = Icon; DT.CustomIcon = CustomIcon; DT.Button = Button; DT.Text = Text; DT.Header = Header; ; DT.Manager = BuiltInComponents.Panels;
                 Panel.Tag = DT;
 
                 if (!BuiltInComponents.Host.sendMessage<OMPanel>(DialogHandler, "OpenMobile.helperFunctions.Dialog", "MessageBox", ref Panel))
                 {   // Log this error to the debug log
-                    BuiltInComponents.Host.DebugMsg("Unable to get messagebox panel, plugin " + DialogHandler + " not available");
+                    BuiltInComponents.Host.DebugMsg("Unable to get MessageBox panel, plugin " + DialogHandler + " not available");
                 }
 
                 if (Panel != null)
                 {
-                    // Set panel name
-                    PanelName = Panel.Name = this.GetHashCode().ToString();
                     ButtonPress.Reset();
                     OwnerScreen = screen.ToString();
 
-                    // Add to list off active dialogs
+                    // Add to list of active dialogs
                     ActiveDialogs.Add(OwnerPlugin + "." + OwnerPanel + "." + OwnerScreen + "." + Panel.Name);
                     ReOpenDialog = false;
 
@@ -832,7 +907,7 @@ namespace OpenMobile.helperFunctions
                     */
 
                     OMButton btn = null;
-                    foreach (DialogResult dr in Enum.GetValues(typeof(DialogResult)))
+                    foreach (buttons dr in Enum.GetValues(typeof(buttons)))
                     {
                         btn = (OMButton)Panel["Dialog_Button_" + dr.ToString()];
                         if (btn != null)
@@ -849,12 +924,14 @@ namespace OpenMobile.helperFunctions
                     // Set header text
                     lbl = (OMLabel)Panel["Dialog_Label_Header"];
                     if (lbl != null)
-                        lbl.Text = Header;
+                        if (lbl.Text == "")
+                            lbl.Text = Header;
 
                     // Set dialog text
                     lbl = (OMLabel)Panel["Dialog_Label_Text"];
                     if (lbl != null)
-                        lbl.Text = Text;
+                        if (lbl.Text == "")
+                            lbl.Text = Text;
 
                     #endregion
 
@@ -865,8 +942,8 @@ namespace OpenMobile.helperFunctions
                     // load and show panel
                     BuiltInComponents.Panels.loadPanel(Panel);
                     if (BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), "", Panel.Name) == false)
-                        return DialogResult.None;
-                    BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString());
+                        return buttons.None;
+                    BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.CrossfadeFast.ToString());
 
                     // Wait for buttons
                     ButtonPress.WaitOne();
@@ -874,16 +951,23 @@ namespace OpenMobile.helperFunctions
                     // Remove messagebox and clean up
                     ActiveDialogs.Remove(OwnerPlugin + "." + OwnerPanel + "." + OwnerScreen + "." + Panel.Name);
                     BuiltInComponents.Host.execute(eFunction.TransitionFromPanel, screen.ToString(), "", Panel.Name);
-                    BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString());
+                    BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString(),eGlobalTransition.CrossfadeFast.ToString());
                     BuiltInComponents.Panels.unloadPanel(Panel.Name);
                     BuiltInComponents.Host.OnSystemEvent -= SysEv;
                 }
                 return Result;
             }
 
+            public void Close()
+            {
+                Visible = false;
+                Result = buttons.None;
+                ButtonPress.Set();
+            }
+
             void Button_OnClick(OMControl sender, int screen)
             {
-                Result = (DialogResult)sender.Tag;
+                Result = (buttons)sender.Tag;
                 ButtonPress.Set();
             }
             void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
@@ -927,11 +1011,101 @@ namespace OpenMobile.helperFunctions
                 {
                     if (arg3 == PanelName)
                     {
-                        Result = DialogResult.None;
+                        Result = buttons.None;
                         ButtonPress.Set();
                     }
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Panel helper functions
+    /// </summary>
+    namespace Panels
+    {
+        public class eventMonitor
+        {
+            private SystemEvent se = null;
+            private string _PanelName = "";
+            public string PanelName 
+            {
+                get
+                {
+                    return _PanelName;
+                }
+            }
+            private string _PluginName = "";
+            public string PluginName
+            {
+                get
+                {
+                    return _PluginName;
+                }
+            }
+
+            public delegate void Event(int screen, string name);
+            public event Event EnteringPanel = null;
+            public event Event LeavingPanel = null;
+            private bool PanelHasBeenEntered = false;
+
+            public eventMonitor(string PluginName, string PanelName)
+            {
+                this._PluginName = PluginName;
+                this._PanelName = PanelName;
+                se = new SystemEvent(Host_OnSystemEvent);
+                BuiltInComponents.Host.OnSystemEvent += se;
+            }
+
+            void Host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+            {
+                switch (function)
+                {
+                    case OpenMobile.eFunction.TransitionToPanel:
+                        if ((arg3 == _PanelName) && (arg2 == _PluginName))
+                        {   // Entering this panel
+                            PanelHasBeenEntered = true;
+                            EnteringThisPanel(int.Parse(arg1), _PanelName);
+                        }
+                        break;
+                    case OpenMobile.eFunction.TransitionFromPanel:
+                        if ((arg3 == _PanelName) && (arg2 == _PluginName))
+                        {   // Leaving this panel
+                            PanelHasBeenEntered = false;
+                            LeavingThisPanel(int.Parse(arg1), _PanelName);
+                        }
+                        break;
+                    case eFunction.TransitionFromAny:
+                        {   // Leaving this panel
+                            if (PanelHasBeenEntered)
+                            {
+                                LeavingThisPanel(int.Parse(arg1), _PanelName);
+                                PanelHasBeenEntered = false;
+                            }
+                        }
+                        break;
+                }
+            }
+
+            private void EnteringThisPanel(int screen, string name)
+            {
+                if (EnteringPanel != null)
+                    EnteringPanel(screen, name);
+            }
+
+            private void LeavingThisPanel(int screen, string name)
+            {
+                if (LeavingPanel != null)
+                    LeavingPanel(screen, name);
+            }
+
+            ~eventMonitor()
+            {
+                BuiltInComponents.Host.OnSystemEvent -= se;
+                se = null;
+            }
+
+
         }
     }
 

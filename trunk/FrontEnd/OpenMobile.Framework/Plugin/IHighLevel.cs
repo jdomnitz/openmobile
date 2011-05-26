@@ -136,7 +136,15 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Pluginlevel user input provider
         /// </summary>
-        UserInput=4
+        UserInput=4,
+        /// <summary>
+        /// Pluginlevel UI (UserInterface) plugin
+        /// </summary>
+        UI=8,
+        /// <summary>
+        /// Pluginlevel MainMenu plugin
+        /// </summary>
+        MainMenu=16
     }
     /// <summary>
     /// Defines the plugin level

@@ -874,12 +874,27 @@ namespace OMMediaDB
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             alreadyIndexed = new Queue<string>();
             toBeIndexed = new List<string>();
+            PluginSettings settings = new PluginSettings();
             if (File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2")) == false)
             {
-                using (PluginSettings settings = new PluginSettings())
-                    settings.setSetting("Default.MusicDatabase", "OMMediaDB");
+                settings.setSetting("Default.MusicDatabase", "OMMediaDB");
                 createDB();
             }
+
+            // Should we set default settings?
+            if (settings.getSetting("Music.Path") == "")
+            {   // Yes
+                foreach (DeviceInfo device in DeviceInfo.EnumerateDevices(theHost))
+                    if (device.systemDrive)
+                    {
+                        if (device.MusicFolders.Length > 0)
+                        {   // Save reference to first available source
+                            settings.setSetting("Music.Path", device.MusicFolders[0]);
+                            settings.setSetting("OMMediaDB.FirstRun", "True");
+                        }
+                    }
+            }
+
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -893,10 +908,10 @@ namespace OMMediaDB
                     if (settings.getSetting("Music.AutoIndex") == "True")
                         path = settings.getSetting("Music.Path");
                     settings.setSetting("Default.MusicDatabase", "OMMediaDB");
-                    if (settings.getSetting("OpenMobile.FirstRun") == "True")
+                    if (settings.getSetting("OMMediaDB.FirstRun") == "True")
                     {
                         path = settings.getSetting("Music.Path");
-                        settings.setSetting("OpenMobile.FirstRun", "False");
+                        settings.setSetting("OMMediaDB.FirstRun", "False");
                     }
                 }
                 if ((path != null) && (path.Length > 0))

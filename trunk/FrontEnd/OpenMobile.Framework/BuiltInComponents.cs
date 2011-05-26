@@ -34,13 +34,27 @@ namespace OpenMobile
         /// A screenmanager for panels created and handled by the framework
         /// NB! Panels from the framework is always common for all screens
         /// </summary>
-        public static OpenMobile.Framework.ScreenManager Panels = new OpenMobile.Framework.ScreenManager(1);
+        public static OpenMobile.Framework.ScreenManager Panels = null;
 
+        private static IPluginHost _Host = null;
         /// <summary>
         /// A reference to the pluginhost to use for the framework.
         /// NB! This reference is not valid unless it's initialized from the core at startup
         /// </summary>
-        public static IPluginHost Host = null;
+        public static IPluginHost Host
+        {
+            get 
+            {
+                if (_Host == null)
+                    throw new Exception("Programming error: BuiltInComponents.Host is not initialized from the core at startup");
+                return _Host; 
+            }
+            set
+            {
+                _Host = value;
+                Panels = new OpenMobile.Framework.ScreenManager(_Host.ScreenCount);
+            }
+        }
 
         /// <summary>
         /// The copyright information to be displayed on the about screen

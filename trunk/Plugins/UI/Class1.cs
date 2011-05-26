@@ -29,7 +29,7 @@ using OpenMobile.Data;
 
 namespace OpenMobile
 {
-    [PluginLevel(PluginLevels.System)]
+    [PluginLevel(PluginLevels.UI | PluginLevels.System)]
     public sealed class UI : IHighLevel
     {
         private IPluginHost theHost;

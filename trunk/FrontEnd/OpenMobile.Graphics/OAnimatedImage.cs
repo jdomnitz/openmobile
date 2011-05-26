@@ -21,6 +21,7 @@
 using System;
 using System.Threading;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace OpenMobile.Graphics
 {
@@ -34,12 +35,14 @@ namespace OpenMobile.Graphics
         public delegate void redraw(OAnimatedImage image);
         private event redraw OnRedrawInternal;
         Thread t;
+
         public event redraw OnRedraw
         {
             add
             {
                 OnRedrawInternal += value;
                 t = new Thread(animationLoop);
+                t.IsBackground = true;
                 t.Start();
             }
             remove
@@ -49,37 +52,65 @@ namespace OpenMobile.Graphics
                 OnRedrawInternal -= value;
             }
         }
+
+        private int TimeStamp;
         public OImage getFrame()
         {
-            if (images[currentFrame] == null)
+            return getFrame(currentFrame);
+        }
+        public OImage getFrame(int frame)
+        {
+            TimeStamp = Environment.TickCount;
+            if (images[frame] == null)
             {
-                img.SelectActiveFrame(System.Drawing.Imaging.FrameDimension.Time, currentFrame);
-                images[currentFrame] = new OImage(img);
+                img.SelectActiveFrame(System.Drawing.Imaging.FrameDimension.Time, frame);
+                images[frame] = new OImage(img);
             }
-            return images[currentFrame];
+            return images[frame];
+        }
+
+        public OAnimatedImage(OImage b)
+        {
+            Initialize(b.image);
         }
         public OAnimatedImage(System.Drawing.Bitmap b)
         {
-            img = b;
-            int count = b.GetFrameCount(System.Drawing.Imaging.FrameDimension.Time);
+            Initialize(b);
+        }
+        public void Initialize(System.Drawing.Bitmap b)
+        {
+            img = (System.Drawing.Bitmap)b.Clone();
+            FrameDimension frameDimension = new FrameDimension(img.FrameDimensionsList[0]);
+            int count = img.GetFrameCount(frameDimension);
             if (count == 0)
                 count = 1;
             frameDelay = new int[count];
             images = new OImage[count];
+            int this_delay = 0;
+            int index = 0;
+
             if (count > 1)
             {
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < frameDelay.Length; i++)
                 {
-                    byte[] buffer = b.GetPropertyItem(0x5100).Value;
-                    frameDelay[i] = ((buffer[i * 4] + (0x100 * buffer[(i * 4) + 1])) + (0x10000 * buffer[(i * 4) + 2])) + (0x1000000 * buffer[(i * 4) + 3]);
+                    // Set animation delay
+                    this_delay = BitConverter.ToInt32(img.GetPropertyItem(0x5100).Value, index) * 10;
+                    frameDelay[i] += (this_delay < 100 ? 100 : this_delay);  // Minimum delay is 100 ms
+                    index += 4;
+
+                    // Generate frame images
+                    img.SelectActiveFrame(frameDimension, i);
+                    images[i] = new OImage((System.Drawing.Bitmap)img.Clone());
                 }
             }
         }
+        
         private void animationLoop()
         {
-            while (true)
+            bool Animate = true;
+            while (Animate)
             {
-                frameTimer += 5;
+                frameTimer += 11;
                 if (frameTimer >= frameDelay[currentFrame])
                 {
                     frameTimer = 0;
@@ -87,10 +118,18 @@ namespace OpenMobile.Graphics
                         currentFrame++;
                     else
                         currentFrame = 0;
+
                     if (OnRedrawInternal!=null)
                         OnRedrawInternal(this);
+
+                    // Is this image still being redrawn (shown)?
+                    int Elapsed = Environment.TickCount - TimeStamp;
+                    if (Elapsed > 5000)
+                    {   // No; too long since last redraw, abort thread
+                        Animate = false;
+                    }
                 }
-                Thread.Sleep(50);
+                Thread.Sleep(10);
             }
         }
     }
