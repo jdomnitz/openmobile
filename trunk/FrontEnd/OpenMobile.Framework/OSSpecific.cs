@@ -155,6 +155,8 @@ namespace OpenMobile.Framework
                         return false;
                     if (Windows.windowsEmbedder.SetParent(lastHandle[screen].handle, (IntPtr)theHost.UIHandle(screen)) == IntPtr.Zero)
                         return false;
+                    if (Windows.windowsEmbedder.SetWindowLong(lastHandle[screen].handle, -16, Windows.windowsEmbedder.GetWindowLong(lastHandle[screen].handle, -16) & -12582913) != 0)
+                        return false;
                     Windows.windowsEmbedder.SetFocus(lastHandle[screen].handle);
                     return true;
                 }
