@@ -23,7 +23,7 @@ Imports OpenMobile.Plugin
 Imports OpenMobile.Framework
 Imports System.Runtime.InteropServices
 
-Public Class EmbedApp2
+Public Class EmbedApp1
     Implements IHighLevel
 
     Private WithEvents m_Host As IPluginHost
@@ -35,6 +35,7 @@ Public Class EmbedApp2
     Private m_Delay As Integer = 8
     Private m_WindowName As String
     Private m_Process As Process
+    Private m_Preload As String = "False"
 
     Private m_EmbedAppString As String = "EmbedApp2"
 
@@ -87,6 +88,10 @@ Public Class EmbedApp2
         m_Host = host
         LoadNavSettings()
 
+        If m_Preload.ToLower = "true" Then
+            LoadNavApp()
+        End If
+
         Return eLoadStatus.LoadSuccessful
     End Function
 
@@ -108,6 +113,7 @@ Public Class EmbedApp2
             Range.Add("20")
             m_Settings.Add(New Setting(SettingTypes.Range, m_EmbedAppString & ".Delay", "Delay", "App Start Up Delay (1-20 Seconds)", Nothing, Range, m_Delay))
             m_Settings.Add(New Setting(SettingTypes.Text, m_EmbedAppString & ".DisplayName", "", "Main Menu Text", m_DisplayName))
+            m_Settings.Add(New Setting(SettingTypes.MultiChoice, m_EmbedAppString & ".Preload", "Preload", "Preload App", Setting.BooleanList, Setting.BooleanList, m_Preload))
 
             AddHandler m_Settings.OnSettingChanged, AddressOf Changed
         End If
@@ -121,14 +127,16 @@ Public Class EmbedApp2
             PlugSet.setSetting(St.Name, St.Value)
 
             If St.Name = m_EmbedAppString & ".DisplayName" Then
-                For i As Integer = 1 To 3
-                    For j As Integer = 1 To 3
-                        If PlugSet.getSetting("MainMenu.MainMenu" & i & j & ".Plugin") = m_EmbedAppString Then
-                            PlugSet.setSetting("MainMenu.MainMenu" & i & j & ".Display", St.Value)
+                For i As Integer = 0 To m_Host.ScreenCount
+                    For j As Integer = 1 To 9  'MainMenu.0.MainMenu1.Plugin
+                        If PlugSet.getSetting("MainMenu." & i & ".MainMenu" & j & ".Plugin") = m_EmbedAppString Then
+                            PlugSet.setSetting("MainMenu." & i & ".MainMenu" & j & ".Display", St.Value)
                         End If
                     Next
                 Next
             End If
+
+            LoadNavSettings()
 
         End Using
     End Sub
@@ -141,6 +149,7 @@ Public Class EmbedApp2
             m_Exe = Settings.getSetting(m_EmbedAppString & ".Exe")
             m_Delay = Settings.getSetting(m_EmbedAppString & ".Delay")
             m_DisplayName = Settings.getSetting(m_EmbedAppString & ".DisplayName")
+            m_Preload = Settings.getSetting(m_EmbedAppString & ".Preload")
         End Using
     End Sub
 
@@ -149,6 +158,7 @@ Public Class EmbedApp2
             Settings.setSetting(m_EmbedAppString & ".Exe", "")
             Settings.setSetting(m_EmbedAppString & ".Delay", "8")
             Settings.setSetting(m_EmbedAppString & ".DisplayName", m_EmbedAppString)
+            Settings.setSetting(m_EmbedAppString & ".Preload", m_Preload)
         End Using
     End Sub
 
