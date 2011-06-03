@@ -16,6 +16,7 @@ Public Class ExternalNav
     Private m_Delay As Integer = 8
     Private m_WindowName As String
     Private m_Process As Process
+    Private m_Preload As String = "False"
 
     Private Sub m_Host_OnSystemEvent(ByVal funct As OpenMobile.eFunction, ByVal arg1 As String, ByVal arg2 As String, ByVal arg3 As String) Handles m_Host.OnSystemEvent
         If Not String.IsNullOrEmpty(m_Exe) Then
@@ -82,7 +83,8 @@ Public Class ExternalNav
             Range.Add("1")
             Range.Add("20")
             m_Settings.Add(New Setting(SettingTypes.Range, "ExternalNav.Delay", "Delay", "App Start Up Delay (1-20 Seconds)", Nothing, Range, m_Delay))
-           
+            m_Settings.Add(New Setting(SettingTypes.MultiChoice, "ExternalNav.Preload", "Preload", "Preload App", Setting.BooleanList, Setting.BooleanList, m_Preload))
+
             AddHandler m_Settings.OnSettingChanged, AddressOf Changed
         End If
 
@@ -92,6 +94,7 @@ Public Class ExternalNav
     Private Sub Changed(ByVal screen As Integer, ByVal St As Setting)
         Dim PlugSet As New OpenMobile.Data.PluginSettings
         PlugSet.setSetting(St.Name, St.Value)
+        LoadNavSettings()
     End Sub
 
     Private Sub LoadNavSettings()
@@ -101,6 +104,8 @@ Public Class ExternalNav
             End If
             m_Exe = Settings.getSetting("ExternalNav.Exe")
             m_Delay = Settings.getSetting("ExternalNav.Delay")
+            m_Preload = Settings.getSetting("ExternalNav.Preload")
+
         End Using
     End Sub
 
@@ -108,6 +113,7 @@ Public Class ExternalNav
         Using Settings As New OpenMobile.Data.PluginSettings
             Settings.setSetting("ExternalNav.Exe", "")
             Settings.setSetting("ExternalNav.Delay", "8")
+            Settings.setSetting("ExternalNav.Preload", "false")
         End Using
     End Sub
 
