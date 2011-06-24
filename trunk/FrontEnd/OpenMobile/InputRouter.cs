@@ -227,14 +227,25 @@ namespace OpenMobile
                     }
                     else
                     {
+                        // Try to map requested mice
+                        bool Mapped = false;
                         for (int j = 0; j < driver.Mouse.Count; j++)
                             if (driver.Mouse[j].Description == val)
                             {
                                 deviceMapM[i] = j;
                                 Core.RenderingWindows[i].currentMouse = driver.Mouse[j];
                                 driver.Mouse[j].SetBounds(DisplayDevice.AvailableDisplays[i].Width, DisplayDevice.AvailableDisplays[i].Height);
+                                Mapped = true;
                                 break;
                             }
+
+                        // Was mapping successfull?
+                        if (!Mapped)
+                        {   // No, remap to default mouse
+                            deviceMapM[i] = -1;
+                            Core.RenderingWindows[i].currentMouse = Core.RenderingWindows[i].Mouse;
+                            Core.RenderingWindows[i].defaultMouse = true;
+                        }
                     }
                 }
             }

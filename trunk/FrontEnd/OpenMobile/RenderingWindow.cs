@@ -153,7 +153,7 @@ namespace OpenMobile
         {
             refresh = true;
         }
-        //Code Added by Borte
+
         public new int Width
         {
             set
@@ -187,7 +187,6 @@ namespace OpenMobile
                 return base.Size;
             }
         }
-        // End of code added by Borte
 
         #region ControlManagement
         public void TransitionInPanel(OMPanel newP)
@@ -340,6 +339,7 @@ namespace OpenMobile
             {
                 g.FillRectangle(new Brush(Color.FromArgb(dimmer, Color.Black)), 0, 0, 1000, 600);
             }
+
             SwapBuffers(); //show the new image before potentially lagging
             g.Finish();
         }

@@ -141,12 +141,14 @@ namespace OMDialog
                         Button_Cancel2.Name = "Dialog_Button_None";
                         Panel.addControl(Button_Cancel2);
 
+                        /*
                         OMBasicShape Shape_Shadow = new OMBasicShape(DT.Left + 6, DT.Top + 8, DT.Width, DT.Height);
                         Shape_Shadow.Name = "Dialog_Shape_Shadow";
                         Shape_Shadow.Shape = shapes.RoundedRectangle;
                         Shape_Shadow.FillColor = Color.FromArgb(160,Color.Black);
                         Shape_Shadow.BorderSize = 0;
                         Panel.addControl(Shape_Shadow);
+                        */
 
                         OMBasicShape Shape_Border2 = new OMBasicShape(DT.Left, DT.Top, DT.Width, DT.Height);
                         Shape_Border2.Name = "Dialog_Shape_Border";

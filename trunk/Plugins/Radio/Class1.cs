@@ -31,7 +31,7 @@ using OpenMobile.helperFunctions.Forms;
 
 namespace OMRadio
 {
-    [SkinIcon("Icons|Radio white")] //"*»"
+    [SkinIcon("Icons|Radio Black")] //"*»"
     public class OMRadio : IHighLevel
     {
         private ScreenManager manager;
@@ -722,7 +722,7 @@ namespace OMRadio
                                 d.Close();
                                 d = new dialog(this.pluginName, "");
                                 d.Header = "Load failed";
-                                d.Text = "Loading " + SelectedItemTag + " failed!";
+                                d.Text = "Loading \"" + SelectedItemTag + "\" failed!";
                                 d.Icon = icons.Error;
                                 d.Button = buttons.OK;
                                 d.ShowMsgBox(screen);

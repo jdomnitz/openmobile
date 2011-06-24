@@ -80,6 +80,21 @@ namespace ControlDemo
         btnDialog.OnClick += new userInteraction(btnDialog_OnClick);
         p.addControl(btnDialog);
 
+        OMLabel lblTtest = new OMLabel(300, 200, 200, 50);
+        lblTtest.Name = "Test";
+        lblTtest.Text = "Test";
+        lblTtest.SkinDebug = true;
+        p.addControl(lblTtest);
+
+        OMButton OK = new OMButton(200, 200, 200, 110);
+        OK.Image = theHost.getSkinImage("Full");
+        OK.FocusImage = theHost.getSkinImage("Full.Highlighted");
+        OK.Text = "OK";
+        OK.Name = "OMSettings.OK";
+        OK.Transition = eButtonTransition.None;
+        OK.SkinDebug = true;
+        p.addControl(OK);
+
         OMImage AnimatedImage = new OMImage();
         AnimatedImage.Name = "Ani";
         AnimatedImage.Left = 600;

@@ -310,13 +310,13 @@ namespace OpenMobile.Controls
                 g.DrawImage(image.image, left, top, width, height, alpha, orientation);
             }
 
-            // Debug function added by Borte
-#if (ShowArea)
-                g.FillRectangle(new Brush(Color.FromArgb(75, Color.Yellow)), left,top,width,height);
-#endif
             if (textTexture == null)
                 textTexture = g.GenerateTextTexture(left, top, width, height, text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
             g.DrawImage(textTexture, left, top, width, height, alpha);
+
+            // Skin debug function 
+            if (_SkinDebug)
+                base.DrawSkinDebugInfo(g, Color.Yellow);
         }
     }
 }

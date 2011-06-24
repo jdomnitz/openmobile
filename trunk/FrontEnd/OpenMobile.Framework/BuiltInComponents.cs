@@ -105,13 +105,19 @@ namespace OpenMobile
             Settings gl = new Settings("General Settings");
             Setting graphics = new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", String.Empty, "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
+            Setting SkinColor = new Setting(SettingTypes.Text, "UI.SkinColor", "Foreground", "Skin foreground color (R,G,B)");
+            Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus", "Skin focus color (R,G,B)");
             using (PluginSettings settings = new PluginSettings())
             {
                 graphics.Value = settings.getSetting("UI.MinGraphics");
                 volume.Value = settings.getSetting("UI.VolumeChangesVisible");
+                SkinColor.Value = settings.getSetting("UI.SkinColor");
+                SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
             }
             gl.Add(graphics);
             gl.Add(volume);
+            gl.Add(SkinColor);
+            gl.Add(SkinFocusColor);
             gl.OnSettingChanged += new SettingChanged(SettingsChanged);
             return gl;
         }
@@ -120,6 +126,7 @@ namespace OpenMobile
         {
             using (PluginSettings s = new PluginSettings())
             {
+                s.setSetting(setting.Name, setting.Value);
                 switch (setting.Name)
                 {
                     case "UI.MinGraphics":
@@ -128,12 +135,10 @@ namespace OpenMobile
                         else
                             theHost.GraphicsLevel = eGraphicsLevel.Standard;
                         break;
-                    case "UI.VolumeChangesVisible":
-                        s.setSetting(setting.Name, setting.Value);
-                        theHost.execute(eFunction.settingsChanged, "UI.VolumeChangesVisible");
-                        return;
+                    default:
+                        theHost.execute(eFunction.settingsChanged, setting.Name);
+                        break;
                 }
-                s.setSetting(setting.Name, setting.Value);
             }
         }
         /// <summary>

@@ -212,6 +212,10 @@ namespace OpenMobile.Controls
             if (textTexture == null)
                 textTexture = g.GenerateTextTexture(left, top, width, height, text, font, textFormat, textAlignment, color, outlineColor);
             g.DrawImage(textTexture, left, top, width, height, tmp);
+
+            // Skin debug function 
+            if (_SkinDebug)
+                base.DrawSkinDebugInfo(g, Color.Green);
         }
     }
 }

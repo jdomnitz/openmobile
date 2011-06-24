@@ -29,7 +29,7 @@ using OpenMobile.Plugin;
 
 namespace OMSettings
 {
-    [SkinIcon("*'")]
+    [SkinIcon("Icons|Info-Settings")] //*'")]
     public class Settings : IHighLevel
     {
         ScreenManager manager;

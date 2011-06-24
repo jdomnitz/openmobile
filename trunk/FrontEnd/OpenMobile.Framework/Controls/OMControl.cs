@@ -41,6 +41,10 @@ namespace OpenMobile.Controls
         /// </summary>
         protected eModeType mode;
         /// <summary>
+        /// Skin debug mode (Shows borders or other features)
+        /// </summary>
+        protected bool _SkinDebug = false;
+        /// <summary>
         /// Is the control visible
         /// </summary>
         protected bool visible = true;
@@ -109,6 +113,22 @@ namespace OpenMobile.Controls
         public bool hooked()
         {
             return parent.hooked();
+        }
+        
+        /// <summary>
+        /// Skin debug feature
+        /// </summary>
+        [Browsable(false)]
+        public virtual bool SkinDebug
+        {
+            get
+            {
+                return _SkinDebug;
+            }
+            set
+            {
+                _SkinDebug = value;
+            }
         }
         /// <summary>
         /// The rendering mode of the control
@@ -240,6 +260,21 @@ namespace OpenMobile.Controls
                     catch (TargetInvocationException) { }
             }
             return returnData;
+        }
+
+        /// <summary>
+        /// Draws skin debug info when called from a rendering method
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="c"></param>
+        protected void DrawSkinDebugInfo(Graphics.Graphics g, Color c)
+        {
+            // Cancel if debug request is not active
+            if (!_SkinDebug)
+                return;
+
+            g.DrawRectangle(new Pen(c, 1), left, top, width, height);
+            //g.DrawImage(g.GenerateTextTexture(left, top, width, height, this.GetType().Name.ToString(), new Font(Font.Arial, 12), eTextFormat.Normal, Alignment.TopLeft, c, c), left, top, width, height, 255);
         }
     }
 }

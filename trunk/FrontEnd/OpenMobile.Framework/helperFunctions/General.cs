@@ -644,9 +644,14 @@ namespace OpenMobile.helperFunctions
                     }
                     else
                     {   // Get image from file
-                        OImage i = BuiltInComponents.Host.getSkinImage(Icon).image;
-                        i.Overlay(color);//Color.FromArgb(10,0,0));
-                        return i; //BuiltInComponents.Host.getSkinImage(Icon).image;
+                        imageItem it = BuiltInComponents.Host.getSkinImage(Icon);
+                        if ((it != null) && (it.image != null))
+                        {
+                            OImage i = it.image;
+                            i.Overlay(color);//Color.FromArgb(10,0,0));
+                            return i; //BuiltInComponents.Host.getSkinImage(Icon).image;
+                        }
+                        return null;
                     }
                 }
                 else

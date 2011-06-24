@@ -135,7 +135,7 @@ namespace OMSettings
                             txtchoice.Text = s.Options[index];
                         txtchoice.Font = new Font(Font.GenericSansSerif, 24F);
                         txtchoice.Tag = txtchoice.Name = s.Name;
-                        OMLabel mcTitle = new OMLabel(100, ofset, 270, 50);
+                        OMLabel mcTitle = new OMLabel((ofset > 170 ? 100 : 220), ofset, (ofset > 170 ? 270 : 150), 50);
                         mcTitle.Font = new Font(Font.GenericSansSerif, 32.25F, FontStyle.Bold);
                         mcTitle.Text = s.Header + ((s.Header!=null)?":":"");
                         mcTitle.TextAlignment = Alignment.CenterRight;
@@ -159,12 +159,8 @@ namespace OMSettings
                     }
                     break;
                 case SettingTypes.Text:
-                    OMLabel tdesc;
-                    if (ofset<75)
-                        tdesc= new OMLabel(220, ofset, 200, 50);
-                    else
-                        tdesc= new OMLabel(120, ofset, 300, 50);
-                    tdesc.Text = s.Description+":";
+                    OMLabel tdesc = new OMLabel((ofset > 170 ? 100 : 220), ofset, (ofset > 170 ? 300 : 180), 50);
+                    tdesc.Text = (s.Header == "" ? s.Description + ":" : s.Header + ":");
                     tdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     tdesc.Name = title;
                     tdesc.TextAlignment = Alignment.CenterRight;
@@ -179,6 +175,17 @@ namespace OMSettings
                     text.Tag = s.Name;
                     ret.Add(text);
                     controls[screen].Add(text);
+                    if (s.Header != "")
+                    {
+                        if ((s.Description != null) && (s.Description.Length > 0))
+                        {
+                            OMLabel mcDescription = new OMLabel(text.Left, ofset + 50, text.Width, 30);
+                            mcDescription.Font = new Font(Font.GenericSansSerif, 20);
+                            mcDescription.Text = s.Description;
+                            ret.Add(mcDescription);
+                            ofset += 30;
+                        }
+                    }
                     ofset += 60;
                     break;
                 case SettingTypes.Folder:
@@ -222,7 +229,7 @@ namespace OMSettings
                     ofset += 60;
                     break;
                 case SettingTypes.Password:
-                    OMLabel pdesc = new OMLabel(220, ofset, 200, 50);
+                    OMLabel pdesc = new OMLabel((ofset > 170 ? 100 : 220), ofset, (ofset > 170 ? 300 : 180), 50);
                     pdesc.Text = s.Description + ":";
                     pdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     pdesc.Name = title;

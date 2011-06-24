@@ -41,9 +41,34 @@ namespace OpenMobile
         public static bool exitTransition = true;
         public static GameWindowFlags Fullscreen;
 
+        /// <summary>
+        /// Loads an assembly with error message if it fails.
+        /// Application exits when an error is detected
+        /// </summary>
+        /// <param name="AssemblyName"></param>
+        /// <returns></returns>
+        private static Assembly LoadAssembly(string AssemblyName)
+        {
+            try
+            {
+                return Assembly.Load(AssemblyName);
+            }
+            catch
+            {
+                using (PluginSettings s = new PluginSettings())
+                {
+                    Application.ShowError(null, "OpenMobile was unable to load required skin file:\n\n" + AssemblyName + ".dll\n\nMake sure that required files are located in the correct skin folder.\nSetting active skin back to \"Default\" since loading skin \"" + s.getSetting("UI.Skin") + "\" failed!\n\nApplication will now exit!", "Missing required file!");
+                    // Set skin back to default
+                    s.setSetting("UI.Skin", "Default");
+                }
+                Environment.Exit(0);
+                return null;
+            }
+        }
+
         private static void loadMainMenu()
         {
-            Assembly pluginAssembly = Assembly.Load("UI");
+            Assembly pluginAssembly = LoadAssembly("UI");
             //Modifications by Borte
             IHighLevel availablePlugin = null;
             try
@@ -60,13 +85,13 @@ namespace OpenMobile
             {
                 availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
                 if (availablePlugin == null)
-                    Application.ShowError(RenderingWindows[0].WindowHandle, "No UI Skin available!", "No skin available!");
+                    Application.ShowError(null, "No UI Skin available!", "No skin available!");
             }
             //End Modifications by Borte
             pluginCollection.Add(availablePlugin);
             availablePlugin.initialize(theHost);
 
-            pluginAssembly = Assembly.Load("MainMenu");
+            pluginAssembly = LoadAssembly("MainMenu");
             //Modifications by Borte
             IBasePlugin mmPlugin = null;
             try
@@ -80,7 +105,7 @@ namespace OpenMobile
             {
                 mmPlugin = (IBasePlugin)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.MainMenu"));
                 if (mmPlugin == null)
-                    Application.ShowError(RenderingWindows[0].WindowHandle, "No Main Menu Skin available!", "No skin available!");
+                    Application.ShowError(null, "No Main Menu Skin available!", "No skin available!");
             }
             //End Modifications by Borte
             pluginCollection.Add(mmPlugin);
@@ -341,7 +366,7 @@ namespace OpenMobile
                 }
             }
 
-            // Map host reference to be availabe to framework components
+            // Map host reference to be available to framework components
             BuiltInComponents.Host = theHost;
 
             // Initialize screens
