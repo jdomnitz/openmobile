@@ -232,6 +232,10 @@ namespace OpenMobile.Controls
                     g.DrawImage(textTexture, this.Left, this.Top, this.Width + 5, this.Height, tmp);
                 }
             }
+            // Skin debug function 
+            if (_SkinDebug)
+                base.DrawSkinDebugInfo(g, Color.Purple);
+
         }
     }
 }

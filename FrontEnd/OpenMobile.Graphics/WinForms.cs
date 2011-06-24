@@ -64,7 +64,10 @@ namespace OpenMobile.Graphics
         {
             if (Configuration.RunningOnWindows)
             {
-                MessageBox((IntPtr)window, text, title, 0x10);
+                if (window == null)
+                    MessageBox(IntPtr.Zero, text, title, 0x10);
+                else
+                    MessageBox((IntPtr)window, text, title, 0x10);
             }
             else if (Configuration.RunningOnLinux)
             {

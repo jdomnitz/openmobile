@@ -486,6 +486,8 @@ namespace OpenMobile
         void OnLongClick(OMControl sender, int screen)
         {
             // Is settings already in action
+            // Disable check for already active since we can set it individually on each screen
+            /*
             if (currentlySetting != "")
             {
                 dialog dialog = new dialog(this.pluginName, sender.Parent.Name);
@@ -496,6 +498,7 @@ namespace OpenMobile
                 dialog.ShowMsgBox(screen).ToString();
                 return;
             }
+            */
 
             currentlySetting = sender.Name;
             Settings_ConfigureList(screen);

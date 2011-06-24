@@ -120,13 +120,14 @@ namespace OpenMobile.Graphics
             System.Drawing.Imaging.ImageAttributes iaPicture = new System.Drawing.Imaging.ImageAttributes();
 
             System.Drawing.Imaging.ColorMatrix cmPicture = new System.Drawing.Imaging.ColorMatrix();
+            /*
             // Change the elements
             cmPicture.Matrix00 = -1;
             cmPicture.Matrix11 = -1;
             cmPicture.Matrix22 = -1;
-
             // Set the new color matrix
             iaPicture.SetColorMatrix(cmPicture);
+            */
             // Set the Graphics object from the bitmap
             System.Drawing.Graphics gfxPicture = System.Drawing.Graphics.FromImage(bmpPicture);
             gfxPicture.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
