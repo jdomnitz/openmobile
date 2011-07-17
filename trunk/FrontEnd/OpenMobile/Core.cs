@@ -47,17 +47,17 @@ namespace OpenMobile
         /// </summary>
         /// <param name="AssemblyName"></param>
         /// <returns></returns>
-        private static Assembly LoadAssembly(string AssemblyName)
+        private static Assembly LoadSkinDLL(string DLLName)
         {
             try
             {
-                return Assembly.Load(AssemblyName);
+                return Assembly.Load(DLLName);
             }
             catch
             {
                 using (PluginSettings s = new PluginSettings())
                 {
-                    Application.ShowError(null, "OpenMobile was unable to load required skin file:\n\n" + AssemblyName + ".dll\n\nMake sure that required files are located in the correct skin folder.\nSetting active skin back to \"Default\" since loading skin \"" + s.getSetting("UI.Skin") + "\" failed!\n\nApplication will now exit!", "Missing required file!");
+                    Application.ShowError(null, "OpenMobile was unable to load required skin file:\n\n" + DLLName + ".dll\n\nMake sure that required files are located in the correct skin folder.\nSetting active skin back to \"Default\" since loading skin \"" + s.getSetting("UI.Skin") + "\" failed!\n\nApplication will now exit!", "Missing required file!");
                     // Set skin back to default
                     s.setSetting("UI.Skin", "Default");
                 }
@@ -66,56 +66,84 @@ namespace OpenMobile
             }
         }
 
+        private static void loadDebug()
+        {   // Load debug dll (if available)
+            IBasePlugin Plugin = null;
+            string DebugDll = Path.Combine(theHost.PluginPath, "!OMDebug.dll");
+            if (!File.Exists(DebugDll))
+            {
+                DebugDll = Path.Combine(theHost.PluginPath, "OMDebug.dll");
+                if (!File.Exists(DebugDll))
+                    return;
+            }
+
+            // Load dll
+            try
+            {
+                Plugin = loadAndCheck(DebugDll, true);
+                if (Plugin != null)
+                    Plugin.initialize(theHost);
+            }
+            catch
+            {   // No error handling, dll will be loaded later if this failed
+            }
+        }
+
         private static void loadMainMenu()
         {
-            Assembly pluginAssembly = LoadAssembly("UI");
+            Assembly pluginAssembly = LoadSkinDLL("UI");
             //Modifications by Borte
-            IHighLevel availablePlugin = null;
+            IHighLevel UIPlugin = null;
             try
             {
                 foreach (Type t in pluginAssembly.GetTypes())
                     if (t.IsPublic)
-                        availablePlugin = (IHighLevel)Activator.CreateInstance(t);
+                        UIPlugin = (IHighLevel)Activator.CreateInstance(t);
             }
             catch (Exception)
             {
                 //handled below
             }
-            if (availablePlugin == null)
+            if (UIPlugin == null)
             {
-                availablePlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
-                if (availablePlugin == null)
+                UIPlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
+                if (UIPlugin == null)
                     Application.ShowError(null, "No UI Skin available!", "No skin available!");
             }
             //End Modifications by Borte
-            pluginCollection.Add(availablePlugin);
-            availablePlugin.initialize(theHost);
+            pluginCollection.Add(UIPlugin);
+            //availablePlugin.initialize(theHost);
 
-            pluginAssembly = LoadAssembly("MainMenu");
+            pluginAssembly = LoadSkinDLL("MainMenu");
             //Modifications by Borte
-            IBasePlugin mmPlugin = null;
+            IBasePlugin MainMenuPlugin = null;
             try
             {
                 foreach (Type t in pluginAssembly.GetTypes())
                     if (t.IsPublic)
-                        mmPlugin = (IBasePlugin)Activator.CreateInstance(t);
+                        MainMenuPlugin = (IBasePlugin)Activator.CreateInstance(t);
             }
             catch { }
-            if (mmPlugin == null)
+            if (MainMenuPlugin == null)
             {
-                mmPlugin = (IBasePlugin)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.MainMenu"));
-                if (mmPlugin == null)
+                MainMenuPlugin = (IBasePlugin)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.MainMenu"));
+                if (MainMenuPlugin == null)
                     Application.ShowError(null, "No Main Menu Skin available!", "No skin available!");
             }
             //End Modifications by Borte
-            pluginCollection.Add(mmPlugin);
-            mmPlugin.initialize(theHost);
-            var a = mmPlugin.GetType().GetCustomAttributes(typeof(InitialTransition), false);
+            pluginCollection.Add(MainMenuPlugin);
+            //mmPlugin.initialize(theHost);
+
+            var a = MainMenuPlugin.GetType().GetCustomAttributes(typeof(InitialTransition), false);
             SandboxedThread.Asynchronous(() =>
             {
+                UIPlugin.initialize(theHost);
+                MainMenuPlugin.initialize(theHost);
                 for (int i = 0; i < RenderingWindows.Count; i++)
                 {
-                    RenderingWindows[i].TransitionInPanel(availablePlugin.loadPanel(String.Empty, i));
+                    // Load UI as background
+                    theHost.execute(eFunction.TransitionToPanel, i.ToString(), "UI", "background");
+                    RenderingWindows[i].TransitionInPanel(UIPlugin.loadPanel(String.Empty, i));
                     RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", String.Empty);
                     if (a.Length == 0)
@@ -124,7 +152,7 @@ namespace OpenMobile
                         RenderingWindows[i].ExecuteTransition(((InitialTransition)a[0]).Transition);
                 }
             });
-            object[] b = mmPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
+            object[] b = MainMenuPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
             if (b.Length > 0)
                 exitTransition = ((FinalTransition)b[0]).Transition;
         }
@@ -164,12 +192,30 @@ namespace OpenMobile
                 }
             }
         }
-        private static void loadAndCheck(string file)
+
+        private static bool IsPluginLoaded(IBasePlugin Plugin)
         {
-            if ((Path.GetFileName(file) == "UI.dll") || (Path.GetFileName(file) == "MainMenu.dll"))
-                return;
-            string last = Path.GetFileNameWithoutExtension(file);
-            Assembly pluginAssembly = Assembly.Load(last);
+            IBasePlugin plugin = pluginCollection.Find(a => a.pluginName == Plugin.pluginName);
+            return (plugin != null ? true : false);
+        }
+
+        private static IBasePlugin loadAndCheck(string file)
+        {
+            return loadAndCheck(file, false);
+        }
+        private static IBasePlugin loadAndCheck(string file, bool LoadSpecific)
+        {
+            Assembly pluginAssembly;
+            if (!LoadSpecific)
+            {
+                string last = Path.GetFileNameWithoutExtension(file);
+                pluginAssembly = Assembly.Load(last);
+            }
+            else
+            {
+                pluginAssembly = Assembly.LoadFrom(file);
+            }
+            IBasePlugin availablePlugin = null;
             foreach (Type pluginType in pluginAssembly.GetTypes())
             {
                 if (pluginType.IsPublic) //Only look at public types
@@ -181,7 +227,12 @@ namespace OpenMobile
                         //Make sure the interface we want to use actually exists
                         if (typeInterface != null)
                         {
-                            IBasePlugin availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginType);
+                            availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginType);
+                            
+                            // Did we load this dll before? If so skip it
+                            if (IsPluginLoaded(availablePlugin))
+                                continue;
+
                             if (typeof(INetwork).IsInstanceOfType(availablePlugin))
                                 ((INetwork)availablePlugin).OnWirelessEvent += theHost.raiseWirelessEvent;
                             if (typeof(IBluetooth).IsInstanceOfType(availablePlugin))
@@ -191,6 +242,7 @@ namespace OpenMobile
                     }
                 }
             }
+            return availablePlugin;
         }
 
         static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
@@ -384,6 +436,7 @@ namespace OpenMobile
                     return;
                 }
             }
+            loadDebug();
             Thread rapidMenu = new Thread(Core.initialize);
             rapidMenu.Start();
             if (RenderingWindows.Count == 0)

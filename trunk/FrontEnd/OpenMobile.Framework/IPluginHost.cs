@@ -319,10 +319,34 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         bool DebugMsg(string from, string message);
         /// <summary>
+        /// Sends a message array to the debug log
+        /// </summary>
+        /// <param name="from">The name of the source plugin</param>
+        /// <param name="header">The message header</param>
+        /// <param name="messages">The messages</param>
+        /// <returns></returns>
+        bool DebugMsg(string from, string header, string[] messages);
+        /// <summary>
         /// Sends a message to the debug log (with automatic source detection)
         /// </summary>
         /// <param name="message">The message</param>
         /// <returns></returns>
         bool DebugMsg(string message);
+        /// <summary>
+        /// Sends a message array to the debug log (with automatic source detection)
+        /// </summary>
+        /// <param name="header">The message header</param>
+        /// <param name="message">The messages</param>
+        /// <returns></returns>
+        bool DebugMsg(string header, string[] messages);
+        /// <summary>
+        /// Raises a systemwide event
+        /// </summary>
+        /// <param name="e">event to raise</param>
+        /// <param name="arg1">event specific</param>
+        /// <param name="arg2">event specific</param>
+        /// <param name="arg3">event specific</param>
+        void raiseSystemEvent(eFunction e, string arg1, string arg2, string arg3);
+
     }
 }

@@ -122,7 +122,7 @@ namespace OpenMobile.Platform.Windows
                                 MouseDevice state = new MouseDevice();
                                 state.Instance = mice.Count;
                                 state.DeviceID = new IntPtr(info.Device.Mouse.Id);
-                                state.Description = deviceDesc + " (" + state.DeviceID.ToString() + ":" + state.Instance + ")";
+                                state.Description = deviceDesc + " (" + dev.Device.ToString() + ")";
                                 mice.Add(state);
                                 rawids.Add(new ContextHandle(dev.Device), mice.Count - 1);
                             }

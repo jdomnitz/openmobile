@@ -98,6 +98,10 @@ namespace OpenMobile
                     dev.Move += new EventHandler<MouseMoveEventArgs>(dev_Move);
                 }
             }
+
+            // Raise system event, informing that inputrouter has completed
+            BuiltInComponents.Host.raiseSystemEvent(eFunction.inputRouterInitialized, driver.Keyboard.Count.ToString(), driver.Mouse.Count.ToString(), String.Empty);
+
         }
 
         static internal void dev_Move(object sender, MouseMoveEventArgs e)
@@ -201,12 +205,22 @@ namespace OpenMobile
                         deviceMapK[i] = -1;
                     else
                     {
+                        // Try to map requested keyboard
+                        bool Mapped = false;
                         for (int j = 0; j < driver.Keyboard.Count; j++)
                             if (driver.Keyboard[j].Description == val)
                             {
                                 deviceMapK[i] = j;
+                                Mapped = true;
                                 break;
                             }
+                        // Was mapping successfull?
+                        if (!Mapped)
+                        {   // No, remap to default keyboard
+                            deviceMapK[i] = -1;
+                            // Write debug information to log
+                            BuiltInComponents.Host.DebugMsg("Unable to map requested keyboard (" + val + "), remapping to default keyboard instead");
+                        }
                     }
                 }
             }
@@ -245,6 +259,8 @@ namespace OpenMobile
                             deviceMapM[i] = -1;
                             Core.RenderingWindows[i].currentMouse = Core.RenderingWindows[i].Mouse;
                             Core.RenderingWindows[i].defaultMouse = true;
+                            // Write debug information to log
+                            BuiltInComponents.Host.DebugMsg("Unable to map requested mice (" + val + "), remapping to default mice instead");
                         }
                     }
                 }

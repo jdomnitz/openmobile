@@ -1982,10 +1982,19 @@ namespace OpenMobile
         {
             return sendMessage("OMDebug", from, message);
         }
+        public bool DebugMsg(string from, string header, string[] messages)
+        {
+            return sendMessage<string[]>("OMDebug", from, header, ref messages);
+        }
         public bool DebugMsg(string message)
         {
             MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();
             return DebugMsg(mb.DeclaringType.FullName + "." + mb.Name, message);
+        }
+        public bool DebugMsg(string header, string[] messages)
+        {
+            MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();
+            return DebugMsg(mb.DeclaringType.FullName + "." + mb.Name, header, messages);
         }
 
     }

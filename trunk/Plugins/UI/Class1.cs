@@ -133,8 +133,6 @@ namespace OpenMobile
 
         public OMPanel loadPanel(string name,int screen)
         {
-            if (name == "")
-                theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"UI", "background");
             return manager[screen,name];
         }
 

@@ -149,6 +149,14 @@ namespace OpenMobile.Graphics
             }
             return Empty;
         }
+        public static System.Drawing.Color ToNativeColor(Color c)
+        {
+            return System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
+        }
+        public static Color FromNativeColor(System.Drawing.Color c)
+        {
+            return Color.FromArgb(c.A, c.R, c.G, c.B);
+        }
         public static bool operator ==(Color left, Color right)
         {
             return ((left.A == right.A) && (left.b == right.B) && (left.G == right.G) && (left.R == right.R));
@@ -1586,6 +1594,38 @@ namespace OpenMobile.Graphics
             this.name = Font;
             this.size = size;
             this.style = style;
+        }
+        public static FontStyle FormatToStyle(eTextFormat format)
+        {
+            FontStyle f = FontStyle.Regular;
+            if ((format == eTextFormat.Bold) || (format == eTextFormat.BoldShadow) || (format == eTextFormat.BoldGlow))
+            {
+                f = FontStyle.Bold;
+            }
+            else if ((format == eTextFormat.Italic) || (format == eTextFormat.ItalicShadow))
+            {
+                f = FontStyle.Italic;
+            }
+            else if ((format == eTextFormat.Underline) || (format == eTextFormat.UnderlineShadow))
+            {
+                f = FontStyle.Underline;
+            }
+            return f;
+        }
+        public System.Drawing.Font ToSystemFont()
+        {
+            return new System.Drawing.Font(this.Name, 1F);
+        }
+        public static System.Drawing.StringFormat AlignmentToStringFormat(Alignment alignment)
+        {
+            System.Drawing.StringFormat sFormat = new System.Drawing.StringFormat();
+            sFormat.Alignment = (System.Drawing.StringAlignment)((float)alignment % 10);
+            sFormat.LineAlignment = (System.Drawing.StringAlignment)(int)(((float)alignment % 100) / 10);
+            if (((int)alignment & 100) == 100)
+                sFormat.FormatFlags = System.Drawing.StringFormatFlags.DirectionVertical;
+            if (alignment == Alignment.CenterLeftEllipsis)
+                sFormat.Trimming = System.Drawing.StringTrimming.EllipsisWord;
+            return sFormat;
         }
     }
     public struct Point

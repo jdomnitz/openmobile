@@ -276,5 +276,24 @@ namespace OpenMobile.Controls
             g.DrawRectangle(new Pen(c, 1), left, top, width, height);
             //g.DrawImage(g.GenerateTextTexture(left, top, width, height, this.GetType().Name.ToString(), new Font(Font.Arial, 12), eTextFormat.Normal, Alignment.TopLeft, c, c), left, top, width, height, 255);
         }
+
+        [Obsolete("Always provide a control name. Method will be removed in next release")]
+        public OMControl()
+        {
+        }
+        public OMControl(string Name)
+        {
+            this.Name = Name;
+        }
+        public OMControl(string Name, int Left, int Top, int Width, int Height)
+        {
+            this.Name = Name;
+            this.Left = Left;
+            this.Top = Top;
+            this.Width = Width;
+            this.Height = Height;
+        }
+
+        
     }
 }
