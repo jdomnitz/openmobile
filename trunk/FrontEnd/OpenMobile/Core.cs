@@ -279,7 +279,8 @@ namespace OpenMobile
                 {
                     if (pluginCollection[i] != null)
                     {
-                        theHost.sendMessage("OMDebug", "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
+                        //theHost.sendMessage("OMDebug", "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", "Task Started: " + "Initializing " + pluginCollection[i].pluginName);
                         status[i] = pluginCollection[i].initialize(theHost);
                     }
                 }
@@ -287,7 +288,8 @@ namespace OpenMobile
                 {
                     status[i] = eLoadStatus.LoadFailedUnloadRequested;
                     string ex = spewException(e);
-                    theHost.sendMessage("OMDebug", "Plugin Manager", ex);
+                    //theHost.sendMessage("OMDebug", "Plugin Manager", ex);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception: " + ex);
                     Debug.Print(ex);
                 }
             }
@@ -301,7 +303,8 @@ namespace OpenMobile
                 {
                     status[i] = eLoadStatus.LoadFailedUnloadRequested;
                     string ex = spewException(e);
-                    theHost.sendMessage("OMDebug", "Plugin Manager", ex);
+                    //theHost.sendMessage("OMDebug", "Plugin Manager", ex);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception2: " + ex);
                     Debug.Print(ex);
                 }
             for (int i = 2; i < pluginCollection.Count; i++) //and then two strikes their out...kill anything that still can't initialize
@@ -469,7 +472,8 @@ namespace OpenMobile
                 catch (Exception e)
                 {
                     string ex = spewException(e);
-                    theHost.sendMessage("OMDebug", "Plugin Manager", ex);
+                    //theHost.sendMessage("OMDebug", "Plugin Manager", ex);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception: " + ex);
                     Debug.Print(ex);
                 }
                 pluginCollection.RemoveAt(count);

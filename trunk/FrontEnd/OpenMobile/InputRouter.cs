@@ -198,11 +198,18 @@ namespace OpenMobile
             {
                 if (create)
                     s.createDB();
+                string CurrentMapping = "";
+                string LastMapping = "-1";
                 for (int i = 0; i < deviceMapK.Length; i++)
                 {
-                    string val = s.getSetting("Screen" + (i + 1).ToString() + ".Keyboard");
+                    string screen = "Screen" + (i + 1).ToString();
+                    string val = s.getSetting(screen + ".Keyboard");
                     if ((val == "Default Keyboard") || (val.Length == 0))
+                    {
+                        CurrentMapping = val;
                         deviceMapK[i] = -1;
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, screen + " mapped to keyboard: " + val);
+                    }
                     else
                     {
                         // Try to map requested keyboard
@@ -210,18 +217,28 @@ namespace OpenMobile
                         for (int j = 0; j < driver.Keyboard.Count; j++)
                             if (driver.Keyboard[j].Description == val)
                             {
+                                CurrentMapping = val;
                                 deviceMapK[i] = j;
                                 Mapped = true;
+                                BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, screen + " mapped to keyboard: " + val);
                                 break;
                             }
                         // Was mapping successfull?
                         if (!Mapped)
                         {   // No, remap to default keyboard
+                            CurrentMapping = "Default Keyboard";
                             deviceMapK[i] = -1;
                             // Write debug information to log
-                            BuiltInComponents.Host.DebugMsg("Unable to map requested keyboard (" + val + "), remapping to default keyboard instead");
+                            BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Unable to map requested keyboard (" + val + "), remapping to default keyboard instead");
                         }
                     }
+
+                    // Check if we have multiple mappings to same unit, if so provide a warning
+                    if (CurrentMapping == LastMapping)
+                    {
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "Multiple mappings to same keyboard detected, input from this unit will affect multiple screens at the same time! Mapping should be on a one to one basis!");
+                    }
+                    LastMapping = CurrentMapping;
                 }
             }
         }
@@ -230,14 +247,20 @@ namespace OpenMobile
             deviceMapM = new int[Core.theHost.ScreenCount];
             using (PluginSettings s = new PluginSettings())
             {
+                string CurrentMapping = "";
+                string LastMapping = "-1";
+
                 for (int i = 0; i < deviceMapM.Length; i++)
                 {
-                    string val = s.getSetting("Screen" + (i + 1).ToString() + ".Mouse");
+                    string screen = "Screen" + (i + 1).ToString();
+                    string val = s.getSetting(screen + ".Mouse");
                     if ((val == "Default Mouse") || (val.Length == 0))
                     {
+                        CurrentMapping = val;
                         deviceMapM[i] = -1;
                         Core.RenderingWindows[i].currentMouse = Core.RenderingWindows[i].Mouse;
                         Core.RenderingWindows[i].defaultMouse = true;
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, screen + " mapped to mice: " + val);
                     }
                     else
                     {
@@ -246,23 +269,34 @@ namespace OpenMobile
                         for (int j = 0; j < driver.Mouse.Count; j++)
                             if (driver.Mouse[j].Description == val)
                             {
+                                CurrentMapping = val;
                                 deviceMapM[i] = j;
                                 Core.RenderingWindows[i].currentMouse = driver.Mouse[j];
                                 driver.Mouse[j].SetBounds(DisplayDevice.AvailableDisplays[i].Width, DisplayDevice.AvailableDisplays[i].Height);
                                 Mapped = true;
+                                BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, screen + " mapped to mice: " + val);
                                 break;
                             }
 
                         // Was mapping successfull?
                         if (!Mapped)
                         {   // No, remap to default mouse
+                            CurrentMapping = "Default Mouse";
                             deviceMapM[i] = -1;
                             Core.RenderingWindows[i].currentMouse = Core.RenderingWindows[i].Mouse;
                             Core.RenderingWindows[i].defaultMouse = true;
                             // Write debug information to log
-                            BuiltInComponents.Host.DebugMsg("Unable to map requested mice (" + val + "), remapping to default mice instead");
+                            BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Unable to map requested mice (" + val + "), remapping to default mice instead");
                         }
                     }
+
+                    // Check if we have multiple mappings to same unit, if so provide a warning
+                    if (CurrentMapping == LastMapping)
+                    {
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "Multiple mappings to same mice detected, input from this unit will affect multiple screens at the same time! Mapping should be on a one to one basis!");
+                    }
+                    LastMapping = CurrentMapping;
+
                 }
             }
         }

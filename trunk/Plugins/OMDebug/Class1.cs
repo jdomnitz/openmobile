@@ -44,27 +44,24 @@ namespace OMDebug
             public static DebugMessage Decode(string RawMessage)
             {
                 DebugMessage Msg = new DebugMessage();
-                string Type = RawMessage.Substring(0, RawMessage.IndexOf('|')).ToLower();
-                Msg.Text = RawMessage.Substring(RawMessage.IndexOf('|'));
-                if (Type == "")
-                    Msg.Type = DebugMessageType.Info;
+                if (RawMessage.Contains("|"))
+                {
+                    string Type = RawMessage.Substring(0, RawMessage.IndexOf('|')).ToLower();
+                    Msg.Text = RawMessage.Substring(RawMessage.IndexOf('|')+1).Trim();
+                    if (Type == "")
+                        Msg.Type = DebugMessageType.Unspecified;
+                    else
+                    {
+                        Msg.Type = DebugMessageType.Unspecified;
+                        foreach (DebugMessageType MsgType in Enum.GetValues(typeof(DebugMessageType)))
+                            if (Type == MsgType.ToString().Substring(0, 1).ToLower())
+                                Msg.Type = MsgType;
+                    }
+                }
                 else
                 {
-                    switch (Type)
-                    {
-                        case "e":
-                            Msg.Type = DebugMessageType.Error;
-                            break;
-                        case "w":
-                            Msg.Type = DebugMessageType.Warning;
-                            break;
-                        case "i":
-                            Msg.Type = DebugMessageType.Info;
-                            break;
-                        default:
-                            Msg.Type = DebugMessageType.Info;
-                            break;
-                    }
+                    Msg.Text = RawMessage;
+                    Msg.Type = DebugMessageType.Unspecified;
                 }
                 return Msg;
             }
@@ -75,7 +72,7 @@ namespace OMDebug
             }
         }
 
-        private DebugMessageType OutputFilter = DebugMessageType.Info;
+        private DebugMessageType OutputFilter = DebugMessageType.Unspecified;
         private Settings settings;
 
         public Settings loadSettings()
@@ -104,7 +101,7 @@ namespace OMDebug
             }
             catch
             {
-                OutputFilter = DebugMessageType.Info;
+                OutputFilter = DebugMessageType.Unspecified;
             }
             writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + " : OMDebug.OutputFilter set to " + OutputFilter.ToString());
         }
@@ -192,7 +189,7 @@ namespace OMDebug
                 }
                 catch
                 {
-                    OutputFilter = DebugMessageType.Info;
+                    OutputFilter = DebugMessageType.Unspecified;
                 }
 
             }
