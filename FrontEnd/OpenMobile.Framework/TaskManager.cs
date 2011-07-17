@@ -140,15 +140,19 @@ namespace OpenMobile.Threading
                 try
                 {
                     if (theHost != null)
-                        theHost.sendMessage("OMDebug", "TaskManager", "Task Started: " + current.TaskName);
+                        //theHost.sendMessage("OMDebug", "TaskManager", "Task Started: " + current.TaskName);
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Task Started: " + current.TaskName);
+
                     current.function.Invoke();
                     if (theHost != null)
-                        theHost.sendMessage("OMDebug", "TaskManager", "Task Ended: " + current.TaskName);
+                        //theHost.sendMessage("OMDebug", "TaskManager", "Task Ended: " + current.TaskName);
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Task Ended: " + current.TaskName);
                 }
                 catch
                 {
                     if (theHost != null)
-                        theHost.sendMessage("OMDebug", "TaskManager", "Task Died: " + current.TaskName);
+                        //theHost.sendMessage("OMDebug", "TaskManager", "Task Died: " + current.TaskName);
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Task Ended: " + current.TaskName);
                 }
                 if (Tasks.Count > 0)
                     sync.Set();

@@ -2547,17 +2547,21 @@ namespace OpenMobile
     public enum DebugMessageType : byte
     { 
         /// <summary>
+        /// Message is of type: Unspecified / default
+        /// </summary>
+        Unspecified = 0,
+        /// <summary>
         /// Message is of type: Info
         /// </summary>
-        Info = 0,
+        Info = 10,
         /// <summary>
         /// Message is of type: Warning
         /// </summary>
-        Warning = 1,
+        Warning = 20,
         /// <summary>
         /// Message is of type: Error
         /// </summary>
-        Error = 2 
+        Error = 30
     }
 
 }

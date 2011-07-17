@@ -340,6 +340,21 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         bool DebugMsg(string header, string[] messages);
         /// <summary>
+        /// Sends a message array to the debug log (with automatic source detection)
+        /// </summary>
+        /// <param name="messageType">The message type</param>
+        /// <param name="message">The messages</param>
+        /// <returns></returns>
+        bool DebugMsg(DebugMessageType messageType, string message);
+        /// <summary>
+        /// Sends a message array to the debug log (with automatic source detection)
+        /// </summary>
+        /// <param name="messageType">The message type</param>
+        /// <param name="from">The name of the source plugin</param>
+        /// <param name="message">The message</param>
+        /// <returns></returns>
+        bool DebugMsg(DebugMessageType messageType, string from, string message);
+        /// <summary>
         /// Raises a systemwide event
         /// </summary>
         /// <param name="e">event to raise</param>
