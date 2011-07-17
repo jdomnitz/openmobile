@@ -1141,6 +1141,13 @@ namespace OpenMobile
         /// </summary>
         screenOrientationChanged = 72,
         /// <summary>
+        /// Raised when the inputrouter finished initializing
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Amount of keyboards available</para>
+        /// <para>Arg2: Amount of mice available</para>
+        /// </summary>
+        inputRouterInitialized = 73,
+        /// <summary>
         /// Go back to the previous panel
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
@@ -2533,4 +2540,24 @@ namespace OpenMobile
         /// </summary>
         public eModeType currentMode = eModeType.Normal;
     }
+
+    /// <summary>
+    /// Classification for debug messages
+    /// </summary>
+    public enum DebugMessageType : byte
+    { 
+        /// <summary>
+        /// Message is of type: Info
+        /// </summary>
+        Info = 0,
+        /// <summary>
+        /// Message is of type: Warning
+        /// </summary>
+        Warning = 1,
+        /// <summary>
+        /// Message is of type: Error
+        /// </summary>
+        Error = 2 
+    }
+
 }

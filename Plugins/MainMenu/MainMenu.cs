@@ -275,21 +275,21 @@ namespace OpenMobile
             subItemformat.font = new Font(Font.GenericSansSerif, 15F);            
             panelSettings.addControl(List_FunctionList);
 
-            OMButton Button_Ok = new OMButton(635, 460, 135, 50);
-            Button_Ok.Name = "Settings_Button_Ok";
-            Button_Ok.Image = opt1;
-            Button_Ok.FocusImage = opt2;
-            Button_Ok.Text = "OK";
-            Button_Ok.OnClick += new userInteraction(okButton_OnClick);
-            panelSettings.addControl(Button_Ok);
+            OMButton Settings_Button_Ok = new OMButton(635, 460, 135, 50);
+            Settings_Button_Ok.Name = "Settings_Button_Ok";
+            Settings_Button_Ok.Image = opt1;
+            Settings_Button_Ok.FocusImage = opt2;
+            Settings_Button_Ok.Text = "OK";
+            Settings_Button_Ok.OnClick += new userInteraction(Settings_Button_Ok_OnClick);
+            panelSettings.addControl(Settings_Button_Ok);
 
-            OMButton Button_Cancel = new OMButton(235, 460, 135, 50);
-            Button_Cancel.Name = "Settings_Button_Cancel";
-            Button_Cancel.Image = Button_Ok.Image;
-            Button_Cancel.FocusImage = Button_Ok.FocusImage;
-            Button_Cancel.Text = "Cancel";
-            Button_Cancel.OnClick += new userInteraction(cancel_OnClick);
-            panelSettings.addControl(Button_Cancel);
+            OMButton Settings_Button_Cancel = new OMButton(235, 460, 135, 50);
+            Settings_Button_Cancel.Name = "Settings_Button_Cancel";
+            Settings_Button_Cancel.Image = Settings_Button_Ok.Image;
+            Settings_Button_Cancel.FocusImage = Settings_Button_Ok.FocusImage;
+            Settings_Button_Cancel.Text = "Cancel";
+            Settings_Button_Cancel.OnClick += new userInteraction(Settings_Button_Cancel_OnClick);
+            panelSettings.addControl(Settings_Button_Cancel);
 
             screens.loadPanel(panelSettings);
 
@@ -434,7 +434,7 @@ namespace OpenMobile
         {
             theHost.execute(eFunction.shutdown);
         }
-        void okButton_OnClick(OMControl sender, int screen)
+        void Settings_Button_Ok_OnClick(OMControl sender, int screen)
         {
             OMList theList=(OMList)screens[screen,"Settings"]["Settings_List_FunctionList"];
             if (theList.SelectedIndex >= 0) //FS#3
@@ -474,7 +474,7 @@ namespace OpenMobile
             }
         }
 
-        void cancel_OnClick(OMControl sender, int screen)
+        void Settings_Button_Cancel_OnClick(OMControl sender, int screen)
         {
             currentlySetting = "";
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Settings");

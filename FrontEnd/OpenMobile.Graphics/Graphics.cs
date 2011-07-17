@@ -391,6 +391,10 @@ namespace OpenMobile.Graphics
                 return new Rectangle(ret.X, ret.Y, ret.Width, ret.Height);
             }
         }
+        public System.Drawing.Font GetSystemFont(Font font, eTextFormat format)
+        {
+            return new System.Drawing.Font(font.Name, font.Size / dpi, (System.Drawing.FontStyle)Font.FormatToStyle(format));
+        }
         public void renderText(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)
         {
             System.Drawing.Color color = System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);

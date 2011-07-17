@@ -647,7 +647,7 @@ namespace OpenMobile.helperFunctions
                         imageItem it = BuiltInComponents.Host.getSkinImage(Icon);
                         if ((it != null) && (it.image != null))
                         {
-                            OImage i = it.image;
+                            OImage i = new OImage(it.image.image);
                             i.Overlay(color);//Color.FromArgb(10,0,0));
                             return i; //BuiltInComponents.Host.getSkinImage(Icon).image;
                         }
