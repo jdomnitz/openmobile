@@ -355,6 +355,13 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         bool DebugMsg(DebugMessageType messageType, string from, string message);
         /// <summary>
+        /// Sends a message array to the debug log (with automatic source detection)
+        /// </summary>
+        /// <param name="header">The message header</param>
+        /// <param name="message">The messages</param>
+        /// <returns></returns>
+        bool DebugMsg(DebugMessageType messageType, string header, string[] messages);
+        /// <summary>
         /// Raises a systemwide event
         /// </summary>
         /// <param name="e">event to raise</param>
@@ -362,6 +369,28 @@ namespace OpenMobile.Plugin
         /// <param name="arg2">event specific</param>
         /// <param name="arg3">event specific</param>
         void raiseSystemEvent(eFunction e, string arg1, string arg2, string arg3);
+
+        /// <summary>
+        /// Shows the identity of each screen
+        /// </summary>
+        void ScreenShowIdentity();
+        /// <summary>
+        /// Shows the identity of each screen for the given time
+        /// </summary>
+        void ScreenShowIdentity(int MS);
+        /// <summary>
+        /// Shows or hides the identity of each screen
+        /// </summary>
+        void ScreenShowIdentity(bool Show);
+        /// <summary>
+        /// Shows or hides the identity of a specific screen
+        /// </summary>
+        void ScreenShowIdentity(int Screen, bool Show);
+
+        /// <summary>
+        /// Startup screen of OM (0 is normal screen, any other value means a specific startup screen is requested)
+        /// </summary>
+        int StartupScreen { get; set; }
 
     }
 }

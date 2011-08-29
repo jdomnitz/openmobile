@@ -548,7 +548,7 @@ namespace OpenMobile.Platform.MacOS
 						if (mousePosInClient.X != InputDriver.Mouse[0].X ||
 							mousePosInClient.Y != InputDriver.Mouse[0].Y)
 						{
-							InputDriver.Mouse[0].SetPosition(mousePosInClient.X,mousePosInClient.Y);
+							InputDriver.Mouse[0].SetPosition(mousePosInClient.X,mousePosInClient.Y, true);
 						}
 					}
 					else
@@ -560,7 +560,7 @@ namespace OpenMobile.Platform.MacOS
 						if (mousePosInClient.X != InputDriver.Mouse[0].X ||
 							mousePosInClient.Y != InputDriver.Mouse[0].Y)
 						{
-                            InputDriver.Mouse[0].SetPosition(mousePosInClient.X, mousePosInClient.Y);
+                            InputDriver.Mouse[0].SetPosition(mousePosInClient.X, mousePosInClient.Y,true );
 						}
 					}
 

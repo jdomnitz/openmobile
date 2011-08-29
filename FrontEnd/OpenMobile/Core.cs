@@ -170,7 +170,7 @@ namespace OpenMobile
                 catch (Exception e)
                 {
                     string ex = spewException(e);
-                    theHost.sendMessage("OMDebug", "Plugin Loader", ex);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Loader", "Exception: " + ex);
 #if DEBUG
                     Debug.Print(ex);
 #endif
@@ -185,7 +185,7 @@ namespace OpenMobile
                 catch (Exception e)
                 {
                     string ex = spewException(e);
-                    theHost.sendMessage("OMDebug", "Plugin Loader", ex);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Loader", "Exception: " + ex);
 #if DEBUG
                     Debug.Print(ex);
 #endif
@@ -207,14 +207,10 @@ namespace OpenMobile
         {
             Assembly pluginAssembly;
             if (!LoadSpecific)
-            {
-                string last = Path.GetFileNameWithoutExtension(file);
-                pluginAssembly = Assembly.Load(last);
-            }
+                pluginAssembly = Assembly.Load(Path.GetFileNameWithoutExtension(file));
             else
-            {
                 pluginAssembly = Assembly.LoadFrom(file);
-            }
+
             IBasePlugin availablePlugin = null;
             foreach (Type pluginType in pluginAssembly.GetTypes())
             {
@@ -222,10 +218,8 @@ namespace OpenMobile
                 {
                     if (!pluginType.IsAbstract)  //Only look at non-abstract types
                     {
-                        Type typeInterface = pluginType.GetInterface("OpenMobile.Plugin.IBasePlugin");
-
                         //Make sure the interface we want to use actually exists
-                        if (typeInterface != null)
+                        if (typeof(IBasePlugin).IsAssignableFrom(pluginType))
                         {
                             availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginType);
                             
@@ -279,8 +273,7 @@ namespace OpenMobile
                 {
                     if (pluginCollection[i] != null)
                     {
-                        //theHost.sendMessage("OMDebug", "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
-                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", "Task Started: " + "Initializing " + pluginCollection[i].pluginName);
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
                         status[i] = pluginCollection[i].initialize(theHost);
                     }
                 }
@@ -288,7 +281,6 @@ namespace OpenMobile
                 {
                     status[i] = eLoadStatus.LoadFailedUnloadRequested;
                     string ex = spewException(e);
-                    //theHost.sendMessage("OMDebug", "Plugin Manager", ex);
                     BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception: " + ex);
                     Debug.Print(ex);
                 }
@@ -303,7 +295,6 @@ namespace OpenMobile
                 {
                     status[i] = eLoadStatus.LoadFailedUnloadRequested;
                     string ex = spewException(e);
-                    //theHost.sendMessage("OMDebug", "Plugin Manager", ex);
                     BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception2: " + ex);
                     Debug.Print(ex);
                 }
@@ -363,6 +354,14 @@ namespace OpenMobile
             FileStream fs = File.OpenWrite(Path.Combine(theHost.DataPath, "AppCrash-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Second.ToString() + ".log"));
             fs.Write(System.Text.ASCIIEncoding.ASCII.GetBytes(strEx), 0, strEx.Length);
             fs.Close();
+
+            // Unhide default OS mouse (in case it was hidden at time of crash)
+            try
+            {
+                Core.RenderingWindows[0].DefaultMouse.ShowCursor(Core.RenderingWindows[0].WindowInfo);
+            }
+            catch { }
+
             //ErrorReporting reporting=new ErrorReporting(strEx);
             //reporting.ShowDialog(System.Windows.Forms.Form.FromHandle(RenderingWindows[0].getHandle()));
             if ((DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMinutes > 3) //Prevent Loops
@@ -394,9 +393,14 @@ namespace OpenMobile
         [STAThread]
         private static void Main()
         {
-            // Added by Borte to be able to set amount of screens with startup parameter
+             // Map host reference to be available to framework components
+            BuiltInComponents.Host = theHost;
+
+            #region Process startup arguments
+
             foreach (string arg in Environment.GetCommandLineArgs())
             {
+                // Restrict amount of screens at startup time
                 if (arg.ToLower().StartsWith("-screencount=") == true)
                 {
                     try
@@ -405,41 +409,70 @@ namespace OpenMobile
                     }
                     catch (ArgumentException) { break; }
                 }
+
+                    // Fullscreen mode?
                 else if (arg.ToLower() == "-fullscreen")
                 {
                     Fullscreen = GameWindowFlags.Fullscreen;
                 }
+
                 // Override current skin to use
                 else if (arg.ToLower().StartsWith("-skinpath=") == true)
                 {
                     theHost.SkinPath = arg.Substring(10);
                 }
-                // Specific startup screen is given, restrict amount of possible screens
+
+                // Specific startup screen is given
                 else if (arg.ToLower().StartsWith("-startupscreen=") == true)
                 {
-                    theHost.ScreenCount = 1;
-                }
+                    // Restrict amount of possible screens since we're changing the screensetups
+                    theHost.ScreenCount = 1; 
+
+                    // Save startupscreen to pluginhost's data
+                    if (arg.Length >= 15)
+                    {
+                        try
+                        {
+                            theHost.StartupScreen = int.Parse(arg.Substring(15));
+                        }
+                        catch (ArgumentException) { break; }
+                    }
+               }
             }
 
-            // Map host reference to be available to framework components
-            BuiltInComponents.Host = theHost;
+            #endregion
 
             // Initialize screens
             RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
             for (int i = 0; i < RenderingWindows.Capacity; i++)
                 RenderingWindows.Add(new RenderingWindow(i));
+
+            #region Check for missing database (and create if needed)
+
             if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
             {
+                // Create database
                 using (PluginSettings settings = new PluginSettings())
-                    settings.createDB();
-                if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
                 {
-                    Application.ShowError(IntPtr.Zero, "A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.", "Database Missing!");
-                    Environment.Exit(0);
-                    return;
+                    if (File.Exists(Path.Combine(theHost.DataPath, "OMData")) == false)
+                    {
+                        Application.ShowError(IntPtr.Zero, "A required SQLite database OMData was not found in the application directory.  An attempt to create the database failed!  This database is required for Open Mobile to run.", "Database Missing!");
+                        Environment.Exit(0);
+                        return;
+                    }
                 }
             }
+
+            #endregion
+
             loadDebug();
+
+            // Write startup params to debug log
+            string[] Args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < Args.Length; i++)
+                Args[i] = i.ToString() + " > " + Args[i];
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Startup arguments:", Args);
+
             Thread rapidMenu = new Thread(Core.initialize);
             rapidMenu.Start();
             if (RenderingWindows.Count == 0)
@@ -472,7 +505,6 @@ namespace OpenMobile
                 catch (Exception e)
                 {
                     string ex = spewException(e);
-                    //theHost.sendMessage("OMDebug", "Plugin Manager", ex);
                     BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception: " + ex);
                     Debug.Print(ex);
                 }

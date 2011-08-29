@@ -293,7 +293,6 @@ namespace OpenMobile.Controls
             this.Width = Width;
             this.Height = Height;
         }
-
         
     }
 }

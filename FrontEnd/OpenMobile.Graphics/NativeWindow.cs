@@ -242,7 +242,7 @@ namespace OpenMobile
         {
             get
             {
-                return implementation.InputDriver;
+                return implementation!=null ? implementation.InputDriver : null;
             }
         }
 

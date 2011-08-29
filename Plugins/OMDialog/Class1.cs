@@ -132,6 +132,12 @@ namespace OMDialog
                         if (DT.Width > 800)
                             DT.Width = 800;
 
+                        // Position dialog box horisontally on screen (unless provided as a parameter)
+                        if ((DT.Width > 500) && (DT.Left == 250))
+                        {
+                            DT.Left = (500 - (DT.Width / 2));
+                        }
+
                         OMBasicShape Shape_AccessBlock2 = new OMBasicShape(0, 0, 1000, 600);
                         Shape_AccessBlock2.Name = "Dialog_Shape_AccessBlock";
                         Shape_AccessBlock2.Shape = shapes.Rectangle;
@@ -184,7 +190,6 @@ namespace OMDialog
                         Shape_Background_Lower2.Top = Shape_Background2.Top + Shape_Background2.Height - 13;
                         Shape_Background_Lower2.Width = Shape_Background2.Width;
                         Shape_Background_Lower2.Height = 20;
-
                         Shape_Background_Lower2.Name = "Dialog_Shape_Background_Lower";
                         Shape_Background_Lower2.Shape = shapes.RoundedRectangle;
                         Shape_Background_Lower2.FillColor = Color.Black;
@@ -223,7 +228,13 @@ namespace OMDialog
                                     break;                                    
                                 case icons.Busy:
                                     Image_Icon.Image = theHost.getSkinImage("BusyAnimation");
-                                    break;                                    
+                                    break;
+                                case icons.OM:
+                                    Image_Icon.Image = theHost.getSkinImage("OM");
+                                    break;
+                                case icons.WorkInProgress:
+                                    Image_Icon.Image = theHost.getSkinImage("WorkInProgress");
+                                    break;
                                 default:
                                     break;
                             }
@@ -235,11 +246,11 @@ namespace OMDialog
                         Label_Text.Left = Image_Icon.Left + Image_Icon.Width + 5;
                         Label_Text.Top = Shape_Background2.Top + 5;
                         Label_Text.Width = Shape_Border2.Width - (Label_Text.Left - Shape_Border2.Left) - 10;
-                        Label_Text.Height = 135;
+                        Label_Text.Height = Shape_Background2.Height - 75;//135;
                         Label_Text.Name = "Dialog_Label_Text";
                         Label_Text.Text = "";
                         Label_Text.Font = f;
-                        Label_Text.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap | Alignment.CenterCenter;
+                        Label_Text.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap | Alignment.TopCenter;
                         Panel.addControl(Label_Text);
 
                         #region Assign buttons

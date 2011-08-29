@@ -79,8 +79,8 @@ namespace OpenMobile.Platform.Windows
             Marshal.GetFunctionPointerForDelegate(new WindowProcedure(Functions.DefWindowProc));
 
         // Used for IInputDriver implementation
-        KeyboardDevice keyboard = new KeyboardDevice();
-        MouseDevice mouse = new MouseDevice();
+        KeyboardDevice keyboard = new KeyboardDevice(true);
+        MouseDevice mouse = new MouseDevice(true);
         IList<KeyboardDevice> keyboards = new List<KeyboardDevice>(1);
         IList<MouseDevice> mice = new List<MouseDevice>(1);
         const long ExtendedBit = 1 << 24;           // Used to distinguish left and right control, alt and enter keys.
@@ -116,12 +116,12 @@ namespace OpenMobile.Platform.Windows
 
             exists = true;
             
-            keyboard.Description = "Default Keyboard";
-
-            mouse.Description = "Default Mouse";
-
+            // Default input units (name and description for these units are assigned in Core.InputRouter)
+            keyboard.Description = "OS Default Keyboard";
             keyboards.Add(keyboard);
+            mouse.Description = "OS Default Mouse";
             mice.Add(mouse);
+
             Functions.SetThreadExecutionState(0x80000002);
         }
 
@@ -245,10 +245,14 @@ namespace OpenMobile.Platform.Windows
                 case WindowMessage.GESTURE:
                     return gestureDecoder(handle, message, wParam, lParam);
                 case WindowMessage.MOUSEMOVE:
-                    mouse.SetPosition((int)((uint)lParam.ToInt32() & 0x0000FFFF),
-                        (int)(((uint)lParam.ToInt32() & 0xFFFF0000) >> 16));
+                    // Only send mouse data if it's not disabled
+                    if (mouse.Disabled)
+                        break;
 
-                    if (mouse_outside_window)
+                    mouse.SetPosition((int)((uint)lParam.ToInt32() & 0x0000FFFF),
+                        (int)(((uint)lParam.ToInt32() & 0xFFFF0000) >> 16), true);
+                    
+                            if (mouse_outside_window)
                     {
                         // Once we receive a mouse move event, it means that the mouse has
                         // re-entered the window.
@@ -266,26 +270,50 @@ namespace OpenMobile.Platform.Windows
                     break;
 
                 case WindowMessage.LBUTTONDOWN:
+                    // Only send mouse data if it's not disabled
+                    if (mouse.Disabled)
+                        break;
+                    
                     mouse[MouseButton.Left] = true;
                     break;
 
                 case WindowMessage.MBUTTONDOWN:
+                    // Only send mouse data if it's not disabled
+                    if (mouse.Disabled)
+                        break;
+
                     mouse[MouseButton.Middle] = true;
                     break;
 
                 case WindowMessage.RBUTTONDOWN:
+                    // Only send mouse data if it's not disabled
+                    if (mouse.Disabled)
+                        break;
+
                     mouse[MouseButton.Right] = true;
                     break;
 
                 case WindowMessage.LBUTTONUP:
+                    // Only send mouse data if it's not disabled
+                    if (mouse.Disabled)
+                        break;
+
                     mouse[MouseButton.Left] = false;
                     break;
 
                 case WindowMessage.MBUTTONUP:
+                    // Only send mouse data if it's not disabled
+                    if (mouse.Disabled)
+                        break;
+
                     mouse[MouseButton.Middle] = false;
                     break;
 
                 case WindowMessage.RBUTTONUP:
+                    // Only send mouse data if it's not disabled
+                    if (mouse.Disabled)
+                        break;
+
                     mouse[MouseButton.Right] = false;
                     break;
 
@@ -294,6 +322,10 @@ namespace OpenMobile.Platform.Windows
                 case WindowMessage.KEYUP:
                 case WindowMessage.SYSKEYDOWN:
                 case WindowMessage.SYSKEYUP:
+                    // Only send keyboard data if it's not disabled
+                    if (keyboard.Disabled)
+                        break;
+
                     bool pressed =
                         message == WindowMessage.KEYDOWN ||
                         message == WindowMessage.SYSKEYDOWN;
@@ -561,7 +593,7 @@ namespace OpenMobile.Platform.Windows
                 wc.ClassName = ClassName;
                 wc.Icon = IntPtr.Zero;
                 wc.IconSm = IntPtr.Zero;
-                wc.Cursor = Functions.LoadCursor(32512);
+                wc.Cursor = Functions.LoadCursor(OCR_SYSTEM_CURSORS.OCR_NORMAL);
                 ushort atom = Functions.RegisterClassEx(ref wc);
 
                 if (atom == 0)

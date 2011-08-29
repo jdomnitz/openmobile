@@ -743,7 +743,15 @@ namespace OpenMobile.helperFunctions
             /// <summary>
             /// Animated icon: Busy / Wait 
             /// </summary>
-            Busy
+            Busy,
+            /// <summary>
+            /// OpenMobile logo
+            /// </summary>
+            OM,
+            /// <summary>
+            /// Work in progress logo
+            /// </summary>
+            WorkInProgress
         }
 
         /// <summary>
@@ -1029,6 +1037,10 @@ namespace OpenMobile.helperFunctions
     /// </summary>
     namespace Panels
     {
+        /// <summary>
+        /// Obsolete, Use the direct events panel.Entering, panel.Leaving, panel.Loaded or panel.Unloaded instead!
+        /// </summary>
+        [Obsolete("Obsolete, Use these events instead: panel.Entering, panel.Leaving, panel.Loaded or panel.Unloaded instead!")]
         public class eventMonitor
         {
             private SystemEvent se = null;
@@ -1112,6 +1124,64 @@ namespace OpenMobile.helperFunctions
 
 
         }
+    }
+
+    /// <summary>
+    /// Control helper functions
+    /// </summary>
+    namespace Controls
+    {
+        /// <summary>
+        /// A set of up and down control methods
+        /// </summary>
+        public class UpDown
+        {
+
+            /// <summary>
+            /// Provides up/down functionality for a set of controls consisting of one or more buttons and one textbox.
+            /// <para>The buttons provides up/down controls where the step size is set by assigning a integer value to the button.Tag property</para>
+            /// <para>The textbox is used to provide feedback for selection</para>
+            /// <para>Connect the same event to all buttons and trigg this method from all buttons</para>
+            /// </summary>
+            /// <param name="screen">Current screen</param>
+            /// <param name="upDownButtons">The button that is used for this up/down</param>
+            /// <param name="textBox">The textbox target</param>
+            /// <param name="stringArray">The string array to use for selection</param>
+            static public void UpDownTextBoxControl(int screen, OMButton upDownButtons, OMTextBox textBox, string[] stringArray)
+            {
+                // Errorcheck
+                if (stringArray == null)
+                {
+                    textBox.Text = "";
+                    return;
+                }
+
+                // Find index in array
+                int Index;
+                try
+                {
+                    Index = Array.FindIndex(stringArray, p => p == textBox.Text);
+                }
+                catch
+                {   // No match, return a default of first index to get a valid value
+                    textBox.Text = stringArray[0];
+                    return;
+                }
+
+                // Calculate new index
+                Index += (int)upDownButtons.Tag;
+
+                // Limit check
+                if (Index < stringArray.GetLowerBound(0))
+                    Index = stringArray.GetLowerBound(0);
+                if (Index >= stringArray.GetUpperBound(0))
+                    Index = stringArray.GetUpperBound(0);
+
+                // Save new selection
+                textBox.Text = stringArray[Index];
+            }
+        }
+
     }
 
 }

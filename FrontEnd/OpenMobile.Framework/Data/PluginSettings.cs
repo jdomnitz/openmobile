@@ -32,22 +32,43 @@ namespace OpenMobile.Data
     /// </summary>
     public sealed class PluginSettings : IDisposable
     {
+        /// <summary>
+        /// True = Database tables created
+        /// </summary>
+        public bool DBCreated { get; set; }
+
         SqliteConnection asyncCon;
         /// <summary>
         /// Stores and retrieves settings from the database
         /// </summary>
         public PluginSettings()
         {
+            bool CreateDatabase = false;
+
+            // If DB file is present, then create database inside
+            if (!System.IO.File.Exists(Path.Combine(BuiltInComponents.Host.DataPath, "OMData")))
+                CreateDatabase = true;
+
+            // Connect to SQLite and create DB file
             asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;temp_store=2");
             asyncCon.Open();
+
+            // If DB file is present, then create tables
+            if (CreateDatabase)
+                createDB();
+
         }
         /// <summary>
         /// Called automatically by the UI if a database does not yet exist
         /// </summary>
-        public void createDB()
+        private void createDB()
         {
-            SqliteCommand cmd = new SqliteCommand(OpenMobile.Framework.Data.SQL.OMData, asyncCon);
-            cmd.ExecuteNonQuery();
+            if (!DBCreated)
+            {
+                SqliteCommand cmd = new SqliteCommand(OpenMobile.Framework.Data.SQL.OMData, asyncCon);
+                cmd.ExecuteNonQuery();
+                DBCreated = true;
+            }
         }
         /// <summary>
         /// Gets the setting with the given name

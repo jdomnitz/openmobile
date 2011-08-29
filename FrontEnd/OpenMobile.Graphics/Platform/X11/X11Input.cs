@@ -108,7 +108,7 @@ namespace OpenMobile.Platform.X11
                     break;
 
                 case XEventName.MotionNotify:
-                    mouse.SetPosition(e.MotionEvent.x, e.MotionEvent.y);
+                    mouse.SetPosition(e.MotionEvent.x, e.MotionEvent.y, true);
                     break;
             }
         }

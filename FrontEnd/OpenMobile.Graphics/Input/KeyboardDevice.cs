@@ -30,6 +30,10 @@ namespace OpenMobile.Input
         #region --- Constructors ---
 
         internal KeyboardDevice() { }
+        internal KeyboardDevice(bool VirtualDevice)
+        {
+            this.virtualDevice = VirtualDevice;
+        }
 
         #endregion
 
@@ -79,10 +83,17 @@ namespace OpenMobile.Input
 			}
         }
 
+        /// <summary>
+        /// Returns the screen this unit is assigned to a negative number indicates that this is 
+        /// a os default unit (negative numbers are offset by one, 1 = 0, 2 = 1 and so on)
+        /// </summary>
         public int Instance
         {
-            get { return instance; }
-            internal set { instance = value; }
+            get 
+            {
+                return instance; 
+            }
+            set { instance = value; }
         }
 
         #region KeyDown
@@ -154,6 +165,23 @@ namespace OpenMobile.Input
 		}
         #endregion
 
+        private bool virtualDevice = false;
+        /// <summary>
+        /// True = this is the default virtual os unit, not a actual hardware device
+        /// </summary>
+        internal bool VirtualDevice
+        {
+            get
+            {
+                return virtualDevice;
+            }
+        }
+
+        /// <summary>
+        /// Set this to true when you want to disable (supress) this device from generating events
+        /// </summary>
+        public bool Disabled { get; set; }
+
         #region --- Public Methods ---
 
         /// <summary>Returns the hash code for this KeyboardDevice.</summary>
@@ -162,6 +190,17 @@ namespace OpenMobile.Input
         {
             //return base.GetHashCode();
             return (int)(devID.GetHashCode() ^ description.GetHashCode());
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that describes this instance.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that describes this instance.</returns>
+        public override string ToString()
+        {
+            //return String.Format("ID: {0} ({1}).",
+            //    DeviceID, Description);
+            return Description;
         }
 
         #endregion

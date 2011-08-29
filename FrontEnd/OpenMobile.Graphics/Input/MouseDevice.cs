@@ -52,6 +52,16 @@ namespace OpenMobile.Input
 
         #endregion
 
+        #region --- Constructors ---
+
+        internal MouseDevice() { }
+        internal MouseDevice(bool VirtualDevice)
+        {
+            this.virtualDevice = VirtualDevice;
+        }
+
+        #endregion
+
         #region --- IInputDevice Members ---
 
         #region public string Description
@@ -62,7 +72,7 @@ namespace OpenMobile.Input
         public string Description
         {
             get { return description; }
-            internal set { description = value; }
+            set { description = value; }
         }
 
         #endregion
@@ -107,29 +117,6 @@ namespace OpenMobile.Input
         }
 
         #endregion
-        public int Instance
-        {
-            get { return instance; }
-            set { instance = value; }
-        }
-        public Point Location
-        {
-            get { return new Point(move_args.X,move_args.Y); }
-            set 
-            {
-                move_args.X = value.X;
-                move_args.Y = value.Y;
-                #if WINDOWS
-                if (Configuration.RunningOnWindows)
-                    Platform.Windows.Functions.SetCursorPos(move_args.X, move_args.Y);
-                #endif
-                #if LINUX
-                if(Configuration.RunningOnLinux)
-                    Platform.X11.Functions.XIWarpPointer(Platform.X11.API.DefaultDisplay, 0, IntPtr.Zero, Platform.X11.API.RootWindow, 0, 0, 0, 0, move_args.X, move_args.Y);
-                #endif
-                //TODO - OSX
-            }
-        }
         #region public int Y
 
         /// <summary>
@@ -141,6 +128,37 @@ namespace OpenMobile.Input
         }
 
         #endregion
+
+        /// <summary>
+        /// Returns the screen this unit is assigned to a negative number indicates that this is 
+        /// a os default unit (negative numbers are offset by one, 1 = 0, 2 = 1 and so on)
+        /// </summary>
+        public int Instance
+        {
+            get 
+            {
+                return instance; 
+            }
+            set { instance = value; }
+        }
+        public Point Location
+        {
+            get { return new Point(move_args.X, move_args.Y); }
+            set
+            {
+                move_args.X = value.X;
+                move_args.Y = value.Y;
+#if WINDOWS
+                if (Configuration.RunningOnWindows)
+                    Platform.Windows.Functions.SetCursorPos(move_args.X, move_args.Y);
+#endif
+#if LINUX
+                if (Configuration.RunningOnLinux)
+                    Platform.X11.Functions.XIWarpPointer(Platform.X11.API.DefaultDisplay, 0, IntPtr.Zero, Platform.X11.API.RootWindow, 0, 0, 0, 0, move_args.X, move_args.Y);
+#endif
+                //TODO - OSX
+            }
+        }
 
         #region public bool this[MouseButton b]
 
@@ -157,19 +175,21 @@ namespace OpenMobile.Input
             }
             internal set
             {
-                bool previous_state = button_state[(int)button];
-                if (!value && previous_state)
-                    MouseClick(instance, button_args);
-                button_state[(int)button] = value;
-
-                button_args.X = move_args.X;
-                button_args.Y = move_args.Y;
-                button_args.Button = button;
-                button_args.IsPressed = value;
-                if (value && !previous_state)
-                    ButtonDown(instance, button_args);
-                else if (!value && previous_state)
-                    ButtonUp(instance, button_args);
+                lock (this) // Prevent other threads trigging events before the next is finished
+                {
+                    bool previous_state = button_state[(int)button];
+                    if (!value && previous_state)
+                        MouseClick(instance, button_args);
+                    button_state[(int)button] = value;
+                    button_args.X = move_args.X;
+                    button_args.Y = move_args.Y;
+                    button_args.Button = button;
+                    button_args.IsPressed = value;
+                    if (value && !previous_state)
+                        ButtonDown(instance, button_args);
+                    else if (!value && previous_state)
+                        ButtonUp(instance, button_args);
+                }
             }
         }
 
@@ -194,33 +214,92 @@ namespace OpenMobile.Input
             this.width = width;
             this.height = height;
         }
+
+
+        private bool virtualDevice = false;
+        /// <summary>
+        /// True = this is the default virtual os unit, not a actual hardware device
+        /// </summary>
+        internal bool VirtualDevice
+        {
+            get
+            {
+                return virtualDevice;
+            }
+        }
+
+        /// <summary>
+        /// Set this to true when you want to disable (supress) this device from generating events
+        /// </summary>
+        public bool Disabled{ get; set; }
+
+        OpenMobile.Graphics.Rectangle screenRect;
+        /// <summary>
+        /// Screen dimensions of current device owner
+        /// </summary>
+        internal OpenMobile.Graphics.Rectangle ScreenRect
+        {
+            get
+            {
+                return screenRect;
+            }
+        }
+
+        OpenMobile.Graphics.Rectangle desktopRect;
+        /// <summary>
+        /// Dimensions of os desktop
+        /// </summary>
+        internal OpenMobile.Graphics.Rectangle DesktopRect
+        {
+            get
+            {
+                return desktopRect;
+            }
+        }
+
+        /// <summary>
+        /// Set monitor and desktop environment information for the device (used in calculation of mouse position)
+        /// </summary>
+        /// <param name="ScreenRect"></param>
+        /// <param name="DesktopRect"></param>
+        public void SetDeviceEnvironmentInfo(OpenMobile.Graphics.Rectangle ScreenRect, OpenMobile.Graphics.Rectangle DesktopRect)
+        {
+            this.screenRect = ScreenRect;
+            this.desktopRect = DesktopRect;
+        }
+
         public void ShowCursor(IWindowInfo info)
         {
             #if WINDOWS
             if (Configuration.RunningOnWindows)
+            {
                 Platform.Windows.Functions.ShowCursor(true);
-            #endif
-            #if LINUX
-            #if WINDOWS
-            else 
-            #endif
-            if (Configuration.RunningOnX11)
-            {
-                Platform.X11.X11WindowInfo x11 = (Platform.X11.X11WindowInfo)info;
-                using (new Platform.X11.XLock(x11.Display))
+
+                // Also show windows task bar incase it was disabled
+                Platform.Windows.Functions.Taskbar.Show();
+            }
+#endif
+#if LINUX
+#if WINDOWS
+            else
+#endif
+                if (Configuration.RunningOnX11)
                 {
-                    Platform.X11.Functions.XUndefineCursor(x11.Display, x11.WindowHandle);
+                    Platform.X11.X11WindowInfo x11 = (Platform.X11.X11WindowInfo)info;
+                    using (new Platform.X11.XLock(x11.Display))
+                    {
+                        Platform.X11.Functions.XUndefineCursor(x11.Display, x11.WindowHandle);
+                    }
                 }
-            }
-            #endif
-            #if OSX
-            #if (WINDOWS||LINUX)
-            else 
-            #endif
-            if (Configuration.RunningOnMacOS)
-            {
-                Platform.MacOS.Carbon.CG.CGDisplayShowCursor(IntPtr.Zero);
-            }
+#endif
+#if OSX
+#if (WINDOWS||LINUX)
+                else
+#endif
+                    if (Configuration.RunningOnMacOS)
+                    {
+                        Platform.MacOS.Carbon.CG.CGDisplayShowCursor(IntPtr.Zero);
+                    }
             #endif
         }
         public void TrapCursor()
@@ -247,42 +326,48 @@ namespace OpenMobile.Input
             for (int i = 0; i < button_state.Length; i++)
                 button_state[i] = false;
         }
+
         public void HideCursor(IWindowInfo info)
         {
-            #if WINDOWS
+#if WINDOWS
             if (Configuration.RunningOnWindows)
+            {
                 Platform.Windows.Functions.ShowCursor(false);
-            #endif
-            #if LINUX
-            #if WINDOWS
-            else 
-            #endif
-                if (Configuration.RunningOnX11)
-            {
-                Platform.X11.X11WindowInfo window = (Platform.X11.X11WindowInfo)info;
-                using (new Platform.X11.XLock(window.Display))
-                {
-                    Platform.X11.XColor black, dummy;
-                    IntPtr cmap = Platform.X11.Functions.XDefaultColormap(window.Display, window.Screen);
-                    Platform.X11.Functions.XAllocNamedColor(window.Display, cmap, "black", out black, out dummy);
-                    IntPtr bmp_empty = Platform.X11.Functions.XCreateBitmapFromData(window.Display,
-                        window.WindowHandle, new byte[,] { { 0 } });
-                    IntPtr cursor_empty = Platform.X11.Functions.XCreatePixmapCursor(window.Display,
-                    bmp_empty, bmp_empty, ref black, ref black, 0, 0);
 
-                    Platform.X11.Functions.XDefineCursor(window.Display, window.WindowHandle, cursor_empty);
-                    Platform.X11.Functions.XFreeCursor(window.Display, cursor_empty);
+                // Also disable windows task bar as this interfears with the mouse handling when OM is in fullscreen
+                Platform.Windows.Functions.Taskbar.Hide();
+            }
+#endif
+#if LINUX
+#if WINDOWS
+            else
+#endif
+                if (Configuration.RunningOnX11)
+                {
+                    Platform.X11.X11WindowInfo window = (Platform.X11.X11WindowInfo)info;
+                    using (new Platform.X11.XLock(window.Display))
+                    {
+                        Platform.X11.XColor black, dummy;
+                        IntPtr cmap = Platform.X11.Functions.XDefaultColormap(window.Display, window.Screen);
+                        Platform.X11.Functions.XAllocNamedColor(window.Display, cmap, "black", out black, out dummy);
+                        IntPtr bmp_empty = Platform.X11.Functions.XCreateBitmapFromData(window.Display,
+                            window.WindowHandle, new byte[,] { { 0 } });
+                        IntPtr cursor_empty = Platform.X11.Functions.XCreatePixmapCursor(window.Display,
+                        bmp_empty, bmp_empty, ref black, ref black, 0, 0);
+
+                        Platform.X11.Functions.XDefineCursor(window.Display, window.WindowHandle, cursor_empty);
+                        Platform.X11.Functions.XFreeCursor(window.Display, cursor_empty);
+                    }
                 }
-            }
-            #endif
-            #if OSX
-            #if (WINDOWS||LINUX)
-            else 
-            #endif
-            if (Configuration.RunningOnMacOS)
-            {
-                Platform.MacOS.Carbon.CG.CGDisplayHideCursor(IntPtr.Zero);
-            }
+#endif
+#if OSX
+#if (WINDOWS||LINUX)
+                else
+#endif
+                    if (Configuration.RunningOnMacOS)
+                    {
+                        Platform.MacOS.Carbon.CG.CGDisplayHideCursor(IntPtr.Zero);
+                    }
             #endif
         }
         #endregion
@@ -291,27 +376,54 @@ namespace OpenMobile.Input
 
         #region internal Point Position
 
-        internal void SetPosition(int x, int y)
+        internal void SetPosition(int x, int y, bool RaiseEvent)
         {
-            if (x < 0)
-                x = 0;
-            if (y < 0)
-                y = 0;
-            if (x > width)
-                x = width;
-            if (y > height)
-                y = height;
-            move_args.X = x;
-            move_args.Y = y;
-            move_args.XDelta = x - last_pos.X;
-            move_args.YDelta = y - last_pos.Y;
-            if (button_state[0])
-                move_args.Buttons = MouseButton.Left;
-            else
-                move_args.Buttons = MouseButton.None;
-            Move(instance, move_args);
-            last_pos.X = move_args.X;
-            last_pos.Y = move_args.Y;
+            lock (this) // Prevent other threads trigging events before the next is finished
+            {
+                if (x < 0)
+                    x = 0;
+                if (y < 0)
+                    y = 0;
+                if (x > width)
+                    x = width;
+                if (y > height)
+                    y = height;
+                move_args.X = x;
+                move_args.Y = y;
+                move_args.XDelta = x - last_pos.X;
+                move_args.YDelta = y - last_pos.Y;
+                if (RaiseEvent)
+                {
+                    // Only raise event if mouse was actually moved
+                    if ((move_args.XDelta != 0) || (move_args.YDelta != 0))
+                    {
+                        if (button_state[0])
+                            move_args.Buttons = MouseButton.Left;
+                        else
+                            move_args.Buttons = MouseButton.None;
+                        // Debug info
+                        //Console.WriteLine(string.Format("MouseDevice({0}).SetPosition: {1}:{2}", this.ToString(), move_args.X, move_args.Y));
+                        Move(instance, move_args);
+                    }
+                }
+                last_pos.X = move_args.X;
+                last_pos.Y = move_args.Y;
+            }
+        }
+
+        internal void RaiseMoveEvent()
+        {
+            // Only raise event if mouse was actually moved
+            if ((move_args.XDelta != 0) || (move_args.YDelta != 0))
+            {
+                if (button_state[0])
+                    move_args.Buttons = MouseButton.Left;
+                else
+                    move_args.Buttons = MouseButton.None;
+                // Debug info
+                //Console.WriteLine(string.Format("MouseDevice({0}).RaiseMoveEvent: {1}:{2}", this.ToString(), move_args.X, move_args.Y));
+                Move(instance, move_args);
+            }
         }
 
         #endregion
@@ -357,8 +469,9 @@ namespace OpenMobile.Input
         /// <returns>A <see cref="System.String"/> that describes this instance.</returns>
         public override string ToString()
         {
-            return String.Format("ID: {0} ({1}).",
-                DeviceID, Description);
+            //return String.Format("ID: {0} ({1}).",
+            //    DeviceID, Description);
+            return Description;
         }
 
         #endregion

@@ -200,7 +200,7 @@ namespace OpenMobile
                 catch (Exception e)
                 {
                     string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
-                    Core.theHost.sendMessage("OMDebug", e.Source, message);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, e.Source, message);
                 }
                 if (devs.Length > 0)
                 {
@@ -699,6 +699,10 @@ namespace OpenMobile
                 currentItem[screen] = new historyItem();
             }
         }
+
+        /// <summary>
+        /// Amount of screens available to OM
+        /// </summary>
         public int ScreenCount
         {
             get
@@ -710,6 +714,11 @@ namespace OpenMobile
                 screenCount = value;
             }
         }
+        
+        /// <summary>
+        /// Startup screen of OM (0 is normal screen, any other value means a specific startup screen is requested)
+        /// </summary>
+        public int StartupScreen { get; set; }
 
         public int InstanceCount
         {
@@ -1759,6 +1768,8 @@ namespace OpenMobile
                     data = cInf;
                     return;
                 case eGetData.GetAudioDevices:
+                    if (devices == null)
+                        refreshDevices();
                     data = devices;
                     return;
                 case eGetData.GetAvailableSkins:
@@ -1794,6 +1805,24 @@ namespace OpenMobile
                     return;
                 case eGetData.GetAvailableMice:
                     data = InputRouter.Mice;
+                    return;
+                case eGetData.GetMappedKeyboards:
+                    data = InputRouter.KeyboardsMapped;
+                    return;
+                case eGetData.GetUnMappedKeyboards:
+                    data = InputRouter.KeyboardsUnMapped;
+                    return;
+                case eGetData.GetMappedMice:
+                    data = InputRouter.MiceMapped;
+                    return;
+                case eGetData.GetUnMappedMice:
+                    data = InputRouter.MiceUnMapped;
+                    return;
+                case eGetData.GetMouseDetectedUnit:
+                    data = InputRouter.DetectMouseDevice();
+                    return;
+                case eGetData.GetKeyboardDetectedUnit:
+                    data = InputRouter.DetectKeyboardDevice();
                     return;
             }
         }
@@ -1958,6 +1987,30 @@ namespace OpenMobile
                         }
                     }
                     return;
+                case eGetData.GetMiceUnitsForScreen:
+                    {
+                        if (int.TryParse(param, out ret) == true)
+                            data = InputRouter.GetMiceDeviceListForScreen(ret);
+                    }
+                    return;
+                case eGetData.GetKeyboardUnitsForScreen:
+                    {
+                        if (int.TryParse(param, out ret) == true)
+                            data = InputRouter.GetKeyboardsDeviceListForScreen(ret);
+                    }
+                    return;
+                case eGetData.GetKeyboardCurrentUnitForScreen:
+                    {
+                        if (int.TryParse(param, out ret) == true)
+                            data = InputRouter.GetKeyboardsCurrentDeviceForScreen(ret);
+                    }
+                    return;
+                case eGetData.GetMiceCurrentUnitForScreen:
+                    {
+                        if (int.TryParse(param, out ret) == true)
+                            data = InputRouter.GetMiceDeviceCurrentForScreen(ret);
+                    }
+                    return;
             }
 
         }
@@ -1977,6 +2030,8 @@ namespace OpenMobile
                     return g.getValue(PID);
             return null;
         }
+
+        #region DebugMsg
 
         public bool DebugMsg(string from, string message)
         {
@@ -2004,6 +2059,50 @@ namespace OpenMobile
         {
             MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();
             return DebugMsg(mb.DeclaringType.FullName + "." + mb.Name, header, messages);
+        }
+        public bool DebugMsg(DebugMessageType messageType, string header, string[] messages)
+        {
+            MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();
+            return DebugMsg(mb.DeclaringType.FullName + "." + mb.Name, messageType.ToString().Substring(0, 1) + "|" + header, messages);
+        }
+
+        #endregion
+
+        #region ScreenShowIdentity
+
+        public void ScreenShowIdentity()
+        {
+            for (int i = 0; i < screenCount; i++)
+                Core.RenderingWindows[i].PaintIdentity();
+        }
+        public void ScreenShowIdentity(int MS)
+        {
+            for (int i = 0; i < screenCount; i++)
+                Core.RenderingWindows[i].PaintIdentity(true);
+            Thread.Sleep(MS);
+            for (int i = 0; i < screenCount; i++)
+                Core.RenderingWindows[i].PaintIdentity(false);
+        }
+        public void ScreenShowIdentity(bool Show)
+        {
+            for (int i = 0; i < screenCount; i++)
+                Core.RenderingWindows[i].PaintIdentity(Show);
+        }
+        public void ScreenShowIdentity(int Screen, bool Show)
+        {
+            Core.RenderingWindows[Screen].PaintIdentity(Show);
+        }
+
+        #endregion
+
+        public void SetWindowState(int Screen, WindowState windowState)
+        {
+            Core.RenderingWindows[Screen].WindowState = windowState;
+        }
+        public void SetAllWindowState(WindowState windowState)
+        {
+            for (int i = 0; i < screenCount; i++)
+                Core.RenderingWindows[i].WindowState = windowState;
         }
 
     }

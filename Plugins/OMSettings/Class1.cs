@@ -75,64 +75,72 @@ namespace OMSettings
             Button1.Name = "Button1";
             Button1.Font = fnt;
             Button1.Text = "1";
+            Button1.Tag = 1;
             Button1.Format = eTextFormat.Outline;
-            Button1.OnClick+=new userInteraction(Button_OnClick);
+            Button1.OnClick+=new userInteraction(MultiZone_Button_OnClick);
             OMButton Button2 = new OMButton(280, 132, 200, 200);
             Button2.Image = opt1;
             Button2.FocusImage = opt4;
             Button2.Name = "Button2";
             Button2.Font = fnt;
             Button2.Text = "2";
+            Button2.Tag = 2;
             Button2.Format = eTextFormat.Outline;
-            Button2.OnClick += new userInteraction(Button_OnClick);
+            Button2.OnClick += new userInteraction(MultiZone_Button_OnClick);
             OMButton Button3 = new OMButton(517, 132, 200, 200);
             Button3.Image = opt1;
             Button3.FocusImage = opt4;
             Button3.Name = "Button3";
             Button3.Font = fnt;
             Button3.Text = "3";
+            Button3.Tag = 3;
             Button3.Format = eTextFormat.Outline;
-            Button3.OnClick += new userInteraction(Button_OnClick);
+            Button3.OnClick += new userInteraction(MultiZone_Button_OnClick);
             OMButton Button4 = new OMButton(764, 132, 200, 200);
             Button4.Image = opt1;
             Button4.FocusImage = opt4;
             Button4.Name = "Button4";
             Button4.Font = fnt;
             Button4.Text = "4";
+            Button4.Tag = 4;
             Button4.Format = eTextFormat.Outline;
-            Button4.OnClick += new userInteraction(Button_OnClick);
+            Button4.OnClick += new userInteraction(MultiZone_Button_OnClick);
             OMButton Button5 = new OMButton(47, 335, 200, 200);
             Button5.Image = opt1;
             Button5.FocusImage = opt4;
             Button5.Name = "Button5";
             Button5.Font = fnt;
             Button5.Text = "5";
+            Button5.Tag = 5;
             Button5.Format = eTextFormat.Outline;
-            Button5.OnClick += new userInteraction(Button_OnClick);
+            Button5.OnClick += new userInteraction(MultiZone_Button_OnClick);
             OMButton Button6 = new OMButton(280, 335, 200, 200);
             Button6.Image = opt1;
             Button6.FocusImage = opt4;
             Button6.Name = "Button6";
             Button6.Font = fnt;
             Button6.Text = "6";
+            Button6.Tag = 6;
             Button6.Format = eTextFormat.Outline;
-            Button6.OnClick += new userInteraction(Button_OnClick);
+            Button6.OnClick += new userInteraction(MultiZone_Button_OnClick);
             OMButton Button7 = new OMButton(517, 335, 200, 200);
             Button7.Image = opt1;
             Button7.FocusImage = opt4;
             Button7.Name = "Button7";
             Button7.Font = fnt;
             Button7.Text = "7";
+            Button7.Tag = 7;
             Button7.Format = eTextFormat.Outline;
-            Button7.OnClick += new userInteraction(Button_OnClick);
+            Button7.OnClick += new userInteraction(MultiZone_Button_OnClick);
             OMButton Button8 = new OMButton(764, 335, 200, 200);
             Button8.Image = opt1;
             Button8.FocusImage = opt4;
             Button8.Name = "Button8";
             Button8.Font = fnt;
             Button8.Text = "8";
+            Button8.Tag = 8;
             Button8.Format = eTextFormat.Outline;
-            Button8.OnClick += new userInteraction(Button_OnClick);
+            Button8.OnClick += new userInteraction(MultiZone_Button_OnClick);
             OMButton identify = new OMButton(204,540,200,60);
             identify.Image = theHost.getSkinImage("Tab");
             identify.Font = new Font(Font.GenericSansSerif, 18F);
@@ -361,21 +369,25 @@ namespace OMSettings
             hardware.addControl(lstplugins);
             manager.loadPanel(hardware);
             #endregion
+
+            // Load multizone panels
+            OMSettings.MultiZone.Initialize(this.pluginName, manager, theHost);
+
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
-        void UpdateDeviceData()
+        void UpdateDeviceData(int screen)
         {
             object o;
             theHost.getData(eGetData.GetAudioDevices, "", out o);
             if (o != null)
                 devices = new List<string>((string[])o);
             o = new object();
-            theHost.getData(eGetData.GetAvailableKeyboards, "", out o);
+            theHost.getData(eGetData.GetKeyboardUnitsForScreen, "", screen.ToString(), out o);
             if (o != null)
                 keyboards = (string[])o;
             o = new object();
-            theHost.getData(eGetData.GetAvailableMice, "", out o);
+            theHost.getData(eGetData.GetMiceUnitsForScreen, "", screen.ToString(), out o);
             if (o != null)
                 mice = (string[])o;
         }
@@ -554,7 +566,7 @@ namespace OMSettings
                     break;
                 case 3:
                     theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "MultiZone");
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "ZoneSelection");
                     theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
                     break;
                 case 4:
@@ -606,7 +618,7 @@ namespace OMSettings
 
         void identify_OnClick(OMControl sender, int screen)
         {
-            theHost.sendMessage("RenderingWindow", "OMSettings", "Identify");
+            theHost.ScreenShowIdentity(3000);
         }
 
         void Cancel_OnClick(OMControl sender, int screen)
@@ -649,8 +661,11 @@ namespace OMSettings
             ((OMTextBox)manager[screen, "zone"][5]).Text = devices[pos - 1].Replace("  ", " ");
         }
 
-        void Button_OnClick(OMControl sender, int screen)
+        void MultiZone_Button_OnClick(OMControl sender, int screen)
         {
+            // Get selected multizone
+
+
             ((OMLabel)manager[screen, "zone"][6]).Text = "Zone " + ((OMButton)sender).Text;
             string s,keyboard,mouse;
             using (PluginSettings settings = new PluginSettings())
@@ -682,7 +697,7 @@ namespace OMSettings
                 return null;
             // Initialize panel data
             if (name == "zone")
-                UpdateDeviceData();
+                UpdateDeviceData(screen);
 
             switch (name)
             {

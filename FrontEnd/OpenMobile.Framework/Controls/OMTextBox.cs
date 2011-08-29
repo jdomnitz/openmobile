@@ -30,6 +30,9 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMTextBox : OMLabel, IClickable, IHighlightable
     {
+        private float orgFontSize = 0;
+        private float fontScaleFactor = 0;
+
         /// <summary>
         /// Sets various textbox options
         /// </summary>
@@ -51,6 +54,22 @@ namespace OpenMobile.Controls
             {
                 flags = value;
                 textTexture = null;
+            }
+        }
+
+        private bool _AutoFitText = true;
+        /// <summary>
+        /// Enabled or disabled automatic adjustment of font size to fit in control
+        /// </summary>
+        public bool AutoFitText 
+        {
+            get
+            {
+                return _AutoFitText;
+            }
+            set
+            {
+                _AutoFitText = value;
             }
         }
 
@@ -123,6 +142,33 @@ namespace OpenMobile.Controls
                     count = 6;
                 textTexture = null;
                 text = value;
+
+                #region AutoFit
+
+                // Autofit size of string
+                if (fontScaleFactor != 0)
+                {
+                    this.font.Size = orgFontSize;
+                    fontScaleFactor = 0;
+                }
+                if (AutoFitText)
+                {
+                    SizeF TextSize = Graphics.Graphics.MeasureString(text, this.Font, this.Format);
+
+                    if (TextSize.Width > this.width)
+                    {   // Reduce text size to fit
+                        orgFontSize = this.font.Size;
+
+                        fontScaleFactor = TextSize.Width / this.width;
+                        this.font.Size = this.font.Size / fontScaleFactor;
+
+                        // Reset text texture to regenerate text
+                        textTexture = null;
+                    }
+                }
+
+                #endregion
+
                 raiseUpdate(false);
                 try
                 {
@@ -195,7 +241,7 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionOut;
 
             g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 255), background)), left, top, width, height, 10);
-            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 2F), left, top, width, height, 10);
+            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 1F), left, top, width, height, 10);
 
             if (this.Mode == eModeType.Highlighted)
             {
@@ -215,18 +261,53 @@ namespace OpenMobile.Controls
                         f.Trimming = System.Drawing.StringTrimming.EllipsisCharacter;
                     else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
                         f.Trimming = System.Drawing.StringTrimming.Word;
+
+                    // Generate password masking characters if needed
+                    string tempStr = text;
+                    if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (text.Length > 0))
+                    {
+                        tempStr = new String('*', text.Length - 1);
+                        if (count > 1)
+                            tempStr += text[text.Length - 1];
+                        else
+                            tempStr += "*";
+                        count--;
+                    }
+
+                    /*
+                    // Autofit size of string
+                    SizeF TextSize = Graphics.Graphics.MeasureString(tempStr, this.Font, this.Format);
+
+                    if (AutoFitText)
+                    {
+                        // Save original font size
+                        if (fontScaleFactor == 0)
+                            orgFontSize = this.font.Size;
+
+                        if (TextSize.Width > this.width)
+                        {   // Reduce text size to fit
+                            fontScaleFactor = TextSize.Width / this.width;
+                            this.font.Size = this.font.Size / fontScaleFactor;
+
+                            // Reset text texture to regenerate text
+                            textTexture = null;
+                        }
+                        // Restore string size if it was reduced and the string will fit
+                        if (fontScaleFactor > 0)
+                            if (TextSize.Width < this.width)
+                            {   // Restore font size
+                                this.font.Size = orgFontSize;
+                                fontScaleFactor = 0;
+
+                                // Reset text texture to regenerate text
+                                textTexture = null;
+                            }
+
+                    }
+                    */
+
                     if ((textTexture == null) || (count > 0))
                     {
-                        string tempStr = text;
-                        if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (text.Length > 0))
-                        {
-                            tempStr = new String('*', text.Length - 1);
-                            if (count > 1)
-                                tempStr += text[text.Length - 1];
-                            else
-                                tempStr += "*";
-                            count--;
-                        }
                         textTexture = g.GenerateStringTexture(tempStr, this.Font, Color.FromArgb((int)(tmp * Color.A), this.Color), this.Left, this.Top, this.Width + 5, this.Height, f);
                     }
                     g.DrawImage(textTexture, this.Left, this.Top, this.Width + 5, this.Height, tmp);

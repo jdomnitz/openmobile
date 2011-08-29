@@ -213,7 +213,7 @@ namespace OpenMobile.Platform.X11
                                     }
                                     current.X += x;
                                     current.Y += y;
-                                    state.SetPosition(current.X, current.Y);
+                                    state.SetPosition(current.X, current.Y,true);
                                     break;
 
                                 case XIEventType.RawButtonPress:

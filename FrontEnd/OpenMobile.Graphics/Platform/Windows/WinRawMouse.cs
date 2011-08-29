@@ -146,6 +146,85 @@ namespace OpenMobile.Platform.Windows
             }
             mouse = mice[rawids[handle]];
 
+            #region Calculate mouse position
+
+            int MouseX, MouseY;
+            bool MouseEvent = false;
+
+            if ((raw.Flags & RawMouseFlags.MOUSE_MOVE_ABSOLUTE) == RawMouseFlags.MOUSE_MOVE_ABSOLUTE)
+            {
+                if ((raw.Flags & RawMouseFlags.MOUSE_VIRTUAL_DESKTOP) == RawMouseFlags.MOUSE_VIRTUAL_DESKTOP)
+                {
+                    // Calculate placement on virtual desktop (value is reported in the range of 0 - 255)
+                    float ScaledX = (raw.LastX / 65535F) / 255F;
+                    int CalcX = mouse.DesktopRect.Left + ((int)(mouse.DesktopRect.Width * ScaledX));
+
+                    float ScaledY = (raw.LastY / 65535F) / 255F;
+                    int CalcY = mouse.DesktopRect.Top + ((int)(mouse.DesktopRect.Height * ScaledY));
+
+                    // Calculate local device coordinates
+                    MouseX = CalcX - mouse.ScreenRect.Left;
+                    MouseY = CalcY - mouse.ScreenRect.Top;
+
+                    // Signal that we need to send mouse event
+                    //MouseEvent = true;
+
+                    // Report coordinates back
+                    //mouse.SetPosition(LocalX, LocalY);
+
+                    // Update mouse position (without raising event)
+                    mouse.SetPosition(MouseX, MouseY, false);
+
+                }
+                else
+                {
+                    //raw.LastX = (int)((raw.LastX / 65535F) * mouse.Width);
+                    //raw.LastY = (int)((raw.LastY / 65535F) * mouse.Height);
+
+                    MouseX = (int)((raw.LastX / 65535F) * mouse.Width);
+                    MouseY = (int)((raw.LastY / 65535F) * mouse.Height);
+
+                    // Signal that we need to send mouse event
+                    //MouseEvent = true;
+
+                    //mouse.SetPosition(raw.LastX, raw.LastY);
+
+                    // Update mouse position (without raising event)
+                    mouse.SetPosition(MouseX, MouseY, false);
+
+                }
+            }
+                /*
+            else
+            {   // Seems like MOUSE_MOVE_RELATIVE is the default, unless otherwise noted.
+                int rawx = raw.LastX / 256;
+                int rawy = raw.LastY / 256;
+                //Apply pointer acceleration
+                if (System.Math.Abs(rawx) >= 10)
+                    rawx *= 2;
+                if (System.Math.Abs(rawy) >= 10)
+                    rawy *= 2;
+
+                MouseX = mouse.X + rawx;
+                MouseY = mouse.Y + rawy;
+
+                // Signal that we need to send mouse event
+                MouseEvent = false;
+
+                // Update mouse position (with raising event)
+                mouse.SetPosition(MouseX, MouseY, true);
+                
+                //mouse.SetPosition(mouse.X + rawx, mouse.Y + rawy);
+                //mouse.RaiseMoveEvent();
+
+            }
+            */
+            
+
+            #endregion
+
+            // Mouse button press constants seems to be incorrect, left mouse button seems to be reported as button5 while 
+            // right mouse button is reported as wheel
             if ((raw.ButtonFlags & RawInputMouseState.LEFT_BUTTON_DOWN) != 0) mouse[MouseButton.Left]=true;
             if ((raw.ButtonFlags & RawInputMouseState.LEFT_BUTTON_UP) != 0) mouse[MouseButton.Left]=false;
             if ((raw.ButtonFlags & RawInputMouseState.RIGHT_BUTTON_DOWN) != 0) mouse[MouseButton.Right] = true;
@@ -154,14 +233,57 @@ namespace OpenMobile.Platform.Windows
             if ((raw.ButtonFlags & RawInputMouseState.MIDDLE_BUTTON_UP) != 0) mouse[MouseButton.Middle] = false;
             if ((raw.ButtonFlags & RawInputMouseState.BUTTON_4_DOWN) != 0) mouse[MouseButton.Left] = true;
             if ((raw.ButtonFlags & RawInputMouseState.BUTTON_4_UP) != 0) mouse[MouseButton.Left] = false;
-            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_5_DOWN) != 0) mouse[MouseButton.Right] = true;
-            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_5_UP) != 0) mouse[MouseButton.Right] = false;
+            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_5_DOWN) != 0) mouse[MouseButton.Left] = true;
+            if ((raw.ButtonFlags & RawInputMouseState.BUTTON_5_UP) != 0) mouse[MouseButton.Left] = false;
 
             if ((raw.Flags & RawMouseFlags.MOUSE_MOVE_ABSOLUTE) == RawMouseFlags.MOUSE_MOVE_ABSOLUTE)
             {
-                raw.LastX = (int)((raw.LastX / 65535F) * mouse.Width);
-                raw.LastY = (int)((raw.LastY / 65535F) * mouse.Height);
-                mouse.SetPosition(raw.LastX, raw.LastY);
+                // Raise move event
+                mouse.RaiseMoveEvent();
+            }
+            else
+            {   // Seems like MOUSE_MOVE_RELATIVE is the default, unless otherwise noted.
+                int rawx = raw.LastX / 256;
+                int rawy = raw.LastY / 256;
+                //Apply pointer acceleration
+                if (System.Math.Abs(rawx) >= 10)
+                    rawx *= 2;
+                if (System.Math.Abs(rawy) >= 10)
+                    rawy *= 2;
+
+                MouseX = mouse.X + rawx;
+                MouseY = mouse.Y + rawy;
+
+                // Update mouse position (with raising event)
+                mouse.SetPosition(MouseX, MouseY, true);
+            }
+
+
+            /*
+            if ((raw.Flags & RawMouseFlags.MOUSE_MOVE_ABSOLUTE) == RawMouseFlags.MOUSE_MOVE_ABSOLUTE)
+            {
+                if ((raw.Flags & RawMouseFlags.MOUSE_VIRTUAL_DESKTOP) == RawMouseFlags.MOUSE_VIRTUAL_DESKTOP)
+                {
+                    // Calculate placement on virtual desktop (value is reported in the range of 0 - 255)
+                    float ScaledX = (raw.LastX / 65535F) / 255F ;
+                    int CalcX = mouse.DesktopRect.Left + ((int)(mouse.DesktopRect.Width * ScaledX));   
+
+                    float ScaledY = (raw.LastY / 65535F) / 255F;
+                    int CalcY = mouse.DesktopRect.Top + ((int)(mouse.DesktopRect.Bottom * ScaledY));
+
+                    // Calculate local device coordinates
+                    int LocalX = CalcX - mouse.ScreenRect.Left;
+                    int LocalY = CalcY - mouse.ScreenRect.Top;
+
+                    // Report coordinates back
+                    mouse.SetPosition(LocalX, LocalY);
+                }
+                else
+                {
+                    raw.LastX = (int)((raw.LastX / 65535F) * mouse.Width); 
+                    raw.LastY = (int)((raw.LastY / 65535F) * mouse.Height);
+                    mouse.SetPosition(raw.LastX, raw.LastY);
+                }
             }
             else
             {   // Seems like MOUSE_MOVE_RELATIVE is the default, unless otherwise noted.
@@ -174,6 +296,8 @@ namespace OpenMobile.Platform.Windows
                     rawy *= 2;
                 mouse.SetPosition(mouse.X + rawx, mouse.Y + rawy);
             }
+            */
+
 
             lock (UpdateLock)
             {

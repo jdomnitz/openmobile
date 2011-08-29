@@ -378,7 +378,35 @@ namespace OpenMobile.Framework
                 return Windows.GetVolumeSerial();
             }
 #endif
-            return null;
+            return "";
+        }
+        /// <summary>
+        /// Retrieves the operating system bit environment (32 or 64 bit)
+        /// </summary>
+        /// <returns></returns>
+        public static string getOSEnvironment()
+        {
+#if WINDOWS
+            if (Configuration.RunningOnWindows)
+            {
+                return (Windows.is64BitOperatingSystem ? "64" : "32");
+            }
+#endif
+            return "";
+        }
+        /// <summary>
+        /// Retrieves the operating system bit environment (32 or 64 bit)
+        /// </summary>
+        /// <returns></returns>
+        public static string getAppEnvironment()
+        {
+#if WINDOWS
+            if (Configuration.RunningOnWindows)
+            {
+                return (Windows.is64BitProcess ? "64" : "32");
+            }
+#endif
+            return "";
         }
         /// <summary>
         /// Returns the current system Architecture

@@ -83,11 +83,29 @@ namespace OpenMobile.Threading
         /// Creates a new asynchronous safe thread
         /// </summary>
         /// <param name="function"></param>
+        public static void Asynchronous(Function function)
+        {
+            Asynchronous(function, BuiltInComponents.Host);
+        }
+        /// <summary>
+        /// Creates a new asynchronous safe thread
+        /// </summary>
+        /// <param name="function"></param>
         /// <param name="args"></param>
         /// <param name="host"></param>
         public static void Asynchronous(Delegate function, object[] args, IPluginHost host)
         {
             Asynchronous(delegate { function.DynamicInvoke(args); }, host);
+        }
+        /// <summary>
+        /// Creates a new asynchronous safe thread
+        /// </summary>
+        /// <param name="function"></param>
+        /// <param name="args"></param>
+        /// <param name="host"></param>
+        public static void Asynchronous(Delegate function, object[] args)
+        {
+            Asynchronous(function, args, BuiltInComponents.Host);
         }
         private static void spawnThread()
         {

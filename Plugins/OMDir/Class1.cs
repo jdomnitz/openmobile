@@ -48,11 +48,13 @@ namespace OMDir
             {
                 ((OMLabel)manager[screen][2]).Text = "Select a Folder";
                 type[screen] = 1;  //Type=0: Select File; Type=1: Select Folder; Multi-Select Files=2;
+                SafeThread.Asynchronous(delegate() { loadRoot(((OMList)manager[screen]["left"])); }, theHost);
             }
             else
             {
                 ((OMLabel)manager[screen][2]).Text = "Select a File";
                 type[screen] = 0;
+                SafeThread.Asynchronous(delegate() { loadRoot(((OMList)manager[screen]["left"])); }, theHost);
             }
             if ((name != "Folder") && (name != ""))
             {
@@ -138,6 +140,7 @@ namespace OMDir
             right.ItemColor1 = Color.FromArgb(0, 0, 16);
             //right.ClickToSelect = true;
             OMList left = new OMList(15, 150, 470, 375);
+            left.Name = "left";
             left.Font = right.Font;
             left.OnClick += new userInteraction(left_OnClick);
             left.SelectedIndexChanged += new OMList.IndexChangedDelegate(left_SelectedIndexChanged);
@@ -171,7 +174,7 @@ namespace OMDir
 
         private void on_storageEvent(eMediaType type, bool justInserted, string path)
         {
-            if ((type == eMediaType.NotSet)||(type==eMediaType.DeviceRemoved))
+            if ((type == eMediaType.NotSet) || (type == eMediaType.DeviceRemoved))
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
                 {
@@ -246,9 +249,9 @@ namespace OMDir
                     return "";
                 if (l.Tag.ToString() == "")
                 {
-                    foreach(DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
-                        if (info.VolumeLabel==l[l.SelectedIndex].text)
-                            source=info.path;
+                    foreach (DeviceInfo info in DeviceInfo.EnumerateDevices(theHost))
+                        if (info.VolumeLabel == l[l.SelectedIndex].text)
+                            source = info.path;
                 }
                 else
                     source = OpenMobile.Path.Combine(l.Tag.ToString(), l[l.SelectedIndex].text);

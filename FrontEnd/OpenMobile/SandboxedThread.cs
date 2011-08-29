@@ -41,7 +41,7 @@ namespace OpenMobile
         public static void Handle(Exception e)
         {
             string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
-            Core.theHost.sendMessage("OMDebug", e.Source, message);
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, e.Source, message);
 #if DEBUG
             Debug.Print(message);
 #endif

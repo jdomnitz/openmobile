@@ -210,8 +210,8 @@ namespace OpenMobile.Controls
             else if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
             if (textTexture == null)
-                textTexture = g.GenerateTextTexture(left, top, width, height, text, font, textFormat, textAlignment, color, outlineColor);
-            g.DrawImage(textTexture, left, top, width, height, tmp);
+                textTexture = g.GenerateTextTexture(left, top, width+5, height, text, font, textFormat, textAlignment, color, outlineColor);
+            g.DrawImage(textTexture, left, top, width+5, height, tmp);
 
             // Skin debug function 
             if (_SkinDebug)
