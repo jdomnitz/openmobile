@@ -1557,6 +1557,10 @@ namespace OpenMobile.Graphics
             {
                 return size;
             }
+            set
+            {
+                size = value;
+            }
         }
         public Font(Font fontName)
         {
@@ -1609,6 +1613,23 @@ namespace OpenMobile.Graphics
             else if ((format == eTextFormat.Underline) || (format == eTextFormat.UnderlineShadow))
             {
                 f = FontStyle.Underline;
+            }
+            return f;
+        }
+        public static eTextFormat StyleToFormat(FontStyle format)
+        {
+            eTextFormat f = eTextFormat.Normal;
+            if (format == FontStyle.Bold)
+            {
+                f = eTextFormat.Bold;
+            }
+            else if (format == FontStyle.Italic)
+            {
+                f = eTextFormat.Italic;
+            }
+            else if (format == FontStyle.Underline)
+            {
+                f = eTextFormat.Underline;
             }
             return f;
         }

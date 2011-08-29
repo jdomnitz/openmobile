@@ -18,8 +18,6 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-//this.KeyUp += new System.Windows.Forms.KeyEventHandler(InputRouter.SourceUp);
-//this.KeyDown+=new System.Windows.Forms.KeyEventHandler(InputRouter.SourceDown);
 using System;
 using OpenMobile.Input;
 namespace OpenMobile
@@ -38,16 +36,19 @@ namespace OpenMobile
             // 
             // RenderingWindow
             // 
+
+            // NB! Mouse and keyboard mapping has been moved to the input router code so do not remove the comments below
+            //this.Mouse.ButtonUp += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_ButtonUp);
+            //this.Mouse.MouseClick += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_MouseClick);
+            //this.Mouse.ButtonDown += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_ButtonDown);
+            //this.Mouse.Move += new EventHandler<OpenMobile.Input.MouseMoveEventArgs>(InputRouter.dev_Move);
+            //this.Keyboard[0].KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
+            //this.Keyboard[0].KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
+
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Mouse.ButtonUp += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_ButtonUp);
-            this.Mouse.MouseClick += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_MouseClick);
-            this.Mouse.ButtonDown += new EventHandler<OpenMobile.Input.MouseButtonEventArgs>(InputRouter.dev_ButtonDown);
             this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
             this.Closing += new EventHandler<System.ComponentModel.CancelEventArgs>(this.RenderingWindow_FormClosing);
             this.Resize += new EventHandler<EventArgs>(this.RenderingWindow_Resize);
-            this.Mouse.Move += new EventHandler<OpenMobile.Input.MouseMoveEventArgs>(InputRouter.dev_Move);
-            this.Keyboard[0].KeyUp += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceUp);
-            this.Keyboard[0].KeyDown += new EventHandler<OpenMobile.Input.KeyboardKeyEventArgs>(InputRouter.SourceDown);
             this.Gesture += new EventHandler<OpenMobile.Graphics.TouchEventArgs>(RenderingWindow_Gesture);
             this.ResolutionChange += new EventHandler<OpenMobile.Graphics.ResolutionChange>(RenderingWindow_ResolutionChange);
         }

@@ -112,32 +112,26 @@ namespace OpenMobile
         {
 
             // Check for specific startup screen
-            int StartupScreen = 0;
-            foreach (string arg in Environment.GetCommandLineArgs())
-            {
-                if (arg.ToLower().StartsWith("-startupscreen=") == true)
-                {
-                    try
-                    {
-                        StartupScreen = int.Parse(arg.Substring(15));
-                    }
-                    catch (ArgumentException) { break; }
-                }
-            }
+            int StartupScreen = Core.theHost.StartupScreen;
 
-            if ((this.WindowState == WindowState.Fullscreen) && (screen == 0))
-                Mouse.Location = this.Location;
             if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
                 this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Bounds.Location, this.Size);
             this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
-            this.Mouse.Instance = (screen * -1) - 1;
-            this.Mouse.SetBounds(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Width, DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Height);
             InitializeComponent();
             if (screen == 0)
                 InputRouter.Initialize();
             if (Configuration.RunningOnWindows)
                 if (options == GameWindowFlags.Fullscreen)
                     OnWindowStateChanged(EventArgs.Empty);
+
+
+            #region Configure and set default os device data
+
+            // Set mouse startup location
+            if ((this.WindowState == WindowState.Fullscreen) && (screen == 0))
+                DefaultMouse.Location = this.Location;
+
+            #endregion
         }
 
         public void PaintIdentity()
@@ -146,6 +140,11 @@ namespace OpenMobile
             Invalidate();
             Thread.Sleep(1500);
             Identify = false;
+            Invalidate();
+        }
+        public void PaintIdentity(bool Show)
+        {
+            Identify = Show;
             Invalidate();
         }
 
@@ -191,27 +190,34 @@ namespace OpenMobile
         #region ControlManagement
         public void TransitionInPanel(OMPanel newP)
         {
-            OMControl c;
-            bool exists = backgroundQueue.Contains(newP);
-            newP.UpdateThisControl += UpdateThisControl;
-            for (int i = 0; i < newP.controlCount; i++)
+            lock (this) // Lock to prevent multiple transitons at the same time
             {
-                c = newP.getControl(i);
-                if ((c.Mode == eModeType.ClickedAndTransitioningOut) || (c.Mode == eModeType.transitioningOut) || (exists))
-                    c.Mode = eModeType.transitionLock;
+                OMControl c;
+                bool exists = backgroundQueue.Contains(newP);
+                newP.UpdateThisControl += UpdateThisControl;
+                for (int i = 0; i < newP.controlCount; i++)
+                {
+                    c = newP.getControl(i);
+                    if ((c.Mode == eModeType.ClickedAndTransitioningOut) || (c.Mode == eModeType.transitioningOut) || (exists))
+                        c.Mode = eModeType.transitionLock;
+                    else
+                        c.Mode = eModeType.transitioningIn;
+                }
+                if (exists)
+                    newP.Mode = eModeType.transitionLock;
+                else if (newP.Mode == eModeType.transitioningOut)
+                    newP.Mode = eModeType.Normal;
                 else
-                    c.Mode = eModeType.transitioningIn;
+                    newP.Mode = eModeType.transitioningIn;
+                if (!exists)
+                    insertPanel(newP);
+                rParam.globalTransitionIn = 0;
+                rParam.globalTransitionOut = 1;
+
+                // Raise panel event
+                if (newP.Mode == eModeType.transitioningIn)
+                    newP.RaiseEvent(screen, eEventType.Loaded);
             }
-            if (exists)
-                newP.Mode = eModeType.transitionLock;
-            else if (newP.Mode == eModeType.transitioningOut)
-                newP.Mode = eModeType.Normal;
-            else
-                newP.Mode = eModeType.transitioningIn;
-            if (!exists)
-                insertPanel(newP);
-            rParam.globalTransitionIn = 0;
-            rParam.globalTransitionOut = 1;
         }
 
         private void insertPanel(OMPanel newP)
@@ -233,86 +239,111 @@ namespace OpenMobile
 
         public bool TransitionOutEverything()
         {
-            if (blockHome)
-                return false;
-            highlighted = null;
-            for (int i = backgroundQueue.Count - 1; i >= 0; i--)
-                if ((backgroundQueue[i].Mode == eModeType.transitioningIn) || (backgroundQueue[i].UIPanel))
-                    backgroundQueue[i].Mode = eModeType.Normal;
-                else
+            lock (this) // Lock to prevent multiple transitons at the same time
+            {
+                if (blockHome)
+                    return false;
+                highlighted = null;
+                for (int i = backgroundQueue.Count - 1; i >= 0; i--)
                 {
-                    backgroundQueue[i].Mode = eModeType.transitioningOut;
-                    for (int j = backgroundQueue[i].controlCount - 1; j >= 0; j--)
-                        backgroundQueue[i][j].Mode = eModeType.transitioningOut;
+                    if ((backgroundQueue[i].Mode == eModeType.transitioningIn) || (backgroundQueue[i].UIPanel))
+                        backgroundQueue[i].Mode = eModeType.Normal;
+                    else
+                    {
+                        backgroundQueue[i].Mode = eModeType.transitioningOut;
+                        for (int j = backgroundQueue[i].controlCount - 1; j >= 0; j--)
+                            backgroundQueue[i][j].Mode = eModeType.transitioningOut;
+
+                        // Raise panel event
+                        if (backgroundQueue[i].Mode == eModeType.transitioningOut)
+                            backgroundQueue[i].RaiseEvent(screen, eEventType.Unloaded);
+                    }
                 }
-            rParam.globalTransitionIn = 0;
-            rParam.globalTransitionOut = 1;
-            return true;
+                rParam.globalTransitionIn = 0;
+                rParam.globalTransitionOut = 1;
+                return true;
+            }
         }
         public void TransitionOutPanel(OMPanel oldP)
         {
-            if (highlighted != null)
-                highlighted.Mode = eModeType.Normal;
-            highlighted = null;
-            for (int i = 0; i < oldP.controlCount; i++)
-                if (oldP.getControl(i).Mode != eModeType.transitionLock)
-                    oldP[i].Mode = eModeType.transitioningOut;
-            if (oldP.Mode == eModeType.transitioningIn)
-                oldP.Mode = eModeType.Normal;
-            else
-                oldP.Mode = eModeType.transitioningOut;
-            rParam.globalTransitionIn = 0;
-            rParam.globalTransitionOut = 1;
+            lock (this) // Lock to prevent multiple transitons at the same time
+            {
+                if (highlighted != null)
+                    highlighted.Mode = eModeType.Normal;
+                highlighted = null;
+                for (int i = 0; i < oldP.controlCount; i++)
+                    if (oldP.getControl(i).Mode != eModeType.transitionLock)
+                        oldP[i].Mode = eModeType.transitioningOut;
+                if (oldP.Mode == eModeType.transitioningIn)
+                    oldP.Mode = eModeType.Normal;
+                else
+                    oldP.Mode = eModeType.transitioningOut;
+                rParam.globalTransitionIn = 0;
+                rParam.globalTransitionOut = 1;
+
+                // Raise panel event
+                if (oldP.Mode == eModeType.transitioningOut)
+                    oldP.RaiseEvent(screen, eEventType.Unloaded);
+            }
         }
         public void ExecuteTransition(eGlobalTransition transType)
         {
             while (!this.Visible)
                 Thread.Sleep(10);
-            if (transType != eGlobalTransition.None)
+
+            lock (this) // Lock to prevent multiple transitons at the same time
             {
-                currentTransition = transType;
-                transitioning = true;
-                while (transitioning == true)
+                if (transType != eGlobalTransition.None)
                 {
-                    transition_Tick();
-                    Thread.Sleep(25);
+                    currentTransition = transType;
+                    transitioning = true;
+                    while (transitioning == true)
+                    {
+                        transition_Tick();
+                        Thread.Sleep(25);
+                    }
+                    Invalidate();
                 }
-                Invalidate();
-            }
-            lock (painting)
-            {
-                tmrClick.Enabled = false;
-                rParam.transparency = 1;
-                rParam.transitionTop = 0;
-                rParam.globalTransitionIn = 1;
-                rParam.globalTransitionOut = 0;
-            }
-            foreach (OMPanel panel in backgroundQueue)
-            {
-                if (panel.Mode == eModeType.transitioningOut)
+                lock (painting)
                 {
-                    panel.Mode = eModeType.Highlighted;
-                    panel.UpdateThisControl -= UpdateThisControl;
+                    tmrClick.Enabled = false;
+                    rParam.transparency = 1;
+                    rParam.transitionTop = 0;
+                    rParam.globalTransitionIn = 1;
+                    rParam.globalTransitionOut = 0;
                 }
-                for (int i = panel.controlCount - 1; i >= 0; i--)
+                foreach (OMPanel panel in backgroundQueue)
                 {
-                    panel[i].Mode = eModeType.Normal;
+                    if (panel.Mode == eModeType.transitioningOut)
+                    {   // Panel transitioning out
+                        panel.Mode = eModeType.Highlighted;
+                        panel.UpdateThisControl -= UpdateThisControl;
+                        panel.RaiseEvent(screen, eEventType.Leaving);
+                    }
+                    if (panel.Mode == eModeType.transitioningIn)
+                    {   // Panel transitioning in
+                        panel.RaiseEvent(screen, eEventType.Entering);
+                    }
+                    for (int i = panel.controlCount - 1; i >= 0; i--)
+                    {
+                        panel[i].Mode = eModeType.Normal;
+                    }
                 }
+                backgroundQueue.RemoveAll(q => q.Mode == eModeType.Highlighted);
+                for (int i = 0; i < backgroundQueue.Count; i++)
+                    backgroundQueue[i].Mode = eModeType.Normal;
+                if (transType > eGlobalTransition.Crossfade)
+                {
+                    tick = 0;
+                    ofsetIn = new Point(0, 0);
+                    ofsetOut = new Point(0, 0);
+                }
+                highlighted = null;
+                if (lastClick != null)
+                    lastClick.Mode = eModeType.Normal;
+                lastClick = null;
+                UpdateThisControl(true);
             }
-            backgroundQueue.RemoveAll(q => q.Mode == eModeType.Highlighted);
-            for (int i = 0; i < backgroundQueue.Count; i++)
-                backgroundQueue[i].Mode = eModeType.Normal;
-            if (transType > eGlobalTransition.Crossfade)
-            {
-                tick = 0;
-                ofsetIn = new Point(0, 0);
-                ofsetOut = new Point(0, 0);
-            }
-            highlighted = null;
-            if (lastClick != null)
-                lastClick.Mode = eModeType.Normal;
-            lastClick = null;
-            UpdateThisControl(true);
         }
         #endregion
 
@@ -326,12 +357,16 @@ namespace OpenMobile
             if ((currentGesture != null) && (currentGesture.Count > 0))
                 lock (painting)
                     RenderGesture();
+            if (CursorShow)
+                lock (painting)
+                    RenderCursor();
+
             if (Identify)
             {
                 lock (painting)
                 {
                     if (identity == null)
-                        identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen + 1).ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
+                        identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen+1).ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
                     g.DrawImage(identity, 0, 0, 1000, 600);
                 }
             }
@@ -356,10 +391,17 @@ namespace OpenMobile
         }
         private void RenderGesture()
         {
-            foreach (Point p in currentGesture)
-                g.FillEllipse(new Brush(Color.Red), new Rectangle((p.X - 10), (p.Y - 10), 20, 20));
-            if (currentGesture.Count > 1)
-                g.DrawLine(new Pen(Color.Red, 18F), currentGesture.ToArray());
+            Point[] GesturePoints = currentGesture.ToArray();
+            for (int i = 0; i < GesturePoints.Length; i++)
+                g.FillEllipse(new Brush(Color.Red), new Rectangle((GesturePoints[i].X - 10), (GesturePoints[i].Y - 10), 20, 20));
+            if (GesturePoints.Length > 1)
+                g.DrawLine(new Pen(Color.Red, 18F), GesturePoints);
+        }
+        private void RenderCursor()
+        {
+            g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 5, CursorPosition.Y);
+            g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X, CursorPosition.Y + 5);
+            g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 12, CursorPosition.Y + 12);
         }
         protected override void OnResize(EventArgs e)
         {
@@ -491,27 +533,41 @@ namespace OpenMobile
         #endregion
 
         #region MouseHandlers
+        PointF CursorPosition = new PointF();
+        bool CursorShow = true;
+
         internal void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
         {
             int scr = (int)sender;
             if (scr == screen)
             {
                 keyboardActive = false;
-                MouseMove(e);
+                MouseMove(sender, e);
             }
         }
+
         private void MouseMove()
         {
+            /*
             if (WindowState == WindowState.Fullscreen)
-                MouseMove(new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
+                MouseMove(null, new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
             else
-                MouseMove(new MouseMoveEventArgs(Mouse.X, Mouse.Y, 0, 0, MouseButton.None));
+                MouseMove(null, new MouseMoveEventArgs(DefaultMouse.X, DefaultMouse.Y, 0, 0, MouseButton.None));
+            */
         }
-        private void MouseMove(MouseMoveEventArgs e)
+        private void MouseMove(object sender, MouseMoveEventArgs e)
         {
             if (keyboardActive)
                 return;
             bool done = false; //We found something that was selected
+
+            // Debug info
+            //Console.WriteLine(string.Format("RenderingWindow_MouseMove: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
+
+            // Save current cursor position
+            CursorPosition.X = e.X / widthScale; CursorPosition.Y = e.Y / heightScale; 
+            Invalidate();
+
             if (rParam.currentMode == eModeType.Scrolling)
             {
                 if (e.Buttons == MouseButton.Left)
@@ -522,6 +578,7 @@ namespace OpenMobile
                         ThrowStarted = false;  // Reset throw data (Added by Borte)
                         if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                         {
+                            //Console.WriteLine(string.Format("RenderingWindow_MouseMove.MouseThrow: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
                             Point ThrowTotalDistance = new Point((int)((e.X - ThrowStart.X + 0.5) / widthScale), (int)((e.Y - ThrowStart.Y + 0.5) / heightScale));
                             ThrowRelativeDistance.X = e.X - ThrowRelativeDistance.X;
                             ThrowRelativeDistance.Y = e.Y - ThrowRelativeDistance.Y;
@@ -544,7 +601,8 @@ namespace OpenMobile
                         currentGesture = new List<Point>();
                         rParam.currentMode = eModeType.gesturing;
                     }
-                    currentGesture.Add(new Point(e.Location.X / widthScale, e.Location.Y / heightScale));
+                    //Console.WriteLine(string.Format("RenderingWindow_MouseMove.currentGesture: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
+                    currentGesture.Add(new Point(e.X / widthScale, e.Y / heightScale));
                     Invalidate();
                     if (lastClick != null)
                         lastClick.Mode = eModeType.Highlighted;
@@ -565,6 +623,7 @@ namespace OpenMobile
                                 if (System.Math.Abs(e.X - ThrowStart.X) > 3 || (System.Math.Abs(e.Y - ThrowStart.Y) > 3))
                                 {
                                     bool cancel = false;
+                                    //Console.WriteLine(string.Format("RenderingWindow_MouseMove.MouseThrowStart: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
                                     ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart, new PointF(widthScale, heightScale), ref cancel);
                                     if (cancel == false)
                                         rParam.currentMode = eModeType.Scrolling;
@@ -579,6 +638,36 @@ namespace OpenMobile
                 }
             }
         }
+
+        private void HighlightControl(MouseMoveEventArgs e)
+        {
+            bool done = checkControl(e);
+            if (highlighted != null)
+            {
+                if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
+                    try
+                    {
+                        ((IMouse)highlighted).MouseMove(screen, e, widthScale, heightScale);
+                    }
+                    catch (Exception ex) { SandboxedThread.Handle(ex); }
+                if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
+                    if (ThrowStarted)
+                        if (System.Math.Abs(e.X - ThrowStart.X) > 3 || (System.Math.Abs(e.Y - ThrowStart.Y) > 3))
+                        {
+                            bool cancel = false;
+                            ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart, new PointF(widthScale, heightScale), ref cancel);
+                            if (cancel == false)
+                                rParam.currentMode = eModeType.Scrolling;
+                        }
+
+                if (done == false)
+                {
+                    highlighted = null;
+                    Invalidate();
+                }
+            }
+        }
+
         private bool checkControl(OpenMobile.Input.MouseMoveEventArgs e)
         {
             try
@@ -618,6 +707,9 @@ namespace OpenMobile
         {
             if ((int)sender != screen)
                 return;
+
+            //Console.WriteLine(string.Format("RenderingWindow_MouseClick: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
+
             if ((e.Buttons == MouseButton.Left) && (highlighted != null))
             {
                 if (rParam.currentMode == eModeType.Highlighted)
@@ -653,6 +745,10 @@ namespace OpenMobile
             tmrLongClick.Enabled = false;
             if (rParam.currentMode == eModeType.gesturing)
                 return;
+
+            // Debug info
+            //Console.WriteLine(string.Format("screen {0} tmrLongClick_Tick ",screen));
+
             if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted)))
             {
                 SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).longClickMe(screen); });
@@ -666,6 +762,13 @@ namespace OpenMobile
         {
             if ((int)sender != screen)
                 return;
+
+            // Debug info
+            //Console.WriteLine(string.Format("RenderingWindow_MouseDown: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
+
+            // Try to highlight control if not already highlighted
+            HighlightControl(new MouseMoveEventArgs(e.X, e.Y, 0, 0, e.Button));
+
             keyboardActive = false;
             if (highlighted != null)
             {
@@ -701,6 +804,10 @@ namespace OpenMobile
         {
             if ((int)sender != screen)
                 return;
+
+            // Debug info
+            //Console.WriteLine(string.Format("RenderingWindow_MouseUp: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
+            
             tmrLongClick.Enabled = false;
             OMButton ptrLast = lastClick;
             if ((ptrLast != null) && (ptrLast.DownImage.image != null))
@@ -710,6 +817,8 @@ namespace OpenMobile
             }
             if (highlighted != null)
             {
+                // Debug info
+                //Console.WriteLine(string.Format("RenderingWindow_MouseUp.MouseUp: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
                 if ((highlighted.Mode != eModeType.Clicked) && (highlighted.Mode != eModeType.ClickedAndTransitioningOut))
                     highlighted.Mode = eModeType.Highlighted;
                 if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
@@ -717,6 +826,7 @@ namespace OpenMobile
             }
             if (rParam.currentMode == eModeType.Scrolling)
             {
+                //Console.WriteLine(string.Format("RenderingWindow_MouseUp.MouseThrowEnd: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
                 rParam.currentMode = eModeType.Highlighted;
                 if ((highlighted != null) && (typeof(IThrow).IsInstanceOfType(highlighted) == true))
                     ((IThrow)highlighted).MouseThrowEnd(screen, e.Location);
@@ -725,13 +835,14 @@ namespace OpenMobile
             {
                 if (currentGesture.Count > 0)
                 {
+                    //Console.WriteLine(string.Format("RenderingWindow_MouseUp.gesture: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
                     Recognizer rec = new Recognizer();
                     rec.Initialize();
                     for (int i = 0; i < currentGesture.Count; i++)
                         rec.AddPoint(currentGesture[i], false);
                     Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
                     rParam.currentMode = eModeType.Highlighted;
-                    MouseMove(new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
+                    MouseMove(sender, new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
                 }
                 Invalidate();
             }
@@ -837,14 +948,14 @@ namespace OpenMobile
             if ((this.WindowState == WindowState.Fullscreen) && (!defaultMouse))
             {
                 if (screen == 0)
-                    Mouse.TrapCursor();
-                Mouse.HideCursor(this.WindowInfo);
+                    DefaultMouse.TrapCursor();
+                DefaultMouse.HideCursor(this.WindowInfo);
             }
             else
             {
                 if ((screen == 0) && (!defaultMouse))
-                    Mouse.UntrapCursor();
-                Mouse.ShowCursor(this.WindowInfo);
+                    DefaultMouse.UntrapCursor();
+                DefaultMouse.ShowCursor(this.WindowInfo);
             }
             base.OnWindowStateChanged(e);
         }
@@ -857,6 +968,10 @@ namespace OpenMobile
             totalScale = (float)System.Math.Sqrt(System.Math.Pow(heightScale, 2) + System.Math.Pow(widthScale, 2));
             OnRenderFrameInternal();
             SandboxedThread.Asynchronous(raiseResize);
+
+            // Also make other windows follow the state of the main window (maximize and minimize)
+            Core.theHost.SetAllWindowState(this.WindowState);
+
         }
         private void raiseResize()
         {

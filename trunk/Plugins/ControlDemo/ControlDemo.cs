@@ -73,7 +73,7 @@ namespace ControlDemo
         p.addControl(button);
         p.addControl(gauge);
 
-        OMButton btnDialog = new OMButton(450, 400, 200, 50);
+        OMButton btnDialog = new OMButton(450, 450, 200, 50);
         btnDialog.Name = "btnDialog";
         btnDialog.Text = "Dialog";
         btnDialog.Image = imageItem.MISSING;

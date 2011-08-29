@@ -315,9 +315,9 @@ namespace OpenMobile
         /// <summary>
         /// Gets the primary Keyboard device, or null if no Keyboard exists.
         /// </summary>
-        public IList<KeyboardDevice> Keyboard
+        public KeyboardDevice DefaultKeyboard
         {
-            get { return InputDriver.Keyboard; }
+            get { return InputDriver.Keyboard.Count > 0 ? InputDriver.Keyboard[0] : null; }
         }
 
         #endregion
@@ -327,7 +327,7 @@ namespace OpenMobile
         /// <summary>
         /// Gets the primary Mouse device, or null if no Mouse exists.
         /// </summary>
-        public MouseDevice Mouse
+        public MouseDevice DefaultMouse
         {
             get { return InputDriver.Mouse.Count > 0 ? InputDriver.Mouse[0] : null; }
         }

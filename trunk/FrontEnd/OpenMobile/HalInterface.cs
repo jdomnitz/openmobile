@@ -39,7 +39,8 @@ namespace OpenMobile
             if (Configuration.RunningOnWindows)
             {
                 if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", String.Empty)), "OMHal.exe"), String.Empty, false))
-                    Core.theHost.sendMessage("OMDebug", "HalInterface", "Unable to start HAL!");
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "HalInterface", "Unable to start HAL!");
+
             }
 #endif
 #if LINUX
@@ -49,7 +50,7 @@ namespace OpenMobile
                 if (Configuration.RunningOnLinux)
                 {
                     if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:", String.Empty)), "OMHal.exe"), String.Empty, false))
-                        Core.theHost.sendMessage("OMDebug", "HalInterface", "Unable to start HAL!");
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "HalInterface", "Unable to start HAL!");
                 }
 #endif
             receive = new System.Net.Sockets.UdpClient(8550);
@@ -65,7 +66,7 @@ namespace OpenMobile
             }
             catch (System.Net.Sockets.SocketException e)
             {
-                Core.theHost.sendMessage("OMDebug", "HalInterface", e.Message);
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "HalInterface", "Exception: " + e.Message);
             }
         }
         void parse(string message)

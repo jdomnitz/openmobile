@@ -40,9 +40,11 @@ namespace OpenMobile.Controls
 
         /// <summary>
         /// Returns the OMControl at the given index
+        /// <para>OBSOLOTE, Use named access instead!</para>
         /// </summary>
         /// <param name="i">The index</param>
         /// <returns></returns>
+        [Obsolete("Obsolete, Use named access instead!")]
         public OMControl this[int i]
         {
             get
@@ -64,6 +66,24 @@ namespace OpenMobile.Controls
             get
             {
                 return containedControls.Find(p => p.Name == s);
+            }
+        }
+        /// <summary>
+        /// Returns the OMControl with the given name for a specific screen
+        /// <para>Returns the same as this[string s] if this panel is not loaded to a screen manager</para>
+        /// <para>if loaded it returns the requested control from the specified screen</para>
+        /// </summary>
+        /// <param name="screen">The screen to access</param>
+        /// <param name="s">The Name of the control</param>
+        /// <returns></returns>
+        public OMControl this[int screen, string s]
+        {
+            get
+            {
+                if (Manager == null)
+                    return this[s];
+                else
+                    return Manager[screen, this.name][s];
             }
         }
         /// <summary>
@@ -117,6 +137,8 @@ namespace OpenMobile.Controls
             raiseUpdate(false);
         }
 
+        #region decreaseZOrder
+
         /// <summary>
         /// Moves the control back in the display order
         /// </summary>
@@ -134,6 +156,39 @@ namespace OpenMobile.Controls
             return false;
         }
         /// <summary>
+        /// Moves the control back in the display order
+        /// </summary>
+        /// <param name="control"></param>
+        /// <returns>If successful</returns>
+        public bool decreaseZOrder(string name)
+        {
+            int control;
+            try
+            {
+                control = containedControls.FindIndex(c => c.Name == name);
+            }
+            catch (System.ArgumentNullException)
+            {
+                return false;
+            }
+            return decreaseZOrder(control);
+        }
+        /// <summary>
+        /// Moves the control back in the display order
+        /// </summary>
+        /// <param name="control"></param>
+        /// <returns>If successful</returns>
+        public bool decreaseZOrder(OMControl c)
+        {
+            int control = containedControls.IndexOf(c);
+            return decreaseZOrder(control);
+        }
+
+        #endregion
+
+        #region increaseZOrder
+
+        /// <summary>
         /// Moves the control forward in the display order
         /// </summary>
         /// <param name="control"></param>
@@ -149,6 +204,36 @@ namespace OpenMobile.Controls
             }
             return false;
         }
+        /// <summary>
+        /// Moves the control forward in the display order
+        /// </summary>
+        /// <param name="control"></param>
+        /// <returns>If successful</returns>
+        public bool increaseZOrder(string name)
+        {
+            int control;
+            try
+            {
+                control = containedControls.FindIndex(c => c.Name == name);
+            }
+            catch (System.ArgumentNullException)
+            {
+                return false;
+            }
+            return increaseZOrder(control);
+        }
+        /// <summary>
+        /// Moves the control forward in the display order
+        /// </summary>
+        /// <param name="control"></param>
+        /// <returns>If successful</returns>
+        public bool increaseZOrder(OMControl c)
+        {
+            int control = containedControls.IndexOf(c);
+            return increaseZOrder(control);
+        }
+
+        #endregion
 
         /// <summary>
         /// 
@@ -396,6 +481,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Create a new panel
         /// </summary>
+        [Obsolete("Always provide a panel name. Method will be removed in next release")]
         public OMPanel()
         {
             this.name = string.Empty;
@@ -555,5 +641,109 @@ namespace OpenMobile.Controls
                 return "";
             return this.name;
         }
+
+        #region Events
+
+        /// <summary>
+        /// Occurs when entering the panel (about to be shown on screen)
+        /// <para>NB! Events has to be mapped before the panel is added to a screen manager</para>
+        /// </summary>
+        public event PanelEvent Entering;
+        /// <summary>
+        /// Occurs when leaving the panel (about to be removed from screen)
+        /// <para>NB! Events has to be mapped before the panel is added to a screen manager</para>
+        /// </summary>
+        public event PanelEvent Leaving;
+        /// <summary>
+        /// Occurs when the panel is loaded and is ready to be shown on screen
+        /// <para>NB! Events has to be mapped before the panel is added to a screen manager</para>
+        /// </summary>
+        public event PanelEvent Loaded;
+        /// <summary>
+        /// Occurs when the panel is unloaded and ready to be removed from screen
+        /// <para>NB! Events has to be mapped before the panel is added to a screen manager</para>
+        /// </summary>
+        public event PanelEvent Unloaded;
+
+        /// <summary>
+        /// Raises a panel event
+        /// This method is reserved for internal usage
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="eventType"></param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void RaiseEvent(int screen, eEventType eventType)
+        {
+            //BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "OMPanel (" + this.name + ") Event: " + eventType.ToString() + " (screen: " + screen.ToString() + ")");
+            switch (eventType)
+            {
+                case eEventType.Entering:
+                    {   // Raise event
+                        if (Entering != null)
+                            OpenMobile.Threading.SafeThread.Asynchronous(() => Entering(this, screen));
+                    }
+                    break;
+                case eEventType.Leaving:
+                    {   // Raise event
+                        if (Leaving != null)
+                            OpenMobile.Threading.SafeThread.Asynchronous(() => Leaving(this, screen));
+                    }
+                    break;
+                case eEventType.Loaded:
+                    {   // Raise event
+                        if (Loaded != null)
+                            OpenMobile.Threading.SafeThread.Asynchronous(() => Loaded(this, screen));
+                    }
+                    break;
+                case eEventType.Unloaded:
+                    {   // Raise event
+                        if (Unloaded != null)
+                            OpenMobile.Threading.SafeThread.Asynchronous(() => Unloaded(this, screen));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// The current screenmanager handling this panel
+        /// </summary>
+        public OpenMobile.Framework.ScreenManager Manager { get; set; }
+
+
     }
+
+    /// <summary>
+    /// Panel event
+    /// </summary>
+    /// <param name="sender">reference to the source panel</param>
+    /// <param name="screen">current screen</param>
+    public delegate void PanelEvent(OMPanel sender, int screen);
+
+    /// <summary>
+    /// Panel event types
+    /// </summary>
+    public enum eEventType 
+    { 
+        /// <summary>
+        /// Entering the panel (about to be shown on screen)
+        /// </summary>
+        Entering, 
+        /// <summary>
+        /// Leaving the panel (about to be removed from screen)
+        /// </summary>
+        Leaving, 
+        /// <summary>
+        /// Panel is loaded and is ready to be shown on screen
+        /// </summary>
+        Loaded, 
+        /// <summary>
+        /// Panel is unloaded and ready to be removed from screen
+        /// </summary>
+        Unloaded 
+    };
+    
 }

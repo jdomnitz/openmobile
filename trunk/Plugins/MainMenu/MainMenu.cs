@@ -514,14 +514,37 @@ namespace OpenMobile
                 OMImage Icon = ((OMImage)screens[screen, ""]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString() + "_Icon"]);
                 if (Button.Tag != null)
                     if ((string)Button.Tag != "")
-                        Icon.Image = new imageItem(plugin.GetPluginIcon((string)Button.Tag, eTextFormat.Normal, Color.Gray, Color.Gray));
+                    {
+                        // Check for default icons
+                        if ((string)Button.Tag == "Exit")
+                            Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "~", Color.Gray));
+                        else if ((string)Button.Tag == "About")
+                            Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "i", Color.Gray));
+                        else
+                            Icon.Image = new imageItem(plugin.GetPluginIcon((string)Button.Tag, eTextFormat.Normal, Color.Gray, Color.Gray));
+                    }
             }
         }
 
         private void Settings_ConfigureList(int screen)
         {
             {   // Create list data for button selection
-                string ActiveItem = ((OMButton)screens[screen][currentlySetting]).Text;
+                OMButton Btn = (OMButton)screens[screen][currentlySetting];
+
+                // Error check
+                if (Btn == null)
+                {
+                    // No active button was found, display error message
+                    dialog dialog = new dialog(this.pluginName, "");
+                    dialog.Header = "Button assignment";
+                    dialog.Text = "Error: Unable to get the currently active button!\nPlease try again.";
+                    dialog.Icon = icons.Error;
+                    dialog.Button = buttons.OK;
+                    dialog.ShowMsgBox(screen).ToString();
+                    return;
+                }
+
+                string ActiveItem = Btn.Text;
                 int SelectedIndex = -1;
                 
                 OMList list = ((OMList)screens[screen, "Settings"]["Settings_List_FunctionList"]);

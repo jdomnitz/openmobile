@@ -60,10 +60,17 @@ namespace OpenMobile.Graphics
         }
         public OImage(System.Drawing.Bitmap i)
         {
+            // Error check
+            if (i == null)
+                return;
+
             texture = new uint[DisplayDevice.AvailableDisplays.Count];
             img = i;
-            height = img.Height;
-            width = img.Width;
+            lock (img)
+            {
+                height = img.Height;
+                width = img.Width;
+            }
         }
 
         public Bitmap image
@@ -115,28 +122,30 @@ namespace OpenMobile.Graphics
                 return;
 
             // Create new Bitmap object with the size of the picture
-            Bitmap bmpPicture = new Bitmap(img.Width, img.Height);
-            // Image attributes for setting the attributes of the picture
-            System.Drawing.Imaging.ImageAttributes iaPicture = new System.Drawing.Imaging.ImageAttributes();
+            lock (img)
+            {
+                Bitmap bmpPicture = new Bitmap(img.Width, img.Height);
+                // Image attributes for setting the attributes of the picture
+                System.Drawing.Imaging.ImageAttributes iaPicture = new System.Drawing.Imaging.ImageAttributes();
 
-            System.Drawing.Imaging.ColorMatrix cmPicture = new System.Drawing.Imaging.ColorMatrix();
-            /*
-            // Change the elements
-            cmPicture.Matrix00 = -1;
-            cmPicture.Matrix11 = -1;
-            cmPicture.Matrix22 = -1;
-            // Set the new color matrix
-            iaPicture.SetColorMatrix(cmPicture);
-            */
-            // Set the Graphics object from the bitmap
-            System.Drawing.Graphics gfxPicture = System.Drawing.Graphics.FromImage(bmpPicture);
-            gfxPicture.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            // New rectangle for the picture, same size as the original picture
-            System.Drawing.Rectangle rctPicture = new System.Drawing.Rectangle(0, 0, img.Width, img.Height);
-            // Draw the new image
-            gfxPicture.DrawImage(img, rctPicture, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, iaPicture);
+                System.Drawing.Imaging.ColorMatrix cmPicture = new System.Drawing.Imaging.ColorMatrix();
+                /*
+                // Change the elements
+                cmPicture.Matrix00 = -1;
+                cmPicture.Matrix11 = -1;
+                cmPicture.Matrix22 = -1;
+                // Set the new color matrix
+                iaPicture.SetColorMatrix(cmPicture);
+                */
+                // Set the Graphics object from the bitmap
+                System.Drawing.Graphics gfxPicture = System.Drawing.Graphics.FromImage(bmpPicture);
+                gfxPicture.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                // New rectangle for the picture, same size as the original picture
+                System.Drawing.Rectangle rctPicture = new System.Drawing.Rectangle(0, 0, img.Width, img.Height);
+                // Draw the new image
+                gfxPicture.DrawImage(img, rctPicture, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, iaPicture);
 
-            cmPicture = new System.Drawing.Imaging.ColorMatrix(new float[][]
+                cmPicture = new System.Drawing.Imaging.ColorMatrix(new float[][]
             {
                 new float[] {1, 0, 0, 0, 0},
                 new float[] {0, 1, 0, 0, 0},
@@ -145,13 +154,13 @@ namespace OpenMobile.Graphics
                 //new float[] {.0f, .50f, .0f, .0f, 1}
                 new float[] {((float)c.R/255f), ((float)c.G/255f), ((float)c.B/255f), .0f, 1}
             });
-            // Set the new color matrix
-            iaPicture.SetColorMatrix(cmPicture);
-            gfxPicture.DrawImage(bmpPicture, rctPicture, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, iaPicture);
+                // Set the new color matrix
+                iaPicture.SetColorMatrix(cmPicture);
+                gfxPicture.DrawImage(bmpPicture, rctPicture, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, iaPicture);
 
-            // Set the PictureBox to the new inverted colors bitmap
-            img = bmpPicture;
-
+                // Set the PictureBox to the new inverted colors bitmap
+                img = bmpPicture;
+            }
         }
 
         public static OImage FromFile(string filename)

@@ -59,14 +59,14 @@ namespace OpenMobile.Platform.Windows
 
         internal WinRawKeyboard(IntPtr windowHandle)
         {
-            //Debug.WriteLine("Initializing keyboard driver (WinRawKeyboard).");
-            //Debug.Indent();
+            Debug.WriteLine("Initializing keyboard driver (WinRawKeyboard).");
+            Debug.Indent();
 
             this.window = windowHandle;
 
             UpdateKeyboardList();
 
-            //Debug.Unindent();
+            Debug.Unindent();
         }
 
         #endregion
