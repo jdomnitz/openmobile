@@ -197,7 +197,7 @@ namespace OpenMobile.Plugin
             switch (this.DataType )
             {
                 case eSensorDataType.Amps:
-                    return sensorValue + "Amps";
+                    return sensorValue + "A";
 
                 case eSensorDataType.binary:
                     if (sensorValue.ToString() == "1")

@@ -290,8 +290,23 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="dataType">The type of information to return (item specific)</param>
         /// <param name="name">Name of the plugin to retrieve data from</param>
+        /// <returns></returns>
+        object getData(eGetData dataType, string name);
+        /// <summary>
+        /// Returns the requested data
+        /// </summary>
+        /// <param name="dataType">The type of information to return (item specific)</param>
+        /// <param name="name">Name of the plugin to retrieve data from</param>
         /// <param name="data">The returned data</param>
+        [Obsolete("Use object getData(eGetData dataType, string name) instead!")]
         void getData(eGetData dataType, string name, out object data);
+        /// <summary>
+        /// Returns the requested data
+        /// </summary>
+        /// <param name="dataType">The type of information to return (item specific)</param>
+        /// <param name="name">Name of the plugin to retrieve data from</param>
+        /// <returns></returns>
+        object getData(eGetData dataType, string name, string param);
         /// <summary>
         /// Returns the requested data
         /// </summary>
@@ -299,6 +314,7 @@ namespace OpenMobile.Plugin
         /// <param name="name">Name of the plugin to retrieve data from</param>
         /// <param name="data">The returned data</param>
         /// <param name="param"></param>
+        [Obsolete("Use object getData(eGetData dataType, string name, string param) instead!")]
         void getData(eGetData dataType, string name, string param, out object data);
         /// <summary>
         /// Sets sensor value
@@ -361,6 +377,13 @@ namespace OpenMobile.Plugin
         /// <param name="message">The messages</param>
         /// <returns></returns>
         bool DebugMsg(DebugMessageType messageType, string header, string[] messages);
+        /// <summary>
+        /// Sends a message array to the debug log (with automatic source detection)
+        /// </summary>
+        /// <param name="header">The message header</param>
+        /// <param name="e">The exception</param>
+        /// <returns></returns>
+        bool DebugMsg(string header, Exception e);
         /// <summary>
         /// Raises a systemwide event
         /// </summary>

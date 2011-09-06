@@ -1700,317 +1700,349 @@ namespace OpenMobile
                 return new mediaInfo();
             return queued[instance][nextPosition[instance]];
         }
+
+        public object getData(eGetData dataType, string name)
+        {
+            object o;
+            getData(dataType, name, out o);
+            return o;
+        }
+
         public void getData(eGetData dataType, string name, out object data)
         {
             IBasePlugin plugin;
-            data = null;
-            switch (dataType)
+            try
             {
-                case eGetData.GetMap:
-                    plugin = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
-                    if (plugin == null)
-                        return;
-                    if (plugin is INavigation)
-                        data = ((INavigation)plugin).getMap;
-                    return;
-                case eGetData.GetMediaDatabase:
-                    plugin = Core.pluginCollection.Find(t => t.pluginName == name);
-                    if (plugin == null)
-                        return;
-                    if (plugin is IMediaDatabase)
-                        data = ((IMediaDatabase)plugin).getNew();
-                    break;
-                case eGetData.GetPlugins:
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        data = Core.pluginCollection;
-                        return;
-                    }
-                    else
-                    {
-                        data = Core.pluginCollection.Find(p => p.pluginName == name);
-                        return;
-                    }
-                case eGetData.DataProviderStatus:
-                    if (!string.IsNullOrEmpty(name))
-                    {
-                        plugin = Core.pluginCollection.Find(p => p.pluginName == name);
+                data = null;
+                switch (dataType)
+                {
+                    case eGetData.GetMap:
+                        plugin = Core.pluginCollection.Find(f => typeof(INavigation).IsInstanceOfType(f));
                         if (plugin == null)
                             return;
-                        if (plugin is IDataProvider)
-                            data = ((IDataProvider)plugin).updaterStatus();
-                    }
-                    break;
-                case eGetData.GetSystemVolume:
-                    getData(eGetData.GetSystemVolume, name, "0", out data);
-                    return;
-                case eGetData.GetFirmwareInfo:
-                    plugin = Core.pluginCollection.Find(p => p.pluginName == name);
-                    if (plugin == null)
+                        if (plugin is INavigation)
+                            data = ((INavigation)plugin).getMap;
                         return;
-                    if (plugin is IRawHardware)
-                        data = ((IRawHardware)plugin).firmwareVersion;
-                    return;
-                case eGetData.GetDeviceInfo:
-                    plugin = Core.pluginCollection.Find(p => p.pluginName == name);
-                    if (plugin == null)
-                        return;
-                    if (plugin is IRawHardware)
-                        data = ((IRawHardware)plugin).deviceInfo;
-                    return;
-                case eGetData.GetAvailableNetworks:
-                    List<connectionInfo> cInf = new List<connectionInfo>();
-                    foreach (IBasePlugin g in Core.pluginCollection.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))
-                    {
-                        foreach (connectionInfo c in ((INetwork)g).getAvailableNetworks())
-                            cInf.Add(c);
-                    }
-                    data = cInf;
-                    return;
-                case eGetData.GetAudioDevices:
-                    if (devices == null)
-                        refreshDevices();
-                    data = devices;
-                    return;
-                case eGetData.GetAvailableSkins:
-                    string[] ret = Directory.GetDirectories(Path.Combine(Application.StartupPath, "Skins"));
-                    for (int i = 0; i < ret.Length; i++)
-                        ret[i] = ret[i].Replace(Path.Combine(Application.StartupPath, "Skins", String.Empty), String.Empty);
-                    data = ret;
-                    return;
-                case eGetData.GetAvailableSensors:
-                    {
+                    case eGetData.GetMediaDatabase:
+                        plugin = Core.pluginCollection.Find(t => t.pluginName == name);
+                        if (plugin == null)
+                            return;
+                        if (plugin is IMediaDatabase)
+                            data = ((IMediaDatabase)plugin).getNew();
+                        break;
+                    case eGetData.GetPlugins:
                         if (string.IsNullOrEmpty(name))
                         {
-                            List<Sensor> Sensors = new List<Sensor>();
-                            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p)))
-                            {
-                                Sensors.AddRange(g.getAvailableSensors(eSensorType.All));
-
-                            }
-                            data = Sensors;
+                            data = Core.pluginCollection;
                             return;
                         }
                         else
                         {
-                            plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                            data = Core.pluginCollection.Find(p => p.pluginName == name);
+                            return;
+                        }
+                    case eGetData.DataProviderStatus:
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            plugin = Core.pluginCollection.Find(p => p.pluginName == name);
                             if (plugin == null)
                                 return;
-                            data = ((IRawHardware)plugin).getAvailableSensors(eSensorType.All);
+                            if (plugin is IDataProvider)
+                                data = ((IDataProvider)plugin).updaterStatus();
                         }
+                        break;
+                    case eGetData.GetSystemVolume:
+                        getData(eGetData.GetSystemVolume, name, "0", out data);
                         return;
-                    }
-                case eGetData.GetAvailableKeyboards:
-                    data = InputRouter.Keyboards;
-                    return;
-                case eGetData.GetAvailableMice:
-                    data = InputRouter.Mice;
-                    return;
-                case eGetData.GetMappedKeyboards:
-                    data = InputRouter.KeyboardsMapped;
-                    return;
-                case eGetData.GetUnMappedKeyboards:
-                    data = InputRouter.KeyboardsUnMapped;
-                    return;
-                case eGetData.GetMappedMice:
-                    data = InputRouter.MiceMapped;
-                    return;
-                case eGetData.GetUnMappedMice:
-                    data = InputRouter.MiceUnMapped;
-                    return;
-                case eGetData.GetMouseDetectedUnit:
-                    data = InputRouter.DetectMouseDevice();
-                    return;
-                case eGetData.GetKeyboardDetectedUnit:
-                    data = InputRouter.DetectKeyboardDevice();
-                    return;
+                    case eGetData.GetFirmwareInfo:
+                        plugin = Core.pluginCollection.Find(p => p.pluginName == name);
+                        if (plugin == null)
+                            return;
+                        if (plugin is IRawHardware)
+                            data = ((IRawHardware)plugin).firmwareVersion;
+                        return;
+                    case eGetData.GetDeviceInfo:
+                        plugin = Core.pluginCollection.Find(p => p.pluginName == name);
+                        if (plugin == null)
+                            return;
+                        if (plugin is IRawHardware)
+                            data = ((IRawHardware)plugin).deviceInfo;
+                        return;
+                    case eGetData.GetAvailableNetworks:
+                        List<connectionInfo> cInf = new List<connectionInfo>();
+                        foreach (IBasePlugin g in Core.pluginCollection.FindAll(p => typeof(INetwork).IsInstanceOfType(p)))
+                        {
+                            foreach (connectionInfo c in ((INetwork)g).getAvailableNetworks())
+                                cInf.Add(c);
+                        }
+                        data = cInf;
+                        return;
+                    case eGetData.GetAudioDevices:
+                        if (devices == null)
+                            refreshDevices();
+                        data = devices;
+                        return;
+                    case eGetData.GetAvailableSkins:
+                        string[] ret = Directory.GetDirectories(Path.Combine(Application.StartupPath, "Skins"));
+                        for (int i = 0; i < ret.Length; i++)
+                            ret[i] = ret[i].Replace(Path.Combine(Application.StartupPath, "Skins", String.Empty), String.Empty);
+                        data = ret;
+                        return;
+                    case eGetData.GetAvailableSensors:
+                        {
+                            if (string.IsNullOrEmpty(name))
+                            {
+                                List<Sensor> Sensors = new List<Sensor>();
+                                foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p)))
+                                {
+                                    Sensors.AddRange(g.getAvailableSensors(eSensorType.All));
+
+                                }
+                                data = Sensors;
+                                return;
+                            }
+                            else
+                            {
+                                plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                                if (plugin == null)
+                                    return;
+                                data = ((IRawHardware)plugin).getAvailableSensors(eSensorType.All);
+                            }
+                            return;
+                        }
+                    case eGetData.GetAvailableKeyboards:
+                        data = InputRouter.Keyboards;
+                        return;
+                    case eGetData.GetAvailableMice:
+                        data = InputRouter.Mice;
+                        return;
+                    case eGetData.GetMappedKeyboards:
+                        data = InputRouter.KeyboardsMapped;
+                        return;
+                    case eGetData.GetUnMappedKeyboards:
+                        data = InputRouter.KeyboardsUnMapped;
+                        return;
+                    case eGetData.GetMappedMice:
+                        data = InputRouter.MiceMapped;
+                        return;
+                    case eGetData.GetUnMappedMice:
+                        data = InputRouter.MiceUnMapped;
+                        return;
+                    case eGetData.GetMouseDetectedUnit:
+                        data = InputRouter.DetectMouseDevice();
+                        return;
+                    case eGetData.GetKeyboardDetectedUnit:
+                        data = InputRouter.DetectKeyboardDevice();
+                        return;
+                }
+            }
+            catch (Exception e)
+            {
+                BuiltInComponents.Host.DebugMsg(dataType.ToString() + " reported an error:", e);
             }
         }
+
+        public object getData(eGetData dataType, string name, string param)
+        {
+            object o;
+            getData(dataType, name, param, out o);
+            return o;
+        }
+
         public void getData(eGetData dataType, string name, string param, out object data)
         {
             data = null;
             int ret;
             IBasePlugin plugin;
-            switch (dataType)
+            try
             {
-                case eGetData.GetMediaPosition:
-                    if (int.TryParse(param, out ret) == true)
-                    {
-                        if (currentMediaPlayer[ret] == null)
-                            if (currentTunedContent[ret] == null)
-                                return;
-                            else
-                                data = currentTunedContent[ret].playbackPosition;
-                        else
-                            data = currentMediaPlayer[ret].getCurrentPosition(ret);
-                    }
-                    return;
-                case eGetData.GetPlayerVolume:
-                    if (int.TryParse(param, out ret) == true)
-                    {
-                        if (currentMediaPlayer[ret] == null)
-                            if (currentTunedContent[ret] == null)
-                                return;
-                            else
-                                data = currentTunedContent[ret].getVolume(ret);
-                        else
-                            data = currentMediaPlayer[ret].getVolume(ret);
-                    }
-                    return;
-                case eGetData.GetSystemVolume:
-                    hal.snd("3|" + param);
-                    bool res = true;
-                    while (res == true)
-                    {
-                        Thread.Sleep(5);
-                        res = (hal.volume == null);
-                        if (res == false)
-                        {
-                            if (hal.volume[0] == param)
-                            {
-                                if (int.TryParse(hal.volume[1], out ret))
-                                    data = ret;
-                                hal.volume = null;
-                            }
-                        }
-                    }
-                    return;
-                case eGetData.GetScreenBrightness:
-                    hal.snd("1|" + param);
-                    bool resp = true;
-                    while (resp == true)
-                    {
-                        Thread.Sleep(5);
-                        resp = (hal.brightness == null);
-                        if (resp == false)
-                        {
-                            if (hal.brightness[0] == param)
-                            {
-                                if (int.TryParse(hal.brightness[1], out ret))
-                                    data = ret;
-                                hal.brightness = null;
-                            }
-                        }
-                    }
-                    return;
-                case eGetData.GetScaleFactors:
-                    if (int.TryParse(param, out ret) == true)
-                    {
-                        if ((ret >= 0) && (ret < ScreenCount))
-                            data = Core.RenderingWindows[ret].ScaleFactors;
-                    }
-                    return;
-                case eGetData.GetPlaybackSpeed:
-                    if (int.TryParse(param, out ret) == true)
-                    {
-                        if (currentMediaPlayer[ret] == null)
-                            return;
-                        else
-                            data = currentMediaPlayer[ret].getPlaybackSpeed(ret);
-                    }
-                    return;
-                case eGetData.GetMediaStatus:
-                    if (int.TryParse(param, out ret) == true)
-                    {
-                        if (string.IsNullOrEmpty(name))
+                switch (dataType)
+                {
+                    case eGetData.GetMediaPosition:
+                        if (int.TryParse(param, out ret) == true)
                         {
                             if (currentMediaPlayer[ret] == null)
                                 if (currentTunedContent[ret] == null)
                                     return;
                                 else
-                                    data = currentTunedContent[ret].getStationInfo(ret);
+                                    data = currentTunedContent[ret].playbackPosition;
                             else
-                                data = currentMediaPlayer[ret].getPlayerStatus(ret);
+                                data = currentMediaPlayer[ret].getCurrentPosition(ret);
                         }
-                        else
+                        return;
+                    case eGetData.GetPlayerVolume:
+                        if (int.TryParse(param, out ret) == true)
+                        {
+                            if (currentMediaPlayer[ret] == null)
+                                if (currentTunedContent[ret] == null)
+                                    return;
+                                else
+                                    data = currentTunedContent[ret].getVolume(ret);
+                            else
+                                data = currentMediaPlayer[ret].getVolume(ret);
+                        }
+                        return;
+                    case eGetData.GetSystemVolume:
+                        hal.snd("3|" + param);
+                        bool res = true;
+                        while (res == true)
+                        {
+                            Thread.Sleep(5);
+                            res = (hal.volume == null);
+                            if (res == false)
+                            {
+                                if (hal.volume[0] == param)
+                                {
+                                    if (int.TryParse(hal.volume[1], out ret))
+                                        data = ret;
+                                    hal.volume = null;
+                                }
+                            }
+                        }
+                        return;
+                    case eGetData.GetScreenBrightness:
+                        hal.snd("1|" + param);
+                        bool resp = true;
+                        while (resp == true)
+                        {
+                            Thread.Sleep(5);
+                            resp = (hal.brightness == null);
+                            if (resp == false)
+                            {
+                                if (hal.brightness[0] == param)
+                                {
+                                    if (int.TryParse(hal.brightness[1], out ret))
+                                        data = ret;
+                                    hal.brightness = null;
+                                }
+                            }
+                        }
+                        return;
+                    case eGetData.GetScaleFactors:
+                        if (int.TryParse(param, out ret) == true)
+                        {
+                            if ((ret >= 0) && (ret < ScreenCount))
+                                data = Core.RenderingWindows[ret].ScaleFactors;
+                        }
+                        return;
+                    case eGetData.GetPlaybackSpeed:
+                        if (int.TryParse(param, out ret) == true)
+                        {
+                            if (currentMediaPlayer[ret] == null)
+                                return;
+                            else
+                                data = currentMediaPlayer[ret].getPlaybackSpeed(ret);
+                        }
+                        return;
+                    case eGetData.GetMediaStatus:
+                        if (int.TryParse(param, out ret) == true)
+                        {
+                            if (string.IsNullOrEmpty(name))
+                            {
+                                if (currentMediaPlayer[ret] == null)
+                                    if (currentTunedContent[ret] == null)
+                                        return;
+                                    else
+                                        data = currentTunedContent[ret].getStationInfo(ret);
+                                else
+                                    data = currentMediaPlayer[ret].getPlayerStatus(ret);
+                            }
+                            else
+                            {
+                                plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                                if (plugin == null)
+                                    return;
+                                else if (typeof(IAVPlayer).IsInstanceOfType(plugin))
+                                    data = ((IAVPlayer)plugin).getPlayerStatus(ret);
+                                else if (typeof(ITunedContent).IsInstanceOfType(plugin))
+                                    data = ((ITunedContent)plugin).getStationInfo(ret);
+                            }
+                        }
+                        return;
+                    case eGetData.GetTunedContentInfo:
+                        {
+                            int q;
+                            if (int.TryParse(param, out q) == true)
+                            {
+                                if (currentTunedContent[q] != null)
+                                    data = currentTunedContent[q].getStatus(q);
+                            }
+                        }
+                        return;
+                    case eGetData.GetStationList:
+                        {
+                            int q;
+                            if (int.TryParse(param, out q) == true)
+                            {
+                                if (currentTunedContent[q] != null)
+                                    data = currentTunedContent[q].getStationList(q);
+                            }
+                        }
+                        return;
+                    case eGetData.GetAvailableNavPanels:
+                        plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                        if (plugin == null)
+                            return;
+                        data = ((INavigation)plugin).availablePanels;
+                        return;
+                    case eGetData.GetCurrentPosition:
+                        plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                        if (plugin == null)
+                            return;
+                        data = ((INavigation)plugin).Position;
+                        return;
+                    case eGetData.GetNearestAddress:
+                        plugin = Core.pluginCollection.Find(s => s.pluginName == name);
+                        if (plugin == null)
+                            return;
+                        data = ((INavigation)plugin).Location;
+                        return;
+                    case eGetData.GetDestination:
                         {
                             plugin = Core.pluginCollection.Find(s => s.pluginName == name);
                             if (plugin == null)
                                 return;
-                            else if (typeof(IAVPlayer).IsInstanceOfType(plugin))
-                                data = ((IAVPlayer)plugin).getPlayerStatus(ret);
-                            else if (typeof(ITunedContent).IsInstanceOfType(plugin))
-                                data = ((ITunedContent)plugin).getStationInfo(ret);
+                            data = ((INavigation)plugin).Destination;
                         }
-                    }
-                    return;
-                case eGetData.GetTunedContentInfo:
-                    {
-                        int q;
-                        if (int.TryParse(param, out q) == true)
+                        return;
+                    case eGetData.GetSupportedBands:
                         {
-                            if (currentTunedContent[q] != null)
-                                data = currentTunedContent[q].getStatus(q);
+                            if (int.TryParse(param, out ret) == true)
+                            {
+                                if (currentTunedContent[ret] != null)
+                                    data = currentTunedContent[ret].getSupportedBands(ret);
+                            }
                         }
-                    }
-                    return;
-                case eGetData.GetStationList:
-                    {
-                        int q;
-                        if (int.TryParse(param, out q) == true)
+                        return;
+                    case eGetData.GetMiceUnitsForScreen:
                         {
-                            if (currentTunedContent[q] != null)
-                                data = currentTunedContent[q].getStationList(q);
+                            if (int.TryParse(param, out ret) == true)
+                                data = InputRouter.GetMiceDeviceListForScreen(ret);
                         }
-                    }
-                    return;
-                case eGetData.GetAvailableNavPanels:
-                    plugin = Core.pluginCollection.Find(s => s.pluginName == name);
-                    if (plugin == null)
                         return;
-                    data = ((INavigation)plugin).availablePanels;
-                    return;
-                case eGetData.GetCurrentPosition:
-                    plugin = Core.pluginCollection.Find(s => s.pluginName == name);
-                    if (plugin == null)
-                        return;
-                    data = ((INavigation)plugin).Position;
-                    return;
-                case eGetData.GetNearestAddress:
-                    plugin = Core.pluginCollection.Find(s => s.pluginName == name);
-                    if (plugin == null)
-                        return;
-                    data = ((INavigation)plugin).Location;
-                    return;
-                case eGetData.GetDestination:
-                    plugin = Core.pluginCollection.Find(s => s.pluginName == name);
-                    if (plugin == null)
-                        return;
-                    data = ((INavigation)plugin).Destination;
-                    return;
-                case eGetData.GetSupportedBands:
-                    {
-                        if (int.TryParse(param, out ret) == true)
+                    case eGetData.GetKeyboardUnitsForScreen:
                         {
-                            if (currentTunedContent[ret] != null)
-                                data = currentTunedContent[ret].getSupportedBands(ret);
+                            if (int.TryParse(param, out ret) == true)
+                                data = InputRouter.GetKeyboardsDeviceListForScreen(ret);
                         }
-                    }
-                    return;
-                case eGetData.GetMiceUnitsForScreen:
-                    {
-                        if (int.TryParse(param, out ret) == true)
-                            data = InputRouter.GetMiceDeviceListForScreen(ret);
-                    }
-                    return;
-                case eGetData.GetKeyboardUnitsForScreen:
-                    {
-                        if (int.TryParse(param, out ret) == true)
-                            data = InputRouter.GetKeyboardsDeviceListForScreen(ret);
-                    }
-                    return;
-                case eGetData.GetKeyboardCurrentUnitForScreen:
-                    {
-                        if (int.TryParse(param, out ret) == true)
-                            data = InputRouter.GetKeyboardsCurrentDeviceForScreen(ret);
-                    }
-                    return;
-                case eGetData.GetMiceCurrentUnitForScreen:
-                    {
-                        if (int.TryParse(param, out ret) == true)
-                            data = InputRouter.GetMiceDeviceCurrentForScreen(ret);
-                    }
-                    return;
+                        return;
+                    case eGetData.GetKeyboardCurrentUnitForScreen:
+                        {
+                            if (int.TryParse(param, out ret) == true)
+                                data = InputRouter.GetKeyboardsCurrentDeviceForScreen(ret);
+                        }
+                        return;
+                    case eGetData.GetMiceCurrentUnitForScreen:
+                        {
+                            if (int.TryParse(param, out ret) == true)
+                                data = InputRouter.GetMiceDeviceCurrentForScreen(ret);
+                        }
+                        return;
+                }
+            }
+            catch (Exception e)
+            {
+                BuiltInComponents.Host.DebugMsg(dataType.ToString() + " reported an error:", e);
             }
 
         }
@@ -2062,6 +2094,33 @@ namespace OpenMobile
         {
             MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();
             return DebugMsg(mb.DeclaringType.FullName + "." + mb.Name, messageType.ToString().Substring(0, 1) + "|" + header, messages);
+        }
+        public bool DebugMsg(string header, Exception e)
+        {
+            MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();
+            return DebugMsg(mb.DeclaringType.FullName + "." + mb.Name, DebugMessageType.Error.ToString().Substring(0, 1) + "|" + header + "\r\n" + spewException(e));
+        }
+        private static string spewException(Exception e)
+        {
+            string err;
+            err = e.GetType().Name + "\r\n";
+            err += ("Exception Message: " + e.Message);
+            err += ("\r\nSource: " + e.Source);
+            err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+            err += ("\r\n");
+            int failsafe = 0;
+            while (e.InnerException != null)
+            {
+                e = e.InnerException;
+                err += ("Inner Exception: " + e.Message);
+                err += ("\r\nSource: " + e.Source);
+                err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+                err += ("\r\n");
+                failsafe++;
+                if (failsafe == 4)
+                    break;
+            }
+            return err;
         }
 
         #endregion
