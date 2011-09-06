@@ -14,21 +14,24 @@ namespace SystemSensors
         PerformanceCounter cpuCounter;
         PerformanceCounter freeRamCounter;
         Process currentProcess;
-        public override System.Collections.Generic.List<Sensor> getAvailableSensors(eSensorType type)
+        IPluginHost thehost;
+        System.Timers.Timer slowTimer;
+        System.Timers.Timer fastTimer;
+
+        public System.Collections.Generic.List<Sensor> getAvailableSensors(eSensorType type)
         {
             return sensors;
         }
 
-        public override bool setValue(int PID, object value)
+        public bool setValue(string name, object value)
         {
             return false;
         }
-        public override object getValue(int PID)
+        public object getValue(string name)
         {
-            int localPID = UnmaskPID(PID);
-            switch (localPID)
+            switch (name)
             {
-                case 0:
+                case "SystemSensors.CPUUsage":
                     if (cpuCounter == null)
                     {
                         cpuCounter = new PerformanceCounter();
@@ -38,25 +41,32 @@ namespace SystemSensors
                         cpuCounter.NextValue(); //init
                     }
                     return cpuCounter.NextValue();
-                case 1:
+                case "SystemSensors.PhysicalMemoryFree":
                     if (freeRamCounter==null)
                         freeRamCounter = new PerformanceCounter("Memory", "Available MBytes");
                     return freeRamCounter.NextValue() * 1048576;
-                case 2:
+                case "SystemSensors.PhysicalMemoryUsed":
                     if (Configuration.RunningOnWindows)
                         return (int)(getUsedPhysicalMemory());
                     return null;
-                case 3:
+                case "SystemSensors.MemoryUsedPercent":
                     if (Configuration.RunningOnWindows)
                         return (float)Math.Round(getUsedMemoryPercent(),2);
                     return null;
-                case 4:
+                case "SystemSensors.ProcessMemoryUsed":
                     if (currentProcess == null)
                         currentProcess = Process.GetCurrentProcess();
                     return currentProcess.WorkingSet64 ;
+                case "SystemSensors.Date":
+                    return DateTime.Now.ToShortDateString();
+                case "SystemSensors.Time":
+                    return DateTime.Now.ToShortTimeString();
+                case "SystemSensors.LongDate":
+                    return DateTime.Now.ToString("MMMM d");
             }
             return null;
         }
+
         private uint getUsedPhysicalMemory()
         {
             MEMORYSTATUS status=new MEMORYSTATUS();
@@ -127,80 +137,108 @@ namespace SystemSensors
         private static extern bool GlobalMemoryStatus(ref MEMORYSTATUS lpBuffer);
         #endregion
 
-        public override void resetDevice()
+        public void resetDevice()
         {
             //
         }
 
-        public override string deviceInfo
+        public string deviceInfo
         {
             get { return "System Sensors"; }
         }
 
-        public override string firmwareVersion
+        public string firmwareVersion
         {
             get { return OSSpecific.getOSVersion(); }
         }
 
-        public override OpenMobile.eLoadStatus initialize(IPluginHost host)
+        public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
-            InitPIDMask();
-            Sensor CPU = new Sensor("System.CPUUsage", MaskPID(0), eSensorType.deviceSuppliesData, "CPU", eSensorDataType.percent );
-            Sensor FreeMemory = new Sensor("System.PhysicalMemoryFree", MaskPID(1), eSensorType.deviceSuppliesData, "FMem", eSensorDataType.bytes );
-            Sensor UsedMemory = new Sensor("System.PhysicalMemoryUsed", MaskPID(2), eSensorType.deviceSuppliesData, "UMem", eSensorDataType.bytes );
-            Sensor UsedMemoryPercent = new Sensor("System.MemoryUsedPercent", MaskPID(3), eSensorType.deviceSuppliesData, "Mem", eSensorDataType.percent );
-            Sensor ProcessMemory = new Sensor("System.ProcessMemoryUsed", MaskPID(4), eSensorType.deviceSuppliesData, "UMem", eSensorDataType.bytes);
+            thehost = host;
+            Sensor CPU = new Sensor("SystemSensors.CPUUsage", eSensorType.deviceSuppliesData, "CPU", eSensorDataType.percent);
+            Sensor FreeMemory = new Sensor("SystemSensors.PhysicalMemoryFree", eSensorType.deviceSuppliesData, "FMem", eSensorDataType.bytes);
+            Sensor UsedMemory = new Sensor("SystemSensors.PhysicalMemoryUsed", eSensorType.deviceSuppliesData, "UMem", eSensorDataType.bytes);
+            Sensor UsedMemoryPercent = new Sensor("SystemSensors.MemoryUsedPercent", eSensorType.deviceSuppliesData, "Mem", eSensorDataType.percent);
+            Sensor ProcessMemory = new Sensor("SystemSensors.ProcessMemoryUsed", eSensorType.deviceSuppliesData, "UMem", eSensorDataType.bytes);
+            Sensor Dt = new Sensor("SystemSensors.Date", eSensorType.deviceSuppliesData, "Dt", eSensorDataType.raw);
+            Sensor Time = new Sensor("SystemSensors.Time", eSensorType.deviceSuppliesData, "Tm", eSensorDataType.raw);
+            Sensor LongDate = new Sensor("SystemSensors.LongDate", eSensorType.deviceSuppliesData, "Dt", eSensorDataType.raw);
             sensors.Add(CPU);
             sensors.Add(FreeMemory);
             sensors.Add(UsedMemory);
             sensors.Add(UsedMemoryPercent);
             sensors.Add(ProcessMemory);
+            sensors.Add(Dt);
+            sensors.Add(Time);
+            sensors.Add(LongDate);
+
+            slowTimer = new System.Timers.Timer(5000); //These items take a while to refresh to do them less often
+            slowTimer.Elapsed += new System.Timers.ElapsedEventHandler(slowTimer_Elapsed);
+            slowTimer.Enabled = true;
+            fastTimer = new System.Timers.Timer(1000);
+            fastTimer.Elapsed += new System.Timers.ElapsedEventHandler(fastTimer_Elapsed);
+            fastTimer.Enabled = true;
+
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
 
-        public override Settings loadSettings()
+        void slowTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            //for (int i=0; i <= 4; i++)
+            //    OpenMobile.Threading.SafeThread.Asynchronous(delegate() { sensors[i].Value = getValue(sensors[i].Name); }, thehost);
+        }
+
+        void fastTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            for (int i=5; i <= 7; i++)
+                sensors[i].Value = getValue(sensors[i].Name); 
+                //OpenMobile.Threading.SafeThread.Asynchronous(delegate() { }, thehost);
+        }
+
+        public Settings loadSettings()
         {
             return null;
         }
 
-        public override string authorName
+        public string authorName
         {
             get { return "Justin Domnitz"; }
         }
 
-        public override string authorEmail
+        public string authorEmail
         {
             get { return ""; }
         }
 
-        public override string pluginName
+        public string pluginName
         {
             get { return "SystemSensors"; }
         }
 
-        public override float pluginVersion
+        public float pluginVersion
         {
             get { return 0.1F; }
         }
 
-        public override string pluginDescription
+        public string pluginDescription
         {
             get { return "System Sensors"; }
         }
 
-        public override bool incomingMessage(string message, string source)
+        public bool incomingMessage(string message, string source)
         {
             return false;
         }
 
-        public override bool incomingMessage<T>(string message, string source, ref T data)
+        public bool incomingMessage<T>(string message, string source, ref T data)
         {
             return false;
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             //
         }
+
     }
 }

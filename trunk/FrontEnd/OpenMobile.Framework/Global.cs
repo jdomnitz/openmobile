@@ -1267,21 +1267,25 @@ namespace OpenMobile
     public enum eLoadStatus : byte
     {
         /// <summary>
+        /// Have not attempted to load it yet
+        /// </summary>
+        NotLoaded = 0,
+        /// <summary>
         /// Everything went OK.  Plugin is initialized
         /// </summary>
-        LoadSuccessful = 0,
+        LoadSuccessful = 1,
         /// <summary>
         /// Plugin requires default settings to continue.  Load default settings panel and then re-initialize when the user has set the settings.
         /// </summary>
-        SettingsRequired = 1,
+        SettingsRequired = 2,
         /// <summary>
         /// A required dependency is not loaded yet or something needs to be retried.  Load the rest of the plugins and then retry the initialization.
         /// </summary>
-        LoadFailedRetryRequested = 2,
+        LoadFailedRetryRequested = 3,
         /// <summary>
         /// Load failed but this was not the result of a crash.  Plugin will be unloaded.
         /// </summary>
-        LoadFailedGracefulUnloadRequested = 3,
+        LoadFailedGracefulUnloadRequested = 4,
         /// <summary>
         /// Load failed or an unknown error occured.  Plugin will be unloaded. (Occurs automatically if an uncaught error is thrown)
         /// </summary>

@@ -28,7 +28,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A label for displaying text
     /// </summary>
-    public class OMLabel : OMControl
+    public class OMLabel : OMControl, ISensorDisplay
     {
         // Comment by Borte: access modefier changed to protected to allow more access when this control is inherited
         /// <summary>
@@ -55,7 +55,11 @@ namespace OpenMobile.Controls
         /// Outline color of the text
         /// </summary>
         protected Color outlineColor = Color.Black;
-
+        /// <summary>
+        /// Sensor name to subscribe to
+        /// </summary>
+        protected string displaySensorName = "";
+        
         /// <summary>
         /// Sets the color of the text
         /// </summary>
@@ -217,5 +221,42 @@ namespace OpenMobile.Controls
             if (_SkinDebug)
                 base.DrawSkinDebugInfo(g, Color.Green);
         }
+
+        /// <summary>
+        /// sensor name to be watched
+        /// </summary>
+        protected string sensor;
+        /// <summary>
+        /// Sets the sensor to subscribe to
+        /// </summary>
+        public  string sensorName
+        {
+            get
+            {
+                return sensor;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    return;
+                this.sensor = value;
+
+                object o;
+                BuiltInComponents.Host.getData(eGetData.GetAvailableSensors, "", out o);
+                if (o == null)
+                    return;
+                System.Collections.Generic.List<OpenMobile.Plugin.Sensor> sensors = (System.Collections.Generic.List<OpenMobile.Plugin.Sensor>)o;
+
+                OpenMobile.Plugin.Sensor sensor = sensors.Find(s => s.Name == this.sensor);
+                if (sensor != null)
+                    sensor.newSensorDataReceived += new OpenMobile.Plugin.sensorDataReceived(sensor_newSensorDataReceived);
+            }
+        }
+
+        void sensor_newSensorDataReceived(OpenMobile.Plugin.Sensor sender)
+        {
+            this.Text = sender.FormatedValue() ;
+        }
+
     }
 }

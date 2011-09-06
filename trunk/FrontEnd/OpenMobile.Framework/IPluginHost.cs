@@ -303,14 +303,14 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Sets sensor value
         /// </summary>
-        /// <param name="PID">Sensor PID</param>
+        /// <param name="name">Sensor Name</param>
         /// <param name="value">Value to set sensor to</param>
-        bool setSensorValue(int PID, object value);
+        bool setSensorValue(string name, object value);
         /// <summary>
         /// Retrieve sensor value
         /// </summary>
-        /// <param name="PID">Sensor PID</param>
-        object getSensorValue(int PID);
+        /// <param name="name">Sensor Name</param>
+        object getSensorValue(string name);
         /// <summary>
         /// Sends a message to the debug log
         /// </summary>

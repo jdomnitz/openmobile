@@ -185,7 +185,7 @@ Public Class GPSStatus
             For Each Ctrl As OMLabel In m_Output
                 C = Ctrl
                 Sen = Sensors.Find(Function(p) p.Name = C.Tag)
-                Ctrl.Tag = Sen.PID
+                Ctrl.Tag = Sen.Name
             Next
 
             PIDsLoaded = True

@@ -65,8 +65,14 @@ Public Class SensorTester
         Return Pan
     End Function
 
+    Public Sub DataChanged(ByVal name As String, ByVal value As Object)
+        Dim List As OMList = m_Manager(0, "")("Sensors")
+        List.Add(New OMListItem(name & "-" & value))
+    End Sub
+
+
     Private Function GetVal(ByVal Sen As Sensor) As String
-        Dim Val As String = m_Host.getSensorValue(Sen.PID).ToString
+        Dim Val As String = m_Host.getSensorValue(Sen.Name).ToString
 
         Select Case Sen.DataType
             Case Is = eSensorDataType.Amps

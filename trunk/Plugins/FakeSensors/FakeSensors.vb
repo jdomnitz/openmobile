@@ -22,7 +22,7 @@ Imports OpenMobile.Framework
 Imports OpenMobile.Plugin
 
 Public Class FakeSensors
-    Inherits OpenMobile.Plugin.IRawHardware
+    Implements OpenMobile.Plugin.IRawHardware
 
     Private m_Sensors As Generic.List(Of Sensor)
     Private m_Rnd As Random
@@ -35,7 +35,7 @@ Public Class FakeSensors
         Altitude
         Bearing
         Speed
-        ZipCode 
+        ZipCode
         City
         State
         OutsideTemp
@@ -46,109 +46,108 @@ Public Class FakeSensors
         Twitter
     End Enum
 
-    Public Overrides ReadOnly Property authorEmail() As String
+    Public ReadOnly Property authorEmail() As String Implements IBasePlugin.authorEmail
         Get
             Return "jheizer@gmail.com"
         End Get
     End Property
 
-    Public Overrides ReadOnly Property authorName() As String
+    Public ReadOnly Property authorName() As String Implements IBasePlugin.authorName
         Get
             Return "Jon Heizer"
         End Get
     End Property
 
-    Public Overrides ReadOnly Property deviceInfo() As String
+    Public ReadOnly Property deviceInfo() As String Implements IRawHardware.deviceInfo
         Get
             Return "Fake Sensors"
         End Get
     End Property
 
-    Public Overrides Sub Dispose()
+    Public Sub Dispose() Implements IBasePlugin.Dispose
 
     End Sub
 
-    Public Overrides ReadOnly Property firmwareVersion() As String
+    Public ReadOnly Property firmwareVersion() As String Implements IRawHardware.firmwareVersion
         Get
             Return 1
         End Get
     End Property
 
-    Public Overrides Function getAvailableSensors(ByVal type As OpenMobile.Plugin.eSensorType) As System.Collections.Generic.List(Of OpenMobile.Plugin.Sensor)
+    Public Function getAvailableSensors(ByVal type As OpenMobile.Plugin.eSensorType) As System.Collections.Generic.List(Of OpenMobile.Plugin.Sensor) Implements IRawHardware.getAvailableSensors
         If m_Sensors Is Nothing Then
             m_Sensors = New Generic.List(Of Sensor)
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Fix.ToString, MyBase.MaskPID(PIDs.Fix), eSensorType.deviceSuppliesData, "Fix", eSensorDataType.binary))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Longitude.ToString, MyBase.MaskPID(PIDs.Longitude), eSensorType.deviceSuppliesData, "Lng", eSensorDataType.degrees))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Latitude.ToString, MyBase.MaskPID(PIDs.Latitude), eSensorType.deviceSuppliesData, "Lat", eSensorDataType.degrees))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Facebook.ToString, MyBase.MaskPID(PIDs.Facebook), eSensorType.deviceSuppliesData, "FB", eSensorDataType.raw))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.NumberOfSats.ToString, MyBase.MaskPID(PIDs.NumberOfSats), eSensorType.deviceSuppliesData, "Sats", eSensorDataType.raw))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Altitude.ToString, MyBase.MaskPID(PIDs.Altitude), eSensorType.deviceSuppliesData, "Alt", eSensorDataType.meters))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Bearing.ToString, MyBase.MaskPID(PIDs.Bearing), eSensorType.deviceSuppliesData, "Dir", eSensorDataType.degrees))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Speed.ToString, MyBase.MaskPID(PIDs.Speed), eSensorType.deviceSuppliesData, "Spd", eSensorDataType.kph))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.InsideTemp.ToString, MyBase.MaskPID(PIDs.InsideTemp), eSensorType.deviceSuppliesData, "In", eSensorDataType.degreesC))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.OutsideTemp.ToString, MyBase.MaskPID(PIDs.OutsideTemp), eSensorType.deviceSuppliesData, "Out", eSensorDataType.degreesC))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Twitter.ToString, MyBase.MaskPID(PIDs.Twitter), eSensorType.deviceSuppliesData, "Twtr", eSensorDataType.raw))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.UnreadEmails.ToString, MyBase.MaskPID(PIDs.UnreadEmails), eSensorType.deviceSuppliesData, "Email", eSensorDataType.raw))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.UnreadIMs.ToString, MyBase.MaskPID(PIDs.UnreadIMs), eSensorType.deviceSuppliesData, "IMs", eSensorDataType.raw))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.ZipCode.ToString, MyBase.MaskPID(PIDs.ZipCode), eSensorType.deviceSuppliesData, "Zip", eSensorDataType.raw))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.City.ToString, MyBase.MaskPID(PIDs.City), eSensorType.deviceSuppliesData, "City", eSensorDataType.raw))
-            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.State.ToString, MyBase.MaskPID(PIDs.State), eSensorType.deviceSuppliesData, "St", eSensorDataType.raw))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Fix.ToString, eSensorType.deviceSuppliesData, "Fix", eSensorDataType.binary))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Longitude.ToString, eSensorType.deviceSuppliesData, "Lng", eSensorDataType.degrees))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Latitude.ToString, eSensorType.deviceSuppliesData, "Lat", eSensorDataType.degrees))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Facebook.ToString, eSensorType.deviceSuppliesData, "FB", eSensorDataType.raw))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.NumberOfSats.ToString, eSensorType.deviceSuppliesData, "Sats", eSensorDataType.raw))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Altitude.ToString, eSensorType.deviceSuppliesData, "Alt", eSensorDataType.meters))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Bearing.ToString, eSensorType.deviceSuppliesData, "Dir", eSensorDataType.degrees))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Speed.ToString, eSensorType.deviceSuppliesData, "Spd", eSensorDataType.kph))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.InsideTemp.ToString, eSensorType.deviceSuppliesData, "In", eSensorDataType.degreesC))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.OutsideTemp.ToString, eSensorType.deviceSuppliesData, "Out", eSensorDataType.degreesC))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.Twitter.ToString, eSensorType.deviceSuppliesData, "Twtr", eSensorDataType.raw))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.UnreadEmails.ToString, eSensorType.deviceSuppliesData, "Email", eSensorDataType.raw))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.UnreadIMs.ToString, eSensorType.deviceSuppliesData, "IMs", eSensorDataType.raw))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.ZipCode.ToString, eSensorType.deviceSuppliesData, "Zip", eSensorDataType.raw))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.City.ToString, eSensorType.deviceSuppliesData, "City", eSensorDataType.raw))
+            m_Sensors.Add(New Sensor("FakeSensors." & PIDs.State.ToString, eSensorType.deviceSuppliesData, "St", eSensorDataType.raw))
         End If
 
         Return m_Sensors
     End Function
 
-    Public Overrides Function getValue(ByVal PID As Integer) As Object
-        If MyBase.UnmaskPID(PID) = PIDs.Longitude Then
-            Return "1234.5678"
-        End If
-        If MyBase.UnmaskPID(PID) = PIDs.Fix Then
-            Return m_Rnd.Next(0, 2).ToString
-        End If
-
-        Return m_Rnd.Next(0, 100).ToString
+    Public Function getValue(ByVal Name As String) As Object Implements IRawHardware.getValue
+        Select Name.Substring(12)
+            Case PIDs.Longitude.ToString
+                Return "1234.5678"
+            Case Is = PIDs.Fix.ToString
+                Return m_Rnd.Next(0, 2).ToString
+            Case Else
+                Return m_Rnd.Next(0, 100).ToString
+        End Select
     End Function
 
-    Public Overloads Overrides Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean
-
-    End Function
-
-    Public Overloads Overrides Function incomingMessage(Of T)(ByVal message As String, ByVal source As String, ByRef data As T) As Boolean
+    Public Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean Implements IBasePlugin.incomingMessage
 
     End Function
 
-    Public Overrides Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus
-        InitPIDMask()
+    Public Function incomingMessage(Of T)(ByVal message As String, ByVal source As String, ByRef data As T) As Boolean Implements IBasePlugin.incomingMessage
+
+    End Function
+
+    Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements IBasePlugin.initialize
         m_Rnd = New Random(DateTime.Now.Millisecond)
     End Function
 
-    Public Overrides Function loadSettings() As OpenMobile.Plugin.Settings
-
+    Public Function loadSettings() As OpenMobile.Plugin.Settings Implements IBasePlugin.loadSettings
+        Return Nothing
     End Function
 
-    Public Overrides ReadOnly Property pluginDescription() As String
+    Public ReadOnly Property pluginDescription() As String Implements IBasePlugin.pluginDescription
         Get
             Return "Fake Sensors"
         End Get
     End Property
 
-    Public Overrides ReadOnly Property pluginName() As String
+    Public ReadOnly Property pluginName() As String Implements IBasePlugin.pluginName
         Get
             Return "FakeSensors"
         End Get
     End Property
 
-    Public Overrides ReadOnly Property pluginVersion() As Single
+    Public ReadOnly Property pluginVersion() As Single Implements IBasePlugin.pluginVersion
         Get
             Return 1
         End Get
     End Property
 
-    Public Overrides Sub resetDevice()
+    Public Sub resetDevice() Implements IRawHardware.resetDevice
 
     End Sub
 
-    Public Overrides Function setValue(ByVal PID As Integer, ByVal value As Object) As Boolean
-
+    Public Function setValue(ByVal name As String, ByVal value As Object) As Boolean Implements OpenMobile.Plugin.IRawHardware.setValue
+        Return True
     End Function
 End Class

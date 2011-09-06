@@ -118,20 +118,29 @@ namespace OpenMobile.Plugin
         /// </summary>
         binary 
     }
+    /// <summary>
+    /// Event raised when the value of the sensor has changed
+    /// </summary>
+    /// <param name="sender"></param>
+    public delegate void sensorDataReceived(Sensor sender); 
 
     /// <summary>
     /// Represents a sensor
     /// </summary>
-    public struct Sensor
+    public class Sensor
     {
+        /// <summary>
+        /// New data value event
+        /// </summary>
+        public event sensorDataReceived newSensorDataReceived;
         /// <summary>
         /// Sensor Name
         /// </summary>
         public string Name;
         /// <summary>
-        /// Sensor PID (masked so its globally unique)
+        /// Senor value
         /// </summary>
-        public int PID;
+        object sensorValue = "";
         /// <summary>
         /// Sensor Type
         /// </summary>
@@ -144,181 +153,160 @@ namespace OpenMobile.Plugin
         /// Sensor return data type
         /// </summary>
         public eSensorDataType DataType;
-
         /// <summary>
         /// Creates a new sensor object
         /// </summary>
         /// <param name="Name"></param>
-        /// <param name="PID"></param>
-        /// <param name="Type"></param>
-        public Sensor(string Name, int PID, eSensorType Type) : this(Name, PID, Type, "", eSensorDataType.raw)
-        {
-        }
-                /// <summary>
-        /// Creates a new sensor object
-        /// </summary>
-        /// <param name="Name"></param>
-        /// <param name="PID"></param>
         /// <param name="Type"></param>
         /// <param name="ShortName"></param>
         /// <param name="DataType"></param>
-        public Sensor(string Name, int PID, eSensorType Type, string ShortName, eSensorDataType DataType)
+        public Sensor(string Name, eSensorType Type, string ShortName, eSensorDataType DataType)
         {
             this.Name = Name;
-            this.PID = PID;
             this.Type = Type;
             this.ShortName = ShortName;
             this.DataType = DataType; 
+        }
+        /// <summary>
+        /// The current value of the sensor
+        /// </summary>
+        public object Value
+        {
+            get
+            {
+                return sensorValue;
+            }
+            set
+            {
+                if (!sensorValue.Equals(value))
+                {
+                    sensorValue = value;
+                    if (newSensorDataReceived != null)
+                        newSensorDataReceived(this);
+                }
+            }
+        }
+        /// <summary>
+        /// Format the sensor value to a pretty string
+        /// </summary>
+        /// <returns></returns>
+        public string FormatedValue()
+        {
+            double dec;
+
+            switch (this.DataType )
+            {
+                case eSensorDataType.Amps:
+                    return sensorValue + "Amps";
+
+                case eSensorDataType.binary:
+                    if (sensorValue.ToString() == "1")
+                    {
+                        return "On";
+                    }
+                    return "Off";
+
+                case eSensorDataType.bytes:
+                    dec = double.Parse(sensorValue.ToString());
+                    if (dec > 1099511627776L)
+                    {
+                        return (dec / 1099511627776L).ToString("#.#") + "T";
+                    }
+                    if (dec > 1073741824)
+                    {
+                        return (dec / 1073741824).ToString("#.#") + "G";
+                    }
+                    if (dec > 1048576)
+                    {
+                        return (dec / 1048576).ToString("#.#") + "M";
+                    }
+                    if (dec > 1024)
+                    {
+                        return (dec / 1024).ToString("#.#") + "K";
+                    }
+                    return sensorValue + "B";
+
+                case eSensorDataType.bytespersec:
+                    dec = double.Parse(sensorValue.ToString());
+                    if (dec > 1048576)
+                    {
+                        return (dec / 1048576).ToString("#.#") + "Mb";
+                    }
+                    if (dec > 1024)
+                    {
+                        return (dec / 1024).ToString("#.#") + "Kb";
+                    }
+                    return sensorValue + "Bp";
+
+                case eSensorDataType.degrees:
+                    return sensorValue + "°";
+
+                case eSensorDataType.degreesC:
+                    dec = double.Parse(sensorValue.ToString());
+                    return Framework.Globalization.convertToLocalTemp(dec, true).Replace(" ", "");
+
+                case eSensorDataType.Gs:
+                    return sensorValue + "Gs";
+                case eSensorDataType.kilometers:
+                    dec = double.Parse(sensorValue.ToString());
+                    return Framework.Globalization.convertDistanceToLocal(dec, true);
+
+                case eSensorDataType.kph:
+                    dec = double.Parse(sensorValue.ToString());
+                    return Framework.Globalization.convertSpeedToLocal(dec, true);
+
+                case eSensorDataType.meters:
+                    return sensorValue + "m";
+
+                case eSensorDataType.percent:
+                    return sensorValue + "%";
+
+                case eSensorDataType.psi:
+                    return sensorValue + "psi";
+
+                case eSensorDataType.volts:
+                    return sensorValue + "V";
+            }
+            return sensorValue.ToString();
         }
     }
     /// <summary>
     /// Interface with I/O devices and other raw hardware
     /// </summary>
-    public abstract class IRawHardware:IBasePlugin
+    public interface IRawHardware : IBasePlugin
     {
-        private static int lastMask;
-        private static int generateMask()
-        {
-            lastMask++;
-            return lastMask;
-        }
-        private static bool CheckPID(int PID, int mask)
-        {
-            if ((PID / 100000) == mask)
-            {
-                PID = PID % (mask * 100000);
-                return true;
-            }
-            return false;
-        }
-        private static int ApplyMask(int PID, int mask)
-        {
-            return (mask * 100000) + PID;
-        }
-        private static int RemoveMask(int maskedPID, int mask)
-        {
-            return maskedPID - (mask * 100000);
-        }
-        
-        private int myMask;
-        /// <summary>
-        /// Generates a new PID mask
-        /// </summary>
-        protected void InitPIDMask()
-        {
-            myMask = generateMask();
-        }
-        /// <summary>
-        /// Masks a PID using the previously generated mask
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <returns></returns>
-        protected int MaskPID(int PID)
-        {
-            return ApplyMask(PID, myMask);
-        }
-        /// <summary>
-        /// Removes a PID mask
-        /// </summary>
-        /// <param name="maskedPID"></param>
-        /// <returns></returns>
-        protected int UnmaskPID(int maskedPID)
-        {
-            return RemoveMask(maskedPID, myMask);
-        }
-        /// <summary>
-        /// Checks if this plugin supported a PID
-        /// </summary>
-        /// <param name="PID"></param>
-        /// <returns></returns>
-        public bool TestPID(int PID)
-        {
-            return CheckPID(PID, myMask);
-        }
-        
         /// <summary>
         /// List available sensors of the given type
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public abstract List<Sensor> getAvailableSensors(eSensorType type);
+        List<Sensor> getAvailableSensors(eSensorType type);
         /// <summary>
         /// Set a sensor value (for output devices)
         /// </summary>
-        /// <param name="PID"></param>
+        /// <param name="name"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public abstract bool setValue(int PID, object value);
+        bool setValue(string name, object value);
         /// <summary>
         /// Get a sensor value
         /// </summary>
-        /// <param name="PID"></param>
+        /// <param name="name"></param>
         /// <returns></returns>
-        public abstract object getValue(int PID);
+        object getValue(string name);
         /// <summary>
         /// Reset the hardware device.
         /// </summary>
-        public abstract void resetDevice();
+        void resetDevice();
         /// <summary>
         /// Plugin specific (vehicle information, hardware name, etc.)
         /// </summary>
         /// <returns></returns>
-        public abstract string deviceInfo { get; }
+        string deviceInfo { get; }
         /// <summary>
         /// Firmware version of currently connected hardware
         /// </summary>
         /// <returns></returns>
-        public abstract string firmwareVersion { get; }
-        /// <summary>
-        /// Initializes the plugin
-        /// </summary>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        public abstract eLoadStatus initialize(IPluginHost host);
-        /// <summary>
-        /// Load a settings object for the plugin
-        /// </summary>
-        /// <returns></returns>
-        public abstract Settings loadSettings();
-        /// <summary>
-        /// Authors Name
-        /// </summary>
-        public abstract string authorName { get; }
-        /// <summary>
-        /// Authors Email
-        /// </summary>
-        public abstract string authorEmail { get; }
-        /// <summary>
-        /// Plugin Name (must mathc filename)
-        /// </summary>
-        public abstract string pluginName{get;}
-        /// <summary>
-        /// Plugin Version
-        /// </summary>
-        public abstract float pluginVersion{get;}
-        /// <summary>
-        /// Plugin Description
-        /// </summary>
-        public abstract string pluginDescription{get;}
-        /// <summary>
-        /// An inter-plugin message has been received
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        public abstract bool incomingMessage(string message, string source);
-        /// <summary>
-        /// An inter-plugin message has been received
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="message"></param>
-        /// <param name="source"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public abstract bool incomingMessage<T>(string message, string source, ref T data);
-        /// <summary>
-        /// Clean up and dispose resources
-        /// </summary>
-        public abstract void Dispose();
+        string firmwareVersion { get; }
     }
 }
