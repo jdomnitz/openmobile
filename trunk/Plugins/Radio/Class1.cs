@@ -54,8 +54,12 @@ namespace OMRadio
             if (name == "MessageBox")
                 ConfigureMessageBox(screen);
 
-            if (name == "") // Default panel
+            // Default panel
+            if (name == "") 
+            {
                 ConfigureMainPanel(screen);
+                return manager[screen, "Radio"];
+            }
                 
             return manager[screen, name];
         }
@@ -258,7 +262,7 @@ namespace OMRadio
 
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel panelMain = new OMPanel();
+            OMPanel panelMain = new OMPanel("Radio");
             theHost = host;
             theHost.OnMediaEvent += new MediaEvent(theHost_OnMediaEvent);
 

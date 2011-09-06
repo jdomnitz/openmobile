@@ -240,8 +240,13 @@ namespace OMHal
                     //device[0].Bass.GetChannelCount(out count);
                     for (int i = 0; i < col.Count; i++)
                     {
-                        device[i + 1] = col[col.Count-i-1];
+                        //device[i + 1] = col[col.Count-i-1]; //Borte: [BugFix] Incorrect audio line was controlled
+                        device[i + 1] = col[i];
                         col[i].AudioEndpointVolume.OnVolumeNotification += new AudioEndpointVolumeNotificationDelegate(AudioEndpointVolume_OnVolumeNotification);
+
+                        //string Name = (col[i].Properties[PKEY.FriendlyName]).Value.ToString();
+                        //Console.WriteLine(String.Format("\tAudioDevice {0} = {1}", i, Name));
+
                     }
                     for(int i=0;i<device.Length;i++)
                         Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(i).ToString(), i.ToString(), "");
@@ -562,5 +567,6 @@ namespace OMHal
             else if (IsPwrHibernateAllowed())
                 SetSuspendState(true, false, false);
         }
+
     }
 }

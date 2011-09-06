@@ -332,7 +332,6 @@ namespace OMSettings
             #endregion
         }
 
-
         static void Zone_ButtonMouseDetect_OnClick(OMControl sender, int screen)
         {
             dialog dialog = new dialog(PluginName, panelZone.Name);
