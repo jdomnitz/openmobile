@@ -133,17 +133,20 @@ namespace OpenMobile
             //End Modifications by Borte
             pluginCollection.Add(MainMenuPlugin);
             //mmPlugin.initialize(theHost);
+        }
 
-            var a = MainMenuPlugin.GetType().GetCustomAttributes(typeof(InitialTransition), false);
+        private static void initMainMenu()
+        {
+            var a = pluginCollection[2].GetType().GetCustomAttributes(typeof(InitialTransition), false);
             SandboxedThread.Asynchronous(() =>
             {
-                UIPlugin.initialize(theHost);
-                MainMenuPlugin.initialize(theHost);
+                pluginCollection[1].initialize(theHost);
+                pluginCollection[2].initialize(theHost);
                 for (int i = 0; i < RenderingWindows.Count; i++)
                 {
                     // Load UI as background
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "UI", "background");
-                    RenderingWindows[i].TransitionInPanel(UIPlugin.loadPanel(String.Empty, i));
+                    RenderingWindows[i].TransitionInPanel(((IHighLevel)pluginCollection[1]).loadPanel(String.Empty, i));
                     RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", String.Empty);
                     if (a.Length == 0)
@@ -152,7 +155,7 @@ namespace OpenMobile
                         RenderingWindows[i].ExecuteTransition(((InitialTransition)a[0]).Transition);
                 }
             });
-            object[] b = MainMenuPlugin.GetType().GetCustomAttributes(typeof(FinalTransition), false);
+            object[] b = pluginCollection[1].GetType().GetCustomAttributes(typeof(FinalTransition), false);
             if (b.Length > 0)
                 exitTransition = ((FinalTransition)b[0]).Transition;
         }
@@ -260,6 +263,10 @@ namespace OpenMobile
             }
             return null;
         }
+        /// <summary>
+        /// Order to of types to try to load the plugins by
+        /// </summary>
+        private static Type[] pluginTypes = new Type[] {typeof(IRawHardware), typeof(IDataProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin)};
         public static eLoadStatus[] status;
         /// <summary>
         /// Initialize each of the plugins in the plugin's array (pluginCollection)
@@ -267,29 +274,40 @@ namespace OpenMobile
         private static void getEmReady()
         {
             status = new eLoadStatus[pluginCollection.Count];
-            for (int i = 2; i < pluginCollection.Count; i++) //Try to initialize the plugins
+            foreach (Type tp in pluginTypes)
             {
-                try
+                for (int i = 3; i < pluginCollection.Count; i++) //Try to initialize the plugins
                 {
-                    if (pluginCollection[i] != null)
+                    try
                     {
-                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
-                        status[i] = pluginCollection[i].initialize(theHost);
+                        if (pluginCollection[i] != null)
+                        {
+                            if (tp.IsInstanceOfType(pluginCollection[i]) && status[i] == eLoadStatus.NotLoaded)
+                            {
+                                BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
+                                status[i] = pluginCollection[i].initialize(theHost);
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        status[i] = eLoadStatus.LoadFailedUnloadRequested;
+                        string ex = spewException(e);
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception: " + ex);
+                        Debug.Print(ex);
                     }
                 }
-                catch (Exception e)
-                {
-                    status[i] = eLoadStatus.LoadFailedUnloadRequested;
-                    string ex = spewException(e);
-                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception: " + ex);
-                    Debug.Print(ex);
-                }
             }
-            for (int i = 2; i < pluginCollection.Count; i++) //Give them all a second chance if they need it
+            foreach (Type tp in pluginTypes)
+            {             
+                for (int i = 3; i < pluginCollection.Count; i++) //Give them all a second chance if they need it
                 try
                 {
-                    if (status[i] == eLoadStatus.LoadFailedRetryRequested)
-                        status[i] = pluginCollection[i].initialize(theHost);
+                    if (tp.IsInstanceOfType(pluginCollection[i]))
+                    {
+                        if (status[i] == eLoadStatus.LoadFailedRetryRequested)
+                            status[i] = pluginCollection[i].initialize(theHost);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -298,21 +316,25 @@ namespace OpenMobile
                     BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception2: " + ex);
                     Debug.Print(ex);
                 }
-            for (int i = 2; i < pluginCollection.Count; i++) //and then two strikes their out...kill anything that still can't initialize
-                if ((status[i] == eLoadStatus.LoadFailedRetryRequested) || (status[i] == eLoadStatus.LoadFailedUnloadRequested) || (status[i] == eLoadStatus.LoadFailedGracefulUnloadRequested))
-                {
-                    try
-                    {
-                        pluginCollection[i].Dispose();
-                        if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
-                            theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName + " CRASHED!");
-                    }
-                    catch (Exception) { }
-                    pluginCollection[i] = null;
-                }
-            status = null;
-            pluginCollection.RemoveAll(p => p == null);
-        }
+            }
+            //for (int i = 3; i < pluginCollection.Count; i++) //and then two strikes their out...kill anything that still can't initialize
+            //{
+            //    if ((status[i] == eLoadStatus.LoadFailedRetryRequested) || (status[i] == eLoadStatus.LoadFailedUnloadRequested) || (status[i] == eLoadStatus.LoadFailedGracefulUnloadRequested))
+            //    {
+            //        try
+            //        {
+            //            pluginCollection[i].Dispose();
+            //            if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
+            //                theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName + " CRASHED!");
+            //        }
+            //        catch (Exception) { }
+            //        pluginCollection[i] = null;
+            //    }
+            //    status = null;
+            //    pluginCollection.RemoveAll(p => p == null);
+            //}
+        }        
+
 
         private static void initialize()
         {
@@ -322,9 +344,10 @@ namespace OpenMobile
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             loadMainMenu();
             loadEmUp();
+            getEmReady();
+            initMainMenu();
             theHost.hal = new HalInterface();
             theHost.Load(); //Stagger I/O
-            getEmReady();
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);
             theHost.hal.snd("32");
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(theHost.NetworkChange_NetworkAvailabilityChanged);
