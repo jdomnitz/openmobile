@@ -25,7 +25,7 @@ Imports System.Data
 Imports Mono.Data.Sqlite
 
 Public Class OMSerialGPS
-    Inherits IRawHardware
+    Implements IRawHardware
 
     Private Enum PIDs As Integer
         Fix = 1
@@ -74,11 +74,9 @@ Public Class OMSerialGPS
     Private m_State As String
 
 
-    Public Overrides Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus
+    Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements IBasePlugin.initialize
         m_Host = host
-        InitPIDMask()
         LoadGPSSettings()
-
 
         SafeThread.Asynchronous(AddressOf BackgroundInit, m_Host)
         Return eLoadStatus.LoadSuccessful
@@ -111,7 +109,7 @@ Public Class OMSerialGPS
         End If
     End Sub
 
-    Public Overrides Function loadSettings() As OpenMobile.Plugin.Settings
+    Public Function loadSettings() As OpenMobile.Plugin.Settings Implements IBasePlugin.loadSettings
         If m_Settings Is Nothing Then
             LoadGPSSettings()
 
@@ -152,7 +150,7 @@ Public Class OMSerialGPS
         Settings.Dispose()
     End Sub
 
-    Public Overrides Function getAvailableSensors(ByVal type As OpenMobile.Plugin.eSensorType) As System.Collections.Generic.List(Of OpenMobile.Plugin.Sensor)
+    Public Function getAvailableSensors(ByVal type As OpenMobile.Plugin.eSensorType) As System.Collections.Generic.List(Of OpenMobile.Plugin.Sensor) Implements IRawHardware.getAvailableSensors
         If Not m_Sensors Is Nothing Then
             Return m_Sensors
         End If
@@ -163,80 +161,80 @@ Public Class OMSerialGPS
         '    Return m_Sensors
         'End If
 
-        m_Sensors.Add(New Sensor("GPS." & PIDs.Fix.ToString, MyBase.MaskPID(PIDs.Fix), eSensorType.deviceSuppliesData, "Fix", eSensorDataType.binary))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.Longitude.ToString, MyBase.MaskPID(PIDs.Longitude), eSensorType.deviceSuppliesData, "Lng", eSensorDataType.degrees))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.Latitude.ToString, MyBase.MaskPID(PIDs.Latitude), eSensorType.deviceSuppliesData, "Lat", eSensorDataType.degrees))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.FixQuality.ToString, MyBase.MaskPID(PIDs.FixQuality), eSensorType.deviceSuppliesData, "Qual", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.NumberOfSats.ToString, MyBase.MaskPID(PIDs.NumberOfSats), eSensorType.deviceSuppliesData, "Sats", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.Altitude.ToString, MyBase.MaskPID(PIDs.Altitude), eSensorType.deviceSuppliesData, "Alt", eSensorDataType.meters))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.Bearing.ToString, MyBase.MaskPID(PIDs.Bearing), eSensorType.deviceSuppliesData, "Dir", eSensorDataType.degrees))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.Speed.ToString, MyBase.MaskPID(PIDs.Speed), eSensorType.deviceSuppliesData, "Spd", eSensorDataType.kph))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.HorzDilution.ToString, MyBase.MaskPID(PIDs.HorzDilution), eSensorType.deviceSuppliesData, "Horz", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.PDOP.ToString, MyBase.MaskPID(PIDs.PDOP), eSensorType.deviceSuppliesData, "PDOP", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.HDOP.ToString, MyBase.MaskPID(PIDs.HDOP), eSensorType.deviceSuppliesData, "HDOP", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.VDOP.ToString, MyBase.MaskPID(PIDs.VDOP), eSensorType.deviceSuppliesData, "VDOP", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.SatList.ToString, MyBase.MaskPID(PIDs.SatList), eSensorType.deviceSuppliesData, "Lst", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.ZipCode.ToString, MyBase.MaskPID(PIDs.ZipCode), eSensorType.deviceSuppliesData, "Zip", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.City.ToString, MyBase.MaskPID(PIDs.City), eSensorType.deviceSuppliesData, "City", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.StateCode.ToString, MyBase.MaskPID(PIDs.StateCode), eSensorType.deviceSuppliesData, "St", eSensorDataType.raw))
-        m_Sensors.Add(New Sensor("GPS." & PIDs.State.ToString, MyBase.MaskPID(PIDs.State), eSensorType.deviceSuppliesData, "St", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.Fix.ToString, eSensorType.deviceSuppliesData, "Fix", eSensorDataType.binary))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.Longitude.ToString, eSensorType.deviceSuppliesData, "Lng", eSensorDataType.degrees))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.Latitude.ToString, eSensorType.deviceSuppliesData, "Lat", eSensorDataType.degrees))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.FixQuality.ToString, eSensorType.deviceSuppliesData, "Qual", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.NumberOfSats.ToString, eSensorType.deviceSuppliesData, "Sats", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.Altitude.ToString, eSensorType.deviceSuppliesData, "Alt", eSensorDataType.meters))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.Bearing.ToString, eSensorType.deviceSuppliesData, "Dir", eSensorDataType.degrees))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.Speed.ToString, eSensorType.deviceSuppliesData, "Spd", eSensorDataType.kph))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.HorzDilution.ToString, eSensorType.deviceSuppliesData, "Horz", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.PDOP.ToString, eSensorType.deviceSuppliesData, "PDOP", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.HDOP.ToString, eSensorType.deviceSuppliesData, "HDOP", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.VDOP.ToString, eSensorType.deviceSuppliesData, "VDOP", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.SatList.ToString, eSensorType.deviceSuppliesData, "Lst", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.ZipCode.ToString, eSensorType.deviceSuppliesData, "Zip", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.City.ToString, eSensorType.deviceSuppliesData, "City", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.StateCode.ToString, eSensorType.deviceSuppliesData, "St", eSensorDataType.raw))
+        m_Sensors.Add(New Sensor("OMSerialGPS." & PIDs.State.ToString, eSensorType.deviceSuppliesData, "St", eSensorDataType.raw))
 
         Return m_Sensors
     End Function
 
-    Public Overrides Function getValue(ByVal PID As Integer) As Object
+    Public Function getValue(ByVal Name As String) As Object Implements IRawHardware.getValue
         Return ""
-        Select Case DirectCast(MyBase.UnmaskPID(PID), PIDs)
-            Case Is = PIDs.Fix
+        Select Case Name.Substring(12) 'Cut off the OMSerialGPS. 
+            Case Is = PIDs.Fix.ToString
                 Return m_GPRMC.SatFix
 
-            Case Is = PIDs.Longitude
+            Case Is = PIDs.Longitude.ToString
                 Return m_Longitude
 
-            Case Is = PIDs.Latitude
+            Case Is = PIDs.Latitude.ToString
                 Return m_Latitude
 
-            Case Is = PIDs.FixQuality
+            Case Is = PIDs.FixQuality.ToString
                 Return m_GPGGA.FixQuality
 
-            Case Is = PIDs.NumberOfSats
+            Case Is = PIDs.NumberOfSats.ToString
                 Return m_GPGGA.NumberOfSats
 
-            Case Is = PIDs.Altitude
+            Case Is = PIDs.Altitude.ToString
                 Return m_GPGGA.Altitude
 
-            Case Is = PIDs.Bearing
+            Case Is = PIDs.Bearing.ToString
                 Return m_GPRMC.Bearing
 
-            Case Is = PIDs.Speed
+            Case Is = PIDs.Speed.ToString
                 Return OpenMobile.Framework.Math.Calculation.convertSpeed(m_GPRMC.Speed, Framework.Math.speedTypes.knots, Framework.Math.speedTypes.kilometersPerHour)
 
-            Case Is = PIDs.HorzDilution
+            Case Is = PIDs.HorzDilution.ToString
                 Return m_GPGGA.HorzDilution
 
-            Case Is = PIDs.PDOP
+            Case Is = PIDs.PDOP.ToString
                 Return m_GPGSA.PDOP
 
-            Case Is = PIDs.HDOP
+            Case Is = PIDs.HDOP.ToString
                 Return m_GPGSA.HDOP
 
-            Case Is = PIDs.VDOP
+            Case Is = PIDs.VDOP.ToString
                 Return m_GPGSA.VDOP
 
             Case Is = PIDs.SatList
                 Return "<Sats>Not Implemented</Sats>"
 
                 'Zip DB
-            Case Is = PIDs.ZipCode
+            Case Is = PIDs.ZipCode.ToString
                 Return m_Zip
 
-            Case Is = PIDs.City
+            Case Is = PIDs.City.ToString
                 Return m_City
 
-            Case Is = PIDs.StateCode
+            Case Is = PIDs.StateCode.ToString
                 Return m_StateCode
 
-            Case Is = PIDs.State
+            Case Is = PIDs.State.ToString
                 Return m_State
 
         End Select
@@ -303,33 +301,33 @@ Public Class OMSerialGPS
         End Try
     End Sub
 
-    Public Overrides Sub resetDevice()
+    Public Sub resetDevice() Implements IRawHardware.resetDevice
 
     End Sub
 
-    Public Overrides Function setValue(ByVal PID As Integer, ByVal value As Object) As Boolean
-
+    Public Function setValue(ByVal Name As String, ByVal value As Object) As Boolean Implements IRawHardware.setValue
+        Return False
     End Function
 
-    Public Overrides ReadOnly Property authorEmail() As String
+    Public ReadOnly Property authorEmail() As String Implements IRawHardware.authorEmail
         Get
             Return "jheizer@gmail.com"
         End Get
     End Property
 
-    Public Overrides ReadOnly Property authorName() As String
+    Public ReadOnly Property authorName() As String Implements IRawHardware.authorName
         Get
             Return "Jon Heizer"
         End Get
     End Property
 
-    Public Overrides ReadOnly Property deviceInfo() As String
+    Public ReadOnly Property deviceInfo() As String Implements IRawHardware.deviceInfo
         Get
             Return "Serial GPS"
         End Get
     End Property
 
-    Public Overloads Overrides Sub Dispose()
+    Public Sub Dispose() Implements IBasePlugin.Dispose
         Try
             If Not m_Conn.State = ConnectionState.Closed Then
                 m_Conn.Clone()
@@ -341,35 +339,35 @@ Public Class OMSerialGPS
         End Try
     End Sub
 
-    Public Overrides ReadOnly Property firmwareVersion() As String
+    Public ReadOnly Property firmwareVersion() As String Implements IRawHardware.firmwareVersion
         Get
             Return 1
         End Get
     End Property
 
 
-    Public Overloads Overrides Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean
+    Public Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean Implements IBasePlugin.incomingMessage
 
     End Function
 
-    Public Overloads Overrides Function incomingMessage(Of T)(ByVal message As String, ByVal source As String, ByRef data As T) As Boolean
+    Public Function incomingMessage(Of T)(ByVal message As String, ByVal source As String, ByRef data As T) As Boolean Implements IBasePlugin.incomingMessage
 
     End Function
 
 
-    Public Overrides ReadOnly Property pluginDescription() As String
+    Public ReadOnly Property pluginDescription() As String Implements IBasePlugin.pluginDescription
         Get
             Return "OMSerialGPS"
         End Get
     End Property
 
-    Public Overrides ReadOnly Property pluginName() As String
+    Public ReadOnly Property pluginName() As String Implements IBasePlugin.pluginName
         Get
             Return "OMSerialGPS"
         End Get
     End Property
 
-    Public Overrides ReadOnly Property pluginVersion() As Single
+    Public ReadOnly Property pluginVersion() As Single Implements IBasePlugin.pluginVersion
         Get
             Return 1
         End Get

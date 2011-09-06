@@ -115,7 +115,7 @@ namespace OMContacts
                     last = null;
                     return;
                 }
-                SafeThread.Asynchronous(new refresh(refreshList), new object[] { int.Parse(arg1) }, theHost);
+                //SafeThread.Asynchronous(new refresh(refreshList), new object[] { int.Parse(arg1) }, theHost);
             }
         }
 

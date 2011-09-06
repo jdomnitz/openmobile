@@ -2015,19 +2015,17 @@ namespace OpenMobile
 
         }
 
-        public bool setSensorValue(int PID, object value)
+        public bool setSensorValue(string SensorName, object value)
         {
-            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p)))
-                if (g.TestPID(PID))
-                    return g.setValue(PID, value);
+            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p) && SensorName.StartsWith(p.pluginName) ))
+                return g.setValue(SensorName, value);
             return false;
         }
 
-        public object getSensorValue(int PID)
+        public object getSensorValue(string SensorName)
         {
-            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p)))
-                if (g.TestPID(PID))
-                    return g.getValue(PID);
+            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p) && SensorName.StartsWith(p.pluginName)))
+                return g.getValue(SensorName);
             return null;
         }
 

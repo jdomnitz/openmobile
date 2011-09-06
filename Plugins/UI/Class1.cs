@@ -35,7 +35,6 @@ namespace OpenMobile
         private IPluginHost theHost;
         private System.Timers.Timer tick = new System.Timers.Timer();
         private System.Timers.Timer statusReset = new System.Timers.Timer(2100);
-        private System.Timers.Timer clockTimer = new System.Timers.Timer(10000);
         private bool showVolumeChanges;
         #region IBasePlugin Members
 
@@ -149,7 +148,7 @@ namespace OpenMobile
         int volScreen = -1;
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel p = new OMPanel();
+            OMPanel p = new OMPanel("");
             theHost = host;
             manager = new ScreenManager(host.ScreenCount);
             tick.BeginInit();
@@ -290,15 +289,13 @@ namespace OpenMobile
             clocktime.Font = new Font(Font.GenericSansSerif, 32F);
             clocktime.Format = eTextFormat.BoldShadow;
             clocktime.Name = "UI.clocktime";
-            clocktime.Text = DateTime.Now.ToShortTimeString();
+            clocktime.sensorName = "SystemSensors.Time";
             OMLabel clockdate = new OMLabel(350, 572, 300, 30);
             clockdate.TextAlignment = Alignment.CenterCenter;
             clockdate.Font = new Font(Font.GenericSansSerif, 20F);
             clockdate.Format = eTextFormat.BoldShadow;
             clockdate.Name = "UI.clockdate";
-            clockdate.Text = DateTime.Now.ToString("MMMM d");
-            clockTimer.Elapsed += new ElapsedEventHandler(clock_Elapsed);
-            clockTimer.Enabled = true;
+            clockdate.sensorName = "SystemSensors.LongDate";
             
             //***
             p.addControl(Back);
@@ -346,15 +343,6 @@ namespace OpenMobile
             theHost.OnMediaEvent += theHost_OnMediaEvent;
             theHost.OnSystemEvent += theHost_OnSystemEvent;
             return eLoadStatus.LoadSuccessful;
-        }
-
-        void clock_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            for (int i = 0; i < theHost.ScreenCount; i++)
-            {
-                ((OMLabel)manager[i][28]).Text = DateTime.Now.ToShortTimeString();
-                ((OMLabel)manager[i][29]).Text = DateTime.Now.ToString("MMMM d");
-            }
         }
 
         void random_OnClick(OMControl sender, int screen)
@@ -610,7 +598,13 @@ namespace OpenMobile
                         case "N":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
                             if (!theHost.execute(eFunction.TransitionToPanel, arg1, "Navigation"))
-                                theHost.execute(eFunction.CancelTransition, arg1);
+                            {
+                                if (!theHost.execute(eFunction.TransitionToPanel, arg1, "ExternalNav"))
+                                    theHost.execute(eFunction.CancelTransition, arg1);
+                                else
+                                    theHost.execute(eFunction.ExecuteTransition, arg1);
+                            }
+                     
                             else
                                 theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
