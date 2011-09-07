@@ -1711,9 +1711,10 @@ namespace OpenMobile
         public void getData(eGetData dataType, string name, out object data)
         {
             IBasePlugin plugin;
+            data = null;
+
             try
             {
-                data = null;
                 switch (dataType)
                 {
                     case eGetData.GetMap:
@@ -2045,20 +2046,6 @@ namespace OpenMobile
                 BuiltInComponents.Host.DebugMsg(dataType.ToString() + " reported an error:", e);
             }
 
-        }
-
-        public bool setSensorValue(string SensorName, object value)
-        {
-            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p) && SensorName.StartsWith(p.pluginName) ))
-                return g.setValue(SensorName, value);
-            return false;
-        }
-
-        public object getSensorValue(string SensorName)
-        {
-            foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p) && SensorName.StartsWith(p.pluginName)))
-                return g.getValue(SensorName);
-            return null;
         }
 
         #region DebugMsg
