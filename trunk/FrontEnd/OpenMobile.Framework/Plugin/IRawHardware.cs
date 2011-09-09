@@ -153,6 +153,8 @@ namespace OpenMobile.Plugin
         /// Sensor return data type
         /// </summary>
         public eSensorDataType DataType;
+        SensorForceReadDelegate ReadDelegate;
+        SensorWriteDelegate WriteDelegate;
         /// <summary>
         /// Creates a new sensor object
         /// </summary>
@@ -166,6 +168,20 @@ namespace OpenMobile.Plugin
             this.Type = Type;
             this.ShortName = ShortName;
             this.DataType = DataType; 
+        }
+        /// <summary>
+        /// Creates a new sensor object
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="Type"></param>
+        /// <param name="ShortName"></param>
+        /// <param name="DataType"></param>
+        public Sensor(string Name, eSensorType Type, string ShortName, eSensorDataType DataType, SensorForceReadDelegate ReadDelegate, SensorWriteDelegate WriteDelegate )
+        {
+            this.Name = Name;
+            this.Type = Type;
+            this.ShortName = ShortName;
+            this.DataType = DataType;
         }
         /// <summary>
         /// The current value of the sensor
@@ -187,27 +203,55 @@ namespace OpenMobile.Plugin
             }
         }
         /// <summary>
+        /// Force the IRawHardware to read a new value from the device and return it instead of waiting for it to poll the device again
+        /// </summary>
+        /// <returns></returns>
+        public object ForceReadValue()
+        {
+            if (ReadDelegate != null) //If the IRawHardware allows a force read update call it
+                return ReadDelegate.Invoke(this);
+            return Value;
+        }
+        /// <summary>
+        /// Send a new value to the device to be handled
+        /// </summary>
+        /// <param name="NewValue"></param>
+        /// <returns></returns>
+        public bool SendNewValueToDevice(object NewValue)
+        {
+            return WriteDelegate.Invoke(this, NewValue);
+        }
+        /// <summary>
         /// Format the sensor value to a pretty string
         /// </summary>
         /// <returns></returns>
         public string FormatedValue()
         {
+            return FormatedValue(this);
+        }
+        /// <summary>
+        /// Format the sensor value to a pretty string
+        /// </summary>
+        /// <param name="sensor"></param>
+        /// <returns></returns>
+        public static string FormatedValue(Sensor sensor)
+        {
             double dec;
 
-            switch (this.DataType )
+            switch (sensor.DataType)
             {
                 case eSensorDataType.Amps:
-                    return sensorValue + "A";
+                    return sensor.Value + "A";
 
                 case eSensorDataType.binary:
-                    if (sensorValue.ToString() == "1")
+                    if (sensor.Value.ToString() == "1")
                     {
                         return "On";
                     }
                     return "Off";
 
                 case eSensorDataType.bytes:
-                    dec = double.Parse(sensorValue.ToString());
+                    dec = double.Parse(sensor.Value.ToString());
                     if (dec > 1099511627776L)
                     {
                         return (dec / 1099511627776L).ToString("#.#") + "T";
@@ -224,10 +268,10 @@ namespace OpenMobile.Plugin
                     {
                         return (dec / 1024).ToString("#.#") + "K";
                     }
-                    return sensorValue + "B";
+                    return sensor.Value + "B";
 
                 case eSensorDataType.bytespersec:
-                    dec = double.Parse(sensorValue.ToString());
+                    dec = double.Parse(sensor.Value.ToString());
                     if (dec > 1048576)
                     {
                         return (dec / 1048576).ToString("#.#") + "Mb";
@@ -236,40 +280,53 @@ namespace OpenMobile.Plugin
                     {
                         return (dec / 1024).ToString("#.#") + "Kb";
                     }
-                    return sensorValue + "Bp";
+                    return sensor.Value + "Bp";
 
                 case eSensorDataType.degrees:
-                    return sensorValue + "°";
+                    return sensor.Value + "°";
 
                 case eSensorDataType.degreesC:
-                    dec = double.Parse(sensorValue.ToString());
+                    dec = double.Parse(sensor.Value.ToString());
                     return Framework.Globalization.convertToLocalTemp(dec, true).Replace(" ", "");
 
                 case eSensorDataType.Gs:
-                    return sensorValue + "Gs";
+                    return sensor.Value + "Gs";
                 case eSensorDataType.kilometers:
-                    dec = double.Parse(sensorValue.ToString());
+                    dec = double.Parse(sensor.Value.ToString());
                     return Framework.Globalization.convertDistanceToLocal(dec, true);
 
                 case eSensorDataType.kph:
-                    dec = double.Parse(sensorValue.ToString());
+                    dec = double.Parse(sensor.Value.ToString());
                     return Framework.Globalization.convertSpeedToLocal(dec, true);
 
                 case eSensorDataType.meters:
-                    return sensorValue + "m";
+                    return sensor.Value + "m";
 
                 case eSensorDataType.percent:
-                    return sensorValue + "%";
+                    return sensor.Value + "%";
 
                 case eSensorDataType.psi:
-                    return sensorValue + "psi";
+                    return sensor.Value + "psi";
 
                 case eSensorDataType.volts:
-                    return sensorValue + "V";
+                    return sensor.Value + "V";
             }
-            return sensorValue.ToString();
+            return sensor.Value.ToString();
         }
     }
+    /// <summary>
+    /// Delegate that gets called to tell the IRawHardware to force request a new value and not wait for the next poll
+    /// </summary>
+    /// <param name="sensor"></param>
+    /// <returns></returns>
+    public delegate object SensorForceReadDelegate(Sensor sensor);
+    /// <summary>
+    /// Delegate that gets called to tell the IRawHardware to write out a new value to teh device
+    /// </summary>
+    /// <param name="sensor"></param>
+    /// <param name="NewValue"></param>
+    /// <returns></returns>
+    public delegate bool SensorWriteDelegate(Sensor sensor, object newValue);
     /// <summary>
     /// Interface with I/O devices and other raw hardware
     /// </summary>

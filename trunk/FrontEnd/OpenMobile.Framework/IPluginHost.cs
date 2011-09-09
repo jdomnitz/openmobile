@@ -317,17 +317,6 @@ namespace OpenMobile.Plugin
         [Obsolete("Use object getData(eGetData dataType, string name, string param) instead!")]
         void getData(eGetData dataType, string name, string param, out object data);
         /// <summary>
-        /// Sets sensor value
-        /// </summary>
-        /// <param name="name">Sensor Name</param>
-        /// <param name="value">Value to set sensor to</param>
-        bool setSensorValue(string name, object value);
-        /// <summary>
-        /// Retrieve sensor value
-        /// </summary>
-        /// <param name="name">Sensor Name</param>
-        object getSensorValue(string name);
-        /// <summary>
         /// Sends a message to the debug log
         /// </summary>
         /// <param name="from">The name of the source plugin</param>

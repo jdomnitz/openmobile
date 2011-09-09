@@ -18,7 +18,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A gauge control for openMobile
     /// </summary>
-    public class OMGauge : OMControl
+    public class OMGauge : OMControl, ISensorDisplay 
     {
         #region Private Attributes
         private float minValue;
@@ -918,6 +918,43 @@ namespace OpenMobile.Controls
         public override Rectangle toRegion()
         {
             return new Rectangle(controlLeft, controlTop, controlWidth, controlHeight);
+        }
+
+        /// <summary>
+        /// sensor name to be watched
+        /// </summary>
+        protected string sensor;
+        /// <summary>
+        /// Sets the sensor to subscribe to
+        /// </summary>
+        public string sensorName
+        {
+            get
+            {
+                return sensor;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    return;
+                this.sensor = value;
+
+                object o;
+                BuiltInComponents.Host.getData(eGetData.GetAvailableSensors, "", out o);
+                if (o == null)
+                    return;
+                System.Collections.Generic.List<OpenMobile.Plugin.Sensor> sensors = (System.Collections.Generic.List<OpenMobile.Plugin.Sensor>)o;
+
+                OpenMobile.Plugin.Sensor sensor = sensors.Find(s => s.Name == this.sensor);
+                if (sensor != null)
+                    sensor.newSensorDataReceived += new OpenMobile.Plugin.sensorDataReceived(sensor_newSensorDataReceived);
+                Value = (float)sensor.Value;
+            }
+        }
+
+        void sensor_newSensorDataReceived(OpenMobile.Plugin.Sensor sender)
+        {
+            this.Value = (float)sender.Value;
         }
     }
 }
