@@ -250,12 +250,13 @@ namespace OpenMobile.Controls
                 OpenMobile.Plugin.Sensor sensor = sensors.Find(s => s.Name == this.sensor);
                 if (sensor != null)
                     sensor.newSensorDataReceived += new OpenMobile.Plugin.sensorDataReceived(sensor_newSensorDataReceived);
+                this.Text = sensor.FormatedValue();
             }
         }
 
         void sensor_newSensorDataReceived(OpenMobile.Plugin.Sensor sender)
         {
-            this.Text = sender.FormatedValue() ;
+            this.Text = sender.FormatedValue();
         }
 
     }

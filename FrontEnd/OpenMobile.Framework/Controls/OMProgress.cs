@@ -29,7 +29,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A progress bar control
     /// </summary>
-    public class OMProgress : OMControl
+    public class OMProgress : OMControl, ISensorDisplay 
     {
         /// <summary>
         /// progress value
@@ -212,5 +212,43 @@ namespace OpenMobile.Controls
                 g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * secondColor.A), secondColor), Color.FromArgb((int)(tmp * firstColor.A), firstColor), Gradient.Vertical), left, top + height - (int)(height * ((float)value / maximum)), width, (int)(height * ((float)value / maximum)));
             g.DrawRectangle(new Pen(Color.FromArgb((int)(tmp * 255), Color.Black), 1.5F), left, top, width, height);
         }
+
+        /// <summary>
+        /// sensor name to be watched
+        /// </summary>
+        protected string sensor;
+        /// <summary>
+        /// Sets the sensor to subscribe to
+        /// </summary>
+        public string sensorName
+        {
+            get
+            {
+                return sensor;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    return;
+                this.sensor = value;
+
+                object o;
+                BuiltInComponents.Host.getData(eGetData.GetAvailableSensors, "", out o);
+                if (o == null)
+                    return;
+                System.Collections.Generic.List<OpenMobile.Plugin.Sensor> sensors = (System.Collections.Generic.List<OpenMobile.Plugin.Sensor>)o;
+
+                OpenMobile.Plugin.Sensor sensor = sensors.Find(s => s.Name == this.sensor);
+                if (sensor != null)
+                    sensor.newSensorDataReceived += new OpenMobile.Plugin.sensorDataReceived(sensor_newSensorDataReceived);
+                this.Value = (int)sensor.Value;
+            }
+        }
+
+        void sensor_newSensorDataReceived(OpenMobile.Plugin.Sensor sender)
+        {
+            this.Value = (int)sender.Value;
+        }
+
     }
 }
