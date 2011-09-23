@@ -30,7 +30,7 @@ Public Class RadioComm
     Private WithEvents m_Host As IPluginHost
 
     Private WithEvents m_Radio As New HDRadio
-    Private m_ComPort As Integer = 0
+    Private m_ComPort As String = "Auto"
     Private m_SourceDevice As Integer = 0
     Private m_Fade As Boolean = True
     Private m_RouteVolume As Integer = 100
@@ -40,8 +40,10 @@ Public Class RadioComm
     Private WithEvents m_Settings As Settings
 
     Private m_StationList As New Generic.SortedDictionary(Of Integer, stationInfo)
+    Private m_SubStationData As New Generic.SortedDictionary(Of Integer, SubChannelData)
     Private m_CurrentMedia As New mediaInfo
     Private m_CurrentInstance As Integer = 0
+    Private m_HDCallSign As String = ""
     Private m_IsScanning As Boolean = False
 
     Public Event MediaEvent(ByVal [function] As OpenMobile.eFunction, ByVal instance As Integer, ByVal arg As String) Implements OpenMobile.Plugin.IPlayer.OnMediaEvent
@@ -65,11 +67,12 @@ Public Class RadioComm
             m_Audio.FadeIn = m_Fade
             m_Audio.FadeOut = m_Fade
 
-            If m_ComPort > 0 Then
+            If Not m_ComPort = "Auto" Then
                 m_Radio.AutoSearch = False
-                m_Radio.ComPort = m_ComPort
+                m_Radio.ComPortString = m_ComPort
             Else
                 m_Radio.AutoSearch = True
+                System.Threading.Thread.Sleep(2000) ' Let other com port plugins connect before opening them and messing things up
             End If
 
             m_Radio.Open()
@@ -91,16 +94,7 @@ Public Class RadioComm
             COMOptions.Add("Auto")
             COMOptions.AddRange(System.IO.Ports.SerialPort.GetPortNames)
 
-            Dim COMValues As New Generic.List(Of String)
-            For Each Port As String In COMOptions
-                If Port = "Auto" Then
-                    COMValues.Add("0")
-                Else
-                    COMValues.Add(Port.Replace("COM", ""))
-                End If
-            Next
-
-            m_Settings.Add(New Setting(SettingTypes.MultiChoice, "OMVisteonRadio.ComPort", "COM", "Com Port", COMOptions, COMValues, m_ComPort.ToString))
+            m_Settings.Add(New Setting(SettingTypes.MultiChoice, "OMVisteonRadio.ComPort", "COM", "Com Port", COMOptions, COMOptions, m_ComPort))
 
             Dim SourceOptions As New Generic.List(Of String)
             SourceOptions.AddRange(AudioRouter.AudioRouter.listSources)
@@ -133,7 +127,7 @@ Public Class RadioComm
     End Sub
 
     Private Sub LoadRadioSettings()
-        m_ComPort = GetSetting("OMVisteonRadio.ComPort", 0)
+        m_ComPort = GetSetting("OMVisteonRadio.ComPort", "Auto")
         m_SourceDevice = GetSetting("OMVisteonRadio.SourceDevice", 0)
         m_Fade = GetSetting("OMVisteonRadio.FadeAudio", True)
         m_RouteVolume = GetSetting("OMVisteonRadio.AudioVolume", 100)
@@ -150,15 +144,19 @@ Public Class RadioComm
 
     Public Function setPowerState(ByVal instance As Integer, ByVal powerState As Boolean) As Boolean Implements OpenMobile.Plugin.ITunedContent.setPowerState
         Try
-
             If m_Audio Is Nothing Then
                 Return False
             End If
+
             m_Audio.setVolume(instance, m_RouteVolume)
             m_Audio.setZonePower(instance, powerState)
 
             If powerState Then
                 'Hardware powers on ahead of time since it is slow...
+                If Not m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
+                    m_Radio.PowerOn()
+                End If
+
                 Return True
             Else
                 If m_Audio.ActiveInstances.Length > 0 Then
@@ -168,10 +166,7 @@ Public Class RadioComm
                 Using St As New OpenMobile.Data.PluginSettings
                     St.setSetting("OMVisteonRadio.LastPlaying" & m_CurrentInstance.ToString, "")
                 End Using
-
-                m_Radio.MuteOn()
-                m_Radio.PowerOff()
-
+                
                 Return True
             End If
 
@@ -188,13 +183,13 @@ Public Class RadioComm
                 System.Threading.Thread.Sleep(2000)
 
                 If Not m_Radio Is Nothing Then
-                    If Not m_Radio.IsOpen Then
-                        m_Radio.Open()
-                    Else
-                        'Open will power on.  This is only if the com port is open but the radio is off
-                        If Not m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
-                            m_Radio.PowerOn()
-                        End If
+                    If m_Radio.IsOpen Then
+                        m_Radio.Close()
+                    End If
+                    m_Radio.Open()
+                    'Open will power on.  This is only if the com port is open but the radio is off
+                    If Not m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
+                        m_Radio.PowerOn()
                     End If
                 End If
 
@@ -204,14 +199,19 @@ Public Class RadioComm
                     End If
                 End Using
 
+                Try
+                    m_Radio.MuteOff()
+                Catch ex As Exception
+                End Try
                 If Not m_Audio Is Nothing Then
                     m_Audio.Resume()
                 End If
-        
+
             Case Is = ePowerEvent.SleepOrHibernatePending
                 If Not m_Audio Is Nothing Then
                     m_Audio.Suspend()
                 End If
+                m_Radio.Close()
 
         End Select
     End Sub
@@ -245,15 +245,17 @@ Public Class RadioComm
 
         If m_Radio.CurrentFrequency > 100 Then
 
-            If Not m_StationList.ContainsKey(m_Radio.CurrentFrequency) Then
-                Info = New stationInfo
-                Info.stationID = m_Radio.CurrentBand.ToString & ":" & m_Radio.CurrentFrequency * 100
-                Info.Bitrate = 0
-                Info.Channels = 2
-                Info.stationGenre = ""
-                Info.signal = 1
-                m_StationList.Add(m_Radio.CurrentFrequency, Info)
-            End If
+            SyncLock m_StationList
+                If Not m_StationList.ContainsKey(m_Radio.CurrentFrequency) Then
+                    Info = New stationInfo
+                    Info.stationID = m_Radio.CurrentBand.ToString & ":" & m_Radio.CurrentFrequency * 100
+                    Info.Bitrate = 0
+                    Info.Channels = 2
+                    Info.stationGenre = ""
+                    Info.signal = 1
+                    m_StationList.Add(m_Radio.CurrentFrequency, Info)
+                End If
+            End SyncLock
 
             Info = m_StationList(m_Radio.CurrentFrequency)
             Info.HD = m_Radio.IsHDActive
@@ -300,7 +302,11 @@ Public Class RadioComm
                 m_Radio.TuneToChannel(Freq, Band)
 
                 If Chan.Length = 3 Then
-                    System.Threading.Thread.Sleep(500)
+                    Dim LockoutCount As Integer = 0
+                    While m_Radio.HDSubChannelCount = 0 AndAlso LockoutCount < 60
+                        System.Threading.Thread.Sleep(500)
+                        LockoutCount += 1
+                    End While
                     If m_Radio.HDSubChannelCount > 0 Then
                         If Array.Exists(m_Radio.HDSubChannelList, Function(p) p = SubChan) Then
                             m_Radio.HDSubChannelSelect(SubChan)
@@ -388,27 +394,56 @@ Public Class RadioComm
         Return New eTunedContentBand() {eTunedContentBand.AM, eTunedContentBand.FM, eTunedContentBand.HD}
     End Function
 
+    Private Sub m_Radio_HDRadioEventHDSubChannel(ByVal State As Integer) Handles m_Radio.HDRadioEventHDSubChannel
+
+        SyncLock m_SubStationData
+            If m_SubStationData.ContainsKey(m_Radio.CurrentHDSubChannel) Then
+                Dim Data As SubChannelData = m_SubStationData(m_Radio.CurrentHDSubChannel)
+                m_CurrentMedia.Artist = Data.Artist
+                m_CurrentMedia.Album = Data.Title
+
+                If String.IsNullOrEmpty(Data.Station) Then
+                    m_CurrentMedia.Name = m_HDCallSign + " HD-" + m_Radio.CurrentHDSubChannel
+                Else
+                    m_CurrentMedia.Name = Data.Station
+                End If
+
+            Else
+                m_CurrentMedia.Artist = " "
+                m_CurrentMedia.Album = " "
+                m_CurrentMedia.Name = m_HDCallSign & "HD-" & m_Radio.CurrentHDSubChannel
+            End If
+
+        End SyncLock
+    End Sub
+
     Private Sub m_Radio_HDRadioEventHDSubChannelCount(ByVal State As Integer) Handles m_Radio.HDRadioEventHDSubChannelCount
         If State > 1 Then
-            For i As Integer = 1 To State
-                If Not m_StationList.ContainsKey(m_Radio.CurrentFrequency & "-" & i) Then
-                    Dim Info As New stationInfo
-                    Info.stationID = m_Radio.CurrentBand.ToString & ":" & m_Radio.CurrentFrequency * 100 & ":" & State
-                    Info.Bitrate = 0
-                    Info.Channels = 2
-                    Info.stationGenre = ""
-                    Info.signal = 1
-                    m_StationList.Add(m_Radio.CurrentFrequency & "-" & i, Info)
-                End If
-            Next
-            RaiseMediaEvent(eFunction.stationListUpdated, "")
+            SyncLock m_SubStationData
+                SyncLock m_StationList
+                    For i As Integer = 1 To State
+                        If Not m_StationList.ContainsKey(m_Radio.CurrentFrequency & ":" & i) Then
+                            Dim Info As New stationInfo
+                            Info.stationID = "HD" + ":" + (m_Radio.CurrentFrequency * 100) + ":" + i
+                            Info.stationName = m_Radio.CurrentFrequency / 10 & "HD-" & i
+                            Info.Bitrate = 0
+                            Info.Channels = 2
+                            Info.stationGenre = ""
+                            Info.signal = 1
+                            m_StationList.Add(m_Radio.CurrentFrequency & ":" & i, Info)
+                            m_SubStationData.Add(i, New SubChannelData)
+                        End If
+                    Next
+                    RaiseMediaEvent(eFunction.stationListUpdated, "")
+                End SyncLock
+            End SyncLock
         End If
     End Sub
 
     Private Sub m_Radio_HDRadioEventSysPortOpened() Handles m_Radio.HDRadioEventSysPortOpened
         m_Radio.PowerOn()
         Using Settings As New OpenMobile.Data.PluginSettings
-            Settings.setSetting("OMVisteonRadio.ComPort", m_Radio.ComPort)
+            Settings.setSetting("OMVisteonRadio.ComPort", m_Radio.ComPortString)
         End Using
     End Sub
 
@@ -429,6 +464,10 @@ Public Class RadioComm
             m_CurrentMedia.Artist = " "
             m_CurrentMedia.Album = " "
 
+            SyncLock m_SubStationData
+                m_SubStationData.Clear()
+            End SyncLock
+
             RaiseMediaEvent(eFunction.tunerDataUpdated, "")
             RaiseMediaEvent(eFunction.Play, "")
 
@@ -447,6 +486,14 @@ Public Class RadioComm
             m_CurrentMedia.Genre = Message
             RaiseMediaEvent(eFunction.Play, "")
         End If
+        SyncLock m_StationList
+            If m_StationList.ContainsKey(m_Radio.CurrentFrequency) Then
+                If Not m_StationList(m_Radio.CurrentFrequency).stationGenre = Message Then
+                    m_StationList(m_Radio.CurrentFrequency).stationGenre = Message
+                    RaiseMediaEvent(eFunction.stationListUpdated, "")
+                End If
+            End If
+        End SyncLock
     End Sub
 
     Private Sub m_Radio_HDRadioEventRDSProgramIdentification(ByVal Message As String) Handles m_Radio.HDRadioEventRDSProgramIdentification
@@ -457,11 +504,7 @@ Public Class RadioComm
     End Sub
 
     Private Sub m_Radio_HDRadioEventRDSProgramService(ByVal Message As String) Handles m_Radio.HDRadioEventRDSProgramService
-        'Changing/scrolling song info etc
-        'If Not m_CurrentMedia.Artist = Message Then
-        '    m_CurrentMedia.Artist = Message
-        '    RaiseMediaEvent(eFunction.Play, "")
-        'End If
+        
     End Sub
 
     Private Sub m_Radio_HDRadioEventRDSRadioText(ByVal Message As String) Handles m_Radio.HDRadioEventRDSRadioText
@@ -473,33 +516,81 @@ Public Class RadioComm
 
     Private Sub m_Radio_HDRadioEventHDActive(ByVal State As Integer) Handles m_Radio.HDRadioEventHDActive
         Dim IsHD As Boolean = (State = 1)
-        If Not m_StationList(m_Radio.CurrentFrequency).HD = IsHD Then
-            m_StationList(m_Radio.CurrentFrequency).HD = IsHD
-            RaiseMediaEvent(eFunction.tunerDataUpdated, "")
-        End If
+        SyncLock m_StationList
+            If m_StationList.ContainsKey(m_Radio.CurrentFrequency) Then
+                If Not m_StationList(m_Radio.CurrentFrequency).HD = IsHD Then
+                    SyncLock m_StationList
+                        m_StationList(m_Radio.CurrentFrequency).HD = IsHD
+                    End SyncLock
+                    RaiseMediaEvent(eFunction.tunerDataUpdated, "")
+                End If
+            End If
+        End SyncLock
     End Sub
 
     Private Sub m_Radio_HDRadioEventHDCallSign(ByVal Message As String) Handles m_Radio.HDRadioEventHDCallSign
-        If m_StationList(m_Radio.CurrentFrequency).stationName = Message Then
-            m_StationList(m_Radio.CurrentFrequency).stationName = Message
+        If Not m_StationList(m_Radio.CurrentFrequency).stationName = Message Then
+            SyncLock m_StationList
+                m_StationList(m_Radio.CurrentFrequency).stationName = Message
+            End SyncLock
+            m_HDCallSign = Message
+            m_CurrentMedia.Name = Message
             RaiseMediaEvent(eFunction.Play, "")
         End If
     End Sub
 
     Private Sub m_Radio_HDRadioEventHDArtist(ByVal Message As String) Handles m_Radio.HDRadioEventHDArtist
-        'Don't have any stations with this to test it with
-        'If Not m_CurrentMedia.Artist = Message Then
-        '    m_CurrentMedia.Artist = Message
-        '    RaiseMediaEvent(eFunction.Play, "")
-        'End If
+        SyncLock m_SubStationData
+            Dim Data() As String = Message.Split("|")
+
+            If Data.Length = 2 Then
+                Dim SubChan As Integer = Integer.Parse(Data(0))
+
+                If Not m_SubStationData.ContainsKey(SubChan) Then
+                    m_SubStationData.Add(SubChan, New SubChannelData)
+                End If
+
+                m_SubStationData(SubChan).Artist = Data(1)
+
+                If SubChan = m_Radio.CurrentHDSubChannel Then
+                    m_CurrentMedia.Artist = m_SubStationData(SubChan).Artist
+                    RaiseMediaEvent(eFunction.Play, "")
+                End If
+            End If
+
+        End SyncLock
+    End Sub
+
+    Private Sub m_Radio_HDRadioEventHDTitle(ByVal Message As String) Handles m_Radio.HDRadioEventHDTitle
+        SyncLock m_SubStationData
+            Dim Data() As String = Message.Split("|")
+
+            If Data.Length = 2 Then
+                Dim SubChan As Integer = Integer.Parse(Data(0))
+
+                If Not m_SubStationData.ContainsKey(SubChan) Then
+                    m_SubStationData.Add(SubChan, New SubChannelData)
+                End If
+
+                m_SubStationData(SubChan).Title = Data(1)
+                m_SubStationData(SubChan).Station = m_HDCallSign + " HD-" + SubChan.ToString
+
+                If SubChan = m_Radio.CurrentHDSubChannel Then
+                    m_CurrentMedia.Name = m_SubStationData(SubChan).Station
+                    m_CurrentMedia.Album = m_SubStationData(SubChan).Title
+                    RaiseMediaEvent(eFunction.Play, "")
+                End If
+            End If
+
+        End SyncLock
     End Sub
 
     Private Sub m_Radio_HDRadioEventTunerSignalStrength(ByVal State As Integer) Handles m_Radio.HDRadioEventTunerSignalStrength
-        UpdateSignal(State, 5)
+        UpdateSignal(State, 3)
     End Sub
 
     Private Sub m_Radio_HDRadioEventHDSignalStrength(ByVal State As Integer) Handles m_Radio.HDRadioEventHDSignalStrength
-        UpdateSignal(State, 819)
+        UpdateSignal(State, 600)
     End Sub
 
     Private Sub UpdateSignal(ByVal State As Integer, ByVal DivideBy As Integer)
@@ -631,5 +722,10 @@ Public Class RadioComm
 #End Region
 
 
+    Private Class SubChannelData
+        Public Station As String
+        Public Artist As String
+        Public Title As String
+    End Class
 End Class
 
