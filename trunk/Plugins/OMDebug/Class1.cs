@@ -210,9 +210,23 @@ namespace OMDebug
             List<string> Texts = new List<string>();
             Texts.Add("OS: " + OpenMobile.Framework.OSSpecific.getOSVersion());
             Texts.Add("Framework: " + OpenMobile.Framework.OSSpecific.getFramework());
-            Texts.Add("OpenMobile: v" + Assembly.GetEntryAssembly().GetName().Version.ToString());
+            //Texts.Add("OpenMobile: v" + Assembly.GetEntryAssembly().GetName().Version.ToString());
             Texts.Add("OS environment: " + OpenMobile.Framework.OSSpecific.getOSEnvironment() + "bit");
             Texts.Add("App environment: " + OpenMobile.Framework.OSSpecific.getAppEnvironment() + "bit");
+            if (System.Diagnostics.Debugger.IsAttached == true)
+                Texts.Add("IDE: " + "Yes (Debugger attached)");
+
+            // Dump version info for all OpenMobile system files
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                string AssemblyName = a.GetName().Name;
+                if (AssemblyName.ToLower().Contains("openmobile"))
+                {
+                    System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(a.Location);
+                    Texts.Add(AssemblyName + ": Version=" + a.GetName().Version + ", FileVersion=" + string.Format("{0}.{1}.{2}.{3}", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart));
+                }
+            }
+
             WriteToLog(false, "------------------Software-------------------", new DebugMessage(DebugMessageType.Info),Texts.ToArray());
 
             // Hardware info
@@ -226,7 +240,11 @@ namespace OMDebug
             // Initial assemblies
             Texts.Clear();
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
-                Texts.Add("LOADED (" + a.GetName() + ")");
+            {
+                //System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(a.Location);
+                //Texts.Add("LOADED -> " + a.GetName() + ", FileVersion=" + string.Format("{0}.{1}.{2}.{3}",fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart));
+                Texts.Add("PRELOADED -> " + a.GetName());
+            }
             Texts.Add("---------------------------------------------");
             WriteToLog(false, "--------------Inital Assemblies--------------", new DebugMessage(DebugMessageType.Info), Texts.ToArray());
         }

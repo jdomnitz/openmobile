@@ -28,7 +28,7 @@ using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using OpenMobile.helperFunctions.Panels;
+using OpenMobile.helperFunctions;
 
 namespace ControlDemo
 {
@@ -109,13 +109,21 @@ namespace ControlDemo
         t.Elapsed += new ElapsedEventHandler(t_Elapsed);
         t.Enabled = true;
         manager = new ScreenManager(theHost.ScreenCount);
+        p.Entering += new PanelEvent(p_Entering);
+        p.Leaving += new PanelEvent(p_Leaving);
         manager.loadPanel(p);
 
-        eventMonitor em = new eventMonitor(this.pluginName, p.Name);
-        em.EnteringPanel += new eventMonitor.Event(Entering);
-        em.LeavingPanel += new eventMonitor.Event(Leaving);
-
         return eLoadStatus.LoadSuccessful;
+    }
+
+    void p_Leaving(OMPanel sender, int screen)
+    {
+        theHost.sendMessage("UI", "", "{" + screen + "}Leaving panel :" + sender.Name);
+    }
+
+    void p_Entering(OMPanel sender, int screen)
+    {
+        theHost.sendMessage("UI", "", "{" + screen + "}Entering panel :" + sender.Name);
     }
 
     int frame;
@@ -130,18 +138,6 @@ namespace ControlDemo
 
         theHost.sendMessage("UI", "", "{" + screen + "}MsgBox result: " + dialog.ShowMsgBox(screen).ToString());
     }
-
-    private void Entering(int screen, string name)
-    {
-        theHost.sendMessage("UI", "", "{" + screen + "}Entering panel " + name);
-        //aimg.OnRedraw += Animator;
-    }
-    private void Leaving(int screen, string name)
-    {
-        theHost.sendMessage("UI", "", "{" + screen + "}Leaving panel " + name);
-        //aimg.OnRedraw -= Animator;
-    }
-
 
     void t_Elapsed(object sender, ElapsedEventArgs e)
     {
