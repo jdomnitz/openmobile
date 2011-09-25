@@ -342,11 +342,11 @@ namespace OpenMobile
             //DateTime start = DateTime.Now;
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            theHost.hal = new HalInterface();
             loadMainMenu();
             loadEmUp();
             getEmReady();
             initMainMenu();
-            theHost.hal = new HalInterface();
             theHost.Load(); //Stagger I/O
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);
             theHost.hal.snd("32");

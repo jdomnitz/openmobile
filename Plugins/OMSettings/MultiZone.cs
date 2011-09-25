@@ -26,7 +26,7 @@ using OpenMobile.Data;
 using OpenMobile.Framework;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
-using OpenMobile.helperFunctions.Panels;
+using OpenMobile.helperFunctions;
 using OpenMobile.helperFunctions.Forms;
 
 namespace OMSettings

@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenMobile</RootNamespace>
-    <AssemblyName>Open Mobile</AssemblyName>
+    <AssemblyName>OpenMobile</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>OpenMobile.Core</StartupObject>
@@ -145,4 +145,9 @@
   <PropertyGroup>
     <PreBuildEvent>EnvironmentSetup.exe</PreBuildEvent>
   </PropertyGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

@@ -43,8 +43,7 @@ namespace OpenMobile.Media
                 return false;
             if ((host == null) || (list == null))
                 return false;
-            object o;
-            host.getData(eGetData.GetMediaDatabase, dbname, out  o);
+            object o = host.getData(eGetData.GetMediaDatabase, dbname);
             if (o == null)
                 return false;
             list.Clear();
