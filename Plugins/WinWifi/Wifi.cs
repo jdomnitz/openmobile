@@ -33,6 +33,7 @@ namespace WinWifi
     public sealed class Wifi:INetwork
     {
         private WlanClient client;
+        private IPluginHost theHost;
         public event WirelessEvent OnWirelessEvent;
 
         public connectionInfo[] getAvailableNetworks()
@@ -350,6 +351,7 @@ namespace WinWifi
             try
             {
                 client = new WlanClient();
+                theHost = host;
             }
             catch (System.ComponentModel.Win32Exception)
             {
@@ -372,6 +374,8 @@ namespace WinWifi
         {
             try
             {
+                if (client.Interfaces.Length == 0)
+                    return;
                 if (client.Interfaces[0].InterfaceState == Wlan.WlanInterfaceState.NotReady)
                     return;
                 if (notifyData.NotificationCode.ToString() == "NetworkAvailable")
@@ -380,6 +384,11 @@ namespace WinWifi
                     raiseWirelessEvent(eWirelessEvent.WirelessSignalStrengthChanged, client.Interfaces[0].CurrentConnection.wlanAssociationAttributes.wlanSignalQuality.ToString());
             }
             catch (Win32Exception) { }
+            catch (Exception e)
+            {
+                if (theHost != null)
+                    theHost.sendMessage("SandboxedThread", "WinWifi", "", ref e);
+            }
         }
 
         void Wifi_WlanConnectionNotification(Wlan.WlanNotificationData notifyData, Wlan.WlanConnectionNotificationData connNotifyData)
