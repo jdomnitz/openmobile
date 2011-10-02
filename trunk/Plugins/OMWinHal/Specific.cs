@@ -35,6 +35,7 @@ namespace OMHal
     public static class Specific
     {
         static MMDevice[] device;
+        public static string[] DeviceNames;
         static WaveLib.AudioMixer.Mixers m;
         static int[] lastVolume;
         private static OperatingSystem os = System.Environment.OSVersion;
@@ -235,7 +236,9 @@ namespace OMHal
                     if (col.Count == 0)
                         return false;
                     device = new MMDevice[col.Count + 1];
+                    DeviceNames = new string[device.Length];
                     device[0] = DevEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
+                    DeviceNames[0] = "Default unit";
                     //uint count;
                     //device[0].Bass.GetChannelCount(out count);
                     for (int i = 0; i < col.Count; i++)
@@ -244,9 +247,8 @@ namespace OMHal
                         device[i + 1] = col[i];
                         col[i].AudioEndpointVolume.OnVolumeNotification += new AudioEndpointVolumeNotificationDelegate(AudioEndpointVolume_OnVolumeNotification);
 
-                        //string Name = (col[i].Properties[PKEY.FriendlyName]).Value.ToString();
-                        //Console.WriteLine(String.Format("\tAudioDevice {0} = {1}", i, Name));
-
+                        // Get devicename (Used for debugging and reported back to OM)
+                        DeviceNames[i + 1] = (col[i].Properties[PKEY.FriendlyName]).Value.ToString();
                     }
                     for(int i=0;i<device.Length;i++)
                         Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(i).ToString(), i.ToString(), "");

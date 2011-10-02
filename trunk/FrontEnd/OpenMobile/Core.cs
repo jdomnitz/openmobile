@@ -317,22 +317,29 @@ namespace OpenMobile
                     Debug.Print(ex);
                 }
             }
-            //for (int i = 3; i < pluginCollection.Count; i++) //and then two strikes their out...kill anything that still can't initialize
-            //{
-            //    if ((status[i] == eLoadStatus.LoadFailedRetryRequested) || (status[i] == eLoadStatus.LoadFailedUnloadRequested) || (status[i] == eLoadStatus.LoadFailedGracefulUnloadRequested))
-            //    {
-            //        try
-            //        {
-            //            pluginCollection[i].Dispose();
-            //            if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
-            //                theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName + " CRASHED!");
-            //        }
-            //        catch (Exception) { }
-            //        pluginCollection[i] = null;
-            //    }
-            //    status = null;
-            //    pluginCollection.RemoveAll(p => p == null);
-            //}
+            for (int i = 3; i < pluginCollection.Count; i++) //and then two strikes their out...kill anything that still can't initialize
+            {
+                if ((status[i] == eLoadStatus.LoadFailedRetryRequested) || (status[i] == eLoadStatus.LoadFailedUnloadRequested) || (status[i] == eLoadStatus.LoadFailedGracefulUnloadRequested))
+                {
+                    try
+                    {
+                        pluginCollection[i].Dispose();
+                        if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
+                            theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName + " CRASHED!");
+                    }
+                    catch (Exception) { }
+                    pluginCollection[i] = null;
+
+                    // Remove status for this plugin
+                    eLoadStatus[] temp = new eLoadStatus[status.Length - 1];
+                    Array.Copy(status, 0, temp, 0, i);
+                    Array.Copy(status, i + 1, temp, i, status.Length - i - 1);
+                    status = temp;
+
+                    // Remove plugin
+                    pluginCollection.RemoveAll(p => p == null);
+                }
+            }
         }        
 
 
