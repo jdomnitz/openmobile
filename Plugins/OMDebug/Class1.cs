@@ -210,7 +210,7 @@ namespace OMDebug
             List<string> Texts = new List<string>();
             Texts.Add("OS: " + OpenMobile.Framework.OSSpecific.getOSVersion());
             Texts.Add("Framework: " + OpenMobile.Framework.OSSpecific.getFramework());
-            //Texts.Add("OpenMobile: v" + Assembly.GetEntryAssembly().GetName().Version.ToString());
+            Texts.Add("OpenMobile: v" + Assembly.GetEntryAssembly().GetName().Version.ToString());
             Texts.Add("OS environment: " + OpenMobile.Framework.OSSpecific.getOSEnvironment() + "bit");
             Texts.Add("App environment: " + OpenMobile.Framework.OSSpecific.getAppEnvironment() + "bit");
             if (System.Diagnostics.Debugger.IsAttached == true)
@@ -315,28 +315,17 @@ namespace OMDebug
             if (function == eFunction.inputRouterInitialized)
             {
                 // List audio devices
-                string[] Devices = new string[0];
-                object o;
-                theHost.getData(eGetData.GetAudioDevices, "", out o);
-                if (o != null)
-                    Devices = (string[])o;
-                foreach (string s in Devices)
-                    Texts.Add("AudioDevice: " + s);
+                string[] Devices = theHost.getData(eGetData.GetAudioDevices, "") as string[];
+                if (Devices != null)
+                    for (int i = 0; i < Devices.Length; i++)
+                        Texts.Add("AudioDevice(" + i.ToString() + "): " + Devices[i]);
 
                 // List keyboard devices
-                o = new object();
-                theHost.getData(eGetData.GetAvailableKeyboards, "", out o);
-                if (o != null)
-                    Devices = (string[])o;
-                foreach (string s in Devices)
+                foreach (string s in (theHost.getData(eGetData.GetAvailableKeyboards, "") as string[]))
                     Texts.Add("Keyboard unit: " + s);
 
                 // List mice devices
-                o = new object();
-                theHost.getData(eGetData.GetAvailableMice, "", out o);
-                if (o != null)
-                    Devices = (string[])o;
-                foreach (string s in Devices)
+                foreach (string s in (theHost.getData(eGetData.GetAvailableMice, "") as string[]))
                     Texts.Add("Mice unit: " + s);
 
                 // Write out current multizone settings

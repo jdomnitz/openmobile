@@ -54,6 +54,43 @@ namespace OMHal
             SystemEvents.SessionEnding += new SessionEndingEventHandler(SystemEvents_SessionEnding);
             receive.BeginReceive(recv, null);
             this.Visible = false;
+
+            // Send info message: initialization completed 
+            sendIt("-99|Init_Completed|" + GetStartupInfo());
+        }
+
+
+        /// <summary>
+        /// Gets startup info for HAL
+        /// </summary>
+        /// <returns></returns>
+        private string GetStartupInfo()
+        {
+            string Info = "";
+ 
+            // Get assembly title (Should be winHal)
+            string Title = "";
+            object[] attributes = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(System.Reflection.AssemblyTitleAttribute), false);
+            if (attributes.Length > 0)
+            {
+                System.Reflection.AssemblyTitleAttribute titleAttribute = (System.Reflection.AssemblyTitleAttribute)attributes[0];
+                if (titleAttribute.Title != "")
+                    Title = titleAttribute.Title;
+            }
+
+            // Use filename if no title is available
+            if (Title == "")
+                Title = System.IO.Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+                    
+            // Add title and assembly info
+            Info += Title + " (" + System.Reflection.Assembly.GetExecutingAssembly().GetName() + ")";
+
+            // Add audiounit information
+            Info += "|HAL AudioUnits:";
+            for (int i = 0; i < Specific.DeviceNames.Length; i++)
+                Info += "|" + i.ToString() + ": " + Specific.DeviceNames[i];
+
+            return Info;
         }
 
         IntPtr Form1_OnHandleRequested()

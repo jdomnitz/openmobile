@@ -2082,6 +2082,11 @@ namespace OpenMobile
             MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();
             return DebugMsg(mb.DeclaringType.FullName + "." + mb.Name, messageType.ToString().Substring(0, 1) + "|" + header, messages);
         }
+        public bool DebugMsg(DebugMessageType messageType, string from, string header, string[] messages)
+        {
+            MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();
+            return DebugMsg(from, messageType.ToString().Substring(0, 1) + "|" + header, messages);
+        }
         public bool DebugMsg(string header, Exception e)
         {
             MethodBase mb = new System.Diagnostics.StackFrame(1).GetMethod();

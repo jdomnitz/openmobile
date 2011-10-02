@@ -101,6 +101,12 @@ namespace OpenMobile
                 Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1), bool.Parse(arg2), arg3);
             else if (i == -4)
                 Core.theHost.raiseKeyPressEvent((eKeypressType)Enum.Parse(typeof(eKeypressType), arg1), new KeyboardKeyEventArgs((Key)Enum.Parse(typeof(Key), arg2)));
+            else if (i == -99) // Info message from HAL
+            {
+                string[] Info = new string[parts.Length-2];
+                Array.Copy(parts, 2, Info, 0, Info.Length);
+                Core.theHost.DebugMsg(DebugMessageType.Info,"HAL", arg1, Info);
+            }
         }
         void recv(IAsyncResult res)
         {
