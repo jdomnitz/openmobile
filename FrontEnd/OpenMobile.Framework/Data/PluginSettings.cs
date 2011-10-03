@@ -68,6 +68,7 @@ namespace OpenMobile.Data
                 SqliteCommand cmd = new SqliteCommand(OpenMobile.Framework.Data.SQL.OMData, asyncCon);
                 cmd.ExecuteNonQuery();
                 DBCreated = true;
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Info,"Database created (OMData)");
             }
         }
         /// <summary>

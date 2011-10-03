@@ -934,17 +934,20 @@ namespace OMRadio
         }
         private bool UpdateStationList(int instance)
         {
-            object o = new object();
-            theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
-            if (o == null)
+            // Get radio info
+            tunedContentInfo info = theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString()) as tunedContentInfo;
+            if (info == null)
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
-                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "Load failed!";
+                    ((OMLabel)manager[i]["Radio_StationName"]).Text = "No data available!";
                 return false;
             }
+
+            // Update list source label
             for (int i = 0; i < theHost.ScreenCount; i++)
                 ((OMLabel)manager[i]["Label_StationListSource"]).Text = "Source: " + StationListSource.ToString();
-            tunedContentInfo info = (tunedContentInfo)o;
+
+            // Errorcheck
             if ((info.currentStation == null) || (info.stationList == null))
                 return false;
 

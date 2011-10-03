@@ -199,10 +199,13 @@ namespace OpenMobile
                 }
                 catch (Exception e)
                 {
-                    string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
-                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, e.Source, message);
+                    //string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, e.Source, spewException(e));
                 }
-                if (devs.Length > 0)
+                
+                // We set it to null if we only detected default unit as this indicates that no units was found
+                // A length of 2 would indicate a default unit and the corresponding physcial unit which is minimum for detection
+                if (devs.Length >= 2)
                 {
                     devices = devs;
                     return true;
