@@ -40,7 +40,9 @@ namespace OpenMobile
         }
         public static void Handle(Exception e)
         {
-            string message = e.GetType().ToString() + "(" + e.Message + ")\r\n\r\n" + e.StackTrace + "\r\n********";
+            //string message = e.GetType().ToString() + " (" + e.Message + ")\r\n" + e.StackTrace + "\r\n********";
+            string message = spewException(e);
+
             BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, e.Source, message);
 #if DEBUG
             Debug.Print(message);
@@ -61,5 +63,29 @@ namespace OpenMobile
                 sample.Dispose();
             }
         }
+
+        private static string spewException(Exception e)
+        {
+            string err;
+            err = e.GetType().Name + "\r\n";
+            err += ("Exception Message: " + e.Message);
+            err += ("\r\nSource: " + e.Source);
+            err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+            err += ("\r\n");
+            int failsafe = 0;
+            while (e.InnerException != null)
+            {
+                e = e.InnerException;
+                err += ("Inner Exception: " + e.Message);
+                err += ("\r\nSource: " + e.Source);
+                err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+                err += ("\r\n");
+                failsafe++;
+                if (failsafe == 4)
+                    break;
+            }
+            return err;
+        }
+
     }
 }

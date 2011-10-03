@@ -679,7 +679,6 @@ namespace OpenMobile.Platform.Windows
 
         #region Show / hide / find window
 
-
         [DllImport("user32.dll")]
         public static extern int FindWindow(string className, string windowText);
         [DllImport("user32.dll")]

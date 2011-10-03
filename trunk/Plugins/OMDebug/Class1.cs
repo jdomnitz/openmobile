@@ -319,6 +319,8 @@ namespace OMDebug
                 if (Devices != null)
                     for (int i = 0; i < Devices.Length; i++)
                         Texts.Add("AudioDevice(" + i.ToString() + "): " + Devices[i]);
+                else
+                    Texts.Add("AudioDevice: No data/units available");
 
                 // List keyboard devices
                 foreach (string s in (theHost.getData(eGetData.GetAvailableKeyboards, "") as string[]))
