@@ -352,7 +352,7 @@ namespace OpenMobile
             set
             {
                 base.WindowState = value;
-                Debug.Print("Updating Context after setting WindowState to {0}", value);
+                //Debug.Print("Updating Context after setting WindowState to {0}", value);
 
                 if (Context != null)
                     Context.Update(WindowInfo);

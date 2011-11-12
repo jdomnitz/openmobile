@@ -105,19 +105,22 @@ namespace OpenMobile
             Settings gl = new Settings("General Settings");
             Setting graphics = new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", String.Empty, "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
-            Setting SkinColor = new Setting(SettingTypes.Text, "UI.SkinColor", "Foreground", "Skin foreground color (R,G,B)");
-            Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus", "Skin focus color (R,G,B)");
+            Setting ShowCursor = new Setting(SettingTypes.MultiChoice, "UI.ShowCursor", String.Empty, "Show OM mouse/pointer cursors", Setting.BooleanList, Setting.BooleanList);
+            //Setting SkinColor = new Setting(SettingTypes.Text, "UI.SkinColor", "Foreground", "Skin foreground color (R,G,B)");
+            //Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus", "Skin focus color (R,G,B)");
             using (PluginSettings settings = new PluginSettings())
             {
                 graphics.Value = settings.getSetting("UI.MinGraphics");
                 volume.Value = settings.getSetting("UI.VolumeChangesVisible");
-                SkinColor.Value = settings.getSetting("UI.SkinColor");
-                SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
+                ShowCursor.Value = settings.getSetting("UI.ShowCursor");
+                //SkinColor.Value = settings.getSetting("UI.SkinColor");
+                //SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
             }
             gl.Add(graphics);
             gl.Add(volume);
-            gl.Add(SkinColor);
-            gl.Add(SkinFocusColor);
+            //gl.Add(SkinColor);
+            //gl.Add(SkinFocusColor);
+            gl.Add(ShowCursor);
             gl.OnSettingChanged += new SettingChanged(SettingsChanged);
             return gl;
         }
@@ -135,6 +138,14 @@ namespace OpenMobile
                         else
                             theHost.GraphicsLevel = eGraphicsLevel.Standard;
                         break;
+
+                    case "UI.ShowCursor":
+                        if (setting.Value == "True")
+                            theHost.ShowCursors = true;
+                        else
+                            theHost.ShowCursors = false;
+                        break;
+
                     default:
                         theHost.execute(eFunction.settingsChanged, setting.Name);
                         break;
@@ -149,6 +160,60 @@ namespace OpenMobile
         public static Settings getZoneSettings(int instance)
         {
             return new Settings("Zone " + (instance + 1).ToString() + " Settings"); //Not Yet Implemented
+        }
+    }
+
+    public static class Timing
+    {
+        static DateTime start = DateTime.Now;
+        static DateTime intermediate = DateTime.Now;
+
+        /// <summary>
+        /// Internal use only! 
+        /// Gets timing data since last call of this method (used for timing of code)
+        /// </summary>
+        /// <returns></returns>
+        public static string GetTiming()
+        {
+            double Duration = (DateTime.Now - intermediate).TotalMilliseconds;
+            intermediate = DateTime.Now;
+            return Duration.ToString() + " (" + (DateTime.Now - start).TotalMilliseconds.ToString() + ")";
+        }
+    }
+
+    /// <summary>
+    /// Provides a set of OM errorhandling methods
+    /// </summary>
+    public static class ErrorHandling
+    {
+        /// <summary>
+        /// Formats all required data for an exception into a string 
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public static string spewException(Exception e)
+        {
+            string err;
+            err = e.GetType().Name + "\r\n";
+            err += ("Exception Message: " + e.Message);
+            err += ("\r\nSource: " + e.Source);
+            err += ("\r\nTargetSite: \r" + e.TargetSite);
+            err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+            err += ("\r\n");
+            int failsafe = 0;
+            while (e.InnerException != null)
+            {
+                e = e.InnerException;
+                err += ("Inner Exception: " + e.Message);
+                err += ("\r\nSource: " + e.Source);
+                err += ("\r\nTargetSite: \r" + e.TargetSite);
+                err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+                err += ("\r\n");
+                failsafe++;
+                if (failsafe == 4)
+                    break;
+            }
+            return err;
         }
     }
 }

@@ -106,10 +106,10 @@ namespace OpenMobile.Platform
 
         #region IPlatformFactory Members
 
-        public INativeWindow CreateNativeWindow(int x, int y, int width, int height, string title,
+        public INativeWindow CreateNativeWindow(int screen, int x, int y, int width, int height, string title,
             GraphicsMode mode, GameWindowFlags options, DisplayDevice device)
         {
-            return default_implementation.CreateNativeWindow(x, y, width, height, title, mode, options, device);
+            return default_implementation.CreateNativeWindow(screen, x, y, width, height, title, mode, options, device);
         }
 
         public IDisplayDeviceDriver CreateDisplayDeviceDriver()
@@ -146,7 +146,7 @@ namespace OpenMobile.Platform
             
             #region IPlatformFactory Members
 
-            public INativeWindow CreateNativeWindow(int x, int y, int width, int height, string title, GraphicsMode mode, GameWindowFlags options, DisplayDevice device)
+            public INativeWindow CreateNativeWindow(int screen, int x, int y, int width, int height, string title, GraphicsMode mode, GameWindowFlags options, DisplayDevice device)
             {
                 throw new PlatformNotSupportedException();
             }

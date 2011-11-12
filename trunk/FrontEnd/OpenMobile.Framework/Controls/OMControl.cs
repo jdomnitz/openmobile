@@ -77,6 +77,14 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// Requests a redraw/update of this control
+        /// </summary>
+        public void Refresh()
+        {
+            raiseUpdate(false);
+        }
+
+        /// <summary>
         /// Returns the screen the control is currently being rendered on.
         /// Note this function uses reflection and is quite slow, use it only when other alternatives do not exist.
         /// Returns -1 if not attached to any screen

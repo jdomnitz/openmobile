@@ -86,7 +86,7 @@ namespace OpenMobile
                 }
             }
             else
-            {   // Screen spesific message
+            {   // Screen specific message
                 OMPanel p = manager[Screen];
                 OMAnimatedLabel title = ((OMAnimatedLabel)p[6]);
                 title.Transition(eAnimation.UnveilRight, message, 50);
@@ -568,6 +568,7 @@ namespace OpenMobile
                 hideSpeech(0); //ToDo - Instance specific
             else if (function == eFunction.gesture)
             {
+                // TODO: Remove requirement for specific skin names, move defaults to database
                 if ((arg3 != "OSK") && (arg3 != "Navigation") && (arg3 != "Slideshow"))
                     switch (arg2)
                     {

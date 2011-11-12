@@ -113,6 +113,7 @@
     <Compile Include="Data\Weather.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="helperFunctions\Globalization.cs" />
+    <Compile Include="helperFunctions\StoredData.cs" />
     <Compile Include="IconManager.cs" />
     <Compile Include="Math\Calculation.cs" />
     <Compile Include="helperFunctions\Encryption.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="Math\Evaluator.cs" />
     <Compile Include="Media\DeviceInfo.cs" />
     <Compile Include="Media\MediaLoader.cs" />
+    <Compile Include="Media\StorageAnalyzer.cs" />
     <Compile Include="Net\Connections.cs" />
     <Compile Include="Net\Network.cs" />
     <Compile Include="Math\SunTimes.cs" />
@@ -156,6 +158,7 @@
     <Compile Include="TaskManager.cs" />
     <Compile Include="Widget.cs" />
     <Compile Include="Platform\GnomeIcon.cs" />
+    <Compile Include="Zones\Zone.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Data\SQL.resx">
@@ -188,7 +191,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

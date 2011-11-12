@@ -126,12 +126,12 @@ namespace OpenMobile
     /// <summary>
     /// An item in an OMList
     /// </summary>
-    public sealed class OMListItem : IComparable
+    public sealed class OMListItem : IComparable, ICloneable
     {
         /// <summary>
         /// Format information for a list subitem
         /// </summary>
-        public sealed class subItemFormat
+        public sealed class subItemFormat: ICloneable
         {
             public bool Changed { get; set; }
 
@@ -234,6 +234,15 @@ namespace OpenMobile
                 }
             }
             private int _Offset = 0;
+
+            #region ICloneable Members
+
+            public object Clone()
+            {
+                return (subItemFormat)this.MemberwiseClone();
+            }
+
+            #endregion
         }
         /// <summary>
         /// The text to display
@@ -511,6 +520,25 @@ namespace OpenMobile
         }
 
         #endregion
+
+        #region ICloneable Members
+
+        public object Clone()
+        {
+            OMListItem NewItem = (OMListItem)this.MemberwiseClone();
+            NewItem._subitemTex = null;
+            NewItem._textTex = null;
+            if (this.subitemFormat != null)
+                NewItem.subitemFormat = (subItemFormat)this.subitemFormat.Clone();
+            return NewItem;
+        }
+
+        #endregion
+
+        public override string ToString()
+        {
+            return _text;
+        }
     }
 
 

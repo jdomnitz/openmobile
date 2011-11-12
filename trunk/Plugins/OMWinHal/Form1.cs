@@ -37,15 +37,21 @@ namespace OMHal
         public Form1()
         {
             InitializeComponent();
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             Specific.OnHandleRequested += new Specific.getHandle(Form1_OnHandleRequested);
             try
             {
                 receive = new UdpClient(8549);
-            }catch(SocketException)
+            }
+            catch(SocketException)
             {
                 Environment.Exit(0);
             }
             send = new UdpClient("127.0.0.1", 8550);
+            
+            // Send info message: initialization started 
+            sendIt("-98|Init_Started");
+
             Specific.hookVolume(this.Handle);
             DriveHandler.hook(this.Handle);
             if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
@@ -56,7 +62,7 @@ namespace OMHal
             this.Visible = false;
 
             // Send info message: initialization completed 
-            sendIt("-99|Init_Completed|" + GetStartupInfo());
+            sendIt("-98|Init_Completed|" + GetStartupInfo());
         }
 
 
@@ -154,7 +160,7 @@ namespace OMHal
                             }
                     }
                     break;
-                case "32":
+                case "32":  // Enumerate drives
                     foreach (DriveInfo drive in DriveInfo.GetDrives())
                         if ((drive.DriveType == DriveType.CDRom)||(drive.DriveType==DriveType.Removable))
                             if (drive.IsReady == true)
@@ -269,5 +275,42 @@ namespace OMHal
         {
             sendIt("-2|" + ePowerEvent.ToString());
         }
+
+
+        static bool ErroredOut;
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (ErroredOut) //Prevent multiple bugs
+                return;
+            ErroredOut = true;
+
+            // Send error message
+            sendIt("-99|UnhandledException|" + spewException((Exception)e.ExceptionObject));
+
+            Environment.Exit(0);
+        }
+        private static string spewException(Exception e)
+        {
+            string err;
+            err = e.GetType().Name + "|";
+            err += ("Exception Message: " + e.Message);
+            err += ("|Source: " + e.Source);
+            err += ("|nStack Trace: |" + e.StackTrace);
+            err += ("|");
+            int failsafe = 0;
+            while (e.InnerException != null)
+            {
+                e = e.InnerException;
+                err += ("Inner Exception: " + e.Message);
+                err += ("|Source: " + e.Source);
+                err += ("|Stack Trace: |" + e.StackTrace);
+                err += ("|");
+                failsafe++;
+                if (failsafe == 4)
+                    break;
+            }
+            return err;
+        }
+
     }
 }

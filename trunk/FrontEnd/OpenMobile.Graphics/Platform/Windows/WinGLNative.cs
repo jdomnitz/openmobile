@@ -103,10 +103,11 @@ namespace OpenMobile.Platform.Windows
             queryDisableAutoplay = Functions.RegisterWindowMessage("QueryCancelAutoPlay");
 
             // This timer callback is called periodically when the window enters a sizing / moving modal loop.
-            ModalLoopCallback = delegate(IntPtr handle, WindowMessage msg, UIntPtr eventId, int time)
-            {};
-            if (Environment.OSVersion.Version.Major>5)
+            ModalLoopCallback = delegate(IntPtr handle, WindowMessage msg, UIntPtr eventId, int time){};
+
+            if (Environment.OSVersion.Version.Major > 5)
                 ParentStyleEx|= ExtendedWindowStyle.Layered;
+
             // To avoid issues with Ati drivers on Windows 6+ with compositing enabled, the context will not be
             // bound to the top-level window, but rather to a child window docked in the parent.
             window = new WinWindowInfo(
@@ -115,7 +116,7 @@ namespace OpenMobile.Platform.Windows
                 CreateWindow(0, 0, ClientSize.Width, ClientSize.Height, title, options, device, window.WindowHandle), window);
 
             exists = true;
-            
+
             // Default input units (name and description for these units are assigned in Core.InputRouter)
             keyboard.Description = "OS Default Keyboard";
             keyboards.Add(keyboard);
@@ -1183,4 +1184,24 @@ namespace OpenMobile.Platform.Windows
         #endregion
     }
 }
+
+public static class Timing
+{
+    static DateTime start = DateTime.Now;
+    static DateTime intermediate = DateTime.Now;
+
+    /// <summary>
+    /// Internal use only! 
+    /// Gets timing data since last call of this method (used for timing of code)
+    /// </summary>
+    /// <returns></returns>
+    public static string GetTiming()
+    {
+        double Duration = (DateTime.Now - intermediate).TotalMilliseconds;
+        intermediate = DateTime.Now;
+        return Duration.ToString() + " (" + (DateTime.Now - start).TotalMilliseconds.ToString() + ")";
+    }
+
+}
+
 #endif

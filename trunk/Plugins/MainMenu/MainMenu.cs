@@ -71,8 +71,8 @@ namespace OpenMobile
             {
                 if (settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu1.Plugin") == "")
                     createDefaultSettings(settings, screen);
-                
-                OMPanel mainPanel = new OMPanel();
+
+                OMPanel mainPanel = new OMPanel("MainMenu");
                 OMButton[] MainMenuButtons = new OMButton[9];
 
                 #region Row 1
@@ -200,7 +200,7 @@ namespace OpenMobile
                 #endregion
                 
                 //screens.loadPanel(mainPanel);
-                screens.loadSinglePanel(mainPanel, screen);
+                screens.loadSinglePanel(mainPanel, screen, true);
             }
 
             settings.Dispose();
@@ -510,8 +510,8 @@ namespace OpenMobile
         {   // Loop trough all button and update icons
             for (int i = 1; i <= 9; i++)
             {
-                OMButton Button = ((OMButton)screens[screen, ""]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString()]);
-                OMImage Icon = ((OMImage)screens[screen, ""]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString() + "_Icon"]);
+                OMButton Button = ((OMButton)screens[screen, "MainMenu"]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString()]);
+                OMImage Icon = ((OMImage)screens[screen, "MainMenu"]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString() + "_Icon"]);
                 if (Button.Tag != null)
                     if ((string)Button.Tag != "")
                     {
@@ -599,6 +599,8 @@ namespace OpenMobile
                 MainMenu_UpdateIcons(screen);
             }
 
+            //if (name == "") 
+            //    return screens[screen, "MainMenu"];
             return screens[screen,name];
         }
         public Settings loadSettings()

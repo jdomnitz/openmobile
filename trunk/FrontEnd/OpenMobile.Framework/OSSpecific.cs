@@ -153,7 +153,7 @@ namespace OpenMobile.Framework
                     PointF scale = (PointF)o;
                     if (Windows.windowsEmbedder.SetWindowPos(lastHandle[screen].handle, (IntPtr)0, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0), (int)(position.Width * scale.X), (int)(position.Height * scale.Y), 0x20) == false)
                         return false;
-                    if (Windows.windowsEmbedder.SetParent(lastHandle[screen].handle, (IntPtr)theHost.UIHandle(screen)) == IntPtr.Zero)
+                    if (Windows.windowsEmbedder.SetParent(lastHandle[screen].handle, (IntPtr)theHost.GetWindowHandle(screen)) == IntPtr.Zero)
                         return false;
                     if (Windows.windowsEmbedder.SetWindowLong(lastHandle[screen].handle, -16, Windows.windowsEmbedder.GetWindowLong(lastHandle[screen].handle, -16) & -12582913) != 0)
                         return false;
@@ -174,7 +174,7 @@ namespace OpenMobile.Framework
                 {
                     if (lastHandle == null)
                         lastHandle = new embedInfo[theHost.ScreenCount];
-                    OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
+                    OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.GetWindowHandle(screen);
                     IntPtr tmp1; IntPtr tmp2;
                     int count;
                     IntPtr w;
@@ -243,7 +243,7 @@ namespace OpenMobile.Framework
                         theHost.getData(eGetData.GetScaleFactors, String.Empty, arg1, out o);
                         if (o == null)
                             return;
-                        OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
+                        OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.GetWindowHandle(screen);
                         PointF scale = (PointF)o;
                         OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, lastHandle[screen].handle, (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y));
                     }
@@ -284,7 +284,7 @@ namespace OpenMobile.Framework
 #endif
                     if (Configuration.RunningOnX11)
                     {
-                        OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.UIHandle(screen);
+                        OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.GetWindowHandle(screen);
                         OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
                         lastHandle[screen].handle = IntPtr.Zero;
                         return true;

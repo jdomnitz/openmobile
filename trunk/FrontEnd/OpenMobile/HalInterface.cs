@@ -28,8 +28,8 @@ namespace OpenMobile
 {
     public sealed class HalInterface
     {
-        System.Net.Sockets.UdpClient receive;
-        System.Net.Sockets.UdpClient send;
+        System.Net.Sockets.UdpClient UDPReceive;
+        System.Net.Sockets.UdpClient UDPSend;
         public string[] volume;
         public string[] brightness;
         private bool isDisposed;
@@ -40,7 +40,8 @@ namespace OpenMobile
             {
                 if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", String.Empty)), "OMHal.exe"), String.Empty, false))
                     BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "HalInterface", "Unable to start HAL!");
-
+                else
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "HalInterface", "WinHAL Started");
             }
 #endif
 #if LINUX
@@ -51,18 +52,20 @@ namespace OpenMobile
                 {
                     if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:", String.Empty)), "OMHal.exe"), String.Empty, false))
                         BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "HalInterface", "Unable to start HAL!");
+                    else
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "HalInterface", "LinHAL Started");
                 }
 #endif
-            receive = new System.Net.Sockets.UdpClient(8550);
-            receive.BeginReceive(recv, null);
-            send = new System.Net.Sockets.UdpClient("127.0.0.1", 8549);
+            UDPReceive = new System.Net.Sockets.UdpClient(8550);
+            UDPReceive.BeginReceive(recv, null);
+            UDPSend = new System.Net.Sockets.UdpClient("127.0.0.1", 8549);
         }
-        public void snd(string text)
+        public void Send(string text)
         {
             try
             {
                 if (!isDisposed)
-                    send.Send(ASCIIEncoding.ASCII.GetBytes(text), text.Length);
+                    UDPSend.Send(ASCIIEncoding.ASCII.GetBytes(text), text.Length);
             }
             catch (System.Net.Sockets.SocketException e)
             {
@@ -101,11 +104,17 @@ namespace OpenMobile
                 Core.theHost.RaiseStorageEvent((eMediaType)Enum.Parse(typeof(eMediaType), arg1), bool.Parse(arg2), arg3);
             else if (i == -4)
                 Core.theHost.raiseKeyPressEvent((eKeypressType)Enum.Parse(typeof(eKeypressType), arg1), new KeyboardKeyEventArgs((Key)Enum.Parse(typeof(Key), arg2)));
-            else if (i == -99) // Info message from HAL
+            else if (i == -98) // Debug message (info) from HAL
+            {
+                string[] Info = new string[parts.Length - 2];
+                Array.Copy(parts, 2, Info, 0, Info.Length);
+                Core.theHost.DebugMsg(DebugMessageType.Info, "HAL", arg1, Info);
+            }
+            else if (i == -99) // Debug message (error) from HAL
             {
                 string[] Info = new string[parts.Length-2];
                 Array.Copy(parts, 2, Info, 0, Info.Length);
-                Core.theHost.DebugMsg(DebugMessageType.Info,"HAL", arg1, Info);
+                Core.theHost.DebugMsg(DebugMessageType.Error,"HAL", arg1, Info);
             }
         }
         void recv(IAsyncResult res)
@@ -115,19 +124,19 @@ namespace OpenMobile
             IPEndPoint remote = new IPEndPoint(IPAddress.Any, 8549);
             try
             {
-                parse(ASCIIEncoding.ASCII.GetString(receive.EndReceive(res, ref remote)));
+                parse(ASCIIEncoding.ASCII.GetString(UDPReceive.EndReceive(res, ref remote)));
             }
             catch (System.Net.Sockets.SocketException) { } //unknown xp bug on startup
             finally
             {
                 if (!isDisposed)
-                    receive.BeginReceive(recv, null);
+                    UDPReceive.BeginReceive(recv, null);
             }
         }
         internal void close()
         {
             isDisposed = true;
-            receive.Close();
+            UDPReceive.Close();
         }
     }
 }

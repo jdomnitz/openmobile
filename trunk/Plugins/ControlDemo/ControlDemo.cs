@@ -90,9 +90,10 @@ namespace ControlDemo
         OK.Image = theHost.getSkinImage("Full");
         OK.FocusImage = theHost.getSkinImage("Full.Highlighted");
         OK.Text = "OK";
-        OK.Name = "OMSettings.OK";
+        OK.Name = "OK";
         OK.Transition = eButtonTransition.None;
         OK.SkinDebug = true;
+        OK.OnClick += new userInteraction(OK_OnClick);
         p.addControl(OK);
 
         OMImage AnimatedImage = new OMImage();
@@ -105,6 +106,28 @@ namespace ControlDemo
         AnimatedImage.Animate = AnimatedImage.CanAnimate;   // Activate animation if possible
         p.addControl(AnimatedImage);
 
+        OMList List1 = new OMList(550,200,200,200);
+        List1.Name = "List1";
+        List1.ListStyle = eListStyle.MultiList;
+        List1.Add(new OMListItem("gggg"));
+        List1.Add(new OMListItem("gg"));
+        List1.Add(new OMListItem("bbbb"));
+        List1.Add(new OMListItem("cccc"));
+        List1.Add(new OMListItem("cc"));
+        List1.Add(new OMListItem("dddd"));
+        List1.Add(new OMListItem("ffff"));
+        List1.Add(new OMListItem("ff"));
+
+        OMListItem ListItem = new OMListItem("Line1", "linemulti");
+        ListItem.image = theHost.getSkinImage("OM").image;
+        List1.Add(ListItem);
+
+        List1.SelectedIndexChanged += new OMList.IndexChangedDelegate(List1_SelectedIndexChanged);
+        p.addControl(List1);
+        OMList List2 = new OMList(750, 200, 200, 200);
+        List2.Name = "List2";
+        p.addControl(List2);
+
         System.Timers.Timer t = new System.Timers.Timer(100);
         t.Elapsed += new ElapsedEventHandler(t_Elapsed);
         t.Enabled = true;
@@ -115,6 +138,21 @@ namespace ControlDemo
 
         return eLoadStatus.LoadSuccessful;
     }
+
+    void List1_SelectedIndexChanged(OMList sender, int screen)
+    {
+        OMList List1 = (OMList)manager[screen]["List1"];
+        OMList List2 = (OMList)manager[screen]["List2"];
+        string find = List1.SelectedItem.text.Substring(0, 1);
+        List2.Items = List1.Items.FindAll(a => a.text.StartsWith(find)).ConvertAll(x => (OpenMobile.OMListItem)x.Clone());
+    }
+
+    void OK_OnClick(OMControl sender, int screen)
+    {
+        OMButton btn = (OMButton)manager[screen]["btnDialog"];
+        btn.Image = theHost.getSkinImage("Full");
+    }
+
 
     void p_Leaving(OMPanel sender, int screen)
     {

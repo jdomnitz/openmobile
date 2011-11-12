@@ -35,7 +35,7 @@ namespace OpenMobile.Platform
 {
     interface IPlatformFactory
     {
-        INativeWindow CreateNativeWindow(int x, int y, int width, int height, string title, GraphicsMode mode, GameWindowFlags options, DisplayDevice device);
+        INativeWindow CreateNativeWindow(int screen, int x, int y, int width, int height, string title, GraphicsMode mode, GameWindowFlags options, DisplayDevice device);
 
         IDisplayDeviceDriver CreateDisplayDeviceDriver();
 

@@ -37,7 +37,7 @@ namespace OpenMobile.Platform.MacOS
     {
         #region IPlatformFactory Members
 
-        public virtual INativeWindow CreateNativeWindow(int x, int y, int width, int height, string title, GraphicsMode mode, GameWindowFlags options, DisplayDevice device)
+        public virtual INativeWindow CreateNativeWindow(int screen, int x, int y, int width, int height, string title, GraphicsMode mode, GameWindowFlags options, DisplayDevice device)
         {
             return new CarbonGLNative(x, y, width, height, title, mode, options, device);
         }

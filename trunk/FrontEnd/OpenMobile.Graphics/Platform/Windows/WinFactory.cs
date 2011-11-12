@@ -38,9 +38,10 @@ namespace OpenMobile.Platform.Windows
     {
         #region IPlatformFactory Members
 
-        public virtual INativeWindow CreateNativeWindow(int x, int y, int width, int height, string title, GraphicsMode mode, GameWindowFlags options, DisplayDevice device)
+        public virtual INativeWindow CreateNativeWindow(int screen, int x, int y, int width, int height, string title, GraphicsMode mode, GameWindowFlags options, DisplayDevice device)
         {
-            return new WinGLNative(x, y, width, height, title, options, device);
+            INativeWindow w = new WinGLNative(x, y, width, height, title, options, device);
+            return w;
         }
 
         public virtual IDisplayDeviceDriver CreateDisplayDeviceDriver()

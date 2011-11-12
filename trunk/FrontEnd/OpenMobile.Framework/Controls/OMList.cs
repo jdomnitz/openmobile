@@ -123,6 +123,22 @@ namespace OpenMobile.Controls
         protected eListStyle style;
 
         /// <summary>
+        /// List items
+        /// </summary>
+        public List<OMListItem> Items
+        {
+            get
+            {
+                return items;
+            }
+            set
+            {
+                Clear();
+                items = value;
+            }
+        }
+
+        /// <summary>
         /// The background color of the list (Default: Transparent)
         /// </summary>
         public Color Background

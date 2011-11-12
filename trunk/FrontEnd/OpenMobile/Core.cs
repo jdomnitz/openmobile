@@ -91,8 +91,9 @@ namespace OpenMobile
 
         private static void loadMainMenu()
         {
+            #region UI
+
             Assembly pluginAssembly = LoadSkinDLL("UI");
-            //Modifications by Borte
             IHighLevel UIPlugin = null;
             try
             {
@@ -105,17 +106,21 @@ namespace OpenMobile
                 //handled below
             }
             if (UIPlugin == null)
-            {
+            {   // Retry load but with a different type
                 UIPlugin = (IHighLevel)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.UI"));
+                
+                // Does it still fail?
                 if (UIPlugin == null)
+                    // Yes, show error
                     Application.ShowError(null, "No UI Skin available!", "No skin available!");
             }
-            //End Modifications by Borte
             pluginCollection.Add(UIPlugin);
-            //availablePlugin.initialize(theHost);
+
+            #endregion 
+
+            #region MainMenu
 
             pluginAssembly = LoadSkinDLL("MainMenu");
-            //Modifications by Borte
             IBasePlugin MainMenuPlugin = null;
             try
             {
@@ -125,14 +130,17 @@ namespace OpenMobile
             }
             catch { }
             if (MainMenuPlugin == null)
-            {
+            {   // Retry load but with a different type
                 MainMenuPlugin = (IBasePlugin)Activator.CreateInstance(pluginAssembly.GetType("OpenMobile.MainMenu"));
+
+                // Does it still fail?
                 if (MainMenuPlugin == null)
+                    // Yes, show error
                     Application.ShowError(null, "No Main Menu Skin available!", "No skin available!");
             }
-            //End Modifications by Borte
             pluginCollection.Add(MainMenuPlugin);
-            //mmPlugin.initialize(theHost);
+
+            #endregion
         }
 
         private static void initMainMenu()
@@ -345,32 +353,54 @@ namespace OpenMobile
 
         private static void initialize()
         {
-            //Uncomment these to time the startup
-            //DateTime start = DateTime.Now;
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-            theHost.hal = new HalInterface();
-            loadMainMenu();
-            loadEmUp();
-            getEmReady();
+
+            // Load and initialize UI and MainMenu
+            loadMainMenu(); 
             initMainMenu();
-            theHost.Load(); //Stagger I/O
+
+            // Init plugins
+            InitPluginsAndData();
+
+            // Start application
+            Application.Run();
+        }
+
+        private static void InitPluginsAndData()
+        {
+            // Load plugins
+            loadEmUp(); 
+
+            // Initialize plugins
+            getEmReady(); 
+
+            // Tell pluginhost to start loading data
+            theHost.Load();
+
+            // Inform system that plugin loading is completed
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);
-            theHost.hal.snd("32");
-            NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(theHost.NetworkChange_NetworkAvailabilityChanged);
-            NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(theHost.NetworkChange_NetworkAddressChanged);
-            OpenMobile.Threading.TaskManager.Enable(Core.theHost); //Start executing background tasks
-            SystemEvents.DisplaySettingsChanged += new EventHandler(theHost.SystemEvents_DisplaySettingsChanged);
+
+            // Enumerate available devices
+            theHost.Hal_Send("32");
+
+            // Start executing background tasks
+            OpenMobile.Threading.TaskManager.Enable(Core.theHost);
+
+            // Set graphic level
             using (PluginSettings settings = new PluginSettings())
             {
                 if (settings.getSetting("UI.MinGraphics") == "True")
                     theHost.GraphicsLevel = eGraphicsLevel.Minimal;
             }
+
+            // Raise network events (if available)
             if (OpenMobile.Net.Network.IsAvailable)
                 theHost.raiseSystemEvent(eFunction.connectedToInternet, String.Empty, String.Empty, String.Empty);
+
+            // Clean plugincollection list
             pluginCollection.TrimExcess();
-            Application.Run();
         }
+
         static bool ErroredOut;
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
@@ -378,8 +408,7 @@ namespace OpenMobile
                 return;
             ErroredOut = true;
             Exception ex = (Exception)e.ExceptionObject;
-            if (theHost.hal != null)
-                theHost.hal.close();
+            theHost.Stop();
             string strEx = spewException(ex);
             FileStream fs = File.OpenWrite(Path.Combine(theHost.DataPath, "AppCrash-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Second.ToString() + ".log"));
             fs.Write(System.Text.ASCIIEncoding.ASCII.GetBytes(strEx), 0, strEx.Length);
@@ -420,11 +449,13 @@ namespace OpenMobile
             }
             return err;
         }
+
         [STAThread]
         private static void Main()
         {
-             // Map host reference to be available to framework components
-            BuiltInComponents.Host = theHost;
+            // Only handle system wide crashes if not in IDE
+            if (!System.Diagnostics.Debugger.IsAttached)
+                AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
             #region Process startup arguments
 
@@ -495,7 +526,11 @@ namespace OpenMobile
 
             #endregion
 
+            // Load and initialize debug
             loadDebug();
+
+            // Start all pluginhost features (including HAL)
+            theHost.Start();
 
             // Write startup params to debug log
             string[] Args = Environment.GetCommandLineArgs();
@@ -503,13 +538,18 @@ namespace OpenMobile
                 Args[i] = i.ToString() + " > " + Args[i];
             BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Startup arguments:", Args);
 
-            Thread rapidMenu = new Thread(Core.initialize);
-            rapidMenu.Start();
+            // Error check
             if (RenderingWindows.Count == 0)
                 throw new Exception("Unable to detect any monitors on this platform!");
+
+            Thread rapidMenu = new Thread(Core.initialize);
+            rapidMenu.Start();
+
             for (int i = 1; i < RenderingWindows.Count; i++)
                 RenderingWindows[i].RunAsync(Fullscreen);
+
             RenderingWindows[0].Run(Fullscreen);
+
             for (int i = 0; i < RenderingWindows.Count; i++)
                 RenderingWindows[i].Dispose();
             for (int i = 0; i < pluginCollection.Count; i++)

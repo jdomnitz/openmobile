@@ -626,7 +626,7 @@ namespace OpenMobile
                             // Reset mouse location
                             ResetMouseLocation();
 
-                            // TODO: CLEANUP! This should be skin dependent!
+                            // Blocks device input if video is playing
                             if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(Core.theHost.instanceForScreen(i)).Contains(e.Location))
                                 return;
                             Core.RenderingWindows[i].defaultMouse = (MouseMapping[i] == DefaultUnit);
@@ -673,11 +673,11 @@ namespace OpenMobile
                         if (GetMouseMapIndex(MouseMapping[i]) == (int)sender)
                         {
                             // TODO: CLEANUP! This should be skin dependent!
-                            if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(Core.theHost.instanceForScreen(i)).Contains(e.Location))
-                            {
-                                Core.theHost.execute(eFunction.showVideoWindow, Core.theHost.instanceForScreen(i).ToString());
-                                return;
-                            }
+                            //if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(Core.theHost.instanceForScreen(i)).Contains(e.Location))
+                            //{
+                            //    Core.theHost.execute(eFunction.showVideoWindow, Core.theHost.instanceForScreen(i).ToString());
+                            //    return;
+                            //}
                             Core.RenderingWindows[i].RenderingWindow_MouseClick(i, e);
                         }
                     }
@@ -760,7 +760,6 @@ namespace OpenMobile
                     {
                         if (GetMouseMapIndex(MouseMapping[i]) == (int)sender)
                         {
-                            // TODO: CLEANUP! This should be skin dependent!
                             if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(Core.theHost.instanceForScreen(i)).Contains(e.Location))
                                 return;
 
@@ -1051,7 +1050,7 @@ namespace OpenMobile
             if (Configuration.RunningOnLinux)
             {
                 if ((e.Key == Key.VolumeUp) || (e.Key == Key.VolumeDown) || (e.Key == Key.Mute))
-                    Core.theHost.hal.snd("-1|Keyboard|VolumeChange");
+                    Core.theHost.Hal_Send("-1|Keyboard|VolumeChange");
             }
 #endif
 
@@ -1142,15 +1141,6 @@ namespace OpenMobile
         #endregion
 
         #region Highlight control
-
-        public static event userInteraction OnHighlightedChanged;
-
-        static internal void raiseHighlightChanged(OMControl sender, int screen)
-        {
-            // TODO: ??????
-            if (OnHighlightedChanged != null)
-                OnHighlightedChanged(sender, screen);
-        }
 
         public static OMControl getHighlighted(int screen)
         {

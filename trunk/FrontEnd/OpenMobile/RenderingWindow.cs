@@ -77,7 +77,6 @@ namespace OpenMobile
                 if ((varHighlighted != null) && (varHighlighted.Mode == eModeType.Highlighted))
                     varHighlighted.Mode = eModeType.Normal;
                 varHighlighted = value;
-                InputRouter.raiseHighlightChanged(varHighlighted, screen);
             }
         }
 
@@ -92,8 +91,10 @@ namespace OpenMobile
         }
         public void Run(GameWindowFlags flags)
         {
+            Console.WriteLine("Renderingwindow(" + screen.ToString() + ").Run (Started):" + Timing.GetTiming());
             NativeInitialize(flags);
             InitializeRendering();
+            Console.WriteLine("Renderingwindow(" + screen.ToString() + ").Run (RenderStarted):" + Timing.GetTiming());
             Run(1.0, 0.0);
         }
         Graphics.Graphics g;
@@ -116,7 +117,11 @@ namespace OpenMobile
 
             if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
                 this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Bounds.Location, this.Size);
-            this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
+            //this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
+
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetCallingAssembly().Location);
+            this.Title = "openMobile v" + string.Format("{0}.{1}.{2}.{3}", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart) + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
+
             InitializeComponent();
             if (screen == 0)
                 InputRouter.Initialize();
@@ -214,10 +219,12 @@ namespace OpenMobile
                 rParam.globalTransitionIn = 0;
                 rParam.globalTransitionOut = 1;
 
-                // Raise panel event
-                if (newP.Mode == eModeType.transitioningIn)
-                    newP.RaiseEvent(screen, eEventType.Loaded);
             }
+
+            // Raise panel event
+            if (newP.Mode == eModeType.transitioningIn)
+                newP.RaiseEvent(screen, eEventType.Loaded);
+            
         }
 
         private void insertPanel(OMPanel newP)
@@ -281,15 +288,21 @@ namespace OpenMobile
                 rParam.globalTransitionIn = 0;
                 rParam.globalTransitionOut = 1;
 
-                // Raise panel event
-                if (oldP.Mode == eModeType.transitioningOut)
-                    oldP.RaiseEvent(screen, eEventType.Unloaded);
             }
+            // Raise panel event
+            if (oldP.Mode == eModeType.transitioningOut)
+                oldP.RaiseEvent(screen, eEventType.Unloaded);
         }
         public void ExecuteTransition(eGlobalTransition transType)
         {
+            if (!this.Visible)
+                Console.WriteLine("Renderingwindow(" + screen.ToString() + ").ExecuteTransition: Waiting for visible (" + Timing.GetTiming() + ")");
+
             while (!this.Visible)
+            {
                 Thread.Sleep(10);
+            }
+            Console.WriteLine("Renderingwindow(" + screen.ToString() + ").ExecuteTransition: Executing transition (" + Timing.GetTiming() + ")");
 
             lock (this) // Lock to prevent multiple transitons at the same time
             {
@@ -399,9 +412,12 @@ namespace OpenMobile
         }
         private void RenderCursor()
         {
-            g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 5, CursorPosition.Y);
-            g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X, CursorPosition.Y + 5);
-            g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 12, CursorPosition.Y + 12);
+            if (BuiltInComponents.Host.ShowCursors)
+            {
+                g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 5, CursorPosition.Y);
+                g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X, CursorPosition.Y + 5);
+                g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 12, CursorPosition.Y + 12);
+            }
         }
         protected override void OnResize(EventArgs e)
         {
@@ -1346,6 +1362,10 @@ namespace OpenMobile
             if (e.Landscape != dev.Landscape)
                 Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", String.Empty);
         }
+        
+        /// <summary>
+        /// Cancel the ongoing transition and remove the panel
+        /// </summary>
         internal void Rollback()
         {
             foreach (OMPanel panel in backgroundQueue)

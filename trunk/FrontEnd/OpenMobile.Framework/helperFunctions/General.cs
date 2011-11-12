@@ -25,6 +25,8 @@ using OpenMobile.Plugin;
 using OpenMobile.Controls;
 using OpenMobile.Graphics;
 using System.Xml;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace OpenMobile.helperFunctions
 {
@@ -1097,5 +1099,30 @@ namespace OpenMobile.helperFunctions
         }
 
     }
+
+    namespace XML
+    {
+        public class Serializer
+        {
+            public static string toXML(object DataToSerialize)
+            {
+                StringWriter textWriter = new StringWriter();
+                XmlSerializer xmlSerializer = new XmlSerializer(DataToSerialize.GetType());
+                xmlSerializer.Serialize(textWriter, DataToSerialize);
+                return textWriter.ToString();
+            }
+
+            public static T fromXML<T>(string XML)
+            {
+                T serializedObject = default(T);
+                using (StringReader textReader = new StringReader(XML))
+                {
+                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
+                    serializedObject = (T)xmlSerializer.Deserialize(textReader);
+                }
+                return serializedObject;
+            }
+        }
+    }    
 
 }
