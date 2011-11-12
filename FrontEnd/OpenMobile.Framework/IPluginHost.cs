@@ -99,7 +99,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Handle for the main rendering window
         /// </summary>
-        object UIHandle(int screen);
+        object GetWindowHandle(int screen);
         /// <summary>
         /// Returns the audio instance that matches the given screen
         /// </summary>
@@ -282,10 +282,6 @@ namespace OpenMobile.Plugin
         /// </summary>
         event WirelessEvent OnWirelessEvent;
         /// <summary>
-        /// Occurs when a control is highlighted in a rendering window
-        /// </summary>
-        event userInteraction OnHighlightedChanged;
-        /// <summary>
         /// Returns the requested data
         /// </summary>
         /// <param name="dataType">The type of information to return (item specific)</param>
@@ -383,6 +379,14 @@ namespace OpenMobile.Plugin
         void raiseSystemEvent(eFunction e, string arg1, string arg2, string arg3);
 
         /// <summary>
+        /// Raises a storage event
+        /// </summary>
+        /// <param name="type">Type of media</param>
+        /// <param name="justInserted"></param>
+        /// <param name="arg"></param>
+        void RaiseStorageEvent(eMediaType type, bool justInserted, string arg);
+
+        /// <summary>
         /// Shows the identity of each screen
         /// </summary>
         void ScreenShowIdentity();
@@ -403,6 +407,19 @@ namespace OpenMobile.Plugin
         /// Startup screen of OM (0 is normal screen, any other value means a specific startup screen is requested)
         /// </summary>
         int StartupScreen { get; set; }
+
+        /// <summary>
+        /// Sets the visibility of the pointer cursors in OM
+        /// </summary>
+        bool ShowCursors { get; set; }
+
+        /// <summary>
+        /// Gets the name of the assosiated audio device
+        /// </summary>
+        /// <param name="instance">AudioDevice index</param>
+        /// <returns></returns>
+        string getAudioDeviceName(int instance);
+
 
     }
 }

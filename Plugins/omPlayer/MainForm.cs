@@ -154,20 +154,57 @@ namespace OMPlayer
             return -1F;
         return (float) player[instance].pos;
     }
-
     public static IMoniker getDevMoniker(int dev)
     {
         DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
         List<IMoniker> lst = new List<IMoniker>();
+        System.Diagnostics.Debug.WriteLine("DirectSound list start:");
         for (int i = 0; i < d.Length; i++)
         {
             if (d[i].Name.Contains("DirectSound"))
+            {
+                System.Diagnostics.Debug.WriteLine("\t" + i.ToString() + " : " + d[i].Name);
                 lst.Add(d[i].Mon);
+            }
         }
-        if ((dev < lst.Count)&&(dev>=0))
+        System.Diagnostics.Debug.WriteLine("DirectSound list end");
+        if ((dev < lst.Count) && (dev >= 0))
             return lst[dev];
         return lst[0];
     }
+    
+        /// <summary>
+        /// Select AudioDevice moniker based on audio device name
+        /// </summary>
+        /// <param name="dev">AudioDevice name</param>
+        /// <returns></returns>
+        public static IMoniker getDevMoniker(string dev)
+        {
+            System.Diagnostics.Debug.WriteLine("Requested directsound unit: " + dev);
+            DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
+            IMoniker DefaultUnit = null;
+            for (int i = 0; i < d.Length; i++)
+            {
+                if (d[i].Name.Contains("DirectSound"))
+                {
+                    if (d[i].Name.Contains(dev))
+                    {
+                        System.Diagnostics.Debug.WriteLine("Selected directsound unit: " + d[i].Name);
+                        return d[i].Mon;
+                    }
+                    else
+                    {
+                        if (DefaultUnit == null)
+                        {
+                            DefaultUnit = d[i].Mon;
+                            System.Diagnostics.Debug.WriteLine("Directsound default unit : " + d[i].Name);
+                        }
+                    }
+                }
+            }
+            System.Diagnostics.Debug.WriteLine("Using directsound default unit!");
+            return DefaultUnit;
+        }
 
     public mediaInfo getMediaInfo(int instance)
     {
@@ -266,8 +303,8 @@ namespace OMPlayer
         if (vistaMode)
             sevenMode = (Environment.OSVersion.Version.Minor == 1);
         theHost = host;
-        sink = new MessageProc();
-        IntPtr tmp= sink.Handle;
+        sink = new MessageProc("MainForm(PluginInitialize)");
+        IntPtr tmp = sink.Handle;
         player = new AVPlayer[theHost.InstanceCount];
         host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
         host.OnPowerChange += new PowerEvent(host_OnPowerChange);
@@ -664,7 +701,8 @@ namespace OMPlayer
         public AVPlayer(int instanceNum)
         {
             instance = instanceNum;
-            sink = new MessageProc();
+            sink = new MessageProc("AVPlayer:"+instance.ToString());
+            Console.WriteLine("AVPlayer:"+instance.ToString() + " (MainForm) AudioInstance: " + instance.ToString() + "[" + theHost.getAudioDeviceName(instance) + "]");
             drain = sink.Handle;
             sink.OnClick += new MessageProc.Click(clicked);
             sink.OnEvent += new MessageProc.eventOccured(eventOccured);
@@ -907,7 +945,7 @@ namespace OMPlayer
             if (fullscreen == true)
             {
                 OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
-                OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)OMPlayer.theHost.UIHandle(screen()),ref info);
+                OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)OMPlayer.theHost.GetWindowHandle(screen()),ref info);
                 if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
                     return videoWindow.SetWindowPosition(0, 0, info.Window.Width - (info.Window.Width-info.Client.Width), info.Window.Height - (info.Window.Height-info.Client.Height));
                 else
@@ -934,7 +972,7 @@ namespace OMPlayer
             graphBuilder = (IGraphBuilder) new FilterGraph();
             IBaseFilter source = null;
             if (instance>0)
-                hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(instance), null, "OutputDevice", out source);
+                hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(theHost.getAudioDeviceName(instance)), null, "OutputDevice", out source);
             hr = graphBuilder.RenderFile(filename, null);
             if (hr == 262744)
                 theHost.sendMessage("OMDebug", "OMPlayer", "Failed to render audio for: " + filename);
@@ -951,8 +989,12 @@ namespace OMPlayer
             CheckVisibility();
             if (!isAudioOnly)
             {
+
+                int ScreenInstance = getFirstScreen(instance);
+                System.Diagnostics.Debug.WriteLine("AVPlayer ScreenInstance: " + ScreenInstance.ToString());
+                System.Diagnostics.Debug.WriteLine("AVPlayer AudioInstance: " + instance.ToString() + "[" + theHost.getAudioDeviceName(instance) + "]");
                 OnMediaEvent(eFunction.showVideoWindow, instance, "");
-                DsError.ThrowExceptionForHR(videoWindow.put_Owner((IntPtr)OMPlayer.theHost.UIHandle(getFirstScreen(instance))));
+                DsError.ThrowExceptionForHR(videoWindow.put_Owner((IntPtr)OMPlayer.theHost.GetWindowHandle(ScreenInstance)));//(getFirstScreen(instance))));
                 DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
                 DsError.ThrowExceptionForHR(Resize());
                 DsError.ThrowExceptionForHR(videoWindow.put_MessageDrain(drain));
@@ -1027,6 +1069,7 @@ namespace OMPlayer
                     Thread.Sleep(1000);
                     if (mediaPosition != null)
                     {
+                        // Update pos with currect playback position
                         sink.Invoke(OnGetPosition);
                         if ((crossfade>0)&&(isAudioOnly)&&((int)pos == nowPlaying.Length - (crossfade/1000)))
                         {
@@ -1055,6 +1098,20 @@ namespace OMPlayer
 
     public sealed class MessageProc : Form
     {
+        
+        public MessageProc(string Name)
+        {
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.BackColor = System.Drawing.Color.Black;
+            OpenMobile.Platform.Windows.Functions.ShowCursor(false);
+
+            // Ensure handle is created
+            this.Handle.ToInt32();
+
+            //this.Text = Name;
+            //this.Show();
+        }
+
         public delegate void eventOccured(int instance);
         public new delegate void Click();
         public new Click OnClick;

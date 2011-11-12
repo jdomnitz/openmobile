@@ -84,7 +84,7 @@ namespace OpenMobile.Graphics
                         Debug.Print("Requested version: {0}.{1}", major, minor);
                     #endif
                     IGraphicsContext shareContext = FindSharedContext();
-                    
+
                     IPlatformFactory factory = null;
                     switch ((flags & GraphicsContextFlags.Embedded) == GraphicsContextFlags.Embedded)
                     {

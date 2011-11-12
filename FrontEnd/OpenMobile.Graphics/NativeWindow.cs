@@ -62,8 +62,33 @@ namespace OpenMobile
         public void NativeInitialize(GameWindowFlags flags)
         {
             options = flags;
-            implementation = Factory.Default.CreateNativeWindow(device.Bounds.X + (device.Bounds.Width - 720) / 2, device.Bounds.Y + (device.Bounds.Height - 450) / 2, 720, 450, "OpenMobile Native Window", GraphicsMode.Default,flags, DisplayDevice.Default);
+            // This call takes approx 2000ms
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Start: " + Timing.GetTiming());
+
+            int S = screen;
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing1: " + Timing.GetTiming());
+            int X = device.Bounds.X + (device.Bounds.Width - 720) / 2;
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing2: " + Timing.GetTiming());
+            int Y = device.Bounds.Y + (device.Bounds.Height - 450) / 2;
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing3: " + Timing.GetTiming());
+            int W = 720;
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing4: " + Timing.GetTiming());
+            int H = 450;
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing5: " + Timing.GetTiming());
+            string T = "OpenMobile Native Window";
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing6: " + Timing.GetTiming());
+            GraphicsMode M = GraphicsMode.Default;
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing7: " + Timing.GetTiming());
+            GameWindowFlags O = flags;
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing8: " + Timing.GetTiming());
+            DisplayDevice D = DisplayDevice.Default;
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing9: " + Timing.GetTiming());
+            implementation = Factory.Default.CreateNativeWindow(S, X, Y, W, H, T, M, O, D);
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").Timing10: " + Timing.GetTiming());
+
+            //implementation = Factory.Default.CreateNativeWindow(screen, device.Bounds.X + (device.Bounds.Width - 720) / 2, device.Bounds.Y + (device.Bounds.Height - 450) / 2, 720, 450, "OpenMobile Native Window", GraphicsMode.Default, flags, DisplayDevice.Default);
             implementation.Visible = false;
+            //Console.WriteLine("NativeInitialize(" + screen.ToString() + ").End: " + Timing.GetTiming());
 
             if (flags != GameWindowFlags.Temporary)
             {

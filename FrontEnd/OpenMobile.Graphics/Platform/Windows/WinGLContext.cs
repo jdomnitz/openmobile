@@ -59,14 +59,17 @@ namespace OpenMobile.Platform.Windows
             // There are many ways this code can break when accessed by multiple threads. The biggest offender is
             // the sharedContext stuff, which will only become valid *after* this constructor returns.
             // The easiest solution is to serialize all context construction - hence the big lock, below.
+            //Console.WriteLine("Platform.Windows.WinGLContext.Start: " + Timing.GetTiming());
             lock (SyncRoot)
             {
+                //Console.WriteLine("Platform.Windows.WinGLContext.Timing1: " + Timing.GetTiming());
                 Mode = format;
 
                 Debug.Print("OpenGL will be bound to handle: {0}", window.WindowHandle);
                 Debug.Write("Setting pixel format... ");
                 this.SetGraphicsModePFD(format, (WinWindowInfo)window);
 
+                //Console.WriteLine("Platform.Windows.WinGLContext.Timing2: " + Timing.GetTiming());
                 if (!wgl_loaded)
                 {
                     // We need to create a temp context in order to load wgl extensions (e.g. for multisampling or GL3).
@@ -81,6 +84,7 @@ namespace OpenMobile.Platform.Windows
                     wgl_loaded = true;
                 }
 
+                //Console.WriteLine("Platform.Windows.WinGLContext.Timing3: " + Timing.GetTiming());
                 if (Wgl.Delegates.wglCreateContextAttribsARB != null)
                 {
                     try
@@ -131,6 +135,7 @@ namespace OpenMobile.Platform.Windows
 
                 Debug.WriteLine(String.Format("success! (id: {0})", Handle));
             }
+            //Console.WriteLine("Platform.Windows.WinGLContext.End: " + Timing.GetTiming());
         }
 
         public WinGLContext(ContextHandle handle, WinWindowInfo window, IGraphicsContext sharedContext,
@@ -246,18 +251,30 @@ namespace OpenMobile.Platform.Windows
 
         void SetGraphicsModePFD(GraphicsMode mode, WinWindowInfo window)
         {
+            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.Start: " + Timing.GetTiming());
             if (!mode.Index.HasValue)
                 throw new Exception("Invalid or unsupported GraphicsMode.");
 
             if (window == null) throw new ArgumentNullException("window", "Must point to a valid window.");
 
+            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.Timing1: " + Timing.GetTiming());
             PixelFormatDescriptor pfd = new PixelFormatDescriptor();
+            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.Timing2: " + Timing.GetTiming());
+
+            // Timing
+            DateTime Start = DateTime.Now;
+
             Functions.DescribePixelFormat(window.DeviceContext, (int)mode.Index.Value,
                 API.PixelFormatDescriptorSize, ref pfd);
-            Debug.WriteLine(mode.Index.ToString());
+
+            Debug.Print("\nFunctions.DescribePixelFormat ExecTime:" + (DateTime.Now - Start).TotalMilliseconds.ToString());
+
+            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.Timing3: " + Timing.GetTiming());
+            //Debug.WriteLine(mode.Index.ToString());
             if (!Functions.SetPixelFormat(window.DeviceContext, (int)mode.Index.Value, ref pfd))
                 throw new Exception(String.Format(
                     "Requested GraphicsMode not available. SetPixelFormat error: {0}", Marshal.GetLastWin32Error()));
+            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.End: " + Timing.GetTiming());
         }
         #endregion
 

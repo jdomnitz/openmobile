@@ -245,6 +245,7 @@ namespace OpenMobile.Graphics
         {
             get
             {
+                //Console.WriteLine("GraphicsMode.Default.Enter: " + Timing.GetTiming());
                 lock (SyncRoot)
                 {
                     if (defaultMode == null)
@@ -253,8 +254,11 @@ namespace OpenMobile.Graphics
                         Debug.Print("Creating default GraphicsMode ({0}, {1}, {2}, {3}, {4}, {5}, {6}).", DisplayDevice.Default.BitsPerPixel,
                                     16, 0, 2, 0, 2, false);
                         #endif
+                        //Console.WriteLine("GraphicsMode.Default.CreateGraphicsMode: " + Timing.GetTiming());
                         defaultMode = new GraphicsMode(DisplayDevice.Default.BitsPerPixel, 16, 0, 0, 0, 2, false);
+                        //Console.WriteLine("GraphicsMode.Default.End: " + Timing.GetTiming());
                     }
+                    //Console.WriteLine("GraphicsMode.Default.Return: " + Timing.GetTiming());
                     return defaultMode;
                 }
             }

@@ -87,8 +87,8 @@ namespace OMPlayer
         {
             lock (player)
             {
-                if (player[instance] == null)
-                    sink.Invoke(OnPlayerRequested, new object[] { instance });
+                    if (player[instance] == null)
+                        sink.Invoke(OnPlayerRequested, new object[] { instance });
             }
         }
         private void createInstance(int instance)
@@ -254,7 +254,7 @@ namespace OMPlayer
             if (Environment.OSVersion.Version.Major < 6)
                 return eLoadStatus.LoadFailedGracefulUnloadRequested;
             theHost = host;
-            sink = new MessageProc();
+            sink = new MessageProc("VistaPlayer(PluginInitialize)");
             IntPtr tmp = sink.Handle;
             player = new AVPlayer[theHost.InstanceCount];
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
@@ -452,8 +452,9 @@ namespace OMPlayer
                 checkInstance(instance);
                 return player[instance].play(url);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, ErrorHandling.spewException(e));
                 return false;
             }
         }
@@ -602,7 +603,9 @@ namespace OMPlayer
             public AVPlayer(int instanceNum)
             {
                 instance = instanceNum;
-                sink = new MessageProc();
+                sink = new MessageProc("VistaPlayer:" + instance.ToString());
+                Console.WriteLine("VistaPlayer:" + instance.ToString() + " (VistaPlayer) AudioInstance: " + instance.ToString() + "[" + theHost.getAudioDeviceName(instance) + "]");
+                
                 drain = sink.Handle;
                 sink.OnClick += new MessageProc.Click(clicked);
                 OnSetPosition += new PositionCallback(AVPlayer_OnSetPosition);
@@ -723,7 +726,7 @@ namespace OMPlayer
                 if (fullscreen == true)
                 {
                     OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
-                    OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)VistaPlayer.theHost.UIHandle(screen()), ref info);
+                    OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)VistaPlayer.theHost.GetWindowHandle(screen()), ref info);
                     if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
                         return ResizeVideo(0, 0, info.Window.Width - (info.Window.Width - info.Client.Width), info.Window.Height - (info.Window.Height - info.Client.Height));
                     else
@@ -922,7 +925,7 @@ namespace OMPlayer
                     {
                         OnMediaEvent(eFunction.showVideoWindow, instance, String.Empty);
                         // Create the video renderer.
-                        IntPtr rw = (IntPtr)VistaPlayer.theHost.UIHandle(getFirstScreen(instance));
+                        IntPtr rw = (IntPtr)VistaPlayer.theHost.GetWindowHandle(getFirstScreen(instance));
                         OpenMobile.Platform.Windows.Functions.SetParent(drain, rw);
                         Resize();
                         sink.Show();
@@ -1289,26 +1292,22 @@ namespace OMPlayer
             }
             private void waitForStop()
             {
-                try
+                if (m_pSource != null)
                 {
-                    if (m_pSource != null)
+                    while (instance >= 0)
                     {
-                        while (instance >= 0)
+                        Thread.Sleep(1000);
+                        if (m_pSource != null)
                         {
-                            Thread.Sleep(1000);
-                            if (m_pSource != null)
+                            if (currentState != ePlayerStatus.Stopped)
+                                sink.Invoke(OnGetPosition);
+                            if ((crossfade > 0) && (isAudioOnly) && ((int)pos == nowPlaying.Length - (crossfade / 1000)))
                             {
-                                if (currentState != ePlayerStatus.Stopped)
-                                    sink.Invoke(OnGetPosition);
-                                if ((crossfade > 0) && (isAudioOnly) && ((int)pos == nowPlaying.Length - (crossfade / 1000)))
-                                {
-                                    OnMediaEvent(eFunction.nextMedia, instance, String.Empty);
-                                }
+                                OnMediaEvent(eFunction.nextMedia, instance, String.Empty);
                             }
                         }
                     }
                 }
-                catch (Exception) { }
                 t = null;
             }
 
@@ -1352,11 +1351,18 @@ namespace OMPlayer
 
         public sealed class MessageProc : Form
         {
-            public MessageProc()
+
+            public MessageProc(string Name)
             {
                 this.FormBorderStyle = FormBorderStyle.None;
                 this.BackColor = System.Drawing.Color.Black;
                 OpenMobile.Platform.Windows.Functions.ShowCursor(false);
+
+                // Ensure handle is created
+                this.Handle.ToInt32();
+
+                //this.Text = Name;
+                //this.Show();
             }
             public new delegate void Click();
             public new Click OnClick;

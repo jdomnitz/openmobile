@@ -173,6 +173,21 @@ namespace OMDebug
         {
             theHost = host;
 
+
+            writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
+            time = Environment.TickCount;
+            writer.WriteLine("");
+            writer.WriteLine("");
+            writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + " : ***** OpenMobile startup initiated at " + DateTime.Now + " (Current filter level = " + OutputFilter.ToString() + ")*****");
+
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            OpenMobile.Threading.SafeThread.Asynchronous(() => LateInit(), theHost);
+            OpenMobile.Threading.SafeThread.Asynchronous(() => writeGraphicsInfo(), theHost);
+            return eLoadStatus.LoadSuccessful;
+        }
+        private void LateInit()
+        {
+            // Get setting from DB
             using (PluginSettings setting = new PluginSettings())
             {
                 string value = setting.getSetting("OMDebug.OutputFilter");
@@ -184,21 +199,9 @@ namespace OMDebug
                 {
                     OutputFilter = DebugMessageType.Unspecified;
                 }
-
             }
-            writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
-            time = Environment.TickCount;
-            writer.WriteLine("");
-            writer.WriteLine("");
-            writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + " : ***** OpenMobile startup initiated at " + DateTime.Now + " (Current filter level = " + OutputFilter.ToString() + ")*****");
 
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-            writeHeader();
-            OpenMobile.Threading.SafeThread.Asynchronous(() => writeGraphicsInfo(), theHost);
-            return eLoadStatus.LoadSuccessful;
-        }
-        private void writeHeader()
-        {
+            // Connect events
             AppDomain.CurrentDomain.AssemblyLoad += new AssemblyLoadEventHandler(CurrentDomain_AssemblyLoad);
             theHost.OnMediaEvent += new MediaEvent(theHost_OnMediaEvent);
             theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
@@ -393,6 +396,11 @@ namespace OMDebug
             if (Msg.Type < OutputFilter)
                 return;
 
+            // Print error and warning messages to console
+            bool IDE = false;
+            if ((System.Diagnostics.Debugger.IsAttached) && ((Msg.Type == DebugMessageType.Error) | (Msg.Type == DebugMessageType.Warning)))
+                IDE = true;
+
             if (writer == null)
             {
                 if (TimeStamp)
@@ -409,14 +417,28 @@ namespace OMDebug
                     if (queue.Count > 0)
                     {
                         foreach (string queued in queue)
+                        {
+                            if (IDE)
+                                Console.WriteLine(queued);
                             writer.WriteLine(queued);
+                        }
                         queue.Clear();
                     }
 
                     if (TimeStamp)
-                        writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + " [" + Msg.Type.ToString() + "]: " + header + Msg.ToString());
+                    {
+                        string Text = (((Environment.TickCount - time) / 1000.0).ToString("0.000") + " [" + Msg.Type.ToString() + "]: " + header + Msg.ToString());
+                        if (IDE)
+                            Console.WriteLine(Text);
+                        writer.WriteLine(Text);
+                    }
                     else
-                        writer.WriteLine(header + Msg.ToString());
+                    {
+                        string Text = header + Msg.ToString();
+                        if (IDE)
+                            Console.WriteLine(Text);
+                        writer.WriteLine(Text);
+                    }
                     writer.Flush();
                 }
             }
@@ -426,7 +448,12 @@ namespace OMDebug
             // Filter messages
             if (Msg.Type < OutputFilter)
                 return;
-
+            
+            // Print error and warning messages to console
+            bool IDE = false;
+            if ((System.Diagnostics.Debugger.IsAttached) && ((Msg.Type == DebugMessageType.Error) | (Msg.Type == DebugMessageType.Warning)))
+                IDE = true;
+          
             if (writer == null)
             {
                 if (TimeStamp)
@@ -442,18 +469,36 @@ namespace OMDebug
                     if (queue.Count > 0)
                     {
                         foreach (string queued in queue)
+                        {
+                            if (IDE)
+                                Console.WriteLine(queued);
                             writer.WriteLine(queued);
+                        }
                         queue.Clear();
                     }
 
                     if (TimeStamp)
-                        writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + " [" + Msg.Type.ToString() + "]: " + header + Msg.ToString());
+                    {
+                        string Text = ((Environment.TickCount - time) / 1000.0).ToString("0.000") + " [" + Msg.Type.ToString() + "]: " + header + Msg.ToString();
+                        if (IDE)
+                            Console.WriteLine(Text);
+                        writer.WriteLine(Text);
+                    }
                     else
-                        writer.WriteLine(header + Msg.ToString());
+                    {
+                        string Text = header + Msg.ToString();
+                        if (IDE)
+                            Console.WriteLine(Text);
+                        writer.WriteLine(Text);
+                    }
 
                     // Write out text array
                     foreach (string text in texts)
+                    {
+                        if (IDE)
+                            Console.WriteLine("\t" + text);
                         writer.WriteLine("\t" + text);
+                    }
 
                     writer.Flush();
                 }
