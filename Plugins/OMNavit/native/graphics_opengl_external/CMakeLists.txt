@@ -1,0 +1,1 @@
+module_add_library(graphics_opengl_external graphics_opengl_external.c)
