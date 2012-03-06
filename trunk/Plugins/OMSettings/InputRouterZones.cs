@@ -158,6 +158,7 @@ namespace OMSettings
 
             panelScreen.addControl(Screen_ButtonCancel);
 
+            /*
             #region Audiounit
 
             OMButton Screen_ButtonAudioUnitRight = new OMButton(750, 215, 120, 80);
@@ -203,6 +204,7 @@ namespace OMSettings
             panelScreen.addControl(Screen_TextBoxAudioUnit);
 
             #endregion 
+            */
 
             #region Keyboard
 
@@ -436,7 +438,7 @@ namespace OMSettings
 
         static void Screen_ButtonAudioUnitLeftRight_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.helperFunctions.Controls.UpDown.UpDownTextBoxControl(screen, (OMButton)sender, (OMTextBox)panelScreen[screen, "Screen_TextBoxAudioUnit"], AudioDevices);
+            //OpenMobile.helperFunctions.Controls.UpDown.UpDownTextBoxControl(screen, (OMButton)sender, (OMTextBox)panelScreen[screen, "Screen_TextBoxAudioUnit"], AudioDevices);
         }
 
         static void Screen_ButtonKeyboardLeftRight_OnClick(OMControl sender, int screen)
@@ -492,7 +494,7 @@ namespace OMSettings
             // Save new settings
             using (PluginSettings settings = new PluginSettings())
             {
-                settings.setSetting("Screen" + SelectedScreen.ToString() + ".SoundCard", ((OMLabel)panelScreen[screen, "Screen_TextBoxAudioUnit"]).Text);
+                //settings.setSetting("Screen" + SelectedScreen.ToString() + ".SoundCard", ((OMLabel)panelScreen[screen, "Screen_TextBoxAudioUnit"]).Text);
                 settings.setSetting("Screen" + SelectedScreen.ToString() + ".Keyboard", ((OMLabel)panelScreen[screen, "Screen_TextBoxKeyboard"]).Text);
                 settings.setSetting("Screen" + SelectedScreen.ToString() + ".Mouse", ((OMLabel)panelScreen[screen, "Screen_TextBoxMouse"]).Text);
             }
@@ -528,7 +530,7 @@ namespace OMSettings
             // Get current settings and set textbox values
             using (PluginSettings settings = new PluginSettings())
             {
-                ((OMLabel)panelScreen[screen, "Screen_TextBoxAudioUnit"]).Text = settings.getSetting("Screen" + SelectedScreen.ToString() + ".SoundCard");
+                //((OMLabel)panelScreen[screen, "Screen_TextBoxAudioUnit"]).Text = settings.getSetting("Screen" + SelectedScreen.ToString() + ".SoundCard");
                 ((OMLabel)panelScreen[screen, "Screen_TextBoxKeyboard"]).Text = settings.getSetting("Screen" + SelectedScreen.ToString() + ".Keyboard");
                 ((OMLabel)panelScreen[screen, "Screen_TextBoxMouse"]).Text = settings.getSetting("Screen" + SelectedScreen.ToString() + ".Mouse");
             }
@@ -577,8 +579,8 @@ namespace OMSettings
             }
 
             // Compare to current values
-            if (((OMLabel)panelScreen[screen, "Screen_TextBoxAudioUnit"]).Text != CurrentAudioSetting)
-                return true;
+            //if (((OMLabel)panelScreen[screen, "Screen_TextBoxAudioUnit"]).Text != CurrentAudioSetting)
+            //    return true;
             if (((OMLabel)panelScreen[screen, "Screen_TextBoxKeyboard"]).Text != CurrentKeyboardSetting)
                 return true;
             if (((OMLabel)panelScreen[screen, "Screen_TextBoxMouse"]).Text != CurrentMouseSetting)
