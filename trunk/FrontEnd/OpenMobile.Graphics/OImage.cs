@@ -25,7 +25,7 @@ namespace OpenMobile.Graphics
 {
     public class OImage : IDisposable, ICloneable
     {
-        Bitmap img;
+        Bitmap[] img = new Bitmap[1];
         public bool persist;
         private uint[] texture;
         int height, width;
@@ -54,34 +54,70 @@ namespace OpenMobile.Graphics
                     return;
             if (!persist)
             {
-                img.Dispose();
-                img = null;
+                for (int i = 0; i < img.Length; i++)
+                {
+                    img[i].Dispose();
+                    img[i] = null;
+                }
             }
+        }
+
+        public bool Shared
+        {
+            get
+            {
+                return (img.Length == 1);
+            }
+        }
+
+        public OImage() 
+        {
+            Screen = 0;
+            texture = new uint[DisplayDevice.AvailableDisplays.Count];
         }
         public OImage(System.Drawing.Bitmap i)
         {
             // Error check
             if (i == null)
                 return;
-
+            Screen = 0;
             texture = new uint[DisplayDevice.AvailableDisplays.Count];
-            img = i;
+            img[Screen] = i;
             lock (img)
             {
-                height = img.Height;
-                width = img.Width;
+                height = img[Screen].Height;
+                width = img[Screen].Width;
             }
+        }
+
+        public int Screen = 0;
+        public void SetScreen(int Screen)
+        {
+            this.Screen = Screen;
         }
 
         public Bitmap image
         {
-            get { return img; }
+            get 
+            {
+                return img[Screen];
+            }
+        }
+        public Bitmap GetImage(int screen)
+        {
+            return img[screen];
+        }
+        public void SetImage(int screen, Bitmap i)
+        {
+            if (img.Length < DisplayDevice.AvailableDisplays.Count)
+                Array.Resize<Bitmap>(ref img, DisplayDevice.AvailableDisplays.Count);
+            img[screen] = i;
         }
         public Size Size
         {
             get
             {
-                if (img == null)
+                if (img[Screen] == null)
                     return new Size();
                 lock (img)
                     return new Size(width, height);
@@ -109,7 +145,7 @@ namespace OpenMobile.Graphics
                     return false;
                 try
                 {
-                    return (img.GetFrameCount(System.Drawing.Imaging.FrameDimension.Time) > 1);
+                    return (img[Screen].GetFrameCount(System.Drawing.Imaging.FrameDimension.Time) > 1);
                 }
                 catch { }
                 return false;
@@ -124,7 +160,7 @@ namespace OpenMobile.Graphics
             // Create new Bitmap object with the size of the picture
             lock (img)
             {
-                Bitmap bmpPicture = new Bitmap(img.Width, img.Height);
+                Bitmap bmpPicture = new Bitmap(img[Screen].Width, img[Screen].Height);
                 // Image attributes for setting the attributes of the picture
                 System.Drawing.Imaging.ImageAttributes iaPicture = new System.Drawing.Imaging.ImageAttributes();
 
@@ -141,9 +177,9 @@ namespace OpenMobile.Graphics
                 System.Drawing.Graphics gfxPicture = System.Drawing.Graphics.FromImage(bmpPicture);
                 gfxPicture.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                 // New rectangle for the picture, same size as the original picture
-                System.Drawing.Rectangle rctPicture = new System.Drawing.Rectangle(0, 0, img.Width, img.Height);
+                System.Drawing.Rectangle rctPicture = new System.Drawing.Rectangle(0, 0, img[Screen].Width, img[Screen].Height);
                 // Draw the new image
-                gfxPicture.DrawImage(img, rctPicture, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, iaPicture);
+                gfxPicture.DrawImage(img[Screen], rctPicture, 0, 0, img[Screen].Width, img[Screen].Height, GraphicsUnit.Pixel, iaPicture);
 
                 cmPicture = new System.Drawing.Imaging.ColorMatrix(new float[][]
             {
@@ -156,24 +192,45 @@ namespace OpenMobile.Graphics
             });
                 // Set the new color matrix
                 iaPicture.SetColorMatrix(cmPicture);
-                gfxPicture.DrawImage(bmpPicture, rctPicture, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, iaPicture);
+                gfxPicture.DrawImage(bmpPicture, rctPicture, 0, 0, img[Screen].Width, img[Screen].Height, GraphicsUnit.Pixel, iaPicture);
 
                 // Set the PictureBox to the new inverted colors bitmap
-                img = bmpPicture;
+                img[Screen] = bmpPicture;
             }
         }
 
         public static OImage FromFile(string filename)
         {
-            return new OImage(new Bitmap(filename));
+            try
+            {
+                return new OImage(new Bitmap(filename));
+            }
+            catch
+            {
+                return null;
+            }
         }
         public static OImage FromStream(System.IO.Stream stream)
         {
-            return new OImage(new Bitmap(stream));
+            try
+            {
+                return new OImage(new Bitmap(stream));
+            }
+            catch
+            {
+                return null;
+            }
         }
         public static OImage FromStream(System.IO.Stream stream, bool useEmbeddedColorManagement)
         {
-            return new OImage(new Bitmap(stream, useEmbeddedColorManagement));
+            try
+            {
+                return new OImage(new Bitmap(stream, useEmbeddedColorManagement));
+            }
+            catch
+            {
+                return null;
+            }
         }
         public static OImage FromWebdingsFont(int w, int h, string s, Color color)
         {
@@ -185,8 +242,16 @@ namespace OpenMobile.Graphics
         }
         public static OImage FromFont(int w, int h, string s, Font font, eTextFormat format, Alignment alignment, Color color, Color secondColor)
         {
-            OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
-            return gr.GenerateTextTexture(0, 0, w, h, s, font, format, alignment, color, secondColor);
+            // TODO: Make this dynamic instead of locked to screen 0
+            try
+            {
+                OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
+                return gr.GenerateTextTexture(0, 0, w, h, s, font, format, alignment, color, secondColor);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         ~OImage()
@@ -201,9 +266,12 @@ namespace OpenMobile.Graphics
                 if (texture[i] > 0)
                     Graphics.DeleteTexture(i, texture[i]);
             texture = null;
-            if (img != null)
-                img.Dispose();
-            img = null;
+            for (int i = 0; i < img.Length; i++)
+            {
+                if (img[i] != null)
+                    img[i].Dispose();
+                img[i] = null;
+            }
             GC.SuppressFinalize(this);
         }
 

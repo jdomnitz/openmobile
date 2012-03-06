@@ -42,7 +42,8 @@ namespace OpenMobile.Graphics
         internal static void DeleteTexture(int screen, uint texture)
         {
             if (screen < textures.Count)
-                textures[screen].Add(texture);
+                //textures[screen].Add(texture);
+                textures[screen].Remove(texture);
         }
 
         public V2Graphics(int screen)
@@ -67,6 +68,11 @@ namespace OpenMobile.Graphics
             uint texture;
             Raw.GenTextures(1, out texture);
             Raw.BindTexture(TextureTarget.Texture2D, texture);
+
+            // Set correct image to use if image data is not shared among all screens
+            if (!image.Shared)
+                image.SetScreen(screen);
+            
             Bitmap img = image.image;
             bool kill = false;
             lock (image.image)

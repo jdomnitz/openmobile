@@ -51,12 +51,27 @@ namespace OpenMobile.Input
             {
                     keys[(int)key] = value;
 
+                    // Handle special keys (indicate both buttons as pressed regardless of which that was pressed
+                    if (key == Key.ShiftLeft)
+                        keys[(int)Key.ShiftRight] = keys[(int)Key.ShiftLeft];
+                    if (key == Key.ShiftRight)
+                        keys[(int)Key.ShiftLeft] = keys[(int)Key.ShiftRight];
+                    if (key == Key.ControlLeft)
+                        keys[(int)Key.ShiftRight] = keys[(int)Key.ControlLeft];
+                    if (key == Key.ControlRight)
+                        keys[(int)Key.ControlLeft] = keys[(int)Key.ControlRight];
+                    if (key == Key.AltLeft)
+                        keys[(int)Key.AltRight] = keys[(int)Key.AltLeft];
+                    if (key == Key.AltRight)
+                        keys[(int)Key.AltLeft] = keys[(int)Key.AltRight];
+
                     if (value && KeyDown != null)
                     {
                         args.Key = key;
                         args.Shift = keys[(int)Key.ShiftLeft] || keys[(int)Key.ShiftRight];
                         args.Control = keys[(int)Key.ControlLeft] || keys[(int)Key.ControlRight];
                         args.CapsLock = keys[(int)Key.CapsLock];
+                        args.Character = "";
                         KeyDown(this, args);
                     }
                     else if (!value && KeyUp != null)
@@ -65,10 +80,51 @@ namespace OpenMobile.Input
                         args.Shift = keys[(int)Key.ShiftLeft] || keys[(int)Key.ShiftRight];
                         args.Control = keys[(int)Key.ControlLeft] || keys[(int)Key.ControlRight];
                         args.CapsLock = keys[(int)Key.CapsLock];
+                        args.Character = "";
                         KeyUp(this, args);
                     }
             }
         }
+
+        public void SetKeyState(Key key, bool pressed, string character)
+        {
+            keys[(int)key] = pressed;
+
+            // Handle special keys (indicate both buttons as pressed regardless of which that was pressed
+            if (key == Key.ShiftLeft)
+                keys[(int)Key.ShiftRight] = keys[(int)Key.ShiftLeft];
+            if (key == Key.ShiftRight)
+                keys[(int)Key.ShiftLeft] = keys[(int)Key.ShiftRight];
+            if (key == Key.ControlLeft)
+                keys[(int)Key.ShiftRight] = keys[(int)Key.ControlLeft];
+            if (key == Key.ControlRight)
+                keys[(int)Key.ControlLeft] = keys[(int)Key.ControlRight];
+            if (key == Key.AltLeft)
+                keys[(int)Key.AltRight] = keys[(int)Key.AltLeft];
+            if (key == Key.AltRight)
+                keys[(int)Key.AltLeft] = keys[(int)Key.AltRight];
+
+            if (pressed && KeyDown != null)
+            {
+                args.Key = key;
+                args.Shift = keys[(int)Key.ShiftLeft] || keys[(int)Key.ShiftRight];
+                args.Control = keys[(int)Key.ControlLeft] || keys[(int)Key.ControlRight];
+                args.CapsLock = keys[(int)Key.CapsLock];
+                args.Character = character;
+                KeyDown(this, args);
+            }
+            else if (!pressed && KeyUp != null)
+            {
+                args.Key = key;
+                args.Shift = keys[(int)Key.ShiftLeft] || keys[(int)Key.ShiftRight];
+                args.Control = keys[(int)Key.ControlLeft] || keys[(int)Key.ControlRight];
+                args.CapsLock = keys[(int)Key.CapsLock];
+                args.Character = character;
+                KeyUp(this, args);
+            }
+
+        }
+
 
         /// <summary>
         /// Gets an IntPtr representing a device dependent ID.

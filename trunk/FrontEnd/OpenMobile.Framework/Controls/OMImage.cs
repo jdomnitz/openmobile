@@ -54,7 +54,9 @@ namespace OpenMobile.Controls
 
         /// <summary>
         /// Creates the control with the default size and location
+        /// <para>[Obsolete] Use OMImage(string name, int left, int top, int width, int height) instead</para>
         /// </summary>
+        [Obsolete("Use OMImage(string name, int left, int top, int width, int height) instead")]
         public OMImage()
         {
             this.top = 20;
@@ -64,11 +66,13 @@ namespace OpenMobile.Controls
         }
         /// <summary>
         /// Creates a new OMImage
+        /// <para>[Obsolete] Use OMImage(string name, int left, int top, int width, int height) instead</para>
         /// </summary>
         /// <param name="left"></param>
         /// <param name="top"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
+        [Obsolete("Use OMImage(string name, int left, int top, int width, int height) instead")]
         public OMImage(int left, int top, int width, int height)
         {
             this.top = top;
@@ -76,6 +80,87 @@ namespace OpenMobile.Controls
             this.width = width;
             this.height = height;
         }
+        /// <summary>
+        /// Creates a new OMImage
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public OMImage(string name, int left, int top, int width, int height)
+        {
+            this.name = name;
+            this.top = top;
+            this.left = left;
+            this.width = width;
+            this.height = height;
+        }
+        /// <summary>
+        /// Creates a new OMImage
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public OMImage(string name, int left, int top, int width, int height, imageItem image)
+        {
+            this.name = name;
+            this.top = top;
+            this.left = left;
+            this.width = width;
+            this.height = height;
+            this.image = image;
+        }
+        /// <summary>
+        /// Creates a new OMImage with the given image and autofits the control to the image size
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="image"></param>
+        public OMImage(string name, int left, int top, imageItem image)
+        {
+            this.name = name;
+            this.top = top;
+            this.left = left;
+            this.FitControlToImage = true;
+            this.image = image;
+        }
+        /// <summary>
+        /// Creates a new OMImage with the given image and autofits the control to the image size
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="image"></param>
+        public OMImage(string name, int left, int top)
+        {
+            this.name = name;
+            this.top = top;
+            this.left = left;
+            this.FitControlToImage = true;
+        }
+
+        private bool _FitControlToImage = false;
+        /// <summary>
+        /// Sets the control to autosize itself to the size of the assigned image
+        /// </summary>
+        public bool FitControlToImage 
+        {
+            get
+            {
+                return _FitControlToImage;
+            }
+            set
+            {
+                _FitControlToImage = value;
+                if (value)
+                    FitControl(image);
+            }
+        }
+
         /// <summary>
         /// The image to be rendered
         /// </summary>
@@ -97,8 +182,20 @@ namespace OpenMobile.Controls
                 else
                     _ShowAnimation = false;
 
+                // Fit control to image?
+                if (_FitControlToImage)
+                    FitControl(image);
+
                 raiseUpdate(false);
             }
+        }
+
+        private void FitControl(imageItem Image)
+        {
+            if ((image == null) || (Image.image == null))
+                return;
+            this.Width = Image.image.Width;
+            this.Height = Image.image.Height;
         }
 
         /// <summary>
@@ -156,6 +253,9 @@ namespace OpenMobile.Controls
                     }
                 }
             }
+            // Skin debug function 
+            if (_SkinDebug)
+                base.DrawSkinDebugInfo(g, Color.Yellow);
         }
         /// <summary>
         /// Draw modes for an image

@@ -25,6 +25,7 @@ using System.Timers;
 using OpenMobile.Graphics;
 using OpenMobile.Input;
 using OpenMobile.Threading;
+using OpenMobile.helperFunctions.Graphics;
 
 namespace OpenMobile.Controls
 {
@@ -88,7 +89,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// height of the list (OM units)
         /// </summary>
-        protected int listHeight;
+        public int listItemHeight;
         /// <summary>
         /// list vertical ofset
         /// </summary>
@@ -139,6 +140,19 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// Enables a fading effect from the listbackground to the list
+        /// </summary>
+        public bool UseSoftEdges { get; set; }
+        /// <summary>
+        /// Data to use for softedge
+        /// </summary>
+        public FadingEdge.GraphicData SoftEdgeData { get; set; }
+        /// <summary>
+        /// SoftEdge image
+        /// </summary>
+        private OImage imgSoftEdge = null;
+        
+        /// <summary>
         /// The background color of the list (Default: Transparent)
         /// </summary>
         public Color Background
@@ -156,7 +170,8 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Changes the selected index and scrolls the list so the selected item is visible
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="index">List index to select</param>
+        /// <para>Use -1 to clear current selection</para>
         public void Select(int index)
         {
             if (index < -1)
@@ -167,6 +182,7 @@ namespace OpenMobile.Controls
         /// Select an item in the list
         /// </summary>
         /// <param name="index">List index to select</param>
+        /// <para>Use -1 to clear current selection</para>
         /// <param name="moveToSelectedItem">Scroll list so selected item is visible</param>
         /// <param name="screen"></param>
         public void Select(int index, bool moveToSelectedItem, int screen)
@@ -187,16 +203,16 @@ namespace OpenMobile.Controls
                 SafeThread.Asynchronous(delegate() { if (SelectedIndexChanged != null) SelectedIndexChanged(this, screen); }, null);
             //   ^ This still isn't ideal...we really should not be queuing all those tasks..only the one when scrolling finishes
 
-            if ((listHeight == 0) && (index != -1))
+            if ((listItemHeight == 0) && (index != -1))
             {
                 selectQueued = true;
                 return;
             }
             if ((moveToSelectedItem) && (index >= 0))
             {
-                if (!((listStart <= selectedIndex) && (selectedIndex <= listStart - (Height / listHeight))))
+                if (!((listStart <= selectedIndex) && (selectedIndex <= listStart - (Height / listItemHeight))))
                 {
-                    moved = -(selectedIndex * listHeight);
+                    moved = -(selectedIndex * listItemHeight);
                 }
             }
             selectQueued = false;
@@ -218,11 +234,11 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return listHeight;
+                return listItemHeight;
             }
             set
             {
-                listHeight = value;
+                listItemHeight = value;
             }
         }
 
@@ -310,7 +326,7 @@ namespace OpenMobile.Controls
             }
         }
         /// <summary>
-        /// The index of the currently selected item (-1 for none)
+        /// The zero based index of the currently selected item (-1 for none)
         /// </summary>
         public int SelectedIndex
         {
@@ -457,6 +473,8 @@ namespace OpenMobile.Controls
         /// </summary>
         public OMList()
         {
+            UseSoftEdges = false;
+            SoftEdgeData = new FadingEdge.GraphicData();
             declare();
         }
         /// <summary>
@@ -472,8 +490,30 @@ namespace OpenMobile.Controls
             Top = y;
             Width = w;
             Height = h;
+            UseSoftEdges = false;
+            SoftEdgeData = new FadingEdge.GraphicData();
             declare();
         }
+        /// <summary>
+        /// A listview control
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="x">Left</param>
+        /// <param name="y">Top</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        public OMList(string name, int x, int y, int w, int h)
+        {
+            Name = name;
+            Left = x;
+            Top = y;
+            Width = w;
+            Height = h;
+            UseSoftEdges = false;
+            SoftEdgeData = new FadingEdge.GraphicData();
+            declare();
+        }
+
         private void declare()
         {
             throwtmr = new System.Timers.Timer(50);
@@ -605,6 +645,21 @@ namespace OpenMobile.Controls
             {
                 if ((width == 0) || (height == 0))
                     return;
+
+                // Use soft edges?
+                if (UseSoftEdges)
+                {
+                    if (Background != Color.Transparent)
+                    {
+                        if (imgSoftEdge == null || imgSoftEdge.Width != Width || imgSoftEdge.Height != Height)
+                        {   // Generate image
+                            SoftEdgeData.Width = Width;
+                            SoftEdgeData.Height = Height;
+                            imgSoftEdge = FadingEdge.GetImage(SoftEdgeData);
+                        }
+                    }
+                }
+
                 float tmp = 1;
                 if (this.Mode == eModeType.transitioningIn)
                     tmp = e.globalTransitionIn;
@@ -618,38 +673,213 @@ namespace OpenMobile.Controls
                 int minListHeight = (int)(Graphics.Graphics.MeasureString("A", Font).Height + 0.5); //Round up
                 if (((style == eListStyle.MultiList) || (style == eListStyle.MultiListText)) && (items.Count > 0) && (items[0].subitemFormat != null))
                     minListHeight += (int)(Graphics.Graphics.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
-                if (listHeight < minListHeight)
-                    listHeight = minListHeight;
+                if (listItemHeight < minListHeight)
+                    listItemHeight = minListHeight;
                 if (selectQueued == true)
                     Select(selectedIndex);
 
                 if (((int)style & 1) == 1) //Is it an image list
                 {
                     if (listViewItemOffset == 0)
-                        listViewItemOffset = listHeight;
+                        listViewItemOffset = listItemHeight;
                     else
-                        listHeight = (listHeight > listViewItemOffset) ? listHeight : listViewItemOffset;
+                        listItemHeight = (listItemHeight > listViewItemOffset) ? listItemHeight : listViewItemOffset;
                 }
-                count = (this.Height / listHeight);
+                count = (this.Height / listItemHeight);
                 int imgSze = 4;
-                if ((moved > 0) || (items.Count * listHeight < Height)) //List start below top
+                if ((moved > 0) || (items.Count * listItemHeight < Height)) //List start below top
                 {
                     moved = 0;
                     thrown = 0;
                 }
-                else if (((items.Count * listHeight) > Height) && (moved < Height - (items.Count * listHeight))) //Top of the list
+                else if (((items.Count * listItemHeight) > Height) && (moved < Height - (items.Count * listItemHeight))) //Top of the list
                 {
-                    moved = Height - (items.Count * listHeight);
+                    moved = Height - (items.Count * listItemHeight);
                     thrown = 0;
                 }
-                listStart = -(moved / listHeight);
+                listStart = -(moved / listItemHeight);
 
 
                 for (int i = listStart; i <= (count + listStart + 1); i++)
                 {
-                    if ((width == 0) || (height == 0) || (listHeight == 0)) //Failsafe -> 1/100 chance that the width changes during rendering
+                    if ((width == 0) || (height == 0) || (listItemHeight == 0)) //Failsafe -> 1/100 chance that the width changes during rendering
                         return;
-                    Rectangle rect = new Rectangle(Left, Top + (moved % listHeight) + ((i - listStart) * listHeight), this.Width, listHeight);
+                    Rectangle rect = new Rectangle(Left, Top + (moved % listItemHeight) + ((i - listStart) * listItemHeight), this.Width, listItemHeight);
+                    switch (style)
+                    {
+                        case eListStyle.RoundedImageList:
+                        case eListStyle.RoundedTextList:
+                            if ((selectedIndex == i) && (focused))
+                                g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), Gradient.Vertical), rect, 10);
+                            else
+                                g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), Gradient.Vertical), rect, 10);
+                            break;
+                        case eListStyle.TextList:
+                        case eListStyle.ImageList:
+                            if ((selectedIndex == i) && (focused))
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), Gradient.Vertical), rect);
+                            else
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), Gradient.Vertical), rect);
+                            break;
+                        case eListStyle.TransparentImageList:
+                        case eListStyle.TransparentTextList:
+                            if ((selectedIndex == i) && (focused))
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), rect);
+                            break;
+                        case eListStyle.DroidStyleImage:
+                        case eListStyle.DroidStyleText:
+                            imgSze = 6;
+                            if ((selectedIndex == i) && (focused))
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A * 0.6), selectedItemColor1)), rect.Left, rect.Top, rect.Width, rect.Height - 2);
+                            else
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), rect.Left, rect.Top, rect.Width, rect.Height - 2);
+                            break;
+                        case eListStyle.MultiList:
+                        case eListStyle.MultiListText:
+                            if (i > 0)
+                            {
+                                int t = ((rect.Top % 2) == 0) ? 1 : 0;
+                                g.DrawLine(new Pen(Color.FromArgb((int)(tmp * background.A), background), 0.5F), rect.Left, rect.Top - t, rect.Left + rect.Width, rect.Top - t);
+                            }
+                            if ((selectedIndex == i) && (focused))
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), rect.Left, rect.Top, rect.Width, rect.Height);
+                            else
+                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), rect.Left, rect.Top, rect.Width, rect.Height);
+                            break;
+                    }
+                    if ((i < items.Count) && (i >= 0))
+                    {
+                        using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
+                        {
+                            if ((ListStyle == eListStyle.MultiList) || (ListStyle == eListStyle.MultiListText))
+                            {
+                                if (items[i].subitemFormat != null)
+                                {
+                                    if ((selectedIndex == i) && (focused))
+                                    {
+                                        if (g.TextureGenerationRequired(items[i].textTex))
+                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, highlightColor, highlightColor);
+                                        g.DrawImage(items[i].textTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
+                                        if (g.TextureGenerationRequired(items[i].subitemTex))
+                                            items[i].subitemTex = g.GenerateTextTexture(items[i].subitemTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
+                                        g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
+                                    }
+                                    else
+                                    {
+                                        if (g.TextureGenerationRequired(items[i].textTex))
+                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, color, color);
+                                        g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
+                                        if (g.TextureGenerationRequired(items[i].subitemTex))
+                                            items[i].subitemTex = g.GenerateTextTexture(items[i].subitemTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.color, items[i].subitemFormat.color);
+                                        g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
+                                    }
+                                }
+                                else
+                                {
+                                    if ((i < items.Count) && (g.TextureGenerationRequired(items[i].textTex)))
+                                    {
+                                        if (targetWidth == 0)
+                                            targetWidth = width;
+                                        if (targetHeight == 0)
+                                            targetHeight = listItemHeight;
+                                        if ((selectedIndex == i) && (focused))
+                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
+                                        else
+                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
+                                    }
+                                    g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, tmp);
+                                }
+                            }
+                            else
+                            {
+                                if ((i < items.Count) && (items[i].textTex == null))
+                                {
+                                    if (targetWidth == 0)
+                                        targetWidth = width;
+                                    if (targetHeight == 0)
+                                        targetHeight = listItemHeight;
+                                    if ((selectedIndex == i) && (focused))
+                                        items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
+                                    else
+                                        items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
+                                }
+                                g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, tmp);
+                            }
+                        }
+                        if (listViewItemOffset == 0)
+                            continue;
+                        if ((items.Count > i) && (items[i].image != null)) //rare thread collision
+                            g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height - 5, rect.Height - imgSze, tmp);
+                    }
+                }
+                g.Clip = r; //Reset the clip size for the rest of the controls
+
+                // Draw soft edges
+                if (UseSoftEdges)
+                    g.DrawImage(imgSoftEdge, Left, Top, imgSoftEdge.Width, imgSoftEdge.Height, tmp);
+
+                // Draw scrollbar
+                if ((scrollbars) && (count < items.Count))
+                {
+                    float nheight = height * ((float)height) / (listItemHeight * items.Count);
+                    float ntop = top + height * ((float)-moved) / (listItemHeight * items.Count);
+                    g.FillRoundRectangle(new Brush(color), left + width - 5, (int)ntop, 10, (int)nheight, 6);
+                }
+                
+            }
+        }
+        /*
+        public override void Render(Graphics.Graphics g, renderingParams e)
+        {
+            lock (g)
+            {
+                if ((width == 0) || (height == 0))
+                    return;
+                float tmp = 1;
+                if (this.Mode == eModeType.transitioningIn)
+                    tmp = e.globalTransitionIn;
+                else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
+                    tmp = e.globalTransitionOut;
+                Rectangle r = g.Clip; //Save the drawing size
+                g.Clip = this.toRegion(); //But only draw out control
+                if (background != Color.Transparent)
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)), Left + 1, Top + 1, Width - 2, Height - 2);
+
+                int minListHeight = (int)(Graphics.Graphics.MeasureString("A", Font).Height + 0.5); //Round up
+                if (((style == eListStyle.MultiList) || (style == eListStyle.MultiListText)) && (items.Count > 0) && (items[0].subitemFormat != null))
+                    minListHeight += (int)(Graphics.Graphics.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
+                if (listItemHeight < minListHeight)
+                    listItemHeight = minListHeight;
+                if (selectQueued == true)
+                    Select(selectedIndex);
+
+                if (((int)style & 1) == 1) //Is it an image list
+                {
+                    if (listViewItemOffset == 0)
+                        listViewItemOffset = listItemHeight;
+                    else
+                        listItemHeight = (listItemHeight > listViewItemOffset) ? listItemHeight : listViewItemOffset;
+                }
+                count = (this.Height / listItemHeight);
+                int imgSze = 4;
+                if ((moved > 0) || (items.Count * listItemHeight < Height)) //List start below top
+                {
+                    moved = 0;
+                    thrown = 0;
+                }
+                else if (((items.Count * listItemHeight) > Height) && (moved < Height - (items.Count * listItemHeight))) //Top of the list
+                {
+                    moved = Height - (items.Count * listItemHeight);
+                    thrown = 0;
+                }
+                listStart = -(moved / listItemHeight);
+
+
+                for (int i = listStart; i <= (count + listStart + 1); i++)
+                {
+                    if ((width == 0) || (height == 0) || (listItemHeight == 0)) //Failsafe -> 1/100 chance that the width changes during rendering
+                        return;
+                    Rectangle rect = new Rectangle(Left, Top + (moved % listItemHeight) + ((i - listStart) * listItemHeight), this.Width, listItemHeight);
                     switch (style)
                     {
                         case eListStyle.RoundedImageList:
@@ -726,7 +956,7 @@ namespace OpenMobile.Controls
                                         if (targetWidth == 0)
                                             targetWidth = width;
                                         if (targetHeight == 0)
-                                            targetHeight = listHeight;
+                                            targetHeight = listItemHeight;
                                         if ((selectedIndex == i) && (focused))
                                             items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
                                         else
@@ -742,7 +972,7 @@ namespace OpenMobile.Controls
                                     if (targetWidth == 0)
                                         targetWidth = width;
                                     if (targetHeight == 0)
-                                        targetHeight = listHeight;
+                                        targetHeight = listItemHeight;
                                     if ((selectedIndex == i) && (focused))
                                         items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
                                     else
@@ -760,12 +990,13 @@ namespace OpenMobile.Controls
                 g.Clip = r; //Reset the clip size for the rest of the controls
                 if ((scrollbars) && (count < items.Count))
                 {
-                    float nheight = height * ((float)height) / (listHeight * items.Count);
-                    float ntop = top + height * ((float)-moved) / (listHeight * items.Count);
+                    float nheight = height * ((float)height) / (listItemHeight * items.Count);
+                    float ntop = top + height * ((float)-moved) / (listItemHeight * items.Count);
                     g.FillRoundRectangle(new Brush(color), left + width - 5, (int)ntop, 10, (int)nheight, 6);
                 }
             }
         }
+        */
 
         #region ICloneable Members
         /// <summary>
@@ -897,8 +1128,8 @@ namespace OpenMobile.Controls
         /// <param name="HeightScale"></param>
         public virtual void MouseMove(int screen, MouseMoveEventArgs e, float WidthScale, float HeightScale)
         {
-            if (listHeight > 0) //<-Just in case
-                Highlight((((int)(e.Y / HeightScale) - top - (moved % listHeight)) / listHeight) + listStart);
+            if (listItemHeight > 0) //<-Just in case
+                Highlight((((int)(e.Y / HeightScale) - top - (moved % listItemHeight)) / listItemHeight) + listStart);
         }
 
         /// <summary>

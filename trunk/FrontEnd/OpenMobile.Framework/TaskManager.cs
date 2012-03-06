@@ -91,8 +91,6 @@ namespace OpenMobile.Threading
         /// <param name="taskName"></param>
         public static void QueueTask(Function task, ePriority taskPriority, string taskName)
         {
-            Tasks.Add(new taskItem(task, taskPriority, taskName));
-            sync.Set();
             lock (Tasks)//No particular reason other then its a mutual object to provide thread safety
             {
                 if (taskThread == null)
@@ -104,6 +102,8 @@ namespace OpenMobile.Threading
                     taskThread.Start();
                 }
             }
+            Tasks.Add(new taskItem(task, taskPriority, taskName));
+            sync.Set();
         }
         /// <summary>
         /// Enables the Task Manager (called automatically after plugins have been loaded)
@@ -139,20 +139,13 @@ namespace OpenMobile.Threading
                 taskItem current = getNext();
                 try
                 {
-                    if (theHost != null)
-                        //theHost.sendMessage("OMDebug", "TaskManager", "Task Started: " + current.TaskName);
-                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Task Started: " + current.TaskName);
-
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Task Started: " + current.TaskName);
                     current.function.Invoke();
-                    if (theHost != null)
-                        //theHost.sendMessage("OMDebug", "TaskManager", "Task Ended: " + current.TaskName);
-                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Task Ended: " + current.TaskName);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Task Ended: " + current.TaskName);
                 }
                 catch
                 {
-                    if (theHost != null)
-                        //theHost.sendMessage("OMDebug", "TaskManager", "Task Died: " + current.TaskName);
-                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Task Ended: " + current.TaskName);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Task Crashed: " + current.TaskName);
                 }
                 if (Tasks.Count > 0)
                     sync.Set();

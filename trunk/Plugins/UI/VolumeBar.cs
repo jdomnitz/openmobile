@@ -35,6 +35,7 @@ namespace OpenMobile.Controls
                 OnSliderMoved(this, screen);
         }
 
+        [System.Obsolete("Use VolumeBar(string name, int x, int y, int w, int h) instead")]
         public VolumeBar()
         {
             this.Top = 20;
@@ -42,8 +43,18 @@ namespace OpenMobile.Controls
             this.Width = 100;
             this.Height = 25;
         }
+        [System.Obsolete("Use VolumeBar(string name, int x, int y, int w, int h) instead")]
         public VolumeBar(int x, int y, int w, int h)
         {
+            this.top = y;
+            this.left = x;
+            this.width = w;
+            this.height = h;
+            this.vertical = true;
+        }
+        public VolumeBar(string name, int x, int y, int w, int h)
+        {
+            this.Name = name;
             this.top = y;
             this.left = x;
             this.width = w;

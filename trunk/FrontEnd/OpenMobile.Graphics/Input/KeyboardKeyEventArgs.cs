@@ -50,6 +50,7 @@ namespace OpenMobile.Input
         bool control;
         bool caps;
         int screen=-1;
+        string character = "";
         #endregion
 
         #region Constructors
@@ -109,6 +110,14 @@ namespace OpenMobile.Input
         {
             get { return screen; }
             set { screen = value; }
+        }
+        /// <summary>
+        /// The corresponding character for this keyboard event (this character is localized in accordance to the correct keyboard layout)
+        /// </summary>
+        public string Character
+        {
+            get { return character; }
+            set { character = value; }
         }
         #endregion
     }

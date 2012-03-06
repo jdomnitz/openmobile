@@ -49,6 +49,14 @@ namespace OpenMobile.Controls
         /// </summary>
         protected bool visible = true;
         /// <summary>
+        /// Is the control disabled (Usage of this property depends upon type of control)
+        /// </summary>
+        protected bool disabled = false;
+        /// <summary>
+        /// Should this control be "transparent" for user interaction?
+        /// </summary>
+        protected bool noUserInteraction = false;
+        /// <summary>
         /// A control specific object
         /// </summary>
         protected object tag;
@@ -188,6 +196,43 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// Disable control
+        /// </summary>
+        public bool Disabled
+        {
+            get
+            {
+                return disabled;
+            }
+            set
+            {
+                if (disabled == value)
+                    return;
+                disabled = value;
+                if (UpdateThisControl != null)
+                    UpdateThisControl(true);
+            }
+        }
+
+        /// <summary>
+        /// Should the control be "transparent" for user interaction. TRUE = any clicks or events will be passed onto the next item underneath
+        /// </summary>
+        public bool NoUserInteraction
+        {
+            get
+            {
+                return noUserInteraction;
+            }
+            set
+            {
+                if (noUserInteraction == value)
+                    return;
+                noUserInteraction = value;
+                raiseUpdate(false);
+            }
+        }
+
+        /// <summary>
         /// The controls height in OM units
         /// </summary>
         public virtual int Height
@@ -255,7 +300,6 @@ namespace OpenMobile.Controls
         public virtual object Clone()
         {
             OMControl returnData = (OMControl)this.MemberwiseClone();
-
             Type type = returnData.GetType();
 
             foreach (PropertyInfo propInfo in type.GetProperties())
@@ -281,18 +325,30 @@ namespace OpenMobile.Controls
             if (!_SkinDebug)
                 return;
 
-            g.DrawRectangle(new Pen(c, 1), left, top, width, height);
+            Rectangle old = g.Clip;
+            g.SetClipFast(left - 2, top - 2, width + 4, height + 4);
+            g.DrawRectangle(new Pen(c, 1), left, top, (width == 0 ? 1 : width), (height == 0 ? 1 : height));
+            g.Clip = old;
             //g.DrawImage(g.GenerateTextTexture(left, top, width, height, this.GetType().Name.ToString(), new Font(Font.Arial, 12), eTextFormat.Normal, Alignment.TopLeft, c, c), left, top, width, height, 255);
         }
 
+        /// <summary>
+        /// Create a new control
+        /// </summary>
         [Obsolete("Always provide a control name. Method will be removed in next release")]
         public OMControl()
         {
         }
+        /// <summary>
+        /// Create a new control
+        /// </summary>
         public OMControl(string Name)
         {
             this.Name = Name;
         }
+        /// <summary>
+        /// Create a new control
+        /// </summary>
         public OMControl(string Name, int Left, int Top, int Width, int Height)
         {
             this.Name = Name;
@@ -301,6 +357,10 @@ namespace OpenMobile.Controls
             this.Width = Width;
             this.Height = Height;
         }
-        
+
+        public override string ToString()
+        {
+            return String.Format("{0} ({1})",base.ToString(),name);
+        }
     }
 }

@@ -40,6 +40,90 @@ using OpenMobile.Input;
 
 namespace OpenMobile.Platform.Windows
 {
+    /// <summary>
+    /// Provides a localized character according to the local active keyboard layout
+    /// </summary>
+    internal class LocallizeKeyboard
+    {
+        byte[] keysDown = new byte[256];
+        bool useNativeCapsLockState = false;
+
+        public LocallizeKeyboard(bool UseNativeCapsLockState)
+        {
+            this.useNativeCapsLockState = UseNativeCapsLockState;
+        }
+
+        /// <summary>
+        /// Gets the localized character from the the corresponding virtual key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="pressed"></param>
+        /// <param name="UseNativeCapsLockState">TRUE = caps lock state will be queued from the local keyboard unit</param>
+        /// <returns></returns>
+        internal string GetCharacter(VirtualKeys key, bool pressed)
+        {
+            // Map keypresses
+            if (key == VirtualKeys.CAPITAL)
+            {   // Toggle CapsLock state 
+                if (!useNativeCapsLockState)
+                {
+                    // TODO: This might have a missmatch with the current capslock state of the keyboard
+                    if (pressed)
+                    {
+                        if (keysDown[(int)VirtualKeys.CAPITAL] == 0x01)
+                            keysDown[(int)VirtualKeys.CAPITAL] = 0x00;
+                        else
+                            keysDown[(int)VirtualKeys.CAPITAL] = 0x01;  // The low bit, if set, indicates that the key is toggled on.
+                    }
+                }
+                else
+                {
+                    if (Console.CapsLock)
+                        keysDown[(int)VirtualKeys.CAPITAL] = 0x01;  // The low bit, if set, indicates that the key is toggled on.
+                    else
+                        keysDown[(int)VirtualKeys.CAPITAL] = 0x00;  
+                }
+            }
+            else
+            {   // Map other key presses
+                keysDown[(int)key] = (pressed ? (byte)0x80 : (byte)0x00); // If the high-order bit of a byte is set, the key is down (pressed). 
+            }
+
+            StringBuilder sb = new StringBuilder(2);
+            string Character = "";
+            int i = Functions.ToAscii((uint)key, 0, keysDown, sb, 0);
+            switch (i)
+            {
+                case -1:
+                    // dead key
+                    //Console.WriteLine("Dead Key, Spacing version={0}", sb.ToString()[0]);
+                    Character = sb.ToString()[0].ToString();
+
+                    // warning!: though the spacing version is returned, the non-spacing
+                    // version is still in the keyboard buffer, therefore it's recommended
+                    // to call ToAscii again with a non-dead key to form a combined character.
+                    // (as this will remove the deadkey from the keyb buffer)
+                    break;
+                case 0:
+                    // no character
+                    //Console.WriteLine("No character");
+                    break;
+                case 1:
+                    // character (combined or not)
+                    //Console.WriteLine("Character={0}", sb.ToString()[0]);
+                    Character = sb.ToString()[0].ToString();
+                    break;
+                case 2:
+                    // deadkey (from previous call) + base (this call) which doesn't combine
+                    //Console.WriteLine("Uncombinable deadkey={0} base={1}", sb.ToString()[0], sb.ToString()[1]);
+                    Character = String.Format("{0}{1}", sb.ToString()[0], sb.ToString()[1]);
+                    break;
+            }
+            
+            return Character;
+        }
+    }
+
     internal class WinRawKeyboard : IKeyboardDriver, IDisposable
     {
         //readonly List<KeyboardState> keyboards = new List<KeyboardState>();
@@ -49,6 +133,9 @@ namespace OpenMobile.Platform.Windows
         private List<KeyboardDevice> keyboards = new List<KeyboardDevice>();
         private IntPtr window;
         readonly object UpdateLock = new object();
+        byte[] keysDown = new byte[256];
+
+        LocallizeKeyboard locallizeKeyboard = new LocallizeKeyboard(false);
 
         #region --- Constructors ---
 
@@ -184,6 +271,8 @@ namespace OpenMobile.Platform.Windows
                 rin.Data.Keyboard.Message == (int)WindowMessage.KEYDOWN ||
                 rin.Data.Keyboard.Message == (int)WindowMessage.SYSKEYDOWN;
 
+            string Character = locallizeKeyboard.GetCharacter(rin.Data.Keyboard.VKey, pressed);
+
             ContextHandle handle = new ContextHandle(rin.Header.Device);
             KeyboardDevice keyboard;
             if (!rawids.ContainsKey(handle))
@@ -197,17 +286,17 @@ namespace OpenMobile.Platform.Windows
             switch (rin.Data.Keyboard.VKey)
             {
                 case VirtualKeys.SHIFT:
-                    keyboard[Input.Key.ShiftLeft] = keyboard[Input.Key.ShiftRight] = pressed;
+                    keyboard[Input.Key.ShiftLeft] = pressed;
                     processed = true;
                     break;
 
                 case VirtualKeys.CONTROL:
-                    keyboard[Input.Key.ControlLeft] = keyboard[Input.Key.ControlRight] = pressed;
+                    keyboard[Input.Key.ControlLeft] = pressed;
                     processed = true;
                     break;
 
                 case VirtualKeys.MENU:
-                    keyboard[Input.Key.AltLeft] = keyboard[Input.Key.AltRight] = pressed;
+                    keyboard[Input.Key.AltLeft] = pressed;
                     processed = true;
                     break;
 
@@ -221,11 +310,14 @@ namespace OpenMobile.Platform.Windows
                     {
                         if (KeyMap[rin.Data.Keyboard.VKey] == Key.CapsLock)
                         {
-                            if(pressed)
+                            if (pressed)
                                 keyboard[Key.CapsLock] = !keyboard[Key.CapsLock];
                         }
                         else
-                            keyboard[KeyMap[rin.Data.Keyboard.VKey]] = pressed;
+                        {
+                            //Debug.Print("WinRawKeyboard key:{0}, Character:{1}, Pressed:{2}", KeyMap[rin.Data.Keyboard.VKey], Character, pressed);
+                            keyboard.SetKeyState(KeyMap[rin.Data.Keyboard.VKey], pressed, Character);
+                        }
                         processed = true;
                     }
                     break;

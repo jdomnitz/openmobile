@@ -31,64 +31,64 @@ namespace OpenMobile.Plugin
         /// <param name="station"></param>
         /// <param name="instance"></param>
         /// <returns>Return true if successful.</returns>
-        bool tuneTo(int instance,string station);
+        bool tuneTo(Zone zone,string station);
         /// <summary>
         /// Scan complete band for channels with signal.
         /// </summary>
-        bool scanBand(int instance);
+        bool scanBand(Zone zone);
         /// <summary>
         /// Scan forward for a channel with signal. Fires system event radioTuned when found.
         /// </summary>
-        bool scanForward(int instance);
+        bool scanForward(Zone zone);
         /// <summary>
         /// Scan backward for a channel with signal. Fires system event radioTuned when found.
         /// </summary>
-        bool scanReverse(int instance);
+        bool scanReverse(Zone zone);
         /// <summary>
         /// Steps forward one station/channel.
         /// </summary>
         /// <returns>Returns false if no more stations/channels in that direction.</returns>
-        bool stepForward(int instance);
+        bool stepForward(Zone zone);
         /// <summary>
         /// Steps backward one station/channel.
         /// </summary>
         /// <returns>Returns false if no more stations/channels in that direction.</returns>
-        bool stepBackward(int instance);
+        bool stepBackward(Zone zone);
         /// <summary>
         /// Returns info on the currently tuned station/channel
         /// </summary>
         /// <returns>Returns info on the currently tuned station/channel</returns>
-        stationInfo getStationInfo(int instance);
+        stationInfo getStationInfo(Zone zone);
         /// <summary>
         /// Gets information on the Tuned Content's medium
         /// </summary>
         /// <returns></returns>
-        eTunedContentBand[] getSupportedBands(int instance);
+        eTunedContentBand[] getSupportedBands(Zone zone);
         /// <summary>
         /// When powerstate is true, power on the device. When powerState is false, power off the device.
         /// </summary>
         /// <param name="powerState">When powerstate is true, power on the device. When powerState is false, power off the device.</param>
         /// <param name="instance"></param>
         /// <returns>Returns true if successful.</returns>
-        bool setPowerState(int instance,bool powerState);
+        bool setPowerState(Zone zone, bool powerState);
         /// <summary>
         /// Returns a list of all stations/channels that can be tuned to
         /// </summary>
         /// <returns></returns>
-        stationInfo[] getStationList(int instance);
+        stationInfo[] getStationList(Zone zone);
         /// <summary>
         /// Set the band of the tuned content
         /// </summary>
         /// <param name="band">Band to activate</param>
         /// <param name="instance"></param>
         /// <returns>Returns true if successful.</returns>
-        bool setBand(int instance, eTunedContentBand band);
+        bool setBand(Zone zone, eTunedContentBand band);
         /// <summary>
         /// Get the status of the tuned content
         /// </summary>
         /// <param name="instance"></param>
         /// <returns>Returns the status of the tuned content.</returns>
-        tunedContentInfo getStatus(int instance);
+        tunedContentInfo getStatus(Zone zone);
         /// <summary>
         /// Returns the current playback position if applicable otherwise -1
         /// </summary>

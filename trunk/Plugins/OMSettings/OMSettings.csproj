@@ -45,8 +45,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Zones.cs" />
     <Compile Include="LayoutManager.cs" />
-    <Compile Include="MultiZone.cs" />
+    <Compile Include="InputRouterZones.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

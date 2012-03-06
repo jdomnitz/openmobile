@@ -22,6 +22,8 @@ using System;
 using System.Collections.Generic;
 using OpenMobile.Graphics;
 using OpenMobile.Controls;
+using OpenMobile.Zones;
+
 namespace OpenMobile.Plugin
 {
     /// <summary>
@@ -38,7 +40,7 @@ namespace OpenMobile.Plugin
     /// <param name="function"></param>
     /// <param name="arg"></param>
     /// <param name="instance"></param>
-    public delegate void MediaEvent(eFunction function, int instance, string arg);
+    public delegate void MediaEvent(eFunction function, Zone zone, string arg);
     /// <summary>
     /// Triggered when a key is pressed on the keyboard
     /// </summary>
@@ -69,6 +71,16 @@ namespace OpenMobile.Plugin
     /// <param name="type"></param>
     /// <param name="arg"></param>
     public delegate void WirelessEvent(eWirelessEvent type, string arg);
+    /// <summary>
+    /// Delegate for method "ForEachScreen"
+    /// </summary>
+    /// <param name="Screen"></param>
+    public delegate void ForEachScreenDelegate(int Screen);
+    /// <summary>
+    /// Delegate for method "ForEachZoneInZone"
+    /// </summary>
+    /// <param name="Screen"></param>
+    public delegate bool ForEachZoneDelegate(Zone zone);
     /// <summary>
     /// Represents the graphics capabilities of the current platform
     /// </summary>
@@ -105,7 +117,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="screen"></param>
         /// <returns></returns>
-        int instanceForScreen(int screen);
+        //int GetDefaultZoneForScreen(int screen);
         /// <summary>
         /// Returns the number of screens currently being rendered
         /// </summary>
@@ -113,7 +125,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Returns the number of unique audio instances
         /// </summary>
-        int InstanceCount { get; }
+        int AudioDeviceCount { get; }
         /// <summary>
         /// The path to the plugins folder
         /// </summary>
@@ -132,12 +144,13 @@ namespace OpenMobile.Plugin
         bool VehicleInMotion { get; set; }
         /// <summary>
         /// Sets the location video should be played (based on the 1000x600 default scale)
+        /// <para>NB! This is used for all screens</para>
         /// </summary>
-        void SetVideoPosition(int instance, Rectangle videoArea);
+        void SetVideoPosition(int Screen, Rectangle videoArea);
         /// <summary>
         /// Gets the location video should be played (based on the 1000x600 default scale)
         /// </summary>
-        Rectangle GetVideoPosition(int instance);
+        Rectangle GetVideoPosition(int Screen);
         /// <summary>
         /// Sets the graphics level the application and plugins should use (represents the computers video performance)
         /// </summary>
@@ -215,44 +228,93 @@ namespace OpenMobile.Plugin
         /// Gets information on the currently playing media
         /// </summary>
         /// <returns></returns>
-        mediaInfo getPlayingMedia(int instance);
+        mediaInfo getPlayingMedia(Zone zone);
+        /// <summary>
+        /// Gets information on the currently playing media
+        /// <para>Method uses the currently assigned zone for the given screen</para>
+        /// </summary>
+        /// <returns></returns>
+        mediaInfo getPlayingMedia(int Screen);
         /// <summary>
         /// Gets information on the media playing next
         /// </summary>
-        /// <param name="instance"></param>
+        /// <param name="zone"></param>
         /// <returns></returns>
-        mediaInfo getNextMedia(int instance);
+        mediaInfo getNextMedia(Zone zone);
+        /// <summary>
+        /// Gets information on the media playing next
+        /// <para>Method uses the currently assigned zone for the given screen</para>
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <returns></returns>
+        mediaInfo getNextMedia(int Screen);
         /// <summary>
         /// Returns true if random playback is enabled.  False otherwise.
         /// </summary>
-        /// <param name="instance"></param>
+        /// <param name="zone"></param>
         /// <returns></returns>
-        bool getRandom(int instance);
+        bool getRandom(Zone zone);
+        /// <summary>
+        /// Returns true if random playback is enabled.  False otherwise.
+        /// <para>Method uses the currently assigned zone for the given screen</para>
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <returns></returns>
+        bool getRandom(int Screen);
         /// <summary>
         /// Returns true if successful
         /// </summary>
-        /// <param name="instance"></param>
+        /// <param name="zone"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        bool setRandom(int instance, bool value);
+        bool setRandom(Zone zone, bool value);
+        /// <summary>
+        /// Returns true if successful
+        /// <para>Method uses the currently assigned zone for the given screen</para>
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        bool setRandom(int Screen, bool value);
         /// <summary>
         /// Returns a list of the currently playing media
         /// </summary>
-        List<mediaInfo> getPlaylist(int instance);
+        List<mediaInfo> getPlaylist(Zone zone);
+        /// <summary>
+        /// Returns a list of the currently playing media
+        /// <para>Method uses the currently assigned zone for the given screen</para>
+        /// </summary>
+        List<mediaInfo> getPlaylist(int Screen);
         /// <summary>
         /// Sets a playlist
         /// </summary>
         /// <param name="source"></param>
         /// <param name="instance"></param>
         /// <returns></returns>
-        bool setPlaylist(List<mediaInfo> source, int instance);
+        bool setPlaylist(List<mediaInfo> source, Zone zone);
+        /// <summary>
+        /// Sets a playlist
+        /// <para>Method uses the currently assigned zone for the given screen</para>
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="Screen"></param>
+        /// <returns></returns>
+        bool setPlaylist(List<mediaInfo> source, int Screen);
         /// <summary>
         /// Appends a playlist to the currently loaded playlist
         /// </summary>
         /// <param name="source"></param>
         /// <param name="instance"></param>
         /// <returns></returns>
-        bool appendPlaylist(List<mediaInfo> source, int instance);
+        bool appendPlaylist(List<mediaInfo> source, Zone zone);
+        /// <summary>
+        /// Appends a playlist to the currently loaded playlist
+        /// <para>Method uses the currently assigned zone for the given screen</para>
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        bool appendPlaylist(List<mediaInfo> source, int Screen);
         /// <summary>
         /// A system-wide event notification
         /// </summary>
@@ -379,12 +441,40 @@ namespace OpenMobile.Plugin
         void raiseSystemEvent(eFunction e, string arg1, string arg2, string arg3);
 
         /// <summary>
+        /// Raises a wireless event
+        /// </summary>
+        /// <param name="type">Type of event</param>
+        /// <param name="arg"></param>
+        void raiseWirelessEvent(eWirelessEvent type, string arg);
+
+        /// <summary>
         /// Raises a storage event
         /// </summary>
         /// <param name="type">Type of media</param>
         /// <param name="justInserted"></param>
         /// <param name="arg"></param>
         void RaiseStorageEvent(eMediaType type, bool justInserted, string arg);
+
+        /// <summary>
+        /// Raises a power event
+        /// </summary>
+        /// <param name="type">Type of event</param>
+        void raisePowerEvent(ePowerEvent e);
+
+        /// <summary>
+        /// Raises a navigation event
+        /// </summary>
+        /// <param name="type">Type of event</param>
+        /// <param name="arg"></param>
+        void raiseNavigationEvent(eNavigationEvent type, string arg);
+
+        /// <summary>
+        /// Raises a media event
+        /// </summary>
+        /// <param name="type">Type of event</param>
+        /// <param name="zone">Zone the event is valid for</param>
+        /// <param name="arg"></param>
+        void raiseMediaEvent(eFunction type, Zone zone, string arg);
 
         /// <summary>
         /// Shows the identity of each screen
@@ -399,9 +489,17 @@ namespace OpenMobile.Plugin
         /// </summary>
         void ScreenShowIdentity(bool Show);
         /// <summary>
+        /// Shows or hides the identity of each screen
+        /// </summary>
+        void ScreenShowIdentity(bool Show, float Opacity);
+        /// <summary>
         /// Shows or hides the identity of a specific screen
         /// </summary>
         void ScreenShowIdentity(int Screen, bool Show);
+        /// <summary>
+        /// Shows or hides the identity of a specific screen
+        /// </summary>
+        void ScreenShowIdentity(int Screen, bool Show, float Opacity);
 
         /// <summary>
         /// Startup screen of OM (0 is normal screen, any other value means a specific startup screen is requested)
@@ -420,6 +518,34 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         string getAudioDeviceName(int instance);
 
+        /// <summary>
+        /// Get's the name of the default audio device 
+        /// </summary>
+        /// <returns></returns>
+        string GetAudioDeviceDefaultName();
 
+        /// <summary>
+        /// Get's the audio device instance for a device name
+        /// </summary>
+        /// <param name="name">Audio device name</param>
+        /// <returns>Audio device instance</returns>
+        int getAudioDeviceInstance(string name);
+
+        /// <summary>
+        /// Multimedia zones
+        /// </summary>
+        ZoneHandler ZoneHandler { get; }
+
+        /// <summary>
+        /// Wrapper for calling a method on each screen
+        /// <para>--------------</para>
+        /// <para>Sample usage:</para>
+        /// <para>theHost.ForEachScreen(delegate(int screen)</para>
+        /// <para>{</para>
+        /// <para>    Code to execute... use screen param to get the screen number</para>
+        /// <para>};</para>
+        /// </summary>
+        /// <param name="d"></param>
+        void ForEachScreen(ForEachScreenDelegate d);
     }
 }

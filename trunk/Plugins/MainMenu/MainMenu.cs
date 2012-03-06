@@ -20,8 +20,8 @@
 *********************************************************************************
 Example Name: Main Menu Example
 Example Created: Sept. 10, 2009
-Last Modified: Nov. 8, 2009
-Created by: Justin Domnitz
+Last Modified: Feb. 18, 2012
+Created by: Justin Domnitz / Bjørn Morten Orderløkken
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
@@ -35,6 +35,9 @@ using System.Diagnostics;
 using OpenMobile.Media;
 using OpenMobile.helperFunctions.Forms;
 using OpenMobile.helperFunctions.Plugins;
+using OpenMobile.helperFunctions.Controls;
+using OpenMobile.helperFunctions.Graphics;
+using OpenMobile.helperFunctions;
 
 namespace OpenMobile
 {
@@ -75,130 +78,62 @@ namespace OpenMobile
                 OMPanel mainPanel = new OMPanel("MainMenu");
                 OMButton[] MainMenuButtons = new OMButton[9];
 
-                #region Row 1
-
-                MainMenuButtons[0] = new OMButton(25, 116);
-                MainMenuButtons[0].Image = mainMenu;
-                MainMenuButtons[0].FocusImage = mainMenuFocus;
-                MainMenuButtons[0].Name = "MainMenu." + screen.ToString() + ".MainMenu1";
-                MainMenuButtons[0].Mode = eModeType.Highlighted;
-                MainMenuButtons[0].OnLongClick += new userInteraction(OnLongClick);
-                MainMenuButtons[0].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu1.Plugin");
-                MainMenuButtons[0].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu1.Display");
-                MainMenuButtons[0].OnClick += new userInteraction(MainMenu_OnClick);
-                mainPanel.addControl(MainMenuButtons[0]);
-
-                MainMenuButtons[1] = new OMButton(353, 116);
-                MainMenuButtons[1].Image = mainMenu;
-                MainMenuButtons[1].FocusImage = mainMenuFocus;
-                MainMenuButtons[1].Name = "MainMenu." + screen.ToString() + ".MainMenu2";
-                MainMenuButtons[1].OnLongClick += new userInteraction(OnLongClick);
-                MainMenuButtons[1].OnClick += new userInteraction(MainMenu_OnClick);
-                MainMenuButtons[1].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu2.Plugin");
-                MainMenuButtons[1].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu2.Display");
-                mainPanel.addControl(MainMenuButtons[1]);
-
-                MainMenuButtons[2] = new OMButton(680, 116);
-                MainMenuButtons[2].OnClick += new userInteraction(MainMenu_OnClick);
-                MainMenuButtons[2].Image = mainMenu;
-                MainMenuButtons[2].FocusImage = mainMenuFocus;
-                MainMenuButtons[2].OnLongClick += new userInteraction(OnLongClick);
-                MainMenuButtons[2].Name = "MainMenu." + screen.ToString() + ".MainMenu3";
-                MainMenuButtons[2].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu3.Plugin");
-                MainMenuButtons[2].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu3.Display");
-                mainPanel.addControl(MainMenuButtons[2]);
-
-
-                #endregion
-
-                #region Row 2
-
-                MainMenuButtons[3] = new OMButton(25, 260);
-                MainMenuButtons[3].Image = mainMenu;
-                MainMenuButtons[3].FocusImage = mainMenuFocus;
-                MainMenuButtons[3].Name = "MainMenu." + screen.ToString() + ".MainMenu4";
-                MainMenuButtons[3].OnClick += new userInteraction(MainMenu_OnClick);
-                MainMenuButtons[3].OnLongClick += new userInteraction(OnLongClick);
-                MainMenuButtons[3].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu4.Plugin");
-                MainMenuButtons[3].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu4.Display");
-                mainPanel.addControl(MainMenuButtons[3]);
-
-                MainMenuButtons[4] = new OMButton(353, 260);
-                MainMenuButtons[4].Image = mainMenu;
-                MainMenuButtons[4].FocusImage = mainMenuFocus;
-                MainMenuButtons[4].Name = "MainMenu." + screen.ToString() + ".MainMenu5";
-                MainMenuButtons[4].OnLongClick += new userInteraction(OnLongClick);
-                MainMenuButtons[4].OnClick += new userInteraction(MainMenu_OnClick);
-                MainMenuButtons[4].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu5.Plugin");
-                MainMenuButtons[4].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu5.Display");
-                mainPanel.addControl(MainMenuButtons[4]);
-
-                MainMenuButtons[5] = new OMButton(680, 260);
-                MainMenuButtons[5].Image = mainMenu;
-                MainMenuButtons[5].OnClick += new userInteraction(MainMenu_OnClick);
-                MainMenuButtons[5].FocusImage = mainMenuFocus;
-                MainMenuButtons[5].OnLongClick += new userInteraction(OnLongClick);
-                MainMenuButtons[5].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu6.Plugin");
-                MainMenuButtons[5].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu6.Display");
-                MainMenuButtons[5].Name = "MainMenu." + screen.ToString() + ".MainMenu6";
-                mainPanel.addControl(MainMenuButtons[5]);
-
-                #endregion
-
-                #region Row 3
-
-                MainMenuButtons[6] = new OMButton(25, 400);
-                MainMenuButtons[6].OnClick += new userInteraction(MainMenu_OnClick);
-                MainMenuButtons[6].Image = mainMenu;
-                MainMenuButtons[6].FocusImage = mainMenuFocus;
-                MainMenuButtons[6].Name = "MainMenu." + screen.ToString() + ".MainMenu7";
-                MainMenuButtons[6].OnLongClick += new userInteraction(OnLongClick);
-                MainMenuButtons[6].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu7.Plugin");
-                MainMenuButtons[6].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu7.Display");
-                mainPanel.addControl(MainMenuButtons[6]);
-
-                MainMenuButtons[7] = new OMButton(353, 400);
-                MainMenuButtons[7].OnClick += new userInteraction(MainMenu_OnClick);
-                MainMenuButtons[7].Image = mainMenu;
-                MainMenuButtons[7].FocusImage = mainMenuFocus;
-                MainMenuButtons[7].Name = "MainMenu." + screen.ToString() + ".MainMenu8";
-                MainMenuButtons[7].OnLongClick += new userInteraction(OnLongClick);
-                MainMenuButtons[7].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu8.Plugin");
-                MainMenuButtons[7].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu8.Display");
-                mainPanel.addControl(MainMenuButtons[7]);
-
-                MainMenuButtons[8] = new OMButton(680, 400);
-                MainMenuButtons[8].Image = mainMenu;
-                MainMenuButtons[8].OnClick += new userInteraction(MainMenu_OnClick);
-                MainMenuButtons[8].FocusImage = mainMenuFocus;
-                MainMenuButtons[8].Tag = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu9.Plugin");
-                MainMenuButtons[8].Text = settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu9.Display");
-                MainMenuButtons[8].Name = "MainMenu." + screen.ToString() + ".MainMenu9";
-                MainMenuButtons[8].OnLongClick += new userInteraction(OnLongClick);
-                mainPanel.addControl(MainMenuButtons[8]);
-
-                #endregion
-
-                #region Button Icons
-
-                // Add icons
-                string Identifier = "MainMenu." + screen.ToString() + ".MainMenu";
-                int Count = 1;
                 for (int i = 0; i < MainMenuButtons.Length; i++)
                 {
-                    // Set row identifier
-                    //if (i == 3) { Identifier = "MainMenu." + screen.ToString() + ".MainMenu2"; Count = 1; }
-                    //if (i == 6) { Identifier = "MainMenu." + screen.ToString() + ".MainMenu3"; Count = 1; }
+                    string Name = String.Format("MainMenu.{0}.MainMenu{1}", screen.ToString(), (i + 1));
+                    string Text = settings.getSetting(String.Format("{0}.Display", Name));
 
-                    OMImage MainMenu_Icon = new OMImage(MainMenuButtons[i].Left + 30, MainMenuButtons[i].Top, 40, 40);
-                    MainMenu_Icon.Top = (MainMenuButtons[i].Top + (MainMenuButtons[i].Height / 2)) - (MainMenu_Icon.Height / 2);
-                    MainMenu_Icon.Name = Identifier + (Count).ToString() + "_Icon";
-                    mainPanel.addControl(MainMenu_Icon);
-                    Count++;
+                    #region Calculate left placement
+
+                    int Left = 0;
+                    switch (i)
+                    {
+                        case 1:
+                        case 4:
+                        case 7:
+                            Left = 353;
+                            break;
+                        case 2:
+                        case 5:
+                        case 8:
+                            Left = 680;
+                            break;
+                        default:
+                            Left = 25;
+                            break;
+                    }
+
+                    #endregion
+
+                    #region Calculate top placement
+
+                    int Top = 0;
+                    switch (i)
+                    {
+                        case 3:
+                        case 4:
+                        case 5:
+                            Top = 260;
+                            break;
+                        case 6:
+                        case 7:
+                        case 8:
+                            Top = 400;
+                            break;
+                        default:
+                            Top = 116;
+                            break;
+                    }
+
+                    #endregion
+
+                    MainMenuButtons[i] = DefaultControls.GetButton(Name, Left, Top, 300, 120, "", Text);
+                    MainMenuButtons[i].OnLongClick += new userInteraction(OnLongClick);
+                    MainMenuButtons[i].Tag = settings.getSetting(String.Format("{0}.Plugin", Name));
+                    MainMenuButtons[i].OnClick += new userInteraction(MainMenu_OnClick);
+                    mainPanel.addControl(MainMenuButtons[i]);                    
                 }
 
-                #endregion
-                
                 //screens.loadPanel(mainPanel);
                 screens.loadSinglePanel(mainPanel, screen, true);
             }
@@ -224,6 +159,19 @@ namespace OpenMobile
             Button_Cancel2.Name = "Settings_Button_Cancel";
             panelSettings.addControl(Button_Cancel2);
 
+            OMImage Image_panelSettings_Background = new OMImage("TestImg", 200, 110);
+            Image_panelSettings_Background.FitControlToImage = true;
+            PanelOutlineGraphic.GraphicData gd = new PanelOutlineGraphic.GraphicData();
+            gd.Width = 614;
+            gd.Height = 434;
+            gd.TextFont = new Font(Font.Arial, 24);
+            gd.Type = PanelOutlineGraphic.Types.RoundedRectangle;
+            gd.Text = "Select the panel to assign to this button";
+            Image_panelSettings_Background.Image = new imageItem(PanelOutlineGraphic.GetImage(gd));
+            panelSettings.addControl(Image_panelSettings_Background);
+
+
+            /*
             OMBasicShape Shape_Border = new OMBasicShape(200, 110, 600, 420);
             Shape_Border.Name = "Settings_Shape_Border";
             Shape_Border.Shape = shapes.RoundedRectangle;
@@ -258,8 +206,15 @@ namespace OpenMobile
             Shape_Background_Lower.Shape = shapes.RoundedRectangle;
             Shape_Background_Lower.FillColor = Color.Black;
             panelSettings.addControl(Shape_Background_Lower);
+            */
 
-            OMList List_FunctionList = new OMList(235, 150, 535, 295);
+            OMList List_FunctionList = new OMList(235, 155, 535, 290);
+            List_FunctionList.SoftEdgeData.Color1 = Color.Black;
+            List_FunctionList.SoftEdgeData.Sides[0] = true;
+            List_FunctionList.SoftEdgeData.Sides[1] = false;
+            List_FunctionList.SoftEdgeData.Sides[2] = true;
+            List_FunctionList.SoftEdgeData.Sides[3] = false;
+            List_FunctionList.UseSoftEdges = true;
             List_FunctionList.Name = "Settings_List_FunctionList";
             List_FunctionList.Scrollbars = true;
             List_FunctionList.ListStyle = eListStyle.MultiList;
@@ -275,19 +230,11 @@ namespace OpenMobile
             subItemformat.font = new Font(Font.GenericSansSerif, 15F);            
             panelSettings.addControl(List_FunctionList);
 
-            OMButton Settings_Button_Ok = new OMButton(635, 460, 135, 50);
-            Settings_Button_Ok.Name = "Settings_Button_Ok";
-            Settings_Button_Ok.Image = opt1;
-            Settings_Button_Ok.FocusImage = opt2;
-            Settings_Button_Ok.Text = "OK";
+            OMButton Settings_Button_Ok = DefaultControls.GetButton("Settings_Button_Ok", 605, 450, 165, 70, "", "OK");
             Settings_Button_Ok.OnClick += new userInteraction(Settings_Button_Ok_OnClick);
             panelSettings.addControl(Settings_Button_Ok);
 
-            OMButton Settings_Button_Cancel = new OMButton(235, 460, 135, 50);
-            Settings_Button_Cancel.Name = "Settings_Button_Cancel";
-            Settings_Button_Cancel.Image = Settings_Button_Ok.Image;
-            Settings_Button_Cancel.FocusImage = Settings_Button_Ok.FocusImage;
-            Settings_Button_Cancel.Text = "Cancel";
+            OMButton Settings_Button_Cancel = DefaultControls.GetButton("Settings_Button_Cancel", 235, 450, 165, 70, "", "Cancel");
             Settings_Button_Cancel.OnClick += new userInteraction(Settings_Button_Cancel_OnClick);
             panelSettings.addControl(Settings_Button_Cancel);
 
@@ -299,60 +246,36 @@ namespace OpenMobile
 
             OMPanel exit = new OMPanel("Quit");
             exit.Forgotten = true;
-            OMImage Image1 = new OMImage(220, 115, 560, 400);
-            Image1.Image = theHost.getSkinImage("MediaBorder");
-            Image1.Name = "Image1";
-            OMButton Quit = new OMButton(245,145,250,80);
-            Quit.Image = opt1;
-            Quit.FocusImage = opt2;
-            Quit.Text = "Quit";
-            Quit.Name = "UI.Quit";
-            Quit.OnClick += new userInteraction(Quit_OnClick);
-            Quit.OnLongClick += new userInteraction(Quit_OnLongClick);
-            OMButton Sleep = new OMButton(245,229,250,80);
-            Sleep.Image = opt1;
-            Sleep.FocusImage = opt2;
-            Sleep.Text = "Sleep";
-            Sleep.Name = "UI.Sleep";
-            Sleep.OnClick += new userInteraction(Sleep_OnClick);
-            OMButton Hibernate = new OMButton(245,313,250,80);
-            Hibernate.Image = opt1;
-            Hibernate.FocusImage = opt2;
-            Hibernate.Text = "Hibernate";
-            Hibernate.Name = "UI.Hibernate";
-            Hibernate.OnClick += new userInteraction(Hibernate_OnClick);
-            OMButton Shutdown = new OMButton(245,397,250,80);
-            Shutdown.Image = opt1;
-            Shutdown.FocusImage = opt2;
-            Shutdown.Text = "Shutdown";
-            Shutdown.Name = "UI.Shutdown";
-            Shutdown.OnClick += new userInteraction(Shutdown_OnClick);
-            OMButton Restart = new OMButton(505, 145, 250, 80);
-            Restart.Image = opt1;
-            Restart.FocusImage = opt2;
-            Restart.Text = "Restart";
-            Restart.Name = "UI.Restart";
-            Restart.OnClick += new userInteraction(Restart_OnClick);
-            OMButton Reload = new OMButton(505, 229, 250, 80);
-            Reload.Image = opt1;
-            Reload.FocusImage = opt2;
-            Reload.Text = "Reload";
-            Reload.Name = "UI.Reload";
-            Reload.OnClick += new userInteraction(Reload_OnClick);
-            OMButton Screen = new OMButton(505, 313, 250, 80);
-            Screen.Image = opt1;
-            Screen.FocusImage = opt2;
-            Screen.Text = "Screen Off";
-            Screen.Name = "UI.Screen";
-            Screen.OnClick += new userInteraction(Screen_OnClick);
-            OMButton Cancel = new OMButton(505, 397, 250, 80);
-            Cancel.Image = opt1;
-            Cancel.FocusImage = opt2;
-            Cancel.Text = "Cancel";
-            Cancel.Name = "UI.Cancel";
-            Cancel.OnClick += new userInteraction(Cancel_OnClick);
             exit.BackgroundType = backgroundStyle.SolidColor;
             exit.BackgroundColor1 = Color.FromArgb(125, Color.Black);
+
+            OMImage Image1 = new OMImage("Image1", 220, 115, 560, 400, theHost.getSkinImage("MediaBorder"));
+
+            OMButton Quit = DefaultControls.GetButton("UI.Quit", 245, 145, 250, 80, "", "Quit");
+            Quit.OnClick += new userInteraction(Quit_OnClick);
+            Quit.OnLongClick += new userInteraction(Quit_OnLongClick);
+
+            OMButton Sleep = DefaultControls.GetButton("UI.Sleep", 245, 229, 250, 80, "", "Sleep");
+            Sleep.OnClick += new userInteraction(Sleep_OnClick);
+
+            OMButton Hibernate = DefaultControls.GetButton("UI.Hibernate", 245, 313, 250, 80, "", "Hibernate");
+            Hibernate.OnClick += new userInteraction(Hibernate_OnClick);
+
+            OMButton Shutdown = DefaultControls.GetButton("UI.Shutdown", 245, 397, 250, 80, "", "Shutdown");
+            Shutdown.OnClick += new userInteraction(Shutdown_OnClick);
+
+            OMButton Restart = DefaultControls.GetButton("UI.Restart", 505, 145, 250, 80, "", "Restart");
+            Restart.OnClick += new userInteraction(Restart_OnClick);
+
+            OMButton Reload = DefaultControls.GetButton("UI.Reload", 505, 229, 250, 80, "", "Reload");
+            Reload.OnClick += new userInteraction(Reload_OnClick);
+
+            OMButton Screen = DefaultControls.GetButton("UI.Screen", 505, 313, 250, 80, "", "Screen Off");
+            Screen.OnClick += new userInteraction(Screen_OnClick);
+
+            OMButton Cancel = DefaultControls.GetButton("UI.Cancel", 505, 397, 250, 80, "", "Cancel");
+            Cancel.OnClick += new userInteraction(Cancel_OnClick);
+
             exit.addControl(Image1);
             exit.addControl(Quit);
             exit.addControl(Sleep);
@@ -446,7 +369,7 @@ namespace OpenMobile
                     setting.setSetting(currentlySetting + ".Plugin", ((string)theList[theList.SelectedIndex].tag));
                     setting.setSetting(currentlySetting + ".Display", theList[theList.SelectedIndex].text);
                     screens[screen][currentlySetting].Tag = ((string)theList[theList.SelectedIndex].tag);
-                    ((OMButton)screens[screen][currentlySetting]).Text = theList[theList.SelectedIndex].text;
+                    //((OMButton)screens[screen][currentlySetting]).Text = theList[theList.SelectedIndex].text;
                 }
             }
             currentlySetting = "";
@@ -511,17 +434,50 @@ namespace OpenMobile
             for (int i = 1; i <= 9; i++)
             {
                 OMButton Button = ((OMButton)screens[screen, "MainMenu"]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString()]);
-                OMImage Icon = ((OMImage)screens[screen, "MainMenu"]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString() + "_Icon"]);
+                //OMImage Icon = ((OMImage)screens[screen, "MainMenu"]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString() + "_Icon"]);
                 if (Button.Tag != null)
                     if ((string)Button.Tag != "")
                     {
                         // Check for default icons
                         if ((string)Button.Tag == "Exit")
-                            Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "~", Color.Gray));
+                            //Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "~", Color.Gray));
+                            Button.OverlayImage = new imageItem(ButtonGraphic.GetImage(Button.Width, Button.Height, ButtonGraphic.ImageTypes.ButtonForeground, "~", StoredData.Get(String.Format("{0}.Display", Button.Name))));
+
                         else if ((string)Button.Tag == "About")
-                            Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "i", Color.Gray));
+                            //Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "i", Color.Gray));
+                            Button.OverlayImage = new imageItem(ButtonGraphic.GetImage(Button.Width, Button.Height, ButtonGraphic.ImageTypes.ButtonForeground, "i", StoredData.Get(String.Format("{0}.Display", Button.Name))));
+
                         else
-                            Icon.Image = new imageItem(plugin.GetPluginIcon((string)Button.Tag, eTextFormat.Normal, Color.Gray, Color.Gray));
+                        //Icon.Image = new imageItem(plugin.GetPluginIcon((string)Button.Tag, eTextFormat.Normal, Color.Gray, Color.Gray));
+                        {
+                            #region Configure button data
+
+                            ButtonGraphic.GraphicData gd = new ButtonGraphic.GraphicData();
+
+                            // Set icon symbol
+                            gd.Icon = plugin.GetPluginIconSymbol((string)Button.Tag);
+                            
+                            // Set Icon Image
+                            if (String.IsNullOrEmpty(gd.Icon))
+                                gd.IconImage = plugin.GetPluginIconString((string)Button.Tag);
+
+                            // Set default image
+                            if ((String.IsNullOrEmpty(gd.Icon)) && (String.IsNullOrEmpty(gd.IconImage)))
+                                gd.Icon = ((char)0x85).ToString();
+
+                            // Set Text
+                            gd.Text = StoredData.Get(String.Format("{0}.Display", Button.Name));
+
+                            // Set size
+                            gd.Width = Button.Width;
+                            gd.Height = Button.Height;
+
+                            // Set type of graphic
+                            gd.ImageType = ButtonGraphic.ImageTypes.ButtonForeground;
+
+                            #endregion
+                            Button.OverlayImage = new imageItem(ButtonGraphic.GetImage(gd));
+                        }
                     }
             }
         }

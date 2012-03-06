@@ -29,6 +29,6 @@ namespace OpenMobile.Plugin
         /// Pause the current media
         /// </summary>
         /// <returns></returns>
-        bool pause(int instance);
+        bool pause(Zone zone);
     }
 }

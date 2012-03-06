@@ -60,6 +60,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Create a new OMSlider
         /// </summary>
+        [System.Obsolete("Use OMSlider(string name, int x, int y, int w, int h) instead")]
         public OMSlider()
         {
         }
@@ -70,6 +71,7 @@ namespace OpenMobile.Controls
         /// <param name="y"></param>
         /// <param name="w"></param>
         /// <param name="h"></param>
+        [System.Obsolete("Use OMSlider(string name, int x, int y, int w, int h, int sHeight, int sWidth) instead")]
         public OMSlider(int x, int y, int w, int h)
         {
             left = x;
@@ -86,8 +88,29 @@ namespace OpenMobile.Controls
         /// <param name="h"></param>
         /// <param name="sHeight"></param>
         /// <param name="sWidth"></param>
+        [System.Obsolete("Use OMSlider(string name, int x, int y, int w, int h, int sHeight, int sWidth) instead")]
         public OMSlider(int x, int y, int w, int h, int sHeight, int sWidth)
         {
+            left = x;
+            top = y;
+            width = w;
+            sliderHeight = h;
+            height = sHeight;
+            sliderWidth = sWidth;
+        }
+        /// <summary>
+        /// Create a new OMSlider
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        /// <param name="sHeight"></param>
+        /// <param name="sWidth"></param>
+        public OMSlider(string name, int x, int y, int w, int h, int sHeight, int sWidth)
+        {
+            this.Name = name;
             left = x;
             top = y;
             width = w;
@@ -238,6 +261,10 @@ namespace OpenMobile.Controls
                 g.Clip = clip;
             }
             g.DrawImage(slider.image, left + sliderPosition - (sliderHeight / 2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight);
+
+            // Skin debug function 
+            if (_SkinDebug)
+                base.DrawSkinDebugInfo(g, Color.Yellow);
         }
 
         #region IThrow Members

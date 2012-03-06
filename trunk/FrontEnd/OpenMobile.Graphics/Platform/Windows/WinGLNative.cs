@@ -86,6 +86,8 @@ namespace OpenMobile.Platform.Windows
         const long ExtendedBit = 1 << 24;           // Used to distinguish left and right control, alt and enter keys.
         static readonly uint ShiftRightScanCode = Functions.MapVirtualKey(VirtualKeys.RSHIFT, 0);         // Used to distinguish left and right shift keys.
 
+        LocallizeKeyboard locallizeKeyboard = new LocallizeKeyboard(true);
+
         //OpenMobile.Graphics.KeyPressEventArgs key_press = new OpenMobile.Graphics.KeyPressEventArgs((char)0);
 
         #endregion
@@ -318,6 +320,17 @@ namespace OpenMobile.Platform.Windows
                     mouse[MouseButton.Right] = false;
                     break;
 
+                case WindowMessage.CHAR:
+                    {
+                        int i = 0;
+                    }
+                    break;
+                case WindowMessage.DEADCHAR:
+                    {
+                        int i = 0;
+                    }
+                    break;
+
                 // Keyboard events:
                 case WindowMessage.KEYDOWN:
                 case WindowMessage.KEYUP:
@@ -330,6 +343,9 @@ namespace OpenMobile.Platform.Windows
                     bool pressed =
                         message == WindowMessage.KEYDOWN ||
                         message == WindowMessage.SYSKEYDOWN;
+
+                    // Get the character associated with this key
+                    string Character = locallizeKeyboard.GetCharacter((VirtualKeys)wParam, pressed);
 
                     // Shift/Control/Alt behave strangely when e.g. ShiftRight is held down and ShiftLeft is pressed
                     // and released. It looks like neither key is released in this case, or that the wrong key is
@@ -384,6 +400,10 @@ namespace OpenMobile.Platform.Windows
                                 keyboard[Key.Enter] = pressed;
                             return IntPtr.Zero;
 
+                        case VirtualKeys.CAPITAL:
+                            keyboard[Key.CapsLock] = Console.CapsLock;
+                            return IntPtr.Zero;
+
                         default:
                             if (!WinRawKeyboard.KeyMap.ContainsKey((VirtualKeys)wParam))
                             {
@@ -391,18 +411,17 @@ namespace OpenMobile.Platform.Windows
                                 break;
                             }
                             else
-                            {
+                            {   
                                 Key key=WinRawKeyboard.KeyMap[(VirtualKeys)wParam];
-                                if (key == Key.CapsLock)
-                                    keyboard[Key.CapsLock] = Console.CapsLock;
-                                else
-                                    keyboard[key] = pressed;
+                                //Debug.Print("WinGLNative key:{0}, Character:{1}, Pressed:{2}", key, Character, pressed);
+                                keyboard.SetKeyState(key, pressed, Character);
                             }
                             return IntPtr.Zero;
                     }
                     break;
 
                 case WindowMessage.SYSCHAR:
+                case WindowMessage.SYSDEADCHAR:
                     return IntPtr.Zero;
 
                 case WindowMessage.KILLFOCUS:

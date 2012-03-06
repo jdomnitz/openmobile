@@ -23,6 +23,7 @@ using System.ComponentModel;
 using OpenMobile.Graphics;
 using System;
 using System.Reflection;
+using OpenMobile.Framework;
 
 namespace OpenMobile.Controls
 {
@@ -309,17 +310,17 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public OMPanel Clone()
         {
+            ScreenManager manager = this.Manager;
             OMPanel two = (OMPanel)this.MemberwiseClone();
+            two.Manager = manager;
             two.containedControls = new List<OMControl>(this.containedControls.Capacity);
             for (int i = 0; i < containedControls.Count; i++)
             {
                 two.addControl((OMControl)this.containedControls[i].Clone());
                 two[two.controlCount - 1].Parent = two;
             }
-            // Start of code added by borte     
             if (this.tag is System.ICloneable)
                 two.tag = ((System.ICloneable)this.tag).Clone();
-            // End of code added by borte
             return two;
         }
 
@@ -339,6 +340,20 @@ namespace OpenMobile.Controls
                 return null;
             }
         }
+
+        /// <summary>
+        /// Gets the panel that's loaded at the specified screen
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <returns>The requested panel</returns>
+        public OMPanel getPanelAtScreen(int screen)
+        {
+            if (Manager == null)
+                return null;
+            else
+                return Manager[screen, this.name];
+        }
+
         /// <summary>
         /// Returns the number of controls contained in this panel
         /// </summary>
@@ -348,6 +363,14 @@ namespace OpenMobile.Controls
             get
             {
                 return containedControls.Count;
+            }
+        }
+
+        public List<OMControl> Controls
+        {
+            get
+            {
+                return containedControls;
             }
         }
 
@@ -638,8 +661,8 @@ namespace OpenMobile.Controls
         public override string ToString()
         {
             if (this.name == null)
-                return "";
-            return this.name;
+                return String.Format("({0})", this.GetHashCode());
+            return String.Format("{0}({1})", this.name, this.GetHashCode());
         }
 
         #region Events

@@ -55,6 +55,7 @@ namespace OpenMobile
         private Point ThrowRelativeDistance = new Point(-1, -1);
         private int tick;
         bool Identify;
+        float IdentifyOpacity = 1f;
         public bool blockHome;
 
         public PointF ScaleFactors
@@ -91,10 +92,10 @@ namespace OpenMobile
         }
         public void Run(GameWindowFlags flags)
         {
-            Console.WriteLine("Renderingwindow(" + screen.ToString() + ").Run (Started):" + Timing.GetTiming());
+            //Console.WriteLine("Renderingwindow(" + screen.ToString() + ").Run (Started):" + Timing.GetTiming());
             NativeInitialize(flags);
             InitializeRendering();
-            Console.WriteLine("Renderingwindow(" + screen.ToString() + ").Run (RenderStarted):" + Timing.GetTiming());
+            //Console.WriteLine("Renderingwindow(" + screen.ToString() + ").Run (RenderStarted):" + Timing.GetTiming());
             Run(1.0, 0.0);
         }
         Graphics.Graphics g;
@@ -120,7 +121,7 @@ namespace OpenMobile
             //this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
 
             System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetCallingAssembly().Location);
-            this.Title = "openMobile v" + string.Format("{0}.{1}.{2}.{3}", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart) + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
+            this.Title = "openMobile v" + string.Format("{0}.{1}.{2}.{3}", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart) + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + screen.ToString();
 
             InitializeComponent();
             if (screen == 0)
@@ -142,6 +143,7 @@ namespace OpenMobile
         public void PaintIdentity()
         {
             Identify = true;
+            IdentifyOpacity = 255;
             Invalidate();
             Thread.Sleep(1500);
             Identify = false;
@@ -150,6 +152,13 @@ namespace OpenMobile
         public void PaintIdentity(bool Show)
         {
             Identify = Show;
+            IdentifyOpacity = 255;
+            Invalidate();
+        }
+        public void PaintIdentity(bool Show, float Opacity)
+        {
+            Identify = Show;
+            IdentifyOpacity = Opacity;
             Invalidate();
         }
 
@@ -295,14 +304,14 @@ namespace OpenMobile
         }
         public void ExecuteTransition(eGlobalTransition transType)
         {
-            if (!this.Visible)
-                Console.WriteLine("Renderingwindow(" + screen.ToString() + ").ExecuteTransition: Waiting for visible (" + Timing.GetTiming() + ")");
+            //if (!this.Visible)
+            //    Console.WriteLine("Renderingwindow(" + screen.ToString() + ").ExecuteTransition: Waiting for visible (" + Timing.GetTiming() + ")");
 
             while (!this.Visible)
             {
                 Thread.Sleep(10);
             }
-            Console.WriteLine("Renderingwindow(" + screen.ToString() + ").ExecuteTransition: Executing transition (" + Timing.GetTiming() + ")");
+            //Console.WriteLine("Renderingwindow(" + screen.ToString() + ").ExecuteTransition: Executing transition (" + Timing.GetTiming() + ")");
 
             lock (this) // Lock to prevent multiple transitons at the same time
             {
@@ -378,9 +387,9 @@ namespace OpenMobile
             {
                 lock (painting)
                 {
-                    if (identity == null)
-                        identity = g.GenerateTextTexture(0, 0, 1000, 600, (screen+1).ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
-                    g.DrawImage(identity, 0, 0, 1000, 600);
+                    if (g.TextureGenerationRequired(identity))
+                        identity = g.GenerateTextTexture(identity, 0, 0, 1000, 600, screen.ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
+                    g.DrawImage(identity, 0, 0, 1000, 600, IdentifyOpacity);
                 }
             }
             if (dimmer > 0)
@@ -608,7 +617,7 @@ namespace OpenMobile
             }
             else
             {
-                if ((e.Buttons == MouseButton.Left) && (!ThrowStarted))
+                if ((e.Buttons == MouseButton.Left) && (!ThrowStarted) && (!typeof(IMouse).IsInstanceOfType(highlighted)))
                 {
                     if (currentGesture == null)
                     {
@@ -700,6 +709,11 @@ namespace OpenMobile
                         {
                             if (b.Visible == true)
                             {
+                                // If this control is marked as clicktrough then skip it
+                                if (b.NoUserInteraction)
+                                    continue;
+
+                                // Check if this point is clickable in the control
                                 if (typeof(INotClickable).IsInstanceOfType(b))
                                     if (!((INotClickable)b).IsPointClickable((int)(e.X / widthScale), (int)(e.Y / widthScale)))
                                         continue;
@@ -725,14 +739,16 @@ namespace OpenMobile
                 return;
 
             //Console.WriteLine(string.Format("RenderingWindow_MouseClick: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
+            //Console.WriteLine(string.Format("RenderingWindow_MouseClick(Enter): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
 
             if ((e.Buttons == MouseButton.Left) && (highlighted != null))
             {
                 if (rParam.currentMode == eModeType.Highlighted)
                 {
+                    tmrLongClick.Enabled = false;
+
                     if (typeof(OMButton).IsInstanceOfType(highlighted))
                     {
-                        tmrLongClick.Enabled = false;
                         if (lastClick != null)
                         {
                             lastClick.Mode = eModeType.Clicked;
@@ -744,16 +760,25 @@ namespace OpenMobile
                     if (lastClick != null)
                         lastClick.Mode = eModeType.Normal;
                     lastClick = null;
+
                     if (typeof(IClickable).IsInstanceOfType(highlighted) == true)
                     {
-                        SandboxedThread.Asynchronous(delegate()
+                        if (highlighted != null)
                         {
-                            if (highlighted != null)
-                                ((IClickable)highlighted).clickMe(screen);
-                        });
+                            if (highlighted.Mode != eModeType.Clicked)
+                            {
+                                highlighted.Mode = eModeType.Clicked;
+                                SandboxedThread.Asynchronous(delegate()
+                                {
+                                    if (highlighted != null)
+                                        ((IClickable)highlighted).clickMe(screen);
+                                });
+                            }
+                        }
                     }
                 }
             }
+            //Console.WriteLine(string.Format("RenderingWindow_MouseClick(Exit): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
         }
 
         private void tmrLongClick_Tick(object sender, EventArgs e)
@@ -764,14 +789,17 @@ namespace OpenMobile
 
             // Debug info
             //Console.WriteLine(string.Format("screen {0} tmrLongClick_Tick ",screen));
+            //Console.WriteLine(string.Format("tmrLongClick_Tick(Enter): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
 
             if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted)))
             {
+                highlighted.Mode = eModeType.Clicked;
                 SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).longClickMe(screen); });
-                if (highlighted != null)
-                    highlighted.Mode = eModeType.Highlighted;
+                //if (highlighted != null)
+                //    highlighted.Mode = eModeType.Highlighted;
             }
             lastClick = null;
+            //Console.WriteLine(string.Format("tmrLongClick_Tick(Exit): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
         }
 
         internal void RenderingWindow_MouseDown(object sender, OpenMobile.Input.MouseButtonEventArgs e)
@@ -781,6 +809,7 @@ namespace OpenMobile
 
             // Debug info
             //Console.WriteLine(string.Format("RenderingWindow_MouseDown: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
+            //Console.WriteLine(string.Format("RenderingWindow_MouseDown(Enter): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
 
             // Try to highlight control if not already highlighted
             HighlightControl(new MouseMoveEventArgs(e.X, e.Y, 0, 0, e.Button));
@@ -802,7 +831,9 @@ namespace OpenMobile
                     tmrLongClick.Enabled = true;
                     Invalidate();
                 }
-                else if (typeof(IClickable).IsInstanceOfType(highlighted))  // Added by Borte to support long click for other controls than a button
+
+                // Start monitoring for a long click
+                else if (typeof(IClickable).IsInstanceOfType(highlighted)) 
                 {
                     tmrLongClick.Enabled = true;
                 }
@@ -813,7 +844,10 @@ namespace OpenMobile
                     ThrowStarted = true;
                     ThrowRelativeDistance = new Point(e.X, e.Y);
                 }
-            } ThrowStart = e.Location; //If we're not throwing something we're gesturing
+            }
+            
+            ThrowStart = e.Location; //If we're not throwing something we're gesturing
+            //Console.WriteLine(string.Format("RenderingWindow_MouseDown(Exit): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
         }
 
         internal void RenderingWindow_MouseUp(object sender, OpenMobile.Input.MouseButtonEventArgs e)
@@ -823,7 +857,8 @@ namespace OpenMobile
 
             // Debug info
             //Console.WriteLine(string.Format("RenderingWindow_MouseUp: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-            
+            //Console.WriteLine(string.Format("RenderingWindow_MouseUp(Enter): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
+           
             tmrLongClick.Enabled = false;
             OMButton ptrLast = lastClick;
             if ((ptrLast != null) && (ptrLast.DownImage.image != null))
@@ -836,6 +871,8 @@ namespace OpenMobile
                 // Debug info
                 //Console.WriteLine(string.Format("RenderingWindow_MouseUp.MouseUp: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
                 if ((highlighted.Mode != eModeType.Clicked) && (highlighted.Mode != eModeType.ClickedAndTransitioningOut))
+                    highlighted.Mode = eModeType.Highlighted;
+                if (highlighted.Mode == eModeType.Clicked)
                     highlighted.Mode = eModeType.Highlighted;
                 if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
                     ((IMouse)highlighted).MouseUp(screen, e, widthScale, heightScale);
@@ -866,6 +903,7 @@ namespace OpenMobile
             ThrowStart.Y = -1;
             ThrowStarted = false;
             currentGesture = null;
+            //Console.WriteLine(string.Format("RenderingWindow_MouseUp(Exit): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
         }
         #endregion
         #region OtherUIEvents
@@ -897,6 +935,9 @@ namespace OpenMobile
         }
         public void RenderingWindow_KeyUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
+            if (e.Screen != Screen)
+                return;
+
             if (e.Key == Key.Escape)
             {
                 if (this.WindowState == WindowState.Fullscreen)
@@ -1071,6 +1112,8 @@ namespace OpenMobile
         OMControl b;
         public void RenderingWindow_KeyDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
+            if (e.Screen != Screen)
+                return;
             try
             {
                 if (highlighted == null)
@@ -1085,6 +1128,10 @@ namespace OpenMobile
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
                                     if ((backgroundQueue[j][i].Left < left) && (backgroundQueue[j][i].Top < top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
                                     {
+                                        // If this control is marked as clicktrough then skip it
+                                        if (b.NoUserInteraction)
+                                            continue;
+
                                         b = backgroundQueue[j][i];
                                         top = b.Top;
                                         left = b.Left;
@@ -1196,6 +1243,10 @@ namespace OpenMobile
 
         private void checkRight(OMControl control,Rectangle highlighted,int ofsetX,int ofsetY)
         {
+            // If this control is marked as clicktrough then skip it
+            if (control.NoUserInteraction)
+                return;
+
             if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
             {
                 OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
@@ -1226,6 +1277,10 @@ namespace OpenMobile
 
         private void checkDown(OMControl control,Rectangle highlighted, int ofsetx,int ofsety)
         {
+            // If this control is marked as clicktrough then skip it
+            if (control.NoUserInteraction)
+                return;
+
             if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
             {
                 OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
@@ -1255,6 +1310,10 @@ namespace OpenMobile
 
         private void checkUp(OMControl control,Rectangle highlighted, int ofsetx,int ofsety)
         {
+            // If this control is marked as clicktrough then skip it
+            if (control.NoUserInteraction)
+                return;
+
             if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
             {
                 OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
@@ -1284,6 +1343,10 @@ namespace OpenMobile
 
         private void checkLeft(OMControl control,Rectangle highlighted,int ofsetX,int ofsetY)
         {
+            // If this control is marked as clicktrough then skip it
+            if (control.NoUserInteraction)
+                return;
+
             if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
             {
                 OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;

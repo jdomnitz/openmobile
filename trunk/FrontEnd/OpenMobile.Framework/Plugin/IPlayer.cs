@@ -31,17 +31,17 @@ namespace OpenMobile.Plugin
         /// <param name="percent"></param>
         /// <param name="instance"></param>
         /// <returns></returns>
-        bool setVolume(int instance, int percent);
+        bool setVolume(Zone zone, int percent);
         /// <summary>
         /// Get the players volume
         /// </summary>
         /// <returns></returns>
-        int getVolume(int instance);
+        int getVolume(Zone zone);
         /// <summary>
         /// Gets information on the currently playing media.
         /// </summary>
         /// <returns>Returns null if information is not available.</returns>
-        mediaInfo getMediaInfo(int instance);
+        mediaInfo getMediaInfo(Zone zone);
         /// <summary>
         /// A media specific event notification
         /// </summary>
@@ -60,6 +60,6 @@ namespace OpenMobile.Plugin
         /// <param name="instance"></param>
         /// <param name="visible"></param>
         /// <returns></returns>
-        bool SetVideoVisible(int instance,bool visible);
+        bool SetVideoVisible(Zone zone,bool visible);
     }
 }

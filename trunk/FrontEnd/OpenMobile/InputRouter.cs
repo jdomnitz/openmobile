@@ -627,7 +627,7 @@ namespace OpenMobile
                             ResetMouseLocation();
 
                             // Blocks device input if video is playing
-                            if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(Core.theHost.instanceForScreen(i)).Contains(e.Location))
+                            if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(i).Contains(e.Location))
                                 return;
                             Core.RenderingWindows[i].defaultMouse = (MouseMapping[i] == DefaultUnit);
                             Core.RenderingWindows[i].RenderingWindow_MouseMove(i, e);
@@ -760,7 +760,7 @@ namespace OpenMobile
                     {
                         if (GetMouseMapIndex(MouseMapping[i]) == (int)sender)
                         {
-                            if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(Core.theHost.instanceForScreen(i)).Contains(e.Location))
+                            if (Core.RenderingWindows[i].VideoPlaying && Core.theHost.GetVideoPosition(i).Contains(e.Location))
                                 return;
 
                             Core.RenderingWindows[i].RenderingWindow_MouseDown(i, e);
@@ -792,6 +792,8 @@ namespace OpenMobile
 
         private static void mapKeyboards()
         {
+            // TODO_ : Add support for default keyboard based on focus (How do we detect focus?)
+
             // exit if there is no keyboards available
             if ((driver.Keyboard == null) || (driver.Keyboard.Count == 0))
                 return;
@@ -1077,6 +1079,7 @@ namespace OpenMobile
             if (DetectionActive)
                 return;
 
+            // TODO_: Events only returns the last instance of the result so if a event higher in the call structure handles the keypress and others don't then only the last state is reported
             if (Core.theHost.raiseKeyPressEvent(eKeypressType.KeyDown, e) == true)
                 return;
             //If an app handles it first don't tell the UI

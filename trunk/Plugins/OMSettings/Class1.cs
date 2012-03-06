@@ -29,7 +29,7 @@ using OpenMobile.Plugin;
 
 namespace OMSettings
 {
-    [SkinIcon("Icons|Info-Settings")] //*'")]
+    [SkinIcon("*@")] //*'")]
     public class Settings : IHighLevel
     {
         ScreenManager manager;
@@ -66,14 +66,21 @@ namespace OMSettings
             menu.Color = Color.White;
             menu.HighlightColor = Color.White;
             menu.SelectedItemColor1 = Color.DarkBlue;
+            menu.SoftEdgeData.Color1 = Color.Black;
+            menu.SoftEdgeData.Sides[0] = true;
+            menu.SoftEdgeData.Sides[1] = false;
+            menu.SoftEdgeData.Sides[2] = true;
+            menu.SoftEdgeData.Sides[3] = false;
+            menu.UseSoftEdges = true;
             OMListItem.subItemFormat format=new OMListItem.subItemFormat();
             format.color=Color.FromArgb(128,Color.White);
             format.font = new Font(Font.GenericSansSerif, 21F);
-            menu.Add(new OMListItem("General Settings", "User Interface and System Settings",format));
-            menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords", format));
-            menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers", format));
-            menu.Add(new OMListItem("Multi-Zone Settings", "Displays, Sound Cards and other zone specific settings", format));
-            menu.Add(new OMListItem("Plugin Settings", "Settings for all low level plugins", format));
+            menu.Add(new OMListItem("General Settings", "User Interface and System Settings", format, "General Settings"));
+            menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords", format, "personal"));
+            menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers", format, "data"));
+            menu.Add(new OMListItem("Input routing", "Routing of data between a input device and a screen", format, "InputRouterScreenSelection"));
+            menu.Add(new OMListItem("Multi-Zone Settings", "Displays, Sound Cards and other zone specific settings", format, "Zones"));
+            menu.Add(new OMListItem("Plugin Settings", "Settings for all low level plugins", format, "Plugins"));
             menu.OnClick += new userInteraction(menu_OnClick);
             main.addControl(menu);
             manager.loadPanel(main);
@@ -184,8 +191,11 @@ namespace OMSettings
             manager.loadPanel(hardware);
             #endregion
 
-            // Load multizone panels
-            OMSettings.MultiZone.Initialize(this.pluginName, manager, theHost);
+            // Load input router panels
+            OMSettings.InputRouterScreens.Initialize(this.pluginName, manager, theHost);
+
+            // Load zones panels
+            OMSettings.ZoneSettings.Initialize(this.pluginName, manager, theHost);
 
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
@@ -294,46 +304,32 @@ namespace OMSettings
 
         void menu_OnClick(OMControl sender, int screen)
         {
-            switch (((OMList)sender).SelectedIndex)
+            OMList list = (OMList)sender;
+            string Panel = (string)list.SelectedItem.tag;
+            switch (Panel)
             {
-                case 0:
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "General Settings");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
-                    break;
-                case 1:
+                case "personal":
                     ((OMTextBox)manager[screen, "personal"][6]).Text = Credentials.getCredential("Google Password");
                     ((OMTextBox)manager[screen, "personal"][5]).Text = Credentials.getCredential("Google Username");
-
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "personal");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
                     break;
-                case 2:
+                case "data":
                     using (PluginSettings s = new PluginSettings())
                         ((OMTextBox)manager[screen, "data"][4]).Text = s.getSetting("Data.DefaultLocation");
                     loadProviders();
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "data");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
-                    break;
-                case 3: // MultiZone
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "ZoneSelection");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
-                    break;
-                case 4:
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "Plugins");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
                     break;
             }
+
+            // Change screen
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", Panel);
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+
             ((OMList)sender).Select(-1);
         }
 
         void location_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
             ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "data",((OMTextBox)sender).Text);
         }
 
@@ -352,7 +348,7 @@ namespace OMSettings
 
         void user_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
             if ((((OMTextBox)sender).Flags&textboxFlags.Password)==textboxFlags.Password)
                 ((OMTextBox)sender).Text = input.getPassword(screen, "OMSettings", "personal", ((OMTextBox)sender).Text);
             else

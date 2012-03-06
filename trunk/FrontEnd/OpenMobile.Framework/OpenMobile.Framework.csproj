@@ -112,7 +112,12 @@
     <Compile Include="Data\Vehicle.cs" />
     <Compile Include="Data\Weather.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="helperFunctions\Controls.cs" />
+    <Compile Include="helperFunctions\Graphics.cs" />
+    <Compile Include="helperFunctions\Forms.cs" />
     <Compile Include="helperFunctions\Globalization.cs" />
+    <Compile Include="helperFunctions\Menu.cs" />
+    <Compile Include="helperFunctions\OSK.cs" />
     <Compile Include="helperFunctions\StoredData.cs" />
     <Compile Include="IconManager.cs" />
     <Compile Include="Math\Calculation.cs" />
@@ -156,9 +161,13 @@
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="TaskManager.cs" />
+    <Compile Include="Timer.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Widget.cs" />
     <Compile Include="Platform\GnomeIcon.cs" />
     <Compile Include="Zones\Zone.cs" />
+    <Compile Include="Zones\ZoneHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Data\SQL.resx">

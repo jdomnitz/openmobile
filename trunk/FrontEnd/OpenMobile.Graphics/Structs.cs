@@ -149,11 +149,19 @@ namespace OpenMobile.Graphics
             }
             return Empty;
         }
+        public System.Drawing.Color ToSystemColor()
+        {
+            return System.Drawing.Color.FromArgb(this.A, this.R, this.G, this.B);
+        }
+        public void FromNativeColor(System.Drawing.Color c)
+        {
+            this = Color.FromArgb(c.A, c.R, c.G, c.B);
+        }
         public static System.Drawing.Color ToNativeColor(Color c)
         {
             return System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
         }
-        public static Color FromNativeColor(System.Drawing.Color c)
+        public static Color FromSystemColor(System.Drawing.Color c)
         {
             return Color.FromArgb(c.A, c.R, c.G, c.B);
         }
@@ -172,7 +180,7 @@ namespace OpenMobile.Graphics
         {
             return !(left == right);
         }
-        internal Color(int a, int r, int g, int b)
+        public Color(int a, int r, int g, int b)
         {
             this.a = (byte)a;
             this.r = (byte)r;

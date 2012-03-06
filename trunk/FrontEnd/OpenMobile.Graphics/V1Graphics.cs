@@ -76,7 +76,11 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Bold Glowing Text
         /// </summary>
-        BoldGlow=10
+        BoldGlow=10,
+        /// <summary>
+        /// Glowing Text (big glow)
+        /// </summary>
+        GlowBig = 11
     };
     /// <summary>
     /// Alignment arguments
@@ -134,7 +138,11 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Top Centered Word Wrap
         /// </summary>
-        WordWrapTC = 10001
+        WordWrapTC = 10001,
+        /// <summary>
+        /// Top Left Word Wrap
+        /// </summary>
+        WordWrapTL = 10000
     };
     /// <summary>
     /// The angle to rotate the control
@@ -377,6 +385,11 @@ namespace OpenMobile.Graphics
             uint texture;
             Raw.GenTextures(1, out texture);
             Raw.BindTexture(TextureTarget.Texture2D, texture);
+
+            // Set correct image to use if image data is not shared among all screens
+            if (!image.Shared)
+                image.SetScreen(screen);
+
             Bitmap img = image.image;
             bool kill=false;
             lock (image.image)
@@ -970,7 +983,8 @@ namespace OpenMobile.Graphics
         internal static void DeleteTexture(int screen,uint texture)
         {
             if (screen<textures.Count)
-                textures[screen].Add(texture);
+                //textures[screen].Add(texture);
+                textures[screen].Remove(texture);
         }
         public void DrawImage(OImage image, Rectangle rect, int x, int y, int Width, int Height, float transparency)
         {

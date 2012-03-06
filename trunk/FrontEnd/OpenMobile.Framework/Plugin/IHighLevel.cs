@@ -130,7 +130,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         Normal=1,
         /// <summary>
-        /// Pluginlevel system
+        /// Pluginlevel system (will not show up in list of available plugins)
         /// </summary>
         System=2,
         /// <summary>
