@@ -329,18 +329,27 @@ namespace OpenMobile.Zones
            // Ensure we have a active zone for all screens
            for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
            {
-               if (_ActiveZones[i] == null)
-               {    // Find a zone to activate
-                   Zone ZoneToActivate = _Zones.Find(x => x.Screen == i);
-                   if (ZoneToActivate == null)
-                   {    // No zone found for screen = error in setup, lets reset to default
-                       SetToDefault = true;
-                       break;
+               try
+               {
+                   if (_ActiveZones[i] == null)
+                   {    // Find a zone to activate
+                       Zone ZoneToActivate = _Zones.Find(x => x.Screen == i);
+                       if (ZoneToActivate == null)
+                       {    // No zone found for screen = error in setup, lets reset to default
+                           SetToDefault = true;
+                           break;
+                       }
+                       else
+                       {
+                           _ActiveZones[i] = ZoneToActivate.ID;
+                       }
                    }
-                   else
-                   {
-                       _ActiveZones[i] = ZoneToActivate.ID;
-                   }
+               }
+               catch
+               {
+                   _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
+                   SetToDefault = true;
+                   break;
                }
            }
 
