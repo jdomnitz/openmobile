@@ -30,7 +30,6 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMLabel : OMControl, ISensorDisplay
     {
-        // Comment by Borte: access modefier changed to protected to allow more access when this control is inherited
         /// <summary>
         /// Label Text
         /// </summary>
@@ -78,10 +77,10 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Create a new OMLabel
         /// </summary>
+        [Obsolete("Use OMLabel(string name, int x, int y, int w, int h) instead")]
         public OMLabel()
         {
-            height = 100;
-            width = 130;
+            Init("", 0, 0, 100, 130);
         }
         /// <summary>
         /// Create a new OMLabel
@@ -90,13 +89,34 @@ namespace OpenMobile.Controls
         /// <param name="y"></param>
         /// <param name="w"></param>
         /// <param name="h"></param>
+        [Obsolete("Use OMLabel(string name, int x, int y, int w, int h) instead")]
         public OMLabel(int x, int y, int w, int h)
         {
-            left = x;
-            top = y;
-            width = w;
-            height = h;
+            Init("", x, y, w, h);
         }
+        /// <summary>
+        /// Create a new OMLabel
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        public OMLabel(string name, int x, int y, int w, int h)
+        {
+            Init(name, x, y, w, h);
+        }
+        private void Init(string Name, int x, int y, int w, int h)
+        {
+            this.Name = Name;
+            this.Top = y;
+            this.Left = x;
+            this.Width = w;
+            this.Height = h;
+            this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
+            this.Format = OpenMobile.Graphics.eTextFormat.Normal;
+        }
+
         /// <summary>
         /// Creates a deep copy of this control
         /// </summary>
@@ -213,8 +233,8 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionIn;
             else if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
-            if (textTexture == null)
-                textTexture = g.GenerateTextTexture(left, top, width+5, height, text, font, textFormat, textAlignment, color, outlineColor);
+            if (g.TextureGenerationRequired(textTexture))
+                textTexture = g.GenerateTextTexture(textTexture, left, top, width + 5, height, text, font, textFormat, textAlignment, color, outlineColor);
             g.DrawImage(textTexture, left, top, width+5, height, tmp);
 
             // Skin debug function 

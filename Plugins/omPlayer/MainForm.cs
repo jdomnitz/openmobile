@@ -77,18 +77,18 @@ namespace OMPlayer
         using (PluginSettings setting = new PluginSettings())
             setting.setSetting(s.Name, s.Value);
     }
-    private void checkInstance(int instance)
+    private void checkInstance(Zone zone)
     {
         lock (player)
         {
-            if (player[instance] == null)
-                sink.Invoke(OnPlayerRequested, new object[] { instance });
+            if (player[zone.AudioDeviceInstance] == null)
+                sink.Invoke(OnPlayerRequested, new object[] { zone });
         }
     }
-    private void createInstance(int instance)
+    private void createInstance(Zone zone)
     {
-        player[instance] = new AVPlayer(instance);
-        player[instance].OnMediaEvent += forwardEvent;
+        player[zone.AudioDeviceInstance] = new AVPlayer(zone);
+        player[zone.AudioDeviceInstance].OnMediaEvent += forwardEvent;
     }
     public void Dispose()
     {
@@ -111,7 +111,7 @@ namespace OMPlayer
         GC.SuppressFinalize(this);
     }
     AVPlayer oldPlayer;
-    public void forwardEvent(eFunction function, int instance, string arg)
+    public void forwardEvent(eFunction function, Zone zone, string arg)
     {
         if (function == eFunction.nextMedia)
         {
@@ -120,21 +120,21 @@ namespace OMPlayer
                 lock (player)
                 {
                     AVPlayer tmp = oldPlayer;
-                    oldPlayer = player[instance];
-                    player[instance] = tmp;
+                    oldPlayer = player[zone.AudioDeviceInstance];
+                    player[zone.AudioDeviceInstance] = tmp;
                 }
-                if (player[instance] != null)
+                if (player[zone.AudioDeviceInstance] != null)
                 {
-                    player[instance].instance = instance;
-                    player[instance].OnMediaEvent += forwardEvent;
+                    player[zone.AudioDeviceInstance].zone = zone;
+                    player[zone.AudioDeviceInstance].OnMediaEvent += forwardEvent;
                 }
-                oldPlayer.instance = -1;
+                oldPlayer.zone = null;
                 if (OnMediaEvent != null)
-                    OnMediaEvent(function, instance, arg);
+                    OnMediaEvent(function, zone, arg);
                 for (int i = 10; i >= 0; i--)
                 {
-                    if (player[instance] != null)
-                        player[instance].setVolume((10 - i) * 10);
+                    if (player[zone.AudioDeviceInstance] != null)
+                        player[zone.AudioDeviceInstance].setVolume((10 - i) * 10);
                     oldPlayer.setVolume(i * 10);
                     Thread.Sleep(crossfade/10);
                 }
@@ -143,16 +143,16 @@ namespace OMPlayer
             }
         }
         if (OnMediaEvent != null)
-            OnMediaEvent(function, instance, arg);
+            OnMediaEvent(function, zone, arg);
     }
-    public float getCurrentPosition(int instance)
+    public float getCurrentPosition(Zone zone)
     {
-        checkInstance(instance);
-        if (player[instance].mediaPosition == null)
+        checkInstance(zone);
+        if (player[zone.AudioDeviceInstance].mediaPosition == null)
             return -1F;
-        if ((player[instance].currentState == ePlayerStatus.Stopped) || (player[instance].currentState == ePlayerStatus.Ready))
+        if ((player[zone.AudioDeviceInstance].currentState == ePlayerStatus.Stopped) || (player[zone.AudioDeviceInstance].currentState == ePlayerStatus.Ready))
             return -1F;
-        return (float) player[instance].pos;
+        return (float)player[zone.AudioDeviceInstance].pos;
     }
     public static IMoniker getDevMoniker(int dev)
     {
@@ -180,7 +180,7 @@ namespace OMPlayer
         /// <returns></returns>
         public static IMoniker getDevMoniker(string dev)
         {
-            System.Diagnostics.Debug.WriteLine("Requested directsound unit: " + dev);
+            //System.Diagnostics.Debug.WriteLine("Requested directsound unit: " + dev);
             DsDevice[] d = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
             IMoniker DefaultUnit = null;
             for (int i = 0; i < d.Length; i++)
@@ -189,7 +189,7 @@ namespace OMPlayer
                 {
                     if (d[i].Name.Contains(dev))
                     {
-                        System.Diagnostics.Debug.WriteLine("Selected directsound unit: " + d[i].Name);
+                        //System.Diagnostics.Debug.WriteLine("Selected directsound unit: " + d[i].Name);
                         return d[i].Mon;
                     }
                     else
@@ -197,63 +197,63 @@ namespace OMPlayer
                         if (DefaultUnit == null)
                         {
                             DefaultUnit = d[i].Mon;
-                            System.Diagnostics.Debug.WriteLine("Directsound default unit : " + d[i].Name);
+                            //System.Diagnostics.Debug.WriteLine("Directsound default unit : " + d[i].Name);
                         }
                     }
                 }
             }
-            System.Diagnostics.Debug.WriteLine("Using directsound default unit!");
+            //System.Diagnostics.Debug.WriteLine("Using directsound default unit!");
             return DefaultUnit;
         }
 
-    public mediaInfo getMediaInfo(int instance)
+        public mediaInfo getMediaInfo(Zone zone)
     {
-        checkInstance(instance);
-        if ((player[instance].currentState == ePlayerStatus.Stopped)||(player[instance].currentState==ePlayerStatus.Ready))
+        checkInstance(zone);
+        if ((player[zone.AudioDeviceInstance].currentState == ePlayerStatus.Stopped) || (player[zone.AudioDeviceInstance].currentState == ePlayerStatus.Ready))
             return new mediaInfo();
         else
-            return player[instance].nowPlaying;
+            return player[zone.AudioDeviceInstance].nowPlaying;
     }
 
-    public float getPlaybackSpeed(int instance)
+        public float getPlaybackSpeed(Zone zone)
     {
-        checkInstance(instance);
-        return (float) player[instance].currentPlaybackRate;
+        checkInstance(zone);
+        return (float)player[zone.AudioDeviceInstance].currentPlaybackRate;
     }
 
-    public ePlayerStatus getPlayerStatus(int instance)
+        public ePlayerStatus getPlayerStatus(Zone zone)
     {
-        checkInstance(instance);
-        return player[instance].currentState;
+        checkInstance(zone);
+        return player[zone.AudioDeviceInstance].currentState;
     }
 
-    public int getVolume(int instance)
+        public int getVolume(Zone zone)
     {
-        checkInstance(instance);
-        if (player[instance].currentVolume<0)
+        checkInstance(zone);
+        if (player[zone.AudioDeviceInstance].currentVolume < 0)
             return -1; //volume muted
         else
-            return player[instance].currentVolume;
+            return player[zone.AudioDeviceInstance].currentVolume;
     }
     private void saveState()
     {
         using (PluginSettings settings = new PluginSettings())
         {
-            for (int i = 0; i < theHost.InstanceCount; i++)
+            foreach (Zone zone in theHost.ZoneHandler.Zones)
             {
-                if ((player!=null)&&(player[i] != null) && (player[i].nowPlaying != null) && (player[i].mediaPosition != null))
+                if ((player!=null)&&(player[zone.AudioDeviceInstance] != null) && (player[zone.AudioDeviceInstance].nowPlaying != null) && (player[zone.AudioDeviceInstance].mediaPosition != null))
                 {
-                    if ((getPlayerStatus(i) == ePlayerStatus.Stopped) || (getPlayerStatus(i) == ePlayerStatus.Ready))
+                    if ((getPlayerStatus(zone) == ePlayerStatus.Stopped) || (getPlayerStatus(zone) == ePlayerStatus.Ready))
                     {
-                        settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingURL", "");
+                        settings.setSetting("Music.Instance" + zone.AudioDeviceInstance.ToString() + ".LastPlayingURL", "");
                         continue;
                     }
-                    settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingURL", player[i].nowPlaying.Location);
-                    settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingPosition", player[i].pos.ToString());
+                    settings.setSetting("Music.Instance" + zone.AudioDeviceInstance.ToString() + ".LastPlayingURL", player[zone.AudioDeviceInstance].nowPlaying.Location);
+                    settings.setSetting("Music.Instance" + zone.AudioDeviceInstance.ToString() + ".LastPlayingPosition", player[zone.AudioDeviceInstance].pos.ToString());
                 }
                 else
                 {
-                    settings.setSetting("Music.Instance" + i.ToString() + ".LastPlayingURL", "");
+                    settings.setSetting("Music.Instance" + zone.AudioDeviceInstance.ToString() + ".LastPlayingURL", "");
                 }
             }
         }
@@ -267,19 +267,39 @@ namespace OMPlayer
         }
         else if (function == eFunction.RenderingWindowResized)
         {
-            int inst = theHost.instanceForScreen(int.Parse(arg1));
+            foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(arg1)))
+            {
+                if (zone.AudioDeviceInstance >= player.Length)
+                    return;
+                if (player[zone.AudioDeviceInstance] != null)
+                    player[zone.AudioDeviceInstance].Resize();
+            }
+
+            /*
+            int inst = theHost.ZoneHandler.GetZone(int.Parse(arg1)).AudioDeviceInstance;
             if (inst >= player.Length)
                 return;
             if (player[inst] != null)
                 player[inst].Resize();
+            */
         }
         else if (function == eFunction.videoAreaChanged)
         {
+            foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(arg1)))
+            {
+                if (zone.AudioDeviceInstance < 0 | zone.AudioDeviceInstance >= player.Length)
+                    continue;
+                if (player[zone.AudioDeviceInstance] != null)
+                    player[zone.AudioDeviceInstance].Resize();
+            }
+
+            /*
             int inst = int.Parse(arg1);
             if (inst >= player.Length)
                 return;
             if (player[inst] != null)
                 player[inst].Resize();
+            */
         }
     }
 
@@ -293,7 +313,7 @@ namespace OMPlayer
         return false;
     }
     MessageProc sink;
-    private delegate void CreateNewPlayer(int instance);
+    private delegate void CreateNewPlayer(Zone zone);
     private event CreateNewPlayer OnPlayerRequested;
     bool vistaMode = false;
     bool sevenMode = false;
@@ -305,7 +325,7 @@ namespace OMPlayer
         theHost = host;
         sink = new MessageProc("MainForm(PluginInitialize)");
         IntPtr tmp = sink.Handle;
-        player = new AVPlayer[theHost.InstanceCount];
+        player = new AVPlayer[theHost.AudioDeviceCount];
         host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
         host.OnPowerChange += new PowerEvent(host_OnPowerChange);
         host.OnKeyPress += new KeyboardEvent(host_OnKeyPress);
@@ -318,13 +338,14 @@ namespace OMPlayer
                 crossfade = int.Parse(cf);
             if (!vistaMode)
             {
+                /*
                 if (setting.getSetting("Music.AutoResume") == "True")
                 {
                     OpenMobile.Threading.SafeThread.Asynchronous(delegate()
                     {
                         for (int i = 0; i < theHost.ScreenCount; i++)
                         {
-                            int k = theHost.instanceForScreen(i);
+                            int k = theHost.GetDefaultZoneForScreen(i).AudioDeviceInstance;
                             host.execute(eFunction.loadAVPlayer, k.ToString(), "OMPlayer");
                             checkInstance(k);
                             player[k].currentVolume = 0;
@@ -344,6 +365,7 @@ namespace OMPlayer
                         fadeIn();
                     }, theHost);
                 }
+                */
             }
         }
         return eLoadStatus.LoadSuccessful;
@@ -361,39 +383,39 @@ namespace OMPlayer
             {
                 case OpenMobile.Input.Key.PlayPause:
                     object o = new object();
-                    theHost.getData(eGetData.GetMediaStatus, "", theHost.instanceForScreen(0).ToString(), out o);
+                    theHost.getData(eGetData.GetMediaStatus, "", theHost.ZoneHandler.GetZone(0).ToString(), out o);
                     if (o == null)
                         return false;
                     if (o.GetType() == typeof(ePlayerStatus))
                     {
                         ePlayerStatus status = (ePlayerStatus)o;
                         if (status == ePlayerStatus.Playing)
-                            theHost.execute(eFunction.Pause, theHost.instanceForScreen(0).ToString());
+                            theHost.execute(eFunction.Pause, theHost.ZoneHandler.GetZone(0).ToString());
                         else
                         {
                             if ((status == ePlayerStatus.FastForwarding) || (status == ePlayerStatus.Rewinding))
-                                theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(0).ToString(), "1");
+                                theHost.execute(eFunction.setPlaybackSpeed, theHost.ZoneHandler.GetZone(0).ToString(), "1");
                             else
-                                theHost.execute(eFunction.Play, theHost.instanceForScreen(0).ToString());
+                                theHost.execute(eFunction.Play, theHost.ZoneHandler.GetZone(0).ToString());
                         }
                     }
                     else if (o.GetType() == typeof(stationInfo))
-                        theHost.execute(eFunction.Pause, theHost.instanceForScreen(0).ToString());
+                        theHost.execute(eFunction.Pause, theHost.ZoneHandler.GetZone(0).ToString());
                     return true;
                 case OpenMobile.Input.Key.Pause:
-                    theHost.execute(eFunction.Pause, theHost.instanceForScreen(0).ToString());
+                    theHost.execute(eFunction.Pause, theHost.ZoneHandler.GetZone(0).ToString());
                     return true;
                 case OpenMobile.Input.Key.TrackNext:
-                    if (theHost.execute(eFunction.stepForward, theHost.instanceForScreen(0).ToString()) == false)
-                        theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(0).ToString());
+                    if (theHost.execute(eFunction.stepForward, theHost.ZoneHandler.GetZone(0).ToString()) == false)
+                        theHost.execute(eFunction.nextMedia, theHost.ZoneHandler.GetZone(0).ToString());
                     return true;
                 case OpenMobile.Input.Key.TrackPrevious:
-                    if (theHost.execute(eFunction.stepBackward, theHost.instanceForScreen(0).ToString()) == false)
-                        theHost.execute(eFunction.previousMedia, theHost.instanceForScreen(0).ToString());
+                    if (theHost.execute(eFunction.stepBackward, theHost.ZoneHandler.GetZone(0).ToString()) == false)
+                        theHost.execute(eFunction.previousMedia, theHost.ZoneHandler.GetZone(0).ToString());
                     return true;
                 case OpenMobile.Input.Key.Stop:
-                    theHost.execute(eFunction.Stop, theHost.instanceForScreen(0).ToString());
-                    theHost.execute(eFunction.unloadTunedContent, theHost.instanceForScreen(0).ToString());
+                    theHost.execute(eFunction.Stop, theHost.ZoneHandler.GetZone(0).ToString());
+                    theHost.execute(eFunction.unloadTunedContent, theHost.ZoneHandler.GetZone(0).ToString());
                     return true;
             }
         }
@@ -415,93 +437,97 @@ namespace OMPlayer
     {
         fading = true;
         for (int k = 100; k >0; k-=10)
-            for (int i = 0; i < player.Length; i++)
-                if ((player[i] != null)&&(player[i].currentVolume>k))
+            foreach (Zone zone in theHost.ZoneHandler.Zones)
+            {
+                if ((player[zone.AudioDeviceInstance] != null) && (player[zone.AudioDeviceInstance].currentVolume > k))
                 {
-                    setVolume(i, k);
+                    setVolume(zone, k);
                     Thread.Sleep(150);
                 }
+            }
         fading = false;
     }
     private void fadeIn()
     {
         for (int k = 1; k < 10; k++)
-            for (int i = 0; i < player.Length; i++)
-                if (player[i] != null)
+            foreach (Zone zone in theHost.ZoneHandler.Zones)
+            {
+                if (player[zone.AudioDeviceInstance] != null)
                 {
-                    setVolume(i, (k * 10));
+                    setVolume(zone, (k * 10));
                     Thread.Sleep(150);
                 }
+            }
     }
-    public bool pause(int instance)
+    public bool pause(Zone zone)
     {
-        checkInstance(instance);
-        if (player[instance].mediaControl == null)
+        checkInstance(zone);
+        if (player[zone.AudioDeviceInstance].mediaControl == null)
             return false;
-        if ((player[instance].currentState == ePlayerStatus.Paused) || (player[instance].currentState == ePlayerStatus.Stopped))
+        if ((player[zone.AudioDeviceInstance].currentState == ePlayerStatus.Paused) || (player[zone.AudioDeviceInstance].currentState == ePlayerStatus.Stopped))
         {
-            if (player[instance].mediaControl.Run() >= 0)
+            if (player[zone.AudioDeviceInstance].mediaControl.Run() >= 0)
             {
-                player[instance].currentState = ePlayerStatus.Playing;
-                OnMediaEvent(eFunction.Play, instance, "");
+                player[zone.AudioDeviceInstance].currentState = ePlayerStatus.Playing;
+                OnMediaEvent(eFunction.Play, zone, "");
                 return true;
             }
         }
         else
         {
-            if (player[instance].mediaControl.Pause() >= 0)
+            if (player[zone.AudioDeviceInstance].mediaControl.Pause() >= 0)
             {
-                player[instance].currentState = ePlayerStatus.Paused;
-                OnMediaEvent(eFunction.Pause, instance, "");
+                player[zone.AudioDeviceInstance].currentState = ePlayerStatus.Paused;
+                OnMediaEvent(eFunction.Pause, zone, "");
                 return true;
             }
         }
         return false;
     }
-    public bool SetVideoVisible(int instance, bool visible)
+    public bool SetVideoVisible(Zone zone, bool visible)
     {
-        checkInstance(instance);
-        if (player[instance].videoWindow == null)
+        checkInstance(zone);
+        if (player[zone.AudioDeviceInstance].videoWindow == null)
             return false;
         if (visible == false)
         {
-            if (player[instance].videoWindow.put_Visible(OABool.False) == 0)
+            if (player[zone.AudioDeviceInstance].videoWindow.put_Visible(OABool.False) == 0)
             {
-                OnMediaEvent(eFunction.hideVideoWindow, instance, "");
+                OnMediaEvent(eFunction.hideVideoWindow, zone, "");
                 return true;
             }
         }
-        else if ((player[instance].currentState != ePlayerStatus.Ready) && (player[instance].currentState != ePlayerStatus.Stopped))
+        else if ((player[zone.AudioDeviceInstance].currentState != ePlayerStatus.Ready) && (player[zone.AudioDeviceInstance].currentState != ePlayerStatus.Stopped))
         {
-            if (!player[instance].fullscreen)
+            if (!player[zone.AudioDeviceInstance].fullscreen)
             {
-                player[instance].fullscreen = true;
-                player[instance].Resize();
+                player[zone.AudioDeviceInstance].fullscreen = true;
+                player[zone.AudioDeviceInstance].Resize();
                 return true;
             }
-            OnMediaEvent(eFunction.showVideoWindow, instance, "");
-            return (player[instance].videoWindow.put_Visible(OABool.True) == 0);
+            OnMediaEvent(eFunction.showVideoWindow, zone, "");
+            return (player[zone.AudioDeviceInstance].videoWindow.put_Visible(OABool.True) == 0);
         }
         return false;
     }
-    public bool play(int instance)
+    public bool play(Zone zone)
     {
-        checkInstance(instance);
-        if ((player[instance].mediaControl != null) && (player[instance].mediaControl.Run() >= 0))
+        checkInstance(zone);
+        if ((player[zone.AudioDeviceInstance].mediaControl != null) && (player[zone.AudioDeviceInstance].mediaControl.Run() >= 0))
         {
-            player[instance].currentState = ePlayerStatus.Playing;
-            OnMediaEvent(eFunction.Play, instance, "");
+            player[zone.AudioDeviceInstance].currentState = ePlayerStatus.Playing;
+            OnMediaEvent(eFunction.Play, zone, "");
             return true;
         }
         else
         {
-            if (!string.IsNullOrEmpty(player[instance].nowPlaying.Location))
-                theHost.execute(eFunction.Play, instance.ToString(), player[instance].nowPlaying.Location);
+            if (!string.IsNullOrEmpty(player[zone.AudioDeviceInstance].nowPlaying.Location))
+                theHost.execute(eFunction.Play, zone.ToString(), player[zone.AudioDeviceInstance].nowPlaying.Location);
         }
         return false;
     }
 
-    public bool play(int instance, string url, eMediaType type)
+    public bool play(Zone zone, string url, eMediaType type)
     {
         switch (type)
         {
@@ -527,7 +553,7 @@ namespace OMPlayer
             }
             if (url.EndsWith(".ifo"))
             {
-                theHost.execute(eFunction.Play, instance.ToString(), System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(url)));
+                theHost.execute(eFunction.Play, zone.ToString(), System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(url)));
                 return false;
             }
             if (vistaMode)
@@ -538,8 +564,8 @@ namespace OMPlayer
                     if ((url.EndsWith("mp4")) || (url.EndsWith("m4a"))||(url.EndsWith("avi"))||(url.EndsWith("mkv"))||(url.EndsWith("mov")))
                         return false;
             }
-            checkInstance(instance);
-            return player[instance].play(url);
+            checkInstance(zone);
+            return player[zone.AudioDeviceInstance].play(zone, url);
         }
         catch (Exception)
         {
@@ -547,45 +573,45 @@ namespace OMPlayer
         }
     }
 
-    public bool setPlaybackSpeed(int instance, float speed)
+    public bool setPlaybackSpeed(Zone zone, float speed)
     {
-        checkInstance(instance);
-        if (player[instance].SetRate((double)speed) != 0)
+        checkInstance(zone);
+        if (player[zone.AudioDeviceInstance].SetRate((double)speed) != 0)
             return false;
-        if (player[instance].currentPlaybackRate > 1.0)
+        if (player[zone.AudioDeviceInstance].currentPlaybackRate > 1.0)
         {
-            player[instance].currentState = ePlayerStatus.FastForwarding;
+            player[zone.AudioDeviceInstance].currentState = ePlayerStatus.FastForwarding;
         }
-        else if (player[instance].currentPlaybackRate < 1.0)
+        else if (player[zone.AudioDeviceInstance].currentPlaybackRate < 1.0)
         {
-            player[instance].currentState = ePlayerStatus.Rewinding;
+            player[zone.AudioDeviceInstance].currentState = ePlayerStatus.Rewinding;
         }
-        else if ((player[instance].currentState == ePlayerStatus.FastForwarding) || (player[instance].currentState == ePlayerStatus.Rewinding))
+        else if ((player[zone.AudioDeviceInstance].currentState == ePlayerStatus.FastForwarding) || (player[zone.AudioDeviceInstance].currentState == ePlayerStatus.Rewinding))
         {
-            player[instance].currentState = ePlayerStatus.Playing;
+            player[zone.AudioDeviceInstance].currentState = ePlayerStatus.Playing;
         }
-        OnMediaEvent(eFunction.setPlaybackSpeed, instance, speed.ToString());
+        OnMediaEvent(eFunction.setPlaybackSpeed, zone, speed.ToString());
         return true;
     }
 
-    public bool setPosition(int instance, float seconds)
+    public bool setPosition(Zone zone, float seconds)
     {
-        checkInstance(instance);
-        return player[instance].setPosition(seconds);
+        checkInstance(zone);
+        return player[zone.AudioDeviceInstance].setPosition(seconds);
     }
 
-    public bool setVolume(int instance, int percent)
+    public bool setVolume(Zone zone, int percent)
     {
-        checkInstance(instance);
-        return player[instance].setVolume(percent);
+        checkInstance(zone);
+        return player[zone.AudioDeviceInstance].setVolume(percent);
     }
 
-    public bool stop(int instance)
+    public bool stop(Zone zone)
     {
-        checkInstance(instance);
-        if (player[instance].stop())
+        checkInstance(zone);
+        if (player[zone.AudioDeviceInstance].stop())
         {
-            OnMediaEvent(eFunction.Stop, instance, "");
+            OnMediaEvent(eFunction.Stop, zone, "");
             return true;
         }
         return false;
@@ -673,7 +699,8 @@ namespace OMPlayer
         public ePlayerStatus currentState = ePlayerStatus.Ready;
         public int currentVolume = 100;
         public IGraphBuilder graphBuilder = null;
-        public int instance = -1;
+        //public int instance = -1;
+        public Zone zone = null;
         public bool isAudioOnly = true;
         public IMediaControl mediaControl = null;
         private IMediaEventEx mediaEventEx = null;
@@ -690,7 +717,7 @@ namespace OMPlayer
         private delegate bool PositionCallback(float seconds);
         private delegate int SpeedCallback(double rate);
         private delegate bool VoidCallback();
-        private delegate bool PlayCallback(string filename);
+        private delegate bool PlayCallback(Zone zone, string filename);
         private delegate void GetPositionCallback();
         private event PositionCallback OnSetPosition;
         private event VoidCallback OnStop;
@@ -698,11 +725,12 @@ namespace OMPlayer
         private event SpeedCallback OnSetRate;
         private event GetPositionCallback OnGetPosition;
         // Methods
-        public AVPlayer(int instanceNum)
+        public AVPlayer(Zone zone)
         {
-            instance = instanceNum;
-            sink = new MessageProc("AVPlayer:"+instance.ToString());
-            Console.WriteLine("AVPlayer:"+instance.ToString() + " (MainForm) AudioInstance: " + instance.ToString() + "[" + theHost.getAudioDeviceName(instance) + "]");
+            //instance = instanceNum;
+            this.zone = zone;
+            sink = new MessageProc("AVPlayer:"+zone.Name.ToString());
+            Console.WriteLine("AVPlayer:"+zone.Name.ToString() + " (MainForm) AudioInstance: " + zone.AudioDeviceInstance.ToString() + "[" + zone.AudioDeviceName + "]");
             drain = sink.Handle;
             sink.OnClick += new MessageProc.Click(clicked);
             sink.OnEvent += new MessageProc.eventOccured(eventOccured);
@@ -733,7 +761,7 @@ namespace OMPlayer
             Resize();
         }
 
-        public void eventOccured(int instance)
+        public void eventOccured()
         {
             EventCode e;
             IntPtr arg1;
@@ -746,7 +774,7 @@ namespace OMPlayer
             {
                 case EventCode.Complete:
                     if (crossfade==0)
-                        OnMediaEvent(eFunction.nextMedia, instance, "");
+                        OnMediaEvent(eFunction.nextMedia, zone, "");
                     else
                         stop();
                     break;
@@ -762,7 +790,7 @@ namespace OMPlayer
                         if (fs == FilterState.Paused)
                         {
                             currentState = ePlayerStatus.Paused;
-                            OnMediaEvent(eFunction.Pause, instance, "");
+                            OnMediaEvent(eFunction.Pause, zone, "");
                         }
                     break;
             }
@@ -794,13 +822,13 @@ namespace OMPlayer
                 }
             }
         }
-        public bool play(string url)
+        public bool play(Zone zone, string url)
         {
             lock (this)
             {
                 if ((currentState != ePlayerStatus.Stopped) && (currentState != ePlayerStatus.Ready))
                     stop();
-                object o = sink.Invoke(OnPlay, new object[] { url });
+                object o = sink.Invoke(OnPlay, new object[] { zone, url });
                 if ((bool)o == false)
                     return false;
             }
@@ -833,11 +861,11 @@ namespace OMPlayer
                 mediaPosition.get_Duration(out dur);
                 nowPlaying.Length = (int)dur;
             }
-            OnMediaEvent(eFunction.Play, instance, url);
+            OnMediaEvent(eFunction.Play, zone, url);
             if (t == null)
             {
                 t = new Thread(waitForStop);
-                t.Name = instance.ToString();
+                t.Name = zone.Name.ToString();
                 t.Start();
             }
             return true;
@@ -869,7 +897,7 @@ namespace OMPlayer
             {
                 DsError.ThrowExceptionForHR(videoWindow.put_Visible(OABool.False));
                 DsError.ThrowExceptionForHR(videoWindow.put_Owner(IntPtr.Zero));
-                OnMediaEvent(eFunction.hideVideoWindow, instance, "");
+                OnMediaEvent(eFunction.hideVideoWindow, zone, "");
             }
             isAudioOnly = true;
             return true;
@@ -929,15 +957,17 @@ namespace OMPlayer
                 pos = time;
             }
         }
+        /*
         private int screen()
         {
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
-                if (theHost.instanceForScreen(i) == instance)
+                if (theHost.GetDefaultZoneForScreen(i) == instance)
                     return i;
             }
             return 0;
         }
+        */
         public int Resize()
         {
             if (videoWindow == null)
@@ -945,7 +975,7 @@ namespace OMPlayer
             if (fullscreen == true)
             {
                 OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
-                OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)OMPlayer.theHost.GetWindowHandle(screen()),ref info);
+                OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)OMPlayer.theHost.GetWindowHandle(zone.Screen),ref info);
                 if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
                     return videoWindow.SetWindowPosition(0, 0, info.Window.Width - (info.Window.Width-info.Client.Width), info.Window.Height - (info.Window.Height-info.Client.Height));
                 else
@@ -954,16 +984,16 @@ namespace OMPlayer
             else
             {
                 object o;
-                theHost.getData(eGetData.GetScaleFactors, "", screen().ToString(), out o);
+                theHost.getData(eGetData.GetScaleFactors, "", zone.Screen.ToString(), out o);
                 if (o == null)
                     return -1;
                 PointF sf = (PointF)o;
-                Rectangle pos = theHost.GetVideoPosition(instance);
+                Rectangle pos = theHost.GetVideoPosition(zone.Screen);
                 return videoWindow.SetWindowPosition((int)(pos.Left * sf.X), (int)(pos.Top * sf.Y), (int)(pos.Width * sf.X), (int)(pos.Height * sf.Y));
             }
         }
 
-        public bool PlayMovieInWindow(string filename)
+        public bool PlayMovieInWindow(Zone zone, string filename)
         {
             int hr = 0;
             if (filename == string.Empty)
@@ -971,11 +1001,12 @@ namespace OMPlayer
             currentState = ePlayerStatus.Transitioning;
             graphBuilder = (IGraphBuilder) new FilterGraph();
             IBaseFilter source = null;
-            if (instance>0)
-                hr = ((IFilterGraph2) graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(theHost.getAudioDeviceName(instance)), null, "OutputDevice", out source);
+            if ((zone != null) && (zone.AudioDeviceInstance>0))
+                hr = ((IFilterGraph2)graphBuilder).AddSourceFilterForMoniker(OMPlayer.getDevMoniker(zone.AudioDeviceName), null, "OutputDevice", out source);
             hr = graphBuilder.RenderFile(filename, null);
             if (hr == 262744)
-                theHost.sendMessage("OMDebug", "OMPlayer", "Failed to render audio for: " + filename);
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Failed to render audio for: " + filename);
+
             if (hr < 0)
                 return false;
             mediaControl = (IMediaControl) graphBuilder;
@@ -990,10 +1021,10 @@ namespace OMPlayer
             if (!isAudioOnly)
             {
 
-                int ScreenInstance = getFirstScreen(instance);
+                int ScreenInstance = zone.Screen;//getFirstScreen(instance);
                 System.Diagnostics.Debug.WriteLine("AVPlayer ScreenInstance: " + ScreenInstance.ToString());
-                System.Diagnostics.Debug.WriteLine("AVPlayer AudioInstance: " + instance.ToString() + "[" + theHost.getAudioDeviceName(instance) + "]");
-                OnMediaEvent(eFunction.showVideoWindow, instance, "");
+                System.Diagnostics.Debug.WriteLine("AVPlayer AudioInstance: " + zone.AudioDeviceInstance.ToString() + "[" + zone.AudioDeviceName + "]");
+                OnMediaEvent(eFunction.showVideoWindow, zone, "");
                 DsError.ThrowExceptionForHR(videoWindow.put_Owner((IntPtr)OMPlayer.theHost.GetWindowHandle(ScreenInstance)));//(getFirstScreen(instance))));
                 DsError.ThrowExceptionForHR(videoWindow.put_WindowStyle(WindowStyle.Child | WindowStyle.ClipSiblings | WindowStyle.ClipChildren));
                 DsError.ThrowExceptionForHR(Resize());
@@ -1002,18 +1033,19 @@ namespace OMPlayer
             currentPlaybackRate = 1.0;
             if (mediaControl.Run()<0)
                 return false;
-            mediaEventEx.SetNotifyWindow(drain, WM_Graph_Notify, new IntPtr(instance));
+            mediaEventEx.SetNotifyWindow(drain, WM_Graph_Notify, new IntPtr(zone.AudioDeviceInstance));
             currentState = ePlayerStatus.Playing;
             return true;
         }
-
-        private int getFirstScreen(int instance)
+        /*
+        private int getFirstScreen(Zone zone)
         {
             for (int i = 0; i < theHost.ScreenCount; i++)
-                if (theHost.instanceForScreen(i) == instance)
+                if (theHost.GetDefaultZoneForScreen(i) == instance)
                     return i;
             return 0;
         }
+        */
         public int SetRate(double rate)
         {
             int hr = 0;
@@ -1064,7 +1096,7 @@ namespace OMPlayer
         {
             if (mediaControl != null)
             {
-                while(instance>=0)
+                while(zone != null)
                 {
                     Thread.Sleep(1000);
                     if (mediaPosition != null)
@@ -1073,7 +1105,7 @@ namespace OMPlayer
                         sink.Invoke(OnGetPosition);
                         if ((crossfade>0)&&(isAudioOnly)&&((int)pos == nowPlaying.Length - (crossfade/1000)))
                         {
-                            OnMediaEvent(eFunction.nextMedia, instance, "");
+                            OnMediaEvent(eFunction.nextMedia, zone, "");
                         }
                     }
                 }
@@ -1112,14 +1144,15 @@ namespace OMPlayer
             //this.Show();
         }
 
-        public delegate void eventOccured(int instance);
+        public delegate void eventOccured();
         public new delegate void Click();
         public new Click OnClick;
         public eventOccured OnEvent;
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == WM_Graph_Notify)
-                OnEvent((int)m.LParam);
+                //OnEvent((int)m.LParam);
+                OnEvent();
             else if (m.Msg == WM_LBUTTONUP)
             {
                 OnClick();

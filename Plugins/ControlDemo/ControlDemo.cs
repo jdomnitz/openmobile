@@ -29,6 +29,10 @@ using OpenMobile.Plugin;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using OpenMobile.helperFunctions;
+using OpenMobile.helperFunctions.Graphics;
+using OpenMobile.helperFunctions.Controls;
+using OpenMobile.Graphics.OpenGL;
+using OpenMobile.helperFunctions.MenuObjects;
 
 namespace ControlDemo
 {
@@ -39,10 +43,17 @@ namespace ControlDemo
     #region IHighLevel Members
     ScreenManager manager;
     IPluginHost theHost;
+
+    imageItem imgBtnIconOn;
+    imageItem imgBtnIconOff;
+    MenuPopup PopupMenu;
+
     public eLoadStatus initialize(IPluginHost host)
     {
         OMPanel p = new OMPanel("");
         theHost = host;
+
+        /*
         OMAnimatedLabel label1 = new OMAnimatedLabel(50, 100, 200, 30);
         label1.Text = "This is an example of scrolling text how well does it work";
         label1.ContiuousAnimation = eAnimation.BounceScroll;
@@ -127,6 +138,123 @@ namespace ControlDemo
         OMList List2 = new OMList(750, 200, 200, 200);
         List2.Name = "List2";
         p.addControl(List2);
+        */
+
+        /*
+        OMImage TestImg = new OMImage("TestImg", 50, 200);
+        TestImg.SkinDebug = true;
+        TestImg.FitControlToImage = true;
+        TestImg.Image = new imageItem(@"C:\Borte\Programming\c#\Projects\OpenMobile\SVN\SVN Rev 661\trunk\FrontEnd\OpenMobile\bin\Debug\Skins\Default\ArtistIcon.png");
+        //TestImg.Image = new imageItem(OImage.FromFile(@"C:\Borte\Programming\c#\Projects\OpenMobile\SVN\SVN Rev 661\trunk\FrontEnd\OpenMobile\bin\Debug\Skins\Default\ArtistIcon.png"));
+        p.addControl(TestImg);
+        */
+
+        // Generate custom image
+        /*
+        imageItem img1 = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(300, 90, OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackground));
+        imageItem img2 = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(300, 90, OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused));
+        imgBtnIconOn = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(300, 90, ButtonGraphic.ImageTypes.ButtonForegroundFocused, "¯", "Music"));
+        imgBtnIconOff = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(300, 90, ButtonGraphic.ImageTypes.ButtonForeground, "¯", "Music"));
+        */
+        /*
+        OMButton OK = new OMButton("A", 325, 200, 300, 120);
+        OK.Image = theHost.getSkinImage("Full");
+        OK.Text = "A";
+        p.addControl(OK);
+
+        OMButton OK2 = new OMButton("A", 325, 350, 300, 120);
+        OK2.Image = theHost.getSkinImage("menuButton");
+        OK2.FocusImage = theHost.getSkinImage("menuButtonHighlighted");
+        OK2.Text = "A";
+        p.addControl(OK2);
+        */
+
+/*
+        OMButton tstButton = new OMButton("A", 650, 365, 300, 90);
+        tstButton.Image = img1;
+        tstButton.FocusImage = img2;
+        tstButton.OverlayImage = imgBtnIconOff;
+        tstButton.Transition = eButtonTransition.None;
+        tstButton.Font = new OpenMobile.Graphics.Font(OpenMobile.Graphics.Font.Arial, 36);
+        //tstButton.Format = eTextFormat.GlowBig;
+        tstButton.OutlineColor = OpenMobile.Graphics.Color.Red;
+        //tstButton.Text = "Music";
+        tstButton.OnClick += new userInteraction(tstButton_OnClick);
+        p.addControl(tstButton);
+*/
+
+        #region Menu popup
+
+        // Popup menu
+        PopupMenu = new MenuPopup("ZoneMenu", MenuPopup.ReturnTypes.Index);
+
+        // Popup menu items
+        OMListItem ListItem = new OMListItem("New", "mnuItemNewZone" as object);
+        ListItem.image = OImage.FromFont(50, 50, "+", new Font(Font.Arial, 40F), eTextFormat.Outline, Alignment.CenterCenter, Color.Gray, Color.Gray);
+        PopupMenu.AddMenuItem(ListItem);
+
+        OMListItem ListItem2 = new OMListItem("Edit", "mnuItemEditZone" as object);
+        ListItem2.image = OImage.FromWebdingsFont(50, 50, "@", Color.Gray);
+        PopupMenu.AddMenuItem(ListItem2);
+
+        OMListItem ListItem3 = new OMListItem("Remove", "mnuItemRemoveZone" as object);
+        ListItem3.image = OImage.FromWebdingsFont(50, 50, "r", Color.Gray);
+        PopupMenu.AddMenuItem(ListItem3);
+
+        OMListItem ListItem4 = new OMListItem("Default", "mnuItemSetDefaultZone" as object);
+        ListItem4.image = OImage.FromWebdingsFont(50, 50, "a", Color.Gray);
+        PopupMenu.AddMenuItem(ListItem4);
+
+        OMListItem ListItem5 = new OMListItem("Set active", "mnuItemSetActive" as object);
+        ListItem5.image = OImage.FromWebdingsFont(50, 50, "a", Color.Gray);
+        PopupMenu.AddMenuItem(ListItem5);
+
+        OMListItem ListItem6 = new OMListItem("Restore defaults", "mnuItemRestoreDefaults" as object);
+        ListItem6.image = OImage.FromWebdingsFont(50, 50, "Ó", Color.Gray);
+        PopupMenu.AddMenuItem(ListItem6);
+
+        #endregion
+
+
+        // OSK Buttons
+        OMButton OSKButton = DefaultControls.GetButton("OSKButton", 650, 265, 300, 90, ">", "Keypad");
+        OSKButton.Tag = OSKInputTypes.Keypad;
+        OSKButton.OnClick +=new userInteraction(OSKButton_OnClick);
+        p.addControl(OSKButton);
+        OMButton OSKButton2 = DefaultControls.GetButton("OSKButton2", 650, 365, 300, 90, ">", "Numpad");
+        OSKButton2.Tag = OSKInputTypes.Numpad;
+        OSKButton2.OnClick += new userInteraction(OSKButton_OnClick);
+        p.addControl(OSKButton2);
+
+        // Add default button
+        OMButton btnDialog = DefaultControls.GetButton("btnDialog", 10, 100, 300, 90, "", "DialogTest");
+        btnDialog.OnClick += new userInteraction(btnDialog_OnClick);
+        p.addControl(btnDialog);
+
+        // Add default button
+        OMButton btnPopupMenu = DefaultControls.GetButton("btnPopupMenu", 10, 200, 300, 90, "", "PopupMenu");
+        btnPopupMenu.OnClick +=new userInteraction(btnPopupMenu_OnClick);
+        p.addControl(btnPopupMenu);
+
+
+        /*
+        OMImage TestImg = new OMImage("TestImg", 10, 100);
+        TestImg.FitControlToImage = true;
+        TestImg.Image = img1;
+        p.addControl(TestImg);
+        OMImage TestImg2 = new OMImage("TestImg2", 10, 200);
+        TestImg2.FitControlToImage = true;
+        TestImg2.Image = img2;
+        p.addControl(TestImg2);
+        OMImage TestImg3 = new OMImage("TestImg3", 10, 300);
+        TestImg3.FitControlToImage = true;
+        TestImg3.Image = imgBtnIconOff;
+        p.addControl(TestImg3);
+        OMImage TestImg4 = new OMImage("TestImg4", 10, 400);
+        TestImg4.FitControlToImage = true;
+        TestImg4.Image = imgBtnIconOn;
+        p.addControl(TestImg4);
+        */
 
         System.Timers.Timer t = new System.Timers.Timer(100);
         t.Elapsed += new ElapsedEventHandler(t_Elapsed);
@@ -137,6 +265,30 @@ namespace ControlDemo
         manager.loadPanel(p);
 
         return eLoadStatus.LoadSuccessful;
+    }
+
+    void btnPopupMenu_OnClick(OMControl sender, int screen)
+    {
+        int Selection = (int)PopupMenu.ShowMenu(screen);
+        theHost.sendMessage("UI", "", "{" + screen + "}PopupMenu selection: " + Selection.ToString());
+    }
+
+    bool btnSelected = false;
+    void OSKButton_OnClick(OMControl sender, int screen)
+    {
+        /*
+        OMButton btn = (OMButton)sender;
+        btnSelected = !btnSelected;
+        if (!btnSelected)
+            btn.OverlayImage = imgBtnIconOff;
+        else
+            btn.OverlayImage = imgBtnIconOn;
+        */
+
+        OSK osk = new OSK("", "Type some text", "Please input some text now", (OSKInputTypes)sender.Tag, false);
+        string Result = osk.ShowOSK(screen);
+        theHost.sendMessage("UI", "", "{" + screen + "}OSK result: " + Result);
+
     }
 
     void List1_SelectedIndexChanged(OMList sender, int screen)

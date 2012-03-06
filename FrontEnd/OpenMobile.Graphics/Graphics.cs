@@ -256,30 +256,54 @@ namespace OpenMobile.Graphics
 
         public OImage GenerateStringTexture(string s, Font font, Color color, int Left, int Top, int Width, int Height, System.Drawing.StringFormat format)
         {
-            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap((int)(Width * scaleWidth), (int)(Height * scaleHeight));
+            return GenerateStringTexture(null, font, color, Left, Top, Width, Height, format);
+        }
+        public OImage GenerateStringTexture(OImage image, string s, Font font, Color color, int Left, int Top, int Width, int Height, System.Drawing.StringFormat format)
+        {
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap((int)(Width * scaleWidth[screen]), (int)(Height * scaleHeight[screen]));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                g.ScaleTransform(scaleWidth, scaleHeight);
+                g.ScaleTransform(scaleWidth[screen], scaleHeight[screen]);
                 g.DrawString(s, new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(color.R, color.G, color.B)), new System.Drawing.RectangleF(0, 0, Width, Height), format);
             }
-            return new OImage(bmp);
+            if (image == null)
+                image = new OImage(bmp);
+            else
+                image.SetImage(screen, bmp);
+            return image;
+        }
+
+        public bool TextureGenerationRequired(OImage img)
+        {
+            if (img == null)
+                return true;
+            return (img.Texture(screen) == 0);
         }
 
         public OImage GenerateTextTexture(int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color color, Color secondColor)
         {
+            return GenerateTextTexture(null, x, y, w, h, text, font, format, alignment, color, secondColor);
+        }
+        public OImage GenerateTextTexture(OImage image, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color color, Color secondColor)
+        {
             if ((w <= 0) || (h <= 0))
                 return null;
 
-            System.Drawing.Bitmap bmp = new Bitmap((int)(w * (scaleWidth == 0F ? 1F : scaleWidth)), (int)(h * (scaleHeight == 0F ? 1F : scaleHeight)));
+            System.Drawing.Bitmap bmp = new Bitmap((int)(w * (scaleWidth[screen] == 0F ? 1F : scaleWidth[screen])), (int)(h * (scaleHeight[screen] == 0F ? 1F : scaleHeight[screen])));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
-                if ((scaleWidth > 0F) & (scaleHeight > 0F))
-                    g.ScaleTransform(scaleWidth, scaleHeight);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;//.ClearTypeGridFit;
+                if ((scaleWidth[screen] > 0F) & (scaleHeight[screen] > 0F))
+                    g.ScaleTransform(scaleWidth[screen], scaleHeight[screen]);
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
             }
-            return new OImage(bmp);
+
+            if (image == null)
+                image = new OImage(bmp);
+            else
+                image.SetImage(screen, bmp);
+            return image;
         }
 
         private int _screen;
@@ -293,11 +317,15 @@ namespace OpenMobile.Graphics
 
         public Graphics(int screen)
         {
+            // Initialize scale factors
+            scaleHeight = new float[DisplayDevice.AvailableDisplays.Count];
+            scaleWidth = new float[DisplayDevice.AvailableDisplays.Count];
+
             _screen = screen;
             virtualG = new Bitmap(1000, 600);
         }
-        private float scaleHeight;
-        private float scaleWidth;
+        private float[] scaleHeight;
+        private float[] scaleWidth;
         private float dpi=1F;
         public void Initialize(int screen)
         {
@@ -328,8 +356,8 @@ namespace OpenMobile.Graphics
                     implementation = new V1Graphics(screen);
                 renderer = Raw.GetString(StringName.Renderer);
             }
-            scaleHeight = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
-            scaleWidth = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
+            scaleHeight[screen] = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
+            scaleWidth[screen] = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
             if (Configuration.RunningOnWindows)
             {
                 IntPtr dc = GetDC(IntPtr.Zero);
@@ -418,6 +446,10 @@ namespace OpenMobile.Graphics
             {
                 using (StringFormat sFormat = new StringFormat())
                 {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    
                     sFormat.Alignment = (StringAlignment)((float)alignment % 10);
                     sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
                     if (((int)alignment & 100) == 100)
@@ -425,8 +457,8 @@ namespace OpenMobile.Graphics
                     if (alignment == Alignment.CenterLeftEllipsis)
                         sFormat.Trimming = StringTrimming.EllipsisWord;
                     GraphicsPath path = new GraphicsPath(FillMode.Winding);
+
                     path.AddString(text, new System.Drawing.Font(font.Name, 1F).FontFamily, (int)f, (font.Size + 6)/dpi, new RectangleF(x, y, w, h), sFormat);
-                    g.SmoothingMode = SmoothingMode.HighQuality;
                     g.DrawPath(new System.Drawing.Pen(secondColor, 3), path);
                     g.FillPath(new SolidBrush(color), path);
                 }
@@ -435,7 +467,9 @@ namespace OpenMobile.Graphics
             {
                 using (StringFormat sFormat = new StringFormat())
                 {
-                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     sFormat.Alignment = (StringAlignment)((float)alignment % 10);
                     sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
                     if (((int)alignment & 100) == 100)
@@ -451,18 +485,52 @@ namespace OpenMobile.Graphics
                     }
                 }
             }
-            else
+            else if ((format == eTextFormat.GlowBig))
             {
                 using (StringFormat sFormat = new StringFormat())
                 {
-                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     sFormat.Alignment = (StringAlignment)((float)alignment % 10);
                     sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
                     if (((int)alignment & 100) == 100)
                         sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
                     if (alignment == Alignment.CenterLeftEllipsis)
                         sFormat.Trimming = StringTrimming.EllipsisWord;
+                    using (System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size / dpi, (System.Drawing.FontStyle)f))
+                    {
+                        GraphicsPath gpTxt = new GraphicsPath();
+                        gpTxt.AddString(text, currentFont.FontFamily, (int)System.Drawing.FontStyle.Regular, currentFont.Size, new System.Drawing.Rectangle(x, y, w, h), sFormat);
+                        for (int i = 1; i < 15; ++i)
+                        {
+                            System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb((secondColor.A>32 ? 32 : secondColor.A) - i, secondColor), i);
+                            pen.LineJoin = LineJoin.Round;
+                            g.DrawPath(pen, gpTxt);
+                            pen.Dispose();
+                        }
+                        g.FillPath(new System.Drawing.SolidBrush(color), gpTxt);
+                        g.DrawPath(new System.Drawing.Pen(secondColor, 0.5F), gpTxt);
+                    }
+                }
+            }
+            else
+            {
+                using (StringFormat sFormat = new StringFormat())
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    sFormat.Alignment = (StringAlignment)((float)alignment % 10);
+                    sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
+                    if (((int)alignment & 100) == 100)
+                        sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
+                    if (alignment == Alignment.CenterLeftEllipsis)
+                        sFormat.Trimming = StringTrimming.EllipsisWord;
+
                     System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)f);
+
+                    // Draw text
                     using (SolidBrush defaultBrush = new SolidBrush(color))
                     {
                         if (((int)alignment & 10000) != 10000)
@@ -471,6 +539,7 @@ namespace OpenMobile.Graphics
                             g.DrawString(text, currentFont, new SolidBrush(secondColor), new RectangleF(x + 1, y + 2, w, h), sFormat);
                         g.DrawString(text, currentFont, defaultBrush, new RectangleF(x, y, w, h), sFormat);
                     }
+
                     currentFont.Dispose();
                 }
             }

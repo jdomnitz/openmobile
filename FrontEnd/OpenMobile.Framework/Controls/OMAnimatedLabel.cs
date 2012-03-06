@@ -78,6 +78,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// A label used for rendering various text effects
         /// </summary>
+        [System.Obsolete("Use OMAnimatedLabel(string name, int x, int y, int w, int h) instead")]
         public OMAnimatedLabel()
         {
             Text = String.Empty;
@@ -90,8 +91,27 @@ namespace OpenMobile.Controls
         /// <param name="y">Top</param>
         /// <param name="w">Width</param>
         /// <param name="h">Height</param>
+        [System.Obsolete("Use OMAnimatedLabel(string name, int x, int y, int w, int h) instead")]
         public OMAnimatedLabel(int x, int y, int w, int h)
         {
+            this.Left = x;
+            this.Top = y;
+            this.Width = w;
+            this.Height = h;
+            Text = String.Empty;
+            init();
+        }
+        /// <summary>
+        /// A label used for rendering various text effects
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="x">Left</param>
+        /// <param name="y">Top</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        public OMAnimatedLabel(string name, int x, int y, int w, int h)
+        {
+            this.Name = name;
             this.Left = x;
             this.Top = y;
             this.Width = w;
@@ -115,7 +135,7 @@ namespace OpenMobile.Controls
         {
             effectFont = Font;
             t = new HomemadeTimer();
-            t.Interval = 150;
+            t.Interval = 250;
             t.Elapsed += new ElapsedEventHandler(t_Elapsed);
         }
         private void endSingleAnimation()
@@ -365,77 +385,81 @@ namespace OpenMobile.Controls
         }
         private void draw(Graphics.Graphics g, renderingParams e, eAnimation animation)
         {
-            t.Enabled = this.hooked();
-            if ((text == null) || (text.Length == 0))
-                return;
-            float tmp = 1;
-            if (this.Mode == eModeType.transitioningIn)
-                tmp = e.globalTransitionIn;
-            if (this.Mode == eModeType.transitioningOut)
-                tmp = e.globalTransitionOut;
-            Rectangle old;
-            switch (animation)
+            if ((text != null) && (text.Length != 0))
             {
-                case eAnimation.None:
-                case eAnimation.UnveilLeft:
-                case eAnimation.UnveilRight:
-                    old = g.Clip;
-                    g.SetClipFast(left + veilLeft, top, width - veilRight, height);
-                    if (textTexture == null)
-                        textTexture = g.GenerateTextTexture(0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
-                    g.DrawImage(textTexture, left, top, width, height, tmp);
-                    if (tempTransition != eAnimation.None)
-                    {
-                        g.SetClipFast(left + (width - veilRight), top, veilRight, height);
-                        if (oldTexture == null)
-                            oldTexture = g.GenerateTextTexture(0, 0, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
-                        g.DrawImage(oldTexture, left, top, width, height, tmp);
-                    }
-                    g.Clip = old;
-                    return;
-                case eAnimation.Scroll:
-                case eAnimation.BounceScroll:
-                    old = g.Clip;
-                    g.SetClipFast(left, top, width, height);
-                    if (textTexture == null)
-                        textTexture = g.GenerateTextTexture(0, 0, (int)(avgChar * text.Length) + 1, height, text, font, textFormat, textAlignment, color, outlineColor);
-                    g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, (int)(avgChar * text.Length) + 1, height, tmp);
-                    g.Clip = old;
-                    if (avgChar * text.Length < width)
-                    {
-                        currentAnimation = eAnimation.None;
-                        scrollPos = 0;
-                        textTexture = null;
-                    }
-                    return;
-                case eAnimation.GlowPulse:
-                case eAnimation.Pulse:
-                    int x2;
-                    for (int i = 0; i < Text.Length; i++)
-                    {
-                        if (currentLetter != i)
+                t.Enabled = this.hooked();
+                float tmp = 1;
+                if (this.Mode == eModeType.transitioningIn)
+                    tmp = e.globalTransitionIn;
+                if (this.Mode == eModeType.transitioningOut)
+                    tmp = e.globalTransitionOut;
+                Rectangle old;
+                switch (animation)
+                {
+                    case eAnimation.None:
+                    case eAnimation.UnveilLeft:
+                    case eAnimation.UnveilRight:
+                        old = g.Clip;
+                        g.SetClipFast(left + veilLeft, top, width - veilRight, height);
+                        if (g.TextureGenerationRequired(textTexture))
+                            textTexture = g.GenerateTextTexture(textTexture, 0, 0, width, height, text, font, textFormat, textAlignment, color, outlineColor);
+                        g.DrawImage(textTexture, left, top, width, height, tmp);
+                        if (tempTransition != eAnimation.None)
                         {
-                            x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, i), Font);
-                            if (charTex[i] == null)
-                                charTex[i] = g.GenerateStringTexture(Text[i].ToString(), this.Font, Color.FromArgb((int)(tmp * 255), this.Color), x2, this.Top, 30, 30, System.Drawing.StringFormat.GenericDefault);
-                            g.DrawImage(charTex[i], x2, this.Top, 30, 30, tmp);
+                            g.SetClipFast(left + (width - veilRight), top, veilRight, height);
+                            if (g.TextureGenerationRequired(oldTexture))
+                                oldTexture = g.GenerateTextTexture(oldTexture, 0, 0, width, height, oldText, font, textFormat, textAlignment, color, outlineColor);
+                            g.DrawImage(oldTexture, left, top, width, height, tmp);
                         }
-                    }
-                    x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, currentLetter), Font);
-                    if (animation == eAnimation.Pulse)
-                    {
-                        if (currentLetterTex == null)
-                            currentLetterTex = g.GenerateStringTexture(Text[currentLetter].ToString(), effectFont, Color.FromArgb((int)(tmp * 255), this.OutlineColor), 0, 0, 30, 30, System.Drawing.StringFormat.GenericDefault);
-                        g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30, tmp);
-                    }
-                    else
-                    {
-                        if (currentLetterTex == null)
-                            currentLetterTex = g.GenerateTextTexture(0, 0, 30, 30, Text[currentLetter].ToString(), effectFont, Format, Alignment.CenterCenter, color, outlineColor);
-                        g.DrawImage(currentLetterTex, x2, this.Top, 30, 30, tmp);
-                    }
-                    return;
+                        g.Clip = old;
+                        break;
+                    case eAnimation.Scroll:
+                    case eAnimation.BounceScroll:
+                        old = g.Clip;
+                        g.SetClipFast(left, top, width, height);
+                        if (g.TextureGenerationRequired(textTexture))
+                            textTexture = g.GenerateTextTexture(textTexture, 0, 0, (int)(avgChar * text.Length) + 1, height, text, font, textFormat, textAlignment, color, outlineColor);
+                        g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, (int)(avgChar * text.Length) + 1, height, tmp);
+                        g.Clip = old;
+                        if (avgChar * text.Length < width)
+                        {
+                            currentAnimation = eAnimation.None;
+                            scrollPos = 0;
+                            textTexture = null;
+                        }
+                        break;
+                    case eAnimation.GlowPulse:
+                    case eAnimation.Pulse:
+                        int x2;
+                        for (int i = 0; i < Text.Length; i++)
+                        {
+                            if (currentLetter != i)
+                            {
+                                x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, i), Font);
+                                if (g.TextureGenerationRequired(charTex[i]))
+                                    charTex[i] = g.GenerateStringTexture(charTex[i], Text[i].ToString(), this.Font, Color.FromArgb((int)(tmp * 255), this.Color), x2, this.Top, 30, 30, System.Drawing.StringFormat.GenericDefault);
+                                g.DrawImage(charTex[i], x2, this.Top, 30, 30, tmp);
+                            }
+                        }
+                        x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, currentLetter), Font);
+                        if (animation == eAnimation.Pulse)
+                        {
+                            if (g.TextureGenerationRequired(currentLetterTex))
+                                currentLetterTex = g.GenerateStringTexture(currentLetterTex, Text[currentLetter].ToString(), effectFont, Color.FromArgb((int)(tmp * 255), this.OutlineColor), 0, 0, 30, 30, System.Drawing.StringFormat.GenericDefault);
+                            g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30, tmp);
+                        }
+                        else
+                        {
+                            if (g.TextureGenerationRequired(currentLetterTex))
+                                currentLetterTex = g.GenerateTextTexture(currentLetterTex, 0, 0, 30, 30, Text[currentLetter].ToString(), effectFont, Format, Alignment.CenterCenter, color, outlineColor);
+                            g.DrawImage(currentLetterTex, x2, this.Top, 30, 30, tmp);
+                        }
+                        break;
+                }
             }
+            // Skin debug function 
+            if (_SkinDebug)
+                base.DrawSkinDebugInfo(g, Color.Yellow);
         }
 
         private int MeasureDisplayStringWidth(Graphics.Graphics graphics, string text,

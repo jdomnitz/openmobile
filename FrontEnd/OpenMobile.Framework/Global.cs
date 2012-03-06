@@ -565,13 +565,18 @@ namespace OpenMobile
             this.image = i;
         }
         /// <summary>
-        /// Construct an image item from a name
+        /// Construct an image item from fully qualified path 
         /// </summary>
         /// <param name="imageName"></param>
-        public imageItem(string imageName)
+        public imageItem(string imagePath)
         {
-            this.name = imageName;
-            this.image = null;
+            this.name = imagePath;
+            if (imagePath == "")
+            {
+                this.image = null;
+                return;
+            }
+            this.image = OImage.FromFile(imagePath);
         }
         /// <summary>
         /// Construct an image item from an image
@@ -644,7 +649,7 @@ namespace OpenMobile
         /// <summary>
         /// Represents an image that the framework can't find
         /// </summary>
-        public static imageItem MISSING = new imageItem("MISSING");
+        public static imageItem MISSING = new imageItem("") { name = "MISSING" };
         /// <summary>
         /// Represents an empty image item
         /// </summary>
@@ -1218,7 +1223,8 @@ namespace OpenMobile
         /// <summary>
         /// Occurs when the VideoPosition property changes
         /// <para>---------------------------------------</para>
-        /// <para>Arg1: Instance</para>
+        /// <para>Arg1: Screen</para>
+        /// <para>Arg2: Video rectangle as string: X|Y|W|H</para>
         /// </summary>
         videoAreaChanged = 87,
         /// <summary>
@@ -1286,8 +1292,32 @@ namespace OpenMobile
         /// <para>Arg1: Phone Number (without seperators)</para>
         /// <para>Arg2: (Optional) Display Name</para>
         /// </summary>
-        promptDialNumber = 301
-
+        promptDialNumber = 301,
+        /// <summary>
+        /// Used as event only! Indicates a new zone has been added 
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: None</para>
+        /// </summary>
+        ZoneAdded,
+        /// <summary>
+        /// Used as event only! Indicates a zone has been removed
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: None</para>
+        /// </summary>
+        ZoneRemoved,
+        /// <summary>
+        /// Used as event only!
+        /// <para>[Event]Indicates the active zones has changed for a screen</para>
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen that was changed</para>
+        /// </summary>
+        ZoneSetActive,
+        /// <summary>
+        /// Used as event only! Indicates a zone has been updated
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: None</para>
+        /// </summary>
+        ZoneUpdated,
     }
     /// <summary>
     /// The status of a plugins initialization
@@ -1657,7 +1687,7 @@ namespace OpenMobile
         /// </summary>
         GetMediaPosition = 2,
         /// <summary>
-        /// Gets the volume (0-100) [int]
+        /// Gets the volume [int -1(mute) to 100]
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Instance [int]</para>
         /// </summary>
@@ -1823,7 +1853,15 @@ namespace OpenMobile
         /// devices is returned as an integer number indicating the index of the device in the driver array.
         /// <para>This method will timeout after 10 seconds if no input is detected, this is returned as -3 (Not Found)</para>
         /// </summary>
-        GetKeyboardDetectedUnit = 36
+        GetKeyboardDetectedUnit = 36,
+
+        /// <summary>
+        /// Returns a list of configured zones (all or one)
+        /// <para>Provide a name if you want to get a specific zone</para>
+        /// <para>NB! Returned object is ZoneHandling if no name is given, the list of zones can be found at the property Zones</para>
+        /// <para>If a name is given the returned object will be a Zone</para>
+        /// </summary>
+        GetZones = 37,
     }
     /// <summary>
     /// Information on Tuned Content
@@ -2648,4 +2686,22 @@ namespace OpenMobile
         Error = 30
     }
 
+    /// <summary>
+    /// Input types that can be used with controls supporting input
+    /// </summary>
+    public enum OSKInputTypes
+    {
+        /// <summary>
+        /// No automatic handling of input (default) or handled manually by the skin
+        /// </summary>
+        None, 
+        /// <summary>
+        /// A onscreen keypad (OSK) will be used for input
+        /// </summary>
+        Keypad,
+        /// <summary>
+        /// A onscreen numpad will be used for input
+        /// </summary>
+        Numpad
+    }
 }

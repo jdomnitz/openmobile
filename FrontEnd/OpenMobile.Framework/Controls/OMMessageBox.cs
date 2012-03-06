@@ -143,8 +143,8 @@ namespace OpenMobile.Controls
             Rectangle r = new Rectangle(this.Left, top, this.Width, height);
             g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), Gradient.Vertical), r, 20);
             g.DrawRoundRectangle(new Pen(borderColor, borderWidth), r, 20);
-            if (textTexture == null)
-                g.GenerateTextTexture(this.Left, top, this.Width, (int)letterHeight, title, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+            if (g.TextureGenerationRequired(textTexture))
+                textTexture = g.GenerateTextTexture(textTexture, this.Left, top, this.Width, (int)letterHeight, title, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
             g.DrawImage(textTexture, left, top, width, height, tmp);
             top += (int)letterHeight;
             height -= (int)letterHeight;

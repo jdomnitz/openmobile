@@ -167,9 +167,15 @@ namespace OpenMobile.Framework
                 OMPanel[] collection = new OMPanel[screens];
                 for (int i = 0; i < screens; i++)
                     if (i == screens - 1)
+                    {
                         collection[i] = source;
+                        collection[i].Manager = this;
+                    }
                     else
+                    {
                         collection[i] = source.Clone();
+                        collection[i].Manager = this;
+                    }
                 panels.Add(collection);
             }
         }
@@ -284,6 +290,32 @@ namespace OpenMobile.Framework
 
             lock (this)
             {
+                List<OMPanel[]> PossiblePanels = panels.FindAll(x => x[screen] != null);
+                OMPanel[] p = PossiblePanels.Find(x => x[screen].Name == name);
+                if (p == null)
+                    return;
+                else
+                {
+                    if (p[screen] == null)
+                        return;
+                    // Remove this screenmanager as manager for the new panel
+                    p[screen].Manager = null;
+
+                    // Unload panel from cache
+                    p[screen] = null;
+
+                    // Remove item if all panels is set to null
+                    for (int i = 0; i < p.Length; i++)
+                    {
+                        if (p[i] != null)
+                            return;
+                    }
+
+                    // If we reach this level then we should remove the item as well
+                    panels.Remove(p);
+                }
+
+                /*
                 OMPanel[] p = panels.Find(x => x[screen].Name == name);
                 if (p == null)
                     return;
@@ -296,6 +328,7 @@ namespace OpenMobile.Framework
                     // Unload panel from cache
                     panels.Remove(p);
                 }
+                */
             }
         }
         #region IDisposable Members
@@ -309,5 +342,10 @@ namespace OpenMobile.Framework
         }
 
         #endregion
+
+        public override string ToString()
+        {
+            return String.Format("{0}({1})",base.ToString(), this.GetHashCode());
+        }
     }
 }

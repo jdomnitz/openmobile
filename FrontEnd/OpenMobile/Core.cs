@@ -68,6 +68,7 @@ namespace OpenMobile
 
         private static void loadDebug()
         {   // Load debug dll (if available)
+            status = new eLoadStatus[1];
             IBasePlugin Plugin = null;
             string DebugDll = Path.Combine(theHost.PluginPath, "!OMDebug.dll");
             if (!File.Exists(DebugDll))
@@ -82,7 +83,7 @@ namespace OpenMobile
             {
                 Plugin = loadAndCheck(DebugDll, true);
                 if (Plugin != null)
-                    Plugin.initialize(theHost);
+                    status[0] = Plugin.initialize(theHost);
             }
             catch
             {   // No error handling, dll will be loaded later if this failed
@@ -145,16 +146,33 @@ namespace OpenMobile
 
         private static void initMainMenu()
         {
-            var a = pluginCollection[2].GetType().GetCustomAttributes(typeof(InitialTransition), false);
-            SandboxedThread.Asynchronous(() =>
+            IBasePlugin UI = pluginCollection.Find(x => x.pluginName.ToLower() == "ui");
+            
+            if (UI == null)
             {
-                pluginCollection[1].initialize(theHost);
-                pluginCollection[2].initialize(theHost);
+                Application.ShowError(null, "No UI Skin available!", "No skin available!");
+                Environment.Exit(0);
+            }
+
+            IBasePlugin MainMenu = pluginCollection.Find(x => x.pluginName.ToLower() == "mainmenu");
+            if (MainMenu == null)
+            {
+                Application.ShowError(null, "No Main Menu Skin available!", "No skin available!");
+                Environment.Exit(0);
+            }
+
+            status[pluginCollection.IndexOf(UI)] = UI.initialize(theHost);
+            status[pluginCollection.IndexOf(MainMenu)] = MainMenu.initialize(theHost);
+
+            var a = MainMenu.GetType().GetCustomAttributes(typeof(InitialTransition), false);
+            //SandboxedThread.Asynchronous(() =>
+            {
                 for (int i = 0; i < RenderingWindows.Count; i++)
                 {
                     // Load UI as background
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "UI", "background");
-                    RenderingWindows[i].TransitionInPanel(((IHighLevel)pluginCollection[1]).loadPanel(String.Empty, i));
+                    //RenderingWindows[i].TransitionInPanel(((IHighLevel)UI).loadPanel(String.Empty, i));
+                    theHost.execute(eFunction.TransitionToPanel, i.ToString(), "UI", "");
                     RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", String.Empty);
                     if (a.Length == 0)
@@ -162,8 +180,8 @@ namespace OpenMobile
                     else
                         RenderingWindows[i].ExecuteTransition(((InitialTransition)a[0]).Transition);
                 }
-            });
-            object[] b = pluginCollection[1].GetType().GetCustomAttributes(typeof(FinalTransition), false);
+            }//);
+            object[] b = MainMenu.GetType().GetCustomAttributes(typeof(FinalTransition), false);
             if (b.Length > 0)
                 exitTransition = ((FinalTransition)b[0]).Transition;
         }
@@ -271,20 +289,36 @@ namespace OpenMobile
             }
             return null;
         }
+
+        private static bool IsPluginLevel(IBasePlugin Plugin, PluginLevels PluginLevel)
+        {
+            // Check plugin level attribute flags
+            PluginLevel[] a = (PluginLevel[])Plugin.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+            PluginLevels Level = PluginLevels.Normal; // Default
+            if (a.Length > 0)
+                Level = a[0].TypeOfPlugin;
+            if ((Level | PluginLevel) == PluginLevel)
+                return true;
+            else
+                return false;
+        }
+
+
         /// <summary>
         /// Order to of types to try to load the plugins by
         /// </summary>
-        private static Type[] pluginTypes = new Type[] {typeof(IRawHardware), typeof(IDataProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin)};
+        private static Type[] pluginTypes = new Type[] { typeof(IBasePlugin), typeof(IRawHardware), typeof(IDataProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther) };
         public static eLoadStatus[] status;
         /// <summary>
         /// Initialize each of the plugins in the plugin's array (pluginCollection)
         /// </summary>
-        private static void getEmReady()
+        private static void getEmReady(bool SystemOnly)
         {
-            status = new eLoadStatus[pluginCollection.Count];
+            Array.Resize<eLoadStatus>(ref status, pluginCollection.Count);
+            //status = new eLoadStatus[pluginCollection.Count];
             foreach (Type tp in pluginTypes)
             {
-                for (int i = 3; i < pluginCollection.Count; i++) //Try to initialize the plugins
+                for (int i = 0; i < pluginCollection.Count; i++) //Try to initialize the plugins
                 {
                     try
                     {
@@ -292,6 +326,10 @@ namespace OpenMobile
                         {
                             if (tp.IsInstanceOfType(pluginCollection[i]) && status[i] == eLoadStatus.NotLoaded)
                             {
+                                // Skip plugins that is not marked as system if SystemOnly is true
+                                if (SystemOnly)
+                                    if (!IsPluginLevel(pluginCollection[i], PluginLevels.System))
+                                        continue;
                                 BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
                                 status[i] = pluginCollection[i].initialize(theHost);
                             }
@@ -308,13 +346,19 @@ namespace OpenMobile
             }
             foreach (Type tp in pluginTypes)
             {             
-                for (int i = 3; i < pluginCollection.Count; i++) //Give them all a second chance if they need it
+                for (int i = 0; i < pluginCollection.Count; i++) //Give them all a second chance if they need it
                 try
                 {
                     if (tp.IsInstanceOfType(pluginCollection[i]))
                     {
                         if (status[i] == eLoadStatus.LoadFailedRetryRequested)
+                        {
+                            // Skip plugins that is not marked as system if SystemOnly is true
+                            if (SystemOnly)
+                                if (!IsPluginLevel(pluginCollection[i], PluginLevels.System))
+                                    continue;
                             status[i] = pluginCollection[i].initialize(theHost);
+                        }
                     }
                 }
                 catch (Exception e)
@@ -325,7 +369,7 @@ namespace OpenMobile
                     Debug.Print(ex);
                 }
             }
-            for (int i = 3; i < pluginCollection.Count; i++) //and then two strikes their out...kill anything that still can't initialize
+            for (int i = 0; i < pluginCollection.Count; i++) //and then two strikes their out...kill anything that still can't initialize
             {
                 if ((status[i] == eLoadStatus.LoadFailedRetryRequested) || (status[i] == eLoadStatus.LoadFailedUnloadRequested) || (status[i] == eLoadStatus.LoadFailedGracefulUnloadRequested))
                 {
@@ -355,8 +399,14 @@ namespace OpenMobile
         {
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
 
+            // Load plugins
+            loadEmUp();
+
+            // Initialize system plugins
+            getEmReady(true); 
+
             // Load and initialize UI and MainMenu
-            loadMainMenu(); 
+            //loadMainMenu(); 
             initMainMenu();
 
             // Init plugins
@@ -368,14 +418,12 @@ namespace OpenMobile
 
         private static void InitPluginsAndData()
         {
-            // Load plugins
-            loadEmUp(); 
 
             // Initialize plugins
-            getEmReady(); 
+            getEmReady(false); 
 
             // Tell pluginhost to start loading data
-            theHost.Load();
+            theHost.LateInit();
 
             // Inform system that plugin loading is completed
             theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);

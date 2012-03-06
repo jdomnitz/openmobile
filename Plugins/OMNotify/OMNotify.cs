@@ -97,8 +97,8 @@ namespace ControlDemo
 					if (Configuration.RunningOnWindows)
 					{
                     	string[] songs=Directory.GetFiles(lastPath);
-                    	if (theHost.setPlaylist(Playlist.Convert(songs), theHost.instanceForScreen(screen)))
-                        	theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
+                        if (theHost.setPlaylist(Playlist.Convert(songs), screen))
+                            theHost.execute(eFunction.nextMedia, screen.ToString());
 					}else if(Configuration.RunningOnLinux)
 					{
 						string name=DeviceInfo.get(lastPath).VolumeLabel;
@@ -107,14 +107,14 @@ namespace ControlDemo
 						int tracks=int.Parse(arg[1]);
 						for(int i=1;i<=tracks;i++)
 							songs.Add("cdda://"+i.ToString());
-						if (theHost.setPlaylist(Playlist.Convert(songs), theHost.instanceForScreen(screen)))
-                        	theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
+                        if (theHost.setPlaylist(Playlist.Convert(songs), screen))
+                            theHost.execute(eFunction.nextMedia, screen.ToString());
 					}
 					break;
                 case "Play DVD":
                 case "Play Blu-Ray":
                 case "Play HDDVD":
-                    if (theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), lastPath))
+                    if (theHost.execute(eFunction.Play, screen.ToString(), lastPath))
                         theHost.sendMessage("UI", "OMNotify", "ShowMediaControls" + screen.ToString());
                     break;
                 case "Play Playlists":
@@ -125,8 +125,8 @@ namespace ControlDemo
                         return;
                     foreach (string playlist in Playlist.listPlaylists(info.PlaylistFolders[0]))
                         media.AddRange(Playlist.readPlaylist(playlist));
-                    theHost.setPlaylist(media, theHost.instanceForScreen(screen));
-                    theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), media[0].Location);
+                    theHost.setPlaylist(media, screen);
+                    theHost.execute(eFunction.Play, screen.ToString(), media[0].Location);
                     break;
                 case "Eject":
                     theHost.execute(eFunction.ejectDisc, lastPath);

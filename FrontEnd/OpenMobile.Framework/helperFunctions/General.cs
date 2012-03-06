@@ -110,7 +110,6 @@ namespace OpenMobile.helperFunctions
         public sealed class getKeyboardInput
         {
             string theText = null;
-            IPluginHost host;
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
             int screen = -1;
             bool bail;
@@ -119,10 +118,8 @@ namespace OpenMobile.helperFunctions
             /// <summary>
             /// Initializes the Keyboard Input class
             /// </summary>
-            /// <param name="theHost"></param>
-            public getKeyboardInput(IPluginHost theHost)
+            public getKeyboardInput()
             {
-                host = theHost;
             }
             /// <summary>
             /// Loads the On Screen Keyboard and then returns the text entered
@@ -181,24 +178,24 @@ namespace OpenMobile.helperFunctions
             public string getPassword(int screen, string pluginname, string[] panelNames, string defaultValue)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
-                host.OnSystemEvent += ev;
+                BuiltInComponents.Host.OnSystemEvent += ev;
                 this.screen = screen;
 
                 bool error = false;
-                host.execute(eFunction.TransitionFromAny, screen.ToString());
-                error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "PASSWORD|" + defaultValue);
+                BuiltInComponents.Host.execute(eFunction.TransitionFromAny, screen.ToString());
+                error = !BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "PASSWORD|" + defaultValue);
                 wait.Reset();
                 armed = true;
-                host.execute(eFunction.ExecuteTransition, screen.ToString());
+                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString());
                 if (!error)
                     wait.WaitOne();
-                host.OnSystemEvent -= ev;
+                BuiltInComponents.Host.OnSystemEvent -= ev;
                 if (bail)
                     return null;
-                host.execute(eFunction.TransitionFromAny, screen.ToString());
+                BuiltInComponents.Host.execute(eFunction.TransitionFromAny, screen.ToString());
                 foreach (string panelName in panelNames)
-                    host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
-                host.execute(eFunction.ExecuteTransition, screen.ToString());
+                    BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
+                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
             }
             /// <summary>
@@ -208,23 +205,23 @@ namespace OpenMobile.helperFunctions
             public string getText(int screen, string pluginname, string[] panelNames, string defaultValue)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
-                host.OnSystemEvent += ev;
+                BuiltInComponents.Host.OnSystemEvent += ev;
                 this.screen = screen;
                 bool error = false;
-                host.execute(eFunction.TransitionFromAny, screen.ToString());
-                error = !host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", defaultValue);
+                BuiltInComponents.Host.execute(eFunction.TransitionFromAny, screen.ToString());
+                error = !BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", defaultValue);
                 wait.Reset();
                 armed = true;
-                host.execute(eFunction.ExecuteTransition, screen.ToString());
+                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString());
                 if (!error)
                     wait.WaitOne();
-                host.OnSystemEvent -= ev;
+                BuiltInComponents.Host.OnSystemEvent -= ev;
                 if (bail)
                     return null;
-                host.execute(eFunction.TransitionFromAny, screen.ToString());
+                BuiltInComponents.Host.execute(eFunction.TransitionFromAny, screen.ToString());
                 foreach (string panelName in panelNames)
-                    host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
-                host.execute(eFunction.ExecuteTransition, screen.ToString());
+                    BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
+                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
             }
             /// <summary>
@@ -245,25 +242,26 @@ namespace OpenMobile.helperFunctions
             public string getNumber(int screen, string pluginname, string panelName)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
-                host.OnSystemEvent += ev;
+                BuiltInComponents.Host.OnSystemEvent += ev;
                 this.screen = screen;
                 wait.Reset();
                 armed = true;
-                if (host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "NUMOSK") == false)
+                if (BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), "OSK", "NUMOSK") == false)
                 {
                     return null;
                 }
-                host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname, panelName);
-                host.execute(eFunction.ExecuteTransition, screen.ToString());
+                BuiltInComponents.Host.execute(eFunction.TransitionFromPanel, screen.ToString(), pluginname, panelName);
+                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString());
                 wait.WaitOne();
-                host.OnSystemEvent -= ev;
+                BuiltInComponents.Host.OnSystemEvent -= ev;
                 if (bail)
                     return null;
-                host.execute(eFunction.TransitionFromAny, screen.ToString());
-                host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
-                host.execute(eFunction.ExecuteTransition, screen.ToString());
+                BuiltInComponents.Host.execute(eFunction.TransitionFromAny, screen.ToString());
+                BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), pluginname, panelName);
+                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString());
                 return theText;
             }
+
             void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
             {
                 if (function == eFunction.userInputReady)
@@ -287,6 +285,7 @@ namespace OpenMobile.helperFunctions
                 }
             }
         }
+
 
         /// <summary>
         /// The equivalent of an Open File Dialog
@@ -524,6 +523,7 @@ namespace OpenMobile.helperFunctions
             /// </summary>
             /// <param name="t"></param>
             /// <param name="host"></param>
+            /// <param name="PluginLevel"></param>
             /// <returns>List of plugin names</returns>
             public static List<string> getPluginsNameOfType(Type t, IPluginHost host, PluginLevels PluginLevel)
             {
@@ -661,378 +661,68 @@ namespace OpenMobile.helperFunctions
                     return null;
                 }
             }
+
+            /// <summary>
+            /// Gets the string describing the IMAGE to use as a Icon for the given PluginName
+            /// </summary>
+            /// <param name="PluginName"></param>
+            /// <returns></returns>
+            public static string GetPluginIconString(string PluginName)
+            {
+                object o = new object();
+                BuiltInComponents.Host.getData(eGetData.GetPlugins, PluginName, out o);
+                if (o == null)
+                    return "";
+                IBasePlugin Plugin = o as IBasePlugin;
+                string Icon = "";
+                PluginLevel[] c = (PluginLevel[])Plugin.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                SkinIcon[] a = (SkinIcon[])Plugin.GetType().GetCustomAttributes(typeof(SkinIcon), false);
+                if (a.Length > 0)
+                {   // Icon name is provided    
+                    Icon = a[0].SkinImageName;
+                    // If first character in name is * then this is a request to use a symbol font instead (Webdings)
+                    if (Icon.Substring(0, 1) == "*")
+                    {
+                        return "";
+                    }
+                    else
+                        return Icon;
+                }
+                return "";
+            }
+
+            /// <summary>
+            /// Gets the string describing the WebDings SYMBOL to use as a Icon for the given PluginName
+            /// </summary>
+            /// <param name="PluginName"></param>
+            /// <returns></returns>
+            public static string GetPluginIconSymbol(string PluginName)
+            {
+                object o = new object();
+                BuiltInComponents.Host.getData(eGetData.GetPlugins, PluginName, out o);
+                if (o == null)
+                    return "";
+                IBasePlugin Plugin = o as IBasePlugin;
+                string Icon = "";
+                PluginLevel[] c = (PluginLevel[])Plugin.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                SkinIcon[] a = (SkinIcon[])Plugin.GetType().GetCustomAttributes(typeof(SkinIcon), false);
+                if (a.Length > 0)
+                {   // Icon name is provided    
+                    Icon = a[0].SkinImageName;
+                    // If first character in name is * then this is a request to use a symbol font instead (Webdings)
+                    if (Icon.Substring(0, 1) == "*")
+                    {   // Use symbol font
+                        Icon = Icon.Substring(1, Icon.Length - 1);
+                        return Icon;
+                    }
+                    else
+                        return "";
+                }
+                return "";
+            }
         }
     }
 
-    /// <summary>
-    /// Form handling/generation functions
-    /// </summary>
-    namespace Forms
-    {
-        /// <summary>
-        /// Dialog buttons and return values
-        /// </summary>
-        [Flags]
-        public enum buttons : byte
-        {
-            /// <summary>
-            /// Button none
-            /// </summary>
-            None = 0,
-            /// <summary>
-            /// Button Abort
-            /// </summary>
-            Abort = 1,
-            /// <summary>
-            /// Button Retry
-            /// </summary>
-            Retry = 2,
-            /// <summary>
-            /// Button Ignore
-            /// </summary>
-            Ignore = 4,
-            /// <summary>
-            /// Button Cancel
-            /// </summary>
-            Cancel = 8,
-            /// <summary>
-            /// Button No
-            /// </summary>
-            No = 16,
-            /// <summary>
-            /// Button Yes
-            /// </summary>
-            Yes = 32,
-            /// <summary>
-            /// Button OK
-            /// </summary>
-            OK = 64
-        }
-
-        /// <summary>
-        /// Icons for built in forms
-        /// </summary>
-        public enum icons
-        {
-            /// <summary>
-            /// No icon
-            /// </summary>
-            None,
-            /// <summary>
-            /// Error icon
-            /// </summary>
-            Error,
-            /// <summary>
-            /// Exclamation icon
-            /// </summary>
-            Exclamation,
-            /// <summary>
-            /// Questionmark
-            /// </summary>
-            Question,
-            /// <summary>
-            /// Checkmark
-            /// </summary>
-            Checkmark,
-            /// <summary>
-            /// Information icon
-            /// </summary>
-            Information,
-            /// <summary>
-            /// Custom icon: Specify icon to use in property CustomIcon
-            /// </summary>
-            Custom,
-            /// <summary>
-            /// Animated icon: Busy / Wait 
-            /// </summary>
-            Busy,
-            /// <summary>
-            /// OpenMobile logo
-            /// </summary>
-            OM,
-            /// <summary>
-            /// Work in progress logo
-            /// </summary>
-            WorkInProgress
-        }
-
-        /// <summary>
-        /// The equivalent of a dialog with options for message box and so on...
-        /// </summary>
-        public class dialog
-        {
-            public class DialogData
-            {
-                public string Header { get; set; }
-                public string Text { get; set; }
-                public int Left { get; set; }
-                public int Top { get; set; }
-                public int Height { get; set; }
-                public int Width { get; set; }
-                public icons Icon { get; set; }
-                public buttons Button { get; set; }
-                public string CustomIcon { get; set; }
-                public OpenMobile.Framework.ScreenManager Manager { get; set; }
-            }
-
-            private string DialogHandler = "OMDialog";
-            private string OwnerPlugin, OwnerPanel, OwnerScreen;
-            private EventWaitHandle ButtonPress = new EventWaitHandle(false, EventResetMode.ManualReset);
-            private buttons Result = buttons.None;
-            private string PanelName = "";
-            private List<string> ActiveDialogs = new List<string>();
-            private bool ReOpenDialog = false;
-            private bool OpenAtExecute = false;
-            private bool Visible = true;
-
-            public string Header { get; set; }
-            public string Text { get; set; }
-            public int Left { get; set; }
-            public int Top { get; set; }
-            public int Height { get; set; }
-            public int Width { get; set; }
-            public icons Icon { get; set; }
-            public buttons Button { get; set; }
-            public string CustomIcon { get; set; }
-
-            #region Constructors
-
-            private void InitData()
-            {
-                // Default dialog data
-                Icon = icons.None;
-                CustomIcon = "";
-            }
-
-            /// <summary>
-            /// Initializes the messagebox class
-            /// </summary>
-            /// <param name="Plugin"></param>
-            /// <param name="Panel"></param>
-            public dialog()
-            {
-                InitData();
-            }
-            /// <summary>
-            /// Initializes the messagebox class
-            /// </summary>
-            /// <param name="Plugin"></param>
-            /// <param name="Panel"></param>
-            public dialog(string Plugin, string Panel)
-            {
-                OwnerPlugin = Plugin;
-                OwnerPanel = Panel;
-                InitData();
-            }
-            /// <summary>
-            /// Initializes the messagebox class
-            /// </summary>
-            /// <param name="DialogHandler">Name of plugin that should provide the dialog panel</param>
-            /// <param name="Plugin"></param>
-            /// <param name="Panel"></param>
-            public dialog(string DialogHandler, string Plugin, string Panel)
-            {
-                OwnerPlugin = Plugin;
-                OwnerPanel = Panel;
-                InitData();
-            }
-            #endregion
-
-            /// <summary>
-            /// Show a non thread blocking messagebox 
-            /// </summary>
-            /// <param name="screen">Screen number to show on</param>
-            /// <param name="Delay">Delay (MS) before showing dialog (will not show if close is called within timeframe)</param>
-            public void ShowMsgBoxNonBlocking(int screen, int Delay)
-            {
-                Visible = true;
-                Thread t = new Thread(
-                    delegate()
-                    {
-                        Thread.Sleep(Delay);
-                        if (Visible)
-                            ShowMsgBox(screen);
-                    });
-                t.IsBackground = true;
-                t.Start();
-            }
-            /// <summary>
-            /// Show a non thread blocking messagebox 
-            /// </summary>
-            /// <param name="screen"></param>
-            public void ShowMsgBoxNonBlocking(int screen)
-            {
-                Visible = true;
-                Thread t = new Thread(
-                    delegate()
-                    {
-                        ShowMsgBox(screen);
-                    });
-                t.IsBackground = true;
-                t.Start();
-            }
-                /// <summary>
-            /// Show a messagebox style dialog
-            /// </summary>
-            public buttons ShowMsgBox(int screen)
-            {
-                Visible = true;
-                
-                // Errorcheck
-                if (BuiltInComponents.Host == null)
-                    throw new Exception("Core error; BuiltInComponents.Host not initialized");
-
-                OMPanel Panel = new OMPanel();
-
-                // Set panel name
-                PanelName = Panel.Name = this.GetHashCode().ToString();
-                
-                OwnerScreen = screen.ToString();
-
-                // Pack paneldata into tag property
-                DialogData DT = new DialogData();
-                DT.Left = Left; DT.Top = Top; DT.Height = Height; DT.Width = Width; DT.Icon = Icon; DT.CustomIcon = CustomIcon; DT.Button = Button; DT.Text = Text; DT.Header = Header; ; DT.Manager = BuiltInComponents.Panels;
-                Panel.Tag = DT;
-
-                if (!BuiltInComponents.Host.sendMessage<OMPanel>(DialogHandler, "OpenMobile.helperFunctions.Dialog", "MessageBox", ref Panel))
-                {   // Log this error to the debug log
-                    BuiltInComponents.Host.DebugMsg("Unable to get MessageBox panel, plugin " + DialogHandler + " not available");
-                }
-
-                if (Panel != null)
-                {
-                    ButtonPress.Reset();
-                    OwnerScreen = screen.ToString();
-
-                    // Add to list of active dialogs
-                    ActiveDialogs.Add(OwnerPlugin + "." + OwnerPanel + "." + OwnerScreen + "." + Panel.Name);
-                    ReOpenDialog = false;
-
-                    #region Map buttons
-                    /* Attach to any buttons (button names are given like according to this:
-                     * None, OK, Cancel, Abort, Retry, Ignore, Yes, No
-                     *  Dialog_Button_Cancel    : Cancel button
-                     *  Dialog_Button_Yes       : Yes button
-                     *  Dialog_Button_No        : No button
-                     *  Dialog_Button_OK        : OK button
-                     *  Dialog_Button_Abort     : Abort button
-                     *  Dialog_Button_Retry     : Retry button
-                     *  Dialog_Button_Ignore    : Ignore button
-                     * 
-                    */
-
-                    OMButton btn = null;
-                    foreach (buttons dr in Enum.GetValues(typeof(buttons)))
-                    {
-                        btn = (OMButton)Panel["Dialog_Button_" + dr.ToString()];
-                        if (btn != null)
-                        {
-                            btn.OnClick += new userInteraction(Button_OnClick);
-                            btn.Tag = dr;
-                        }
-                    }
-                    #endregion
-
-                    #region Set texts
-
-                    OMLabel lbl = null;
-                    // Set header text
-                    lbl = (OMLabel)Panel["Dialog_Label_Header"];
-                    if (lbl != null)
-                        if (lbl.Text == "")
-                            lbl.Text = Header;
-
-                    // Set dialog text
-                    lbl = (OMLabel)Panel["Dialog_Label_Text"];
-                    if (lbl != null)
-                        if (lbl.Text == "")
-                            lbl.Text = Text;
-
-                    #endregion
-
-                    // Connect to system events (to detect goback event)
-                    SystemEvent SysEv = new SystemEvent(theHost_OnSystemEvent);
-                    BuiltInComponents.Host.OnSystemEvent += SysEv;
-
-                    // load and show panel
-                    BuiltInComponents.Panels.loadPanel(Panel);
-                    if (BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), "", Panel.Name) == false)
-                        return buttons.None;
-                    BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.CrossfadeFast.ToString());
-
-                    // Wait for buttons
-                    ButtonPress.WaitOne();
-
-                    // Remove messagebox and clean up
-                    ActiveDialogs.Remove(OwnerPlugin + "." + OwnerPanel + "." + OwnerScreen + "." + Panel.Name);
-                    BuiltInComponents.Host.execute(eFunction.TransitionFromPanel, screen.ToString(), "", Panel.Name);
-                    BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString(),eGlobalTransition.CrossfadeFast.ToString());
-                    BuiltInComponents.Panels.unloadPanel(Panel.Name);
-                    BuiltInComponents.Host.OnSystemEvent -= SysEv;
-                }
-                return Result;
-            }
-
-            public void Close()
-            {
-                Visible = false;
-                Result = buttons.None;
-                ButtonPress.Set();
-            }
-
-            void Button_OnClick(OMControl sender, int screen)
-            {
-                Result = (buttons)sender.Tag;
-                ButtonPress.Set();
-            }
-            void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
-            {
-                if (function == eFunction.TransitionFromAny)
-                {
-                    // Reopen dialog
-                    ReOpenDialog = true;
-                }
-                if (function == eFunction.TransitionFromPanel)
-                {
-                    if ((arg1 == OwnerScreen) & (arg2 == OwnerPlugin) & (arg3 == OwnerPanel))
-                    {
-                        // Reopen dialog
-                        ReOpenDialog = true;
-                    }
-                }
-                if (function == eFunction.ExecuteTransition)
-                {
-                    if (OpenAtExecute)
-                    {
-                        OpenAtExecute = false;
-                        BuiltInComponents.Host.execute(eFunction.TransitionToPanel, OwnerScreen, "", PanelName);
-                        BuiltInComponents.Host.execute(eFunction.ExecuteTransition, OwnerScreen);
-                    }
-
-                }
-                if (function == eFunction.TransitionToPanel)
-                {
-                    if (ReOpenDialog)
-                    {
-                        if ((arg1 == OwnerScreen) & (arg2 == OwnerPlugin) & (arg3 == OwnerPanel))
-                        {
-                            // Reopen dialog
-                            OpenAtExecute = true;
-                            ReOpenDialog = false;
-                        }
-                    }
-                }
-                if (function == eFunction.goBack)
-                {
-                    if (arg3 == PanelName)
-                    {
-                        Result = buttons.None;
-                        ButtonPress.Set();
-                    }
-                }
-            }
-        }
-    }
 
     /// <summary>
     /// Panel helper functions
@@ -1042,63 +732,6 @@ namespace OpenMobile.helperFunctions
 
     }
 
-    /// <summary>
-    /// Control helper functions
-    /// </summary>
-    namespace Controls
-    {
-        /// <summary>
-        /// A set of up and down control methods
-        /// </summary>
-        public class UpDown
-        {
-
-            /// <summary>
-            /// Provides up/down functionality for a set of controls consisting of one or more buttons and one textbox.
-            /// <para>The buttons provides up/down controls where the step size is set by assigning a integer value to the button.Tag property</para>
-            /// <para>The textbox is used to provide feedback for selection</para>
-            /// <para>Connect the same event to all buttons and trigg this method from all buttons</para>
-            /// </summary>
-            /// <param name="screen">Current screen</param>
-            /// <param name="upDownButtons">The button that is used for this up/down</param>
-            /// <param name="textBox">The textbox target</param>
-            /// <param name="stringArray">The string array to use for selection</param>
-            static public void UpDownTextBoxControl(int screen, OMButton upDownButtons, OMTextBox textBox, string[] stringArray)
-            {
-                // Errorcheck
-                if (stringArray == null)
-                {
-                    textBox.Text = "";
-                    return;
-                }
-
-                // Find index in array
-                int Index;
-                try
-                {
-                    Index = Array.FindIndex(stringArray, p => p == textBox.Text);
-                }
-                catch
-                {   // No match, return a default of first index to get a valid value
-                    textBox.Text = stringArray[0];
-                    return;
-                }
-
-                // Calculate new index
-                Index += (int)upDownButtons.Tag;
-
-                // Limit check
-                if (Index < stringArray.GetLowerBound(0))
-                    Index = stringArray.GetLowerBound(0);
-                if (Index >= stringArray.GetUpperBound(0))
-                    Index = stringArray.GetUpperBound(0);
-
-                // Save new selection
-                textBox.Text = stringArray[Index];
-            }
-        }
-
-    }
 
     namespace XML
     {

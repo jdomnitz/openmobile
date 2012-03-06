@@ -30,26 +30,26 @@ namespace OpenMobile.Plugin
         /// Play the current media
         /// </summary>
         /// <returns></returns>
-        bool play(int instance);
+        bool play(Zone zone);
         /// <summary>
         /// Stop the currently playing media
         /// </summary>
         /// <returns></returns>
-        bool stop(int instance);
+        bool stop(Zone zone);
         /// <summary>
         /// The the media playback position (in seconds)
         /// </summary>
         /// <param name="seconds"></param>
         /// <param name="instance"></param>
         /// <returns></returns>
-        bool setPosition(int instance,float seconds);
+        bool setPosition(Zone zone, float seconds);
         /// <summary>
         /// Set the media playback speed
         /// </summary>
         /// <param name="speed"></param>
         /// <param name="instance"></param>
         /// <returns></returns>
-        bool setPlaybackSpeed(int instance,float speed);
+        bool setPlaybackSpeed(Zone zone, float speed);
         /// <summary>
         /// Play the given media
         /// </summary>
@@ -57,22 +57,22 @@ namespace OpenMobile.Plugin
         /// <param name="type"></param>
         /// <param name="instance"></param>
         /// <returns></returns>
-        bool play(int instance,string url,eMediaType type);
+        bool play(Zone zone, string url, eMediaType type);
         /// <summary>
         /// Return the current playback position (in seconds)
         /// </summary>
         /// <returns></returns>
-        float getCurrentPosition(int instance);
+        float getCurrentPosition(Zone zone);
         /// <summary>
         /// Get the status of the player
         /// </summary>
         /// <returns></returns>
-        ePlayerStatus getPlayerStatus(int instance);
+        ePlayerStatus getPlayerStatus(Zone zone);
         /// <summary>
         /// Returns the media players playback speed
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        float getPlaybackSpeed(int instance);
+        float getPlaybackSpeed(Zone zone);
     }
 }

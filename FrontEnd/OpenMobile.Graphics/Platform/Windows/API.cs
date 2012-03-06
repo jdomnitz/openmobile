@@ -996,6 +996,15 @@ namespace OpenMobile.Platform.Windows
             INT SizeHeader
         );
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int ToAscii(
+        uint uVirtKey, // virtual-key code
+        uint uScanCode, // scan code
+        byte[] lpKeyState, // key-state array
+        StringBuilder lpChar, // buffer for translated key
+        uint flags // active-menu flag
+        );
+
         #endregion
 
         #region IntPtr NextRawInputStructure(IntPtr data)

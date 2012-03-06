@@ -22,6 +22,7 @@ using System;
 using System.ComponentModel;
 using OpenMobile.Graphics;
 using OpenMobile;
+using OpenMobile.helperFunctions;
 
 namespace OpenMobile.Controls
 {
@@ -42,6 +43,10 @@ namespace OpenMobile.Controls
         /// </summary>
         protected Color background = Color.White;
         /// <summary>
+        /// The disabled background color of the textbox
+        /// </summary>
+        protected Color disabledBackgroundColor = Color.Gray;
+        /// <summary>
         /// Sets textbox option.  Note: multiple flags are allowed
         /// </summary>
         public textboxFlags Flags
@@ -56,6 +61,71 @@ namespace OpenMobile.Controls
                 textTexture = null;
             }
         }
+
+        #region OSK Properties
+
+        private OSKInputTypes _OSKType = OSKInputTypes.None;
+        /// <summary>
+        /// Sets the osk input type used for this controls, 
+        /// <para>if set to anything other than None it will show a osk when the control is cliked</para>
+        /// </summary>
+        public OSKInputTypes OSKType
+        {
+            get
+            {
+                return _OSKType;
+            }
+            set
+            {
+                _OSKType = value;
+            }
+        }
+
+        private bool _OSKShowOnLongClick = false;
+        /// <summary>
+        /// Specifies when to show the OSK (false = on click event, true = on long click event)
+        /// </summary>
+        public bool OSKShowOnLongClick
+        {
+            get
+            {
+                return _OSKShowOnLongClick;
+            }
+            set
+            {
+                _OSKShowOnLongClick = value;
+            }
+        }
+
+        private bool _OSKShowAfterClickEvent = false;
+        /// <summary>
+        /// Specifies when to show the OSK (false = before click event, true = after click event)
+        /// </summary>
+        public bool OSKShowAfterClickEvent
+        {
+            get
+            {
+                return _OSKShowAfterClickEvent;
+            }
+            set
+            {
+                _OSKShowAfterClickEvent = value;
+            }
+        }
+
+        /// <summary>
+        /// The help text that will be displayed in a empty text field (only shown if textbox value is "")
+        /// </summary>
+        public string OSKHelpText { get; set; }
+
+        /// <summary>
+        /// The description that will be shown in the OSK
+        /// </summary>
+        public string OSKDescription { get; set; }
+
+
+
+        #endregion
 
         private bool _AutoFitText = true;
         /// <summary>
@@ -78,9 +148,17 @@ namespace OpenMobile.Controls
         /// </summary>
         public event userInteraction OnTextChange;
         /// <summary>
-        /// Button Clicked
+        /// Control Clicked
         /// </summary>
         public event userInteraction OnClick;
+        /// <summary>
+        /// Control clicked and held
+        /// </summary>
+        public event userInteraction OnLongClick;
+        /// <summary>
+        /// OSK Shown
+        /// </summary>
+        public event userInteraction OnOSKShow;
 
         //Same properties as a label just rendered differently
 
@@ -100,17 +178,76 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// Controls the background color of the textbox when the control is not enabled
+        /// </summary>
+        public Color DisabledBackgroundColor
+        {
+            get
+            {
+                return disabledBackgroundColor;
+            }
+            set
+            {
+                disabledBackgroundColor = value;
+            }
+        }
+
+
+        /// <summary>
         /// Fires the buttons OnClick event
         /// </summary>
         public void clickMe(int screen)
         {
+            // Don't fire events if this control is disabled
+            if (this.disabled)
+                return;
+
+            // Show OSK
+            if (!_OSKShowOnLongClick && !_OSKShowAfterClickEvent)
+                ShowOSK(screen);
+
             if (OnClick != null)
                 OnClick(this, screen);
+
+            // Show OSK
+            if (!_OSKShowOnLongClick && _OSKShowAfterClickEvent)
+                ShowOSK(screen);
         }
         /// <summary>
         /// Fires the OnLongClick event
         /// </summary>
-        public void longClickMe(int screen) { }
+        public void longClickMe(int screen)
+        {
+            // Don't fire events if this control is disabled
+            if (this.disabled)
+                return;
+
+            // Show OSK
+            if (_OSKShowOnLongClick && !_OSKShowAfterClickEvent)
+                ShowOSK(screen);
+
+            if (OnLongClick != null)
+                OnLongClick(this, screen);
+
+            // Show OSK
+            if (_OSKShowOnLongClick && _OSKShowAfterClickEvent)
+                ShowOSK(screen);
+        }
+
+        private void ShowOSK(int screen)
+        {
+            if (_OSKType != OSKInputTypes.None)
+            {
+                OSK osk = new OSK(this.Text, OSKHelpText, OSKDescription, _OSKType, false);
+
+                // Trigg OSK shown event
+                if (OnOSKShow != null)
+                    OpenMobile.Threading.SafeThread.Asynchronous(delegate() { OnOSKShow(this, screen); });                
+
+                // Show OSK
+                this.Text = osk.ShowOSK(screen);
+            }
+        }
 
         private int count;
         /// <summary>
@@ -198,16 +335,10 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Create the control with the default size and location
         /// </summary>
+        [Obsolete("Use OMTextBox(string name, int x, int y, int w, int h) instead")]
         public OMTextBox()
         {
-            this.Height = 32;
-            this.Width = 100;
-            this.Left = 25;
-            this.Top = 25;
-            this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
-            this.Format = OpenMobile.Graphics.eTextFormat.Normal;
-            this.Color = Color.Black;
-            this.OutlineColor = Color.Blue;
+            Init(name, 32, 100, 25, 25);
         }
         /// <summary>
         /// Create a new textbox with the given dimensions
@@ -216,8 +347,26 @@ namespace OpenMobile.Controls
         /// <param name="y">Top</param>
         /// <param name="w">Width</param>
         /// <param name="h">Height</param>
+        [Obsolete("Use OMTextBox(string name, int x, int y, int w, int h) instead")]
         public OMTextBox(int x, int y, int w, int h)
         {
+            Init("", x, y, w, h);
+        }
+        /// <summary>
+        /// Create a new textbox
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        public OMTextBox(string name, int x, int y, int w, int h)
+        {
+            Init(name, x, y, w, h);
+        }
+        private void Init(string Name, int x, int y, int w, int h)
+        {
+            this.Name = Name;
             this.Height = h;
             this.Width = w;
             this.Left = x;
@@ -240,7 +389,7 @@ namespace OpenMobile.Controls
             else if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
 
-            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 255), background)), left, top, width, height, 10);
+            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 255), (this.disabled ? disabledBackgroundColor : background))), left, top, width, height, 10);
             g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 1F), left, top, width, height, 10);
 
             if (this.Mode == eModeType.Highlighted)
@@ -251,6 +400,24 @@ namespace OpenMobile.Controls
             }
             if (text != null)
             {
+                // Generate password masking characters if needed
+                //TODO: Remove this masking 
+                string tempStr = text;
+                if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (text.Length > 0))
+                {
+                    tempStr = new String('*', text.Length - 1);
+                    if (count > 1)
+                        tempStr += text[text.Length - 1];
+                    else
+                        tempStr += "*";
+                    count--;
+                }
+
+                if ((g.TextureGenerationRequired(textTexture)) || (count > 0))
+                    textTexture = g.GenerateTextTexture(textTexture, left+5, top, width, height, tempStr, font, textFormat, textAlignment, color, outlineColor);
+                g.DrawImage(textTexture, this.Left+5, this.Top, this.Width, this.Height, tmp);
+
+                /*
                 using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
                 {
                     f.Alignment = System.Drawing.StringAlignment.Center;
@@ -261,7 +428,7 @@ namespace OpenMobile.Controls
                         f.Trimming = System.Drawing.StringTrimming.EllipsisCharacter;
                     else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
                         f.Trimming = System.Drawing.StringTrimming.Word;
-
+                 * 
                     // Generate password masking characters if needed
                     string tempStr = text;
                     if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (text.Length > 0))
@@ -274,49 +441,28 @@ namespace OpenMobile.Controls
                         count--;
                     }
 
-                    /*
-                    // Autofit size of string
-                    SizeF TextSize = Graphics.Graphics.MeasureString(tempStr, this.Font, this.Format);
-
-                    if (AutoFitText)
+                    if ((g.TextureGenerationRequired(textTexture)) || (count > 0))
                     {
-                        // Save original font size
-                        if (fontScaleFactor == 0)
-                            orgFontSize = this.font.Size;
-
-                        if (TextSize.Width > this.width)
-                        {   // Reduce text size to fit
-                            fontScaleFactor = TextSize.Width / this.width;
-                            this.font.Size = this.font.Size / fontScaleFactor;
-
-                            // Reset text texture to regenerate text
-                            textTexture = null;
-                        }
-                        // Restore string size if it was reduced and the string will fit
-                        if (fontScaleFactor > 0)
-                            if (TextSize.Width < this.width)
-                            {   // Restore font size
-                                this.font.Size = orgFontSize;
-                                fontScaleFactor = 0;
-
-                                // Reset text texture to regenerate text
-                                textTexture = null;
-                            }
-
-                    }
-                    */
-
-                    if ((textTexture == null) || (count > 0))
-                    {
-                        textTexture = g.GenerateStringTexture(tempStr, this.Font, Color.FromArgb((int)(tmp * Color.A), this.Color), this.Left, this.Top, this.Width + 5, this.Height, f);
+                        textTexture = g.GenerateStringTexture(textTexture, tempStr, this.Font, Color.FromArgb((int)(tmp * Color.A), this.Color), this.Left, this.Top, this.Width + 5, this.Height, f);
                     }
                     g.DrawImage(textTexture, this.Left, this.Top, this.Width + 5, this.Height, tmp);
                 }
+                */
             }
             // Skin debug function 
             if (_SkinDebug)
                 base.DrawSkinDebugInfo(g, Color.Purple);
 
         }
+
+        public object Clone(bool ClearEvents)
+        {
+            OMTextBox TextBox = (OMTextBox)base.Clone();
+            TextBox.OnClick = null;
+            TextBox.OnOSKShow = null;
+            TextBox.OnTextChange = null;
+            return TextBox;
+        }
+
     }
 }

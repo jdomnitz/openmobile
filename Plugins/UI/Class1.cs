@@ -26,6 +26,14 @@ using OpenMobile.Controls;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using OpenMobile.Data;
+using OpenMobile.helperFunctions.Forms;
+using OpenMobile.helperFunctions.Plugins;
+using OpenMobile.helperFunctions.Controls;
+using OpenMobile.helperFunctions.Graphics;
+using OpenMobile.helperFunctions.MenuObjects;
+using OpenMobile.helperFunctions;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace OpenMobile
 {
@@ -78,17 +86,17 @@ namespace OpenMobile
 
             if (Screen == -1)
             {   // Global message
-                for (int i = 0; i < theHost.ScreenCount; i++)
+                theHost.ForEachScreen(delegate(int screen)
                 {
-                    OMPanel p = manager[i];
-                    OMAnimatedLabel title = ((OMAnimatedLabel)p[6]);
+                    OMPanel p = manager[screen];
+                    OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
                     title.Transition(eAnimation.UnveilRight, message, 50);
-                }
+                });
             }
             else
             {   // Screen specific message
                 OMPanel p = manager[Screen];
-                OMAnimatedLabel title = ((OMAnimatedLabel)p[6]);
+                OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[Screen, "Label_UITopBar_TrackTitle"]; //6
                 title.Transition(eAnimation.UnveilRight, message, 50);
             }
             return true;
@@ -132,6 +140,9 @@ namespace OpenMobile
 
         public OMPanel loadPanel(string name,int screen)
         {
+            if (String.IsNullOrEmpty(name))
+                return manager[screen, "UI"];
+
             return manager[screen,name];
         }
 
@@ -145,312 +156,527 @@ namespace OpenMobile
         #region IBasePlugin Members
         IconManager icons = new IconManager();
         ScreenManager manager;
-        int volScreen = -1;
+        OMPanel UIPanel = null;
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel p = new OMPanel("");
+            UIPanel = new OMPanel("UI");
             theHost = host;
             manager = new ScreenManager(host.ScreenCount);
+
             tick.BeginInit();
             tick.EndInit();
             tick.Elapsed += new ElapsedEventHandler(tick_Elapsed);
             tick.Interval = 500;
             tick.Enabled = true;
+
             statusReset.BeginInit();
             statusReset.EndInit();
             statusReset.Elapsed += new ElapsedEventHandler(statusReset_Elapsed);
-            OMAnimatedLabel trackTitle = new OMAnimatedLabel(240,3,390,28);
-            trackTitle.TextAlignment = Alignment.CenterLeft;
-            trackTitle.Format = eTextFormat.BoldShadow;
-            trackTitle.ContiuousAnimation = eAnimation.Scroll;
-            trackTitle.TickSpeed = 250;
-            OMAnimatedLabel trackAlbum = new OMAnimatedLabel(240, 34, 490, 28);
-            trackAlbum.TextAlignment = Alignment.CenterLeft;
-            trackAlbum.Format = eTextFormat.BoldShadow;
-            trackAlbum.ContiuousAnimation = eAnimation.Scroll;
-            trackAlbum.TickSpeed = 250;
-            OMAnimatedLabel trackArtist = new OMAnimatedLabel(240, 64, 490, 28);
-            trackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
-            trackArtist.Format = eTextFormat.DropShadow;
-            trackArtist.ContiuousAnimation = eAnimation.Scroll;
-            trackArtist.TickSpeed = 250;
-            OMImage cover = new OMImage(150,2,90,85);
-            cover.Image = imageItem.NONE;
-            OMButton mediaButton = new OMButton(9,533,160,70);
-            mediaButton.Image = theHost.getSkinImage("MediaButton", true);
-            mediaButton.Transition = eButtonTransition.None;
-            mediaButton.FocusImage = theHost.getSkinImage("MediaButtonFocus", true);
-            mediaButton.Name = "UI.mediaButton";
-            mediaButton.OnClick += new userInteraction(mediaButton_OnClick);
-            OMButton Back = new OMButton(831,533,160,70);
-            Back.Image = theHost.getSkinImage("BackButton", true);
-            Back.FocusImage = theHost.getSkinImage("BackButtonFocus", true);
-            Back.OnClick += new userInteraction(Back_OnClick);
-            Back.Transition = eButtonTransition.None;
-            OMButton speech = new OMButton(670, 533, 160, 70);
-            speech.Image = theHost.getSkinImage("Speak",true);
-            speech.FocusImage = theHost.getSkinImage("SpeakFocus", true);
-            speech.Name = "UI.speech";
-            speech.Visible = false;
-            speech.OnClick += new userInteraction(speech_OnClick);
-            OMButton HomeButton = new OMButton(863,0,130,90);
-            HomeButton.Image = theHost.getSkinImage("HomeButton",true);
-            HomeButton.FocusImage = theHost.getSkinImage("HomeButtonFocus", true);
-            HomeButton.Name = "UI.HomeButton";
-            HomeButton.OnClick += new userInteraction(HomeButton_OnClick);
-            OMButton vol = new OMButton(6,0,130,90);
-            vol.Image = theHost.getSkinImage("VolumeButton");
-            vol.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
-            vol.Name = "UI.vol";
-            vol.Mode = eModeType.Resizing;
-            vol.Transition = eButtonTransition.None;
-            vol.OnClick += new userInteraction(vol_OnClick);
-            vol.OnLongClick += new userInteraction(vol_OnLongClick);
-            OMImage Image2 = new OMImage(0,0,1000,99);
-            Image2.Name = "UI.TopBar";
-            Image2.Image = theHost.getSkinImage("topBar");
-            OMImage mediaBar = new OMImage(0,620,1000,140);
-            mediaBar.Image = theHost.getSkinImage("mediaBar", true);
-            mediaBar.Transparency = 80;
-            OMSlider slider = new OMSlider(20,635,960,25,12,40);
-            slider.Name = "UI.Slider";
-            slider.Slider = theHost.getSkinImage("Slider");
-            slider.SliderBar = theHost.getSkinImage("Slider.Bar");
-            slider.OnSliderMoved += new OMSlider.slidermoved(slider_OnSliderMoved);
-            OMButton playButton = new OMButton(287,648,135,100);
-            playButton.Image = theHost.getSkinImage("Play");
-            playButton.DownImage = theHost.getSkinImage("Play.Highlighted");
-            playButton.OnClick += new userInteraction(playButton_OnClick);
-            playButton.Transition = eButtonTransition.None;
-            OMButton stopButton = new OMButton(425, 648,135, 100);
-            stopButton.Image = theHost.getSkinImage("Stop", true);
-            stopButton.DownImage = theHost.getSkinImage("Stop.Highlighted", true);
-            stopButton.OnClick += new userInteraction(stopButton_OnClick);
-            stopButton.Transition = eButtonTransition.None;
-            OMButton rewindButton = new OMButton(149, 648, 135, 100);
-            rewindButton.Image = theHost.getSkinImage("Rewind");
-            rewindButton.DownImage = theHost.getSkinImage("Rewind.Highlighted");
-            rewindButton.OnClick += new userInteraction(rewindButton_OnClick);
-            rewindButton.Transition = eButtonTransition.None;
-            OMButton fastForwardButton = new OMButton(564, 648, 135, 100);
-            fastForwardButton.OnClick += new userInteraction(fastForwardButton_OnClick);
-            fastForwardButton.Image = theHost.getSkinImage("fastForward");
-            fastForwardButton.DownImage = theHost.getSkinImage("fastForward.Highlighted");
-            fastForwardButton.Transition = eButtonTransition.None;
-            OMButton skipForwardButton = new OMButton(703, 648, 135, 100);
-            skipForwardButton.Image = theHost.getSkinImage("SkipForward", true);
-            skipForwardButton.DownImage = theHost.getSkinImage("SkipForward.Highlighted", true);
-            skipForwardButton.OnClick += new userInteraction(skipForwardButton_OnClick);
-            skipForwardButton.Transition = eButtonTransition.None;
-            OMButton skipBackwardButton = new OMButton(13, 648, 135, 100);
-            skipBackwardButton.Image = theHost.getSkinImage("SkipBackward", true);
-            skipBackwardButton.DownImage = theHost.getSkinImage("SkipBackward.Highlighted", true);
-            skipBackwardButton.OnClick += new userInteraction(skipBackwardButton_OnClick);
-            skipBackwardButton.Transition = eButtonTransition.None;
-            OMLabel elapsed = new OMLabel(878,650,140,100);
-            elapsed.Name = "UI.Elapsed";
-            elapsed.OutlineColor = Color.Blue;
-            elapsed.Format = eTextFormat.Glow;
-            elapsed.Font = new Font(Font.GenericSansSerif,26F);
-            OMButton random = new OMButton(840, 650, 55, 40);
-            random.Image = theHost.getSkinImage("random");
-            random.DownImage = theHost.getSkinImage("random.Highlighted");
-            random.OnClick += new userInteraction(random_OnClick);
-            //Speech
-            OMImage imgSpeak = new OMImage(350, 200, 300, 300);
-            imgSpeak.Name = "UI.imgSpeak";
-            imgSpeak.Visible = false;
-            OMLabel caption = new OMLabel(300, 150, 400, 60);
-            caption.Font = new Font(Font.GenericSerif, 48F);
-            caption.Format = eTextFormat.BoldShadow;
-            caption.Visible = false;
-            caption.Name = "UI.caption";
-            OMBasicShape shape = new OMBasicShape(0, 0, 1000, 600);
-            shape.Shape = shapes.Rectangle;
-            shape.FillColor = Color.FromArgb(130, Color.Black);
-            shape.Visible = false;
-            OMButton icon1 = new OMButton(778, 4, 80, 85);
-            icon1.Name = "UI.Icon1";
-            icon1.OnClick += new userInteraction(icon_OnClick);
-            OMButton icon2 = new OMButton(727, 1, 50, 90);
-            icon2.Name = "UI.Icon2";
-            icon2.OnClick += new userInteraction(icon_OnClick);
-            OMButton icon3 = new OMButton(676, 1, 50, 90);
-            icon3.Name = "UI.Icon3";
-            icon3.OnClick += new userInteraction(icon_OnClick);
-            OMButton icon4 = new OMButton(625, 1, 50, 90);
-            icon4.Name = "UI.Icon4";
-            icon4.OnClick += new userInteraction(icon_OnClick);
-            VolumeBar volume = new VolumeBar(6, -510, 130, 510);
-            volume.Visible = false;
-            volume.OnSliderMoved += new userInteraction(volumeChange);
+
+            MediaBarVisible = new bool[theHost.ScreenCount];
+            VolumeBarVisible = new bool[theHost.ScreenCount];
+            VolumeBarTimer = new Timer[theHost.ScreenCount];
+
+            OMBasicShape Shape_VideoBackground = new OMBasicShape("Shape_VideoBackground", 0, 0, 1000, 600);
+            Shape_VideoBackground.Shape = shapes.Rectangle;
+            Shape_VideoBackground.FillColor = Color.Black;
+            Shape_VideoBackground.Visible = false;
+            UIPanel.addControl(Shape_VideoBackground);
+
+            #region BottomBar (Media)
+
+            OMButton Button_UIBottomBar_Back = new OMButton("Button_UIBottomBar_Back", 831, 533, 160, 70);
+            Button_UIBottomBar_Back.Image = theHost.getSkinImage("BackButton", true);
+            Button_UIBottomBar_Back.FocusImage = theHost.getSkinImage("BackButtonFocus", true);
+            Button_UIBottomBar_Back.OnClick += new userInteraction(Back_OnClick);
+            Button_UIBottomBar_Back.Transition = eButtonTransition.None;
+            UIPanel.addControl(Button_UIBottomBar_Back);
+
+            OMImage Image_UIMediaBar_Background = new OMImage("Image_UIMediaBar_Background", 0, 620, 1000, 140);
+            Image_UIMediaBar_Background.Image = theHost.getSkinImage("mediaBar", true);
+            Image_UIMediaBar_Background.Transparency = 80;
+            UIPanel.addControl(Image_UIMediaBar_Background);
+
+            OMButton Button_UIMediaBar_Media = new OMButton("Button_UIMediaBar_Media", 9, 533, 160, 70);
+            Button_UIMediaBar_Media.Image = theHost.getSkinImage("MediaButton", true);
+            Button_UIMediaBar_Media.Transition = eButtonTransition.None;
+            Button_UIMediaBar_Media.FocusImage = theHost.getSkinImage("MediaButtonFocus", true);
+            Button_UIMediaBar_Media.OnClick += new userInteraction(mediaButton_OnClick);
+            UIPanel.addControl(Button_UIMediaBar_Media);
+
+            OMSlider Slider_UIMediaBar_Slider = new OMSlider("Slider_UIMediaBar_Slider", 20, 630, 820, 25, 12, 40);
+            Slider_UIMediaBar_Slider.Slider = theHost.getSkinImage("Slider");
+            Slider_UIMediaBar_Slider.SliderBar = theHost.getSkinImage("Slider.Bar");
+            Slider_UIMediaBar_Slider.Maximum = 0;
+            Slider_UIMediaBar_Slider.OnSliderMoved += new OMSlider.slidermoved(slider_OnSliderMoved);
+            UIPanel.addControl(Slider_UIMediaBar_Slider);
+
+            OMButton Button_UIMediaBar_Play = new OMButton("Button_UIMediaBar_Play", 287, 648, 135, 100);
+            Button_UIMediaBar_Play.Image = theHost.getSkinImage("Play");
+            Button_UIMediaBar_Play.DownImage = theHost.getSkinImage("Play.Highlighted");
+            Button_UIMediaBar_Play.OnClick += new userInteraction(playButton_OnClick);
+            Button_UIMediaBar_Play.Transition = eButtonTransition.None;
+            UIPanel.addControl(Button_UIMediaBar_Play);
+
+            OMButton Button_UIMediaBar_Stop = new OMButton("Button_UIMediaBar_Stop", 425, 648, 135, 100);
+            Button_UIMediaBar_Stop.Image = theHost.getSkinImage("Stop", true);
+            Button_UIMediaBar_Stop.DownImage = theHost.getSkinImage("Stop.Highlighted", true);
+            Button_UIMediaBar_Stop.OnClick += new userInteraction(stopButton_OnClick);
+            Button_UIMediaBar_Stop.Transition = eButtonTransition.None;
+            UIPanel.addControl(Button_UIMediaBar_Stop);
+
+            OMButton Button_UIMediaBar_Rewind = new OMButton("Button_UIMediaBar_Rewind", 149, 648, 135, 100);
+            Button_UIMediaBar_Rewind.Image = theHost.getSkinImage("Rewind");
+            Button_UIMediaBar_Rewind.DownImage = theHost.getSkinImage("Rewind.Highlighted");
+            Button_UIMediaBar_Rewind.OnClick += new userInteraction(rewindButton_OnClick);
+            Button_UIMediaBar_Rewind.Transition = eButtonTransition.None;
+            UIPanel.addControl(Button_UIMediaBar_Rewind);
+
+            OMButton Button_UIMediaBar_FastForward = new OMButton("Button_UIMediaBar_FastForward", 564, 648, 135, 100);
+            Button_UIMediaBar_FastForward.OnClick += new userInteraction(fastForwardButton_OnClick);
+            Button_UIMediaBar_FastForward.Image = theHost.getSkinImage("fastForward");
+            Button_UIMediaBar_FastForward.DownImage = theHost.getSkinImage("fastForward.Highlighted");
+            Button_UIMediaBar_FastForward.Transition = eButtonTransition.None;
+            UIPanel.addControl(Button_UIMediaBar_FastForward);
+
+            OMButton Button_UIMediaBar_SkipForward = new OMButton("Button_UIMediaBar_SkipForward", 703, 648, 135, 100);
+            Button_UIMediaBar_SkipForward.Image = theHost.getSkinImage("SkipForward", true);
+            Button_UIMediaBar_SkipForward.DownImage = theHost.getSkinImage("SkipForward.Highlighted", true);
+            Button_UIMediaBar_SkipForward.OnClick += new userInteraction(skipForwardButton_OnClick);
+            Button_UIMediaBar_SkipForward.Transition = eButtonTransition.None;
+            UIPanel.addControl(Button_UIMediaBar_SkipForward);
+
+            OMButton Button_UIMediaBar_SkipBackward = new OMButton("Button_UIMediaBar_SkipBackward", 13, 648, 135, 100);
+            Button_UIMediaBar_SkipBackward.Image = theHost.getSkinImage("SkipBackward", true);
+            Button_UIMediaBar_SkipBackward.DownImage = theHost.getSkinImage("SkipBackward.Highlighted", true);
+            Button_UIMediaBar_SkipBackward.OnClick += new userInteraction(skipBackwardButton_OnClick);
+            Button_UIMediaBar_SkipBackward.Transition = eButtonTransition.None;
+            UIPanel.addControl(Button_UIMediaBar_SkipBackward);
+
+            OMLabel Label_UIMediaBar_Elapsed = new OMLabel("Label_UIMediaBar_Elapsed", 840, 630, 160, 22);
+            Label_UIMediaBar_Elapsed.OutlineColor = Color.Blue;
+            Label_UIMediaBar_Elapsed.Font = new Font(Font.GenericSansSerif, 16F);
+            Label_UIMediaBar_Elapsed.Format = eTextFormat.Outline;
+            UIPanel.addControl(Label_UIMediaBar_Elapsed);
+
+            OMButton Button_UIMediaBar_Random = new OMButton("Button_UIMediaBar_Random", 845, 650, 55, 40);
+            Button_UIMediaBar_Random.Image = theHost.getSkinImage("random");
+            Button_UIMediaBar_Random.DownImage = theHost.getSkinImage("random.Highlighted");
+            Button_UIMediaBar_Random.OnClick += new userInteraction(random_OnClick);
+            UIPanel.addControl(Button_UIMediaBar_Random);
+
+            OMButton Button_UIMediaBar_Zone = DefaultControls.GetButton("Button_UIMediaBar_Zone", 845, 695, 140, 50, "", "Zone");
+            Button_UIMediaBar_Zone.OnClick += new userInteraction(Button_UIMediaBar_Zone_OnClick);
+            UIPanel.addControl(Button_UIMediaBar_Zone);
+
+            #endregion
+
+            #region Top bar
+
+            OMImage Image_UITopBar_Background = new OMImage("Image_UITopBar_Background", 0, 0, 1000, 99);
+            Image_UITopBar_Background.Image = theHost.getSkinImage("topBar");
+            UIPanel.addControl(Image_UITopBar_Background);
+
+            OMAnimatedLabel Label_UITopBar_TrackTitle = new OMAnimatedLabel("Label_UITopBar_TrackTitle", 240, 3, 490, 28);
+            Label_UITopBar_TrackTitle.TextAlignment = Alignment.CenterLeft;
+            Label_UITopBar_TrackTitle.Format = eTextFormat.BoldShadow;
+            Label_UITopBar_TrackTitle.ContiuousAnimation = eAnimation.Scroll;
+            UIPanel.addControl(Label_UITopBar_TrackTitle);
+
+            OMAnimatedLabel Label_UITopBar_TrackAlbum = new OMAnimatedLabel("Label_UITopBar_TrackAlbum", 240, 34, 490, 28);
+            Label_UITopBar_TrackAlbum.TextAlignment = Alignment.CenterLeft;
+            Label_UITopBar_TrackAlbum.Format = eTextFormat.BoldShadow;
+            Label_UITopBar_TrackAlbum.ContiuousAnimation = eAnimation.Scroll;
+            UIPanel.addControl(Label_UITopBar_TrackAlbum);
+
+            OMAnimatedLabel Label_UITopBar_TrackArtist = new OMAnimatedLabel("Label_UITopBar_TrackArtist", 240, 64, 490, 28);
+            Label_UITopBar_TrackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
+            Label_UITopBar_TrackArtist.Format = eTextFormat.DropShadow;
+            Label_UITopBar_TrackArtist.ContiuousAnimation = eAnimation.Scroll;
+            UIPanel.addControl(Label_UITopBar_TrackArtist);
+
+            OMImage Image_UITopBar_Cover = new OMImage("Image_UITopBar_Cover", 143, 3, 90, 90);
+            Image_UITopBar_Cover.Image = imageItem.NONE;
+            UIPanel.addControl(Image_UITopBar_Cover);
+
+            OMButton Button_UITopBar_Home = new OMButton("Button_UITopBar_Home", 863, 0, 130, 90);
+            Button_UITopBar_Home.Image = theHost.getSkinImage("HomeButton", true);
+            Button_UITopBar_Home.FocusImage = theHost.getSkinImage("HomeButtonFocus", true);
+            Button_UITopBar_Home.OnClick += new userInteraction(HomeButton_OnClick);
+            UIPanel.addControl(Button_UITopBar_Home);
+
+            OMButton Button_UITopBar_Volume = new OMButton("Button_UITopBar_Volume", 6, 0, 130, 90);
+            Button_UITopBar_Volume.Image = theHost.getSkinImage("VolumeButton");
+            Button_UITopBar_Volume.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
+            Button_UITopBar_Volume.Mode = eModeType.Resizing;
+            Button_UITopBar_Volume.Transition = eButtonTransition.None;
+            Button_UITopBar_Volume.OnClick += new userInteraction(vol_OnClick);
+            Button_UITopBar_Volume.OnLongClick += new userInteraction(vol_OnLongClick);
+            UIPanel.addControl(Button_UITopBar_Volume);
+
+            #region Icons
+
+            OMButton Button_UITopBar_Icon1 = new OMButton("Button_UITopBar_Icon1", 778, 4, 80, 85);
+            Button_UITopBar_Icon1.OnClick += new userInteraction(icon_OnClick);
+            UIPanel.addControl(Button_UITopBar_Icon1);
+
+            OMButton Button_UITopBar_Icon2 = new OMButton("Button_UITopBar_Icon2", 727, 1, 50, 90);
+            Button_UITopBar_Icon2.OnClick += new userInteraction(icon_OnClick);
+            UIPanel.addControl(Button_UITopBar_Icon2);
+
+            OMButton Button_UITopBar_Icon3 = new OMButton("Button_UITopBar_Icon3", 676, 1, 50, 90);
+            Button_UITopBar_Icon3.OnClick += new userInteraction(icon_OnClick);
+            UIPanel.addControl(Button_UITopBar_Icon3);
+
+            OMButton Button_UITopBar_Icon4 = new OMButton("Button_UITopBar_Icon4", 625, 1, 50, 90);
+            Button_UITopBar_Icon4.OnClick += new userInteraction(icon_OnClick);
+            UIPanel.addControl(Button_UITopBar_Icon4);
+
+            icons.OnIconsChanged += new IconManager.IconsChanged(icons_OnIconsChanged);
+
+            #endregion
+
+            VolumeBar VolumeBar_UITopBar_Volume = new VolumeBar("VolumeBar_UITopBar_Volume", 6, -510, 130, 510);
+            VolumeBar_UITopBar_Volume.Visible = false;
+            VolumeBar_UITopBar_Volume.OnSliderMoved += new userInteraction(volumeChange);
+            UIPanel.addControl(VolumeBar_UITopBar_Volume);
+
+            #endregion
+
+            #region Speech
+
+            OMButton Button_Speech_Speech = new OMButton("Button_Speech_Speech", 670, 533, 160, 70);
+            Button_Speech_Speech.Image = theHost.getSkinImage("Speak", true);
+            Button_Speech_Speech.FocusImage = theHost.getSkinImage("SpeakFocus", true);
+            Button_Speech_Speech.Visible = false;
+            Button_Speech_Speech.OnClick += new userInteraction(speech_OnClick);
+            UIPanel.addControl(Button_Speech_Speech);
+
+            OMImage Image_Speech_Speech = new OMImage("Image_Speech_Speech", 350, 200, 300, 300);
+            Image_Speech_Speech.Visible = false;
+            UIPanel.addControl(Image_Speech_Speech);
+
+            OMLabel Label_Speech_Caption = new OMLabel("Label_Speech_Caption", 300, 150, 400, 60);
+            Label_Speech_Caption.Font = new Font(Font.GenericSerif, 48F);
+            Label_Speech_Caption.Format = eTextFormat.BoldShadow;
+            Label_Speech_Caption.Visible = false;
+            UIPanel.addControl(Label_Speech_Caption);
+
+            OMBasicShape Shape_Speech_BackgroundBlock = new OMBasicShape("Shape_Speech_BackgroundBlock", 0, 0, 1000, 600);
+            Shape_Speech_BackgroundBlock.Shape = shapes.Rectangle;
+            Shape_Speech_BackgroundBlock.FillColor = Color.FromArgb(130, Color.Black);
+            Shape_Speech_BackgroundBlock.Visible = false;
+            UIPanel.addControl(Shape_Speech_BackgroundBlock);
+
+            #endregion
+            
+            // TODO : Move clock and date to main menu skin
+            //OMLabel clocktime = new OMLabel(350, 522, 0, 0);
+            //OMLabel clockdate = new OMLabel(350, 572, 0, 0);
+
+            /*
             OMLabel clocktime = new OMLabel(350, 522, 300, 60);
             clocktime.TextAlignment = Alignment.CenterCenter;
             clocktime.Font = new Font(Font.GenericSansSerif, 32F);
             clocktime.Format = eTextFormat.BoldShadow;
             clocktime.Name = "UI.clocktime";
             clocktime.sensorName = "SystemSensors.Time";
+            clocktime.Visible = false;
             OMLabel clockdate = new OMLabel(350, 572, 300, 30);
             clockdate.TextAlignment = Alignment.CenterCenter;
             clockdate.Font = new Font(Font.GenericSansSerif, 20F);
             clockdate.Format = eTextFormat.BoldShadow;
             clockdate.Name = "UI.clockdate";
+            clockdate.Visible = false;
             clockdate.sensorName = "SystemSensors.LongDate";
+            */
             
-            //***
-            p.addControl(Back);
-            p.addControl(speech);
-            p.addControl(mediaButton);
-            p.addControl(mediaBar);
-            p.addControl(Image2);
-            p.addControl(random); //5
-            p.addControl(trackTitle);
-            p.addControl(trackAlbum);
-            p.addControl(trackArtist);
-            p.addControl(cover);
-            p.addControl(playButton); //10
-            p.addControl(stopButton);
-            p.addControl(rewindButton);
-            p.addControl(skipBackwardButton);
-            p.addControl(skipForwardButton);
-            p.addControl(fastForwardButton);
-            p.addControl(elapsed);
-            p.addControl(slider);
-            p.addControl(HomeButton);
-            p.addControl(shape);
-            p.addControl(caption); //20
-            p.addControl(imgSpeak);
-            p.addControl(icon1);
-            p.addControl(icon2);
-            p.addControl(icon3);
-            p.addControl(icon4);
-            p.addControl(volume);
-            p.addControl(vol); //27
-            p.addControl(clocktime);
-            p.addControl(clockdate);
-            icons.OnIconsChanged += new IconManager.IconsChanged(icons_OnIconsChanged);
-            p.Priority = ePriority.High;
-            p.UIPanel = true;
-            manager.loadPanel(p);
+            UIPanel.Priority = ePriority.High;
+            UIPanel.UIPanel = true;
+
+            UIPanel.Entering += new PanelEvent(UIPanel_Entering);
+
+            manager.loadPanel(UIPanel);
+
+            #region OM Background panel
+
             OMPanel background = new OMPanel("background");
-            background.BackgroundType = backgroundStyle.Gradiant;
-            background.BackgroundColor1 = Color.FromArgb(0, 0, 20);
-            background.BackgroundColor2 = Color.FromArgb(0, 0, 4);
+            background.BackgroundType = backgroundStyle.SolidColor;
+            background.BackgroundColor1 = Color.Black;
             background.Priority = ePriority.Low;
             background.UIPanel = true;
             background.Forgotten = true;
             manager.loadPanel(background);
+
+            #endregion
+
             theHost.OnMediaEvent += theHost_OnMediaEvent;
             theHost.OnSystemEvent += theHost_OnSystemEvent;
+
             return eLoadStatus.LoadSuccessful;
         }
 
-        void random_OnClick(OMControl sender, int screen)
-        {
-            theHost.setRandom(theHost.instanceForScreen(screen), (sender.Tag == null));
+        void UIPanel_Entering(OMPanel sender, int screen)
+        {   // Update initial data
+
+            // Update active zone
+            Zone zone = theHost.ZoneHandler.GetActiveZone(screen);
+            OMButton b = (OMButton)UIPanel[screen, "Button_UIMediaBar_Zone"];
+            b.OverlayImage = new imageItem(ButtonGraphic.GetImage(b.Width, b.Height, ButtonGraphic.ImageTypes.ButtonForeground, "", zone.Name));
         }
 
-        void vol_OnLongClick(OMControl sender, int screen)
+        void Button_UIMediaBar_Zone_OnClick(OMControl sender, int screen)
         {
-            object o;
-            theHost.getData(eGetData.GetSystemVolume, "", theHost.instanceForScreen(screen).ToString(), out o);
-            if (o == null)
+            // Popup menu - Zones. Returns the tag in the selected item which holds the zone object.
+            MenuPopup Zones = new MenuPopup("Select a zone", MenuPopup.ReturnTypes.Tag);
+
+            // Add zones to the list (Excluding if already present in the sender textbox)
+            foreach (Zone zone in theHost.ZoneHandler.Zones)
+            {
+                // Add zone to list
+                OMListItem ZoneItem = new OMListItem(zone.Name, zone as object);
+                ZoneItem.image = OImage.FromWebdingsFont(50, 50, "²", Color.Gray);
+                Zones.AddMenuItem(ZoneItem);
+            }
+
+            // Show menu and get selected item
+            Zone SelectedZone = Zones.ShowMenu(screen) as Zone;
+            if (SelectedZone == null)
+            {   // No change
                 return;
-            if (((int)o)==-1)
-                theHost.execute(eFunction.setSystemVolume,"-2",theHost.instanceForScreen(screen).ToString());
+            }
             else
-                theHost.execute(eFunction.setSystemVolume,"-1",theHost.instanceForScreen(screen).ToString());
+            {   // Change to new zone
+                theHost.ZoneHandler.SetActiveZone(screen, SelectedZone);
+            }
         }
-        System.Timers.Timer volTmr;
+
+        void HomeButton_OnClick(OMControl sender, int screen)
+        {
+            if (theHost.execute(eFunction.TransitionFromAny, screen.ToString()))
+            {
+                theHost.execute(eFunction.hideVideoWindow, screen.ToString());
+                theHost.execute(eFunction.clearHistory, screen.ToString());
+                theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
+                theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            }
+        }
+
+        void Back_OnClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.goBack, screen.ToString());
+        }
+
+        #region Mediabar up/down control
+
+        private List<OMControl> GetMediaControls(int screen)
+        {
+            return UIPanel.getPanelAtScreen(screen).Controls.FindAll(x => x.Name.Contains("UIMediaBar"));
+        }
+        private bool[] MediaBarVisible = null;
+        private void AnimateMediaBar(bool up, int screen)
+        {
+            int AnimationSteps = 8;
+            int Steps = 0;
+            List<OMControl> MediaControls = GetMediaControls(screen);
+            if (up)
+            {   // Move media bar up
+                while (Steps < AnimationSteps)
+                {
+                    foreach (OMControl control in MediaControls)
+                    {
+                        if (control.Name == "Button_UIMediaBar_Media")
+                            control.Top -= 18;
+                        else
+                            control.Top -= 20;
+                    }
+                    Steps++;
+                    if (theHost.GraphicsLevel == eGraphicsLevel.Standard)
+                        Thread.Sleep(10);
+                }
+                // Readjust placement of menubutton to match mediabar
+                UIPanel[screen,"Button_UIMediaBar_Media"].Top += 1;
+                MediaBarVisible[screen] = true;
+            }
+            else
+            {   // Move media bar down
+                UIPanel[screen, "Button_UIMediaBar_Media"].Top -= 1;
+                while (Steps < AnimationSteps)
+                {
+                    foreach (OMControl control in MediaControls)
+                    {
+                        if (control.Name == "Button_UIMediaBar_Media")
+                            control.Top += 18;
+                        else
+                            control.Top += 20;
+                    }
+                    Steps++;
+                    if (theHost.GraphicsLevel == eGraphicsLevel.Standard)
+                        Thread.Sleep(10);
+                }
+                MediaBarVisible[screen] = false;
+            }
+        }
+        void mediaButton_OnClick(OMControl sender, int screen)
+        {
+            // Initialize variable 
+            if (MediaBarVisible == null)
+                MediaBarVisible = new bool[theHost.ScreenCount];
+
+            if (!MediaBarVisible[screen])
+            {   // Show media bar
+                AnimateMediaBar(true, screen);
+            }
+            else 
+            {   // Hide media bar
+                AnimateMediaBar(false, screen);
+            }
+        }
+
+        #endregion
+
+        #region Volumecontrol
+
+        private bool[] VolumeBarVisible = null;
+        private Timer[] VolumeBarTimer = null;
         void vol_OnClick(OMControl sender, int screen)
         {
+            // Initialize visibility variable 
+            if (VolumeBarVisible == null)
+                VolumeBarVisible = new bool[theHost.ScreenCount];
+
+            // Initialize timer variable 
+            if (VolumeBarTimer == null)
+                VolumeBarTimer = new Timer[theHost.ScreenCount];
+
             lock (sender)
             {
-                volScreen= screen;
-                if (sender.Top > 0)
-                {
-                    if (sender.Top == 511)
-                        volTmr_Elapsed(null, null);
-                    return;
-                }
-                theHost.SetVideoPosition(theHost.instanceForScreen(screen), new Rectangle(136, 100, 864, 368));
-                manager[screen][26].Visible = true;
-                volTmr = new System.Timers.Timer(2500);
-                volTmr.Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
-                OMButton btn = (OMButton)manager[screen][27];
+                AnimateVolumeBar(!VolumeBarVisible[screen], screen);
+            }
+        }
+
+        private void AnimateVolumeBar(bool show, int screen)
+        {
+            OMButton btn = (OMButton)UIPanel[screen, "Button_UITopBar_Volume"];
+            VolumeBar vol = (VolumeBar)UIPanel[screen, "VolumeBar_UITopBar_Volume"];
+
+            // Errorcheck
+            if (btn == null || vol == null)
+                return;
+
+            if (show)
+            {
+                // Set visibility state
+                VolumeBarVisible[screen] = true;
+
+                // Move video window so that we can draw the volumecontrol
+                theHost.SetVideoPosition(screen, new Rectangle(136, 100, 864, 368));
+
+                // Show volumebar control
+                vol.Visible = true;
+
+                // Animate control  
                 for (int i = 0; i <= 10; i++)
                 {
-                    manager[screen][26].Top = (51 * i) - 510;
+                    vol.Top = (51 * i) - 510;
                     btn.Top = (int)(51.1 * i);
                     Thread.Sleep(50);
                 }
-                if (volTmr != null)
-                    volTmr.Enabled = true;
+
+                // Activate timeout timer
+                VolumeBarTimer[screen] = new Timer(2500);
+                VolumeBarTimer[screen].Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
+                VolumeBarTimer[screen].Screen = screen;
+                VolumeBarTimer[screen].Tag = UIPanel[screen, "VolumeBar_UITopBar_Volume"];
+                VolumeBarTimer[screen].Enabled = true;
+            }
+            else
+            {
+                // Deactivate timeout timer
+                if (VolumeBarTimer[screen] != null)
+                {
+                    VolumeBarTimer[screen].Enabled = false;
+                    VolumeBarTimer[screen].Dispose();
+                    VolumeBarTimer[screen] = null;
+                }
+
+                // Set visibility state
+                VolumeBarVisible[screen] = false;
+
+                // Animate control  
+                for (int i = 0; i <= 10; i++)
+                {
+                    vol.Top = -(51 * i);
+                    btn.Top = 511 - (int)(51.1 * i);
+                    Thread.Sleep(50);
+                }
+
+                // Hide volumebar
+                vol.Visible = false;
+
+                // Move video window back to original location
+                theHost.SetVideoPosition(screen, new Rectangle(0, 100, 1000, 368));
             }
         }
 
         void volTmr_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (volScreen >= 0)
-            {
-                OMButton btn = (OMButton)manager[volScreen][27];
-                for (int i = 0; i <= 10; i++)
-                {
-                    if (volScreen >= 0)
-                    {
-                        btn.Parent[26].Top = -(51 * i);
-                        btn.Top = 511 - (int)(51.1 * i);
-                        Thread.Sleep(50);
-                    }
-                }
-                if (btn!=null)
-                    btn.Parent[26].Visible = false;
-                theHost.SetVideoPosition(theHost.instanceForScreen(volScreen), new Rectangle(0, 100, 1000, 368));
-            }
-            volScreen = -1;
-            if (volTmr != null)
-            {
-                System.Timers.Timer tmp = volTmr;
-                volTmr = null;
-                tmp.Dispose();
-            }
+            Timer tmr = (Timer)sender;
+            tmr.Enabled = false;
+            AnimateVolumeBar(false, tmr.Screen);
         }
 
         void volumeChange(OMControl sender, int screen)
         {
-            if (volTmr != null)
-            {
-                volTmr.Enabled = false;
-                volTmr.Enabled = true;
+            // Reset autohide timer
+            if (VolumeBarTimer[screen] != null)
+            {   
+                VolumeBarTimer[screen].Enabled = false;
+                VolumeBarTimer[screen].Enabled = true;
             }
-            if (sender.Top==0)
-                theHost.execute(eFunction.setSystemVolume, ((VolumeBar)sender).Value.ToString(), theHost.instanceForScreen(screen).ToString());
+
+            // Set volume (only if control is fully visible, VolumeBarVisible is set to false before it starts to animate)
+            theHost.execute(eFunction.setSystemVolume, ((VolumeBar)sender).Value.ToString(), screen.ToString());
         }
+
+        void vol_OnLongClick(OMControl sender, int screen)
+        {
+            // Mute and unmute volume
+            int Volume = (int)theHost.getData(eGetData.GetSystemVolume, "", screen.ToString());
+            if (Volume == -1)
+                theHost.execute(eFunction.setSystemVolume, "-2", screen.ToString());
+            else
+                theHost.execute(eFunction.setSystemVolume, "-1", screen.ToString());
+        }
+
+        #endregion
+
+        #region Icons
 
         void icon_OnClick(OMControl sender, int screen)
         {
             IconManager.UIIcon icon;
-            switch(sender.Name)
+            switch (sender.Name)
             {
-                case "UI.Icon1":
-                    icon=icons.getIcon(1,true);
+                case "Button_UITopBar_Icon1":
+                    icon = icons.getIcon(1, true);
                     if (icon.plugin == null)
                         return;
-                    theHost.sendMessage(icon.plugin, "UI|"+screen.ToString(), "IconClicked", ref icon);
+                    theHost.sendMessage(icon.plugin, "UI|" + screen.ToString(), "IconClicked", ref icon);
                     break;
-                case "UI.Icon2":
+                case "Button_UITopBar_Icon2":
                     icon = icons.getIcon(1, false);
                     if (icon.plugin == null)
                         return;
                     theHost.sendMessage(icon.plugin, "UI|" + screen.ToString(), "IconClicked", ref icon);
                     break;
-                case "UI.Icon3":
+                case "Button_UITopBar_Icon3":
                     icon = icons.getIcon(2, false);
                     if (icon.plugin == null)
                         return;
                     theHost.sendMessage(icon.plugin, "UI|" + screen.ToString(), "IconClicked", ref icon);
                     break;
-                case "UI.Icon4":
+                case "Button_UITopBar_Icon4":
                     icon = icons.getIcon(3, false);
                     if (icon.plugin == null)
                         return;
@@ -461,115 +687,394 @@ namespace OpenMobile
 
         void icons_OnIconsChanged()
         {
-            for (int i = 0; i < theHost.ScreenCount; i++)
+            theHost.ForEachScreen(delegate(int screen)
             {
-                ((OMButton)manager[i][22]).Image = new imageItem(icons.getIcon(1, true).image.image);
-                ((OMButton)manager[i][23]).Image = new imageItem(icons.getIcon(1, false).image.image);
-                ((OMButton)manager[i][24]).Image = new imageItem(icons.getIcon(2, false).image.image);
-                ((OMButton)manager[i][25]).Image = new imageItem(icons.getIcon(3, false).image.image);
+                ((OMButton)UIPanel[screen, "Button_UITopBar_Icon1"]).Image = new imageItem(icons.getIcon(1, true).image.image);
+                ((OMButton)UIPanel[screen, "Button_UITopBar_Icon2"]).Image = new imageItem(icons.getIcon(1, false).image.image);
+                ((OMButton)UIPanel[screen, "Button_UITopBar_Icon3"]).Image = new imageItem(icons.getIcon(2, false).image.image);
+                ((OMButton)UIPanel[screen, "Button_UITopBar_Icon4"]).Image = new imageItem(icons.getIcon(3, false).image.image);
+            });
+        }
+
+        #endregion
+
+        #region Media controls
+
+        void slider_OnSliderMoved(OMSlider sender, int screen)
+        {   // Set playback position
+            theHost.execute(eFunction.setPosition, screen.ToString(), sender.Value.ToString());
+        }
+
+        void playButton_OnClick(OMControl sender, int screen)
+        {   // Start / Pause media playback
+
+            // Get media status
+            object o = theHost.getData(eGetData.GetMediaStatus, "", screen.ToString());
+            
+            // Errorcheck
+            if (o == null)
+                return;
+
+            // Is a normal player active (mp3, video etc)
+            if (o.GetType() == typeof(ePlayerStatus))
+            {   // Yes this is a normal player 
+                ePlayerStatus status = (ePlayerStatus)o;
+
+                // Is any media playing in normal state?
+                if (status == ePlayerStatus.Playing)
+                {   // Yes, let's pause it
+                    if (theHost.execute(eFunction.Pause, screen.ToString()))
+                    {   // Change button icon on all screens
+                        theHost.ForEachScreen(delegate(int LocalScreen)
+                        {   // Let's make sure we only update the correct screens, 
+                            // we therefor try to match each screens active zone to the one that initiated this command 
+                            // if they are the same we update the icon (more than one screen can be set to the same zone)
+                            if (theHost.ZoneHandler.GetZone(LocalScreen) == theHost.ZoneHandler.GetZone(screen))
+                            {
+                                OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                                btn.Image = theHost.getSkinImage("Play");
+                                btn.DownImage = theHost.getSkinImage("Play.Highlighted");
+                            }
+                        });
+                    }
+                }
+                
+                // Is the current state is fast playback, let's set it back to normal
+                else if ((status == ePlayerStatus.FastForwarding) || (status == ePlayerStatus.Rewinding))
+                {
+                    theHost.execute(eFunction.setPlaybackSpeed, screen.ToString(), "1");
+                    theHost.ForEachScreen(delegate(int LocalScreen)
+                    {   // Let's make sure we only update the correct screens, 
+                        // we therefor try to match each screens active zone to the one that initiated this command 
+                        // if they are the same we update the icon (more than one screen can be set to the same zone)
+                        if (theHost.ZoneHandler.GetZone(LocalScreen) == theHost.ZoneHandler.GetZone(screen))
+                        {
+                            OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                            btn.Image = theHost.getSkinImage("Pause");
+                            btn.DownImage = theHost.getSkinImage("Pause.Highlighted");
+                        }
+                    });
+                }
+
+                else
+                {   // Current state is stopped, let's start to play
+                    if (theHost.execute(eFunction.Play, screen.ToString()))
+                    {   // Change button icon on all screens
+                        theHost.ForEachScreen(delegate(int LocalScreen)
+                        {   // Let's make sure we only update the correct screens, 
+                            // we therefor try to match each screens active zone to the one that initiated this command 
+                            // if they are the same we update the icon (more than one screen can be set to the same zone)
+                            if (theHost.ZoneHandler.GetZone(LocalScreen) == theHost.ZoneHandler.GetZone(screen))
+                            {
+                                OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                                btn.Image = theHost.getSkinImage("Play");
+                                btn.DownImage = theHost.getSkinImage("Play.Highlighted");
+                            }
+                        });
+                    }
+                }                
+            }
+
+            // Is current media TunedContent (Radio)?
+            else if (o.GetType() == typeof(stationInfo))
+            {   // Yes, let's pause it
+                if (theHost.execute(eFunction.Pause, screen.ToString()))
+                {
+                    theHost.ForEachScreen(delegate(int LocalScreen)
+                    {   // Let's make sure we only update the correct screens, 
+                        // we therefor try to match each screens active zone to the one that initiated this command 
+                        // if they are the same we update the icon (more than one screen can be set to the same zone)
+                        if (theHost.ZoneHandler.GetZone(LocalScreen) == theHost.ZoneHandler.GetZone(screen))
+                        {
+                            OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                            btn.Image = theHost.getSkinImage("Play");
+                            btn.DownImage = theHost.getSkinImage("Play.Highlighted");
+                        }
+                    });
+                }
             }
         }
 
-        void speech_OnClick(OMControl sender, int screen)
-        {
-            theHost.execute(eFunction.listenForSpeech);
-            showSpeech(screen);
-        }
-        private void showSpeech(int screen)
-        {
-            ((OMImage)manager[screen][21]).Image = theHost.getSkinImage("Speech");
-            ((OMLabel)manager[screen][20]).Text = "Speak Now";
-            manager[screen][21].Visible = true;
-            manager[screen][20].Visible = true;
-            manager[screen][19].Visible = true;
-        }
-        private void hideSpeech(int screen)
-        {
-            manager[screen][21].Visible = false;
-            manager[screen][20].Visible = false;
-            manager[screen][19].Visible = false;
-        }
-        void statusReset_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            for(int i=0;i<theHost.ScreenCount;i++)
-                ((OMLabel)manager[i][6]).Text=theHost.getPlayingMedia(theHost.instanceForScreen(i)).Name;
-            statusReset.Enabled = false;
+        void stopButton_OnClick(OMControl sender, int screen)
+        {   // Stop media playback
+            theHost.execute(eFunction.Stop, screen.ToString());
+
+            // Unload any tuned content
+            theHost.execute(eFunction.unloadTunedContent, screen.ToString());
         }
 
-        void skipBackwardButton_OnClick(OMControl sender, int screen)
-        {
-            if (theHost.execute(eFunction.stepBackward,theHost.instanceForScreen(screen).ToString())==false)
-                theHost.execute(eFunction.previousMedia,theHost.instanceForScreen(screen).ToString());
+        void rewindButton_OnClick(OMControl sender, int screen)
+        {   // Rewind control
+
+            if (theHost.execute(eFunction.scanBackward, screen.ToString()) == true)
+                return;
+
+            // Get the current playback speed
+            object o = theHost.getData(eGetData.GetPlaybackSpeed, "", screen.ToString());
+            if (o == null)
+                return;
+            float speed = (float)o;
+            
+            // Do we have normal speed?
+            if (speed > 1)
+            {   // Yes this is maximum speed
+
+                // Update playback speed
+                theHost.execute(eFunction.setPlaybackSpeed, screen.ToString(), "1");
+
+                // Update playbutton image
+                OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                btn.Image = theHost.getSkinImage("Pause");
+                btn.DownImage = theHost.getSkinImage("Pause.Highlighted");
+            }
+            else
+            {   // Let's calculate and set playback speed
+                if (speed > 0)
+                    speed = speed * -1;
+                theHost.execute(eFunction.setPlaybackSpeed, screen.ToString(), (2 * speed).ToString());
+            }
+        }
+
+        void fastForwardButton_OnClick(OMControl sender, int screen)
+        {   // Fast forward
+
+            if (theHost.execute(eFunction.scanForward, screen.ToString()) == true)
+                return;
+            
+            object o = theHost.getData(eGetData.GetPlaybackSpeed, "", screen.ToString());
+            if (o == null)
+                return;
+            float speed = (float)o;
+
+            if (speed < 0)
+            {
+                // Set playback speed
+                theHost.execute(eFunction.setPlaybackSpeed, screen.ToString(), "1");
+
+                // Update playbutton image
+                OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                btn.Image = theHost.getSkinImage("Pause");
+                btn.DownImage = theHost.getSkinImage("Pause.Highlighted");
+            }
+            else
+                // Set playback speed
+                theHost.execute(eFunction.setPlaybackSpeed, screen.ToString(), (2 * speed).ToString());
         }
 
         void skipForwardButton_OnClick(OMControl sender, int screen)
         {
-            if (theHost.execute(eFunction.stepForward,theHost.instanceForScreen(screen).ToString())==false)
-                theHost.execute(eFunction.nextMedia, theHost.instanceForScreen(screen).ToString());
+            if (theHost.execute(eFunction.stepForward, screen.ToString()) == false)
+                theHost.execute(eFunction.nextMedia, screen.ToString());
         }
 
-        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2,string arg3)
+        void skipBackwardButton_OnClick(OMControl sender, int screen)
+        {
+            if (theHost.execute(eFunction.stepBackward, screen.ToString()) == false)
+                theHost.execute(eFunction.previousMedia, screen.ToString());
+        }
+
+        void random_OnClick(OMControl sender, int screen)
+        {
+            theHost.setRandom(screen, (sender.Tag == null));
+        }
+
+        void tick_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            tick.Enabled = false;
+            theHost.ForEachScreen(delegate(int screen)
+            {
+                object o = theHost.getData(eGetData.GetMediaPosition, "", screen.ToString());
+                if (o != null)
+                {
+                    int i = Convert.ToInt32(o);
+
+                    OMLabel lbl = (OMLabel)UIPanel[screen, "Label_UIMediaBar_Elapsed"];
+                    OMSlider sldr = (OMSlider)UIPanel[screen, "Slider_UIMediaBar_Slider"];
+
+                    if (i == -1)
+                    {
+                        // Reset slider and elapsed values
+                        lbl.Text = "";
+                        sldr.Value = 0;
+                    }
+                    else if ((i < sldr.Maximum) && (i >= 0))
+                    {
+                        // Don't update if a user is changing the slider
+                        if (sldr.Mode == eModeType.Scrolling)
+                            return;
+
+                        // Update slider position
+                        sldr.Value = i;
+
+                        // Update elapsed text
+                        lbl.Text = String.Format("{0} / {1}", formatTime(i), formatTime(sldr.Maximum));
+                    }
+                }
+            });
+            tick.Enabled = true;
+        }
+
+        private string formatTime(int seconds)
+        {
+            return (seconds / 60).ToString() + ":" + (seconds % 60).ToString("00");
+        }
+
+        #endregion
+
+        #region Speech
+
+        void speech_OnClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.listenForSpeech);
+            SpeechControls(true, screen);
+        }
+        private void SpeechControls(bool show, int screen)
+        {
+            OMImage img = (OMImage)UIPanel[screen, "Image_Speech_Speech"];
+            OMLabel lbl = (OMLabel)UIPanel[screen, "Label_Speech_Caption"];
+            OMBasicShape shp = (OMBasicShape)UIPanel[screen, "Shape_Speech_BackgroundBlock"];
+
+            // Errorcheck
+            if (img == null || lbl == null || shp == null)
+                return;
+
+            if (show)
+            {
+                img.Image = theHost.getSkinImage("Speech");
+                lbl.Text = "Speak Now";
+                lbl.Visible = true;
+                img.Visible = true;
+                shp.Visible = true;
+            }
+            else
+            {
+                lbl.Visible = false;
+                img.Visible = false;
+                shp.Visible = false;
+            }
+        }
+ 
+        #endregion
+
+        void statusReset_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            theHost.ForEachScreen(delegate(int screen)
+            {
+                ((OMLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]).Text = theHost.getPlayingMedia(screen).Name;
+            });
+            statusReset.Enabled = false;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
         {
             if (function == eFunction.backgroundOperationStatus)
             {
+                #region backgroundOperationStatus
+
+                // Is this a update from the speech engine?
                 if (arg2 == "Speech")
+                {
+                    // Yes, check engine status
                     if (arg1 == "Engine Ready!")
-                    {
-                        for (int i = 0; i < theHost.ScreenCount; i++)
-                            manager[i][1].Visible = true;
+                    {   // Engine is ready, Show speech button
+                        theHost.ForEachScreen(delegate(int screen)
+                        {
+                            UIPanel[screen, "Button_Speech_Speech"].Visible = true;
+                        });
                         return;
                     }
                     else if (arg1 == "Processing...")
-                    {
-                        ((OMImage)manager[0][21]).Image = theHost.getSkinImage("Processing");
-                        ((OMLabel)manager[0][20]).Text = "Processing...";
+                    {   // Engine is processing speech
+                        // TODO: Add parameter to speech engine that holds the active screen number
+                        ((OMImage)UIPanel[0, "Image_Speech_Speech"]).Image = theHost.getSkinImage("Processing");
+                        ((OMLabel)UIPanel[0, "Label_Speech_Caption"]).Text = "Processing...";
                         return;
                     }
+                }
+
+                // Reset status update timer
                 statusReset.Enabled = false;
                 statusReset.Enabled = true;
-                for (int i = 0; i < theHost.ScreenCount; i++)
-                    ((OMLabel)manager[i][6]).Text = arg1;
+
+                // Show the status update in the topbar
+                theHost.ForEachScreen(delegate(int screen)
+                {
+                    ((OMLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]).Text = arg1;
+                });
+
+                #endregion
             }
+
             else if (function == eFunction.systemVolumeChanged)
             {
+                #region systemVolumeChanged
+
                 if (arg1 == "-1")
-                {
-                    for (int i = 0; i < theHost.ScreenCount; i++)
-                    {
-                        if (arg2 != theHost.instanceForScreen(i).ToString())
-                            continue;
-                        OMButton b = ((OMButton)manager[i][27]);
-                        b.Image = theHost.getSkinImage("VolumeButtonMuted");
-                        b.FocusImage = theHost.getSkinImage("VolumeButtonMutedFocus");
-                    }
+                {   // Volume muted
+                    theHost.ForEachScreen(delegate(int screen)
+                    {   // Make sure we update the correct screens by comparing the active zone to the zone in the event
+                        if (arg2 == theHost.ZoneHandler.GetZone(screen).ToString())
+                        {   // Update volume button icon
+                            OMButton b = (OMButton)UIPanel[screen, "Button_UITopBar_Volume"];
+                            b.Image = theHost.getSkinImage("VolumeButtonMuted");
+                            b.FocusImage = theHost.getSkinImage("VolumeButtonMutedFocus");
+                        }
+                    });
                 }
                 else
-                {
-                    if ((showVolumeChanges)&&(volTmr != null))
+                {   // Volume change
+                    if (showVolumeChanges)
                     {
-                        volTmr.Enabled = false;
-                        volTmr.Enabled = true;
-                    }
-                    for (int i = 0; i < theHost.ScreenCount; i++)
-                    {
-                        if (arg2 != theHost.instanceForScreen(i).ToString())
-                            continue;
-                        OMButton b = ((OMButton)manager[i][27]);
-                        b.Image = theHost.getSkinImage("VolumeButton");
-                        b.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
-                        VolumeBar vb=((VolumeBar)manager[i][26]);
-                        vb.Value = int.Parse(arg1);
-                        if ((showVolumeChanges)&&(vb.Top==-510))
-                            vol_OnClick(vb.Parent[27],i);
+                        theHost.ForEachScreen(delegate(int screen)
+                        {   // Make sure we update the correct screens by comparing the active zone to the zone in the event
+                            if (arg2 == theHost.ZoneHandler.GetZone(screen).ToString())
+                            {   // Show volume control to indicate new volume
+                                OMButton b = (OMButton)UIPanel[screen, "Button_UITopBar_Volume"];
+                                b.Image = theHost.getSkinImage("VolumeButton");
+                                b.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
+
+                                // Set volume bar value
+                                VolumeBar vol = (VolumeBar)UIPanel[screen, "VolumeBar_UITopBar_Volume"];
+                                try
+                                {
+                                    vol.Value = int.Parse(arg1);
+                                }
+                                catch 
+                                {
+                                    return;
+                                }
+
+                                // Show volume bar
+                                AnimateVolumeBar(true, screen);
+                            }
+                        });
                     }
                 }
+
+                #endregion
             }
+
             else if (function == eFunction.stopListeningForSpeech)
-                hideSpeech(0); //ToDo - Instance specific
+            {
+                #region stopListeningForSpeech
+
+                // hide speech controls 
+                // TODO: Add parameter to speech engine that holds the active screen number
+                theHost.ForEachScreen(delegate(int screen)
+                {
+                    SpeechControls(false, screen);
+                });
+
+                #endregion
+            }
+
             else if (function == eFunction.gesture)
             {
+                #region gesture
+
                 // TODO: Remove requirement for specific skin names, move defaults to database
                 if ((arg3 != "OSK") && (arg3 != "Navigation") && (arg3 != "Slideshow"))
+                {
                     switch (arg2)
                     {
                         case "M":
@@ -586,7 +1091,7 @@ namespace OpenMobile
                             break;
                         case "R":
                             theHost.execute(eFunction.TransitionFromAny, arg1);
-                            if(!theHost.execute(eFunction.TransitionToPanel, arg1, "Radio"))
+                            if (!theHost.execute(eFunction.TransitionToPanel, arg1, "Radio"))
                                 theHost.execute(eFunction.CancelTransition, arg1);
                             else
                                 theHost.execute(eFunction.ExecuteTransition, arg1);
@@ -605,7 +1110,7 @@ namespace OpenMobile
                                 else
                                     theHost.execute(eFunction.ExecuteTransition, arg1);
                             }
-                     
+
                             else
                                 theHost.execute(eFunction.ExecuteTransition, arg1);
                             break;
@@ -619,338 +1124,176 @@ namespace OpenMobile
                             skipBackwardButton_OnClick(null, int.Parse(arg1));
                             break;
                     }
+                }
+
+                #endregion
             }
+                
             else if (function == eFunction.settingsChanged)
             {
+                #region settingsChanged
+
                 if (arg1 == "UI.VolumeChangesVisible")
                 {
                     using (PluginSettings settings = new PluginSettings())
                         showVolumeChanges = (settings.getSetting("UI.VolumeChangesVisible") == "True");
                 }
+
+                #endregion
             }
+
             else if (function == eFunction.pluginLoadingComplete)
             {
+                #region pluginLoadingComplete
+
                 using (PluginSettings settings = new PluginSettings())
                     showVolumeChanges = (settings.getSetting("UI.VolumeChangesVisible") == "True");
-                for (int i = 0; i < theHost.InstanceCount; i++)
-                    theHost.SetVideoPosition(i, new Rectangle(0, 100, 1000, 368));
-            }
-        }
 
-        void HomeButton_OnClick(OMControl sender, int screen)
-        {
-            if (theHost.execute(eFunction.TransitionFromAny, screen.ToString()))
-            {
-                theHost.execute(eFunction.hideVideoWindow, theHost.instanceForScreen(screen).ToString());
-                theHost.execute(eFunction.clearHistory, screen.ToString());
-                theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
-                theHost.execute(eFunction.ExecuteTransition, screen.ToString());
-            }
-        }
-
-        void slider_OnSliderMoved(OMSlider sender,int screen)
-        {
-            theHost.execute(eFunction.setPosition, theHost.instanceForScreen(screen).ToString(),sender.Value.ToString());
-        }
-
-        void rewindButton_OnClick(OMControl sender, int screen)
-        {
-            if (theHost.execute(eFunction.scanBackward, theHost.instanceForScreen(screen).ToString()) == true)
-                return;
-            object o;
-            theHost.getData(eGetData.GetPlaybackSpeed, "", theHost.instanceForScreen(screen).ToString(), out o);
-            if (o == null)
-                return;
-            float speed = (float)o;
-            if (speed > 1)
-            {
-                theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(), "1");
-                ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("Pause");
-                ((OMButton)manager[screen][10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
-            }
-            else
-            {
-                if (speed > 0)
-                    speed = speed * -1;
-                theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(), (2 * speed).ToString());
-            }
-        }
-
-        void tick_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            object o;
-            for (int j = 0; j < theHost.ScreenCount; j++)
-            {
-                theHost.getData(eGetData.GetMediaPosition, "", theHost.instanceForScreen(j).ToString(), out o);
-                if (o == null)
-                    continue;
-                int i = Convert.ToInt32(o);
-                if (i == -1)
+                // Set video window position
+                theHost.ForEachScreen(delegate(int screen)
                 {
-                    ((OMLabel)manager[j]["UI.Elapsed"]).Text = "";
-                    ((OMSlider)manager[j]["UI.Slider"]).Value = 0;
-                }
-                else if ((i < ((OMSlider)manager[j]["UI.Slider"]).Maximum) && (i >= 0))
-                {
-                    if (((OMSlider)manager[j]["UI.Slider"]).Mode == eModeType.Scrolling)
-                        return;
-                    ((OMSlider)manager[j]["UI.Slider"]).Value = i;
-                    ((OMLabel)manager[j]["UI.Elapsed"]).Text = (formatTime(i) + " " + formatTime(((OMSlider)manager[j]["UI.Slider"]).Maximum));
-                }
+                    theHost.SetVideoPosition(screen, new Rectangle(0, 100, 1000, 368));
+                });
+
+                #endregion
             }
         }
 
-        private string formatTime(int seconds)
-        {
-            return (seconds / 60).ToString() + ":" + (seconds % 60).ToString("00");
-        }
-
-        void fastForwardButton_OnClick(OMControl sender, int screen)
-        {
-            if (theHost.execute(eFunction.scanForward, theHost.instanceForScreen(screen).ToString()) == true)
-                return;
-            object o;
-            theHost.getData(eGetData.GetPlaybackSpeed, "", theHost.instanceForScreen(screen).ToString(), out o);
-            if (o==null)
-                return;
-            float speed = (float)o;
-            if (speed < 0)
-            {
-                theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(),"1");
-                ((OMButton)manager[screen][10]).Image = theHost.getSkinImage("Pause");
-                ((OMButton)manager[screen][10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
-            }
-            else
-                theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(), (2 * speed).ToString());
-        }
-
-        void stopButton_OnClick(OMControl sender, int screen)
-        {
-            theHost.execute(eFunction.Stop, theHost.instanceForScreen(screen).ToString());
-            theHost.execute(eFunction.unloadTunedContent, theHost.instanceForScreen(screen).ToString());
-        }
-
-        int timerIteration = 0;
-        bool timerForward=false;
-
-        private void moveMediaBar(int screen)
-        {
-            while (true)
-            {
-                if (timerForward == false)
-                {
-                    if (timerIteration == 8)
-                    {
-                        timerIteration = 0;
-                        return;
-                    }
-                    OMPanel p = manager[screen];
-                    {
-                            p[2].Top -= 17;
-                            p[3].Top -= 20;
-                            p[10].Top -= 20;
-                            p[11].Top -= 20;
-                            p[12].Top -= 20;
-                            p[13].Top -= 20;
-                            p[14].Top -= 20;
-                            p[15].Top -= 20;
-                            p[16].Top -= 20;
-                            p[17].Top -= 20;
-                            p[5].Top -= 20;
-                    }
-                }
-                else
-                {
-                    if (timerIteration == 8)
-                    {
-                        timerIteration = 0;
-                        return;
-                    }
-                    OMPanel p = manager[screen];
-                        p[2].Top += 17;
-                        p[3].Top += 20;
-                        p[10].Top += 20;
-                        p[11].Top += 20;
-                        p[12].Top += 20;
-                        p[13].Top += 20;
-                        p[14].Top += 20;
-                        p[15].Top += 20;
-                        p[16].Top += 20;
-                        p[17].Top += 20;
-                        p[5].Top += 20;
-                }
-                timerIteration++;
-                if (theHost.GraphicsLevel==eGraphicsLevel.Standard)
-                    Thread.Sleep(30);
-            }
-        }
-
-        void playButton_OnClick(OMControl sender, int screen)
-        {
-            object o = new object();
-            theHost.getData(eGetData.GetMediaStatus, "", theHost.instanceForScreen(screen).ToString(), out o);
-            if (o == null)
-                return;
-            if (o.GetType() == typeof(ePlayerStatus))
-            {
-                ePlayerStatus status = (ePlayerStatus)o;
-                if (status == ePlayerStatus.Playing)
-                {
-                    if (theHost.execute(eFunction.Pause, theHost.instanceForScreen(screen).ToString()))
-                    {
-                        for (int i = 0; i < theHost.ScreenCount; i++)
-                        {
-                            if (theHost.instanceForScreen(i) == theHost.instanceForScreen(screen))
-                            {
-                                ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
-                                ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if ((status == ePlayerStatus.FastForwarding) || (status == ePlayerStatus.Rewinding))
-                    {
-                        theHost.execute(eFunction.setPlaybackSpeed, theHost.instanceForScreen(screen).ToString(), "1");
-                        for (int i = 0; i < theHost.ScreenCount; i++)
-                        {
-                            if (theHost.instanceForScreen(i) == theHost.instanceForScreen(screen))
-                            {
-                                ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Pause");
-                                ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString());
-                    }
-                }
-            }
-            else if(o.GetType()==typeof(stationInfo))
-            {
-                if (theHost.execute(eFunction.Pause, theHost.instanceForScreen(screen).ToString()))
-                {
-                    for (int i = 0; i < theHost.ScreenCount; i++)
-                    {
-                        if (theHost.instanceForScreen(i) == theHost.instanceForScreen(screen))
-                        {
-                            ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
-                            ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
-                        }
-                    }
-                }
-            }
-        }
-
-        void mediaButton_OnClick(OMControl sender, int screen)
-        {
-            if (manager[screen][2].Top == 397)
-            {
-                timerForward = true;
-                moveMediaBar(screen);
-                manager[screen][28].Visible = true;
-                manager[screen][29].Visible = true;
-            }
-            else if (manager[screen][2].Top == 533)
-            {
-                timerForward = false;
-                manager[screen][28].Visible = false;
-                manager[screen][29].Visible = false;
-                moveMediaBar(screen);
-            }
-        }
-
-        void Back_OnClick(OMControl sender, int screen)
-        {
-            theHost.execute(eFunction.goBack,screen.ToString());
-        }
-
-        void theHost_OnMediaEvent(eFunction function, int instance,string arg)
+        void theHost_OnMediaEvent(eFunction function, Zone zone, string arg)
         {
             if (function == eFunction.loadTunedContent)
             {
+                // TODO: This should not be here! This is specific code based on another plugin!
+                #region PANDORA
+
                 if (arg == "Pandora")
-                {
-                    for(int i=0;i<theHost.ScreenCount;i++)
-                        if (theHost.instanceForScreen(i) == instance)
+                {   // Show rating buttons
+                    theHost.ForEachScreen(delegate(int screen)
+                    {
+                        if (theHost.ZoneHandler.GetZone(screen) == zone)
                         {
-                            OMButton rw=(OMButton)manager[i][12];
-                            OMButton ff = (OMButton)manager[i][15];
+                            OMButton rw = (OMButton)UIPanel[screen, "Button_UIMediaBar_Rewind"]; //12
+                            OMButton ff = (OMButton)UIPanel[screen, "Button_UIMediaBar_FastForward"]; //15;
                             rw.Image = theHost.getSkinImage("ThumbsDown");
                             rw.DownImage = imageItem.NONE;
                             ff.Image = theHost.getSkinImage("ThumbsUp");
                             ff.DownImage = imageItem.NONE;
                         }
+                    });
                 }
+
+                #endregion
             }
-            else if(function==eFunction.unloadTunedContent)
+
+            else if (function == eFunction.unloadTunedContent)
             {
+                // TODO: This should not be here! This is specific code based on another plugin!
+                #region PANDORA
+
                 if (arg == "Pandora")
-                {
-                    for (int i = 0; i < theHost.ScreenCount; i++)
-                        if (theHost.instanceForScreen(i) == instance)
+                {   // Show rating buttons
+                    theHost.ForEachScreen(delegate(int screen)
+                    {
+                        if (theHost.ZoneHandler.GetZone(screen) == zone)
                         {
-                            OMButton rw = (OMButton)manager[i][12];
-                            OMButton ff = (OMButton)manager[i][15];
+                            OMButton rw = (OMButton)UIPanel[screen, "Button_UIMediaBar_Rewind"]; //12
+                            OMButton ff = (OMButton)UIPanel[screen, "Button_UIMediaBar_FastForward"]; //15;
                             rw.Image = theHost.getSkinImage("Rewind", true);
                             rw.DownImage = theHost.getSkinImage("Rewind.Highlighted");
                             ff.Image = theHost.getSkinImage("FastForward", true);
                             ff.DownImage = theHost.getSkinImage("FastForward.Highlighted");
                         }
+                    });
                 }
+            
+                #endregion
             }
+
             else if (function == eFunction.Play)
-            {
-                mediaInfo info = theHost.getPlayingMedia(instance);
-				if (info==null)
-					return;
+            {  
+                #region Play
+
+                // get media information
+                mediaInfo info = theHost.getPlayingMedia(zone);
+                // Errorcheck
+                if (info == null)
+                    return;
+
+                // Get coverart
                 imageItem it = new imageItem(info.coverArt);
-                object o = new object();
-                tunedContentInfo TunedContentInfo = null;
-                theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
-                if (o != null)
-                    TunedContentInfo = (tunedContentInfo)o;
-                for(int i=0;i<theHost.ScreenCount;i++)
+
+                // Get tuned content info
+                tunedContentInfo TunedContentInfo = theHost.getData(eGetData.GetTunedContentInfo, "", zone.AudioDeviceInstance.ToString()) as tunedContentInfo;
+
+                theHost.ForEachScreen(delegate(int screen)
                 {
-                    if (theHost.instanceForScreen(i) == instance)
+                    // Only update information on the correct screen
+                    if (theHost.ZoneHandler.GetZone(screen) == zone)
                     {
-                        OMPanel p = manager[i];
-                        OMAnimatedLabel title = ((OMAnimatedLabel)p[6]);
-                        OMAnimatedLabel artist = ((OMAnimatedLabel)p[7]);
-                        OMAnimatedLabel album = ((OMAnimatedLabel)p[8]);
+                        OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
+                        OMAnimatedLabel artist = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackAlbum"]; //7
+                        OMAnimatedLabel album = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackArtist"]; //8
+                        OMImage cover = (OMImage)UIPanel[screen, "Image_UITopBar_Cover"]; //9
+                        // Errorcheck
+                        if (title == null || artist == null || album == null || cover == null)
+                            return;
+
+                        // Update radio info
                         if ((info.Type == eMediaType.Radio) && (TunedContentInfo != null))
                         {
-                            if (title.Text!=TunedContentInfo.currentStation.stationName)
-                                title.Transition(eAnimation.UnveilRight,TunedContentInfo.currentStation.stationName,50);
-                            if (artist.Text!=info.Name)
-                                artist.Transition(eAnimation.UnveilRight,info.Name,50);
+                            #region Radio info
+
+                            // Set texts
+                            if (title.Text != TunedContentInfo.currentStation.stationName)
+                                title.Transition(eAnimation.UnveilRight, TunedContentInfo.currentStation.stationName, 50);
+                            if (artist.Text != info.Name)
+                                artist.Transition(eAnimation.UnveilRight, info.Name, 50);
                             if (album.Text != info.Album)
-                                album.Transition(eAnimation.UnveilRight, info.Album,50);
-                            OMImage cover = ((OMImage)p[9]);
+                                album.Transition(eAnimation.UnveilRight, info.Album, 50);
+
+                            // Set cover art
                             if (info.coverArt == null)
+                                // Use default radio icon if no graphic is present
                                 cover.Image = theHost.getSkinImage("Radio");
                             else
+                                // Use graphic from radio
                                 cover.Image = new imageItem(info.coverArt);
+
+                            // Rescale cover image
+                            /*
                             if (cover.Image.image.Height < cover.Image.image.Width)
                             {
                                 cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
-                                cover.Top = 2 + (85-cover.Height)/2;
+                                cover.Top = 2 + (85 - cover.Height) / 2;
                             }
+                            */
+                            #endregion
                         }
+
+                        // Update player info
                         else
                         {
-                            if (title.Text != info.Name)
-                                title.Transition(eAnimation.UnveilRight, info.Name,50);
+                            #region Player info
+
+                            // Update texts
+                            string s = String.Format("[{0}] {1}", zone.Name, info.Name);
+                            if (title.Text != s)
+                                title.Transition(eAnimation.UnveilRight, s, 50);
+                            if (String.IsNullOrEmpty(title.Text))
+                                title.Transition(eAnimation.UnveilRight, info.Location, 50);
                             if (artist.Text != info.Name)
-                                artist.Transition(eAnimation.UnveilRight, info.Artist,50);
+                                artist.Transition(eAnimation.UnveilRight, info.Artist, 50);
                             if (album.Text != info.Album)
-                                album.Transition(eAnimation.UnveilRight, info.Album,50);
-                            OMImage cover = ((OMImage)p[9]);
+                                album.Transition(eAnimation.UnveilRight, info.Album, 50);
+
+                            // Update cover image
                             cover.Image = it;
-                            if ((cover.Image==null)||(cover.Image.image == null))
+                            // Use default image if no cover is present from any source
+                            if ((cover.Image == null) || (cover.Image.image == null))
                                 cover.Image = theHost.getSkinImage("Unknown Album");
+
+                            // Rescale cover image
+                            /*
                             if ((cover.Image.image != null) && (cover.Image.image.Height < cover.Image.image.Width))
                             {
                                 cover.Height = (int)(cover.Width * ((float)cover.Image.image.Height / cover.Image.image.Width));
@@ -961,60 +1304,94 @@ namespace OpenMobile
                                 cover.Height = 85;
                                 cover.Top = 2;
                             }
+                            */
+
+                            #endregion
                         }
-                        ((OMButton)p[10]).Image = theHost.getSkinImage("Pause");
-                        ((OMButton)p[10]).DownImage = theHost.getSkinImage("Pause.Highlighted");
-                        ((OMSlider)p[17]).Maximum = info.Length;
+
+                        OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                        btn.Image = theHost.getSkinImage("Pause");
+                        btn.DownImage = theHost.getSkinImage("Pause.Highlighted");
+                        ((OMSlider)UIPanel[screen, "Slider_UIMediaBar_Slider"]).Maximum = info.Length;
                     }
-                }
+                });
+
+                #endregion
             }
+
             else if (function == eFunction.setPlaybackSpeed)
             {
-                for (int i = 0; i < theHost.ScreenCount; i++)
+                #region setPlaybackSpeed
+
+                theHost.ForEachScreen(delegate(int screen)
                 {
-                    if (theHost.instanceForScreen(i) == instance)
+                    if (theHost.ZoneHandler.GetZone(screen) == zone)
                     {
-                        ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
-                        ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                        OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                        btn.Image = theHost.getSkinImage("Play");
+                        btn.DownImage = theHost.getSkinImage("Play.Highlighted");
                     }
-                }
+                });
+
+                #endregion
             }
+
             else if (function == eFunction.Stop)
             {
-                for (int i = 0; i < theHost.ScreenCount; i++)
+                #region Stop
+
+                theHost.ForEachScreen(delegate(int screen)
                 {
-                    if (theHost.instanceForScreen(i) == instance)
+                    if (theHost.ZoneHandler.GetZone(screen) == zone)
                     {
-                        OMPanel p = manager[i];
-                        ((OMLabel)p[6]).Text = "";
-                        ((OMLabel)p[7]).Text = "";
-                        ((OMLabel)p[8]).Text = "";
-                        ((OMImage)p[9]).Image = imageItem.NONE;
-                        ((OMButton)p[10]).Image = theHost.getSkinImage("Play");
-                        ((OMButton)p[10]).DownImage = theHost.getSkinImage("Play.Highlighted");
-                        ((OMLabel)p["UI.Elapsed"]).Text = "";
-                        ((OMSlider)p["UI.Slider"]).Value = 0;
+                        OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
+                        OMAnimatedLabel artist = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackAlbum"]; //7
+                        OMAnimatedLabel album = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackArtist"]; //8
+                        OMImage cover = (OMImage)UIPanel[screen, "Image_UITopBar_Cover"]; //9
+                        OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                        OMLabel lbl = (OMLabel)UIPanel[screen, "Label_UIMediaBar_Elapsed"];
+                        OMSlider sldr = (OMSlider)UIPanel[screen, "Slider_UIMediaBar_Slider"];
+
+                        title.Text = "";
+                        artist.Text = "";
+                        album.Text = "";
+                        cover.Image = imageItem.NONE;
+                        btn.Image = theHost.getSkinImage("Play");
+                        btn.DownImage = theHost.getSkinImage("Play.Highlighted");
+                        lbl.Text = "";
+                        sldr.Value = 0;
                     }
-                }
+                });
+
+                #endregion
             }
+
             else if (function == eFunction.Pause)
             {
-                for (int i = 0; i < theHost.ScreenCount; i++)
+                #region Pause
+
+                theHost.ForEachScreen(delegate(int screen)
                 {
-                    if (theHost.instanceForScreen(i) == instance)
+                    if (theHost.ZoneHandler.GetZone(screen) == zone)
                     {
-                        ((OMButton)manager[i][10]).Image = theHost.getSkinImage("Play");
-                        ((OMButton)manager[i][10]).DownImage = theHost.getSkinImage("Play.Highlighted");
+                        OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
+                        btn.Image = theHost.getSkinImage("Play");
+                        btn.DownImage = theHost.getSkinImage("Play.Highlighted");
                     }
-                }
+                });
+ 
+                #endregion
             }
+
             else if (function == eFunction.RandomChanged)
             {
-                for (int i = 0; i < theHost.ScreenCount; i++)
+                #region RandomChanged
+
+                theHost.ForEachScreen(delegate(int screen)
                 {
-                    if (theHost.instanceForScreen(i) == instance)
+                    if (theHost.ZoneHandler.GetZone(screen) == zone)
                     {
-                        OMButton b = (OMButton)manager[i][5];
+                        OMButton b = (OMButton)UIPanel[screen, "Button_UIMediaBar_Random"];
                         if (arg == "Disabled")
                         {
                             b.Image = theHost.getSkinImage("random");
@@ -1028,39 +1405,81 @@ namespace OpenMobile
                             b.Tag = "Enabled";
                         }
                     }
-                }
+                });
+
+                #endregion
             }
+
             else if (function == eFunction.hideVideoWindow)
             {
+                #region hideVideoWindow
 
-                for(int screen=0;screen<theHost.ScreenCount;screen++)
-                    if (theHost.instanceForScreen(screen) == instance)
+                theHost.ForEachScreen(delegate(int screen)
+                {
+                    if (theHost.ZoneHandler.GetZone(screen).Screen == zone.Screen)
                     {
-                        if (manager[screen][2].Top == 397)
-                        {
-                            timerForward = true;
-                            moveMediaBar(screen);
-                            manager[screen][28].Visible = true;
-                            manager[screen][29].Visible = true;
-                        }
+                        if (MediaBarVisible[screen])
+                            AnimateMediaBar(false, screen);
+
+                        // Hide background
+                        UIPanel[screen, "Shape_VideoBackground"].Visible = false;
+
+                        // Hide media bar button
+                        UIPanel[screen, "Button_UIMediaBar_Media"].Visible = true;
+
                         return;
                     }
+                });
+
+                #endregion
             }
+
             else if (function == eFunction.showVideoWindow)
             {
-                for(int screen=0;screen<theHost.ScreenCount;screen++)
-                    if (theHost.instanceForScreen(screen) == instance)
+                #region showVideoWindow
+
+                theHost.ForEachScreen(delegate(int screen)
+                {
+                    if (theHost.ZoneHandler.GetZone(screen).Screen == zone.Screen)
                     {
-                        if (manager[screen][2].Top == 533)
-                        {
-                            timerForward = false;
-                            manager[screen][28].Visible = false;
-                            manager[screen][29].Visible = false;
-                            moveMediaBar(screen);
-                        }
+                        if (!MediaBarVisible[screen])
+                            AnimateMediaBar(true, screen);
+
+                        // Show background
+                        UIPanel[screen, "Shape_VideoBackground"].Visible = true;
+
+                        // Show media bar button
+                        UIPanel[screen, "Button_UIMediaBar_Media"].Visible = false;
+
                         return;
                     }
+                });
+
+                #endregion
             }
+
+            else if ((function == eFunction.ZoneAdded) | (function == eFunction.ZoneRemoved) | (function == eFunction.ZoneSetActive) | (function == eFunction.ZoneUpdated))
+            {
+                #region ZoneSetActive
+
+                int Screen = -1;
+                if (int.TryParse(arg, out Screen))
+                {
+                    OMButton b = (OMButton)UIPanel[Screen, "Button_UIMediaBar_Zone"];
+                    b.OverlayImage = new imageItem(ButtonGraphic.GetImage(b.Width, b.Height, ButtonGraphic.ImageTypes.ButtonForeground, "", zone.Name));
+                }
+                else
+                {   // Manually update each panel
+                    theHost.ForEachScreen(delegate(int screen)
+                    {
+                        OMButton b = (OMButton)UIPanel[screen, "Button_UIMediaBar_Zone"];
+                        b.OverlayImage = new imageItem(ButtonGraphic.GetImage(b.Width, b.Height, ButtonGraphic.ImageTypes.ButtonForeground, "", zone.Name));
+                    });
+                }
+
+                #endregion
+            }
+
         }
 
         #endregion

@@ -50,7 +50,6 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMBasicShape : OMControl
     {
-        // Start of code added by Borte
         /// <summary>
         /// Sets the corner radius of a rounded rectangle
         /// </summary>
@@ -63,10 +62,10 @@ namespace OpenMobile.Controls
             get { return cornerRadius; }
             set { cornerRadius = value; }
         }
-        // End of code added by Borte
         /// <summary>
         /// Creates a new Basic Shape
         /// </summary>
+        [System.Obsolete("Use OMBasicShape(string name, int x, int y, int w, int h) instead")]
         public OMBasicShape() { }
         /// <summary>
         /// Creates a new Basic Shape
@@ -75,6 +74,7 @@ namespace OpenMobile.Controls
         /// <param name="y"></param>
         /// <param name="w"></param>
         /// <param name="h"></param>
+        [System.Obsolete("Use OMBasicShape(string name, int x, int y, int w, int h) instead")]
         public OMBasicShape(int x, int y, int w, int h)
         {
             left = x;
@@ -82,6 +82,23 @@ namespace OpenMobile.Controls
             width = w;
             height = h;
         }
+        /// <summary>
+        /// Creates a new Basic Shape
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        public OMBasicShape(string name, int x, int y, int w, int h)
+        {
+            Name = name;
+            left = x;
+            top = y;
+            width = w;
+            height = h;
+        }
+
         Pen BorderPen;
         /// <summary>
         /// Draws the basic shape
@@ -90,8 +107,6 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            // Start of code added by Borte
-            // Basic shape didn't respect the transition values while rendering
             float tmp = 1;
             if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
@@ -101,7 +116,6 @@ namespace OpenMobile.Controls
             Brush Fill = new Brush(Color.FromArgb((int)(tmp * fillColor.A), fillColor));
             if (borderSize > 0)
                 BorderPen = new Pen(Color.FromArgb((int)(tmp * borderColor.A), borderColor), borderSize);
-            // End of code added by Borte
 
             switch (shape)
             {

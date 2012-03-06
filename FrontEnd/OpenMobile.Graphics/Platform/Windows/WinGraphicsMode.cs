@@ -56,7 +56,8 @@ namespace OpenMobile.Platform.Windows
                     //Console.WriteLine("WinGraphicsMode.Constructor.Timing1: " + Timing.GetTiming());
                     native.NativeInitialize(GameWindowFlags.Temporary);
 
-                    // Create graphics context
+                    // TODO: Antialiasing
+                    // Create graphics context (Antialiasing is set by changing 0, 0, 0, to 0, 0, 3, in the line underneat)
                     IGraphicsContext context = new GraphicsContext(
                         new GraphicsMode(new IntPtr(2), new ColorFormat(), 0, 0, 0, new ColorFormat(), 2, false),
                         (WinWindowInfo)native.WindowInfo, 1, 0, GraphicsContextFlags.Default);

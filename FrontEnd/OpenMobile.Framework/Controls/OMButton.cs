@@ -125,6 +125,7 @@ namespace OpenMobile.Controls
             set
             {
                 image = value;
+                raiseUpdate(false);
             }
         }
 
@@ -140,7 +141,7 @@ namespace OpenMobile.Controls
             set
             {
                 transition = value;
-
+                raiseUpdate(false);
             }
         }
 
@@ -156,8 +157,31 @@ namespace OpenMobile.Controls
             set
             {
                 downImage = value;
+                raiseUpdate(false);
             }
         }
+
+
+        #region OverlayImage
+
+        private imageItem _OverlayImage;
+        /// <summary>
+        /// Sets the image that's rendered on top of all other images (can be used instead of the text property)
+        /// </summary>
+        public imageItem OverlayImage
+        {
+            get
+            {
+                return _OverlayImage;
+            }
+            set
+            {
+                _OverlayImage = value;
+                raiseUpdate(false);
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// An integer from 0-100 (100% being opaque)
@@ -187,6 +211,7 @@ namespace OpenMobile.Controls
             set
             {
                 focusImage = value;
+                raiseUpdate(false);
             }
         }
 
@@ -202,44 +227,59 @@ namespace OpenMobile.Controls
             set
             {
                 orientation = value;
+                raiseUpdate(false);
             }
         }
 
         /// <summary>
         /// Creates a button with the default size and position
+        /// <para>[Obsolete] Use OMButton(string name, int x, int y, int w, int h) instead</para>
         /// </summary>
+        [Obsolete("Use OMButton(string name, int x, int y, int w, int h) instead")]
         public OMButton()
         {
-            this.Top = 20;
-            this.Left = 20;
-            this.Width = 300;
-            this.Height = 120;
-            this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
-            this.Format = OpenMobile.Graphics.eTextFormat.Normal;
+            Init("", 20, 20, 300, 120);
         }
         /// <summary>
         /// Creates a new OMButton
+        /// <para>[Obsolete] Use OMButton(string name, int x, int y, int w, int h) instead</para>
         /// </summary>
         /// <param name="x">Left</param>
         /// <param name="y">Top</param>
+        [Obsolete("Use OMButton(string name, int x, int y, int w, int h) instead")]
         public OMButton(int x, int y)
         {
-            this.Top = y;
-            this.Left = x;
-            this.Width = 300;
-            this.Height = 120;
-            this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
-            this.Format = OpenMobile.Graphics.eTextFormat.Normal;
+            Init("", x, y, 300, 120);
         }
         /// <summary>
         /// Initializes a button with a starting location and size
+        /// <para>[Obsolete] Use OMButton(string name, int x, int y, int w, int h) instead</para>
         /// </summary>
         /// <param name="x">Left</param>
         /// <param name="y">Top</param>
         /// <param name="w">Width</param>
         /// <param name="h">Height</param>
+        [Obsolete("Use OMButton(string name, int x, int y, int w, int h) instead")]
         public OMButton(int x, int y, int w, int h)
         {
+            Init("", x, y, w, h);
+        }
+        /// <summary>
+        /// Initializes a button with a starting location and size
+        /// </summary>
+        /// <param name="name">Name of control</param>
+        /// <param name="x">Left</param>
+        /// <param name="y">Top</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        public OMButton(string name, int x, int y, int w, int h)
+        {
+            Init(name, x, y, w, h);
+        }
+
+        private void Init(string Name, int x, int y, int w, int h)
+        {
+            this.Name = Name;
             this.Top = y;
             this.Left = x;
             this.Width = w;
@@ -247,6 +287,12 @@ namespace OpenMobile.Controls
             this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
             this.Format = OpenMobile.Graphics.eTextFormat.Normal;
         }
+
+        /// <summary>
+        /// Controls where the text is drawn on the control relative to the control itself
+        /// </summary>
+        public Point TextLocation { get; set; }
+
         /// <summary>
         /// Draws the control
         /// </summary>
@@ -263,60 +309,89 @@ namespace OpenMobile.Controls
             else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
                 alpha = e.globalTransitionOut;
             alpha *= ((float)transparency / 100);
-            if ((this.Mode == eModeType.Highlighted) && (this.FocusImage.image != null))
+
+            // Draw button state
+            switch (this.Mode)
             {
-                g.DrawImage(focusImage.image, this.Left, this.Top, this.Width, this.Height, alpha, orientation);
-                if (textTexture == null)
-                    textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-                g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha);
-                return;
-            }
-            else if ((this.Mode == eModeType.Clicked) || (this.Mode == eModeType.ClickedAndTransitioningOut))
-            {
-                alpha *= e.transparency;
-                if (downImage.image != null)
-                {
-                    g.DrawImage(downImage.image, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha, orientation);
-                    if (textTexture == null)
-                        textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-                    g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha);
-                    return;
-                }
-                else if (focusImage.image != null)
-                {
-                    g.DrawImage(focusImage.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha, orientation);
-                    if (textTexture == null)
-                        textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width, this.Height, this.Text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-                    g.DrawImage(textTexture, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha);
-                    return;
-                }
-                else if (image.image == null)
-                {
-                    if (image == imageItem.MISSING)
-                        g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
-                }
-                else
-                {
-                    g.DrawImage(image.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha, orientation);
-                }
-            }
-            if (image.image == null)
-            {
-                if (image == imageItem.MISSING)
-                    g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
-            }
-            else
-            {
-                g.DrawImage(image.image, left, top, width, height, alpha, orientation);
+                case eModeType.Highlighted:
+                    {
+                        if (focusImage.image != null)
+                        {   // Draw focused image
+                            g.DrawImage(focusImage.image, this.Left, this.Top, this.Width, this.Height, alpha, orientation);
+                        }
+                        else if (image.image != null)
+                        {   // Draw regular image
+                            g.DrawImage(image.image, this.Left, this.Top, this.Width, this.Height, alpha, orientation);
+                        }
+                        else
+                        {   // Default fallback if image is missing
+                            if (image == imageItem.MISSING)
+                                g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                        }
+                    }
+                    break;
+                case eModeType.Clicked:
+                case eModeType.ClickedAndTransitioningOut:
+                    {
+                        alpha *= e.transparency;
+                        if (downImage.image != null)
+                        {   // Draw down state (clicked state)
+                            g.DrawImage(downImage.image, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), alpha, orientation);
+                        }
+                        else if (focusImage.image != null)
+                        {   // Draw focus image
+                            g.DrawImage(focusImage.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha, orientation);
+                        }
+                        else if (image.image != null)
+                        {   // Draw regular image
+                            g.DrawImage(image.image, this.Left - transitionTop, this.Top - transitionTop, this.Width + (int)(transitionTop * 2.5), this.Height + (int)(transitionTop * 2.5), alpha, orientation);
+                        }
+                        else
+                        {   // Default fallback if image is missing
+                            if (image == imageItem.MISSING)
+                                g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                        }
+                    }
+                    break;
+                default:
+                    {
+                        if (image.image != null)
+                        {   // Draw regular image
+                            g.DrawImage(image.image, left, top, width, height, alpha, orientation);
+                        }
+                        else
+                        {   // Default fallback if image is missing
+                            if (image == imageItem.MISSING)
+                                g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                        }
+                    }
+                    break;
             }
 
-            if (textTexture == null)
-                textTexture = g.GenerateTextTexture(left, top, width, height, text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-            g.DrawImage(textTexture, left, top, width, height, alpha);
+            // Draw overlay image
+            if (_OverlayImage.image != null)
+                g.DrawImage(_OverlayImage.image, left, top, width, height);
+
+            // Draw text (if any)
+            if (text != "")
+            {
+                if (g.TextureGenerationRequired(textTexture))
+                    textTexture = g.GenerateTextTexture(textTexture, this.Left, this.Top, this.width, this.height, text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+                g.DrawImage(textTexture, (this.Left + TextLocation.X), (this.Top + TextLocation.Y), width, height, alpha);
+            }
 
             // Skin debug function 
             if (_SkinDebug)
                 base.DrawSkinDebugInfo(g, Color.Yellow);
+        }
+
+        public object Clone(bool ClearEvents)
+        {
+            OMButton btn = (OMButton)base.Clone();
+            btn.OnClick = null;
+            btn.OnLongClick = null;
+            btn.OnModeChange = null;
+            return btn;
         }
     }
 }

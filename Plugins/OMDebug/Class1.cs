@@ -356,9 +356,9 @@ namespace OMDebug
         {
             WriteToLog("(Event:OnPowerChange) => \t" + type.ToString());
         }
-        void theHost_OnMediaEvent(OpenMobile.eFunction function, int instance, string arg)
+        void theHost_OnMediaEvent(OpenMobile.eFunction function, Zone zone, string arg)
         {
-            WriteToLog("(Event:OnMediaEvent) => \t" + function.ToString() + ", " + instance.ToString() + ", " + arg);
+            WriteToLog("(Event:OnMediaEvent) => \t" + function.ToString() + ", [Zone:" + zone.Name.ToString() + "], " + arg);
         }
 
         private void WriteToLog(DebugMessage[] Msg)

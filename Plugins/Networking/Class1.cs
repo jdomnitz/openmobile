@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using OpenMobile.Data;
 namespace Networking
 {
-    [SkinIcon("Icons|network")]//*Â")]
+    [SkinIcon("*Â")]//*Â")]
     public sealed class Class1 : IHighLevel
     {
         IPluginHost theHost;
@@ -153,7 +153,7 @@ namespace Networking
 
         void textbox_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
             ((OMTextBox)sender).Text = input.getText(screen, "Networking", new string[] { "", "Prompt" }, ((OMTextBox)sender).Text);
         }
 

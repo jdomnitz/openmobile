@@ -31,7 +31,7 @@ using OpenMobile.helperFunctions.Forms;
 
 namespace OMRadio
 {
-    [SkinIcon("Icons|Radio Black")] //"*»"
+    [SkinIcon("*»")] //"*»"
     public class OMRadio : IHighLevel
     {
         private ScreenManager manager;
@@ -74,7 +74,7 @@ namespace OMRadio
                     if ((Source != "None")&&(Source!=""))
                     {
                         object o = new object();
-                        theHost.getData(eGetData.GetTunedContentInfo, "", theHost.instanceForScreen(screen).ToString(), out o);
+                        theHost.getData(eGetData.GetTunedContentInfo, "", screen.ToString(), out o);
                         if (o == null)
                         {
                             for (int i = 0; i < theHost.ScreenCount; i++)
@@ -122,7 +122,7 @@ namespace OMRadio
                         OMList List_Source = (OMList)panel["ListView_List"];
                         List_Source.Clear();
                         object o;
-                        theHost.getData(eGetData.GetSupportedBands, "", theHost.instanceForScreen(screen).ToString(), out o);
+                        theHost.getData(eGetData.GetSupportedBands, "", screen.ToString(), out o);
                         eTunedContentBand[] lst = (eTunedContentBand[])o;
                         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
                         format.color = Color.FromArgb(128, Color.White);
@@ -175,11 +175,11 @@ namespace OMRadio
 
         private void AutoLoadSource(int screen,string Source)
         {
-            if (theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), Source))
-                UpdateStationList(theHost.instanceForScreen(screen));
+            if (theHost.execute(eFunction.loadTunedContent, screen.ToString(), Source))
+                UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
             else
-                if (theHost.getPlayingMedia(theHost.instanceForScreen(screen)).Type==eMediaType.Radio)
-                    UpdateStationList(theHost.instanceForScreen(screen));
+                if (theHost.getPlayingMedia(screen).Type == eMediaType.Radio)
+                    UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
                 else
                     for (int i = 0; i < theHost.ScreenCount; i++)
                         ((OMLabel)manager[i]["Radio_StationName"]).Text = "Auto load failed!";
@@ -600,24 +600,24 @@ namespace OMRadio
 
         void Button_TuneTo_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
             string newStation = input.getNumber(screen, "Radio");
             object o;
-            theHost.getData(eGetData.GetMediaStatus, "",theHost.instanceForScreen(screen).ToString(), out o);
+            theHost.getData(eGetData.GetMediaStatus, "",screen.ToString(), out o);
             stationInfo info = o as stationInfo;
             if ((info != null)&&(info.stationID!=null)&&(info.stationID.Contains(":")))
             {   //this method is more reliable for undefined bands (ex pandora)
                 newStation = info.stationID.Substring(0, info.stationID.IndexOf(':') + 1) + newStation;
-                theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), newStation);
+                theHost.execute(eFunction.tuneTo, screen.ToString(), newStation);
             }
             else
             {   //this method is plan b - if the radio hasn't tuned anything yet
-                theHost.getData(eGetData.GetTunedContentInfo, "", theHost.instanceForScreen(screen).ToString(), out o);
+                theHost.getData(eGetData.GetTunedContentInfo, "", screen.ToString(), out o);
                 tunedContentInfo tc = o as tunedContentInfo;
                 if (tc != null)
                 {
                     newStation = tc.band.ToString() + ":" + newStation;
-                    theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), newStation);
+                    theHost.execute(eFunction.tuneTo, screen.ToString(), newStation);
                 }
             }
         }
@@ -642,8 +642,8 @@ namespace OMRadio
                     {
                         theHost.execute(eFunction.goBack, screen.ToString(), eGlobalTransition.None.ToString());
                         stationInfo station = new stationInfo(((OMList)manager[screen]["List_RadioStations"]).SelectedItem.text, (string)((OMList)manager[screen]["List_RadioStations"]).SelectedItem.tag);
-                        DeletePreset(theHost.instanceForScreen(screen), station);
-                        UpdateStationList(theHost.instanceForScreen(screen));
+                        DeletePreset(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance, station);
+                        UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
                     }
                     break;
             }
@@ -659,7 +659,7 @@ namespace OMRadio
                 System.Media.SystemSounds.Beep.Play();
                 Message(screen, "Preset saved", 1000);
                 stationInfo station = new stationInfo(List.SelectedItem.text, (string)List.SelectedItem.tag);
-                SaveToPresets(theHost.instanceForScreen(screen), station);
+                SaveToPresets(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance, station);
             }
 
             if (StationListSource == StationListSources.Presets)
@@ -700,7 +700,7 @@ namespace OMRadio
                         SourceSelected = true;
                         if (SelectedItemTag == "unload")
                         {
-                            theHost.execute(eFunction.unloadTunedContent, theHost.instanceForScreen(screen).ToString());
+                            theHost.execute(eFunction.unloadTunedContent, screen.ToString());
                             for (int i = 0; i < theHost.ScreenCount; i++)
                                 ClearStationInfo(i);
                         }
@@ -714,10 +714,10 @@ namespace OMRadio
                             d.Text = "Please wait, loading " + SelectedItemTag;
                             d.Icon = OpenMobile.helperFunctions.Forms.icons.Busy;
                             d.ShowMsgBoxNonBlocking(screen,250);
-                            if (theHost.execute(eFunction.loadTunedContent, theHost.instanceForScreen(screen).ToString(), SelectedItemTag))
+                            if (theHost.execute(eFunction.loadTunedContent,screen.ToString(), SelectedItemTag))
                             {
                                 d.Close();
-                                if (UpdateStationList(theHost.instanceForScreen(screen)))
+                                if (UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance))
                                     for (int i = 0; i < theHost.ScreenCount; i++)
                                         ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
                             }
@@ -740,8 +740,8 @@ namespace OMRadio
                             return;
                         for (int i = 0; i < theHost.ScreenCount; i++)
                             ClearStationInfo(i);
-                        if (theHost.execute(eFunction.setBand, theHost.instanceForScreen(screen).ToString(), SelectedItemTag))
-                            UpdateStationList(theHost.instanceForScreen(screen));
+                        if (theHost.execute(eFunction.setBand, screen.ToString(), SelectedItemTag))
+                            UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
 
                     }
                     break;
@@ -759,7 +759,7 @@ namespace OMRadio
                                 break;
                         }
                         ((OMLabel)manager[screen]["Label_StationListSource"]).Text = "Source: " + StationListSource.ToString();
-                        UpdateStationList(theHost.instanceForScreen(screen));
+                        UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
                     }
                     break;
                 default:
@@ -773,19 +773,19 @@ namespace OMRadio
             if (List.SelectedItem.tag == null)
                 return;
             for (int i = 0; i < theHost.ScreenCount; i++)
-                if (theHost.instanceForScreen(i)==theHost.instanceForScreen(screen))
+                if (theHost.ZoneHandler.GetZone(i) == theHost.ZoneHandler.GetZone(screen))
                     ((OMLabel)manager[i]["Radio_StationName"]).Text = "Tuning . . .";
-            theHost.execute(eFunction.tuneTo, theHost.instanceForScreen(screen).ToString(), (string)List.SelectedItem.tag);
+            theHost.execute(eFunction.tuneTo, screen.ToString(), (string)List.SelectedItem.tag);
         }
 
         void Button_RadioAutoScan_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.scanBand, theHost.instanceForScreen(screen).ToString());
+            theHost.execute(eFunction.scanBand, screen.ToString());
         }
 
         void TextBox_RadioTuneTo_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput(theHost);
+            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
             ((OMTextBox)sender).Text = input.getText(screen, this.pluginName, "");
         }
 
@@ -797,20 +797,20 @@ namespace OMRadio
             ((OMButton)sender).Transition = eButtonTransition.None;
         }
 
-        void theHost_OnMediaEvent(eFunction function, int instance, string arg)
+        void theHost_OnMediaEvent(eFunction function, Zone zone, string arg)
         {
             if ((function == eFunction.Play)||(function==eFunction.tunerDataUpdated))
             {
-                UpdateStationInfo(instance);
+                UpdateStationInfo(zone);
             }
             else if (function == eFunction.stationListUpdated)
             {
-                UpdateStationList(instance);
+                UpdateStationList(zone.AudioDeviceInstance);
             }
             else if (function == eFunction.unloadTunedContent)
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
-                    if (theHost.instanceForScreen(i) == instance)
+                    if (theHost.ZoneHandler.GetZone(i) == zone)
                         killStationInfo(i);
             }
         }
@@ -848,15 +848,15 @@ namespace OMRadio
             OMList List = (OMList)manager[screen]["List_RadioStations"];
             List.Clear();
         }
-        private void UpdateStationInfo(int instance)
+        private void UpdateStationInfo(Zone zone)
         {
             object o = new object();
-            theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
+            theHost.getData(eGetData.GetTunedContentInfo, "", zone.AudioDeviceInstance.ToString(), out o);
             if (o == null)
                 return;
             tunedContentInfo info = (tunedContentInfo)o;
 
-            mediaInfo mediaInfo = theHost.getPlayingMedia(instance);
+            mediaInfo mediaInfo = theHost.getPlayingMedia(zone);
 
             for (int i = 0; i < theHost.ScreenCount; i++)
             {

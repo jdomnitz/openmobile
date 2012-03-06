@@ -35,12 +35,12 @@ namespace Video
         {
             if (theHost == null)
                 return null;
-            if (theHost.execute(eFunction.showVideoWindow, theHost.instanceForScreen(screen).ToString()) == true)
+            if (theHost.execute(eFunction.showVideoWindow, screen.ToString()) == true)
                 return null;
             General.getFilePath path = new General.getFilePath(theHost);
             string url=path.getFile(screen, "MainMenu", "");
             if (url!=null)
-                theHost.execute(eFunction.Play, theHost.instanceForScreen(screen).ToString(), url);
+                theHost.execute(eFunction.Play, screen.ToString(), url);
             return null;
         }
 
