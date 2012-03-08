@@ -275,10 +275,11 @@ namespace OpenMobile.helperFunctions.Forms
             if (BuiltInComponents.Host == null)
                 throw new Exception("Core error; BuiltInComponents.Host not initialized");
 
-            OMPanel Panel = new OMPanel();
+            // Create panel
+            OMPanel Panel = new OMPanel("");
 
             // Set panel name
-            PanelName = Panel.Name = this.GetHashCode().ToString();
+            PanelName = Panel.Name = String.Format("{0}_{1}", DialogHandler, Panel.GetHashCode());
 
             OwnerScreen = screen.ToString();
 

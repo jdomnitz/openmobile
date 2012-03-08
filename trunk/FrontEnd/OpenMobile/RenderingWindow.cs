@@ -1128,16 +1128,17 @@ namespace OpenMobile
                                 if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
                                     if ((backgroundQueue[j][i].Left < left) && (backgroundQueue[j][i].Top < top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
                                     {
-                                        // If this control is marked as clicktrough then skip it
-                                        if (b.NoUserInteraction)
-                                            continue;
-
                                         b = backgroundQueue[j][i];
                                         top = b.Top;
                                         left = b.Left;
                                     }
                         if (b == null)
                             return;
+                        
+                        // If this control is marked as clicktrough then skip it
+                        if (b.NoUserInteraction)
+                            return;
+
                         b.Mode = eModeType.Highlighted;
                         highlighted = b;
                         Invalidate();

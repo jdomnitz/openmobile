@@ -43,7 +43,7 @@ namespace OpenMobile
         private IPluginHost theHost;
         private System.Timers.Timer tick = new System.Timers.Timer();
         private System.Timers.Timer statusReset = new System.Timers.Timer(2100);
-        private bool showVolumeChanges;
+
         #region IBasePlugin Members
 
         public string authorName
@@ -576,15 +576,62 @@ namespace OpenMobile
                 vol.Visible = true;
 
                 // Animate control  
+                int EndPos = 510;
+
+                int Animation_Step;
+                float Animation_Speed = 2f;
+                bool Animation_Running = true;
+                float Interval = System.Diagnostics.Stopwatch.Frequency / 30.0f;
+                float currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+                float lastUpdateTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+                float ticks = 0;
+                float ticksMS = 0;
+                int Top = btn.Top;
+
+                while (Animation_Running)
+                {
+                    Animation_Running = true;
+
+                    currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+                    ticks = currentTicks - lastUpdateTicks;
+                    if (ticks >= Interval)
+                    {
+                        lastUpdateTicks = currentTicks;
+                        ticksMS = (ticks / System.Diagnostics.Stopwatch.Frequency) * 1000;
+                        
+                        Animation_Step = ((int)(ticksMS * Animation_Speed));
+
+                        Top += Animation_Step;
+
+                        if (Top >= EndPos)
+                        {
+                            Animation_Running = false;
+                            btn.Top = EndPos;
+                            vol.Top = btn.Top - vol.Height;
+                        }
+                        else
+                        {
+                            btn.Top = Top;
+                            vol.Top = btn.Top - vol.Height;
+                        }
+                    }
+                    Thread.Sleep(1);
+                }
+
+            
+                /*
                 for (int i = 0; i <= 10; i++)
                 {
                     vol.Top = (51 * i) - 510;
                     btn.Top = (int)(51.1 * i);
                     Thread.Sleep(50);
                 }
+                */
+            
 
                 // Activate timeout timer
-                VolumeBarTimer[screen] = new Timer(2500);
+                //if (VolumeBarTimer[screen] == null)
+                    VolumeBarTimer[screen] = new Timer(2500);
                 VolumeBarTimer[screen].Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
                 VolumeBarTimer[screen].Screen = screen;
                 VolumeBarTimer[screen].Tag = UIPanel[screen, "VolumeBar_UITopBar_Volume"];
@@ -1012,8 +1059,8 @@ namespace OpenMobile
                 if (arg1 == "-1")
                 {   // Volume muted
                     theHost.ForEachScreen(delegate(int screen)
-                    {   // Make sure we update the correct screens by comparing the active zone to the zone in the event
-                        if (arg2 == theHost.ZoneHandler.GetZone(screen).ToString())
+                    {   // Make sure we update the correct screens by comparing the active zone to the zone in the event (volumeevents sends audioinstance)
+                        if (arg2 == theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance.ToString())
                         {   // Update volume button icon
                             OMButton b = (OMButton)UIPanel[screen, "Button_UITopBar_Volume"];
                             b.Image = theHost.getSkinImage("VolumeButtonMuted");
@@ -1023,29 +1070,29 @@ namespace OpenMobile
                 }
                 else
                 {   // Volume change
-                    if (showVolumeChanges)
+                    if (StoredData.SystemSettings.VolumeChangesVisible)
                     {
                         theHost.ForEachScreen(delegate(int screen)
-                        {   // Make sure we update the correct screens by comparing the active zone to the zone in the event
-                            if (arg2 == theHost.ZoneHandler.GetZone(screen).ToString())
+                        {   // Make sure we update the correct screens by comparing the active zone to the zone in the event (volumeevents sends audioinstance)
+                            if (arg2 == theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance.ToString())
                             {   // Show volume control to indicate new volume
                                 OMButton b = (OMButton)UIPanel[screen, "Button_UITopBar_Volume"];
                                 b.Image = theHost.getSkinImage("VolumeButton");
                                 b.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
 
-                                // Set volume bar value
-                                VolumeBar vol = (VolumeBar)UIPanel[screen, "VolumeBar_UITopBar_Volume"];
-                                try
+                                // Extract current volume 
+                                int VolValue = 0;
+                                if (int.TryParse(arg1, out VolValue))
                                 {
-                                    vol.Value = int.Parse(arg1);
+                                    // Is this a volume adjustment or a unmute?
+                                    if (VolValue >= 0)
+                                    {   // Volume adjustment, Set volume bar value
+                                        VolumeBar vol = (VolumeBar)UIPanel[screen, "VolumeBar_UITopBar_Volume"];
+                                        vol.Value = VolValue;
+                                        // Show volume bar
+                                        AnimateVolumeBar(true, screen);
+                                    }
                                 }
-                                catch 
-                                {
-                                    return;
-                                }
-
-                                // Show volume bar
-                                AnimateVolumeBar(true, screen);
                             }
                         });
                     }
@@ -1129,27 +1176,11 @@ namespace OpenMobile
                 #endregion
             }
                 
-            else if (function == eFunction.settingsChanged)
-            {
-                #region settingsChanged
-
-                if (arg1 == "UI.VolumeChangesVisible")
-                {
-                    using (PluginSettings settings = new PluginSettings())
-                        showVolumeChanges = (settings.getSetting("UI.VolumeChangesVisible") == "True");
-                }
-
-                #endregion
-            }
-
             else if (function == eFunction.pluginLoadingComplete)
             {
                 #region pluginLoadingComplete
 
-                using (PluginSettings settings = new PluginSettings())
-                    showVolumeChanges = (settings.getSetting("UI.VolumeChangesVisible") == "True");
-
-                // Set video window position
+                // Set video window position according to what the local skin can use
                 theHost.ForEachScreen(delegate(int screen)
                 {
                     theHost.SetVideoPosition(screen, new Rectangle(0, 100, 1000, 368));
@@ -1223,7 +1254,7 @@ namespace OpenMobile
                 imageItem it = new imageItem(info.coverArt);
 
                 // Get tuned content info
-                tunedContentInfo TunedContentInfo = theHost.getData(eGetData.GetTunedContentInfo, "", zone.AudioDeviceInstance.ToString()) as tunedContentInfo;
+                tunedContentInfo TunedContentInfo = theHost.getData(eGetData.GetTunedContentInfo, "", zone.ToString()) as tunedContentInfo;
 
                 theHost.ForEachScreen(delegate(int screen)
                 {

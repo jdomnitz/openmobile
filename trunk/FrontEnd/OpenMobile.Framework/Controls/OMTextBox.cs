@@ -238,7 +238,11 @@ namespace OpenMobile.Controls
         {
             if (_OSKType != OSKInputTypes.None)
             {
-                OSK osk = new OSK(this.Text, OSKHelpText, OSKDescription, _OSKType, false);
+                // Mask input?
+                bool MaskInput = (flags & textboxFlags.Password) == textboxFlags.Password;
+
+                // Show osk
+                OSK osk = new OSK(this.Text, OSKHelpText, OSKDescription, _OSKType, MaskInput);
 
                 // Trigg OSK shown event
                 if (OnOSKShow != null)

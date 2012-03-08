@@ -30,6 +30,7 @@ using OpenMobile.Plugin;
 using OpenMobile.Threading;
 using OpenMobile.Zones;
 using OpenMobile.helperFunctions.MenuObjects;
+using OpenMobile.helperFunctions;
 
 namespace NewMedia
 {
@@ -658,9 +659,9 @@ namespace NewMedia
                 OMList l = (OMList)sender;
                 if ((l.SelectedItem != null) && (l.SelectedItem.text == "Current Playlist"))
                 {
-                    OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
-                    string title = input.getText(screen, "NewMedia");
-                    if (title != null)
+                    OSK osk = new OSK("", "Playlist name", "Enter name of new playlist", OSKInputTypes.Keypad, false);
+                    string title = osk.ShowOSK(screen);                    
+                    if (!string.IsNullOrEmpty(title))
                     {
                         Playlist.writePlaylistToDB(theHost, title, theHost.getPlaylist(screen));
                         ((OMLabel)sender.Parent[6]).Text = title + " Tracks";

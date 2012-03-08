@@ -31,6 +31,15 @@ using OpenMobile.Framework;
 
 namespace OpenMobile.helperFunctions.Graphics
 {
+    public static class Animation
+    {
+        public class Animator
+        {
+
+        }
+
+    }
+
     /// <summary>
     /// A button style image that can be generated to match any size
     /// </summary>

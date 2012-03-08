@@ -1125,11 +1125,8 @@ namespace OpenMobile
                 case eFunction.disconnectFromInternet:
                     return Net.Connections.disconnect(this);
 
-                // System settings changed (forces a reload of settings data in the pluginhost)
-                // TODO: Remove the need for this function
+                // System settings changed 
                 case eFunction.settingsChanged:
-                    for (int i = 0; i < screenCount; i++)
-                        _AudioDeviceInstanceMapping[i] = getAudioDeviceInstance(i);
                     return true;
 
                 // Forces a refresh of data from data providers
@@ -1972,7 +1969,7 @@ namespace OpenMobile
                             Zone zone = ZoneHandler.GetZone(ret);
                             if (zone == null) return false;
                             Hal_Send("34|" + arg1 + "|" + zone.AudioDeviceInstance.ToString());
-                            raiseSystemEvent(eFunction.systemVolumeChanged, arg1, zone.ToString(), String.Empty);
+                            raiseSystemEvent(eFunction.systemVolumeChanged, arg1, zone.AudioDeviceInstance.ToString(), String.Empty);
                             return true;
                         }
                         return false;

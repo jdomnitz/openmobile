@@ -88,6 +88,10 @@ namespace OMPlayer
         {
             lock (player)
             {
+                int AudioDeviceInstance = zone.AudioDeviceInstance;
+                // Errorcheck
+                if (AudioDeviceInstance < 0)
+                    return;
                 if (player[zone.AudioDeviceInstance] == null)
                         sink.Invoke(OnPlayerRequested, new object[] { zone });
             }
@@ -413,6 +417,10 @@ namespace OMPlayer
         }
         public bool SetVideoVisible(Zone zone, bool visible)
         {
+            // Errorcheck
+            if (zone == null) return false;
+            if (zone.AudioDeviceInstance < 0) return false;
+
             checkInstance(zone);
             if (player[zone.AudioDeviceInstance].m_pVideoDisplay == null)
                 return false;

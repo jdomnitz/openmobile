@@ -107,11 +107,15 @@ namespace OMSettings
             OMTextBox user = new OMTextBox(450, 180, 500, 50);
             user.Font = new Font(Font.GenericSansSerif, 28F);
             user.TextAlignment = Alignment.CenterLeft;
-            user.OnClick += new userInteraction(user_OnClick);
+            user.OSKType = OSKInputTypes.Keypad;
+            user.OSKDescription = "Enter username";
+            user.OSKHelpText = "username";
             OMTextBox pass = new OMTextBox(450, 240, 500, 50);
             pass.Font = new Font(Font.GenericSansSerif, 28F);
             pass.Flags = textboxFlags.Password;
-            pass.OnClick += new userInteraction(user_OnClick);
+            pass.OSKType = OSKInputTypes.Keypad;
+            pass.OSKDescription = "Password";
+            pass.OSKHelpText = "password";
             pass.TextAlignment = Alignment.CenterLeft;
             personal.addControl(Save2);
             personal.addControl(Cancel);
@@ -146,7 +150,9 @@ namespace OMSettings
             OMTextBox location = new OMTextBox(525, 180, 450, 50);
             location.Font = new Font(Font.GenericSansSerif, 28F);
             location.TextAlignment = Alignment.CenterLeft;
-            location.OnClick += new userInteraction(location_OnClick);
+            location.OSKType = OSKInputTypes.Keypad;
+            location.OSKDescription = "Location";
+            location.OSKHelpText = "Enter location";
             OMLabel explanation = new OMLabel(525,230,450,30);
             explanation.Text = "Postcode, city and state, etc.";
             OMList providers = new OMList(275, 280, 650, 240);
@@ -327,12 +333,6 @@ namespace OMSettings
             ((OMList)sender).Select(-1);
         }
 
-        void location_OnClick(OMControl sender, int screen)
-        {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
-            ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "data",((OMTextBox)sender).Text);
-        }
-
         void Save4_OnClick(OMControl sender, int screen)
         {
             using (PluginSettings settings = new PluginSettings())
@@ -344,15 +344,6 @@ namespace OMSettings
             }
             theHost.execute(eFunction.refreshData);
             theHost.execute(eFunction.goBack, screen.ToString());
-        }
-
-        void user_OnClick(OMControl sender, int screen)
-        {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
-            if ((((OMTextBox)sender).Flags&textboxFlags.Password)==textboxFlags.Password)
-                ((OMTextBox)sender).Text = input.getPassword(screen, "OMSettings", "personal", ((OMTextBox)sender).Text);
-            else
-                ((OMTextBox)sender).Text = input.getText(screen, "OMSettings", "personal",((OMTextBox)sender).Text);
         }
 
         void Save2_OnClick(OMControl sender, int screen)

@@ -486,6 +486,10 @@ namespace OMPlayer
     }
     public bool SetVideoVisible(Zone zone, bool visible)
     {
+        // Errorcheck
+        if (zone == null) return false;
+        if (zone.AudioDeviceInstance < 0) return false;
+
         checkInstance(zone);
         if (player[zone.AudioDeviceInstance].videoWindow == null)
             return false;

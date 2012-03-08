@@ -358,7 +358,10 @@ namespace OMDebug
         }
         void theHost_OnMediaEvent(OpenMobile.eFunction function, Zone zone, string arg)
         {
-            WriteToLog("(Event:OnMediaEvent) => \t" + function.ToString() + ", [Zone:" + zone.Name.ToString() + "], " + arg);
+            if (zone != null)
+                WriteToLog("(Event:OnMediaEvent) => \t" + function.ToString() + ", [Zone:" + zone.Name.ToString() + "], " + arg);
+            else
+                WriteToLog("(Event:OnMediaEvent) => \t" + function.ToString() + ", [Zone:NULL], " + arg);
         }
 
         private void WriteToLog(DebugMessage[] Msg)

@@ -217,14 +217,17 @@ namespace ControlDemo
 
 
         // OSK Buttons
-        OMButton OSKButton = DefaultControls.GetButton("OSKButton", 650, 265, 300, 90, ">", "Keypad");
+        OMButton OSKButton = DefaultControls.GetButton("OSKButton", 650, 165, 300, 90, ">", "Keypad");
         OSKButton.Tag = OSKInputTypes.Keypad;
         OSKButton.OnClick +=new userInteraction(OSKButton_OnClick);
         p.addControl(OSKButton);
-        OMButton OSKButton2 = DefaultControls.GetButton("OSKButton2", 650, 365, 300, 90, ">", "Numpad");
+        OMButton OSKButton2 = DefaultControls.GetButton("OSKButton2", 650, 265, 300, 90, ">", "Numpad");
         OSKButton2.Tag = OSKInputTypes.Numpad;
         OSKButton2.OnClick += new userInteraction(OSKButton_OnClick);
         p.addControl(OSKButton2);
+        OMButton OSKButton3 = DefaultControls.GetButton("OSKButton2", 650, 365, 300, 90, ">", "Password");
+        OSKButton3.OnClick += new userInteraction(OSKButton3_OnClick);
+        p.addControl(OSKButton3);
 
         // Add default button
         OMButton btnDialog = DefaultControls.GetButton("btnDialog", 10, 100, 300, 90, "", "DialogTest");
@@ -267,6 +270,13 @@ namespace ControlDemo
         return eLoadStatus.LoadSuccessful;
     }
 
+    void OSKButton3_OnClick(OMControl sender, int screen)
+    {
+        OSK osk = new OSK("", "password", "Please input password now", OSKInputTypes.Keypad, true);
+        string Result = osk.ShowOSK(screen);
+        theHost.sendMessage("UI", "", "{" + screen + "}OSK result: " + Result);
+    }
+
     void btnPopupMenu_OnClick(OMControl sender, int screen)
     {
         int Selection = (int)PopupMenu.ShowMenu(screen);
@@ -285,7 +295,7 @@ namespace ControlDemo
             btn.OverlayImage = imgBtnIconOn;
         */
 
-        OSK osk = new OSK("", "Type some text", "Please input some text now", (OSKInputTypes)sender.Tag, false);
+        OSK osk = new OSK("", "Type something", "Please input something now", (OSKInputTypes)sender.Tag, false);
         string Result = osk.ShowOSK(screen);
         theHost.sendMessage("UI", "", "{" + screen + "}OSK result: " + Result);
 

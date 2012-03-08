@@ -270,7 +270,9 @@ namespace OMOsk2
                 case "onkeypress":
                     {   // Keypress events are sent from the OSK helperfunctions to provide the correct panel for updating controls
                         OSK.OSKOnKeyPressData KeyPressData = data as OSK.OSKOnKeyPressData; // Convert input data to local data object
-                        OSK_OnKeyPress(KeyPressData.Panel, KeyPressData.Screen, KeyPressData.Type, KeyPressData.Arg);
+                        KeyPressData.KeyHandled = OSK_OnKeyPress(KeyPressData.Panel, KeyPressData.Screen, KeyPressData.Type, KeyPressData.Arg);
+                        // Return data
+                        data = (T)Convert.ChangeType(KeyPressData, typeof(T));
                     }
                     break;
 
@@ -309,7 +311,15 @@ namespace OMOsk2
 
                         OMTextBox OSK_TextBox_Text = new OMTextBox("OSK_TextBox_Text", 17, 40, 966, 60);
                         OSK_TextBox_Text.Font = new Font(Font.GenericSansSerif, 30F);
-                        OSK_TextBox_Text.Text = DT.Text;
+                        if (DT.MaskInput)
+                        {
+                            if (!String.IsNullOrEmpty(DT.Text))
+                                OSK_TextBox_Text.Text = new string('*', DT.Text.Length);
+                        }
+                        else
+                        {
+                            OSK_TextBox_Text.Text = DT.Text;
+                        }
                         OSK_TextBox_Text.Tag = DT.Text;
                         Panel.addControl(OSK_TextBox_Text);
 
@@ -737,8 +747,9 @@ namespace OMOsk2
                     if (!String.IsNullOrEmpty(arg.Character))
                     {   // Add character 
                         OSKValueAddCharacter(panel, screen, arg.Character);
+                        return true;
                     }
-                    return true;
+                    return false;
             }
             return false;        
         }
