@@ -557,17 +557,20 @@ namespace OMSettings
             if (!txtName.Disabled)
             {
 
-                // Check for unique name
-                if (Host.ZoneHandler.Zones.Find(x => x.Name == txtName.Text) != null)
+                // Check for unique name (only do this if we're adding a new zone)
+                if (TmpZone == null)
                 {
-                    txtName.BackgroundColor = Color.Red;
-                    dialog dialogInfo = new OpenMobile.helperFunctions.Forms.dialog();
-                    dialogInfo.Header = "Data error";
-                    dialogInfo.Text = "Zone name must be unique!\nPlease use a different name";
-                    dialogInfo.Icon = OpenMobile.helperFunctions.Forms.icons.Error;
-                    dialogInfo.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
-                    dialogInfo.ShowMsgBox(screen);
-                    return;
+                    if (Host.ZoneHandler.Zones.Find(x => x.Name == txtName.Text) != null)
+                    {
+                        txtName.BackgroundColor = Color.Red;
+                        dialog dialogInfo = new OpenMobile.helperFunctions.Forms.dialog();
+                        dialogInfo.Header = "Data error";
+                        dialogInfo.Text = "Zone name must be unique!\nPlease use a different name";
+                        dialogInfo.Icon = OpenMobile.helperFunctions.Forms.icons.Error;
+                        dialogInfo.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
+                        dialogInfo.ShowMsgBox(screen);
+                        return;
+                    }
                 }
 
                 // Check for valid screen number
@@ -843,30 +846,32 @@ namespace OMSettings
         static private void ZoneList_Update(int screen)
         {
             OMList List = (OMList)Manager[screen, "Zones"][screen, "List_Zones"];
-            List.Clear();
-
-            foreach (Zone z in Host.ZoneHandler.Zones)
+            lock (List)
             {
-                int[] ActiveScreens = Host.ZoneHandler.GetScreensForActiveZone(z);
-                string sActiveScreens = "";
-                bool first = true;
-                foreach (int i in ActiveScreens)
+                List.Clear();
+
+                foreach (Zone z in Host.ZoneHandler.Zones)
                 {
-                    if (first)
+                    int[] ActiveScreens = Host.ZoneHandler.GetScreensForActiveZone(z);
+                    string sActiveScreens = "";
+                    bool first = true;
+                    foreach (int i in ActiveScreens)
                     {
-                        sActiveScreens += String.Format("{0}", i.ToString());
-                        first = false;
+                        if (first)
+                        {
+                            sActiveScreens += String.Format("{0}", i.ToString());
+                            first = false;
+                        }
+                        else
+                            sActiveScreens += String.Format(",{0}", i.ToString());
                     }
-                    else
-                        sActiveScreens += String.Format(",{0}", i.ToString());
+
+                    OMListItem item = new OMListItem(String.Format("{0}{1}", (ActiveScreens.Length > 0 ? String.Format("(*{0}) ", sActiveScreens) : ""), z.Name), z.Description, subItemformat);
+                    item.tag = z;
+                    item.image = Host.getSkinImage("Mixer").image;
+                    List.Add(item);
                 }
-
-                OMListItem item = new OMListItem(String.Format("{0}{1}", (ActiveScreens.Length > 0 ? String.Format("(*{0}) ", sActiveScreens) : ""), z.Name), z.Description, subItemformat);
-                item.tag = z;
-                item.image = Host.getSkinImage("Mixer").image;
-                List.Add(item);
             }
-
         }
 
     }

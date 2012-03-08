@@ -40,6 +40,7 @@ namespace OpenMobile.helperFunctions
                 public eKeypressType Type { get; set; }
                 public KeyboardKeyEventArgs Arg { get; set; }
                 public int Screen { get; set; }
+                public bool KeyHandled { get; set; }
             }
 
             public class OSKData
@@ -202,10 +203,10 @@ namespace OpenMobile.helperFunctions
             private void CreatePanel(int screen)
             {
                 // Create panel
-                Panel = new OMPanel(this.GetHashCode().ToString());
+                Panel = new OMPanel("");
 
                 // Set panel name
-                PanelName = Panel.Name;
+                PanelName = Panel.Name = String.Format("{0}_{1}", Handler, Panel.GetHashCode());
 
                 // Pack paneldata into tag property
                 Panel.Tag = _ConfigData;
@@ -324,7 +325,7 @@ namespace OpenMobile.helperFunctions
                     BuiltInComponents.Host.DebugMsg("Unable to send keypress event to OSK, plugin " + Handler + " not available");
                     return false;
                 }
-                return true;
+                return Data.KeyHandled;
             }
 
             /// <summary>

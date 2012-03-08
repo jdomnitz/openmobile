@@ -47,17 +47,24 @@ namespace OpenMobile.Graphics
         }
         internal void SetTexture(int screen, uint texture)
         {
+            // Set texture
             if (screen < this.texture.Length)
                 this.texture[screen] = texture;
+
             for (int i = 0; i < this.texture.Length; i++)
                 if (this.texture[i] == 0)
                     return;
+
+            // Cleanup
             if (!persist)
             {
                 for (int i = 0; i < img.Length; i++)
                 {
-                    img[i].Dispose();
-                    img[i] = null;
+                    if (img[i] != null)
+                    {
+                        img[i].Dispose();
+                        img[i] = null;
+                    }
                 }
             }
         }

@@ -600,8 +600,8 @@ namespace OMRadio
 
         void Button_TuneTo_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
-            string newStation = input.getNumber(screen, "Radio");
+            OpenMobile.helperFunctions.OSK osk = new OpenMobile.helperFunctions.OSK("", "tune parameters", "Enter tune parameters", OSKInputTypes.Keypad, false);
+            string newStation = osk.ShowOSK(screen);
             object o;
             theHost.getData(eGetData.GetMediaStatus, "",screen.ToString(), out o);
             stationInfo info = o as stationInfo;
@@ -783,12 +783,6 @@ namespace OMRadio
             theHost.execute(eFunction.scanBand, screen.ToString());
         }
 
-        void TextBox_RadioTuneTo_OnClick(OMControl sender, int screen)
-        {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
-            ((OMTextBox)sender).Text = input.getText(screen, this.pluginName, "");
-        }
-
         void Button_RadioBand_OnClick(OMControl sender, int screen)
         {
             ((OMPanel)manager[screen, "ListView"]).Tag = "band";
@@ -851,7 +845,7 @@ namespace OMRadio
         private void UpdateStationInfo(Zone zone)
         {
             object o = new object();
-            theHost.getData(eGetData.GetTunedContentInfo, "", zone.AudioDeviceInstance.ToString(), out o);
+            theHost.getData(eGetData.GetTunedContentInfo, "", zone.ToString(), out o);
             if (o == null)
                 return;
             tunedContentInfo info = (tunedContentInfo)o;

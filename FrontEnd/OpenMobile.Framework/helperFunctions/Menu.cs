@@ -271,7 +271,8 @@ namespace OpenMobile.helperFunctions.MenuObjects
             OMPanel Panel = new OMPanel("");
 
             // Set panel name
-            Panel.Name = Panel.GetHashCode().ToString();
+            Panel.Name = String.Format("{0}_{1}", Handler, Panel.GetHashCode());
+
             PanelName[screen] = Panel.Name;
 
             // Pack paneldata into tag property

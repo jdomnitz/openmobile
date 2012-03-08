@@ -111,6 +111,9 @@ namespace Networking
             OMTextBox textbox2 = new OMTextBox(310, 310, 380, 50);
             textbox2.OutlineColor = Color.Red;
             textbox2.OnClick += new userInteraction(textbox_OnClick);
+            textbox2.OSKType = OSKInputTypes.Keypad;
+            textbox2.OSKDescription = "Prompt";
+            textbox2.OSKHelpText = "Prompt";
             textbox2.Visible = false;
             OMButton login = new OMButton(310, 310, 380, 50);
             login.Text = "Login";
@@ -153,8 +156,8 @@ namespace Networking
 
         void textbox_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
-            ((OMTextBox)sender).Text = input.getText(screen, "Networking", new string[] { "", "Prompt" }, ((OMTextBox)sender).Text);
+            //OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
+            //((OMTextBox)sender).Text = input.getText(screen, "Networking", new string[] { "", "Prompt" }, ((OMTextBox)sender).Text);
         }
 
         void connect_OnClick(OMControl sender, int screen)

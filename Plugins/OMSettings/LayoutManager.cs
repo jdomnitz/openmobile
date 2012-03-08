@@ -169,6 +169,8 @@ namespace OMSettings
                     OMTextBox text = new OMTextBox(450, ofset, 500, 50);
                     text.Font = new Font(Font.GenericSansSerif, 28F);
                     text.TextAlignment = Alignment.CenterLeft;
+                    text.OSKDescription = (s.Header == "" ? s.Description : s.Header);
+                    text.OSKType = OSKInputTypes.Keypad;
                     text.OnClick += new userInteraction(text_OnClick);
                     text.Name = title;
                     text.Text = s.getInstanceValue(screen);
@@ -239,6 +241,9 @@ namespace OMSettings
                     OMTextBox ptext = new OMTextBox(450, ofset, 500, 50);
                     ptext.Font = new Font(Font.GenericSansSerif, 28F);
                     ptext.TextAlignment = Alignment.CenterLeft;
+                    ptext.OSKDescription = "Enter password";
+                    ptext.OSKHelpText = "password";
+                    ptext.OSKType = OSKInputTypes.Keypad;
                     ptext.OnClick += new userInteraction(text_OnClick);
                     ptext.Text = s.getInstanceValue(screen);
                     ptext.Name = title;
@@ -346,12 +351,7 @@ namespace OMSettings
 
         void text_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.helperFunctions.General.getKeyboardInput input = new OpenMobile.helperFunctions.General.getKeyboardInput();
             OMTextBox tb = ((OMTextBox)sender);
-            if ((tb.Flags&textboxFlags.Password)==textboxFlags.Password)
-                tb.Text = input.getPassword(screen, "OMSettings", sender.Parent.Name,tb.Text);
-            else
-                tb.Text = input.getText(screen, "OMSettings", sender.Parent.Name,tb.Text);
             Setting s = collection.Find(p => p.Name == sender.Tag.ToString());
             s.setInstanceValue(screen, tb.Text);
             collection.changeSetting(screen,s);

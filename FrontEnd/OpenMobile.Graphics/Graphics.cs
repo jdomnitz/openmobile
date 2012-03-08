@@ -290,7 +290,17 @@ namespace OpenMobile.Graphics
             if ((w <= 0) || (h <= 0))
                 return null;
 
-            System.Drawing.Bitmap bmp = new Bitmap((int)(w * (scaleWidth[screen] == 0F ? 1F : scaleWidth[screen])), (int)(h * (scaleHeight[screen] == 0F ? 1F : scaleHeight[screen])));
+            // Get scaled sizes
+            int bmpW = (int)System.Math.Ceiling(w * (scaleWidth[screen] == 0F ? 1F : scaleWidth[screen]));
+            int bmpH = (int)System.Math.Ceiling(h * (scaleHeight[screen] == 0F ? 1F : scaleHeight[screen]));
+
+            // Let's verify that sizes isn't zero, if so as a last resort set it to 1
+            if (bmpW <= 0)
+                bmpW = w;
+            if (bmpH <= 0)
+                bmpH = h;
+
+            System.Drawing.Bitmap bmp = new Bitmap(bmpW, bmpH);
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
                 if ((scaleWidth[screen] > 0F) & (scaleHeight[screen] > 0F))

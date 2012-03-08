@@ -134,7 +134,7 @@ namespace OpenMobile.Zones
         /// <returns>Null = no zone found for given screen or invalid screen number</returns>
         public Zone GetActiveZone(int Screen)
         {
-            if ((Screen < 0) && (Screen > BuiltInComponents.Host.ScreenCount))
+            if ((Screen < 0) && (Screen > _ActiveZones.Length))
                 return null;
             return GetZone(_ActiveZones[Screen]);
         }
@@ -326,30 +326,40 @@ namespace OpenMobile.Zones
                // Error detected, force default settings 
                SetToDefault = true;
 
-           // Ensure we have a active zone for all screens
-           for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+           // Ensure we have valid active zones
+           for (int i = 0; i < _ActiveZones.Length; i++)
            {
-               try
+               if (GetZone(_ActiveZones[i]) == null)
+                   SetToDefault = true;
+           }
+
+           if (!SetToDefault)
+           {
+               // Ensure we have a active zone for all screens
+               for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
                {
-                   if (_ActiveZones[i] == null)
-                   {    // Find a zone to activate
-                       Zone ZoneToActivate = _Zones.Find(x => x.Screen == i);
-                       if (ZoneToActivate == null)
-                       {    // No zone found for screen = error in setup, lets reset to default
-                           SetToDefault = true;
-                           break;
-                       }
-                       else
-                       {
-                           _ActiveZones[i] = ZoneToActivate.ID;
+                   try
+                   {
+                       if (_ActiveZones[i] == null)
+                       {    // Find a zone to activate
+                           Zone ZoneToActivate = _Zones.Find(x => x.Screen == i);
+                           if (ZoneToActivate == null)
+                           {    // No zone found for screen = error in setup, lets reset to default
+                               SetToDefault = true;
+                               break;
+                           }
+                           else
+                           {
+                               _ActiveZones[i] = ZoneToActivate.ID;
+                           }
                        }
                    }
-               }
-               catch
-               {
-                   _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
-                   SetToDefault = true;
-                   break;
+                   catch
+                   {
+                       _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
+                       SetToDefault = true;
+                       break;
+                   }
                }
            }
 

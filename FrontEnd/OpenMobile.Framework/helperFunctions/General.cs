@@ -107,6 +107,8 @@ namespace OpenMobile.helperFunctions
         /// <summary>
         /// Synchronously get keyboard input from the On Screen Keyboard
         /// </summary>
+        /// 
+        [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
         public sealed class getKeyboardInput
         {
             string theText = null;
@@ -127,6 +129,7 @@ namespace OpenMobile.helperFunctions
             /// <param name="screen"></param>
             /// <param name="pluginname"></param>
             /// <returns></returns>
+            [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
             public string getText(int screen, string pluginname)
             {
                 return getText(screen, pluginname, String.Empty);
@@ -135,6 +138,7 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
+            [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
             public string getText(int screen, string pluginname, string panelName)
             {
                 return getText(screen, pluginname, new string[] { panelName });
@@ -143,6 +147,7 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
+            [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
             public string getPassword(int screen, string pluginname, string defaultValue)
             {
                 return getPassword(screen, pluginname, new string[] { String.Empty }, defaultValue);
@@ -159,6 +164,7 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
+            [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
             public string getPassword(int screen, string pluginname, string panelName, string defaultValue)
             {
                 return getPassword(screen, pluginname, new string[] { panelName }, defaultValue);
@@ -167,6 +173,7 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
+            [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
             public string getText(int screen, string pluginname, string[] panelNames)
             {
                 return getText(screen, pluginname, panelNames, "OSK");
@@ -175,6 +182,7 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
+            [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
             public string getPassword(int screen, string pluginname, string[] panelNames, string defaultValue)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
@@ -202,6 +210,7 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the text entered
             /// </summary>
             /// <returns></returns>
+            [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
             public string getText(int screen, string pluginname, string[] panelNames, string defaultValue)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);
@@ -230,6 +239,7 @@ namespace OpenMobile.helperFunctions
             /// <param name="screen"></param>
             /// <param name="pluginname"></param>
             /// <returns></returns>
+            [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
             public string getNumber(int screen, string pluginname)
             {
                 return getNumber(screen, pluginname, String.Empty);
@@ -239,6 +249,7 @@ namespace OpenMobile.helperFunctions
             /// Loads the On Screen Keyboard and then returns the number entered
             /// </summary>
             /// <returns></returns>
+            [Obsolete("Use OpenMobile.helperFunctions.OSK instead")]
             public string getNumber(int screen, string pluginname, string panelName)
             {
                 SystemEvent ev = new SystemEvent(theHost_OnSystemEvent);

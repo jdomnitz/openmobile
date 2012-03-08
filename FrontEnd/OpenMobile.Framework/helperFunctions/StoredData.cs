@@ -25,6 +25,18 @@ namespace OpenMobile.helperFunctions
 {
     public static class StoredData
     {
+
+        public static bool GetBool(string Name)
+        {
+            using (PluginSettings settings = new PluginSettings())
+                return settings.getSetting(Name).ToLower().Equals("true");
+        }
+        public static bool SetBool(string Name, bool Value)
+        {
+            using (PluginSettings setting = new PluginSettings())
+                return setting.setSetting(Name, Value.ToString());
+        }
+
         public static string Get(string Name)
         {
             using (PluginSettings settings = new PluginSettings())
@@ -33,9 +45,57 @@ namespace OpenMobile.helperFunctions
 
         public static bool Set(string Name, string Value)
         {
-            // Save XML to database
             using (PluginSettings setting = new PluginSettings())
                 return setting.setSetting(Name, Value);
+        }
+
+        public static class SystemSettings
+        {
+            /// <summary>
+            /// OM System setting: True = use minimalistic graphics
+            /// </summary>
+            public static bool UseSimpleGraphics 
+            {
+                get
+                {
+                    return StoredData.GetBool("UI.MinGraphics");
+                }
+                set
+                {
+                    StoredData.SetBool("UI.MinGraphics", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: True = Show volume changes
+            /// </summary>
+            public static bool VolumeChangesVisible
+            {
+                get
+                {
+                    return StoredData.GetBool("UI.VolumeChangesVisible");
+                }
+                set
+                {
+                    StoredData.SetBool("UI.VolumeChangesVisible", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: True = Show OM system cursors
+            /// </summary>
+            public static bool ShowCursor
+            {
+                get
+                {
+                    return StoredData.GetBool("UI.ShowCursor");
+                }
+                set
+                {
+                    StoredData.SetBool("UI.ShowCursor", value);
+                }
+            }
+
         }
     }
 }
