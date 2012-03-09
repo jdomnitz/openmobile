@@ -436,7 +436,7 @@ namespace OpenMobile
                 OMButton Button = ((OMButton)screens[screen, "MainMenu"]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString()]);
                 //OMImage Icon = ((OMImage)screens[screen, "MainMenu"]["MainMenu." + screen.ToString() + ".MainMenu" + i.ToString() + "_Icon"]);
                 if (Button.Tag != null)
-                    if ((string)Button.Tag != "")
+                    //if ((string)Button.Tag != "")
                     {
                         // Check for default icons
                         if ((string)Button.Tag == "Exit")
@@ -454,16 +454,19 @@ namespace OpenMobile
 
                             ButtonGraphic.GraphicData gd = new ButtonGraphic.GraphicData();
 
-                            // Set icon symbol
-                            gd.Icon = plugin.GetPluginIconSymbol((string)Button.Tag);
-                            
-                            // Set Icon Image
-                            if (String.IsNullOrEmpty(gd.Icon))
-                                gd.IconImage = plugin.GetPluginIconString((string)Button.Tag);
+                            if (!String.IsNullOrEmpty((string)Button.Tag))
+                            {
+                                // Set icon symbol
+                                gd.Icon = plugin.GetPluginIconSymbol((string)Button.Tag);
 
-                            // Set default image
-                            if ((String.IsNullOrEmpty(gd.Icon)) && (String.IsNullOrEmpty(gd.IconImage)))
-                                gd.Icon = ((char)0x85).ToString();
+                                // Set Icon Image
+                                if (String.IsNullOrEmpty(gd.Icon))
+                                    gd.IconImage = plugin.GetPluginIconString((string)Button.Tag);
+
+                                // Set default image
+                                if ((String.IsNullOrEmpty(gd.Icon)) && (String.IsNullOrEmpty(gd.IconImage)))
+                                    gd.Icon = ((char)0x85).ToString();
+                            }
 
                             // Set Text
                             gd.Text = StoredData.Get(String.Format("{0}.Display", Button.Name));

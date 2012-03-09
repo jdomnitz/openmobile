@@ -28,6 +28,7 @@ using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 using OpenMobile.helperFunctions;
 using OpenMobile.helperFunctions.Forms;
+using OpenMobile.helperFunctions.Controls;
 
 namespace OMSettings
 {
@@ -95,7 +96,7 @@ namespace OMSettings
                 ScreenSelection_Button[i].FocusImage = opt4;
                 ScreenSelection_Button[i].Name = "ScreenSelection_Button" + i.ToString();
                 ScreenSelection_Button[i].Font = fnt;
-                ScreenSelection_Button[i].Text = (i+1).ToString();
+                ScreenSelection_Button[i].Text = (i).ToString();
                 ScreenSelection_Button[i].Tag = i+1;
                 ScreenSelection_Button[i].Format = eTextFormat.Outline;
                 ScreenSelection_Button[i].OnClick += new userInteraction(ScreenSelection_Button_OnClick);
@@ -133,26 +134,17 @@ namespace OMSettings
             imageItem imgBtn = Host.getSkinImage("Btn");
             imageItem imgBtnHighlighted = Host.getSkinImage("Btn.Highlighted");
 
-            OMLabel Screen_LabelCaption = new OMLabel(0, 110, 1000, 70);
+            OMLabel Screen_LabelCaption = new OMLabel("Screen_LabelCaption", 0, 110, 1000, 70);
             Screen_LabelCaption.Font = new Font(Font.GenericSansSerif, 34);
-            Screen_LabelCaption.Name = "Screen_LabelCaption";
             Screen_LabelCaption.TextAlignment = Alignment.CenterCenter;
             panelScreen.addControl(Screen_LabelCaption);
 
-            OMButton Screen_ButtonSave = new OMButton(10, 105, 150, 70);
-            Screen_ButtonSave.Image = imgFull;
-            Screen_ButtonSave.FocusImage = imgFullHighlighted;
-            Screen_ButtonSave.Text = "Save";
-            Screen_ButtonSave.Name = "Screen_ButtonSave";
+            OMButton Screen_ButtonSave = DefaultControls.GetButton("Screen_ButtonSave", 10, 105, 150, 70, "", "Save");//new OMButton(10, 105, 150, 70);
             Screen_ButtonSave.Transition = eButtonTransition.None;
             Screen_ButtonSave.OnClick += new userInteraction(Screen_ButtonSave_OnClick);
             panelScreen.addControl(Screen_ButtonSave);
 
-            OMButton Screen_ButtonCancel = new OMButton(840, 105, 150, 70);
-            Screen_ButtonCancel.Image = imgFull;
-            Screen_ButtonCancel.FocusImage = imgFullHighlighted;
-            Screen_ButtonCancel.Text = "Cancel";
-            Screen_ButtonCancel.Name = "Screen_ButtonCancel";
+            OMButton Screen_ButtonCancel = DefaultControls.GetButton("Screen_ButtonCancel", 840, 105, 150, 70, "", "Cancel");//new OMButton(10, 105, 150, 70);
             Screen_ButtonCancel.Transition = eButtonTransition.None;
             Screen_ButtonCancel.OnClick += new userInteraction(Screen_ButtonCancel_OnClick);
 
@@ -525,7 +517,7 @@ namespace OMSettings
             }
 
             // Set caption
-            ((OMLabel)panelScreen[screen, "Screen_LabelCaption"]).Text = "Input routing for Screen " + SelectedScreen.ToString();
+            ((OMLabel)panelScreen[screen, "Screen_LabelCaption"]).Text = "Input routing for Screen " + (SelectedScreen-1).ToString();
 
             // Get current settings and set textbox values
             using (PluginSettings settings = new PluginSettings())

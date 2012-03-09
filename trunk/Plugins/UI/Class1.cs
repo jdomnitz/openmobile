@@ -192,80 +192,80 @@ namespace OpenMobile
             Button_UIBottomBar_Back.Transition = eButtonTransition.None;
             UIPanel.addControl(Button_UIBottomBar_Back);
 
-            OMImage Image_UIMediaBar_Background = new OMImage("Image_UIMediaBar_Background", 0, 620, 1000, 140);
+            OMImage Image_UIMediaBar_Background = new OMImage("Image_UIMediaBar_Background", 0, 604, 1000, 140);
             Image_UIMediaBar_Background.Image = theHost.getSkinImage("mediaBar", true);
             Image_UIMediaBar_Background.Transparency = 80;
             UIPanel.addControl(Image_UIMediaBar_Background);
 
-            OMButton Button_UIMediaBar_Media = new OMButton("Button_UIMediaBar_Media", 9, 533, 160, 70);
+            OMButton Button_UIMediaBar_Media = new OMButton("Button_UIMediaBar_Media", 9, 534, 160, 70);
             Button_UIMediaBar_Media.Image = theHost.getSkinImage("MediaButton", true);
             Button_UIMediaBar_Media.Transition = eButtonTransition.None;
             Button_UIMediaBar_Media.FocusImage = theHost.getSkinImage("MediaButtonFocus", true);
             Button_UIMediaBar_Media.OnClick += new userInteraction(mediaButton_OnClick);
             UIPanel.addControl(Button_UIMediaBar_Media);
 
-            OMSlider Slider_UIMediaBar_Slider = new OMSlider("Slider_UIMediaBar_Slider", 20, 630, 820, 25, 12, 40);
+            OMSlider Slider_UIMediaBar_Slider = new OMSlider("Slider_UIMediaBar_Slider", 20, 615, 820, 25, 12, 40);
             Slider_UIMediaBar_Slider.Slider = theHost.getSkinImage("Slider");
             Slider_UIMediaBar_Slider.SliderBar = theHost.getSkinImage("Slider.Bar");
             Slider_UIMediaBar_Slider.Maximum = 0;
             Slider_UIMediaBar_Slider.OnSliderMoved += new OMSlider.slidermoved(slider_OnSliderMoved);
             UIPanel.addControl(Slider_UIMediaBar_Slider);
 
-            OMButton Button_UIMediaBar_Play = new OMButton("Button_UIMediaBar_Play", 287, 648, 135, 100);
+            OMButton Button_UIMediaBar_Play = new OMButton("Button_UIMediaBar_Play", 287, 633, 135, 100);
             Button_UIMediaBar_Play.Image = theHost.getSkinImage("Play");
             Button_UIMediaBar_Play.DownImage = theHost.getSkinImage("Play.Highlighted");
             Button_UIMediaBar_Play.OnClick += new userInteraction(playButton_OnClick);
             Button_UIMediaBar_Play.Transition = eButtonTransition.None;
             UIPanel.addControl(Button_UIMediaBar_Play);
 
-            OMButton Button_UIMediaBar_Stop = new OMButton("Button_UIMediaBar_Stop", 425, 648, 135, 100);
+            OMButton Button_UIMediaBar_Stop = new OMButton("Button_UIMediaBar_Stop", 425, 633, 135, 100);
             Button_UIMediaBar_Stop.Image = theHost.getSkinImage("Stop", true);
             Button_UIMediaBar_Stop.DownImage = theHost.getSkinImage("Stop.Highlighted", true);
             Button_UIMediaBar_Stop.OnClick += new userInteraction(stopButton_OnClick);
             Button_UIMediaBar_Stop.Transition = eButtonTransition.None;
             UIPanel.addControl(Button_UIMediaBar_Stop);
 
-            OMButton Button_UIMediaBar_Rewind = new OMButton("Button_UIMediaBar_Rewind", 149, 648, 135, 100);
+            OMButton Button_UIMediaBar_Rewind = new OMButton("Button_UIMediaBar_Rewind", 149, 633, 135, 100);
             Button_UIMediaBar_Rewind.Image = theHost.getSkinImage("Rewind");
             Button_UIMediaBar_Rewind.DownImage = theHost.getSkinImage("Rewind.Highlighted");
             Button_UIMediaBar_Rewind.OnClick += new userInteraction(rewindButton_OnClick);
             Button_UIMediaBar_Rewind.Transition = eButtonTransition.None;
             UIPanel.addControl(Button_UIMediaBar_Rewind);
 
-            OMButton Button_UIMediaBar_FastForward = new OMButton("Button_UIMediaBar_FastForward", 564, 648, 135, 100);
+            OMButton Button_UIMediaBar_FastForward = new OMButton("Button_UIMediaBar_FastForward", 564, 633, 135, 100);
             Button_UIMediaBar_FastForward.OnClick += new userInteraction(fastForwardButton_OnClick);
             Button_UIMediaBar_FastForward.Image = theHost.getSkinImage("fastForward");
             Button_UIMediaBar_FastForward.DownImage = theHost.getSkinImage("fastForward.Highlighted");
             Button_UIMediaBar_FastForward.Transition = eButtonTransition.None;
             UIPanel.addControl(Button_UIMediaBar_FastForward);
 
-            OMButton Button_UIMediaBar_SkipForward = new OMButton("Button_UIMediaBar_SkipForward", 703, 648, 135, 100);
+            OMButton Button_UIMediaBar_SkipForward = new OMButton("Button_UIMediaBar_SkipForward", 703, 633, 135, 100);
             Button_UIMediaBar_SkipForward.Image = theHost.getSkinImage("SkipForward", true);
             Button_UIMediaBar_SkipForward.DownImage = theHost.getSkinImage("SkipForward.Highlighted", true);
             Button_UIMediaBar_SkipForward.OnClick += new userInteraction(skipForwardButton_OnClick);
             Button_UIMediaBar_SkipForward.Transition = eButtonTransition.None;
             UIPanel.addControl(Button_UIMediaBar_SkipForward);
 
-            OMButton Button_UIMediaBar_SkipBackward = new OMButton("Button_UIMediaBar_SkipBackward", 13, 648, 135, 100);
+            OMButton Button_UIMediaBar_SkipBackward = new OMButton("Button_UIMediaBar_SkipBackward", 13, 633, 135, 100);
             Button_UIMediaBar_SkipBackward.Image = theHost.getSkinImage("SkipBackward", true);
             Button_UIMediaBar_SkipBackward.DownImage = theHost.getSkinImage("SkipBackward.Highlighted", true);
             Button_UIMediaBar_SkipBackward.OnClick += new userInteraction(skipBackwardButton_OnClick);
             Button_UIMediaBar_SkipBackward.Transition = eButtonTransition.None;
             UIPanel.addControl(Button_UIMediaBar_SkipBackward);
 
-            OMLabel Label_UIMediaBar_Elapsed = new OMLabel("Label_UIMediaBar_Elapsed", 840, 630, 160, 22);
+            OMLabel Label_UIMediaBar_Elapsed = new OMLabel("Label_UIMediaBar_Elapsed", 840, 615, 160, 22);
             Label_UIMediaBar_Elapsed.OutlineColor = Color.Blue;
             Label_UIMediaBar_Elapsed.Font = new Font(Font.GenericSansSerif, 16F);
             Label_UIMediaBar_Elapsed.Format = eTextFormat.Outline;
             UIPanel.addControl(Label_UIMediaBar_Elapsed);
 
-            OMButton Button_UIMediaBar_Random = new OMButton("Button_UIMediaBar_Random", 845, 650, 55, 40);
+            OMButton Button_UIMediaBar_Random = new OMButton("Button_UIMediaBar_Random", 845, 635, 55, 40);
             Button_UIMediaBar_Random.Image = theHost.getSkinImage("random");
             Button_UIMediaBar_Random.DownImage = theHost.getSkinImage("random.Highlighted");
             Button_UIMediaBar_Random.OnClick += new userInteraction(random_OnClick);
             UIPanel.addControl(Button_UIMediaBar_Random);
 
-            OMButton Button_UIMediaBar_Zone = DefaultControls.GetButton("Button_UIMediaBar_Zone", 845, 695, 140, 50, "", "Zone");
+            OMButton Button_UIMediaBar_Zone = DefaultControls.GetButton("Button_UIMediaBar_Zone", 845, 680, 140, 50, "", "Zone");
             Button_UIMediaBar_Zone.OnClick += new userInteraction(Button_UIMediaBar_Zone_OnClick);
             UIPanel.addControl(Button_UIMediaBar_Zone);
 
@@ -476,44 +476,67 @@ namespace OpenMobile
         private bool[] MediaBarVisible = null;
         private void AnimateMediaBar(bool up, int screen)
         {
-            int AnimationSteps = 8;
-            int Steps = 0;
+            // Get media controls
             List<OMControl> MediaControls = GetMediaControls(screen);
+
+            // Get media button control
+            OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Media"];
+
+            // Calculate relative placements of media controls
+            int[] RelativePlacements = new int[MediaControls.Count];
+            for (int i = 0; i < RelativePlacements.Length; i++)
+                RelativePlacements[i] = MediaControls[i].Top - btn.Top;
+
             if (up)
-            {   // Move media bar up
-                while (Steps < AnimationSteps)
+            {   // Move media bar up                
+                int EndPos = 390;
+                int Top = btn.Top;
+
+                SmoothAnimator Animation = new SmoothAnimator(0.9f);
+                Animation.Animate(delegate(int AnimationStep)
                 {
-                    foreach (OMControl control in MediaControls)
-                    {
-                        if (control.Name == "Button_UIMediaBar_Media")
-                            control.Top -= 18;
-                        else
-                            control.Top -= 20;
+                    Top -= AnimationStep;
+                    if (Top <= EndPos)
+                    {   // Animation has completed
+                        btn.Top = EndPos;
+                        for (int i = 0; i < RelativePlacements.Length; i++)
+                            MediaControls[i].Top = btn.Top + RelativePlacements[i];
+                        return false;
                     }
-                    Steps++;
-                    if (theHost.GraphicsLevel == eGraphicsLevel.Standard)
-                        Thread.Sleep(10);
-                }
-                // Readjust placement of menubutton to match mediabar
-                UIPanel[screen,"Button_UIMediaBar_Media"].Top += 1;
+                    else
+                    {   // Move object down
+                        btn.Top = Top;
+                        for (int i = 0; i < RelativePlacements.Length; i++)
+                            MediaControls[i].Top = btn.Top + RelativePlacements[i];
+                    }
+                    return true;
+                });
                 MediaBarVisible[screen] = true;
             }
             else
             {   // Move media bar down
-                UIPanel[screen, "Button_UIMediaBar_Media"].Top -= 1;
-                while (Steps < AnimationSteps)
+                int EndPos = 534;
+                int Top = btn.Top;
+
+                SmoothAnimator Animation = new SmoothAnimator(0.9f);
+                Animation.Animate(delegate(int AnimationStep)
                 {
-                    foreach (OMControl control in MediaControls)
-                    {
-                        if (control.Name == "Button_UIMediaBar_Media")
-                            control.Top += 18;
-                        else
-                            control.Top += 20;
+                    Top += AnimationStep;
+                    if (Top >= EndPos)
+                    {   // Animation has completed
+                        btn.Top = EndPos;
+                        for (int i = 0; i < RelativePlacements.Length; i++)
+                            MediaControls[i].Top = btn.Top + RelativePlacements[i];
+                        return false;
                     }
-                    Steps++;
-                    if (theHost.GraphicsLevel == eGraphicsLevel.Standard)
-                        Thread.Sleep(10);
-                }
+                    else
+                    {   // Move object down
+                        btn.Top = Top;
+                        for (int i = 0; i < RelativePlacements.Length; i++)
+                            MediaControls[i].Top = btn.Top + RelativePlacements[i];
+                    }
+                    return true;
+                });
                 MediaBarVisible[screen] = false;
             }
         }
@@ -577,61 +600,28 @@ namespace OpenMobile
 
                 // Animate control  
                 int EndPos = 510;
-
-                int Animation_Step;
-                float Animation_Speed = 2f;
-                bool Animation_Running = true;
-                float Interval = System.Diagnostics.Stopwatch.Frequency / 30.0f;
-                float currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
-                float lastUpdateTicks = System.Diagnostics.Stopwatch.GetTimestamp();
-                float ticks = 0;
-                float ticksMS = 0;
                 int Top = btn.Top;
 
-                while (Animation_Running)
-                {
-                    Animation_Running = true;
-
-                    currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
-                    ticks = currentTicks - lastUpdateTicks;
-                    if (ticks >= Interval)
+                SmoothAnimator Animation = new SmoothAnimator(2.0f);
+                Animation.Animate(delegate(int AnimationStep)
                     {
-                        lastUpdateTicks = currentTicks;
-                        ticksMS = (ticks / System.Diagnostics.Stopwatch.Frequency) * 1000;
-                        
-                        Animation_Step = ((int)(ticksMS * Animation_Speed));
-
-                        Top += Animation_Step;
-
+                        Top += AnimationStep;
                         if (Top >= EndPos)
-                        {
-                            Animation_Running = false;
+                        {   // Animation has completed
                             btn.Top = EndPos;
                             vol.Top = btn.Top - vol.Height;
+                            return false;
                         }
                         else
-                        {
+                        {   // Move object down
                             btn.Top = Top;
                             vol.Top = btn.Top - vol.Height;
                         }
-                    }
-                    Thread.Sleep(1);
-                }
-
-            
-                /*
-                for (int i = 0; i <= 10; i++)
-                {
-                    vol.Top = (51 * i) - 510;
-                    btn.Top = (int)(51.1 * i);
-                    Thread.Sleep(50);
-                }
-                */
-            
+                        return true;
+                    });
 
                 // Activate timeout timer
-                //if (VolumeBarTimer[screen] == null)
-                    VolumeBarTimer[screen] = new Timer(2500);
+                VolumeBarTimer[screen] = new Timer(2500);
                 VolumeBarTimer[screen].Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
                 VolumeBarTimer[screen].Screen = screen;
                 VolumeBarTimer[screen].Tag = UIPanel[screen, "VolumeBar_UITopBar_Volume"];
@@ -651,12 +641,26 @@ namespace OpenMobile
                 VolumeBarVisible[screen] = false;
 
                 // Animate control  
-                for (int i = 0; i <= 10; i++)
+                int EndPos = 0;
+                int Top = btn.Top;
+
+                SmoothAnimator Animation = new SmoothAnimator(2.0f);
+                Animation.Animate(delegate(int AnimationStep)
                 {
-                    vol.Top = -(51 * i);
-                    btn.Top = 511 - (int)(51.1 * i);
-                    Thread.Sleep(50);
-                }
+                    Top -= AnimationStep;
+                    if (Top <= EndPos)
+                    {   // Animation has completed
+                        btn.Top = EndPos;
+                        vol.Top = btn.Top - vol.Height;
+                        return false;
+                    }
+                    else
+                    {   // Move object up
+                        btn.Top = Top;
+                        vol.Top = btn.Top - vol.Height;
+                    }
+                    return true;
+                });
 
                 // Hide volumebar
                 vol.Visible = false;

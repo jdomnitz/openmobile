@@ -31,12 +31,114 @@ using OpenMobile.Framework;
 
 namespace OpenMobile.helperFunctions.Graphics
 {
-    public static class Animation
+    /// <summary>
+    /// A smooth animator class
+    /// </summary>
+    public class SmoothAnimator
     {
-        public class Animator
-        {
+        /// <summary>
+        /// Delegate for Animator class. Return true when the animation should run, returning false stops the animation.
+        /// </summary>
+        /// <param name="AnimationStep"></param>
+        public delegate bool AnimatorDelegate(int AnimationStep);
 
+        /// <summary>
+        /// Speed of animation. 
+        /// <para>A value of 1.0F indicates that the AnimationStep will correspond to milliseconds since last call to the animation loop</para>
+        /// </summary>
+        public float Animation_Speed { get; set; }
+
+        /// <summary>
+        /// Execute animation
+        /// </summary>
+        public bool Run { get; set; }
+
+        /// <summary>
+        /// Execute animation asynchronous
+        /// </summary>
+        public bool Asynchronous { get; set; }
+
+        /// <summary>
+        /// Animation thread delay (A higer delay is better for slower systems but may lead to "choppy" graphics)
+        /// </summary>
+        public int ThreadDelay { get; set; }
+
+        /// <summary>
+        /// Frames pr second to run animation at (default 30fps)
+        /// </summary>
+        public float FPS { get; set; }
+
+        /// <summary>
+        /// Initialize a new smooth animator
+        /// </summary>
+        /// <param name="Animation_Speed"></param>
+        public SmoothAnimator(float Animation_Speed, bool Asynchronous)
+            : this(Animation_Speed)
+        {
+            this.Asynchronous = Asynchronous;
         }
+        /// <summary>
+        /// Initialize a new smooth animator
+        /// </summary>
+        /// <param name="Animation_Speed"></param>
+        public SmoothAnimator(float Animation_Speed)
+        {
+            this.Animation_Speed = Animation_Speed;
+            this.FPS = 30.0F;
+            this.ThreadDelay = 1;
+            this.Asynchronous = false;
+        }
+
+        /// <summary>
+        /// Execute animation. Sample code with anonymous delegate:
+        /// <para>Animate(delegate(int AnimationStep)</para>
+        /// <para>{</para>
+        /// <para>.... Code goes here ....</para>
+        /// <para>]);</para>
+        /// </summary>
+        /// <param name="d"></param>
+        public void Animate(AnimatorDelegate d)
+        {
+            if (this.Asynchronous)
+            {
+                OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+                {
+                    RunAnimation(d);
+                });
+            }
+            else
+            {
+                RunAnimation(d);
+            }
+        }
+
+        private void RunAnimation(AnimatorDelegate d)
+        {
+            int Animation_Step;
+            float Interval = System.Diagnostics.Stopwatch.Frequency / FPS;
+            float currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+            float lastUpdateTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+            float ticks = 0;
+            float ticksMS = 0;
+
+            this.Run = true;
+            while (Run)
+            {
+                currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+                ticks = currentTicks - lastUpdateTicks;
+                if (ticks >= Interval)
+                {
+                    lastUpdateTicks = currentTicks;
+                    ticksMS = (ticks / System.Diagnostics.Stopwatch.Frequency) * 1000;
+                    Animation_Step = ((int)(ticksMS * Animation_Speed));
+
+                    // Call animation 
+                    Run = d(Animation_Step);
+                }
+                Thread.Sleep(ThreadDelay);
+            }
+        }
+        
 
     }
 

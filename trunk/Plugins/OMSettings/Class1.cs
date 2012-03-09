@@ -41,16 +41,14 @@ namespace OMSettings
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
             manager = new ScreenManager(host.ScreenCount);
 
-            OMLabel Label = new OMLabel(383, 160, 450, 100);
+            OMLabel Label = new OMLabel("Label", 383, 160, 450, 100);
             Label.Font = new Font(Font.GenericSansSerif, 36F);
             Label.Text = "Audio Zone";
-            Label.Name = "Label";
 
-            OMButton Cancel = new OMButton(14, 255, 200, 110);
+            OMButton Cancel = new OMButton("Media.Cancel", 14, 255, 200, 110);
             Cancel.Image = theHost.getSkinImage("Full");
             Cancel.FocusImage = theHost.getSkinImage("Full.Highlighted");
             Cancel.Text = "Cancel";
-            Cancel.Name = "Media.Cancel";
             Cancel.Transition = eButtonTransition.None;
             Cancel.OnClick += new userInteraction(Cancel_OnClick);
 
