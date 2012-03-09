@@ -67,11 +67,13 @@ namespace OpenMobile
                 string Text = "OpenMobile is copyright the openMobile Foundation and its contributors.\r\n\r\n";
                 Text += "This program in full or in part is protected under a clarified version of the GPLv3 license which can be found in the application directory.\r\n\r\n";
                 Text += "Contributors:\r\n";
-                Text += "Justin Domnitz (justchat_1) - Lead Developer\r\n";
-                Text += "UnusuallyGenius - Graphics Designer\r\n";
+                Text += "Justin Domnitz (justchat_1) - Founder / Developer\r\n";
+                Text += "UnusuallyGenius - Graphics\r\n";
                 Text += "ws6vert - openOBD and Garmin Mobile PC Projects\r\n";
                 Text += "Borte - Developer\r\n";
                 Text += "jheizer - Developer\r\n";
+                Text += "jmullan99@gmail.com - Tester\r\n";
+                Text += "Efess - Navit developer\r\n";
                 Text += "\r\nSupporting Projects:\r\n";
                 Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, Sqlite, Aqua Gauge, CoreAudio and the Open ToolKit Project";
                 return Text;
