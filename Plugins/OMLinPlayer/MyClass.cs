@@ -11,7 +11,7 @@ namespace OMLinPlayer
 	public class MyClass : IAVPlayer
 	{
 		#region IAVPlayer implementation
-		public bool play (int instance)
+		public bool play (Zone instance)
 		{
 			if (player==null)
 				return false;
@@ -29,7 +29,7 @@ namespace OMLinPlayer
 		}
 
 
-		public bool pause (int instance)
+		public bool pause (Zone instance)
 		{
 			if (player!=null)
 				if (player.SetState(State.Paused)==StateChangeReturn.Success)
@@ -41,7 +41,7 @@ namespace OMLinPlayer
 		}
 
 
-		public bool stop (int stop)
+		public bool stop (Zone stop)
 		{
 			if (player!=null)
 			{
@@ -50,7 +50,7 @@ namespace OMLinPlayer
 				if (player.SetState(State.Null)==StateChangeReturn.Success)
 				{
 					nowPlaying = new mediaInfo();
-            		OnMediaEvent(eFunction.Stop, 0, "");
+            		OnMediaEvent(eFunction.Stop, stop, "");
 					return true;
 				}
 			}
@@ -58,7 +58,7 @@ namespace OMLinPlayer
 		}
 
 
-		public bool setPosition (int instance, float seconds)
+		public bool setPosition (Zone instance, float seconds)
 		{
 			if (player==null)
 				return false;
@@ -67,7 +67,7 @@ namespace OMLinPlayer
 		}
 
 
-		public bool setPlaybackSpeed (int instance, float speed)
+		public bool setPlaybackSpeed (Zone instance, float speed)
 		{
 			if (player==null)
 				return false;
@@ -75,7 +75,7 @@ namespace OMLinPlayer
 		}
 
 		MainLoop loop;
-        public bool play(int instance, string location, OpenMobile.eMediaType type)
+        public bool play(Zone instance, string location, OpenMobile.eMediaType type)
         {
             // Bugfixes provided by Kevin (kross@mp3car)
 			error=false;
@@ -137,7 +137,7 @@ namespace OMLinPlayer
 					nowPlaying.Name=url;
 				nowPlaying.Type=type;
 			}
-			OnMediaEvent(eFunction.Play,0,url);
+			OnMediaEvent(eFunction.Play, instance,url);
 			loop.Run();
 			return true;
 		}
@@ -155,7 +155,7 @@ namespace OMLinPlayer
 			nowPlaying.Length=(int)(duration/1000000000.0);
 		}
 
-		public float getCurrentPosition (int instance)
+		public float getCurrentPosition (Zone instance)
 		{
 			if (player==null)
 				return -1;
@@ -165,7 +165,7 @@ namespace OMLinPlayer
 			return (float)(pos/1000000000.0);
 		}
 		bool error=false;
-		public OpenMobile.ePlayerStatus getPlayerStatus (int instance)
+		public OpenMobile.ePlayerStatus getPlayerStatus (Zone instance)
 		{
 			if (error)
 				return ePlayerStatus.Error;
@@ -184,7 +184,7 @@ namespace OMLinPlayer
 		}
 
 
-		public float getPlaybackSpeed (int instance)
+		public float getPlaybackSpeed (Zone instance)
 		{
 			return 1F;
 		}
@@ -209,12 +209,12 @@ namespace OMLinPlayer
 			switch (message.Type)
 			{
 				case MessageType.Eos:
-					stop(0);
-					OnMediaEvent(eFunction.nextMedia,0,"");
+					stop(null);
+					OnMediaEvent(eFunction.nextMedia,new Zone(string.Empty,string.Empty,0,0),"");
 					break;
 				case MessageType.Error:
 					error=true;	
-					stop(0);
+					stop(null);
 					break;
 			}
 			return true;
@@ -289,7 +289,7 @@ namespace OMLinPlayer
 		#region IPlayer implementation
 		public event MediaEvent OnMediaEvent;
 
-		public bool setVolume (int instance, int percent)
+		public bool setVolume (Zone instance, int percent)
 		{
 			if (player!=null)
 			{
@@ -300,7 +300,7 @@ namespace OMLinPlayer
 		}
 
 
-		public int getVolume (int instance)
+		public int getVolume (Zone instance)
 		{
 			if (player==null)
 				return 0;
@@ -308,13 +308,13 @@ namespace OMLinPlayer
 		}
 
 		mediaInfo nowPlaying=new mediaInfo();
-		public mediaInfo getMediaInfo (int instance)
+		public mediaInfo getMediaInfo (Zone instance)
 		{
 			return nowPlaying;
 		}
 
 
-		public bool SetVideoVisible (int instance, bool visible)
+		public bool SetVideoVisible (Zone instance, bool visible)
 		{
 			return false;
 		}
