@@ -446,6 +446,68 @@ namespace OpenMobile.helperFunctions
             }
         }
 
+
+    }
+
+    public static class Arguments
+    {
+        /// <summary>
+        /// Extracts and removes the screen number part from an argument string.
+        /// <para>NB! Returns -1 if no screen number is present</para>
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public static int GetScreenFromArg(ref string arg)
+        {
+            // Extract screen number (if any). Must be written as {0} in the first three caracthers in the string
+            // where 0 is the screen number, missing command means send to all screens.
+            string Command = arg.Substring(0, 3);
+            int Screen = -1;
+            if ((Command.Contains("{")) && (Command.Contains("}")))
+            {   // Screen exists extract info
+                if (!int.TryParse(Command.Substring(1, 1), out Screen))
+                    return -1;
+                // Remove command from orginal message
+                arg = arg.Substring(3, arg.Length - 3);
+            }
+            return Screen;
+        }
+
+        /// <summary>
+        /// Extracts the DataType from an argument string
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public static eDataType GetDataTypeFromArg(string arg)
+        {
+            return EnumUtils.ParseEnum<eDataType>(arg);
+        }
+    }
+
+    public static class EnumUtils
+    {
+        public static T ParseEnum<T>(string value, T defaultValue) where T : struct, IConvertible
+        {
+            if (!typeof(T).IsEnum) throw new ArgumentException("T must be an enumerated type");
+            if (string.IsNullOrEmpty(value)) return defaultValue;
+
+            foreach (T item in Enum.GetValues(typeof(T)))
+            {
+                if (item.ToString().ToLower().Equals(value.Trim().ToLower())) return item;
+            }
+            return defaultValue;
+        }
+        public static T ParseEnum<T>(string value) where T : struct, IConvertible
+        {
+            if (!typeof(T).IsEnum) throw new ArgumentException("T must be an enumerated type");
+            if (string.IsNullOrEmpty(value)) return default(T);
+
+            foreach (T item in Enum.GetValues(typeof(T)))
+            {
+                if (item.ToString().ToLower().Equals(value.Trim().ToLower())) return item;
+            }
+            return default(T); 
+        }
     }
 
     /// <summary>

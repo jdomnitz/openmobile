@@ -378,7 +378,7 @@ namespace OpenMobile.Controls
             this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
             this.Format = OpenMobile.Graphics.eTextFormat.Normal;
             this.Color = Color.Black;
-            this.OutlineColor = Color.Blue;
+            this.OutlineColor = StoredData.SystemSettings.SkinFocusColor;
         }
         /// <summary>
         /// Draws the control
@@ -387,7 +387,7 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float tmp = 1;
+            float tmp = OpacityFloat;
             if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
             else if (this.Mode == eModeType.transitioningOut)

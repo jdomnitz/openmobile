@@ -134,13 +134,14 @@ namespace RemovableDB
                     tmr.Dispose();
                     tmr = null;
                 }
-                theHost.execute(eFunction.backgroundOperationStatus, "Indexing Complete!");
+                theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
                 return;
             }
             if (lastURL == currentURL)
-                theHost.execute(eFunction.backgroundOperationStatus, "FAILURE:" + System.IO.Path.GetFileName(currentURL));
-            else
-                theHost.execute(eFunction.backgroundOperationStatus, (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count) - lastCount) / 2).ToString() + " songs/sec)");
+                theHost.SendStatusData(eDataType.Failure, this, "", "FAILURE:" + System.IO.Path.GetFileName(currentURL));
+           else
+                theHost.SendStatusData(eDataType.Update, this, "", String.Format("Indexing: {0}", (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count) - lastCount) / 2).ToString() + " songs/sec)"));
+
             lastURL = currentURL;
             lastCount = (startCount - toBeIndexed.Count);
         }

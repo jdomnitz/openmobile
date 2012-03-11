@@ -269,8 +269,18 @@ namespace OMHal
             if (mixer.DeviceIdDefault==mixer.DeviceId)
                 Form1.raiseSystemEvent(eFunction.systemVolumeChanged, getVolume(mixer.DeviceId).ToString(), "0", "");
         }
+
+        static AudioVolumeNotificationData AudioEvent_PreviousData = null;
         static void AudioEndpointVolume_OnVolumeNotification(AudioVolumeNotificationData data)
         {
+            if (AudioEvent_PreviousData != null)
+                if (data.MasterVolume == AudioEvent_PreviousData.MasterVolume &&
+                    data.Channels == AudioEvent_PreviousData.Channels &&
+                    data.EventContext == AudioEvent_PreviousData.EventContext &&
+                    data.Muted == AudioEvent_PreviousData.Muted)
+                    return;
+            AudioEvent_PreviousData = data;
+
             for (int i = 0; i < device.Length; i++)
             {
                 if ((data.MasterVolume != device[i].AudioEndpointVolume.MasterVolumeLevelScalar)||(device[i].AudioEndpointVolume.Mute!=data.Muted))

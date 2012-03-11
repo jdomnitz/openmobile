@@ -238,6 +238,7 @@ namespace OpenMobile.Controls
             g.ResetClip();
         }
 
+        // TODO: Fix OMScrollingContainer so that it doesn't have to have renderingwindow code internally
 
         #region IMouse Members
         /// <summary>

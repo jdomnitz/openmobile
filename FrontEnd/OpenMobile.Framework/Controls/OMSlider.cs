@@ -252,15 +252,21 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            g.DrawImage(sliderBar.image, left, top, width, height);
+            float alpha = OpacityFloat;
+            if (Mode == eModeType.transitioningIn)
+                alpha = e.globalTransitionIn;
+            else if (Mode == eModeType.transitioningOut)
+                alpha = e.globalTransitionOut;
+
+            g.DrawImage(sliderBar.image, left, top, width, height, alpha);
             if (sliderTrackFull.image != null)
             {
                 Rectangle clip = g.Clip;
                 g.SetClipFast(left, top, sliderPosition, height);
-                g.DrawImage(sliderTrackFull.image, left - 2, top, width + 4, height);
+                g.DrawImage(sliderTrackFull.image, left - 2, top, width + 4, height, alpha);
                 g.Clip = clip;
             }
-            g.DrawImage(slider.image, left + sliderPosition - (sliderHeight / 2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight);
+            g.DrawImage(slider.image, left + sliderPosition - (sliderHeight / 2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight, alpha);
 
             // Skin debug function 
             if (_SkinDebug)

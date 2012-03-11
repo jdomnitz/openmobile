@@ -48,6 +48,7 @@ namespace OpenMobile.Controls
                 if (transparency == value)
                     return;
                 transparency = value;
+                opacity = (byte)(255 * (transparency / 100F));
                 raiseUpdate(false);
             }
         }
@@ -208,7 +209,7 @@ namespace OpenMobile.Controls
             if (image.image == null)
             {
                 if (image == imageItem.MISSING)
-                    g.FillRectangle(new Brush(Color.Black), left, top, width, height);
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(255 * OpacityFloat),Color.Black)), left, top, width, height);
             }
             else
             {
@@ -230,12 +231,12 @@ namespace OpenMobile.Controls
                     #endregion
                 }
 
-                float alpha = 1;
+                float alpha = OpacityFloat;
                 if (this.Mode == eModeType.transitioningIn)
                     alpha = e.globalTransitionIn;
                 else if (this.Mode == eModeType.transitioningOut)
                     alpha = e.globalTransitionOut;
-                alpha = alpha * (transparency / 100F);
+                //alpha = alpha * (transparency / 100F);
                 lock (image.image)
                 {
                     // Start of code added by Borte

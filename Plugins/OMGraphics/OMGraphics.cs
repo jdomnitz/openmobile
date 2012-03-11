@@ -181,7 +181,7 @@ namespace OMGraphics
                                         
                                         #region Draw outer border
 
-                                        g.DrawPath(new System.Drawing.Pen(borderColor, 3), gp);
+                                        g.DrawPath(new System.Drawing.Pen(borderColor, 1), gp);
 
                                         #endregion
                                     }

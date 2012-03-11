@@ -34,90 +34,6 @@ using OpenMobile.Zones;
 
 namespace OMSettings
 {
-/*
-    internal class DialogPanel : OMPanel
-    {
-        public OMBasicShape Shape_AccessBlock = null;
-        public OMBasicShape Shape_Border = null;
-        public OMLabel Label_Header = null;
-        public OMBasicShape Shape_Line = null;
-        public OMBasicShape Shape_Background = null;
-        public OMBasicShape Shape_Background_Lower = null;
-        public OMButton Button_Ok = null;
-        public OMButton Button_Cancel = null;
-
-        public Rectangle ClientArea = new Rectangle(0, 0, 0, 0);
-
-        public DialogPanel(IPluginHost Host, string name, int x, int y, int w, int h, bool ShowButtons)
-            : base(name)
-        {                        
-            this.Forgotten = true;
-
-            Shape_AccessBlock = new OMBasicShape(0, 0, 1000, 600);
-            Shape_AccessBlock.Name = name + "_Shape_AccessBlock";
-            Shape_AccessBlock.Shape = shapes.Rectangle;
-            Shape_AccessBlock.FillColor = Color.FromArgb(150, Color.Black);
-            this.addControl(Shape_AccessBlock);
-            OMButton Button_Cancel2 = new OMButton(name + "_Button_Cancel", 0, 0, 1000, 600);
-            this.addControl(Button_Cancel2);
-
-            Shape_Border = new OMBasicShape(x, y, w, h);
-            Shape_Border.Name = name + "_Shape_Border";
-            Shape_Border.Shape = shapes.RoundedRectangle;
-            Shape_Border.FillColor = Color.FromArgb(58, 58, 58);
-            Shape_Border.BorderColor = Color.Gray;
-            Shape_Border.BorderSize = 2;
-            this.addControl(Shape_Border);
-
-            Label_Header = new OMLabel(Shape_Border.Left + 5, Shape_Border.Top + 5, Shape_Border.Width - 10, 30);
-            Label_Header.Name = name + "_Label_Header";
-            Label_Header.Text = "Zone details";
-            this.addControl(Label_Header);
-
-            Shape_Line = new OMBasicShape(Shape_Border.Left, Label_Header.Top + Label_Header.Height, Shape_Border.Width, 2);
-            Shape_Line.Name = name + "_Shape_Line";
-            Shape_Line.Shape = shapes.Rectangle;
-            Shape_Line.FillColor = Color.Gray;
-            Shape_Line.BorderColor = Color.Transparent;
-            this.addControl(Shape_Line);
-
-            Shape_Background = new OMBasicShape();
-            Shape_Background.Top = Shape_Line.Top + Shape_Line.Height;
-            Shape_Background.Left = Shape_Border.Left + (int)Shape_Border.BorderSize;
-            Shape_Background.Width = Shape_Border.Width - ((int)Shape_Border.BorderSize * 2);
-            Shape_Background.Height = Shape_Border.Height - (Shape_Background.Top - Shape_Border.Top) - 8;
-            Shape_Background.Name = name + "_Shape_Background";
-            Shape_Background.Shape = shapes.Rectangle;
-            Shape_Background.FillColor = Color.Black;
-            this.addControl(Shape_Background);
-            Shape_Background_Lower = new OMBasicShape(Shape_Background.Left, Shape_Background.Top + Shape_Background.Height - 13, Shape_Background.Width, 20);
-            Shape_Background_Lower.Name = name + "_Shape_Background_Lower";
-            Shape_Background_Lower.Shape = shapes.RoundedRectangle;
-            Shape_Background_Lower.FillColor = Color.Black;
-            this.addControl(Shape_Background_Lower);
-
-            if (ShowButtons)
-            {
-                Button_Ok = new OMButton(name + "_Button_Ok", x + w - 165, y + h - 60, 135, 50);
-                Button_Ok.Image = Host.getSkinImage("Full");
-                Button_Ok.FocusImage = Host.getSkinImage("Full.Highlighted");
-                Button_Ok.Text = "OK";
-                this.addControl(Button_Ok);
-
-                Button_Cancel = new OMButton(name + "_Button_Cancel", x + 35, y + h - 60, 135, 50);
-                Button_Cancel.Image = Button_Ok.Image;
-                Button_Cancel.FocusImage = Button_Ok.FocusImage;
-                Button_Cancel.Text = "Cancel";
-                this.addControl(Button_Cancel);
-                ClientArea = new Rectangle(Shape_Border.Left + 10, Shape_Line.Top + 10, Shape_Border.Width - 20, Shape_Border.Height - Button_Ok.Height - 20);
-            }
-            else
-            {
-                ClientArea = new Rectangle(Shape_Border.Left + 10, Shape_Line.Top + 10, Shape_Border.Width - 20, Shape_Border.Height - 20);
-            }
-        }
-    }
-*/
     internal static class ZoneSettings
     {
         static IPluginHost Host;
@@ -148,7 +64,7 @@ namespace OMSettings
             Label_PanelHeader.Font = new Font(Font.GenericSansSerif, 22F, FontStyle.Bold);
             panelZones.addControl(Label_PanelHeader);
 
-            OMImage Image_PanelIcon = new OMImage(50, 100, 200, 200);
+            OMImage Image_PanelIcon = new OMImage("Image_PanelIcon", 50, 100, 200, 200);
             Image_PanelIcon.Image = host.getSkinImage("MixerBig");
             panelZones.addControl(Image_PanelIcon);
 
@@ -165,7 +81,6 @@ namespace OMSettings
             List_Zones.Font = new Font(Font.GenericSansSerif, 28F);
             List_Zones.Color = Color.White;
             List_Zones.HighlightColor = Color.White;
-            List_Zones.SelectedItemColor1 = Color.DarkBlue;
             List_Zones.ListItemHeight = 70;
             List_Zones.OnLongClick += new userInteraction(List_Zones_OnLongClick);
             subItemformat = new OMListItem.subItemFormat();

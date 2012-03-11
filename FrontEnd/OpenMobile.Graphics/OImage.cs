@@ -247,6 +247,10 @@ namespace OpenMobile.Graphics
         {
             return FromFont(w, h, s, new Font(OpenMobile.Graphics.Font.Webdings, h*0.65F), format, alignment, color, secondColor);
         }
+        public static OImage FromWebdingsFont(int w, int h, string s, float size, eTextFormat format, Alignment alignment, Color color, Color secondColor)
+        {
+            return FromFont(w, h, s, new Font(OpenMobile.Graphics.Font.Webdings, size), format, alignment, color, secondColor);
+        }
         public static OImage FromFont(int w, int h, string s, Font font, eTextFormat format, Alignment alignment, Color color, Color secondColor)
         {
             // TODO: Make this dynamic instead of locked to screen 0

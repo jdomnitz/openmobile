@@ -377,7 +377,11 @@ namespace OpenMobile
                     {
                         pluginCollection[i].Dispose();
                         if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
-                            theHost.execute(eFunction.backgroundOperationStatus, pluginCollection[i].pluginName + " CRASHED!");
+                        {
+                            theHost.SendStatusData(eDataType.Error, pluginCollection[i], "", String.Format("{0} CRASHED!", pluginCollection[i].pluginName));
+                            BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", String.Format("{0} CRASHED!", pluginCollection[i].pluginName));
+                        }
+
                     }
                     catch (Exception) { }
                     pluginCollection[i] = null;

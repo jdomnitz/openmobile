@@ -46,7 +46,7 @@ namespace OpenMobile.helperFunctions.Graphics
         /// Speed of animation. 
         /// <para>A value of 1.0F indicates that the AnimationStep will correspond to milliseconds since last call to the animation loop</para>
         /// </summary>
-        public float Animation_Speed { get; set; }
+        public float Speed { get; set; }
 
         /// <summary>
         /// Execute animation
@@ -81,9 +81,17 @@ namespace OpenMobile.helperFunctions.Graphics
         /// Initialize a new smooth animator
         /// </summary>
         /// <param name="Animation_Speed"></param>
+        public SmoothAnimator()
+            : this(1.0F)
+        {            
+        }
+        /// <summary>
+        /// Initialize a new smooth animator
+        /// </summary>
+        /// <param name="Animation_Speed"></param>
         public SmoothAnimator(float Animation_Speed)
         {
-            this.Animation_Speed = Animation_Speed;
+            this.Speed = Animation_Speed;
             this.FPS = 30.0F;
             this.ThreadDelay = 1;
             this.Asynchronous = false;
@@ -130,7 +138,7 @@ namespace OpenMobile.helperFunctions.Graphics
                 {
                     lastUpdateTicks = currentTicks;
                     ticksMS = (ticks / System.Diagnostics.Stopwatch.Frequency) * 1000;
-                    Animation_Step = ((int)(ticksMS * Animation_Speed));
+                    Animation_Step = ((int)(ticksMS * Speed));
 
                     // Call animation 
                     Run = d(Animation_Step);
@@ -138,8 +146,6 @@ namespace OpenMobile.helperFunctions.Graphics
                 Thread.Sleep(ThreadDelay);
             }
         }
-        
-
     }
 
     /// <summary>
@@ -184,6 +190,10 @@ namespace OpenMobile.helperFunctions.Graphics
                 IconLocation = new Point(-1, -1);
                 TextLocation = new Point(-1, -1);
                 BackgroundFocusSize = 0.5F;
+
+                // Default colors are read from the OM system setting (SkinFocusColor)
+                this.BackgroundFocusColor = StoredData.SystemSettings.SkinFocusColor;
+                this.ForegroundFocusColor = this.BackgroundFocusColor;
             }
             
             /// <summary>
@@ -361,6 +371,9 @@ namespace OpenMobile.helperFunctions.Graphics
             public GraphicData()
             {   // Default values
                 ShowShadow = true;
+
+                // Default colors are read from the OM system setting (SkinFocusColor)
+                this.ShadowColor = StoredData.SystemSettings.SkinFocusColor;
             }
 
             /// <summary>

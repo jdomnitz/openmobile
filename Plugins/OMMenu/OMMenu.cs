@@ -157,7 +157,7 @@ namespace OMMenu
                         List_Menu.Font = new Font(Font.GenericSansSerif, DT.FontSize);
                         List_Menu.Color = Color.White;
                         List_Menu.HighlightColor = Color.White;
-                        List_Menu.SelectedItemColor1 = Color.DarkBlue;
+                        //List_Menu.SelectedItemColor1 = Color.DarkBlue;
                         List_Menu.SoftEdgeData.Color1 = Color.Black;
                         List_Menu.SoftEdgeData.Sides[0] = true;
                         List_Menu.SoftEdgeData.Sides[1] = false;

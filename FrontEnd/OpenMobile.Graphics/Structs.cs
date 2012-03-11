@@ -1247,7 +1247,7 @@ namespace OpenMobile.Graphics
         }
         public static Color FromArgb(int alpha, int red, int green, int blue)
         {
-            return new Color(alpha, red, green, blue);
+            return new Color(alpha, red, green, blue, "Custom");
         }
 
         public static Color FromArgb(int alpha, Color baseColor)
@@ -1257,7 +1257,7 @@ namespace OpenMobile.Graphics
 
         public static Color FromArgb(int red, int green, int blue)
         {
-            return new Color(0xff, red, green, blue);
+            return new Color(0xff, red, green, blue, "Custom");
         }
         public override string ToString()
         {

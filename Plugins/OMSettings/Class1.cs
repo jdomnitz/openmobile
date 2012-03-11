@@ -45,10 +45,11 @@ namespace OMSettings
             Label.Font = new Font(Font.GenericSansSerif, 36F);
             Label.Text = "Audio Zone";
 
-            OMButton Cancel = new OMButton("Media.Cancel", 14, 255, 200, 110);
-            Cancel.Image = theHost.getSkinImage("Full");
-            Cancel.FocusImage = theHost.getSkinImage("Full.Highlighted");
-            Cancel.Text = "Cancel";
+            OMButton Cancel = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("Media.Cancel", 14, 255, 200, 110, "", "Cancel");
+            //OMButton Cancel = new OMButton("Media.Cancel", 14, 255, 200, 110);
+            //Cancel.Image = theHost.getSkinImage("Full");
+            //Cancel.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            //Cancel.Text = "Cancel";
             Cancel.Transition = eButtonTransition.None;
             Cancel.OnClick += new userInteraction(Cancel_OnClick);
 
@@ -63,7 +64,7 @@ namespace OMSettings
             menu.Font = new Font(Font.GenericSansSerif, 30F);
             menu.Color = Color.White;
             menu.HighlightColor = Color.White;
-            menu.SelectedItemColor1 = Color.DarkBlue;
+            menu.SelectedItemColor1 = OpenMobile.helperFunctions.StoredData.SystemSettings.SkinFocusColor;
             menu.SoftEdgeData.Color1 = Color.Black;
             menu.SoftEdgeData.Sides[0] = true;
             menu.SoftEdgeData.Sides[1] = false;
@@ -85,11 +86,12 @@ namespace OMSettings
             #endregion
             #region personal
             OMPanel personal = new OMPanel("personal");
-            OMButton Save2 = new OMButton(13, 136, 200, 110);
-            Save2.Image = theHost.getSkinImage("Full");
-            Save2.FocusImage = theHost.getSkinImage("Full.Highlighted");
-            Save2.Text = "Save";
-            Save2.Name = "Media.Save";
+            OMButton Save2 = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("Media.Save", 14, 136, 200, 110, "", "Save");
+            //OMButton Save2 = new OMButton(13, 136, 200, 110);
+            //Save2.Image = theHost.getSkinImage("Full");
+            //Save2.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            //Save2.Text = "Save";
+            //Save2.Name = "Media.Save";
             Save2.OnClick += new userInteraction(Save2_OnClick);
             Save2.Transition = eButtonTransition.None;
             OMLabel Heading = new OMLabel(300, 80, 600, 100);
@@ -126,16 +128,19 @@ namespace OMSettings
             #endregion
             #region general
             LayoutManager generalLayout = new LayoutManager();
-            OMPanel[] general = generalLayout.layout(theHost, BuiltInComponents.GlobalSettings(host));
+            OpenMobile.Plugin.Settings SystemSettings = BuiltInComponents.GlobalSettings();
+            SystemSettings.OnSettingChanged += new SettingChanged(SystemSettings_OnSettingChanged);
+            OMPanel[] general = generalLayout.layout(theHost, SystemSettings);
             manager.loadPanel(general);
             #endregion
             #region data
             OMPanel data = new OMPanel("data");
-            OMButton Save4 = new OMButton(13, 136, 200, 110);
-            Save4.Image = theHost.getSkinImage("Full");
-            Save4.FocusImage = theHost.getSkinImage("Full.Highlighted");
-            Save4.Text = "Save";
-            Save4.Name = "Media.Save";
+            OMButton Save4 = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("Media.Save", 14, 136, 200, 110, "", "Save");
+            //OMButton Save4 = new OMButton(13, 136, 200, 110);
+            //Save4.Image = theHost.getSkinImage("Full");
+            //Save4.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            //Save4.Text = "Save";
+            //Save4.Name = "Media.Save";
             Save4.OnClick += new userInteraction(Save4_OnClick);
             Save4.Transition = eButtonTransition.None;
             OMLabel Heading3 = new OMLabel(300, 80, 600, 100);
@@ -187,7 +192,6 @@ namespace OMSettings
             lstplugins.Font = new Font(Font.GenericSansSerif, 30F);
             lstplugins.Color = Color.White;
             lstplugins.HighlightColor = Color.White;
-            lstplugins.SelectedItemColor1 = Color.DarkBlue;
             lstplugins.OnClick += new userInteraction(lstplugins_OnClick);
             lstplugins.Add(new OMListItem("Loading . . .","",format));
             lstplugins.Scrollbars = true;
@@ -202,6 +206,27 @@ namespace OMSettings
             OMSettings.ZoneSettings.Initialize(this.pluginName, manager, theHost);
 
             return OpenMobile.eLoadStatus.LoadSuccessful;
+        }
+
+        void SystemSettings_OnSettingChanged(int screen, Setting setting)
+        {
+            // Verify settings input
+            switch (setting.Name)
+            {
+                case "UI.SkinFocusColor":
+                    {   // Ensure that it's written in valid format 
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(setting.Value, @"[0-9a-fA-F][0-9a-fA-F],[0-9a-fA-F][0-9a-fA-F],[0-9a-fA-F][0-9a-fA-F]"))
+                        {   // Invalid value, show error message
+                            OpenMobile.helperFunctions.Forms.dialog dialogInfo = new OpenMobile.helperFunctions.Forms.dialog();
+                            dialogInfo.Header = "Data error";
+                            dialogInfo.Text = "SkinFocusColor must be written in a format of Red,Green,Blue where each value can be a number from 00 to FF";
+                            dialogInfo.Icon = OpenMobile.helperFunctions.Forms.icons.Error;
+                            dialogInfo.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
+                            dialogInfo.ShowMsgBox(screen);
+                        }
+                    }
+                    break;
+            }
         }
 
         private void loadPluginSettings()
