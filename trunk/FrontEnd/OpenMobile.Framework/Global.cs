@@ -945,10 +945,11 @@ namespace OpenMobile
         /// </summary>
         pluginLoadingComplete = 32,
         /// <summary>
-        /// A status update on a background operation
+        /// A status update on a background operation (Event usage only)
         /// <para>---------------------------------------</para>
-        /// <para>Arg1: Status Message</para>
-        /// <para>Arg2: (Optional) Status Source</para>
+        /// <para>Arg1: Message</para>
+        /// <para>Arg2: Source ("PluginName" or "PluginName.Tag" or "Tag")</para>
+        /// <para>Arg3: Type of data (eDataType)</para>
         /// </summary>
         backgroundOperationStatus = 33,
         /// <summary>
@@ -2703,5 +2704,48 @@ namespace OpenMobile
         /// A onscreen numpad will be used for input
         /// </summary>
         Numpad
+    }
+
+    /// <summary>
+    /// Type of information provided
+    /// </summary>
+    public enum eDataType
+    {
+        /// <summary>
+        /// No datatype / normal data type
+        /// </summary>
+        None,
+        /// <summary>
+        /// This is general informational data
+        /// </summary>
+        Info,
+        /// <summary>
+        /// This is some update data 
+        /// </summary>
+        Update,
+        /// <summary>
+        /// This is warning data
+        /// </summary>
+        Warning,
+        /// <summary>
+        /// This is error data
+        /// </summary>
+        Error,
+        /// <summary>
+        /// This is internal data
+        /// </summary>
+        Internal,
+        /// <summary>
+        /// This is data indicating a completion of some sort
+        /// </summary>
+        Completion,
+        /// <summary>
+        /// This is data indicating a failure of some sort
+        /// </summary>
+        Failure,
+        /// <summary>
+        /// This is some data that should be shown as a popup to the user (or it is just urgent)
+        /// </summary>
+        PopUp
     }
 }

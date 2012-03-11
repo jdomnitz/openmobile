@@ -120,7 +120,7 @@ namespace ControlDemo
                 case "Play Playlists":
                     DeviceInfo info = DeviceInfo.get(lastPath);
                     List<mediaInfo>media=new List<mediaInfo>();
-                    theHost.execute(eFunction.backgroundOperationStatus, "Loading playlists . . .");
+                    theHost.SendStatusData(eDataType.Info, this, "", "Loading playlists...");
                     if (info.PlaylistFolders.Length == 0)
                         return;
                     foreach (string playlist in Playlist.listPlaylists(info.PlaylistFolders[0]))

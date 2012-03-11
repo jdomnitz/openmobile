@@ -202,6 +202,47 @@ namespace OpenMobile.Plugin
         /// <param name="data"></param>
         /// <returns></returns>
         bool sendMessage<T>(string to, string from, string message, ref T data);
+
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="Message"></param>
+        /// <param name="SourceTag"></param>
+        /// <returns></returns>
+        void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message);
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="Message"></param>
+        /// <param name="SourceTag"></param>
+        /// <returns></returns>
+        void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message);
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="Message"></param>
+        /// <param name="SourceTag"></param>
+        /// <returns></returns>
+        void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string Message);
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="Message"></param>
+        /// <param name="SourceTag"></param>
+        /// <returns></returns>
+        void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin, string Message);
         /// <summary>
         /// Execute the function on all plugins of the given type
         /// </summary>

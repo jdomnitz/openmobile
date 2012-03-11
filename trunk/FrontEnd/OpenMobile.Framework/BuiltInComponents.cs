@@ -22,6 +22,7 @@ using System;
 using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
+using OpenMobile.helperFunctions;
 
 namespace OpenMobile
 {
@@ -97,32 +98,40 @@ namespace OpenMobile
             return about;
         }
         static IPluginHost theHost;
+
         /// <summary>
-        /// Returns the Non-Skin Specific Settings
+        /// Returns a settings object with OM system settings
         /// </summary>
         /// <returns></returns>
-        public static Settings GlobalSettings(IPluginHost host)
+        public static Settings GlobalSettings()
         {
-            theHost = host;
+            theHost = BuiltInComponents.Host;
+
+            // Set default values
+            StoredData.SetDefaultValue("UI.SkinFocusColor", "00,00,FF");
+            StoredData.SetDefaultValue("UI.MinGraphics", false.ToString());
+            StoredData.SetDefaultValue("UI.VolumeChangesVisible", true.ToString());
+            StoredData.SetDefaultValue("UI.ShowCursor", false.ToString());
+
             Settings gl = new Settings("General Settings");
             Setting graphics = new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", String.Empty, "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
             Setting ShowCursor = new Setting(SettingTypes.MultiChoice, "UI.ShowCursor", String.Empty, "Show OM mouse/pointer cursors", Setting.BooleanList, Setting.BooleanList);
             //Setting SkinColor = new Setting(SettingTypes.Text, "UI.SkinColor", "Foreground", "Skin foreground color (R,G,B)");
-            //Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus", "Skin focus color (R,G,B)");
+            Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus color", "Skin focus color (R,G,B)");
             using (PluginSettings settings = new PluginSettings())
             {
                 graphics.Value = settings.getSetting("UI.MinGraphics");
                 volume.Value = settings.getSetting("UI.VolumeChangesVisible");
                 ShowCursor.Value = settings.getSetting("UI.ShowCursor");
                 //SkinColor.Value = settings.getSetting("UI.SkinColor");
-                //SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
+                SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
             }
             gl.Add(graphics);
             gl.Add(volume);
-            //gl.Add(SkinColor);
-            //gl.Add(SkinFocusColor);
             gl.Add(ShowCursor);
+            //gl.Add(SkinColor);
+            gl.Add(SkinFocusColor);
             gl.OnSettingChanged += new SettingChanged(SettingsChanged);
             return gl;
         }
@@ -153,15 +162,6 @@ namespace OpenMobile
                         break;
                 }
             }
-        }
-        /// <summary>
-        /// Gets zone specific settings for the given instance
-        /// </summary>
-        /// <param name="instance"></param>
-        /// <returns></returns>
-        public static Settings getZoneSettings(int instance)
-        {
-            return new Settings("Zone " + (instance + 1).ToString() + " Settings"); //Not Yet Implemented
         }
     }
 

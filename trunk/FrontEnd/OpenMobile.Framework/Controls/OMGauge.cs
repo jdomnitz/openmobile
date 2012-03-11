@@ -847,9 +847,11 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            //TODO - FIX
+            //TODO - Gauge doesn't respect transition data (and opacity level)
             if ((this.Width == 0) || (this.Height == 0))
                 return;
+
+
             //paint the gauge
             g.FillRectangle(new Brush(Color.Transparent), new Rectangle(Left, Top, Width, Height));
             if (backgroundImg == null || requiresRedraw)

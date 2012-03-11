@@ -107,7 +107,7 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float tmp = 1;
+            float tmp = OpacityFloat;
             if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
             else if (this.Mode == eModeType.transitioningOut)

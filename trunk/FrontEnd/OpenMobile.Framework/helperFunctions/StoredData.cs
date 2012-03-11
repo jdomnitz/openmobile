@@ -20,6 +20,7 @@
 *********************************************************************************/
 using System;
 using OpenMobile.Data;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.helperFunctions
 {
@@ -47,6 +48,13 @@ namespace OpenMobile.helperFunctions
         {
             using (PluginSettings setting = new PluginSettings())
                 return setting.setSetting(Name, Value);
+        }
+
+        public static void SetDefaultValue(string Setting, string Value)
+        {
+            // Set default values
+            if (String.IsNullOrEmpty(StoredData.Get(Setting)))
+                StoredData.Set(Setting, Value);
         }
 
         public static class SystemSettings
@@ -93,6 +101,33 @@ namespace OpenMobile.helperFunctions
                 set
                 {
                     StoredData.SetBool("UI.ShowCursor", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: Skin Focus color
+            /// </summary>
+            public static Color SkinFocusColor
+            {
+                get
+                {
+                    try
+                    {
+                        // Extract color values from string data
+                        string[] ColorValues = StoredData.Get("UI.SkinFocusColor").Split(new char[] { ',' });
+                        return Color.FromArgb(255, 
+                            int.Parse(ColorValues[0], System.Globalization.NumberStyles.AllowHexSpecifier),
+                            int.Parse(ColorValues[1], System.Globalization.NumberStyles.AllowHexSpecifier),
+                            int.Parse(ColorValues[2], System.Globalization.NumberStyles.AllowHexSpecifier));
+                    }
+                    catch
+                    {   // Default fallback color in case of conversion error
+                        return Color.Blue;
+                    }
+                }
+                set
+                {
+                    StoredData.Set("UI.SkinFocusColor", String.Format("{0},{1},{2}",value.R, value.G,value.B));
                 }
             }
 

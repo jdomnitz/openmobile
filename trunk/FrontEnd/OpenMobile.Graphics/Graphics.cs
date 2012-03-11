@@ -452,7 +452,7 @@ namespace OpenMobile.Graphics
             {
                 f = FontStyle.Underline;
             }
-            if (format == eTextFormat.Outline)
+            if (format == eTextFormat.Outline | format == eTextFormat.OutlineNarrow | format == eTextFormat.OutlineFat)
             {
                 using (StringFormat sFormat = new StringFormat())
                 {
@@ -469,8 +469,13 @@ namespace OpenMobile.Graphics
                     GraphicsPath path = new GraphicsPath(FillMode.Winding);
 
                     path.AddString(text, new System.Drawing.Font(font.Name, 1F).FontFamily, (int)f, (font.Size + 6)/dpi, new RectangleF(x, y, w, h), sFormat);
-                    g.DrawPath(new System.Drawing.Pen(secondColor, 3), path);
                     g.FillPath(new SolidBrush(color), path);
+                    if (format == eTextFormat.Outline)
+                        g.DrawPath(new System.Drawing.Pen(secondColor, 3), path);
+                    else if (format == eTextFormat.OutlineFat)
+                        g.DrawPath(new System.Drawing.Pen(secondColor, 6), path);
+                    else
+                        g.DrawPath(new System.Drawing.Pen(secondColor, 1), path);
                 }
             }
             else if ((format == eTextFormat.Glow) || (format == eTextFormat.BoldGlow))

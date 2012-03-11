@@ -1922,7 +1922,7 @@ namespace OpenMobile
 
                 // Background operation status update
                 case eFunction.backgroundOperationStatus:
-                    SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.backgroundOperationStatus, arg1, arg2, String.Empty); });
+                    raiseSystemEvent(eFunction.backgroundOperationStatus, arg1, arg2, String.Empty); 
                     return true;
 
                 // Sends a keypress to a specified screen
@@ -1969,7 +1969,7 @@ namespace OpenMobile
                             Zone zone = ZoneHandler.GetZone(ret);
                             if (zone == null) return false;
                             Hal_Send("34|" + arg1 + "|" + zone.AudioDeviceInstance.ToString());
-                            raiseSystemEvent(eFunction.systemVolumeChanged, arg1, zone.AudioDeviceInstance.ToString(), String.Empty);
+                            //raiseSystemEvent(eFunction.systemVolumeChanged, arg1, zone.AudioDeviceInstance.ToString(), String.Empty);
                             return true;
                         }
                         return false;
@@ -2569,6 +2569,61 @@ namespace OpenMobile
             }
             catch (Exception e) { SandboxedThread.Handle(e); }
             return false;
+        }
+
+         /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="SourceTag"></param>
+        /// <param name="Message"></param>
+        public void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin,string Message)
+        {
+            SendStatusData(-1, DataType, SourcePlugin, "", Message);
+        }
+
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="SourceTag"></param>
+        /// <param name="Message"></param>
+        public void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string Message)
+        {
+            SendStatusData(Screen, DataType, SourcePlugin, "", Message);
+        }
+       /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="SourceTag"></param>
+        /// <param name="Message"></param>
+        public void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message)
+        {
+            SendStatusData(-1, DataType, SourcePlugin, SourceTag, Message);
+        }
+
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="SourceTag"></param>
+        /// <param name="Message"></param>
+        public void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message)
+        {
+            string Source = "";
+            if (Screen >= 0)
+                Source += "{" + Screen + "}";
+            if (SourcePlugin != null)
+                Source += SourcePlugin.pluginName;
+            if (!String.IsNullOrEmpty(Source) & !String.IsNullOrEmpty(SourceTag))
+                Source += ".";
+            Source += SourceTag;
+            raiseSystemEvent(eFunction.backgroundOperationStatus, Message, Source, DataType.ToString());
         }
 
         #endregion

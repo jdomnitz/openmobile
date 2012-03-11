@@ -69,6 +69,10 @@ namespace OpenMobile.Controls
         /// </summary>
         protected int height, width, top, left;
         /// <summary>
+        /// Control opacity level (0 transparent - 255 solid)
+        /// </summary>
+        protected byte opacity = 255;
+        /// <summary>
         /// Forces the renderer to redraw this control
         /// </summary>
         public event refreshNeeded UpdateThisControl;
@@ -277,6 +281,31 @@ namespace OpenMobile.Controls
         {
             get { return left; }
             set { left = value; raiseUpdate(true); }
+        }
+
+        /// <summary>
+        /// Control opacity level (0 transparent - 255 solid)
+        /// </summary>
+        public virtual int Opacity
+        {
+            get { return opacity; }
+            set 
+            {
+                if (value <= 0)
+                    opacity = 0;
+                else if (value >= 255)
+                    opacity = 255;
+                else
+                    opacity = (byte)value; 
+                raiseUpdate(false); 
+            }
+        }
+        protected float OpacityFloat
+        {
+            get
+            {
+                return (Opacity / 255F);
+            }
         }
         /// <summary>
         /// Renders the control

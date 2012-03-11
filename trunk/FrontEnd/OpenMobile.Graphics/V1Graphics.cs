@@ -66,7 +66,7 @@ namespace OpenMobile.Graphics
         /// </summary>
         UnderlineShadow = 7,
         /// <summary>
-        /// Outlined
+        /// Outlined (normal 3 pixel)
         /// </summary>
         Outline = 8,
         /// <summary>
@@ -80,7 +80,15 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Glowing Text (big glow)
         /// </summary>
-        GlowBig = 11
+        GlowBig = 11,
+        /// <summary>
+        /// Outlined narrow (1 pixel)
+        /// </summary>
+        OutlineNarrow = 12,
+        /// <summary>
+        /// Outlined fat (6 pixel)
+        /// </summary>
+        OutlineFat = 12,
     };
     /// <summary>
     /// Alignment arguments

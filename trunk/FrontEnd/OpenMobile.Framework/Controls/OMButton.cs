@@ -231,6 +231,106 @@ namespace OpenMobile.Controls
             }
         }
 
+        #region Shape properties
+
+        /// <summary>
+        /// The shape to draw
+        /// </summary>
+        protected shapes shape;
+        /// <summary>
+        /// The fill color of the Shape
+        /// </summary>
+        protected Color fillColor;
+        /// <summary>
+        /// The width in pixels of a border (0 for no border)
+        /// </summary>
+        protected float borderSize = 0;
+        /// <summary>
+        /// The color of the border
+        /// </summary>
+        protected Color borderColor;
+        /// <summary>
+        /// The shape to draw
+        /// </summary>
+        public shapes Shape
+        {
+            get
+            {
+                return shape;
+            }
+            set
+            {
+                shape = value;
+                genTriangle();
+            }
+        }
+        Point[] triPoint = new Point[0];
+        private void genTriangle()
+        {
+            if (shape == shapes.Triangle)
+            {
+                triPoint = new Point[] { new Point(left, top + height), new Point(left + width, top + height), new Point(left + (width / 2), top) };
+            }
+        }
+        /// <summary>
+        /// The fill color of the Shape
+        /// </summary>
+        public Color FillColor
+        {
+            get
+            {
+                return fillColor;
+            }
+            set
+            {
+                fillColor = value;
+            }
+        }
+        /// <summary>
+        /// The color of the border
+        /// </summary>
+        public Color BorderColor
+        {
+            get
+            {
+                return borderColor;
+            }
+            set
+            {
+                borderColor = value;
+            }
+        }
+        /// <summary>
+        /// The width in pixels of a border (0 for no border)
+        /// </summary>
+        public float BorderSize
+        {
+            get
+            {
+                return borderSize;
+            }
+            set
+            {
+                borderSize = value;
+            }
+        }
+
+        /// <summary>
+        /// Sets the corner radius of a rounded rectangle
+        /// </summary>
+        protected int cornerRadius = 10;
+        /// <summary>
+        /// Sets the corner radius of a rounded rectangle
+        /// </summary>
+        public int CornerRadius
+        {
+            get { return cornerRadius; }
+            set { cornerRadius = value; }
+        }
+
+        #endregion
+
+
         /// <summary>
         /// Creates a button with the default size and position
         /// <para>[Obsolete] Use OMButton(string name, int x, int y, int w, int h) instead</para>
@@ -293,6 +393,38 @@ namespace OpenMobile.Controls
         /// </summary>
         public Point TextLocation { get; set; }
 
+        Pen BorderPen;
+        private void DrawShape(Graphics.Graphics g, renderingParams e, float Alpha)
+        {
+            Brush Fill = new Brush(Color.FromArgb((int)(Alpha * fillColor.A), fillColor));
+            if (borderSize > 0)
+                BorderPen = new Pen(Color.FromArgb((int)(Alpha * borderColor.A), borderColor), borderSize);
+
+            switch (shape)
+            {
+                case shapes.Rectangle:
+                    g.FillRectangle(Fill, left, top, width, height);
+                    if (borderSize > 0)
+                        g.DrawRectangle(BorderPen, left, top, width, height);
+                    break;
+                case shapes.Triangle:
+                    g.FillPolygon(Fill, triPoint);
+                    if (borderSize > 0)
+                        g.DrawPolygon(BorderPen, triPoint);
+                    break;
+                case shapes.Oval:
+                    g.FillEllipse(Fill, left, top, width, height);
+                    if (borderSize > 0)
+                        g.DrawEllipse(BorderPen, left, top, width, height);
+                    break;
+                case shapes.RoundedRectangle:
+                    g.FillRoundRectangle(Fill, left, top, width, height, cornerRadius);
+                    if (borderSize > 0)
+                        g.DrawRoundRectangle(BorderPen, left, top, width, height, cornerRadius);
+                    break;
+            }
+        }
+
         /// <summary>
         /// Draws the control
         /// </summary>
@@ -303,7 +435,7 @@ namespace OpenMobile.Controls
             int transitionTop = e.transitionTop;
             if (Width == 0)
                 return;
-            float alpha = 1;
+            float alpha = OpacityFloat;
             if (this.Mode == eModeType.transitioningIn)
                 alpha = e.globalTransitionIn;
             else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
@@ -325,8 +457,9 @@ namespace OpenMobile.Controls
                         }
                         else
                         {   // Default fallback if image is missing
-                            if (image == imageItem.MISSING)
-                                g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                            //if (image == imageItem.MISSING)
+                                //g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                            DrawShape(g, e, alpha);
                         }
                     }
                     break;
@@ -348,8 +481,9 @@ namespace OpenMobile.Controls
                         }
                         else
                         {   // Default fallback if image is missing
-                            if (image == imageItem.MISSING)
-                                g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                            //if (image == imageItem.MISSING)
+                            //    g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                            DrawShape(g, e, alpha);
                         }
                     }
                     break;
@@ -361,8 +495,9 @@ namespace OpenMobile.Controls
                         }
                         else
                         {   // Default fallback if image is missing
-                            if (image == imageItem.MISSING)
-                                g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                            //if (image == imageItem.MISSING)
+                            //    g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(255 * alpha), Color.White), 4F), left + 2, top + 2, width - 4, height - 4, 8);
+                            DrawShape(g, e, alpha);
                         }
                     }
                     break;

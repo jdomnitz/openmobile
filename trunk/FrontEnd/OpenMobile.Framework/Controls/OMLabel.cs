@@ -72,6 +72,7 @@ namespace OpenMobile.Controls
             {
                 color = value;
                 textTexture = null;
+                raiseUpdate(false);
             }
         }
         /// <summary>
@@ -140,6 +141,7 @@ namespace OpenMobile.Controls
                     return;
                 outlineColor = value;
                 textTexture = null;
+                raiseUpdate(false);
             }
         }
 
@@ -158,6 +160,26 @@ namespace OpenMobile.Controls
                     return;
                 font = value;
                 textTexture = null;
+                raiseUpdate(false);
+            }
+        }
+
+        /// <summary>
+        /// Sets the Font size of the text
+        /// </summary>
+        public float FontSize
+        {
+            get
+            {
+                return font.Size;
+            }
+            set
+            {
+                if (font == null)
+                    return;
+                font.Size = value;
+                textTexture = null;
+                raiseUpdate(false);
             }
         }
 
@@ -183,6 +205,7 @@ namespace OpenMobile.Controls
                 {
                     textTexture = null;
                 }
+                raiseUpdate(false);
 
             }
         }
@@ -201,6 +224,7 @@ namespace OpenMobile.Controls
                     return;
                 textFormat = value;
                 textTexture = null;
+                raiseUpdate(false);
             }
         }
         /// <summary>
@@ -218,6 +242,7 @@ namespace OpenMobile.Controls
                     return;
                 textAlignment = value;
                 textTexture = null;
+                raiseUpdate(false);
             }
         }
 
@@ -228,7 +253,7 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float tmp = 1;
+            float tmp = OpacityFloat;
             if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
             else if (this.Mode == eModeType.transitioningOut)
@@ -273,12 +298,14 @@ namespace OpenMobile.Controls
                     sensor.newSensorDataReceived += new OpenMobile.Plugin.sensorDataReceived(sensor_newSensorDataReceived);
                     this.Text = sensor.FormatedValue();
                 }
+                raiseUpdate(false);
             }
         }
 
         void sensor_newSensorDataReceived(OpenMobile.Plugin.Sensor sender)
         {
             this.Text = sender.FormatedValue();
+            raiseUpdate(false);
         }
 
     }

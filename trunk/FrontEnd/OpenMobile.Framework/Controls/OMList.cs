@@ -76,7 +76,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// selected item background color
         /// </summary>
-        protected Color selectedItemColor1 = Color.Silver;
+        protected Color selectedItemColor1 = Color.DarkBlue;
         /// <summary>
         /// selected item background color 2 (for gradiants)
         /// </summary>
@@ -169,9 +169,9 @@ namespace OpenMobile.Controls
 
         /// <summary>
         /// Changes the selected index and scrolls the list so the selected item is visible
+        /// <para>Use -1 to clear current selection</para>
         /// </summary>
         /// <param name="index">List index to select</param>
-        /// <para>Use -1 to clear current selection</para>
         public void Select(int index)
         {
             if (index < -1)
@@ -516,6 +516,13 @@ namespace OpenMobile.Controls
 
         private void declare()
         {
+            // Set default selection color
+            Color tmpColor = OpenMobile.helperFunctions.StoredData.SystemSettings.SkinFocusColor;
+            selectedItemColor1 = Color.FromArgb(tmpColor.A,
+                (tmpColor.R == 255 ? tmpColor.R - 139 : tmpColor.R),
+                (tmpColor.G == 255 ? tmpColor.G - 139 : tmpColor.G),
+                (tmpColor.B == 255 ? tmpColor.B - 139 : tmpColor.B));
+
             throwtmr = new System.Timers.Timer(50);
             throwtmr.Elapsed += new ElapsedEventHandler(throwtmr_Elapsed);
             items = new List<OMListItem>();
@@ -660,7 +667,7 @@ namespace OpenMobile.Controls
                     }
                 }
 
-                float tmp = 1;
+                float tmp = OpacityFloat;
                 if (this.Mode == eModeType.transitioningIn)
                     tmp = e.globalTransitionIn;
                 else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))

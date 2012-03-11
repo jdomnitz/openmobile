@@ -59,7 +59,8 @@ namespace OpenMobile
                     Core.pluginCollection[index] = null;
                 else if (Core.RenderingWindows[0] != null)
                     Core.pluginCollection.Remove(sample);
-                Core.theHost.raiseSystemEvent(eFunction.backgroundOperationStatus, sample.pluginName + " CRASHED!", "ERROR", String.Empty);
+                Core.theHost.SendStatusData(eDataType.Error, null, "SandboxedThread", String.Format("{0} CRASHED!", sample.pluginName));
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "SandboxedThread", String.Format("{0} CRASHED!", sample.pluginName));
                 sample.Dispose();
             }
         }

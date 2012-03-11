@@ -111,7 +111,7 @@ namespace OMMediaDB
                 {
                     status= (cmd.ExecuteNonQuery() > 0);
                 }
-                theHost.execute(eFunction.backgroundOperationStatus, "Database Cleared!");
+                theHost.SendStatusData(eDataType.Completion, this, "", "Database Cleared!");
                 return status;
             }
         }
@@ -211,13 +211,13 @@ namespace OMMediaDB
             {
                 if (tmr!=null)
                     tmr.Dispose();
-                theHost.execute(eFunction.backgroundOperationStatus, "Indexing Complete!");
+                theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
                 return;
             }
             if (lastURL == currentURL)
-                theHost.execute(eFunction.backgroundOperationStatus, "SLOW:" + System.IO.Path.GetFileName(currentURL));
+                theHost.SendStatusData(eDataType.Update, this, "", String.Format("Indexing: {0}",System.IO.Path.GetFileName(currentURL)));
             else
-                theHost.execute(eFunction.backgroundOperationStatus, (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count)-lastCount) / 2).ToString() + " songs/sec)");
+                theHost.SendStatusData(eDataType.Update, this, "", String.Format("Indexing: {0}", (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count) - lastCount) / 2).ToString() + " songs/sec)"));
             lastURL = currentURL;
             lastCount=(startCount-toBeIndexed.Count);
         }

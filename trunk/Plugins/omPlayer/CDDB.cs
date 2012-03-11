@@ -177,7 +177,7 @@ namespace OMPlayer
                 media= list;
             else
                 media = new List<mediaInfo>(info);
-            theHost.execute(eFunction.backgroundOperationStatus, "Indexing Complete!");
+            theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
             return true;
         }
 

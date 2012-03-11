@@ -73,32 +73,6 @@ namespace OpenMobile
 
         public bool incomingMessage(string message, string source)
         {
-            // Extract screen number (if any). Must be written as {0} in the first three caracthers in the string
-            // where 0 is the screen number, missing command means send to all screens.
-            string Command = message.Substring(0, 3);
-            int Screen = -1;
-            if ((Command.Contains("{")) && (Command.Contains("}")))
-            {   // Screen exists extract info
-                Screen = int.Parse(Command.Substring(1, 1)); 
-                // Remove command from orginal message
-                message = message.Substring(3, message.Length - 3);
-            }
-
-            if (Screen == -1)
-            {   // Global message
-                theHost.ForEachScreen(delegate(int screen)
-                {
-                    OMPanel p = manager[screen];
-                    OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
-                    title.Transition(eAnimation.UnveilRight, message, 50);
-                });
-            }
-            else
-            {   // Screen specific message
-                OMPanel p = manager[Screen];
-                OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[Screen, "Label_UITopBar_TrackTitle"]; //6
-                title.Transition(eAnimation.UnveilRight, message, 50);
-            }
             return true;
         }
         public bool incomingMessage<T>(string message,string source, ref T data)
@@ -185,6 +159,7 @@ namespace OpenMobile
 
             #region BottomBar (Media)
 
+            //OMButton Button_UIBottomBar_Back = DefaultControls.GetHorisontalEdgeButton("Button_UIBottomBar_Back", 831, 533, 160, 70, "", "Back");
             OMButton Button_UIBottomBar_Back = new OMButton("Button_UIBottomBar_Back", 831, 533, 160, 70);
             Button_UIBottomBar_Back.Image = theHost.getSkinImage("BackButton", true);
             Button_UIBottomBar_Back.FocusImage = theHost.getSkinImage("BackButtonFocus", true);
@@ -305,14 +280,39 @@ namespace OpenMobile
             Button_UITopBar_Home.OnClick += new userInteraction(HomeButton_OnClick);
             UIPanel.addControl(Button_UITopBar_Home);
 
-            OMButton Button_UITopBar_Volume = new OMButton("Button_UITopBar_Volume", 6, 0, 130, 90);
-            Button_UITopBar_Volume.Image = theHost.getSkinImage("VolumeButton");
-            Button_UITopBar_Volume.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
-            Button_UITopBar_Volume.Mode = eModeType.Resizing;
-            Button_UITopBar_Volume.Transition = eButtonTransition.None;
-            Button_UITopBar_Volume.OnClick += new userInteraction(vol_OnClick);
-            Button_UITopBar_Volume.OnLongClick += new userInteraction(vol_OnLongClick);
-            UIPanel.addControl(Button_UITopBar_Volume);
+            #region Volumecontrol
+
+            OMButton Button_UITopBar_VolumeBar_Volume = new OMButton("Button_UITopBar_VolumeBar_Volume", 6, 0, 130, 90);
+            Button_UITopBar_VolumeBar_Volume.Image = theHost.getSkinImage("VolumeButton");
+            Button_UITopBar_VolumeBar_Volume.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
+            Button_UITopBar_VolumeBar_Volume.Mode = eModeType.Resizing;
+            Button_UITopBar_VolumeBar_Volume.Transition = eButtonTransition.None;
+            Button_UITopBar_VolumeBar_Volume.OnClick += new userInteraction(vol_OnClick);
+            Button_UITopBar_VolumeBar_Volume.OnLongClick += new userInteraction(vol_OnLongClick);
+            UIPanel.addControl(Button_UITopBar_VolumeBar_Volume);
+
+            VolumeBar VolumeBar_UITopBar_VolumeBar_Volume = new VolumeBar("VolumeBar_UITopBar_VolumeBar_Volume", 6, -420, 130, 330);
+            VolumeBar_UITopBar_VolumeBar_Volume.Visible = false;
+            VolumeBar_UITopBar_VolumeBar_Volume.OnSliderMoved += new userInteraction(volumeChange);
+            UIPanel.addControl(VolumeBar_UITopBar_VolumeBar_Volume);
+
+            OMButton Button_UITopBar_VolumeBar_VolumeDown = new OMButton("Button_UITopBar_VolumeBar_VolumeDown", 7, -90, 128, 90);
+            Button_UITopBar_VolumeBar_VolumeDown.FillColor = Color.FromArgb(180, Color.White);
+            //Button_UITopBar_VolumeBar_VolumeDown.OverlayImage = new imageItem(OImage.FromFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "-", new Font(Font.Arial, 150), eTextFormat.Outline, Alignment.CenterCenter, Color.Transparent, StoredData.SystemSettings.SkinFocusColor));
+            Button_UITopBar_VolumeBar_VolumeDown.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "6", 150, eTextFormat.OutlineFat, Alignment.CenterCenter, Color.White, StoredData.SystemSettings.SkinFocusColor));
+            Button_UITopBar_VolumeBar_VolumeDown.Transition = eButtonTransition.None;
+            Button_UITopBar_VolumeBar_VolumeDown.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeDown_OnClick);
+            UIPanel.addControl(Button_UITopBar_VolumeBar_VolumeDown);
+
+            OMButton Button_UITopBar_VolumeBar_VolumeUp = new OMButton("Button_UITopBar_VolumeBar_VolumeUp", 7, -510, 128, 90);
+            Button_UITopBar_VolumeBar_VolumeUp.FillColor = Color.FromArgb(180, Color.White);
+            //Button_UITopBar_VolumeBar_VolumeUp.OverlayImage = new imageItem(OImage.FromFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "+", new Font(Font.Arial, 150), eTextFormat.Outline, Alignment.CenterCenter, Color.Transparent, StoredData.SystemSettings.SkinFocusColor));
+            Button_UITopBar_VolumeBar_VolumeUp.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "5", 150, eTextFormat.OutlineFat, Alignment.CenterCenter, Color.White, StoredData.SystemSettings.SkinFocusColor));
+            Button_UITopBar_VolumeBar_VolumeUp.Transition = eButtonTransition.None;
+            Button_UITopBar_VolumeBar_VolumeUp.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUp_OnClick);
+            UIPanel.addControl(Button_UITopBar_VolumeBar_VolumeUp);
+
+            #endregion
 
             #region Icons
 
@@ -336,10 +336,6 @@ namespace OpenMobile
 
             #endregion
 
-            VolumeBar VolumeBar_UITopBar_Volume = new VolumeBar("VolumeBar_UITopBar_Volume", 6, -510, 130, 510);
-            VolumeBar_UITopBar_Volume.Visible = false;
-            VolumeBar_UITopBar_Volume.OnSliderMoved += new userInteraction(volumeChange);
-            UIPanel.addControl(VolumeBar_UITopBar_Volume);
 
             #endregion
 
@@ -370,6 +366,28 @@ namespace OpenMobile
 
             #endregion
             
+            // A general information label in the center of the screen
+            OMBasicShape Shape_Info_Background = new OMBasicShape("Shape_Info_Background", -10, 250, 1020, 100);
+            Shape_Info_Background.Shape = shapes.Rectangle;
+            Shape_Info_Background.BorderColor = Color.White;
+            Shape_Info_Background.BorderSize = 1;
+            Shape_Info_Background.FillColor = Color.FromArgb(210, Color.Black);
+            Shape_Info_Background.Visible = false;
+            Shape_Info_Background.NoUserInteraction = true;
+            UIPanel.addControl(Shape_Info_Background);
+
+            OMLabel Label_Info_Background = new OMLabel("Label_Info_Background", -500, 250, 2000, 100);
+            Label_Info_Background.NoUserInteraction = true;
+            Label_Info_Background.Font = new Font(Font.Arial, 45);
+            Label_Info_Background.Visible = false;
+            UIPanel.addControl(Label_Info_Background);
+
+            OMLabel Label_Info = new OMLabel("Label_Info", 0, 250, 1000, 100);
+            Label_Info.NoUserInteraction = true;
+            Label_Info.Font = new Font(Font.Arial, 45);
+            Label_Info.Visible = false;
+            UIPanel.addControl(Label_Info);
+
             // TODO : Move clock and date to main menu skin
             //OMLabel clocktime = new OMLabel(350, 522, 0, 0);
             //OMLabel clockdate = new OMLabel(350, 572, 0, 0);
@@ -416,6 +434,44 @@ namespace OpenMobile
             return eLoadStatus.LoadSuccessful;
         }
 
+        void Button_UITopBar_VolumeBar_VolumeUp_OnClick(OMControl sender, int screen)
+        {
+            // Reset autohide timer
+            if (VolumeBarTimer[screen] != null)
+            {
+                VolumeBarTimer[screen].Enabled = false;
+                VolumeBarTimer[screen].Enabled = true;
+            }
+
+            // Update current volume
+            object o = theHost.getData(eGetData.GetSystemVolume, "", theHost.ZoneHandler.GetActiveZone(screen).AudioDeviceInstance.ToString());
+            if (o != null)
+            {
+                int VolValue = (int)o;
+                VolValue += 2;
+                theHost.execute(eFunction.setSystemVolume, VolValue.ToString(), screen.ToString());
+            }
+        }
+
+        void Button_UITopBar_VolumeBar_VolumeDown_OnClick(OMControl sender, int screen)
+        {
+            // Reset autohide timer
+            if (VolumeBarTimer[screen] != null)
+            {
+                VolumeBarTimer[screen].Enabled = false;
+                VolumeBarTimer[screen].Enabled = true;
+            }
+
+            // Update current volume
+            object o = theHost.getData(eGetData.GetSystemVolume, "", theHost.ZoneHandler.GetActiveZone(screen).AudioDeviceInstance.ToString());
+            if (o != null)
+            {
+                int VolValue = (int)o;
+                VolValue -= 2;
+                theHost.execute(eFunction.setSystemVolume, VolValue.ToString(), screen.ToString());
+            }
+        }
+
         void UIPanel_Entering(OMPanel sender, int screen)
         {   // Update initial data
 
@@ -423,6 +479,15 @@ namespace OpenMobile
             Zone zone = theHost.ZoneHandler.GetActiveZone(screen);
             OMButton b = (OMButton)UIPanel[screen, "Button_UIMediaBar_Zone"];
             b.OverlayImage = new imageItem(ButtonGraphic.GetImage(b.Width, b.Height, ButtonGraphic.ImageTypes.ButtonForeground, "", zone.Name));
+
+            // Update current volume
+            object o = theHost.getData(eGetData.GetSystemVolume, "", theHost.ZoneHandler.GetActiveZone(screen).AudioDeviceInstance.ToString());
+            if (o != null)
+            {
+                int VolValue = (int)o;
+                VolumeBar vol = (VolumeBar)UIPanel[screen, "VolumeBar_UITopBar_VolumeBar_Volume"];
+                vol.Value = VolValue;                
+            }
         }
 
         void Button_UIMediaBar_Zone_OnClick(OMControl sender, int screen)
@@ -564,14 +629,6 @@ namespace OpenMobile
         private Timer[] VolumeBarTimer = null;
         void vol_OnClick(OMControl sender, int screen)
         {
-            // Initialize visibility variable 
-            if (VolumeBarVisible == null)
-                VolumeBarVisible = new bool[theHost.ScreenCount];
-
-            // Initialize timer variable 
-            if (VolumeBarTimer == null)
-                VolumeBarTimer = new Timer[theHost.ScreenCount];
-
             lock (sender)
             {
                 AnimateVolumeBar(!VolumeBarVisible[screen], screen);
@@ -580,12 +637,34 @@ namespace OpenMobile
 
         private void AnimateVolumeBar(bool show, int screen)
         {
-            OMButton btn = (OMButton)UIPanel[screen, "Button_UITopBar_Volume"];
-            VolumeBar vol = (VolumeBar)UIPanel[screen, "VolumeBar_UITopBar_Volume"];
+            // Initialize visibility variable 
+            if (VolumeBarVisible == null)
+                VolumeBarVisible = new bool[theHost.ScreenCount];
+
+            // Initialize timer variable 
+            if (VolumeBarTimer == null)
+                VolumeBarTimer = new Timer[theHost.ScreenCount];
+            if (VolumeBarTimer[screen] == null)
+            {
+                // Activate timeout timer
+                VolumeBarTimer[screen] = new Timer(2500);
+                VolumeBarTimer[screen].AutoReset = false;
+                VolumeBarTimer[screen].Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
+                VolumeBarTimer[screen].Screen = screen;
+                VolumeBarTimer[screen].Tag = UIPanel[screen, "VolumeBar_UITopBar_VolumeBar_Volume"];
+            }
+
+
+            OMButton btn = (OMButton)UIPanel[screen, "Button_UITopBar_VolumeBar_Volume"];
+            OMButton btnDown = (OMButton)UIPanel[screen, "Button_UITopBar_VolumeBar_VolumeDown"];
+            OMButton btnUp = (OMButton)UIPanel[screen, "Button_UITopBar_VolumeBar_VolumeUp"];
+            VolumeBar vol = (VolumeBar)UIPanel[screen, "VolumeBar_UITopBar_VolumeBar_Volume"];
 
             // Errorcheck
             if (btn == null || vol == null)
                 return;
+
+            SmoothAnimator Animation = new SmoothAnimator(2.0f);
 
             if (show)
             {
@@ -602,40 +681,34 @@ namespace OpenMobile
                 int EndPos = 510;
                 int Top = btn.Top;
 
-                SmoothAnimator Animation = new SmoothAnimator(2.0f);
                 Animation.Animate(delegate(int AnimationStep)
                     {
                         Top += AnimationStep;
                         if (Top >= EndPos)
                         {   // Animation has completed
                             btn.Top = EndPos;
-                            vol.Top = btn.Top - vol.Height;
+                            btnDown.Top = btn.Top - btnDown.Height;
+                            vol.Top = btnDown.Top - vol.Height;
+                            btnUp.Top = vol.Top - btnUp.Height;
                             return false;
                         }
                         else
                         {   // Move object down
                             btn.Top = Top;
-                            vol.Top = btn.Top - vol.Height;
+                            btnDown.Top = btn.Top - btnDown.Height;
+                            vol.Top = btnDown.Top - vol.Height;
+                            btnUp.Top = vol.Top - btnUp.Height;
                         }
                         return true;
                     });
 
                 // Activate timeout timer
-                VolumeBarTimer[screen] = new Timer(2500);
-                VolumeBarTimer[screen].Elapsed += new ElapsedEventHandler(volTmr_Elapsed);
-                VolumeBarTimer[screen].Screen = screen;
-                VolumeBarTimer[screen].Tag = UIPanel[screen, "VolumeBar_UITopBar_Volume"];
                 VolumeBarTimer[screen].Enabled = true;
             }
             else
             {
                 // Deactivate timeout timer
-                if (VolumeBarTimer[screen] != null)
-                {
-                    VolumeBarTimer[screen].Enabled = false;
-                    VolumeBarTimer[screen].Dispose();
-                    VolumeBarTimer[screen] = null;
-                }
+                VolumeBarTimer[screen].Enabled = false;
 
                 // Set visibility state
                 VolumeBarVisible[screen] = false;
@@ -644,20 +717,23 @@ namespace OpenMobile
                 int EndPos = 0;
                 int Top = btn.Top;
 
-                SmoothAnimator Animation = new SmoothAnimator(2.0f);
                 Animation.Animate(delegate(int AnimationStep)
                 {
                     Top -= AnimationStep;
                     if (Top <= EndPos)
                     {   // Animation has completed
                         btn.Top = EndPos;
-                        vol.Top = btn.Top - vol.Height;
+                        btnDown.Top = btn.Top - btnDown.Height;
+                        vol.Top = btnDown.Top - vol.Height;
+                        btnUp.Top = vol.Top - btnUp.Height;
                         return false;
                     }
                     else
                     {   // Move object up
                         btn.Top = Top;
-                        vol.Top = btn.Top - vol.Height;
+                        btnDown.Top = btn.Top - btnDown.Height;
+                        vol.Top = btnDown.Top - vol.Height;
+                        btnUp.Top = vol.Top - btnUp.Height;
                     }
                     return true;
                 });
@@ -701,6 +777,175 @@ namespace OpenMobile
         }
 
         #endregion
+
+        private bool[] InfoMessageVisible = null;
+        private bool[] InfoMessageUpdated = null;
+        void ShowInfoMessage(int Screen, string Message)
+        {
+            // Initialize variables
+            if (InfoMessageVisible == null)
+                InfoMessageVisible = new bool[theHost.ScreenCount];
+            if (InfoMessageUpdated == null)
+                InfoMessageUpdated = new bool[theHost.ScreenCount];
+
+            OMBasicShape shp = (OMBasicShape)UIPanel[Screen, "Shape_Info_Background"];
+            OMLabel lbl = (OMLabel)UIPanel[Screen, "Label_Info_Background"];
+            OMLabel lblFront = (OMLabel)UIPanel[Screen, "Label_Info"];
+
+            if (!InfoMessageVisible[Screen])
+            {
+                InfoMessageVisible[Screen] = true;
+                InfoMessageUpdated[Screen] = false;
+
+                OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+                    {
+                        lbl.Text = Message;
+                        lblFront.Text = lbl.Text;
+                        lbl.FontSize = 45F;
+                        lbl.Color = Color.FromArgb(120, lbl.Color);
+                        lblFront.Color = Color.FromArgb(120, lbl.Color);
+
+                        shp.Opacity = lbl.Opacity = lblFront.Opacity = 0;
+
+                        lblFront.Visible = true;
+                        lbl.Visible = true;
+                        shp.Visible = true;
+
+
+                        // Animation where text starts centered and fades outwards
+                        int AnimationState = 0;
+                        int Delay = 0;
+                        SmoothAnimator Animation = new SmoothAnimator(0.2f);
+                        Animation.Animate(delegate(int AnimationStep)
+                        {
+                            bool ContinueAnimation = false;
+                            switch (AnimationState)
+                            {
+                                case 0: // Fade controls in (fading in is done in the main loop)
+                                        ContinueAnimation = true;
+                                        AnimationState = 1;
+                                    break;
+
+                                case 1:
+                                    {   
+                                        #region Message text effect
+                                        
+                                        // Opacity of all controls
+                                        if (lblFront.Opacity < 255)
+                                        {
+                                            lblFront.Opacity += AnimationStep*10;
+                                            shp.Opacity = lbl.Opacity = lblFront.Opacity;
+                                            ContinueAnimation = true;
+                                        }
+                                        else
+                                        {
+                                            shp.Opacity = lbl.Opacity = lblFront.Opacity = 255;
+                                        }
+
+                                        // Text effect opactity level
+                                        int Opacity = lbl.Color.A - AnimationStep;
+                                        if (Opacity > 0)
+                                        {
+                                            lbl.Color = Color.FromArgb(Opacity, lbl.Color);
+                                            ContinueAnimation = true;
+                                        }
+                                        else
+                                        {
+                                            lbl.Color = Color.FromArgb(0, lbl.Color);
+                                        }
+
+                                        // Text effect font size
+                                        if (lbl.FontSize < 200)
+                                        {
+                                            lbl.FontSize += AnimationStep;
+                                            ContinueAnimation = true;
+                                        }
+                                        else
+                                        {
+                                            // No final value
+                                        }
+
+                                        // Message label opacticy
+                                        Opacity = lblFront.Color.A + (int)(AnimationStep * 8F);
+                                        if (Opacity < 255)
+                                        {
+                                            lblFront.Color = Color.FromArgb(Opacity, lbl.Color);
+                                            ContinueAnimation = true;
+                                        }
+                                        else
+                                        {
+                                            lblFront.Color = Color.FromArgb(255, lbl.Color);
+                                        }
+
+                                        #endregion
+                                    }
+                                    if (!ContinueAnimation)
+                                    {
+                                        ContinueAnimation = true;
+                                        AnimationState = 2;
+                                    }
+                                    break;
+                                case 2:
+                                    {   
+                                        #region Delay while showing message
+                                        
+                                        Delay += AnimationStep;
+                                        if (Delay < 100)
+                                            ContinueAnimation = true;
+
+                                        if (InfoMessageUpdated[Screen])
+                                        {
+                                            Delay = 0;
+                                            InfoMessageUpdated[Screen] = false;
+                                        }
+
+                                        #endregion
+                                    }
+                                    if (!ContinueAnimation)
+                                    {
+                                        ContinueAnimation = true;
+                                        AnimationState = 3;
+                                    }
+                                    break;
+                                case 3:
+                                    {
+                                        #region Fade controls out
+
+                                        // Opacity of all controls
+                                        if (lblFront.Opacity > 0)
+                                        {
+                                            lblFront.Opacity -= AnimationStep * 8;
+                                            shp.Opacity = lbl.Opacity = lblFront.Opacity;
+                                            ContinueAnimation = true;
+                                        }
+                                        else
+                                        {
+                                            shp.Opacity = lbl.Opacity = lblFront.Opacity = 0;
+                                        }
+
+                                        #endregion
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }     
+                            return ContinueAnimation;
+                        });
+
+                        lbl.Visible = false;
+                        lblFront.Visible = false;
+                        shp.Visible = false;
+
+                        InfoMessageVisible[Screen] = false;
+                    });
+            }
+            else
+            {   // Direct update, animation already in progress
+                InfoMessageUpdated[Screen] = true;
+                lbl.Text = Message;
+                lblFront.Text = lbl.Text;
+            }
+        }
 
         #region Icons
 
@@ -1022,6 +1267,8 @@ namespace OpenMobile
             {
                 #region backgroundOperationStatus
 
+                int ArgScreen = OpenMobile.helperFunctions.Arguments.GetScreenFromArg(ref arg2);
+
                 // Is this a update from the speech engine?
                 if (arg2 == "Speech")
                 {
@@ -1047,12 +1294,57 @@ namespace OpenMobile
                 statusReset.Enabled = false;
                 statusReset.Enabled = true;
 
-                // Show the status update in the topbar
-                theHost.ForEachScreen(delegate(int screen)
+                eDataType DataType = OpenMobile.helperFunctions.Arguments.GetDataTypeFromArg(arg3);
+                switch (DataType)
                 {
-                    ((OMLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]).Text = arg1;
-                });
-
+                    case eDataType.Update:
+                        {
+                            if (ArgScreen < 0)
+                            {
+                                theHost.ForEachScreen(delegate(int screen)
+                                {
+                                    ((OMLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]).Text = arg1;
+                                });
+                            }
+                            else
+                            {   // Directly update the given screen
+                                ((OMLabel)UIPanel[ArgScreen, "Label_UITopBar_TrackTitle"]).Text = arg1;
+                            }
+                        }
+                        break;
+                    case eDataType.PopUp:
+                        {
+                            if (ArgScreen < 0)
+                            {
+                                theHost.ForEachScreen(delegate(int screen)
+                                {
+                                    ShowInfoMessage(screen, arg1);
+                                });
+                            }
+                            else
+                            {   // Directly update the given screen
+                                ShowInfoMessage(ArgScreen, arg1);
+                            }
+                        }
+                        break;
+                    default:
+                        {
+                            if (ArgScreen < 0)
+                            {   // Global message
+                                theHost.ForEachScreen(delegate(int screen)
+                                {
+                                    OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
+                                    title.Transition(eAnimation.UnveilRight, arg1, 25);
+                                });
+                            }
+                            else
+                            {   // Screen specific message
+                                OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[ArgScreen, "Label_UITopBar_TrackTitle"]; //6
+                                title.Transition(eAnimation.UnveilRight, arg1, 25);
+                            }
+                        }
+                        break;
+                }
                 #endregion
             }
 
@@ -1066,9 +1358,11 @@ namespace OpenMobile
                     {   // Make sure we update the correct screens by comparing the active zone to the zone in the event (volumeevents sends audioinstance)
                         if (arg2 == theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance.ToString())
                         {   // Update volume button icon
-                            OMButton b = (OMButton)UIPanel[screen, "Button_UITopBar_Volume"];
+                            OMButton b = (OMButton)UIPanel[screen, "Button_UITopBar_VolumeBar_Volume"];
                             b.Image = theHost.getSkinImage("VolumeButtonMuted");
                             b.FocusImage = theHost.getSkinImage("VolumeButtonMutedFocus");
+                            // Show infomessage
+                            ShowInfoMessage(screen, "Muted");
                         }
                     });
                 }
@@ -1080,7 +1374,7 @@ namespace OpenMobile
                         {   // Make sure we update the correct screens by comparing the active zone to the zone in the event (volumeevents sends audioinstance)
                             if (arg2 == theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance.ToString())
                             {   // Show volume control to indicate new volume
-                                OMButton b = (OMButton)UIPanel[screen, "Button_UITopBar_Volume"];
+                                OMButton b = (OMButton)UIPanel[screen, "Button_UITopBar_VolumeBar_Volume"];
                                 b.Image = theHost.getSkinImage("VolumeButton");
                                 b.FocusImage = theHost.getSkinImage("VolumeButtonFocus");
 
@@ -1091,10 +1385,12 @@ namespace OpenMobile
                                     // Is this a volume adjustment or a unmute?
                                     if (VolValue >= 0)
                                     {   // Volume adjustment, Set volume bar value
-                                        VolumeBar vol = (VolumeBar)UIPanel[screen, "VolumeBar_UITopBar_Volume"];
+                                        VolumeBar vol = (VolumeBar)UIPanel[screen, "VolumeBar_UITopBar_VolumeBar_Volume"];
                                         vol.Value = VolValue;
                                         // Show volume bar
                                         AnimateVolumeBar(true, screen);
+                                        // Show infomessage
+                                        ShowInfoMessage(screen, String.Format("Volume {0}%", VolValue));
                                     }
                                 }
                             }
@@ -1502,6 +1798,8 @@ namespace OpenMobile
                 {
                     OMButton b = (OMButton)UIPanel[Screen, "Button_UIMediaBar_Zone"];
                     b.OverlayImage = new imageItem(ButtonGraphic.GetImage(b.Width, b.Height, ButtonGraphic.ImageTypes.ButtonForeground, "", zone.Name));
+                    // Show infomessage
+                    ShowInfoMessage(Screen, String.Format("Zone '{0}' Activated", zone.Name));
                 }
                 else
                 {   // Manually update each panel

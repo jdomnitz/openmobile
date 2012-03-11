@@ -38,11 +38,7 @@ namespace OMSettings
             theHost = host;
             collection = s;
             collection.OnSettingChanged += new SettingChanged(collection_OnSettingChanged);
-            OMButton OK = new OMButton(13, 56, 200, 110);
-            OK.Image = theHost.getSkinImage("Full");
-            OK.FocusImage = theHost.getSkinImage("Full.Highlighted");
-            OK.Text = "OK";
-            OK.Name = "OMSettings.OK";
+            OMButton OK = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("OMSettings.OK", 13, 56, 200, 110, "", "OK");
             OK.OnClick += new userInteraction(Save_OnClick);
             OK.Transition = eButtonTransition.None;
             OMLabel Heading = new OMLabel(200, 0, 800, 100);
@@ -52,6 +48,7 @@ namespace OMSettings
             OMPanel[] ret=new OMPanel[theHost.ScreenCount];
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
+                ofset = 87;
                 ret[i]= new OMPanel(s.Title);
                 controls.Add(new List<OMControl>());
                 OMScrollingContainer container = new OMScrollingContainer(0, 80, 1000, 450);
