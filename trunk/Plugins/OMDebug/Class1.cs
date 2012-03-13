@@ -266,7 +266,7 @@ namespace OMDebug
             WriteToLog(false, "------------------Graphics Initialized-------------------", new DebugMessage(DebugMessageType.Info), Texts.ToArray());
         }
 
-        bool theHost_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
+        bool theHost_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg, ref bool handled)
         {
             if (arg.Key == OpenMobile.Input.Key.VolumeUp)
                 WriteToLog("(Event:OnKeyPress) => \tVolume Up!");

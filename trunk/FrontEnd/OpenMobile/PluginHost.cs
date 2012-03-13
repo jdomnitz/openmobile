@@ -382,13 +382,11 @@ namespace OpenMobile
             using (PluginSettings s = new PluginSettings())
             {
                 // TODO: ReEnable PlayList load and save
-                /*
                 for (int i = 0; i < AudioDeviceCount; i++)
                 {
                     Playlist.writePlaylistToDB(this, "Current" + i.ToString(), getPlaylist(i));
                     s.setSetting("Media.Instance" + i.ToString() + ".Random", getRandom(i).ToString());
                 }
-                */
             }
         }
 
@@ -402,14 +400,12 @@ namespace OpenMobile
                 bool res;
                 string dbname = s.getSetting("Default.MusicDatabase");
                 // TODO: ReEnable PlayList load and save
-                /*
                 for (int i = 0; i < AudioDeviceCount; i++)
                 {
                     setPlaylist(Playlist.readPlaylistFromDB(this, "Current" + i.ToString(), dbname), i);
                     if (bool.TryParse(s.getSetting("Media.Instance" + i.ToString() + ".Random"), out res))
                         setRandom(i, res);
                 }
-                */
             }
         }
 
@@ -1939,8 +1935,16 @@ namespace OpenMobile
                 case eFunction.gesture:
                     if (int.TryParse(arg1, out ret) == true)
                     {
-                        SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.gesture, arg1, arg2, history.CurrentItem(ret).pluginName); });
-                        return true;
+                        // Only raise this event if a character was recognized
+                        if (!String.IsNullOrEmpty(arg2))
+                        {
+                            SandboxedThread.Asynchronous(delegate()
+                            {
+                                // TODO_ : We need a way of canceling this event if it's handled 
+                                raiseSystemEvent(eFunction.gesture, arg1, arg2, String.Format("{0}|{1}", history.CurrentItem(ret).pluginName, history.CurrentItem(ret).panelName));
+                            });
+                            return true;
+                        }
                     }
                     return false;
 
@@ -2562,10 +2566,12 @@ namespace OpenMobile
         public bool raiseKeyPressEvent(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
         {
             System.Diagnostics.Debug.WriteLine(String.Format("raiseKeyPressEvent( eKeypressType: {0}, Key: {1}, KeyCode:{2}, Screen:{3}, Character:{4}", type, arg.Key, arg.KeyCode, arg.Screen, arg.Character));
+            bool Handled = false;
             try
             {
                 if (OnKeyPress != null)
-                    return OnKeyPress(type, arg);
+                    OnKeyPress(type, arg, ref Handled);
+                return Handled;
             }
             catch (Exception e) { SandboxedThread.Handle(e); }
             return false;

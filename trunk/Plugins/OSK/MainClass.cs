@@ -166,7 +166,7 @@ namespace OpenMobile
         }
 
         //Add physical keyboard input to the textbox
-        bool theHost_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
+        bool theHost_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg, ref bool handled)
         {  
             for (int i = 0; i < theHost.ScreenCount; i++)
             {

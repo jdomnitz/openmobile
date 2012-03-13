@@ -46,7 +46,7 @@ namespace OpenMobile.Plugin
     /// </summary>
     /// <param name="type"></param>
     /// <param name="arg"></param>
-    public delegate bool KeyboardEvent(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg);
+    public delegate bool KeyboardEvent(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg, ref bool handled);
     /// <summary>
     /// A system power change event
     /// </summary>

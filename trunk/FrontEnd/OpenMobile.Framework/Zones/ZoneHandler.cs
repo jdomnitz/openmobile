@@ -136,7 +136,7 @@ namespace OpenMobile.Zones
         {
             if ((Screen < 0) && (Screen > _ActiveZones.Length))
                 return null;
-            return GetZone(_ActiveZones[Screen]);
+            return this[_ActiveZones[Screen]];
         }
         
         /// <summary>
@@ -397,6 +397,7 @@ namespace OpenMobile.Zones
 
            // Remove current zones
            _Zones.Clear();
+           _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
 
            // Currently only one screen/device pr zone is supported
            // Create one default zone pr screen (default zone uses default audiodevice)

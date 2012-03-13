@@ -88,7 +88,7 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Outlined fat (6 pixel)
         /// </summary>
-        OutlineFat = 12,
+        OutlineFat = 13,
     };
     /// <summary>
     /// Alignment arguments
