@@ -957,7 +957,7 @@ namespace OpenMobile
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Volume [int -1(mute) to 100]</para>
         /// <para>Note: -2 May be used as unmute</para>
-        /// <para>Arg2: (Optional) Instance</para>
+        /// <para>Arg2: Screen number or zone ID [int]</para>
         /// </summary>
         setSystemVolume = 34,
         /// <summary>
@@ -1233,7 +1233,7 @@ namespace OpenMobile
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen</para>
         /// <para>Arg2: Character</para>
-        /// <para>Arg3: Plugin (The name of the plugin with the top most panel)</para>
+        /// <para>Arg3: Plugin|Panel (The name of the plugin with the top most panel, Plugin and panel is separated with |)</para>
         /// </summary>
         gesture = 100,
         /// <summary>
@@ -1690,7 +1690,7 @@ namespace OpenMobile
         /// <summary>
         /// Gets the volume [int -1(mute) to 100]
         /// <para>----------------------------------------------------</para>
-        /// <para>Param: Instance [int]</para>
+        /// <para>Param: Screen number or zone ID [int]</para>
         /// </summary>
         GetSystemVolume = 3,
         /// <summary>

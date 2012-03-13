@@ -371,7 +371,7 @@ namespace OMPlayer
         return eLoadStatus.LoadSuccessful;
     }
 
-    bool host_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg)
+    bool host_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg, ref bool handled)
     {
         if (type != eKeypressType.KeyDown)
             return false;

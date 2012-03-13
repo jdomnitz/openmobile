@@ -276,6 +276,14 @@ namespace OMOsk2
                     }
                     break;
 
+                case "ongesture":
+                    {   // Gesture events are sent from the OSK helperfunctions to provide the correct panel for updating controls
+                        OSK.OSKOnGestureData GestureData = data as OSK.OSKOnGestureData; // Convert input data to local data object
+                        OSK_OnGesture(GestureData.Panel, GestureData.Screen, GestureData.Character);
+                        // No return data
+                    }
+                    break;
+
                 case "osk":
                     {
                         // Convert input data to local data object
@@ -754,6 +762,31 @@ namespace OMOsk2
             return false;        
         }
 
+        void OSK_OnGesture(OMPanel panel, int screen, string character)
+        {
+            if (panel == null)
+                return;
+            OMTextBox txt = panel["OSK_TextBox_Text"] as OMTextBox;
+            if (txt == null)
+                return;
+
+            switch (character)
+            {
+                case "back":
+                    {   // Remove a character
+                        OSKValueRemoveCharacter(panel, screen);
+                    }
+                    break;
+                default:
+                    if (!String.IsNullOrEmpty(character))
+                    {   // Add character 
+                        OSKValueAddCharacter(panel, screen, character);
+                        return;
+                    }
+                    break;
+            }
+        }
+
         public void Dispose()
         {
             GC.SuppressFinalize(this);
@@ -761,3 +794,17 @@ namespace OMOsk2
 
     }
 }
+
+/*
+            if (function == eFunction.gesture)
+            {
+                if (arg3 == "OSK")
+                {
+                    OMTextBox tb = (OMTextBox)manager[int.Parse(arg1)]["Text"];
+                    if (arg2=="back")
+                        tb.Text=tb.Text.Remove(tb.Text.Length-1);
+                    else
+                        tb.Text+=arg2;
+                }
+            }
+*/

@@ -43,6 +43,13 @@ namespace OpenMobile.helperFunctions
                 public bool KeyHandled { get; set; }
             }
 
+            public class OSKOnGestureData
+            {
+                public OMPanel Panel { get; set; }
+                public int Screen { get; set; }
+                public string Character { get; set; }
+            }
+
             public class OSKData
             {
                 public OSKData()
@@ -308,7 +315,7 @@ namespace OpenMobile.helperFunctions
                 return Result;
             }
 
-            bool Host_OnKeyPress(eKeypressType type, KeyboardKeyEventArgs arg)
+            bool Host_OnKeyPress(eKeypressType type, KeyboardKeyEventArgs arg, ref bool handled)
             {
                 // Make sure that we only pass the keypresses that belongs to the correct screen
                 if (arg.Screen != Screen)
@@ -325,6 +332,8 @@ namespace OpenMobile.helperFunctions
                     BuiltInComponents.Host.DebugMsg("Unable to send keypress event to OSK, plugin " + Handler + " not available");
                     return false;
                 }
+                if (Data.KeyHandled)
+                    handled = true;
                 return Data.KeyHandled;
             }
 
@@ -347,6 +356,27 @@ namespace OpenMobile.helperFunctions
                         CloseOSK.Set();
                     }
                 }
+
+                else if (function == eFunction.gesture)
+                {
+                    if (arg3.Contains(PanelName))
+                    {
+                        // Pass keypress on to the OSK plugin along with the current panel
+                        OSKOnGestureData Data = new OSKOnGestureData();
+                        Data.Character = arg2;
+                        int screen = 0;
+                        if (!int.TryParse(arg1, out screen))
+                            return;
+                        Data.Screen = screen;
+                        Data.Panel = BuiltInComponents.Panels[Screen, PanelName];
+                        if (!BuiltInComponents.Host.sendMessage<OSKOnGestureData>(Handler, "OpenMobile.helperFunctions.OSK", "ongesture", ref Data))
+                        {   // Log this error to the debug log
+                            BuiltInComponents.Host.DebugMsg("Unable to send gesture event to OSK, plugin " + Handler + " not available");
+                            return;
+                        }
+                    }
+                }
+
             }
         }
 }

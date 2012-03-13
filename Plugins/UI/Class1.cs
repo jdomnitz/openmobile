@@ -231,7 +231,7 @@ namespace OpenMobile
             OMLabel Label_UIMediaBar_Elapsed = new OMLabel("Label_UIMediaBar_Elapsed", 840, 615, 160, 22);
             Label_UIMediaBar_Elapsed.OutlineColor = Color.Blue;
             Label_UIMediaBar_Elapsed.Font = new Font(Font.GenericSansSerif, 16F);
-            Label_UIMediaBar_Elapsed.Format = eTextFormat.Outline;
+            Label_UIMediaBar_Elapsed.Format = eTextFormat.OutlineNarrow;
             UIPanel.addControl(Label_UIMediaBar_Elapsed);
 
             OMButton Button_UIMediaBar_Random = new OMButton("Button_UIMediaBar_Random", 845, 635, 55, 40);
@@ -296,20 +296,22 @@ namespace OpenMobile
             VolumeBar_UITopBar_VolumeBar_Volume.OnSliderMoved += new userInteraction(volumeChange);
             UIPanel.addControl(VolumeBar_UITopBar_VolumeBar_Volume);
 
-            OMButton Button_UITopBar_VolumeBar_VolumeDown = new OMButton("Button_UITopBar_VolumeBar_VolumeDown", 7, -90, 128, 90);
+            OMButton Button_UITopBar_VolumeBar_VolumeDown = new OMButton("Button_UITopBar_VolumeBar_VolumeDown", 6, -90, 130, 90);
             Button_UITopBar_VolumeBar_VolumeDown.FillColor = Color.FromArgb(180, Color.White);
-            //Button_UITopBar_VolumeBar_VolumeDown.OverlayImage = new imageItem(OImage.FromFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "-", new Font(Font.Arial, 150), eTextFormat.Outline, Alignment.CenterCenter, Color.Transparent, StoredData.SystemSettings.SkinFocusColor));
-            Button_UITopBar_VolumeBar_VolumeDown.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "6", 150, eTextFormat.OutlineFat, Alignment.CenterCenter, Color.White, StoredData.SystemSettings.SkinFocusColor));
+            Button_UITopBar_VolumeBar_VolumeDown.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "6", 150, eTextFormat.Outline, Alignment.CenterCenter, StoredData.SystemSettings.SkinFocusColor, Color.White));
             Button_UITopBar_VolumeBar_VolumeDown.Transition = eButtonTransition.None;
-            Button_UITopBar_VolumeBar_VolumeDown.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeDown_OnClick);
+            Button_UITopBar_VolumeBar_VolumeDown.Tag = -2;
+            Button_UITopBar_VolumeBar_VolumeDown.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnClick);
+            Button_UITopBar_VolumeBar_VolumeDown.OnLongClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnLongClick);
             UIPanel.addControl(Button_UITopBar_VolumeBar_VolumeDown);
 
-            OMButton Button_UITopBar_VolumeBar_VolumeUp = new OMButton("Button_UITopBar_VolumeBar_VolumeUp", 7, -510, 128, 90);
+            OMButton Button_UITopBar_VolumeBar_VolumeUp = new OMButton("Button_UITopBar_VolumeBar_VolumeUp", 6, -510, 130, 90);
             Button_UITopBar_VolumeBar_VolumeUp.FillColor = Color.FromArgb(180, Color.White);
-            //Button_UITopBar_VolumeBar_VolumeUp.OverlayImage = new imageItem(OImage.FromFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "+", new Font(Font.Arial, 150), eTextFormat.Outline, Alignment.CenterCenter, Color.Transparent, StoredData.SystemSettings.SkinFocusColor));
-            Button_UITopBar_VolumeBar_VolumeUp.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "5", 150, eTextFormat.OutlineFat, Alignment.CenterCenter, Color.White, StoredData.SystemSettings.SkinFocusColor));
+            Button_UITopBar_VolumeBar_VolumeUp.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "5", 150, eTextFormat.Outline, Alignment.CenterCenter, StoredData.SystemSettings.SkinFocusColor, Color.White));
             Button_UITopBar_VolumeBar_VolumeUp.Transition = eButtonTransition.None;
-            Button_UITopBar_VolumeBar_VolumeUp.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUp_OnClick);
+            Button_UITopBar_VolumeBar_VolumeUp.Tag = 2;
+            Button_UITopBar_VolumeBar_VolumeUp.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnClick);
+            Button_UITopBar_VolumeBar_VolumeUp.OnLongClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnLongClick);
             UIPanel.addControl(Button_UITopBar_VolumeBar_VolumeUp);
 
             #endregion
@@ -365,7 +367,9 @@ namespace OpenMobile
             UIPanel.addControl(Shape_Speech_BackgroundBlock);
 
             #endregion
-            
+
+            #region Infobanner
+
             // A general information label in the center of the screen
             OMBasicShape Shape_Info_Background = new OMBasicShape("Shape_Info_Background", -10, 250, 1020, 100);
             Shape_Info_Background.Shape = shapes.Rectangle;
@@ -387,6 +391,8 @@ namespace OpenMobile
             Label_Info.Font = new Font(Font.Arial, 45);
             Label_Info.Visible = false;
             UIPanel.addControl(Label_Info);
+
+            #endregion
 
             // TODO : Move clock and date to main menu skin
             //OMLabel clocktime = new OMLabel(350, 522, 0, 0);
@@ -434,44 +440,6 @@ namespace OpenMobile
             return eLoadStatus.LoadSuccessful;
         }
 
-        void Button_UITopBar_VolumeBar_VolumeUp_OnClick(OMControl sender, int screen)
-        {
-            // Reset autohide timer
-            if (VolumeBarTimer[screen] != null)
-            {
-                VolumeBarTimer[screen].Enabled = false;
-                VolumeBarTimer[screen].Enabled = true;
-            }
-
-            // Update current volume
-            object o = theHost.getData(eGetData.GetSystemVolume, "", theHost.ZoneHandler.GetActiveZone(screen).AudioDeviceInstance.ToString());
-            if (o != null)
-            {
-                int VolValue = (int)o;
-                VolValue += 2;
-                theHost.execute(eFunction.setSystemVolume, VolValue.ToString(), screen.ToString());
-            }
-        }
-
-        void Button_UITopBar_VolumeBar_VolumeDown_OnClick(OMControl sender, int screen)
-        {
-            // Reset autohide timer
-            if (VolumeBarTimer[screen] != null)
-            {
-                VolumeBarTimer[screen].Enabled = false;
-                VolumeBarTimer[screen].Enabled = true;
-            }
-
-            // Update current volume
-            object o = theHost.getData(eGetData.GetSystemVolume, "", theHost.ZoneHandler.GetActiveZone(screen).AudioDeviceInstance.ToString());
-            if (o != null)
-            {
-                int VolValue = (int)o;
-                VolValue -= 2;
-                theHost.execute(eFunction.setSystemVolume, VolValue.ToString(), screen.ToString());
-            }
-        }
-
         void UIPanel_Entering(OMPanel sender, int screen)
         {   // Update initial data
 
@@ -481,7 +449,7 @@ namespace OpenMobile
             b.OverlayImage = new imageItem(ButtonGraphic.GetImage(b.Width, b.Height, ButtonGraphic.ImageTypes.ButtonForeground, "", zone.Name));
 
             // Update current volume
-            object o = theHost.getData(eGetData.GetSystemVolume, "", theHost.ZoneHandler.GetActiveZone(screen).AudioDeviceInstance.ToString());
+            object o = theHost.getData(eGetData.GetSystemVolume, "", screen.ToString());
             if (o != null)
             {
                 int VolValue = (int)o;
@@ -776,7 +744,92 @@ namespace OpenMobile
                 theHost.execute(eFunction.setSystemVolume, "-1", screen.ToString());
         }
 
+        void Button_UITopBar_VolumeBar_VolumeUpDown_OnLongClick(OMControl sender, int screen)
+        {
+            // Get step size and direction
+            int Step = 0;
+            if (sender.Tag != null)
+            {
+                try
+                {
+                    Step = (int)sender.Tag;
+                }
+                catch
+                {
+                    return;
+                }
+            }
+
+            // Reset autohide timer
+            if (VolumeBarTimer[screen] != null)
+                VolumeBarTimer[screen].Enabled = false;
+
+            // Repeat button press
+            OMButton btn = sender as OMButton;
+            int loopCount = 0;
+
+            // Update current volume
+            object o = theHost.getData(eGetData.GetSystemVolume, "", screen.ToString());
+            if (o != null)
+            {
+                int VolValue = (int)o;
+                while (btn.Mode == eModeType.Clicked)
+                {
+                    loopCount++;
+
+                    VolValue += Step;
+                    theHost.execute(eFunction.setSystemVolume, VolValue.ToString(), screen.ToString());
+
+                    Thread.Sleep(100);
+
+                    // Loop safety
+                    if (loopCount >= 50)
+                        break;
+                }
+            }
+
+            // Reset autohide timer
+            if (VolumeBarTimer[screen] != null)
+                VolumeBarTimer[screen].Enabled = true;
+        }
+
+        void Button_UITopBar_VolumeBar_VolumeUpDown_OnClick(OMControl sender, int screen)
+        {
+            // Get step size and direction
+            int Step = 0;
+            if (sender.Tag != null)
+            {
+                try
+                {
+                    Step = (int)sender.Tag;
+                }
+                catch
+                {
+                    return;
+                }
+            }
+
+            // Reset autohide timer
+            if (VolumeBarTimer[screen] != null)
+                VolumeBarTimer[screen].Enabled = false;
+
+            // Update current volume
+            object o = theHost.getData(eGetData.GetSystemVolume, "", screen.ToString());
+            if (o != null)
+            {
+                int VolValue = (int)o;
+                VolValue += Step;
+                theHost.execute(eFunction.setSystemVolume, VolValue.ToString(), screen.ToString());
+            }
+
+            // Reset autohide timer
+            if (VolumeBarTimer[screen] != null)
+                VolumeBarTimer[screen].Enabled = true;
+        }
+
         #endregion
+
+        #region InfoBanner
 
         private bool[] InfoMessageVisible = null;
         private bool[] InfoMessageUpdated = null;
@@ -946,6 +999,8 @@ namespace OpenMobile
                 lblFront.Text = lbl.Text;
             }
         }
+
+        #endregion
 
         #region Icons
 
