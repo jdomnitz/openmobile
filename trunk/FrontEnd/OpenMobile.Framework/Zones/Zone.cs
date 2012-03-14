@@ -51,6 +51,29 @@ namespace OpenMobile
         /// </summary>
         public bool BlockSubZoneUsage { get; set; }
 
+        /// <summary>
+        /// Specifies wich screens this zone can be activated on. 
+        /// <para>Empty string = any screen, specify each screennumber with a | separator like this 0|1|2 (alloed usage is screen 0, 1 and 2)</para>
+        /// </summary>
+        public string AllowedScreens { get; set; }
+
+        /// <summary>
+        /// Check if this zone can be activated on the given screen
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="zone"></param>
+        /// <returns></returns>
+        public bool CanZoneBeActivated(int screen)
+        {
+            // If empty string then everything is allowed
+            if (String.IsNullOrEmpty(AllowedScreens))
+                return true;
+
+            // Check if the screen number is listed in the string, if so it's allowed
+            return AllowedScreens.Contains(screen.ToString());
+        }
+
+
         private List<int> _SubZones = new List<int>();
         /// <summary>
         /// List of zone's (ID's) that's included in this zone

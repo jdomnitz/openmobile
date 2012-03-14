@@ -154,7 +154,7 @@ namespace OMSettings
 
             #region Zone details panel
 
-            panelZonesDetail = new DialogPanel("ZoneDetail"," ", 100, 80, 800, 450, true, false);
+            panelZonesDetail = new DialogPanel("ZoneDetail"," ", 100, 55, 800, 500, true, false);
             panelZonesDetail.Button_Ok.OnClick += new userInteraction(panelZonesDetail_Button_Ok_OnClick);
             panelZonesDetail.Button_Cancel.OnClick += new userInteraction(panelZonesDetail_Button_Cancel_OnClick);
 
@@ -165,7 +165,7 @@ namespace OMSettings
 
             #region Zone Name textbox
 
-            OMLabel ZoneDetail_Label_ZoneName = new OMLabel("ZoneDetail_Label_ZoneName", panelZonesDetail.ClientArea.X, panelZonesDetail.ClientArea.Y, 150, 40);
+            OMLabel ZoneDetail_Label_ZoneName = new OMLabel("ZoneDetail_Label_ZoneName", panelZonesDetail.ClientArea.X, panelZonesDetail.ClientArea.Y, 170, 40);
             ZoneDetail_Label_ZoneName.Text = "Name:";
             ZoneDetail_Label_ZoneName.TextAlignment = Alignment.CenterLeft;
             panelZonesDetail.addControl(ZoneDetail_Label_ZoneName);
@@ -235,13 +235,26 @@ namespace OMSettings
 
             #endregion
 
+            #region Allowed screens textbox
+
+            OMLabel ZoneDetail_Label_AllowedScreens = (OMLabel)OMControl_CloneAndAlignDown("ZoneDetail_Label_AllowedScreens", ZoneDetail_Label_SubZones);
+            ZoneDetail_Label_AllowedScreens.Text = "Activation on:";
+            panelZonesDetail.addControl(ZoneDetail_Label_AllowedScreens);
+
+            OMTextBox ZoneDetail_TextBox_AllowedScreens = (OMTextBox)OMControl_CloneAndAlignDown("ZoneDetail_TextBox_AllowedScreens", ZoneDetail_TextBox_SubZones);
+            ZoneDetail_TextBox_AllowedScreens.OSKType = OSKInputTypes.None;
+            ZoneDetail_TextBox_AllowedScreens.OnClick += new userInteraction(ZoneDetail_TextBox_AllowedScreens_OnClick);
+            panelZonesDetail.addControl(ZoneDetail_TextBox_AllowedScreens);
+
+            #endregion
+
             #region Zone ID textbox
 
-            OMLabel ZoneDetail_Label_ZoneID = (OMLabel)OMControl_CloneAndAlignDown("ZoneDetail_Label_ZoneID", ZoneDetail_Label_SubZones);
+            OMLabel ZoneDetail_Label_ZoneID = (OMLabel)OMControl_CloneAndAlignDown("ZoneDetail_Label_ZoneID", ZoneDetail_Label_AllowedScreens);
             ZoneDetail_Label_ZoneID.Text = "ID:";
             panelZonesDetail.addControl(ZoneDetail_Label_ZoneID);
 
-            OMTextBox ZoneDetail_TextBox_ZoneID = (OMTextBox)OMControl_CloneAndAlignDown("ZoneDetail_TextBox_ZoneID", ZoneDetail_TextBox_SubZones);
+            OMTextBox ZoneDetail_TextBox_ZoneID = (OMTextBox)OMControl_CloneAndAlignDown("ZoneDetail_TextBox_ZoneID", ZoneDetail_TextBox_AllowedScreens);
             ZoneDetail_TextBox_ZoneID.OSKType = OSKInputTypes.None;
             ZoneDetail_TextBox_ZoneID.Disabled = true;  // This is a read only field
             panelZonesDetail.addControl(ZoneDetail_TextBox_ZoneID);
@@ -276,6 +289,38 @@ namespace OMSettings
             #endregion
         }
 
+        static void ZoneDetail_TextBox_AllowedScreens_OnClick(OMControl sender, int screen)
+        {
+            OMTextBox txtBox = sender as OMTextBox;
+
+            // Show menu and get selected item
+            object SelectedScreen = ZoneDetail_ScreenList.ShowMenu(screen);
+            if (SelectedScreen == null)
+                // Clear data
+                txtBox.Text = "";
+            else
+            {
+                string sScreen = ((int)SelectedScreen).ToString();
+                // Check for data already present
+                if (String.IsNullOrEmpty(txtBox.Text))
+                {
+                    // Add new screen
+                    txtBox.Text += sScreen;
+                }
+                else
+                {
+                    if (!txtBox.Text.Contains(sScreen))
+                    {
+                        // Add new screen
+                        if (txtBox.Text == "")
+                            txtBox.Text += sScreen;
+                        else
+                            txtBox.Text += "|" + sScreen;
+                    }
+                }
+            }
+        }
+
         static void panelZonesDetail_Loaded(OMPanel sender, int screen)
         {
             // Update data fields
@@ -291,6 +336,7 @@ namespace OMSettings
             txtSubZones.BackgroundColor = Color.White;
             OMLabel lblHeader = (OMLabel)sender[screen, "ZoneDetail_Label_Header"];
             OMTextBox txtID = (OMTextBox)sender[screen, "ZoneDetail_TextBox_ZoneID"];
+            OMTextBox txtAllowedScreens = (OMTextBox)sender[screen, "ZoneDetail_TextBox_AllowedScreens"];            
 
             // Enable controls
             txtName.Disabled = false;
@@ -298,6 +344,7 @@ namespace OMSettings
             txtScreen.Disabled = false;
             txtAudioDevice.Disabled = false;
             txtSubZones.Disabled = false;
+            txtAllowedScreens.Disabled = false;
 
             if (TmpZone != null)
             {   // Edit current zone, fill with existing data
@@ -310,6 +357,7 @@ namespace OMSettings
                     txtScreen.Disabled = true;
                     txtAudioDevice.Disabled = true;
                     txtSubZones.Disabled = true;
+                    txtAllowedScreens.Disabled = true;
                 }
 
                 lblHeader.Text = String.Format("Details for {0} {1}", TmpZone.Name, (TmpZone.AutoGenerated ? "(Read Only!)" : ""));
@@ -319,6 +367,7 @@ namespace OMSettings
                 txtScreen.Text = TmpZone.Screen.ToString();
                 txtAudioDevice.Text = TmpZone.AudioDeviceName;
                 txtID.Text = TmpZone.ID.ToString();
+                txtAllowedScreens.Text = TmpZone.AllowedScreens;
 
                 // List subzones
                 if (TmpZone.SubZones.Count > 0)
@@ -339,6 +388,7 @@ namespace OMSettings
                 txtAudioDevice.Text = Host.GetAudioDeviceDefaultName(); // Default audio device
                 txtSubZones.Text = "";
                 txtID.Text = "";
+                txtAllowedScreens.Text = "";
             }
         }
 
@@ -467,6 +517,8 @@ namespace OMSettings
             txtAudioDevice.BackgroundColor = Color.White;
             OMTextBox txtSubZones = (OMTextBox)sender.Parent[screen, "ZoneDetail_TextBox_SubZones"];
             txtSubZones.BackgroundColor = Color.White;
+            OMTextBox txtAllowedScreens = (OMTextBox)sender.Parent[screen, "ZoneDetail_TextBox_AllowedScreens"];
+            txtAllowedScreens.BackgroundColor = Color.White;
 
             // Only validate data and create new zone if controls aren't disabled
             if (!txtName.Disabled)
@@ -562,6 +614,9 @@ namespace OMSettings
                     // Add any subzones to the new zone
                     foreach (Zone SubZone in SubZones)
                         NewZone.Add(SubZone);
+
+                    // Set allowed activation screens
+                    NewZone.AllowedScreens = txtAllowedScreens.Text;
                 }
                 else
                 {   // Update existing zone
@@ -570,6 +625,7 @@ namespace OMSettings
                     TmpZone.Screen = ZoneScreen;
                     TmpZone.AudioDeviceInstance = AudioDeviceInstance;
                     TmpZone.SubZones.Clear();
+                    TmpZone.AllowedScreens = txtAllowedScreens.Text;
                     // Add any subzones to the zone
                     foreach (Zone SubZone in SubZones)
                         TmpZone.Add(SubZone);
@@ -726,7 +782,29 @@ namespace OMSettings
             if (dialogInfo.ShowMsgBox(screen) == buttons.No)
                 return;
 
-            Host.ZoneHandler.SetActiveZone(SelectedScreen, zone);
+            if (!Host.ZoneHandler.SetActiveZone(SelectedScreen, zone))
+            {
+                if (!zone.CanZoneBeActivated(SelectedScreen))
+                {   // Zone doesnt allowed to be activated
+                    dialog dialogWarning = new OpenMobile.helperFunctions.Forms.dialog();
+                    dialogWarning.Header = "Unable to activate zone!";
+                    dialogWarning.Text = String.Format("The zone {0} can't be activated on screen {1}! It can only be activated on screens: {2}", zone.Name, SelectedScreen, zone.AllowedScreens.Replace('|',','));
+                    dialogWarning.Icon = icons.Error;
+                    dialogWarning.Button = buttons.OK;
+                    dialogWarning.ShowMsgBox(screen);
+                    return;
+                }
+                else
+                {   // Other failure
+                    dialog dialogWarning = new OpenMobile.helperFunctions.Forms.dialog();
+                    dialogWarning.Header = "Unable to activate zone!";
+                    dialogWarning.Text = "Some error occured while activating the zone. Please check debug log for information.";
+                    dialogWarning.Icon = icons.Error;
+                    dialogWarning.Button = buttons.OK;
+                    dialogWarning.ShowMsgBox(screen);
+                    return;
+                }
+            }
         }
 
         static private MediaEvent MediaEvents = new MediaEvent(Host_OnMediaEvent);
