@@ -55,6 +55,15 @@ namespace OpenMobile.Zones
             }
         }
 
+        /// <summary>
+        /// List of available zones (Read only)
+        /// </summary>
+        public List<Zone> GetAvailableZones(int screen)
+        {
+            return _Zones.FindAll(x => x.CanZoneBeActivated(screen));
+        }
+
+
         private int[] _ActiveZones = null; 
 
         /// <summary>
@@ -138,7 +147,7 @@ namespace OpenMobile.Zones
                 return null;
             return this[_ActiveZones[Screen]];
         }
-        
+
         /// <summary>
         /// Sets the active zone for a screen
         /// </summary>
@@ -148,6 +157,10 @@ namespace OpenMobile.Zones
         public bool SetActiveZone(int Screen, Zone zone)
         {
             if ((Screen < 0) && (Screen > BuiltInComponents.Host.ScreenCount))
+                return false;
+
+            // Does the zone allow us to activate it on this screen?
+            if (!zone.CanZoneBeActivated(Screen))
                 return false;
 
             _ActiveZones[Screen] = zone.ID;
@@ -168,7 +181,7 @@ namespace OpenMobile.Zones
             Zone z = this[ZoneID];
             if (z != null)
                 return SetActiveZone(Screen, z);
-            return true;
+            return false;
         }
 
         /// <summary>

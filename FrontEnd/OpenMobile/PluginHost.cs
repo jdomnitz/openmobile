@@ -293,7 +293,7 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// Gets the current playlist for a specific audio device (instance)
+        /// Gets the current playlist for a specific screen
         /// </summary>
         /// <param name="instance">Audio device</param>
         /// <returns></returns>
@@ -302,7 +302,7 @@ namespace OpenMobile
             return getPlaylist(ZoneHandler.GetZone(Screen));
         }
         /// <summary>
-        /// Gets the current playlist for a specific audio device (instance)
+        /// Gets the current playlist for a specific zone
         /// </summary>
         /// <param name="instance">Audio device</param>
         /// <returns></returns>
@@ -312,9 +312,19 @@ namespace OpenMobile
                 return null;
             return queued[zone.AudioDeviceInstance];
         }
-
         /// <summary>
-        /// Activates a playlist for a specific Zone
+        /// Gets the current playlist for a specific audio device (instance)
+        /// </summary>
+        /// <param name="instance">Audio device</param>
+        /// <returns></returns>
+        public List<mediaInfo> getPlaylistForAudioDeviceInstance(int AudioDeviceInstance)
+        {
+            if (AudioDeviceInstance < 0 | AudioDeviceInstance > queued.Length)
+                return null;
+            return queued[AudioDeviceInstance];
+        }
+        /// <summary>
+        /// Activates a playlist for a specific screen
         /// </summary>
         /// <param name="source">List to activate</param>
         /// <param name="Zone">Zone</param>
@@ -343,6 +353,27 @@ namespace OpenMobile
             SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, zone, string.Empty); });
             return true;
         }
+        /// <summary>
+        /// Activates a playlist for a specific Zone
+        /// </summary>
+        /// <param name="source">List to activate</param>
+        /// <param name="Zone">Zone</param>
+        /// <returns></returns>
+        public bool setPlaylistForAudioDeviceInstance(List<mediaInfo> source, int AudioDeviceInstance)
+        {
+            if (AudioDeviceInstance < 0 | AudioDeviceInstance > queued.Length)
+                return false;
+            if (source == null)
+                return false;
+            currentPosition[AudioDeviceInstance] = -1;
+            queued[AudioDeviceInstance].Clear();
+            queued[AudioDeviceInstance].AddRange(source.GetRange(0, source.Count));
+            //if (queued[AudioDeviceInstance].Count > 0)
+            //    generateNext(zone);
+            //SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, zone, string.Empty); });
+            return true;
+        }
+
 
         /// <summary>
         /// Appends a playlist to the current playlist for a specific Zone
@@ -384,8 +415,8 @@ namespace OpenMobile
                 // TODO: ReEnable PlayList load and save
                 for (int i = 0; i < AudioDeviceCount; i++)
                 {
-                    Playlist.writePlaylistToDB(this, "Current" + i.ToString(), getPlaylist(i));
-                    s.setSetting("Media.Instance" + i.ToString() + ".Random", getRandom(i).ToString());
+                    Playlist.writePlaylistToDB(this, "Current" + i.ToString(), getPlaylistForAudioDeviceInstance(i));
+                    s.setSetting("Media.Instance" + i.ToString() + ".Random", getRandomForAudioDeviceInstance(i).ToString());
                 }
             }
         }
@@ -402,9 +433,9 @@ namespace OpenMobile
                 // TODO: ReEnable PlayList load and save
                 for (int i = 0; i < AudioDeviceCount; i++)
                 {
-                    setPlaylist(Playlist.readPlaylistFromDB(this, "Current" + i.ToString(), dbname), i);
+                    setPlaylistForAudioDeviceInstance(Playlist.readPlaylistFromDB(this, "Current" + i.ToString(), dbname), i);
                     if (bool.TryParse(s.getSetting("Media.Instance" + i.ToString() + ".Random"), out res))
-                        setRandom(i, res);
+                        setRandomForAudioDeviceInstance(i, res);
                 }
             }
         }
@@ -2251,6 +2282,22 @@ namespace OpenMobile
                 random = new bool[_AudioDeviceCount];
             return random[zone.AudioDeviceInstance];
         }
+        /// <summary>
+        /// Gets the random state for a given AV player instance
+        /// </summary>
+        /// <param name="instance">AV Player instance</param>
+        /// <returns></returns>
+        public bool getRandomForAudioDeviceInstance(int AudioDeviceInstance)
+        {
+            if (_AudioDeviceCount == -1)
+                return false;
+            if ((AudioDeviceInstance < 0) || (AudioDeviceInstance >= _AudioDeviceCount))
+                return false;
+            if (random == null)
+                random = new bool[_AudioDeviceCount];
+            return random[AudioDeviceInstance];
+        }
+
 
         /// <summary>
         /// Sets the random state for a given AV player instance
@@ -2288,6 +2335,33 @@ namespace OpenMobile
                 else
                     raiseMediaEvent(eFunction.RandomChanged, zone, "Disabled");
                 generateNext(zone);
+            }
+            return true;
+        }
+        /// <summary>
+        /// Sets the random state for a given AV player instance
+        /// </summary>
+        /// <param name="instance">AV Player instance</param>
+        /// <param name="value">random state</param>
+        /// <returns></returns>
+        public bool setRandomForAudioDeviceInstance(int AudioDeviceInstance, bool value)
+        {
+            if (_AudioDeviceCount == -1)
+                return false;
+            if ((AudioDeviceInstance < 0) || (AudioDeviceInstance >= _AudioDeviceCount))
+                return false;
+            if (random == null)
+                random = new bool[_AudioDeviceCount];
+
+            // Only send events and update if the state was actually changed
+            if (value != random[AudioDeviceInstance])
+            {
+                random[AudioDeviceInstance] = value;
+                //if (value)
+                //    raiseMediaEvent(eFunction.RandomChanged, zone, "Enabled");
+                //else
+                //    raiseMediaEvent(eFunction.RandomChanged, zone, "Disabled");
+                //generateNext(zone);
             }
             return true;
         }
