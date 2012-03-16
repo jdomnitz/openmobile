@@ -291,8 +291,10 @@ namespace OpenMobile.helperFunctions
                 // Connect to system events (to detect "goback" event)
                 SystemEvent SysEv = new SystemEvent(theHost_OnSystemEvent);
                 KeyboardEvent KeyEv = new KeyboardEvent(Host_OnKeyPress);
+                GestureEvent GestureEv = new GestureEvent(Host_OnGesture);
                 BuiltInComponents.Host.OnSystemEvent += SysEv;
                 BuiltInComponents.Host.OnKeyPress += KeyEv;
+                BuiltInComponents.Host.OnGesture += GestureEv;
 
                 // Show the panel
                 if (BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), "", Panel.Name) == false)
@@ -305,6 +307,7 @@ namespace OpenMobile.helperFunctions
                 // Disconnect events
                 BuiltInComponents.Host.OnSystemEvent -= SysEv;
                 BuiltInComponents.Host.OnKeyPress -= KeyEv;
+                BuiltInComponents.Host.OnGesture -= GestureEv;
 
                 // Remove menu and clean up
                 //BuiltInComponents.Host.execute(eFunction.TransitionFromPanel, screen.ToString(), "", Panel.Name);
@@ -313,6 +316,25 @@ namespace OpenMobile.helperFunctions
                 BuiltInComponents.Panels.unloadPanel(Panel.Name);
 
                 return Result;
+            }
+
+            bool Host_OnGesture(int screen, string character, string pluginName, string panelName, ref bool handled)
+            {
+                if (panelName.Contains(PanelName))
+                {
+                    // Pass keypress on to the OSK plugin along with the current panel
+                    OSKOnGestureData Data = new OSKOnGestureData();
+                    Data.Character = character;
+                    Data.Screen = screen;
+                    Data.Panel = BuiltInComponents.Panels[Screen, PanelName];
+                    if (!BuiltInComponents.Host.sendMessage<OSKOnGestureData>(Handler, "OpenMobile.helperFunctions.OSK", "ongesture", ref Data))
+                    {   // Log this error to the debug log
+                        BuiltInComponents.Host.DebugMsg("Unable to send gesture event to OSK, plugin " + Handler + " not available");
+                        return false;
+                    }
+                    return true;
+                }
+                return false;
             }
 
             bool Host_OnKeyPress(eKeypressType type, KeyboardKeyEventArgs arg, ref bool handled)
@@ -337,6 +359,8 @@ namespace OpenMobile.helperFunctions
                 return Data.KeyHandled;
             }
 
+            
+
             /// <summary>
             /// Close the dialog
             /// </summary>
@@ -356,27 +380,6 @@ namespace OpenMobile.helperFunctions
                         CloseOSK.Set();
                     }
                 }
-
-                else if (function == eFunction.gesture)
-                {
-                    if (arg3.Contains(PanelName))
-                    {
-                        // Pass keypress on to the OSK plugin along with the current panel
-                        OSKOnGestureData Data = new OSKOnGestureData();
-                        Data.Character = arg2;
-                        int screen = 0;
-                        if (!int.TryParse(arg1, out screen))
-                            return;
-                        Data.Screen = screen;
-                        Data.Panel = BuiltInComponents.Panels[Screen, PanelName];
-                        if (!BuiltInComponents.Host.sendMessage<OSKOnGestureData>(Handler, "OpenMobile.helperFunctions.OSK", "ongesture", ref Data))
-                        {   // Log this error to the debug log
-                            BuiltInComponents.Host.DebugMsg("Unable to send gesture event to OSK, plugin " + Handler + " not available");
-                            return;
-                        }
-                    }
-                }
-
             }
         }
 }

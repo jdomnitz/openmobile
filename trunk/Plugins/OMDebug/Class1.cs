@@ -309,7 +309,6 @@ namespace OMDebug
             List<string> Texts = new List<string>();
             
             if ((function == eFunction.userInputReady)
-                || (function == eFunction.gesture)
                 || (function == eFunction.multiTouchGesture))
                 return; //Protect Users Privacy - Potentially contains password info
 

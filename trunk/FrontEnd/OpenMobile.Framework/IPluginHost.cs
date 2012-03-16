@@ -48,6 +48,16 @@ namespace OpenMobile.Plugin
     /// <param name="arg"></param>
     public delegate bool KeyboardEvent(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg, ref bool handled);
     /// <summary>
+    /// Triggered when a gesture is raised
+    /// </summary>
+    /// <param name="screen"></param>
+    /// <param name="character"></param>
+    /// <param name="pluginName"></param>
+    /// <param name="panelName"></param>
+    /// <param name="handled"></param>
+    /// <returns></returns>
+    public delegate bool GestureEvent(int screen, string character, string pluginName, string panelName, ref bool handled);
+    /// <summary>
     /// A system power change event
     /// </summary>
     /// <param name="type"></param>
@@ -376,6 +386,11 @@ namespace OpenMobile.Plugin
         /// A storage media detection event
         /// </summary>
         event StorageEvent OnStorageEvent;
+        /// <summary>
+        /// Triggered when a gesture happens
+        /// <para>Please note that this event is called in a last in first called manner</para>
+        /// </summary>
+        event GestureEvent OnGesture;
         /// <summary>
         /// Triggered when a keyboard key is pressed
         /// </summary>

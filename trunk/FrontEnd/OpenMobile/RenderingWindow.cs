@@ -893,7 +893,8 @@ namespace OpenMobile
                     rec.Initialize();
                     for (int i = 0; i < currentGesture.Count; i++)
                         rec.AddPoint(currentGesture[i], false);
-                    Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
+                    //Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
+                    Core.theHost.raiseGestureEvent(screen, rec.Recognize());
                     rParam.currentMode = eModeType.Highlighted;
                     MouseMove(sender, new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
                 }
