@@ -1963,6 +1963,8 @@ namespace OpenMobile
                     return false;
 
                 // A gesture has been recognized
+                // TODO_: Remove this
+                /*
                 case eFunction.gesture:
                     if (int.TryParse(arg1, out ret) == true)
                     {
@@ -1978,6 +1980,7 @@ namespace OpenMobile
                         }
                     }
                     return false;
+                    */
 
                 // A multitouch gesture has been recognized
                 case eFunction.multiTouchGesture:
@@ -2516,6 +2519,7 @@ namespace OpenMobile
         public event NavigationEvent OnNavigationEvent;
         public event KeyboardEvent OnKeyPress;
         public event WirelessEvent OnWirelessEvent;
+        public event GestureEvent OnGesture;
 
         /// <summary>
         /// Raises systemwide events
@@ -2644,11 +2648,63 @@ namespace OpenMobile
             try
             {
                 if (OnKeyPress != null)
-                    OnKeyPress(type, arg, ref Handled);
+                {
+                    // Manually call each delegate, if one handles the keypress then the rest will be blocked
+                    foreach (KeyboardEvent d in OnKeyPress.GetInvocationList())
+                    {
+                        if (d.Invoke(type, arg, ref Handled))
+                            Handled = true;
+                        if (Handled)
+                            break;
+                    }
+                }
                 return Handled;
             }
             catch (Exception e) { SandboxedThread.Handle(e); }
             return false;
+        }
+
+        /// <summary>
+        /// Raises systemwide gesture events
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        internal void raiseGestureEvent(int screen, string character)
+        {
+            if (String.IsNullOrEmpty(character))
+                return;
+
+            string name = history.CurrentItem(screen).pluginName;
+            string panel = history.CurrentItem(screen).panelName;
+
+            System.Diagnostics.Debug.WriteLine(String.Format("raiseGestureEvent( screen: {0}, character: {1}, pluginName:{2}, panelName:{3}", screen, character, name, panel ));
+
+            bool Handled = false;
+            try
+            {
+                if (OnGesture != null)
+                {
+                    SandboxedThread.Asynchronous(delegate()
+                    {   // Manually call each delegate, if one handles the event then the rest will be blocked
+                        Delegate[] InvocationList = OnGesture.GetInvocationList();
+                        for (int i = InvocationList.Length-1; i >= 0; i--)
+                        {
+                            GestureEvent d = InvocationList[i] as GestureEvent;
+                            if (d != null)
+                            {
+                                if (d.Invoke(screen, character, name, panel, ref Handled))
+                                    Handled = true;
+                                if (Handled)
+                                    break;
+                            }
+                        }
+                    });
+                }
+                return;
+            }
+            catch (Exception e) { SandboxedThread.Handle(e); }
+            return;
         }
 
          /// <summary>

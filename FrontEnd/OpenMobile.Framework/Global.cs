@@ -1235,7 +1235,7 @@ namespace OpenMobile
         /// <para>Arg2: Character</para>
         /// <para>Arg3: Plugin|Panel (The name of the plugin with the top most panel, Plugin and panel is separated with |)</para>
         /// </summary>
-        gesture = 100,
+        //gesture = 100,
         /// <summary>
         /// A multi-touch gesture has been recognized
         /// <para>---------------------------------------</para>

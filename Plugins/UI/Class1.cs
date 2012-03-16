@@ -436,6 +436,7 @@ namespace OpenMobile
 
             theHost.OnMediaEvent += theHost_OnMediaEvent;
             theHost.OnSystemEvent += theHost_OnSystemEvent;
+            theHost.OnGesture += new GestureEvent(theHost_OnGesture);
 
             return eLoadStatus.LoadSuccessful;
         }
@@ -1469,68 +1470,7 @@ namespace OpenMobile
 
                 #endregion
             }
-
-            else if (function == eFunction.gesture)
-            {
-                #region gesture
-
-                // TODO: Remove requirement for specific skin names, move defaults to database
-                if ((arg3 != "OSK") && (arg3 != "Navigation") && (arg3 != "Slideshow"))
-                {
-                    switch (arg2)
-                    {
-                        case "M":
-                            theHost.execute(eFunction.TransitionFromAny, arg1);
-                            if (!theHost.execute(eFunction.TransitionToPanel, arg1, "NewMedia"))
-                            {
-                                if (!theHost.execute(eFunction.TransitionToPanel, arg1, "Media"))
-                                    theHost.execute(eFunction.CancelTransition, arg1);
-                                else
-                                    theHost.execute(eFunction.ExecuteTransition, arg1);
-                            }
-                            else
-                                theHost.execute(eFunction.ExecuteTransition, arg1);
-                            break;
-                        case "R":
-                            theHost.execute(eFunction.TransitionFromAny, arg1);
-                            if (!theHost.execute(eFunction.TransitionToPanel, arg1, "Radio"))
-                                theHost.execute(eFunction.CancelTransition, arg1);
-                            else
-                                theHost.execute(eFunction.ExecuteTransition, arg1);
-                            break;
-                        case "H":
-                            theHost.execute(eFunction.TransitionFromAny, arg1);
-                            theHost.execute(eFunction.TransitionToPanel, arg1, "MainMenu");
-                            theHost.execute(eFunction.ExecuteTransition, arg1);
-                            break;
-                        case "N":
-                            theHost.execute(eFunction.TransitionFromAny, arg1);
-                            if (!theHost.execute(eFunction.TransitionToPanel, arg1, "Navigation"))
-                            {
-                                if (!theHost.execute(eFunction.TransitionToPanel, arg1, "ExternalNav"))
-                                    theHost.execute(eFunction.CancelTransition, arg1);
-                                else
-                                    theHost.execute(eFunction.ExecuteTransition, arg1);
-                            }
-
-                            else
-                                theHost.execute(eFunction.ExecuteTransition, arg1);
-                            break;
-                        case " ":
-                            skipForwardButton_OnClick(null, int.Parse(arg1));
-                            break;
-                        case "I":
-                            playButton_OnClick(null, int.Parse(arg1));
-                            break;
-                        case "back":
-                            skipBackwardButton_OnClick(null, int.Parse(arg1));
-                            break;
-                    }
-                }
-
-                #endregion
-            }
-                
+               
             else if (function == eFunction.pluginLoadingComplete)
             {
                 #region pluginLoadingComplete
@@ -1867,6 +1807,61 @@ namespace OpenMobile
 
                 #endregion
             }
+
+        }
+
+        bool theHost_OnGesture(int screen, string character, string pluginName, string panelName, ref bool handled)
+        {
+            switch (character)
+            {
+                case "M":
+                    theHost.execute(eFunction.TransitionFromAny, screen.ToString());
+                    if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "NewMedia"))
+                    {
+                        if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Media"))
+                            theHost.execute(eFunction.CancelTransition, screen.ToString());
+                        else
+                            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                    }
+                    else
+                        theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                    return true;
+                case "R":
+                    theHost.execute(eFunction.TransitionFromAny, screen.ToString());
+                    if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Radio"))
+                        theHost.execute(eFunction.CancelTransition, screen.ToString());
+                    else
+                        theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                    return true;
+                case "H":
+                    theHost.execute(eFunction.TransitionFromAny, screen.ToString());
+                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
+                    theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                    return true;
+                case "N":
+                    theHost.execute(eFunction.TransitionFromAny, screen.ToString());
+                    if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Navigation"))
+                    {
+                        if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "ExternalNav"))
+                            theHost.execute(eFunction.CancelTransition, screen.ToString());
+                        else
+                            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                    }
+
+                    else
+                        theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                    return true;
+                case " ":
+                    skipForwardButton_OnClick(null, int.Parse(screen.ToString()));
+                    return true;
+                case "I":
+                    playButton_OnClick(null, int.Parse(screen.ToString()));
+                    return true;
+                case "back":
+                    skipBackwardButton_OnClick(null, int.Parse(screen.ToString()));
+                    return true;
+            }
+            return false;
 
         }
 

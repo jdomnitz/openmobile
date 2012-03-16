@@ -141,7 +141,7 @@ namespace OpenMobile
                     ((OMTextBox)numKeyboard[i]).Flags = textboxFlags.NumericOnly;
             //Here we hook the keyboard in case characters are typed
             theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
-            theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
+            theHost.OnGesture += new GestureEvent(theHost_OnGesture);
             //And then load the panel into the screen manager
             manager.loadPanel(regularKeyboard);
             manager.loadPanel(symKeyboard);
@@ -150,20 +150,20 @@ namespace OpenMobile
             return eLoadStatus.LoadSuccessful;
         }
 
-        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        bool theHost_OnGesture(int screen, string character, string pluginName, string panelName, ref bool handled)
         {
-            if (function == eFunction.gesture)
+            if (panelName == "OSK")
             {
-                if (arg3 == "OSK")
-                {
-                    OMTextBox tb = (OMTextBox)manager[int.Parse(arg1)]["Text"];
-                    if (arg2=="back")
-                        tb.Text=tb.Text.Remove(tb.Text.Length-1);
-                    else
-                        tb.Text+=arg2;
-                }
+                OMTextBox tb = (OMTextBox)manager[screen]["Text"];
+                if (character == "back")
+                    tb.Text = tb.Text.Remove(tb.Text.Length - 1);
+                else
+                    tb.Text += character;
+                return true;
             }
+            return false;
         }
+
 
         //Add physical keyboard input to the textbox
         bool theHost_OnKeyPress(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg, ref bool handled)
