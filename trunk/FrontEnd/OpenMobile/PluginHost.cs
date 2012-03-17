@@ -2131,6 +2131,10 @@ namespace OpenMobile
                             return false;
                         if (panel.Priority > ePriority.Urgent) //prevent panels from entering the security layer
                             panel.Priority = ePriority.Urgent;
+
+                        // Update reference to last owner of panel
+                        panel.OwnerPlugin = getPluginByName(arg2);
+
                         lock (Core.RenderingWindows[ret])
                         {
                             Core.RenderingWindows[ret].TransitionInPanel(panel);
@@ -2360,11 +2364,17 @@ namespace OpenMobile
             if (value != random[AudioDeviceInstance])
             {
                 random[AudioDeviceInstance] = value;
-                //if (value)
-                //    raiseMediaEvent(eFunction.RandomChanged, zone, "Enabled");
-                //else
-                //    raiseMediaEvent(eFunction.RandomChanged, zone, "Disabled");
-                //generateNext(zone);
+
+                // Raise event zones using this audio instance
+                Zone zone = ZoneHandler.BaseZones.Find(x => x.AudioDeviceInstance == AudioDeviceInstance);
+                if (zone != null)
+                {
+                    if (value)
+                        raiseMediaEvent(eFunction.RandomChanged, zone, "Enabled");
+                    else
+                        raiseMediaEvent(eFunction.RandomChanged, zone, "Disabled");
+                    generateNext(zone);
+                }
             }
             return true;
         }
@@ -2670,15 +2680,37 @@ namespace OpenMobile
         /// <param name="type"></param>
         /// <param name="arg"></param>
         /// <returns></returns>
-        internal void raiseGestureEvent(int screen, string character)
+        internal void raiseGestureEvent(int screen, string character, OMPanel panel, OMControl highlightedControl)
         {
             if (String.IsNullOrEmpty(character))
                 return;
+            
+            string PluginName = "";
+            string PanelName = "";
 
-            string name = history.CurrentItem(screen).pluginName;
-            string panel = history.CurrentItem(screen).panelName;
+            // Get panel and plugin name
+            if (highlightedControl != null)
+            {
+                PanelName = highlightedControl.Parent.Name;
+                if (highlightedControl.Parent.OwnerPlugin != null)
+                    PluginName = highlightedControl.Parent.OwnerPlugin.pluginName;
+            }
+            else
+            {
+                if (panel != null)
+                {
+                    PanelName = panel.Name;
+                    PluginName = panel.OwnerPlugin.pluginName;
+                }
+                else
+                {
+                    // This is the backup method of getting the data
+                    PanelName = history.CurrentItem(screen).panelName;
+                    PluginName = history.CurrentItem(screen).pluginName;
+                }
+            }
 
-            System.Diagnostics.Debug.WriteLine(String.Format("raiseGestureEvent( screen: {0}, character: {1}, pluginName:{2}, panelName:{3}", screen, character, name, panel ));
+            System.Diagnostics.Debug.WriteLine(String.Format("raiseGestureEvent( screen: {0}, character: {1}, pluginName:{2}, panelName:{3}", screen, character, PluginName, PanelName));
 
             bool Handled = false;
             try
@@ -2693,7 +2725,7 @@ namespace OpenMobile
                             GestureEvent d = InvocationList[i] as GestureEvent;
                             if (d != null)
                             {
-                                if (d.Invoke(screen, character, name, panel, ref Handled))
+                                if (d.Invoke(screen, character, PluginName, PanelName, ref Handled))
                                     Handled = true;
                                 if (Handled)
                                     break;
