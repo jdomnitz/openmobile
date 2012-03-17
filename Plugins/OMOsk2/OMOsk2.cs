@@ -732,6 +732,14 @@ namespace OMOsk2
 
         bool OSK_OnKeyPress(OMPanel panel, int screen, eKeypressType type, KeyboardKeyEventArgs arg)
         {
+            // Handle esc button (this is done on key up to prevent it from exiting the application)
+            if (type == eKeypressType.KeyUp)
+                if (arg.Key == Key.Escape)
+                {
+                    ((OMButton)panel["OSK_Button_Cancel"]).clickMe(screen);
+                    return true;
+                }
+            
             if (type != eKeypressType.KeyDown)
                 return false;
             if (panel == null)
@@ -749,7 +757,11 @@ namespace OMOsk2
                     }
                     return true;
                 case Key.Escape:
+                    return true;
                 case Key.Enter:
+                    {
+                        ((OMButton)panel["OSK_Button_OK"]).clickMe(screen);
+                    }
                     return true;
                 default:
                     if (!String.IsNullOrEmpty(arg.Character))

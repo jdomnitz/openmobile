@@ -599,8 +599,8 @@ namespace OpenMobile
                 {
                     if (highlighted != null)
                     {
-                        // Added support of IThrow interface
-                        ThrowStarted = false;  // Reset throw data (Added by Borte)
+                        // IThrow interface
+                        ThrowStarted = false; 
                         if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
                         {
                             //Console.WriteLine(string.Format("RenderingWindow_MouseMove.MouseThrow: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
@@ -611,7 +611,6 @@ namespace OpenMobile
                             ThrowRelativeDistance = e.Location;
                             tmrLongClick.Enabled = false;
                         }
-                        // End of code added by Borte
                     }
                 }
             }
@@ -628,6 +627,7 @@ namespace OpenMobile
                     }
                     //Console.WriteLine(string.Format("RenderingWindow_MouseMove.currentGesture: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
                     currentGesture.Add(new Point(e.X / widthScale, e.Y / heightScale));
+                    //Console.WriteLine(String.Format("RenderingWindow_MouseMove.currentGesture: highlighted{0}", highlighted));
                     Invalidate();
                     if (lastClick != null)
                         lastClick.Mode = eModeType.Highlighted;
@@ -894,7 +894,7 @@ namespace OpenMobile
                     for (int i = 0; i < currentGesture.Count; i++)
                         rec.AddPoint(currentGesture[i], false);
                     //Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
-                    Core.theHost.raiseGestureEvent(screen, rec.Recognize());
+                    Core.theHost.raiseGestureEvent(screen, rec.Recognize(), backgroundQueue[backgroundQueue.Count-1], highlighted);
                     rParam.currentMode = eModeType.Highlighted;
                     MouseMove(sender, new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
                 }

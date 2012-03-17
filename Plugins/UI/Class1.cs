@@ -465,7 +465,7 @@ namespace OpenMobile
             MenuPopup Zones = new MenuPopup("Select a zone", MenuPopup.ReturnTypes.Tag);
 
             // Add zones to the list (Excluding if already present in the sender textbox)
-            foreach (Zone zone in theHost.ZoneHandler.GetAvailableZones(screen))
+            foreach (Zone zone in theHost.ZoneHandler.GetAvailableZonesForScreen(screen))
             {
                 // Add zone to list
                 OMListItem ZoneItem = new OMListItem(zone.Name, zone as object);

@@ -40,6 +40,11 @@ namespace OpenMobile.Controls
         public event refreshNeeded UpdateThisControl;
 
         /// <summary>
+        /// The plugin that last transitioned in this panel
+        /// </summary>
+        public OpenMobile.Plugin.IBasePlugin OwnerPlugin { get; set; }            
+
+        /// <summary>
         /// Returns the OMControl at the given index
         /// <para>OBSOLOTE, Use named access instead!</para>
         /// </summary>
