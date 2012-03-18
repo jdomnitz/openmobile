@@ -155,7 +155,23 @@ namespace OpenMobile.helperFunctions.Graphics
     {
 
         /// <summary>
-        /// The different data that the menu can return
+        /// The different types of buttons
+        /// </summary>
+        public enum GraphicStyles
+        {
+            /// <summary>
+            /// Basic style button style
+            /// </summary>
+            BaseStyle,
+
+            /// <summary>
+            /// Base style 1 button style
+            /// </summary>
+            Style1
+        }
+        
+        /// <summary>
+        /// The different images that can be returned
         /// </summary>
         public enum ImageTypes
         {
@@ -192,10 +208,15 @@ namespace OpenMobile.helperFunctions.Graphics
                 BackgroundFocusSize = 0.5F;
 
                 // Default colors are read from the OM system setting (SkinFocusColor)
-                this.BackgroundFocusColor = StoredData.SystemSettings.SkinFocusColor;
+                this.BackgroundFocusColor = BuiltInComponents.SystemSettings.SkinFocusColor;
                 this.ForegroundFocusColor = this.BackgroundFocusColor;
+                this.TextColor = BuiltInComponents.SystemSettings.SkinTextColor;
             }
-            
+
+            /// <summary>
+            /// Button type to generate
+            /// </summary>
+            public GraphicStyles Style { get; set; }
             /// <summary>
             /// Height of graphic
             /// </summary>
@@ -291,6 +312,22 @@ namespace OpenMobile.helperFunctions.Graphics
         /// <param name="Width"></param>
         /// <param name="Height"></param>
         /// <param name="ImageType"></param>
+        /// <returns></returns>
+        public static OImage GetImage(int Width, int Height, ImageTypes ImageType, GraphicStyles Style)
+        {
+            GraphicData gd = new GraphicData();
+            gd.Width = Width;
+            gd.Height = Height;
+            gd.ImageType = ImageType;
+            gd.Style = Style;
+            return GetImage(gd, "OMGraphics");
+        }
+        /// <summary>
+        /// Gets a image of the requested type and the requested width and height using the default handler (OMGraphics)
+        /// </summary>
+        /// <param name="Width"></param>
+        /// <param name="Height"></param>
+        /// <param name="ImageType"></param>
         /// <param name="Icon"></param>
         /// <param name="Text"></param>
         /// <returns></returns>
@@ -302,6 +339,26 @@ namespace OpenMobile.helperFunctions.Graphics
             gd.ImageType = ImageType;
             gd.Icon = Icon;
             gd.Text = Text;
+            return GetImage(gd, "OMGraphics");
+        }
+        /// <summary>
+        /// Gets a image of the requested type and the requested width and height using the default handler (OMGraphics)
+        /// </summary>
+        /// <param name="Width"></param>
+        /// <param name="Height"></param>
+        /// <param name="ImageType"></param>
+        /// <param name="Icon"></param>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public static OImage GetImage(int Width, int Height, ImageTypes ImageType, string Icon, string Text, GraphicStyles Style)
+        {
+            GraphicData gd = new GraphicData();
+            gd.Width = Width;
+            gd.Height = Height;
+            gd.ImageType = ImageType;
+            gd.Icon = Icon;
+            gd.Text = Text;
+            gd.Style = Style;
             return GetImage(gd, "OMGraphics");
         }
         /// <summary>
@@ -373,7 +430,8 @@ namespace OpenMobile.helperFunctions.Graphics
                 ShowShadow = true;
 
                 // Default colors are read from the OM system setting (SkinFocusColor)
-                this.ShadowColor = StoredData.SystemSettings.SkinFocusColor;
+                this.ShadowColor = BuiltInComponents.SystemSettings.SkinFocusColor;
+                this.TextColor = BuiltInComponents.SystemSettings.SkinTextColor;
             }
 
             /// <summary>

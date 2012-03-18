@@ -190,31 +190,30 @@ namespace ControlDemo
 
         // Popup menu items
         OMListItem ListItem = new OMListItem("New", "mnuItemNewZone" as object);
-        ListItem.image = OImage.FromFont(50, 50, "+", new Font(Font.Arial, 40F), eTextFormat.Outline, Alignment.CenterCenter, Color.Gray, Color.Gray);
+        ListItem.image = OImage.FromFont(50, 50, "+", new Font(Font.Arial, 40F), eTextFormat.Outline, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinTextColor);
         PopupMenu.AddMenuItem(ListItem);
 
         OMListItem ListItem2 = new OMListItem("Edit", "mnuItemEditZone" as object);
-        ListItem2.image = OImage.FromWebdingsFont(50, 50, "@", Color.Gray);
+        ListItem2.image = OImage.FromWebdingsFont(50, 50, "@", BuiltInComponents.SystemSettings.SkinTextColor);
         PopupMenu.AddMenuItem(ListItem2);
 
         OMListItem ListItem3 = new OMListItem("Remove", "mnuItemRemoveZone" as object);
-        ListItem3.image = OImage.FromWebdingsFont(50, 50, "r", Color.Gray);
+        ListItem3.image = OImage.FromWebdingsFont(50, 50, "r", BuiltInComponents.SystemSettings.SkinTextColor);
         PopupMenu.AddMenuItem(ListItem3);
 
         OMListItem ListItem4 = new OMListItem("Default", "mnuItemSetDefaultZone" as object);
-        ListItem4.image = OImage.FromWebdingsFont(50, 50, "a", Color.Gray);
+        ListItem4.image = OImage.FromWebdingsFont(50, 50, "a", BuiltInComponents.SystemSettings.SkinTextColor);
         PopupMenu.AddMenuItem(ListItem4);
 
         OMListItem ListItem5 = new OMListItem("Set active", "mnuItemSetActive" as object);
-        ListItem5.image = OImage.FromWebdingsFont(50, 50, "a", Color.Gray);
+        ListItem5.image = OImage.FromWebdingsFont(50, 50, "a", BuiltInComponents.SystemSettings.SkinTextColor);
         PopupMenu.AddMenuItem(ListItem5);
 
         OMListItem ListItem6 = new OMListItem("Restore defaults", "mnuItemRestoreDefaults" as object);
-        ListItem6.image = OImage.FromWebdingsFont(50, 50, "Ó", Color.Gray);
+        ListItem6.image = OImage.FromWebdingsFont(50, 50, "Ó", BuiltInComponents.SystemSettings.SkinTextColor);
         PopupMenu.AddMenuItem(ListItem6);
 
         #endregion
-
 
         // OSK Buttons
         OMButton OSKButton = DefaultControls.GetButton("OSKButton", 650, 165, 300, 90, ">", "Keypad");
@@ -239,6 +238,22 @@ namespace ControlDemo
         btnPopupMenu.OnClick +=new userInteraction(btnPopupMenu_OnClick);
         p.addControl(btnPopupMenu);
 
+
+        OMBasicShape shp = new OMBasicShape("shp",0, 350, 400, 200);
+        shp.Shape = shapes.Rectangle;
+        shp.FillColor = Color.FromArgb(0xFF, 25, 25, 25);
+        shp.BorderSize = 0;
+        p.addControl(shp);
+
+        OMImage TestImg = new OMImage("TestImg", 10, 400);
+        TestImg.FitControlToImage = true;
+        TestImg.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(180, 107, ButtonGraphic.ImageTypes.ButtonBackground, ButtonGraphic.GraphicStyles.Style1));
+        p.addControl(TestImg);
+
+        OMImage TestImg2 = new OMImage("TestImg2", 210, 400);
+        TestImg2.FitControlToImage = true;
+        TestImg2.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(100, 60, ButtonGraphic.ImageTypes.ButtonBackground, ButtonGraphic.GraphicStyles.Style1));
+        p.addControl(TestImg2);
 
         /*
         OMImage TestImg = new OMImage("TestImg", 10, 100);

@@ -155,7 +155,7 @@ namespace OMMenu
                         List_Menu.Background = Color.Silver;
                         List_Menu.ItemColor1 = Color.Black;
                         List_Menu.Font = new Font(Font.GenericSansSerif, DT.FontSize);
-                        List_Menu.Color = Color.White;
+                        //List_Menu.Color = Color.White;
                         List_Menu.HighlightColor = Color.White;
                         //List_Menu.SelectedItemColor1 = Color.DarkBlue;
                         List_Menu.SoftEdgeData.Color1 = Color.Black;

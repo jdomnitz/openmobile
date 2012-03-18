@@ -253,6 +253,8 @@ namespace OpenMobile
             currentPosition = new int[AudioDeviceCount];
             nextPosition = new int[AudioDeviceCount];
 
+            videoPosition = new Rectangle[AudioDeviceCount];
+
             // Start loading playlist data
             SandboxedThread.Asynchronous(loadPlaylists);
         }
@@ -577,7 +579,6 @@ namespace OpenMobile
                         _AudioDeviceCount = AudioDevices.Length;
                     else
                         return -1;
-                    videoPosition = new Rectangle[_AudioDeviceCount];
                 }
                 return _AudioDeviceCount;
             }
@@ -739,6 +740,8 @@ namespace OpenMobile
         {
             if ((Screen < 0) || (Screen >= ScreenCount))
                 return;
+            if (videoPosition == null)
+                return;
             if (videoPosition[Screen] == videoArea)
                 return;
             videoPosition[Screen] = videoArea;
@@ -753,6 +756,8 @@ namespace OpenMobile
         public Rectangle GetVideoPosition(int Screen)
         {
             if ((Screen < 0) || (Screen >= ScreenCount))
+                return Rectangle.Empty;
+            if (videoPosition == null)
                 return Rectangle.Empty;
             return videoPosition[Screen];
         }
@@ -2625,7 +2630,9 @@ namespace OpenMobile
             if (type == eFunction.nextMedia)
                 while ((!execute(eFunction.nextMedia, zone.ToString())) && (queued[zone.AudioDeviceInstance].Count > 1))
                     Thread.Sleep(200);
-            
+
+            #region Internal video playback status
+
             // Set internal status for video playing
             else if (type == eFunction.showVideoWindow)
             {
@@ -2643,6 +2650,8 @@ namespace OpenMobile
                     if (ZoneHandler.GetZone(i) == zone)
                         Core.RenderingWindows[i].VideoPlaying = false;
             }
+
+            #endregion 
         }
 
         /// <summary>

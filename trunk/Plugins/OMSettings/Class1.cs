@@ -62,9 +62,8 @@ namespace OMSettings
             menu.Background = Color.Silver;
             menu.ItemColor1 = Color.Black;
             menu.Font = new Font(Font.GenericSansSerif, 30F);
-            menu.Color = Color.White;
             menu.HighlightColor = Color.White;
-            menu.SelectedItemColor1 = OpenMobile.helperFunctions.StoredData.SystemSettings.SkinFocusColor;
+            menu.SelectedItemColor1 = BuiltInComponents.SystemSettings.SkinFocusColor;
             menu.SoftEdgeData.Color1 = Color.Black;
             menu.SoftEdgeData.Sides[0] = true;
             menu.SoftEdgeData.Sides[1] = false;
@@ -72,7 +71,7 @@ namespace OMSettings
             menu.SoftEdgeData.Sides[3] = false;
             menu.UseSoftEdges = true;
             OMListItem.subItemFormat format=new OMListItem.subItemFormat();
-            format.color=Color.FromArgb(128,Color.White);
+            format.color = Color.FromArgb(128, menu.Color);
             format.font = new Font(Font.GenericSansSerif, 21F);
             menu.Add(new OMListItem("General Settings", "User Interface and System Settings", format, "General Settings"));
             menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords", format, "personal"));
@@ -190,7 +189,6 @@ namespace OMSettings
             lstplugins.Background = Color.Silver;
             lstplugins.ItemColor1 = Color.Black;
             lstplugins.Font = new Font(Font.GenericSansSerif, 30F);
-            lstplugins.Color = Color.White;
             lstplugins.HighlightColor = Color.White;
             lstplugins.OnClick += new userInteraction(lstplugins_OnClick);
             lstplugins.Add(new OMListItem("Loading . . .","",format));
@@ -238,8 +236,6 @@ namespace OMSettings
                 return;
             plugins = (List<IBasePlugin>)o;
             List<Exception> problems = new List<Exception>();
-            OMListItem.subItemFormat format = new OMListItem.subItemFormat();
-            format.color = Color.FromArgb(140, Color.White);
             OMList[] lstplugins = new OMList[theHost.ScreenCount];
             //Get a reference to the list of plugins on each screen
             for (int i = 0; i < theHost.ScreenCount; i++)
@@ -247,6 +243,8 @@ namespace OMSettings
                 lstplugins[i] = (OMList)manager[i, "Plugins"][0];
                 lstplugins[i].Clear();
             }
+            OMListItem.subItemFormat format = new OMListItem.subItemFormat();
+            format.color = Color.FromArgb(140, lstplugins[0].Color);
             //now load the settings for each plugin and add a menu item to the plugin lists
             foreach (IBasePlugin b in plugins)
             {

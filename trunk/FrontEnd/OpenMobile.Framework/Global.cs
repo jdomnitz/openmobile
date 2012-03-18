@@ -1297,28 +1297,38 @@ namespace OpenMobile
         /// <summary>
         /// Used as event only! Indicates a new zone has been added 
         /// <para>---------------------------------------</para>
-        /// <para>Arg1: None</para>
+        /// <para>Arg: None</para>
         /// </summary>
         ZoneAdded,
         /// <summary>
         /// Used as event only! Indicates a zone has been removed
         /// <para>---------------------------------------</para>
-        /// <para>Arg1: None</para>
+        /// <para>Arg: None</para>
         /// </summary>
         ZoneRemoved,
         /// <summary>
         /// Used as event only!
         /// <para>[Event]Indicates the active zones has changed for a screen</para>
         /// <para>---------------------------------------</para>
-        /// <para>Arg1: Screen that was changed</para>
+        /// <para>Arg: Screen that was changed</para>
         /// </summary>
         ZoneSetActive,
         /// <summary>
         /// Used as event only! Indicates a zone has been updated
         /// <para>---------------------------------------</para>
-        /// <para>Arg1: None</para>
+        /// <para>Arg: None</para>
         /// </summary>
         ZoneUpdated,
+        /// <summary>
+        /// Used as event only! Media indexing has completed (NB! This event is not bound to any zone)
+        /// <para>Arg: Name of plugin that completed indexing</para>
+        /// </summary>
+        MediaIndexingCompleted,
+        /// <summary>
+        /// Used as event only! Media database has been cleared (NB! This event is not bound to any zone)
+        /// <para>Arg: Name of plugin that initialized the clearing</para>
+        /// </summary>
+        MediaDBCleared
     }
     /// <summary>
     /// The status of a plugins initialization

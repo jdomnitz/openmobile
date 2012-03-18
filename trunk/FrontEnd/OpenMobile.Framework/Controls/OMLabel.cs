@@ -45,7 +45,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the color of the text
         /// </summary>
-        protected Color color = Color.White;
+        protected Color color = BuiltInComponents.SystemSettings.SkinTextColor;
         /// <summary>
         /// Sets the font of the text
         /// </summary>

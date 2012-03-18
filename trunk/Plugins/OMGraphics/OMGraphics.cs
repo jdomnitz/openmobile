@@ -81,283 +81,437 @@ namespace OMGraphics
                     {
                         // Convert input data to local data object (data sent in is a 
                         ButtonGraphic.GraphicData gd = data as ButtonGraphic.GraphicData;
-                        
-                        #region Create button graphic
-                        System.Drawing.Bitmap bmp = new Bitmap(gd.Width, gd.Height);
-                        using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+
+                        switch (gd.Style)
                         {
-                            switch (gd.ImageType)
-                            {
-                                case ButtonGraphic.ImageTypes.ButtonBackgroundFocused:
-                                case ButtonGraphic.ImageTypes.ButtonBackground:
+                            case ButtonGraphic.GraphicStyles.BaseStyle:
+                            default:
+                                {
+                                    #region Create base style button graphic
+
+                                    System.Drawing.Bitmap bmp = new Bitmap(gd.Width, gd.Height);
+                                    using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
                                     {
-                                        g.SmoothingMode = SmoothingMode.AntiAlias;
-                                        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-
-                                        #region Colors
-
-                                        Color glowColor;
-                                        if (String.IsNullOrEmpty(gd.BackgroundFocusColor.Name) || gd.BackgroundFocusColor.Name == "0")
-                                            glowColor = System.Drawing.Color.FromArgb(0, 0, 255);
-                                        else
-                                            glowColor = gd.BackgroundFocusColor.ToSystemColor();
-
-                                        Color backColor;
-                                        if (String.IsNullOrEmpty(gd.BackgroundColor.Name) || gd.BackgroundColor.Name == "0")
-                                            //backColor = Color.FromArgb(0x7f, System.Drawing.Color.Black);
-                                            backColor = Color.FromArgb(255,System.Drawing.Color.Black);
-                                        else
-                                            backColor = gd.BackgroundColor.ToSystemColor();
-
-                                        Color borderColor;
-                                        if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
-                                            borderColor = System.Drawing.Color.LightGray;
-                                        else
-                                            borderColor = gd.BorderColor.ToSystemColor();
-
-                                        #endregion
-
-                                        // Create outline path
-                                        System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, bmp.Width - 1, bmp.Height - 1);
-                                        GraphicsPath gp = GetPath_RoundedRectangle(g, rect, 30);
-                                        g.SetClip(gp);
-
-                                        #region Draw ButtonBackground
-                                        
-                                        // Draw background
-                                        using (GraphicsPath bb = CreateRoundRectangle(rect, 2))
+                                        switch (gd.ImageType)
                                         {
-                                            using (System.Drawing.Brush br = new System.Drawing.SolidBrush(backColor))
-                                                g.FillPath(br, bb);
-                                        }
-
-                                        System.Drawing.Rectangle rect2 = rect;
-                                        rect2.Height >>= 1;
-                                        rect2.Height++;
-                                        System.Drawing.Color shineColor = System.Drawing.Color.FromArgb(85, 98, 130); // System.Drawing.Color.White;
-                                        using (GraphicsPath bh = CreateTopRoundRectangle(rect2, 2))
-                                        {
-                                            rect2.Height++;
-                                            int opacity = 0x99;
-                                            using (LinearGradientBrush br = new LinearGradientBrush(rect2, System.Drawing.Color.FromArgb(opacity, shineColor), System.Drawing.Color.FromArgb(opacity / 3, shineColor), LinearGradientMode.Vertical))
-                                                g.FillPath(br, bh);
-                                        }
-                                        rect2.Height -= 2;
-
-
-                                        #endregion
-
-                                        if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonBackgroundFocused)
-                                        {
-                                            #region Draw inner glow
-
-                                            System.Drawing.Rectangle rectTop = new System.Drawing.Rectangle(0, 0, rect.Width, rect.Height / 2);
-                                            //System.Drawing.Rectangle rectBottom = new System.Drawing.Rectangle(0, rect.Height / 2, rect.Width, rect.Height / 2);
-                                            System.Drawing.Rectangle rectBottom = new System.Drawing.Rectangle(0, (int)(rect.Height * (1 - gd.BackgroundFocusSize)), rect.Width, (int)(rect.Height * gd.BackgroundFocusSize));
-
-                                            // Draw inner button glow
-
-                                            using (GraphicsPath brad = CreateBottomRadialPath(rectBottom))
-                                            {
-                                                using (PathGradientBrush pgr = new PathGradientBrush(brad))
+                                            case ButtonGraphic.ImageTypes.ButtonBackgroundFocused:
+                                            case ButtonGraphic.ImageTypes.ButtonBackground:
                                                 {
-                                                    unchecked
-                                                    {
-                                                        int opacity = 255;
-                                                        System.Drawing.RectangleF bounds = brad.GetBounds();
-                                                        pgr.CenterPoint = new System.Drawing.PointF((bounds.Left + bounds.Right) / 2f, (bounds.Top + bounds.Bottom) / 2f);
-                                                        pgr.CenterColor = System.Drawing.Color.FromArgb(opacity, glowColor);
-                                                        pgr.SurroundColors = new System.Drawing.Color[] { System.Drawing.Color.FromArgb(0, glowColor) };
-                                                    }
-                                                    g.FillPath(pgr, brad);
-                                                }
-                                            }
+                                                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                                                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                                                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                                            #endregion
-                                        }
+                                                    #region Colors
 
-                                        g.ResetClip();
-                                        
-                                        #region Draw outer border
-
-                                        g.DrawPath(new System.Drawing.Pen(borderColor, 1), gp);
-
-                                        #endregion
-                                    }
-                                    break;
-                                case ButtonGraphic.ImageTypes.ButtonForegroundFocused:
-                                case ButtonGraphic.ImageTypes.ButtonForeground:
-                                    {
-
-                                        g.SmoothingMode = SmoothingMode.AntiAlias;
-                                        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-
-                                        #region Colors
-
-                                        Color glowColor;
-                                        if (String.IsNullOrEmpty(gd.ForegroundFocusColor.Name) || gd.ForegroundFocusColor.Name == "0")
-                                            glowColor = System.Drawing.Color.FromArgb(0, 0, 255);
-                                        else
-                                            glowColor = gd.ForegroundFocusColor.ToSystemColor();
-
-                                        Color iconColor;
-                                        if (String.IsNullOrEmpty(gd.IconColor.Name) || gd.IconColor.Name == "0")
-                                            iconColor = System.Drawing.Color.FromArgb(225, 225, 255);
-                                        else
-                                            iconColor = gd.IconColor.ToSystemColor();
-
-                                        Color textColor;
-                                        if (String.IsNullOrEmpty(gd.TextColor.Name) || gd.TextColor.Name == "0")
-                                            textColor = System.Drawing.Color.LightGray;
-                                        else
-                                            textColor = gd.TextColor.ToSystemColor();
-
-                                        #endregion
-
-                                        System.Drawing.Rectangle rect = new Rectangle(0, 0, 0, 0);
-
-                                        #region Draw Icon
-
-                                        if ((!String.IsNullOrEmpty(gd.Icon)) && String.IsNullOrEmpty(gd.IconImage))
-                                        {
-                                            // Calculate placement (if no text it's centered in graphic)
-                                            rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, (int)((bmp.Width - 1) * 0.33F), bmp.Height - 1);
-                                            if (String.IsNullOrEmpty(gd.Text))
-                                                rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, bmp.Width - 1, bmp.Height - 1);
-                                            
-                                            // Set font format
-                                            StringFormat sf = new StringFormat();
-                                            sf.Alignment = StringAlignment.Center;
-                                            sf.LineAlignment = StringAlignment.Center;
-                                            System.Drawing.Font f = (gd.IconFont.Name == null ? new System.Drawing.Font(OpenMobile.Graphics.Font.Webdings.Name, 76) : new System.Drawing.Font(gd.IconFont.Name, gd.IconFont.Size));
-
-                                            SizeF FSize = g.MeasureString(gd.Icon, f, new SizeF(bmp.Width, bmp.Height), sf);
-                                            // Calculate scaling factor
-                                            float Scale = bmp.Height / FSize.Height;
-
-                                            // Recalculate font based on scaling
-                                            f = new Font(f.Name, f.Size * Scale);
-
-                                            // Check placement data
-                                            if ((gd.IconLocation.X == -1) && (gd.IconLocation.Y == -1))
-                                                gd.IconLocation = new OpenMobile.Graphics.Point(0, 7);
-
-                                            // Wanted scale between font and height is 90 / 76 = 1,184210526315789
-                                            GraphicsPath gpTxt = new GraphicsPath();
-                                            gpTxt.AddString(gd.Icon, f.FontFamily, (int)System.Drawing.FontStyle.Regular, f.Size, rect, sf);
-
-                                            if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonForegroundFocused)
-                                            {
-                                                #region Draw Icon glow
-
-                                                for (int i = 1; i < 15; ++i)
-                                                {
-                                                    //System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32, 0, 128, 192), i);
-                                                    System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32 - i, glowColor), i);
-                                                    pen.LineJoin = LineJoin.Round;
-                                                    g.DrawPath(pen, gpTxt);
-                                                    pen.Dispose();
-                                                }
-
-                                                #endregion
-                                            }
-
-                                            System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(iconColor);
-                                            g.FillPath(brush, gpTxt);
-                                            g.DrawPath(new System.Drawing.Pen(glowColor, 0.5F), gpTxt);
-                                        }
-
-                                        #endregion
-
-                                        #region Draw Image Icon
-
-                                        if (!String.IsNullOrEmpty(gd.IconImage))
-                                        {
-                                            imageItem img = BuiltInComponents.Host.getSkinImage(gd.IconImage);
-                                            if (img.image != null)
-                                                if (img.image.image != null)
-                                                {
-                                                    Bitmap image = img.image.image;
-                                                    // Calculate aspect
-                                                    float Aspect = image.Width / image.Height;
-
-                                                    // Calculate placement (if no text it's centered in graphic)
-                                                    rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, (int)((bmp.Width - 1) * 0.33F), bmp.Height - 1);
-                                                    if (String.IsNullOrEmpty(gd.Text))
-                                                        rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, bmp.Width - 1, bmp.Height - 1);
-
-                                                    Rectangle imgRect = new Rectangle(gd.IconLocation.X, gd.IconLocation.Y,(int)(rect.Width*0.60f),(int)(rect.Height*0.60f));
-                                                    
-                                                    // Center graphic 
-                                                    imgRect.X = (rect.Width - imgRect.Width) / 2;
-                                                    imgRect.Y = (rect.Height - imgRect.Height) / 2;
-
-                                                    // Calculate width to draw
-                                                    if (image.Width > image.Height)
-                                                    {
-                                                        if (image.Width > imgRect.Width)
-                                                            imgRect.Width = imgRect.Width;
-                                                        else
-                                                            imgRect.Width = image.Width;
-                                                        imgRect.Height = (int)(imgRect.Width * Aspect);
-                                                    }
+                                                    Color glowColor;
+                                                    if (String.IsNullOrEmpty(gd.BackgroundFocusColor.Name) || gd.BackgroundFocusColor.Name == "0")
+                                                        glowColor = System.Drawing.Color.FromArgb(0, 0, 255);
                                                     else
+                                                        glowColor = gd.BackgroundFocusColor.ToSystemColor();
+
+                                                    Color backColor;
+                                                    if (String.IsNullOrEmpty(gd.BackgroundColor.Name) || gd.BackgroundColor.Name == "0")
+                                                        //backColor = Color.FromArgb(0x7f, System.Drawing.Color.Black);
+                                                        backColor = Color.FromArgb(255, System.Drawing.Color.Black);
+                                                    else
+                                                        backColor = gd.BackgroundColor.ToSystemColor();
+
+                                                    Color borderColor;
+                                                    if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
+                                                        borderColor = System.Drawing.Color.FromArgb(125, System.Drawing.Color.White);//System.Drawing.Color.LightGray;
+                                                    else
+                                                        borderColor = gd.BorderColor.ToSystemColor();
+
+                                                    #endregion
+
+                                                    // Create outline path
+                                                    System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, bmp.Width - 1, bmp.Height - 1);
+                                                    GraphicsPath gp = GetPath_RoundedRectangle(g, rect, 30);
+                                                    g.SetClip(gp);
+
+                                                    #region Draw ButtonBackground
+
+                                                    // Draw background
+                                                    using (GraphicsPath bb = CreateRoundRectangle(rect, 2))
                                                     {
-                                                        if (image.Height > imgRect.Height)
-                                                            imgRect.Height = imgRect.Height;
-                                                        else
-                                                            imgRect.Height = image.Height;
-                                                        imgRect.Width = (int)(imgRect.Height * Aspect);
+                                                        using (System.Drawing.Brush br = new System.Drawing.SolidBrush(backColor))
+                                                            g.FillPath(br, bb);
                                                     }
 
-                                                    // Draw image
-                                                    g.DrawImage(img.image.image, imgRect);
+                                                    System.Drawing.Rectangle rect2 = rect;
+                                                    rect2.Height >>= 1;
+                                                    rect2.Height++;
+                                                    System.Drawing.Color shineColor = System.Drawing.Color.FromArgb(85, 98, 130); // System.Drawing.Color.White;
+                                                    using (GraphicsPath bh = CreateTopRoundRectangle(rect2, 2))
+                                                    {
+                                                        rect2.Height++;
+                                                        int opacity = 0x99;
+                                                        using (LinearGradientBrush br = new LinearGradientBrush(rect2, System.Drawing.Color.FromArgb(opacity, shineColor), System.Drawing.Color.FromArgb(opacity / 3, shineColor), LinearGradientMode.Vertical))
+                                                            g.FillPath(br, bh);
+                                                    }
+                                                    rect2.Height -= 2;
+
+
+                                                    #endregion
+
+                                                    if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonBackgroundFocused)
+                                                    {
+                                                        #region Draw inner glow
+
+                                                        System.Drawing.Rectangle rectTop = new System.Drawing.Rectangle(0, 0, rect.Width, rect.Height / 2);
+                                                        //System.Drawing.Rectangle rectBottom = new System.Drawing.Rectangle(0, rect.Height / 2, rect.Width, rect.Height / 2);
+                                                        System.Drawing.Rectangle rectBottom = new System.Drawing.Rectangle(0, (int)(rect.Height * (1 - gd.BackgroundFocusSize)), rect.Width, (int)(rect.Height * gd.BackgroundFocusSize));
+
+                                                        // Draw inner button glow
+
+                                                        using (GraphicsPath brad = CreateBottomRadialPath(rectBottom))
+                                                        {
+                                                            using (PathGradientBrush pgr = new PathGradientBrush(brad))
+                                                            {
+                                                                unchecked
+                                                                {
+                                                                    int opacity = 255;
+                                                                    System.Drawing.RectangleF bounds = brad.GetBounds();
+                                                                    pgr.CenterPoint = new System.Drawing.PointF((bounds.Left + bounds.Right) / 2f, (bounds.Top + bounds.Bottom) / 2f);
+                                                                    pgr.CenterColor = System.Drawing.Color.FromArgb(opacity, glowColor);
+                                                                    pgr.SurroundColors = new System.Drawing.Color[] { System.Drawing.Color.FromArgb(0, glowColor) };
+                                                                }
+                                                                g.FillPath(pgr, brad);
+                                                            }
+                                                        }
+
+                                                        #endregion
+                                                    }
+
+                                                    g.ResetClip();
+
+                                                    #region Draw outer border
+
+                                                    g.DrawPath(new System.Drawing.Pen(borderColor, 1), gp);
+
+                                                    #endregion
                                                 }
+                                                break;
+                                            case ButtonGraphic.ImageTypes.ButtonForegroundFocused:
+                                            case ButtonGraphic.ImageTypes.ButtonForeground:
+                                                {
+
+                                                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                                                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                                                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                                                    #region Colors
+
+                                                    Color glowColor;
+                                                    if (String.IsNullOrEmpty(gd.ForegroundFocusColor.Name) || gd.ForegroundFocusColor.Name == "0")
+                                                        glowColor = System.Drawing.Color.FromArgb(0, 0, 255);
+                                                    else
+                                                        glowColor = gd.ForegroundFocusColor.ToSystemColor();
+
+                                                    Color iconColor;
+                                                    if (String.IsNullOrEmpty(gd.IconColor.Name) || gd.IconColor.Name == "0")
+                                                        iconColor = System.Drawing.Color.FromArgb(225, 225, 255);
+                                                    else
+                                                        iconColor = gd.IconColor.ToSystemColor();
+
+                                                    Color textColor;
+                                                    if (String.IsNullOrEmpty(gd.TextColor.Name) || gd.TextColor.Name == "0")
+                                                        textColor = System.Drawing.Color.LightGray;
+                                                    else
+                                                        textColor = gd.TextColor.ToSystemColor();
+
+                                                    #endregion
+
+                                                    System.Drawing.Rectangle rect = new Rectangle(0, 0, 0, 0);
+
+                                                    #region Draw Icon
+
+                                                    if ((!String.IsNullOrEmpty(gd.Icon)) && String.IsNullOrEmpty(gd.IconImage))
+                                                    {
+                                                        // Calculate placement (if no text it's centered in graphic)
+                                                        rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, (int)((bmp.Width - 1) * 0.33F), bmp.Height - 1);
+                                                        if (String.IsNullOrEmpty(gd.Text))
+                                                            rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, bmp.Width - 1, bmp.Height - 1);
+
+                                                        // Set font format
+                                                        StringFormat sf = new StringFormat();
+                                                        sf.Alignment = StringAlignment.Center;
+                                                        sf.LineAlignment = StringAlignment.Center;
+                                                        System.Drawing.Font f = (gd.IconFont.Name == null ? new System.Drawing.Font(OpenMobile.Graphics.Font.Webdings.Name, 76) : new System.Drawing.Font(gd.IconFont.Name, gd.IconFont.Size));
+
+                                                        SizeF FSize = g.MeasureString(gd.Icon, f, new SizeF(bmp.Width, bmp.Height), sf);
+                                                        // Calculate scaling factor
+                                                        float Scale = bmp.Height / FSize.Height;
+
+                                                        // Recalculate font based on scaling
+                                                        f = new Font(f.Name, f.Size * Scale);
+
+                                                        // Check placement data
+                                                        if ((gd.IconLocation.X == -1) && (gd.IconLocation.Y == -1))
+                                                            gd.IconLocation = new OpenMobile.Graphics.Point(0, 7);
+
+                                                        // Wanted scale between font and height is 90 / 76 = 1,184210526315789
+                                                        GraphicsPath gpTxt = new GraphicsPath();
+                                                        gpTxt.AddString(gd.Icon, f.FontFamily, (int)System.Drawing.FontStyle.Regular, f.Size, rect, sf);
+
+                                                        if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonForegroundFocused)
+                                                        {
+                                                            #region Draw Icon glow
+
+                                                            for (int i = 1; i < 15; ++i)
+                                                            {
+                                                                //System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32, 0, 128, 192), i);
+                                                                System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32 - i, glowColor), i);
+                                                                pen.LineJoin = LineJoin.Round;
+                                                                g.DrawPath(pen, gpTxt);
+                                                                pen.Dispose();
+                                                            }
+
+                                                            #endregion
+                                                        }
+
+                                                        System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(iconColor);
+                                                        g.FillPath(brush, gpTxt);
+                                                        g.DrawPath(new System.Drawing.Pen(glowColor, 0.5F), gpTxt);
+                                                    }
+
+                                                    #endregion
+
+                                                    #region Draw Image Icon
+
+                                                    if (!String.IsNullOrEmpty(gd.IconImage))
+                                                    {
+                                                        imageItem img = BuiltInComponents.Host.getSkinImage(gd.IconImage);
+                                                        if (img.image != null)
+                                                            if (img.image.image != null)
+                                                            {
+                                                                Bitmap image = img.image.image;
+                                                                // Calculate aspect
+                                                                float Aspect = image.Width / image.Height;
+
+                                                                // Calculate placement (if no text it's centered in graphic)
+                                                                rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, (int)((bmp.Width - 1) * 0.33F), bmp.Height - 1);
+                                                                if (String.IsNullOrEmpty(gd.Text))
+                                                                    rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, bmp.Width - 1, bmp.Height - 1);
+
+                                                                Rectangle imgRect = new Rectangle(gd.IconLocation.X, gd.IconLocation.Y, (int)(rect.Width * 0.60f), (int)(rect.Height * 0.60f));
+
+                                                                // Center graphic 
+                                                                imgRect.X = (rect.Width - imgRect.Width) / 2;
+                                                                imgRect.Y = (rect.Height - imgRect.Height) / 2;
+
+                                                                // Calculate width to draw
+                                                                if (image.Width > image.Height)
+                                                                {
+                                                                    if (image.Width > imgRect.Width)
+                                                                        imgRect.Width = imgRect.Width;
+                                                                    else
+                                                                        imgRect.Width = image.Width;
+                                                                    imgRect.Height = (int)(imgRect.Width * Aspect);
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (image.Height > imgRect.Height)
+                                                                        imgRect.Height = imgRect.Height;
+                                                                    else
+                                                                        imgRect.Height = image.Height;
+                                                                    imgRect.Width = (int)(imgRect.Height * Aspect);
+                                                                }
+
+                                                                // Draw image
+                                                                g.DrawImage(img.image.image, imgRect);
+                                                            }
+                                                    }
+
+                                                    #endregion
+
+                                                    #region Draw text
+
+                                                    if (!String.IsNullOrEmpty(gd.Text))
+                                                    {
+                                                        // Check placement data
+                                                        if ((gd.TextLocation.X == -1) && (gd.TextLocation.Y == -1))
+                                                            gd.TextLocation = new OpenMobile.Graphics.Point(0, 0);
+
+                                                        // Calculate placement (if no icon it's centered in graphic)
+                                                        rect = new System.Drawing.Rectangle(rect.Width + gd.TextLocation.X, gd.TextLocation.Y, (bmp.Width - 1) - rect.Width, bmp.Height - 1);
+
+                                                        // Set style
+                                                        StringFormat sf = new StringFormat();
+                                                        if (String.IsNullOrEmpty(gd.Icon))
+                                                            sf.Alignment = StringAlignment.Center;
+                                                        else
+                                                            sf.Alignment = StringAlignment.Near;
+                                                        sf.LineAlignment = StringAlignment.Center;
+
+                                                        // Get font
+                                                        System.Drawing.Font f = (gd.TextFont.Name == null ? new System.Drawing.Font(OpenMobile.Graphics.Font.Arial.Name, 36) : new System.Drawing.Font(gd.TextFont.Name, gd.TextFont.Size));
+
+                                                        // Draw text
+                                                        GraphicsPath gpTxt = new GraphicsPath();
+                                                        gpTxt.AddString(gd.Text, f.FontFamily, (int)System.Drawing.FontStyle.Regular, f.Size, rect, sf);
+                                                        g.FillPath(new System.Drawing.SolidBrush(textColor), gpTxt);
+                                                    }
+
+                                                    #endregion
+                                                }
+                                                break;
+                                            default:
+                                                break;
                                         }
-
-                                        #endregion
-
-                                        #region Draw text
-
-                                        if (!String.IsNullOrEmpty(gd.Text))
-                                        {
-                                            // Check placement data
-                                            if ((gd.TextLocation.X == -1) && (gd.TextLocation.Y == -1))
-                                                gd.TextLocation = new OpenMobile.Graphics.Point(0, 0);
-
-                                            // Calculate placement (if no icon it's centered in graphic)
-                                            rect = new System.Drawing.Rectangle(rect.Width + gd.TextLocation.X, gd.TextLocation.Y, (bmp.Width - 1) - rect.Width, bmp.Height - 1);
-
-                                            // Set style
-                                            StringFormat sf = new StringFormat();
-                                            if (String.IsNullOrEmpty(gd.Icon))
-                                                sf.Alignment = StringAlignment.Center;
-                                            else
-                                                sf.Alignment = StringAlignment.Near;
-                                            sf.LineAlignment = StringAlignment.Center;
-
-                                            // Get font
-                                            System.Drawing.Font f = (gd.TextFont.Name == null ? new System.Drawing.Font(OpenMobile.Graphics.Font.Arial.Name, 36) : new System.Drawing.Font(gd.TextFont.Name, gd.TextFont.Size));
-
-                                            // Draw text
-                                            GraphicsPath gpTxt = new GraphicsPath();
-                                            gpTxt.AddString(gd.Text, f.FontFamily, (int)System.Drawing.FontStyle.Regular, f.Size, rect, sf);
-                                            g.FillPath(new System.Drawing.SolidBrush(textColor), gpTxt);
-                                        }
-
-                                        #endregion
+                                        g.Flush();
                                     }
-                                    break;
-                                default:
-                                    break;
-                            }
-                            g.Flush();
+                                    gd.Image = new OpenMobile.Graphics.OImage(bmp);
+
+                                    #endregion
+                                }
+                                break;
+                            case ButtonGraphic.GraphicStyles.Style1:
+                                {
+                                    #region Create button graphic with style 1
+
+                                    System.Drawing.Bitmap bmp = new Bitmap(gd.Width, gd.Height);
+                                    using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                                    {
+                                        switch (gd.ImageType)
+                                        {
+                                            case ButtonGraphic.ImageTypes.ButtonBackgroundFocused:
+                                            case ButtonGraphic.ImageTypes.ButtonBackground:
+                                                {
+                                                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                                                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                                                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                                                    #region Colors
+
+                                                    Color glowColor;
+                                                    if (String.IsNullOrEmpty(gd.BackgroundFocusColor.Name) || gd.BackgroundFocusColor.Name == "0")
+                                                        glowColor = System.Drawing.Color.FromArgb(0, 0, 255);
+                                                    else
+                                                        glowColor = gd.BackgroundFocusColor.ToSystemColor();
+
+                                                    Color backColor;
+                                                    if (String.IsNullOrEmpty(gd.BackgroundColor.Name) || gd.BackgroundColor.Name == "0")
+                                                        //backColor = Color.FromArgb(0x7f, System.Drawing.Color.Black);
+                                                        backColor = Color.FromArgb(255, 0x7,0x7,0x7);
+                                                    else
+                                                        backColor = gd.BackgroundColor.ToSystemColor();
+
+                                                    Color borderColor;
+                                                    if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
+                                                        borderColor = System.Drawing.Color.FromArgb(125,System.Drawing.Color.White);
+                                                    else
+                                                        borderColor = gd.BorderColor.ToSystemColor();
+
+                                                    #endregion
+
+                                                    Rectangle OuterRect = new Rectangle(0, 0, bmp.Width - 1, bmp.Height - 1);
+
+                                                    int scalingDividend = Math.Min(OuterRect.Width, OuterRect.Height);
+                                                    int rectCornerRadius = Math.Max(1, scalingDividend / 5);
+                                                    float rectOutlineWidth = Math.Max(1, scalingDividend / 50);
+                                                    
+                                                    Color ColorBackgroundGradientTop = Color.FromArgb(255, 30, 30, 30); //Color.FromArgb(255, 44, 85, 177);
+                                                    Color ColorBackgroundGradientBottom = Color.FromArgb(255, 7, 7, 7); //Color.FromArgb(255, 153, 198, 241);
+
+                                                    using (GraphicsPath OuterPath = CreateRoundRectangle(OuterRect, rectCornerRadius))
+                                                    {
+                                                        g.SetClip(OuterPath);
+
+                                                        // Draw background
+                                                        using (LinearGradientBrush OuterBrush = new LinearGradientBrush(OuterRect, ColorBackgroundGradientTop, ColorBackgroundGradientBottom, LinearGradientMode.Vertical))
+                                                        {
+                                                            g.FillPath(OuterBrush, OuterPath);
+                                                        }
+
+                                                        // Draw bevels 
+                                                        int BevelHeight = (int)(OuterRect.Height * 1F);
+                                                        int BevelWidth = Math.Max(1, scalingDividend / 70);
+                                                        int OffsetPlacement = (int)rectOutlineWidth * 2;
+                                                        Rectangle LeftBevel = new Rectangle(OuterRect.X + OffsetPlacement, OuterRect.Y, BevelWidth, BevelHeight);
+                                                        using (LinearGradientBrush innerBrush = new LinearGradientBrush(LeftBevel, Color.FromArgb(30, Color.White), Color.FromArgb(20, Color.White), LinearGradientMode.Vertical))
+                                                            g.FillRectangle(innerBrush, LeftBevel);
+                                                        Rectangle RightBevel = new Rectangle(OuterRect.X + OuterRect.Width - OffsetPlacement, OuterRect.Y, BevelWidth, BevelHeight);
+                                                        using (LinearGradientBrush innerBrush = new LinearGradientBrush(RightBevel, Color.FromArgb(255, Color.Black), Color.FromArgb(255, Color.Black), LinearGradientMode.Vertical))
+                                                            g.FillRectangle(innerBrush, RightBevel);
+
+
+                                                        // Draw outline
+                                                        using (Pen OutlinePen = new Pen(Color.Black, rectOutlineWidth))
+                                                        {
+                                                            OutlinePen.Alignment = PenAlignment.Inset;
+                                                            g.DrawPath(OutlinePen, OuterPath);
+                                                        }
+
+                                                        // Draw gloss effect
+                                                        Rectangle HighlightRect = new Rectangle(OuterRect.X + OffsetPlacement, OuterRect.Y, OuterRect.Width - (OffsetPlacement * 2), (int)(OuterRect.Height * 0.4F));
+                                                        int highlightRectOffset = Math.Max(1, scalingDividend / 40);
+                                                        int highlightAlphaTop = 60;
+                                                        int highlightAlphaBottom = 0;
+                                                        using (GraphicsPath innerPath = RoundedRectangle(HighlightRect, (int)(rectCornerRadius * 0.8F), highlightRectOffset))
+                                                        {
+                                                            using (LinearGradientBrush innerBrush = new LinearGradientBrush(HighlightRect,
+                                                                    Color.FromArgb(highlightAlphaTop, Color.White),
+                                                                    Color.FromArgb(highlightAlphaBottom, Color.White), LinearGradientMode.Vertical))
+                                                            {
+                                                                g.FillPath(innerBrush, innerPath);
+                                                            }
+                                                        }
+
+                                                        // Draw icon
+                                                        GraphicsPath IconPath = new GraphicsPath();
+
+
+                                                        // Set font format
+                                                        StringFormat sf = new StringFormat();
+                                                        sf.Alignment = StringAlignment.Center;
+                                                        sf.LineAlignment = StringAlignment.Center;
+                                                        System.Drawing.Font f = (gd.IconFont.Name == null ? new System.Drawing.Font(OpenMobile.Graphics.Font.Webdings.Name, 76) : new System.Drawing.Font(gd.IconFont.Name, gd.IconFont.Size));
+                                                        SizeF FSize = g.MeasureString(":", f, new SizeF(1000, 600), sf);
+                                                        float Scale = (OuterRect.Height / FSize.Height) * 1.1F;
+                                                        f = new Font(f.Name, f.Size * Scale);
+
+                                                        IconPath.AddString(":", f.FontFamily, (int)System.Drawing.FontStyle.Regular, f.Size, OuterRect, sf);
+                                                        g.FillPath(Brushes.White, IconPath);
+                                                        using (Pen IconPen = new Pen(Color.Black, 1F))
+                                                        {
+                                                            IconPen.Alignment = PenAlignment.Inset;
+                                                            g.DrawPath(IconPen, IconPath);
+                                                        }
+
+                                                        g.SetClip(IconPath);
+                                                        /*
+                                                        Rectangle IconEffectRect = new Rectangle(OuterRect.X + (int)(OuterRect.Width * 0.3F), OuterRect.Y + (int)(OuterRect.Height * 0.4f), OuterRect.Width, OuterRect.Height);
+                                                        using (LinearGradientBrush myLinearGradientBrush = new LinearGradientBrush(
+                                                           IconEffectRect,
+                                                           Color.FromArgb(255, Color.Blue),
+                                                           Color.FromArgb(0, Color.Blue),
+                                                           LinearGradientMode.Horizontal))
+                                                        {
+                                                            g.FillEllipse(myLinearGradientBrush, IconEffectRect);
+                                                        }
+                                                        */
+
+                                                        sf.Dispose();
+                                                        IconPath.Dispose();
+                                                        f.Dispose();
+
+                                                        g.ResetClip();
+                                                    }
+                                                }
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                        g.Flush();
+                                    }
+                                    gd.Image = new OpenMobile.Graphics.OImage(bmp);
+
+                                    #endregion
+                                }
+                                break;
                         }
-                        gd.Image = new OpenMobile.Graphics.OImage(bmp);
-                       
-                        #endregion
+
 
                         // Return data
                         data = (T)Convert.ChangeType(gd, typeof(T));
@@ -830,5 +984,16 @@ namespace OMGraphics
             return path;
         }
 
+        private static GraphicsPath RoundedRectangle(Rectangle boundingRect, int cornerRadius, int margin)
+        {
+            GraphicsPath roundedRect = new GraphicsPath();
+            roundedRect.AddArc(boundingRect.X + margin, boundingRect.Y + margin, cornerRadius * 2, cornerRadius * 2, 180, 90);
+            roundedRect.AddArc(boundingRect.X + boundingRect.Width - margin - cornerRadius * 2, boundingRect.Y + margin, cornerRadius * 2, cornerRadius * 2, 270, 90);
+            roundedRect.AddArc(boundingRect.X + boundingRect.Width - margin - cornerRadius * 2, boundingRect.Y + boundingRect.Height - margin - cornerRadius * 2, cornerRadius * 2, cornerRadius * 2, 0, 90);
+            roundedRect.AddArc(boundingRect.X + margin, boundingRect.Y + boundingRect.Height - margin - cornerRadius * 2, cornerRadius * 2, cornerRadius * 2, 90, 90);
+            roundedRect.AddLine(boundingRect.X + margin, boundingRect.Y + boundingRect.Height - margin - cornerRadius * 2, boundingRect.X + margin, boundingRect.Y + margin + cornerRadius);
+            roundedRect.CloseFigure();
+            return roundedRect;
+        }
     }
 }

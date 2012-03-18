@@ -20,7 +20,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The text color when highlighted
         /// </summary>
-        protected Color highlightColor = OpenMobile.helperFunctions.StoredData.SystemSettings.SkinFocusColor;
+        protected Color highlightColor = BuiltInComponents.SystemSettings.SkinFocusColor;
 
         /// <summary>
         /// The color the text should turn when the checkbox is highlighted

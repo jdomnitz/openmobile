@@ -378,7 +378,7 @@ namespace OpenMobile.Controls
             this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
             this.Format = OpenMobile.Graphics.eTextFormat.Normal;
             this.Color = Color.Black;
-            this.OutlineColor = StoredData.SystemSettings.SkinFocusColor;
+            this.OutlineColor = BuiltInComponents.SystemSettings.SkinFocusColor;
         }
         /// <summary>
         /// Draws the control
