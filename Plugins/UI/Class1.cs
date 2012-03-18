@@ -298,7 +298,7 @@ namespace OpenMobile
 
             OMButton Button_UITopBar_VolumeBar_VolumeDown = new OMButton("Button_UITopBar_VolumeBar_VolumeDown", 6, -90, 130, 90);
             Button_UITopBar_VolumeBar_VolumeDown.FillColor = Color.FromArgb(180, Color.White);
-            Button_UITopBar_VolumeBar_VolumeDown.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "6", 150, eTextFormat.Outline, Alignment.CenterCenter, StoredData.SystemSettings.SkinFocusColor, Color.White));
+            Button_UITopBar_VolumeBar_VolumeDown.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "6", 150, eTextFormat.Outline, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinFocusColor, Color.White));
             Button_UITopBar_VolumeBar_VolumeDown.Transition = eButtonTransition.None;
             Button_UITopBar_VolumeBar_VolumeDown.Tag = -2;
             Button_UITopBar_VolumeBar_VolumeDown.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnClick);
@@ -307,7 +307,7 @@ namespace OpenMobile
 
             OMButton Button_UITopBar_VolumeBar_VolumeUp = new OMButton("Button_UITopBar_VolumeBar_VolumeUp", 6, -510, 130, 90);
             Button_UITopBar_VolumeBar_VolumeUp.FillColor = Color.FromArgb(180, Color.White);
-            Button_UITopBar_VolumeBar_VolumeUp.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "5", 150, eTextFormat.Outline, Alignment.CenterCenter, StoredData.SystemSettings.SkinFocusColor, Color.White));
+            Button_UITopBar_VolumeBar_VolumeUp.OverlayImage = new imageItem(OImage.FromWebdingsFont(Button_UITopBar_VolumeBar_VolumeDown.Width, Button_UITopBar_VolumeBar_VolumeDown.Height, "5", 150, eTextFormat.Outline, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinFocusColor, Color.White));
             Button_UITopBar_VolumeBar_VolumeUp.Transition = eButtonTransition.None;
             Button_UITopBar_VolumeBar_VolumeUp.Tag = 2;
             Button_UITopBar_VolumeBar_VolumeUp.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnClick);
@@ -1424,7 +1424,7 @@ namespace OpenMobile
                 }
                 else
                 {   // Volume change
-                    if (StoredData.SystemSettings.VolumeChangesVisible)
+                    if (BuiltInComponents.SystemSettings.VolumeChangesVisible)
                     {
                         theHost.ForEachScreen(delegate(int screen)
                         {   // Make sure we update the correct screens by comparing the active zone to the zone in the event (volumeevents sends audioinstance)

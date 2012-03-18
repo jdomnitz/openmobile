@@ -134,13 +134,14 @@ namespace RemovableDB
                     tmr.Dispose();
                     tmr = null;
                 }
-                theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
+                theHost.raiseMediaEvent(eFunction.MediaIndexingCompleted, null, this.pluginName);
+                theHost.SendStatusData(eDataType.Completion, this, "", "Removable indexing Complete!");
                 return;
             }
             if (lastURL == currentURL)
-                theHost.SendStatusData(eDataType.Failure, this, "", "FAILURE:" + System.IO.Path.GetFileName(currentURL));
+                theHost.SendStatusData(eDataType.Update, this, "", String.Format("Removable indexing: {0}",System.IO.Path.GetFileName(currentURL)));
            else
-                theHost.SendStatusData(eDataType.Update, this, "", String.Format("Indexing: {0}", (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count) - lastCount) / 2).ToString() + " songs/sec)"));
+                theHost.SendStatusData(eDataType.Update, this, "", String.Format("Removable indexing: {0}", (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count) - lastCount) / 2).ToString() + " songs/sec)"));
 
             lastURL = currentURL;
             lastCount = (startCount - toBeIndexed.Count);
@@ -155,10 +156,14 @@ namespace RemovableDB
                 {
                     if (toBeIndexed.Count == 0)
                         return;
+
                     currentURL = toBeIndexed[toBeIndexed.Count - 1];
                     toBeIndexed.RemoveAt(toBeIndexed.Count - 1);
                 }
-                processFile(currentURL);
+                lock (currentURL)
+                {
+                    processFile(currentURL);
+                }
             }
         }
 
@@ -337,8 +342,6 @@ namespace RemovableDB
                     command.CommandText = "SELECT Distinct Artist FROM tblAlbum";
                 else
                     command.CommandText = "SELECT Distinct(Artist),Cover FROM tblAlbum";
-                // Comment from Borte: This SQL query contains a bug since it returns multiple rows for one artist if the images are different
-                //command.CommandText = "SELECT Distinct Artist,Cover FROM tblAlbum";
                 reader = command.ExecuteReader();
             }
             field = eMediaField.Artist;

@@ -97,6 +97,7 @@ namespace OpenMobile
             }
             return about;
         }
+
         static IPluginHost theHost;
 
         /// <summary>
@@ -109,6 +110,7 @@ namespace OpenMobile
 
             // Set default values
             StoredData.SetDefaultValue("UI.SkinFocusColor", "00,00,FF");
+            StoredData.SetDefaultValue("UI.SkinTextColor", "00,00,00");
             StoredData.SetDefaultValue("UI.MinGraphics", false.ToString());
             StoredData.SetDefaultValue("UI.VolumeChangesVisible", true.ToString());
             StoredData.SetDefaultValue("UI.ShowCursor", false.ToString());
@@ -119,6 +121,7 @@ namespace OpenMobile
             Setting ShowCursor = new Setting(SettingTypes.MultiChoice, "UI.ShowCursor", String.Empty, "Show OM mouse/pointer cursors", Setting.BooleanList, Setting.BooleanList);
             //Setting SkinColor = new Setting(SettingTypes.Text, "UI.SkinColor", "Foreground", "Skin foreground color (R,G,B)");
             Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus color", "Skin focus color (R,G,B)");
+            Setting SkinTextColor = new Setting(SettingTypes.Text, "UI.SkinTextColor", "Text color", "Skin text color (R,G,B)");
             using (PluginSettings settings = new PluginSettings())
             {
                 graphics.Value = settings.getSetting("UI.MinGraphics");
@@ -126,12 +129,14 @@ namespace OpenMobile
                 ShowCursor.Value = settings.getSetting("UI.ShowCursor");
                 //SkinColor.Value = settings.getSetting("UI.SkinColor");
                 SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
+                SkinTextColor.Value = settings.getSetting("UI.SkinTextColor");
             }
             gl.Add(graphics);
             gl.Add(volume);
             gl.Add(ShowCursor);
             //gl.Add(SkinColor);
             gl.Add(SkinFocusColor);
+            gl.Add(SkinTextColor);
             gl.OnSettingChanged += new SettingChanged(SettingsChanged);
             return gl;
         }
@@ -163,6 +168,113 @@ namespace OpenMobile
                 }
             }
         }
+
+        /// <summary>
+        /// OpenMobile System settings
+        /// </summary>
+        public static class SystemSettings
+        {
+            /// <summary>
+            /// OM System setting: True = use minimalistic graphics
+            /// </summary>
+            public static bool UseSimpleGraphics
+            {
+                get
+                {
+                    return StoredData.GetBool("UI.MinGraphics");
+                }
+                set
+                {
+                    StoredData.SetBool("UI.MinGraphics", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: True = Show volume changes
+            /// </summary>
+            public static bool VolumeChangesVisible
+            {
+                get
+                {
+                    return StoredData.GetBool("UI.VolumeChangesVisible");
+                }
+                set
+                {
+                    StoredData.SetBool("UI.VolumeChangesVisible", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: True = Show OM system cursors
+            /// </summary>
+            public static bool ShowCursor
+            {
+                get
+                {
+                    return StoredData.GetBool("UI.ShowCursor");
+                }
+                set
+                {
+                    StoredData.SetBool("UI.ShowCursor", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: Skin Focus color
+            /// </summary>
+            public static OpenMobile.Graphics.Color SkinFocusColor
+            {
+                get
+                {
+                    try
+                    {
+                        // Extract color values from string data
+                        string[] ColorValues = StoredData.Get("UI.SkinFocusColor").Split(new char[] { ',' });
+                        return OpenMobile.Graphics.Color.FromArgb(255,
+                            int.Parse(ColorValues[0], System.Globalization.NumberStyles.AllowHexSpecifier),
+                            int.Parse(ColorValues[1], System.Globalization.NumberStyles.AllowHexSpecifier),
+                            int.Parse(ColorValues[2], System.Globalization.NumberStyles.AllowHexSpecifier));
+                    }
+                    catch
+                    {   // Default fallback color in case of conversion error
+                        return OpenMobile.Graphics.Color.Blue;
+                    }
+                }
+                set
+                {
+                    StoredData.Set("UI.SkinFocusColor", String.Format("{0},{1},{2}", value.R, value.G, value.B));
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: Skin text color
+            /// </summary>
+            public static OpenMobile.Graphics.Color SkinTextColor
+            {
+                get
+                {
+                    try
+                    {
+                        // Extract color values from string data
+                        string[] ColorValues = StoredData.Get("UI.SkinTextColor").Split(new char[] { ',' });
+                        return OpenMobile.Graphics.Color.FromArgb(255,
+                            int.Parse(ColorValues[0], System.Globalization.NumberStyles.AllowHexSpecifier),
+                            int.Parse(ColorValues[1], System.Globalization.NumberStyles.AllowHexSpecifier),
+                            int.Parse(ColorValues[2], System.Globalization.NumberStyles.AllowHexSpecifier));
+                    }
+                    catch
+                    {   // Default fallback color in case of conversion error
+                        return OpenMobile.Graphics.Color.White;
+                    }
+                }
+                set
+                {
+                    StoredData.Set("UI.SkinFocusColor", String.Format("{0},{1},{2}", value.R, value.G, value.B));
+                }
+            }
+
+        }
+
     }
 
     public static class Timing

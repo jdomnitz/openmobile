@@ -178,6 +178,7 @@ namespace OMPlayer
             else
                 media = new List<mediaInfo>(info);
             theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
+            theHost.raiseMediaEvent(eFunction.MediaIndexingCompleted, null, this.pluginName);
             return true;
         }
 

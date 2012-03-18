@@ -43,11 +43,11 @@ namespace OpenMobile.Media
             {
                 if (AllDevices.Count > 0)
                     return AllDevices;
+
                 theHost.OnStorageEvent += new StorageEvent(theHost_OnStorageEvent);
                 foreach (string drive in Environment.GetLogicalDrives())
-                {
                     AllDevices.Add(getDeviceInfo(drive));
-                }
+
                 return AllDevices;
             }
         }
@@ -131,6 +131,8 @@ namespace OpenMobile.Media
             }
             else
             {
+                // TODO: Add non english support
+
                 bool caseInsensitive = false;
                 if (Configuration.RunningOnLinux)
                 {

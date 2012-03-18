@@ -516,8 +516,8 @@ namespace OpenMobile.Controls
 
         private void declare()
         {
-            // Set default selection color
-            Color tmpColor = OpenMobile.helperFunctions.StoredData.SystemSettings.SkinFocusColor;
+            // Set default selection color (this is set to a darker shade of the current focus color)
+            Color tmpColor = BuiltInComponents.SystemSettings.SkinFocusColor;
             selectedItemColor1 = Color.FromArgb(tmpColor.A,
                 (tmpColor.R == 255 ? tmpColor.R - 139 : tmpColor.R),
                 (tmpColor.G == 255 ? tmpColor.G - 139 : tmpColor.G),
@@ -631,7 +631,7 @@ namespace OpenMobile.Controls
             get { return selectedItemColor2; }
             set { selectedItemColor2 = value; }
         }
-        private bool scrollbars;
+        private bool scrollbars = true;
         /// <summary>
         /// Display scrollbars
         /// </summary>

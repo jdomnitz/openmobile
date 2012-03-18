@@ -111,7 +111,8 @@ namespace OMMediaDB
                 {
                     status= (cmd.ExecuteNonQuery() > 0);
                 }
-                theHost.SendStatusData(eDataType.Completion, this, "", "Database Cleared!");
+                theHost.raiseMediaEvent(eFunction.MediaDBCleared, null, this.pluginName);
+                theHost.SendStatusData(eDataType.PopUp, this, "", "Database Cleared!");
                 return status;
             }
         }
@@ -211,6 +212,7 @@ namespace OMMediaDB
             {
                 if (tmr!=null)
                     tmr.Dispose();
+                theHost.raiseMediaEvent(eFunction.MediaIndexingCompleted, null, this.pluginName);
                 theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
                 return;
             }

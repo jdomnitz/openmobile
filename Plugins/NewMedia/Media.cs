@@ -257,11 +257,18 @@ namespace NewMedia
 
         void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
         {
+            if (function == eFunction.MediaIndexingCompleted)
+                loadArtists();
+            else if (function == eFunction.MediaDBCleared)
+                loadArtists();
+
+            /*
             if (function == eFunction.backgroundOperationStatus)
                 if ((arg1 == "Indexing Complete!")||(arg1=="Database Cleared!"))
                 {
                     loadArtists();
                 }
+            */
         }
 
         void source_OnClick(OMControl sender, int screen)
