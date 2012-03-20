@@ -212,16 +212,24 @@ namespace OMSettings
             switch (setting.Name)
             {
                 case "UI.SkinFocusColor":
+                case "UI.SkinTextColor":
                     {   // Ensure that it's written in valid format 
                         if (!System.Text.RegularExpressions.Regex.IsMatch(setting.Value, @"[0-9a-fA-F][0-9a-fA-F],[0-9a-fA-F][0-9a-fA-F],[0-9a-fA-F][0-9a-fA-F]"))
                         {   // Invalid value, show error message
                             OpenMobile.helperFunctions.Forms.dialog dialogInfo = new OpenMobile.helperFunctions.Forms.dialog();
                             dialogInfo.Header = "Data error";
-                            dialogInfo.Text = "SkinFocusColor must be written in a format of Red,Green,Blue where each value can be a number from 00 to FF";
+                            dialogInfo.Text = String.Format("{0} must be written in a format of Red,Green,Blue where each value can be a number from 00 to FF (including leading zeros)", setting.Name.Replace("UI.",""));
                             dialogInfo.Icon = OpenMobile.helperFunctions.Forms.icons.Error;
                             dialogInfo.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
                             dialogInfo.ShowMsgBox(screen);
                         }
+
+                        OpenMobile.helperFunctions.Forms.dialog dialogInfo2 = new OpenMobile.helperFunctions.Forms.dialog();
+                        dialogInfo2.Header = "Color change";
+                        dialogInfo2.Text = "Please restart OM to ensure the new color settings is applied to all objects!";
+                        dialogInfo2.Icon = OpenMobile.helperFunctions.Forms.icons.Information;
+                        dialogInfo2.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
+                        dialogInfo2.ShowMsgBox(screen);
                     }
                     break;
             }
