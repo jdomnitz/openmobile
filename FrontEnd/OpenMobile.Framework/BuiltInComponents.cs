@@ -110,7 +110,7 @@ namespace OpenMobile
 
             // Set default values
             StoredData.SetDefaultValue("UI.SkinFocusColor", "00,00,FF");
-            StoredData.SetDefaultValue("UI.SkinTextColor", "00,00,00");
+            StoredData.SetDefaultValue("UI.SkinTextColor", "FF,FF,FF");
             StoredData.SetDefaultValue("UI.MinGraphics", false.ToString());
             StoredData.SetDefaultValue("UI.VolumeChangesVisible", true.ToString());
             StoredData.SetDefaultValue("UI.ShowCursor", false.ToString());
