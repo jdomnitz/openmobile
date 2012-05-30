@@ -22,6 +22,7 @@ Imports OpenMobile.Controls
 Imports OpenMobile.Plugin
 Imports OpenMobile.Framework
 Imports System.Runtime.InteropServices
+Imports OpenMobile.Threading
 
 Public Class EmbedApp1
     Implements IHighLevel
@@ -89,7 +90,7 @@ Public Class EmbedApp1
         LoadNavSettings()
 
         If m_Preload.ToLower = "true" Then
-            LoadNavApp()
+            SafeThread.Asynchronous(AddressOf LoadNavApp, m_Host)
         End If
 
         Return eLoadStatus.LoadSuccessful
