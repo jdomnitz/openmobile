@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using OpenMobile;
 using System.Runtime.InteropServices;
+using OpenMobile.helperFunctions;
 
 namespace SystemSensors
 {
-    public class SystemSensors:IRawHardware
+    public class SystemSensors:ISensorProvider 
     {
-        List<Sensor> sensors = new List<Sensor>();
+        List<SensorWrapper> sensors = new List<SensorWrapper>();
+
         PerformanceCounter cpuCounter;
         PerformanceCounter freeRamCounter;
         Process currentProcess;
@@ -20,16 +22,12 @@ namespace SystemSensors
 
         public System.Collections.Generic.List<Sensor> getAvailableSensors(eSensorType type)
         {
-            return sensors;
+            return Sensors.sensorWrappersToSensors(sensors);
         }
 
-        public bool setValue(string name, object value)
+        private object getValue(Sensor sensor)
         {
-            return false;
-        }
-        public object getValue(string name)
-        {
-            switch (name)
+            switch (sensor.Name)
             {
                 case "SystemSensors.CPUUsage":
                     if (cpuCounter == null)
@@ -136,42 +134,20 @@ namespace SystemSensors
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GlobalMemoryStatus(ref MEMORYSTATUS lpBuffer);
         #endregion
-
-        public void resetDevice()
-        {
-            //
-        }
-
-        public string deviceInfo
-        {
-            get { return "System Sensors"; }
-        }
-
-        public string firmwareVersion
-        {
-            get { return OSSpecific.getOSVersion(); }
-        }
-
+        
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             thehost = host;
-            Sensor CPU = new Sensor("SystemSensors.CPUUsage", eSensorType.deviceSuppliesData, "CPU", eSensorDataType.percent);
-            Sensor FreeMemory = new Sensor("SystemSensors.PhysicalMemoryFree", eSensorType.deviceSuppliesData, "FMem", eSensorDataType.bytes);
-            Sensor UsedMemory = new Sensor("SystemSensors.PhysicalMemoryUsed", eSensorType.deviceSuppliesData, "UMem", eSensorDataType.bytes);
-            Sensor UsedMemoryPercent = new Sensor("SystemSensors.MemoryUsedPercent", eSensorType.deviceSuppliesData, "Mem", eSensorDataType.percent);
-            Sensor ProcessMemory = new Sensor("SystemSensors.ProcessMemoryUsed", eSensorType.deviceSuppliesData, "UMem", eSensorDataType.bytes);
-            Sensor Dt = new Sensor("SystemSensors.Date", eSensorType.deviceSuppliesData, "Dt", eSensorDataType.raw);
-            Sensor Time = new Sensor("SystemSensors.Time", eSensorType.deviceSuppliesData, "Tm", eSensorDataType.raw);
-            Sensor LongDate = new Sensor("SystemSensors.LongDate", eSensorType.deviceSuppliesData, "Dt", eSensorDataType.raw);
-            sensors.Add(CPU);
-            sensors.Add(FreeMemory);
-            sensors.Add(UsedMemory);
-            sensors.Add(UsedMemoryPercent);
-            sensors.Add(ProcessMemory);
-            sensors.Add(Dt);
-            sensors.Add(Time);
-            sensors.Add(LongDate);
 
+            sensors.Add(new SensorWrapper(this.pluginName + ".CPUUsage", "CPU", eSensorDataType.percent, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".PhysicalMemoryFree", "FMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".PhysicalMemoryUsed", "UMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".MemoryUsedPercent", "Men", eSensorDataType.percent, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".ProcessMemoryUsed", "UMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".Date", "Dt", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".Time", "Tm", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".LongDate", "Dt", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
+        
             slowTimer = new System.Timers.Timer(5000); //These items take a while to refresh to do them less often
             slowTimer.Elapsed += new System.Timers.ElapsedEventHandler(slowTimer_Elapsed);
             slowTimer.Enabled = true;
@@ -184,15 +160,14 @@ namespace SystemSensors
 
         void slowTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            //for (int i=0; i <= 4; i++)
-            //    OpenMobile.Threading.SafeThread.Asynchronous(delegate() { sensors[i].Value = getValue(sensors[i].Name); }, thehost);
+            for (int i=0; i <= 4; i++)
+                OpenMobile.Threading.SafeThread.Asynchronous(delegate() { sensors[i].UpdateSensorValue( getValue(sensors[i].sensor)); }, thehost);
         }
 
         void fastTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            for (int i=5; i <= 7; i++)
-                sensors[i].Value = getValue(sensors[i].Name); 
-                //OpenMobile.Threading.SafeThread.Asynchronous(delegate() { }, thehost);
+            for (int i=5; i <= 6; i++)
+                OpenMobile.Threading.SafeThread.Asynchronous(delegate() { sensors[i].UpdateSensorValue( getValue(sensors[i].sensor));}, thehost);
         }
 
         public Settings loadSettings()
@@ -202,7 +177,7 @@ namespace SystemSensors
 
         public string authorName
         {
-            get { return "Justin Domnitz"; }
+            get { return "Justin Domnitz, Jon Heizer"; }
         }
 
         public string authorEmail
