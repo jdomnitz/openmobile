@@ -1,10 +1,30 @@
-﻿Imports OpenMobile
+﻿#Region "GPL"
+'    This file is part of OpenMobile.
+
+'    OpenMobile is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+
+'    OpenMobile is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+
+'    You should have received a copy of the GNU General Public License
+'    along with OpenMobile.  If not, see <http://www.gnu.org/licenses/>.
+
+'    Copyright 2010 Jonathan Heizer jheizer@gmail.com
+#End Region
+
+Imports OpenMobile
 Imports OpenMobile.Controls
 Imports OpenMobile.Plugin
 Imports OpenMobile.Framework
 Imports System.Runtime.InteropServices
+Imports OpenMobile.Threading
 
-Public Class ExternalNav
+Public Class EmbedApp1
     Implements IHighLevel
 
     Private WithEvents m_Host As IPluginHost
@@ -18,12 +38,16 @@ Public Class ExternalNav
     Private m_Process As Process
     Private m_Preload As String = "False"
 
+    Private m_EmbedAppString As String = "ExternalNav"
+
+    Private m_DisplayName As String = m_EmbedAppString
+
     Private Sub m_Host_OnSystemEvent(ByVal funct As OpenMobile.eFunction, ByVal arg1 As String, ByVal arg2 As String, ByVal arg3 As String) Handles m_Host.OnSystemEvent
         If Not String.IsNullOrEmpty(m_Exe) Then
             Select Case funct
                 Case Is = eFunction.TransitionToPanel
                     If Not m_Embedded Then
-                        If arg2 = "ExternalNav" Then
+                        If arg2 = m_EmbedAppString Then
                             If m_Process Is Nothing Then
                                 LoadNavApp()
                             End If
@@ -64,11 +88,17 @@ Public Class ExternalNav
     Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements OpenMobile.Plugin.IBasePlugin.initialize
         m_Host = host
         LoadNavSettings()
+
+        If m_Preload.ToLower = "true" Then
+            SafeThread.Asynchronous(AddressOf LoadNavApp, m_Host)
+        End If
+
+        Return eLoadStatus.LoadSuccessful
     End Function
 
     Private Sub LoadNavApp()
         m_Process = Process.Start(m_Exe)
-        'Give it some time to load before moving it
+        'Give it some time to load before embedding it
         System.Threading.Thread.Sleep(m_Delay * 1000)
         m_WindowName = m_Process.ProcessName
     End Sub
@@ -77,13 +107,13 @@ Public Class ExternalNav
         If m_Settings Is Nothing Then
             LoadNavSettings()
 
-            m_Settings = New Settings("External GPS")
-            m_Settings.Add(New Setting(SettingTypes.File, "ExternalNav.Exe", "EXE", "App EXE", m_Exe))
+            m_Settings = New Settings(m_EmbedAppString)
+            m_Settings.Add(New Setting(SettingTypes.File, m_EmbedAppString & ".Exe", "EXE", "App EXE", m_Exe))
             Dim Range As New Generic.List(Of String)
             Range.Add("1")
             Range.Add("20")
-            m_Settings.Add(New Setting(SettingTypes.Range, "ExternalNav.Delay", "Delay", "App Start Up Delay (1-20 Seconds)", Nothing, Range, m_Delay))
-            m_Settings.Add(New Setting(SettingTypes.MultiChoice, "ExternalNav.Preload", "Preload", "Preload App", Setting.BooleanList, Setting.BooleanList, m_Preload))
+            m_Settings.Add(New Setting(SettingTypes.Range, m_EmbedAppString & ".Delay", "Delay", "App Start Up Delay (1-20 Seconds)", Nothing, Range, m_Delay))
+            m_Settings.Add(New Setting(SettingTypes.MultiChoice, m_EmbedAppString & ".Preload", "Preload", "Preload App", Setting.BooleanList, Setting.BooleanList, m_Preload))
 
             AddHandler m_Settings.OnSettingChanged, AddressOf Changed
         End If
@@ -92,28 +122,30 @@ Public Class ExternalNav
     End Function
 
     Private Sub Changed(ByVal screen As Integer, ByVal St As Setting)
-        Dim PlugSet As New OpenMobile.Data.PluginSettings
-        PlugSet.setSetting(St.Name, St.Value)
-        LoadNavSettings()
+        Using PlugSet As New OpenMobile.Data.PluginSettings
+
+            PlugSet.setSetting(St.Name, St.Value)
+            LoadNavSettings()
+
+        End Using
     End Sub
 
     Private Sub LoadNavSettings()
         Using Settings As New OpenMobile.Data.PluginSettings
-            If String.IsNullOrEmpty(Settings.getSetting("ExternalNav.Exe")) Then
+            If String.IsNullOrEmpty(Settings.getSetting(m_EmbedAppString & ".Exe")) Then
                 CreateSettings()
             End If
-            m_Exe = Settings.getSetting("ExternalNav.Exe")
-            m_Delay = Settings.getSetting("ExternalNav.Delay")
-            m_Preload = Settings.getSetting("ExternalNav.Preload")
-
+            m_Exe = Settings.getSetting(m_EmbedAppString & ".Exe")
+            m_Delay = Settings.getSetting(m_EmbedAppString & ".Delay")
+            m_Preload = Settings.getSetting(m_EmbedAppString & ".Preload")
         End Using
     End Sub
 
     Private Sub CreateSettings()
         Using Settings As New OpenMobile.Data.PluginSettings
-            Settings.setSetting("ExternalNav.Exe", "")
-            Settings.setSetting("ExternalNav.Delay", "8")
-            Settings.setSetting("ExternalNav.Preload", "false")
+            Settings.setSetting(m_EmbedAppString & ".Exe", "")
+            Settings.setSetting(m_EmbedAppString & ".Delay", "8")
+            Settings.setSetting(m_EmbedAppString & ".Preload", m_Preload)
         End Using
     End Sub
 
@@ -129,7 +161,7 @@ Public Class ExternalNav
         End Get
     End Property
 
-    Public ReadOnly Property pluginDescription() As String Implements OpenMobile.Plugin.IBasePlugin.pluginDescription
+Public ReadOnly Property pluginDescription() As String Implements OpenMobile.Plugin.IBasePlugin.pluginDescription
         Get
             Return "Embed External Navigation"
         End Get
@@ -183,5 +215,5 @@ Public Class ExternalNav
         GC.SuppressFinalize(Me)
     End Sub
 #End Region
-
 End Class
+
