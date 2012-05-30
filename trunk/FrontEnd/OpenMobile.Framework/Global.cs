@@ -126,7 +126,7 @@ namespace OpenMobile
     /// <summary>
     /// An item in an OMList
     /// </summary>
-    public sealed class OMListItem : IComparable, ICloneable
+    public sealed class OMListItem : IComparable, ICloneable, OpenMobile.Controls.ISensorDisplay 
     {
         /// <summary>
         /// Format information for a list subitem
@@ -539,6 +539,49 @@ namespace OpenMobile
         {
             return _text;
         }
+
+        /// <summary>
+        /// sensor to be watched
+        /// </summary>
+        private Plugin.Sensor sensor;
+        /// <summary>
+        /// Text to be included when formatting the sensor
+        /// </summary>
+        private string sensorText;
+        /// <summary>
+        /// Sets the sensor to subscribe to
+        /// </summary>
+        public string sensorName
+        {
+            get
+            {
+                return sensor.Name;
+            }
+            set
+            {
+                Plugin.Sensor sensor = helperFunctions.Sensors.getPluginByName(value);
+                if (sensor != null)
+                {
+                    sensorText = this.text;
+                    this.sensor = sensor;
+                    sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
+                    {
+                        updateTextFromSensor();
+                    });
+
+                    updateTextFromSensor();
+                }
+            }
+        }
+
+        private void updateTextFromSensor()
+        {
+            if (string.IsNullOrEmpty(sensorText))
+                this.text = sensor.FormatedValue();
+            else
+                this.text = string.Format(sensorText, sensor.FormatedValue());
+        }
+
     }
 
 

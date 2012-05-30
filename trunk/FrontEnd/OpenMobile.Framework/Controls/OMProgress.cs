@@ -239,7 +239,7 @@ namespace OpenMobile.Controls
 
                 OpenMobile.Plugin.Sensor sensor = sensors.Find(s => s.Name == this.sensor);
                 if (sensor != null)
-                    sensor.newSensorDataReceived += new OpenMobile.Plugin.sensorDataReceived(sensor_newSensorDataReceived);
+                    sensor.newSensorDataReceived += new OpenMobile.Plugin.SensorDataReceived(sensor_newSensorDataReceived);
                 this.Value = (int)sensor.Value;
             }
         }

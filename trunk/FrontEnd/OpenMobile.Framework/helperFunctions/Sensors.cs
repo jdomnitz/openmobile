@@ -17,32 +17,49 @@
     There is one additional restriction when using this framework regardless of modifications to it.
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
-
-    Copyright 2011-2012 Jonathan Heizer jheizer@gmail.com
+    
+    Copyright 2012 Jonathan Heizer jheizer@gmail.com
 *********************************************************************************/
-
 using System;
+using System.Text;
+using OpenMobile.Framework;
+using OpenMobile.Plugin;
 using System.Collections.Generic;
-namespace OpenMobile.Plugin
+
+namespace OpenMobile.helperFunctions
 {
     /// <summary>
-    /// Interface with I/O devices and other raw hardware
+    /// Helper functions for the sensor framework
     /// </summary>
-    public interface IRawHardware : ISensorProvider
+    public static class Sensors
     {
         /// <summary>
-        /// Reset the hardware device.
+        /// Retrieve the specific plugin
         /// </summary>
-        void resetDevice();
-        /// <summary>
-        /// Plugin specific (vehicle information, hardware name, etc.)
-        /// </summary>
+        /// <param name="Name">Name of the plugin you want</param>
         /// <returns></returns>
-        string deviceInfo { get; }
-        /// <summary>
-        /// Firmware version of currently connected hardware
-        /// </summary>
-        /// <returns></returns>
-        string firmwareVersion { get; }
+        public static Sensor getPluginByName(string Name)
+        {
+            if (string.IsNullOrEmpty(Name))
+                return null;
+
+            System.Collections.Generic.List<OpenMobile.Plugin.Sensor> sensors = (System.Collections.Generic.List<OpenMobile.Plugin.Sensor>)BuiltInComponents.Host.getData(eGetData.GetAvailableSensors, "");
+            if (sensors == null)
+                return null;
+            
+            Sensor sensor = sensors.Find(s => s.Name == Name);
+
+            return sensor;
+        }
+
+        public static List<Sensor> sensorWrappersToSensors(List<SensorWrapper> SensorWrappers)
+        {
+            List<Sensor> Sensors = new List<Sensor>();
+            if (SensorWrappers != null)
+                foreach(SensorWrapper wrap in SensorWrappers)
+                    Sensors.Add(wrap.sensor);
+
+            return Sensors;
+        }
     }
 }
