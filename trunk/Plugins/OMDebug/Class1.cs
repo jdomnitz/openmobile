@@ -148,6 +148,15 @@ namespace OMDebug
              *      W   :   Warning
              *      I   :   Info (this is the default level if no code is present)
             */
+            if(message == "CLEARLOG")
+            {
+                lock (writer)
+                {
+                    writer.Close();
+                    System.IO.File.Delete(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"));
+                    writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
+                }
+            }
 
             WriteToLog("(" + source + ") => \t", DebugMessage.Decode(message));
             return true;
