@@ -14,7 +14,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with OpenMobile.  If not, see <http://www.gnu.org/licenses/>.
 
-'    Copyright 2010 Jonathan Heizer jheizer@gmail.com
+'    Copyright 2010-2012 Jonathan Heizer jheizer@gmail.com
 #End Region
 
 Imports OpenMobile
@@ -28,13 +28,7 @@ Public Class GPSStatus
 
     Private WithEvents m_Host As IPluginHost
     Private m_Manager As ScreenManager
-    Private m_Output As New Generic.List(Of OMLabel)
-
     Private m_Gps As IRawHardware
-
-    Private WithEvents m_Timer As New Timers.Timer(1000)
-
-    Private PIDsLoaded As Boolean = False
 
     Public Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean Implements OpenMobile.Plugin.IBasePlugin.incomingMessage
 
@@ -60,9 +54,8 @@ Public Class GPSStatus
         Lat.Name = "GPSStatus_Lat"
         Lat.TextAlignment = Alignment.CenterLeft
         Lat.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Lat.Tag = "GPS.Latitude"
+        Lat.sensorName = "SystemSensors.Date"
         Pan.addControl(Lat)
-        m_Output.Add(Lat)
 
         'Long
         Dim LongTitle As New OMLabel(100, 150, 200, 50)
@@ -76,9 +69,8 @@ Public Class GPSStatus
         Lng.Name = "GPSStatus_Long"
         Lng.TextAlignment = Alignment.CenterLeft
         Lng.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Lng.Tag = "GPS.Longitude"
+        Lng.sensorName = "OMSerialGPS.Longitude"
         Pan.addControl(Lng)
-        m_Output.Add(Lng)
 
         'Speed
         Dim SpeedTitle As New OMLabel(100, 200, 200, 50)
@@ -92,9 +84,8 @@ Public Class GPSStatus
         Speed.Name = "GPSStatus_Speed"
         Speed.TextAlignment = Alignment.CenterLeft
         Speed.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Speed.Tag = "GPS.Speed"
+        Speed.sensorName = "OMSerialGPS.Speed"
         Pan.addControl(Speed)
-        m_Output.Add(Speed)
 
         'Altitude
         Dim AltTitle As New OMLabel(100, 250, 200, 50)
@@ -108,9 +99,8 @@ Public Class GPSStatus
         Alt.Name = "GPSStatus_Alt"
         Alt.TextAlignment = Alignment.CenterLeft
         Alt.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Alt.Tag = "GPS.Altitude"
+        Alt.sensorName = "OMSerialGPS.Altitude"
         Pan.addControl(Alt)
-        m_Output.Add(Alt)
 
         'Bearing
         Dim BearingTitle As New OMLabel(100, 300, 200, 50)
@@ -124,9 +114,8 @@ Public Class GPSStatus
         Bearing.Name = "GPSStatus_Bearing"
         Bearing.TextAlignment = Alignment.CenterLeft
         Bearing.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Bearing.Tag = "GPS.Bearing"
+        Bearing.sensorName = "OMSerialGPS.Bearing"
         Pan.addControl(Bearing)
-        m_Output.Add(Bearing)
 
         'ZipCode
         Dim ZipTitle As New OMLabel(100, 350, 200, 50)
@@ -140,9 +129,8 @@ Public Class GPSStatus
         Zip.Name = "GPSStatus_ZipCode"
         Zip.TextAlignment = Alignment.CenterLeft
         Zip.Font = New Font(Font.GenericSansSerif, 24.0F)
-        Zip.Tag = "GPS.ZipCode"
+        Zip.sensorName = "OMSerialGPS.ZipCode"
         Pan.addControl(Zip)
-        m_Output.Add(Zip)
 
         'City
         Dim CityTitle As New OMLabel(100, 400, 200, 50)
@@ -156,9 +144,8 @@ Public Class GPSStatus
         City.Name = "GPSStatus_City"
         City.TextAlignment = Alignment.CenterLeft
         City.Font = New Font(Font.GenericSansSerif, 24.0F)
-        City.Tag = "GPS.City"
+        City.sensorName = "OMSerialGPS.City"
         Pan.addControl(City)
-        m_Output.Add(City)
 
         m_Manager = New ScreenManager(m_Host.ScreenCount)
         m_Manager.loadSharedPanel(Pan)
@@ -174,42 +161,10 @@ Public Class GPSStatus
 
         Dim Pan As OMPanel = m_Manager(screen, name)
 
-        If Not PIDsLoaded Then
-
-            Dim o As Object
-            m_Host.getData(eGetData.GetAvailableSensors, "OMSerialGPS", o)
-
-            Dim Sensors As Generic.List(Of Sensor) = o
-            Dim Sen As Sensor
-            Dim C As OMLabel
-            For Each Ctrl As OMLabel In m_Output
-                C = Ctrl
-                Sen = Sensors.Find(Function(p) p.Name = C.Tag)
-                Ctrl.Tag = Sen.Name
-            Next
-
-            PIDsLoaded = True
-        End If
-
-        m_Timer.Enabled = True
-
         Return Pan
     End Function
 
-    Private Sub m_Timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_Timer.Elapsed
-        RefreshValues()
-    End Sub
-
-    Private Sub RefreshValues()
-        For Each Ctrl As OMLabel In m_Output
-            Ctrl.Text = m_Host.getSensorValue(Ctrl.Tag).ToString
-        Next
-    End Sub
-
     Private Sub m_Host_OnSystemEvent(ByVal funct As OpenMobile.eFunction, ByVal arg1 As String, ByVal arg2 As String, ByVal arg3 As String) Handles m_Host.OnSystemEvent
-        If funct = eFunction.TransitionFromAny Then
-            m_Timer.Enabled = False
-        End If
     End Sub
 
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
