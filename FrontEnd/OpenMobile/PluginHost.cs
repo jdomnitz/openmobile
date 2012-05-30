@@ -3029,7 +3029,7 @@ namespace OpenMobile
                             if (string.IsNullOrEmpty(name))
                             {
                                 List<Sensor> Sensors = new List<Sensor>();
-                                foreach (IRawHardware g in Core.pluginCollection.FindAll(p => typeof(IRawHardware).IsInstanceOfType(p)))
+                                foreach (ISensorProvider g in Core.pluginCollection.FindAll(p => typeof(ISensorProvider).IsInstanceOfType(p)))
                                 {
                                     Sensors.AddRange(g.getAvailableSensors(eSensorType.All));
 
