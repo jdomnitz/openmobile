@@ -1,4 +1,22 @@
-﻿Imports OpenMobile
+﻿#Region "GPL"
+'    This file is part of OpenMobile.
+
+'    OpenMobile is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+
+'    OpenMobile is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+
+'    You should have received a copy of the GNU General Public License
+'    along with OpenMobile.  If not, see <http://www.gnu.org/licenses/>.
+
+'    Copyright 2011-2012 Jonathan Heizer jheizer@gmail.com
+#End Region
+Imports OpenMobile
 Imports OpenMobile.Framework
 Imports OpenMobile.Plugin
 Imports OpenMobile.Controls
@@ -44,102 +62,31 @@ Public Class SensorTester
 
         Dim Pan As OMPanel = m_Manager(screen, name)
         Dim List As OMList = Pan("Sensors")
+        List.ListStyle = eListStyle.TextList
+
         List.Clear()
 
-        Dim o As Object
-        m_Host.getData(eGetData.GetAvailableSensors, "", o)
+        Dim Sensors As Generic.List(Of Sensor) = m_Host.getData(eGetData.GetAvailableSensors, "")
 
-        If Not o Is Nothing Then
-            Dim Sensors As Generic.List(Of Sensor) = o
-
+        If Not Sensors Is Nothing Then
             For Each Sen As Sensor In Sensors
                 If Sen.Type = eSensorType.deviceSuppliesData Then
-                    List.Add(New OMListItem(Sen.Name & "-" & GetVal(Sen)))
+                    Dim item As New OMListItem(Sen.Name & " - {0}")
+                    item.sensorName = Sen.Name
+                    List.Add(item)
                 End If
             Next
 
         End If
 
-        m_Host.setSensorValue(100101, 1)
-
         Return Pan
+
     End Function
 
     Public Sub DataChanged(ByVal name As String, ByVal value As Object)
         Dim List As OMList = m_Manager(0, "")("Sensors")
         List.Add(New OMListItem(name & "-" & value))
     End Sub
-
-
-    Private Function GetVal(ByVal Sen As Sensor) As String
-        Dim Val As String = m_Host.getSensorValue(Sen.Name).ToString
-
-        Select Case Sen.DataType
-            Case Is = eSensorDataType.Amps
-                Return Val & "Amps"
-
-            Case Is = eSensorDataType.binary
-                If Val = "1" Then
-                    Return "On"
-                End If
-                Return "Off"
-
-            Case Is = eSensorDataType.bytes
-                Dim dec As Double = Val
-                If dec > 1099511627776 Then
-                    Return (dec / 1099511627776).ToString("#.#") & "TB"
-                End If
-                If dec > 1073741824 Then
-                    Return (dec / 1073741824).ToString("#.#") & "GB"
-                End If
-                If dec > 1048576 Then
-                    Return (dec / 1048576).ToString("#.#") & "MB"
-                End If
-                If dec > 1024 Then
-                    Return (dec / 1024).ToString("#.#") & "KB"
-                End If
-                Return Val & "B"
-
-            Case Is = eSensorDataType.bytespersec
-                Dim dec As Double = Val
-                If dec > 1048576 Then
-                    Return (dec / 1048576).ToString("#.#") & "Mbps"
-                End If
-                If dec > 1024 Then
-                    Return (dec / 1024).ToString("#.#") & "Kbps"
-                End If
-                Return Val & "Bps"
-
-            Case Is = eSensorDataType.degrees
-                Return Val & "°"
-
-            Case Is = eSensorDataType.degreesC
-                Return Val & "°"
-
-            Case Is = eSensorDataType.Gs
-                Return Val & "Gs"
-
-            Case Is = eSensorDataType.kilometers
-                Return Val & "km"
-
-            Case Is = eSensorDataType.kph
-                Return Val & "kph"
-
-            Case Is = eSensorDataType.meters
-                Return Val & "m"
-
-            Case Is = eSensorDataType.percent
-                Return Val & "%"
-
-            Case Is = eSensorDataType.psi
-                Return Val & "psi"
-
-            Case Is = eSensorDataType.volts
-                Return Val & "V"
-        End Select
-
-        Return Val
-    End Function
 
     Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
         Return Nothing
@@ -178,7 +125,7 @@ Public Class SensorTester
 
     Public ReadOnly Property authorName() As String Implements OpenMobile.Plugin.IBasePlugin.authorName
         Get
-            Return "Jon heizer"
+            Return "Jon Heizer"
         End Get
     End Property
 
