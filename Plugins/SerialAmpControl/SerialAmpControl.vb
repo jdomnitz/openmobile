@@ -48,6 +48,7 @@ Public Class SerialAmpControl
     Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements OpenMobile.Plugin.IBasePlugin.initialize
         LoadPortSettings()
         If Not m_ComPort = "-1" Then
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "SerialAmpControl", "ComPort" & m_ComPort)
             m_Host = host
             m_Port = New SerialPort(m_ComPort)
             SafeThread.Asynchronous(AddressOf TurnOn, host)
@@ -55,19 +56,27 @@ Public Class SerialAmpControl
     End Function
 
     Private Sub TurnOn()
-        If Not m_Port Is Nothing Then
-            If Not m_Port.IsOpen Then
-                m_Port.Open()
+        Try
+            If Not m_Port Is Nothing Then
+                If Not m_Port.IsOpen Then
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "SerialAmpControl", "Opening Port")
+                    m_Port.Open()
+                End If
+
+                System.Threading.Thread.Sleep(Double.Parse(m_Delay) * 1000)
+
+                If m_Line = "DTR" Then
+                    m_Port.DtrEnable = True
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "SerialAmpControl", "DTR Enabled")
+                Else
+                    m_Port.RtsEnable = True
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "SerialAmpControl", "RTS Enabled")
+                End If
             End If
 
-            System.Threading.Thread.Sleep(Double.Parse(m_Delay) * 1000)
-
-            If m_Line = "DTR" Then
-                m_Port.DtrEnable = True
-            Else
-                m_Port.RtsEnable = True
-            End If
-        End If
+        Catch ex As Exception
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "SerialAmpControl", "Error " & ex.ToString)
+        End Try
     End Sub
 
     Private Sub TurnOff()
@@ -157,7 +166,7 @@ Public Class SerialAmpControl
 
     Public ReadOnly Property pluginDescription() As String Implements OpenMobile.Plugin.IBasePlugin.pluginDescription
         Get
-            Return "Amp Control Serial Port DTR"
+            Return "Amp Control Serial Port"
         End Get
     End Property
 
