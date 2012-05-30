@@ -42,11 +42,11 @@ Public Class RadioComm
     Private m_StationList As New Generic.SortedDictionary(Of Integer, stationInfo)
     Private m_SubStationData As New Generic.SortedDictionary(Of Integer, SubChannelData)
     Private m_CurrentMedia As New mediaInfo
-    Private m_CurrentInstance As Integer = 0
+    Private m_CurrentInstance As Zone = Nothing
     Private m_HDCallSign As String = ""
     Private m_IsScanning As Boolean = False
 
-    Public Event MediaEvent(ByVal [function] As OpenMobile.eFunction, ByVal instance As Integer, ByVal arg As String) Implements OpenMobile.Plugin.IPlayer.OnMediaEvent
+    Public Event OnMediaEvent(ByVal [function] As OpenMobile.eFunction, ByVal zone As OpenMobile.Zone, ByVal arg As String) Implements OpenMobile.Plugin.IPlayer.OnMediaEvent
 
     Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements OpenMobile.Plugin.IBasePlugin.initialize
         m_Host = host
@@ -142,14 +142,14 @@ Public Class RadioComm
         End Using
     End Function
 
-    Public Function setPowerState(ByVal instance As Integer, ByVal powerState As Boolean) As Boolean Implements OpenMobile.Plugin.ITunedContent.setPowerState
+    Public Function setPowerState(ByVal zone As OpenMobile.Zone, ByVal powerState As Boolean) As Boolean Implements OpenMobile.Plugin.ITunedContent.setPowerState
         Try
             If m_Audio Is Nothing Then
                 Return False
             End If
 
-            m_Audio.setVolume(instance, m_RouteVolume)
-            m_Audio.setZonePower(instance, powerState)
+            m_Audio.setVolume(zone.AudioDeviceInstance, m_RouteVolume)
+            m_Audio.setZonePower(zone.AudioDeviceInstance, powerState)
 
             If powerState Then
                 'Hardware powers on ahead of time since it is slow...
@@ -166,7 +166,7 @@ Public Class RadioComm
                 Using St As New OpenMobile.Data.PluginSettings
                     St.setSetting("OMVisteonRadio.LastPlaying" & m_CurrentInstance.ToString, "")
                 End Using
-                
+
                 Return True
             End If
 
@@ -216,7 +216,7 @@ Public Class RadioComm
         End Select
     End Sub
 
-    Public Function getStatus(ByVal instance As Integer) As OpenMobile.tunedContentInfo Implements OpenMobile.Plugin.ITunedContent.getStatus
+    Public Function getStatus(ByVal zone As OpenMobile.Zone) As OpenMobile.tunedContentInfo Implements OpenMobile.Plugin.ITunedContent.getStatus
         Dim tc As New tunedContentInfo
 
         Select Case m_Radio.PowerState
@@ -234,13 +234,13 @@ Public Class RadioComm
         tc.powerState = True
         tc.channels = 2
 
-        tc.currentStation = getStationInfo(instance)
-        tc.stationList = getStationList(instance)
+        tc.currentStation = getStationInfo(zone)
+        tc.stationList = getStationList(zone)
 
         Return tc
     End Function
 
-    Public Function getStationInfo(ByVal instance As Integer) As OpenMobile.stationInfo Implements OpenMobile.Plugin.ITunedContent.getStationInfo
+    Public Function getStationInfo(ByVal zone As OpenMobile.Zone) As OpenMobile.stationInfo Implements OpenMobile.Plugin.ITunedContent.getStationInfo
         Dim Info As stationInfo
 
         If m_Radio.CurrentFrequency > 100 Then
@@ -267,24 +267,24 @@ Public Class RadioComm
         Return New stationInfo
     End Function
 
-    Public Function getMediaInfo(ByVal instance As Integer) As OpenMobile.mediaInfo Implements OpenMobile.Plugin.IPlayer.getMediaInfo
+    Public Function getMediaInfo(ByVal zone As OpenMobile.Zone) As OpenMobile.mediaInfo Implements OpenMobile.Plugin.IPlayer.getMediaInfo
         Return m_CurrentMedia
     End Function
 
-    Public Function getStationList(ByVal instance As Integer) As OpenMobile.stationInfo() Implements OpenMobile.Plugin.ITunedContent.getStationList
-        Dim info(m_StationList.Values.Count) As stationInfo
-        m_StationList.Values.CopyTo(info, 0) 'Faster then ToArray :)
-        Return info
+    Public Function getStationList(ByVal zone As OpenMobile.Zone) As OpenMobile.stationInfo() Implements OpenMobile.Plugin.ITunedContent.getStationList
+            Dim info(m_StationList.Values.Count) As stationInfo
+            m_StationList.Values.CopyTo(info, 0) 'Faster then ToArray :)
+            Return info
     End Function
 
-    Public Function tuneTo(ByVal instance As Integer, ByVal station As String) As Boolean Implements OpenMobile.Plugin.ITunedContent.tuneTo
+    Public Function tuneTo(ByVal zone As OpenMobile.Zone, ByVal station As String) As Boolean Implements OpenMobile.Plugin.ITunedContent.tuneTo
         Dim Chan() As String
         Dim Band As HDRadioComm.HDRadio.HDRadioBands = HDRadio.HDRadioBands.FM
         Dim Freq As Decimal = 0
         Dim SubChan As Integer
 
         If station.Length > 0 Then
-            m_CurrentInstance = instance
+            m_CurrentInstance = zone
 
             Chan = station.Split(":")
             If Chan.Length > 1 Then
@@ -313,6 +313,8 @@ Public Class RadioComm
                         End If
                     End If
                 End If
+                RaiseMediaEvent(eFunction.tunerDataUpdated, "")
+                RaiseMediaEvent(eFunction.Play, "")
 
                 Return True
             End If
@@ -321,38 +323,39 @@ Public Class RadioComm
         Return False
     End Function
 
-    Public Function stepBackward(ByVal instance As Integer) As Boolean Implements OpenMobile.Plugin.ITunedContent.stepBackward
-        m_CurrentInstance = instance
+    Public Function stepBackward(ByVal zone As OpenMobile.Zone) As Boolean Implements OpenMobile.Plugin.ITunedContent.stepBackward
+        m_CurrentInstance = zone
         If m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
             m_Radio.TuneDown()
         End If
         Return True
     End Function
 
-    Public Function stepForward(ByVal instance As Integer) As Boolean Implements OpenMobile.Plugin.ITunedContent.stepForward
-        m_CurrentInstance = instance
+    Public Function stepForward(ByVal zone As OpenMobile.Zone) As Boolean Implements OpenMobile.Plugin.ITunedContent.stepForward
+        m_CurrentInstance = zone
         If m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
             m_Radio.TuneUp()
         End If
         Return True
     End Function
 
-    Public Function scanForward(ByVal instance As Integer) As Boolean Implements OpenMobile.Plugin.ITunedContent.scanForward
+    Public Function scanForward(ByVal zone As OpenMobile.Zone) As Boolean Implements OpenMobile.Plugin.ITunedContent.scanForward
+        m_CurrentInstance = zone
         If m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
             m_Radio.SeekUp(HDRadio.HDRadioSeekType.ALL)
         End If
         Return True
     End Function
 
-    Public Function scanReverse(ByVal instance As Integer) As Boolean Implements OpenMobile.Plugin.ITunedContent.scanReverse
-        m_CurrentInstance = instance
+    Public Function scanReverse(ByVal zone As OpenMobile.Zone) As Boolean Implements OpenMobile.Plugin.ITunedContent.scanReverse
+        m_CurrentInstance = zone
         If m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
             m_Radio.SeekDown(HDRadio.HDRadioSeekType.ALL)
         End If
         Return True
     End Function
 
-    Public Function scanBand(ByVal instance As Integer) As Boolean Implements OpenMobile.Plugin.ITunedContent.scanBand
+    Public Function scanBand(ByVal zone As OpenMobile.Zone) As Boolean Implements OpenMobile.Plugin.ITunedContent.scanBand
         If m_IsScanning Then
             m_IsScanning = False
         Else
@@ -381,16 +384,16 @@ Public Class RadioComm
         End Try
     End Sub
 
-    Public Function setBand(ByVal instance As Integer, ByVal band As OpenMobile.eTunedContentBand) As Boolean Implements OpenMobile.Plugin.ITunedContent.setBand
-        m_CurrentInstance = instance
+    Public Function setBand(ByVal zone As OpenMobile.Zone, ByVal band As OpenMobile.eTunedContentBand) As Boolean Implements OpenMobile.Plugin.ITunedContent.setBand
+        m_CurrentInstance = zone
         If band = eTunedContentBand.AM Then
-            Return tuneTo(instance, "AM:53000")
+            Return tuneTo(zone, "AM:53000")
         ElseIf band = eTunedContentBand.FM OrElse band = eTunedContentBand.HD Then
-            Return tuneTo(instance, "FM:88100")
+            Return tuneTo(zone, "FM:88100")
         End If
     End Function
 
-    Public Function getSupportedBands(ByVal instance As Integer) As OpenMobile.eTunedContentBand() Implements OpenMobile.Plugin.ITunedContent.getSupportedBands
+    Public Function getSupportedBands(ByVal zone As OpenMobile.Zone) As OpenMobile.eTunedContentBand() Implements OpenMobile.Plugin.ITunedContent.getSupportedBands
         Return New eTunedContentBand() {eTunedContentBand.AM, eTunedContentBand.FM, eTunedContentBand.HD}
     End Function
 
@@ -414,6 +417,7 @@ Public Class RadioComm
                 m_CurrentMedia.Name = m_HDCallSign & "HD-" & m_Radio.CurrentHDSubChannel
             End If
 
+            RaiseMediaEvent(eFunction.Play, "")
         End SyncLock
     End Sub
 
@@ -425,7 +429,7 @@ Public Class RadioComm
                         If Not m_StationList.ContainsKey(m_Radio.CurrentFrequency & ":" & i) Then
                             Dim Info As New stationInfo
                             Info.stationID = "HD" + ":" + (m_Radio.CurrentFrequency * 100) + ":" + i
-                            Info.stationName = m_Radio.CurrentFrequency / 10 & "HD-" & i
+                            Info.stationName = m_Radio.CurrentFormattedChannel & "HD-" & i
                             Info.Bitrate = 0
                             Info.Channels = 2
                             Info.stationGenre = ""
@@ -435,6 +439,7 @@ Public Class RadioComm
                         End If
                     Next
                     RaiseMediaEvent(eFunction.stationListUpdated, "")
+
                 End SyncLock
             End SyncLock
         End If
@@ -504,7 +509,7 @@ Public Class RadioComm
     End Sub
 
     Private Sub m_Radio_HDRadioEventRDSProgramService(ByVal Message As String) Handles m_Radio.HDRadioEventRDSProgramService
-        
+
     End Sub
 
     Private Sub m_Radio_HDRadioEventRDSRadioText(ByVal Message As String) Handles m_Radio.HDRadioEventRDSRadioText
@@ -608,9 +613,10 @@ Public Class RadioComm
     End Sub
 
     Private Sub RaiseMediaEvent(ByVal Fun As eFunction, ByVal arg As String)
-        For Each Inst As Integer In m_Audio.ActiveInstances
-            RaiseEvent MediaEvent(Fun, Inst, arg)
-        Next
+        'Just for now
+        'For Each z As Object In m_Host.ZoneHandler.
+        RaiseEvent OnMediaEvent(Fun, m_CurrentInstance, arg)
+        'Next
     End Sub
 
     Public Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean Implements OpenMobile.Plugin.IBasePlugin.incomingMessage
@@ -627,12 +633,12 @@ Public Class RadioComm
         End Get
     End Property
 
-    Public Function getVolume(ByVal instance As Integer) As Integer Implements OpenMobile.Plugin.IPlayer.getVolume
-        Return m_Audio.getVolume(instance)
+    Public Function getVolume(ByVal zone As OpenMobile.Zone) As Integer Implements OpenMobile.Plugin.IPlayer.getVolume
+        Return m_Audio.getVolume(zone.ID)
     End Function
 
-    Public Function setVolume(ByVal instance As Integer, ByVal percent As Integer) As Boolean Implements OpenMobile.Plugin.IPlayer.setVolume
-        m_Audio.setVolume(instance, percent)
+    Public Function setVolume(ByVal zone As OpenMobile.Zone, ByVal percent As Integer) As Boolean Implements OpenMobile.Plugin.IPlayer.setVolume
+        m_Audio.setVolume(zone.ID, percent)
     End Function
 
     'Pre powering the radio on and off so return true
@@ -650,7 +656,7 @@ Public Class RadioComm
         End Get
     End Property
 
-    Public Function SetVideoVisible(ByVal instance As Integer, ByVal visible As Boolean) As Boolean Implements OpenMobile.Plugin.IPlayer.SetVideoVisible
+    Public Function SetVideoVisible(ByVal zone As OpenMobile.Zone, ByVal visible As Boolean) As Boolean Implements OpenMobile.Plugin.IPlayer.SetVideoVisible
         Return False
     End Function
 
@@ -727,5 +733,6 @@ Public Class RadioComm
         Public Artist As String
         Public Title As String
     End Class
+
 End Class
 
