@@ -525,7 +525,7 @@ namespace OpenMobile
             if (string.IsNullOrEmpty(name))
                 return -1;
 
-            return Array.FindIndex(AudioDevices, p => (p != null) && (p.Replace("  ", " ") == name)); // +1;
+            return Array.FindIndex(AudioDevices, p => (p != null) && p == name);//(p.Replace("  ", " ") == name)); // +1;
         }
 
         /// <summary>
