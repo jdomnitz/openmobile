@@ -30,6 +30,69 @@ namespace OpenMobile.Media
     /// </summary>
     public static class MediaLoader
     {
+        private static OImage _MissingCoverImage = null;
+
+        /// <summary>
+        /// An image representing a missing cover
+        /// </summary>
+        public static OImage MissingCoverImage
+        {
+            get
+            {
+                if (_MissingCoverImage == null)
+                    _MissingCoverImage = OpenMobile.helperFunctions.Graphics.MediaGraphic.GetImage(300, 300, OpenMobile.helperFunctions.Graphics.MediaGraphic.GraphicStyles.NoCover);
+                return _MissingCoverImage;
+            }
+        }
+
+        /// <summary>
+        /// Updates missing information in a mediaInfo data (if available) from the default music database
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="MissingCoverImage"></param>
+        /// <returns></returns>
+        public static mediaInfo UpdateMissingMediaInfo(mediaInfo item, OImage MissingCoverImage)
+        {
+            return UpdateMissingMediaInfo(item, null, helperFunctions.StoredData.Get("Default.MusicDatabase"));
+        }
+        /// <summary>
+        /// Updates missing information in a mediaInfo data (if available) from the default music database
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static mediaInfo UpdateMissingMediaInfo(mediaInfo item)
+        {
+            return UpdateMissingMediaInfo(item, null, helperFunctions.StoredData.Get("Default.MusicDatabase"));
+        }
+        /// <summary>
+        /// Updates missing information in a mediaInfo data (if available)
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="dbName"></param>
+        /// <returns></returns>
+        public static mediaInfo UpdateMissingMediaInfo(mediaInfo item, OImage missingCoverImage, string dbName)
+        {
+            // Extract info from source file if information is missing
+            if (string.IsNullOrEmpty(item.Name))
+                item = OpenMobile.Media.TagReader.getInfo(item.Location);
+            if (item == null)
+                return item;
+
+            // Try to get cover art from database
+            if (item.coverArt == null)
+                item.coverArt = TagReader.getCoverFromDB(item.Artist, item.Album, dbName);
+
+            // Try to get cover from file(s) located in source folder
+            if (item.coverArt == null)
+                item.coverArt = TagReader.getFolderImage(item.Location);
+
+            // if nothing is available then use a generated default image
+            if (item.coverArt == null)
+                item.coverArt = (missingCoverImage == null ? MediaLoader.MissingCoverImage : missingCoverImage);
+
+            return item;
+        }
+
         /// <summary>
         /// Loads a list of genres
         /// </summary>
@@ -136,7 +199,7 @@ namespace OpenMobile.Media
                 while (info != null)
                 {
                     if (info.coverArt == null)
-                        info.coverArt = noCover;
+                        info.coverArt = (noCover == null ? MediaLoader.MissingCoverImage : noCover);
                     list.AddDistinct(new OMListItem(info.Album, artist, info.coverArt, format));
                     info = db.getNextMedia();
                 }
@@ -177,7 +240,7 @@ namespace OpenMobile.Media
                 while (info != null)
                 {
                     if (info.coverArt == null)
-                        info.coverArt = noCover;
+                        info.coverArt = (noCover == null ? MediaLoader.MissingCoverImage : noCover);
                     list.AddDistinct(new OMListItem(info.Name, info.Album, info.coverArt, format, info.Location));
                     info = db.getNextMedia();
                 }
@@ -249,7 +312,7 @@ namespace OpenMobile.Media
                 while (info != null)
                 {
                     if (info.coverArt == null)
-                        info.coverArt = noCover;
+                        info.coverArt = (noCover == null ? MediaLoader.MissingCoverImage : noCover);
                     if (info.Type == eMediaType.AudioCD)
                         list.Add(new OMListItem(info.Name, info.Artist, info.coverArt, format, info.Location, info.TrackNumber.ToString()));
                     else
@@ -312,7 +375,7 @@ namespace OpenMobile.Media
                 while (info != null)
                 {
                     if (info.coverArt == null)
-                        info.coverArt = noCover;
+                        info.coverArt = (noCover == null ? MediaLoader.MissingCoverImage : noCover);
                     if (info.Type == eMediaType.AudioCD)
                         list.Add(new OMListItem(info.Name, info.Album, info.coverArt, format, info.Location, info.TrackNumber.ToString()));
                     else
@@ -369,7 +432,7 @@ namespace OpenMobile.Media
                 while (info != null)
                 {
                     if (info.coverArt == null)
-                        info.coverArt = noCover;
+                        info.coverArt = (noCover == null ? MediaLoader.MissingCoverImage : noCover);
                     list.AddDistinct(new OMListItem(info.Name, artist, info.coverArt, format, info.Location));
                     info = db.getNextMedia();
                 }

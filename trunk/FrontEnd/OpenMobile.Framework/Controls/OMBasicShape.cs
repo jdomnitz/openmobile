@@ -107,15 +107,15 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float tmp = OpacityFloat;
+            float alpha = OpacityFloat;
             if (this.Mode == eModeType.transitioningIn)
-                tmp = e.globalTransitionIn;
+                alpha = e.globalTransitionIn;
             else if (this.Mode == eModeType.transitioningOut)
-                tmp = e.globalTransitionOut;
+                alpha = e.globalTransitionOut;
 
-            Brush Fill = new Brush(Color.FromArgb((int)(tmp * fillColor.A), fillColor));
+            Brush Fill = new Brush(Color.FromArgb((int)(alpha * fillColor.A), fillColor));
             if (borderSize > 0)
-                BorderPen = new Pen(Color.FromArgb((int)(tmp * borderColor.A), borderColor), borderSize);
+                BorderPen = new Pen(Color.FromArgb((int)(alpha * borderColor.A), borderColor), borderSize);
 
             switch (shape)
             {

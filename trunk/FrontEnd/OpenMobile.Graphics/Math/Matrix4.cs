@@ -52,7 +52,7 @@ namespace OpenMobile.Math
         /// Bottom row of the matrix
         /// </summary>
         public Vector4 Row3;
- 
+
         /// <summary>
         /// The identity matrix
         /// </summary>
@@ -274,9 +274,83 @@ namespace OpenMobile.Math
         #endregion
 
         #region Static
-        
+
+        #region CreateFromQuaternion
+        /// <summary>
+        /// Build a rotation matrix from the specified quaternion.
+        /// </summary>
+        /// <param name="q">Quaternion to translate.</param>
+        /// <param name="m">Matrix result.</param>
+        public static void CreateFromQuaternion(ref Quaternion q, ref Matrix4 m)
+        {
+            m = Matrix4.Identity;
+
+            float X = q.X;
+            float Y = q.Y;
+            float Z = q.Z;
+            float W = q.W;
+
+            float xx = X * X;
+            float xy = X * Y;
+            float xz = X * Z;
+            float xw = X * W;
+            float yy = Y * Y;
+            float yz = Y * Z;
+            float yw = Y * W;
+            float zz = Z * Z;
+            float zw = Z * W;
+
+            m.M11 = 1 - 2 * (yy + zz);
+            m.M21 = 2 * (xy - zw);
+            m.M31 = 2 * (xz + yw);
+            m.M12 = 2 * (xy + zw);
+            m.M22 = 1 - 2 * (xx + zz);
+            m.M32 = 2 * (yz - xw);
+            m.M13 = 2 * (xz - yw);
+            m.M23 = 2 * (yz + xw);
+            m.M33 = 1 - 2 * (xx + yy);
+        }
+
+        /// <summary>
+        /// Build a rotation matrix from the specified quaternion.
+        /// </summary>
+        /// <param name="q">Quaternion to translate.</param>
+        /// <returns>A matrix instance.</returns>
+        public static Matrix4 CreateFromQuaternion(ref Quaternion q)
+        {
+            Matrix4 result = Matrix4.Identity;
+
+            float X = q.X;
+            float Y = q.Y;
+            float Z = q.Z;
+            float W = q.W;
+
+            float xx = X * X;
+            float xy = X * Y;
+            float xz = X * Z;
+            float xw = X * W;
+            float yy = Y * Y;
+            float yz = Y * Z;
+            float yw = Y * W;
+            float zz = Z * Z;
+            float zw = Z * W;
+
+            result.M11 = 1 - 2 * (yy + zz);
+            result.M21 = 2 * (xy - zw);
+            result.M31 = 2 * (xz + yw);
+            result.M12 = 2 * (xy + zw);
+            result.M22 = 1 - 2 * (xx + zz);
+            result.M32 = 2 * (yz - xw);
+            result.M13 = 2 * (xz - yw);
+            result.M23 = 2 * (yz + xw);
+            result.M33 = 1 - 2 * (xx + yy);
+            return result;
+        }
+
+        #endregion
+
         #region CreateFromAxisAngle
-        
+
         /// <summary>
         /// Build a rotation matrix from the specified axis/angle rotation.
         /// </summary>
@@ -296,7 +370,7 @@ namespace OpenMobile.Math
                                  t * axis.X * axis.Z - sin * axis.Y, t * axis.Y * axis.Z + sin * axis.X, t * axis.Z * axis.Z + cos, 0.0f,
                                  0, 0, 0, 1);
         }
-        
+
         /// <summary>
         /// Build a rotation matrix from the specified axis/angle rotation.
         /// </summary>
@@ -309,7 +383,7 @@ namespace OpenMobile.Math
             CreateFromAxisAngle(axis, angle, out result);
             return result;
         }
-        
+
         #endregion
 
         #region CreateRotation[XYZ]
@@ -396,6 +470,28 @@ namespace OpenMobile.Math
             Matrix4 result;
             CreateRotationZ(angle, out result);
             return result;
+        }
+
+        #endregion
+
+        #region CreateShear
+
+        /// <summary>
+        /// Builds a shear matrix.
+        /// </summary>
+        /// <param name="shearXbyY">a shear of X by Y</param>
+        /// <param name="shearXbyZ">a shear of X by Z</param>
+        /// <param name="shearYbyX">a shear of Y by X</param>
+        /// <param name="shearYbyZ">a shear of Y by Z</param>
+        /// <param name="shearZbyX">a shear of Z by X</param>
+        /// <param name="shearZbyY">a shear of Z by Y</param>
+        /// <returns>the shear matrix</returns>
+        public static Matrix4 CreateShearMatrix(float shearXbyY, float shearXbyZ, float shearYbyX, float shearYbyZ, float shearZbyX, float shearZbyY)
+        {
+            return new Matrix4(1, shearYbyX, shearZbyX, 0,
+                                shearXbyY, 1, shearZbyY, 0,
+                                shearXbyZ, shearYbyZ, 1, 0,
+                                0, 0, 0, 1);
         }
 
         #endregion
@@ -534,9 +630,9 @@ namespace OpenMobile.Math
         }
 
         #endregion
-        
+
         #region CreatePerspectiveFieldOfView
-        
+
         /// <summary>
         /// Creates a perspective projection matrix.
         /// </summary>
@@ -565,7 +661,7 @@ namespace OpenMobile.Math
                 throw new ArgumentOutOfRangeException("zNear");
             if (zFar <= 0)
                 throw new ArgumentOutOfRangeException("zFar");
-            
+
             float yMax = zNear * (float)System.Math.Tan(0.5f * fovy);
             float yMin = -yMax;
             float xMin = yMin * aspect;
@@ -573,7 +669,7 @@ namespace OpenMobile.Math
 
             CreatePerspectiveOffCenter(xMin, xMax, yMin, yMax, zNear, zFar, out result);
         }
-        
+
         /// <summary>
         /// Creates a perspective projection matrix.
         /// </summary>
@@ -598,11 +694,11 @@ namespace OpenMobile.Math
             CreatePerspectiveFieldOfView(fovy, aspect, zNear, zFar, out result);
             return result;
         }
-        
+
         #endregion
-        
+
         #region CreatePerspectiveOffCenter
-        
+
         /// <summary>
         /// Creates an perspective projection matrix.
         /// </summary>
@@ -629,20 +725,20 @@ namespace OpenMobile.Math
                 throw new ArgumentOutOfRangeException("zFar");
             if (zNear >= zFar)
                 throw new ArgumentOutOfRangeException("zNear");
-            
+
             float x = (2.0f * zNear) / (right - left);
             float y = (2.0f * zNear) / (top - bottom);
             float a = (right + left) / (right - left);
             float b = (top + bottom) / (top - bottom);
             float c = -(zFar + zNear) / (zFar - zNear);
             float d = -(2.0f * zFar * zNear) / (zFar - zNear);
-            
-            result = new Matrix4(x, 0, 0,  0,
-                                 0, y, 0,  0,
+
+            result = new Matrix4(x, 0, 0, 0,
+                                 0, y, 0, 0,
                                  a, b, c, -1,
-                                 0, 0, d,  0);
+                                 0, 0, d, 0);
         }
-        
+
         /// <summary>
         /// Creates an perspective projection matrix.
         /// </summary>
@@ -667,7 +763,7 @@ namespace OpenMobile.Math
             CreatePerspectiveOffCenter(left, right, bottom, top, zNear, zFar, out result);
             return result;
         }
-        
+
         #endregion
 
         #region Scale Functions

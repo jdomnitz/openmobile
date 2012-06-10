@@ -53,7 +53,7 @@ namespace ControlDemo
             List3.ListStyle = eListStyle.DroidStyleImage;
             List3.ItemColor1 = Color.Black;
             List3.ListItemHeight = 70;
-            List3.OnClick+= new userInteraction(List3_OnClick);
+            List3.OnClick += new userInteraction(List3_OnClick);
             p.addControl(Image1);
             p.addControl(Label2);
             p.addControl(List3);
@@ -69,7 +69,7 @@ namespace ControlDemo
                 List3.Clear();
                 lastPath = arg1;
                 ((OMLabel)p[1]).Text = OpenMobile.Framework.Globalization.formatPhoneNumber(arg1);
-                ((OMImage)p[3]).Image=theHost.getSkinImage("Discs|Phone",true);
+                ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|Phone", true);
                 imageItem itm = theHost.getSkinImage("Discs|Dial", true);
                 List3.Add(new OMListItem("Dial Number", itm.image));
                 itm = theHost.getSkinImage("Discs|Add", true);
@@ -88,29 +88,30 @@ namespace ControlDemo
         {
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
-                theHost.execute(eFunction.TransitionFromPanel,i.ToString(), "OMNotify", "notify");
+                theHost.execute(eFunction.TransitionFromPanel, i.ToString(), "OMNotify", "notify");
                 theHost.execute(eFunction.ExecuteTransition, i.ToString(), "None");
             }
             switch (List3[List3.SelectedIndex].text)
             {
                 case "Play CD":
-					if (Configuration.RunningOnWindows)
-					{
-                    	string[] songs=Directory.GetFiles(lastPath);
-                        if (theHost.setPlaylist(Playlist.Convert(songs), screen))
+                    if (Configuration.RunningOnWindows)
+                    {
+                        string[] songs = Directory.GetFiles(lastPath);
+                        if (theHost.setPlaylist(PlaylistHandler.Convert(songs), screen))
                             theHost.execute(eFunction.nextMedia, screen.ToString());
-					}else if(Configuration.RunningOnLinux)
-					{
-						string name=DeviceInfo.get(lastPath).VolumeLabel;
-						string[] arg=name.Split(new char[]{'|'});
-						List<string> songs=new List<string>();
-						int tracks=int.Parse(arg[1]);
-						for(int i=1;i<=tracks;i++)
-							songs.Add("cdda://"+i.ToString());
-                        if (theHost.setPlaylist(Playlist.Convert(songs), screen))
+                    }
+                    else if (Configuration.RunningOnLinux)
+                    {
+                        string name = DeviceInfo.get(lastPath).VolumeLabel;
+                        string[] arg = name.Split(new char[] { '|' });
+                        List<string> songs = new List<string>();
+                        int tracks = int.Parse(arg[1]);
+                        for (int i = 1; i <= tracks; i++)
+                            songs.Add("cdda://" + i.ToString());
+                        if (theHost.setPlaylist(PlaylistHandler.Convert(songs), screen))
                             theHost.execute(eFunction.nextMedia, screen.ToString());
-					}
-					break;
+                    }
+                    break;
                 case "Play DVD":
                 case "Play Blu-Ray":
                 case "Play HDDVD":
@@ -119,12 +120,12 @@ namespace ControlDemo
                     break;
                 case "Play Playlists":
                     DeviceInfo info = DeviceInfo.get(lastPath);
-                    List<mediaInfo>media=new List<mediaInfo>();
+                    List<mediaInfo> media = new List<mediaInfo>();
                     theHost.SendStatusData(eDataType.Info, this, "", "Loading playlists...");
                     if (info.PlaylistFolders.Length == 0)
                         return;
-                    foreach (string playlist in Playlist.listPlaylists(info.PlaylistFolders[0]))
-                        media.AddRange(Playlist.readPlaylist(playlist));
+                    foreach (string playlist in PlaylistHandler.listPlaylists(info.PlaylistFolders[0]))
+                        media.AddRange(PlaylistHandler.readPlaylist(playlist));
                     theHost.setPlaylist(media, screen);
                     theHost.execute(eFunction.Play, screen.ToString(), media[0].Location);
                     break;
@@ -141,11 +142,11 @@ namespace ControlDemo
                     break;
                 case "View Pictures":
                     DeviceInfo info2 = DeviceInfo.get(lastPath);
-                    string picPath=string.Empty;
+                    string picPath = string.Empty;
                     for (int i = 0; i < info2.PictureFolders.Length; i++)
                     {
                         picPath = info2.PictureFolders[i];
-                        if (Directory.Exists(picPath)&& Directory.GetFiles(picPath).Length > 0)
+                        if (Directory.Exists(picPath) && Directory.GetFiles(picPath).Length > 0)
                             break;
                     }
                     if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Slideshow", picPath))
@@ -155,7 +156,7 @@ namespace ControlDemo
             List3.SelectedIndex = -1;
         }
 
-        void theHost_OnStorageEvent(eMediaType type,bool justInserted, string arg)
+        void theHost_OnStorageEvent(eMediaType type, bool justInserted, string arg)
         {
             lastPath = arg;
             List3.Clear();
@@ -179,7 +180,7 @@ namespace ControlDemo
                     break;
                 case eMediaType.AudioCD:
                     ((OMLabel)p[1]).Text = "Audio CD";
-                    ((OMImage)p[3]).Image=theHost.getSkinImage("Discs|AudioCD",true);
+                    ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|AudioCD", true);
                     imageItem itm = theHost.getSkinImage("Discs|Play", true);
                     List3.Add(new OMListItem("Play CD", itm.image));
                     itm = theHost.getSkinImage("Discs|Rip", true);
@@ -188,7 +189,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    IconManager.UIIcon audiocd=new IconManager.UIIcon(theHost.getSkinImage("Discs|AudioCD"), ePriority.MediumHigh, true,"OMNotify");
+                    IconManager.UIIcon audiocd = new IconManager.UIIcon(theHost.getSkinImage("Discs|AudioCD"), ePriority.MediumHigh, true, "OMNotify");
                     audiocd.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "AddIcon", ref audiocd);
                     return;
@@ -214,7 +215,7 @@ namespace ControlDemo
                     List3.Add(new OMListItem("Eject", itm.image));
                     itm = theHost.getSkinImage("Discs|Close", true);
                     List3.Add(new OMListItem("Close", itm.image));
-                    IconManager.UIIcon hddvd = new IconManager.UIIcon(theHost.getSkinImage("Discs|HDDVD"), ePriority.MediumHigh, true,"OMNotify");
+                    IconManager.UIIcon hddvd = new IconManager.UIIcon(theHost.getSkinImage("Discs|HDDVD"), ePriority.MediumHigh, true, "OMNotify");
                     hddvd.tag = lastPath;
                     theHost.sendMessage("UI", "OMNotify", "AddIcon", ref hddvd);
                     return;
@@ -295,7 +296,7 @@ namespace ControlDemo
 
         public OMPanel loadPanel(string name, int screen)
         {
-            if (name=="notify")
+            if (name == "notify")
                 return p;
             return null;
         }

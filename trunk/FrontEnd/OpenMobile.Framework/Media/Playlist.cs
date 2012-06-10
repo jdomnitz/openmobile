@@ -32,7 +32,7 @@ namespace OpenMobile.Media
     /// <summary>
     /// Playlist types
     /// </summary>
-    public enum ePlaylistType
+    public enum ePlaylistType_old
     {
         /// <summary>
         /// M3U Playlist (aka MP3 URL)
@@ -62,7 +62,7 @@ namespace OpenMobile.Media
     /// <summary>
     /// Provides functions for reading and writing playlists
     /// </summary>
-    public static class Playlist
+    public static class Playlist_old
     {
         /// <summary>
         /// Writes a playlist to a file

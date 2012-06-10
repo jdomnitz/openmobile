@@ -687,7 +687,7 @@ namespace OMPlayer
                     nowPlaying = new mediaInfo(url);
                 nowPlaying.Type = eMediaType.Local;
                 if (nowPlaying.coverArt == null)
-                    nowPlaying.coverArt = TagReader.getCoverFromDB(nowPlaying.Artist, nowPlaying.Album, theHost);
+                    nowPlaying.coverArt = TagReader.getCoverFromDB(nowPlaying.Artist, nowPlaying.Album);
                 if (nowPlaying.coverArt == null)
                     nowPlaying.coverArt = TagReader.getFolderImage(nowPlaying.Location);
                 if (nowPlaying.coverArt == null)

@@ -58,9 +58,9 @@ namespace SystemSensors
                 case "SystemSensors.Date":
                     return DateTime.Now.ToShortDateString();
                 case "SystemSensors.Time":
-                    return DateTime.Now.ToShortTimeString();
+                    return DateTime.Now.ToLongTimeString();
                 case "SystemSensors.LongDate":
-                    return DateTime.Now.ToString("MMMM d");
+                    return DateTime.Now.ToLongDateString(); // .ToString("MMMM d");
             }
             return null;
         }
@@ -145,7 +145,13 @@ namespace SystemSensors
             sensors.Add(new SensorWrapper(this.pluginName + ".MemoryUsedPercent", "Men", eSensorDataType.percent, delegate(Sensor sensor) { return getValue(sensor); }));
             sensors.Add(new SensorWrapper(this.pluginName + ".ProcessMemoryUsed", "UMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
             sensors.Add(new SensorWrapper(this.pluginName + ".Date", "Dt", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
-            sensors.Add(new SensorWrapper(this.pluginName + ".Time", "Tm", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
+
+            sensors.Add(new SensorWrapper(this.pluginName + ".Time", "Tm", eSensorDataType.raw, 
+                delegate(Sensor sensor) 
+                { 
+                    return getValue(sensor); 
+                }));
+            
             sensors.Add(new SensorWrapper(this.pluginName + ".LongDate", "Dt", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
         
             slowTimer = new System.Timers.Timer(5000); //These items take a while to refresh to do them less often
@@ -161,13 +167,19 @@ namespace SystemSensors
         void slowTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             for (int i=0; i <= 4; i++)
-                OpenMobile.Threading.SafeThread.Asynchronous(delegate() { sensors[i].UpdateSensorValue( getValue(sensors[i].sensor)); }, thehost);
+                OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+                { 
+                    sensors[i].UpdateSensorValue( getValue(sensors[i].sensor)); 
+                });
         }
 
         void fastTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             for (int i=5; i <= 6; i++)
-                OpenMobile.Threading.SafeThread.Asynchronous(delegate() { sensors[i].UpdateSensorValue( getValue(sensors[i].sensor));}, thehost);
+                OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+                { 
+                    sensors[i].UpdateSensorValue( getValue(sensors[i].sensor));
+                });
         }
 
         public Settings loadSettings()

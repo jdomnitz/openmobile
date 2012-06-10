@@ -172,7 +172,14 @@ namespace OpenMobile.Graphics
                     {
                         ContextHandle handle = GetCurrentContext();
                         if (handle.Handle != IntPtr.Zero)
-                            return (GraphicsContext)available_contexts[handle].Target;
+                            try
+                            {
+                                return (GraphicsContext)available_contexts[handle].Target;
+                            }
+                            catch
+                            {
+                                return null;
+                            }
                     }
                     return null;
                 }

@@ -83,7 +83,7 @@ namespace OpenMobile.helperFunctions.Graphics
         /// <param name="Animation_Speed"></param>
         public SmoothAnimator()
             : this(1.0F)
-        {            
+        {
         }
         /// <summary>
         /// Initialize a new smooth animator
@@ -169,7 +169,7 @@ namespace OpenMobile.helperFunctions.Graphics
             /// </summary>
             Style1
         }
-        
+
         /// <summary>
         /// The different images that can be returned
         /// </summary>
@@ -669,6 +669,121 @@ namespace OpenMobile.helperFunctions.Graphics
             if (!BuiltInComponents.Host.sendMessage<GraphicData>(Handler, "OpenMobile.helperFunctions.FadingEdge", "FadingEdge", ref gd))
             {   // Log this error to the debug log
                 BuiltInComponents.Host.DebugMsg("Unable to get FadingEdge, plugin " + Handler + " not available");
+                return null;
+            }
+            return gd.Image;
+        }
+    }
+
+    /// <summary>
+    /// Media graphics (missing cover etc.)
+    /// </summary>
+    public static class MediaGraphic
+    {
+
+        /// <summary>
+        /// The different types of graphics
+        /// </summary>
+        public enum GraphicStyles
+        {
+            /// <summary>
+            /// NoCover image
+            /// </summary>
+            NoCover,
+            /// <summary>
+            /// The OpenMobile logo
+            /// </summary>
+            OMLogo
+        }
+
+        /// <summary>
+        /// Data for generated graphics
+        /// </summary>
+        public class GraphicData
+        {
+            public GraphicData()
+            {   // Default values
+
+                // Default colors are read from the OM system setting (SkinFocusColor)
+                this.ForegroundColor = BuiltInComponents.SystemSettings.SkinFocusColor;
+            }
+
+            /// <summary>
+            /// Button type to generate
+            /// </summary>
+            public GraphicStyles Style { get; set; }
+            /// <summary>
+            /// Height of graphic
+            /// </summary>
+            public int Height { get; set; }
+            /// <summary>
+            /// Width of graphic
+            /// </summary>
+            public int Width { get; set; }
+            /// <summary>
+            /// Generated image
+            /// </summary>
+            public OImage Image { get; set; }
+            /// <summary>
+            /// Color to use when drawing the background color
+            /// </summary>
+            public Color BackgroundColor { get; set; }
+            /// <summary>
+            /// Color to use when drawing the foreground
+            /// </summary>
+            public Color ForegroundColor { get; set; }
+        }
+
+        /// <summary>
+        /// Gets a image of the requested type and the requested width and height using the default handler (OMGraphics)
+        /// </summary>
+        /// <param name="Width"></param>
+        /// <param name="Height"></param>
+        /// <param name="ImageType"></param>
+        /// <returns></returns>
+        public static OImage GetImage(int Width, int Height, GraphicStyles Style)
+        {
+            GraphicData gd = new GraphicData();
+            gd.Width = Width;
+            gd.Height = Height;
+            gd.Style = Style;
+            return GetImage(gd, "OMGraphics");
+        }
+        /// <summary>
+        /// Gets a image of the requested type and the requested width and height using the requested handler
+        /// </summary>
+        /// <param name="Width"></param>
+        /// <param name="Height"></param>
+        /// <param name="ImageType"></param>
+        /// <param name="Handler"></param>
+        /// <returns></returns>
+        public static OImage GetImage(int Width, int Height, GraphicStyles Style, string Handler)
+        {
+            GraphicData gd = new GraphicData();
+            gd.Width = Width;
+            gd.Height = Height;
+            return GetImage(gd, Handler);
+        }
+        /// <summary>
+        /// Gets a image according to the graphicdata using the default handler (OMGraphics)
+        /// </summary>
+        /// <param name="gd"></param>
+        /// <returns></returns>
+        public static OImage GetImage(GraphicData gd)
+        {
+            return GetImage(gd, "OMGraphics");
+        }
+        /// <summary>
+        /// Gets a image according to the graphicdata using the requested handler
+        /// </summary>
+        /// <param name="gd"></param>
+        /// <param name="Handler"></param>
+        /// <returns></returns>
+        public static OImage GetImage(GraphicData gd, string Handler)
+        {
+            if (!BuiltInComponents.Host.sendMessage<GraphicData>(Handler, "OpenMobile.helperFunctions.MediaGraphic", "MediaGraphic", ref gd))
+            {   // Log this error to the debug log
+                BuiltInComponents.Host.DebugMsg("Unable to get MediaGraphic, plugin " + Handler + " not available");
                 return null;
             }
             return gd.Image;

@@ -270,7 +270,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// sensor to be watched
         /// </summary>
-        protected Plugin.Sensor sensor;
+        protected Plugin.Sensor _Sensor = null;
         /// <summary>
         /// Sets the sensor to subscribe to
         /// </summary>
@@ -278,14 +278,22 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return sensor.Name;
+                if (_Sensor == null)
+                    return "";
+                return _Sensor.Name;
             }
             set
             {
+                if (String.IsNullOrEmpty(value))
+                {
+                    if (_Sensor != null)
+                        _Sensor = null;
+                    return;
+                }
                 Plugin.Sensor sensor = helperFunctions.Sensors.getPluginByName(value);
                 if (sensor != null)
                 {
-                    this.sensor = sensor;
+                    this._Sensor = sensor;
                     //sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
                     //{
                     //    this.Text = sender.FormatedValue();

@@ -190,7 +190,12 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return (int)((((sliderPosition - (sliderWidth / 2)) / (float)(width - sliderWidth)) * (maximum - minimum)) + minimum);
+                int v = (int)((((sliderPosition - (sliderWidth / 2)) / (float)(width - sliderWidth)) * (maximum - minimum)) + minimum);
+                if (v > maximum)
+                    return maximum;
+                if (v < minimum)
+                    return minimum;
+                return v;
             }
             set
             {

@@ -213,9 +213,9 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// sensor name to be watched
+        /// sensor to be watched
         /// </summary>
-        protected string sensor;
+        protected Plugin.Sensor _Sensor = null;
         /// <summary>
         /// Sets the sensor to subscribe to
         /// </summary>
@@ -223,30 +223,31 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return sensor;
+                if (_Sensor == null)
+                    return "";
+                return _Sensor.Name;
             }
             set
             {
-                if (string.IsNullOrEmpty(value))
+                if (String.IsNullOrEmpty(value))
+                {
+                    if (_Sensor != null)
+                        _Sensor = null;
                     return;
-                this.sensor = value;
-
-                object o;
-                BuiltInComponents.Host.getData(eGetData.GetAvailableSensors, "", out o);
-                if (o == null)
-                    return;
-                System.Collections.Generic.List<OpenMobile.Plugin.Sensor> sensors = (System.Collections.Generic.List<OpenMobile.Plugin.Sensor>)o;
-
-                OpenMobile.Plugin.Sensor sensor = sensors.Find(s => s.Name == this.sensor);
+                }
+                Plugin.Sensor sensor = helperFunctions.Sensors.getPluginByName(value);
                 if (sensor != null)
-                    sensor.newSensorDataReceived += new OpenMobile.Plugin.SensorDataReceived(sensor_newSensorDataReceived);
-                this.Value = (int)sensor.Value;
+                {
+                    this._Sensor = sensor;
+                    //sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
+                    //{
+                    //    this.Text = sender.FormatedValue();
+                    //    raiseUpdate(false);
+                    //});
+                    this.Value = (int)sensor.Value;
+                    raiseUpdate(false);
+                }
             }
-        }
-
-        void sensor_newSensorDataReceived(OpenMobile.Plugin.Sensor sender)
-        {
-            this.Value = (int)sender.Value;
         }
 
     }

@@ -75,7 +75,7 @@ namespace OpenMobile.Zones
         }
 
 
-        private int[] _ActiveZones = null; 
+        private int[] _ActiveZones = null;
 
         /// <summary>
         /// List of currently active zone id's (Array index is screen number)(Read only)
@@ -113,6 +113,10 @@ namespace OpenMobile.Zones
         /// <param name="d">delegate</param>
         public bool ForEachZoneInZone(Zone zone, ForEachZoneDelegate d)
         {
+            // Errorcheck
+            if (zone == null || d == null)
+                return false;
+
             bool result = true;
             if (zone.SubZones.Count > 0)
             {   // Loop trough sub zones
@@ -233,7 +237,7 @@ namespace OpenMobile.Zones
                 return true;   // No, return since there is nothing to do
 
             bool Result = _Zones.Remove(zone);
-            
+
             // remove zone
             _Zones.Remove(zone);
 
@@ -301,188 +305,188 @@ namespace OpenMobile.Zones
 
 
 
-       /// <summary>
-       /// Initializes and starts zones
-       /// </summary>
-       public void Start()
-       {
-           // Initialize data
-           //DefaultZones = new int[BuiltInComponents.Host.ScreenCount];
-           _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
+        /// <summary>
+        /// Initializes and starts zones
+        /// </summary>
+        public void Start()
+        {
+            // Initialize data
+            //DefaultZones = new int[BuiltInComponents.Host.ScreenCount];
+            _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
 
-           // Restore settings from database (deserialize)
-           bool SetToDefault = false;
-           string XML = StoredData.Get("System.Zones");
-           if (!string.IsNullOrEmpty(XML))
-           {
-               try
-               {
-                   _Zones = OpenMobile.helperFunctions.XML.Serializer.fromXML<List<Zone>>(XML);
-                   BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Zones loaded from database");
-               }
-               catch
-               {   // Error while loading, reset to defaults
-                   SetToDefault = true;
-               }
-               if (_Zones.Count == 0)
-                   SetToDefault = true;
-           }
-           else
-           {   // No setting can be read from database, set to default
-               SetToDefault = true;
-           }
+            // Restore settings from database (deserialize)
+            bool SetToDefault = false;
+            string XML = StoredData.Get("System.Zones");
+            if (!string.IsNullOrEmpty(XML))
+            {
+                try
+                {
+                    _Zones = OpenMobile.helperFunctions.XML.Serializer.fromXML<List<Zone>>(XML);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Zones loaded from database");
+                }
+                catch
+                {   // Error while loading, reset to defaults
+                    SetToDefault = true;
+                }
+                if (_Zones.Count == 0)
+                    SetToDefault = true;
+            }
+            else
+            {   // No setting can be read from database, set to default
+                SetToDefault = true;
+            }
 
-           // Restore active zones
-           XML = StoredData.Get("System.Zones.Active");
-           if (!string.IsNullOrEmpty(XML))
-           {
-               try
-               {
-                   _ActiveZones = OpenMobile.helperFunctions.XML.Serializer.fromXML<int[]>(XML);
-                   BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Active Zones loaded from database");
-               }
-               catch
-               {   // Error while loading, reset to defaults
-                   SetToDefault = true;
-               }
-           }
-           else
-               // Error detected, force default settings 
-               SetToDefault = true;
+            // Restore active zones
+            XML = StoredData.Get("System.Zones.Active");
+            if (!string.IsNullOrEmpty(XML))
+            {
+                try
+                {
+                    _ActiveZones = OpenMobile.helperFunctions.XML.Serializer.fromXML<int[]>(XML);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Active Zones loaded from database");
+                }
+                catch
+                {   // Error while loading, reset to defaults
+                    SetToDefault = true;
+                }
+            }
+            else
+                // Error detected, force default settings 
+                SetToDefault = true;
 
-           // Ensure we have valid active zones
-           for (int i = 0; i < _ActiveZones.Length; i++)
-           {
-               if (GetZone(_ActiveZones[i]) == null)
-                   SetToDefault = true;
-           }
+            // Ensure we have valid active zones
+            for (int i = 0; i < _ActiveZones.Length; i++)
+            {
+                if (GetZone(_ActiveZones[i]) == null)
+                    SetToDefault = true;
+            }
 
-           if (!SetToDefault)
-           {
-               // Ensure we have a active zone for all screens
-               for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
-               {
-                   try
-                   {
-                       if (_ActiveZones[i] == null)
-                       {    // Find a zone to activate
-                           Zone ZoneToActivate = _Zones.Find(x => x.Screen == i);
-                           if (ZoneToActivate == null)
-                           {    // No zone found for screen = error in setup, lets reset to default
-                               SetToDefault = true;
-                               break;
-                           }
-                           else
-                           {
-                               _ActiveZones[i] = ZoneToActivate.ID;
-                           }
-                       }
-                   }
-                   catch
-                   {
-                       _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
-                       SetToDefault = true;
-                       break;
-                   }
-               }
-           }
+            if (!SetToDefault)
+            {
+                // Ensure we have a active zone for all screens
+                for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+                {
+                    try
+                    {
+                        if (_ActiveZones[i] == null)
+                        {    // Find a zone to activate
+                            Zone ZoneToActivate = _Zones.Find(x => x.Screen == i);
+                            if (ZoneToActivate == null)
+                            {    // No zone found for screen = error in setup, lets reset to default
+                                SetToDefault = true;
+                                break;
+                            }
+                            else
+                            {
+                                _ActiveZones[i] = ZoneToActivate.ID;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
+                        SetToDefault = true;
+                        break;
+                    }
+                }
+            }
 
-           if (SetToDefault)
-               CreateDefaultZones();
+            if (SetToDefault)
+                CreateDefaultZones();
 
-           // Create zone for "all"
-           UpdateZoneAll();
+            // Create zone for "all"
+            UpdateZoneAll();
 
-           // Trigg events for activated zones
-           for (int i = 0; i < _ActiveZones.Length; i++)
-               BuiltInComponents.Host.raiseMediaEvent(eFunction.ZoneSetActive, GetZone(_ActiveZones[i]), i.ToString());
+            // Trigg events for activated zones
+            for (int i = 0; i < _ActiveZones.Length; i++)
+                BuiltInComponents.Host.raiseMediaEvent(eFunction.ZoneSetActive, GetZone(_ActiveZones[i]), i.ToString());
 
-           //Log data
-           List<string> Texts = new List<string>();
-           foreach (Zone zone in _Zones)
-           {
-               string s = "";
-               foreach (int subZoneID in zone.SubZones)
-                   s += subZoneID.ToString() + ";";
-               string a = zone.AudioDeviceName;
-               if (String.IsNullOrEmpty(a))
-                   a = zone.AudioDeviceInstance.ToString();
-               Texts.Add(String.Format("{0}[{1}, Screen:{2}, Audio:{3}, SubZones:{4}] - {5}", zone.Name, zone, zone.Screen, a, s, zone.Description));
-           }
-           BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Available zones:", Texts.ToArray());
-       }
+            //Log data
+            List<string> Texts = new List<string>();
+            foreach (Zone zone in _Zones)
+            {
+                string s = "";
+                foreach (int subZoneID in zone.SubZones)
+                    s += subZoneID.ToString() + ";";
+                string a = zone.AudioDeviceName;
+                if (String.IsNullOrEmpty(a))
+                    a = zone.AudioDeviceInstance.ToString();
+                Texts.Add(String.Format("{0}[{1}, Screen:{2}, Audio:{3}, SubZones:{4}] - {5}", zone.Name, zone, zone.Screen, a, s, zone.Description));
+            }
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Available zones:", Texts.ToArray());
+        }
 
-       public void CreateDefaultZones()
-       {
-           //TODO: Figure out a way to handle multiple screens and audiodevices
+        public void CreateDefaultZones()
+        {
+            //TODO: Figure out a way to handle multiple screens and audiodevices
 
-           // Log text
-           List<string> Texts = new List<string>();
+            // Log text
+            List<string> Texts = new List<string>();
 
-           // Remove current zones
-           _Zones.Clear();
-           _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
+            // Remove current zones
+            _Zones.Clear();
+            _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
 
-           // Currently only one screen/device pr zone is supported
-           // Create one default zone pr screen (default zone uses default audiodevice)
-           for (int screen = 0; screen < BuiltInComponents.Host.ScreenCount; screen++)
-           {
-               Zone zone = new Zone("Zone " + screen.ToString(), "Autogenerated zone for screen " + screen.ToString(), screen, BuiltInComponents.Host.GetAudioDeviceDefaultName());
-               SetActiveZone(screen, zone);
-               _Zones.Add(zone);
-               
-               // Raise event
-               BuiltInComponents.Host.raiseMediaEvent(eFunction.ZoneAdded, zone, "");
+            // Currently only one screen/device pr zone is supported
+            // Create one default zone pr screen (default zone uses default audiodevice)
+            for (int screen = 0; screen < BuiltInComponents.Host.ScreenCount; screen++)
+            {
+                Zone zone = new Zone("Zone " + screen.ToString(), "Autogenerated zone for screen " + screen.ToString(), screen, BuiltInComponents.Host.GetAudioDeviceDefaultName());
+                SetActiveZone(screen, zone);
+                _Zones.Add(zone);
 
-               Texts.Add(String.Format("Zone '{0}' autogenerated and set as active for screen {1}.", zone.Name, screen));
-           }
+                // Raise event
+                BuiltInComponents.Host.raiseMediaEvent(eFunction.ZoneAdded, zone, "");
 
-           //Log data
-           BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Default zones created:", Texts.ToArray());
+                Texts.Add(String.Format("Zone '{0}' autogenerated and set as active for screen {1}.", zone.Name, screen));
+            }
 
-           // Update zone "all"
-           UpdateZoneAll();
-       }
+            //Log data
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Default zones created:", Texts.ToArray());
 
-       private void UpdateZoneAll()
-       {
-           // Try to find zone named "All"
-           Zone ZoneAll = _Zones.Find(a => a.Name == "All");
-           _Zones.Remove(ZoneAll);
+            // Update zone "all"
+            UpdateZoneAll();
+        }
 
-           Zone ScreenZone = new Zone("All", "Autogenerated zone that includes all other zones", 0, BuiltInComponents.Host.GetAudioDeviceDefaultName());
-           ScreenZone.BlockSubZoneUsage = true;
-           ScreenZone.AutoGenerated = true;
-           ScreenZone.AllowedScreens = "0"; // This zone can only be activated on screen 0
+        private void UpdateZoneAll()
+        {
+            // Try to find zone named "All"
+            Zone ZoneAll = _Zones.Find(a => a.Name == "All");
+            _Zones.Remove(ZoneAll);
 
-           // Add all other zones to this zone
-           foreach (Zone z in _Zones)
-               ScreenZone.Add(z);
+            Zone ScreenZone = new Zone("All", "Autogenerated zone that includes all other zones", 0, BuiltInComponents.Host.GetAudioDeviceDefaultName());
+            ScreenZone.BlockSubZoneUsage = true;
+            ScreenZone.AutoGenerated = true;
+            ScreenZone.AllowedScreens = "0"; // This zone can only be activated on screen 0
 
-           // Add new zone for All
-           _Zones.Add(ScreenZone);
+            // Add all other zones to this zone
+            foreach (Zone z in _Zones)
+                ScreenZone.Add(z);
 
-           // Raise event
-           BuiltInComponents.Host.raiseMediaEvent(eFunction.ZoneAdded, ScreenZone, "");
-       }
+            // Add new zone for All
+            _Zones.Add(ScreenZone);
 
-       /// <summary>
-       /// Save zone to database
-       /// </summary>
-       public void Save()
-       {
-           // Save data
-           StoredData.Set("System.Zones", OpenMobile.helperFunctions.XML.Serializer.toXML(_Zones));
-           StoredData.Set("System.Zones.Active", OpenMobile.helperFunctions.XML.Serializer.toXML(_ActiveZones));
-       }
+            // Raise event
+            BuiltInComponents.Host.raiseMediaEvent(eFunction.ZoneAdded, ScreenZone, "");
+        }
 
-       /// <summary>
-       /// Stop and clean zones
-       /// </summary>
-       public void Stop()
-       {
-           // Save data
-           Save();
-       }
+        /// <summary>
+        /// Save zone to database
+        /// </summary>
+        public void Save()
+        {
+            // Save data
+            StoredData.Set("System.Zones", OpenMobile.helperFunctions.XML.Serializer.toXML(_Zones));
+            StoredData.Set("System.Zones.Active", OpenMobile.helperFunctions.XML.Serializer.toXML(_ActiveZones));
+        }
+
+        /// <summary>
+        /// Stop and clean zones
+        /// </summary>
+        public void Stop()
+        {
+            // Save data
+            Save();
+        }
     }
 }

@@ -270,10 +270,10 @@ namespace OpenMobile
                 OnRenderFrameInternal();
                 render_time = render_watch.Elapsed.TotalMilliseconds;
             }
-			#if DEBUG
+#if DEBUG
             else
                 Debug.Print(DateTime.Now.ToString() + "-Frame Dropped!");
-			#endif
+#endif
         }
 
         #endregion
@@ -431,13 +431,17 @@ namespace OpenMobile
 
         #region OnRenderFrameInternal
 
+        private static object LockObject = new object();
         public void OnRenderFrameInternal()
         {
             if (Exists && !isExiting)
             {
-                MakeCurrent(); //switch context
-                OnRenderFrame(EventArgs.Empty);
-                MakeCurrent(null); //release context
+                lock (LockObject)
+                {
+                    MakeCurrent(); //switch context
+                    OnRenderFrame(EventArgs.Empty);
+                    MakeCurrent(null); //release context
+                }
             }
         }
 

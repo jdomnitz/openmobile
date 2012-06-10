@@ -393,13 +393,13 @@ namespace OMGraphics
                                                     Color backColor;
                                                     if (String.IsNullOrEmpty(gd.BackgroundColor.Name) || gd.BackgroundColor.Name == "0")
                                                         //backColor = Color.FromArgb(0x7f, System.Drawing.Color.Black);
-                                                        backColor = Color.FromArgb(255, 0x7,0x7,0x7);
+                                                        backColor = Color.FromArgb(255, 0x7, 0x7, 0x7);
                                                     else
                                                         backColor = gd.BackgroundColor.ToSystemColor();
 
                                                     Color borderColor;
                                                     if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
-                                                        borderColor = System.Drawing.Color.FromArgb(125,System.Drawing.Color.White);
+                                                        borderColor = System.Drawing.Color.FromArgb(125, System.Drawing.Color.White);
                                                     else
                                                         borderColor = gd.BorderColor.ToSystemColor();
 
@@ -410,7 +410,7 @@ namespace OMGraphics
                                                     int scalingDividend = Math.Min(OuterRect.Width, OuterRect.Height);
                                                     int rectCornerRadius = Math.Max(1, scalingDividend / 5);
                                                     float rectOutlineWidth = Math.Max(1, scalingDividend / 50);
-                                                    
+
                                                     Color ColorBackgroundGradientTop = Color.FromArgb(255, 30, 30, 30); //Color.FromArgb(255, 44, 85, 177);
                                                     Color ColorBackgroundGradientBottom = Color.FromArgb(255, 7, 7, 7); //Color.FromArgb(255, 153, 198, 241);
 
@@ -628,7 +628,7 @@ namespace OMGraphics
                                         }
 
                                         #endregion
-                                        
+
                                         g.SetClip(gp);
 
                                         // Create border pen
@@ -770,7 +770,7 @@ namespace OMGraphics
                                         gp.AddArc(rect.X + rect.Width - d, rect.Y + rect.Height - d, d, d, 0, 90);
                                         gp.AddArc(rect.X, rect.Y + rect.Height - d, d, d, 90, 90);
                                         gp.AddLine(rect.X, rect.Y + rect.Height - d, rect.X, rect.Y + d / 2);
-                                        
+
                                         #region Draw inner shadow
 
                                         using (PathGradientBrush _Brush = new PathGradientBrush(gp))
@@ -886,6 +886,233 @@ namespace OMGraphics
                     }
                     break;
 
+                case "mediagraphic":
+                    {
+                        // Convert input data to local data object (data sent in is a 
+                        MediaGraphic.GraphicData gd = data as MediaGraphic.GraphicData;
+
+                        switch (gd.Style)
+                        {
+                            case MediaGraphic.GraphicStyles.NoCover:
+                                {
+                                    #region NoCover graphics
+
+                                    System.Drawing.Bitmap bmp = new Bitmap(gd.Width, gd.Height);
+                                    using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                                    {
+
+                                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                                        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                                        #region Colors
+
+                                        Color backColor;
+                                        if (String.IsNullOrEmpty(gd.BackgroundColor.Name) || gd.BackgroundColor.Name == "0")
+                                            backColor = Color.FromArgb(255, System.Drawing.Color.Black);
+                                        else
+                                            backColor = gd.BackgroundColor.ToSystemColor();
+
+                                        Color foreColor;
+                                        if (String.IsNullOrEmpty(gd.ForegroundColor.Name) || gd.ForegroundColor.Name == "0")
+                                            foreColor = System.Drawing.Color.FromArgb(125, System.Drawing.Color.White);
+                                        else
+                                            foreColor = gd.ForegroundColor.ToSystemColor();
+
+                                        #endregion
+
+                                        // Create outline path
+                                        System.Drawing.Rectangle rect = new System.Drawing.Rectangle(1, 1, bmp.Width - 2, bmp.Height - 2);
+                                        GraphicsPath gp = new GraphicsPath();
+                                        gp.AddRectangle(rect);
+
+                                        #region Draw background
+
+                                        PathGradientBrush pgb = new PathGradientBrush(gp);
+
+                                        pgb.CenterPoint = new PointF(rect.Width / 2, rect.Height / 2);
+                                        pgb.CenterColor = Color.Black;
+                                        pgb.SurroundColors = new Color[] { Color.FromArgb(127, foreColor) };
+
+                                        pgb.FocusScales = new PointF(0f, 0f);
+                                        Blend blnd = new Blend();
+                                        blnd.Positions = new float[] { 0f, 1f };
+                                        blnd.Factors = new float[] { 1f, 0f };
+                                        pgb.Blend = blnd;
+
+                                        g.FillPath(pgb, gp);
+
+                                        pgb.Dispose();
+
+                                        #endregion
+
+                                        g.SetClip(gp);
+
+                                        #region Draw Icon
+
+                                        string Icon = "¯";
+
+                                        System.Drawing.Rectangle rectIcon = new System.Drawing.Rectangle(0, (int)(rect.Height * 0.1F), rect.Width, rect.Height);
+
+                                        // Set font format
+                                        StringFormat sf = new StringFormat();
+                                        sf.Alignment = StringAlignment.Center;
+                                        sf.LineAlignment = StringAlignment.Center;
+                                        System.Drawing.Font f = new System.Drawing.Font(OpenMobile.Graphics.Font.Webdings.Name, 76);
+
+                                        SizeF FSize = g.MeasureString(Icon, f, new SizeF(bmp.Width, bmp.Height), sf);
+                                        // Calculate scaling factor
+                                        float Scale = bmp.Height / FSize.Height;
+
+                                        // Recalculate font based on scaling
+                                        f = new Font(f.Name, f.Size * Scale * 1.5F);
+
+                                        GraphicsPath gpTxt = new GraphicsPath();
+                                        gpTxt.AddString(Icon, f.FontFamily, (int)System.Drawing.FontStyle.Regular, f.Size, rectIcon, sf);
+
+                                        #region Draw Icon glow
+
+                                        for (int i = 1; i < 15; ++i)
+                                        {
+                                            System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32 - i, foreColor), i);
+                                            pen.LineJoin = LineJoin.Round;
+                                            g.DrawPath(pen, gpTxt);
+                                            pen.Dispose();
+                                        }
+
+                                        #endregion
+
+                                        System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(backColor);
+                                        g.FillPath(brush, gpTxt);
+                                        g.DrawPath(new System.Drawing.Pen(foreColor, 0.5F), gpTxt);
+
+                                        #endregion
+
+                                        g.ResetClip();
+
+                                        #region Draw outer border
+
+                                        g.DrawPath(new System.Drawing.Pen(foreColor, 2), gp);
+
+                                        #endregion
+
+                                        g.Flush();
+                                    }
+                                    gd.Image = new OpenMobile.Graphics.OImage(bmp);
+
+                                    #endregion
+                                }
+                                break;
+
+                            case MediaGraphic.GraphicStyles.OMLogo:
+                                {
+                                    #region NoCover graphics
+
+                                    System.Drawing.Bitmap bmp = new Bitmap(gd.Width, gd.Height);
+                                    using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                                    {
+
+                                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                                        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                                        #region Colors
+
+                                        Color backColor;
+                                        if (String.IsNullOrEmpty(gd.BackgroundColor.Name) || gd.BackgroundColor.Name == "0")
+                                            backColor = Color.FromArgb(255, System.Drawing.Color.Black);
+                                        else
+                                            backColor = gd.BackgroundColor.ToSystemColor();
+
+                                        Color foreColor;
+                                        if (String.IsNullOrEmpty(gd.ForegroundColor.Name) || gd.ForegroundColor.Name == "0")
+                                            foreColor = System.Drawing.Color.FromArgb(125, System.Drawing.Color.White);
+                                        else
+                                            foreColor = gd.ForegroundColor.ToSystemColor();
+
+                                        #endregion
+
+                                        // Load source image
+                                        imageItem img = BuiltInComponents.Host.getSkinImage("OMIconBlack_Transparent_Clean");
+
+                                        // Get region
+                                        //Region rgn = GetRegion(img.image.image, System.Drawing.Color.Black);
+                                        //g.FillRegion(Brushes.Blue, rgn);
+                                        //GraphicsPath gp = new GraphicsPath();
+                                        //gp.AddRectangles(rgn.GetRegionScans(new Matrix()));
+                                        //Graphics.DrawPath((Pen), (RegionToPath?)(Form).Region);
+
+                                        GraphicsPath gp = GetGraphicsPathOutline(img.image.image, System.Drawing.Color.Black);
+
+                                        // Create outline path
+                                        System.Drawing.Rectangle rect = new System.Drawing.Rectangle(1, 1, bmp.Width - 2, bmp.Height - 2);
+                                        //GraphicsPath gp = GetGraphicsPath(img.image.image, System.Drawing.Color.Black);
+                                        //GraphicsPath gp = GetGraphicsPathFilled(img.image.image, System.Drawing.Color.Black);
+
+                                        #region Draw background
+
+                                        PathGradientBrush pgb = new PathGradientBrush(gp);
+
+                                        pgb.CenterPoint = new PointF(rect.Width / 2, rect.Height / 2);
+                                        pgb.CenterColor = Color.Black;
+                                        pgb.SurroundColors = new Color[] { Color.FromArgb(127, foreColor) };
+
+                                        pgb.FocusScales = new PointF(0f, 0f);
+                                        Blend blnd = new Blend();
+                                        blnd.Positions = new float[] { 0f, 1f };
+                                        blnd.Factors = new float[] { 1f, 0f };
+                                        pgb.Blend = blnd;
+
+                                        g.FillPath(pgb, gp);
+
+                                        pgb.Dispose();
+
+                                        #endregion
+
+                                        //g.SetClip(gp);
+
+                                        #region Draw glow
+                                        /*
+                                        for (int i = 1; i < 15; ++i)
+                                        {
+                                            System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32 - i, foreColor), i);
+                                            pen.LineJoin = LineJoin.Round;
+                                            g.DrawPath(pen, gp);
+                                            pen.Dispose();
+                                        }
+                                        */
+                                        #endregion
+
+                                        System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(foreColor);
+                                        g.FillPath(brush, gp);
+                                        //g.DrawPath(new System.Drawing.Pen(foreColor, 0.5F), gp);
+
+                                        g.ResetClip();
+
+                                        #region Draw outer border
+
+                                        g.DrawPath(new System.Drawing.Pen(foreColor, 2), gp);
+
+
+                                        #endregion
+
+                                        g.Flush();
+                                    }
+                                    gd.Image = new OpenMobile.Graphics.OImage(bmp);
+
+                                    #endregion
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        // Return data
+                        data = (T)Convert.ChangeType(gd, typeof(T));
+                    }
+                    break;
+
                 default:
                     break;
             }
@@ -902,7 +1129,7 @@ namespace OMGraphics
             GC.SuppressFinalize(this);
         }
 
-        public static void DrawRoundedRectangle(System.Drawing.Graphics g,
+        private static void DrawRoundedRectangle(System.Drawing.Graphics g,
                 System.Drawing.Rectangle r, int d, System.Drawing.Pen p)
         {
 
@@ -919,7 +1146,7 @@ namespace OMGraphics
             g.DrawPath(p, gp);
         }
 
-        public static System.Drawing.Drawing2D.GraphicsPath GetPath_RoundedRectangle(System.Drawing.Graphics g, System.Drawing.Rectangle r, int d)
+        private static System.Drawing.Drawing2D.GraphicsPath GetPath_RoundedRectangle(System.Drawing.Graphics g, System.Drawing.Rectangle r, int d)
         {
             System.Drawing.Drawing2D.GraphicsPath gp = new System.Drawing.Drawing2D.GraphicsPath();
             gp.AddArc(r.X, r.Y, d, d, 180, 90);
@@ -943,7 +1170,7 @@ namespace OMGraphics
             return path;
         }
 
-        public static GraphicsPath CreateRoundRectangle(System.Drawing.Rectangle rectangle, int radius)
+        private static GraphicsPath CreateRoundRectangle(System.Drawing.Rectangle rectangle, int radius)
         {
             GraphicsPath path = new GraphicsPath();
 
@@ -994,6 +1221,144 @@ namespace OMGraphics
             roundedRect.AddLine(boundingRect.X + margin, boundingRect.Y + boundingRect.Height - margin - cornerRadius * 2, boundingRect.X + margin, boundingRect.Y + margin + cornerRadius);
             roundedRect.CloseFigure();
             return roundedRect;
+        }
+
+        private static Region GetRegion(Bitmap _img, Color color)
+        {
+            Color _matchColor = Color.FromArgb(color.R, color.G, color.B);
+            System.Drawing.Region rgn = new Region();
+            rgn.MakeEmpty();
+            Rectangle rc = new Rectangle(0, 0, 0, 0);
+            bool inimage = false;
+            for (int y = 0; y < _img.Height; y++)
+            {
+                for (int x = 0; x < _img.Width; x++)
+                {
+                    if (!inimage)
+                    {
+                        if (_img.GetPixel(x, y) != _matchColor)
+                        {
+                            inimage = true;
+                            rc.X = x;
+                            rc.Y = y;
+                            rc.Height = 1;
+                        }
+                    }
+                    else
+                    {
+                        if (_img.GetPixel(x, y) == _matchColor)
+                        {
+                            inimage = false;
+                            rc.Width = x - rc.X;
+                            rgn.Union(rc);
+                        }
+                    }
+
+                }
+                if (inimage)
+                {
+                    inimage = false;
+                    rc.Width = _img.Width - rc.X;
+                    rgn.Union(rc);
+                }
+            }
+
+            return rgn;
+
+        }
+
+        private static GraphicsPath GetGraphicsPathOutline(Bitmap _img, Color color)
+        {
+            Color _matchColor = Color.FromArgb(color.R, color.G, color.B);
+            GraphicsPath path = new GraphicsPath();
+            Rectangle rc = new Rectangle(0, 0, 0, 0);
+            bool inimage = false;
+            rc.Height = 1;
+            for (int y = 0; y < _img.Height; y++)
+            {
+                for (int x = 0; x < _img.Width; x++)
+                {
+                    if (!inimage)
+                    {
+                        if (_img.GetPixel(x, y) != _matchColor)
+                        {
+                            inimage = true;
+                            path.AddRectangle(new Rectangle(x, y, 1, 1));
+                        }
+                        else if (y < _img.Height - 1 && _img.GetPixel(x, y + 1) != _matchColor)
+                        {
+                            path.AddRectangle(new Rectangle(x, y + 1, 1, 1));
+                        }
+                    }
+                    else
+                    {
+                        if (_img.GetPixel(x, y) == _matchColor)
+                        {
+                            inimage = false;
+                            path.AddRectangle(new Rectangle(x, y, 1, 1));
+                        }
+                        else if (y < _img.Height - 1 && _img.GetPixel(x, y + 1) == _matchColor)
+                        {
+                            path.AddRectangle(new Rectangle(x, y + 1, 1, 1));
+                        }
+                    }
+
+                }
+
+                if (inimage)
+                {
+                    inimage = false;
+
+                }
+            }
+
+            path.CloseAllFigures();
+
+            return path;
+        }
+
+        private static GraphicsPath GetGraphicsPathFilled(Bitmap _img, Color color)
+        {
+            Color _matchColor = Color.FromArgb(color.R, color.G, color.B);
+            GraphicsPath path = new GraphicsPath();
+            Rectangle rc = new Rectangle(0, 0, 0, 0);
+            bool inimage = false;
+            rc.Height = 1;
+            for (int y = 0; y < _img.Height; y++)
+            {
+                for (int x = 0; x < _img.Width; x++)
+                {
+                    if (!inimage)
+                    {
+                        Color c = _img.GetPixel(x, y);
+                        if (_img.GetPixel(x, y) != _matchColor)
+                        {
+                            inimage = true;
+                            rc.X = x;
+                            rc.Y = y;
+                            rc.Height = 1;
+                        }
+                    }
+                    else
+                    {
+                        if (_img.GetPixel(x, y) == _matchColor)
+                        {
+                            inimage = false;
+                            rc.Width = x - rc.X;
+                            path.AddRectangle(rc);
+                        }
+                    }
+
+                }
+
+                if (inimage)
+                {
+                    inimage = false;
+                    rc.Width = _img.Width - rc.X;
+                    path.AddRectangle(rc);
+                }
+            }
+            return path;
         }
     }
 }
