@@ -207,10 +207,10 @@ namespace OpenMobile.Media
         /// <param name="album"></param>
         /// <param name="pluginHost"></param>
         /// <returns></returns>
-        public static OImage getCoverFromDB(string artist, string album, IPluginHost pluginHost)
+        public static OImage getCoverFromDB(string artist, string album)
         {
             using (PluginSettings s = new PluginSettings())
-                return getCoverFromDB(artist, album, pluginHost, s.getSetting("Default.MusicDatabase"));
+                return getCoverFromDB(artist, album, s.getSetting("Default.MusicDatabase"));
         }
         /// <summary>
         /// Retrieves the cover art from the given database
@@ -220,12 +220,10 @@ namespace OpenMobile.Media
         /// <param name="pluginHost"></param>
         /// <param name="dbName"></param>
         /// <returns></returns>
-        public static OImage getCoverFromDB(string artist, string album, IPluginHost pluginHost, string dbName)
+        public static OImage getCoverFromDB(string artist, string album, string dbName)
         {
-            if (pluginHost == null)
-                return null;
             object o = new object();
-            pluginHost.getData(eGetData.GetMediaDatabase, dbName, out o);
+            BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, dbName, out o);
             if (o == null)
                 return null;
             using (IMediaDatabase db = (IMediaDatabase)o)

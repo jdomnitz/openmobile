@@ -53,6 +53,26 @@ namespace OpenMobile.Controls
             }
         }
 
+        private Color _BackgroundColor = Color.Transparent;
+
+        public Color BackgroundColor
+        {
+            get
+            {
+                return _BackgroundColor;
+            }
+            set
+            {
+                if (value == _BackgroundColor)
+                    return;
+
+                _BackgroundColor = value;
+                raiseUpdate(false);
+            }
+        }
+
+        public OpenMobile.Math.Vector3 Rotation = new OpenMobile.Math.Vector3();
+
         /// <summary>
         /// Creates the control with the default size and location
         /// <para>[Obsolete] Use OMImage(string name, int left, int top, int width, int height) instead</para>
@@ -112,7 +132,7 @@ namespace OpenMobile.Controls
             this.left = left;
             this.width = width;
             this.height = height;
-            this.image = image;
+            this.Image = image;
         }
         /// <summary>
         /// Creates a new OMImage with the given image and autofits the control to the image size
@@ -127,7 +147,7 @@ namespace OpenMobile.Controls
             this.top = top;
             this.left = left;
             this.FitControlToImage = true;
-            this.image = image;
+            this.Image = image;
         }
         /// <summary>
         /// Creates a new OMImage with the given image and autofits the control to the image size
@@ -148,7 +168,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the control to autosize itself to the size of the assigned image
         /// </summary>
-        public bool FitControlToImage 
+        public bool FitControlToImage
         {
             get
             {
@@ -209,7 +229,7 @@ namespace OpenMobile.Controls
             if (image.image == null)
             {
                 if (image == imageItem.MISSING)
-                    g.FillRectangle(new Brush(Color.FromArgb((int)(255 * OpacityFloat),Color.Black)), left, top, width, height);
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(255 * OpacityFloat), Color.Black)), left, top, width, height);
             }
             else
             {
@@ -236,10 +256,13 @@ namespace OpenMobile.Controls
                     alpha = e.globalTransitionIn;
                 else if (this.Mode == eModeType.transitioningOut)
                     alpha = e.globalTransitionOut;
-                //alpha = alpha * (transparency / 100F);
+
+                // Draw image background (if any)
+                if (_BackgroundColor != Color.Transparent && alpha == 1)
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(_BackgroundColor.A * OpacityFloat), _BackgroundColor)), new Rectangle(left + 1, top + 1, width - 2, height - 2));
+
                 lock (image.image)
                 {
-                    // Start of code added by Borte
                     switch (drawmode)
                     {
                         case DrawModes.Crop:
@@ -249,7 +272,8 @@ namespace OpenMobile.Controls
                             g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, alpha);
                             break;
                         case DrawModes.Scale:
-                            g.DrawImage(image.image, left, top, width, height, alpha);
+                            //TODO = g.DrawImage(image.image, left, top, width, height, alpha, eAngle.Normal, Rotation);
+                            g.DrawImage(image.image, left, top, width, height, alpha, eAngle.Normal);
                             break;
                     }
                 }
@@ -295,7 +319,7 @@ namespace OpenMobile.Controls
         #region Animiation
 
         private OAnimatedImage aimg = null;
-        
+
         /// <summary>
         /// Can the image in this control animate?
         /// </summary>

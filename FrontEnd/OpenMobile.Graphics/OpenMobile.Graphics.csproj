@@ -97,6 +97,8 @@
     <Compile Include="DisplayResolution.cs" />
     <Compile Include="GameWindow.cs" />
     <Compile Include="GameWindowFlags.cs" />
+    <Compile Include="GDI\CSharpFilters.cs" />
+    <Compile Include="GDI\GDIEffects.cs" />
     <Compile Include="Graphics.cs" />
     <Compile Include="Graphics\ES11\Core.cs" />
     <Compile Include="Graphics\ES11\Delegates.cs" />
@@ -105,7 +107,9 @@
     <Compile Include="Graphics\ES11\ES.cs" />
     <Compile Include="Graphics\ES11\Helper.cs" />
     <Compile Include="Graphics\GraphicsModeComparer.cs" />
+    <Compile Include="imageItem.cs" />
     <Compile Include="Input\IInputDriver.cs" />
+    <Compile Include="Math\Conversions.cs" />
     <Compile Include="OAnimatedImage.cs" />
     <Compile Include="OImage.cs" />
     <Compile Include="Platform\Windows\WinRawInput.cs" />
@@ -254,7 +258,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

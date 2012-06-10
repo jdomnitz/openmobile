@@ -180,8 +180,25 @@ namespace OpenMobile.Plugin
         /// <param name="function"></param>
         /// <param name="arg1">Optional Argument</param>
         /// <param name="arg2">Optional Argument</param>
+        /// <param name="arg3">Optional Argument</param>
+        /// <returns></returns>
+        bool execute(eFunction function, object arg1, object arg2, object arg3);
+        /// <summary>
+        /// Execute the given function
+        /// </summary>
+        /// <param name="function"></param>
+        /// <param name="arg1">Optional Argument</param>
+        /// <param name="arg2">Optional Argument</param>
         /// <returns></returns>
         bool execute(eFunction function, string arg1, string arg2);
+        /// <summary>
+        /// Execute the given function
+        /// </summary>
+        /// <param name="function"></param>
+        /// <param name="arg1">Optional Argument</param>
+        /// <param name="arg2">Optional Argument</param>
+        /// <returns></returns>
+        bool execute(eFunction function, object arg1, object arg2);
         /// <summary>
         /// Execute the given function
         /// </summary>
@@ -189,6 +206,13 @@ namespace OpenMobile.Plugin
         /// <param name="arg">Optional Argument</param>
         /// <returns></returns>
         bool execute(eFunction function, string arg);
+        /// <summary>
+        /// Execute the given function
+        /// </summary>
+        /// <param name="function"></param>
+        /// <param name="arg">Optional Argument</param>
+        /// <returns></returns>
+        bool execute(eFunction function, object arg);
         /// <summary>
         /// Execute the given function
         /// </summary>

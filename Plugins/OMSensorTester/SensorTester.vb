@@ -47,6 +47,7 @@ Public Class SensorTester
         List.TextAlignment = Alignment.CenterLeft
         List.ListStyle = eListStyle.TextList
         Pan.addControl(List)
+        AddHandler Pan.Entering, AddressOf Pan_Entering
 
         m_Manager = New ScreenManager(m_Host.ScreenCount)
         m_Manager.loadPanel(Pan)
@@ -55,19 +56,12 @@ Public Class SensorTester
 
     End Function
 
-    Public Function loadPanel(ByVal name As String, ByVal screen As Integer) As OpenMobile.Controls.OMPanel Implements OpenMobile.Plugin.IHighLevel.loadPanel
-        If m_Manager Is Nothing Then
-            Return Nothing
-        End If
-
-        Dim Pan As OMPanel = m_Manager(screen, name)
+    Public Sub Pan_Entering(ByVal sender As OMPanel, ByVal screen As Integer)
+        Dim Pan As OMPanel = sender
         Dim List As OMList = Pan("Sensors")
         List.ListStyle = eListStyle.TextList
-
         List.Clear()
-
         Dim Sensors As Generic.List(Of Sensor) = m_Host.getData(eGetData.GetAvailableSensors, "")
-
         If Not Sensors Is Nothing Then
             For Each Sen As Sensor In Sensors
                 If Sen.Type = eSensorType.deviceSuppliesData Then
@@ -76,11 +70,14 @@ Public Class SensorTester
                     List.Add(item)
                 End If
             Next
-
         End If
+    End Sub
 
-        Return Pan
-
+    Public Function loadPanel(ByVal name As String, ByVal screen As Integer) As OpenMobile.Controls.OMPanel Implements OpenMobile.Plugin.IHighLevel.loadPanel
+        If m_Manager Is Nothing Then
+            Return Nothing
+        End If
+        Return m_Manager(screen, name)
     End Function
 
     Public Sub DataChanged(ByVal name As String, ByVal value As Object)

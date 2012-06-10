@@ -279,14 +279,15 @@ namespace OpenMobile.helperFunctions
             public string ShowOSK(int screen)
             {
                 // Save screen manager
+                DateTime start = DateTime.Now;
                 _ConfigData.Manager = BuiltInComponents.Panels;
                 Screen = screen;
-                
+               
                 CreatePanel(screen);
                 CloseOSK.Reset();
 
                 // loadpanel
-                BuiltInComponents.Panels.loadPanel(Panel);
+                BuiltInComponents.Panels.loadSinglePanel(Panel,screen);
 
                 // Connect to system events (to detect "goback" event)
                 SystemEvent SysEv = new SystemEvent(theHost_OnSystemEvent);
@@ -297,11 +298,12 @@ namespace OpenMobile.helperFunctions
                 BuiltInComponents.Host.OnGesture += GestureEv;
 
                 // Show the panel
-                if (BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), "", Panel.Name) == false)
+                if (BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen, "", Panel.Name) == false)
                     return "";
-                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.CrossfadeFast.ToString());
+                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen, eGlobalTransition.CrossfadeFast);
 
                 // Wait for close
+                Console.WriteLine("OSK Showed in :" + (DateTime.Now - start).TotalMilliseconds.ToString() + "ms");
                 CloseOSK.WaitOne();
 
                 // Disconnect events
@@ -310,9 +312,7 @@ namespace OpenMobile.helperFunctions
                 BuiltInComponents.Host.OnGesture -= GestureEv;
 
                 // Remove menu and clean up
-                //BuiltInComponents.Host.execute(eFunction.TransitionFromPanel, screen.ToString(), "", Panel.Name);
-                //BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.CrossfadeFast.ToString());
-                BuiltInComponents.Host.execute(eFunction.goBack, screen.ToString(), eGlobalTransition.CrossfadeFast.ToString());
+                BuiltInComponents.Host.execute(eFunction.goBack, screen, eGlobalTransition.CrossfadeFast);
                 BuiltInComponents.Panels.unloadPanel(Panel.Name);
 
                 return Result;

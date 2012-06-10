@@ -120,7 +120,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         binary,
         /// <summary>
-        /// OMImgae
+        /// OMImage
         /// </summary>
         image
     }

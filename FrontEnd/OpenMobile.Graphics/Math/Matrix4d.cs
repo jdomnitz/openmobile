@@ -39,24 +39,24 @@ namespace OpenMobile.Math
         /// <summary>
         /// Top row of the matrix
         /// </summary>
-        public Vector4d  Row0;
+        public Vector4d Row0;
         /// <summary>
         /// 2nd row of the matrix
         /// </summary>
-        public Vector4d  Row1;
+        public Vector4d Row1;
         /// <summary>
         /// 3rd row of the matrix
         /// </summary>
-        public Vector4d  Row2;
+        public Vector4d Row2;
         /// <summary>
         /// Bottom row of the matrix
         /// </summary>
-        public Vector4d  Row3;
- 
+        public Vector4d Row3;
+
         /// <summary>
         /// The identity matrix
         /// </summary>
-        public static Matrix4d Identity = new Matrix4d(Vector4d .UnitX, Vector4d .UnitY, Vector4d .UnitZ, Vector4d .UnitW);
+        public static Matrix4d Identity = new Matrix4d(Vector4d.UnitX, Vector4d.UnitY, Vector4d.UnitZ, Vector4d.UnitW);
 
         #endregion
 
@@ -134,33 +134,33 @@ namespace OpenMobile.Math
         /// <summary>
         /// The first column of this matrix
         /// </summary>
-        public Vector4d  Column0
+        public Vector4d Column0
         {
-            get { return new Vector4d (Row0.X, Row1.X, Row2.X, Row3.X); }
+            get { return new Vector4d(Row0.X, Row1.X, Row2.X, Row3.X); }
         }
 
         /// <summary>
         /// The second column of this matrix
         /// </summary>
-        public Vector4d  Column1
+        public Vector4d Column1
         {
-            get { return new Vector4d (Row0.Y, Row1.Y, Row2.Y, Row3.Y); }
+            get { return new Vector4d(Row0.Y, Row1.Y, Row2.Y, Row3.Y); }
         }
 
         /// <summary>
         /// The third column of this matrix
         /// </summary>
-        public Vector4d  Column2
+        public Vector4d Column2
         {
-            get { return new Vector4d (Row0.Z, Row1.Z, Row2.Z, Row3.Z); }
+            get { return new Vector4d(Row0.Z, Row1.Z, Row2.Z, Row3.Z); }
         }
 
         /// <summary>
         /// The fourth column of this matrix
         /// </summary>
-        public Vector4d  Column3
+        public Vector4d Column3
         {
-            get { return new Vector4d (Row0.W, Row1.W, Row2.W, Row3.W); }
+            get { return new Vector4d(Row0.W, Row1.W, Row2.W, Row3.W); }
         }
 
         /// <summary>
@@ -274,6 +274,80 @@ namespace OpenMobile.Math
         #endregion
 
         #region Static
+
+        #region CreateFromQuaternion
+        /// <summary>
+        /// Build a rotation matrix from the specified quaternion.
+        /// </summary>
+        /// <param name="q">Quaternion to translate.</param>
+        /// <param name="m">Matrix result.</param>
+        public static void CreateFromQuaternion(ref Quaterniond q, ref Matrix4d m)
+        {
+            m = Matrix4d.Identity;
+
+            double X = q.X;
+            double Y = q.Y;
+            double Z = q.Z;
+            double W = q.W;
+
+            double xx = X * X;
+            double xy = X * Y;
+            double xz = X * Z;
+            double xw = X * W;
+            double yy = Y * Y;
+            double yz = Y * Z;
+            double yw = Y * W;
+            double zz = Z * Z;
+            double zw = Z * W;
+
+            m.M11 = 1 - 2 * (yy + zz);
+            m.M21 = 2 * (xy - zw);
+            m.M31 = 2 * (xz + yw);
+            m.M12 = 2 * (xy + zw);
+            m.M22 = 1 - 2 * (xx + zz);
+            m.M32 = 2 * (yz - xw);
+            m.M13 = 2 * (xz - yw);
+            m.M23 = 2 * (yz + xw);
+            m.M33 = 1 - 2 * (xx + yy);
+        }
+
+        /// <summary>
+        /// Build a rotation matrix from the specified quaternion.
+        /// </summary>
+        /// <param name="q">Quaternion to translate.</param>
+        /// <returns>A matrix instance.</returns>
+        public static Matrix4d CreateFromQuaternion(ref Quaterniond q)
+        {
+            Matrix4d result = Matrix4d.Identity;
+
+            double X = q.X;
+            double Y = q.Y;
+            double Z = q.Z;
+            double W = q.W;
+
+            double xx = X * X;
+            double xy = X * Y;
+            double xz = X * Z;
+            double xw = X * W;
+            double yy = Y * Y;
+            double yz = Y * Z;
+            double yw = Y * W;
+            double zz = Z * Z;
+            double zw = Z * W;
+
+            result.M11 = 1 - 2 * (yy + zz);
+            result.M21 = 2 * (xy - zw);
+            result.M31 = 2 * (xz + yw);
+            result.M12 = 2 * (xy + zw);
+            result.M22 = 1 - 2 * (xx + zz);
+            result.M32 = 2 * (yz - xw);
+            result.M13 = 2 * (xz - yw);
+            result.M23 = 2 * (yz + xw);
+            result.M33 = 1 - 2 * (xx + yy);
+            return result;
+        }
+
+        #endregion
 
         #region CreateFromAxisAngle
 
@@ -396,6 +470,28 @@ namespace OpenMobile.Math
             Matrix4d result;
             CreateRotationZ(angle, out result);
             return result;
+        }
+
+        #endregion
+
+        #region CreateShear
+
+        /// <summary>
+        /// Builds a shear matrix.
+        /// </summary>
+        /// <param name="shearXbyY">a shear of X by Y</param>
+        /// <param name="shearXbyZ">a shear of X by Z</param>
+        /// <param name="shearYbyX">a shear of Y by X</param>
+        /// <param name="shearYbyZ">a shear of Y by Z</param>
+        /// <param name="shearZbyX">a shear of Z by X</param>
+        /// <param name="shearZbyY">a shear of Z by Y</param>
+        /// <returns>the shear matrix</returns>
+        public static Matrix4d CreateShearMatrix(double shearXbyY, double shearXbyZ, double shearYbyX, double shearYbyZ, double shearZbyX, double shearZbyY)
+        {
+            return new Matrix4d(1, shearYbyX, shearZbyX, 0,
+                                shearXbyY, 1, shearZbyY, 0,
+                                shearXbyZ, shearYbyZ, 1, 0,
+                                0, 0, 0, 1);
         }
 
         #endregion
@@ -702,10 +798,10 @@ namespace OpenMobile.Math
         public static Matrix4d Scale(double x, double y, double z)
         {
             Matrix4d result;
-            result.Row0 = Vector4d .UnitX * x;
-            result.Row1 = Vector4d .UnitY * y;
-            result.Row2 = Vector4d .UnitZ * z;
-            result.Row3 = Vector4d .UnitW;
+            result.Row0 = Vector4d.UnitX * x;
+            result.Row1 = Vector4d.UnitY * y;
+            result.Row2 = Vector4d.UnitZ * z;
+            result.Row3 = Vector4d.UnitW;
             return result;
         }
 
@@ -724,10 +820,10 @@ namespace OpenMobile.Math
             double sin = System.Math.Sin(angle);
 
             Matrix4d result;
-            result.Row0 = Vector4d .UnitX;
-            result.Row1 = new Vector4d (0.0, cos, sin, 0.0);
-            result.Row2 = new Vector4d (0.0, -sin, cos, 0.0);
-            result.Row3 = Vector4d .UnitW;
+            result.Row0 = Vector4d.UnitX;
+            result.Row1 = new Vector4d(0.0, cos, sin, 0.0);
+            result.Row2 = new Vector4d(0.0, -sin, cos, 0.0);
+            result.Row3 = Vector4d.UnitW;
             return result;
         }
 
@@ -742,10 +838,10 @@ namespace OpenMobile.Math
             double sin = System.Math.Sin(angle);
 
             Matrix4d result;
-            result.Row0 = new Vector4d (cos, 0.0, -sin, 0.0);
-            result.Row1 = Vector4d .UnitY;
-            result.Row2 = new Vector4d (sin, 0.0, cos, 0.0);
-            result.Row3 = Vector4d .UnitW;
+            result.Row0 = new Vector4d(cos, 0.0, -sin, 0.0);
+            result.Row1 = Vector4d.UnitY;
+            result.Row2 = new Vector4d(sin, 0.0, cos, 0.0);
+            result.Row3 = Vector4d.UnitW;
             return result;
         }
 
@@ -760,10 +856,10 @@ namespace OpenMobile.Math
             double sin = System.Math.Sin(angle);
 
             Matrix4d result;
-            result.Row0 = new Vector4d (cos, sin, 0.0, 0.0);
-            result.Row1 = new Vector4d (-sin, cos, 0.0, 0.0);
-            result.Row2 = Vector4d .UnitZ;
-            result.Row3 = Vector4d .UnitW;
+            result.Row0 = new Vector4d(cos, sin, 0.0, 0.0);
+            result.Row1 = new Vector4d(-sin, cos, 0.0, 0.0);
+            result.Row2 = Vector4d.UnitZ;
+            result.Row3 = Vector4d.UnitW;
             return result;
         }
 
@@ -782,10 +878,10 @@ namespace OpenMobile.Math
             axis.Normalize();
 
             Matrix4d result;
-            result.Row0 = new Vector4d (t * axis.X * axis.X + cos, t * axis.X * axis.Y - sin * axis.Z, t * axis.X * axis.Z + sin * axis.Y, 0.0);
-            result.Row1 = new Vector4d (t * axis.X * axis.Y + sin * axis.Z, t * axis.Y * axis.Y + cos, t * axis.Y * axis.Z - sin * axis.X, 0.0);
-            result.Row2 = new Vector4d (t * axis.X * axis.Z - sin * axis.Y, t * axis.Y * axis.Z + sin * axis.X, t * axis.Z * axis.Z + cos, 0.0);
-            result.Row3 = Vector4d .UnitW;
+            result.Row0 = new Vector4d(t * axis.X * axis.X + cos, t * axis.X * axis.Y - sin * axis.Z, t * axis.X * axis.Z + sin * axis.Y, 0.0);
+            result.Row1 = new Vector4d(t * axis.X * axis.Y + sin * axis.Z, t * axis.Y * axis.Y + cos, t * axis.Y * axis.Z - sin * axis.X, 0.0);
+            result.Row2 = new Vector4d(t * axis.X * axis.Z - sin * axis.Y, t * axis.Y * axis.Z + sin * axis.X, t * axis.Z * axis.Z + cos, 0.0);
+            result.Row3 = Vector4d.UnitW;
             return result;
         }
 
@@ -819,10 +915,10 @@ namespace OpenMobile.Math
             Vector3d x = Vector3d.Normalize(Vector3d.Cross(up, z));
             Vector3d y = Vector3d.Normalize(Vector3d.Cross(z, x));
 
-            Matrix4d rot = new Matrix4d(new Vector4d (x.X, y.X, z.X, 0.0),
-                                        new Vector4d (x.Y, y.Y, z.Y, 0.0),
-                                        new Vector4d (x.Z, y.Z, z.Z, 0.0),
-                                        Vector4d .UnitW);
+            Matrix4d rot = new Matrix4d(new Vector4d(x.X, y.X, z.X, 0.0),
+                                        new Vector4d(x.Y, y.Y, z.Y, 0.0),
+                                        new Vector4d(x.Z, y.Z, z.Z, 0.0),
+                                        Vector4d.UnitW);
 
             Matrix4d trans = Matrix4d.CreateTranslation(-eye);
 
@@ -862,10 +958,10 @@ namespace OpenMobile.Math
             double invRL = 1.0 / (right - left);
             double invTB = 1.0 / (top - bottom);
             double invFN = 1.0 / (far - near);
-            return new Matrix4d(new Vector4d (2.0 * near * invRL, 0.0, 0.0, 0.0),
-                               new Vector4d (0.0, 2.0 * near * invTB, 0.0, 0.0),
-                               new Vector4d ((right + left) * invRL, (top + bottom) * invTB, -(far + near) * invFN, -1.0),
-                               new Vector4d (0.0, 0.0, -2.0 * far * near * invFN, 0.0));
+            return new Matrix4d(new Vector4d(2.0 * near * invRL, 0.0, 0.0, 0.0),
+                               new Vector4d(0.0, 2.0 * near * invTB, 0.0, 0.0),
+                               new Vector4d((right + left) * invRL, (top + bottom) * invTB, -(far + near) * invFN, -1.0),
+                               new Vector4d(0.0, 0.0, -2.0 * far * near * invFN, 0.0));
         }
 
         /// <summary>
@@ -1037,10 +1133,10 @@ namespace OpenMobile.Math
                 }
             }
 
-            mat.Row0 = new Vector4d (inverse[0, 0], inverse[0, 1], inverse[0, 2], inverse[0, 3]);
-            mat.Row1 = new Vector4d (inverse[1, 0], inverse[1, 1], inverse[1, 2], inverse[1, 3]);
-            mat.Row2 = new Vector4d (inverse[2, 0], inverse[2, 1], inverse[2, 2], inverse[2, 3]);
-            mat.Row3 = new Vector4d (inverse[3, 0], inverse[3, 1], inverse[3, 2], inverse[3, 3]);
+            mat.Row0 = new Vector4d(inverse[0, 0], inverse[0, 1], inverse[0, 2], inverse[0, 3]);
+            mat.Row1 = new Vector4d(inverse[1, 0], inverse[1, 1], inverse[1, 2], inverse[1, 3]);
+            mat.Row2 = new Vector4d(inverse[2, 0], inverse[2, 1], inverse[2, 2], inverse[2, 3]);
+            mat.Row3 = new Vector4d(inverse[3, 0], inverse[3, 1], inverse[3, 2], inverse[3, 3]);
             return mat;
         }
 

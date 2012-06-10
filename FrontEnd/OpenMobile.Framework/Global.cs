@@ -126,12 +126,12 @@ namespace OpenMobile
     /// <summary>
     /// An item in an OMList
     /// </summary>
-    public sealed class OMListItem : IComparable, ICloneable, OpenMobile.Controls.ISensorDisplay 
+    public sealed class OMListItem : IComparable, ICloneable, OpenMobile.Controls.ISensorDisplay
     {
         /// <summary>
         /// Format information for a list subitem
         /// </summary>
-        public sealed class subItemFormat: ICloneable
+        public sealed class subItemFormat : ICloneable
         {
             public bool Changed { get; set; }
 
@@ -270,7 +270,7 @@ namespace OpenMobile
             {
                 _textTex = value;
                 if (_textTex == null)
-                    _subitemTex = null; 
+                    _subitemTex = null;
             }
         }
 
@@ -540,10 +540,11 @@ namespace OpenMobile
             return _text;
         }
 
+
         /// <summary>
         /// sensor to be watched
         /// </summary>
-        private Plugin.Sensor sensor;
+        private Plugin.Sensor _Sensor;
         /// <summary>
         /// Text to be included when formatting the sensor
         /// </summary>
@@ -555,15 +556,23 @@ namespace OpenMobile
         {
             get
             {
-                return sensor.Name;
+                if (_Sensor == null)
+                    return "";
+                return _Sensor.Name;
             }
             set
             {
+                if (String.IsNullOrEmpty(value))
+                {
+                    if (_Sensor != null)
+                        _Sensor = null;
+                    return;
+                }
                 Plugin.Sensor sensor = helperFunctions.Sensors.getPluginByName(value);
                 if (sensor != null)
                 {
                     sensorText = this.text;
-                    this.sensor = sensor;
+                    this._Sensor = sensor;
                     sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
                     {
                         updateTextFromSensor();
@@ -577,127 +586,13 @@ namespace OpenMobile
         private void updateTextFromSensor()
         {
             if (string.IsNullOrEmpty(sensorText))
-                this.text = sensor.FormatedValue();
+                this.text = _Sensor.FormatedValue();
             else
-                this.text = string.Format(sensorText, sensor.FormatedValue());
+                this.text = string.Format(sensorText, _Sensor.FormatedValue());
         }
 
     }
 
-
-    /// <summary>
-    /// An Open Mobile representation of an image
-    /// </summary>
-    public struct imageItem
-    {
-        /// <summary>
-        /// The image
-        /// </summary>
-        public OImage image;
-        /// <summary>
-        /// The image name in the skin folder
-        /// </summary>
-        public string name;
-        /// <summary>
-        /// Construct an image item from an image
-        /// </summary>
-        /// <param name="i"></param>
-        public imageItem(OImage i)
-        {
-            this.name = "Unknown";
-            this.image = i;
-        }
-        /// <summary>
-        /// Construct an image item from fully qualified path 
-        /// </summary>
-        /// <param name="imageName"></param>
-        public imageItem(string imagePath)
-        {
-            this.name = imagePath;
-            if (imagePath == "")
-            {
-                this.image = null;
-                return;
-            }
-            this.image = OImage.FromFile(imagePath);
-        }
-        /// <summary>
-        /// Construct an image item from an image
-        /// </summary>
-        /// <param name="i"></param>
-        /// <param name="Name"></param>
-        public imageItem(OImage i, string Name)
-        {
-            this.name = Name;
-            this.image = i;
-        }
-        /// <summary>
-        /// Provides the name of an image
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            if (image == null)
-                return null;
-            else
-                return name;
-        }
-        /// <summary>
-        /// Value Comparison
-        /// </summary>
-        /// <param name="item1"></param>
-        /// <param name="item2"></param>
-        /// <returns></returns>
-        public static bool operator ==(imageItem item1, imageItem item2)
-        {
-            if (item1.name != item2.name)
-                return false;
-            if (item1.image != item2.image)
-                return false;
-            return true;
-        }
-        /// <summary>
-        /// Value comparison
-        /// </summary>
-        /// <param name="item1"></param>
-        /// <param name="item2"></param>
-        /// <returns></returns>
-        public static bool operator !=(imageItem item1, imageItem item2)
-        {
-            if (item1.name != item2.name)
-                return true;
-            if (item1.image != item2.image)
-                return true;
-            return false;
-        }
-        /// <summary>
-        /// Value comparison
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public override bool Equals(object obj)
-        {
-            if (obj is imageItem)
-                return (this == (imageItem)obj);
-            return false;
-        }
-        /// <summary>
-        /// Serves as a hash function for a particular type
-        /// </summary>
-        /// <returns></returns>
-        public override int GetHashCode()
-        {
-            return image.GetHashCode();
-        }
-        /// <summary>
-        /// Represents an image that the framework can't find
-        /// </summary>
-        public static imageItem MISSING = new imageItem("") { name = "MISSING" };
-        /// <summary>
-        /// Represents an empty image item
-        /// </summary>
-        public static imageItem NONE = new imageItem();
-    }
     /// <summary>
     /// The button click transition
     /// </summary>
@@ -2721,7 +2616,7 @@ namespace OpenMobile
     /// Classification for debug messages
     /// </summary>
     public enum DebugMessageType : byte
-    { 
+    {
         /// <summary>
         /// Message is of type: Unspecified / default
         /// </summary>
@@ -2748,7 +2643,7 @@ namespace OpenMobile
         /// <summary>
         /// No automatic handling of input (default) or handled manually by the skin
         /// </summary>
-        None, 
+        None,
         /// <summary>
         /// A onscreen keypad (OSK) will be used for input
         /// </summary>
