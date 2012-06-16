@@ -58,9 +58,9 @@ namespace ControlDemo
             imgBackground.BackgroundColor = BuiltInComponents.SystemSettings.SkinFocusColor;
             imgBackground.Left = 500 - (imgBackground.Image.image.Width / 2);
             imgBackground.Top = 300 - (imgBackground.Image.image.Height / 2);
-            p.addControl(imgBackground);            
+            p.addControl(imgBackground);
 
-            OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 700, 100, host.getSkinImage("OM.png"));
+            OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 730, 130, 200, 200, host.getSkinImage("Unknown Album.png"));
             //imgReflectionTestSource.Rotation = new OpenMobile.Math.Vector3(0, 0, 45);
             p.addControl(imgReflectionTestSource);
 
@@ -97,9 +97,10 @@ namespace ControlDemo
             //Slider_RotationZ.OnSliderMoved += new OMSlider.slidermoved(Slider_Rotation_OnSliderMoved);
             //p.addControl(Slider_RotationZ);
 
-            OMImage imgReflectionTestTarget = new OMImage("", 700, 100 + imgReflectionTestSource.Height);
+            OMImage imgReflectionTestTarget = new OMImage("", imgReflectionTestSource.Left, imgReflectionTestSource.Top + imgReflectionTestSource.Height, imgReflectionTestSource.Width, imgReflectionTestSource.Height);
             if (imgReflectionTestSource.Image != null)
-                imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, 1.4F, true);
+                imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, 0.7f, true);
+                //imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, true);
             p.addControl(imgReflectionTestTarget);
 
             manager.loadPanel(p);

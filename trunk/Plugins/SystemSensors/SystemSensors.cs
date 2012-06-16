@@ -38,7 +38,8 @@ namespace SystemSensors
                         cpuCounter.InstanceName = "_Total";
                         cpuCounter.NextValue(); //init
                     }
-                    return cpuCounter.NextValue();
+                    return (float)Math.Round(cpuCounter.NextValue(), 0);
+
                 case "SystemSensors.PhysicalMemoryFree":
                     if (freeRamCounter==null)
                         freeRamCounter = new PerformanceCounter("Memory", "Available MBytes");
@@ -79,7 +80,8 @@ namespace SystemSensors
             MEMORYSTATUS status = new MEMORYSTATUS();
             if (GlobalMemoryStatus(ref status))
             {
-                return (1-(status.dwAvailPhys/(float)status.dwTotalVirtual))*100;
+                //return (1-(status.dwAvailPhys/(float)status.dwTotalVirtual))*100;
+                return status.dwMemoryLoad;
             }
             return 0;
         }
@@ -139,24 +141,24 @@ namespace SystemSensors
         {
             thehost = host;
 
+            // Slow update sensors
             sensors.Add(new SensorWrapper(this.pluginName + ".CPUUsage", "CPU", eSensorDataType.percent, delegate(Sensor sensor) { return getValue(sensor); }));
             sensors.Add(new SensorWrapper(this.pluginName + ".PhysicalMemoryFree", "FMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
             sensors.Add(new SensorWrapper(this.pluginName + ".PhysicalMemoryUsed", "UMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
             sensors.Add(new SensorWrapper(this.pluginName + ".MemoryUsedPercent", "Men", eSensorDataType.percent, delegate(Sensor sensor) { return getValue(sensor); }));
             sensors.Add(new SensorWrapper(this.pluginName + ".ProcessMemoryUsed", "UMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
-            sensors.Add(new SensorWrapper(this.pluginName + ".Date", "Dt", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
 
-            sensors.Add(new SensorWrapper(this.pluginName + ".Time", "Tm", eSensorDataType.raw, 
-                delegate(Sensor sensor) 
-                { 
-                    return getValue(sensor); 
-                }));
-            
+            // Fast update sensors
+            sensors.Add(new SensorWrapper(this.pluginName + ".Date", "Dt", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".Time", "Tm", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
             sensors.Add(new SensorWrapper(this.pluginName + ".LongDate", "Dt", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
-        
+
+            // Update timers: Slow
             slowTimer = new System.Timers.Timer(5000); //These items take a while to refresh to do them less often
             slowTimer.Elapsed += new System.Timers.ElapsedEventHandler(slowTimer_Elapsed);
             slowTimer.Enabled = true;
+
+            // Update timers: Fast
             fastTimer = new System.Timers.Timer(1000);
             fastTimer.Elapsed += new System.Timers.ElapsedEventHandler(fastTimer_Elapsed);
             fastTimer.Enabled = true;
@@ -166,20 +168,18 @@ namespace SystemSensors
 
         void slowTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            slowTimer.Enabled = false;
             for (int i=0; i <= 4; i++)
-                OpenMobile.Threading.SafeThread.Asynchronous(delegate()
-                { 
-                    sensors[i].UpdateSensorValue( getValue(sensors[i].sensor)); 
-                });
+                sensors[i].UpdateSensorValue( getValue(sensors[i].sensor));
+            slowTimer.Enabled = true;
         }
 
         void fastTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            for (int i=5; i <= 6; i++)
-                OpenMobile.Threading.SafeThread.Asynchronous(delegate()
-                { 
-                    sensors[i].UpdateSensorValue( getValue(sensors[i].sensor));
-                });
+            fastTimer.Enabled = false;
+            for (int i = 5; i <= 7; i++)
+                sensors[i].UpdateSensorValue(getValue(sensors[i].sensor));
+            fastTimer.Enabled = true;
         }
 
         public Settings loadSettings()
