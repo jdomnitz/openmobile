@@ -175,7 +175,7 @@ namespace OpenMobile.Plugin
             this.ReadDelegate = ForceReadDel;
             UpdateValueDel = delegate(object NewValue)
             {
-                if (sensorValue != NewValue)
+                if (!(sensorValue.Equals(NewValue)))
                 {
                     sensorValue = NewValue;
                     if (newSensorDataReceived != null)
