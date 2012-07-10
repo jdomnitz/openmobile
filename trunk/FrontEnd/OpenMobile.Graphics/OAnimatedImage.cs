@@ -42,6 +42,7 @@ namespace OpenMobile.Graphics
             {
                 OnRedrawInternal += value;
                 t = new Thread(animationLoop);
+                t.Name = "OAnimatedImage";
                 t.IsBackground = true;
                 t.Start();
             }
@@ -50,12 +51,22 @@ namespace OpenMobile.Graphics
                 if (t != null)
                     t.Abort();
                 OnRedrawInternal -= value;
+                Dispose();
             }
         }
 
         private int TimeStamp;
+        private int Frame = 0;
         public OImage getFrame()
         {
+            // Check if we stopped animation
+            if (t == null)
+            {
+                t = new Thread(animationLoop);
+                t.Name = "OAnimatedImage";
+                t.IsBackground = true;
+                t.Start();
+            }
             return getFrame(currentFrame);
         }
         public OImage getFrame(int frame)
@@ -79,7 +90,7 @@ namespace OpenMobile.Graphics
         }
         public void Initialize(System.Drawing.Bitmap b)
         {
-            img = (System.Drawing.Bitmap)b.Clone();
+            img = b;
             FrameDimension frameDimension = new FrameDimension(img.FrameDimensionsList[0]);
             int count = img.GetFrameCount(frameDimension);
             if (count == 0)
@@ -95,7 +106,7 @@ namespace OpenMobile.Graphics
                 {
                     // Set animation delay
                     this_delay = BitConverter.ToInt32(img.GetPropertyItem(0x5100).Value, index) * 10;
-                    frameDelay[i] += (this_delay < 100 ? 100 : this_delay);  // Minimum delay is 100 ms
+                    frameDelay[i] = (this_delay < 100 ? 100 : this_delay);  // Minimum delay is 100 ms
                     index += 4;
 
                     // Generate frame images
@@ -110,7 +121,7 @@ namespace OpenMobile.Graphics
             bool Animate = true;
             while (Animate)
             {
-                frameTimer += 11;
+                frameTimer += 10;
                 if (frameTimer >= frameDelay[currentFrame])
                 {
                     frameTimer = 0;
@@ -131,6 +142,35 @@ namespace OpenMobile.Graphics
                 }
                 Thread.Sleep(10);
             }
+            t = null;
         }
+
+        public void Dispose()
+        {
+            if (t != null)
+            {
+                t.Abort();
+                t = null;
+            }
+            if (img != null)
+            {
+                img.Dispose();
+                img = null;
+            }
+            for (int i = 0; i < images.Length; i++)
+            {
+                if (images[i] != null)
+                {
+                    images[i].Dispose();
+                    images[i] = null;
+                }
+            }
+        }
+
+        ~OAnimatedImage()
+        {
+            Dispose();
+        }
+
     }
 }

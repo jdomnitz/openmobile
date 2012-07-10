@@ -1468,6 +1468,15 @@ namespace OpenMobile.Graphics
                 return times;
             }
         }
+
+        public static Font LED
+        {
+            get
+            {
+                return new Font("DigiFaceWide");
+            }
+        }        
+
         public static Font Webdings
         {
             get

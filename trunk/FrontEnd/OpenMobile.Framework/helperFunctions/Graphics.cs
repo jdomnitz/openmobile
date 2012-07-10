@@ -406,7 +406,7 @@ namespace OpenMobile.helperFunctions.Graphics
     /// <summary>
     /// A rectangle with or without a header text that can be used as background for other objects
     /// </summary>
-    public static class PanelOutlineGraphic
+    public static class PanelPopupOutlineGraphic
     {
 
         /// <summary>
@@ -508,6 +508,162 @@ namespace OpenMobile.helperFunctions.Graphics
             gd.Height = Height;
             gd.Type = Type;
             gd.Text = Text;
+            return GetImage(ref gd, "OMGraphics");
+        }
+
+        /// <summary>
+        /// Gets a image according to the graphicdata using the default handler (OMGraphics)
+        /// </summary>
+        /// <param name="gd"></param>
+        /// <returns></returns>
+        public static OImage GetImage(GraphicData gd)
+        {
+            return GetImage(ref gd, "OMGraphics");
+        }
+        /// <summary>
+        /// Gets a image according to the graphicdata using the default handler (OMGraphics)
+        /// </summary>
+        /// <param name="gd"></param>
+        /// <returns></returns>
+        public static OImage GetImage(ref GraphicData gd)
+        {
+            return GetImage(ref gd, "OMGraphics");
+        }
+        /// <summary>
+        /// Gets a image according to the graphicdata using the requested handler
+        /// </summary>
+        /// <param name="gd"></param>
+        /// <param name="Handler"></param>
+        /// <returns></returns>
+        public static OImage GetImage(ref GraphicData gd, string Handler)
+        {
+            if (!BuiltInComponents.Host.sendMessage<GraphicData>(Handler, "OpenMobile.helperFunctions.PanelPopupOutline", "PanelPopupOutline", ref gd))
+            {   // Log this error to the debug log
+                BuiltInComponents.Host.DebugMsg("Unable to get PanelPopupOutline, plugin " + Handler + " not available");
+                return null;
+            }
+            return gd.Image;
+        }
+    }
+
+    /// <summary>
+    /// A rectangle customisable properties that can be used as background for other objects
+    /// </summary>
+    public static class PanelOutlineGraphic
+    {
+
+        /// <summary>
+        /// The different data that the menu can return
+        /// </summary>
+        public enum Types
+        {
+            /// <summary>
+            /// Returns a rounded rectangle style graphic
+            /// </summary>
+            RoundedRectangle
+        }
+
+        /// <summary>
+        /// The different shadowtypes
+        /// </summary>
+        public enum ShadowTypes
+        {
+            /// <summary>
+            /// No shadow
+            /// </summary>
+            None,
+
+            /// <summary>
+            /// Normal drop style shadow
+            /// </summary>
+            DropShadow,
+
+            /// <summary>
+            /// Glows on all edges
+            /// </summary>
+            GlowOnAllEdges
+        }
+
+        /// <summary>
+        /// Data for generated graphics
+        /// </summary>
+        public class GraphicData
+        {
+            public GraphicData()
+            {   // Default values
+                this.ShadowType =  ShadowTypes.GlowOnAllEdges;
+                this.ShadowSize = 14;
+                this.BorderThickness = 2;
+
+                // Default colors are read from the OM system setting (SkinFocusColor)
+                this.ShadowColor = BuiltInComponents.SystemSettings.SkinFocusColor;
+            }
+
+            /// <summary>
+            /// Height of graphic
+            /// </summary>
+            public int Height { get; set; }
+            /// <summary>
+            /// Width of graphic
+            /// </summary>
+            public int Width { get; set; }
+            /// <summary>
+            /// Generated image
+            /// </summary>
+            public OImage Image { get; set; }
+            /// <summary>
+            /// Client area (The available space for client controls relative to the generated image)
+            /// </summary>
+            public Rectangle ClientArea { get; set; }
+            /// <summary>
+            /// Imagetype to generate
+            /// </summary>
+            public Types Type { get; set; }
+            /// <summary>
+            /// Color to use when drawing the background color
+            /// </summary>
+            public Color BackgroundColor { get; set; }
+            /// <summary>
+            /// Color to use when drawing border
+            /// </summary>
+            public Color BorderColor { get; set; }
+            /// <summary>
+            /// Color to use when drawing the shadow
+            /// </summary>
+            public Color ShadowColor { get; set; }
+            /// <summary>
+            /// Type of shadow to use
+            /// </summary>
+            public ShadowTypes ShadowType { get; set; }
+            /// <summary>
+            /// Size of shadow
+            /// </summary>
+            public int ShadowSize { get; set; }
+            /// <summary>
+            /// Thickness of border
+            /// </summary>
+            public int BorderThickness { get; set; }
+            /// <summary>
+            /// A custom graphicpath to use when generating this graphic
+            /// </summary>
+            public System.Drawing.Drawing2D.GraphicsPath GraphicPath { get; set; }
+        }
+
+        /// <summary>
+        /// Gets a image of the requested type and the requested width and height using the default handler (OMGraphics)
+        /// </summary>
+        /// <param name="Width"></param>
+        /// <param name="Height"></param>
+        /// <param name="ImageType"></param>
+        /// <param name="Icon"></param>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public static OImage GetImage(int Width, int Height, Types Type)
+        {
+            GraphicData gd = new GraphicData();
+            gd.Width = Width;
+            gd.Height = Height;
+            gd.Type = Type;
             return GetImage(ref gd, "OMGraphics");
         }
 

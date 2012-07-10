@@ -179,16 +179,33 @@ namespace OpenMobile.Input
                 {
                     bool previous_state = button_state[(int)button];
                     if (!value && previous_state)
-                        MouseClick(instance, button_args);
+                        // Spawn a new thread for the actual event
+                        OpenMobile.Threading.LocalSafeThread.Asynchronous(delegate()
+                        {
+                            if (MouseClick != null)
+                                MouseClick(instance, button_args);
+                        });
+                    
                     button_state[(int)button] = value;
                     button_args.X = move_args.X;
                     button_args.Y = move_args.Y;
                     button_args.Button = button;
                     button_args.IsPressed = value;
                     if (value && !previous_state)
-                        ButtonDown(instance, button_args);
+                        // Spawn a new thread for the actual event
+                        OpenMobile.Threading.LocalSafeThread.Asynchronous(delegate()
+                        {
+                            if (ButtonDown != null)
+                                ButtonDown(instance, button_args);
+                        });
                     else if (!value && previous_state)
-                        ButtonUp(instance, button_args);
+                        // Spawn a new thread for the actual event
+                        OpenMobile.Threading.LocalSafeThread.Asynchronous(delegate()
+                        {
+                            if (ButtonUp != null)
+                                ButtonUp(instance, button_args);
+                        });
+                    
                 }
             }
         }
@@ -401,9 +418,13 @@ namespace OpenMobile.Input
                             move_args.Buttons = MouseButton.Left;
                         else
                             move_args.Buttons = MouseButton.None;
-                        // Debug info
-                        //Console.WriteLine(string.Format("MouseDevice({0}).SetPosition: {1}:{2}", this.ToString(), move_args.X, move_args.Y));
-                        Move(instance, move_args);
+
+                        // Spawn a new thread for the actual event
+                        OpenMobile.Threading.LocalSafeThread.Asynchronous(delegate()
+                        {
+                            if (Move != null)
+                                Move(instance, move_args);
+                        });
                     }
                 }
                 last_pos.X = move_args.X;
@@ -420,9 +441,15 @@ namespace OpenMobile.Input
                     move_args.Buttons = MouseButton.Left;
                 else
                     move_args.Buttons = MouseButton.None;
-                // Debug info
-                //Console.WriteLine(string.Format("MouseDevice({0}).RaiseMoveEvent: {1}:{2}", this.ToString(), move_args.X, move_args.Y));
-                Move(instance, move_args);
+                //Move(instance, move_args);
+
+                // Spawn a new thread for the actual event
+                OpenMobile.Threading.LocalSafeThread.Asynchronous(delegate()
+                {
+                    if (Move != null)
+                        Move(instance, move_args);
+                });
+
             }
         }
 

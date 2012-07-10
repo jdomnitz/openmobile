@@ -733,6 +733,11 @@ namespace OpenMobile.Graphics.OpenGL
             DeleteTextures(1, ref id);
         }
 
+        public static void DeleteTexture(uint id)
+        {
+            DeleteTextures(1, ref id);
+        }
+
         #endregion
 
         #region [Vertex|Normal|Index|Color|FogCoord|VertexAttrib]Pointer

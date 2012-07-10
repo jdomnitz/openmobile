@@ -33,31 +33,32 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Label Text
         /// </summary>
-        protected string text = String.Empty;
+        protected string _text = String.Empty;
         /// <summary>
         /// Format for the labels text
         /// </summary>
-        protected OpenMobile.Graphics.eTextFormat textFormat = OpenMobile.Graphics.eTextFormat.Normal;
+        protected OpenMobile.Graphics.eTextFormat _textFormat = OpenMobile.Graphics.eTextFormat.Normal;
         /// <summary>
         /// Text alignment
         /// </summary>
-        protected OpenMobile.Graphics.Alignment textAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
+        protected OpenMobile.Graphics.Alignment _textAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
         /// <summary>
         /// Sets the color of the text
         /// </summary>
-        protected Color color = BuiltInComponents.SystemSettings.SkinTextColor;
+        protected Color _color = BuiltInComponents.SystemSettings.SkinTextColor;
         /// <summary>
         /// Sets the font of the text
         /// </summary>
-        protected Font font = new Font(Font.GenericSansSerif, 18F);
+        protected Font _font = new Font(Font.GenericSansSerif, 18F);
         /// <summary>
         /// Outline color of the text
         /// </summary>
-        protected Color outlineColor = Color.Black;
+        protected Color _outlineColor = Color.Black;
         /// <summary>
         /// Sensor name to subscribe to
         /// </summary>
-        protected string displaySensorName = "";
+        protected string _displaySensorName = "";
+
         
         /// <summary>
         /// Sets the color of the text
@@ -66,12 +67,12 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return color;
+                return _color;
             }
             set
             {
-                color = value;
-                textTexture = null;
+                _color = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -133,14 +134,14 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return outlineColor;
+                return _outlineColor;
             }
             set
             {
-                if (outlineColor == value)
+                if (_outlineColor == value)
                     return;
-                outlineColor = value;
-                textTexture = null;
+                _outlineColor = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -152,14 +153,14 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return font;
+                return _font;
             }
             set
             {
-                if (font == value)
+                if (_font == value)
                     return;
-                font = value;
-                textTexture = null;
+                _font = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -171,14 +172,14 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return font.Size;
+                return _font.Size;
             }
             set
             {
-                if (font == null)
+                if (_font == null)
                     return;
-                font.Size = value;
-                textTexture = null;
+                _font.Size = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -194,19 +195,17 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return text;
+                return _text;
             }
             set
             {
-                if (text == value)
+                if (value == null)
+                    value = String.Empty;
+                if (_text == value)
                     return;
-                text = value;
-                if (textTexture != null)
-                {
-                    textTexture = null;
-                }
+                _text = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
-
             }
         }
         /// <summary>
@@ -216,14 +215,14 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return textFormat;
+                return _textFormat;
             }
             set
             {
-                if (textFormat == value)
+                if (_textFormat == value)
                     return;
-                textFormat = value;
-                textTexture = null;
+                _textFormat = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -234,14 +233,14 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return textAlignment;
+                return _textAlignment;
             }
             set
             {
-                if (textAlignment == value)
+                if (_textAlignment == value)
                     return;
-                textAlignment = value;
-                textTexture = null;
+                _textAlignment = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -253,18 +252,23 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
+            // No use in rendering if text is empty
+            if (String.IsNullOrEmpty(_text))
+                return;
+            
             float tmp = OpacityFloat;
             if (this.Mode == eModeType.transitioningIn)
                 tmp = e.globalTransitionIn;
             else if (this.Mode == eModeType.transitioningOut)
                 tmp = e.globalTransitionOut;
-            if (g.TextureGenerationRequired(textTexture))
-                textTexture = g.GenerateTextTexture(textTexture, left, top, width + 5, height, text, font, textFormat, textAlignment, color, outlineColor);
-            g.DrawImage(textTexture, left, top, width+5, height, tmp);
+            if (_RefreshGraphic)
+                textTexture = g.GenerateTextTexture(textTexture, left, top, width + 5, height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
+            g.DrawImage(textTexture, left, top, width + 5, height, tmp);
 
+            _RefreshGraphic = false;
             // Skin debug function 
             if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Green);
+                base.DrawSkinDebugInfo(g, Color.Yellow);
         }
 
         /// <summary>
@@ -294,13 +298,12 @@ namespace OpenMobile.Controls
                 if (sensor != null)
                 {
                     this._Sensor = sensor;
-                    //sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
-                    //{
-                    //    this.Text = sender.FormatedValue();
-                    //    raiseUpdate(false);
-                    //});
-                    this.Text = sensor.FormatedValue();
-                    raiseUpdate(false);
+                    this.Text = _Sensor.FormatedValue();
+                    sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
+                    {
+                        this.Text = sender.FormatedValue();
+                        raiseUpdate(false);
+                    });
                 }
             }
         }

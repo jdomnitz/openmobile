@@ -112,8 +112,7 @@ namespace BatterySupport
                     batteryImage.image.persist = true;
                     System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
                     {
-                        OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
-                        gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
+                        Graphics.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
                     }
                     g.Dispose();
                     AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
@@ -125,8 +124,7 @@ namespace BatterySupport
                     batteryImage = theHost.getSkinImage("BatteryWarning", true);
                     batteryImage.image.persist = true;
                     System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
-                    OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
-                    gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
+                    Graphics.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
                     g.Dispose();
                     AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
                     startWatching();
@@ -137,8 +135,7 @@ namespace BatterySupport
                     batteryImage = theHost.getSkinImage("BatteryCritical", true);
                     batteryImage.image.persist = true;
                     System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
-                    OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
-                    gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
+                    Graphics.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
                     g.Dispose();
                     AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
                     startWatching();
@@ -189,6 +186,7 @@ namespace BatterySupport
                     }
                     catch (Exception) { }
                 });
+            batteryWatcher.Name = this.pluginName + ".BatteryWatcher";
             batteryWatcher.Start();
         }
         int lastBatt;
@@ -210,8 +208,7 @@ namespace BatterySupport
                     else if (batteryImage.name == "BatteryCritical")
                         batteryImage = theHost.getSkinImage("BatteryCritical", true);
                     System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(batteryImage.image.image);
-                        OpenMobile.Graphics.Graphics gr = new OpenMobile.Graphics.Graphics(0);
-                        gr.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
+                        Graphics.renderText(g, 0, 0, batteryImage.image.Width, batteryImage.image.Height, ((int)(SystemInformation.PowerStatus.BatteryLifePercent * 100)).ToString() + "%", new Font(Font.GenericSansSerif, 36), eTextFormat.Glow, Alignment.CenterCenter, Color.White, Color.Black);
                     g.Dispose();
                     AddIcon(new IconManager.UIIcon(batteryImage, ePriority.MediumLow, false));
                 }

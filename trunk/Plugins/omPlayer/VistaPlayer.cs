@@ -677,7 +677,8 @@ namespace OMPlayer
                 stop();
                 lock (this)
                 {
-                    object o = sink.Invoke(OnPlay, new object[] { zone, url });
+                    //object o = sink.Invoke(OnPlay, new object[] { zone, url });
+                    object o = PlayMovieInWindow(zone, url);
                     if ((bool)o == false)
                         return false;
                 }
@@ -698,20 +699,20 @@ namespace OMPlayer
                 if (t == null)
                 {
                     t = new Thread(waitForStop);
-                    t.Name = zone.ToString();
+                    t.Name = String.Format("OMPlayer.VistaPlayer.AVPlayer.{0}", zone);
                     t.Start();
                 }
                 return true;
             }
             public bool stop()
             {
-                if (sink.InvokeRequired)
-                {
-                    object ret = sink.Invoke(OnStop);
-                    if (ret == null)
-                        return false;
-                    return (bool)ret;
-                }
+                //if (sink.InvokeRequired)
+                //{
+                //    object ret = sink.Invoke(OnStop);
+                //    if (ret == null)
+                //        return false;
+                //    return (bool)ret;
+                //}
                 if (session==null)
                     return false;
                 if (isAudioOnly == false)
@@ -728,7 +729,7 @@ namespace OMPlayer
             IMFPresentationClock clock;
             public void getCurrentPos()
             {
-                long time;
+                long time = 0;
                 if (session != null)
                 {
                     if (clock == null)
@@ -744,10 +745,11 @@ namespace OMPlayer
                         clock.GetTime(out time);
                     }
                     catch (COMException)
-                    { 
-                        time = 0; 
+                    {
+                        time = 0;
                     }
-                    pos = time/10000000;
+                    // Convert nanoseconds to seconds
+                    pos = time / 10000000;
                 }
             }
             /*
@@ -1266,18 +1268,25 @@ namespace OMPlayer
                 if (session != null)
                 {
                     session.Shutdown();
+                    SafeRelease(session);
                     Marshal.ReleaseComObject(session);
                     session = null;
+                }
+
+                if (clock != null)
+                {
+                    SafeRelease(clock);
+                    clock = null;
                 }
             }
 
             public bool SetRate(float rate)
             {
-                if (sink.InvokeRequired)
-                {
-                    return (bool)sink.Invoke(OnSetRate, new object[] { rate });
-                }
-                else
+                //if (sink.InvokeRequired)
+                //{
+                //    return (bool)sink.Invoke(OnSetRate, new object[] { rate });
+                //}
+                //else
                 {
                     return (m_rateControl.SetRate(true, rate) == S_Ok);
                 }
@@ -1340,13 +1349,14 @@ namespace OMPlayer
             {
                 if (m_pSource != null)
                 {
-                    while (zone != null)
+                    while (zone != null && m_pSource != null)
                     {
                         Thread.Sleep(1000);
                         if (m_pSource != null)
                         {
                             if (currentState != ePlayerStatus.Stopped)
-                                sink.Invoke(OnGetPosition);
+                                //sink.BeginInvoke(OnGetPosition);
+                                getCurrentPos();
                             if ((crossfade > 0) && (isAudioOnly) && ((int)pos == nowPlaying.Length - (crossfade / 1000)))
                             {
                                 OnMediaEvent(eFunction.nextMedia, zone, String.Empty);
@@ -1365,7 +1375,8 @@ namespace OMPlayer
                     return false;
                 double old = pos;
                 pos = seconds;
-                bool success = (bool)sink.Invoke(OnSetPosition, new object[] { seconds });
+                //bool success = (bool)sink.Invoke(OnSetPosition, new object[] { seconds });
+                bool success = (bool)AVPlayer_OnSetPosition(seconds);
                 if (!success)
                     pos = old;
                 return success;

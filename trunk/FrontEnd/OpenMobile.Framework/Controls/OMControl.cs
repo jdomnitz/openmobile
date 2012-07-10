@@ -37,6 +37,10 @@ namespace OpenMobile.Controls
     public abstract class OMControl : ICloneable
     {
         /// <summary>
+        /// Indicates that graphics needs a refresh
+        /// </summary>
+        protected bool _RefreshGraphic = true;
+        /// <summary>
         /// The rendering mode of the control
         /// </summary>
         protected eModeType mode;
@@ -300,6 +304,9 @@ namespace OpenMobile.Controls
                 raiseUpdate(false); 
             }
         }
+        /// <summary>
+        /// Current opacity level as a float value
+        /// </summary>
         protected float OpacityFloat
         {
             get
@@ -312,7 +319,13 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g">The User Interfaces graphics object</param>
         /// <param name="e">Rendering Parameters</param>
-        public abstract void Render(Graphics.Graphics g, renderingParams e);
+        public virtual void Render(Graphics.Graphics g, renderingParams e)
+        {
+            _RefreshGraphic = false;
+            // Skin debug function 
+            if (_SkinDebug)
+                DrawSkinDebugInfo(g, Color.Yellow);
+        }
 
         /// <summary>
         /// Returns the region occupied by the control

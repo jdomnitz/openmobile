@@ -61,10 +61,11 @@ namespace OpenMobile.Platform.Windows
         public WinRawInput()
         {
             InputThread.IsBackground = true;
+            InputThread.Name = "WinRawInput.InputThread";
             InputThread.Start();
 
             while (mouseDriver == null || keyboardDriver == null)
-                Thread.Sleep(0);
+                Thread.Sleep(10);
         }
 
         #endregion

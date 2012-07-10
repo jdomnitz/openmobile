@@ -241,7 +241,9 @@ namespace OpenMobile.Controls
                     if (aimg == null)
                     {   // Create animation object
                         aimg = new OAnimatedImage(image.image.image);
-                        aimg.OnRedraw += new OAnimatedImage.redraw(aimg_OnRedraw);
+                        if (DrawAnimationDelegate==null)
+                            DrawAnimationDelegate = new OAnimatedImage.redraw(aimg_OnRedraw);
+                        aimg.OnRedraw += DrawAnimationDelegate;
                     }
                     else
                     {   // Get current frame from animation
@@ -319,6 +321,7 @@ namespace OpenMobile.Controls
         #region Animiation
 
         private OAnimatedImage aimg = null;
+        private OAnimatedImage.redraw DrawAnimationDelegate = null;
 
         /// <summary>
         /// Can the image in this control animate?
@@ -367,7 +370,7 @@ namespace OpenMobile.Controls
         {
             // Stop any animation threads
             if (aimg != null)
-                aimg.OnRedraw -= new OAnimatedImage.redraw(aimg_OnRedraw);
+                aimg.OnRedraw -= DrawAnimationDelegate; 
         }
 
     }

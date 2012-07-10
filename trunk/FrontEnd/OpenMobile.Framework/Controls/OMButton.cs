@@ -125,6 +125,7 @@ namespace OpenMobile.Controls
             set
             {
                 image = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -141,6 +142,7 @@ namespace OpenMobile.Controls
             set
             {
                 transition = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -157,6 +159,7 @@ namespace OpenMobile.Controls
             set
             {
                 downImage = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -177,6 +180,7 @@ namespace OpenMobile.Controls
             set
             {
                 _OverlayImage = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -195,6 +199,7 @@ namespace OpenMobile.Controls
             set
             {
                 transparency = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -211,6 +216,7 @@ namespace OpenMobile.Controls
             set
             {
                 focusImage = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -227,6 +233,7 @@ namespace OpenMobile.Controls
             set
             {
                 orientation = value;
+                _RefreshGraphic = true;
                 raiseUpdate(false);
             }
         }
@@ -261,6 +268,7 @@ namespace OpenMobile.Controls
             set
             {
                 shape = value;
+                _RefreshGraphic = true;
                 genTriangle();
             }
         }
@@ -284,6 +292,7 @@ namespace OpenMobile.Controls
             set
             {
                 fillColor = value;
+                _RefreshGraphic = true;
             }
         }
         /// <summary>
@@ -298,6 +307,7 @@ namespace OpenMobile.Controls
             set
             {
                 borderColor = value;
+                _RefreshGraphic = true;
             }
         }
         /// <summary>
@@ -312,6 +322,7 @@ namespace OpenMobile.Controls
             set
             {
                 borderSize = value;
+                _RefreshGraphic = true;
             }
         }
 
@@ -325,7 +336,11 @@ namespace OpenMobile.Controls
         public int CornerRadius
         {
             get { return cornerRadius; }
-            set { cornerRadius = value; }
+            set 
+            { 
+                cornerRadius = value;
+                _RefreshGraphic = true;
+            }
         }
 
         #endregion
@@ -457,8 +472,6 @@ namespace OpenMobile.Controls
                         }
                         else
                         {   // Default fallback if image is missing
-                            //if (image == imageItem.MISSING)
-                                //g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
                             DrawShape(g, e, alpha);
                         }
                     }
@@ -481,8 +494,6 @@ namespace OpenMobile.Controls
                         }
                         else
                         {   // Default fallback if image is missing
-                            //if (image == imageItem.MISSING)
-                            //    g.DrawRoundRectangle(new Pen(Color.White, 4F), left + 2, top + 2, width - 4, height - 4, 8);
                             DrawShape(g, e, alpha);
                         }
                     }
@@ -495,8 +506,6 @@ namespace OpenMobile.Controls
                         }
                         else
                         {   // Default fallback if image is missing
-                            //if (image == imageItem.MISSING)
-                            //    g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(255 * alpha), Color.White), 4F), left + 2, top + 2, width - 4, height - 4, 8);
                             DrawShape(g, e, alpha);
                         }
                     }
@@ -508,13 +517,14 @@ namespace OpenMobile.Controls
                 g.DrawImage(_OverlayImage.image, left, top, width, height);
 
             // Draw text (if any)
-            if (text != "")
+            if (_text != "")
             {
-                if (g.TextureGenerationRequired(textTexture))
-                    textTexture = g.GenerateTextTexture(textTexture, this.Left, this.Top, this.width, this.height, text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
+                if (_RefreshGraphic)
+                    textTexture = g.GenerateTextTexture(textTexture, this.Left, this.Top, this.width, this.height, _text, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
                 g.DrawImage(textTexture, (this.Left + TextLocation.X), (this.Top + TextLocation.Y), width, height, alpha);
             }
 
+            _RefreshGraphic = false;
             // Skin debug function 
             if (_SkinDebug)
                 base.DrawSkinDebugInfo(g, Color.Yellow);

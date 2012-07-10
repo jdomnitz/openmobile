@@ -108,6 +108,8 @@ namespace OpenMobile.helperFunctions.Controls
             // Set overlay image
             btn.OverlayImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(w, h, ButtonGraphic.ImageTypes.ButtonForeground, Icon, Text));
 
+            btn.Transition = eButtonTransition.None;
+
             return btn;
         }
 
@@ -142,5 +144,33 @@ namespace OpenMobile.helperFunctions.Controls
 
             return btn;
         }
+
+        /// <summary>
+        /// Updates a generic button for placement on either the top or bottom edge of the screen
+        /// </summary>
+        /// <param name="btn"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        /// <param name="Icon"></param>
+        /// <param name="Text"></param>
+        static public void UpdateHorisontalEdgeButton(OMButton btn, int x, int y, int w, int h, string Icon, string Text)
+        {
+            // Set background image
+            btn.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(w, h, ButtonGraphic.ImageTypes.ButtonBackground));
+
+            // Set focus image
+            ButtonGraphic.GraphicData gd = new ButtonGraphic.GraphicData();
+            gd.Width = w;
+            gd.Height = h;
+            gd.ImageType = ButtonGraphic.ImageTypes.ButtonBackgroundFocused;
+            gd.BackgroundFocusSize = 1.0f;
+            btn.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+
+            // Set overlay image
+            btn.OverlayImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(w, h, ButtonGraphic.ImageTypes.ButtonForeground, Icon, Text));
+        }
+
     }
 }

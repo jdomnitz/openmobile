@@ -247,6 +247,7 @@ namespace OpenMobile.helperFunctions.Forms
                         ShowMsgBox(screen);
                 });
             t.IsBackground = true;
+            t.Name = "helperFunctions.Forms.Dialog.ShowMsgBoxNonBlocking";
             t.Start();
         }
         /// <summary>
@@ -262,6 +263,7 @@ namespace OpenMobile.helperFunctions.Forms
                     ShowMsgBox(screen);
                 });
             t.IsBackground = true;
+            t.Name = "helperFunctions.Forms.Dialog.ShowMsgBoxNonBlocking";
             t.Start();
         }
         /// <summary>
@@ -476,13 +478,13 @@ namespace OpenMobile.helperFunctions.Forms
 
             OMImage Image_panelSettings_Background = new OMImage(name + "_Image_Background",x,y);
             Image_panelSettings_Background.FitControlToImage = true;
-            PanelOutlineGraphic.GraphicData gd = new PanelOutlineGraphic.GraphicData();
+            PanelPopupOutlineGraphic.GraphicData gd = new PanelPopupOutlineGraphic.GraphicData();
             gd.Width = w;
             gd.Height = h;
             gd.TextFont = new Font(Font.Arial, 24);
-            gd.Type = PanelOutlineGraphic.Types.RoundedRectangle;
+            gd.Type = PanelPopupOutlineGraphic.Types.RoundedRectangle;
             gd.Text = Header;
-            Image_panelSettings_Background.Image = new imageItem(PanelOutlineGraphic.GetImage(ref gd));
+            Image_panelSettings_Background.Image = new imageItem(PanelPopupOutlineGraphic.GetImage(ref gd));
             this.addControl(Image_panelSettings_Background);
 
             // Save reference to area data given from graphics generation

@@ -42,8 +42,9 @@ namespace OpenMobile.Graphics
         internal static void DeleteTexture(int screen, uint texture)
         {
             if (screen < textures.Count)
-                //textures[screen].Add(texture);
-                textures[screen].Remove(texture);
+                textures[screen].Add(texture);
+                //textures[screen].Remove(texture);
+            Raw.DeleteTexture(texture);
         }
 
         public V2Graphics(int screen)
@@ -56,32 +57,39 @@ namespace OpenMobile.Graphics
                         textures.Add(new List<uint>());
             }
         }
-
-
         private bool loadTexture(ref OImage image)
         {
-            if (image == null)
-                return false;
-            if (image.Size == Size.Empty)
+            if (image == null || image.Size == Size.Empty)
                 return false;
 
+            // Load texture
             uint texture;
+
+            // Delete old texture before generating a new one
+            if (image.Texture != 0)
+            {
+                texture = image.Texture;
+                Raw.DeleteTexture(texture);
+            }
+
+            // Create new texture name
             Raw.GenTextures(1, out texture);
+
+            // Bind texture to opengl
             Raw.BindTexture(TextureTarget.Texture2D, texture);
 
-            // Set correct image to use if image data is not shared among all screens
-            if (!image.Shared)
-                image.SetScreen(screen);
-            
             Bitmap img = image.image;
             bool kill = false;
             lock (image.image)
             {
+                // Ensure we don't go outside graphic cards limits
                 if ((image.Width > maxTextureSize) || (image.Height > maxTextureSize))
                 {
                     kill = true;
                     fixImage(ref img);
                 }
+
+                // Extract data from bitmap and load to opengl
                 BitmapData data;
                 switch (img.PixelFormat)
                 {
@@ -96,6 +104,7 @@ namespace OpenMobile.Graphics
                                         OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
+
                     case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
                         try
                         {
@@ -107,6 +116,7 @@ namespace OpenMobile.Graphics
                                         OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
+
                     case System.Drawing.Imaging.PixelFormat.Format8bppIndexed:
                     case System.Drawing.Imaging.PixelFormat.Format4bppIndexed:
                     case System.Drawing.Imaging.PixelFormat.Format16bppRgb555:
@@ -131,7 +141,7 @@ namespace OpenMobile.Graphics
             }
             if (kill)
                 img.Dispose();
-            image.SetTexture(screen, texture);
+            image.Texture = texture;
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureParameterName.ClampToBorder);
@@ -298,13 +308,21 @@ namespace OpenMobile.Graphics
             if (image == null)
                 return;
             Raw.Enable(EnableCap.Texture2D);
-            if (image.Texture(screen) == 0)
+            if (image.TextureGenerationRequired)
                 if (!loadTexture(ref image))
                 {
                     Raw.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.Texture(screen));
+            Raw.BindTexture(TextureTarget.Texture2D, image.Texture);
+
+            // Set texture parameters
+            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureParameterName.ClampToBorder);
+            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToBorder);
+            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToBorder);
+
             Raw.Color4(1F, 1F, 1F, transparency);
 
             int[] tex = new int[] { X, Height + Y, Width + X, Height + Y, X, Y, Width + X, Y };

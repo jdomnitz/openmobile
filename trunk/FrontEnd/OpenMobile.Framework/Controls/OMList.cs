@@ -190,9 +190,11 @@ namespace OpenMobile.Controls
             if ((index < -1) || (index >= items.Count))
                 return;
             if ((selectedIndex >= 0) && (selectedIndex < items.Count))
-                items[selectedIndex].textTex = null;
+                //items[selectedIndex].textTex = null;
+                items[selectedIndex].RefreshGraphic = true; 
             if (index >= 0)
-                items[index].textTex = null;
+                //items[index].textTex = null;
+                items[index].RefreshGraphic = true; 
 
             selectedIndex = index;
             if (!selectFollowsHighlight)    // this is already done in the highlight function if selectFollowsHighilight is true
@@ -569,7 +571,7 @@ namespace OpenMobile.Controls
             {
                 style = value;
                 if ((style == eListStyle.MultiList) || (style == eListStyle.MultiListText))
-                    textAlignment = OpenMobile.Graphics.Alignment.TopLeft;
+                    _textAlignment = OpenMobile.Graphics.Alignment.TopLeft;
             }
         }
         /// <summary>
@@ -764,58 +766,58 @@ namespace OpenMobile.Controls
                                 {
                                     if ((selectedIndex == i) && (focused))
                                     {
-                                        if (g.TextureGenerationRequired(items[i].textTex))
-                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, highlightColor, highlightColor);
+                                        if (items[i].RefreshGraphic)
+                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this._textFormat, this._textAlignment, highlightColor, highlightColor);
                                         g.DrawImage(items[i].textTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
-                                        if (g.TextureGenerationRequired(items[i].subitemTex))
+                                        if (items[i].RefreshGraphic)
                                             items[i].subitemTex = g.GenerateTextTexture(items[i].subitemTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
                                         g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
                                     }
                                     else
                                     {
-                                        if (g.TextureGenerationRequired(items[i].textTex))
-                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, color, color);
+                                        if (items[i].RefreshGraphic)
+                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this._textFormat, this._textAlignment, _color, _color);
                                         g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
-                                        if (g.TextureGenerationRequired(items[i].subitemTex))
+                                        if (items[i].RefreshGraphic)
                                             items[i].subitemTex = g.GenerateTextTexture(items[i].subitemTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.color, items[i].subitemFormat.color);
                                         g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
                                     }
                                 }
                                 else
                                 {
-                                    if ((i < items.Count) && (g.TextureGenerationRequired(items[i].textTex)))
+                                    if ((i < items.Count) && (items[i].RefreshGraphic))
                                     {
                                         if (targetWidth == 0)
                                             targetWidth = width;
                                         if (targetHeight == 0)
                                             targetHeight = listItemHeight;
                                         if ((selectedIndex == i) && (focused))
-                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
+                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, _font, _textFormat, _textAlignment, highlightColor, highlightColor);
                                         else
-                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
+                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, _font, _textFormat, _textAlignment, _color, _color);
                                     }
                                     g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, tmp);
                                 }
                             }
                             else
                             {
-                                if ((i < items.Count) && (items[i].textTex == null))
+                                if ((i < items.Count) && (items[i].RefreshGraphic))
                                 {
                                     if (targetWidth == 0)
                                         targetWidth = width;
                                     if (targetHeight == 0)
                                         targetHeight = listItemHeight;
                                     if ((selectedIndex == i) && (focused))
-                                        items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
+                                        items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, _font, _textFormat, _textAlignment, highlightColor, highlightColor);
                                     else
-                                        items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
+                                        items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, _font, _textFormat, _textAlignment, _color, _color);
                                 }
                                 g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, tmp);
                             }
                         }
                         if (listViewItemOffset == 0)
                             continue;
-                        if ((items.Count > i) && (items[i].image != null)) //rare thread collision
+                        if ((items.Count > i) && (items[i].RefreshGraphic)) //rare thread collision
                             g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height - 5, rect.Height - imgSze, tmp);
                     }
                 }
@@ -830,10 +832,15 @@ namespace OpenMobile.Controls
                 {
                     float nheight = height * ((float)height) / (listItemHeight * items.Count);
                     float ntop = top + height * ((float)-moved) / (listItemHeight * items.Count);
-                    g.FillRoundRectangle(new Brush(color), left + width - 5, (int)ntop, 10, (int)nheight, 6);
+                    g.FillRoundRectangle(new Brush(_color), left + width - 5, (int)ntop, 10, (int)nheight, 6);
                 }
                 
             }
+
+            _RefreshGraphic = false;
+            // Skin debug function 
+            if (_SkinDebug)
+                base.DrawSkinDebugInfo(g, Color.Green);
         }
         /*
         public override void Render(Graphics.Graphics g, renderingParams e)
@@ -1117,7 +1124,7 @@ namespace OpenMobile.Controls
             if (System.Math.Abs(TotalDistance.Y) > 3)
             {
                 if (selectedIndex >= 0)
-                    items[selectedIndex].textTex = null;
+                    items[selectedIndex].RefreshGraphic = true; 
                 selectedIndex = -1;
                 raiseUpdate(false);
             }
@@ -1241,7 +1248,7 @@ namespace OpenMobile.Controls
         {
             focused = true;
             if (selectedIndex > -1)
-                items[selectedIndex].textTex = null;
+                items[selectedIndex].RefreshGraphic = true; 
             if (selectedIndex == -1)
                 Select(0, false, screen);
         }
@@ -1254,7 +1261,7 @@ namespace OpenMobile.Controls
         {
             focused = false;
             if (selectedIndex > -1)
-                items[selectedIndex].textTex = null;
+                items[selectedIndex].RefreshGraphic = true; 
         }
 
         #endregion

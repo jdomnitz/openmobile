@@ -164,6 +164,7 @@ namespace OMMediaDB
         {
             //Phase 1 - Find out what needs to be indexed
             Thread Worker = new Thread(getURLList);
+            Worker.Name = "OMMediaDB.makeItSo";
             Worker.Priority = ThreadPriority.BelowNormal;
             Worker.IsBackground = true;
             Worker.Start();

@@ -157,6 +157,32 @@ namespace OpenMobile
             Shape_VideoBackground.Visible = false;
             UIPanel.addControl(Shape_VideoBackground);
 
+            #region Infobanner
+
+            // A general information label in the center of the screen
+            OMBasicShape Shape_Info_Background = new OMBasicShape("Shape_Info_Background", -10, 250, 1020, 100);
+            Shape_Info_Background.Shape = shapes.Rectangle;
+            Shape_Info_Background.BorderColor = Color.White;
+            Shape_Info_Background.BorderSize = 1;
+            Shape_Info_Background.FillColor = Color.FromArgb(210, Color.Black);
+            Shape_Info_Background.Visible = false;
+            Shape_Info_Background.NoUserInteraction = true;
+            UIPanel.addControl(Shape_Info_Background);
+
+            OMLabel Label_Info_Background = new OMLabel("Label_Info_Background", -500, 250, 2000, 100);
+            Label_Info_Background.NoUserInteraction = true;
+            Label_Info_Background.Font = new Font(Font.Arial, 45);
+            Label_Info_Background.Visible = false;
+            UIPanel.addControl(Label_Info_Background);
+
+            OMLabel Label_Info = new OMLabel("Label_Info", 0, 250, 1000, 100);
+            Label_Info.NoUserInteraction = true;
+            Label_Info.Font = new Font(Font.Arial, 45);
+            Label_Info.Visible = false;
+            UIPanel.addControl(Label_Info);
+
+            #endregion
+
             #region BottomBar (Media)
 
             //OMButton Button_UIBottomBar_Back = DefaultControls.GetHorisontalEdgeButton("Button_UIBottomBar_Back", 831, 533, 160, 70, "", "Back");
@@ -165,7 +191,7 @@ namespace OpenMobile
             Button_UIBottomBar_Back.FocusImage = theHost.getSkinImage("BackButtonFocus", true);
             Button_UIBottomBar_Back.OnClick += new userInteraction(Back_OnClick);
             Button_UIBottomBar_Back.Transition = eButtonTransition.None;
-            UIPanel.addControl(Button_UIBottomBar_Back);
+            //UIPanel.addControl(Button_UIBottomBar_Back);
 
             OMImage Image_UIMediaBar_Background = new OMImage("Image_UIMediaBar_Background", 0, 604, 1000, 140);
             Image_UIMediaBar_Background.Image = theHost.getSkinImage("mediaBar", true);
@@ -177,7 +203,7 @@ namespace OpenMobile
             Button_UIMediaBar_Media.Transition = eButtonTransition.None;
             Button_UIMediaBar_Media.FocusImage = theHost.getSkinImage("MediaButtonFocus", true);
             Button_UIMediaBar_Media.OnClick += new userInteraction(mediaButton_OnClick);
-            UIPanel.addControl(Button_UIMediaBar_Media);
+            //UIPanel.addControl(Button_UIMediaBar_Media);
 
             OMSlider Slider_UIMediaBar_Slider = new OMSlider("Slider_UIMediaBar_Slider", 20, 615, 820, 25, 12, 40);
             Slider_UIMediaBar_Slider.Slider = theHost.getSkinImage("Slider");
@@ -252,19 +278,19 @@ namespace OpenMobile
             Image_UITopBar_Background.Image = theHost.getSkinImage("topBar");
             UIPanel.addControl(Image_UITopBar_Background);
 
-            OMAnimatedLabel Label_UITopBar_TrackTitle = new OMAnimatedLabel("Label_UITopBar_TrackTitle", 240, 3, 490, 28);
+            OMAnimatedLabel Label_UITopBar_TrackTitle = new OMAnimatedLabel("Label_UITopBar_TrackTitle", 240, 3, 620, 28);
             Label_UITopBar_TrackTitle.TextAlignment = Alignment.CenterLeft;
             Label_UITopBar_TrackTitle.Format = eTextFormat.BoldShadow;
             Label_UITopBar_TrackTitle.ContiuousAnimation = eAnimation.Scroll;
             UIPanel.addControl(Label_UITopBar_TrackTitle);
 
-            OMAnimatedLabel Label_UITopBar_TrackAlbum = new OMAnimatedLabel("Label_UITopBar_TrackAlbum", 240, 34, 490, 28);
+            OMAnimatedLabel Label_UITopBar_TrackAlbum = new OMAnimatedLabel("Label_UITopBar_TrackAlbum", 240, 34, 620, 28);
             Label_UITopBar_TrackAlbum.TextAlignment = Alignment.CenterLeft;
             Label_UITopBar_TrackAlbum.Format = eTextFormat.BoldShadow;
             Label_UITopBar_TrackAlbum.ContiuousAnimation = eAnimation.Scroll;
             UIPanel.addControl(Label_UITopBar_TrackAlbum);
 
-            OMAnimatedLabel Label_UITopBar_TrackArtist = new OMAnimatedLabel("Label_UITopBar_TrackArtist", 240, 64, 490, 28);
+            OMAnimatedLabel Label_UITopBar_TrackArtist = new OMAnimatedLabel("Label_UITopBar_TrackArtist", 240, 64, 620, 28);
             Label_UITopBar_TrackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
             Label_UITopBar_TrackArtist.Format = eTextFormat.DropShadow;
             Label_UITopBar_TrackArtist.ContiuousAnimation = eAnimation.Scroll;
@@ -274,10 +300,16 @@ namespace OpenMobile
             Image_UITopBar_Cover.Image = imageItem.NONE;
             UIPanel.addControl(Image_UITopBar_Cover);
 
+            OMButton Button_UITopBar_Media = new OMButton("Button_UITopBar_Media", 0, 0, 1000, 100);
+            Button_UITopBar_Media.Transition = eButtonTransition.None;
+            Button_UITopBar_Media.OnClick += new userInteraction(mediaButton_OnClick);
+            UIPanel.addControl(Button_UITopBar_Media);
+
             OMButton Button_UITopBar_Home = new OMButton("Button_UITopBar_Home", 863, 0, 130, 90);
             Button_UITopBar_Home.Image = theHost.getSkinImage("HomeButton", true);
             Button_UITopBar_Home.FocusImage = theHost.getSkinImage("HomeButtonFocus", true);
-            Button_UITopBar_Home.OnClick += new userInteraction(HomeButton_OnClick);
+            Button_UITopBar_Home.OnLongClick += new userInteraction(HomeButton_OnClick);
+            Button_UITopBar_Home.OnClick += new userInteraction(Back_OnClick);
             UIPanel.addControl(Button_UITopBar_Home);
 
             #region Volumecontrol
@@ -368,53 +400,6 @@ namespace OpenMobile
 
             #endregion
 
-            #region Infobanner
-
-            // A general information label in the center of the screen
-            OMBasicShape Shape_Info_Background = new OMBasicShape("Shape_Info_Background", -10, 250, 1020, 100);
-            Shape_Info_Background.Shape = shapes.Rectangle;
-            Shape_Info_Background.BorderColor = Color.White;
-            Shape_Info_Background.BorderSize = 1;
-            Shape_Info_Background.FillColor = Color.FromArgb(210, Color.Black);
-            Shape_Info_Background.Visible = false;
-            Shape_Info_Background.NoUserInteraction = true;
-            UIPanel.addControl(Shape_Info_Background);
-
-            OMLabel Label_Info_Background = new OMLabel("Label_Info_Background", -500, 250, 2000, 100);
-            Label_Info_Background.NoUserInteraction = true;
-            Label_Info_Background.Font = new Font(Font.Arial, 45);
-            Label_Info_Background.Visible = false;
-            UIPanel.addControl(Label_Info_Background);
-
-            OMLabel Label_Info = new OMLabel("Label_Info", 0, 250, 1000, 100);
-            Label_Info.NoUserInteraction = true;
-            Label_Info.Font = new Font(Font.Arial, 45);
-            Label_Info.Visible = false;
-            UIPanel.addControl(Label_Info);
-
-            #endregion
-
-            // TODO : Move clock and date to main menu skin
-            //OMLabel clocktime = new OMLabel(350, 522, 0, 0);
-            //OMLabel clockdate = new OMLabel(350, 572, 0, 0);
-
-            /*
-            OMLabel clocktime = new OMLabel(350, 522, 300, 60);
-            clocktime.TextAlignment = Alignment.CenterCenter;
-            clocktime.Font = new Font(Font.GenericSansSerif, 32F);
-            clocktime.Format = eTextFormat.BoldShadow;
-            clocktime.Name = "UI.clocktime";
-            clocktime.sensorName = "SystemSensors.Time";
-            clocktime.Visible = false;
-            OMLabel clockdate = new OMLabel(350, 572, 300, 30);
-            clockdate.TextAlignment = Alignment.CenterCenter;
-            clockdate.Font = new Font(Font.GenericSansSerif, 20F);
-            clockdate.Format = eTextFormat.BoldShadow;
-            clockdate.Name = "UI.clockdate";
-            clockdate.Visible = false;
-            clockdate.sensorName = "SystemSensors.LongDate";
-            */
-            
             UIPanel.Priority = ePriority.High;
             UIPanel.UIPanel = true;
 
@@ -513,18 +498,22 @@ namespace OpenMobile
             // Get media controls
             List<OMControl> MediaControls = GetMediaControls(screen);
 
-            // Get media button control
-            OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Media"];
+            // Get main control
+            OMControl MainControl = UIPanel[screen, "Image_UIMediaBar_Background"];//(OMButton)UIPanel[screen, "Button_UIMediaBar_Media"];
 
             // Calculate relative placements of media controls
             int[] RelativePlacements = new int[MediaControls.Count];
             for (int i = 0; i < RelativePlacements.Length; i++)
-                RelativePlacements[i] = MediaControls[i].Top - btn.Top;
+                RelativePlacements[i] = MediaControls[i].Top - MainControl.Top;
 
             if (up)
             {   // Move media bar up                
-                int EndPos = 390;
-                int Top = btn.Top;
+                int EndPos = 470;
+                int Top = MainControl.Top;
+
+                // Show mediabar controls
+                foreach (OMControl control in MediaControls)
+                    control.Visible = true;
 
                 SmoothAnimator Animation = new SmoothAnimator(0.9f);
                 Animation.Animate(delegate(int AnimationStep)
@@ -532,16 +521,16 @@ namespace OpenMobile
                     Top -= AnimationStep;
                     if (Top <= EndPos)
                     {   // Animation has completed
-                        btn.Top = EndPos;
+                        MainControl.Top = EndPos;
                         for (int i = 0; i < RelativePlacements.Length; i++)
-                            MediaControls[i].Top = btn.Top + RelativePlacements[i];
+                            MediaControls[i].Top = MainControl.Top + RelativePlacements[i];
                         return false;
                     }
                     else
                     {   // Move object down
-                        btn.Top = Top;
+                        MainControl.Top = Top;
                         for (int i = 0; i < RelativePlacements.Length; i++)
-                            MediaControls[i].Top = btn.Top + RelativePlacements[i];
+                            MediaControls[i].Top = MainControl.Top + RelativePlacements[i];
                     }
                     return true;
                 });
@@ -549,8 +538,8 @@ namespace OpenMobile
             }
             else
             {   // Move media bar down
-                int EndPos = 534;
-                int Top = btn.Top;
+                int EndPos = 604;
+                int Top = MainControl.Top;
 
                 SmoothAnimator Animation = new SmoothAnimator(0.9f);
                 Animation.Animate(delegate(int AnimationStep)
@@ -558,20 +547,25 @@ namespace OpenMobile
                     Top += AnimationStep;
                     if (Top >= EndPos)
                     {   // Animation has completed
-                        btn.Top = EndPos;
+                        MainControl.Top = EndPos;
                         for (int i = 0; i < RelativePlacements.Length; i++)
-                            MediaControls[i].Top = btn.Top + RelativePlacements[i];
+                            MediaControls[i].Top = MainControl.Top + RelativePlacements[i];
                         return false;
                     }
                     else
                     {   // Move object down
-                        btn.Top = Top;
+                        MainControl.Top = Top;
                         for (int i = 0; i < RelativePlacements.Length; i++)
-                            MediaControls[i].Top = btn.Top + RelativePlacements[i];
+                            MediaControls[i].Top = MainControl.Top + RelativePlacements[i];
                     }
                     return true;
                 });
                 MediaBarVisible[screen] = false;
+
+                // Hide mediabar controls
+                foreach (OMControl control in MediaControls)
+                    control.Visible = true;
+
             }
         }
         void mediaButton_OnClick(OMControl sender, int screen)
@@ -1751,7 +1745,7 @@ namespace OpenMobile
                         UIPanel[screen, "Shape_VideoBackground"].Visible = false;
 
                         // Hide media bar button
-                        UIPanel[screen, "Button_UIMediaBar_Media"].Visible = true;
+                        //UIPanel[screen, "Button_UIMediaBar_Media"].Visible = true;
 
                         return;
                     }
@@ -1775,7 +1769,7 @@ namespace OpenMobile
                         UIPanel[screen, "Shape_VideoBackground"].Visible = true;
 
                         // Show media bar button
-                        UIPanel[screen, "Button_UIMediaBar_Media"].Visible = false;
+                        //UIPanel[screen, "Button_UIMediaBar_Media"].Visible = false;
 
                         return;
                     }

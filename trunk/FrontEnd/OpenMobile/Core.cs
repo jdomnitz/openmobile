@@ -502,7 +502,7 @@ namespace OpenMobile
             return err;
         }
 
-        [STAThread]
+        [MTAThread]
         private static void Main()
         {
             // Only handle system wide crashes if not in IDE
@@ -595,6 +595,7 @@ namespace OpenMobile
                 throw new Exception("Unable to detect any monitors on this platform!");
 
             Thread rapidMenu = new Thread(Core.initialize);
+            rapidMenu.Name = "OpenMobile.Core.rapidMenu";
             rapidMenu.Start();
 
             for (int i = 1; i < RenderingWindows.Count; i++)

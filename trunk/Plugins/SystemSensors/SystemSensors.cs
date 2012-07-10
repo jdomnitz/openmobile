@@ -6,10 +6,12 @@ using System.Diagnostics;
 using OpenMobile;
 using System.Runtime.InteropServices;
 using OpenMobile.helperFunctions;
+using System.IO;
 
 namespace SystemSensors
 {
-    public class SystemSensors:ISensorProvider 
+    [PluginLevel(PluginLevels.System)]
+    public class SystemSensors : ISensorProvider 
     {
         List<SensorWrapper> sensors = new List<SensorWrapper>();
 
@@ -58,10 +60,16 @@ namespace SystemSensors
                     return currentProcess.WorkingSet64 ;
                 case "SystemSensors.Date":
                     return DateTime.Now.ToShortDateString();
+                case "SystemSensors.DateTime":
+                    return DateTime.Now.ToLocalTime();
                 case "SystemSensors.Time":
+                    return DateTime.Now.ToShortTimeString();
+                case "SystemSensors.LongTime":
                     return DateTime.Now.ToLongTimeString();
                 case "SystemSensors.LongDate":
                     return DateTime.Now.ToLongDateString(); // .ToString("MMMM d");
+                case "SystemSensors.DateText":
+                    return DateTime.Now.ToString("D");
             }
             return null;
         }
@@ -136,22 +144,25 @@ namespace SystemSensors
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GlobalMemoryStatus(ref MEMORYSTATUS lpBuffer);
         #endregion
-        
+
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             thehost = host;
 
             // Slow update sensors
             sensors.Add(new SensorWrapper(this.pluginName + ".CPUUsage", "CPU", eSensorDataType.percent, delegate(Sensor sensor) { return getValue(sensor); }));
-            sensors.Add(new SensorWrapper(this.pluginName + ".PhysicalMemoryFree", "FMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
-            sensors.Add(new SensorWrapper(this.pluginName + ".PhysicalMemoryUsed", "UMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
-            sensors.Add(new SensorWrapper(this.pluginName + ".MemoryUsedPercent", "Men", eSensorDataType.percent, delegate(Sensor sensor) { return getValue(sensor); }));
-            sensors.Add(new SensorWrapper(this.pluginName + ".ProcessMemoryUsed", "UMen", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".PhysicalMemoryFree", "FMem", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".PhysicalMemoryUsed", "UMem", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".MemoryUsedPercent", "Mem", eSensorDataType.percent, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".ProcessMemoryUsed", "UMem", eSensorDataType.bytes, delegate(Sensor sensor) { return getValue(sensor); }));
 
             // Fast update sensors
             sensors.Add(new SensorWrapper(this.pluginName + ".Date", "Dt", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
-            sensors.Add(new SensorWrapper(this.pluginName + ".Time", "Tm", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
             sensors.Add(new SensorWrapper(this.pluginName + ".LongDate", "Dt", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".Time", "Tm", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".LongTime", "Tm", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".DateTime", "DtTm", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
+            sensors.Add(new SensorWrapper(this.pluginName + ".DateText", "DtTm", eSensorDataType.raw, delegate(Sensor sensor) { return getValue(sensor); }));
 
             // Update timers: Slow
             slowTimer = new System.Timers.Timer(5000); //These items take a while to refresh to do them less often
@@ -177,7 +188,7 @@ namespace SystemSensors
         void fastTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             fastTimer.Enabled = false;
-            for (int i = 5; i <= 7; i++)
+            for (int i = 5; i <= 10; i++)
                 sensors[i].UpdateSensorValue(getValue(sensors[i].sensor));
             fastTimer.Enabled = true;
         }

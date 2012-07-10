@@ -42,10 +42,10 @@ namespace OpenMobile.Graphics
             int ret;
             if (Configuration.RunningOnWindows)
             {
-                Thread.Sleep(0);
                 OpenMobile.Platform.Windows.MSG msg = new OpenMobile.Platform.Windows.MSG();
                 while (msg.Message != Platform.Windows.WindowMessage.CLOSE)
                 {
+                    Thread.Sleep(0);
                     ret = OpenMobile.Platform.Windows.Functions.GetMessage(ref msg, IntPtr.Zero, 0, 0);
                     if (ret == -1)
                     {

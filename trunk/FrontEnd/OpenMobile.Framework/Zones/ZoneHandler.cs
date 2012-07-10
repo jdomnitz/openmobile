@@ -108,6 +108,16 @@ namespace OpenMobile.Zones
         }
 
         /// <summary>
+        /// Gets the first zone that uses the specified audio device instance
+        /// </summary>
+        /// <param name="AudioDeviceInstance">Instance of audio device</param>
+        /// <returns></returns>
+        public Zone GetZoneByAudioDeviceInstance(int AudioDeviceInstance)
+        {
+            return Zones.Find(x => x.AudioDeviceInstance == AudioDeviceInstance);
+        }
+
+        /// <summary>
         /// A wrapper for executing code on each zone (can be used with anonymous delegates)
         /// </summary>
         /// <param name="d">delegate</param>

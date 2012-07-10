@@ -239,13 +239,11 @@ namespace OpenMobile.Controls
                 if (sensor != null)
                 {
                     this._Sensor = sensor;
-                    //sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
-                    //{
-                    //    this.Text = sender.FormatedValue();
-                    //    raiseUpdate(false);
-                    //});
-                    this.Value = (int)sensor.Value;
-                    raiseUpdate(false);
+                    sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
+                    {
+                        this.Value = (int)sensor.Value;
+                        raiseUpdate(false);
+                    });
                 }
             }
         }

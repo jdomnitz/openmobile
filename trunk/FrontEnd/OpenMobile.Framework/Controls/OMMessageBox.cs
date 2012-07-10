@@ -73,7 +73,7 @@ namespace OpenMobile.Controls
                 if (title == value)
                     return;
                 title = value;
-                textTexture = null;
+                _RefreshGraphic = true;
             }
             get
             {
@@ -92,7 +92,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (text == value)
+                if (_text == value)
                     return;
                 base.Text = value;
                 height = (int)Graphics.Graphics.MeasureString(this.Text, Font, this.Width - 1).Height + 1;
@@ -109,7 +109,7 @@ namespace OpenMobile.Controls
         /// </summary>
         public OMMessageBox()
         {
-            textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
+            _textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
         }
         /// <summary>
         /// Creates a new OMMessageBox
@@ -124,7 +124,7 @@ namespace OpenMobile.Controls
             Top = top;
             Width = width;
             Height = height;
-            textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
+            _textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace OpenMobile.Controls
             Rectangle r = new Rectangle(this.Left, top, this.Width, height);
             g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), Gradient.Vertical), r, 20);
             g.DrawRoundRectangle(new Pen(borderColor, borderWidth), r, 20);
-            if (g.TextureGenerationRequired(textTexture))
+            if (_RefreshGraphic)
                 textTexture = g.GenerateTextTexture(textTexture, this.Left, top, this.Width, (int)letterHeight, title, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
             g.DrawImage(textTexture, left, top, width, height, tmp);
             top += (int)letterHeight;
@@ -151,6 +151,12 @@ namespace OpenMobile.Controls
             base.Render(g, e);
             //Renderer.renderLabel(g,this);  //ToDo-Fix this (pre-hardware acceleration merge)
             top -= (int)letterHeight;
+
+            _RefreshGraphic = false;
+            // Skin debug function 
+            if (_SkinDebug)
+                base.DrawSkinDebugInfo(g, Color.Green);
+
         }
     }
 }
