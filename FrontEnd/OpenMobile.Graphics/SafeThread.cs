@@ -20,7 +20,6 @@
 *********************************************************************************/
 using System;
 using System.Threading;
-using OpenMobile.Plugin;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,16 +29,20 @@ namespace OpenMobile.Threading
     /// <summary>
     /// Provides a thread which is sandboxed to prevent crashing the rest of the framework when an error occurs
     /// </summary>
-    public static class SafeThread
+    public static class LocalSafeThread
     {
+        /// <summary>
+        /// The function for the task manager to execute (should be a void function)
+        /// </summary>
+        public delegate void Function();
+     
         //State:
         // -1 = Kill
         //  0 = Working
         //  1 = Sleeping
-        static IPluginHost theHost;
         static int availableThreads;
         static int maxThreads;
-        static SafeThread()
+        static LocalSafeThread()
         {
             maxThreads = 25 * Environment.ProcessorCount;
         }
@@ -58,11 +61,8 @@ namespace OpenMobile.Threading
         /// Creates a new asynchronous safe thread
         /// </summary>
         /// <param name="function"></param>
-        /// <param name="host"></param>
-        public static void Asynchronous(Function function, IPluginHost host)
+        public static void Asynchronous(Function function)
         {
-            if (theHost == null)
-                theHost = host;
             lock (functions)
                 functions.Enqueue(function);
             if (availableThreads > 0)
@@ -83,29 +83,11 @@ namespace OpenMobile.Threading
         /// Creates a new asynchronous safe thread
         /// </summary>
         /// <param name="function"></param>
-        public static void Asynchronous(Function function)
-        {
-            Asynchronous(function, BuiltInComponents.Host);
-        }
-        /// <summary>
-        /// Creates a new asynchronous safe thread
-        /// </summary>
-        /// <param name="function"></param>
-        /// <param name="args"></param>
-        /// <param name="host"></param>
-        public static void Asynchronous(Delegate function, object[] args, IPluginHost host)
-        {
-            Asynchronous(delegate { function.DynamicInvoke(args); }, host);
-        }
-        /// <summary>
-        /// Creates a new asynchronous safe thread
-        /// </summary>
-        /// <param name="function"></param>
         /// <param name="args"></param>
         /// <param name="host"></param>
         public static void Asynchronous(Delegate function, object[] args)
         {
-            Asynchronous(function, args, BuiltInComponents.Host);
+            Asynchronous(delegate { function.DynamicInvoke(args); });
         }
         private static void spawnThread()
         {
@@ -138,8 +120,8 @@ namespace OpenMobile.Threading
                         }
                         catch (Exception e)
                         {
-                            if (theHost != null)
-                                theHost.sendMessage("SandboxedThread", "SafeThread", "", ref e);
+                            // TODO: Add error handling
+                            // No error handling available here
                         }
                     }
                     s.state = 1;
@@ -157,15 +139,9 @@ namespace OpenMobile.Threading
                     locks.Remove(id);
             });
             lock (locks)
-            {
-                // Only spawn new thread if not already active
-                if (!locks.ContainsKey(p.ManagedThreadId))
-                {
-                    locks.Add(p.ManagedThreadId, new ThreadState());
-                    p.Name = "OpenMobile.SafeThread";
-                    p.Start();                    
-                }
-            }
+                locks.Add(p.ManagedThreadId, new ThreadState());
+            p.Name = "OpenMobile.LocalSafeThread";
+            p.Start();
         }
     }
 }

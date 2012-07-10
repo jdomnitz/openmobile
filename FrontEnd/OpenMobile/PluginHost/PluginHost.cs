@@ -1021,6 +1021,11 @@ namespace OpenMobile
         /// </summary>
         public bool ShowCursors { get; set; }
 
+        /// <summary>
+        /// Sets the visibility of DebugInfo
+        /// </summary>
+        public bool ShowDebugInfo { get; set; }
+
         #endregion
 
         #region Storage events
@@ -2648,7 +2653,7 @@ namespace OpenMobile
         /// <param name="arg"></param>
         public void raiseMediaEvent(eFunction type, Zone zone, string arg)
         {
-            System.Diagnostics.Debug.WriteLine(String.Format("raiseMediaEvent( eFunction: {0}, instance: {1}, arg: {2}", type, zone, arg));
+            System.Diagnostics.Debug.WriteLine(String.Format("raiseMediaEvent( eFunction: {0}, instance: {1}({2}), arg: {3}", type, zone, (zone != null ? zone.Name : ""), arg));
             if (OnMediaEvent != null)
                 SandboxedThread.Asynchronous(delegate() { OnMediaEvent(type, zone, arg); });
 

@@ -130,7 +130,9 @@ namespace OpenMobile.Platform.X11
                     }
                     Functions.XIFreeDeviceInfo(devPtr);
                 }
-                new Thread(delegate() { ProcessEvents(); }).Start();
+                Thread t = new Thread(delegate() { ProcessEvents(); });
+                t.Name = "X11.XI2Driver";
+                t.Start();
             }
         }
         // Checks whether XInput2 is supported on the specified display.

@@ -592,6 +592,11 @@ namespace OpenMobile.Plugin
         bool ShowCursors { get; set; }
 
         /// <summary>
+        /// Sets the visibility of DebugInfo
+        /// </summary>
+        bool ShowDebugInfo { get; set; }
+
+        /// <summary>
         /// Gets the name of the assosiated audio device
         /// </summary>
         /// <param name="instance">AudioDevice index</param>

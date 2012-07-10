@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{20FBEEA4-92C2-409E-9448-219CE60C0041}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -116,7 +116,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="VistaAudio, Version=1.1.0.24056, Culture=neutral, PublicKeyToken=734135321ceb880a, processorArchitecture=MSIL">
+    <Reference Include="VistaAudio, Version=1.1.0.25573, Culture=neutral, PublicKeyToken=734135321ceb880a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\VistaAudio.dll</HintPath>
     </Reference>

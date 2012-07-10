@@ -170,11 +170,13 @@ namespace OpenMobile.Framework
                     {
                         collection[i] = source;
                         collection[i].Manager = this;
+                        collection[i].ActiveScreen = i;
                     }
                     else
                     {
                         collection[i] = source.Clone();
                         collection[i].Manager = this;
+                        collection[i].ActiveScreen = i;
                     }
                 panels.Add(collection);
             }
@@ -193,8 +195,11 @@ namespace OpenMobile.Framework
             lock (this)
             {
                 // Set this screenmanager as manager for the new panel
-                foreach (OMPanel p in source)
-                    p.Manager = this;
+                for (int i = 0; i < source.Length; i++)
+                {
+                    source[i].Manager = this;
+                    source[i].ActiveScreen = i;
+                }
 
                 panels.Add(source);
             }
@@ -226,7 +231,10 @@ namespace OpenMobile.Framework
 
                 OMPanel[] collection = new OMPanel[screens];
                 for (int i = 0; i < screens; i++)
+                {
                     collection[i] = source;
+                    collection[i].ActiveScreen = i;
+                }
                 panels.Add(collection);
             }
         }
@@ -256,6 +264,7 @@ namespace OpenMobile.Framework
             {
                 // Set this screenmanager as manager for the new panel
                 source.Manager = this;
+                source.ActiveScreen = screen;
 
                 OMPanel[] collection = new OMPanel[screens];
                 if ((screen < 0) || (screen >= screens))

@@ -58,7 +58,7 @@ namespace OpenMobile.Controls
             set
             {
                 flags = value;
-                textTexture = null;
+                _RefreshGraphic = true;
             }
         }
 
@@ -140,6 +140,8 @@ namespace OpenMobile.Controls
             set
             {
                 _AutoFitText = value;
+                _RefreshGraphic = true;
+                raiseUpdate(false);
             }
         }
 
@@ -174,6 +176,8 @@ namespace OpenMobile.Controls
             set
             {
                 background = value;
+                _RefreshGraphic = true;
+                raiseUpdate(false);
             }
         }
 
@@ -189,6 +193,8 @@ namespace OpenMobile.Controls
             set
             {
                 disabledBackgroundColor = value;
+                _RefreshGraphic = true;
+                raiseUpdate(false);
             }
         }
 
@@ -261,11 +267,11 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return text;
+                return _text;
             }
             set
             {
-                if (text == value)
+                if (_text == value)
                     return;
                 //Pre-Screen
                 if ((flags & textboxFlags.NumericOnly) == textboxFlags.NumericOnly)
@@ -279,32 +285,32 @@ namespace OpenMobile.Controls
                     if (IsAlphabetic(value) == false)
                         return;
                 }
-                if (((flags & textboxFlags.Password) == textboxFlags.Password) && (value != null) && ((text != "") || ((value.Length == 1))) && ((text != null) && (value.Contains(text))))
+                if (((flags & textboxFlags.Password) == textboxFlags.Password) && (value != null) && ((_text != "") || ((value.Length == 1))) && ((_text != null) && (value.Contains(_text))))
                     count = 6;
-                textTexture = null;
-                text = value;
+                _RefreshGraphic = true; 
+                _text = value;
 
                 #region AutoFit
 
                 // Autofit size of string
                 if (fontScaleFactor != 0)
                 {
-                    this.font.Size = orgFontSize;
+                    this._font.Size = orgFontSize;
                     fontScaleFactor = 0;
                 }
                 if (AutoFitText)
                 {
-                    SizeF TextSize = Graphics.Graphics.MeasureString(text, this.Font, this.Format);
+                    SizeF TextSize = Graphics.Graphics.MeasureString(_text, this.Font, this.Format);
 
                     if (TextSize.Width > this.width)
                     {   // Reduce text size to fit
-                        orgFontSize = this.font.Size;
+                        orgFontSize = this._font.Size;
 
                         fontScaleFactor = TextSize.Width / this.width;
-                        this.font.Size = this.font.Size / fontScaleFactor;
+                        this._font.Size = this._font.Size / fontScaleFactor;
 
                         // Reset text texture to regenerate text
-                        textTexture = null;
+                        _RefreshGraphic = true;
                     }
                 }
 
@@ -402,23 +408,23 @@ namespace OpenMobile.Controls
                 g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * tmp), this.OutlineColor), 3F), left + 1, top + 1, width - 2, height - 2, 10);
                 g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * tmp), this.OutlineColor), 2F), left + 1, top + 1, width - 2, height - 2, 10);
             }
-            if (text != null)
+            if (_text != null)
             {
                 // Generate password masking characters if needed
                 //TODO: Remove this masking 
-                string tempStr = text;
-                if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (text.Length > 0))
+                string tempStr = _text;
+                if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (_text.Length > 0))
                 {
-                    tempStr = new String('*', text.Length - 1);
+                    tempStr = new String('*', _text.Length - 1);
                     if (count > 1)
-                        tempStr += text[text.Length - 1];
+                        tempStr += _text[_text.Length - 1];
                     else
                         tempStr += "*";
                     count--;
                 }
 
-                if ((g.TextureGenerationRequired(textTexture)) || (count > 0))
-                    textTexture = g.GenerateTextTexture(textTexture, left+5, top, width, height, tempStr, font, textFormat, textAlignment, color, outlineColor);
+                if ((_RefreshGraphic) || (count > 0))
+                    textTexture = g.GenerateTextTexture(textTexture, left+5, top, width, height, tempStr, _font, _textFormat, _textAlignment, _color, _outlineColor);
                 g.DrawImage(textTexture, this.Left+5, this.Top, this.Width, this.Height, tmp);
 
                 /*
@@ -453,9 +459,11 @@ namespace OpenMobile.Controls
                 }
                 */
             }
+
+            _RefreshGraphic = false;
             // Skin debug function 
             if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Purple);
+                base.DrawSkinDebugInfo(g, Color.Green);
 
         }
 

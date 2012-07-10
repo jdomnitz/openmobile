@@ -152,14 +152,14 @@ namespace OMDialog
 
                         OMImage Image_panel_Background = new OMImage("Dialog_Image_Background", DT.Left, DT.Top);
                         Image_panel_Background.FitControlToImage = true;
-                        PanelOutlineGraphic.GraphicData gd = new PanelOutlineGraphic.GraphicData();
+                        PanelPopupOutlineGraphic.GraphicData gd = new PanelPopupOutlineGraphic.GraphicData();
                         gd.Width = DT.Width;
                         gd.Height = DT.Height;
                         // TODO: Calculate text width to match dialog size
                         gd.TextFont = new Font(Font.Arial, 24);
-                        gd.Type = PanelOutlineGraphic.Types.RoundedRectangle;
+                        gd.Type = PanelPopupOutlineGraphic.Types.RoundedRectangle;
                         gd.Text = DT.Header;
-                        Image_panel_Background.Image = new imageItem(PanelOutlineGraphic.GetImage(ref gd));
+                        Image_panel_Background.Image = new imageItem(PanelPopupOutlineGraphic.GetImage(ref gd));
                         Panel.addControl(Image_panel_Background);
 
                         // Save reference to client area data given from graphics generation

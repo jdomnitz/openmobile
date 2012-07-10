@@ -88,15 +88,22 @@ namespace OpenMobile
                 Run(flags);
             });
             t.TrySetApartmentState(ApartmentState.STA);
+            t.Name = String.Format("RenderingWindow_{0}.RunAsync", screen);
             t.Start();
         }
         public void Run(GameWindowFlags flags)
         {
-            //Console.WriteLine("Renderingwindow(" + screen.ToString() + ").Run (Started):" + Timing.GetTiming());
             NativeInitialize(flags);
             InitializeRendering();
-            //Console.WriteLine("Renderingwindow(" + screen.ToString() + ").Run (RenderStarted):" + Timing.GetTiming());
-            Run(1.0, 0.0);
+            try
+            {
+                Run(1.0, 50.0);
+            }
+            catch (Exception e)
+            {
+                BuiltInComponents.Host.DebugMsg("RenderingWindow.Run Exception", e);
+            }
+
         }
         Graphics.Graphics g;
         public RenderingWindow(int s)
@@ -382,15 +389,18 @@ namespace OpenMobile
             if (CursorShow)
                 lock (painting)
                     RenderCursor();
-
             if (Identify)
             {
                 lock (painting)
                 {
-                    if (g.TextureGenerationRequired(identity))
+                    if (identity.TextureGenerationRequired)
                         identity = g.GenerateTextTexture(identity, 0, 0, 1000, 600, screen.ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
                     g.DrawImage(identity, 0, 0, 1000, 600, IdentifyOpacity);
                 }
+            }
+            //lock (painting)
+            {
+                RenderDebugInfo();
             }
             if (dimmer > 0)
             {
@@ -418,6 +428,15 @@ namespace OpenMobile
                 g.FillEllipse(new Brush(Color.Red), new Rectangle((GesturePoints[i].X - 10), (GesturePoints[i].Y - 10), 20, 20));
             if (GesturePoints.Length > 1)
                 g.DrawLine(new Pen(Color.Red, 18F), GesturePoints);
+        }
+        private OImage textTexture = null;
+        private void RenderDebugInfo()
+        {
+            if (BuiltInComponents.Host.ShowDebugInfo)
+            {
+                textTexture = g.GenerateTextTexture(textTexture, 0, 0, 400, 200, String.Format("S {0}, FPS {1}({2}/{3}), MS {4}/{5}/{6}({7})", screen, FPS, FPS_Max, FPS_Avg, render_ExecTimeMS_Min.ToString("#.#"),render_ExecTimeMS.ToString("#.#"),render_ExecTimeMS_Max.ToString("#.#"), render_ExecTimeMSAvg.ToString("#.#")), Font.Arial, eTextFormat.Normal, Alignment.TopLeft, Color.Yellow, Color.Yellow);
+                g.DrawImage(textTexture, 0, 0, 400, 200);
+            }
         }
         private void RenderCursor()
         {
@@ -1423,9 +1442,16 @@ namespace OpenMobile
         }
         void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
         {
-            DisplayDevice dev = DisplayDevice.AvailableDisplays[screen];
-            if (e.Landscape != dev.Landscape)
-                Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", String.Empty);
+            try
+            {
+                DisplayDevice dev = DisplayDevice.AvailableDisplays[screen];
+                if (e.Landscape != dev.Landscape)
+                    Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", String.Empty);
+            }
+            catch (Exception ex)
+            {
+                BuiltInComponents.Host.DebugMsg("RenderingWindow_ResolutionChange Exception", ex);
+            }
         }
         
         /// <summary>

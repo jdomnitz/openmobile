@@ -116,6 +116,7 @@
     <Compile Include="Platform\Windows\WinRawKeyboard.cs" />
     <Compile Include="Platform\Windows\WinRawMouse.cs" />
     <Compile Include="Platform\X11\X11RawInput.cs" />
+    <Compile Include="SafeThread.cs" />
     <Compile Include="V1Graphics.cs" />
     <Compile Include="Graphics\Color4.cs" />
     <Compile Include="Graphics\ColorFormat.cs" />
@@ -258,7 +259,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

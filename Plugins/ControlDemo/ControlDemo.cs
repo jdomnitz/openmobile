@@ -267,6 +267,11 @@ namespace ControlDemo
             btnImages.OnClick += new userInteraction(btnImages_OnClick);
             p.addControl(btnImages);
 
+            // SlideIn test
+            OMButton btnSlideInTest = DefaultControls.GetButton("btnSlideInTest", 320, 400, 300, 90, "", "SlideIn");
+            btnSlideInTest.OnClick += new userInteraction(btnSlideInTest_OnClick);
+            p.addControl(btnSlideInTest);
+
             /*
             OMImage TestImg = new OMImage("TestImg", 10, 100);
             TestImg.FitControlToImage = true;
@@ -286,11 +291,15 @@ namespace ControlDemo
             p.addControl(TestImg4);
             */
 
+
             // Load playlist panel
             panelPlayListTest.Initialize(this.pluginName, manager, theHost);
 
             // Load images panel
             panelImages.Initialize(this.pluginName, manager, theHost);
+
+            // Load SlideIn panel
+            panelSlideInTest.Initialize(this.pluginName, manager, theHost);
 
             System.Timers.Timer t = new System.Timers.Timer(100);
             t.Elapsed += new ElapsedEventHandler(t_Elapsed);
@@ -301,6 +310,13 @@ namespace ControlDemo
             manager.DefaultPanel = p.Name;
 
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void btnSlideInTest_OnClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "SlideInTest");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
         void btnImages_OnClick(OMControl sender, int screen)

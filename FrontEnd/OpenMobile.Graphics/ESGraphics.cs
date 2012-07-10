@@ -69,10 +69,6 @@ namespace OpenMobile.Graphics
             Raw.GenTextures(1, out texture);
             Raw.BindTexture(All.Texture2D, texture);
             
-            // Set correct image to use if image data is not shared among all screens
-            if (!image.Shared)
-                image.SetScreen(screen);
-
             Bitmap img = image.image;
             bool kill = false;
             lock (image.image)
@@ -131,7 +127,7 @@ namespace OpenMobile.Graphics
             }
             if (kill)
                 img.Dispose();
-            image.SetTexture(screen, texture);
+            image.Texture = texture;
             Raw.TexParameter(All.Texture2D, All.TextureMinFilter, (int)TextureMinFilter.Linear);
             Raw.TexParameter(All.Texture2D, All.TextureMagFilter, (int)TextureMagFilter.Linear);
             Raw.TexParameter(All.Texture2D, All.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
@@ -297,13 +293,13 @@ namespace OpenMobile.Graphics
             if (image == null)
                 return;
             Raw.Enable(EnableCap.Texture2D);
-            if (image.Texture(screen) == 0)
+            if (image.Texture == 0)
                 if (!loadTexture(ref image))
                 {
                     Raw.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(All.Texture2D, image.Texture(screen));
+            Raw.BindTexture(All.Texture2D, image.Texture);
             Raw.Color4(1F, 1F, 1F, transparency);
 
             int[] tex = new int[] { X, Height + Y, Width + X, Height + Y, X, Y, Width + X, Y };

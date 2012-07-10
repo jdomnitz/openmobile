@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{CF16AA25-58E4-40A1-9137-40CF48FB38EC}</ProjectGuid>
+    <ProjectGuid>{87E5BF16-A4AF-4E47-A7F1-670E626D4237}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ControlDemo</RootNamespace>
-    <AssemblyName>ControlDemo</AssemblyName>
+    <RootNamespace>OMClock</RootNamespace>
+    <AssemblyName>OMClock</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -66,12 +66,8 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ControlDemo.cs" />
-    <Compile Include="panelSlideInTest.cs" />
-    <Compile Include="panelImages.cs" />
-    <Compile Include="panelPlayListTest.cs" />
+    <Compile Include="OMClock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReflectedImage.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Graphics\OpenMobile.Graphics.csproj">

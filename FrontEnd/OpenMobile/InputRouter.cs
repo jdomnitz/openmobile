@@ -497,9 +497,12 @@ namespace OpenMobile
                 // Connect default OS keyboard
                 for (int i = 0; i < Core.theHost.ScreenCount; i++)
                 {
-                    Core.RenderingWindows[i].DefaultKeyboard.KeyUp += new System.EventHandler<KeyboardKeyEventArgs>(SourceDown);
-                    Core.RenderingWindows[i].DefaultKeyboard.KeyDown += new System.EventHandler<KeyboardKeyEventArgs>(SourceUp);
-                    Core.RenderingWindows[i].DefaultKeyboard.Instance = (i * -1) - 1; // Instance is negative screen number for default units with an offset of one
+                    if (Core.RenderingWindows[i].DefaultKeyboard != null)
+                    {
+                        Core.RenderingWindows[i].DefaultKeyboard.KeyUp += new System.EventHandler<KeyboardKeyEventArgs>(SourceDown);
+                        Core.RenderingWindows[i].DefaultKeyboard.KeyDown += new System.EventHandler<KeyboardKeyEventArgs>(SourceUp);
+                        Core.RenderingWindows[i].DefaultKeyboard.Instance = (i * -1) - 1; // Instance is negative screen number for default units with an offset of one
+                    }
                 }
                 // Only connect what's needed
                 for (int i = 0; i < KeyboardMapping.Length; i++)
@@ -520,16 +523,19 @@ namespace OpenMobile
                 // Connect default OS Mouse
                 for (int i = 0; i < Core.theHost.ScreenCount; i++)
                 {
-                    Core.RenderingWindows[i].DefaultMouse.ButtonUp += new EventHandler<MouseButtonEventArgs>(dev_ButtonUp);
-                    Core.RenderingWindows[i].DefaultMouse.ButtonDown += new EventHandler<MouseButtonEventArgs>(dev_ButtonDown);
-                    Core.RenderingWindows[i].DefaultMouse.MouseClick += new EventHandler<MouseButtonEventArgs>(dev_MouseClick);
-                    Core.RenderingWindows[i].DefaultMouse.Move += new EventHandler<MouseMoveEventArgs>(dev_Move);
+                    if (Core.RenderingWindows[i].DefaultMouse != null)
+                    {
+                        Core.RenderingWindows[i].DefaultMouse.ButtonUp += new EventHandler<MouseButtonEventArgs>(dev_ButtonUp);
+                        Core.RenderingWindows[i].DefaultMouse.ButtonDown += new EventHandler<MouseButtonEventArgs>(dev_ButtonDown);
+                        Core.RenderingWindows[i].DefaultMouse.MouseClick += new EventHandler<MouseButtonEventArgs>(dev_MouseClick);
+                        Core.RenderingWindows[i].DefaultMouse.Move += new EventHandler<MouseMoveEventArgs>(dev_Move);
 
-                    // Set mouse instance number (negative instance number = default os unit)
-                    Core.RenderingWindows[i].DefaultMouse.Instance = (i * -1) - 1; // Instance is negative screen number for default units with an offset of one
+                        // Set mouse instance number (negative instance number = default os unit)
+                        Core.RenderingWindows[i].DefaultMouse.Instance = (i * -1) - 1; // Instance is negative screen number for default units with an offset of one
 
-                    // Limit mouse area to the size of the screen
-                    Core.RenderingWindows[i].DefaultMouse.SetBounds(DisplayDevice.AvailableDisplays[BuiltInComponents.Host.StartupScreen > 0 ? BuiltInComponents.Host.StartupScreen : i].Width, DisplayDevice.AvailableDisplays[BuiltInComponents.Host.StartupScreen > 0 ? BuiltInComponents.Host.StartupScreen : i].Height);
+                        // Limit mouse area to the size of the screen
+                        Core.RenderingWindows[i].DefaultMouse.SetBounds(DisplayDevice.AvailableDisplays[BuiltInComponents.Host.StartupScreen > 0 ? BuiltInComponents.Host.StartupScreen : i].Width, DisplayDevice.AvailableDisplays[BuiltInComponents.Host.StartupScreen > 0 ? BuiltInComponents.Host.StartupScreen : i].Height);
+                    }
                 }
 
                 // Only connect what's needed
@@ -795,7 +801,7 @@ namespace OpenMobile
             // TODO_ : Add support for default keyboard based on focus (How do we detect focus?)
 
             // exit if there is no keyboards available
-            if ((driver.Keyboard == null) || (driver.Keyboard.Count == 0))
+            if ((driver == null) || (driver.Keyboard == null) || (driver.Keyboard.Count == 0))
                 return;
 
             // Select default unit
@@ -875,6 +881,10 @@ namespace OpenMobile
 
         private static void mapMice()
         {
+            // exit if there is no mice available
+            if ((driver == null) || (driver.Mouse == null) || (driver.Mouse.Count == 0))
+                return;
+
             // List available mouse devices
             string[] Devices = new string[driver.Mouse.Count];
             for (int i = 0; i < driver.Mouse.Count; i++)

@@ -29,13 +29,40 @@ namespace OpenMobile.helperFunctions
 
         public static bool GetBool(string Name)
         {
-            using (PluginSettings settings = new PluginSettings())
-                return settings.getSetting(Name).ToLower().Equals("true");
+            using (PluginSettings setting = new PluginSettings())
+                return setting.getSetting(Name).ToLower().Equals("true");
         }
         public static bool SetBool(string Name, bool Value)
         {
             using (PluginSettings setting = new PluginSettings())
                 return setting.setSetting(Name, Value.ToString());
+        }
+
+        /// <summary>
+        /// Returns an int value from the settings database
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="DefaultValue">Value to use in case of conversion error or missing setting</param>
+        /// <returns></returns>
+        public static int GetInt(string Name, int DefaultValue)
+        {
+            using (PluginSettings setting = new PluginSettings())
+            {
+                int i = 0;
+                if (!int.TryParse(setting.getSetting(Name), out i))
+                    return DefaultValue;
+                return i;
+            }
+        }
+
+        /// <summary>
+        /// Returns an int value from the settings database (0 is used as default value)
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <returns></returns>
+        public static int GetInt(string Name)
+        {
+            return GetInt(Name, 0);
         }
 
         public static string Get(string Name)
@@ -48,6 +75,11 @@ namespace OpenMobile.helperFunctions
         {
             using (PluginSettings setting = new PluginSettings())
                 return setting.setSetting(Name, Value);
+        }
+        public static bool Set(string Name, object Value)
+        {
+            using (PluginSettings setting = new PluginSettings())
+                return setting.setSetting(Name, Value.ToString());
         }
 
         public static void SetDefaultValue(string Setting, string Value)

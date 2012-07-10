@@ -293,13 +293,13 @@ namespace OpenMobile.Graphics
             if (image == null)
                 return;
             Raw.Enable(EnableCap.Texture2D);
-            if (image.Texture(screen) == 0)
+            if (image.Texture == 0)
                 if (!loadTexture(ref image))
                 {
                     Raw.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.Texture(screen));
+            Raw.BindTexture(TextureTarget.Texture2D, image.Texture);
             Raw.Color4(Color.White);
             Raw.Begin(BeginMode.Quads);
             {
@@ -329,13 +329,13 @@ namespace OpenMobile.Graphics
             if (image == null)
                 return;
             Raw.Enable(EnableCap.Texture2D);
-            if (image.Texture(screen) == 0)
+            if (image.TextureGenerationRequired)
                 if (!loadTexture(ref image))
                 {
                     Raw.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.Texture(screen));
+            Raw.BindTexture(TextureTarget.Texture2D, image.Texture);
             Raw.Color4(1F,1F,1F,transparency);
             Raw.Begin(BeginMode.Quads);
             {
@@ -385,18 +385,24 @@ namespace OpenMobile.Graphics
 
         private bool loadTexture(ref OImage image)
         {
-            if (image == null)
-                return false;
-            if (image.Size == Size.Empty)
+            if (image == null || image.Size == Size.Empty)
                 return false;
             
+            // Load texture
             uint texture;
-            Raw.GenTextures(1, out texture);
-            Raw.BindTexture(TextureTarget.Texture2D, texture);
 
-            // Set correct image to use if image data is not shared among all screens
-            if (!image.Shared)
-                image.SetScreen(screen);
+            // Delete old texture before generating a new one
+            if (image.Texture != 0)
+            {
+                texture = image.Texture;
+                Raw.DeleteTexture(texture);
+            }
+
+            // Create new texture name
+            Raw.GenTextures(1, out texture);
+
+            // Bind texture to opengl
+            Raw.BindTexture(TextureTarget.Texture2D, texture);
 
             Bitmap img = image.image;
             bool kill=false;
@@ -453,11 +459,12 @@ namespace OpenMobile.Graphics
             }
             if (kill)
                 img.Dispose();
-            image.SetTexture(screen,texture);
+            image.Texture = texture;
+
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToBorder);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToBorder);
+            //Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToEdge);
+            //Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToEdge);
             return true;
         }
 
@@ -504,13 +511,13 @@ namespace OpenMobile.Graphics
             double srcHeight = srcRect.Height / 600.0;
 
             Raw.Enable(EnableCap.Texture2D);
-            if (image.Texture(screen) == 0)
+            if (image.Texture == 0)
                 if (!loadTexture(ref image))
                 {
                     Raw.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.Texture(screen));
+            Raw.BindTexture(TextureTarget.Texture2D, image.Texture);
             Raw.Color4(Color.White);
             Raw.Begin(BeginMode.Quads);
             {
@@ -1064,13 +1071,13 @@ namespace OpenMobile.Graphics
             if (image == null)
                 return;
             Raw.Enable(EnableCap.Texture2D);
-            if (image.Texture(screen) == 0)
+            if (image.Texture == 0)
                 if (!loadTexture(ref image))
                 {
                     Raw.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.Texture(screen));
+            Raw.BindTexture(TextureTarget.Texture2D, image.Texture);
             Raw.Color4(1F, 1F, 1F, 0.0);
             Raw.Begin(BeginMode.Quads);
             {

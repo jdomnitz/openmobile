@@ -869,7 +869,7 @@ namespace OMPlayer
             if (t == null)
             {
                 t = new Thread(waitForStop);
-                t.Name = zone.Name.ToString();
+                t.Name = String.Format("OMPlayer.OMPlayer.AVPlayer.{0}", zone);
                 t.Start();
             }
             return true;

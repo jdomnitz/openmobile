@@ -135,6 +135,8 @@ namespace OpenMobile
         {
             public bool Changed { get; set; }
 
+            public bool RefreshGraphic = true;
+
             /// <summary>
             /// Text Formatting
             /// </summary>
@@ -146,6 +148,7 @@ namespace OpenMobile
                     _textFormat = value;
                     //subitemTex = null;
                     Changed = true;
+                    RefreshGraphic = true;
                 }
             }
             private OpenMobile.Graphics.eTextFormat _textFormat = OpenMobile.Graphics.eTextFormat.Normal;
@@ -161,6 +164,7 @@ namespace OpenMobile
                     _textAlignment = value;
                     //subitemTex = null;
                     Changed = true;
+                    RefreshGraphic = true;
                 }
             }
             private OpenMobile.Graphics.Alignment _textAlignment = OpenMobile.Graphics.Alignment.BottomLeft;
@@ -175,6 +179,7 @@ namespace OpenMobile
                     _color = value;
                     //subitemTex = null;
                     Changed = true;
+                    RefreshGraphic = true;
                 }
             }
             private Color _color = Color.White;
@@ -189,6 +194,7 @@ namespace OpenMobile
                     _highlightColor = value;
                     //subitemTex = null;
                     Changed = true;
+                    RefreshGraphic = true;
                 }
             }
             private Color _highlightColor = Color.White;
@@ -203,6 +209,7 @@ namespace OpenMobile
                     _font = value;
                     //subitemTex = null;
                     Changed = true;
+                    RefreshGraphic = true;
                 }
             }
             private Font _font = new Font(Font.GenericSansSerif, 18F);
@@ -217,6 +224,7 @@ namespace OpenMobile
                     _outlineColor = value;
                     //subitemTex = null;
                     Changed = true;
+                    RefreshGraphic = true;
                 }
             }
             private Color _outlineColor = Color.Black;
@@ -231,6 +239,7 @@ namespace OpenMobile
                     _Offset = value;
                     //subitemTex = null;
                     Changed = true;
+                    RefreshGraphic = true;
                 }
             }
             private int _Offset = 0;
@@ -239,11 +248,16 @@ namespace OpenMobile
 
             public object Clone()
             {
-                return (subItemFormat)this.MemberwiseClone();
+                subItemFormat ret = (subItemFormat)this.MemberwiseClone();
+                ret.RefreshGraphic = true;
+                return ret;
             }
 
             #endregion
         }
+
+        public bool RefreshGraphic = true;
+
         /// <summary>
         /// The text to display
         /// </summary>
@@ -253,8 +267,7 @@ namespace OpenMobile
             set
             {
                 _text = value;
-                textTex = null; // Reset text texture so control gets redrawn
-                subitemTex = null; // Reset text texture so control gets redrawn
+                RefreshGraphic = true;
             }
         }
         private string _text;
@@ -269,8 +282,7 @@ namespace OpenMobile
             set
             {
                 _textTex = value;
-                if (_textTex == null)
-                    _subitemTex = null;
+                RefreshGraphic = true;
             }
         }
 
@@ -284,13 +296,7 @@ namespace OpenMobile
             set
             {
                 _subitemTex = value;
-                if (_subitemTex == null)
-                    _textTex = null;
-                else
-                {
-                    if (subitemFormat != null)
-                        subitemFormat.Changed = false;
-                }
+                RefreshGraphic = true;
             }
         }
         /// <summary>
@@ -302,8 +308,7 @@ namespace OpenMobile
             set
             {
                 _image = value;
-                textTex = null; // Reset text texture so control gets redrawn
-                subitemTex = null; // Reset text texture so control gets redrawn
+                RefreshGraphic = true;
             }
         }
         private OImage _image;
@@ -316,8 +321,7 @@ namespace OpenMobile
             set
             {
                 _subItem = value;
-                textTex = null; // Reset text texture so control gets redrawn
-                subitemTex = null; // Reset text texture so control gets redrawn
+                RefreshGraphic = true;
             }
         }
         private string _subItem;
@@ -330,8 +334,7 @@ namespace OpenMobile
             set
             {
                 _subitemFormat = value;
-                textTex = null; // Reset text texture so control gets redrawn
-                subitemTex = null; // Reset text texture so control gets redrawn
+                RefreshGraphic = true;
             }
         }
         private subItemFormat _subitemFormat;
@@ -344,11 +347,10 @@ namespace OpenMobile
             set
             {
                 _tag = value;
-                textTex = null; // Reset text texture so control gets redrawn
-                subitemTex = null; // Reset text texture so control gets redrawn
+                RefreshGraphic = true;
             }
         }
-        private object _tag; //Added by Borte
+        private object _tag; 
         /// <summary>
         /// A tag to sort by (defaults to text if not set)
         /// </summary>
@@ -358,8 +360,7 @@ namespace OpenMobile
             set
             {
                 _sort = value;
-                textTex = null; // Reset text texture so control gets redrawn
-                subitemTex = null; // Reset text texture so control gets redrawn
+                RefreshGraphic = true;
             }
         }
         private string _sort;
@@ -526,8 +527,7 @@ namespace OpenMobile
         public object Clone()
         {
             OMListItem NewItem = (OMListItem)this.MemberwiseClone();
-            NewItem._subitemTex = null;
-            NewItem._textTex = null;
+            NewItem.RefreshGraphic = true; 
             if (this.subitemFormat != null)
                 NewItem.subitemFormat = (subItemFormat)this.subitemFormat.Clone();
             return NewItem;

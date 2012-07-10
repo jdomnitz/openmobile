@@ -518,10 +518,10 @@ namespace OMGraphics
                     }
                     break;
 
-                case "paneloutline":
+                case "panelpopupoutline":
                     {
                         // Convert input data to local data object (data sent in is a 
-                        PanelOutlineGraphic.GraphicData gd = data as PanelOutlineGraphic.GraphicData;
+                        PanelPopupOutlineGraphic.GraphicData gd = data as PanelPopupOutlineGraphic.GraphicData;
 
                         #region Create Panel Outline graphic
 
@@ -530,7 +530,7 @@ namespace OMGraphics
                         {
                             switch (gd.Type)
                             {
-                                case PanelOutlineGraphic.Types.RoundedRectangle:
+                                case PanelPopupOutlineGraphic.Types.RoundedRectangle:
                                     {
                                         #region RoundedRectangle
 
@@ -695,6 +695,151 @@ namespace OMGraphics
 
                                             #endregion
                                         }
+
+                                        #endregion
+
+                                        g.ResetClip();
+
+                                        #region Draw outer border
+
+                                        g.DrawPath(BorderPen, gp);
+
+                                        #endregion
+
+                                        #endregion
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                            g.Flush();
+                        }
+                        gd.Image = new OpenMobile.Graphics.OImage(bmp);
+
+                        #endregion
+
+                        // Return data
+                        data = (T)Convert.ChangeType(gd, typeof(T));
+                    }
+                    break;
+
+                case "paneloutline":
+                    {
+                        // Convert input data to local data object (data sent in is a 
+                        PanelOutlineGraphic.GraphicData gd = data as PanelOutlineGraphic.GraphicData;
+
+                        #region Create Panel Outline graphic
+
+                        System.Drawing.Bitmap bmp = new Bitmap(gd.Width, gd.Height);
+                        using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                        {
+                            switch (gd.Type)
+                            {
+                                case PanelOutlineGraphic.Types.RoundedRectangle:
+                                    {
+                                        #region RoundedRectangle
+
+                                        bool CustomPath = false;
+
+                                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                                        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                                        int ShadowDistance = gd.ShadowSize;
+                                        if (gd.ShadowType == PanelOutlineGraphic.ShadowTypes.None)
+                                            ShadowDistance = 0;
+
+                                        #region Colors
+
+                                        Color backColor;
+                                        if (String.IsNullOrEmpty(gd.BackgroundColor.Name) || gd.BackgroundColor.Name == "0")
+                                            //backColor = Color.FromArgb(0x7f, System.Drawing.Color.Black);
+                                            backColor = Color.FromArgb(255, System.Drawing.Color.Black);
+                                        else
+                                            backColor = gd.BackgroundColor.ToSystemColor();
+
+                                        Color borderColor;
+                                        if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
+                                            borderColor = System.Drawing.Color.LightGray;
+                                        else
+                                            borderColor = gd.BorderColor.ToSystemColor();
+
+                                        Color shadowColor;
+                                        if (String.IsNullOrEmpty(gd.ShadowColor.Name) || gd.ShadowColor.Name == "0")
+                                            shadowColor = System.Drawing.Color.Blue;
+                                        else
+                                            shadowColor = gd.ShadowColor.ToSystemColor();
+
+                                        #endregion
+
+                                        // Create outline path
+                                        System.Drawing.Rectangle rect = new System.Drawing.Rectangle((int)(ShadowDistance * 1.5f), ShadowDistance, bmp.Width - (ShadowDistance * 3), bmp.Height - (ShadowDistance * 2));
+                                        GraphicsPath gp = gd.GraphicPath;
+                                        if (gp == null)
+                                            gp = GetPath_RoundedRectangle(g, rect, 30);
+                                        else
+                                            CustomPath = true;
+
+                                        // Save client area
+                                        gd.ClientArea = new OpenMobile.Graphics.Rectangle(rect.X + 10, rect.Y + 10, rect.Width - 20, rect.Height - 20);
+
+                                        #region Draw drop shadow
+
+                                        // Sample code found here: http://www.codeproject.com/Articles/15847/Fuzzy-DropShadows-in-GDI
+
+                                        if (ShadowDistance > 0)
+                                        {
+                                            // Move shadow off to the side of the object
+                                            System.Drawing.Rectangle rectShadow = new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height);
+                                            //GraphicsPath gpShadow = GetPath_RoundedRectangle(g, rectShadow, 30);
+                                            GraphicsPath gpShadow = (GraphicsPath)gp.Clone();
+                                            gpShadow.Widen(new Pen(Color.Transparent, ShadowDistance*2));
+                                            gpShadow.CloseAllFigures();
+
+                                            using (PathGradientBrush _Brush = new PathGradientBrush(gpShadow))
+                                            {
+                                                // set the wrapmode so that the colors will layer themselves
+                                                // from the outer edge in
+                                                _Brush.WrapMode = WrapMode.Clamp;
+
+                                                // Create a color blend to manage our colors and positions and
+                                                // since we need 3 colors set the default length to 3
+                                                ColorBlend _ColorBlend = new ColorBlend(3);
+
+                                                // here is the important part of the shadow making process, remember
+                                                // the clamp mode on the colorblend object layers the colors from
+                                                // the outside to the center so we want our transparent color first
+                                                // followed by the actual shadow color. Set the shadow color to a 
+                                                // slightly transparent DimGray, I find that it works best.|
+                                                //_ColorBlend.Colors = new Color[] { Color.Transparent, Color.FromArgb(180, Color.DimGray), Color.FromArgb(180, Color.DimGray) };
+                                                _ColorBlend.Colors = new Color[] { Color.Transparent, Color.FromArgb(180, shadowColor), Color.FromArgb(180, shadowColor) };
+
+                                                // our color blend will control the distance of each color layer
+                                                // we want to set our transparent color to 0 indicating that the 
+                                                // transparent color should be the outer most color drawn, then
+                                                // our Dimgray color at about 10% of the distance from the edge
+                                                _ColorBlend.Positions = new float[] { 0f, .1f, 1f };
+
+                                                // assign the color blend to the pathgradientbrush
+                                                _Brush.InterpolationColors = _ColorBlend;
+
+                                                // fill the shadow with our pathgradientbrush
+                                                g.FillPath(_Brush, gpShadow);
+                                            }
+                                        }
+
+                                        #endregion
+
+                                        g.SetClip(gp);
+
+                                        // Create border pen
+                                        Pen BorderPen = new System.Drawing.Pen(borderColor, gd.BorderThickness);
+
+                                        #region Draw Background
+
+                                        // Draw background
+                                        using (System.Drawing.Brush br = new System.Drawing.SolidBrush(backColor))
+                                            g.FillPath(br, gp);
 
                                         #endregion
 

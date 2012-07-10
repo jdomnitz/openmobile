@@ -32,6 +32,11 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMPanel
     {
+        /// <summary>
+        /// Contains the number of the currently assigned screen for this panel
+        /// </summary>
+        public int ActiveScreen { get; set; }
+        
         private List<OMControl> containedControls = new List<OMControl>();
         private imageItem background;
         /// <summary>
@@ -357,6 +362,17 @@ namespace OpenMobile.Controls
                 return null;
             else
                 return Manager[screen, this.name];
+        }
+        /// <summary>
+        /// Get's the panels that's currently used for this control instance
+        /// </summary>
+        /// <returns></returns>
+        public OMPanel getActivePanel()
+        {
+            if (Manager == null)
+                return null;
+            else
+                return Manager[ActiveScreen, this.name];
         }
 
         /// <summary>

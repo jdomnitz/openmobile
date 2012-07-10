@@ -34,6 +34,7 @@ namespace OpenMobile.Controls
             set
             {
                 highlightColor = value;
+                _RefreshGraphic = true;
             }
         }
 
@@ -49,6 +50,7 @@ namespace OpenMobile.Controls
             set
             {
                 isChecked = value;
+                _RefreshGraphic = true;
             }
         }
         /// <summary>
@@ -105,7 +107,7 @@ namespace OpenMobile.Controls
                 tmp = e.globalTransitionOut;
             using (Brush defaultBrush = new Brush(Color.FromArgb((int)tmp * 255, this.OutlineColor)))
             {
-                if ((textTexture == null) || (genHighlight != (Mode == eModeType.Highlighted)))
+                if ((_RefreshGraphic) || (genHighlight != (Mode == eModeType.Highlighted)))
                 {
                     if (Mode == eModeType.Highlighted)
                         textTexture = g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, highlightColor, this.OutlineColor);
@@ -123,6 +125,11 @@ namespace OpenMobile.Controls
                     g.DrawLine(new Pen(defaultBrush, 2.0F), this.Left + 5, this.Top + this.Height - 5, this.Left + this.Height - 5, this.Top + 5);
                 }
             }
+
+            _RefreshGraphic = false;
+            // Skin debug function 
+            if (_SkinDebug)
+                base.DrawSkinDebugInfo(g, Color.Green);
         }
     }
 }

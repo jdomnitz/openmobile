@@ -134,7 +134,22 @@ namespace OpenMobile
                     mainPanel.addControl(MainMenuButtons[i]);                    
                 }
 
-                //screens.loadPanel(mainPanel);
+                // Clock and date
+                OMLabel labelClockTime = new OMLabel("labelClockTime", 350, 522, 300, 60);
+                labelClockTime.TextAlignment = Alignment.CenterCenter;
+                labelClockTime.Font = new Font(Font.GenericSansSerif, 32F);
+                labelClockTime.Format = eTextFormat.BoldShadow;
+                labelClockTime.sensorName = "SystemSensors.Time";
+                labelClockTime.Text = "Clock";
+                mainPanel.addControl(labelClockTime);     
+                OMLabel labelClockdate = new OMLabel("labelClockdate", 350, 572, 300, 30);
+                labelClockdate.TextAlignment = Alignment.CenterCenter;
+                labelClockdate.Font = new Font(Font.GenericSansSerif, 20F);
+                labelClockdate.Format = eTextFormat.BoldShadow;
+                labelClockdate.sensorName = "SystemSensors.Date";
+                labelClockdate.Text = "Date";
+                mainPanel.addControl(labelClockdate);       
+
                 screens.loadSinglePanel(mainPanel, screen, true);
             }
 
@@ -161,13 +176,13 @@ namespace OpenMobile
 
             OMImage Image_panelSettings_Background = new OMImage("TestImg", 200, 110);
             Image_panelSettings_Background.FitControlToImage = true;
-            PanelOutlineGraphic.GraphicData gd = new PanelOutlineGraphic.GraphicData();
+            PanelPopupOutlineGraphic.GraphicData gd = new PanelPopupOutlineGraphic.GraphicData();
             gd.Width = 614;
             gd.Height = 434;
             gd.TextFont = new Font(Font.Arial, 24);
-            gd.Type = PanelOutlineGraphic.Types.RoundedRectangle;
+            gd.Type = PanelPopupOutlineGraphic.Types.RoundedRectangle;
             gd.Text = "Select the panel to assign to this button";
-            Image_panelSettings_Background.Image = new imageItem(PanelOutlineGraphic.GetImage(gd));
+            Image_panelSettings_Background.Image = new imageItem(PanelPopupOutlineGraphic.GetImage(gd));
             panelSettings.addControl(Image_panelSettings_Background);
 
 
@@ -309,31 +324,31 @@ namespace OpenMobile
         }
         void Screen_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
-            theHost.execute(eFunction.setMonitorBrightness, screen.ToString(), "0");
+            theHost.execute(eFunction.TransitionFromPanel, screen, "MainMenu", "Quit");
+            theHost.execute(eFunction.ExecuteTransition, screen, "None");
+            theHost.execute(eFunction.setMonitorBrightness, screen, "0");
         }
         void Cancel_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
+            theHost.execute(eFunction.TransitionFromPanel, screen, "MainMenu", "Quit");
+            theHost.execute(eFunction.ExecuteTransition, screen, "None");
         }
         void MainMenu_OnClick(OMControl sender, int screen)
         {
             switch(sender.Tag.ToString())
             {
                 case "Exit":
-                    theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"MainMenu", "Quit");
-                    theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                    theHost.execute(eFunction.TransitionToPanel, screen,"MainMenu", "Quit");
+                    theHost.execute(eFunction.ExecuteTransition, screen);
                     ((OMButton)sender).Transition = eButtonTransition.None;
                     break;
                 case "":
                     return;
                 default:
-                    theHost.execute(eFunction.TransitionFromPanel, screen.ToString(),"MainMenu");
-                    if (theHost.execute(eFunction.TransitionToPanel,screen.ToString(), ((OMButton)sender).Tag.ToString())==false)
-                        theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "MainMenu");
-                    theHost.execute(eFunction.ExecuteTransition,screen.ToString());
+                    theHost.execute(eFunction.TransitionFromPanel, screen,"MainMenu");
+                    if (theHost.execute(eFunction.TransitionToPanel,screen, ((OMButton)sender).Tag)==false)
+                        theHost.execute(eFunction.TransitionToPanel, screen, "MainMenu");
+                    theHost.execute(eFunction.ExecuteTransition,screen);
                     break;
             }
         }

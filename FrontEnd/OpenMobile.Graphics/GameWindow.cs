@@ -77,10 +77,26 @@ namespace OpenMobile
 
         bool isExiting;
 
-        const double target_render_period = (1.0 / 35);
+        double target_render_periodSec = (1.0 / 66);
+        double target_render_periodMS = (1000.0 / 66);
         double render_time;
 
         Stopwatch render_watch = new Stopwatch();
+        Stopwatch render_ExecTime = new Stopwatch();
+        public double render_ExecTimeMS = 0;
+        public double render_ExecTimeMS_Min = Double.MaxValue;
+        public double render_ExecTimeMS_Max = 0;
+        public double render_ExecTimeMSAvg = 0;
+        private double render_ExecTimeMSTotal = 0;
+        private int render_ExecTimeMSCount = 0;
+        private double render_ExecTimeSec = 0.0;
+
+
+        public int FPS = 0;
+        public int FPS_Max = 0;
+        public int FPS_Avg = 0;
+        private int FPS_AvgSum = 0;
+        private int FPS_AvgCount = 0;
 
         #endregion
 
@@ -236,43 +252,86 @@ namespace OpenMobile
             // the window. We can avoid this issue by raising UpdateFrame and RenderFrame events
             // whenever we encounter a size or move event.
 
+            target_render_periodSec = (1.0 / frames_per_second);
+            target_render_periodMS = (target_render_periodSec * 1000) / 4;
+
+            int ProcessDelay = 10;
+            double MSBetweenRenderings = 1000 / updates_per_second;
+            int LoopCount = (int)(MSBetweenRenderings / ProcessDelay);
             render_watch.Start();
             while (true)
             {
-                for (int i = 0; i < 29; i++)
+                for (int i = 0; i < LoopCount; i++)
                 {
                     ProcessEvents();
                     if (refresh)
                         break;
-                    Thread.Sleep(15);
+                    Thread.Sleep(ProcessDelay);
                 }
                 refresh = false;
                 if (Exists && !isExiting)
                     DispatchRenderFrame();
                 else
                     return;
-                if (render_time < 34)
-                    Thread.Sleep((int)(34 - render_time));
+                if (render_time < target_render_periodMS)
+                    Thread.Sleep((int)(target_render_periodMS - render_time));
             }
         }
         public void DispatchRenderFrame()
         {
             RaiseRenderFrame();
         }
-
         void RaiseRenderFrame()
         {
-            if ((target_render_period - render_watch.Elapsed.TotalSeconds) <= 0.0)
+            render_ExecTimeSec = target_render_periodSec - render_watch.Elapsed.TotalSeconds;
+            if (render_ExecTimeSec <= 0.0)
             {
+                FPS = (int)(1000 / render_watch.Elapsed.TotalMilliseconds);
+                if (FPS > FPS_Max)
+                    FPS_Max = FPS;
+                FPS_AvgCount++;
+                FPS_AvgSum += FPS;
+                if (FPS_AvgCount > 0 && FPS_AvgSum > 0)
+                    FPS_Avg = FPS_AvgSum / FPS_AvgCount;
+                if (FPS_AvgCount > 100)
+                {
+                    FPS_AvgCount = 0;
+                    FPS_AvgSum = 0;
+                }                
+
+                // Timing
                 render_watch.Reset();
                 render_watch.Start();
+                render_ExecTime.Reset();
+                render_ExecTime.Start();
 
                 OnRenderFrameInternal();
-                render_time = render_watch.Elapsed.TotalMilliseconds;
+
+                // Debug info
+                render_ExecTime.Stop();
+#if DEBUG
+                render_ExecTimeMS = render_ExecTime.Elapsed.TotalMilliseconds;
+                if (render_ExecTimeMS < render_ExecTimeMS_Min)
+                    render_ExecTimeMS_Min = render_ExecTimeMS;
+                if (render_ExecTimeMS > render_ExecTimeMS_Max)
+                    render_ExecTimeMS_Max = render_ExecTimeMS;
+                render_ExecTimeMSCount++;
+                render_ExecTimeMSTotal += render_ExecTimeMS;
+                if (render_ExecTimeMSCount > 100)
+                {
+                    render_ExecTimeMSCount = 0;
+                    render_ExecTimeMSTotal = 0;
+                }
+                render_ExecTimeMSAvg = render_ExecTimeMSTotal / render_ExecTimeMSCount;
+                //Console.WriteLine("Rendering screen {0}, FPS = {1}, RenderExecTime = {2}, RenderExecTimeAvf = {3}", screen, FPS, render_ExecTimeMS.ToString("#.##"), render_ExecTimeMSAvg.ToString("#.##"));
+#endif
+
+               render_time = render_watch.Elapsed.TotalMilliseconds;
+
             }
 #if DEBUG
-            else
-                Debug.Print(DateTime.Now.ToString() + "-Frame Dropped!");
+            //else
+            //    Debug.Print(DateTime.Now.ToString() + "-Frame Dropped ({0})!", render_ExecTimeSec);
 #endif
         }
 
@@ -317,7 +376,12 @@ namespace OpenMobile
         /// </summary>
         public KeyboardDevice DefaultKeyboard
         {
-            get { return InputDriver.Keyboard.Count > 0 ? InputDriver.Keyboard[0] : null; }
+            get 
+            {
+                if ((InputDriver == null) || (InputDriver.Keyboard == null))
+                    return null;
+                return InputDriver.Keyboard.Count > 0 ? InputDriver.Keyboard[0] : null; 
+            }
         }
 
         #endregion
