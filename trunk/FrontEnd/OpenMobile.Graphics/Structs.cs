@@ -19,6 +19,7 @@ namespace OpenMobile.Graphics
         Underline = 4,
         Strikeout = 8,
     }
+    [Serializable]
     public struct Pen : IDisposable
     {
         Color color;
@@ -77,8 +78,9 @@ namespace OpenMobile.Graphics
 
         #endregion
     }
-    
-    public struct Brush:IDisposable
+
+    [Serializable]
+    public struct Brush : IDisposable
     {
         Color color;
         Color secondColor;
@@ -128,6 +130,7 @@ namespace OpenMobile.Graphics
         #endregion
     }
 
+    [Serializable]
     public struct Color
     {
         public static readonly Color Empty;
@@ -1271,6 +1274,7 @@ namespace OpenMobile.Graphics
             transparent = new Color(0, 0xFF, 0xFF, 0xFF, "Transparent");
         }
     }
+    [Serializable]
     public struct PointF
     {
         private float x;
@@ -1346,6 +1350,7 @@ namespace OpenMobile.Graphics
         }
     }
 #pragma warning disable 0660
+    [Serializable]
     public struct Font
     {
         string name;
@@ -1666,6 +1671,7 @@ namespace OpenMobile.Graphics
             return sFormat;
         }
     }
+    [Serializable]
     public struct Point
     {
         public static readonly Point Empty;
@@ -1680,6 +1686,16 @@ namespace OpenMobile.Graphics
         public static bool operator !=(Point left, Point right)
         {
             return !(left == right);
+        }
+
+        public static Point operator -(Point left, Point right)
+        {
+            return new Point(left.x - right.x, left.y - right.y);
+        }
+
+        public static Point operator +(Point left, Point right)
+        {
+            return new Point(left.x + right.x, left.y + right.y);
         }
 
         public Point(int x, int y)
@@ -1735,6 +1751,16 @@ namespace OpenMobile.Graphics
             return ("{X=" + this.x.ToString() + ", Y=" + this.y.ToString() + "}");
         }
 
+        public System.Drawing.Point ToSystemPoint()
+        {
+            return new System.Drawing.Point(x, y);
+        }
+
+        public OpenMobile.Math.Vector2 ToVector2()
+        {
+            return new OpenMobile.Math.Vector2(x, y);
+        }
+
         static Point()
         {
             Empty = new Point();
@@ -1753,6 +1779,7 @@ namespace OpenMobile.Graphics
         }
     }
 
+    [Serializable]
     public struct Size
     {
         public static readonly Size Empty;
@@ -1833,6 +1860,7 @@ namespace OpenMobile.Graphics
         }
     }
 
+    [Serializable]
     public struct SizeF
     {
         public static readonly SizeF Empty;
@@ -1907,6 +1935,7 @@ namespace OpenMobile.Graphics
         }
     }
 
+    [Serializable]
     public struct Rectangle
     {
         public static readonly Rectangle Empty;
@@ -1986,6 +2015,14 @@ namespace OpenMobile.Graphics
             }
         }
 
+        public Point Center
+        {
+            get
+            {
+                return new Point(X + (Width / 2), Y + (Height / 2));
+            }
+        }
+
         public Size Size
         {
             get
@@ -2025,6 +2062,26 @@ namespace OpenMobile.Graphics
             return !(first == second);
         }
 
+        public static Rectangle operator +(Rectangle first, Rectangle second)
+        {
+            return new Rectangle(first.X + second.X, first.Y + second.Y, first.Width + second.Width, first.Height + second.Height);
+        }
+
+        public static Rectangle operator -(Rectangle first, Rectangle second)
+        {
+            return new Rectangle(first.X - second.X, first.Y - second.Y, first.Width - second.Width, first.Height - second.Height);
+        }
+
+        public static Rectangle operator *(Rectangle first, Rectangle second)
+        {
+            return new Rectangle(first.X * second.X, first.Y * second.Y, first.Width * second.Width, first.Height * second.Height);
+        }
+
+        public static Rectangle operator /(Rectangle first, Rectangle second)
+        {
+            return new Rectangle(first.X / second.X, first.Y / second.Y, first.Width / second.Width, first.Height / second.Height);
+        }
+
         public static Rectangle Round(System.Drawing.RectangleF value)
         {
             return new Rectangle((int)Math.Round((double)value.X), (int)Math.Round((double)value.Y), (int)Math.Round((double)value.Width), (int)Math.Round((double)value.Height));
@@ -2033,6 +2090,11 @@ namespace OpenMobile.Graphics
         public override string ToString()
         {
             return ("{X=" + this.X.ToString() + ",Y=" + this.Y.ToString() + ",Width=" + this.Width.ToString() + ",Height=" + this.Height.ToString() + "}");
+        }
+
+        public System.Drawing.Rectangle ToSystemRectangle()
+        {
+            return new System.Drawing.Rectangle(X, Y, Width, Height);
         }
 
         static Rectangle()

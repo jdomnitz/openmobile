@@ -641,6 +641,14 @@ namespace OpenMobile.Input
         public MouseButton Buttons { get { return button; } set { button = value; } }
 
         #endregion
+
+        public static void Scale(MouseEventArgs e, PointF ScaleFactors)
+        {
+            // Scale location
+            e.X = (int)(e.X / ScaleFactors.X);
+            e.Y = (int)(e.Y / ScaleFactors.Y);
+        }
+
     }
 
     /// <summary>
@@ -706,6 +714,16 @@ namespace OpenMobile.Input
         /// </summary>
         public int YDelta { get { return y_delta; } internal set { y_delta = value; } }
         #endregion
+
+        public static void Scale(MouseMoveEventArgs e, PointF ScaleFactors)
+        {
+            // Scale location
+            MouseEventArgs.Scale((MouseEventArgs)e, ScaleFactors);
+
+            // Scale mouse delta 
+            e.XDelta = (int)(e.XDelta / ScaleFactors.X);
+            e.YDelta = (int)(e.YDelta / ScaleFactors.Y);
+        }
     }
 
     /// <summary>

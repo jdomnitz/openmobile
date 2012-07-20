@@ -680,10 +680,11 @@ namespace OpenMobile
         /// </summary>
         None = 0,
         /// <summary>
-        /// Rolls back and cancels a transition
+        /// [REMOVED] Rolls back and cancels a transition
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen</para>
         /// </summary>
+        [Obsolete("This function has been removed/disabled")]
         CancelTransition = 1,
         /// <summary>
         /// A data provider has completed an update
@@ -2610,6 +2611,21 @@ namespace OpenMobile
         /// The current rendering mode of the rendering window
         /// </summary>
         public eModeType currentMode = eModeType.Normal;
+
+        /// <summary>
+        /// A offset value indicating how the control should affects it's left and top properties
+        /// </summary>
+        public Point PlacementOffset = new Point();
+
+        /// <summary>
+        /// A offset value indicating how the control should affects it's left, top, width and height properties
+        /// </summary>
+        public Rectangle Offset = new Rectangle();
+
+        /// <summary>
+        /// A value indicating the alpha value to use when rendering the control (Negative value = disabled)
+        /// </summary>
+        public float Alpha = 1.0f;
     }
 
     /// <summary>
@@ -2695,5 +2711,54 @@ namespace OpenMobile
         /// This is some data that should be shown as a popup to the user (or it is just urgent)
         /// </summary>
         PopUp
+    }
+
+    /// <summary>
+    /// A string wrapper that can return status if a string has been modified
+    /// </summary>
+    public class StringWrapper
+    {
+        private string _Text = "";
+        private int _Hash = 0;
+        private int _Hash_Stored = 0; 
+
+        /// <summary>
+        /// Text
+        /// </summary>
+        public string Text 
+        {
+            get
+            {
+                return _Text;
+            }
+            set
+            {
+                int NewHash = value.GetHashCode();
+                if (_Hash == NewHash)
+                    return;
+                _Text = value;
+                _Hash = NewHash;
+            }
+        }
+
+        /// <summary>
+        /// Is string changed since last time?
+        /// <para>NB! This property can not be monitored, the value is only true until it has been read (One shot only)</para>
+        /// </summary>
+        public bool Changed
+        {
+            get
+            {
+                if (_Hash != _Hash_Stored)
+                {
+                    _Hash_Stored = _Hash;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
     }
 }

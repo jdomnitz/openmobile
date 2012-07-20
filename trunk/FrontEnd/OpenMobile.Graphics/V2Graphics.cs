@@ -63,14 +63,11 @@ namespace OpenMobile.Graphics
                 return false;
 
             // Load texture
-            uint texture;
+            uint texture = image.GetTexture(screen);
 
             // Delete old texture before generating a new one
-            if (image.Texture != 0)
-            {
-                texture = image.Texture;
+            if (texture != 0)
                 Raw.DeleteTexture(texture);
-            }
 
             // Create new texture name
             Raw.GenTextures(1, out texture);
@@ -141,7 +138,7 @@ namespace OpenMobile.Graphics
             }
             if (kill)
                 img.Dispose();
-            image.Texture = texture;
+            image.SetTexture(screen, texture);
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureParameterName.ClampToBorder);
@@ -308,13 +305,13 @@ namespace OpenMobile.Graphics
             if (image == null)
                 return;
             Raw.Enable(EnableCap.Texture2D);
-            if (image.TextureGenerationRequired)
+            if (image.TextureGenerationRequired(screen))
                 if (!loadTexture(ref image))
                 {
                     Raw.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.Texture);
+            Raw.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
 
             // Set texture parameters
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);

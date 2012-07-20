@@ -22,12 +22,14 @@ using System;
 using System.Collections.Generic;
 using OpenMobile.Controls;
 using System.Threading;
+using System.Runtime.Serialization;
 
 namespace OpenMobile.Framework
 {
     /// <summary>
     /// Manages panel cloning and memory management for multiple screens
     /// </summary>
+    [Serializable]
     public sealed class ScreenManager : IDisposable
     {
         private int screens;
@@ -37,7 +39,8 @@ namespace OpenMobile.Framework
         /// <summary>
         /// Sets or gets the name of the default panel (this panel is returned if the requested panel is "")
         /// </summary>
-        public string DefaultPanel {
+        public string DefaultPanel
+        {
             get
             {
                 return _DefaultPanel;
@@ -283,7 +286,7 @@ namespace OpenMobile.Framework
             // Reset default panel
             if (name == DefaultPanel)
                 _DefaultPanel = "";
-            
+
             unloadPanel(name, 0);
         }
         /// <summary>
@@ -354,7 +357,60 @@ namespace OpenMobile.Framework
 
         public override string ToString()
         {
-            return String.Format("{0}({1})",base.ToString(), this.GetHashCode());
+            return String.Format("{0}({1})", base.ToString(), this.GetHashCode());
+        }
+
+    }
+
+
+/*
+    static class DeepCopy<T>
+    {
+        public static T CreateDeepCopy(T obj)
+        {
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            if (obj is ISerializable)
+            {
+                formatter.Serialize(ms, obj);
+                ms.Position = 0;
+                return (T)formatter.Deserialize(ms);
+            }
+            else
+            {
+                ObjectWrapper<T> wrapper = new ObjectWrapper<T>(obj);
+                formatter.Serialize(ms, wrapper);
+                ms.Position = 0;
+                ObjectWrapper<T> copy = (ObjectWrapper<T>)formatter.Deserialize(ms);
+                return copy.GetObj();
+            }
         }
     }
+
+    [Serializable]
+    class ObjectWrapper<T> : ISerializable
+    {
+        T obj;
+
+        protected ObjectWrapper(SerializationInfo info, StreamingContext context)
+        {
+            obj = (T)info.GetValue("object", typeof(T));
+        }
+
+        public ObjectWrapper(T core)
+        {
+            this.obj = core;
+        }
+
+        public T GetObj()
+        {
+            return obj;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("object", obj);
+        }
+    }
+    */
 }

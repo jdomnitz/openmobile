@@ -18,6 +18,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A gauge control for openMobile
     /// </summary>
+    [System.Serializable]
     public class OMGauge : OMControl, ISensorDisplay 
     {
         #region Private Attributes
@@ -47,6 +48,7 @@ namespace OpenMobile.Controls
         /// A gauge control for openMobile
         /// </summary>
         public OMGauge()
+            : base("", 0, 0, 200, 200)
         {
             x = 5;
             y = 5;
@@ -60,6 +62,7 @@ namespace OpenMobile.Controls
         /// A gauge control for openMobile
         /// </summary>
         public OMGauge(int X, int Y, int W, int H)
+            : base("", X, Y, W, H)
         {
             x = 5 + X;
             y = 5 + Y;
@@ -847,6 +850,8 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
+            base.RenderBegin(g, e);
+
             //TODO - Gauge doesn't respect transition data (and opacity level)
             if ((this.Width == 0) || (this.Height == 0))
                 return;
@@ -912,6 +917,8 @@ namespace OpenMobile.Controls
             width = this.Width - x * 2;
             height = this.Height - y * 2;
             DrawPointer(g, ((width) / 2) + x, ((height) / 2) + y);
+
+            base.RenderFinish(g, e);
         }
         /// <summary>
         /// Returns the area covered by the gauge control

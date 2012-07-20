@@ -246,6 +246,16 @@ namespace OpenMobile.Plugin
         /// <param name="Message"></param>
         /// <param name="SourceTag"></param>
         /// <returns></returns>
+        void SendStatusData(int Screen, eDataType DataType, string SourcePluginName, string SourceTag, string Message);
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="Message"></param>
+        /// <param name="SourceTag"></param>
+        /// <returns></returns>
         void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message);
         /// <summary>
         /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
@@ -266,6 +276,16 @@ namespace OpenMobile.Plugin
         /// <param name="Message"></param>
         /// <param name="SourceTag"></param>
         /// <returns></returns>
+        void SendStatusData(eDataType DataType, string SourcePluginName, string SourceTag, string Message);
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="Message"></param>
+        /// <param name="SourceTag"></param>
+        /// <returns></returns>
         void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string Message);
         /// <summary>
         /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
@@ -276,7 +296,27 @@ namespace OpenMobile.Plugin
         /// <param name="Message"></param>
         /// <param name="SourceTag"></param>
         /// <returns></returns>
+        void SendStatusData(int Screen, eDataType DataType, string SourcePluginName, string Message);
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="Message"></param>
+        /// <param name="SourceTag"></param>
+        /// <returns></returns>
         void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin, string Message);
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="Message"></param>
+        /// <param name="SourceTag"></param>
+        /// <returns></returns>
+        void SendStatusData(eDataType DataType, string SourcePluginName, string Message);
         /// <summary>
         /// Execute the function on all plugins of the given type
         /// </summary>

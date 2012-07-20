@@ -32,14 +32,31 @@ namespace OpenMobile.Controls
     public delegate void refreshNeeded(bool resetHighlighted);
 
     /// <summary>
+    /// Forces the renderer to redraw this control
+    /// </summary>
+    public delegate void ReDrawTrigger();
+
+    /// <summary>
     /// The base control type
     /// </summary>
+    [System.Serializable()]
     public abstract class OMControl : ICloneable
     {
+        /// <summary>
+        /// True = rendering for this control is not called automatically
+        /// </summary>
+        public bool ManualRendering = false;
+        
         /// <summary>
         /// Indicates that graphics needs a refresh
         /// </summary>
         protected bool _RefreshGraphic = true;
+        
+        /// <summary>
+        /// The region this control occupies
+        /// </summary>
+        protected Rectangle _Region = new Rectangle();
+
         /// <summary>
         /// The rendering mode of the control
         /// </summary>
@@ -76,10 +93,19 @@ namespace OpenMobile.Controls
         /// Control opacity level (0 transparent - 255 solid)
         /// </summary>
         protected byte opacity = 255;
+
+        protected float _RenderingValue_Alpha = 1;
         /// <summary>
         /// Forces the renderer to redraw this control
         /// </summary>
         public event refreshNeeded UpdateThisControl;
+
+        public bool IsControlRenderable(bool DisregardRenderingType) 
+        {
+            return Visible & (!ManualRendering | DisregardRenderingType);
+        }
+
+
         /// <summary>
         /// Requests the control be redrawn
         /// </summary>
@@ -90,6 +116,17 @@ namespace OpenMobile.Controls
                 return;
             if (UpdateThisControl != null)
                 UpdateThisControl(resetHighlighted);
+        }
+
+        /// <summary>
+        /// The region this control occupies
+        /// </summary>
+        public Rectangle Region
+        {
+            get
+            {
+                return _Region;
+            }
         }
 
         /// <summary>
@@ -115,7 +152,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// The OMPanel that contains this control
         /// </summary>
-        protected OMPanel parent;
+        [System.NonSerialized] protected OMPanel parent;
         /// <summary>
         /// The OMPanel that contains this control
         /// </summary>
@@ -240,13 +277,22 @@ namespace OpenMobile.Controls
             }
         }
 
+        private void UpdateRegion()
+        {
+            _Region = new Rectangle(left, top, width, height);
+        }
+
         /// <summary>
         /// The controls height in OM units
         /// </summary>
         public virtual int Height
         {
             get { return height; }
-            set { height = value; raiseUpdate(true); }
+            set { 
+                height = value;
+                UpdateRegion();
+                raiseUpdate(true); 
+            }
         }
         /// <summary>
         /// The controls width in OM units
@@ -254,7 +300,11 @@ namespace OpenMobile.Controls
         public virtual int Width
         {
             get { return width; }
-            set { width = value; raiseUpdate(true); }
+            set {
+                width = value;
+                UpdateRegion();
+                raiseUpdate(true);
+            }
         }
         /// <summary>
         /// Used to store additional information about a control
@@ -276,7 +326,12 @@ namespace OpenMobile.Controls
         public virtual int Top
         {
             get { return top; }
-            set { top = value; raiseUpdate(true); }
+            set 
+                {
+                    top = value;
+                    UpdateRegion();
+                    raiseUpdate(true);
+                }
         }
         /// <summary>
         /// The distance between the left of the UI and the Left of the control
@@ -284,7 +339,12 @@ namespace OpenMobile.Controls
         public virtual int Left
         {
             get { return left; }
-            set { left = value; raiseUpdate(true); }
+            set 
+                { 
+                    left = value;
+                    UpdateRegion();
+                    raiseUpdate(true);
+                }
         }
 
         /// <summary>
@@ -300,7 +360,9 @@ namespace OpenMobile.Controls
                 else if (value >= 255)
                     opacity = 255;
                 else
-                    opacity = (byte)value; 
+                    opacity = (byte)value;
+
+                _RenderingValue_Alpha = (Opacity / 255F);
                 raiseUpdate(false); 
             }
         }
@@ -314,12 +376,44 @@ namespace OpenMobile.Controls
                 return (Opacity / 255F);
             }
         }
+
+        /// <summary>
+        /// Get's the alpha value to use when rendering the control
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        protected float RenderingParams_GetAlphaValue(renderingParams e)
+        {
+            return System.Math.Max(OpacityFloat, e.Alpha);
+        }
         /// <summary>
         /// Renders the control
         /// </summary>
         /// <param name="g">The User Interfaces graphics object</param>
         /// <param name="e">Rendering Parameters</param>
         public virtual void Render(Graphics.Graphics g, renderingParams e)
+        {
+            RenderBegin(g, e);
+            RenderFinish(g, e);
+        }
+
+        /// <summary>
+        /// Renders the control
+        /// </summary>
+        /// <param name="g">The User Interfaces graphics object</param>
+        /// <param name="e">Rendering Parameters</param>
+        internal virtual void RenderBegin(Graphics.Graphics g, renderingParams e)
+        {
+            // Handle parameters
+            RenderingParams_Handle(g, e);
+        }
+
+        /// <summary>
+        /// Renders the control
+        /// </summary>
+        /// <param name="g">The User Interfaces graphics object</param>
+        /// <param name="e">Rendering Parameters</param>
+        internal virtual void RenderFinish(Graphics.Graphics g, renderingParams e)
         {
             _RefreshGraphic = false;
             // Skin debug function 
@@ -344,12 +438,41 @@ namespace OpenMobile.Controls
             OMControl returnData = (OMControl)this.MemberwiseClone();
             Type type = returnData.GetType();
 
-            foreach (PropertyInfo propInfo in type.GetProperties())
+            // Clone fields
+            foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
+            {
+                try
+                {
+                    //Clone IClonable object
+                    if (fieldInfo.FieldType.GetInterface("ICloneable", true) != null)
+                    {
+                        ICloneable clone = (ICloneable)fieldInfo.GetValue(this);
+                        fieldInfo.SetValue(returnData, (clone != null ? clone.Clone() : clone));
+                    }
+                    else
+                    {
+                        fieldInfo.SetValue(returnData, fieldInfo.GetValue(this));
+                    }
+                }
+                catch (TargetInvocationException) { }
+            }
+
+            // Clone properties
+            foreach (PropertyInfo propInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
             {
                 if (propInfo.CanWrite && propInfo.CanRead && (propInfo.GetGetMethod().GetParameters().Length == 0))
                     try
                     {
-                        propInfo.SetValue(returnData, propInfo.GetValue(this, null), null);
+                        //Clone IClonable object
+                        if (propInfo.PropertyType.GetInterface("ICloneable", true) != null)
+                        {
+                            ICloneable clone = (ICloneable)propInfo.GetValue(this, null);
+                            propInfo.SetValue(returnData, (clone != null ? clone.Clone() : clone), null);
+                        }
+                        else
+                        {
+                            propInfo.SetValue(returnData, propInfo.GetValue(this, null), null);
+                        }
                     }
                     catch (TargetInvocationException) { }
             }
@@ -403,6 +526,40 @@ namespace OpenMobile.Controls
         public override string ToString()
         {
             return String.Format("{0} ({1})",base.ToString(),name);
+        }
+
+        /// <summary>
+        /// Handles the different rendering parameters
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        internal virtual bool RenderingParams_Handle(Graphics.Graphics g, renderingParams e)
+        {
+            bool dataHandled = false;
+
+            // Apply offset data?
+            if (!e.Offset.IsEmpty)
+            {
+                left += e.Offset.X;
+                top += e.Offset.Y;
+                width += e.Offset.Width;
+                height += e.Offset.Height;
+                UpdateRegion();    
+                dataHandled = true;
+            }
+
+            // Apply alpha value
+            if (e.Alpha > 0)
+            {
+                if (e.Alpha > OpacityFloat)
+                    _RenderingValue_Alpha = OpacityFloat;
+                else
+                    _RenderingValue_Alpha = e.Alpha;
+            }
+
+
+            return dataHandled;
         }
     }
 }

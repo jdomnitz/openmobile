@@ -30,6 +30,7 @@ namespace OpenMobile.Controls
     /// An image control
     /// </summary>
     [DefaultPropertyAttribute("Name")]
+    [System.Serializable]
     public class OMImage : OMControl
     {
         private imageItem image;
@@ -79,11 +80,8 @@ namespace OpenMobile.Controls
         /// </summary>
         [Obsolete("Use OMImage(string name, int left, int top, int width, int height) instead")]
         public OMImage()
+            : base("", 20, 20, 100, 100)
         {
-            this.top = 20;
-            this.left = 20;
-            this.width = 100;
-            this.height = 100;
         }
         /// <summary>
         /// Creates a new OMImage
@@ -95,11 +93,8 @@ namespace OpenMobile.Controls
         /// <param name="height"></param>
         [Obsolete("Use OMImage(string name, int left, int top, int width, int height) instead")]
         public OMImage(int left, int top, int width, int height)
+            : base("", left, top, width, height)
         {
-            this.top = top;
-            this.left = left;
-            this.width = width;
-            this.height = height;
         }
         /// <summary>
         /// Creates a new OMImage
@@ -110,12 +105,8 @@ namespace OpenMobile.Controls
         /// <param name="width"></param>
         /// <param name="height"></param>
         public OMImage(string name, int left, int top, int width, int height)
+            : base(name, left, top, width, height)
         {
-            this.name = name;
-            this.top = top;
-            this.left = left;
-            this.width = width;
-            this.height = height;
         }
         /// <summary>
         /// Creates a new OMImage
@@ -126,12 +117,8 @@ namespace OpenMobile.Controls
         /// <param name="width"></param>
         /// <param name="height"></param>
         public OMImage(string name, int left, int top, int width, int height, imageItem image)
+            : base(name, left, top, width, height)
         {
-            this.name = name;
-            this.top = top;
-            this.left = left;
-            this.width = width;
-            this.height = height;
             this.Image = image;
         }
         /// <summary>
@@ -142,10 +129,8 @@ namespace OpenMobile.Controls
         /// <param name="top"></param>
         /// <param name="image"></param>
         public OMImage(string name, int left, int top, imageItem image)
+            : base(name, left, top, 0, 0)
         {
-            this.name = name;
-            this.top = top;
-            this.left = left;
             this.FitControlToImage = true;
             this.Image = image;
         }
@@ -157,10 +142,8 @@ namespace OpenMobile.Controls
         /// <param name="top"></param>
         /// <param name="image"></param>
         public OMImage(string name, int left, int top)
+            : base(name, left, top, 0, 0)
         {
-            this.name = name;
-            this.top = top;
-            this.left = left;
             this.FitControlToImage = true;
         }
 
@@ -226,6 +209,9 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
+            // Initialize rendering
+            base.RenderBegin(g, e);
+
             if (image.image == null)
             {
                 if (image == imageItem.MISSING)
@@ -253,14 +239,14 @@ namespace OpenMobile.Controls
                     #endregion
                 }
 
-                float alpha = OpacityFloat;
-                if (this.Mode == eModeType.transitioningIn)
-                    alpha = e.globalTransitionIn;
-                else if (this.Mode == eModeType.transitioningOut)
-                    alpha = e.globalTransitionOut;
+                //float alpha = OpacityFloat;
+                //if (this.Mode == eModeType.transitioningIn)
+                //    alpha = e.globalTransitionIn;
+                //else if (this.Mode == eModeType.transitioningOut)
+                //    alpha = e.globalTransitionOut;
 
                 // Draw image background (if any)
-                if (_BackgroundColor != Color.Transparent && alpha == 1)
+                if (_BackgroundColor != Color.Transparent && _RenderingValue_Alpha == 1)
                     g.FillRectangle(new Brush(Color.FromArgb((int)(_BackgroundColor.A * OpacityFloat), _BackgroundColor)), new Rectangle(left + 1, top + 1, width - 2, height - 2));
 
                 lock (image.image)
@@ -268,21 +254,21 @@ namespace OpenMobile.Controls
                     switch (drawmode)
                     {
                         case DrawModes.Crop:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, alpha);
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, _RenderingValue_Alpha);
                             break;
                         case DrawModes.CropLeft:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, alpha);
+                            g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, _RenderingValue_Alpha);
                             break;
                         case DrawModes.Scale:
                             //TODO = g.DrawImage(image.image, left, top, width, height, alpha, eAngle.Normal, Rotation);
-                            g.DrawImage(image.image, left, top, width, height, alpha, eAngle.Normal);
+                            g.DrawImage(image.image, left, top, width, height, _RenderingValue_Alpha, eAngle.Normal);
                             break;
                     }
                 }
             }
-            // Skin debug function 
-            if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Yellow);
+
+            // End rendering
+            base.RenderFinish(g, e);
         }
         /// <summary>
         /// Draw modes for an image

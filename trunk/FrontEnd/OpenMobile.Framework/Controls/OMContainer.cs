@@ -25,6 +25,7 @@ using OpenMobile.Input;
 
 namespace OpenMobile.Controls
 {
+    [System.Serializable]
     public class OMContainer : OMControl, IContainer2
     {
         private class ControlData
@@ -46,7 +47,8 @@ namespace OpenMobile.Controls
         public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
         {
             // No special rendering need for this control, use base rendering
-            base.Render(g, e);
+            base.RenderBegin(g, e);
+            base.RenderFinish(g, e);
         }
 
         /// <summary>
@@ -119,12 +121,8 @@ namespace OpenMobile.Controls
         }
 
         public OMContainer(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
         {
-            this.Name = name;
-            this.Left = x;
-            this.Top = y;
-            this.Width = w;
-            this.Height = h;
         }
 
         public override OMPanel Parent
@@ -169,5 +167,23 @@ namespace OpenMobile.Controls
             }
         }
 
+
+        #region IContainer2 Members
+
+        public List<OMControl> Controls
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        #endregion
+
+        #region IContainer2 Members
+
+        List<OMControl> IContainer2.Controls
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        #endregion
     }
 }

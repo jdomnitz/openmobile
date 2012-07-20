@@ -19,7 +19,8 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 
-// This interface is added by Borte
+using OpenMobile.Graphics;
+using OpenMobile.Input;
 
 namespace OpenMobile.Controls
 {
@@ -31,16 +32,16 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Mouse moved over the control
         /// </summary>
-        void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale);
+        void MouseMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance);
 
         /// <summary>
         /// MouseDown event for this control
         /// </summary>
-        void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale);
+        void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation);
 
         /// <summary>
         /// MouseUp event for this control
         /// </summary>
-        void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale);
+        void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance);
     }
 }

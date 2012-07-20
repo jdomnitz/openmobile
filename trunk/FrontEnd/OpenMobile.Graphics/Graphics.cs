@@ -431,7 +431,7 @@ namespace OpenMobile.Graphics
         static private float[] scaleHeight;
         static private float[] scaleWidth;
         static private float dpi=1F;
-        public void Initialize(int screen)
+        public void Initialize()
         {
             #if LINUX
             if (Platform.Factory.IsEmbedded)

@@ -23,59 +23,121 @@ using System.Drawing;
 
 namespace OpenMobile.Graphics
 {
+    [Serializable]
     public class OImage : IDisposable, ICloneable
     {
         Bitmap img = null;
         public bool persist;
         int height, width;
-        private bool _GenerateTexture = true;
-        private uint _Texture = 0;
+        private bool[] _GenerateTexture = new bool[10];
+        private uint[] _Texture = new uint[10];
+        //private bool _GenerateTexture = true;
+        //private uint _Texture = 0;
 
-        /// <summary>
-        /// The OpenGL texture reference for this image (0 = not texture generated)
-        /// </summary>
-        public uint Texture 
+        ///// <summary>
+        ///// The OpenGL texture reference for this image (0 = not texture generated)
+        ///// </summary>
+        //public uint[] Texture
+        //{
+        //    get
+        //    {
+        //        return _Texture;
+        //    }
+        //}
+
+        ///// <summary>
+        ///// The OpenGL texture reference for this image (0 = not texture generated)
+        ///// </summary>
+        //public uint Texture
+        //{
+        //    get
+        //    {
+        //        return _Texture;
+        //    }
+        //}
+
+        //public bool[] GenerateTexture
+        //{
+        //    get
+        //    {
+        //        return _GenerateTexture;
+        //    }
+        //}
+
+        //private void ResizeArraysToScreen(int Screen)
+        //{
+        //            // Resize texture array to match new screen 
+        //    if (Screen >= _Texture.Length)
+        //    {
+        //        lock (_Texture)
+        //        {
+        //            lock (_GenerateTexture)
+        //            {
+        //                Array.Resize<uint>(ref _Texture, Screen + 1);
+        //                Array.Resize<bool>(ref _GenerateTexture, Screen + 1);
+        //                _GenerateTexture[Screen] = true;
+        //            }
+        //        }
+        //    }
+        //}
+
+        public uint GetTexture(int Screen)
         {
-            get
-            {
-                return _Texture;
-            }
-            set
-            {
-                _Texture = value;
-                _GenerateTexture = false;
-            }
+            //return _Texture;
+            if (Screen < 0)
+                return 0;
+
+            //ResizeArraysToScreen(Screen);
+            return _Texture[Screen];
         }
-        //public uint Texture = 0;
+
+        public void SetTexture(int Screen, uint Texture)
+        {
+            //_Texture = Texture;
+            if (Screen < 0)
+                return;
+
+            //ResizeArraysToScreen(Screen);
+            _Texture[Screen] = Texture;
+            _GenerateTexture[Screen] = false;
+        }
 
         /// <summary>
         /// True = Texture generation required for this image 
         /// </summary>
-        public bool TextureGenerationRequired
+        public bool TextureGenerationRequired(int Screen)
         {
-            get
-            {
-                if (_Texture == 0 || _GenerateTexture)
-                    return true;
+            //if (_Texture == 0 || _GenerateTexture)
+            //    return true;
+            //return false;
+
+            if (Screen < 0)
                 return false;
-            }
+
+            //ResizeArraysToScreen(Screen);
+            if (_Texture[Screen] == 0 || _GenerateTexture[Screen])
+                return true;
+            return false;
         }
 
         public OImage() 
         {
         }
-        public OImage(System.Drawing.Bitmap i)
+        public OImage(System.Drawing.Bitmap bmp)
         {
             // Error check
-            if (i == null)
+            if (bmp == null)
                 return;
-            img = i;
+            img = bmp;
             lock (img)
             {
                 height = img.Height;
                 width = img.Width;
             }
-            _GenerateTexture = true;
+
+            for (int i = 0; i < _GenerateTexture.Length; i++)
+                _GenerateTexture[i] = true;
+            //_GenerateTexture = true;
         }
 
         /// <summary>
@@ -95,7 +157,10 @@ namespace OpenMobile.Graphics
                     img = null;
                 }
                 img = value;
-                _GenerateTexture = true;
+
+                for (int i = 0; i < _GenerateTexture.Length; i++)
+                    _GenerateTexture[i] = true;
+                //_GenerateTexture = true;
             }
         }
 
@@ -203,6 +268,11 @@ namespace OpenMobile.Graphics
 
                 // Set the PictureBox to the new inverted colors bitmap
                 img = bmpPicture;
+
+                for (int i = 0; i < _GenerateTexture.Length; i++)
+                    _GenerateTexture[i] = true;
+                //_GenerateTexture = true;
+
             }
         }
 
@@ -350,7 +420,9 @@ namespace OpenMobile.Graphics
         public void Dispose()
         {
             // TODO: Add delete texture call
-            _Texture = 0;
+            for (int i = 0; i < _Texture.Length; i++)
+                _Texture[i] = 0;
+            //_GenerateTexture = true;
             if (img != null)
                 img.Dispose();
             img = null;
@@ -361,8 +433,15 @@ namespace OpenMobile.Graphics
         {
             lock (img)
             {
-                return new OImage((Bitmap)img.Clone()); ;
+                OImage newImg = new OImage((Bitmap)img.Clone());
+                return newImg;
+                //return new OImage((Bitmap)img.Clone());
             }
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}({1})",base.ToString(), this.GetHashCode());
         }
     }
 }

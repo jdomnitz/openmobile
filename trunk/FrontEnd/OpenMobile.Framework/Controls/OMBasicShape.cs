@@ -48,6 +48,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Allows drawing of basic shapes
     /// </summary>
+    [System.Serializable]
     public class OMBasicShape : OMControl
     {
         /// <summary>
@@ -66,7 +67,9 @@ namespace OpenMobile.Controls
         /// Creates a new Basic Shape
         /// </summary>
         [System.Obsolete("Use OMBasicShape(string name, int x, int y, int w, int h) instead")]
-        public OMBasicShape() { }
+        public OMBasicShape()
+            : base("", 0, 0, 200, 200)
+        { }
         /// <summary>
         /// Creates a new Basic Shape
         /// </summary>
@@ -76,11 +79,8 @@ namespace OpenMobile.Controls
         /// <param name="h"></param>
         [System.Obsolete("Use OMBasicShape(string name, int x, int y, int w, int h) instead")]
         public OMBasicShape(int x, int y, int w, int h)
+            : base("", x, y, w, h)
         {
-            left = x;
-            top = y;
-            width = w;
-            height = h;
         }
         /// <summary>
         /// Creates a new Basic Shape
@@ -91,12 +91,8 @@ namespace OpenMobile.Controls
         /// <param name="w"></param>
         /// <param name="h"></param>
         public OMBasicShape(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
         {
-            Name = name;
-            left = x;
-            top = y;
-            width = w;
-            height = h;
         }
 
         Pen BorderPen;
@@ -107,15 +103,17 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float alpha = OpacityFloat;
-            if (this.Mode == eModeType.transitioningIn)
-                alpha = e.globalTransitionIn;
-            else if (this.Mode == eModeType.transitioningOut)
-                alpha = e.globalTransitionOut;
+            base.RenderBegin(g, e);
 
-            Brush Fill = new Brush(Color.FromArgb((int)(alpha * fillColor.A), fillColor));
+            //float alpha = OpacityFloat;
+            //if (this.Mode == eModeType.transitioningIn)
+            //    alpha = e.globalTransitionIn;
+            //else if (this.Mode == eModeType.transitioningOut)
+            //    alpha = e.globalTransitionOut;
+
+            Brush Fill = new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * fillColor.A), fillColor));
             if (borderSize > 0)
-                BorderPen = new Pen(Color.FromArgb((int)(alpha * borderColor.A), borderColor), borderSize);
+                BorderPen = new Pen(Color.FromArgb((int)(_RenderingValue_Alpha * borderColor.A), borderColor), borderSize);
 
             switch (shape)
             {
@@ -140,6 +138,8 @@ namespace OpenMobile.Controls
                         g.DrawRoundRectangle(BorderPen, left, top, width, height, cornerRadius);
                     break;
             }
+
+            base.RenderFinish(g, e);
         }
         /// <summary>
         /// The shape to draw

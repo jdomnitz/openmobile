@@ -95,6 +95,7 @@ namespace OMGraphics
                                         switch (gd.ImageType)
                                         {
                                             case ButtonGraphic.ImageTypes.ButtonBackgroundFocused:
+                                            case ButtonGraphic.ImageTypes.ButtonBackgroundClicked:
                                             case ButtonGraphic.ImageTypes.ButtonBackground:
                                                 {
                                                     g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -154,13 +155,17 @@ namespace OMGraphics
 
                                                     #endregion
 
-                                                    if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonBackgroundFocused)
+                                                    if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonBackgroundFocused || gd.ImageType == ButtonGraphic.ImageTypes.ButtonBackgroundClicked)
                                                     {
                                                         #region Draw inner glow
 
                                                         System.Drawing.Rectangle rectTop = new System.Drawing.Rectangle(0, 0, rect.Width, rect.Height / 2);
                                                         //System.Drawing.Rectangle rectBottom = new System.Drawing.Rectangle(0, rect.Height / 2, rect.Width, rect.Height / 2);
                                                         System.Drawing.Rectangle rectBottom = new System.Drawing.Rectangle(0, (int)(rect.Height * (1 - gd.BackgroundFocusSize)), rect.Width, (int)(rect.Height * gd.BackgroundFocusSize));
+
+                                                        // Adjust innerglow to show clicked state
+                                                        if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonBackgroundClicked)
+                                                            rectBottom = new System.Drawing.Rectangle(0, (int)(rect.Height * (1 - gd.BackgroundFocusClickedSize)), rect.Width, (int)(rect.Height * gd.BackgroundFocusClickedSize));
 
                                                         // Draw inner button glow
 

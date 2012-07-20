@@ -87,6 +87,7 @@ namespace OpenMobile.helperFunctions.Graphics
         }
         /// <summary>
         /// Initialize a new smooth animator
+        /// <para>A speed of 1.0F indicates that the AnimationStep will correspond to milliseconds since last call to the animation loop</para>
         /// </summary>
         /// <param name="Animation_Speed"></param>
         public SmoothAnimator(float Animation_Speed)
@@ -186,6 +187,11 @@ namespace OpenMobile.helperFunctions.Graphics
             ButtonBackgroundFocused,
 
             /// <summary>
+            /// Returns the button background image in a focused (highlighted) and clicked state
+            /// </summary>
+            ButtonBackgroundClicked,
+
+            /// <summary>
             /// Returns the button foreground image (icon and text)
             /// </summary>
             ButtonForeground,
@@ -201,11 +207,15 @@ namespace OpenMobile.helperFunctions.Graphics
         /// </summary>
         public class GraphicData
         {
+            /// <summary>
+            /// Generates a new graphicdata object
+            /// </summary>
             public GraphicData()
             {   // Default values
                 IconLocation = new Point(-1, -1);
                 TextLocation = new Point(-1, -1);
                 BackgroundFocusSize = 0.5F;
+                BackgroundFocusClickedSize = 0.75F;
 
                 // Default colors are read from the OM system setting (SkinFocusColor)
                 this.BackgroundFocusColor = BuiltInComponents.SystemSettings.SkinFocusColor;
@@ -241,6 +251,10 @@ namespace OpenMobile.helperFunctions.Graphics
             /// Size to use when drawing the background focus (size is given in percent of height (0.0F to 1.0F), default is 0.5F (50%))
             /// </summary>
             public float BackgroundFocusSize { get; set; }
+            /// <summary>
+            /// Size to use when drawing the background focus in a clicked state (size is given in percent of height (0.0F to 1.0F), default is 0.75F (75%))
+            /// </summary>
+            public float BackgroundFocusClickedSize { get; set; }
             /// <summary>
             /// Color to use when drawing the background color
             /// </summary>

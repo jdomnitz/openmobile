@@ -83,6 +83,8 @@ namespace OpenMobile
 
         Stopwatch render_watch = new Stopwatch();
         Stopwatch render_ExecTime = new Stopwatch();
+        Stopwatch sw = new Stopwatch(); 
+
         public double render_ExecTimeMS = 0;
         public double render_ExecTimeMS_Min = Double.MaxValue;
         public double render_ExecTimeMS_Max = 0;
@@ -91,17 +93,15 @@ namespace OpenMobile
         private int render_ExecTimeMSCount = 0;
         private double render_ExecTimeSec = 0.0;
 
-
         public int FPS = 0;
         public int FPS_Max = 0;
-        public int FPS_Avg = 0;
-        private int FPS_AvgSum = 0;
-        private int FPS_AvgCount = 0;
+        public int FPS_Min = int.MaxValue;
+        public bool FPS_MeasureMax = false;
 
         #endregion
 
         #region Contructors
-        public void Initialize()
+        public void Initialize(bool VSync)
         {
             try
             {
@@ -112,7 +112,7 @@ namespace OpenMobile
                 if (!Platform.Factory.IsEmbedded)
                     OpenMobile.Graphics.OpenGL.Raw.ClearColor(OpenMobile.Graphics.Color.Black);
                 SwapBuffers();
-                glContext.VSync = true;
+                glContext.VSync = VSync;
             }
             catch (Exception e)
             {
@@ -240,10 +240,10 @@ namespace OpenMobile
         /// </remarks>
         /// <param name="updates_per_second">The frequency of UpdateFrame events.</param>
         /// <param name="frames_per_second">The frequency of RenderFrame events.</param>
-        public void Run(double updates_per_second, double frames_per_second)
+        public void Run(double updates_per_second, double frames_per_second, bool VSync)
         {
             EnsureUndisposed();
-            Initialize();
+            Initialize(VSync);
             OnLoadInternal(EventArgs.Empty);
             MakeCurrent();
             OnResize(EventArgs.Empty);
@@ -253,80 +253,121 @@ namespace OpenMobile
             // whenever we encounter a size or move event.
 
             target_render_periodSec = (1.0 / frames_per_second);
-            target_render_periodMS = (target_render_periodSec * 1000) / 4;
+            target_render_periodMS = (target_render_periodSec * 1000);
 
-            int ProcessDelay = 10;
+            int ProcessDelay = 1;
             double MSBetweenRenderings = 1000 / updates_per_second;
             int LoopCount = (int)(MSBetweenRenderings / ProcessDelay);
             render_watch.Start();
+
+            Stopwatch swIdle = new Stopwatch();
+
             while (true)
             {
-                for (int i = 0; i < LoopCount; i++)
+                swIdle.Reset();
+                swIdle.Start();
+                while (true)
                 {
                     ProcessEvents();
-                    if (refresh)
+                    if (refresh || FPS_MeasureMax || swIdle.Elapsed.TotalMilliseconds >= MSBetweenRenderings)
                         break;
-                    Thread.Sleep(ProcessDelay);
+                    Thread.Sleep(1);
                 }
+                swIdle.Stop();
+                //for (int i = 0; i < LoopCount; i++)
+                //{
+                //    ProcessEvents();
+                //    if (refresh || FPS_MeasureMax)
+                //        break;
+                //    Thread.Sleep(ProcessDelay);
+                //}
                 refresh = false;
                 if (Exists && !isExiting)
                     DispatchRenderFrame();
                 else
                     return;
-                if (render_time < target_render_periodMS)
-                    Thread.Sleep((int)(target_render_periodMS - render_time));
+                //if (render_time < target_render_periodMS)
+                //    Thread.Sleep((int)(target_render_periodMS - render_time));
             }
         }
         public void DispatchRenderFrame()
         {
             RaiseRenderFrame();
         }
-        void RaiseRenderFrame()
+
+        public void FPS_Reset()
         {
-            render_ExecTimeSec = target_render_periodSec - render_watch.Elapsed.TotalSeconds;
-            if (render_ExecTimeSec <= 0.0)
+            FPS_MeasureMax = false;
+            accumulator = 0;
+            idleCounter = 0;
+            FPS = 0;
+            FPS_Max = 0;
+            FPS_Min = int.MaxValue;
+            refresh = true;
+        }
+
+        double accumulator = 0;
+        int idleCounter = 0;
+        private void CalculateFPS()
+        {
+            sw.Stop();
+            double milliseconds = sw.Elapsed.TotalMilliseconds;
+            sw.Reset();
+            sw.Start();
+
+            idleCounter++;
+            accumulator += milliseconds;
+            if (accumulator > 1000)
             {
-                FPS = (int)(1000 / render_watch.Elapsed.TotalMilliseconds);
+                FPS = idleCounter;
+                accumulator -= 1000;
+                idleCounter = 0; 
+            }
+
+            if (FPS > 0)
+            {
                 if (FPS > FPS_Max)
                     FPS_Max = FPS;
-                FPS_AvgCount++;
-                FPS_AvgSum += FPS;
-                if (FPS_AvgCount > 0 && FPS_AvgSum > 0)
-                    FPS_Avg = FPS_AvgSum / FPS_AvgCount;
-                if (FPS_AvgCount > 100)
-                {
-                    FPS_AvgCount = 0;
-                    FPS_AvgSum = 0;
-                }                
+                if (FPS < FPS_Min)
+                    FPS_Min = FPS;
+            }
+        }
+
+        void RaiseRenderFrame()
+        {
+            //render_ExecTimeSec = target_render_periodSec - render_watch.Elapsed.TotalSeconds;
+            //if (render_ExecTimeSec <= 0.0)
+            {
+                CalculateFPS();
 
                 // Timing
                 render_watch.Reset();
                 render_watch.Start();
-                render_ExecTime.Reset();
-                render_ExecTime.Start();
+                //render_ExecTime.Reset();
+                //render_ExecTime.Start();
 
                 OnRenderFrameInternal();
 
                 // Debug info
-                render_ExecTime.Stop();
-#if DEBUG
-                render_ExecTimeMS = render_ExecTime.Elapsed.TotalMilliseconds;
-                if (render_ExecTimeMS < render_ExecTimeMS_Min)
-                    render_ExecTimeMS_Min = render_ExecTimeMS;
-                if (render_ExecTimeMS > render_ExecTimeMS_Max)
-                    render_ExecTimeMS_Max = render_ExecTimeMS;
-                render_ExecTimeMSCount++;
-                render_ExecTimeMSTotal += render_ExecTimeMS;
-                if (render_ExecTimeMSCount > 100)
-                {
-                    render_ExecTimeMSCount = 0;
-                    render_ExecTimeMSTotal = 0;
-                }
-                render_ExecTimeMSAvg = render_ExecTimeMSTotal / render_ExecTimeMSCount;
-                //Console.WriteLine("Rendering screen {0}, FPS = {1}, RenderExecTime = {2}, RenderExecTimeAvf = {3}", screen, FPS, render_ExecTimeMS.ToString("#.##"), render_ExecTimeMSAvg.ToString("#.##"));
-#endif
+//                render_ExecTime.Stop();
+//#if DEBUG
+//                render_ExecTimeMS = render_ExecTime.Elapsed.TotalMilliseconds;
+//                if (render_ExecTimeMS < render_ExecTimeMS_Min)
+//                    render_ExecTimeMS_Min = render_ExecTimeMS;
+//                if (render_ExecTimeMS > render_ExecTimeMS_Max)
+//                    render_ExecTimeMS_Max = render_ExecTimeMS;
+//                render_ExecTimeMSCount++;
+//                render_ExecTimeMSTotal += render_ExecTimeMS;
+//                if (render_ExecTimeMSCount > 100)
+//                {
+//                    render_ExecTimeMSCount = 0;
+//                    render_ExecTimeMSTotal = 0;
+//                }
+//                render_ExecTimeMSAvg = render_ExecTimeMSTotal / render_ExecTimeMSCount;
+//                //Console.WriteLine("Rendering screen {0}, FPS = {1}, RenderExecTime = {2}, RenderExecTimeAvf = {3}", screen, FPS, render_ExecTimeMS.ToString("#.##"), render_ExecTimeMSAvg.ToString("#.##"));
+//#endif
 
-               render_time = render_watch.Elapsed.TotalMilliseconds;
+                render_time = render_watch.Elapsed.TotalMilliseconds;
 
             }
 #if DEBUG
@@ -465,7 +506,8 @@ namespace OpenMobile
         /// </remarks>
         protected virtual void OnRenderFrame(EventArgs e)
         {
-            if (RenderFrame != null) RenderFrame(this, e);
+            if (RenderFrame != null)
+                RenderFrame(this, e);
         }
 
         #endregion
