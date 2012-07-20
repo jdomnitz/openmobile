@@ -29,6 +29,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A textbox control
     /// </summary>
+    [System.Serializable]
     public class OMTextBox : OMLabel, IClickable, IHighlightable
     {
         private float orgFontSize = 0;
@@ -347,6 +348,7 @@ namespace OpenMobile.Controls
         /// </summary>
         [Obsolete("Use OMTextBox(string name, int x, int y, int w, int h) instead")]
         public OMTextBox()
+            : base("", 0, 0, 200, 200)
         {
             Init(name, 32, 100, 25, 25);
         }
@@ -359,6 +361,7 @@ namespace OpenMobile.Controls
         /// <param name="h">Height</param>
         [Obsolete("Use OMTextBox(string name, int x, int y, int w, int h) instead")]
         public OMTextBox(int x, int y, int w, int h)
+            : base("", x, y, w, h)
         {
             Init("", x, y, w, h);
         }
@@ -371,6 +374,7 @@ namespace OpenMobile.Controls
         /// <param name="w"></param>
         /// <param name="h"></param>
         public OMTextBox(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
         {
             Init(name, x, y, w, h);
         }
@@ -393,20 +397,22 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float tmp = OpacityFloat;
-            if (this.Mode == eModeType.transitioningIn)
-                tmp = e.globalTransitionIn;
-            else if (this.Mode == eModeType.transitioningOut)
-                tmp = e.globalTransitionOut;
+            base.RenderBegin(g, e);
 
-            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 255), (this.disabled ? disabledBackgroundColor : background))), left, top, width, height, 10);
-            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(tmp * 255), this.Color), 1F), left, top, width, height, 10);
+            //float tmp = OpacityFloat;
+            //if (this.Mode == eModeType.transitioningIn)
+            //    tmp = e.globalTransitionIn;
+            //else if (this.Mode == eModeType.transitioningOut)
+            //    tmp = e.globalTransitionOut;
+
+            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * 255), (this.disabled ? disabledBackgroundColor : background))), left, top, width, height, 10);
+            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(_RenderingValue_Alpha * 255), this.Color), 1F), left, top, width, height, 10);
 
             if (this.Mode == eModeType.Highlighted)
             {
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(40 * tmp), this.OutlineColor), 4F), left + 1, top + 1, width - 2, height - 2, 10);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * tmp), this.OutlineColor), 3F), left + 1, top + 1, width - 2, height - 2, 10);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * tmp), this.OutlineColor), 2F), left + 1, top + 1, width - 2, height - 2, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(40 * _RenderingValue_Alpha), this.OutlineColor), 4F), left + 1, top + 1, width - 2, height - 2, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * _RenderingValue_Alpha), this.OutlineColor), 3F), left + 1, top + 1, width - 2, height - 2, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * _RenderingValue_Alpha), this.OutlineColor), 2F), left + 1, top + 1, width - 2, height - 2, 10);
             }
             if (_text != null)
             {
@@ -425,7 +431,7 @@ namespace OpenMobile.Controls
 
                 if ((_RefreshGraphic) || (count > 0))
                     textTexture = g.GenerateTextTexture(textTexture, left+5, top, width, height, tempStr, _font, _textFormat, _textAlignment, _color, _outlineColor);
-                g.DrawImage(textTexture, this.Left+5, this.Top, this.Width, this.Height, tmp);
+                g.DrawImage(textTexture, this.Left + 5, this.Top, this.Width, this.Height, _RenderingValue_Alpha);
 
                 /*
                 using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
@@ -460,11 +466,7 @@ namespace OpenMobile.Controls
                 */
             }
 
-            _RefreshGraphic = false;
-            // Skin debug function 
-            if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Green);
-
+            base.RenderFinish(g, e);
         }
 
         public object Clone(bool ClearEvents)

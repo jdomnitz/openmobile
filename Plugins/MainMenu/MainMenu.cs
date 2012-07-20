@@ -348,7 +348,7 @@ namespace OpenMobile
                     theHost.execute(eFunction.TransitionFromPanel, screen,"MainMenu");
                     if (theHost.execute(eFunction.TransitionToPanel,screen, ((OMButton)sender).Tag)==false)
                         theHost.execute(eFunction.TransitionToPanel, screen, "MainMenu");
-                    theHost.execute(eFunction.ExecuteTransition,screen);
+                    theHost.execute(eFunction.ExecuteTransition, screen, "CrossfadeFast");
                     break;
             }
         }
@@ -472,7 +472,9 @@ namespace OpenMobile
                             if (!String.IsNullOrEmpty((string)Button.Tag))
                             {
                                 // Set icon symbol
-                                gd.Icon = plugin.GetPluginIconSymbol((string)Button.Tag);
+                                Font f = Font.Webdings;
+                                gd.Icon = plugin.GetPluginIconSymbol((string)Button.Tag, ref f);
+                                gd.IconFont = f;
 
                                 // Set Icon Image
                                 if (String.IsNullOrEmpty(gd.Icon))

@@ -29,6 +29,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A progress bar control
     /// </summary>
+    [System.Serializable]
     public class OMProgress : OMControl, ISensorDisplay 
     {
         /// <summary>
@@ -93,11 +94,8 @@ namespace OpenMobile.Controls
         /// Create the control with the default size and location
         /// </summary>
         public OMProgress()
+            : base("", 0, 0, 200, 200)
         {
-            this.Top = 20;
-            this.Left = 20;
-            this.Width = 100;
-            this.Height = 25;
         }
         /// <summary>
         /// Create a new progress bar
@@ -107,11 +105,19 @@ namespace OpenMobile.Controls
         /// <param name="w">Width</param>
         /// <param name="h">Height</param>
         public OMProgress(int x, int y, int w, int h)
+            : base("", x, y, w, h)
         {
-            top = y;
-            left = x;
-            width = w;
-            height = h;
+        }
+        /// <summary>
+        /// Create a new progress bar
+        /// </summary>
+        /// <param name="x">Left</param>
+        /// <param name="y">Top</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        public OMProgress(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
+        {
         }
         /// <summary>
         /// A number between the minimum and the maximum value
@@ -200,16 +206,20 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float tmp = OpacityFloat;
-            if (Mode == eModeType.transitioningIn)
-                tmp = e.globalTransitionIn;
-            else if (Mode == eModeType.transitioningOut)
-                tmp = e.globalTransitionOut;
-            g.FillRectangle(new Brush(Color.FromArgb((int)(backColor.A * tmp), backColor)), left, top, width, height);
+            base.RenderBegin(g, e);
+
+            //float tmp = OpacityFloat;
+            //if (Mode == eModeType.transitioningIn)
+            //    tmp = e.globalTransitionIn;
+            //else if (Mode == eModeType.transitioningOut)
+            //    tmp = e.globalTransitionOut;
+            g.FillRectangle(new Brush(Color.FromArgb((int)(backColor.A * _RenderingValue_Alpha), backColor)), left, top, width, height);
             if (vertical == false)
-                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * firstColor.A), firstColor), Color.FromArgb((int)(tmp * secondColor.A), secondColor), Gradient.Horizontal), left, top, (int)(width * ((float)value / maximum)), height);
+                g.FillRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * firstColor.A), firstColor), Color.FromArgb((int)(_RenderingValue_Alpha * secondColor.A), secondColor), Gradient.Horizontal), left, top, (int)(width * ((float)value / maximum)), height);
             else
-                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * secondColor.A), secondColor), Color.FromArgb((int)(tmp * firstColor.A), firstColor), Gradient.Vertical), left, top + height - (int)(height * ((float)value / maximum)), width, (int)(height * ((float)value / maximum)));
+                g.FillRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * secondColor.A), secondColor), Color.FromArgb((int)(_RenderingValue_Alpha * firstColor.A), firstColor), Gradient.Vertical), left, top + height - (int)(height * ((float)value / maximum)), width, (int)(height * ((float)value / maximum)));
+
+            base.RenderFinish(g, e);
         }
 
         /// <summary>

@@ -97,7 +97,7 @@ namespace ControlDemo
             //Slider_RotationZ.OnSliderMoved += new OMSlider.slidermoved(Slider_Rotation_OnSliderMoved);
             //p.addControl(Slider_RotationZ);
 
-            OMImage imgReflectionTestTarget = new OMImage("", imgReflectionTestSource.Left, imgReflectionTestSource.Top + imgReflectionTestSource.Height, imgReflectionTestSource.Width, imgReflectionTestSource.Height);
+            OMImage imgReflectionTestTarget = new OMImage("imgReflectionTestTarget", imgReflectionTestSource.Left, imgReflectionTestSource.Top + imgReflectionTestSource.Height, imgReflectionTestSource.Width, imgReflectionTestSource.Height);
             if (imgReflectionTestSource.Image != null)
                 imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, 0.7f, true);
                 //imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, true);

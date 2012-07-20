@@ -27,7 +27,8 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A slider bar control
     /// </summary>
-    public class OMSlider : OMControl, IThrow, IMouse
+    [System.Serializable]
+    public class OMSlider : OMControl, IThrow, IMouse, IHighlightable
     {
         /// <summary>
         /// height of the slider bar
@@ -62,6 +63,7 @@ namespace OpenMobile.Controls
         /// </summary>
         [System.Obsolete("Use OMSlider(string name, int x, int y, int w, int h) instead")]
         public OMSlider()
+            : base("", 0, 0, 200, 200)
         {
         }
         /// <summary>
@@ -73,10 +75,8 @@ namespace OpenMobile.Controls
         /// <param name="h"></param>
         [System.Obsolete("Use OMSlider(string name, int x, int y, int w, int h, int sHeight, int sWidth) instead")]
         public OMSlider(int x, int y, int w, int h)
+            : base("", x, y, w, h)
         {
-            left = x;
-            top = y;
-            width = w;
             sliderHeight = h;
         }
         /// <summary>
@@ -90,10 +90,8 @@ namespace OpenMobile.Controls
         /// <param name="sWidth"></param>
         [System.Obsolete("Use OMSlider(string name, int x, int y, int w, int h, int sHeight, int sWidth) instead")]
         public OMSlider(int x, int y, int w, int h, int sHeight, int sWidth)
+            : base("", x, y, w, h)
         {
-            left = x;
-            top = y;
-            width = w;
             sliderHeight = h;
             height = sHeight;
             sliderWidth = sWidth;
@@ -109,11 +107,8 @@ namespace OpenMobile.Controls
         /// <param name="sHeight"></param>
         /// <param name="sWidth"></param>
         public OMSlider(string name, int x, int y, int w, int h, int sHeight, int sWidth)
+            : base(name, x, y, w, h)
         {
-            this.Name = name;
-            left = x;
-            top = y;
-            width = w;
             sliderHeight = h;
             height = sHeight;
             sliderWidth = sWidth;
@@ -257,25 +252,25 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float alpha = OpacityFloat;
-            if (Mode == eModeType.transitioningIn)
-                alpha = e.globalTransitionIn;
-            else if (Mode == eModeType.transitioningOut)
-                alpha = e.globalTransitionOut;
+            base.RenderBegin(g, e);
 
-            g.DrawImage(sliderBar.image, left, top, width, height, alpha);
+            //float alpha = OpacityFloat;
+            //if (Mode == eModeType.transitioningIn)
+            //    alpha = e.globalTransitionIn;
+            //else if (Mode == eModeType.transitioningOut)
+            //    alpha = e.globalTransitionOut;
+
+            g.DrawImage(sliderBar.image, left, top, width, height, _RenderingValue_Alpha);
             if (sliderTrackFull.image != null)
             {
                 Rectangle clip = g.Clip;
                 g.SetClipFast(left, top, sliderPosition, height);
-                g.DrawImage(sliderTrackFull.image, left - 2, top, width + 4, height, alpha);
+                g.DrawImage(sliderTrackFull.image, left - 2, top, width + 4, height, _RenderingValue_Alpha);
                 g.Clip = clip;
             }
-            g.DrawImage(slider.image, left + sliderPosition - (sliderHeight / 2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight, alpha);
+            g.DrawImage(slider.image, left + sliderPosition - (sliderHeight / 2), (top + (height / 2)) - (sliderHeight / 2), sliderWidth, sliderHeight, _RenderingValue_Alpha);
 
-            // Skin debug function 
-            if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Yellow);
+            base.RenderFinish(g, e);
         }
 
         #region IThrow Members
@@ -341,7 +336,7 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
-        public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale)
+        public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
             //
         }
@@ -352,7 +347,7 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
-        public void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        public void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation)
         {
             //
         }
@@ -363,11 +358,12 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
-        public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
         {
             if (!dragged)
             {
-                sliderPosition = (int)(e.X / WidthScale) - left;
+                //sliderPosition = (int)(e.X / ScaleFactors.X) - left;
+                sliderPosition = e.X - left;
                 if ((sliderPosition - (sliderWidth / 2)) < 0)
                     sliderPosition = (sliderWidth / 2);
                 if ((sliderPosition + (sliderWidth / 2)) > Width)

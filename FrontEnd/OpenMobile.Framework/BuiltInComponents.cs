@@ -115,12 +115,14 @@ namespace OpenMobile
             StoredData.SetDefaultValue("UI.VolumeChangesVisible", true.ToString());
             StoredData.SetDefaultValue("UI.ShowCursor", false.ToString());
             StoredData.SetDefaultValue("UI.ShowDebugInfo", false.ToString());
+            StoredData.SetDefaultValue("OpenGL.VSync", false.ToString());
 
             Settings gl = new Settings("General Settings");
             Setting graphics = new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", String.Empty, "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
             Setting ShowCursor = new Setting(SettingTypes.MultiChoice, "UI.ShowCursor", String.Empty, "Show OM mouse/pointer cursors", Setting.BooleanList, Setting.BooleanList);
             Setting ShowDebugInfo = new Setting(SettingTypes.MultiChoice, "UI.ShowDebugInfo", String.Empty, "Show debug info overlay", Setting.BooleanList, Setting.BooleanList);
+            Setting OpenGLVsync = new Setting(SettingTypes.MultiChoice, "OpenGL.VSync", String.Empty, "Use VSync for opengl", Setting.BooleanList, Setting.BooleanList);
             //Setting SkinColor = new Setting(SettingTypes.Text, "UI.SkinColor", "Foreground", "Skin foreground color (R,G,B)");
             Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus color", "Skin focus color (R,G,B)");
             Setting SkinTextColor = new Setting(SettingTypes.Text, "UI.SkinTextColor", "Text color", "Skin text color (R,G,B)");
@@ -129,7 +131,8 @@ namespace OpenMobile
                 graphics.Value = settings.getSetting("UI.MinGraphics");
                 volume.Value = settings.getSetting("UI.VolumeChangesVisible");
                 ShowCursor.Value = settings.getSetting("UI.ShowCursor");
-                ShowDebugInfo.Value = settings.getSetting("UI.ShowDebugInfo");                
+                ShowDebugInfo.Value = settings.getSetting("UI.ShowDebugInfo");
+                OpenGLVsync.Value = settings.getSetting("OpenGL.VSync");
                 //SkinColor.Value = settings.getSetting("UI.SkinColor");
                 SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
                 SkinTextColor.Value = settings.getSetting("UI.SkinTextColor");
@@ -138,6 +141,7 @@ namespace OpenMobile
             gl.Add(volume);
             gl.Add(ShowCursor);
             gl.Add(ShowDebugInfo);
+            gl.Add(OpenGLVsync);
             //gl.Add(SkinColor);
             gl.Add(SkinFocusColor);
             gl.Add(SkinTextColor);
@@ -145,8 +149,7 @@ namespace OpenMobile
 
             // Update local data variables (for speed)
             BuiltInComponents.Host.ShowDebugInfo = helperFunctions.StoredData.GetBool("UI.ShowDebugInfo");
-            BuiltInComponents.Host.ShowCursors = helperFunctions.StoredData.GetBool("UI.ShowCursor");            
-
+            BuiltInComponents.Host.ShowCursors = helperFunctions.StoredData.GetBool("UI.ShowCursor");
             return gl;
         }
 
@@ -247,6 +250,21 @@ namespace OpenMobile
                 set
                 {
                     StoredData.SetBool("UI.ShowDebugInfo", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: True = Use VSync for OpengGL rendering
+            /// </summary>
+            public static bool OpenGLVSync
+            {
+                get
+                {
+                    return StoredData.GetBool("OpenGL.VSync");
+                }
+                set
+                {
+                    StoredData.SetBool("OpenGL.VSync", value);
                 }
             }
 

@@ -29,6 +29,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Provides a basic message box control
     /// </summary>
+    [System.Serializable]
     public class OMMessageBox : OMLabel, IClickable
     {
         /// <summary>
@@ -108,6 +109,7 @@ namespace OpenMobile.Controls
         /// Creates a new OMMessage box
         /// </summary>
         public OMMessageBox()
+            : base("", 0, 0, 200, 200)
         {
             _textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
         }
@@ -118,12 +120,21 @@ namespace OpenMobile.Controls
         /// <param name="top"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public OMMessageBox(int left, int top, int width, int height)
+        public OMMessageBox(int x, int y, int w, int h)
+            : base("", x, y, w, h)
         {
-            Left = left;
-            Top = top;
-            Width = width;
-            Height = height;
+            _textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
+        }
+        /// <summary>
+        /// Creates a new OMMessageBox
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public OMMessageBox(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
+        {
             _textAlignment = OpenMobile.Graphics.Alignment.WordWrap;
         }
 
@@ -134,29 +145,27 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float tmp = OpacityFloat;
-            if (this.Mode == eModeType.transitioningIn)
-                tmp = e.globalTransitionIn;
-            if (this.Mode == eModeType.transitioningOut)
-                tmp = e.globalTransitionOut;
+            base.RenderBegin(g, e);
+
+            //float tmp = OpacityFloat;
+            //if (this.Mode == eModeType.transitioningIn)
+            //    tmp = e.globalTransitionIn;
+            //if (this.Mode == eModeType.transitioningOut)
+            //    tmp = e.globalTransitionOut;
             height += (int)letterHeight;
             Rectangle r = new Rectangle(this.Left, top, this.Width, height);
-            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * 250), backColor1), Color.FromArgb((int)(tmp * 250), backColor2), Gradient.Vertical), r, 20);
+            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * 250), backColor1), Color.FromArgb((int)(_RenderingValue_Alpha * 250), backColor2), Gradient.Vertical), r, 20);
             g.DrawRoundRectangle(new Pen(borderColor, borderWidth), r, 20);
             if (_RefreshGraphic)
                 textTexture = g.GenerateTextTexture(textTexture, this.Left, top, this.Width, (int)letterHeight, title, this.Font, this.Format, this.TextAlignment, this.Color, this.OutlineColor);
-            g.DrawImage(textTexture, left, top, width, height, tmp);
+            g.DrawImage(textTexture, left, top, width, height, _RenderingValue_Alpha);
             top += (int)letterHeight;
             height -= (int)letterHeight;
             base.Render(g, e);
             //Renderer.renderLabel(g,this);  //ToDo-Fix this (pre-hardware acceleration merge)
             top -= (int)letterHeight;
 
-            _RefreshGraphic = false;
-            // Skin debug function 
-            if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Green);
-
+            base.RenderFinish(g, e);
         }
     }
 }

@@ -30,6 +30,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// The default control container
     /// </summary>
+    [Serializable]
     public class OMPanel
     {
         /// <summary>
@@ -51,11 +52,10 @@ namespace OpenMobile.Controls
 
         /// <summary>
         /// Returns the OMControl at the given index
-        /// <para>OBSOLOTE, Use named access instead!</para>
+        /// <para>Please use named access in skins instead of indexed access</para>
         /// </summary>
         /// <param name="i">The index</param>
         /// <returns></returns>
-        [Obsolete("Obsolete, Use named access instead!")]
         public OMControl this[int i]
         {
             get
@@ -97,6 +97,7 @@ namespace OpenMobile.Controls
                     return Manager[screen, this.name][s];
             }
         }
+        
         /// <summary>
         /// Add all controls from an existing panel
         /// </summary>
@@ -294,7 +295,7 @@ namespace OpenMobile.Controls
                     break;
             }
             for (int i = 0; i < containedControls.Count; i++)
-                if (containedControls[i].Visible)
+                if (containedControls[i].IsControlRenderable(false))
                     containedControls[i].Render(g, e);
         }
         /// <summary>
@@ -323,6 +324,9 @@ namespace OpenMobile.Controls
             ScreenManager manager = this.Manager;
             OMPanel two = (OMPanel)this.MemberwiseClone();
             two.Manager = manager;
+
+            //two.containedControls = DeepCopy.DeepCopyBinary<List<OMControl>>(containedControls);
+
             two.containedControls = new List<OMControl>(this.containedControls.Capacity);
             for (int i = 0; i < containedControls.Count; i++)
             {
@@ -756,8 +760,6 @@ namespace OpenMobile.Controls
         /// The current screenmanager handling this panel
         /// </summary>
         public OpenMobile.Framework.ScreenManager Manager { get; set; }
-
-
     }
 
     /// <summary>

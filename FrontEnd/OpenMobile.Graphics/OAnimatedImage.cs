@@ -25,6 +25,7 @@ using System.Drawing.Imaging;
 
 namespace OpenMobile.Graphics
 {
+    [System.Serializable]
     public sealed class OAnimatedImage
     {
         int[] frameDelay;

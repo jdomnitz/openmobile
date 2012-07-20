@@ -25,7 +25,8 @@ using OpenMobile.Graphics;
 
 namespace OpenMobile.Controls
 {
-    internal sealed class VolumeBar:OMProgress, IMouse,IThrow
+    [System.Serializable]
+    internal sealed class VolumeBar : OMProgress, IMouse, IThrow, IHighlightable
     {
         public userInteraction OnSliderMoved;
 
@@ -62,22 +63,25 @@ namespace OpenMobile.Controls
             this.vertical = true;
         }
 
-        public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale)
+        public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
             if (e.Buttons == MouseButton.Left)
             {
-                this.Value = (int)(((top + height - (e.Y / HeightScale)) / height) * (maximum - minimum)) + minimum;
+                //this.Value = (int)(((top + height - (e.Y / HeightScale)) / height) * (maximum - minimum)) + minimum;
+                //this.Value = (int)(((top + height - e.Y) / height) * (maximum - minimum)) + minimum;
+                this.Value = (int)((((float)(top + height - e.Y)) / height) * (maximum - minimum)) + minimum;
                 raiseSliderMoved(screen);
             }
         }
 
-        public void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        public void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation)
         {
-            this.Value = (int)(((top+height-(e.Y / HeightScale)) / height)*(maximum-minimum))+minimum;
+            //this.Value = (int)(((top+height-(e.Y / HeightScale)) / height)*(maximum-minimum))+minimum;
+            this.Value = (int)((((float)(top + height - e.Y)) / height) * (maximum - minimum)) + minimum;
             raiseSliderMoved(screen);
         }
 
-        public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
         {
             //
         }

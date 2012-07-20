@@ -7,6 +7,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A checkbox control
     /// </summary>
+    [System.Serializable]
     public class OMCheckbox : OMLabel, IClickable, IHighlightable
     {
         /// <summary>
@@ -57,6 +58,7 @@ namespace OpenMobile.Controls
         /// create a new checkbox
         /// </summary>
         public OMCheckbox()
+            : base("",0,0,200,200)
         {
             //
         }
@@ -68,11 +70,19 @@ namespace OpenMobile.Controls
         /// <param name="w"></param>
         /// <param name="h"></param>
         public OMCheckbox(int x, int y, int w, int h)
+            : base("", x, y, w, h)
         {
-            this.Left = x;
-            this.Top = y;
-            this.Width = w;
-            this.Height = h;
+        }
+        /// <summary>
+        /// Create a new checkbox
+        /// </summary>
+        /// <param name="x">Left</param>
+        /// <param name="y">Top</param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        public OMCheckbox(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
+        {
         }
 
         /// <summary>
@@ -100,12 +110,14 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
-            float tmp = OpacityFloat;
-            if (this.Mode == eModeType.transitioningIn)
-                tmp = e.globalTransitionIn;
-            if (this.Mode == eModeType.transitioningOut)
-                tmp = e.globalTransitionOut;
-            using (Brush defaultBrush = new Brush(Color.FromArgb((int)tmp * 255, this.OutlineColor)))
+            base.RenderBegin(g, e);
+
+            //float tmp = OpacityFloat;
+            //if (this.Mode == eModeType.transitioningIn)
+            //    tmp = e.globalTransitionIn;
+            //if (this.Mode == eModeType.transitioningOut)
+            //    tmp = e.globalTransitionOut;
+            using (Brush defaultBrush = new Brush(Color.FromArgb((int)_RenderingValue_Alpha * 255, this.OutlineColor)))
             {
                 if ((_RefreshGraphic) || (genHighlight != (Mode == eModeType.Highlighted)))
                 {
@@ -115,7 +127,7 @@ namespace OpenMobile.Controls
                         textTexture = g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, this.Color, this.OutlineColor);
                     genHighlight = (Mode == eModeType.Highlighted);
                 }
-                g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, tmp);
+                g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, _RenderingValue_Alpha);
                 g.DrawRoundRectangle(new Pen(defaultBrush, 3.0F), this.Left, this.Top, this.Height, this.Height, 5);
                 if (this.isChecked == true)
                 {
@@ -126,10 +138,7 @@ namespace OpenMobile.Controls
                 }
             }
 
-            _RefreshGraphic = false;
-            // Skin debug function 
-            if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Green);
+            base.RenderFinish(g, e);
         }
     }
 }

@@ -94,6 +94,7 @@ namespace OpenMobile.Plugin
     /// Defines an icon to use to represent this plugin.
     /// If the icon name is written with * as first character then the next 
     /// characters will generate the corresponding symbol from the Webdings font instead of using an image
+    /// <para>Use # as first char to generate icon from WingDings font instead</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class SkinIcon : Attribute

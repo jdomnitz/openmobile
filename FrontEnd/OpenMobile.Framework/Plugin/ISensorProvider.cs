@@ -29,6 +29,7 @@ namespace OpenMobile.Plugin
     /// The type of sensor
     /// </summary>
     [Flags]
+    [System.Serializable]
     public enum eSensorType
     {
         /// <summary>
@@ -57,6 +58,7 @@ namespace OpenMobile.Plugin
     /// Data type sensor returns
     /// </summary>
     [Flags]
+    [System.Serializable]
     public enum eSensorDataType
     {
         /// <summary>
@@ -128,6 +130,7 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Represents a sensor
     /// </summary>
+    [System.Serializable]
     public class Sensor
     {
         /// <summary>
@@ -383,6 +386,7 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Represents a sensor on the hardware plugin side to control access to setting the sensor value
     /// </summary>
+    [System.Serializable]
     public class SensorWrapper
     {
         public Sensor sensor;

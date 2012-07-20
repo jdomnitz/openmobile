@@ -104,14 +104,16 @@ namespace ControlDemo
             AniLabel_Org_Test.ContiuousAnimation = eAnimation.BounceScroll;
             pSlideInTest.addControl(AniLabel_Org_Test);
 
-            OMContainer Container = new OMContainer("Container", 200, 200, 300, 150);
+            OMContainer2 Container = new OMContainer2("Container", 200, 200, 300, 150);
             pSlideInTest.addControl(Container);
 
             OMImage Image_ContainerTest1 = new OMImage("Image_ContainerTest1", 0, 0, Host.getSkinImage("AlbumIcon_Highlighted"));
-            Container.Add(Image_ContainerTest1);
+            Container.addControl(Image_ContainerTest1);
             OMImage Image_ContainerTest2 = new OMImage("Image_ContainerTest2", 150, 0, Host.getSkinImage("AlbumIcon_SelectedHighlighted"));
-            Container.Add(Image_ContainerTest2);
-
+            Container.addControl(Image_ContainerTest2);
+            OMButton btn_ContainerTest3 = DefaultControls.GetButton("btn_ContainerTest3", 50, 50, 180, 90, "", "Test");
+            btn_ContainerTest3.OnClick += new userInteraction(btn_ContainerTest3_OnClick);
+            Container.addControl(btn_ContainerTest3);
 
             OMButton Button_PanelSlideIn  = DefaultControls.GetHorisontalEdgeButton("Button_SlideIn", 420, 540, 160, 70, "5", "");
             Button_PanelSlideIn.OnClick += new userInteraction(menuButton_OnClick);
@@ -140,6 +142,11 @@ namespace ControlDemo
 
             manager.loadPanel(pSlideInTest);
 
+        }
+
+        static void btn_ContainerTest3_OnClick(OMControl sender, int screen)
+        {
+            Host.SendStatusData(screen, eDataType.PopUp, PluginName, "Container test");
         }
 
         static int lblState = 0;

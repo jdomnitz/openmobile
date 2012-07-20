@@ -37,7 +37,7 @@ using OpenMobile.Media;
 
 namespace ControlDemo
 {
-    [SkinIcon("*#")]
+    [SkinIcon("#¸")]
     public sealed class OMClock : IHighLevel
     {
 

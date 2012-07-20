@@ -105,6 +105,9 @@ namespace OpenMobile.helperFunctions.Controls
             // Set focus image
             btn.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(w, h, ButtonGraphic.ImageTypes.ButtonBackgroundFocused));
 
+            // Set focus clicked image
+            btn.DownImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(w, h, ButtonGraphic.ImageTypes.ButtonBackgroundClicked));
+
             // Set overlay image
             btn.OverlayImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(w, h, ButtonGraphic.ImageTypes.ButtonForeground, Icon, Text));
 

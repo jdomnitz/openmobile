@@ -23,6 +23,7 @@ using System.ComponentModel;
 using OpenMobile.Graphics;
 using System.Drawing.Design;
 using System.IO;
+using System.Reflection;
 using System.Collections.Specialized;
 
 namespace OpenMobile
@@ -30,7 +31,8 @@ namespace OpenMobile
     /// <summary>
     /// An Open Mobile representation of an image
     /// </summary>
-    public struct imageItem
+    [Serializable]
+    public struct imageItem : ICloneable
     {
         /// <summary>
         /// The image
@@ -82,7 +84,7 @@ namespace OpenMobile
             if (image == null)
                 return null;
             else
-                return name;
+                return string.Format("{0}({1})",name,this.GetHashCode());
         }
         /// <summary>
         /// Value Comparison
@@ -139,5 +141,39 @@ namespace OpenMobile
         /// Represents an empty image item
         /// </summary>
         public static imageItem NONE = new imageItem();
+
+        #region ICloneable Members
+
+        public object Clone()
+        {
+            imageItem returnData = (imageItem)this.MemberwiseClone();
+            if (this.image != null)
+                returnData.image = (OImage)this.image.Clone();
+            returnData.name = this.name;
+
+            //Type type = returnData.GetType();
+            //foreach (PropertyInfo propInfo in type.GetProperties())
+            //{
+            //    if (propInfo.CanWrite && propInfo.CanRead && (propInfo.GetGetMethod().GetParameters().Length == 0))
+            //        try
+            //        {
+            //            //Clone IClonable object
+            //            if (propInfo.PropertyType.GetInterface("ICloneable", true) != null)
+            //            {
+            //                ICloneable clone = (ICloneable)propInfo.GetValue(this, null);
+            //                propInfo.SetValue(returnData, clone.Clone(), null);
+            //            }
+            //            else
+            //            {
+            //                propInfo.SetValue(returnData, propInfo.GetValue(this, null), null);
+            //            }
+            //        }
+            //        catch (TargetInvocationException) { }
+            //}
+
+            return returnData;
+        }
+
+        #endregion
     }
 }

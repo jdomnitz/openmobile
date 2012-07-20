@@ -127,7 +127,7 @@ namespace OpenMobile.Graphics
             }
             if (kill)
                 img.Dispose();
-            image.Texture = texture;
+            image.SetTexture(screen, texture);
             Raw.TexParameter(All.Texture2D, All.TextureMinFilter, (int)TextureMinFilter.Linear);
             Raw.TexParameter(All.Texture2D, All.TextureMagFilter, (int)TextureMagFilter.Linear);
             Raw.TexParameter(All.Texture2D, All.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
@@ -293,13 +293,13 @@ namespace OpenMobile.Graphics
             if (image == null)
                 return;
             Raw.Enable(EnableCap.Texture2D);
-            if (image.Texture == 0)
+            if (image.GetTexture(screen) == 0)
                 if (!loadTexture(ref image))
                 {
                     Raw.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(All.Texture2D, image.Texture);
+            Raw.BindTexture(All.Texture2D, image.GetTexture(screen));
             Raw.Color4(1F, 1F, 1F, transparency);
 
             int[] tex = new int[] { X, Height + Y, Width + X, Height + Y, X, Y, Width + X, Y };

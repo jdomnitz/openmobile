@@ -92,6 +92,8 @@
   <ItemGroup>
     <Compile Include="Animator.cs" />
     <Compile Include="BuiltInComponents.cs" />
+    <Compile Include="Controls\PanelTransitionEffects.cs" />
+    <Compile Include="Controls\OMContainer2.cs" />
     <Compile Include="Controls\OMAnimatedLabel2.cs" />
     <Compile Include="Controls\IContainer2.cs" />
     <Compile Include="Controls\IClickable.cs" />
@@ -137,6 +139,7 @@
     <Compile Include="Data\Traffic.cs" />
     <Compile Include="Data\Vehicle.cs" />
     <Compile Include="Data\Weather.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="helperFunctions\Controls.cs" />
     <Compile Include="helperFunctions\Graphics.cs" />
@@ -246,7 +249,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

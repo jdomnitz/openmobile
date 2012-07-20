@@ -63,6 +63,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A label used for rendering various text effects
     /// </summary>
+    [Serializable]
     public class OMAnimatedLabel : OMLabel
     {
         HomemadeTimer t;
@@ -80,6 +81,7 @@ namespace OpenMobile.Controls
         /// </summary>
         [System.Obsolete("Use OMAnimatedLabel(string name, int x, int y, int w, int h) instead")]
         public OMAnimatedLabel()
+            :base("",0,0,200,200)
         {
             Text = String.Empty;
             init();
@@ -93,11 +95,8 @@ namespace OpenMobile.Controls
         /// <param name="h">Height</param>
         [System.Obsolete("Use OMAnimatedLabel(string name, int x, int y, int w, int h) instead")]
         public OMAnimatedLabel(int x, int y, int w, int h)
+            : base("", x, y, w, h)
         {
-            this.Left = x;
-            this.Top = y;
-            this.Width = w;
-            this.Height = h;
             Text = String.Empty;
             init();
         }
@@ -110,12 +109,8 @@ namespace OpenMobile.Controls
         /// <param name="w">Width</param>
         /// <param name="h">Height</param>
         public OMAnimatedLabel(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
         {
-            this.Name = name;
-            this.Left = x;
-            this.Top = y;
-            this.Width = w;
-            this.Height = h;
             Text = String.Empty;
             init();
         }
@@ -379,21 +374,25 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
+            base.RenderBegin(g, e);
+
             if (tempTransition == eAnimation.None)
                 draw(g, e, this.currentAnimation);
             else
                 draw(g, e, this.tempTransition);
+
+            base.RenderFinish(g, e);
         }
         private void draw(Graphics.Graphics g, renderingParams e, eAnimation animation)
         {
             if ((_text != null) && (_text.Length != 0))
             {
                 t.Enabled = this.hooked();
-                float tmp = OpacityFloat;
-                if (this.Mode == eModeType.transitioningIn)
-                    tmp = e.globalTransitionIn;
-                if (this.Mode == eModeType.transitioningOut)
-                    tmp = e.globalTransitionOut;
+                //float tmp = OpacityFloat;
+                //if (this.Mode == eModeType.transitioningIn)
+                //    tmp = e.globalTransitionIn;
+                //if (this.Mode == eModeType.transitioningOut)
+                //    tmp = e.globalTransitionOut;
                 Rectangle old;
                 switch (animation)
                 {
@@ -404,13 +403,13 @@ namespace OpenMobile.Controls
                         g.SetClipFast(left + veilLeft, top, width - veilRight, height);
                         if (_RefreshGraphic)
                             textTexture = g.GenerateTextTexture(textTexture, 0, 0, width, height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
-                        g.DrawImage(textTexture, left, top, width, height, tmp);
+                        g.DrawImage(textTexture, left, top, width, height, _RenderingValue_Alpha);
                         if (tempTransition != eAnimation.None)
                         {
                             g.SetClipFast(left + (width - veilRight), top, veilRight, height);
                             if (_RefreshGraphic)
                                 oldTexture = g.GenerateTextTexture(oldTexture, 0, 0, width, height, oldText, _font, _textFormat, _textAlignment, _color, _outlineColor);
-                            g.DrawImage(oldTexture, left, top, width, height, tmp);
+                            g.DrawImage(oldTexture, left, top, width, height, _RenderingValue_Alpha);
                         }
                         g.Clip = old;
                         break;
@@ -420,7 +419,7 @@ namespace OpenMobile.Controls
                         g.SetClipFast(left, top, width, height);
                         if (_RefreshGraphic)
                             textTexture = g.GenerateTextTexture(textTexture, 0, 0, (int)(avgChar * _text.Length) + 1, height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
-                        g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, (int)(avgChar * _text.Length) + 1, height, tmp);
+                        g.DrawImage(textTexture, left - (int)(scrollPos * avgChar), top, (int)(avgChar * _text.Length) + 1, height, _RenderingValue_Alpha);
                         g.Clip = old;
                         if (avgChar * _text.Length < width)
                         {
@@ -438,30 +437,26 @@ namespace OpenMobile.Controls
                             {
                                 x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, i), Font);
                                 if (_RefreshGraphic)
-                                    charTex[i] = g.GenerateStringTexture(charTex[i], Text[i].ToString(), this.Font, Color.FromArgb((int)(tmp * 255), this.Color), x2, this.Top, 30, 30, System.Drawing.StringFormat.GenericDefault);
-                                g.DrawImage(charTex[i], x2, this.Top, 30, 30, tmp);
+                                    charTex[i] = g.GenerateStringTexture(charTex[i], Text[i].ToString(), this.Font, Color.FromArgb((int)(_RenderingValue_Alpha * 255), this.Color), x2, this.Top, 30, 30, System.Drawing.StringFormat.GenericDefault);
+                                g.DrawImage(charTex[i], x2, this.Top, 30, 30, _RenderingValue_Alpha);
                             }
                         }
                         x2 = Left + MeasureDisplayStringWidth(g, Text.Substring(0, currentLetter), Font);
                         if (animation == eAnimation.Pulse)
                         {
                             if (_RefreshGraphic)
-                                currentLetterTex = g.GenerateStringTexture(currentLetterTex, Text[currentLetter].ToString(), effectFont, Color.FromArgb((int)(tmp * 255), this.OutlineColor), 0, 0, 30, 30, System.Drawing.StringFormat.GenericDefault);
-                            g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30, tmp);
+                                currentLetterTex = g.GenerateStringTexture(currentLetterTex, Text[currentLetter].ToString(), effectFont, Color.FromArgb((int)(_RenderingValue_Alpha * 255), this.OutlineColor), 0, 0, 30, 30, System.Drawing.StringFormat.GenericDefault);
+                            g.DrawImage(currentLetterTex, x2, this.Top - (int)(EffectFont.Size - Font.Size) - 2, 30, 30, _RenderingValue_Alpha);
                         }
                         else
                         {
                             if (_RefreshGraphic)
                                 currentLetterTex = g.GenerateTextTexture(currentLetterTex, 0, 0, 30, 30, Text[currentLetter].ToString(), effectFont, Format, Alignment.CenterCenter, _color, _outlineColor);
-                            g.DrawImage(currentLetterTex, x2, this.Top, 30, 30, tmp);
+                            g.DrawImage(currentLetterTex, x2, this.Top, 30, 30, _RenderingValue_Alpha);
                         }
                         break;
                 }
             }
-            _RefreshGraphic = false;
-            // Skin debug function 
-            if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Yellow);
         }
 
         private int MeasureDisplayStringWidth(Graphics.Graphics graphics, string text,
@@ -481,6 +476,8 @@ namespace OpenMobile.Controls
             return (int)(rect.Right - (Font.Size / 4.5));
         }
     }
+
+    [System.Serializable]
     internal sealed class HomemadeTimer : IDisposable
     {
         public event ElapsedEventHandler Elapsed;

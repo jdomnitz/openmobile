@@ -28,56 +28,253 @@ using OpenMobile.Controls;
 using OpenMobile.Graphics;
 using OpenMobile.Input;
 using OpenMobile.Plugin;
+using System.Diagnostics;
+using OpenMobile.Framework;
+using OpenMobile.helperFunctions.Graphics;
 
 namespace OpenMobile
 {
-    public partial class RenderingWindow : GameWindow
+    public class RenderingWindow : GameWindow
     {
-        public bool VideoPlaying;
-        OMControl varHighlighted;
-        private renderingParams rParam = new renderingParams();
-        object painting = new object();
-        private Point ThrowStart = new Point(-1, -1);
-        OMButton lastClick;
-        List<OMPanel> backgroundQueue = new List<OMPanel>();
-        float heightScale = 1F;
-        float widthScale = 1F;
-        Point ofsetIn = new Point(0, 0);
-        Point ofsetOut = new Point(0, 0);
-        private eGlobalTransition currentTransition;
-        private bool transitioning;
-        private bool keyboardActive;
-        public MouseDevice currentMouse;
-        private List<Point> currentGesture;
-        // Throw started (will be reset when throw starts) for thrown interface
-        private bool ThrowStarted;
-        // Relative mouse moved distance for thrown interface
-        private Point ThrowRelativeDistance = new Point(-1, -1);
-        private int tick;
+
+        /// <summary>
+        /// Current screen dimming value
+        /// </summary>
+        private int dimmer;
+
         bool Identify;
         float IdentifyOpacity = 1f;
-        public bool blockHome;
+        Graphics.Graphics g;
+        Point CursorPosition = new Point();
+        float CursorDistance = 0f;
+        Point CursorDistanceXYTotal = new Point();
+        Point CursorDistanceXYRelative = new Point();
+        bool keyboardActive;
+        OMControl FocusedControl = null;
+        OMControl DebugControl = null;
+        private List<Point> currentGesture = new List<Point>();
+        bool ThrowActive = false;
 
+        Timer tmrClickHold = new Timer(500);
+        Stopwatch swClickTiming = new Stopwatch();
+
+        Timer tmrMeasureFPS = new Timer(100);
+        bool MeasureFPS_Done = false;
+
+        ReDrawTrigger ReDrawPanel;
+
+        private Point MouseMoveStartPoint = new Point();
+
+        public Rectangle ApplicationArea = new Rectangle(0, 0, 1000, 600);
+
+        /// <summary>
+        /// List of panels to be rendered, the list is organized in accordance with panel priority (lowest priority at the start of the queue)
+        /// </summary>
+        private List<OMPanel> RenderingQueue = new List<OMPanel>();
+
+        /// <summary>
+        /// Rendering parameters passed on to each panel
+        /// </summary>
+        private renderingParams RenderingParam = new renderingParams();
+
+        private renderingParams TransitionEffectParam_In = new renderingParams();
+        private renderingParams TransitionEffectParam_Out = new renderingParams();
+
+
+        /// <summary>
+        /// Render lock, IS THIS NEEDED?
+        /// </summary>
+        object painting = new object();
+
+        /// <summary>
+        /// [REMOVE] Indicates that this screen uses the default mouse
+        /// </summary>
+        public bool defaultMouse { get; set; }
+
+        /// <summary>
+        /// [REMOVE] Indicates that video playback is currently active on this screen
+        /// </summary>
+        public bool VideoPlaying { get; set; }
+
+        /// <summary>
+        /// Currently active mouse device for this screen
+        /// </summary>
+        public MouseDevice currentMouse { get; set; }
+
+        /// <summary>
+        /// [REPLACE WITH TOPMOST CONTROLS INSTEAD] Blocks the functionallity of TransitionOutEverything
+        /// </summary>
+        public bool blockHome { get; set; }
+
+        /// <summary>
+        /// Form title string
+        /// </summary>
+        public string FormTitle { get; internal set; }
+
+
+        /// <summary>
+        /// Screen number
+        /// </summary>
+        public int Screen
+        {
+            get
+            {
+                return screen;
+            }
+        }
+
+        private PointF _ScaleFactors = new PointF(1,1);
+        /// <summary>
+        /// The scale factors for the screen
+        /// </summary>
         public PointF ScaleFactors
         {
             get
             {
-                return new PointF(widthScale, heightScale);
-            }
-        }
-        internal OMControl highlighted
-        {
-            get
-            {
-                return varHighlighted;
+                return _ScaleFactors;
             }
             set
             {
-                if (varHighlighted == value)
-                    return;
-                if ((varHighlighted != null) && (varHighlighted.Mode == eModeType.Highlighted))
-                    varHighlighted.Mode = eModeType.Normal;
-                varHighlighted = value;
+                _ScaleFactors = value;
+            }
+        }
+
+        /// <summary>
+        /// The aspect ratio of the screen
+        /// </summary>
+        public float AspectRatio
+        {
+            get
+            {
+                return (float)System.Math.Sqrt(System.Math.Pow(_ScaleFactors.Y, 2) + System.Math.Pow(_ScaleFactors.X, 2));
+            }
+        }
+
+        public RenderingWindow(int s)
+        {
+            g = new OpenMobile.Graphics.Graphics(s);
+            this.screen = s;
+
+            tmrMeasureFPS.Elapsed += new System.Timers.ElapsedEventHandler(tmrMeasureFPS_Elapsed);
+
+            // Register redraw method
+            ReDrawPanel = new ReDrawTrigger(Invalidate);
+        }
+
+        void tmrMeasureFPS_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {   // Measure max fps and log it to the debug log
+            tmrMeasureFPS.Enabled = false;
+            MeasureFPS_Done = true;
+
+            FPS_Reset();
+            Stopwatch sw = new Stopwatch();
+            bool Measure = true;
+            sw.Reset();
+            sw.Start();
+            while (Measure)
+            {
+                if (sw.ElapsedMilliseconds > 1500)
+                    Measure = false;
+                Thread.Sleep(0);
+                refresh = true;
+            }
+            sw.Stop();
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Graphics", String.Format("Screen {0}: FPS Max (0ms) {1}", screen, FPS_Max));
+            FPS_Reset();
+            Measure = true;
+            sw.Reset();
+            sw.Start();
+            while (Measure)
+            {
+                if (sw.ElapsedMilliseconds > 1500)
+                    Measure = false;
+                Thread.Sleep(1);
+                refresh = true;
+            }
+            sw.Stop();
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Graphics", String.Format("Screen {0}: FPS Max (1ms) {1}", screen, FPS_Max));
+            FPS_Reset();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public void InitializeRendering()
+        {
+            // Check for specific startup screen
+            int StartupScreen = Core.theHost.StartupScreen;
+
+            // Set bounds
+            if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
+                this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Bounds.Location, this.Size);
+
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetCallingAssembly().Location);
+            FormTitle = "openMobile v" + string.Format("{0}.{1}.{2}.{3}", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart) + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + screen.ToString();
+            this.Title = FormTitle;
+            
+            // Connect events
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CommonResources));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("Icon")));
+            this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
+            this.Closing += new EventHandler<System.ComponentModel.CancelEventArgs>(this.RenderingWindow_FormClosing);
+            this.Resize += new EventHandler<EventArgs>(this.RenderingWindow_Resize);
+            this.Gesture += new EventHandler<OpenMobile.Graphics.TouchEventArgs>(RenderingWindow_Gesture);
+            this.ResolutionChange += new EventHandler<OpenMobile.Graphics.ResolutionChange>(RenderingWindow_ResolutionChange);
+            tmrClickHold.Elapsed += new System.Timers.ElapsedEventHandler(tmrClickLong_Elapsed);
+
+            // Start input router
+            if (screen == 0)
+                InputRouter.Initialize();
+
+            // Set window size
+            if (Configuration.RunningOnWindows)
+                if (options == GameWindowFlags.Fullscreen)
+                    OnWindowStateChanged(EventArgs.Empty);
+
+            // Set mouse startup location
+            if ((this.WindowState == WindowState.Fullscreen) && (screen == 0))
+                DefaultMouse.Location = this.Location;
+
+             
+        }
+
+        void tmrClickLong_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            // Disable timer to prevent multiple hits
+            tmrClickHold.Enabled = false;
+            
+            // Exit if no control is focused
+            if (FocusedControl == null)
+                return;
+
+            // Exit if gestures is active
+            if (Gesture_Active)
+                return;
+
+            // Activate hold click
+            ActivateClick(FocusedControl, ClickTypes.Hold);
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            g.Initialize();
+            if (screen == 0)
+            {
+                if ((Graphics.Graphics.Renderer == "GDI Generic") || (Graphics.Graphics.Renderer == "Software Rasterizer"))
+                    Application.ShowError(this.WindowHandle, "This application has been forced to use software rendering.  Performance will be horrible until you install proper graphics drivers!!", "Performance Warning");
+            }
+            base.OnLoad(e);
+        }
+
+        public void Run(GameWindowFlags flags)
+        {
+            NativeInitialize(flags);
+            InitializeRendering();
+            try
+            {
+                Run(1.0, 60.0, BuiltInComponents.SystemSettings.OpenGLVSync);
+            }
+            catch (Exception e)
+            {
+                BuiltInComponents.Host.DebugMsg("RenderingWindow.Run Exception", e);
             }
         }
 
@@ -91,61 +288,706 @@ namespace OpenMobile
             t.Name = String.Format("RenderingWindow_{0}.RunAsync", screen);
             t.Start();
         }
-        public void Run(GameWindowFlags flags)
+
+        protected override void OnRenderFrame(EventArgs e)
         {
-            NativeInitialize(flags);
-            InitializeRendering();
+            if (!MeasureFPS_Done)
+                tmrMeasureFPS.Enabled = true;
+
+            g.Clear(Color.Black);
+            g.ResetClip();
+
+            RenderPanels();
+
+            // Render gestures
+            RenderGesture();
+
+            // Render cursors
+            RenderCursor();
+
+            // Render identity (if needed)
+            RenderIndentity();
+
+            // Render debuginfo (if needed)
+            RenderDebugInfo();
+            //ShowDebugInfoTitle();
+
+            // Render a "dimmer" overlay to reduce screen brightness
+            RenderDimmer();
+
+            SwapBuffers(); //show the new image before potentially lagging
+
+            g.Finish();
+        }
+
+
+        private void ShowDebugInfoTitle()
+        {
+            if (BuiltInComponents.Host.ShowDebugInfo)
+                this.Title = String.Format("{0} (FPS: {1}/{2}/{3})", FormTitle, FPS_Min, FPS, FPS_Max);
+        }
+
+        #region Local renderers
+
+        private void RenderDimmer()
+        {
+            if (dimmer > 0)
+                g.FillRectangle(new Brush(Color.FromArgb(dimmer, Color.Black)), 0, 0, 1000, 600);
+        }
+
+        private StringWrapper DebugString = new StringWrapper();
+        private OImage RenderDebugInfoTexture = null;
+        private void RenderDebugInfo()
+        {
+            if (BuiltInComponents.Host.ShowDebugInfo)
+            {
+                lock (painting)
+                {
+                    DebugString.Text = String.Format("S {0}, FPS {1}/{2}/{3}, FC {4}, DC {5}", screen, FPS_Min, FPS, FPS_Max, (FocusedControl != null ? FocusedControl.Name : ""), (DebugControl != null ? DebugControl.Name : ""));
+                    if (DebugString.Changed)
+                        RenderDebugInfoTexture = g.GenerateTextTexture(RenderDebugInfoTexture, 0, 0, 1000, 200, DebugString.Text, Font.Arial, eTextFormat.Normal, Alignment.TopLeft, Color.Yellow, Color.Yellow);
+                    g.DrawImage(RenderDebugInfoTexture, 0, 0, 1000, 200);
+                }
+            }
+        }
+
+        private OImage identity = new OImage();
+        private void RenderIndentity()
+        {
+            if (Identify)
+            {
+                lock (painting)
+                {
+                    if (identity.TextureGenerationRequired(screen))
+                        identity = g.GenerateTextTexture(identity, 0, 0, 1000, 600, screen.ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
+                    g.DrawImage(identity, 0, 0, 1000, 600, IdentifyOpacity);
+                }
+            }
+        }
+
+        private void RenderCursor()
+        {
+            if (BuiltInComponents.Host.ShowCursors)
+            {
+                lock (painting)
+                {
+                    g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 5, CursorPosition.Y);
+                    g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X, CursorPosition.Y + 5);
+                    g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 12, CursorPosition.Y + 12);
+                }
+            }
+        }
+
+        private void TransitionEffect_ConfigureRenderingParams(renderingParams e)
+        {
+            // Reset transformation data
+            g.ResetTransform();
+            RenderingParam.Alpha = 1.0f;
+
+            // Exit after resetting transiton effects?
+            if (e == null)
+                return;
+
+            // Apply any offset data
+            g.TranslateTransform(e.Offset.X, e.Offset.Y);
+
+            // Apply transparency values (this is done via rendering parameters passed along to each control)
+            RenderingParam.Alpha = e.Alpha;
+        }
+
+        protected void RenderPanels()
+        {
+            lock (painting)
+            {
+                try
+                {
+                    for (int i = 0; i < RenderingQueue.Count; i++)
+                    {
+                        // Configure rendering params based on panel mode
+                        if (RenderingQueue[i].Mode == eModeType.transitioningIn)
+                            // Render parameters for transition effect in
+                            TransitionEffect_ConfigureRenderingParams(TransitionEffectParam_In);
+                        else if (RenderingQueue[i].Mode == eModeType.transitioningOut)
+                            // Render parameters for transition effect out
+                            TransitionEffect_ConfigureRenderingParams(TransitionEffectParam_Out);
+                        else
+                            // Reset any transition effects
+                            TransitionEffect_ConfigureRenderingParams(null);
+
+                        RenderingQueue[i].Render(g, RenderingParam);
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private void RenderGesture()
+        {
+            if ((currentGesture != null) && (currentGesture.Count > 0))
+                lock (painting)
+                {
+                    Point[] GesturePoints = currentGesture.ToArray();
+                    for (int i = 0; i < GesturePoints.Length; i++)
+                        g.FillEllipse(new Brush(Color.Red), new Rectangle((GesturePoints[i].X - 5), (GesturePoints[i].Y - 5), 10, 10));
+                    if (GesturePoints.Length > 1)
+                        g.DrawLine(new Pen(Color.Red, 10F), GesturePoints);
+                }
+        }
+
+        #endregion
+
+        private void RenderingWindow_Resize(object sender, EventArgs e)
+        {
+            _ScaleFactors = new PointF((this.ClientRectangle.Width / 1000F), (this.ClientRectangle.Height / 600F));
+            OnRenderFrameInternal();
+            raiseResizeEvent();
+
+            // Also make other windows follow the state of the main window (maximize and minimize)
+            Core.theHost.SetAllWindowState(this.WindowState);
+        }
+        protected override void OnResize(EventArgs e)
+        {
+            MakeCurrent();
+            g.Resize(Width, Height);
+            base.OnResize(e);
+            MakeCurrent(null);
+        }
+        protected override void OnWindowStateChanged(EventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+                this.WindowState = WindowState.Fullscreen;
+            if ((this.WindowState == WindowState.Fullscreen) && (!defaultMouse))
+            {
+                if (screen == 0)
+                    DefaultMouse.TrapCursor();
+                DefaultMouse.HideCursor(this.WindowInfo);
+            }
+            else
+            {
+                if ((screen == 0) && (!defaultMouse))
+                    DefaultMouse.UntrapCursor();
+                DefaultMouse.ShowCursor(this.WindowInfo);
+            }
+            base.OnWindowStateChanged(e);
+        }
+
+        void RenderingWindow_Gesture(object sender, OpenMobile.Graphics.TouchEventArgs e)
+        {
+            string gesture = String.Empty;
+            if (e.GestureComplete)
+                gesture = "End";
+            gesture += e.Name + "|";
+            if (e.Name == "Rotate")
+                gesture += e.Arg1.ToString() + "|";
+            else
+                gesture = (e.Arg1 * AspectRatio).ToString("0.00") + "|";
+            gesture += ((e.Position.X - this.X) * _ScaleFactors.X).ToString() + ",";
+            gesture += ((e.Position.Y - this.Y) * _ScaleFactors.Y).ToString();
+            Core.theHost.execute(eFunction.multiTouchGesture, screen.ToString(), gesture);
+        }
+
+        void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
+        {
             try
             {
-                Run(1.0, 50.0);
+                DisplayDevice dev = DisplayDevice.AvailableDisplays[screen];
+                if (e.Landscape != dev.Landscape)
+                    Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", String.Empty);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                BuiltInComponents.Host.DebugMsg("RenderingWindow.Run Exception", e);
+                BuiltInComponents.Host.DebugMsg("RenderingWindow_ResolutionChange Exception", ex);
+            }
+        }
+
+        private void RenderingWindow_FormClosing(object sender, CancelEventArgs e)
+        {
+            try
+            {
+                if (screen == 0)
+                    Core.theHost.execute(eFunction.closeProgram);
+            }
+            catch (Exception) { }
+        }
+
+        /// <summary>
+        /// Indicates gesture recognition is active
+        /// </summary>
+        private bool Gesture_Active
+        {
+            get
+            {
+                return (currentGesture.Count > 0);
+            }
+        }
+
+        private Point ScalePointToScreen(Point p)
+        {
+            p.Scale(_ScaleFactors.X, _ScaleFactors.Y);
+            return p;
+        }
+
+        internal void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
+        {
+            if ((int)sender != screen)
+                return;
+
+            // Scale mouse data
+            MouseMoveEventArgs eScaled = new MouseMoveEventArgs(e);
+            MouseMoveEventArgs.Scale(eScaled, _ScaleFactors);
+
+            // Save current cursor position
+            CursorPosition = eScaled.Location;
+
+            // Calculate mouse move distances
+            CursorDistance = (MouseMoveStartPoint.ToVector2() - CursorPosition.ToVector2()).Length;
+            CursorDistanceXYTotal = CursorPosition - MouseMoveStartPoint;
+            CursorDistanceXYRelative = CursorPosition - CursorDistanceXYRelative;
+
+            if (e.Buttons == MouseButton.Left)
+            {   // Mouse moved with button pressed, this indicates a gesture or a throw
+
+                bool EnableGesture = true;
+                
+                // Disable gesture if this control uses iThrow interface
+                if (FocusedControl != null && typeof(IThrow).IsInstanceOfType(FocusedControl))
+                    EnableGesture = false;
+
+                // Ensure mouse is moved a certain distance before we start to gesture
+                if (EnableGesture)
+                    if (Gesture_Active || CursorDistance > 50)
+                    {
+                        // Add mouse position to gesture array
+                        currentGesture.Add(CursorPosition);
+                    }
+
+                // iThrow interface
+                if (FocusedControl != null)
+                    if (typeof(IThrow).IsInstanceOfType(FocusedControl) == true)
+                    {
+                        if (!ThrowActive)
+                        {   // Start new throw
+                            if (CursorDistance > 5)
+                            {
+                                bool cancel = false;
+                                ((IThrow)FocusedControl).MouseThrowStart(screen, MouseMoveStartPoint, _ScaleFactors, ref cancel);
+                                ThrowActive = !cancel;
+                            }
+                        }
+                        else
+                        {   // Throw started, update data for throw interface
+                            ((IThrow)FocusedControl).MouseThrow(screen, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                        }
+                    }
+            }
+            else
+            {   // Regular mouse move action
+
+                // Find control under mouse
+                OMControl control = FindControlAtLocation(CursorPosition);
+
+                // Highlight/unhighlight the control
+                UpdateControlFocus(control);
+            }
+
+            // Mouse interface
+            if (FocusedControl != null)
+                if (typeof(IMouse).IsInstanceOfType(FocusedControl))
+                    ((IMouse)FocusedControl).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+
+            // Update relative distance data
+            CursorDistanceXYRelative = CursorPosition;
+            
+            // Redraw screen
+            Invalidate();
+        }
+
+        internal void RenderingWindow_MouseClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
+        {
+            if ((int)sender != screen)
+                return;
+        }
+
+        internal void RenderingWindow_MouseDown(object sender, OpenMobile.Input.MouseButtonEventArgs e)
+        {
+            if ((int)sender != screen)
+                return;
+
+            // Scale mouse data
+            MouseButtonEventArgs eScaled = new MouseButtonEventArgs(e);
+            MouseButtonEventArgs.Scale(eScaled, _ScaleFactors);
+
+            // Save mouse start point
+            MouseMoveStartPoint = eScaled.Location;
+
+            // Default value for mouse moved distances
+            CursorDistance = 0;
+            CursorDistanceXYTotal.X = 0;
+            CursorDistanceXYTotal.Y = 0;
+            CursorDistanceXYRelative = MouseMoveStartPoint;
+
+            // If nothing is selected then try to select something
+            if (FocusedControl == null)
+            {
+                // Find control under mouse
+                OMControl control = FindControlAtLocation(MouseMoveStartPoint);
+
+                // Highlight/unhighlight the control
+                UpdateControlFocus(control);
+            }
+
+            // No use in doing anything if nothing is focused
+            if (FocusedControl == null)
+                return;
+
+            // Can this control accept clicks?
+            if (IsControlClickable(FocusedControl))
+            {   // Reset and start click timing 
+                swClickTiming.Reset();
+                swClickTiming.Start();
+
+                // Enable hold detection
+                tmrClickHold.Enabled = true;
+
+                // Show control as clicked 
+                FocusedControl.Mode = eModeType.Clicked;
+            }
+
+            // Mouse interface
+            if (FocusedControl != null)
+                if (typeof(IMouse).IsInstanceOfType(FocusedControl))
+                    ((IMouse)FocusedControl).MouseDown(screen, eScaled, MouseMoveStartPoint);
+
+            // Redraw
+            Invalidate();
+        }
+
+        internal void RenderingWindow_MouseUp(object sender, OpenMobile.Input.MouseButtonEventArgs e)
+        {
+            if ((int)sender != screen)
+                return;
+
+            // Scale mouse data
+            MouseButtonEventArgs eScaled = new MouseButtonEventArgs(e);
+            MouseButtonEventArgs.Scale(eScaled, _ScaleFactors);
+
+            // Stop click timing
+            swClickTiming.Stop();
+            tmrClickHold.Enabled = false;
+
+            // Handle gesture
+            bool GestureHandled = HandleGesture();
+            
+            // No use in checking click if no control is focused
+            if (FocusedControl != null)
+            {
+                // Reset clicked state on focused control
+                FocusedControl.Mode = eModeType.Highlighted;
+            }
+            
+            // Redraw
+            Invalidate();
+
+            // Return if gesture is handled or no control has focus
+            if (GestureHandled || FocusedControl == null)
+            {
+                // Find control under mouse (if any)
+                OMControl control = FindControlAtLocation(CursorPosition);
+
+                // Highlight/unhighlight the control
+                UpdateControlFocus(control);
+
+                return;
+            }
+
+            // Click filter time
+            if (swClickTiming.ElapsedMilliseconds > 1)
+            {
+                // Determine type of click (click or long click)
+                if (swClickTiming.ElapsedMilliseconds < 500)
+                {   // Normal click
+                    ActivateClick(FocusedControl, ClickTypes.Normal);
+                }
+                else
+                {   // Long click
+                    ActivateClick(FocusedControl, ClickTypes.Long);
+                }
+            }
+            else
+            {
+                int i = 0;
+            }
+
+            // iMouse interface
+            if (FocusedControl != null)
+                if (typeof(IMouse).IsInstanceOfType(FocusedControl))
+                    ((IMouse)FocusedControl).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+
+            // iThrow interface
+            if (ThrowActive)
+            {
+                if (FocusedControl != null)
+                    if (typeof(IThrow).IsInstanceOfType(FocusedControl))
+                        ((IThrow)FocusedControl).MouseThrowEnd(screen, eScaled.Location);
+            }
+
+            // Redraw
+            Invalidate();
+
+            // Default value for mouse moved distances
+            CursorDistance = 0;
+            CursorDistanceXYTotal.X = 0;
+            CursorDistanceXYTotal.Y = 0;
+            CursorDistanceXYRelative = MouseMoveStartPoint;
+            ThrowActive = false;
+        }
+
+        private void RenderingWindow_MouseLeave(object sender, EventArgs e)
+        {
+            UpdateControlFocus(null);
+        }
+
+        public void RenderingWindow_KeyDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
+        {
+            if (e.Screen != Screen)
+                return;
+
+            // Handle arrow keys to move focus around
+            if ((e.Key == Key.Left) || (e.Key == Key.Right) || (e.Key == Key.Up) || (e.Key == Key.Down))
+            {
+                if (FocusedControl == null)
+                {   // Select the first available control that can receive focus
+                    OMControl control = FindFirstFocusableControl();
+                    UpdateControlFocus(control);
+                    Invalidate();
+                }
+                else
+                {   // Goto to next control in the requested direction
+                    OMControl control = null;
+                    if (e.Key == Key.Right)
+                        control = FindFirstFocusableControlInDirection(SearchDirections.Right, 0.1F);
+                    else if (e.Key == Key.Left)
+                        control = FindFirstFocusableControlInDirection(SearchDirections.Left, 0.1F);
+                    else if (e.Key == Key.Up)
+                        control = FindFirstFocusableControlInDirection(SearchDirections.Up, 0.1F);
+                    else if (e.Key == Key.Down)
+                        control = FindFirstFocusableControlInDirection(SearchDirections.Down, 0.1F);
+                    if (control != null)
+                        UpdateControlFocus(control);
+                    Invalidate();
+                }
+            }
+        }
+
+        public void RenderingWindow_KeyUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
+        {
+            if (e.Screen != Screen)
+                return;
+
+            // Exit fullscreen or close program
+            if (e.Key == Key.Escape)
+            {
+                if (this.WindowState == WindowState.Fullscreen)
+                    this.WindowState = WindowState.Normal;
+                else
+                {
+                    if (screen == 0)
+                        Core.theHost.execute(eFunction.closeProgram);
+                    else
+                        CloseMe();
+                }
+            }
+            else if (e.Key == Key.Enter)
+            {
+                // Only active if we have a focused control
+                if (FocusedControl != null)
+                {
+                    if (IsControlClickable(FocusedControl))
+                    {
+                        // Check for normal enter (click), shift enter (long click) or ctrl enter (hold click)
+                        if (e.Shift == true && e.Control == false)
+                        {   // Long click
+                            ActivateClick(FocusedControl, ClickTypes.Long);
+                        }
+                        else if (e.Shift == true && e.Control == true)
+                        {   // Hold click
+                            ActivateClick(FocusedControl, ClickTypes.Hold);
+                        }
+                        else
+                        {   // Normal click
+                            ActivateClick(FocusedControl, ClickTypes.Normal);
+                        }
+                    }
+                }
             }
 
         }
-        Graphics.Graphics g;
-        public RenderingWindow(int s)
+
+        public void ExecuteTransition(eGlobalTransition transType)
         {
-            g = new OpenMobile.Graphics.Graphics(s);
-            this.screen = s;
-            this.tmrClick = new System.Timers.Timer(20);
-            this.tmrLongClick = new System.Timers.Timer(500);
-            this.tmrClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrClick_Tick);
-            this.tmrLongClick.Elapsed += new System.Timers.ElapsedEventHandler(this.tmrLongClick_Tick);
+            lock (this) // Lock to prevent multiple transitons at the same time
+            {
+                List<OMPanel> panels = RenderingQueue.FindAll(x => ((x.Mode == eModeType.transitioningIn) || (x.Mode == eModeType.transitioningOut)));
+
+                // Reset transition effects parameters
+                TransitionEffectParam_In = new renderingParams();
+                TransitionEffectParam_Out = new renderingParams();
+                
+                // Execute effect
+                PanelTransitionEffectHandler.GetEffect(transType.ToString()).Run(TransitionEffectParam_In, TransitionEffectParam_Out, ReDrawPanel);
+                
+                // Go trough each panel to set correct modes after transition effects
+                foreach (OMPanel panel in panels)
+                {
+                    if (panel.Mode == eModeType.transitioningIn)
+                    {   // Panel is transitioning in, set to normal state
+                        panel.Mode = eModeType.Normal;
+
+                        // Raise event for entering panel
+                        panel.RaiseEvent(screen, eEventType.Entering);
+                    }
+                    else if (panel.Mode == eModeType.transitioningOut)
+                    {   // Panel is transitioning out, remove from rendering queue
+                        RenderingQueue.Remove(panel);
+
+                        // Unhook refresh event
+                        panel.UpdateThisControl -= UpdateThisControl;
+
+                        // Raise event for leaving panel
+                        panel.RaiseEvent(screen, eEventType.Leaving);
+                    }
+                }
+            }
+
+            // Reset transition effects parameters
+            TransitionEffectParam_In = new renderingParams();
+            TransitionEffectParam_Out = new renderingParams();
+
+            Invalidate();
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public void InitializeRendering()
+        public void TransitionInPanel(OMPanel newP)
         {
+            bool exists = false;
+            lock (this) // Lock to prevent multiple transitons at the same time
+            {
+                exists = RenderingQueue.Contains(newP);
+                if (!exists)
+                {
+                    // Attach screen update event to new panel
+                    newP.UpdateThisControl += UpdateThisControl;
 
-            // Check for specific startup screen
-            int StartupScreen = Core.theHost.StartupScreen;
+                    // Unfocus currently focused control
+                    UpdateControlFocus(null);
 
-            if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
-                this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Bounds.Location, this.Size);
-            //this.Title = "openMobile v" + Assembly.GetCallingAssembly().GetName().Version + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + (screen + 1).ToString();
+                    // Mark this panel as transitionin in
+                    newP.Mode = eModeType.transitioningIn;
 
-            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetCallingAssembly().Location);
-            this.Title = "openMobile v" + string.Format("{0}.{1}.{2}.{3}", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart) + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + screen.ToString();
+                    // Add new panel
+                    insertPanel(newP);
 
-            InitializeComponent();
-            if (screen == 0)
-                InputRouter.Initialize();
-            if (Configuration.RunningOnWindows)
-                if (options == GameWindowFlags.Fullscreen)
-                    OnWindowStateChanged(EventArgs.Empty);
-
-
-            #region Configure and set default os device data
-
-            // Set mouse startup location
-            if ((this.WindowState == WindowState.Fullscreen) && (screen == 0))
-                DefaultMouse.Location = this.Location;
-
-            #endregion
+                    // Raise panel event
+                    newP.RaiseEvent(screen, eEventType.Loaded);
+                }
+            }
         }
+
+        public void TransitionOutPanel(OMPanel oldP)
+        {
+            lock (this) // Lock to prevent multiple transitons at the same time
+            {
+                // Unfocus currently focused control
+                UpdateControlFocus(null);
+
+                // Mark this panel as transitioning out
+                oldP.Mode = eModeType.transitioningOut;
+
+                // Raise panel event
+                oldP.RaiseEvent(screen, eEventType.Unloaded);
+            }
+        }
+
+        public bool TransitionOutEverything()
+        {
+            lock (this) // Lock to prevent multiple transitons at the same time
+            {
+                if (blockHome)
+                    return false;
+
+                // Unfocus currently focused control
+                UpdateControlFocus(null);
+
+                for (int i = RenderingQueue.Count - 1; i >= 0; i--)
+                {
+                    if ((RenderingQueue[i].Mode == eModeType.transitioningIn) || (RenderingQueue[i].UIPanel))
+                        RenderingQueue[i].Mode = eModeType.Normal;
+                    else
+                    {
+                        RenderingQueue[i].Mode = eModeType.transitioningOut;
+
+                        // Raise panel event
+                        RenderingQueue[i].RaiseEvent(screen, eEventType.Unloaded);
+                    }
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Closes this screen with animation
+        /// </summary>
+        public void CloseMe()
+        {
+            //SandboxedThread.Asynchronous(delegate() { tmrClosing_Tick(null, null); });
+            this.Exit();
+        }
+
+        /// <summary>
+        /// [RENAME TO CloseAll] Closes all screens with animation
+        /// </summary>
+        public static void CloseRenderer()
+        {
+            for (int i = 0; i < Core.RenderingWindows.Count; i++)
+                Core.RenderingWindows[i].CloseMe();
+        }
+
+        /// <summary>
+        /// Fades the screen to black
+        /// </summary>
+        public void FadeOut()
+        {
+            for (dimmer = 1; dimmer < 250; dimmer += 5)
+            {
+                Invalidate();
+                Thread.Sleep(30);
+            }
+            dimmer = 255;
+            Invalidate();
+            SandboxedThread.Asynchronous(delegate() { Thread.Sleep(1000); dimmer = 0; });
+        }
+
+        /// <summary>
+        /// Requests a redraw of the screen
+        /// </summary>
+        private void Invalidate()
+        {
+            refresh = true;
+        }
+
+        /// <summary>
+        /// Hookable method to request a redraw of the screen
+        /// </summary>
+        /// <param name="resetHighlighted"></param>
+        public void UpdateThisControl(bool resetHighlighted)
+        {
+            Invalidate();
+            //if (resetHighlighted)
+            //    MouseMove();
+        }
+
+        #region Paint Identity
 
         public void PaintIdentity()
         {
@@ -169,1308 +1011,402 @@ namespace OpenMobile
             Invalidate();
         }
 
-        private void Invalidate()
-        {
-            refresh = true;
-        }
+        #endregion
 
-        public new int Width
-        {
-            set
-            {
-                base.Width = value + (this.Width - ClientSize.Width);
-            }
-            get
-            {
-                return base.Width;
-            }
-        }
-        public new int Height
-        {
-            set
-            {
-                base.Height = value + (this.Height - ClientSize.Height);
-            }
-            get
-            {
-                return base.Height;
-            }
-        }
-        public new Size Size
-        {
-            set
-            {
-                base.Size = new Size(value.Width + (this.Width - ClientSize.Width), value.Height + (this.Height - ClientSize.Height));
-            }
-            get
-            {
-                return base.Size;
-            }
-        }
 
-        #region ControlManagement
-        public void TransitionInPanel(OMPanel newP)
+        /// <summary>
+        /// Raises the resize event to the framework
+        /// </summary>
+        private void raiseResizeEvent()
         {
-            lock (this) // Lock to prevent multiple transitons at the same time
-            {
-                OMControl c;
-                bool exists = backgroundQueue.Contains(newP);
-                newP.UpdateThisControl += UpdateThisControl;
-                for (int i = 0; i < newP.controlCount; i++)
+            SandboxedThread.Asynchronous(delegate()
                 {
-                    c = newP.getControl(i);
-                    if ((c.Mode == eModeType.ClickedAndTransitioningOut) || (c.Mode == eModeType.transitioningOut) || (exists))
-                        c.Mode = eModeType.transitionLock;
-                    else
-                        c.Mode = eModeType.transitioningIn;
+                    Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), String.Empty, String.Empty);
                 }
-                if (exists)
-                    newP.Mode = eModeType.transitionLock;
-                else if (newP.Mode == eModeType.transitioningOut)
-                    newP.Mode = eModeType.Normal;
-                else
-                    newP.Mode = eModeType.transitioningIn;
-                if (!exists)
-                    insertPanel(newP);
-                rParam.globalTransitionIn = 0;
-                rParam.globalTransitionOut = 1;
-
-            }
-
-            // Raise panel event
-            if (newP.Mode == eModeType.transitioningIn)
-                newP.RaiseEvent(screen, eEventType.Loaded);
-            
+            );
         }
 
+        /// <summary>
+        /// Inserts a panel into the rendering queue according to panel priority
+        /// </summary>
+        /// <param name="newP"></param>
         private void insertPanel(OMPanel newP)
         {
-            for (int i = backgroundQueue.Count - 1; i >= 0; i--)
-                if (backgroundQueue[i].Priority <= newP.Priority)
+            for (int i = RenderingQueue.Count - 1; i >= 0; i--)
+                if (RenderingQueue[i].Priority <= newP.Priority)
                 {
-                    backgroundQueue.Insert(i + 1, newP);
+                    RenderingQueue.Insert(i + 1, newP);
                     return;
                 }
-            backgroundQueue.Insert(0, newP);
-        }
-        public void UpdateThisControl(bool resetHighlighted)
-        {
-            Invalidate();
-            if (resetHighlighted)
-                MouseMove();
+            RenderingQueue.Insert(0, newP);
         }
 
-        public bool TransitionOutEverything()
+        /// <summary>
+        /// Sets or unsets the currently focused control
+        /// </summary>
+        /// <param name="control"></param>
+        private void UpdateControlFocus(OMControl control)
         {
-            lock (this) // Lock to prevent multiple transitons at the same time
+            // Reset any click actions
+            ResetForm();
+
+            // Remove highlight from previously highlighted control
+            if (FocusedControl != null && FocusedControl != control)
             {
-                if (blockHome)
-                    return false;
-                highlighted = null;
-                for (int i = backgroundQueue.Count - 1; i >= 0; i--)
-                {
-                    if ((backgroundQueue[i].Mode == eModeType.transitioningIn) || (backgroundQueue[i].UIPanel))
-                        backgroundQueue[i].Mode = eModeType.Normal;
-                    else
-                    {
-                        backgroundQueue[i].Mode = eModeType.transitioningOut;
-                        for (int j = backgroundQueue[i].controlCount - 1; j >= 0; j--)
-                            backgroundQueue[i][j].Mode = eModeType.transitioningOut;
-
-                        // Raise panel event
-                        if (backgroundQueue[i].Mode == eModeType.transitioningOut)
-                            backgroundQueue[i].RaiseEvent(screen, eEventType.Unloaded);
-                    }
-                }
-                rParam.globalTransitionIn = 0;
-                rParam.globalTransitionOut = 1;
-                return true;
-            }
-        }
-        public void TransitionOutPanel(OMPanel oldP)
-        {
-            lock (this) // Lock to prevent multiple transitons at the same time
-            {
-                if (highlighted != null)
-                    highlighted.Mode = eModeType.Normal;
-                highlighted = null;
-                for (int i = 0; i < oldP.controlCount; i++)
-                    if (oldP.getControl(i).Mode != eModeType.transitionLock)
-                        oldP[i].Mode = eModeType.transitioningOut;
-                if (oldP.Mode == eModeType.transitioningIn)
-                    oldP.Mode = eModeType.Normal;
-                else
-                    oldP.Mode = eModeType.transitioningOut;
-                rParam.globalTransitionIn = 0;
-                rParam.globalTransitionOut = 1;
-
-            }
-            // Raise panel event
-            if (oldP.Mode == eModeType.transitioningOut)
-                oldP.RaiseEvent(screen, eEventType.Unloaded);
-        }
-        public void ExecuteTransition(eGlobalTransition transType)
-        {
-            //if (!this.Visible)
-            //    Console.WriteLine("Renderingwindow(" + screen.ToString() + ").ExecuteTransition: Waiting for visible (" + Timing.GetTiming() + ")");
-
-            while (!this.Visible)
-            {
-                Thread.Sleep(10);
-            }
-            //Console.WriteLine("Renderingwindow(" + screen.ToString() + ").ExecuteTransition: Executing transition (" + Timing.GetTiming() + ")");
-
-            lock (this) // Lock to prevent multiple transitons at the same time
-            {
-                if (transType != eGlobalTransition.None)
-                {
-                    currentTransition = transType;
-                    transitioning = true;
-                    while (transitioning == true)
-                    {
-                        transition_Tick();
-                        Thread.Sleep(25);
-                    }
-                    Invalidate();
-                }
-                lock (painting)
-                {
-                    tmrClick.Enabled = false;
-                    rParam.transparency = 1;
-                    rParam.transitionTop = 0;
-                    rParam.globalTransitionIn = 1;
-                    rParam.globalTransitionOut = 0;
-                }
-                foreach (OMPanel panel in backgroundQueue)
-                {
-                    if (panel.Mode == eModeType.transitioningOut)
-                    {   // Panel transitioning out
-                        panel.Mode = eModeType.Highlighted;
-                        panel.UpdateThisControl -= UpdateThisControl;
-                        panel.RaiseEvent(screen, eEventType.Leaving);
-                    }
-                    if (panel.Mode == eModeType.transitioningIn)
-                    {   // Panel transitioning in
-                        panel.RaiseEvent(screen, eEventType.Entering);
-                    }
-                    for (int i = panel.controlCount - 1; i >= 0; i--)
-                    {
-                        panel[i].Mode = eModeType.Normal;
-                    }
-                }
-                backgroundQueue.RemoveAll(q => q.Mode == eModeType.Highlighted);
-                for (int i = 0; i < backgroundQueue.Count; i++)
-                    backgroundQueue[i].Mode = eModeType.Normal;
-                if (transType > eGlobalTransition.Crossfade)
-                {
-                    tick = 0;
-                    ofsetIn = new Point(0, 0);
-                    ofsetOut = new Point(0, 0);
-                }
-                highlighted = null;
-                if (lastClick != null)
-                    lastClick.Mode = eModeType.Normal;
-                lastClick = null;
-                UpdateThisControl(true);
-            }
-        }
-        #endregion
-
-        #region Overrides
-        OImage identity;
-        int dimmer;
-        protected override void OnRenderFrame(EventArgs e)
-        {
-            //g.ResetClip();
-            OnPaint();
-            if ((currentGesture != null) && (currentGesture.Count > 0))
-                lock (painting)
-                    RenderGesture();
-            if (CursorShow)
-                lock (painting)
-                    RenderCursor();
-            if (Identify)
-            {
-                lock (painting)
-                {
-                    if (identity.TextureGenerationRequired)
-                        identity = g.GenerateTextTexture(identity, 0, 0, 1000, 600, screen.ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
-                    g.DrawImage(identity, 0, 0, 1000, 600, IdentifyOpacity);
-                }
-            }
-            //lock (painting)
-            {
-                RenderDebugInfo();
-            }
-            if (dimmer > 0)
-            {
-                g.FillRectangle(new Brush(Color.FromArgb(dimmer, Color.Black)), 0, 0, 1000, 600);
-            }
-
-            SwapBuffers(); //show the new image before potentially lagging
-            g.Finish();
-        }
-        public void FadeOut()
-        {
-            for (dimmer = 1; dimmer < 250; dimmer += 5)
-            {
-                Invalidate();
-                Thread.Sleep(30);
-            }
-            dimmer = 255;
-            Invalidate();
-            SandboxedThread.Asynchronous(delegate() { Thread.Sleep(1000); dimmer = 0; });
-        }
-        private void RenderGesture()
-        {
-            Point[] GesturePoints = currentGesture.ToArray();
-            for (int i = 0; i < GesturePoints.Length; i++)
-                g.FillEllipse(new Brush(Color.Red), new Rectangle((GesturePoints[i].X - 10), (GesturePoints[i].Y - 10), 20, 20));
-            if (GesturePoints.Length > 1)
-                g.DrawLine(new Pen(Color.Red, 18F), GesturePoints);
-        }
-        private OImage textTexture = null;
-        private void RenderDebugInfo()
-        {
-            if (BuiltInComponents.Host.ShowDebugInfo)
-            {
-                textTexture = g.GenerateTextTexture(textTexture, 0, 0, 400, 200, String.Format("S {0}, FPS {1}({2}/{3}), MS {4}/{5}/{6}({7})", screen, FPS, FPS_Max, FPS_Avg, render_ExecTimeMS_Min.ToString("#.#"),render_ExecTimeMS.ToString("#.#"),render_ExecTimeMS_Max.ToString("#.#"), render_ExecTimeMSAvg.ToString("#.#")), Font.Arial, eTextFormat.Normal, Alignment.TopLeft, Color.Yellow, Color.Yellow);
-                g.DrawImage(textTexture, 0, 0, 400, 200);
-            }
-        }
-        private void RenderCursor()
-        {
-            if (BuiltInComponents.Host.ShowCursors)
-            {
-                g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 5, CursorPosition.Y);
-                g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X, CursorPosition.Y + 5);
-                g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 12, CursorPosition.Y + 12);
-            }
-        }
-        protected override void OnResize(EventArgs e)
-        {
-            MakeCurrent();
-            g.Resize(Width, Height);
-            base.OnResize(e);
-            MakeCurrent(null);
-        }
-        protected void OnPaint()
-        {
-            lock (painting)
-            {
-                for (int i = 0; i < backgroundQueue.Count; i++)
-                {
-                    if (backgroundQueue[i].Mode == eModeType.transitioningIn)
-                        modifyIn(g);
-                    else if (backgroundQueue[i].Mode == eModeType.transitioningOut)
-                        modifyOut(g);
-                    else
-                        g.ResetTransform(); //modify neutral
-                    backgroundQueue[i].Render(g, rParam);
-                }
-            }
-        }
-
-        private void modifyOut(OpenMobile.Graphics.Graphics g)
-        {
-            //out=-
-            g.ResetTransform();
-            g.TranslateTransform(ofsetOut.X, ofsetOut.Y);
-        }
-        private void modifyIn(OpenMobile.Graphics.Graphics g)
-        {
-            //in=+
-            g.ResetTransform();
-            g.TranslateTransform(ofsetIn.X, ofsetIn.Y);
-        }
-        #endregion
-
-        #region Timers
-        private void tmrClick_Tick(object sender, EventArgs e)
-        {
-            if (rParam.transparency < 0.15)
-            {
-                tmrClick.Enabled = false;
-                if (lastClick != null)
-                {
-                    if ((lastClick.Mode == eModeType.Highlighted) || (lastClick.Mode == eModeType.Clicked))
-                    {
-                        rParam.transparency = 1;
-                        rParam.transitionTop = 0;
-                        if (keyboardActive == true)
-                        {
-                            lastClick.Mode = eModeType.Highlighted;
-                        }
-                        else
-                        {
-                            lastClick.Mode = eModeType.Normal;
-                            //Recheck where the mouse is at
-                            MouseMove();
-                        }
-                        Invalidate();
-                    }
-                }
-                else
-                {
-                    rParam.transparency = 1;
-                    rParam.transitionTop = 0;
-                    Invalidate();
-                }
-                lastClick = null;
-                return;
-            }
-            if (lastClick != null)
-            {
-                if (lastClick.Mode == eModeType.transitioningOut) //<- Unnecessary?
-                    lastClick.Mode = eModeType.ClickedAndTransitioningOut;
-                if (lastClick.Transition == eButtonTransition.None)
-                {
-                    rParam.transparency = 1;
-                    rParam.transitionTop = 0;
-                    if (lastClick.Mode == eModeType.ClickedAndTransitioningOut)
-                        lastClick.Mode = eModeType.transitioningOut;
-                    else
-                        lastClick.Mode = eModeType.Normal;
-
-                    if (keyboardActive == true)
-                    {
-                        lastClick.Mode = eModeType.Highlighted;
-                    }
-                    else
-                    {
-                        //Recheck where the mouse is at
-                        MouseMove();
-                    }
-                    tmrClick.Enabled = false;
-                    lastClick = null;
-                    return;
-                }
-            }
-            if (rParam.transparency >= 0.15F)
-            {
-                rParam.transparency = rParam.transparency - 0.15F;
-                rParam.transitionTop += 7;
-            }
-            Invalidate();
-        }
-
-        private void tmrClosing_Tick(object sender, EventArgs e)
-        {
-            if (Core.exitTransition == false)
-            {
-                this.Exit();
-                return;
-            }
-            while (this.Opacity >= 0)
-            {
-                if ((this.Opacity > 0) && (Core.theHost.GraphicsLevel == eGraphicsLevel.Standard))
-                    this.Opacity -= 0.04F;
-                else
-                {
-                    this.Exit();
-                    return;
-                }
-                Thread.Sleep(20);
-            }
-            this.Exit();
-        }
-        #endregion
-
-        #region MouseHandlers
-        PointF CursorPosition = new PointF();
-        bool CursorShow = true;
-
-        internal void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
-        {
-            int scr = (int)sender;
-            if (scr == screen)
-            {
-                keyboardActive = false;
-                MouseMove(sender, e);
-            }
-        }
-
-        private void MouseMove()
-        {
-            /*
-            if (WindowState == WindowState.Fullscreen)
-                MouseMove(null, new MouseMoveEventArgs(currentMouse.X, currentMouse.Y, 0, 0, MouseButton.None));
-            else
-                MouseMove(null, new MouseMoveEventArgs(DefaultMouse.X, DefaultMouse.Y, 0, 0, MouseButton.None));
-            */
-        }
-        private void MouseMove(object sender, MouseMoveEventArgs e)
-        {
-            if (keyboardActive)
-                return;
-            bool done = false; //We found something that was selected
-
-            // Debug info
-            //Console.WriteLine(string.Format("RenderingWindow_MouseMove: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-
-            // Save current cursor position
-            CursorPosition.X = e.X / widthScale; CursorPosition.Y = e.Y / heightScale; 
-            Invalidate();
-
-            if (rParam.currentMode == eModeType.Scrolling)
-            {
-                if (e.Buttons == MouseButton.Left)
-                {
-                    if (highlighted != null)
-                    {
-                        // IThrow interface
-                        ThrowStarted = false; 
-                        if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
-                        {
-                            //Console.WriteLine(string.Format("RenderingWindow_MouseMove.MouseThrow: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-                            Point ThrowTotalDistance = new Point((int)((e.X - ThrowStart.X + 0.5) / widthScale), (int)((e.Y - ThrowStart.Y + 0.5) / heightScale));
-                            ThrowRelativeDistance.X = e.X - ThrowRelativeDistance.X;
-                            ThrowRelativeDistance.Y = e.Y - ThrowRelativeDistance.Y;
-                            ((IThrow)highlighted).MouseThrow(screen, ThrowTotalDistance, new Point((int)(ThrowRelativeDistance.X / widthScale), (int)(ThrowRelativeDistance.Y / heightScale)));
-                            ThrowRelativeDistance = e.Location;
-                            tmrLongClick.Enabled = false;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if ((e.Buttons == MouseButton.Left) && (!ThrowStarted) && (!typeof(IMouse).IsInstanceOfType(highlighted)))
-                {
-                    if (currentGesture == null)
-                    {
-                        if ((System.Math.Abs(e.X - ThrowStart.X) <= (int)(20 * widthScale)) && (System.Math.Abs(e.Y - ThrowStart.Y) <= (int)(20 * heightScale)))
-                            return;
-                        currentGesture = new List<Point>();
-                        rParam.currentMode = eModeType.gesturing;
-                    }
-                    //Console.WriteLine(string.Format("RenderingWindow_MouseMove.currentGesture: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-                    currentGesture.Add(new Point(e.X / widthScale, e.Y / heightScale));
-                    //Console.WriteLine(String.Format("RenderingWindow_MouseMove.currentGesture: highlighted{0}", highlighted));
-                    Invalidate();
-                    if (lastClick != null)
-                        lastClick.Mode = eModeType.Highlighted;
-                }
-                else
-                {
-                    done = checkControl(e);
-                    if (highlighted != null)
-                    {
-                        if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
-                            try
-                            {
-                                ((IMouse)highlighted).MouseMove(screen, e, widthScale, heightScale);
-                            }
-                            catch (Exception ex) { SandboxedThread.Handle(ex); }
-                        if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
-                            if (ThrowStarted)
-                                if (System.Math.Abs(e.X - ThrowStart.X) > 3 || (System.Math.Abs(e.Y - ThrowStart.Y) > 3))
-                                {
-                                    bool cancel = false;
-                                    //Console.WriteLine(string.Format("RenderingWindow_MouseMove.MouseThrowStart: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-                                    ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart, new PointF(widthScale, heightScale), ref cancel);
-                                    if (cancel == false)
-                                        rParam.currentMode = eModeType.Scrolling;
-                                }
-
-                        if (done == false)
-                        {
-                            highlighted = null;
-                            Invalidate();
-                        }
-                    }
-                }
-            }
-        }
-
-        private void HighlightControl(MouseMoveEventArgs e)
-        {
-            bool done = checkControl(e);
-            if (highlighted != null)
-            {
-                if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
-                    try
-                    {
-                        ((IMouse)highlighted).MouseMove(screen, e, widthScale, heightScale);
-                    }
-                    catch (Exception ex) { SandboxedThread.Handle(ex); }
-                if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
-                    if (ThrowStarted)
-                        if (System.Math.Abs(e.X - ThrowStart.X) > 3 || (System.Math.Abs(e.Y - ThrowStart.Y) > 3))
-                        {
-                            bool cancel = false;
-                            ((IThrow)highlighted).MouseThrowStart(screen, ThrowStart, new PointF(widthScale, heightScale), ref cancel);
-                            if (cancel == false)
-                                rParam.currentMode = eModeType.Scrolling;
-                        }
-
-                if (done == false)
-                {
-                    highlighted = null;
-                    Invalidate();
-                }
-            }
-        }
-
-        private bool checkControl(OpenMobile.Input.MouseMoveEventArgs e)
-        {
-            try
-            {
-                OMControl b;
-                for (int i = backgroundQueue.Count - 1; i >= 0; i--)
-                {
-                    for (int j = backgroundQueue[i].controlCount - 1; j >= 0; j--)
-                    {
-                        if (backgroundQueue.Count <= i)
-                            continue;
-                        b = backgroundQueue[i][j];
-                        if ((e.X > (b.Left * widthScale)) && (e.Y > (b.Top * heightScale)) && (e.X < ((b.Left + b.Width) * widthScale)) && (e.Y < ((b.Top + b.Height) * heightScale)))
-                        {
-                            if (b.Visible == true)
-                            {
-                                // If this control is marked as clicktrough then skip it
-                                if (b.NoUserInteraction)
-                                    continue;
-
-                                // Check if this point is clickable in the control
-                                if (typeof(INotClickable).IsInstanceOfType(b))
-                                    if (!((INotClickable)b).IsPointClickable((int)(e.X / widthScale), (int)(e.Y / widthScale)))
-                                        continue;
-                                rParam.currentMode = eModeType.Highlighted;
-                                if ((b.Mode == eModeType.Normal))
-                                    b.Mode = eModeType.Highlighted;
-                                if (b == highlighted)
-                                    return true;
-                                highlighted = b;
-                                Invalidate();
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception) { }
-            return false;
-        }
-        internal void RenderingWindow_MouseClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
-        {
-            if ((int)sender != screen)
-                return;
-
-            //Console.WriteLine(string.Format("RenderingWindow_MouseClick: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-            //Console.WriteLine(string.Format("RenderingWindow_MouseClick(Enter): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
-
-            if ((e.Buttons == MouseButton.Left) && (highlighted != null))
-            {
-                if (rParam.currentMode == eModeType.Highlighted)
-                {
-                    tmrLongClick.Enabled = false;
-
-                    if (typeof(OMButton).IsInstanceOfType(highlighted))
-                    {
-                        if (lastClick != null)
-                        {
-                            lastClick.Mode = eModeType.Clicked;
-                            tmrClick.Enabled = true;
-                            SandboxedThread.Asynchronous(delegate() { if (lastClick != null) lastClick.clickMe(screen); });
-                        }
-                        return;
-                    }
-                    if (lastClick != null)
-                        lastClick.Mode = eModeType.Normal;
-                    lastClick = null;
-
-                    if (typeof(IClickable).IsInstanceOfType(highlighted) == true)
-                    {
-                        if (highlighted != null)
-                        {
-                            if (highlighted.Mode != eModeType.Clicked)
-                            {
-                                highlighted.Mode = eModeType.Clicked;
-                                SandboxedThread.Asynchronous(delegate()
-                                {
-                                    if (highlighted != null)
-                                        ((IClickable)highlighted).clickMe(screen);
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-            //Console.WriteLine(string.Format("RenderingWindow_MouseClick(Exit): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
-        }
-
-        private void tmrLongClick_Tick(object sender, EventArgs e)
-        {
-            tmrLongClick.Enabled = false;
-            if (rParam.currentMode == eModeType.gesturing)
-                return;
-
-            // Debug info
-            //Console.WriteLine(string.Format("screen {0} tmrLongClick_Tick ",screen));
-            //Console.WriteLine(string.Format("tmrLongClick_Tick(Enter): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
-
-            if ((highlighted != null) && (typeof(IClickable).IsInstanceOfType(highlighted)))
-            {
-                highlighted.Mode = eModeType.Clicked;
-                SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).longClickMe(screen); });
-                //if (highlighted != null)
-                //    highlighted.Mode = eModeType.Highlighted;
-            }
-            lastClick = null;
-            //Console.WriteLine(string.Format("tmrLongClick_Tick(Exit): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
-        }
-
-        internal void RenderingWindow_MouseDown(object sender, OpenMobile.Input.MouseButtonEventArgs e)
-        {
-            if ((int)sender != screen)
-                return;
-
-            // Debug info
-            //Console.WriteLine(string.Format("RenderingWindow_MouseDown: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-            //Console.WriteLine(string.Format("RenderingWindow_MouseDown(Enter): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
-
-            // Try to highlight control if not already highlighted
-            HighlightControl(new MouseMoveEventArgs(e.X, e.Y, 0, 0, e.Button));
-
-            keyboardActive = false;
-            if (highlighted != null)
-            {
-                if ((rParam.currentMode == eModeType.Highlighted) && (typeof(OMButton).IsInstanceOfType(highlighted)))
-                {
-                    if (lastClick != null)
-                    {
-                        lastClick.Mode = eModeType.Normal;
-                    }
-                    lastClick = (OMButton)highlighted;
-                    if (lastClick.Mode == eModeType.transitioningOut)
-                        lastClick.Mode = eModeType.ClickedAndTransitioningOut;
-                    else
-                        lastClick.Mode = eModeType.Clicked;
-                    tmrLongClick.Enabled = true;
-                    Invalidate();
-                }
-
-                // Start monitoring for a long click
-                else if (typeof(IClickable).IsInstanceOfType(highlighted)) 
-                {
-                    tmrLongClick.Enabled = true;
-                }
-                if (typeof(IMouse).IsInstanceOfType(highlighted))
-                    ((IMouse)highlighted).MouseDown(screen, e, widthScale, heightScale);
-                if (typeof(IThrow).IsInstanceOfType(highlighted) == true)
-                {
-                    ThrowStarted = true;
-                    ThrowRelativeDistance = new Point(e.X, e.Y);
-                }
+                FocusedControl.Mode = eModeType.Normal;
+                FocusedControl = null;
             }
             
-            ThrowStart = e.Location; //If we're not throwing something we're gesturing
-            //Console.WriteLine(string.Format("RenderingWindow_MouseDown(Exit): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
-        }
+            // Remove any debug info
+            if (DebugControl != null && DebugControl != control)
+            {
+                DebugControl.SkinDebug = false;
+                DebugControl = null;
+            }
 
-        internal void RenderingWindow_MouseUp(object sender, OpenMobile.Input.MouseButtonEventArgs e)
-        {
-            if ((int)sender != screen)
-                return;
-
-            // Debug info
-            //Console.WriteLine(string.Format("RenderingWindow_MouseUp: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-            //Console.WriteLine(string.Format("RenderingWindow_MouseUp(Enter): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
-           
-            tmrLongClick.Enabled = false;
-            OMButton ptrLast = lastClick;
-            if ((ptrLast != null) && (ptrLast.DownImage.image != null))
+            if (control != null)
             {
-                ptrLast.Mode = eModeType.Highlighted;
-                Invalidate();
-            }
-            if (highlighted != null)
-            {
-                // Debug info
-                //Console.WriteLine(string.Format("RenderingWindow_MouseUp.MouseUp: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-                if ((highlighted.Mode != eModeType.Clicked) && (highlighted.Mode != eModeType.ClickedAndTransitioningOut))
-                    highlighted.Mode = eModeType.Highlighted;
-                if (highlighted.Mode == eModeType.Clicked)
-                    highlighted.Mode = eModeType.Highlighted;
-                if (typeof(IMouse).IsInstanceOfType(highlighted) == true)
-                    ((IMouse)highlighted).MouseUp(screen, e, widthScale, heightScale);
-            }
-            if (rParam.currentMode == eModeType.Scrolling)
-            {
-                //Console.WriteLine(string.Format("RenderingWindow_MouseUp.MouseThrowEnd: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-                rParam.currentMode = eModeType.Highlighted;
-                if ((highlighted != null) && (typeof(IThrow).IsInstanceOfType(highlighted) == true))
-                    ((IThrow)highlighted).MouseThrowEnd(screen, e.Location);
-            }
-            else if (rParam.currentMode == eModeType.gesturing)
-            {
-                if (currentGesture.Count > 0)
+                // Only set focus to highlightable controls
+                if (IsControlFocusable(control))
                 {
-                    //Console.WriteLine(string.Format("RenderingWindow_MouseUp.gesture: {0} | {1}:{2} | {3}", sender, e.X, e.Y, e.Buttons.ToString()));
-                    Recognizer rec = new Recognizer();
-                    rec.Initialize();
-                    for (int i = 0; i < currentGesture.Count; i++)
-                        rec.AddPoint(currentGesture[i], false);
-                    //Core.theHost.execute(eFunction.gesture, screen.ToString(), rec.Recognize());
-                    Core.theHost.raiseGestureEvent(screen, rec.Recognize(), backgroundQueue[backgroundQueue.Count-1], highlighted);
-                    rParam.currentMode = eModeType.Highlighted;
-                    MouseMove(sender, new OpenMobile.Input.MouseMoveEventArgs(e.X, e.Y, 0, 0, MouseButton.None));
+                    // highlight this control
+                    FocusedControl = control;
+
+                    // Set focused control's mode as highlighted
+                    if (FocusedControl != null)
+                        FocusedControl.Mode = eModeType.Highlighted;
                 }
-                Invalidate();
-            }
-            ThrowStart.X = -1;
-            ThrowStart.Y = -1;
-            ThrowStarted = false;
-            currentGesture = null;
-            //Console.WriteLine(string.Format("RenderingWindow_MouseUp(Exit): {0}.{1}", highlighted, (highlighted != null ? highlighted.Mode : eModeType.Normal)));
-        }
-        #endregion
-        #region OtherUIEvents
-        protected override void OnLoad(EventArgs e)
-        {
-            g.Initialize(screen);
-            if (screen == 0)
-            {
-                if ((Graphics.Graphics.Renderer == "GDI Generic") || (Graphics.Graphics.Renderer == "Software Rasterizer"))
-                    Application.ShowError(this.WindowHandle, "This application has been forced to use software rendering.  Performance will be horrible until you install proper graphics drivers!!", "Performance Warning");
-            }
-            base.OnLoad(e);
-        }
-        private void RenderingWindow_FormClosing(object sender, CancelEventArgs e)
-        {
-            try
-            {
-                if (screen == 0)
-                    Core.theHost.execute(eFunction.closeProgram);
-            }
-            catch (Exception) { }
-        }
-        public int Screen
-        {
-            get
-            {
-                return screen;
-            }
-        }
-        public void RenderingWindow_KeyUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
-        {
-            if (e.Screen != Screen)
-                return;
-
-            if (e.Key == Key.Escape)
-            {
-                if (this.WindowState == WindowState.Fullscreen)
-                    this.WindowState = WindowState.Normal;
-                else
-                {
-                    if (screen == 0)
-                        Core.theHost.execute(eFunction.closeProgram);
-                    else
-                        CloseMe();
-                }
-            }
-            else if (e.Key == Key.Enter)
-            {
-                tmrLongClick.Enabled = false;
-
-                if (lastClick != null)
-                {
-                    keyboardActive = true;
-                    tmrClick.Enabled = true;
-                    SandboxedThread.Asynchronous(delegate()
-                    {
-                        if (lastClick != null)
-                            lastClick.clickMe(screen);
-                    });
-                    if ((lastClick != null) && (lastClick.FocusImage.image != null))
-                    {
-                        lastClick.Mode = eModeType.Highlighted;
-                        Invalidate();
-                    }
-                }
-            }
-            if ((highlighted != null) && (typeof(IKey).IsInstanceOfType(highlighted) == true))
-                ((IKey)highlighted).KeyUp(screen, e, widthScale, heightScale);
-        }
-
-        public void CloseMe()
-        {
-            SandboxedThread.Asynchronous(delegate() { tmrClosing_Tick(null, null); });
-        }
-
-        void RenderingWindow_Gesture(object sender, OpenMobile.Graphics.TouchEventArgs e)
-        {
-            string gesture = String.Empty;
-            if (e.GestureComplete)
-                gesture = "End";
-            gesture += e.Name + "|";
-            if (e.Name == "Rotate")
-                gesture += e.Arg1.ToString() + "|";
-            else
-                gesture = (e.Arg1 * totalScale).ToString("0.00") + "|";
-            gesture += ((e.Position.X - this.X) * widthScale).ToString() + ",";
-            gesture += ((e.Position.Y - this.Y) * heightScale).ToString();
-            Core.theHost.execute(eFunction.multiTouchGesture, screen.ToString(), gesture);
-        }
-        public static void CloseRenderer()
-        {
-            for (int i = 0; i < Core.RenderingWindows.Count; i++)
-                Core.RenderingWindows[i].CloseMe();
-        }
-        protected override void OnWindowStateChanged(EventArgs e)
-        {
-            if (this.WindowState == WindowState.Maximized)
-                this.WindowState = WindowState.Fullscreen;
-            if ((this.WindowState == WindowState.Fullscreen) && (!defaultMouse))
-            {
-                if (screen == 0)
-                    DefaultMouse.TrapCursor();
-                DefaultMouse.HideCursor(this.WindowInfo);
             }
             else
             {
-                if ((screen == 0) && (!defaultMouse))
-                    DefaultMouse.UntrapCursor();
-                DefaultMouse.ShowCursor(this.WindowInfo);
+                FocusedControl = null;
             }
-            base.OnWindowStateChanged(e);
-        }
-        public bool defaultMouse;
-        float totalScale = 1F;
-        private void RenderingWindow_Resize(object sender, EventArgs e)
-        {
-            heightScale = (this.ClientRectangle.Height / 600F);
-            widthScale = (this.ClientRectangle.Width / 1000F);
-            totalScale = (float)System.Math.Sqrt(System.Math.Pow(heightScale, 2) + System.Math.Pow(widthScale, 2));
-            OnRenderFrameInternal();
-            SandboxedThread.Asynchronous(raiseResize);
 
-            // Also make other windows follow the state of the main window (maximize and minimize)
-            Core.theHost.SetAllWindowState(this.WindowState);
-
-        }
-        private void raiseResize()
-        {
-            Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), String.Empty, String.Empty);
-        }
-        #endregion
-        private void transition_Tick()
-        {
-            switch (currentTransition)
+            // Additional actions on control
+            if (control != null)
             {
-                case eGlobalTransition.Crossfade:
-                    rParam.globalTransitionIn += 0.1F;
-                    rParam.globalTransitionOut -= 0.1F;
-                    if (rParam.globalTransitionOut < 0.1F)
-                    {
-                        transitioning = false;
-                        rParam.globalTransitionIn = 1;
-                        rParam.globalTransitionOut = 0;
-                        return;
-                    }
-                    break;
-                case eGlobalTransition.CrossfadeFast:
-                    rParam.globalTransitionIn += 0.15F;
-                    rParam.globalTransitionOut -= 0.15F;
-                    if (rParam.globalTransitionOut < 0.1F)
-                    {
-                        transitioning = false;
-                        rParam.globalTransitionIn = 1;
-                        rParam.globalTransitionOut = 0;
-                        return;
-                    }
-                    break;
-                case eGlobalTransition.SlideUp:
-                    rParam.globalTransitionIn = 1;
-                    tick++;
-                    if (tick == 6)
-                    {
-                        transitioning = false;
-                        return;
-                    }
-                    ofsetOut = new Point(0, -(120 * tick));
-                    ofsetIn = new Point(0, 600 - (120 * tick));
-                    break;
-                case eGlobalTransition.SlideDown:
-                    rParam.globalTransitionIn = 1;
-                    tick++;
-                    if (tick == 6)
-                    {
-                        transitioning = false;
-                        return;
-                    }
-                    ofsetOut = new Point(0, (120 * tick));
-                    ofsetIn = new Point(0, (120 * tick) - 600);
-                    break;
-                case eGlobalTransition.SlideLeft:
-                    rParam.globalTransitionIn = 1;
-                    tick++;
-                    if (tick == 6)
-                    {
-                        transitioning = false;
-                        return;
-                    }
-                    ofsetOut = new Point(-200 * tick, 0);
-                    ofsetIn = new Point(1000 - (200 * tick), 0);
-                    break;
-                case eGlobalTransition.SlideRight:
-                    rParam.globalTransitionIn = 1;
-                    tick++;
-                    if (tick == 6)
-                    {
-                        transitioning = false;
-                        return;
-                    }
-                    ofsetOut = new Point(200 * tick, 0);
-                    ofsetIn = new Point((200 * tick) - 1000, 0);
-                    break;
-            }
-            Invalidate();
-        }
-        int best;
-        OMControl b;
-        public void RenderingWindow_KeyDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
-        {
-            if (e.Screen != Screen)
-                return;
-            try
-            {
-                if (highlighted == null)
+                // Show debug info?
+                if (BuiltInComponents.Host.ShowDebugInfo)
                 {
-                    if ((e.Key == Key.Left) || (e.Key == Key.Right) || (e.Key == Key.Up) || (e.Key == Key.Down))
-                    {
-                        int top = 601;
-                        int left = 1001;
-                        OMControl b = null;
-                        for (int j = 0; j < backgroundQueue.Count; j++)
-                            for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                    if ((backgroundQueue[j][i].Left < left) && (backgroundQueue[j][i].Top < top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(backgroundQueue[j][i].toRegion()) == true))
-                                    {
-                                        b = backgroundQueue[j][i];
-                                        top = b.Top;
-                                        left = b.Left;
-                                    }
-                        if (b == null)
-                            return;
-                        
-                        // If this control is marked as clicktrough then skip it
-                        if (b.NoUserInteraction)
-                            return;
+                    DebugControl = control;
+                    DebugControl.SkinDebug = true;
+                }
+            }
+        }
 
-                        b.Mode = eModeType.Highlighted;
-                        highlighted = b;
-                        Invalidate();
+        /// <summary>
+        /// Checks if a control in this panel is hit at the given location
+        /// </summary>
+        /// <param name="Location"></param>
+        /// <returns></returns>
+        private OMControl PanelHitTest(OMPanel panel, Point Location)
+        {
+            // Check this panel for hit
+            OMControl control = null;
+            for (int i = panel.controlCount - 1; i >= 0; i--)
+            {
+                control = panel.Controls[i];
+                if (typeof(IContainer2).IsInstanceOfType(control))
+                {
+                    for (int i2 = ((IContainer2)control).Controls.Count - 1; i2 >= 0; i2--)
+                    {
+                        if (ControlHitTest(((IContainer2)control).Controls[i2], Location))
+                            return ((IContainer2)control).Controls[i2];
                     }
                 }
                 else
                 {
-                    if (typeof(IKey).IsInstanceOfType(highlighted) == true)
-                        if (((IKey)highlighted).KeyDown(screen, e, widthScale, heightScale))
-                            return;
-                    best = 1000;
-                    b = null;
-                    switch (e.Key)
-                    {
-                        case Key.Left:
-                            for (int j = 0; j < backgroundQueue.Count; j++)
-                                for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                    if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                        checkLeft(backgroundQueue[j][i],highlighted.toRegion(),0,0);
-                            if (b == null)
-                                break;
-                            b.Mode = eModeType.Highlighted;
-                            highlighted.Mode = eModeType.Normal;
-                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                                ((IKeyboard)highlighted).KeyboardExit(screen);
-                            highlighted = b;
-                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                                ((IKeyboard)highlighted).KeyboardEnter(screen);
-                            Invalidate();
-                            break;
-                        case Key.Right:
-                            for (int j = 0; j < backgroundQueue.Count; j++)
-                                for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                    if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                        checkRight(backgroundQueue[j][i],highlighted.toRegion(),0,0);
-                            if (b == null)
-                                break;
-                            b.Mode = eModeType.Highlighted;
-                            highlighted.Mode = eModeType.Normal;
-                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                                ((IKeyboard)highlighted).KeyboardExit(screen);
-                            highlighted = b;
-                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                                ((IKeyboard)highlighted).KeyboardEnter(screen);
-                            Invalidate();
-                            break;
-                        case Key.Up:
-                            for (int j = 0; j < backgroundQueue.Count; j++)
-                                for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                    if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                        checkUp(backgroundQueue[j][i],highlighted.toRegion(), 0,0);
-                            if (b == null)
-                                break;
-                            b.Mode = eModeType.Highlighted;
-                            highlighted.Mode = eModeType.Normal;
-                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                                ((IKeyboard)highlighted).KeyboardExit(screen);
-                            highlighted = b;
-                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                                ((IKeyboard)highlighted).KeyboardEnter(screen);
-                            Invalidate();
-                            break;
-                        case Key.Down:
-                            for (int j = 0; j < backgroundQueue.Count; j++)
-                                for (int i = 0; i < backgroundQueue[j].controlCount; i++)
-                                    if (typeof(IHighlightable).IsInstanceOfType(backgroundQueue[j][i]))
-                                        checkDown(backgroundQueue[j][i],highlighted.toRegion(),0,0);
-                            if (b == null)
-                                break;
-                            b.Mode = eModeType.Highlighted;
-                            highlighted.Mode = eModeType.Normal;
-                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                                ((IKeyboard)highlighted).KeyboardExit(screen);
-                            highlighted = b;
-                            if (typeof(IKeyboard).IsInstanceOfType(highlighted))
-                                ((IKeyboard)highlighted).KeyboardEnter(screen);
-                            Invalidate();
-                            break;
-                        case Key.Enter:
-                            if (typeof(OMButton).IsInstanceOfType(highlighted))
-                            {
-                                lastClick = (OMButton)highlighted;
-                                if (lastClick.Mode == eModeType.transitioningOut)
-                                    lastClick.Mode = eModeType.ClickedAndTransitioningOut;
-                                else
-                                    lastClick.Mode = eModeType.Clicked;
-                                tmrLongClick.Enabled = true;
-                                Invalidate();
-                            }
-                            else if (typeof(IClickable).IsInstanceOfType(highlighted))
-                            {
-                                SandboxedThread.Asynchronous(delegate() { ((IClickable)highlighted).clickMe(screen); });
-                            }
-                            break;
-                    }
+                    if (ControlHitTest(control, Location))
+                        return control;
                 }
             }
-            catch (Exception ex)
-            {
-                SandboxedThread.Handle(ex);
-            }
+
+            // No hit on this panel, return null
+            return null;
         }
 
-        private void checkRight(OMControl control,Rectangle highlighted,int ofsetX,int ofsetY)
+        /// <summary>
+        /// Checks if this control is hit at the given location
+        /// </summary>
+        /// <param name="Location"></param>
+        /// <returns></returns>
+        public virtual bool ControlHitTest(OMControl control, Point Location)
         {
-            // If this control is marked as clicktrough then skip it
+            // Make sure this control is inside the application area
+            if (!ApplicationArea.Contains(control.Region))
+                return false;
+
+            // Make sure this control is visible
+            if (!control.Visible)
+                return false;
+
+            // Ensure control allows user interaction
             if (control.NoUserInteraction)
-                return;
+                return false;
 
-            if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
-            {
-                OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
-                if (container.Contains(this.highlighted))
-                {
-                    highlighted.X += container.ofsetX;
-                    highlighted.Y += container.ofsetY;
-                }
-                for (int i = 0; i < container.controlCount; i++)
-                    checkRight(container[i], highlighted, container.ofsetX, container.ofsetY);
-            }
-            else if (((control.Left+ofsetX) > highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(control.toRegion()) == true))
-            {
-                Rectangle region = control.toRegion();
-                region.X += ofsetX;
-                region.Y += ofsetY;
-                highlighted.X += (highlighted.Width / 2);
-                if (xdistance(highlighted, region) < best)
-                {
-                    if (notCovered(control,ofsetX,ofsetY) == true)
-                    {
-                        best = xdistance(highlighted, region);
-                        b = control;
-                    }
-                }
-            }
-        }
+            // Return false if this is not inside this controls region
+            if (!control.Region.Contains(Location))
+                return false;
 
-        private void checkDown(OMControl control,Rectangle highlighted, int ofsetx,int ofsety)
-        {
-            // If this control is marked as clicktrough then skip it
-            if (control.NoUserInteraction)
-                return;
-
-            if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
-            {
-                OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
-                if (container.Contains(this.highlighted))
-                {
-                    highlighted.X += container.ofsetX;
-                    highlighted.Y += container.ofsetY;
-                }
-                for (int i = 0; i < container.controlCount; i++)
-                    checkDown(container[i],highlighted, container.ofsetX, container.ofsetY);
-            }
-            else if ((control.Top + ofsety > highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(control.toRegion()) == true))
-            {
-                Rectangle region = control.toRegion();
-                region.Y += ofsety;
-                region.X += ofsetx;
-                if (ydistance(highlighted, region) < best)
-                {
-                    if (notCovered(control,ofsetx,ofsety) == true)
-                    {
-                        best = ydistance(highlighted, region);
-                        b = control;
-                    }
-                }
-            }
-        }
-
-        private void checkUp(OMControl control,Rectangle highlighted, int ofsetx,int ofsety)
-        {
-            // If this control is marked as clicktrough then skip it
-            if (control.NoUserInteraction)
-                return;
-
-            if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
-            {
-                OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
-                if (container.Contains(this.highlighted))
-                {
-                    highlighted.X += container.ofsetX;
-                    highlighted.Y += container.ofsetY;
-                }
-                for (int i = 0; i < container.controlCount; i++)
-                    checkUp(container[i], highlighted, container.ofsetX, container.ofsetY);
-            }
-            else if ((control.Top + ofsety < highlighted.Top) && (OpenMobile.Graphics.Graphics.NoClip.Contains(control.toRegion()) == true))
-            {
-                Rectangle region = control.toRegion();
-                region.X += ofsetx;
-                region.Y += ofsety;
-                if (ydistance(highlighted, region) < best)
-                {
-                    if (notCovered(control,ofsetx,ofsety) == true)
-                    {
-                        best = ydistance(highlighted, region);
-                        b = control;
-                    }
-                }
-            }
-        }
-
-        private void checkLeft(OMControl control,Rectangle highlighted,int ofsetX,int ofsetY)
-        {
-            // If this control is marked as clicktrough then skip it
-            if (control.NoUserInteraction)
-                return;
-
-            if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(control))
-            {
-                OpenMobile.Controls.IContainer container = (OpenMobile.Controls.IContainer)control;
-                if (container.Contains(this.highlighted))
-                {
-                    highlighted.X += container.ofsetX;
-                    highlighted.Y += container.ofsetY;
-                }
-                for (int i = 0; i < container.controlCount; i++)
-                    checkLeft(container[i], highlighted, container.ofsetX, container.ofsetY);
-            }
-            else if (((control.Left + ofsetX) < highlighted.Left) && (OpenMobile.Graphics.Graphics.NoClip.Contains(control.toRegion()) == true))
-            {
-                Rectangle region = control.toRegion();
-                region.X += ofsetX;
-                region.Y += ofsetY;
-                if (xdistance(highlighted, region) < best)
-                {
-                    if (notCovered(control,ofsetX,ofsetY) == true)
-                    {
-                        best = xdistance(highlighted, region);
-                        b = control;
-                    }
-                }
-            }
-        }
-
-        private bool notCovered(OMControl oMControl,int ofsetx,int ofsety)
-        {
-            for (int h = backgroundQueue.Count - 1; h >= 0; h--)
-            {
-                for (int i = backgroundQueue[h].controlCount - 1; i >= 0; i--)
-                {
-                    if (backgroundQueue[h][i].Visible == false)
-                        continue;
-                    if (((oMControl.Left + ofsetx) >= backgroundQueue[h][i].Left) && ((oMControl.Top + ofsety) >= backgroundQueue[h][i].Top) && ((oMControl.Left + oMControl.Width + ofsetx) <= (backgroundQueue[h][i].Left + backgroundQueue[h][i].Width)) && ((oMControl.Top + oMControl.Height + ofsety) <= (backgroundQueue[h][i].Top + backgroundQueue[h][i].Height)))
-                    {
-                        if (backgroundQueue[h][i] == oMControl)
-                            return true;
-                        else if (typeof(OpenMobile.Controls.IContainer).IsInstanceOfType(backgroundQueue[h][i]))
-                            return true;
-                        else
-                            return false;
-                    }
-                }
-                if (backgroundQueue[h].BackgroundType != backgroundStyle.None)
+            // Check if control overrides the hit test 
+            if (typeof(INotClickable).IsInstanceOfType(control))
+                if (((INotClickable)this).IsPointClickable(Location.X, Location.Y))
+                    return true;
+                else
                     return false;
-            }
+
+            // This is inside this controls region
             return true;
         }
 
-        private static int xdistance(Rectangle r1, Rectangle r2)
-        {
-            return (int)System.Math.Sqrt(System.Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) + 8 * System.Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
-        }
-        private static int ydistance(Rectangle r1, Rectangle r2)
-        {
-            return (int)System.Math.Sqrt(System.Math.Pow((r2.Left + r2.Width / 2) - (r1.Left + r1.Width / 2), 2) * 8 + System.Math.Pow((r2.Top + r2.Height / 2) - (r1.Top + r1.Height / 2), 2));
-        }
-        private void RenderingWindow_MouseLeave(object sender, EventArgs e)
-        {
-            if (rParam.currentMode == eModeType.Scrolling)
-            {
-                rParam.currentMode = eModeType.Highlighted;
-                ThrowStart.Y = -1;
-                ThrowStart.X = -1;
-                if ((highlighted != null) && typeof(IThrow).IsInstanceOfType(highlighted))
-                    ((IThrow)highlighted).MouseThrowEnd(screen, Point.Empty);
-            }
-            currentGesture = null;
-            tmrLongClick.Enabled = false;
-        }
-        void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
-        {
-            try
-            {
-                DisplayDevice dev = DisplayDevice.AvailableDisplays[screen];
-                if (e.Landscape != dev.Landscape)
-                    Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", String.Empty);
-            }
-            catch (Exception ex)
-            {
-                BuiltInComponents.Host.DebugMsg("RenderingWindow_ResolutionChange Exception", ex);
-            }
-        }
-        
         /// <summary>
-        /// Cancel the ongoing transition and remove the panel
+        /// Tries to find a control at the given location
         /// </summary>
-        internal void Rollback()
+        /// <param name="Location"></param>
+        /// <returns>The control if found, null if no control is found</returns>
+        private OMControl FindControlAtLocation(Point Location)
         {
-            foreach (OMPanel panel in backgroundQueue)
+            // Loop trough controls checking for hit test, starting at the end of the rendering queue (topmost item)
+            OMControl control = null;
+            for (int i = RenderingQueue.Count - 1; i >= 0; i--)
             {
-                if (panel.Mode == eModeType.transitioningOut)
-                    panel.Mode = eModeType.Normal;
-                for (int i = panel.controlCount - 1; i >= 0; i--)
-                {
-                    if (panel[i].Mode == eModeType.transitioningIn)
-                        panel[i].UpdateThisControl -= UpdateThisControl;
-                    panel[i].Mode = eModeType.Normal;
+                control = PanelHitTest(RenderingQueue[i], Location);
+                
+                // Did we hit something?
+                if (control != null)
+                {   // Yes
+                    return control;
                 }
             }
-            backgroundQueue.RemoveAll(p => p.Mode == eModeType.transitioningIn);
+            return null;
         }
+
+        private bool IsControlFocusable(OMControl control)
+        {
+            return (control.Visible && !control.NoUserInteraction && typeof(IHighlightable).IsInstanceOfType(control) && ApplicationArea.Contains(control.Region));
+        }
+
+        private bool IsControlClickable(OMControl control)
+        {
+            return typeof(IClickable).IsInstanceOfType(control);
+        }
+
+        /// <summary>
+        /// Finds the upper left control that can receive focus
+        /// </summary>
+        /// <returns></returns>
+        private OMControl FindFirstFocusableControl()
+        {
+            // Loop trough controls checking against a search region that starts small in the upper left corner then increases if no control is found
+            System.Drawing.Rectangle SearchRect = new System.Drawing.Rectangle(0,0,50,30);
+            for (int SearchStep = 1; SearchStep < 21; SearchStep++)
+            {
+                SearchRect.Width = SearchStep * 50;
+                SearchRect.Height = SearchStep * 30;
+
+                OMControl control = null;
+                for (int i = RenderingQueue.Count - 1; i >= 0; i--)
+                {
+                    for (int i2 = RenderingQueue[i].controlCount - 1; i2 >= 0; i2--)
+                    {
+                        control = RenderingQueue[i][i2];
+                        if (IsControlFocusable(control))
+                        {
+                            System.Drawing.Rectangle region = control.Region.ToSystemRectangle();
+                            if (region.IntersectsWith(SearchRect))
+                                return control;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+
+        private enum SearchDirections { Left, Right, Up, Down }
+        private OMControl FindFirstFocusableControlInDirection(SearchDirections SearchDirection, float Tolerance)
+        {
+            int ToleranceX = (int)(ApplicationArea.Width * Tolerance);
+            int ToleranceY = (int)(ApplicationArea.Height * Tolerance);
+            OMControl bestControl = null;
+            for (int SearchMode = 0; SearchMode < 2; SearchMode++)
+            {
+                OMControl control = null;
+                float BestDistance = float.MaxValue;
+                OpenMobile.Math.Vector2 FocusedControlLocation = FocusedControl.Region.Center.ToVector2();
+                for (int i = RenderingQueue.Count - 1; i >= 0; i--)
+                {
+                    for (int i2 = RenderingQueue[i].controlCount - 1; i2 >= 0; i2--)
+                    {
+                        control = RenderingQueue[i][i2];
+
+                        // no use in testing against ourself
+                        if (control == FocusedControl)
+                            continue;
+
+                        // Ensure we move in the requested direction
+                        switch (SearchDirection)
+                        {
+                            case SearchDirections.Left:
+                                if (control.Region.Center.X >= FocusedControl.Region.Center.X)
+                                    continue;
+                                break;
+                            case SearchDirections.Right:
+                                if (control.Region.Center.X <= FocusedControl.Region.Center.X)
+                                    continue;
+                                break;
+                            case SearchDirections.Up:
+                                if (control.Region.Center.Y >= FocusedControl.Region.Center.Y)
+                                    continue;
+                                break;
+                            case SearchDirections.Down:
+                                if (control.Region.Center.Y <= FocusedControl.Region.Center.Y)
+                                    continue;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        switch (SearchMode)
+                        {
+                            // Limit search to controls on the same height
+                            case 0:
+                                {
+                                    switch (SearchDirection)
+                                    {
+                                        case SearchDirections.Left:
+                                        case SearchDirections.Right:
+                                            if (control.Region.Center.Y < (FocusedControl.Region.Center.Y - ToleranceY))
+                                                continue;
+                                            if (control.Region.Center.Y > (FocusedControl.Region.Center.Y + ToleranceY))
+                                                continue;
+                                            break;
+                                        case SearchDirections.Up:
+                                        case SearchDirections.Down:
+                                            if (control.Region.Center.X < (FocusedControl.Region.Center.X - ToleranceX))
+                                                continue;
+                                            if (control.Region.Center.X > (FocusedControl.Region.Center.X + ToleranceX))
+                                                continue;
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
+
+
+                        // Only check against controls that can receive focus
+                        if (!IsControlFocusable(control))
+                            continue;
+
+                        // Calculate distance between the focused control and the next one
+                        float Distance = (FocusedControlLocation - control.Region.Center.ToVector2()).Length;
+                        if (Distance < BestDistance)
+                        {
+                            BestDistance = Distance;
+                            bestControl = control;
+                        }
+                    }
+                }
+
+                if (bestControl != null)
+                    break;
+            }
+            return bestControl;
+        }
+
+        private enum ClickTypes { None, Normal, Long, Hold }
+        private void ActivateClick(OMControl control, ClickTypes ClickType)
+        {
+            // Cancel if no control is provided
+            if (control == null)
+                return;
+
+            // Lock the currently focused control
+            lock (FocusedControl)
+            {
+
+                // Cancel if control is not clickable
+                if (!typeof(IClickable).IsInstanceOfType(control))
+                    return;
+
+                Console.WriteLine("{0} click on {1} activated", ClickType, control.Name);
+
+                switch (ClickType)
+                {
+                    case ClickTypes.None:
+                        break;
+                    case ClickTypes.Normal:
+                        {
+                            SandboxedThread.Asynchronous(delegate()
+                            {
+                                ((IClickable)control).clickMe(screen);
+                            });
+                        }
+                        break;
+                    case ClickTypes.Long:
+                        SandboxedThread.Asynchronous(delegate()
+                        {
+                            ((IClickable)control).longClickMe(screen);
+                        });
+                        break;
+                    case ClickTypes.Hold:
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+
+        private void ResetForm()
+        {
+            // Stop click timing
+            swClickTiming.Stop();
+            tmrClickHold.Enabled = false;
+
+            // Reset clicked state on focused control
+            if (FocusedControl != null)
+                FocusedControl.Mode = eModeType.Highlighted;
+
+            // Clear any gestures
+            currentGesture.Clear();
+
+            // Reset mouse move points
+            MouseMoveStartPoint = new Point();
+
+            // Default value for mouse moved distances
+            CursorDistance = 0;
+            CursorDistanceXYTotal.X = 0;
+            CursorDistanceXYTotal.Y = 0;
+            CursorDistanceXYRelative = MouseMoveStartPoint;
+            ThrowActive = false;
+
+            // Redraw
+            Invalidate();
+        }
+
+        private bool HandleGesture()
+        {
+            // Handle gesture
+            if (currentGesture.Count > 0)
+            {
+                Recognizer rec = new Recognizer();
+                rec.Initialize();
+                foreach (Point p in currentGesture)
+                    rec.AddPoint(p, false);
+                string s = rec.Recognize();
+                if (!string.IsNullOrEmpty(s))
+                    Core.theHost.raiseGestureEvent(screen, rec.Recognize(), RenderingQueue[RenderingQueue.Count - 1], FocusedControl);
+                currentGesture.Clear();
+                return true;
+            }
+            return false;
+        }
+
     }
 }

@@ -30,6 +30,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A label used for rendering various text effects
     /// </summary>
+    [System.Serializable]
     public class OMAnimatedLabel2 : OMLabel
     {
         /// <summary>
@@ -100,6 +101,7 @@ namespace OpenMobile.Controls
         /// </summary>
         [System.Obsolete("Use OMAnimatedLabel2(string name, int x, int y, int w, int h) instead")]
         public OMAnimatedLabel2()
+            : base("", 0, 0, 200,200)
         {
         }
         /// <summary>
@@ -111,12 +113,8 @@ namespace OpenMobile.Controls
         /// <param name="h">Height</param>
         [System.Obsolete("Use OMAnimatedLabel2(string name, int x, int y, int w, int h) instead")]
         public OMAnimatedLabel2(int x, int y, int w, int h)
-            : this()
+            : base("", x, y, w, h)
         {
-            this.Left = x;
-            this.Top = y;
-            this.Width = w;
-            this.Height = h;
         }
         /// <summary>
         /// A label used for rendering various text effects
@@ -127,13 +125,8 @@ namespace OpenMobile.Controls
         /// <param name="w">Width</param>
         /// <param name="h">Height</param>
         public OMAnimatedLabel2(string name, int x, int y, int w, int h)
-            : this()
+            : base(name, x, y, w, h)
         {
-            this.Name = name;
-            this.Left = x;
-            this.Top = y;
-            this.Width = w;
-            this.Height = h;
         }
 
 
@@ -571,6 +564,8 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
         {
+            base.RenderBegin(g, e);
+
             // No use in rendering if text is empty
             if (String.IsNullOrEmpty(_text))
                 return;
@@ -578,11 +573,11 @@ namespace OpenMobile.Controls
             // Start animation
             Animation_Start();
 
-            float tmp = OpacityFloat;
-            if (this.Mode == eModeType.transitioningIn)
-                tmp = e.globalTransitionIn;
-            else if (this.Mode == eModeType.transitioningOut)
-                tmp = e.globalTransitionOut;
+            //float tmp = OpacityFloat;
+            //if (this.Mode == eModeType.transitioningIn)
+            //    tmp = e.globalTransitionIn;
+            //else if (this.Mode == eModeType.transitioningOut)
+            //    tmp = e.globalTransitionOut;
             //if (_RefreshGraphic)
             //    textTexture = g.GenerateTextTexture(textTexture, _Pos_Current.Left, _Pos_Current.Top, _Pos_Current.Width + 5, _Pos_Current.Height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
 
@@ -591,15 +586,12 @@ namespace OpenMobile.Controls
             g.SetClipFast(_Clip_Current.Left, _Clip_Current.Top, _Clip_Current.Width, _Clip_Current.Height);
                        
             // Draw text
-            g.DrawImage(textTexture, _Pos_Current[0].Left, _Pos_Current[0].Top, _Pos_Current[0].Width + 5, _Pos_Current[0].Height, tmp);
+            g.DrawImage(textTexture, _Pos_Current[0].Left, _Pos_Current[0].Top, _Pos_Current[0].Width + 5, _Pos_Current[0].Height, _RenderingValue_Alpha);
 
             // Restore clip region
             g.Clip = _Clip_Stored;
 
-            _RefreshGraphic = false;
-            // Skin debug function 
-            if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Yellow);
+            base.RenderFinish(g, e);
         }
     }
 

@@ -717,6 +717,11 @@ namespace OpenMobile.helperFunctions
                         Icon = Icon.Substring(1, Icon.Length - 1);
                         return OImage.FromWebdingsFont(100, 100, Icon, SymbolFormat, Alignment.CenterCenter, color, secondColor);
                     }
+                    else if (Icon.Substring(0, 1) == "#")
+                    {   // Use symbol font
+                        Icon = Icon.Substring(1, Icon.Length - 1);
+                        return OImage.FromFont(100, 100, Icon, Font.Wingdings, SymbolFormat, Alignment.CenterCenter, color, secondColor);
+                    }
                     else
                     {   // Get image from file
                         imageItem it = BuiltInComponents.Host.getSkinImage(Icon);
@@ -765,11 +770,13 @@ namespace OpenMobile.helperFunctions
             }
 
             /// <summary>
-            /// Gets the string describing the WebDings SYMBOL to use as a Icon for the given PluginName
+            /// Gets the string describing the SYMBOL to use as a Icon for the given PluginName
+            /// <para>The font type is returned in the font ref param</para>
             /// </summary>
             /// <param name="PluginName"></param>
+            /// <param name="font"></param>
             /// <returns></returns>
-            public static string GetPluginIconSymbol(string PluginName)
+            public static string GetPluginIconSymbol(string PluginName, ref Font font)
             {
                 object o = new object();
                 BuiltInComponents.Host.getData(eGetData.GetPlugins, PluginName, out o);
@@ -786,6 +793,13 @@ namespace OpenMobile.helperFunctions
                     if (Icon.Substring(0, 1) == "*")
                     {   // Use symbol font
                         Icon = Icon.Substring(1, Icon.Length - 1);
+                        font = Font.Webdings;
+                        return Icon;
+                    }
+                    else if (Icon.Substring(0, 1) == "#")
+                    {   // Use symbol font
+                        Icon = Icon.Substring(1, Icon.Length - 1);
+                        font = Font.Wingdings;
                         return Icon;
                     }
                     else

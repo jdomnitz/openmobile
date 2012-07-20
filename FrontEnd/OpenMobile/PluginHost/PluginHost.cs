@@ -203,6 +203,9 @@ namespace OpenMobile
 
             // Initialize zonehandler
             _ZoneHandler = new ZoneHandler();
+
+            // Initialize panel transition effects handler
+            OpenMobile.Controls.PanelTransitionEffectHandler.Init();
         }
 
         /// <summary>
@@ -646,10 +649,7 @@ namespace OpenMobile
         /// <returns></returns>
         private static IBasePlugin getPluginByName(string name)
         {
-            foreach (IBasePlugin c in Core.pluginCollection)
-                if (c.pluginName == name)
-                    return c;
-            return null;
+            return Core.pluginCollection.Find(x => x.pluginName == name);            
         }
 
         #endregion
@@ -841,34 +841,34 @@ namespace OpenMobile
             security.BackgroundColor1 = Color.FromArgb(100, Color.Black);
             security.Forgotten = true;
             security.Priority = (ePriority)6;
-            OMBasicShape box = new OMBasicShape(250, 130, 500, 300);
+            OMBasicShape box = new OMBasicShape("",250, 130, 500, 300);
             box.BorderColor = Color.Silver;
             box.BorderSize = 3F;
             box.CornerRadius = 15;
             box.FillColor = Color.FromArgb(0, 0, 15);
             box.Shape = shapes.RoundedRectangle;
             security.addControl(box);
-            OMImage img = new OMImage(400, 140, 225, 280);
+            OMImage img = new OMImage("", 400, 140, 225, 280);
             img.Image = Core.theHost.getSkinImage("Lock");
             security.addControl(img);
-            OMLabel label = new OMLabel(250, 200, 500, 115);
+            OMLabel label = new OMLabel("", 250, 200, 500, 115);
             label.Text = pluginName + " is requesting access to the credentials cache to access your " + requestedAccess + ".";
             label.TextAlignment = Alignment.WordWrapTC;
             label.Font = new Font(Font.Arial, 22F);
             security.addControl(label);
-            OMLabel title = new OMLabel(260, 135, 480, 60);
+            OMLabel title = new OMLabel("", 260, 135, 480, 60);
             title.Text = "Authorization Required";
             title.Font = new Font(Font.Verdana, 29F);
             title.Format = eTextFormat.Glow;
             title.OutlineColor = Color.Yellow;
             security.addControl(title);
-            OMButton accept = new OMButton(295, 340, 200, 80);
+            OMButton accept = new OMButton("", 295, 340, 200, 80);
             accept.Image = Core.theHost.getSkinImage("Full");
             accept.FocusImage = Core.theHost.getSkinImage("Full.Highlighted");
             accept.Text = "Allow";
             accept.OnClick += security_OnClick;
             security.addControl(accept);
-            OMButton deny = new OMButton(515, 340, 200, 80);
+            OMButton deny = new OMButton("", 515, 340, 200, 80);
             deny.Image = Core.theHost.getSkinImage("Full");
             deny.FocusImage = Core.theHost.getSkinImage("Full.Highlighted");
             deny.Text = "Deny";
@@ -1216,15 +1216,15 @@ namespace OpenMobile
                     return execute(eFunction.ExecuteTransition, arg, "Crossfade");
 
                 // Cancel requested transition
-                case eFunction.CancelTransition:
-                    if (int.TryParse(arg, out ret))
-                    {
-                        lock (Core.RenderingWindows[ret])
-                        {
-                            Core.RenderingWindows[ret].Rollback();
-                        }
-                    }
-                    return false;
+                //case eFunction.CancelTransition:
+                //    if (int.TryParse(arg, out ret))
+                //    {
+                //        lock (Core.RenderingWindows[ret])
+                //        {
+                //            Core.RenderingWindows[ret].Rollback();
+                //        }
+                //    }
+                //    return false;
 
                 // Set panel that we want to load
                 case eFunction.TransitionToPanel:
@@ -2789,6 +2789,17 @@ namespace OpenMobile
         {
             SendStatusData(-1, DataType, SourcePlugin, "", Message);
         }
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="SourceTag"></param>
+        /// <param name="Message"></param>
+        public void SendStatusData(eDataType DataType, string SourcePluginName, string Message)
+        {
+            SendStatusData(-1, DataType, SourcePluginName, "", Message);
+        }
 
         /// <summary>
         /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
@@ -2801,7 +2812,18 @@ namespace OpenMobile
         {
             SendStatusData(Screen, DataType, SourcePlugin, "", Message);
         }
-       /// <summary>
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="SourceTag"></param>
+        /// <param name="Message"></param>
+        public void SendStatusData(int Screen, eDataType DataType, string SourcePluginName, string Message)
+        {
+            SendStatusData(Screen, DataType, SourcePluginName, "", Message);
+        }
+        /// <summary>
         /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
         /// </summary>
         /// <param name="DataType"></param>
@@ -2811,6 +2833,17 @@ namespace OpenMobile
         public void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message)
         {
             SendStatusData(-1, DataType, SourcePlugin, SourceTag, Message);
+        }
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="SourceTag"></param>
+        /// <param name="Message"></param>
+        public void SendStatusData(eDataType DataType, string SourcePluginName, string SourceTag, string Message)
+        {
+            SendStatusData(-1, DataType, SourcePluginName, SourceTag, Message);
         }
 
         /// <summary>
@@ -2822,11 +2855,21 @@ namespace OpenMobile
         /// <param name="Message"></param>
         public void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message)
         {
+            SendStatusData(-1, DataType, SourcePlugin.pluginName, SourceTag, Message);
+        }
+        /// <summary>
+        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
+        /// </summary>
+        /// <param name="DataType"></param>
+        /// <param name="SourcePlugin"></param>
+        /// <param name="SourceTag"></param>
+        /// <param name="Message"></param>
+        public void SendStatusData(int Screen, eDataType DataType, string SourcePluginName, string SourceTag, string Message)
+        {
             string Source = "";
             if (Screen >= 0)
                 Source += "{" + Screen + "}";
-            if (SourcePlugin != null)
-                Source += SourcePlugin.pluginName;
+            Source += SourcePluginName;
             if (!String.IsNullOrEmpty(Source) & !String.IsNullOrEmpty(SourceTag))
                 Source += ".";
             Source += SourceTag;

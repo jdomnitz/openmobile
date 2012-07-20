@@ -1153,17 +1153,6 @@ namespace OpenMobile
 
         #endregion
 
-        #region Highlight control
-
-        public static OMControl getHighlighted(int screen)
-        {
-            if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
-                return null;
-            return Core.RenderingWindows[screen].highlighted;
-        }
-
-        #endregion
-
         #region AutoDetection of devices
 
         static bool DetectionActive = false;

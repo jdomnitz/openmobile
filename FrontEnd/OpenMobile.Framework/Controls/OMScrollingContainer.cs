@@ -27,6 +27,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Contains and Renders a collection of OMControls
     /// </summary>
+    [System.Serializable]
     public class OMScrollingContainer : OMControl, IContainer, IMouse, IThrow, IClickable, IKey, IHighlightable
     {
         /// <summary>
@@ -113,6 +114,22 @@ namespace OpenMobile.Controls
         /// <param name="w"></param>
         /// <param name="h"></param>
         public OMScrollingContainer(int x, int y, int w, int h)
+            : base("", x, y, w, h)
+        {
+            area.X = left = x;
+            area.Y = top = y;
+            area.Width = width = w;
+            area.Height = height = h;
+        }
+        /// <summary>
+        /// Create a new OMScrollingContainer
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        public OMScrollingContainer(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
         {
             area.X = left = x;
             area.Y = top = y;
@@ -216,6 +233,8 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
         {
+            base.RenderBegin(g, e);
+
             g.SetClip(this.toRegion());
             g.TranslateTransform(left, top - scrolly);
             lock (Controls)
@@ -236,6 +255,8 @@ namespace OpenMobile.Controls
                 }
             }
             g.ResetClip();
+
+            base.RenderFinish(g, e);
         }
 
         // TODO: Fix OMScrollingContainer so that it doesn't have to have renderingwindow code internally
@@ -248,16 +269,16 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
-        public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, float WidthScale, float HeightScale)
+        public void MouseMove(int screen, OpenMobile.Input.MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
             if (ignoreScroll)
                 return;
             Point loc = e.Location;
-            loc.Scale(WidthScale, HeightScale);
+            //loc.Scale(ScaleFactors.X, ScaleFactors.Y);
             loc.Translate(-left, -top + scrolly);
             for (int i = 0; i < Controls.Count; i++)
             {
-                if (Controls[i].toRegion().Contains(loc))
+                if (Controls[i].Region.Contains(loc))
                 {
                     if (highlighted != null)
                         highlighted.Mode = eModeType.Normal;
@@ -265,7 +286,7 @@ namespace OpenMobile.Controls
                     highlighted.Mode = mode;
                     raiseUpdate(false);
                     if (typeof(IMouse).IsInstanceOfType(highlighted))
-                        ((IMouse)highlighted).MouseMove(screen, e, WidthScale, HeightScale);
+                        ((IMouse)highlighted).MouseMove(screen, e, StartLocation, TotalDistance, RelativeDistance);
                     return;
                 }
             }
@@ -274,7 +295,7 @@ namespace OpenMobile.Controls
                 highlighted.Mode = eModeType.Normal;
                 raiseUpdate(false);
             }
-            highlighted = null;
+            //highlighted = null;
         }
         /// <summary>
         /// Mouse Down
@@ -283,10 +304,10 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
-        public void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        public void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation)
         {
             Point loc = e.Location;
-            loc.Scale(WidthScale, HeightScale);
+            //loc.Scale(ScaleFactors.X, ScaleFactors.Y);
             loc.Translate(-left, -top + scrolly);
             for (int i = 0; i < Controls.Count; i++)
             {
@@ -296,7 +317,7 @@ namespace OpenMobile.Controls
                         highlighted.Mode = eModeType.Normal;
                     highlighted = Controls[i];
                     if (typeof(IMouse).IsInstanceOfType(highlighted))
-                        ((IMouse)highlighted).MouseDown(screen, e, WidthScale, HeightScale);
+                        ((IMouse)highlighted).MouseDown(screen, e, StartLocation);
                     break;
                 }
             }
@@ -308,10 +329,10 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
-        public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, float WidthScale, float HeightScale)
+        public void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
         {
             Point loc = e.Location;
-            loc.Scale(WidthScale, HeightScale);
+            //loc.Scale(ScaleFactors.X, ScaleFactors.Y);
             loc.Translate(-left, -top + scrolly);
             for (int i = 0; i < Controls.Count; i++)
             {
@@ -321,7 +342,7 @@ namespace OpenMobile.Controls
                         highlighted.Mode = eModeType.Normal;
                     highlighted = Controls[i];
                     if (typeof(IMouse).IsInstanceOfType(highlighted))
-                        ((IMouse)highlighted).MouseUp(screen, e, WidthScale, HeightScale);
+                        ((IMouse)highlighted).MouseUp(screen, e, StartLocation, TotalDistance);
                     break;
                 }
             }

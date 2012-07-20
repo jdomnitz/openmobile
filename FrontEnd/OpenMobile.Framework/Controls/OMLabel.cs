@@ -28,6 +28,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A label for displaying text
     /// </summary>
+    [System.Serializable]
     public class OMLabel : OMControl, ISensorDisplay
     {
         /// <summary>
@@ -81,8 +82,9 @@ namespace OpenMobile.Controls
         /// </summary>
         [Obsolete("Use OMLabel(string name, int x, int y, int w, int h) instead")]
         public OMLabel()
+            : base("", 0, 0, 100, 130)
         {
-            Init("", 0, 0, 100, 130);
+            Init();
         }
         /// <summary>
         /// Create a new OMLabel
@@ -93,8 +95,9 @@ namespace OpenMobile.Controls
         /// <param name="h"></param>
         [Obsolete("Use OMLabel(string name, int x, int y, int w, int h) instead")]
         public OMLabel(int x, int y, int w, int h)
+            : base("", x, y, w, h)
         {
-            Init("", x, y, w, h);
+            Init();
         }
         /// <summary>
         /// Create a new OMLabel
@@ -105,16 +108,12 @@ namespace OpenMobile.Controls
         /// <param name="w"></param>
         /// <param name="h"></param>
         public OMLabel(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
         {
-            Init(name, x, y, w, h);
+            Init();
         }
-        private void Init(string Name, int x, int y, int w, int h)
+        private void Init()
         {
-            this.Name = Name;
-            this.Top = y;
-            this.Left = x;
-            this.Width = w;
-            this.Height = h;
             this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
             this.Format = OpenMobile.Graphics.eTextFormat.Normal;
         }
@@ -252,23 +251,24 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
+            base.RenderBegin(g, e);
+
             // No use in rendering if text is empty
             if (String.IsNullOrEmpty(_text))
                 return;
-            
-            float tmp = OpacityFloat;
-            if (this.Mode == eModeType.transitioningIn)
-                tmp = e.globalTransitionIn;
-            else if (this.Mode == eModeType.transitioningOut)
-                tmp = e.globalTransitionOut;
+
+            //float tmp = OpacityFloat;
+            //if (this.Mode == eModeType.transitioningIn)
+            //    tmp = e.globalTransitionIn;
+            //else if (this.Mode == eModeType.transitioningOut)
+            //    tmp = e.globalTransitionOut;
+
+
             if (_RefreshGraphic)
                 textTexture = g.GenerateTextTexture(textTexture, left, top, width + 5, height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
-            g.DrawImage(textTexture, left, top, width + 5, height, tmp);
+            g.DrawImage(textTexture, left, top, width + 5, height, _RenderingValue_Alpha);
 
-            _RefreshGraphic = false;
-            // Skin debug function 
-            if (_SkinDebug)
-                base.DrawSkinDebugInfo(g, Color.Yellow);
+            base.RenderFinish(g, e);
         }
 
         /// <summary>
