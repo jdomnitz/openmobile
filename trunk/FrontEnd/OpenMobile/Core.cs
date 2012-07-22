@@ -173,12 +173,12 @@ namespace OpenMobile
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "UI", "background");
                     //RenderingWindows[i].TransitionInPanel(((IHighLevel)UI).loadPanel(String.Empty, i));
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "UI", "");
-                    RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
+                    RenderingWindows[i].ExecuteTransition("None");
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", String.Empty);
                     if (a.Length == 0)
-                        RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
+                        RenderingWindows[i].ExecuteTransition("None");
                     else
-                        RenderingWindows[i].ExecuteTransition(((InitialTransition)a[0]).Transition);
+                        RenderingWindows[i].ExecuteTransition(((InitialTransition)a[0]).Transition.ToString());
                 }
             }//);
             object[] b = MainMenu.GetType().GetCustomAttributes(typeof(FinalTransition), false);

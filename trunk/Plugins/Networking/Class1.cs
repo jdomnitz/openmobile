@@ -82,7 +82,7 @@ namespace Networking
             networks.ListStyle = eListStyle.MultiList;
             networks.ListItemHeight = 80;
             networks.Font = new Font(Font.GenericSansSerif, 30F);
-            networks.OnLongClick += new userInteraction(networks_OnLongClick);
+            networks.OnHoldClick += new userInteraction(networks_OnHoldClick);
             networks.OnClick += new userInteraction(networks_OnClick);
             networks.ItemColor1 = Color.Transparent;
             networks.SelectedItemColor1 = Color.Blue;
@@ -220,7 +220,7 @@ namespace Networking
                 ((OMButton)manager[screen][6]).Text = "Connect";
         }
 
-        void networks_OnLongClick(OMControl sender, int screen)
+        void networks_OnHoldClick(OMControl sender, int screen)
         {
             connect_OnClick(sender.Parent[6], screen);
         }

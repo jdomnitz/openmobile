@@ -1042,11 +1042,15 @@ namespace OpenMobile.Controls
 
         #region IClickable Members
         /// <summary>
-        /// Button Clicked
+        /// Occurs when the control is clicked
         /// </summary>
         public event userInteraction OnClick;
         /// <summary>
-        /// Button clicked and held
+        /// Occurs when the control is held
+        /// </summary>
+        public event userInteraction OnHoldClick;
+        /// <summary>
+        /// Occurs when the control is long clicked
         /// </summary>
         public event userInteraction OnLongClick;
         /// <summary>
@@ -1062,6 +1066,17 @@ namespace OpenMobile.Controls
                 return;
             if (OnClick != null)
                 OnClick(this, screen);
+            raiseUpdate(false);
+        }
+
+        /// <summary>
+        /// Hold the control 
+        /// </summary>
+        public void holdClickMe(int screen)
+        {
+            if (OnHoldClick != null)
+                OnHoldClick(this, screen);
+            raiseUpdate(false);
         }
 
         /// <summary>
@@ -1072,6 +1087,7 @@ namespace OpenMobile.Controls
         {
             if (OnLongClick != null)
                 OnLongClick(this, screen);
+            raiseUpdate(false);
         }
 
         #endregion

@@ -89,9 +89,6 @@ namespace OMOsk2
             }
         }
 
-        IPluginHost theHost;
-        ScreenManager Manager;
-        string PanelName;
         OpenMobile.Timer[] MaskInputTimer = null;
 
         // Character selection
@@ -267,6 +264,13 @@ namespace OMOsk2
             // What should we do?
             switch (message.ToLower())
             {
+                case "init":
+                    {
+                        //CharSet = 0;
+                        //UpdateButtonGraphics(Panel, Screen, CharSet);
+                    }
+                    break;
+
                 case "onkeypress":
                     {   // Keypress events are sent from the OSK helperfunctions to provide the correct panel for updating controls
                         OSK.OSKOnKeyPressData KeyPressData = data as OSK.OSKOnKeyPressData; // Convert input data to local data object
@@ -291,8 +295,6 @@ namespace OMOsk2
 
                         // Extract Menu data
                         OSK.OSKData DT = (OSK.OSKData)Panel.Tag;
-                        Manager = DT.Manager;
-                        PanelName = Panel.Name;
 
                         /* Items has to be named according to this:
                          *  OSK_Button_OK       : OK button
@@ -359,6 +361,9 @@ namespace OMOsk2
 
                                     int CurrentKey = 0;
 
+                                    imageItem imgBack = new imageItem();
+                                    imageItem imgFocus = new imageItem();
+
                                     // Rows
                                     for (int Row = 0; Row < 5; Row++)
                                     {
@@ -379,14 +384,16 @@ namespace OMOsk2
                                         // Add keys to row
                                         for (int i = 0; i < KeyCount; i++)
                                         {
-                                            //OMButton btn = DefaultControls.GetButton(String.Format("OSK_Button_{0}", CurrentKey), Left, Top, Keys[CurrentKey].Width, Keys[CurrentKey].Height, Keys[CurrentKey].Icon[CharSet], Keys[CurrentKey].Symbol[CharSet]);
-
                                             OMButton btn = new OMButton(String.Format("OSK_Button_{0}", CurrentKey), Left, Top, KeyPadKeys[CurrentKey].Width, KeyPadKeys[CurrentKey].Height);
 
                                             // Set background image
-                                            btn.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(KeyPadKeys[CurrentKey].Width, KeyPadKeys[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackground));
+                                            if (imgBack.image == null || imgBack.image.Width != KeyPadKeys[CurrentKey].Width || imgBack.image.Height != KeyPadKeys[CurrentKey].Height)
+                                                imgBack = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(KeyPadKeys[CurrentKey].Width, KeyPadKeys[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackground));
+                                            btn.Image = imgBack;
                                             // Set focus image
-                                            btn.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(KeyPadKeys[CurrentKey].Width, KeyPadKeys[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackgroundFocused));
+                                            if (imgFocus.image == null || imgFocus.image.Width != KeyPadKeys[CurrentKey].Width || imgFocus.image.Height != KeyPadKeys[CurrentKey].Height)
+                                                imgFocus = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(KeyPadKeys[CurrentKey].Width, KeyPadKeys[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackgroundFocused));
+                                            btn.FocusImage = imgFocus;
 
                                             // Generate overlay images (save it to KeyInfo)
                                             for (int i2 = 0; i2 < KeyPadKeys[CurrentKey].Image.Length; i2++)
@@ -403,7 +410,7 @@ namespace OMOsk2
                                             btn.Tag = KeyPadKeys[CurrentKey];
                                             btn.Transition = eButtonTransition.None;
                                             btn.OnClick += new userInteraction(btn_OnClick);
-                                            btn.OnLongClick += new userInteraction(btn_OnLongClick);
+                                            btn.OnHoldClick += new userInteraction(btn_OnHoldClick);
 
                                             // Set special names (OK and cancel buttons)
                                             if (KeyPadKeys[CurrentKey].KeyCode == Key.Escape)
@@ -440,6 +447,9 @@ namespace OMOsk2
 
                                     int CurrentKey = 0;
 
+                                    imageItem imgBack = new imageItem();
+                                    imageItem imgFocus = new imageItem();
+                                    
                                     // Rows
                                     for (int Row = 0; Row < 5; Row++)
                                     {
@@ -466,9 +476,13 @@ namespace OMOsk2
                                                 OMButton btn = new OMButton(String.Format("OSK_Button_{0}", CurrentKey), Left, Top, NumPadKeys[CurrentKey].Width, NumPadKeys[CurrentKey].Height);
 
                                                 // Set background image
-                                                btn.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(NumPadKeys[CurrentKey].Width, NumPadKeys[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackground));
+                                                if (imgBack.image == null || imgBack.image.Width != NumPadKeys[CurrentKey].Width || imgBack.image.Height != NumPadKeys[CurrentKey].Height)
+                                                    imgBack = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(NumPadKeys[CurrentKey].Width, NumPadKeys[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackground));
+                                                btn.Image = imgBack;
                                                 // Set focus image
-                                                btn.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(NumPadKeys[CurrentKey].Width, NumPadKeys[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackgroundFocused));
+                                                if (imgFocus.image == null || imgFocus.image.Width != NumPadKeys[CurrentKey].Width || imgFocus.image.Height != NumPadKeys[CurrentKey].Height)
+                                                    imgFocus = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(NumPadKeys[CurrentKey].Width, NumPadKeys[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackgroundFocused));
+                                                btn.FocusImage = imgFocus;
 
                                                 // Generate overlay images (save it to KeyInfo)
                                                 for (int i2 = 0; i2 < NumPadKeys[CurrentKey].Image.Length; i2++)
@@ -485,7 +499,7 @@ namespace OMOsk2
                                                 btn.Tag = NumPadKeys[CurrentKey];
                                                 btn.Transition = eButtonTransition.None;
                                                 btn.OnClick += new userInteraction(btn_OnClick);
-                                                btn.OnLongClick += new userInteraction(btn_OnLongClick);
+                                                btn.OnHoldClick += new userInteraction(btn_OnHoldClick);
 
                                                 // Set special names (OK and cancel buttons)
                                                 if (NumPadKeys[CurrentKey].KeyCode == Key.Escape)
@@ -510,12 +524,12 @@ namespace OMOsk2
                                 break;
                         }
 
-
                         // Configure return data
-                        Panel.Forgotten = true;
+                        //Panel.Forgotten = true;
                         
                         // Make sure that the OSK will cover the whole screen
                         Panel.Priority = ePriority.High;
+                        Panel.PanelType = OMPanel.PanelTypes.Modal;
 
                         #endregion
 
@@ -530,7 +544,7 @@ namespace OMOsk2
             return true;
         }
 
-        void btn_OnLongClick(OMControl sender, int screen)
+        void btn_OnHoldClick(OMControl sender, int screen)
         {
             // Repeat button press
             OMButton btn = sender as OMButton;
@@ -700,6 +714,7 @@ namespace OMOsk2
                     break;
                 case Key.Escape:
                 case Key.Enter:
+                    CharSet = 0;
                     break;
                 case Key.Space:
                     OSKValueAddCharacter(Panel, Screen, " ");
@@ -725,7 +740,6 @@ namespace OMOsk2
 
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
-            theHost = host;
             MaskInputTimer = new OpenMobile.Timer[host.ScreenCount];
             return eLoadStatus.LoadSuccessful;
         }

@@ -54,7 +54,6 @@ namespace OpenMobile.helperFunctions
                 return i;
             }
         }
-
         /// <summary>
         /// Returns an int value from the settings database (0 is used as default value)
         /// </summary>
@@ -64,6 +63,33 @@ namespace OpenMobile.helperFunctions
         {
             return GetInt(Name, 0);
         }
+
+        /// <summary>
+        /// Returns a float value from the settings database
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="DefaultValue">Value to use in case of conversion error or missing setting</param>
+        /// <returns></returns>
+        public static float GetFloat(string Name, float DefaultValue)
+        {
+            using (PluginSettings setting = new PluginSettings())
+            {
+                float i = 0;
+                if (!float.TryParse(setting.getSetting(Name), out i))
+                    return DefaultValue;
+                return i;
+            }
+        }
+        /// <summary>
+        /// Returns a float value from the settings database (0 is used as default value)
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <returns></returns>
+        public static float GetFloat(string Name)
+        {
+            return GetInt(Name, 0);
+        }
+
 
         public static string Get(string Name)
         {

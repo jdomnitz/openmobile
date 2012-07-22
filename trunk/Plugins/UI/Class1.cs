@@ -308,7 +308,7 @@ namespace OpenMobile
             OMButton Button_UITopBar_Home = new OMButton("Button_UITopBar_Home", 863, 0, 130, 90);
             Button_UITopBar_Home.Image = theHost.getSkinImage("HomeButton", true);
             Button_UITopBar_Home.FocusImage = theHost.getSkinImage("HomeButtonFocus", true);
-            Button_UITopBar_Home.OnLongClick += new userInteraction(HomeButton_OnClick);
+            Button_UITopBar_Home.OnHoldClick += new userInteraction(HomeButton_OnClick);
             Button_UITopBar_Home.OnClick += new userInteraction(Back_OnClick);
             UIPanel.addControl(Button_UITopBar_Home);
 
@@ -320,7 +320,7 @@ namespace OpenMobile
             Button_UITopBar_VolumeBar_Volume.Mode = eModeType.Resizing;
             Button_UITopBar_VolumeBar_Volume.Transition = eButtonTransition.None;
             Button_UITopBar_VolumeBar_Volume.OnClick += new userInteraction(vol_OnClick);
-            Button_UITopBar_VolumeBar_Volume.OnLongClick += new userInteraction(vol_OnLongClick);
+            Button_UITopBar_VolumeBar_Volume.OnHoldClick += new userInteraction(vol_OnHoldClick);
             UIPanel.addControl(Button_UITopBar_VolumeBar_Volume);
 
             VolumeBar VolumeBar_UITopBar_VolumeBar_Volume = new VolumeBar("VolumeBar_UITopBar_VolumeBar_Volume", 6, -420, 130, 330);
@@ -334,7 +334,7 @@ namespace OpenMobile
             Button_UITopBar_VolumeBar_VolumeDown.Transition = eButtonTransition.None;
             Button_UITopBar_VolumeBar_VolumeDown.Tag = -2;
             Button_UITopBar_VolumeBar_VolumeDown.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnClick);
-            Button_UITopBar_VolumeBar_VolumeDown.OnLongClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnLongClick);
+            Button_UITopBar_VolumeBar_VolumeDown.OnHoldClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnHoldClick);
             UIPanel.addControl(Button_UITopBar_VolumeBar_VolumeDown);
 
             OMButton Button_UITopBar_VolumeBar_VolumeUp = new OMButton("Button_UITopBar_VolumeBar_VolumeUp", 6, -510, 130, 90);
@@ -343,7 +343,7 @@ namespace OpenMobile
             Button_UITopBar_VolumeBar_VolumeUp.Transition = eButtonTransition.None;
             Button_UITopBar_VolumeBar_VolumeUp.Tag = 2;
             Button_UITopBar_VolumeBar_VolumeUp.OnClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnClick);
-            Button_UITopBar_VolumeBar_VolumeUp.OnLongClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnLongClick);
+            Button_UITopBar_VolumeBar_VolumeUp.OnHoldClick += new userInteraction(Button_UITopBar_VolumeBar_VolumeUpDown_OnHoldClick);
             UIPanel.addControl(Button_UITopBar_VolumeBar_VolumeUp);
 
             #endregion
@@ -729,7 +729,7 @@ namespace OpenMobile
             theHost.execute(eFunction.setSystemVolume, ((VolumeBar)sender).Value.ToString(), screen.ToString());
         }
 
-        void vol_OnLongClick(OMControl sender, int screen)
+        void vol_OnHoldClick(OMControl sender, int screen)
         {
             // Mute and unmute volume
             int Volume = (int)theHost.getData(eGetData.GetSystemVolume, "", screen.ToString());
@@ -739,7 +739,7 @@ namespace OpenMobile
                 theHost.execute(eFunction.setSystemVolume, "-1", screen.ToString());
         }
 
-        void Button_UITopBar_VolumeBar_VolumeUpDown_OnLongClick(OMControl sender, int screen)
+        void Button_UITopBar_VolumeBar_VolumeUpDown_OnHoldClick(OMControl sender, int screen)
         {
             // Get step size and direction
             int Step = 0;

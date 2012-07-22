@@ -33,9 +33,17 @@ namespace OpenMobile.Controls
     public class OMMessageBox : OMLabel, IClickable
     {
         /// <summary>
-        /// Button Clicked
+        /// Occurs when the control is clicked
         /// </summary>
         public event userInteraction OnClick;
+        /// <summary>
+        /// Occurs when the control is held
+        /// </summary>
+        public event userInteraction OnHoldClick;
+        /// <summary>
+        /// Occurs when the control is long clicked
+        /// </summary>
+        public event userInteraction OnLongClick;
         /// <summary>
         /// Back color 1
         /// </summary>
@@ -62,6 +70,15 @@ namespace OpenMobile.Controls
                 OnClick(this, screen);
             }
             catch (Exception) { };//If no one has hooked the click event
+        }
+        /// <summary>
+        /// Hold the checkbox 
+        /// </summary>
+        public void holdClickMe(int screen)
+        {
+            if (OnHoldClick != null)
+                OnHoldClick(this, screen);
+            raiseUpdate(false);
         }
         private string title;
         /// <summary>

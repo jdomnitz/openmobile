@@ -3,6 +3,7 @@ using System.Drawing;
 using System;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
+using OpenMobile.Math;
 
 namespace OpenMobile.Graphics
 {
@@ -14,6 +15,8 @@ namespace OpenMobile.Graphics
         IGraphics implementation;
         static string version;
         static string renderer;
+
+        public enum Axis { X, Y, Z }
 
         public void Clear(Color color)
         {
@@ -688,6 +691,30 @@ namespace OpenMobile.Graphics
         public void TranslateTransform(float dx, float dy, float dz)
         {
             implementation.TranslateTransform(dx, dy, dz);
+        }
+
+        public void Rotate(Vector3 rotation)
+        {
+            Rotate(rotation.X, rotation.Y, rotation.Z);
+        }
+        public void Rotate(float ax, float ay, float az)
+        {
+            // Rotate in the order of X, Y and then Z
+            if (ax != 0)
+                implementation.Rotate(ax, Axis.X);
+            if (ay != 0)
+                implementation.Rotate(ay, Axis.Y);
+            if (az != 0)
+                implementation.Rotate(az, Axis.Z);
+        }
+
+        public void Scale(Vector3 scale)
+        {
+            Scale(scale.X, scale.Y, scale.Z);
+        }
+        public void Scale(float sx, float sy, float sz)
+        {
+            implementation.Scale(sx, sy, sz);
         }
     }
 }

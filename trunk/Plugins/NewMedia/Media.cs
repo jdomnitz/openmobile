@@ -79,7 +79,7 @@ namespace NewMedia
             List.Color = Color.Black;
             List.Font = new Font(Font.GenericSansSerif, 28F);
             List.OnClick += new userInteraction(List_OnClick);
-            List.OnLongClick += new userInteraction(List_OnLongClick);
+            List.OnHoldClick += new userInteraction(List_OnHoldClick);
             List.Add("Loading . . .");
             OMImage LeftTab = new OMImage(-5, 160, 225, 150);
             LeftTab.Image = theHost.getSkinImage("LeftSlidingSelect");
@@ -659,7 +659,7 @@ namespace NewMedia
                 moveToTracks(screen);
             }
         }
-        void List_OnLongClick(OMControl sender, int screen)
+        void List_OnHoldClick(OMControl sender, int screen)
         {
             if (level[screen] == 3)
             {

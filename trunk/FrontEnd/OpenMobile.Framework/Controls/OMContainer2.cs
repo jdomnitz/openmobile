@@ -28,12 +28,85 @@ namespace OpenMobile.Controls
     [System.Serializable]
     public class OMContainer2 : OMControl, IContainer2
     {
+
+        
         List<OMControl> _Controls = new List<OMControl>();
         Rectangle oldRegion = new Rectangle();
+
+        #region Background 
+
+        private imageItem image;
+        private byte transparency = 100;
+        /// <summary>
+        /// Opacity (0-100%)
+        /// </summary>
+        public byte Transparency
+        {
+            get
+            {
+                return transparency;
+            }
+            set
+            {
+                if (transparency == value)
+                    return;
+                transparency = value;
+                opacity = (byte)(255 * (transparency / 100F));
+                raiseUpdate(false);
+            }
+        }
+
+        private Color _BackgroundColor = Color.Transparent;
+
+        public Color BackgroundColor
+        {
+            get
+            {
+                return _BackgroundColor;
+            }
+            set
+            {
+                if (value == _BackgroundColor)
+                    return;
+
+                _BackgroundColor = value;
+                raiseUpdate(false);
+            }
+        }
+
+        /// <summary>
+        /// The image to be rendered
+        /// </summary>
+        public imageItem Image
+        {
+            get
+            {
+                return image;
+            }
+            set
+            {
+                if (image == value)
+                    return;
+
+                image = value;
+                raiseUpdate(false);
+            }
+        }
+
+        #endregion
 
         public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
         {
             base.RenderBegin(g, e);
+
+            // Draw image background (if any)
+            if (_BackgroundColor != Color.Transparent && _RenderingValue_Alpha == 1)
+                g.FillRectangle(new Brush(Color.FromArgb((int)(_BackgroundColor.A * OpacityFloat), _BackgroundColor)), new Rectangle(left + 1, top + 1, width - 2, height - 2));
+
+            // Draw image (if any)
+            if (image.image != null)
+                lock (image.image)
+                    g.DrawImage(image.image, left, top, width, height, _RenderingValue_Alpha, eAngle.Normal);
 
             // Pass offset data along with renderingparameters
             if (!oldRegion.IsEmpty)

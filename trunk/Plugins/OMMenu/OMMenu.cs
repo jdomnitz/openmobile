@@ -172,6 +172,7 @@ namespace OMMenu
                         for (int i = 0; i < panelMenu.controlCount; i++)
                             Panel.addControl(panelMenu.getControl(i));
                         Panel.Forgotten = true;
+                        Panel.PanelType = OMPanel.PanelTypes.Modal;
                         //Panel.Priority = ePriority.High;
                         
                         #endregion

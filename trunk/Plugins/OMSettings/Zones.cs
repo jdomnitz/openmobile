@@ -82,7 +82,7 @@ namespace OMSettings
             List_Zones.Color = Color.White;
             List_Zones.HighlightColor = Color.White;
             List_Zones.ListItemHeight = 70;
-            List_Zones.OnLongClick += new userInteraction(List_Zones_OnLongClick);
+            List_Zones.OnHoldClick += new userInteraction(List_Zones_OnHoldClick);
             subItemformat = new OMListItem.subItemFormat();
             subItemformat.color = Color.FromArgb(128, Color.White);
             subItemformat.font = new Font(Font.GenericSansSerif, 15F);
@@ -105,7 +105,7 @@ namespace OMSettings
                 {
                     case 0:
                         Button_BottomBar[i] = DefaultControls.GetHorisontalEdgeButton(String.Format("Button_BottomBar{0}", i), MenuButtonStartLocation + (MenuButtonWidth * i), 540, 160, 70, "", "Menu");
-                        Button_BottomBar[i].OnClick += new userInteraction(List_Zones_OnLongClick);
+                        Button_BottomBar[i].OnClick += new userInteraction(List_Zones_OnHoldClick);
                         break;
                     case 1:
                         Button_BottomBar[i] = DefaultControls.GetHorisontalEdgeButton(String.Format("Button_BottomBar{0}", i), MenuButtonStartLocation + (MenuButtonWidth * i), 540, 160, 70, "", "Activate");
@@ -202,7 +202,7 @@ namespace OMSettings
             ZoneDetail_TextBox_ZoneScreen.OSKType = OSKInputTypes.Numpad;
             ZoneDetail_TextBox_ZoneScreen.OSKDescription = "Enter assigned screen number:";
             ZoneDetail_TextBox_ZoneScreen.OSKHelpText = "Screen number";
-            ZoneDetail_TextBox_ZoneScreen.OSKShowOnLongClick = true;
+            ZoneDetail_TextBox_ZoneScreen.OSKShowTrigger = OSKShowTriggers.AfterOnHoldClickEvent;
             ZoneDetail_TextBox_ZoneScreen.OnOSKShow += new userInteraction(ZoneDetail_TextBox_ZoneScreen_OnOSKShow);
             ZoneDetail_TextBox_ZoneScreen.OnClick += new userInteraction(ZoneDetail_TextBox_ZoneScreen_OnClick);
             panelZonesDetail.addControl(ZoneDetail_TextBox_ZoneScreen);
@@ -663,7 +663,7 @@ namespace OMSettings
             SetActiveZone(screen, TmpZone);
         }
 
-        static void List_Zones_OnLongClick(OMControl sender, int screen)
+        static void List_Zones_OnHoldClick(OMControl sender, int screen)
         {
             // Get sender object
             OMList list = sender.Parent[screen, "List_Zones"] as OMList;

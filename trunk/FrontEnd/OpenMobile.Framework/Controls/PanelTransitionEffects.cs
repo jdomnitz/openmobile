@@ -26,12 +26,18 @@ using OpenMobile.Graphics;
 
 namespace OpenMobile.Controls
 {
+    /// <summary>
+    /// Transition effects interface
+    /// </summary>
     public interface iPanelTransitionEffect
     {
         string Name { get; }
-        void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh);
+        void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier);
     }
 
+    /// <summary>
+    /// The transition effect handler
+    /// </summary>
     public static class PanelTransitionEffectHandler
     {
         static List<iPanelTransitionEffect> _TransitionEffecs = new List<iPanelTransitionEffect>();
@@ -49,9 +55,15 @@ namespace OpenMobile.Controls
             AddEffect(new PanelTransitionEffect_SlideDown());
             AddEffect(new PanelTransitionEffect_Crossfade());
             AddEffect(new PanelTransitionEffect_CrossfadeFast());
+            AddEffect(new PanelTransitionEffect_CollapseGrowCrossUL());
+            AddEffect(new PanelTransitionEffect_CollapseGrowCrossCenter());
+            AddEffect(new PanelTransitionEffect_CollapseGrowCenter());
         }
 
-
+        /// <summary>
+        /// Registers a new transition effect
+        /// </summary>
+        /// <param name="Effect"></param>
         static public void AddEffect(iPanelTransitionEffect Effect)
         {
             iPanelTransitionEffect Exist = _TransitionEffecs.Find(x => x.Name.ToLower() == Effect.Name.ToLower());
@@ -61,8 +73,18 @@ namespace OpenMobile.Controls
             }
         }
 
+        /// <summary>
+        /// Get's the transition effect that corresponds to the given name
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <returns></returns>
         static public iPanelTransitionEffect GetEffect(string Name)
         {
+            if (Name.ToLower() == "random")
+            {
+                Random rnd = new Random();
+                return _TransitionEffecs[rnd.Next(1, _TransitionEffecs.Count)];
+            }
             iPanelTransitionEffect effect = _TransitionEffecs.Find(x => x.Name.ToLower() == Name.ToLower());
             if (effect == null)
                 return Effect_None;
@@ -81,10 +103,10 @@ namespace OpenMobile.Controls
             get { return "SlideLeft"; }
         }
 
-        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh)
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Animator
-            SmoothAnimator Animation = new SmoothAnimator(6f);
+            SmoothAnimator Animation = new SmoothAnimator(6f * SpeedMultiplier);
 
             // Start values for effect
             TransitionEffectParam_In.Offset = new Rectangle(1000, 0, 0, 0);
@@ -128,10 +150,10 @@ namespace OpenMobile.Controls
             get { return "SlideRight"; }
         }
 
-        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh)
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Animator
-            SmoothAnimator Animation = new SmoothAnimator(6f);
+            SmoothAnimator Animation = new SmoothAnimator(6f * SpeedMultiplier);
 
             // Start values for effect
             TransitionEffectParam_In.Offset = new Rectangle(-1000, 0, 0, 0);
@@ -175,10 +197,10 @@ namespace OpenMobile.Controls
             get { return "SlideUp"; }
         }
 
-        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh)
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Animator
-            SmoothAnimator Animation = new SmoothAnimator(4.5f);
+            SmoothAnimator Animation = new SmoothAnimator(4.5f * SpeedMultiplier);
 
             // Start values for effect
             TransitionEffectParam_In.Offset = new Rectangle(0, 600, 0, 0);
@@ -222,10 +244,10 @@ namespace OpenMobile.Controls
             get { return "SlideDown"; }
         }
 
-        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh)
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Animator
-            SmoothAnimator Animation = new SmoothAnimator(4.5f);
+            SmoothAnimator Animation = new SmoothAnimator(4.5f * SpeedMultiplier);
 
             // Start values for effect
             TransitionEffectParam_In.Offset = new Rectangle(0, -600, 0, 0);
@@ -269,10 +291,10 @@ namespace OpenMobile.Controls
             get { return "Crossfade"; }
         }
 
-        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh)
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Animator
-            SmoothAnimator Animation = new SmoothAnimator(1f);
+            SmoothAnimator Animation = new SmoothAnimator(1f * SpeedMultiplier);
 
             // Start values for effect
             TransitionEffectParam_In.Alpha = 0.01F;
@@ -324,10 +346,10 @@ namespace OpenMobile.Controls
             get { return "CrossfadeFast"; }
         }
 
-        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh)
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Animator
-            SmoothAnimator Animation = new SmoothAnimator(2f);
+            SmoothAnimator Animation = new SmoothAnimator(2f * SpeedMultiplier);
 
             // Start values for effect
             TransitionEffectParam_In.Alpha = 0.01F;
@@ -370,6 +392,236 @@ namespace OpenMobile.Controls
         #endregion
     }
 
+    public class PanelTransitionEffect_CollapseGrowCrossUL : iPanelTransitionEffect
+    {
+        #region iPanelTransitionEffect Members
+
+        public string Name
+        {
+            get { return "CollapseGrowCrossUL"; }
+        }
+
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
+        {
+            // Animator
+            SmoothAnimator Animation = new SmoothAnimator(0.3f * SpeedMultiplier);
+
+            // Start values for effect
+            TransitionEffectParam_In.Scale.X = 0.01F;
+            TransitionEffectParam_In.Scale.Y = 0.01F;
+            TransitionEffectParam_Out.Scale.X = 1F;
+            TransitionEffectParam_Out.Scale.Y = 1F;
+
+            // Execute animation
+            Animation.Animate(delegate(int AnimationStep)
+            {
+                if (AnimationStep == 0)
+                    AnimationStep = 1;
+
+                TransitionEffectParam_In.Scale.X += (AnimationStep * 0.01F);
+                TransitionEffectParam_In.Scale.Y = TransitionEffectParam_In.Scale.X;
+                TransitionEffectParam_Out.Scale.X -= (AnimationStep * 0.01F);
+                TransitionEffectParam_Out.Scale.Y = TransitionEffectParam_Out.Scale.X;
+
+                // Value limits
+                if (TransitionEffectParam_In.Scale.X >= 1.0F)
+                    TransitionEffectParam_In.Scale.X = 1.0F;
+                if (TransitionEffectParam_In.Scale.Y >= 1.0F)
+                    TransitionEffectParam_In.Scale.Y = 1.0F;
+                if (TransitionEffectParam_Out.Scale.X <= 0.01F)
+                    TransitionEffectParam_Out.Scale.X = 0.01F;
+                if (TransitionEffectParam_Out.Scale.Y <= 0.01F)
+                    TransitionEffectParam_Out.Scale.Y = 0.01F;
+
+                // End animation?
+                if ((TransitionEffectParam_In.Scale.X >= 1.0F) && (TransitionEffectParam_Out.Scale.X <= 0.01F))
+                {
+                    // Set end transition effects
+                    TransitionEffectParam_In.Scale.X = 1F;
+                    TransitionEffectParam_In.Scale.Y = 1F;
+                    TransitionEffectParam_Out.Scale.X = 0.01F;
+                    TransitionEffectParam_Out.Scale.Y = 0.01F;
+
+                    // Redraw
+                    Refresh();
+                    return false;
+                }
+
+                // Redraw
+                Refresh();
+
+                // Continue animation loop
+                return true;
+            });
+        }
+
+        #endregion
+    }
+
+    public class PanelTransitionEffect_CollapseGrowCrossCenter : iPanelTransitionEffect
+    {
+        #region iPanelTransitionEffect Members
+
+        public string Name
+        {
+            get { return "CollapseGrowCrossCenter"; }
+        }
+
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
+        {
+            // Animator
+            SmoothAnimator Animation = new SmoothAnimator(0.3f * SpeedMultiplier);
+
+            // Start values for effect
+            TransitionEffectParam_In.Scale.X = 0.01F;
+            TransitionEffectParam_In.Scale.Y = 0.01F;
+            TransitionEffectParam_Out.Scale.X = 1F;
+            TransitionEffectParam_Out.Scale.Y = 1F;
+
+            TransitionEffectParam_In.Offset = new Rectangle(500,300,0,0);
+            TransitionEffectParam_Out.Offset = new Rectangle(0,0,0,0);
+
+            // Execute animation
+            Animation.Animate(delegate(int AnimationStep)
+            {
+                if (AnimationStep == 0)
+                    AnimationStep = 1;
+
+                // Calculate scale values
+                TransitionEffectParam_In.Scale.X += (AnimationStep * 0.01F);
+                TransitionEffectParam_In.Scale.Y = TransitionEffectParam_In.Scale.X;
+                TransitionEffectParam_Out.Scale.X -= (AnimationStep * 0.01F);
+                TransitionEffectParam_Out.Scale.Y = TransitionEffectParam_Out.Scale.X;
+
+                // Calculate position offset to keep graphics centered
+                TransitionEffectParam_In.Offset.X = 500 - (int)(500 * TransitionEffectParam_In.Scale.X);
+                TransitionEffectParam_In.Offset.Y = 300 - (int)(300 * TransitionEffectParam_In.Scale.Y);
+                TransitionEffectParam_Out.Offset.X = 500 - (int)(500 * TransitionEffectParam_Out.Scale.X);
+                TransitionEffectParam_Out.Offset.Y = 300 - (int)(300 * TransitionEffectParam_Out.Scale.Y);
+
+                // Value limits
+                if (TransitionEffectParam_In.Scale.X >= 1.0F)
+                    TransitionEffectParam_In.Scale.X = 1.0F;
+                if (TransitionEffectParam_In.Scale.Y >= 1.0F)
+                    TransitionEffectParam_In.Scale.Y = 1.0F;
+                if (TransitionEffectParam_Out.Scale.X <= 0.01F)
+                    TransitionEffectParam_Out.Scale.X = 0.01F;
+                if (TransitionEffectParam_Out.Scale.Y <= 0.01F)
+                    TransitionEffectParam_Out.Scale.Y = 0.01F;
+
+                // End animation?
+                if ((TransitionEffectParam_In.Scale.X >= 1.0F) && (TransitionEffectParam_Out.Scale.X <= 0.01F))
+                {
+                    // Set end transition effects
+                    TransitionEffectParam_In.Scale.X = 1F;
+                    TransitionEffectParam_In.Scale.Y = 1F;
+                    TransitionEffectParam_Out.Scale.X = 0.01F;
+                    TransitionEffectParam_Out.Scale.Y = 0.01F;
+                    TransitionEffectParam_In.Offset = new Rectangle(0, 0, 0, 0);
+                    TransitionEffectParam_Out.Offset = new Rectangle(500, 300, 0, 0);
+
+                    // Redraw
+                    Refresh();
+                    return false;
+                }
+
+                // Redraw
+                Refresh();
+
+                // Continue animation loop
+                return true;
+            });
+        }
+
+        #endregion
+    }
+
+    public class PanelTransitionEffect_CollapseGrowCenter : iPanelTransitionEffect
+    {
+        #region iPanelTransitionEffect Members
+
+        public string Name
+        {
+            get { return "CollapseGrowCenter"; }
+        }
+
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
+        {
+            // Animator
+            SmoothAnimator Animation = new SmoothAnimator(0.5f * SpeedMultiplier);
+
+            // Start values for effect
+            TransitionEffectParam_In.Scale.X = 0.01F;
+            TransitionEffectParam_In.Scale.Y = 0.01F;
+            TransitionEffectParam_Out.Scale.X = 1F;
+            TransitionEffectParam_Out.Scale.Y = 1F;
+
+            TransitionEffectParam_In.Offset = new Rectangle(500, 300, 0, 0);
+            TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
+
+            // Execute animation
+            Animation.Animate(delegate(int AnimationStep)
+            {
+                if (AnimationStep == 0)
+                    AnimationStep = 1;
+
+                // Calculate scale values for object going out
+                TransitionEffectParam_Out.Scale.X -= (AnimationStep * 0.01F);
+                TransitionEffectParam_Out.Scale.Y = TransitionEffectParam_Out.Scale.X;
+
+                // Value limits
+                if (TransitionEffectParam_Out.Scale.X <= 0.01F)
+                    TransitionEffectParam_Out.Scale.X = 0.01F;
+                if (TransitionEffectParam_Out.Scale.Y <= 0.01F)
+                    TransitionEffectParam_Out.Scale.Y = 0.01F;
+
+                // Calculate scale values for object going in (after object going out has completed)
+                if (TransitionEffectParam_Out.Scale.X <= 0.01F)
+                {
+                    TransitionEffectParam_In.Scale.X += (AnimationStep * 0.01F);
+                    TransitionEffectParam_In.Scale.Y = TransitionEffectParam_In.Scale.X;
+                }
+
+                // Value limits
+                if (TransitionEffectParam_In.Scale.X >= 1.0F)
+                    TransitionEffectParam_In.Scale.X = 1.0F;
+                if (TransitionEffectParam_In.Scale.Y >= 1.0F)
+                    TransitionEffectParam_In.Scale.Y = 1.0F;
+
+                // Calculate position offset to keep graphics centered
+                TransitionEffectParam_In.Offset.X = 500 - (int)(500 * TransitionEffectParam_In.Scale.X);
+                TransitionEffectParam_In.Offset.Y = 300 - (int)(300 * TransitionEffectParam_In.Scale.Y);
+                TransitionEffectParam_Out.Offset.X = 500 - (int)(500 * TransitionEffectParam_Out.Scale.X);
+                TransitionEffectParam_Out.Offset.Y = 300 - (int)(300 * TransitionEffectParam_Out.Scale.Y);
+
+
+                // End animation?
+                if ((TransitionEffectParam_In.Scale.X >= 1.0F) && (TransitionEffectParam_Out.Scale.X <= 0.01F))
+                {
+                    // Set end transition effects
+                    TransitionEffectParam_In.Scale.X = 1F;
+                    TransitionEffectParam_In.Scale.Y = 1F;
+                    TransitionEffectParam_Out.Scale.X = 0.01F;
+                    TransitionEffectParam_Out.Scale.Y = 0.01F;
+                    TransitionEffectParam_In.Offset = new Rectangle(0, 0, 0, 0);
+                    TransitionEffectParam_Out.Offset = new Rectangle(500, 300, 0, 0);
+
+                    // Redraw
+                    Refresh();
+                    return false;
+                }
+
+                // Redraw
+                Refresh();
+
+                // Continue animation loop
+                return true;
+            });
+        }
+
+        #endregion
+    }
+
     public class PanelTransitionEffect_None : iPanelTransitionEffect
     {
         #region iPanelTransitionEffect Members
@@ -379,7 +631,7 @@ namespace OpenMobile.Controls
             get { return "None"; }
         }
 
-        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh)
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Reset transition effects
             TransitionEffectParam_In = new renderingParams();

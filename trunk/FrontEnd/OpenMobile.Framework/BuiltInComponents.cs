@@ -108,15 +108,6 @@ namespace OpenMobile
         {
             theHost = BuiltInComponents.Host;
 
-            // Set default values
-            StoredData.SetDefaultValue("UI.SkinFocusColor", "00,00,FF");
-            StoredData.SetDefaultValue("UI.SkinTextColor", "FF,FF,FF");
-            StoredData.SetDefaultValue("UI.MinGraphics", false.ToString());
-            StoredData.SetDefaultValue("UI.VolumeChangesVisible", true.ToString());
-            StoredData.SetDefaultValue("UI.ShowCursor", false.ToString());
-            StoredData.SetDefaultValue("UI.ShowDebugInfo", false.ToString());
-            StoredData.SetDefaultValue("OpenGL.VSync", false.ToString());
-
             Settings gl = new Settings("General Settings");
             Setting graphics = new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", String.Empty, "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
@@ -126,6 +117,7 @@ namespace OpenMobile
             //Setting SkinColor = new Setting(SettingTypes.Text, "UI.SkinColor", "Foreground", "Skin foreground color (R,G,B)");
             Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus color", "Skin focus color (R,G,B)");
             Setting SkinTextColor = new Setting(SettingTypes.Text, "UI.SkinTextColor", "Text color", "Skin text color (R,G,B)");
+            Setting TransitionSpeed = new Setting(SettingTypes.Text, "UI.TransitionSpeed", "Transition Speed", "Transition speed multiplier");
             using (PluginSettings settings = new PluginSettings())
             {
                 graphics.Value = settings.getSetting("UI.MinGraphics");
@@ -136,6 +128,7 @@ namespace OpenMobile
                 //SkinColor.Value = settings.getSetting("UI.SkinColor");
                 SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
                 SkinTextColor.Value = settings.getSetting("UI.SkinTextColor");
+                TransitionSpeed.Value = settings.getSetting("UI.TransitionSpeed");
             }
             gl.Add(graphics);
             gl.Add(volume);
@@ -145,6 +138,7 @@ namespace OpenMobile
             //gl.Add(SkinColor);
             gl.Add(SkinFocusColor);
             gl.Add(SkinTextColor);
+            gl.Add(TransitionSpeed);
             gl.OnSettingChanged += new SettingChanged(SettingsChanged);
 
             // Update local data variables (for speed)
@@ -181,6 +175,10 @@ namespace OpenMobile
                             theHost.ShowDebugInfo = false;
                         break;
 
+                    case "UI.TransitionSpeed":
+                        theHost.TransitionSpeed = StoredData.GetFloat("UI.TransitionSpeed", 1.0F);
+                        break;
+
                     default:
                         theHost.execute(eFunction.settingsChanged, setting.Name);
                         break;
@@ -193,6 +191,22 @@ namespace OpenMobile
         /// </summary>
         public static class SystemSettings
         {
+            /// <summary>
+            /// Initializes systemsettings
+            /// </summary>
+            public static void Init()
+            {
+                // Set default values
+                StoredData.SetDefaultValue("UI.SkinFocusColor", "00,00,FF");
+                StoredData.SetDefaultValue("UI.SkinTextColor", "FF,FF,FF");
+                StoredData.SetDefaultValue("UI.MinGraphics", false.ToString());
+                StoredData.SetDefaultValue("UI.VolumeChangesVisible", true.ToString());
+                StoredData.SetDefaultValue("UI.ShowCursor", false.ToString());
+                StoredData.SetDefaultValue("UI.ShowDebugInfo", false.ToString());
+                StoredData.SetDefaultValue("UI.TransitionSpeed", "1.0");
+                StoredData.SetDefaultValue("OpenGL.VSync", false.ToString());
+            }
+
             /// <summary>
             /// OM System setting: True = use minimalistic graphics
             /// </summary>
@@ -265,6 +279,21 @@ namespace OpenMobile
                 set
                 {
                     StoredData.SetBool("OpenGL.VSync", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: Transition speed multiplier
+            /// </summary>
+            public static float TransitionSpeed
+            {
+                get
+                {
+                    return StoredData.GetFloat("UI.TransitionSpeed", 1.0F);
+                }
+                set
+                {
+                    StoredData.Set("UI.TransitionSpeed", value);
                 }
             }
 
