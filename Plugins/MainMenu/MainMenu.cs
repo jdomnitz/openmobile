@@ -128,7 +128,7 @@ namespace OpenMobile
                     #endregion
 
                     MainMenuButtons[i] = DefaultControls.GetButton(Name, Left, Top, 300, 120, "", Text);
-                    MainMenuButtons[i].OnLongClick += new userInteraction(OnLongClick);
+                    MainMenuButtons[i].OnHoldClick += new userInteraction(OnHoldClick);
                     MainMenuButtons[i].Tag = settings.getSetting(String.Format("{0}.Plugin", Name));
                     MainMenuButtons[i].OnClick += new userInteraction(MainMenu_OnClick);
                     mainPanel.addControl(MainMenuButtons[i]);                    
@@ -260,6 +260,7 @@ namespace OpenMobile
             #region Exit menu
 
             OMPanel exit = new OMPanel("Quit");
+            exit.PanelType = OMPanel.PanelTypes.Modal;
             exit.Forgotten = true;
             exit.BackgroundType = backgroundStyle.SolidColor;
             exit.BackgroundColor1 = Color.FromArgb(125, Color.Black);
@@ -268,7 +269,7 @@ namespace OpenMobile
 
             OMButton Quit = DefaultControls.GetButton("UI.Quit", 245, 145, 250, 80, "", "Quit");
             Quit.OnClick += new userInteraction(Quit_OnClick);
-            Quit.OnLongClick += new userInteraction(Quit_OnLongClick);
+            Quit.OnHoldClick += new userInteraction(Quit_OnHoldClick);
 
             OMButton Sleep = DefaultControls.GetButton("UI.Sleep", 245, 229, 250, 80, "", "Sleep");
             Sleep.OnClick += new userInteraction(Sleep_OnClick);
@@ -308,7 +309,7 @@ namespace OpenMobile
             return eLoadStatus.LoadSuccessful;
         }
 
-        void Quit_OnLongClick(OMControl sender, int screen)
+        void Quit_OnHoldClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "None");
@@ -348,7 +349,7 @@ namespace OpenMobile
                     theHost.execute(eFunction.TransitionFromPanel, screen,"MainMenu");
                     if (theHost.execute(eFunction.TransitionToPanel,screen, ((OMButton)sender).Tag)==false)
                         theHost.execute(eFunction.TransitionToPanel, screen, "MainMenu");
-                    theHost.execute(eFunction.ExecuteTransition, screen, "CrossfadeFast");
+                    theHost.execute(eFunction.ExecuteTransition, screen, "Random");
                     break;
             }
         }
@@ -421,7 +422,7 @@ namespace OpenMobile
         }
 
         string currentlySetting = "";
-        void OnLongClick(OMControl sender, int screen)
+        void OnHoldClick(OMControl sender, int screen)
         {
             // Is settings already in action
             // Disable check for already active since we can set it individually on each screen

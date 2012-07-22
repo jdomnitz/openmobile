@@ -449,7 +449,7 @@ namespace OMRadio
             List_RadioStations.Scrollbars = true;
             List_RadioStations.TextAlignment = Alignment.CenterLeft;
             List_RadioStations.OnClick += new userInteraction(List_RadioStations_OnClick);
-            List_RadioStations.OnLongClick += new userInteraction(List_RadioStations_OnLongClick);
+            List_RadioStations.OnHoldClick += new userInteraction(List_RadioStations_OnHoldClick);
             panelMain.addControl(List_RadioStations);
 
             #endregion
@@ -649,7 +649,7 @@ namespace OMRadio
             }
         }
 
-        void List_RadioStations_OnLongClick(OMControl sender, int screen)
+        void List_RadioStations_OnHoldClick(OMControl sender, int screen)
         {
             if (StationListSource == StationListSources.Live)
             {

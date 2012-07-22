@@ -337,8 +337,9 @@ namespace ControlDemo
 
         void OSKButton3_OnClick(OMControl sender, int screen)
         {
-            OSK osk = new OSK("", "password", "Please input password now", OSKInputTypes.Keypad, true);
-            string Result = osk.ShowOSK(screen);
+            //OSK osk = new OSK("", "password", "Please input password now", OSKInputTypes.Keypad, true);
+            //string Result = osk.ShowOSK(screen);
+            string Result = OSK.ShowDefaultOSK(screen, "", "password", "Please input password now", OSKInputTypes.Keypad, true);
             theHost.SendStatusData(screen, eDataType.PopUp, this, String.Format("OSK result: {0}", Result));
         }
 
@@ -351,17 +352,9 @@ namespace ControlDemo
         bool btnSelected = false;
         void OSKButton_OnClick(OMControl sender, int screen)
         {
-            /*
-            OMButton btn = (OMButton)sender;
-            btnSelected = !btnSelected;
-            if (!btnSelected)
-                btn.OverlayImage = imgBtnIconOff;
-            else
-                btn.OverlayImage = imgBtnIconOn;
-            */
-
-            OSK osk = new OSK("", "Type something", "Please input something now", (OSKInputTypes)sender.Tag, false);
-            string Result = osk.ShowOSK(screen);
+            //OSK osk = new OSK("", "Type something", "Please input something now", (OSKInputTypes)sender.Tag, false);
+            //string Result = osk.ShowOSK(screen);
+            string Result = OSK.ShowDefaultOSK(screen, "", "Type something", "Please input something now", (OSKInputTypes)sender.Tag, false);
             theHost.SendStatusData(screen, eDataType.PopUp, this, String.Format("OSK result: {0}", Result));
         }
 

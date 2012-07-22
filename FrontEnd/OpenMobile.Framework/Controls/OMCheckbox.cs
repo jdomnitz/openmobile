@@ -15,6 +15,14 @@ namespace OpenMobile.Controls
         /// </summary>
         public event userInteraction OnClick;
         /// <summary>
+        /// Occurs when the control is held
+        /// </summary>
+        public event userInteraction OnHoldClick;
+        /// <summary>
+        /// Occurs when the control is long clicked
+        /// </summary>
+        public event userInteraction OnLongClick;
+        /// <summary>
         /// Is the checkbox checked
         /// </summary>
         protected bool isChecked;
@@ -96,10 +104,21 @@ namespace OpenMobile.Controls
             raiseUpdate(false);
         }
         /// <summary>
+        /// Hold the checkbox 
+        /// </summary>
+        public void holdClickMe(int screen)
+        {
+            if (OnHoldClick != null)
+                OnHoldClick(this, screen);
+            raiseUpdate(false);
+        }
+        /// <summary>
         /// Fires the OnLongClick event
         /// </summary>
         public void longClickMe(int screen)
         {
+            if (OnLongClick != null)
+                OnLongClick(this, screen);
         }
 
         private bool genHighlight;

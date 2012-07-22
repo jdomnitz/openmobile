@@ -637,6 +637,11 @@ namespace OpenMobile.Plugin
         bool ShowDebugInfo { get; set; }
 
         /// <summary>
+        /// Transition speed multiplier
+        /// </summary>
+        float TransitionSpeed { get; set; }
+        
+        /// <summary>
         /// Gets the name of the assosiated audio device
         /// </summary>
         /// <param name="instance">AudioDevice index</param>

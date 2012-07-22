@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 
 namespace OpenMobile.Framework
 {
@@ -41,6 +42,57 @@ namespace OpenMobile.Framework
                 return (T)xs.Deserialize(ms);
             }
         }
+
+        /// <summary>
+        /// Create a deep copy of this control
+        /// </summary>
+        /// <returns></returns>
+        public static T CloneGeneric<T>(T obj)
+        {
+            T returnData = (T)obj; //.MemberwiseClone();
+            Type type = returnData.GetType();
+
+            // Clone fields
+            foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
+            {
+                try
+                {
+                    //Clone IClonable object
+                    if (fieldInfo.FieldType.GetInterface("ICloneable", true) != null)
+                    {
+                        ICloneable clone = (ICloneable)fieldInfo.GetValue(obj);
+                        fieldInfo.SetValue(returnData, (clone != null ? clone.Clone() : clone));
+                    }
+                    else
+                    {
+                        fieldInfo.SetValue(returnData, fieldInfo.GetValue(obj));
+                    }
+                }
+                catch (TargetInvocationException) { }
+            }
+
+            // Clone properties
+            foreach (PropertyInfo propInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
+            {
+                if (propInfo.CanWrite && propInfo.CanRead && (propInfo.GetGetMethod().GetParameters().Length == 0))
+                    try
+                    {
+                        //Clone IClonable object
+                        if (propInfo.PropertyType.GetInterface("ICloneable", true) != null)
+                        {
+                            ICloneable clone = (ICloneable)propInfo.GetValue(obj, null);
+                            propInfo.SetValue(returnData, (clone != null ? clone.Clone() : clone), null);
+                        }
+                        else
+                        {
+                            propInfo.SetValue(returnData, propInfo.GetValue(obj, null), null);
+                        }
+                    }
+                    catch (TargetInvocationException) { }
+            }
+            return returnData;
+        }
+
 
     }
 }

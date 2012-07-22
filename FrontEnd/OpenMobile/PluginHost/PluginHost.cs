@@ -180,6 +180,9 @@ namespace OpenMobile
             nextPosition = new int[8];
             */
 
+            // Save reference to the pluginhost for the framework (Do not remove this line!)
+            BuiltInComponents.Host = this;
+
             // Create local data folder for OM (under users local data)
             if (Directory.Exists(DataPath) == false)
                 Directory.CreateDirectory(DataPath);
@@ -191,8 +194,6 @@ namespace OpenMobile
             // Start a timer to get the current time (fired each minute)
             tmrCurrentClock = new System.Threading.Timer(tmrCurrentClock_time, null, 60000, 60000);
 
-            // Save reference to the pluginhost for the framework (Do not remove this line!)
-            BuiltInComponents.Host = this;
 
             // Connect network events
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
@@ -200,6 +201,9 @@ namespace OpenMobile
 
             // Connect screen events
             SystemEvents.DisplaySettingsChanged += new EventHandler(SystemEvents_DisplaySettingsChanged);
+
+            // Initialize system settings
+            BuiltInComponents.SystemSettings.Init();
 
             // Initialize zonehandler
             _ZoneHandler = new ZoneHandler();
@@ -255,6 +259,9 @@ namespace OpenMobile
 
             // Start loading playlist data
             SandboxedThread.Asynchronous(loadPlaylists);
+
+            // Initialize builtin helperfunctions
+            SandboxedThread.Asynchronous(OpenMobile.helperFunctions.OSK.Init);
         }
 
         #endregion
@@ -879,7 +886,7 @@ namespace OpenMobile
                 lock (Core.RenderingWindows[i])
                 {
                     Core.RenderingWindows[i].TransitionInPanel(security);
-                    Core.RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
+                    Core.RenderingWindows[i].ExecuteTransition("None");
                     history.setDisabled(i, true);
                     Core.RenderingWindows[i].blockHome = true;
                 }
@@ -890,7 +897,7 @@ namespace OpenMobile
                 lock (Core.RenderingWindows[i])
                 {
                     Core.RenderingWindows[i].TransitionOutPanel(security);
-                    Core.RenderingWindows[i].ExecuteTransition(eGlobalTransition.None);
+                    Core.RenderingWindows[i].ExecuteTransition("None");
                     history.setDisabled(i, false);
                     Core.RenderingWindows[i].blockHome = false;
                 }
@@ -1025,6 +1032,21 @@ namespace OpenMobile
         /// Sets the visibility of DebugInfo
         /// </summary>
         public bool ShowDebugInfo { get; set; }
+
+        /// <summary>
+        /// Transition speed multiplier
+        /// </summary>
+        public float TransitionSpeed { 
+            get 
+            {
+                return _TransitionSpeed; 
+            }
+            set
+            {
+                _TransitionSpeed = value;
+            }
+        }
+        float _TransitionSpeed = 1.0F;
 
         #endregion
 
@@ -1687,28 +1709,21 @@ namespace OpenMobile
 
                 // Execute transition with the specified effect
                 case eFunction.ExecuteTransition:
-                    eGlobalTransition effect;
+                    string effect;
 
                     if (_GraphicsLevel == eGraphicsLevel.Minimal)
-                        effect = eGlobalTransition.None;
+                        effect = "None";
                     else if (string.IsNullOrEmpty(arg2))
-                        effect = eGlobalTransition.None;
+                        effect = "None";
                     else
-                        try
-                        {
-                            effect = (eGlobalTransition)Enum.Parse(typeof(eGlobalTransition), arg2);
-                        }
-                        catch (ArgumentException)
-                        {
-                            effect = eGlobalTransition.None;
-                        }
+                        effect = arg2;
                     if (int.TryParse(arg1, out ret) == true)
                     {
                         lock (Core.RenderingWindows[ret])
                         {
                             Core.RenderingWindows[ret].ExecuteTransition(effect);
                         }
-                        raiseSystemEvent(eFunction.ExecuteTransition, arg1, effect.ToString(), String.Empty);
+                        raiseSystemEvent(eFunction.ExecuteTransition, arg1, effect, String.Empty);
                         return true;
                     }
                     return false;
@@ -2855,7 +2870,7 @@ namespace OpenMobile
         /// <param name="Message"></param>
         public void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message)
         {
-            SendStatusData(-1, DataType, SourcePlugin.pluginName, SourceTag, Message);
+            SendStatusData(Screen, DataType, SourcePlugin.pluginName, SourceTag, Message);
         }
         /// <summary>
         /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)

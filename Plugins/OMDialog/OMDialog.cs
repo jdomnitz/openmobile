@@ -323,6 +323,7 @@ namespace OMDialog
                         #endregion
 
                         Panel.Forgotten = true;
+                        Panel.PanelType = OMPanel.PanelTypes.Modal;
                         //Panel.Priority = ePriority.High;
                         
                         #endregion

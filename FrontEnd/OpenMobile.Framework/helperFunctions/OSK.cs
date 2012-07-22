@@ -32,8 +32,75 @@ using OpenMobile.Framework;
 
 namespace OpenMobile.helperFunctions
 {
-        public class OSK
+        public class OSK : ICloneable
         {
+            static OSK OSK_Default_Keypad;
+            static OSK OSK_Default_Keypad_Masked;
+            static OSK OSK_Default_Numpad;
+            static OSK OSK_Default_Numpad_Masked;
+
+            public static void Init()
+            {
+                // Generate default OSK panels
+                OSK_Default_Keypad = new OSK("", "", "", OSKInputTypes.Keypad, false);
+                OSK_Default_Keypad.GeneratePanel();
+
+                OSK_Default_Keypad_Masked = new OSK("", "", "", OSKInputTypes.Keypad, true);
+                OSK_Default_Keypad_Masked.GeneratePanel();
+
+                OSK_Default_Numpad = new OSK("", "", "", OSKInputTypes.Numpad, false);
+                OSK_Default_Numpad.GeneratePanel();
+
+                OSK_Default_Numpad_Masked = new OSK("", "", "", OSKInputTypes.Numpad, true);
+                OSK_Default_Numpad_Masked.GeneratePanel();
+            }
+
+            public static string ShowDefaultOSK(int screen, string Text, string HelpText, string Header, OSKInputTypes Style, bool MaskInput)
+            {
+                if (Style == OSKInputTypes.None)
+                    return "";
+
+                //OMTextBox"OSK_TextBox_Text"
+
+                OSK osk = null;
+
+                switch (Style)
+                {
+                    case OSKInputTypes.Keypad:
+                        {
+                            if (MaskInput)
+                                osk = (OSK)OSK_Default_Keypad_Masked.Clone();
+                            else
+                                osk = (OSK)OSK_Default_Keypad.Clone();
+                        }
+                        break;
+                    case OSKInputTypes.Numpad:
+                        {
+                            if (MaskInput)
+                                osk = (OSK)OSK_Default_Numpad_Masked.Clone();
+                            else
+                                osk = (OSK)OSK_Default_Numpad.Clone();
+                        }
+                        break;
+                }
+
+                // Configure text and other items
+                OMTextBox txt = (OMTextBox)osk.Panel.Controls.Find(x => x.Name == "OSK_TextBox_Text");
+                if (txt != null)
+                {
+                    txt.Tag = Text;
+                    txt.Text = Text;
+                }
+                OMLabel lbl = (OMLabel)osk.Panel.Controls.Find(x => x.Name == "OSK_Label_HelpText");
+                if (lbl != null)
+                    lbl.Text = HelpText;
+                lbl = (OMLabel)osk.Panel.Controls.Find(x => x.Name == "OSK_Label_Header");
+                if (lbl != null)
+                    lbl.Text = Header;
+
+                return osk.ShowPreloadedOSK(screen);
+            }
+
             public class OSKOnKeyPressData
             {
                 public OMPanel Panel { get; set; }
@@ -178,6 +245,9 @@ namespace OpenMobile.helperFunctions
 
             #region Constructors
 
+            public OSK()
+            {
+            }
             /// <summary>
             /// Initializes the OSK
             /// </summary>
@@ -206,14 +276,10 @@ namespace OpenMobile.helperFunctions
 
             #endregion
 
-
-            private void CreatePanel(int screen)
+            private void CreatePanel()
             {
                 // Create panel
                 Panel = new OMPanel("");
-
-                // Set panel name
-                PanelName = Panel.Name = String.Format("{0}_{1}", Handler, Panel.GetHashCode());
 
                 // Pack paneldata into tag property
                 Panel.Tag = _ConfigData;
@@ -224,28 +290,6 @@ namespace OpenMobile.helperFunctions
                     return;
                 }
 
-                if (Panel != null)
-                {
-                    //Panel.Priority = ePriority.High;
-                    /* Items has to be named according to this:
-                     *  OSK_Button_OK       : OK button
-                     *  OSK_Button_?        : OSK keys
-                     *  OSK_TextBox_Text    : Text input box
-                    */
-
-                    // Attach events
-                    for (int i = 0; i < Panel.controlCount; i++)
-                    {
-                        OMButton btn = Panel.getControl(i) as OMButton;
-                        if (btn != null)
-                        {
-                            if (btn.Name == "OSK_Button_Cancel")
-                                btn.OnClick += new userInteraction(CancelButton_OnClick);
-                            else if (btn.Name == "OSK_Button_OK")
-                                btn.OnClick += new userInteraction(OKButton_OnClick);
-                        }
-                    }
-                }
             }
 
             void CancelButton_OnClick(OMControl sender, int screen)
@@ -270,6 +314,18 @@ namespace OpenMobile.helperFunctions
                 CloseOSK.Set();
             }
 
+            public string ShowPreloadedOSK(int screen)
+            {
+                // Initialize the panel
+                if (!BuiltInComponents.Host.sendMessage<OMPanel>(Handler, "OpenMobile.helperFunctions.OSK", "init", ref Panel))
+                {   // Log this error to the debug log
+                    BuiltInComponents.Host.DebugMsg("Unable to get OSK panel, plugin " + Handler + " not available");
+                    return "";
+                }
+
+                return ShowOSK(screen, true);
+            }
+
             /// <summary>
             /// Shows the menu and returns the zero based index (if not changed by the returntype property) of the selected menu option
             /// <para>A negative number indicates no selection</para>
@@ -278,16 +334,57 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public string ShowOSK(int screen)
             {
+                return ShowOSK(screen, false);
+            }
+            /// <summary>
+            /// Shows the menu and returns the zero based index (if not changed by the returntype property) of the selected menu option
+            /// <para>A negative number indicates no selection</para>
+            /// </summary>
+            /// <param name="screen"></param>
+            /// <returns></returns>
+            public string ShowOSK(int screen, bool UsePreloadedPanel)
+            {
                 // Save screen manager
                 DateTime start = DateTime.Now;
                 _ConfigData.Manager = BuiltInComponents.Panels;
                 Screen = screen;
-               
-                CreatePanel(screen);
-                CloseOSK.Reset();
+
+
+                // Create panel
+                if (!UsePreloadedPanel)
+                    CreatePanel();
+
+                // Set panel name
+                PanelName = Panel.Name = String.Format("{0}_{1}", Handler, Panel.GetHashCode());
+
+                // Attach events
+                if (Panel != null)
+                {
+                    //Panel.Priority = ePriority.High;
+                    /* Items has to be named according to this:
+                     *  OSK_Button_OK       : OK button
+                     *  OSK_Button_?        : OSK keys
+                     *  OSK_TextBox_Text    : Text input box
+                    */
+
+                    // Attach events
+                    for (int i = 0; i < Panel.controlCount; i++)
+                    {
+                        OMButton btn = Panel.getControl(i) as OMButton;
+                        if (btn != null)
+                        {
+                            if (btn.Name == "OSK_Button_Cancel")
+                                btn.OnClick += new userInteraction(CancelButton_OnClick);
+                            else if (btn.Name == "OSK_Button_OK")
+                                btn.OnClick += new userInteraction(OKButton_OnClick);
+                        }
+                    }
+                }
 
                 // loadpanel
-                BuiltInComponents.Panels.loadSinglePanel(Panel,screen);
+                BuiltInComponents.Panels.loadSinglePanel(Panel, screen);
+
+                CloseOSK.Reset();
 
                 // Connect to system events (to detect "goback" event)
                 SystemEvent SysEv = new SystemEvent(theHost_OnSystemEvent);
@@ -316,6 +413,11 @@ namespace OpenMobile.helperFunctions
                 BuiltInComponents.Panels.unloadPanel(Panel.Name);
 
                 return Result;
+            }
+
+            public void GeneratePanel()
+            {
+                CreatePanel();
             }
 
             bool Host_OnGesture(int screen, string character, string pluginName, string panelName, ref bool handled)
@@ -358,7 +460,6 @@ namespace OpenMobile.helperFunctions
                     handled = true;
                 return Data.KeyHandled;
             }
-
             
 
             /// <summary>
@@ -381,5 +482,17 @@ namespace OpenMobile.helperFunctions
                     }
                 }
             }
+
+            #region ICloneable Members
+
+            public object Clone()
+            {
+                OSK newOSK = new OSK();
+                newOSK.Panel = this.Panel.Clone();
+                newOSK.PanelName = this.PanelName;
+                return newOSK;
+            }
+
+            #endregion
         }
 }

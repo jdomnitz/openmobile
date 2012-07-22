@@ -40,6 +40,11 @@ namespace OpenMobile.Controls
         
         private List<OMControl> containedControls = new List<OMControl>();
         private imageItem background;
+
+        public enum PanelTypes { Normal, Modal }
+        public PanelTypes PanelType = PanelTypes.Normal;
+        
+
         /// <summary>
         /// Request a screen refresh
         /// </summary>
@@ -276,22 +281,22 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public void Render(Graphics.Graphics g, renderingParams e)
         {
-            float tmp = 1F;
-            if (Mode == eModeType.transitioningIn)
-                tmp = e.globalTransitionIn;
-            else if (Mode == eModeType.transitioningOut)
-                tmp = e.globalTransitionOut;
+            //float tmp = 1F;
+            //if (Mode == eModeType.transitioningIn)
+            //    tmp = e.globalTransitionIn;
+            //else if (Mode == eModeType.transitioningOut)
+            //    tmp = e.globalTransitionOut;
             switch (BackgroundType)
             {
                 case backgroundStyle.Gradiant:
-                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * BackgroundColor1.A), BackgroundColor1), Color.FromArgb((int)(tmp * BackgroundColor2.A), BackgroundColor2), Gradient.Vertical), 0, 0, 1000, 600);
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(e.Alpha * BackgroundColor1.A), BackgroundColor1), Color.FromArgb((int)(e.Alpha * BackgroundColor2.A), BackgroundColor2), Gradient.Vertical), 0, 0, 1000, 600);
                     break;
                 case backgroundStyle.SolidColor:
-                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * BackgroundColor1.A), BackgroundColor1)), 0, 0, 1000, 600);
+                    g.FillRectangle(new Brush(Color.FromArgb((int)(e.Alpha * BackgroundColor1.A), BackgroundColor1)), 0, 0, 1000, 600);
                     break;
                 case backgroundStyle.Image:
                     if (BackgroundImage.image != null)
-                        g.DrawImage(BackgroundImage.image, new Rectangle(0, 0, 1000, 600), 0, 0, BackgroundImage.image.Width, BackgroundImage.image.Height, tmp);
+                        g.DrawImage(BackgroundImage.image, new Rectangle(0, 0, 1000, 600), 0, 0, BackgroundImage.image.Width, BackgroundImage.image.Height, e.Alpha);
                     break;
             }
             for (int i = 0; i < containedControls.Count; i++)

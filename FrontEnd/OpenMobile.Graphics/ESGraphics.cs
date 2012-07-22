@@ -829,6 +829,21 @@ namespace OpenMobile.Graphics
         {
             Raw.Translate(dx, dy, dz);
         }
+
+        public void Rotate(float angle, Graphics.Axis axis)
+        {
+            Raw.Rotate(angle, (axis == Graphics.Axis.X ? 1 : 0), (axis == Graphics.Axis.Y ? 1 : 0), (axis == Graphics.Axis.Z ? 1 : 0));
+        }
+
+        public void Scale(float sx, float sy, float sz)
+        {
+            Raw.Scale(sx, sy, sz);
+        }
+        public void Transform(Matrix4 m)
+        {
+            //Raw.MultMatrix(ref m);
+        }
+
     }
 }
 #endif

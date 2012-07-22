@@ -82,35 +82,16 @@ namespace OpenMobile.Controls
             }
         }
 
-        private bool _OSKShowOnLongClick = false;
-        /// <summary>
-        /// Specifies when to show the OSK (false = on click event, true = on long click event)
-        /// </summary>
-        public bool OSKShowOnLongClick
+        private OSKShowTriggers _OSKShowTrigger = OSKShowTriggers.BeforeOnClickEvent;
+        public OSKShowTriggers OSKShowTrigger
         {
             get
             {
-                return _OSKShowOnLongClick;
+                return _OSKShowTrigger;
             }
             set
             {
-                _OSKShowOnLongClick = value;
-            }
-        }
-
-        private bool _OSKShowAfterClickEvent = false;
-        /// <summary>
-        /// Specifies when to show the OSK (false = before click event, true = after click event)
-        /// </summary>
-        public bool OSKShowAfterClickEvent
-        {
-            get
-            {
-                return _OSKShowAfterClickEvent;
-            }
-            set
-            {
-                _OSKShowAfterClickEvent = value;
+                _OSKShowTrigger = value;
             }
         }
 
@@ -151,11 +132,15 @@ namespace OpenMobile.Controls
         /// </summary>
         public event userInteraction OnTextChange;
         /// <summary>
-        /// Control Clicked
+        /// Occurs when the control is clicked
         /// </summary>
         public event userInteraction OnClick;
         /// <summary>
-        /// Control clicked and held
+        /// Occurs when the control is held
+        /// </summary>
+        public event userInteraction OnHoldClick;
+        /// <summary>
+        /// Occurs when the control is long clicked
         /// </summary>
         public event userInteraction OnLongClick;
         /// <summary>
@@ -210,15 +195,35 @@ namespace OpenMobile.Controls
                 return;
 
             // Show OSK
-            if (!_OSKShowOnLongClick && !_OSKShowAfterClickEvent)
+            if (_OSKShowTrigger == OSKShowTriggers.BeforeOnClickEvent)
                 ShowOSK(screen);
 
             if (OnClick != null)
                 OnClick(this, screen);
 
             // Show OSK
-            if (!_OSKShowOnLongClick && _OSKShowAfterClickEvent)
+            if (_OSKShowTrigger == OSKShowTriggers.AfterOnClickEvent)
                 ShowOSK(screen);
+
+            raiseUpdate(false);
+        }
+        /// <summary>
+        /// Hold the checkbox 
+        /// </summary>
+        public void holdClickMe(int screen)
+        {
+            // Show OSK
+            if (_OSKShowTrigger == OSKShowTriggers.BeforeOnHoldClickEvent)
+                ShowOSK(screen);
+
+            if (OnHoldClick != null)
+                OnHoldClick(this, screen);
+
+            // Show OSK
+            if (_OSKShowTrigger == OSKShowTriggers.AfterOnHoldClickEvent)
+                ShowOSK(screen);
+
+            raiseUpdate(false);
         }
         /// <summary>
         /// Fires the OnLongClick event
@@ -230,15 +235,17 @@ namespace OpenMobile.Controls
                 return;
 
             // Show OSK
-            if (_OSKShowOnLongClick && !_OSKShowAfterClickEvent)
+            if (_OSKShowTrigger == OSKShowTriggers.BeforeOnLongClickEvent)
                 ShowOSK(screen);
 
             if (OnLongClick != null)
                 OnLongClick(this, screen);
 
             // Show OSK
-            if (_OSKShowOnLongClick && _OSKShowAfterClickEvent)
+            if (_OSKShowTrigger == OSKShowTriggers.AfterOnLongClickEvent)
                 ShowOSK(screen);
+
+            raiseUpdate(false);
         }
 
         private void ShowOSK(int screen)
@@ -249,14 +256,15 @@ namespace OpenMobile.Controls
                 bool MaskInput = (flags & textboxFlags.Password) == textboxFlags.Password;
 
                 // Show osk
-                OSK osk = new OSK(this.Text, OSKHelpText, OSKDescription, _OSKType, MaskInput);
+                //OSK osk = new OSK(this.Text, OSKHelpText, OSKDescription, _OSKType, MaskInput);
 
                 // Trigg OSK shown event
                 if (OnOSKShow != null)
                     OpenMobile.Threading.SafeThread.Asynchronous(delegate() { OnOSKShow(this, screen); });                
 
                 // Show OSK
-                this.Text = osk.ShowOSK(screen);
+                //this.Text = osk.ShowOSK(screen);
+                this.Text = OSK.ShowDefaultOSK(screen, this.Text, OSKHelpText, OSKDescription, _OSKType, MaskInput);
             }
         }
 

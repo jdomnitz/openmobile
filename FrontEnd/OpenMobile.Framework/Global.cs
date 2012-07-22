@@ -24,6 +24,7 @@ using OpenMobile.Graphics;
 using System.Drawing.Design;
 using System.IO;
 using System.Collections.Specialized;
+using OpenMobile.Math;
 
 namespace OpenMobile
 {
@@ -2591,31 +2592,31 @@ namespace OpenMobile
     /// </summary>
     public sealed class renderingParams
     {
-        /// <summary>
-        /// A transition modifier for global transitions (Range: 0-1)
-        /// </summary>
-        public float globalTransitionIn = 0;
-        /// <summary>
-        /// A transition modifier for global transitions (Range: 1-0)
-        /// </summary>
-        public float globalTransitionOut = 1;
-        /// <summary>
-        /// Transparency of a highlighted button (Used in button click animations)
-        /// </summary>
-        public float transparency = 1;
-        /// <summary>
-        /// A size modifier for button animations
-        /// </summary>
-        public int transitionTop = 0;
-        /// <summary>
-        /// The current rendering mode of the rendering window
-        /// </summary>
-        public eModeType currentMode = eModeType.Normal;
+        ///// <summary>
+        ///// A transition modifier for global transitions (Range: 0-1)
+        ///// </summary>
+        //public float globalTransitionIn = 0;
+        ///// <summary>
+        ///// A transition modifier for global transitions (Range: 1-0)
+        ///// </summary>
+        //public float globalTransitionOut = 1;
+        ///// <summary>
+        ///// Transparency of a highlighted button (Used in button click animations)
+        ///// </summary>
+        //public float transparency = 1;
+        ///// <summary>
+        ///// A size modifier for button animations
+        ///// </summary>
+        //public int transitionTop = 0;
+        ///// <summary>
+        ///// The current rendering mode of the rendering window
+        ///// </summary>
+        //public eModeType currentMode = eModeType.Normal;
 
-        /// <summary>
-        /// A offset value indicating how the control should affects it's left and top properties
-        /// </summary>
-        public Point PlacementOffset = new Point();
+        ///// <summary>
+        ///// A offset value indicating how the control should affects it's left and top properties
+        ///// </summary>
+        //public Point PlacementOffset = new Point();
 
         /// <summary>
         /// A offset value indicating how the control should affects it's left, top, width and height properties
@@ -2626,6 +2627,10 @@ namespace OpenMobile
         /// A value indicating the alpha value to use when rendering the control (Negative value = disabled)
         /// </summary>
         public float Alpha = 1.0f;
+
+        public Vector3 Rotation = new Vector3();
+        public Vector3 Scale = new Vector3(1, 1, 1);
+        public Matrix4 TransformationMatrix = new Matrix4();
     }
 
     /// <summary>
@@ -2668,6 +2673,16 @@ namespace OpenMobile
         /// A onscreen numpad will be used for input
         /// </summary>
         Numpad
+    }
+
+    public enum OSKShowTriggers
+    {
+        AfterOnClickEvent,
+        BeforeOnClickEvent,
+        AfterOnHoldClickEvent,
+        BeforeOnHoldClickEvent,
+        AfterOnLongClickEvent,
+        BeforeOnLongClickEvent
     }
 
     /// <summary>

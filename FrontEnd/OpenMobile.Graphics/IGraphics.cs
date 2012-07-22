@@ -1,4 +1,6 @@
 ﻿using System;
+using OpenMobile.Math;
+
 namespace OpenMobile.Graphics
 {
     interface IGraphics
@@ -48,6 +50,9 @@ namespace OpenMobile.Graphics
         void SetClipFast(int x, int y, int width, int height);
         void TranslateTransform(float dx, float dy);
         void TranslateTransform(float dx, float dy, float dz);
+        void Rotate(float angle, Graphics.Axis axis);
+        void Scale(float sx, float sy, float sz);
+        void Transform(Matrix4 m);
         int MaxTextureSize { get; }
     }
 }

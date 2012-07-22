@@ -105,15 +105,16 @@ namespace ControlDemo
             pSlideInTest.addControl(AniLabel_Org_Test);
 
             OMContainer2 Container = new OMContainer2("Container", 200, 200, 300, 150);
+            Container.Image = Host.getSkinImage("MediaBorder");
             pSlideInTest.addControl(Container);
 
             OMImage Image_ContainerTest1 = new OMImage("Image_ContainerTest1", 0, 0, Host.getSkinImage("AlbumIcon_Highlighted"));
             Container.addControl(Image_ContainerTest1);
             OMImage Image_ContainerTest2 = new OMImage("Image_ContainerTest2", 150, 0, Host.getSkinImage("AlbumIcon_SelectedHighlighted"));
             Container.addControl(Image_ContainerTest2);
-            OMButton btn_ContainerTest3 = DefaultControls.GetButton("btn_ContainerTest3", 50, 50, 180, 90, "", "Test");
-            btn_ContainerTest3.OnClick += new userInteraction(btn_ContainerTest3_OnClick);
-            Container.addControl(btn_ContainerTest3);
+            //OMButton btn_ContainerTest3 = DefaultControls.GetButton("btn_ContainerTest3", 50, 50, 180, 90, "", "Test");
+            //btn_ContainerTest3.OnClick += new userInteraction(btn_ContainerTest3_OnClick);
+            //Container.addControl(btn_ContainerTest3);
 
             OMButton Button_PanelSlideIn  = DefaultControls.GetHorisontalEdgeButton("Button_SlideIn", 420, 540, 160, 70, "5", "");
             Button_PanelSlideIn.OnClick += new userInteraction(menuButton_OnClick);

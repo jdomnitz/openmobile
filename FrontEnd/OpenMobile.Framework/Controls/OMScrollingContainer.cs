@@ -31,6 +31,19 @@ namespace OpenMobile.Controls
     public class OMScrollingContainer : OMControl, IContainer, IMouse, IThrow, IClickable, IKey, IHighlightable
     {
         /// <summary>
+        /// Occurs when the control is clicked
+        /// </summary>
+        public event userInteraction OnClick;
+        /// <summary>
+        /// Occurs when the control is held
+        /// </summary>
+        public event userInteraction OnHoldClick;
+        /// <summary>
+        /// Occurs when the control is long clicked
+        /// </summary>
+        public event userInteraction OnLongClick;
+
+        /// <summary>
         /// the collection of controls
         /// </summary>
         protected List<OMControl> Controls = new List<OMControl>();
@@ -429,6 +442,10 @@ namespace OpenMobile.Controls
             if (highlighted != null)
                 if (typeof(IClickable).IsInstanceOfType(highlighted))
                     ((IClickable)highlighted).clickMe(screen);
+
+            if (OnClick != null)
+                OnClick(this, screen);
+            raiseUpdate(false);
         }
 
         /// <summary>
@@ -440,6 +457,25 @@ namespace OpenMobile.Controls
             if (highlighted != null)
                 if (typeof(IClickable).IsInstanceOfType(highlighted))
                     ((IClickable)highlighted).longClickMe(screen);
+
+            if (OnLongClick != null)
+                OnLongClick(this, screen);
+            raiseUpdate(false);
+        }
+
+        /// <summary>
+        /// Hold Clicked
+        /// </summary>
+        /// <param name="screen"></param>
+        public void holdClickMe(int screen)
+        {
+            if (highlighted != null)
+                if (typeof(IClickable).IsInstanceOfType(highlighted))
+                    ((IClickable)highlighted).holdClickMe(screen);
+
+            if (OnHoldClick != null)
+                OnHoldClick(this, screen);
+            raiseUpdate(false);
         }
 
         #endregion

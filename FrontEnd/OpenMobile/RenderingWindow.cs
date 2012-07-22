@@ -391,6 +391,14 @@ namespace OpenMobile
             // Apply any offset data
             g.TranslateTransform(e.Offset.X, e.Offset.Y);
 
+            // Apply any rotation data
+            if (e.Rotation.Length != 0)
+                g.Rotate(e.Rotation);
+
+            // Apply any scale data
+            if (e.Scale.X != 1 | e.Scale.Y != 1 | e.Scale.Y != 1)
+                g.Scale(e.Scale);
+
             // Apply transparency values (this is done via rendering parameters passed along to each control)
             RenderingParam.Alpha = e.Alpha;
         }
@@ -825,7 +833,7 @@ namespace OpenMobile
 
         }
 
-        public void ExecuteTransition(eGlobalTransition transType)
+        public void ExecuteTransition(string transType)
         {
             lock (this) // Lock to prevent multiple transitons at the same time
             {
@@ -836,7 +844,7 @@ namespace OpenMobile
                 TransitionEffectParam_Out = new renderingParams();
                 
                 // Execute effect
-                PanelTransitionEffectHandler.GetEffect(transType.ToString()).Run(TransitionEffectParam_In, TransitionEffectParam_Out, ReDrawPanel);
+                PanelTransitionEffectHandler.GetEffect(transType).Run(TransitionEffectParam_In, TransitionEffectParam_Out, ReDrawPanel, BuiltInComponents.Host.TransitionSpeed);
                 
                 // Go trough each panel to set correct modes after transition effects
                 foreach (OMPanel panel in panels)
@@ -1133,7 +1141,7 @@ namespace OpenMobile
         public virtual bool ControlHitTest(OMControl control, Point Location)
         {
             // Make sure this control is inside the application area
-            if (!ApplicationArea.Contains(control.Region))
+            if (!ApplicationArea.ToSystemRectangle().IntersectsWith(control.Region.ToSystemRectangle()))
                 return false;
 
             // Make sure this control is visible
@@ -1160,6 +1168,15 @@ namespace OpenMobile
         }
 
         /// <summary>
+        /// Returns a OMPanel if a modal panel is loaded, if not returns null
+        /// </summary>
+        /// <returns></returns>
+        private OMPanel GetModalPanel()
+        {
+            return RenderingQueue.Find(x => x.PanelType == OMPanel.PanelTypes.Modal);
+        }
+
+        /// <summary>
         /// Tries to find a control at the given location
         /// </summary>
         /// <param name="Location"></param>
@@ -1168,16 +1185,32 @@ namespace OpenMobile
         {
             // Loop trough controls checking for hit test, starting at the end of the rendering queue (topmost item)
             OMControl control = null;
-            for (int i = RenderingQueue.Count - 1; i >= 0; i--)
-            {
-                control = PanelHitTest(RenderingQueue[i], Location);
-                
+
+            // Check for any modal panels present, if so check only this
+            OMPanel ModalPanel = GetModalPanel();
+
+            if (ModalPanel == null)
+            {   // Check all panels
+                for (int i = RenderingQueue.Count - 1; i >= 0; i--)
+                {
+                    control = PanelHitTest(RenderingQueue[i], Location);
+                    // Did we hit something?
+                    if (control != null)
+                    {   // Yes
+                        return control;
+                    }
+                }
+            }
+            else
+            {   // Check the modal panel only
+                control = PanelHitTest(ModalPanel, Location);
                 // Did we hit something?
                 if (control != null)
                 {   // Yes
                     return control;
                 }
             }
+
             return null;
         }
 
@@ -1205,11 +1238,32 @@ namespace OpenMobile
                 SearchRect.Height = SearchStep * 30;
 
                 OMControl control = null;
-                for (int i = RenderingQueue.Count - 1; i >= 0; i--)
-                {
-                    for (int i2 = RenderingQueue[i].controlCount - 1; i2 >= 0; i2--)
+
+                // Do we have a modal panel?
+                OMPanel ModalPanel = GetModalPanel();
+
+                // Loop trough panels
+                if (ModalPanel == null)
+                {   // Check all panels
+                    for (int i = RenderingQueue.Count - 1; i >= 0; i--)
+                    {   // Loop trough controls in the panel
+                        for (int i2 = RenderingQueue[i].controlCount - 1; i2 >= 0; i2--)
+                        {
+                            control = RenderingQueue[i][i2];
+                            if (IsControlFocusable(control))
+                            {
+                                System.Drawing.Rectangle region = control.Region.ToSystemRectangle();
+                                if (region.IntersectsWith(SearchRect))
+                                    return control;
+                            }
+                        }
+                    }
+                }
+                else
+                {   // Loop trough controls in the panel
+                    for (int i2 = ModalPanel.controlCount - 1; i2 >= 0; i2--)
                     {
-                        control = RenderingQueue[i][i2];
+                        control = ModalPanel[i2];
                         if (IsControlFocusable(control))
                         {
                             System.Drawing.Rectangle region = control.Region.ToSystemRectangle();
@@ -1234,11 +1288,22 @@ namespace OpenMobile
                 OMControl control = null;
                 float BestDistance = float.MaxValue;
                 OpenMobile.Math.Vector2 FocusedControlLocation = FocusedControl.Region.Center.ToVector2();
+
+                // Do we have a modal panel?
+                OMPanel ModalPanel = GetModalPanel();
+                OMPanel PanelToCheck = null;
+
                 for (int i = RenderingQueue.Count - 1; i >= 0; i--)
                 {
-                    for (int i2 = RenderingQueue[i].controlCount - 1; i2 >= 0; i2--)
+                    // Set panel to check
+                    if (ModalPanel == null)
+                        PanelToCheck = RenderingQueue[i];
+                    else
+                        PanelToCheck = ModalPanel;
+
+                    for (int i2 = PanelToCheck.controlCount - 1; i2 >= 0; i2--)
                     {
-                        control = RenderingQueue[i][i2];
+                        control = PanelToCheck[i2];
 
                         // no use in testing against ourself
                         if (control == FocusedControl)
@@ -1311,6 +1376,10 @@ namespace OpenMobile
                             bestControl = control;
                         }
                     }
+
+                    // Exit if we only has a modal panel
+                    if (ModalPanel != null)
+                        break;
                 }
 
                 if (bestControl != null)
@@ -1349,12 +1418,20 @@ namespace OpenMobile
                         }
                         break;
                     case ClickTypes.Long:
-                        SandboxedThread.Asynchronous(delegate()
                         {
-                            ((IClickable)control).longClickMe(screen);
-                        });
+                            SandboxedThread.Asynchronous(delegate()
+                            {
+                                ((IClickable)control).longClickMe(screen);
+                            });
+                        }
                         break;
                     case ClickTypes.Hold:
+                        {
+                            SandboxedThread.Asynchronous(delegate()
+                            {
+                                ((IClickable)control).holdClickMe(screen);
+                            });
+                        }
                         break;
                     default:
                         break;
