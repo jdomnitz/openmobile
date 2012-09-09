@@ -33,6 +33,11 @@ namespace OpenMobile.Controls
     [System.Serializable]
     public class OMImage : OMControl
     {
+        /// <summary>
+        /// Occurs when the image is changed
+        /// </summary>
+        public event userInteraction OnImageChange;
+
         private imageItem image;
         private byte transparency = 100;
         /// <summary>
@@ -191,6 +196,10 @@ namespace OpenMobile.Controls
                     FitControl(image);
 
                 raiseUpdate(false);
+
+                // Raise image change event
+                if (OnImageChange != null)
+                    OnImageChange(this, this.parent.ActiveScreen);
             }
         }
 

@@ -511,6 +511,8 @@ namespace OpenMobile
 
             #region Process startup arguments
 
+            Size InitialScreenSize = new Size(800, 480);
+
             foreach (string arg in Environment.GetCommandLineArgs())
             {
                 // Restrict amount of screens at startup time
@@ -539,7 +541,7 @@ namespace OpenMobile
                 else if (arg.ToLower().StartsWith("-startupscreen=") == true)
                 {
                     // Restrict amount of possible screens since we're changing the screensetups
-                    theHost.ScreenCount = 1; 
+                    theHost.ScreenCount = 1;
 
                     // Save startupscreen to pluginhost's data
                     if (arg.Length >= 15)
@@ -550,7 +552,18 @@ namespace OpenMobile
                         }
                         catch (ArgumentException) { break; }
                     }
-               }
+                }
+                
+                // Specific size is given (-ScreenSize=1000x600)
+                else if (arg.ToLower().StartsWith("-screensize=") == true)
+                {
+                    try
+                    {
+                        string[] SizeString = arg.Substring(12).Split('x');
+                        InitialScreenSize = new Size(int.Parse(SizeString[0]), int.Parse(SizeString[1]));
+                    }
+                    catch (ArgumentException) { break; }
+                }
             }
 
             #endregion
@@ -599,9 +612,9 @@ namespace OpenMobile
             rapidMenu.Start();
 
             for (int i = 1; i < RenderingWindows.Count; i++)
-                RenderingWindows[i].RunAsync(Fullscreen);
+                RenderingWindows[i].RunAsync(Fullscreen, InitialScreenSize);
 
-            RenderingWindows[0].Run(Fullscreen);
+            RenderingWindows[0].Run(Fullscreen, InitialScreenSize);
 
             for (int i = 0; i < RenderingWindows.Count; i++)
                 RenderingWindows[i].Dispose();

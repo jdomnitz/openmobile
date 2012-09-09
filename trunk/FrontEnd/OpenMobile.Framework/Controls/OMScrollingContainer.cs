@@ -28,6 +28,7 @@ namespace OpenMobile.Controls
     /// Contains and Renders a collection of OMControls
     /// </summary>
     [System.Serializable]
+    [Obsolete("Use OMContainer instead")]
     public class OMScrollingContainer : OMControl, IContainer, IMouse, IThrow, IClickable, IKey, IHighlightable
     {
         /// <summary>
@@ -370,11 +371,11 @@ namespace OpenMobile.Controls
         /// <param name="screen"></param>
         /// <param name="TotalDistance"></param>
         /// <param name="RelativeDistance"></param>
-        public void MouseThrow(int screen, OpenMobile.Graphics.Point TotalDistance, OpenMobile.Graphics.Point RelativeDistance)
+        public void MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
             if (ignoreScroll)
             {
-                ((IThrow)highlighted).MouseThrow(screen, TotalDistance, RelativeDistance);
+                ((IThrow)highlighted).MouseThrow(screen, StartLocation, TotalDistance, RelativeDistance);
                 return;
             }
             if (area.Height <= height)
@@ -403,7 +404,7 @@ namespace OpenMobile.Controls
         /// <param name="StartLocation"></param>
         /// <param name="scaleFactors"></param>
         /// <param name="Cancel"></param>
-        public void MouseThrowStart(int screen, OpenMobile.Graphics.Point StartLocation, OpenMobile.Graphics.PointF scaleFactors, ref bool Cancel)
+        public void MouseThrowStart(int screen, Point StartLocation, PointF scaleFactors, ref bool Cancel)
         {
             if (highlighted != null)
                 ignoreScroll = (typeof(IThrow).IsInstanceOfType(highlighted));
@@ -420,10 +421,10 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="EndLocation"></param>
-        public void MouseThrowEnd(int screen, OpenMobile.Graphics.Point EndLocation)
+        public void MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation)
         {
             if (ignoreScroll)
-                ((IThrow)highlighted).MouseThrowEnd(screen, EndLocation);
+                ((IThrow)highlighted).MouseThrowEnd(screen, StartLocation, TotalDistance, EndLocation);
             ignoreScroll = false;
             if (highlighted != null)
                 highlighted.Mode = eModeType.Normal;
@@ -489,15 +490,21 @@ namespace OpenMobile.Controls
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
         /// <returns></returns>
-        public bool KeyDown(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
+        public bool KeyDown_BeforeUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors)
         {
             if (typeof(IKey).IsInstanceOfType(highlighted) == true)
-                if (((IKey)highlighted).KeyDown(screen, e, WidthScale, HeightScale))
+                if (((IKey)highlighted).KeyDown_BeforeUI(screen, e, scaleFactors))
                     return true;
             if (highlighted != null)
                 highlighted.Mode = eModeType.Normal;
             highlighted = null;
             return false;
+        }
+        public void KeyDown_AfterUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors)
+        {
+            if (typeof(IKey).IsInstanceOfType(highlighted) == true)
+                ((IKey)highlighted).KeyDown_AfterUI(screen, e, scaleFactors);
+            return;
         }
         /// <summary>
         /// Key released
@@ -507,12 +514,18 @@ namespace OpenMobile.Controls
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
         /// <returns></returns>
-        public bool KeyUp(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
+        public bool KeyUp_BeforeUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors)
         {
             if (typeof(IKey).IsInstanceOfType(highlighted) == true)
-                if (((IKey)highlighted).KeyUp(screen, e, WidthScale, HeightScale))
+                if (((IKey)highlighted).KeyUp_BeforeUI(screen, e, scaleFactors))
                     return true;
             return false;
+        }
+        public void KeyUp_AfterUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors)
+        {
+            if (typeof(IKey).IsInstanceOfType(highlighted) == true)
+                ((IKey)highlighted).KeyUp_AfterUI(screen, e, scaleFactors);
+            return;
         }
         #endregion
 

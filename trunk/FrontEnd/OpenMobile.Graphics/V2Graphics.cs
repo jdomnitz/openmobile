@@ -320,13 +320,32 @@ namespace OpenMobile.Graphics
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToBorder);
             Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToBorder);
 
+            //Raw.Color4(1F, 1F, 1F, transparency);
+            
+            //Vector3 tl = new Vector3(-(Width / 2), -(Height / 2), 0);
+            //Vector3 br = new Vector3((Width / 2), (Height / 2), 0);
+
+            //Matrix4 mtx = Matrix4.CreateTranslation(X, Y, 0.0f) *
+            //    Matrix4.CreateTranslation((Width / 2), (Height / 2), 0.0f);
+            //tl = Vector3.Transform(tl, mtx);
+            //br = Vector3.Transform(br, mtx);
+
+            //// Render texture
+            //Raw.Begin(BeginMode.Quads);
+            //Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex3(tl.X, tl.Y, tl.Z); //TOP-LEFT
+            //Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex3(br.X, tl.Y, tl.Z); //TOP-RIGHT
+            //Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex3(br.X, br.Y, br.Z); //BOTTOM-RIGHT
+            //Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex3(tl.X, br.Y, br.Z); //BOTTOM-LEFT
+            //Raw.End();
+            //Raw.Disable(EnableCap.Texture2D);
+
             Raw.Color4(1F, 1F, 1F, transparency);
 
             int[] tex = new int[] { X, Height + Y, Width + X, Height + Y, X, Y, Width + X, Y };
             Raw.EnableClientState(ArrayCap.VertexArray);
             Raw.VertexPointer(2, VertexPointerType.Int, 0, tex);
             Raw.EnableClientState(ArrayCap.TextureCoordArray);
-            switch(angle)
+            switch (angle)
             {
                 case eAngle.FlipHorizontal:
                     Raw.TexCoordPointer(2, TexCoordPointerType.Int, 0, horizTex);

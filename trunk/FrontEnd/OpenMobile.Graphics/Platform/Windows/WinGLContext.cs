@@ -251,30 +251,20 @@ namespace OpenMobile.Platform.Windows
 
         void SetGraphicsModePFD(GraphicsMode mode, WinWindowInfo window)
         {
-            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.Start: " + Timing.GetTiming());
             if (!mode.Index.HasValue)
                 throw new Exception("Invalid or unsupported GraphicsMode.");
 
             if (window == null) throw new ArgumentNullException("window", "Must point to a valid window.");
 
-            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.Timing1: " + Timing.GetTiming());
             PixelFormatDescriptor pfd = new PixelFormatDescriptor();
-            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.Timing2: " + Timing.GetTiming());
-
-            // Timing
-            DateTime Start = DateTime.Now;
 
             Functions.DescribePixelFormat(window.DeviceContext, (int)mode.Index.Value,
                 API.PixelFormatDescriptorSize, ref pfd);
 
-            Debug.Print("\nFunctions.DescribePixelFormat ExecTime:" + (DateTime.Now - Start).TotalMilliseconds.ToString());
 
-            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.Timing3: " + Timing.GetTiming());
-            //Debug.WriteLine(mode.Index.ToString());
             if (!Functions.SetPixelFormat(window.DeviceContext, (int)mode.Index.Value, ref pfd))
                 throw new Exception(String.Format(
                     "Requested GraphicsMode not available. SetPixelFormat error: {0}", Marshal.GetLastWin32Error()));
-            //Console.WriteLine("Platform.Windows.WinGLContext.SetGraphicsModePFD.End: " + Timing.GetTiming());
         }
         #endregion
 

@@ -84,19 +84,29 @@ namespace OpenMobile.helperFunctions
                         break;
                 }
 
+                // Configure configdata
+                OSKData oskData = (OSKData)osk.Panel.Tag;
+
                 // Configure text and other items
                 OMTextBox txt = (OMTextBox)osk.Panel.Controls.Find(x => x.Name == "OSK_TextBox_Text");
                 if (txt != null)
                 {
                     txt.Tag = Text;
                     txt.Text = Text;
+                    oskData.Text = Text;
                 }
                 OMLabel lbl = (OMLabel)osk.Panel.Controls.Find(x => x.Name == "OSK_Label_HelpText");
                 if (lbl != null)
+                {
                     lbl.Text = HelpText;
+                    oskData.HelpText = HelpText;
+                }
                 lbl = (OMLabel)osk.Panel.Controls.Find(x => x.Name == "OSK_Label_Header");
                 if (lbl != null)
+                {
                     lbl.Text = Header;
+                    oskData.Header = Header;
+                }
 
                 return osk.ShowPreloadedOSK(screen);
             }
@@ -117,7 +127,7 @@ namespace OpenMobile.helperFunctions
                 public string Character { get; set; }
             }
 
-            public class OSKData
+            public class OSKData : ICloneable
             {
                 public OSKData()
                 {   // OSK Defaults
@@ -133,12 +143,20 @@ namespace OpenMobile.helperFunctions
                 public string Text { get; set; }
                 public OSKInputTypes Style { get; set; }
                 public bool MaskInput { get; set; }
-                public ScreenManager Manager { get; set; }
 
                 /// <summary>
                 /// The opacity level of the background (0 - 255)
                 /// </summary>
                 public byte BackgroundOpacity { get; set; }
+
+                #region ICloneable Members
+
+                public object Clone()
+                {
+                    return this.MemberwiseClone();
+                }
+
+                #endregion
             }
 
             private string Handler = "OMOsk2";
@@ -295,7 +313,7 @@ namespace OpenMobile.helperFunctions
             void CancelButton_OnClick(OMControl sender, int screen)
             {
                 //Result = ((OMTextBox)sender.Parent["OSK_TextBox_Text"]).Text;
-                Result = _ConfigData.Text;
+                Result = ((OSKData)sender.Parent.Tag).Text;
                 CloseOSK.Set();
             }
 
@@ -310,7 +328,7 @@ namespace OpenMobile.helperFunctions
                         Result = txt.Tag as string;
                 }
                 else
-                    Result = _ConfigData.Text;
+                    Result = ((OSKData)sender.Parent.Tag).Text;
                 CloseOSK.Set();
             }
 
@@ -346,7 +364,6 @@ namespace OpenMobile.helperFunctions
             {
                 // Save screen manager
                 DateTime start = DateTime.Now;
-                _ConfigData.Manager = BuiltInComponents.Panels;
                 Screen = screen;
 
 
@@ -397,10 +414,10 @@ namespace OpenMobile.helperFunctions
                 // Show the panel
                 if (BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen, "", Panel.Name) == false)
                     return "";
-                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen, eGlobalTransition.CrossfadeFast);
+                BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen);
 
                 // Wait for close
-                Console.WriteLine("OSK Showed in :" + (DateTime.Now - start).TotalMilliseconds.ToString() + "ms");
+                System.Diagnostics.Debug.WriteLine("OSK Showed in :" + (DateTime.Now - start).TotalMilliseconds.ToString() + "ms");
                 CloseOSK.WaitOne();
 
                 // Disconnect events
@@ -409,7 +426,7 @@ namespace OpenMobile.helperFunctions
                 BuiltInComponents.Host.OnGesture -= GestureEv;
 
                 // Remove menu and clean up
-                BuiltInComponents.Host.execute(eFunction.goBack, screen, eGlobalTransition.CrossfadeFast);
+                BuiltInComponents.Host.execute(eFunction.goBack, screen);
                 BuiltInComponents.Panels.unloadPanel(Panel.Name);
 
                 return Result;
@@ -490,6 +507,7 @@ namespace OpenMobile.helperFunctions
                 OSK newOSK = new OSK();
                 newOSK.Panel = this.Panel.Clone();
                 newOSK.PanelName = this.PanelName;
+                newOSK.Panel.Tag = this._ConfigData.Clone();
                 return newOSK;
             }
 

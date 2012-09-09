@@ -430,7 +430,7 @@ namespace OMDebug
                         foreach (string queued in queue)
                         {
                             if (IDE)
-                                Console.WriteLine(queued);
+                                System.Diagnostics.Debug.WriteLine(queued);
                             writer.WriteLine(queued);
                         }
                         queue.Clear();
@@ -440,14 +440,14 @@ namespace OMDebug
                     {
                         string Text = (((Environment.TickCount - time) / 1000.0).ToString("0.000") + " [" + Msg.Type.ToString() + "]: " + header + Msg.ToString());
                         if (IDE)
-                            Console.WriteLine(Text);
+                            System.Diagnostics.Debug.WriteLine(Text);
                         writer.WriteLine(Text);
                     }
                     else
                     {
                         string Text = header + Msg.ToString();
                         if (IDE)
-                            Console.WriteLine(Text);
+                            System.Diagnostics.Debug.WriteLine(Text);
                         writer.WriteLine(Text);
                     }
                     writer.Flush();
@@ -482,7 +482,7 @@ namespace OMDebug
                         foreach (string queued in queue)
                         {
                             if (IDE)
-                                Console.WriteLine(queued);
+                                System.Diagnostics.Debug.WriteLine(queued);
                             writer.WriteLine(queued);
                         }
                         queue.Clear();
@@ -492,14 +492,14 @@ namespace OMDebug
                     {
                         string Text = ((Environment.TickCount - time) / 1000.0).ToString("0.000") + " [" + Msg.Type.ToString() + "]: " + header + Msg.ToString();
                         if (IDE)
-                            Console.WriteLine(Text);
+                            System.Diagnostics.Debug.WriteLine(Text);
                         writer.WriteLine(Text);
                     }
                     else
                     {
                         string Text = header + Msg.ToString();
                         if (IDE)
-                            Console.WriteLine(Text);
+                            System.Diagnostics.Debug.WriteLine(Text);
                         writer.WriteLine(Text);
                     }
 
@@ -507,7 +507,7 @@ namespace OMDebug
                     foreach (string text in texts)
                     {
                         if (IDE)
-                            Console.WriteLine("\t" + text);
+                            System.Diagnostics.Debug.WriteLine("\t" + text);
                         writer.WriteLine("\t" + text);
                     }
 

@@ -18,26 +18,34 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-
-// This interface is added by Borte
-
+using OpenMobile.Graphics;
 namespace OpenMobile.Controls
 {
     /// <summary>
-    /// Controls that support key handling (Added by Borte)
+    /// Controls that support key handling
     /// </summary>
     public interface IKey
     {
         /// <summary>
-        /// KeyDown when the control has focus
+        /// KeyDown when the control has focus but before the ui handles the keypress
         /// Return true if you don't want the ui to handle the keypress, otherwise return false
         /// </summary>
-        bool KeyDown(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale);
+        bool KeyDown_BeforeUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors);
 
         /// <summary>
-        /// KeyUp when the control has focus
+        /// KeyDown when the control has focus but after the ui has handled the keypress
+        /// </summary>
+        void KeyDown_AfterUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors);
+
+        /// <summary>
+        /// KeyUp when the control has focus but before the ui handles the keypress
         /// Return true if you don't want the ui to handle the keypress, otherwise return false
         /// </summary>
-        bool KeyUp(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale);
+        bool KeyUp_BeforeUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors);
+
+        /// <summary>
+        /// KeyUp when the control has focus but after the ui has handled the keypress
+        /// </summary>
+        void KeyUp_AfterUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors);
     }
 }

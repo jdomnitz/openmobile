@@ -696,7 +696,7 @@ namespace OpenMobile.Input
         /// </summary>
         /// <param name="args">The <see cref="MouseMoveEventArgs"/> instance to clone.</param>
         public MouseMoveEventArgs(MouseMoveEventArgs args)
-            : this(args.X, args.Y, args.XDelta, args.YDelta,args.Buttons)
+            : this(args.X, args.Y, args.XDelta, args.YDelta, args.Buttons)
         {
         }
 

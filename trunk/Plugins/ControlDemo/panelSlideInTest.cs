@@ -82,39 +82,48 @@ namespace ControlDemo
             #endregion
 
             // Add default button
-            OMButton btnMoveContainer = DefaultControls.GetButton("btnMoveContainer", 10, 100, 180, 90, "", "Move");
+            OMButton btnMoveContainer = DefaultControls.GetButton("btnMoveContainer", 0, 100, 180, 90, "", "Move");
             btnMoveContainer.OnClick += new userInteraction(btnMoveContainer_OnClick);
             pSlideInTest.addControl(btnMoveContainer);
 
-            OMButton btnChangeText = DefaultControls.GetButton("btnChangeText", 200, 100, 180, 90, "", "Change Text");
+            OMButton btnChangeText = DefaultControls.GetButton("btnChangeText", 180, 100, 180, 90, "", "Change Text");
             btnChangeText.OnClick += new userInteraction(btnChangeText_OnClick);
             pSlideInTest.addControl(btnChangeText);
 
-            OMAnimatedLabel2 AniLabel_Test = new OMAnimatedLabel2("AniLabel_Test", 50, 400, 900, 50);
-            AniLabel_Test.SkinDebug = true;
+            OMButton btnScrollToControl = DefaultControls.GetButton("btnScrollToControl", 360, 100, 180, 90, "", "Scroll");
+            btnScrollToControl.OnClick += new userInteraction(btnScrollToControl_OnClick);
+            btnScrollToControl.Tag = 0;
+            pSlideInTest.addControl(btnScrollToControl);
+
+            OMAnimatedLabel2 AniLabel_Test = new OMAnimatedLabel2("AniLabel_Test", 50, 400, 900, 35);
+            // AniLabel_Test.SkinDebug = true;
             //AniLabel_Test.Text = String.Format("Current time and date is now {0}, this is a really long string so that we can test the animated labels in OpenMobile", DateTime.Now); //"This is a test of OMAnimatedLabel2";
             AniLabel_Test.Text = "This is a test of OMAnimatedLabel2";
+            AniLabel_Test.Background = Color.Black;
+            AniLabel_Test.SoftEdges = FadingEdge.GraphicSides.Left | FadingEdge.GraphicSides.Right | FadingEdge.GraphicSides.Top | FadingEdge.GraphicSides.Bottom;
             AniLabel_Test.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
+            AniLabel_Test.AnimationSingle = OMAnimatedLabel2.eAnimation.UnveilUpSmooth;
             pSlideInTest.addControl(AniLabel_Test);
 
-            OMAnimatedLabel AniLabel_Org_Test = new OMAnimatedLabel(50, 450, 900, 50);
-            AniLabel_Org_Test.Name = "AniLabel_Test";
-            AniLabel_Org_Test.SkinDebug = true;
-            AniLabel_Org_Test.Text = String.Format("Current time and date is now {0}, this is a really long string so that we can test the animated labels in OpenMobile", DateTime.Now);//"This is a test of OMAnimatedLabel";
-            AniLabel_Org_Test.ContiuousAnimation = eAnimation.BounceScroll;
-            pSlideInTest.addControl(AniLabel_Org_Test);
+            //OMAnimatedLabel AniLabel_Org_Test = new OMAnimatedLabel(50, 450, 900, 50);
+            //AniLabel_Org_Test.Name = "AniLabel_Test2";
+            ////AniLabel_Org_Test.SkinDebug = true;
+            ////AniLabel_Org_Test.Text = String.Format("Current time and date is now {0}, this is a really long string so that we can test the animated labels in OpenMobile", DateTime.Now);//"This is a test of OMAnimatedLabel";
+            //AniLabel_Org_Test.Text = "This is a test of OMAnimatedLabel1";
+            //AniLabel_Org_Test.ContiuousAnimation = eAnimation.UnveilRight;
+            //pSlideInTest.addControl(AniLabel_Org_Test);
 
-            OMContainer2 Container = new OMContainer2("Container", 200, 200, 300, 150);
+            OMContainer Container = new OMContainer("Container", 200, 200, 300, 150);
             Container.Image = Host.getSkinImage("MediaBorder");
             pSlideInTest.addControl(Container);
 
             OMImage Image_ContainerTest1 = new OMImage("Image_ContainerTest1", 0, 0, Host.getSkinImage("AlbumIcon_Highlighted"));
-            Container.addControl(Image_ContainerTest1);
-            OMImage Image_ContainerTest2 = new OMImage("Image_ContainerTest2", 150, 0, Host.getSkinImage("AlbumIcon_SelectedHighlighted"));
-            Container.addControl(Image_ContainerTest2);
-            //OMButton btn_ContainerTest3 = DefaultControls.GetButton("btn_ContainerTest3", 50, 50, 180, 90, "", "Test");
-            //btn_ContainerTest3.OnClick += new userInteraction(btn_ContainerTest3_OnClick);
-            //Container.addControl(btn_ContainerTest3);
+            Container.addControlRelative(Image_ContainerTest1);
+            OMImage Image_ContainerTest2 = new OMImage("Image_ContainerTest2", 250, 50, Host.getSkinImage("AlbumIcon_SelectedHighlighted"));
+            Container.addControlRelative(Image_ContainerTest2);
+            OMButton btn_ContainerTest3 = DefaultControls.GetButton("btn_ContainerTest3", 50, 50, 180, 90, "", "Test");
+            btn_ContainerTest3.OnClick += new userInteraction(btn_ContainerTest3_OnClick);
+            Container.addControlRelative(btn_ContainerTest3);
 
             OMButton Button_PanelSlideIn  = DefaultControls.GetHorisontalEdgeButton("Button_SlideIn", 420, 540, 160, 70, "5", "");
             Button_PanelSlideIn.OnClick += new userInteraction(menuButton_OnClick);
@@ -145,6 +154,29 @@ namespace ControlDemo
 
         }
 
+        static void btnScrollToControl_OnClick(OMControl sender, int screen)
+        {
+            OMContainer container = (OMContainer)sender.Parent[screen, "Container"];
+            int i = (int)sender.Tag;
+            switch (i)
+            {
+                case 0:
+                    container.ScrollToControl("Image_ContainerTest2");
+                    break;
+                case 1:
+                    container.ScrollToControl("btn_ContainerTest3");
+                    break;
+                case 2:
+                    container.ScrollToControl("Image_ContainerTest1");
+                    break;
+                default:
+                    i = -1;
+                    break;
+            }
+            i++;
+            sender.Tag = i;
+        }
+
         static void btn_ContainerTest3_OnClick(OMControl sender, int screen)
         {
             Host.SendStatusData(screen, eDataType.PopUp, PluginName, "Container test");
@@ -154,22 +186,26 @@ namespace ControlDemo
         static void btnChangeText_OnClick(OMControl sender, int screen)
         {
             OMAnimatedLabel2 lbl = ((OMAnimatedLabel2)sender.Parent[screen, "AniLabel_Test"]);
+            OMAnimatedLabel lbl2 = ((OMAnimatedLabel)sender.Parent[screen, "AniLabel_Test2"]);
             
             switch (lblState)
 	        {
                 case 0:
                     lbl.Text = String.Format("Current time and date is now {0}, this is a really long string so that we can test the animated labels in OpenMobile", DateTime.Now);
+                    lbl.AnimationSpeed = 1F;
                     lblState = 1;
                     break;
 
                 case 1:
                     lbl.Text = "This is a test of OMAnimatedLabel2";
+                    lbl.AnimationSpeed = 1F;
                     lblState = 0;
                     break;
 
                 default:
                     break;
 	        }
+            lbl2.Text = lbl.Text;
         }
 
         
@@ -179,13 +215,13 @@ namespace ControlDemo
             //ctrl.Left += 50;
             //ctrl.Top += 10;
 
-            SmoothAnimator Animation = new SmoothAnimator(0.5f);
+            SmoothAnimator Animation = new SmoothAnimator(0.25f);
             int Pos = ctrl.Left;
             int EndPos = 600;
 
             if (ctrl.Left != EndPos)
             {
-                Animation.Animate(delegate(int AnimationStep)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
                 {
                     Pos += AnimationStep;
                     if (Pos >= EndPos)
@@ -203,7 +239,7 @@ namespace ControlDemo
             else
             {
                 EndPos = 200;
-                Animation.Animate(delegate(int AnimationStep)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
                 {
                     Pos -= AnimationStep;
                     if (Pos <= EndPos)
@@ -317,7 +353,7 @@ namespace ControlDemo
                     AnimationSpeed = 0.9f;
 
                 SmoothAnimator Animation = new SmoothAnimator(AnimationSpeed);
-                Animation.Animate(delegate(int AnimationStep)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
                 {
                     Top -= AnimationStep;
                     if (Top <= EndPos)
@@ -343,7 +379,7 @@ namespace ControlDemo
                 int Top = MainControl.Top;
 
                 SmoothAnimator Animation = new SmoothAnimator(0.9f);
-                Animation.Animate(delegate(int AnimationStep)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
                 {
                     Top += AnimationStep;
                     if (Top >= EndPos)

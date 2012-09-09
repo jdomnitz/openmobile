@@ -255,16 +255,12 @@ namespace OpenMobile.Controls
                 // Mask input?
                 bool MaskInput = (flags & textboxFlags.Password) == textboxFlags.Password;
 
-                // Show osk
-                //OSK osk = new OSK(this.Text, OSKHelpText, OSKDescription, _OSKType, MaskInput);
+                // Show OSK
+                this.Text = OSK.ShowDefaultOSK(screen, this.Text, OSKHelpText, OSKDescription, _OSKType, MaskInput);
 
                 // Trigg OSK shown event
                 if (OnOSKShow != null)
                     OpenMobile.Threading.SafeThread.Asynchronous(delegate() { OnOSKShow(this, screen); });                
-
-                // Show OSK
-                //this.Text = osk.ShowOSK(screen);
-                this.Text = OSK.ShowDefaultOSK(screen, this.Text, OSKHelpText, OSKDescription, _OSKType, MaskInput);
             }
         }
 

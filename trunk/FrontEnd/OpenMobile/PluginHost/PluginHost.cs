@@ -1033,21 +1033,6 @@ namespace OpenMobile
         /// </summary>
         public bool ShowDebugInfo { get; set; }
 
-        /// <summary>
-        /// Transition speed multiplier
-        /// </summary>
-        public float TransitionSpeed { 
-            get 
-            {
-                return _TransitionSpeed; 
-            }
-            set
-            {
-                _TransitionSpeed = value;
-            }
-        }
-        float _TransitionSpeed = 1.0F;
-
         #endregion
 
         #region Storage events
@@ -1235,7 +1220,7 @@ namespace OpenMobile
                 
                 // Execute transition between panels (default effect)
                 case eFunction.ExecuteTransition:
-                    return execute(eFunction.ExecuteTransition, arg, "Crossfade");
+                    return execute(eFunction.ExecuteTransition, arg, "");
 
                 // Cancel requested transition
                 //case eFunction.CancelTransition:
@@ -1262,7 +1247,7 @@ namespace OpenMobile
 
                 // Go back to previous history item (using default transition effect)
                 case eFunction.goBack:
-                    return execute(eFunction.goBack, arg, "SlideRight");
+                    return execute(eFunction.goBack, arg, "");
 
                 // Unload current Audio/Video player
                 case eFunction.unloadAVPlayer:
@@ -1714,7 +1699,7 @@ namespace OpenMobile
                     if (_GraphicsLevel == eGraphicsLevel.Minimal)
                         effect = "None";
                     else if (string.IsNullOrEmpty(arg2))
-                        effect = "None";
+                        effect = "";
                     else
                         effect = arg2;
                     if (int.TryParse(arg1, out ret) == true)

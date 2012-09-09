@@ -62,7 +62,15 @@ namespace ControlDemo
 
             OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 730, 130, 200, 200, host.getSkinImage("Unknown Album.png"));
             //imgReflectionTestSource.Rotation = new OpenMobile.Math.Vector3(0, 0, 45);
+            imgReflectionTestSource.OnImageChange += new userInteraction(imgReflectionTestSource_OnImageChange);
             p.addControl(imgReflectionTestSource);
+
+            OMButton btnChangeSource = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("btnChangeSource", 400, 500, 200, 90, "", "Source");
+            btnChangeSource.OnClick += new userInteraction(btnChangeSource_OnClick);
+            p.addControl(btnChangeSource);
+
+
+
 
             //OMLabel lblRotationX = new OMLabel("lblRotationX", 525, 388, 200, 40);
             //lblRotationX.Text = "X rotation:";
@@ -104,6 +112,19 @@ namespace ControlDemo
             p.addControl(imgReflectionTestTarget);
 
             manager.loadPanel(p);
+        }
+
+        static void imgReflectionTestSource_OnImageChange(OMControl sender, int screen)
+        {
+            OMImage imgTarget = (OMImage)sender.Parent[screen, "imgReflectionTestTarget"];
+            OMImage imgSource = (OMImage)sender;
+            if (imgSource.Image != null)
+                imgTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgSource.Image, 0.7f, true);
+        }
+
+        static void btnChangeSource_OnClick(OMControl sender, int screen)
+        {
+            ((OMImage)sender.Parent[screen,"imgReflectionTestSource"]).Image = new imageItem(OpenMobile.Net.Network.imageFromURL("http://farm4.staticflickr.com/3273/2996054575_a08a46fdb8.jpg"));
         }
 
         static void Slider_Rotation_OnSliderMoved(OMSlider sender, int screen)

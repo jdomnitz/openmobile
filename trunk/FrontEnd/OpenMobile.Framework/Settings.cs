@@ -251,6 +251,16 @@ namespace OpenMobile.Plugin
             this.Values = Values;
             this.CurrentValues = currentValues;
         }
+
+        /// <summary>
+        /// Returns a string describing this object
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return String.Format("{0}({1})", this.Name, this.Value);
+        }
+
         /// <summary>
         /// A List containing True and False
         /// </summary>

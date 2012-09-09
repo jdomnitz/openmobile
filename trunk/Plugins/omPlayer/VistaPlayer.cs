@@ -642,7 +642,7 @@ namespace OMPlayer
                 //instance = instanceNum;
                 this.zone = zone;
                 sink = new MessageProc("VistaPlayer:" + zone.Name);
-                Console.WriteLine("VistaPlayer:" + zone.Name.ToString() + " (VistaPlayer) AudioInstance: " + zone.AudioDeviceInstance.ToString() + "[" + zone.AudioDeviceName + "]");
+                System.Diagnostics.Debug.WriteLine("VistaPlayer:" + zone.Name.ToString() + " (VistaPlayer) AudioInstance: " + zone.AudioDeviceInstance.ToString() + "[" + zone.AudioDeviceName + "]");
                 
                 drain = sink.Handle;
                 sink.OnClick += new MessageProc.Click(clicked);

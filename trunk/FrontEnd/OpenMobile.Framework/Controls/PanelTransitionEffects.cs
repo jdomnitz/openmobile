@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Text;
 using OpenMobile.helperFunctions.Graphics;
 using OpenMobile.Graphics;
+using OpenMobile.Plugin;
 
 namespace OpenMobile.Controls
 {
@@ -42,6 +43,7 @@ namespace OpenMobile.Controls
     {
         static List<iPanelTransitionEffect> _TransitionEffecs = new List<iPanelTransitionEffect>();
         static iPanelTransitionEffect Effect_None = new PanelTransitionEffect_None();
+        static iPanelTransitionEffect Effect_Random = new PanelTransitionEffect_Random();
 
         /// <summary>
         /// Initialize handler and load default data
@@ -49,6 +51,7 @@ namespace OpenMobile.Controls
         static public void Init()
         {
             AddEffect(Effect_None);
+            AddEffect(Effect_Random);
             AddEffect(new PanelTransitionEffect_SlideLeft());
             AddEffect(new PanelTransitionEffect_SlideRight());
             AddEffect(new PanelTransitionEffect_SlideUp());
@@ -74,25 +77,68 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// Gets a list of names for all available effects
+        /// </summary>
+        /// <returns></returns>
+        static public List<string> GetEffectNames()
+        {
+            List<string> Names = new List<string>();
+            foreach (iPanelTransitionEffect effect in _TransitionEffecs)
+                Names.Add(effect.Name);
+            return Names;
+        }
+
+
+        static public Setting Setting_TransitionDefaultEffect()
+        {
+            //Setting TransitionSpeed = new Setting(SettingTypes.Text, "UI.TransitionSpeed", "Transition Speed", "Transition speed multiplier");
+            return new Setting(SettingTypes.MultiChoice, "UI.TransitionDefaultEffect", "Transition effect", "Transition; Default effect", PanelTransitionEffectHandler.GetEffectNames(), PanelTransitionEffectHandler.GetEffectNames());
+        }
+
+        static public Setting Setting_TransitionSpeed()
+        {
+            // Configure texts and values
+            List<string> Texts = new List<string>();
+            List<string> Values = new List<string>();
+            Texts.Add("0.1x"); Values.Add((0.1f).ToString());
+            Texts.Add("0.25x"); Values.Add((0.25f).ToString());
+            Texts.Add("0.5x"); Values.Add((0.5f).ToString());
+            Texts.Add("1x"); Values.Add((1.0f).ToString());
+            Texts.Add("1.5x"); Values.Add((1.5f).ToString());
+            Texts.Add("2x"); Values.Add((2.0f).ToString());
+            Texts.Add("5x"); Values.Add((5.0f).ToString());
+            Texts.Add("10x"); Values.Add((10.0f).ToString());
+
+            return new Setting(SettingTypes.MultiChoice, "UI.TransitionSpeed", "Transition speed", "Transition speed multiplier", Texts, Values);
+            //return new Setting(SettingTypes.Text, "UI.TransitionSpeed", "Transition Speed", "Transition speed multiplier");
+        }
+
+
+        /// <summary>
         /// Get's the transition effect that corresponds to the given name
         /// </summary>
         /// <param name="Name"></param>
         /// <returns></returns>
         static public iPanelTransitionEffect GetEffect(string Name)
         {
-            if (Name.ToLower() == "random")
+            if (String.IsNullOrEmpty(Name))
+            {
+                return GetEffect(BuiltInComponents.SystemSettings.TransitionDefaultEffect);
+            }
+            else if (Name.ToLower() == Effect_Random.Name.ToLower())
             {
                 Random rnd = new Random();
                 return _TransitionEffecs[rnd.Next(1, _TransitionEffecs.Count)];
             }
-            iPanelTransitionEffect effect = _TransitionEffecs.Find(x => x.Name.ToLower() == Name.ToLower());
-            if (effect == null)
-                return Effect_None;
-            return effect;
+            else
+            {
+                iPanelTransitionEffect effect = _TransitionEffecs.Find(x => x.Name.ToLower() == Name.ToLower());
+                if (effect == null)
+                    return Effect_None;
+                return effect;
+            }
         }
-
     }
-
 
     public class PanelTransitionEffect_SlideLeft : iPanelTransitionEffect
     {
@@ -113,7 +159,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
             {
                 TransitionEffectParam_In.Offset.X -= AnimationStep;
                 TransitionEffectParam_Out.Offset.X -= AnimationStep;
@@ -160,7 +206,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
             {
                 TransitionEffectParam_In.Offset.X += AnimationStep;
                 TransitionEffectParam_Out.Offset.X += AnimationStep;
@@ -207,7 +253,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
             {
                 TransitionEffectParam_In.Offset.Y -= AnimationStep;
                 TransitionEffectParam_Out.Offset.Y -= AnimationStep;
@@ -254,7 +300,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
             {
                 TransitionEffectParam_In.Offset.Y += AnimationStep;
                 TransitionEffectParam_Out.Offset.Y += AnimationStep;
@@ -301,7 +347,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Alpha = 1.0F;
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;
@@ -356,7 +402,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Alpha = 1.0F;
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;
@@ -413,7 +459,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Scale.Y = 1F;
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;
@@ -482,7 +528,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0,0,0,0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;
@@ -560,7 +606,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;
@@ -629,6 +675,25 @@ namespace OpenMobile.Controls
         public string Name
         {
             get { return "None"; }
+        }
+
+        public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
+        {
+            // Reset transition effects
+            TransitionEffectParam_In = new renderingParams();
+            TransitionEffectParam_Out = new renderingParams();
+        }
+
+        #endregion
+    }
+
+    public class PanelTransitionEffect_Random : iPanelTransitionEffect
+    {
+        #region iPanelTransitionEffect Members
+
+        public string Name
+        {
+            get { return "Random"; }
         }
 
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)

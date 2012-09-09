@@ -32,10 +32,6 @@ namespace OpenMobile.Threading
     /// </summary>
     public static class SafeThread
     {
-        //State:
-        // -1 = Kill
-        //  0 = Working
-        //  1 = Sleeping
         static IPluginHost theHost;
         static int availableThreads;
         static int maxThreads;
@@ -45,8 +41,22 @@ namespace OpenMobile.Threading
         }
         private class ThreadState
         {
+            /// <summary>
+            /// Thread sync handle
+            /// </summary>
             public EventWaitHandle waitHandle;
-            public int state;
+
+            public enum States { Kill, Working, Sleeping }
+
+            /// <summary>
+            /// Thread state
+            /// States: -1 = Kill, 0 = Working, 1 = Sleeping
+            /// </summary>
+            public States state;
+
+            /// <summary>
+            ///  Initializes a new threadstate
+            /// </summary>
             public ThreadState()
             {
                 waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
@@ -65,18 +75,22 @@ namespace OpenMobile.Threading
                 theHost = host;
             lock (functions)
                 functions.Enqueue(function);
+            
+            // Do we have thread available?
             if (availableThreads > 0)
-            {
+            {   // Yes, use one of these
                 lock (locks)
                 {
                     foreach (ThreadState state in locks.Values)
-                        if (state.state == 1)
+                        if (state.state == ThreadState.States.Sleeping)
                         {
                             state.waitHandle.Set();
                             return;
                         }
                 }
             }
+
+            // No, spawn a new thread
             spawnThread();
         }
         /// <summary>
@@ -107,6 +121,8 @@ namespace OpenMobile.Threading
         {
             Asynchronous(function, args, BuiltInComponents.Host);
         }
+
+/*
         private static void spawnThread()
         {
             if (locks.Count >= maxThreads)
@@ -156,6 +172,7 @@ namespace OpenMobile.Threading
                 lock (locks)
                     locks.Remove(id);
             });
+
             lock (locks)
             {
                 // Only spawn new thread if not already active
@@ -166,6 +183,117 @@ namespace OpenMobile.Threading
                     p.Start();                    
                 }
             }
+        }
+*/
+
+        private static void spawnThread()
+        {
+            // Limit amount of threads to use
+            if (locks.Count >= maxThreads)
+                return; 
+
+            // Create new thread object
+            Thread p = new Thread(ExecuteActions);
+
+            // Spawn new thread
+            lock (locks)
+            {
+                // Only spawn new thread if not already active
+                if (!locks.ContainsKey(p.ManagedThreadId))
+                {
+                    // Register new thread in thread pool
+                    locks.Add(p.ManagedThreadId, new ThreadState());
+                    
+                    // Start new thread
+                    p.Name = String.Format("OpenMobile.SafeThread.{0}", p.ManagedThreadId);
+                    p.Start();
+                }
+            }
+        }
+
+        private static void ExecuteActions()
+        {
+            // Report thread as available
+            availableThreads++;
+
+            // Get ID of this thread            
+            int id = Thread.CurrentThread.ManagedThreadId;
+
+            // Extract thread local context data
+            ThreadState s = locks[id];
+            
+            // Set thread state
+            s.state = ThreadState.States.Working;
+
+            while (s.state == ThreadState.States.Working)
+            {
+                // Report this thread as busy
+                availableThreads--;
+
+                // Execute functions
+                while (functions.Count > 0)
+                {
+                    // Extract function from gueue
+                    Function f = null;
+                    try
+                    {
+                        lock (functions)
+                        {
+                            if (functions.Count > 0)
+                                f = functions.Dequeue();
+                        }
+                    }
+                    catch
+                    {
+                    }
+
+                    // Execute function
+                    try
+                    {  
+                        if (f != null)
+                            f();
+                    }
+                    catch (Exception e)
+                    {   // Send error to debug log
+                        BuiltInComponents.Host.DebugMsg(Thread.CurrentThread.Name, e);
+                    }
+                }
+
+                // No more functions, go to idle state
+                s.state = ThreadState.States.Sleeping;
+
+                // Report thread as available
+                availableThreads++;
+
+                // Idle
+                while (s.state == ThreadState.States.Sleeping)
+                {
+                    // Stop and wait for trigger (max 30 seconds, after timeout thread will die)
+                    s.waitHandle.WaitOne(30000);
+
+                    // Should we terminate this thread?
+                    if ((functions.Count == 0) && (availableThreads > 1))
+                    {   // Yes terminate this thread
+                        s.state = ThreadState.States.Kill;
+                    }
+                    else
+                    {   // No keep thread running
+
+                        // Go back to idle or execute functions?
+                        if (functions.Count >= 0)
+                            s.state = ThreadState.States.Working;
+                        else
+                            s.state = ThreadState.States.Sleeping;
+                    }
+                }
+            }
+
+            // Report this thread as killed
+            availableThreads--;
+
+            // Remove thread data
+            lock (locks)
+                locks.Remove(id);
         }
     }
 }

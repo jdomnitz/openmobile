@@ -1164,7 +1164,7 @@ namespace OpenMobile.Platform.Windows
                 StringBuilder buffer = new StringBuilder(256);
                 if (GetWindowText(hWnd, buffer, buffer.Capacity) > 0)
                 {
-                    Console.WriteLine(buffer);
+                    System.Diagnostics.Debug.WriteLine(buffer);
                     if (buffer.ToString() == VistaStartMenuCaption)
                     {
                         vistaStartMenuWnd = hWnd;

@@ -40,7 +40,7 @@ namespace OpenMobile.helperFunctions.Graphics
         /// Delegate for Animator class. Return true when the animation should run, returning false stops the animation.
         /// </summary>
         /// <param name="AnimationStep"></param>
-        public delegate bool AnimatorDelegate(int AnimationStep);
+        public delegate bool AnimatorDelegate(int AnimationStep, float AnimationStepF);
 
         /// <summary>
         /// Speed of animation. 
@@ -72,6 +72,7 @@ namespace OpenMobile.helperFunctions.Graphics
         /// Initialize a new smooth animator
         /// </summary>
         /// <param name="Animation_Speed"></param>
+        /// <param name="Asynchronous"></param>
         public SmoothAnimator(float Animation_Speed, bool Asynchronous)
             : this(Animation_Speed)
         {
@@ -80,7 +81,6 @@ namespace OpenMobile.helperFunctions.Graphics
         /// <summary>
         /// Initialize a new smooth animator
         /// </summary>
-        /// <param name="Animation_Speed"></param>
         public SmoothAnimator()
             : this(1.0F)
         {
@@ -93,14 +93,14 @@ namespace OpenMobile.helperFunctions.Graphics
         public SmoothAnimator(float Animation_Speed)
         {
             this.Speed = Animation_Speed;
-            this.FPS = 30.0F;
+            this.FPS = 60.0F;
             this.ThreadDelay = 1;
             this.Asynchronous = false;
         }
 
         /// <summary>
         /// Execute animation. Sample code with anonymous delegate:
-        /// <para>Animate(delegate(int AnimationStep)</para>
+        /// <para>Animate(delegate(int AnimationStep, float AnimationStepF)</para>
         /// <para>{</para>
         /// <para>.... Code goes here ....</para>
         /// <para>]);</para>
@@ -124,11 +124,12 @@ namespace OpenMobile.helperFunctions.Graphics
         private void RunAnimation(AnimatorDelegate d)
         {
             int Animation_Step;
-            float Interval = System.Diagnostics.Stopwatch.Frequency / FPS;
-            float currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
-            float lastUpdateTicks = System.Diagnostics.Stopwatch.GetTimestamp();
-            float ticks = 0;
-            float ticksMS = 0;
+            float Animation_StepF;
+            double Interval = System.Diagnostics.Stopwatch.Frequency / FPS;
+            double currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+            double lastUpdateTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+            double ticks = 0;
+            double ticksMS = 0;
 
             this.Run = true;
             while (Run)
@@ -139,10 +140,14 @@ namespace OpenMobile.helperFunctions.Graphics
                 {
                     lastUpdateTicks = currentTicks;
                     ticksMS = (ticks / System.Diagnostics.Stopwatch.Frequency) * 1000;
+                    Animation_StepF = (float)(ticksMS * Speed);
                     Animation_Step = ((int)(ticksMS * Speed));
+                    // Minimumsvalue for animation step
+                    if (Animation_Step == 0)
+                        Animation_Step = 1;
 
                     // Call animation 
-                    Run = d(Animation_Step);
+                    Run = d(Animation_Step, Animation_StepF);
                 }
                 Thread.Sleep(ThreadDelay);
             }
@@ -738,6 +743,18 @@ namespace OpenMobile.helperFunctions.Graphics
         }
 
         /// <summary>
+        /// The sides to generate graphics for
+        /// </summary>
+        public enum GraphicSides
+        {
+            None = 0,
+            Top = 1,
+            Left = 2,
+            Right = 4,
+            Bottom = 8
+        }
+
+        /// <summary>
         /// Data for generated graphics
         /// </summary>
         public class GraphicData
@@ -745,7 +762,7 @@ namespace OpenMobile.helperFunctions.Graphics
             public GraphicData()
             {   // Default values
                 FadeSize = 0.05f;
-                Sides = new bool[4] { true, true, true, true };
+                Sides = GraphicSides.Left | GraphicSides.Top | GraphicSides.Right | GraphicSides.Bottom;
             }
 
             /// <summary>
@@ -777,9 +794,11 @@ namespace OpenMobile.helperFunctions.Graphics
             /// </summary>
             public Color Color2 { get; set; }
             /// <summary>
-            /// Sides that should be drawn (0 = Top, 1 = Right, 2 = Bottom, 3 = Left)
+            /// Sides that should be drawn (Top | Left | Right | Bottom = all sides active)
             /// </summary>
-            public bool[] Sides { get; set; }
+            public GraphicSides Sides { get; set; }
+
+
         }
 
         /// <summary>

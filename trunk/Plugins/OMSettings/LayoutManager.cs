@@ -38,30 +38,28 @@ namespace OMSettings
             theHost = host;
             collection = s;
             collection.OnSettingChanged += new SettingChanged(collection_OnSettingChanged);
-            OMButton OK = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("OMSettings.OK", 13, 56, 200, 110, "", "OK");
-            OK.OnClick += new userInteraction(Save_OnClick);
-            OK.Transition = eButtonTransition.None;
-            OMLabel Heading = new OMLabel(200, 0, 800, 100);
-            Heading.Font = new Font(Font.GenericSansSerif, 36F);
-            Heading.Text = s.Title;
-            Heading.Name = "Label";
             OMPanel[] ret=new OMPanel[theHost.ScreenCount];
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
                 ofset = 87;
                 ret[i]= new OMPanel(s.Title);
                 controls.Add(new List<OMControl>());
-                OMScrollingContainer container = new OMScrollingContainer(0, 80, 1000, 450);
+                OMContainer container = new OMContainer("SettingsContainer", 0, 100, 1000, 500);
+                ret[i].addControl(container);
+
+                //OMButton OK = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("OMSettings.OK", 13, 56, 200, 110, "", "OK");
+                //OK.OnClick += new userInteraction(Save_OnClick);
+                //OK.Transition = eButtonTransition.None;
+                OMLabel Heading = new OMLabel(200, 0, 800, 50);
+                Heading.Font = new Font(Font.GenericSansSerif, 36F);
+                Heading.Text = s.Title;
+                Heading.Name = "Label";
+                
+                //container.addControlRelative(OK); //Always on top
+                container.addControlRelative(Heading);
                 foreach (Setting setting in s)
                     foreach (OMControl c in generate(setting, s.Title,i))
-                        container.Add(c);
-                Rectangle area = container.ControlArea;
-                area.Height = ofset;
-                container.ControlArea = area;
-                container.ScrollBarWidth = 10;
-                container.Add(OK); //Always on top
-                container.Add(Heading);
-                ret[i].addControl(container);
+                        container.addControlRelative(c);
             }
             return ret;
         }
@@ -84,7 +82,7 @@ namespace OMSettings
             else if (typeof(OMSlider).IsInstanceOfType(c))
             {
                 ((OMSlider)c).Value = int.Parse(setting.getInstanceValue(screen));
-                OMLabel lbl = ((OMScrollingContainer)c.Parent[0])["dsc" + setting.Name] as OMLabel;
+                OMLabel lbl = ((OMContainer)c.Parent[0])["dsc" + setting.Name] as OMLabel;
                 if (lbl != null)
                     lbl.Text = setting.Description.Replace("%value%", setting.getInstanceValue(screen));
             }
@@ -98,7 +96,7 @@ namespace OMSettings
                 case SettingTypes.MultiChoice:
                     if (s.Values == Setting.BooleanList)
                     {
-                        OMCheckbox cursor = new OMCheckbox(220, ofset, 700, 50);
+                        OMCheckbox cursor = new OMCheckbox(330, ofset, 620, 50);
                         cursor.Text = s.Description;
                         cursor.Font = new Font(Font.GenericSansSerif, 24F);
                         cursor.OutlineColor = Color.Red;
@@ -107,38 +105,40 @@ namespace OMSettings
                         cursor.OnClick += new userInteraction(cursor_OnClick);
                         if (s.getInstanceValue(screen) == "True")
                             cursor.Checked = true;
+                        OMLabel mcTitle = new OMLabel(20, ofset, 300, 50);
+                        mcTitle.Font = new Font(Font.GenericSansSerif, 24F, FontStyle.Regular);
+                        mcTitle.Text = s.Header + (!string.IsNullOrEmpty(s.Header) ? ":" : "");
+                        mcTitle.TextAlignment = Alignment.CenterRight;
+                        ret.Add(mcTitle);
+                        controls[screen].Add(mcTitle);
+                        ret.Add(cursor); 
+                        controls[screen].Add(cursor);
                         ofset += 70;
-                        ret.Add(cursor); controls[screen].Add(cursor);
                     }
                     else if((s.Values.Count>=s.Options.Count)&&(s.Options.Count>0))
                     {
-                        OMButton scrollRight = new OMButton(918, ofset, 70, 60);
-                        scrollRight.Image = theHost.getSkinImage("Play");
-                        scrollRight.DownImage = theHost.getSkinImage("Play.Highlighted");
+                        OMButton scrollRight = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("", 910, ofset, 70, 60, "", ">");
                         scrollRight.OnClick += new userInteraction(scrollRight_OnClick);
                         scrollRight.Tag = "btn" + s.Name;
                         scrollRight.Transition = eButtonTransition.None;
-                        OMButton scrollLeft = new OMButton(370, ofset, 70, 60);
-                        scrollLeft.Image = scrollRight.Image;
-                        scrollLeft.DownImage = scrollRight.DownImage;
-                        scrollLeft.Orientation = eAngle.FlipHorizontal;
+                        OMButton scrollLeft = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("", 330, ofset, 70, 60, "", "<");
                         scrollLeft.OnClick += new userInteraction(scrollLeft_OnClick);
                         scrollLeft.Tag = "btn" + s.Name;
                         scrollLeft.Transition = eButtonTransition.None;
-                        OMTextBox txtchoice = new OMTextBox(449, ofset+5, 460, 50);
+                        OMTextBox txtchoice = new OMTextBox(395, ofset+5, 520, 50);
                         txtchoice.Flags = textboxFlags.EllipsisEnd;
                         int index = s.Values.FindIndex(def => def == s.getInstanceValue(screen));
                         if (index != -1)
                             txtchoice.Text = s.Options[index];
                         txtchoice.Font = new Font(Font.GenericSansSerif, 24F);
                         txtchoice.Tag = txtchoice.Name = s.Name;
-                        OMLabel mcTitle = new OMLabel((ofset > 170 ? 100 : 220), ofset, (ofset > 170 ? 270 : 150), 50);
-                        mcTitle.Font = new Font(Font.GenericSansSerif, 32.25F, FontStyle.Bold);
-                        mcTitle.Text = s.Header + ((s.Header!=null)?":":"");
+                        OMLabel mcTitle = new OMLabel(20, ofset, 300, 50);
+                        mcTitle.Font = new Font(Font.GenericSansSerif, 24F, FontStyle.Regular);
+                        mcTitle.Text = s.Header + (!string.IsNullOrEmpty(s.Header) ? ":" : "");
                         mcTitle.TextAlignment = Alignment.CenterRight;
                         if ((s.Description != null) && (s.Description.Length > 0))
                         {
-                            OMLabel mcDescription = new OMLabel(450, ofset+57, 460, 30);
+                            OMLabel mcDescription = new OMLabel(330, ofset+57, 640, 30);
                             mcDescription.Font = new Font(Font.GenericSansSerif, 20);
                             mcDescription.Text = s.Description;
                             ret.Add(mcDescription);
@@ -156,14 +156,14 @@ namespace OMSettings
                     }
                     break;
                 case SettingTypes.Text:
-                    OMLabel tdesc = new OMLabel((ofset > 170 ? 100 : 220), ofset, (ofset > 170 ? 300 : 180), 50);
+                    OMLabel tdesc = new OMLabel(20, ofset, 300, 50);
                     tdesc.Text = (s.Header == "" ? s.Description + ":" : s.Header + ":");
                     tdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     tdesc.Name = title;
                     tdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(tdesc);
                     controls[screen].Add(tdesc);
-                    OMTextBox text = new OMTextBox(450, ofset, 500, 50);
+                    OMTextBox text = new OMTextBox(330, ofset, 650, 50);
                     text.Font = new Font(Font.GenericSansSerif, 28F);
                     text.TextAlignment = Alignment.CenterLeft;
                     text.OSKDescription = (s.Header == "" ? s.Description : s.Header);
@@ -188,14 +188,14 @@ namespace OMSettings
                     ofset += 60;
                     break;
                 case SettingTypes.Folder:
-                    OMLabel fdesc = new OMLabel(220, ofset, 200, 50);
+                    OMLabel fdesc = new OMLabel(20, ofset, 300, 50);
                     fdesc.Text = s.Description + ":";
                     fdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     fdesc.Name = title;
                     fdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(fdesc);
                     controls[screen].Add(fdesc);
-                    OMTextBox folder = new OMTextBox(450, ofset, 500, 50);
+                    OMTextBox folder = new OMTextBox(330, ofset, 650, 50);
                     folder.Font = new Font(Font.GenericSansSerif, 28F);
                     folder.TextAlignment = Alignment.CenterLeft;
 					folder.Flags=textboxFlags.EllipsisCenter;
@@ -208,14 +208,14 @@ namespace OMSettings
                     ofset += 60;
                     break;
                 case SettingTypes.File:
-                    OMLabel fldesc = new OMLabel(220, ofset, 200, 50);
+                    OMLabel fldesc = new OMLabel(20, ofset, 300, 50);
                     fldesc.Text = s.Description + ":";
                     fldesc.Font = new Font(Font.GenericSansSerif, 24F);
                     fldesc.Name = title;
                     fldesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(fldesc);
                     controls[screen].Add(fldesc);
-                    OMTextBox file = new OMTextBox(450, ofset, 500, 50);
+                    OMTextBox file = new OMTextBox(330, ofset, 650, 50);
                     file.Font = new Font(Font.GenericSansSerif, 28F);
                     file.TextAlignment = Alignment.CenterLeft;
                     file.OnClick += new userInteraction(file_OnClick);
@@ -228,14 +228,14 @@ namespace OMSettings
                     ofset += 60;
                     break;
                 case SettingTypes.Password:
-                    OMLabel pdesc = new OMLabel((ofset > 170 ? 100 : 220), ofset, (ofset > 170 ? 300 : 180), 50);
+                    OMLabel pdesc = new OMLabel(20, ofset, 300, 50);
                     pdesc.Text = s.Description + ":";
                     pdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     pdesc.Name = title;
                     pdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(pdesc);
                     controls[screen].Add(pdesc);
-                    OMTextBox ptext = new OMTextBox(450, ofset, 500, 50);
+                    OMTextBox ptext = new OMTextBox(330, ofset, 650, 50);
                     ptext.Font = new Font(Font.GenericSansSerif, 28F);
                     ptext.TextAlignment = Alignment.CenterLeft;
                     ptext.OSKDescription = "Enter password";
@@ -251,14 +251,14 @@ namespace OMSettings
                     ofset += 60;
                     break;
                 case SettingTypes.Range:
-                    OMLabel rdesc = new OMLabel(220, ofset, 200, 50);
+                    OMLabel rdesc = new OMLabel(20, ofset, 300, 50);
                     rdesc.Text = s.Header + ":";
                     rdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     rdesc.Name = title;
                     rdesc.TextAlignment = Alignment.CenterRight;
                     if (s.Values.Count != 2)
                         break;
-                    OMSlider range = new OMSlider(450, ofset+15, 500, 30,12,20);
+                    OMSlider range = new OMSlider(330, ofset+15, 650, 30,12,20);
                     range.Slider = theHost.getSkinImage("Slider");
                     range.SliderBar = theHost.getSkinImage("Slider.Bar");
                     int val;
@@ -277,7 +277,7 @@ namespace OMSettings
                     range.OnSliderMoved += new OMSlider.slidermoved(range_OnSliderMoved);
                     if ((s.Description != null) && (s.Description.Length > 0))
                     {
-                        OMLabel rDescription = new OMLabel(450, ofset + 35, 500, 30);
+                        OMLabel rDescription = new OMLabel(330, ofset + 35, 650, 30);
                         rDescription.Font = new Font(Font.GenericSansSerif, 20);
                         rDescription.Text = s.Description.Replace("%value%", s.getInstanceValue(screen));
                         rDescription.Name = "dsc" + s.Name;
@@ -291,18 +291,28 @@ namespace OMSettings
                     ofset += 60;
                     break;
                 case SettingTypes.Button:
-                    OMButton button = new OMButton(220, ofset, 600, 50);
-                    button.Text = s.Description;
-                    button.Font = new Font(Font.GenericSansSerif, 24F);
-                    button.Width=(int)(Graphics.MeasureString(button.Text, button.Font).Width+0.5F)+20;
-                    button.Name = title;
-                    button.Tag = s.Name;
-                    button.OnClick += new userInteraction(button_OnClick);
-                    button.Image = theHost.getSkinImage("Full");
-                    button.FocusImage = theHost.getSkinImage("Full.Highlighted");
-                    ofset += 70;
-                    ret.Add(button);
-                    controls[screen].Add(button);
+                    {
+                        OMButton button = new OMButton(330, ofset, 650, 50);
+                        button.Text = s.Description;
+                        button.Font = new Font(Font.GenericSansSerif, 24F);
+                        button.Width = (int)(Graphics.MeasureString(button.Text, button.Font).Width + 0.5F) + 20;
+                        button.Name = title;
+                        button.Tag = s.Name;
+                        button.OnClick += new userInteraction(button_OnClick);
+                        button.Image = theHost.getSkinImage("Full");
+                        button.FocusImage = theHost.getSkinImage("Full.Highlighted");
+                        OMLabel mcTitle = new OMLabel(20, ofset, 250, 50);
+                        mcTitle.Font = new Font(Font.GenericSansSerif, 24F, FontStyle.Regular);
+                        mcTitle.Text = s.Header + (!string.IsNullOrEmpty(s.Header) ? ":" : "");
+                        mcTitle.TextAlignment = Alignment.CenterRight;
+
+                        ret.Add(mcTitle);
+                        controls[screen].Add(mcTitle);
+                        ret.Add(button);
+                        controls[screen].Add(button);
+
+                        ofset += 70;
+                    }
                     break;
             }
             return ret;
@@ -360,7 +370,7 @@ namespace OMSettings
         void scrollRight_OnClick(OMControl sender, int screen)
         {
             Setting setting=collection.Find(s => s.Name == sender.Tag.ToString().Substring(3));
-            OMTextBox tb = (OMTextBox)((OMScrollingContainer)sender.Parent[0])[setting.Name];
+            OMTextBox tb = (OMTextBox)((OMContainer)sender.Parent[0])[setting.Name];
             int index = setting.Options.FindIndex(s => s == tb.Text);
             if (index >= setting.Options.Count - 1)
                 return;
@@ -371,7 +381,7 @@ namespace OMSettings
         void scrollLeft_OnClick(OMControl sender, int screen)
         {
             Setting setting = collection.Find(s => s.Name == sender.Tag.ToString().Substring(3));
-            OMTextBox tb = (OMTextBox)((OMScrollingContainer)sender.Parent[0])[setting.Name];
+            OMTextBox tb = (OMTextBox)((OMContainer)sender.Parent[0])[setting.Name];
             int index = setting.Options.FindIndex(s => s == tb.Text);
             if (index <= 0)
                 return;

@@ -168,6 +168,16 @@ namespace OpenMobile.Graphics
         {
             return Color.FromArgb(c.A, c.R, c.G, c.B);
         }
+
+        /// <summary>
+        /// Updates the Alpha value of the color
+        /// </summary>
+        /// <param name="a"></param>
+        public Color SetAlpha(int a)
+        {
+            this.a = (byte)a;
+            return this;
+        }
         public static bool operator ==(Color left, Color right)
         {
             return ((left.A == right.A) && (left.b == right.B) && (left.G == right.G) && (left.R == right.R));
@@ -1686,6 +1696,15 @@ namespace OpenMobile.Graphics
         public static bool operator !=(Point left, Point right)
         {
             return !(left == right);
+        }
+
+        public static bool operator >(Point left, Point right)
+        {
+            return left.x > right.x && left.y > right.y;
+        }
+        public static bool operator <(Point left, Point right)
+        {
+            return left.x < right.x && left.y < right.y;
         }
 
         public static Point operator -(Point left, Point right)
