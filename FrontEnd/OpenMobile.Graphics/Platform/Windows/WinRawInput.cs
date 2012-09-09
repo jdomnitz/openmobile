@@ -100,7 +100,7 @@ namespace OpenMobile.Platform.Windows
 
             // Create a new message-only window to retrieve WM_INPUT messages.
             Native = new NativeWindow();
-            Native.NativeInitialize(GameWindowFlags.Default);
+            Native.NativeInitialize(GameWindowFlags.Default, 720, 450);
             Native.ProcessEvents();
             Functions.SetParent(Parent.WindowHandle, Constants.MESSAGE_ONLY);
             Native.ProcessEvents();

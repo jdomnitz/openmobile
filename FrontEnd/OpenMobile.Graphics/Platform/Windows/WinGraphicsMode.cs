@@ -48,12 +48,10 @@ namespace OpenMobile.Platform.Windows
 
         public WinGraphicsMode()
         {
-            //Console.WriteLine("WinGraphicsMode.Constructor.Start: " + Timing.GetTiming());
             lock (SyncRoot)
             {
                 using (NativeWindow native = new NativeWindow())
                 {
-                    //Console.WriteLine("WinGraphicsMode.Constructor.Timing1: " + Timing.GetTiming());
                     native.NativeInitialize(GameWindowFlags.Temporary);
 
                     // TODO: Antialiasing
@@ -62,22 +60,17 @@ namespace OpenMobile.Platform.Windows
                         new GraphicsMode(new IntPtr(2), new ColorFormat(), 0, 0, 0, new ColorFormat(), 2, false),
                         (WinWindowInfo)native.WindowInfo, 1, 0, GraphicsContextFlags.Default);
 
-                    //Console.WriteLine("WinGraphicsMode.Constructor.Timing2: " + Timing.GetTiming());
                     modes.AddRange(GetModesARB(native));
-                    //Console.WriteLine("WinGraphicsMode.Constructor.Timing3: " + Timing.GetTiming());
                     if (modes.Count == 0)
                         modes.AddRange(GetModesPFD(native));
-                    //Console.WriteLine("WinGraphicsMode.Constructor.Timing4: " + Timing.GetTiming());
                     if (modes.Count == 0)
                         throw new Exception(
                             "No GraphicsMode available. This should never happen, please report a bug at http://www.opentk.com");
 
-                    //Console.WriteLine("WinGraphicsMode.Constructor.Timing5: " + Timing.GetTiming());
                     modes.Sort(new GraphicsModeComparer());
 
                 }
             }
-            //Console.WriteLine("WinGraphicsMode.Constructor.End: " + Timing.GetTiming());
 
         }
 

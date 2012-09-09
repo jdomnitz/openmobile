@@ -278,22 +278,25 @@ namespace OpenMobile
             Image_UITopBar_Background.Image = theHost.getSkinImage("topBar");
             UIPanel.addControl(Image_UITopBar_Background);
 
-            OMAnimatedLabel Label_UITopBar_TrackTitle = new OMAnimatedLabel("Label_UITopBar_TrackTitle", 240, 3, 620, 28);
+            OMAnimatedLabel2 Label_UITopBar_TrackTitle = new OMAnimatedLabel2("Label_UITopBar_TrackTitle", 240, 3, 620, 28);
             Label_UITopBar_TrackTitle.TextAlignment = Alignment.CenterLeft;
             Label_UITopBar_TrackTitle.Format = eTextFormat.BoldShadow;
-            Label_UITopBar_TrackTitle.ContiuousAnimation = eAnimation.Scroll;
+            Label_UITopBar_TrackTitle.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
+            Label_UITopBar_TrackTitle.AnimationSingle = OMAnimatedLabel2.eAnimation.UnveilRightSmooth;
             UIPanel.addControl(Label_UITopBar_TrackTitle);
 
-            OMAnimatedLabel Label_UITopBar_TrackAlbum = new OMAnimatedLabel("Label_UITopBar_TrackAlbum", 240, 34, 620, 28);
+            OMAnimatedLabel2 Label_UITopBar_TrackAlbum = new OMAnimatedLabel2("Label_UITopBar_TrackAlbum", 240, 34, 620, 28);
             Label_UITopBar_TrackAlbum.TextAlignment = Alignment.CenterLeft;
             Label_UITopBar_TrackAlbum.Format = eTextFormat.BoldShadow;
-            Label_UITopBar_TrackAlbum.ContiuousAnimation = eAnimation.Scroll;
+            Label_UITopBar_TrackAlbum.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
+            Label_UITopBar_TrackAlbum.AnimationSingle = OMAnimatedLabel2.eAnimation.UnveilRightSmooth;
             UIPanel.addControl(Label_UITopBar_TrackAlbum);
 
-            OMAnimatedLabel Label_UITopBar_TrackArtist = new OMAnimatedLabel("Label_UITopBar_TrackArtist", 240, 64, 620, 28);
+            OMAnimatedLabel2 Label_UITopBar_TrackArtist = new OMAnimatedLabel2("Label_UITopBar_TrackArtist", 240, 64, 620, 28);
             Label_UITopBar_TrackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
             Label_UITopBar_TrackArtist.Format = eTextFormat.DropShadow;
-            Label_UITopBar_TrackArtist.ContiuousAnimation = eAnimation.Scroll;
+            Label_UITopBar_TrackArtist.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
+            Label_UITopBar_TrackArtist.AnimationSingle = OMAnimatedLabel2.eAnimation.UnveilRightSmooth;
             UIPanel.addControl(Label_UITopBar_TrackArtist);
 
             OMImage Image_UITopBar_Cover = new OMImage("Image_UITopBar_Cover", 143, 3, 90, 90);
@@ -516,7 +519,7 @@ namespace OpenMobile
                     control.Visible = true;
 
                 SmoothAnimator Animation = new SmoothAnimator(0.9f);
-                Animation.Animate(delegate(int AnimationStep)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
                 {
                     Top -= AnimationStep;
                     if (Top <= EndPos)
@@ -542,7 +545,7 @@ namespace OpenMobile
                 int Top = MainControl.Top;
 
                 SmoothAnimator Animation = new SmoothAnimator(0.9f);
-                Animation.Animate(delegate(int AnimationStep)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
                 {
                     Top += AnimationStep;
                     if (Top >= EndPos)
@@ -644,7 +647,7 @@ namespace OpenMobile
                 int EndPos = 510;
                 int Top = btn.Top;
 
-                Animation.Animate(delegate(int AnimationStep)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
                     {
                         Top += AnimationStep;
                         if (Top >= EndPos)
@@ -680,7 +683,7 @@ namespace OpenMobile
                 int EndPos = 0;
                 int Top = btn.Top;
 
-                Animation.Animate(delegate(int AnimationStep)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
                 {
                     Top -= AnimationStep;
                     if (Top <= EndPos)
@@ -864,7 +867,7 @@ namespace OpenMobile
                         int AnimationState = 0;
                         int Delay = 0;
                         SmoothAnimator Animation = new SmoothAnimator(0.2f);
-                        Animation.Animate(delegate(int AnimationStep)
+                        Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
                         {
                             bool ContinueAnimation = false;
                             switch (AnimationState)
@@ -1383,14 +1386,14 @@ namespace OpenMobile
                             {   // Global message
                                 theHost.ForEachScreen(delegate(int screen)
                                 {
-                                    OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
-                                    title.Transition(eAnimation.UnveilRight, arg1, 25);
+                                    OMAnimatedLabel2 title = (OMAnimatedLabel2)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
+                                    title.Text = arg1;
                                 });
                             }
                             else
                             {   // Screen specific message
-                                OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[ArgScreen, "Label_UITopBar_TrackTitle"]; //6
-                                title.Transition(eAnimation.UnveilRight, arg1, 25);
+                                OMAnimatedLabel2 title = (OMAnimatedLabel2)UIPanel[ArgScreen, "Label_UITopBar_TrackTitle"]; //6
+                                title.Text = arg1;
                             }
                         }
                         break;
@@ -1550,9 +1553,9 @@ namespace OpenMobile
                     // Only update information on the correct screen
                     if (theHost.ZoneHandler.GetZone(screen) == zone)
                     {
-                        OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
-                        OMAnimatedLabel artist = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackAlbum"]; //7
-                        OMAnimatedLabel album = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackArtist"]; //8
+                        OMAnimatedLabel2 title = (OMAnimatedLabel2)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
+                        OMAnimatedLabel2 artist = (OMAnimatedLabel2)UIPanel[screen, "Label_UITopBar_TrackAlbum"]; //7
+                        OMAnimatedLabel2 album = (OMAnimatedLabel2)UIPanel[screen, "Label_UITopBar_TrackArtist"]; //8
                         OMImage cover = (OMImage)UIPanel[screen, "Image_UITopBar_Cover"]; //9
                         // Errorcheck
                         if (title == null || artist == null || album == null || cover == null)
@@ -1564,12 +1567,9 @@ namespace OpenMobile
                             #region Radio info
 
                             // Set texts
-                            if (title.Text != TunedContentInfo.currentStation.stationName)
-                                title.Transition(eAnimation.UnveilRight, TunedContentInfo.currentStation.stationName, 50);
-                            if (artist.Text != info.Name)
-                                artist.Transition(eAnimation.UnveilRight, info.Name, 50);
-                            if (album.Text != info.Album)
-                                album.Transition(eAnimation.UnveilRight, info.Album, 50);
+                            title.Text = TunedContentInfo.currentStation.stationName;
+                            artist.Text = info.Name;
+                            album.Text = info.Album;
 
                             // Set cover art
                             if (info.coverArt == null)
@@ -1597,14 +1597,11 @@ namespace OpenMobile
 
                             // Update texts
                             string s = String.Format("[{0}] {1}", zone.Name, info.Name);
-                            if (title.Text != s)
-                                title.Transition(eAnimation.UnveilRight, s, 50);
+                            title.Text = s;
                             if (String.IsNullOrEmpty(title.Text))
-                                title.Transition(eAnimation.UnveilRight, info.Location, 50);
-                            if (artist.Text != info.Name)
-                                artist.Transition(eAnimation.UnveilRight, info.Artist, 50);
-                            if (album.Text != info.Album)
-                                album.Transition(eAnimation.UnveilRight, info.Album, 50);
+                                title.Text = info.Location;
+                            artist.Text = info.Artist;
+                            album.Text = info.Album;
 
                             // Update cover image
                             cover.Image = it;
@@ -1664,9 +1661,9 @@ namespace OpenMobile
                 {
                     if (theHost.ZoneHandler.GetZone(screen) == zone)
                     {
-                        OMAnimatedLabel title = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
-                        OMAnimatedLabel artist = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackAlbum"]; //7
-                        OMAnimatedLabel album = (OMAnimatedLabel)UIPanel[screen, "Label_UITopBar_TrackArtist"]; //8
+                        OMAnimatedLabel2 title = (OMAnimatedLabel2)UIPanel[screen, "Label_UITopBar_TrackTitle"]; //6
+                        OMAnimatedLabel2 artist = (OMAnimatedLabel2)UIPanel[screen, "Label_UITopBar_TrackAlbum"]; //7
+                        OMAnimatedLabel2 album = (OMAnimatedLabel2)UIPanel[screen, "Label_UITopBar_TrackArtist"]; //8
                         OMImage cover = (OMImage)UIPanel[screen, "Image_UITopBar_Cover"]; //9
                         OMButton btn = (OMButton)UIPanel[screen, "Button_UIMediaBar_Play"];
                         OMLabel lbl = (OMLabel)UIPanel[screen, "Label_UIMediaBar_Elapsed"];
@@ -1812,9 +1809,7 @@ namespace OpenMobile
                     theHost.execute(eFunction.TransitionFromAny, screen.ToString());
                     if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "NewMedia"))
                     {
-                        if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Media"))
-                            theHost.execute(eFunction.CancelTransition, screen.ToString());
-                        else
+                        if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Media"))
                             theHost.execute(eFunction.ExecuteTransition, screen.ToString());
                     }
                     else
@@ -1822,9 +1817,7 @@ namespace OpenMobile
                     return true;
                 case "R":
                     theHost.execute(eFunction.TransitionFromAny, screen.ToString());
-                    if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Radio"))
-                        theHost.execute(eFunction.CancelTransition, screen.ToString());
-                    else
+                    if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Radio"))
                         theHost.execute(eFunction.ExecuteTransition, screen.ToString());
                     return true;
                 case "H":
@@ -1836,9 +1829,7 @@ namespace OpenMobile
                     theHost.execute(eFunction.TransitionFromAny, screen.ToString());
                     if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "Navigation"))
                     {
-                        if (!theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "ExternalNav"))
-                            theHost.execute(eFunction.CancelTransition, screen.ToString());
-                        else
+                        if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "ExternalNav"))
                             theHost.execute(eFunction.ExecuteTransition, screen.ToString());
                     }
 

@@ -604,7 +604,7 @@ namespace OMSettings
             // Show panel
             Host.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings", "InputRouterScreenSelection");
             Host.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", "InputRouterScreen");
-            Host.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+            Host.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
         static void ScreenSelection_ButtonIdentify_OnClick(OMControl sender, int screen)

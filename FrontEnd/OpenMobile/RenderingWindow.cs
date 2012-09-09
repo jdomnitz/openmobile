@@ -50,8 +50,14 @@ namespace OpenMobile
         Point CursorDistanceXYTotal = new Point();
         Point CursorDistanceXYRelative = new Point();
         bool keyboardActive;
+        
+        /// <summary>
+        /// Contains the currently focused control's parent object (if any)
+        /// <para>The control is only set if a control implements certain interfaces (like iContainer)</para>
+        /// </summary>
+        OMControl FocusedControlParent = null;
         OMControl FocusedControl = null;
-        OMControl DebugControl = null;
+        OMControl MouseOverControl = null;
         private List<Point> currentGesture = new List<Point>();
         bool ThrowActive = false;
 
@@ -133,9 +139,34 @@ namespace OpenMobile
             {
                 return _ScaleFactors;
             }
-            set
+            private set
             {
+                if (_ScaleFactors == value)
+                    return;
+
                 _ScaleFactors = value;
+                g.SetScaleFactors(_ScaleFactors);
+                RefreshAllControls();
+            }
+        }
+
+        /// <summary>
+        /// Requests a refresh of all control graphics
+        /// </summary>
+        private void RefreshAllControls()
+        {
+            foreach (OMPanel panel in RenderingQueue)
+            {
+                foreach (OMControl control in panel.Controls)
+                {
+                    if (typeof(IContainer2).IsInstanceOfType(control))
+                    {
+                        foreach (OMControl containerControl in ((IContainer2)control).Controls)
+                            containerControl.RefreshGraphic();
+                    }
+                    else
+                        control.RefreshGraphic();
+                }
             }
         }
 
@@ -231,9 +262,7 @@ namespace OpenMobile
 
             // Set mouse startup location
             if ((this.WindowState == WindowState.Fullscreen) && (screen == 0))
-                DefaultMouse.Location = this.Location;
-
-             
+                DefaultMouse.Location = this.Location;             
         }
 
         void tmrClickLong_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -264,9 +293,11 @@ namespace OpenMobile
             base.OnLoad(e);
         }
 
-        public void Run(GameWindowFlags flags)
+        public void Run(GameWindowFlags flags, Size initalScreenSize)
         {
-            NativeInitialize(flags);
+            //NativeInitialize(flags, 800, 480);
+            //NativeInitialize(flags, 1000, 600);
+            NativeInitialize(flags, initalScreenSize.Width, initalScreenSize.Height);
             InitializeRendering();
             try
             {
@@ -278,11 +309,11 @@ namespace OpenMobile
             }
         }
 
-        public void RunAsync(GameWindowFlags flags)
+        public void RunAsync(GameWindowFlags flags, Size initalScreenSize)
         {
             Thread t = new Thread(delegate()
             {
-                Run(flags);
+                Run(flags, initalScreenSize);
             });
             t.TrySetApartmentState(ApartmentState.STA);
             t.Name = String.Format("RenderingWindow_{0}.RunAsync", screen);
@@ -343,10 +374,10 @@ namespace OpenMobile
             {
                 lock (painting)
                 {
-                    DebugString.Text = String.Format("S {0}, FPS {1}/{2}/{3}, FC {4}, DC {5}", screen, FPS_Min, FPS, FPS_Max, (FocusedControl != null ? FocusedControl.Name : ""), (DebugControl != null ? DebugControl.Name : ""));
+                    DebugString.Text = String.Format("Screen: {0}\nFPS: {1}/{2}/{3}\nFocus: {4}.{5}\nFocusParent: {6}\nUnderMouse: {7}.{8}", screen, FPS_Min, FPS, FPS_Max, (FocusedControl != null && FocusedControl.Parent != null ? FocusedControl.Parent.Name : ""), (FocusedControl != null ? FocusedControl.Name : ""), (FocusedControlParent != null ? FocusedControlParent.Name : ""), (MouseOverControl != null && MouseOverControl.Parent != null ? MouseOverControl.Parent.Name : ""), (MouseOverControl != null ? MouseOverControl.Name : ""));
                     if (DebugString.Changed)
-                        RenderDebugInfoTexture = g.GenerateTextTexture(RenderDebugInfoTexture, 0, 0, 1000, 200, DebugString.Text, Font.Arial, eTextFormat.Normal, Alignment.TopLeft, Color.Yellow, Color.Yellow);
-                    g.DrawImage(RenderDebugInfoTexture, 0, 0, 1000, 200);
+                        RenderDebugInfoTexture = g.GenerateTextTexture(RenderDebugInfoTexture, 0, 0, 1000, 300, DebugString.Text, new Font(Font.Arial, 12), eTextFormat.Normal, Alignment.TopLeft, Color.Yellow, Color.Yellow);
+                    g.DrawImage(RenderDebugInfoTexture, 0, 0, 1000, 300);
                 }
             }
         }
@@ -403,6 +434,7 @@ namespace OpenMobile
             RenderingParam.Alpha = e.Alpha;
         }
 
+        private bool RenderingError = false;
         protected void RenderPanels()
         {
             lock (painting)
@@ -424,31 +456,42 @@ namespace OpenMobile
 
                         RenderingQueue[i].Render(g, RenderingParam);
                     }
+                    RenderingError = false;
                 }
-                catch
+                catch (Exception e)
                 {
+                    if (!RenderingError)
+                    {
+                        RenderingError = true;
+                        BuiltInComponents.Host.DebugMsg(String.Format("RenderingWindow.RenderPanels (Screen {0}) Exception:", screen), e);
+                    }
                 }
             }
         }
 
         private void RenderGesture()
         {
-            if ((currentGesture != null) && (currentGesture.Count > 0))
-                lock (painting)
+            if (BuiltInComponents.SystemSettings.ShowGestures)
+            {
+                if ((currentGesture != null) && (currentGesture.Count > 0))
                 {
-                    Point[] GesturePoints = currentGesture.ToArray();
-                    for (int i = 0; i < GesturePoints.Length; i++)
-                        g.FillEllipse(new Brush(Color.Red), new Rectangle((GesturePoints[i].X - 5), (GesturePoints[i].Y - 5), 10, 10));
-                    if (GesturePoints.Length > 1)
-                        g.DrawLine(new Pen(Color.Red, 10F), GesturePoints);
+                    lock (painting)
+                    {
+                        Point[] GesturePoints = currentGesture.ToArray();
+                        for (int i = 0; i < GesturePoints.Length; i++)
+                            g.FillEllipse(new Brush(Color.Red), new Rectangle((GesturePoints[i].X - 5), (GesturePoints[i].Y - 5), 10, 10));
+                        if (GesturePoints.Length > 1)
+                            g.DrawLine(new Pen(Color.Red, 10F), GesturePoints);
+                    }
                 }
+            }
         }
 
         #endregion
 
         private void RenderingWindow_Resize(object sender, EventArgs e)
         {
-            _ScaleFactors = new PointF((this.ClientRectangle.Width / 1000F), (this.ClientRectangle.Height / 600F));
+            ScaleFactors = new PointF((this.ClientRectangle.Width / 1000F), (this.ClientRectangle.Height / 600F));
             OnRenderFrameInternal();
             raiseResizeEvent();
 
@@ -554,13 +597,19 @@ namespace OpenMobile
             CursorDistanceXYTotal = CursorPosition - MouseMoveStartPoint;
             CursorDistanceXYRelative = CursorPosition - CursorDistanceXYRelative;
 
+            OMControl control = null;
+
             if (e.Buttons == MouseButton.Left)
             {   // Mouse moved with button pressed, this indicates a gesture or a throw
 
                 bool EnableGesture = true;
                 
                 // Disable gesture if this control uses iThrow interface
-                if (FocusedControl != null && typeof(IThrow).IsInstanceOfType(FocusedControl))
+                if ((FocusedControl != null && typeof(IThrow).IsInstanceOfType(FocusedControl)) || (FocusedControlParent != null && typeof(IThrow).IsInstanceOfType(FocusedControlParent)))
+                    EnableGesture = false;
+
+                // Disable gesture if this control uses iMouse interface
+                if ((FocusedControl != null && typeof(IMouse).IsInstanceOfType(FocusedControl)) || (FocusedControlParent != null && typeof(IMouse).IsInstanceOfType(FocusedControlParent)))
                     EnableGesture = false;
 
                 // Ensure mouse is moved a certain distance before we start to gesture
@@ -571,9 +620,30 @@ namespace OpenMobile
                         currentGesture.Add(CursorPosition);
                     }
 
-                // iThrow interface
-                if (FocusedControl != null)
-                    if (typeof(IThrow).IsInstanceOfType(FocusedControl) == true)
+                // Send iThrow interface data
+                if (FocusedControlParent != null && ((FocusedControl != null && !typeof(IThrow).IsInstanceOfType(FocusedControl)) || (FocusedControl == null)))
+                {   // Use focused control parent
+                    if (FocusedControlParent != null && typeof(IThrow).IsInstanceOfType(FocusedControlParent) == true)
+                    {
+                        if (!ThrowActive)
+                        {   // Start new throw
+                            if (CursorDistance > 5)
+                            {
+                                bool cancel = false;
+                                ((IThrow)FocusedControlParent).MouseThrowStart(screen, MouseMoveStartPoint, _ScaleFactors, ref cancel);
+                                ThrowActive = !cancel;
+                                UpdateControlFocus(FocusedControlParent, null, false);
+                            }
+                        }
+                        else
+                        {   // Throw started, update data for throw interface
+                            ((IThrow)FocusedControlParent).MouseThrow(screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                        }
+                    }
+                }
+                else
+                {   // Use focused control
+                    if (FocusedControl != null && typeof(IThrow).IsInstanceOfType(FocusedControl) == true)
                     {
                         if (!ThrowActive)
                         {   // Start new throw
@@ -586,24 +656,39 @@ namespace OpenMobile
                         }
                         else
                         {   // Throw started, update data for throw interface
-                            ((IThrow)FocusedControl).MouseThrow(screen, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                            ((IThrow)FocusedControl).MouseThrow(screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
                         }
                     }
+                }
             }
             else
             {   // Regular mouse move action
 
+                OMControl ParentControl = null;
+
                 // Find control under mouse
-                OMControl control = FindControlAtLocation(CursorPosition);
+                control = FindControlAtLocation(CursorPosition, out ParentControl);
 
                 // Highlight/unhighlight the control
-                UpdateControlFocus(control);
+                UpdateControlFocus(control, ParentControl, true);
             }
 
-            // Mouse interface
-            if (FocusedControl != null)
-                if (typeof(IMouse).IsInstanceOfType(FocusedControl))
-                    ((IMouse)FocusedControl).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+            // Send event data
+            if (FocusedControlParent != null && ((FocusedControl != null && !typeof(IMouse).IsInstanceOfType(FocusedControl)) || (FocusedControl == null)))
+            {   // Send event to focused control parent
+                if (FocusedControlParent != null)
+                    if (typeof(IMouse).IsInstanceOfType(FocusedControlParent))
+                    {
+                        ((IMouse)FocusedControlParent).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                    }
+            }
+            else
+            {   // Send event to focused control
+                // Mouse interface
+                if (FocusedControl != null)
+                    if (typeof(IMouse).IsInstanceOfType(FocusedControl))
+                        ((IMouse)FocusedControl).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+            }
 
             // Update relative distance data
             CursorDistanceXYRelative = CursorPosition;
@@ -612,10 +697,14 @@ namespace OpenMobile
             Invalidate();
         }
 
+        /// <summary>
+        /// This event is not used 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         internal void RenderingWindow_MouseClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
         {
-            if ((int)sender != screen)
-                return;
+            // Not used
         }
 
         internal void RenderingWindow_MouseDown(object sender, OpenMobile.Input.MouseButtonEventArgs e)
@@ -636,19 +725,25 @@ namespace OpenMobile
             CursorDistanceXYTotal.Y = 0;
             CursorDistanceXYRelative = MouseMoveStartPoint;
 
+            OMControl control = FocusedControl;
+            OMControl ParentControl = null;
+
             // If nothing is selected then try to select something
             if (FocusedControl == null)
             {
                 // Find control under mouse
-                OMControl control = FindControlAtLocation(MouseMoveStartPoint);
+                control = FindControlAtLocation(MouseMoveStartPoint, out ParentControl);
 
                 // Highlight/unhighlight the control
-                UpdateControlFocus(control);
+                UpdateControlFocus(control, ParentControl, true);
             }
 
             // No use in doing anything if nothing is focused
             if (FocusedControl == null)
                 return;
+
+            // Set current control as clicked
+            FocusedControl.Mode = eModeType.Clicked;
 
             // Can this control accept clicks?
             if (IsControlClickable(FocusedControl))
@@ -658,15 +753,23 @@ namespace OpenMobile
 
                 // Enable hold detection
                 tmrClickHold.Enabled = true;
-
-                // Show control as clicked 
-                FocusedControl.Mode = eModeType.Clicked;
             }
 
-            // Mouse interface
-            if (FocusedControl != null)
-                if (typeof(IMouse).IsInstanceOfType(FocusedControl))
-                    ((IMouse)FocusedControl).MouseDown(screen, eScaled, MouseMoveStartPoint);
+            // Send Mouse interface data
+            if (FocusedControlParent != null && ((FocusedControl != null && !typeof(IMouse).IsInstanceOfType(FocusedControl)) || (FocusedControl == null)))
+            {   // Send event to focused control parent
+                if (FocusedControlParent != null)
+                    if (typeof(IMouse).IsInstanceOfType(FocusedControlParent))
+                    {
+                        ((IMouse)FocusedControlParent).MouseDown(screen, eScaled, MouseMoveStartPoint);
+                    }
+            }
+            else
+            {   // Send event to focused control
+                if (FocusedControl != null)
+                    if (typeof(IMouse).IsInstanceOfType(FocusedControl))
+                        ((IMouse)FocusedControl).MouseDown(screen, eScaled, MouseMoveStartPoint);
+            }
 
             // Redraw
             Invalidate();
@@ -694,18 +797,28 @@ namespace OpenMobile
                 // Reset clicked state on focused control
                 FocusedControl.Mode = eModeType.Highlighted;
             }
+            if (FocusedControlParent != null)
+            {
+                // Reset clicked state on focused control
+                FocusedControlParent.Mode = eModeType.Highlighted;
+            }
             
             // Redraw
             Invalidate();
+
 
             // Return if gesture is handled or no control has focus
             if (GestureHandled || FocusedControl == null)
             {
                 // Find control under mouse (if any)
-                OMControl control = FindControlAtLocation(CursorPosition);
+                OMControl ParentControl = null;
+                OMControl control = FindControlAtLocation(CursorPosition, out ParentControl);
 
                 // Highlight/unhighlight the control
-                UpdateControlFocus(control);
+                UpdateControlFocus(control, ParentControl, true);
+
+                // Redraw
+                Invalidate();
 
                 return;
             }
@@ -723,22 +836,39 @@ namespace OpenMobile
                     ActivateClick(FocusedControl, ClickTypes.Long);
                 }
             }
+
+            // Send Mouse interface data
+            if (FocusedControlParent != null && ((FocusedControl != null && !typeof(IMouse).IsInstanceOfType(FocusedControl)) || (FocusedControl == null)))
+            {   // Send event to focused control parent
+                if (FocusedControlParent != null)
+                    if (typeof(IMouse).IsInstanceOfType(FocusedControlParent))
+                        ((IMouse)FocusedControlParent).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+            }
             else
-            {
-                int i = 0;
+            {   // Send event to focused control
+                if (FocusedControl != null)
+                    if (typeof(IMouse).IsInstanceOfType(FocusedControl))
+                        ((IMouse)FocusedControl).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
             }
 
-            // iMouse interface
-            if (FocusedControl != null)
-                if (typeof(IMouse).IsInstanceOfType(FocusedControl))
-                    ((IMouse)FocusedControl).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
-
-            // iThrow interface
-            if (ThrowActive)
-            {
-                if (FocusedControl != null)
-                    if (typeof(IThrow).IsInstanceOfType(FocusedControl))
-                        ((IThrow)FocusedControl).MouseThrowEnd(screen, eScaled.Location);
+            // Send Throw interface data
+            if (FocusedControlParent != null && ((FocusedControl != null && !typeof(IThrow).IsInstanceOfType(FocusedControl)) || (FocusedControl == null)))
+            {   // Send event to focused control parent
+                if (ThrowActive)
+                {
+                    if (FocusedControlParent != null)
+                        if (typeof(IThrow).IsInstanceOfType(FocusedControlParent))
+                            ((IThrow)FocusedControlParent).MouseThrowEnd(screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location);
+                }
+            }
+            else
+            {   // Send event to focused control 
+                if (ThrowActive)
+                {
+                    if (FocusedControl != null)
+                        if (typeof(IThrow).IsInstanceOfType(FocusedControl))
+                            ((IThrow)FocusedControl).MouseThrowEnd(screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location);
+                }
             }
 
             // Redraw
@@ -754,7 +884,7 @@ namespace OpenMobile
 
         private void RenderingWindow_MouseLeave(object sender, EventArgs e)
         {
-            UpdateControlFocus(null);
+            UpdateControlFocus(null, null, true);
         }
 
         public void RenderingWindow_KeyDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
@@ -762,13 +892,23 @@ namespace OpenMobile
             if (e.Screen != Screen)
                 return;
 
+            // iKey interface (if key is handled by controls then it will not be handled by the rendering window
+            OMControl iKeyControl = FocusedControl;
+            if (iKeyControl != null)
+                if (typeof(IKey).IsInstanceOfType(iKeyControl))
+                    if (((IKey)iKeyControl).KeyDown_BeforeUI(screen, e, _ScaleFactors))
+                    {
+                        Invalidate();
+                        return;
+                    }
+
             // Handle arrow keys to move focus around
             if ((e.Key == Key.Left) || (e.Key == Key.Right) || (e.Key == Key.Up) || (e.Key == Key.Down))
             {
                 if (FocusedControl == null)
                 {   // Select the first available control that can receive focus
                     OMControl control = FindFirstFocusableControl();
-                    UpdateControlFocus(control);
+                    UpdateControlFocus(control, null, true);
                     Invalidate();
                 }
                 else
@@ -783,16 +923,32 @@ namespace OpenMobile
                     else if (e.Key == Key.Down)
                         control = FindFirstFocusableControlInDirection(SearchDirections.Down, 0.1F);
                     if (control != null)
-                        UpdateControlFocus(control);
-                    Invalidate();
+                        UpdateControlFocus(control, null, true);
                 }
             }
+
+            // iKey interface
+            if (iKeyControl != null)
+                if (typeof(IKey).IsInstanceOfType(iKeyControl))
+                    ((IKey)iKeyControl).KeyDown_AfterUI(screen, e, _ScaleFactors);
+
+            Invalidate();
         }
 
         public void RenderingWindow_KeyUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
         {
             if (e.Screen != Screen)
                 return;
+
+            // iKey interface (if key is handled by controls then it will not be handled by the rendering window
+            OMControl iKeyControl = FocusedControl;
+            if (iKeyControl != null)
+                if (typeof(IKey).IsInstanceOfType(iKeyControl))
+                    if (((IKey)iKeyControl).KeyUp_BeforeUI(screen, e, _ScaleFactors))
+                    {
+                        Invalidate();
+                        return;
+                    }
 
             // Exit fullscreen or close program
             if (e.Key == Key.Escape)
@@ -831,6 +987,12 @@ namespace OpenMobile
                 }
             }
 
+            // iKey interface
+            if (iKeyControl != null)
+                if (typeof(IKey).IsInstanceOfType(iKeyControl))
+                    ((IKey)iKeyControl).KeyUp_AfterUI(screen, e, _ScaleFactors);
+
+            Invalidate();
         }
 
         public void ExecuteTransition(string transType)
@@ -844,7 +1006,7 @@ namespace OpenMobile
                 TransitionEffectParam_Out = new renderingParams();
                 
                 // Execute effect
-                PanelTransitionEffectHandler.GetEffect(transType).Run(TransitionEffectParam_In, TransitionEffectParam_Out, ReDrawPanel, BuiltInComponents.Host.TransitionSpeed);
+                PanelTransitionEffectHandler.GetEffect(transType).Run(TransitionEffectParam_In, TransitionEffectParam_Out, ReDrawPanel, BuiltInComponents.SystemSettings.TransitionSpeed);
                 
                 // Go trough each panel to set correct modes after transition effects
                 foreach (OMPanel panel in panels)
@@ -878,17 +1040,16 @@ namespace OpenMobile
 
         public void TransitionInPanel(OMPanel newP)
         {
-            bool exists = false;
             lock (this) // Lock to prevent multiple transitons at the same time
             {
-                exists = RenderingQueue.Contains(newP);
-                if (!exists)
+                OMPanel ExistingPanel = RenderingQueue.Find(x => x == newP);
+                if (ExistingPanel == null)
                 {
                     // Attach screen update event to new panel
                     newP.UpdateThisControl += UpdateThisControl;
 
                     // Unfocus currently focused control
-                    UpdateControlFocus(null);
+                    UpdateControlFocus(null, null, true);
 
                     // Mark this panel as transitionin in
                     newP.Mode = eModeType.transitioningIn;
@@ -899,6 +1060,11 @@ namespace OpenMobile
                     // Raise panel event
                     newP.RaiseEvent(screen, eEventType.Loaded);
                 }
+                else
+                {   // Reset existing panel to normal mode if it's already loaded
+                    ExistingPanel.Mode = eModeType.Normal;
+                }
+
             }
         }
 
@@ -907,7 +1073,7 @@ namespace OpenMobile
             lock (this) // Lock to prevent multiple transitons at the same time
             {
                 // Unfocus currently focused control
-                UpdateControlFocus(null);
+                UpdateControlFocus(null, null, true);
 
                 // Mark this panel as transitioning out
                 oldP.Mode = eModeType.transitioningOut;
@@ -925,7 +1091,7 @@ namespace OpenMobile
                     return false;
 
                 // Unfocus currently focused control
-                UpdateControlFocus(null);
+                UpdateControlFocus(null, null, true);
 
                 for (int i = RenderingQueue.Count - 1; i >= 0; i--)
                 {
@@ -1053,10 +1219,11 @@ namespace OpenMobile
         /// Sets or unsets the currently focused control
         /// </summary>
         /// <param name="control"></param>
-        private void UpdateControlFocus(OMControl control)
+        private void UpdateControlFocus(OMControl control, OMControl controlParent, bool Reset)
         {
             // Reset any click actions
-            ResetForm();
+            if (Reset)
+                ResetForm();
 
             // Remove highlight from previously highlighted control
             if (FocusedControl != null && FocusedControl != control)
@@ -1064,16 +1231,23 @@ namespace OpenMobile
                 FocusedControl.Mode = eModeType.Normal;
                 FocusedControl = null;
             }
+            if (FocusedControlParent != null && FocusedControlParent != control)
+            {
+                FocusedControlParent.Mode = eModeType.Normal;
+                FocusedControlParent = null;
+            }
             
             // Remove any debug info
-            if (DebugControl != null && DebugControl != control)
+            if (MouseOverControl != null && MouseOverControl != control)
             {
-                DebugControl.SkinDebug = false;
-                DebugControl = null;
+                MouseOverControl.SkinDebug = false;
+                MouseOverControl = null;
             }
 
             if (control != null)
             {
+                FocusedControlParent = controlParent;
+
                 // Only set focus to highlightable controls
                 if (IsControlFocusable(control))
                 {
@@ -1084,10 +1258,19 @@ namespace OpenMobile
                     if (FocusedControl != null)
                         FocusedControl.Mode = eModeType.Highlighted;
                 }
+
+                // Only set focus to highlightable controls
+                if (IsControlFocusable(FocusedControlParent))
+                {
+                    // Set focused control's mode as highlighted
+                    if (FocusedControlParent != null)
+                        FocusedControlParent.Mode = eModeType.Highlighted;
+                }
             }
             else
             {
                 FocusedControl = null;
+                FocusedControlParent = null;
             }
 
             // Additional actions on control
@@ -1096,31 +1279,51 @@ namespace OpenMobile
                 // Show debug info?
                 if (BuiltInComponents.Host.ShowDebugInfo)
                 {
-                    DebugControl = control;
-                    DebugControl.SkinDebug = true;
+                    MouseOverControl = control;
+                    MouseOverControl.SkinDebug = true;
                 }
             }
         }
 
+        private void ResetControl(OMControl control)
+        {
+            if (control != null)
+            {
+                control.Mode = eModeType.Normal;
+                control = null;
+            }
+        }
+
         /// <summary>
-        /// Checks if a control in this panel is hit at the given location
+        /// Checks if a control in this panel has a hit at the given location
         /// </summary>
         /// <param name="Location"></param>
         /// <returns></returns>
-        private OMControl PanelHitTest(OMPanel panel, Point Location)
+        private OMControl PanelHitTest(OMPanel panel, Point Location, out OMControl ParentControl)
         {
             // Check this panel for hit
             OMControl control = null;
+            ParentControl = null;
             for (int i = panel.controlCount - 1; i >= 0; i--)
             {
                 control = panel.Controls[i];
                 if (typeof(IContainer2).IsInstanceOfType(control))
                 {
+                    OMControl ContainerControl = null;
                     for (int i2 = ((IContainer2)control).Controls.Count - 1; i2 >= 0; i2--)
                     {
-                        if (ControlHitTest(((IContainer2)control).Controls[i2], Location))
-                            return ((IContainer2)control).Controls[i2];
+                        ContainerControl = ((IContainer2)control).Controls[i2];
+                        if (control.Region.Contains(Location))
+                        {
+                            if (ControlHitTest(ContainerControl, Location))
+                            {
+                                ParentControl = control;
+                                return ContainerControl;
+                            }
+                        }
                     }
+                    if (ControlHitTest(control, Location))
+                        return control;
                 }
                 else
                 {
@@ -1134,7 +1337,7 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// Checks if this control is hit at the given location
+        /// Checks if this control has a hit at the given location
         /// </summary>
         /// <param name="Location"></param>
         /// <returns></returns>
@@ -1180,11 +1383,13 @@ namespace OpenMobile
         /// Tries to find a control at the given location
         /// </summary>
         /// <param name="Location"></param>
+        /// <param name="ParentControl">Contains null if the current control has no parent control, otherwise holds a referance to the parent control</param>
         /// <returns>The control if found, null if no control is found</returns>
-        private OMControl FindControlAtLocation(Point Location)
+        private OMControl FindControlAtLocation(Point Location, out OMControl ParentControl)
         {
             // Loop trough controls checking for hit test, starting at the end of the rendering queue (topmost item)
             OMControl control = null;
+            ParentControl = null;
 
             // Check for any modal panels present, if so check only this
             OMPanel ModalPanel = GetModalPanel();
@@ -1193,7 +1398,7 @@ namespace OpenMobile
             {   // Check all panels
                 for (int i = RenderingQueue.Count - 1; i >= 0; i--)
                 {
-                    control = PanelHitTest(RenderingQueue[i], Location);
+                    control = PanelHitTest(RenderingQueue[i], Location, out ParentControl);
                     // Did we hit something?
                     if (control != null)
                     {   // Yes
@@ -1203,7 +1408,7 @@ namespace OpenMobile
             }
             else
             {   // Check the modal panel only
-                control = PanelHitTest(ModalPanel, Location);
+                control = PanelHitTest(ModalPanel, Location, out ParentControl);
                 // Did we hit something?
                 if (control != null)
                 {   // Yes
@@ -1216,6 +1421,9 @@ namespace OpenMobile
 
         private bool IsControlFocusable(OMControl control)
         {
+            if (control == null)
+                return false;
+
             return (control.Visible && !control.NoUserInteraction && typeof(IHighlightable).IsInstanceOfType(control) && ApplicationArea.Contains(control.Region));
         }
 
@@ -1303,77 +1511,92 @@ namespace OpenMobile
 
                     for (int i2 = PanelToCheck.controlCount - 1; i2 >= 0; i2--)
                     {
+                        // Find base control
                         control = PanelToCheck[i2];
 
-                        // no use in testing against ourself
-                        if (control == FocusedControl)
-                            continue;
+                        // Create a control to list to use for checking
+                        List<OMControl> Controls = new List<OMControl>();
+                        Controls.Add(control);
 
-                        // Ensure we move in the requested direction
-                        switch (SearchDirection)
-                        {
-                            case SearchDirections.Left:
-                                if (control.Region.Center.X >= FocusedControl.Region.Center.X)
-                                    continue;
-                                break;
-                            case SearchDirections.Right:
-                                if (control.Region.Center.X <= FocusedControl.Region.Center.X)
-                                    continue;
-                                break;
-                            case SearchDirections.Up:
-                                if (control.Region.Center.Y >= FocusedControl.Region.Center.Y)
-                                    continue;
-                                break;
-                            case SearchDirections.Down:
-                                if (control.Region.Center.Y <= FocusedControl.Region.Center.Y)
-                                    continue;
-                                break;
-                            default:
-                                break;
-                        }
+                        // Add sub controls to list to check
+                        if (typeof(IContainer2).IsInstanceOfType(control))
+                            for (int i3 = ((IContainer2)control).Controls.Count - 1; i3 >= 0; i3--)
+                                Controls.Add(((IContainer2)control).Controls[i3]);
 
-                        switch (SearchMode)
+                        // loop trough controls
+                        for (int i3 = 0; i3 < Controls.Count; i3++)
                         {
-                            // Limit search to controls on the same height
-                            case 0:
-                                {
-                                    switch (SearchDirection)
+                            control = Controls[i3];
+
+                            // no use in testing against ourself
+                            if (control == FocusedControl)
+                                continue;
+
+                            // Ensure we move in the requested direction
+                            switch (SearchDirection)
+                            {
+                                case SearchDirections.Left:
+                                    if (control.Region.Center.X >= FocusedControl.Region.Center.X)
+                                        continue;
+                                    break;
+                                case SearchDirections.Right:
+                                    if (control.Region.Center.X <= FocusedControl.Region.Center.X)
+                                        continue;
+                                    break;
+                                case SearchDirections.Up:
+                                    if (control.Region.Center.Y >= FocusedControl.Region.Center.Y)
+                                        continue;
+                                    break;
+                                case SearchDirections.Down:
+                                    if (control.Region.Center.Y <= FocusedControl.Region.Center.Y)
+                                        continue;
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            switch (SearchMode)
+                            {
+                                // Limit search to controls on the same height
+                                case 0:
                                     {
-                                        case SearchDirections.Left:
-                                        case SearchDirections.Right:
-                                            if (control.Region.Center.Y < (FocusedControl.Region.Center.Y - ToleranceY))
-                                                continue;
-                                            if (control.Region.Center.Y > (FocusedControl.Region.Center.Y + ToleranceY))
-                                                continue;
-                                            break;
-                                        case SearchDirections.Up:
-                                        case SearchDirections.Down:
-                                            if (control.Region.Center.X < (FocusedControl.Region.Center.X - ToleranceX))
-                                                continue;
-                                            if (control.Region.Center.X > (FocusedControl.Region.Center.X + ToleranceX))
-                                                continue;
-                                            break;
-                                        default:
-                                            break;
+                                        switch (SearchDirection)
+                                        {
+                                            case SearchDirections.Left:
+                                            case SearchDirections.Right:
+                                                if (control.Region.Center.Y < (FocusedControl.Region.Center.Y - ToleranceY))
+                                                    continue;
+                                                if (control.Region.Center.Y > (FocusedControl.Region.Center.Y + ToleranceY))
+                                                    continue;
+                                                break;
+                                            case SearchDirections.Up:
+                                            case SearchDirections.Down:
+                                                if (control.Region.Center.X < (FocusedControl.Region.Center.X - ToleranceX))
+                                                    continue;
+                                                if (control.Region.Center.X > (FocusedControl.Region.Center.X + ToleranceX))
+                                                    continue;
+                                                break;
+                                            default:
+                                                break;
+                                        }
                                     }
-                                }
-                                break;
+                                    break;
 
-                            default:
-                                break;
-                        }
+                                default:
+                                    break;
+                            }
 
+                            // Only check against controls that can receive focus
+                            if (!IsControlFocusable(control))
+                                continue;
 
-                        // Only check against controls that can receive focus
-                        if (!IsControlFocusable(control))
-                            continue;
-
-                        // Calculate distance between the focused control and the next one
-                        float Distance = (FocusedControlLocation - control.Region.Center.ToVector2()).Length;
-                        if (Distance < BestDistance)
-                        {
-                            BestDistance = Distance;
-                            bestControl = control;
+                            // Calculate distance between the focused control and the next one
+                            float Distance = (FocusedControlLocation - control.Region.Center.ToVector2()).Length;
+                            if (Distance < BestDistance)
+                            {
+                                BestDistance = Distance;
+                                bestControl = control;
+                            }
                         }
                     }
 
@@ -1398,12 +1621,11 @@ namespace OpenMobile
             // Lock the currently focused control
             lock (FocusedControl)
             {
-
                 // Cancel if control is not clickable
                 if (!typeof(IClickable).IsInstanceOfType(control))
                     return;
 
-                Console.WriteLine("{0} click on {1} activated", ClickType, control.Name);
+                Debug.WriteLine(string.Format("Click {0} on {1} activated", ClickType, control));
 
                 switch (ClickType)
                 {
@@ -1454,13 +1676,13 @@ namespace OpenMobile
             currentGesture.Clear();
 
             // Reset mouse move points
-            MouseMoveStartPoint = new Point();
+            //MouseMoveStartPoint = new Point();
 
             // Default value for mouse moved distances
             CursorDistance = 0;
             CursorDistanceXYTotal.X = 0;
             CursorDistanceXYTotal.Y = 0;
-            CursorDistanceXYRelative = MouseMoveStartPoint;
+            CursorDistanceXYRelative = new Point();
             ThrowActive = false;
 
             // Redraw
@@ -1484,6 +1706,18 @@ namespace OpenMobile
             }
             return false;
         }
+
+        ///// <summary>
+        ///// Returns the control to use for events (Selects between FocusedControl and FocusedControlParent)
+        ///// </summary>
+        ///// <returns></returns>
+        //private OMControl GetControlForEvents()
+        //{
+        //    if (FocusedControlParent != null)
+        //        return FocusedControlParent;
+        //    else
+        //        return FocusedControl;
+        //}
 
     }
 }

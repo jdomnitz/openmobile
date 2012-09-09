@@ -263,11 +263,11 @@ namespace OpenMobile.Graphics
         }
         public OImage GenerateStringTexture(OImage image, string s, Font font, Color color, int Left, int Top, int Width, int Height, System.Drawing.StringFormat format)
         {
-            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap((int)(Width * scaleWidth[screen]), (int)(Height * scaleHeight[screen]));
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap((int)(Width * _ScaleFactors[screen].X), (int)(Height * _ScaleFactors[screen].Y));
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
             {
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                g.ScaleTransform(scaleWidth[screen], scaleHeight[screen]);
+                g.ScaleTransform(_ScaleFactors[screen].X, _ScaleFactors[screen].Y);
                 g.DrawString(s, new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)font.Style), new SolidBrush(System.Drawing.Color.FromArgb(color.R, color.G, color.B)), new System.Drawing.RectangleF(0, 0, Width, Height), format);
             }
             image = new OImage(bmp);
@@ -278,66 +278,27 @@ namespace OpenMobile.Graphics
         {
             return GenerateTextTexture(null, x, y, w, h, text, font, format, alignment, color, secondColor);
         }
-        public OImage GenerateTextTexture_old(OImage image, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color color, Color secondColor)
-        {
-            if ((w <= 0) || (h <= 0))
-                return null;
-
-            // Get scaled sizes
-            int bmpW = (int)System.Math.Ceiling(w * (scaleWidth[screen] == 0F ? 1F : scaleWidth[screen]));
-            int bmpH = (int)System.Math.Ceiling(h * (scaleHeight[screen] == 0F ? 1F : scaleHeight[screen]));
-
-            // Let's verify that sizes isn't zero, if so as a last resort set it to 1
-            if (bmpW <= 0)
-                bmpW = w;
-            if (bmpW <= 0)
-                bmpW = 1;
-            if (bmpH <= 0)
-                bmpH = h;
-            if (bmpH <= 0)
-                bmpH = 1;
-
-            System.Drawing.Bitmap bmp = new Bitmap(bmpW, bmpH);
-            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
-            {
-                if ((scaleWidth[screen] > 0F) & (scaleHeight[screen] > 0F))
-                    g.ScaleTransform(scaleWidth[screen], scaleHeight[screen]);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
-            } 
-            image = new OImage(bmp);
-            return image;
-        }
         public OImage GenerateTextTexture(OImage image, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color color, Color secondColor)
         {
-            //if (image == null && image.image == null)
-            //    return;
-            
             if ((w <= 0) || (h <= 0))
                 return image;
 
             // Get scaled sizes
-            int bmpW = (int)System.Math.Ceiling(w * (scaleWidth[screen] == 0F ? 1F : scaleWidth[screen]));
-            int bmpH = (int)System.Math.Ceiling(h * (scaleHeight[screen] == 0F ? 1F : scaleHeight[screen]));
+            int bmpW = (int)System.Math.Ceiling(w * _ScaleFactors[screen].X);
+            int bmpH = (int)System.Math.Ceiling(h * _ScaleFactors[screen].Y);
 
             // Let's verify that sizes isn't zero, if so as a last resort set it to 1
-            if (bmpW <= 0)
-                bmpW = w;
-            if (bmpW <= 0)
-                bmpW = 1;
-            if (bmpH <= 0)
-                bmpH = h;
-            if (bmpH <= 0)
-                bmpH = 1;
+            if (bmpW <= 0) bmpW = w;
+            if (bmpW <= 0) bmpW = 1;
+            if (bmpH <= 0) bmpH = h;
+            if (bmpH <= 0) bmpH = 1;
 
             if (image == null || image.image == null)
             {
                 System.Drawing.Bitmap bmp = new Bitmap(bmpW, bmpH);
                 using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
                 {
-                    if ((scaleWidth[screen] > 0F) & (scaleHeight[screen] > 0F))
-                        g.ScaleTransform(scaleWidth[screen], scaleHeight[screen]);
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                    g.ScaleTransform(_ScaleFactors[screen].X, _ScaleFactors[screen].Y);
                     renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
                 }
                 if (image != null)
@@ -348,12 +309,18 @@ namespace OpenMobile.Graphics
             else
             {   // Reuse already assigned image object
                 System.Drawing.Bitmap bmp = image.image;
+
+                // Regenerate a new bitmap if sizes are different
+                if (bmpH != bmp.Height || bmpW != bmp.Width)
+                {
+                    bmp.Dispose();
+                    bmp = new Bitmap(bmpW, bmpH);
+                }
+
                 using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
                 {
                     g.Clear(System.Drawing.Color.Transparent);
-                    if ((scaleWidth[screen] > 0F) & (scaleHeight[screen] > 0F))
-                        g.ScaleTransform(scaleWidth[screen], scaleHeight[screen]);
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                    g.ScaleTransform(_ScaleFactors[screen].X, _ScaleFactors[screen].Y);
                     renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
                 }
 
@@ -368,27 +335,21 @@ namespace OpenMobile.Graphics
                 return null;
 
             // Get scaled sizes
-            int bmpW = (int)System.Math.Ceiling(w * (scaleWidth[screen] == 0F ? 1F : scaleWidth[screen]));
-            int bmpH = (int)System.Math.Ceiling(h * (scaleHeight[screen] == 0F ? 1F : scaleHeight[screen]));
+            int bmpW = (int)System.Math.Ceiling(w * _ScaleFactors[screen].X);
+            int bmpH = (int)System.Math.Ceiling(h * _ScaleFactors[screen].Y);
 
             // Let's verify that sizes isn't zero, if so as a last resort set it to 1
-            if (bmpW <= 0)
-                bmpW = w;
-            if (bmpW <= 0)
-                bmpW = 1;
-            if (bmpH <= 0)
-                bmpH = h;
-            if (bmpH <= 0)
-                bmpH = 1;
+            if (bmpW <= 0) bmpW = w;
+            if (bmpW <= 0) bmpW = 1;
+            if (bmpH <= 0) bmpH = h;
+            if (bmpH <= 0) bmpH = 1;
 
             if (image == null || image.image == null)
             {
                 System.Drawing.Bitmap bmp = new Bitmap(bmpW, bmpH);
                 using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
                 {
-                    if ((scaleWidth[screen] > 0F) & (scaleHeight[screen] > 0F))
-                        g.ScaleTransform(scaleWidth[screen], scaleHeight[screen]);
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                    g.ScaleTransform(_ScaleFactors[screen].X, _ScaleFactors[screen].Y);
                     renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
                 }
                 if (image != null)
@@ -399,12 +360,18 @@ namespace OpenMobile.Graphics
             else
             {   // Reuse already assigned image object
                 System.Drawing.Bitmap bmp = image.image;
+                
+                // Regenerate a new bitmap if sizes are different
+                if (bmpH != bmp.Height || bmpW != bmp.Width)
+                {
+                    bmp.Dispose();
+                    bmp = new Bitmap(bmpW, bmpH);
+                }
+
                 using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
                 {
                     g.Clear(System.Drawing.Color.Transparent);
-                    if ((scaleWidth[screen] > 0F) & (scaleHeight[screen] > 0F))
-                        g.ScaleTransform(scaleWidth[screen], scaleHeight[screen]);
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                    g.ScaleTransform(_ScaleFactors[screen].X, _ScaleFactors[screen].Y);
                     renderText(g, 0, 0, w, h, text, font, format, alignment, color, secondColor);
                 }
 
@@ -424,16 +391,26 @@ namespace OpenMobile.Graphics
 
         public Graphics(int screen)
         {
-            // Initialize scale factors
-            scaleHeight = new float[DisplayDevice.AvailableDisplays.Count];
-            scaleWidth = new float[DisplayDevice.AvailableDisplays.Count];
+            //// Initialize scale factors
+            _ScaleFactors = new PointF[DisplayDevice.AvailableDisplays.Count];
+            for (int i = 0; i < _ScaleFactors.Length; i++)
+                _ScaleFactors[i] = new PointF(1, 1);
 
             _screen = screen;
             virtualG = new Bitmap(1000, 600);
         }
-        static private float[] scaleHeight;
-        static private float[] scaleWidth;
-        static private float dpi=1F;
+        static private float dpi = 1F;
+        static private PointF[] _ScaleFactors;
+
+        /// <summary>
+        /// Updates the scalefactors used internally in the graphics class
+        /// </summary>
+        /// <param name="Scale"></param>
+        public void SetScaleFactors(PointF Scale)
+        {
+            _ScaleFactors[screen] = Scale;
+        }
+
         public void Initialize()
         {
             #if LINUX
@@ -463,8 +440,6 @@ namespace OpenMobile.Graphics
                     implementation = new V1Graphics(screen);
                 renderer = Raw.GetString(StringName.Renderer);
             }
-            scaleHeight[screen] = (DisplayDevice.AvailableDisplays[screen].Height / 600F);
-            scaleWidth[screen] = (DisplayDevice.AvailableDisplays[screen].Width / 1000F);
             if (Configuration.RunningOnWindows)
             {
                 IntPtr dc = GetDC(IntPtr.Zero);
@@ -533,6 +508,7 @@ namespace OpenMobile.Graphics
         }
         static public void renderText(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)
         {
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
             System.Drawing.Color color = System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
             System.Drawing.Color secondColor = System.Drawing.Color.FromArgb(sC.A, sC.R, sC.G, sC.B);
             if (string.IsNullOrEmpty(text))

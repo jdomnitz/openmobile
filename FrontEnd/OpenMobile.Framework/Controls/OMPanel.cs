@@ -136,7 +136,7 @@ namespace OpenMobile.Controls
             raiseUpdate(false);
         }
 
-        private void raiseUpdate(bool refreshNeeded)
+        internal void raiseUpdate(bool refreshNeeded)
         {
             if (UpdateThisControl != null)
                 UpdateThisControl(refreshNeeded);

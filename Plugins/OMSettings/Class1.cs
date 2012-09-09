@@ -26,6 +26,7 @@ using OpenMobile.Data;
 using OpenMobile.Framework;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
+using OpenMobile.helperFunctions.Graphics;
 
 namespace OMSettings
 {
@@ -57,7 +58,7 @@ namespace OMSettings
             OMPanel main = new OMPanel("Main");
             main.BackgroundColor1 = Color.Black;
             main.BackgroundType = backgroundStyle.SolidColor;
-            OMList menu = new OMList(10, 100, 980, 433);
+            OMList menu = new OMList(10, 100, 980, 500);
             menu.ListStyle = eListStyle.MultiListText;
             menu.Background = Color.Silver;
             menu.ItemColor1 = Color.Black;
@@ -65,14 +66,12 @@ namespace OMSettings
             menu.HighlightColor = Color.White;
             menu.SelectedItemColor1 = BuiltInComponents.SystemSettings.SkinFocusColor;
             menu.SoftEdgeData.Color1 = Color.Black;
-            menu.SoftEdgeData.Sides[0] = true;
-            menu.SoftEdgeData.Sides[1] = false;
-            menu.SoftEdgeData.Sides[2] = true;
-            menu.SoftEdgeData.Sides[3] = false;
+            menu.SoftEdgeData.Sides = FadingEdge.GraphicSides.Top | FadingEdge.GraphicSides.Bottom;
             menu.UseSoftEdges = true;
             OMListItem.subItemFormat format=new OMListItem.subItemFormat();
             format.color = Color.FromArgb(128, menu.Color);
             format.font = new Font(Font.GenericSansSerif, 21F);
+            menu.Add(new OMListItem("About", "Credits and information", format, "About"));
             menu.Add(new OMListItem("General Settings", "User Interface and System Settings", format, "General Settings"));
             menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords", format, "personal"));
             menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers", format, "data"));
@@ -298,7 +297,7 @@ namespace OMSettings
             if (theHost.execute(eFunction.TransitionToPanel, screen.ToString(),"OMSettings",lst.SelectedItem.text)==false)
                 return;
             theHost.execute(eFunction.TransitionFromPanel,screen.ToString(),"OMSettings","Plugins");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(),"SlideLeft");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
         void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
@@ -343,6 +342,15 @@ namespace OMSettings
             string Panel = (string)list.SelectedItem.tag;
             switch (Panel)
             {
+                case "About":
+                    {
+                        // Change screen
+                        theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                        theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "About");
+                        theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                        ((OMList)sender).Select(-1);
+                        return;
+                    }
                 case "personal":
                     ((OMTextBox)manager[screen, "personal"][6]).Text = Credentials.getCredential("Google Password");
                     ((OMTextBox)manager[screen, "personal"][5]).Text = Credentials.getCredential("Google Username");
@@ -357,7 +365,7 @@ namespace OMSettings
             // Change screen
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", Panel);
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString(), "SlideLeft");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
 
             ((OMList)sender).Select(-1);
         }

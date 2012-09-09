@@ -26,7 +26,7 @@ using OpenMobile.Graphics;
 namespace OpenMobile.Controls
 {
     [System.Serializable]
-    internal sealed class VolumeBar : OMProgress, IMouse, IThrow, IHighlightable
+    internal sealed class VolumeBar : OMProgress, IMouse, IHighlightable
     {
         public userInteraction OnSliderMoved;
 
@@ -86,23 +86,23 @@ namespace OpenMobile.Controls
             //
         }
 
-        #region IThrow Members
-        //Implemented to prevent gestures
-        public void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
-        {
-            //
-        }
+        //#region IThrow Members
+        ////Implemented to prevent gestures
+        //public void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
+        //{
+        //    //
+        //}
 
-        public void MouseThrowStart(int screen, Point StartLocation, PointF scaleFactors, ref bool Cancel)
-        {
-            Cancel = true;
-        }
+        //public void MouseThrowStart(int screen, Point StartLocation, PointF scaleFactors, ref bool Cancel)
+        //{
+        //    Cancel = true;
+        //}
 
-        public void MouseThrowEnd(int screen, Point EndLocation)
-        {
-            //
-        }
+        //public void MouseThrowEnd(int screen, Point EndLocation)
+        //{
+        //    //
+        //}
 
-        #endregion
+        //#endregion
     }
 }

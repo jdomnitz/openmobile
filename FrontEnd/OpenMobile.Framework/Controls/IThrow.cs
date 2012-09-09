@@ -19,8 +19,6 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 
-// This interface is added by Borte
-
 using OpenMobile.Graphics;
 namespace OpenMobile.Controls
 {
@@ -36,7 +34,7 @@ namespace OpenMobile.Controls
         /// <param name="screen">Screen the event occured on</param>
         /// <param name="TotalDistance">Distance mouse has been moved from throw start location</param>
         /// <param name="RelativeDistance">Relative distance mouse has been moved from throw start location</param>
-        void MouseThrow(int screen, Point TotalDistance, Point RelativeDistance);
+        void MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance);
 
         /// <summary>
         /// Throw is started
@@ -50,6 +48,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Throw is ended
         /// </summary>
-        void MouseThrowEnd(int screen, Point EndLocation);
+        void MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation);
     }
 }

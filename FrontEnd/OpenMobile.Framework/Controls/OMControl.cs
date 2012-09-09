@@ -51,6 +51,14 @@ namespace OpenMobile.Controls
         /// Indicates that graphics needs a refresh
         /// </summary>
         protected bool _RefreshGraphic = true;
+
+        /// <summary>
+        /// Requests a refresh (regeneration) of the graphics in this control
+        /// </summary>
+        public void RefreshGraphic()
+        {
+            _RefreshGraphic = true;
+        }
         
         /// <summary>
         /// The region this control occupies
@@ -290,7 +298,8 @@ namespace OpenMobile.Controls
             get { return height; }
             set { 
                 height = value;
-                UpdateRegion();
+                _Region.Height = value;
+                //UpdateRegion();
                 raiseUpdate(true); 
             }
         }
@@ -302,7 +311,8 @@ namespace OpenMobile.Controls
             get { return width; }
             set {
                 width = value;
-                UpdateRegion();
+                _Region.Width = value;
+                //UpdateRegion();
                 raiseUpdate(true);
             }
         }
@@ -329,7 +339,8 @@ namespace OpenMobile.Controls
             set 
                 {
                     top = value;
-                    UpdateRegion();
+                    _Region.Top = value;
+                    //UpdateRegion();
                     raiseUpdate(true);
                 }
         }
@@ -342,7 +353,8 @@ namespace OpenMobile.Controls
             set 
                 { 
                     left = value;
-                    UpdateRegion();
+                    _Region.Left = value;
+                    //UpdateRegion();
                     raiseUpdate(true);
                 }
         }
@@ -436,6 +448,7 @@ namespace OpenMobile.Controls
         public virtual object Clone()
         {
             OMControl returnData = (OMControl)this.MemberwiseClone();
+            returnData.Parent = this.Parent;
             Type type = returnData.GetType();
 
             // Clone fields
@@ -454,7 +467,7 @@ namespace OpenMobile.Controls
                         fieldInfo.SetValue(returnData, fieldInfo.GetValue(this));
                     }
                 }
-                catch (TargetInvocationException) { }
+                catch { }
             }
 
             // Clone properties
@@ -474,7 +487,7 @@ namespace OpenMobile.Controls
                             propInfo.SetValue(returnData, propInfo.GetValue(this, null), null);
                         }
                     }
-                    catch (TargetInvocationException) { }
+                    catch { }
             }
             return returnData;
         }

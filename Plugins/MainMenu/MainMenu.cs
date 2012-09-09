@@ -225,10 +225,7 @@ namespace OpenMobile
 
             OMList List_FunctionList = new OMList(235, 155, 535, 290);
             List_FunctionList.SoftEdgeData.Color1 = Color.Black;
-            List_FunctionList.SoftEdgeData.Sides[0] = true;
-            List_FunctionList.SoftEdgeData.Sides[1] = false;
-            List_FunctionList.SoftEdgeData.Sides[2] = true;
-            List_FunctionList.SoftEdgeData.Sides[3] = false;
+            List_FunctionList.SoftEdgeData.Sides = FadingEdge.GraphicSides.Top | FadingEdge.GraphicSides.Bottom;
             List_FunctionList.UseSoftEdges = true;
             List_FunctionList.Name = "Settings_List_FunctionList";
             List_FunctionList.Scrollbars = true;
@@ -349,7 +346,7 @@ namespace OpenMobile
                     theHost.execute(eFunction.TransitionFromPanel, screen,"MainMenu");
                     if (theHost.execute(eFunction.TransitionToPanel,screen, ((OMButton)sender).Tag)==false)
                         theHost.execute(eFunction.TransitionToPanel, screen, "MainMenu");
-                    theHost.execute(eFunction.ExecuteTransition, screen, "Random");
+                    theHost.execute(eFunction.ExecuteTransition, screen);
                     break;
             }
         }

@@ -90,6 +90,22 @@ namespace OpenMobile.helperFunctions
             return GetInt(Name, 0);
         }
 
+        public static Color GetColor(string Name, Color DefaultValue)
+        {
+            try
+            {
+                // Extract color values from string data
+                string[] ColorValues = Get(Name).Split(new char[] { ',' });
+                return OpenMobile.Graphics.Color.FromArgb(255,
+                    int.Parse(ColorValues[0], System.Globalization.NumberStyles.AllowHexSpecifier),
+                    int.Parse(ColorValues[1], System.Globalization.NumberStyles.AllowHexSpecifier),
+                    int.Parse(ColorValues[2], System.Globalization.NumberStyles.AllowHexSpecifier));
+            }
+            catch
+            {   // Default fallback color in case of conversion error
+                return DefaultValue;
+            }
+        }
 
         public static string Get(string Name)
         {

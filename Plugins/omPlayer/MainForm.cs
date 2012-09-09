@@ -734,7 +734,7 @@ namespace OMPlayer
             //instance = instanceNum;
             this.zone = zone;
             sink = new MessageProc("AVPlayer:"+zone.Name.ToString());
-            Console.WriteLine("AVPlayer:"+zone.Name.ToString() + " (MainForm) AudioInstance: " + zone.AudioDeviceInstance.ToString() + "[" + zone.AudioDeviceName + "]");
+            System.Diagnostics.Debug.WriteLine("AVPlayer:" + zone.Name.ToString() + " (MainForm) AudioInstance: " + zone.AudioDeviceInstance.ToString() + "[" + zone.AudioDeviceName + "]");
             drain = sink.Handle;
             sink.OnClick += new MessageProc.Click(clicked);
             sink.OnEvent += new MessageProc.eventOccured(eventOccured);

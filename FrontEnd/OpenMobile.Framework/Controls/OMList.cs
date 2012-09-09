@@ -1101,7 +1101,7 @@ namespace OpenMobile.Controls
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
         /// <returns></returns>
-        public virtual bool KeyDown(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
+        public virtual bool KeyDown_BeforeUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors)
         {
             if (e.Key == Key.PageUp)
             {
@@ -1115,6 +1115,9 @@ namespace OpenMobile.Controls
             }
             return false;
         }
+        public virtual void KeyDown_AfterUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors)
+        {
+        }
         /// <summary>
         /// Occurs when a Key is pressed while the control is highlighted
         /// </summary>
@@ -1123,9 +1126,12 @@ namespace OpenMobile.Controls
         /// <param name="WidthScale"></param>
         /// <param name="HeightScale"></param>
         /// <returns></returns>
-        public virtual bool KeyUp(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, float WidthScale, float HeightScale)
+        public virtual bool KeyUp_BeforeUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors)
         {
             return false;
+        }
+        public virtual void KeyUp_AfterUI(int screen, OpenMobile.Input.KeyboardKeyEventArgs e, PointF scaleFactors)
+        {
         }
         #endregion
 
@@ -1136,13 +1142,13 @@ namespace OpenMobile.Controls
             thrown = 0;
         }
 
-        void IThrow.MouseThrowEnd(int screen, Point EndLocation)
+        void IThrow.MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation)
         {
             if (thrown != 0)
                 throwtmr.Enabled = true;
         }
 
-        void IThrow.MouseThrow(int screen, Point TotalDistance, Point RelativeDistance)
+        void IThrow.MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
             throwtmr.Enabled = false;
             thrown = 0;

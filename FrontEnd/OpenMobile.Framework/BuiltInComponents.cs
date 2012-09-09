@@ -23,6 +23,7 @@ using OpenMobile.Controls;
 using OpenMobile.Data;
 using OpenMobile.Plugin;
 using OpenMobile.helperFunctions;
+using OpenMobile.Graphics;
 
 namespace OpenMobile
 {
@@ -80,22 +81,45 @@ namespace OpenMobile
                 return Text;
             }
         }
-        private static OMPanel about;
+        private static OMPanel panelAbout;
         /// <summary>
         /// Returns an About panel for display
         /// </summary>
         /// <returns></returns>
         public static OMPanel AboutPanel()
         {
-            if (about == null)
+            if (panelAbout == null)
             {
-                about = new OMPanel("About");
-                OMLabel description = new OMLabel(30, 55, 940, 540);
-                description.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap | OpenMobile.Graphics.Alignment.TopCenter;
-                description.Text = AboutText;
-                about.addControl(description);
+                panelAbout = new OMPanel("About");
+                panelAbout.PanelType = OMPanel.PanelTypes.Modal;
+                panelAbout.Priority = ePriority.High;
+                panelAbout.Forgotten = true;
+                panelAbout.BackgroundType = backgroundStyle.SolidColor;
+                panelAbout.BackgroundColor1 = Color.FromArgb(180, Color.Black);
+
+                OMContainer contAboutContainer = new OMContainer("contAboutContainer", 0, 0, 1000, 600);
+                panelAbout.addControl(contAboutContainer);
+
+                //OMLabel description = new OMLabel(30, 55, 940, 540);
+                OMLabel lblDescription = new OMLabel("lblDescription", 25, 0, 950, 550);
+                lblDescription.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap | OpenMobile.Graphics.Alignment.TopCenter;
+                lblDescription.Text = AboutText;
+                contAboutContainer.addControl(lblDescription);
+
+                OMLabel lblInfo = new OMLabel("lblInfo", lblDescription.Left, lblDescription.Region.Bottom, lblDescription.Width, 25);
+                lblInfo.Text = "Click this message to return";
+                contAboutContainer.addControl(lblInfo);
+
+                OMButton btnReturn = new OMButton("btnReturn", lblDescription.Left, lblDescription.Top, lblDescription.Width, lblDescription.Height + lblInfo.Height);
+                btnReturn.OnClick += new userInteraction(btnReturn_OnClick);
+                contAboutContainer.addControl(btnReturn);
             }
-            return about;
+            return panelAbout;
+        }
+
+        static void btnReturn_OnClick(OMControl sender, int screen)
+        {
+            Host.execute(eFunction.goBack, screen.ToString());
         }
 
         static IPluginHost theHost;
@@ -113,37 +137,43 @@ namespace OpenMobile
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
             Setting ShowCursor = new Setting(SettingTypes.MultiChoice, "UI.ShowCursor", String.Empty, "Show OM mouse/pointer cursors", Setting.BooleanList, Setting.BooleanList);
             Setting ShowDebugInfo = new Setting(SettingTypes.MultiChoice, "UI.ShowDebugInfo", String.Empty, "Show debug info overlay", Setting.BooleanList, Setting.BooleanList);
+            Setting ShowGestures = new Setting(SettingTypes.MultiChoice, "UI.ShowGestures", String.Empty, "Draw gestures while gesturing", Setting.BooleanList, Setting.BooleanList);
             Setting OpenGLVsync = new Setting(SettingTypes.MultiChoice, "OpenGL.VSync", String.Empty, "Use VSync for opengl", Setting.BooleanList, Setting.BooleanList);
             //Setting SkinColor = new Setting(SettingTypes.Text, "UI.SkinColor", "Foreground", "Skin foreground color (R,G,B)");
             Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus color", "Skin focus color (R,G,B)");
             Setting SkinTextColor = new Setting(SettingTypes.Text, "UI.SkinTextColor", "Text color", "Skin text color (R,G,B)");
-            Setting TransitionSpeed = new Setting(SettingTypes.Text, "UI.TransitionSpeed", "Transition Speed", "Transition speed multiplier");
+            //Setting TransitionSpeed = new Setting(SettingTypes.MultiChoice, "UI.TransitionSpeed", "Transition speed", "Transition; speed multiplier", PanelTransitionEffectHandler.GetEffectNames(), PanelTransitionEffectHandler.GetEffectNames());
+            Setting TransitionSpeed = PanelTransitionEffectHandler.Setting_TransitionSpeed();
+            Setting TransitionDefaultEffect = PanelTransitionEffectHandler.Setting_TransitionDefaultEffect();
+            //Setting TransitionDefaultEffect = new Setting(SettingTypes.MultiChoice, "UI.TransitionDefaultEffect", "Transition effect", "Transition; Default effect", PanelTransitionEffectHandler.GetEffectNames(), PanelTransitionEffectHandler.GetEffectNames());
+            
             using (PluginSettings settings = new PluginSettings())
             {
                 graphics.Value = settings.getSetting("UI.MinGraphics");
                 volume.Value = settings.getSetting("UI.VolumeChangesVisible");
                 ShowCursor.Value = settings.getSetting("UI.ShowCursor");
                 ShowDebugInfo.Value = settings.getSetting("UI.ShowDebugInfo");
+                ShowGestures.Value = settings.getSetting("UI.ShowGestures");
                 OpenGLVsync.Value = settings.getSetting("OpenGL.VSync");
                 //SkinColor.Value = settings.getSetting("UI.SkinColor");
                 SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
                 SkinTextColor.Value = settings.getSetting("UI.SkinTextColor");
                 TransitionSpeed.Value = settings.getSetting("UI.TransitionSpeed");
+                TransitionDefaultEffect.Value = settings.getSetting("UI.TransitionDefaultEffect");
             }
             gl.Add(graphics);
             gl.Add(volume);
             gl.Add(ShowCursor);
             gl.Add(ShowDebugInfo);
+            gl.Add(ShowGestures);
             gl.Add(OpenGLVsync);
             //gl.Add(SkinColor);
             gl.Add(SkinFocusColor);
             gl.Add(SkinTextColor);
             gl.Add(TransitionSpeed);
+            gl.Add(TransitionDefaultEffect);
             gl.OnSettingChanged += new SettingChanged(SettingsChanged);
 
-            // Update local data variables (for speed)
-            BuiltInComponents.Host.ShowDebugInfo = helperFunctions.StoredData.GetBool("UI.ShowDebugInfo");
-            BuiltInComponents.Host.ShowCursors = helperFunctions.StoredData.GetBool("UI.ShowCursor");
             return gl;
         }
 
@@ -176,7 +206,23 @@ namespace OpenMobile
                         break;
 
                     case "UI.TransitionSpeed":
-                        theHost.TransitionSpeed = StoredData.GetFloat("UI.TransitionSpeed", 1.0F);
+                        BuiltInComponents.SystemSettings.TransitionSpeed = StoredData.GetFloat("UI.TransitionSpeed", 1.0F);
+                        break;
+
+                    case "UI.TransitionDefaultEffect":
+                        BuiltInComponents.SystemSettings.TransitionDefaultEffect = setting.Value;
+                        break;
+
+                    case "UI.SkinTextColor":
+                        BuiltInComponents.SystemSettings.SkinTextColor = StoredData.GetColor("UI.SkinTextColor", Color.White);
+                        break;
+
+                    case "UI.SkinFocusColor":
+                        BuiltInComponents.SystemSettings.SkinFocusColor = StoredData.GetColor("UI.SkinFocusColor", Color.Blue);
+                        break;
+
+                    case "UI.ShowGestures":
+                        BuiltInComponents.SystemSettings.ShowGestures = StoredData.GetBool("UI.ShowGestures");
                         break;
 
                     default:
@@ -203,8 +249,17 @@ namespace OpenMobile
                 StoredData.SetDefaultValue("UI.VolumeChangesVisible", true.ToString());
                 StoredData.SetDefaultValue("UI.ShowCursor", false.ToString());
                 StoredData.SetDefaultValue("UI.ShowDebugInfo", false.ToString());
-                StoredData.SetDefaultValue("UI.TransitionSpeed", "1.0");
+                StoredData.SetDefaultValue("UI.ShowGestures", false.ToString());
+                StoredData.SetDefaultValue("UI.TransitionSpeed", (1.0f).ToString());
+                StoredData.SetDefaultValue("UI.TransitionDefaultEffect", "Random");
                 StoredData.SetDefaultValue("OpenGL.VSync", false.ToString());
+
+                // Update local data variables (for speed)
+                BuiltInComponents.Host.ShowDebugInfo = helperFunctions.StoredData.GetBool("UI.ShowDebugInfo");
+                BuiltInComponents.Host.ShowCursors = helperFunctions.StoredData.GetBool("UI.ShowCursor");
+                _SkinTextColor = StoredData.GetColor("UI.SkinTextColor", Color.White);
+                _SkinFocusColor = StoredData.GetColor("UI.SkinFocusColor", Color.Blue);
+                _SkinFocusColor = StoredData.GetColor("UI.SkinFocusColor", Color.Blue);
             }
 
             /// <summary>
@@ -267,6 +322,23 @@ namespace OpenMobile
                 }
             }
 
+            private static bool _ShowGestures = false;
+            /// <summary>
+            /// OM System setting: True = Show debug info
+            /// </summary>
+            public static bool ShowGestures
+            {
+                get
+                {
+                    return _ShowGestures;
+                }
+                set
+                {
+                    StoredData.SetBool("UI.ShowGestures", value);
+                    _ShowGestures = value;
+                }
+            }
+
             /// <summary>
             /// OM System setting: True = Use VSync for OpengGL rendering
             /// </summary>
@@ -289,14 +361,50 @@ namespace OpenMobile
             {
                 get
                 {
-                    return StoredData.GetFloat("UI.TransitionSpeed", 1.0F);
+                    if (_TransitionSpeed == 0f)
+                        _TransitionSpeed = StoredData.GetFloat("UI.TransitionSpeed", 1f);
+                    if (_TransitionSpeed == 0)
+                    {
+                        _TransitionSpeed = 1f;
+                        StoredData.Set("UI.TransitionSpeed", 1f);
+                    }
+                    return _TransitionSpeed;
                 }
                 set
                 {
                     StoredData.Set("UI.TransitionSpeed", value);
+                    _TransitionSpeed = value;
                 }
             }
+            private static float _TransitionSpeed = 0f;
 
+            /// <summary>
+            /// OM System setting: Transition default effect
+            /// </summary>
+            public static string TransitionDefaultEffect
+            {
+                get
+                {
+                    if (String.IsNullOrEmpty(_TransitionDefaultEffect))
+                        _TransitionDefaultEffect = StoredData.Get("UI.TransitionDefaultEffect");
+                    // Safety check
+                    if (String.IsNullOrEmpty(_TransitionDefaultEffect))
+                    {
+                        StoredData.Set("UI.TransitionDefaultEffect", "Random");
+                        _TransitionDefaultEffect = "Random";
+                    }
+                    return _TransitionDefaultEffect; 
+                }
+                set
+                {
+                    StoredData.Set("UI.TransitionDefaultEffect", value);
+                    _TransitionDefaultEffect = value;
+                }
+            }
+            private static string _TransitionDefaultEffect = "";
+
+
+            private static OpenMobile.Graphics.Color _SkinFocusColor = Color.Blue;
             /// <summary>
             /// OM System setting: Skin Focus color
             /// </summary>
@@ -304,26 +412,17 @@ namespace OpenMobile
             {
                 get
                 {
-                    try
-                    {
-                        // Extract color values from string data
-                        string[] ColorValues = StoredData.Get("UI.SkinFocusColor").Split(new char[] { ',' });
-                        return OpenMobile.Graphics.Color.FromArgb(255,
-                            int.Parse(ColorValues[0], System.Globalization.NumberStyles.AllowHexSpecifier),
-                            int.Parse(ColorValues[1], System.Globalization.NumberStyles.AllowHexSpecifier),
-                            int.Parse(ColorValues[2], System.Globalization.NumberStyles.AllowHexSpecifier));
-                    }
-                    catch
-                    {   // Default fallback color in case of conversion error
-                        return OpenMobile.Graphics.Color.Blue;
-                    }
+                    return _SkinFocusColor;
                 }
                 set
                 {
-                    StoredData.Set("UI.SkinFocusColor", String.Format("{0},{1},{2}", value.R, value.G, value.B));
+                    StoredData.Set("UI.SkinFocusColor", String.Format("{0},{1},{2}", value.R.ToString("X2"), value.G.ToString("X2"), value.B.ToString("X2")));
+                    _SkinTextColor = StoredData.GetColor("UI.SkinFocusColor", Color.White);
                 }
             }
 
+
+            private static OpenMobile.Graphics.Color _SkinTextColor = Color.White;
             /// <summary>
             /// OM System setting: Skin text color
             /// </summary>
@@ -331,23 +430,12 @@ namespace OpenMobile
             {
                 get
                 {
-                    try
-                    {
-                        // Extract color values from string data
-                        string[] ColorValues = StoredData.Get("UI.SkinTextColor").Split(new char[] { ',' });
-                        return OpenMobile.Graphics.Color.FromArgb(255,
-                            int.Parse(ColorValues[0], System.Globalization.NumberStyles.AllowHexSpecifier),
-                            int.Parse(ColorValues[1], System.Globalization.NumberStyles.AllowHexSpecifier),
-                            int.Parse(ColorValues[2], System.Globalization.NumberStyles.AllowHexSpecifier));
-                    }
-                    catch
-                    {   // Default fallback color in case of conversion error
-                        return OpenMobile.Graphics.Color.White;
-                    }
+                    return _SkinTextColor;
                 }
                 set
                 {
-                    StoredData.Set("UI.SkinFocusColor", String.Format("{0},{1},{2}", value.R, value.G, value.B));
+                    StoredData.Set("UI.SkinTextColor", String.Format("{0},{1},{2}", value.R.ToString("X2"), value.G.ToString("X2"), value.B.ToString("X2")));
+                    _SkinTextColor = StoredData.GetColor("UI.SkinTextColor", Color.White);
                 }
             }
 

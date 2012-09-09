@@ -93,7 +93,7 @@
     <Compile Include="Animator.cs" />
     <Compile Include="BuiltInComponents.cs" />
     <Compile Include="Controls\PanelTransitionEffects.cs" />
-    <Compile Include="Controls\OMContainer2.cs" />
+    <Compile Include="Controls\OMContainer.cs" />
     <Compile Include="Controls\OMAnimatedLabel2.cs" />
     <Compile Include="Controls\IContainer2.cs" />
     <Compile Include="Controls\IClickable.cs" />
@@ -110,7 +110,6 @@
     <Compile Include="Controls\OMBasicShape.cs" />
     <Compile Include="Controls\OMButton.cs" />
     <Compile Include="Controls\OMCheckbox.cs" />
-    <Compile Include="Controls\OMContainer.cs" />
     <Compile Include="Controls\OMControl.cs" />
     <Compile Include="Controls\OMGauge.cs" />
     <Compile Include="Controls\OMImage.cs" />
@@ -249,7 +248,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

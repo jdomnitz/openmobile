@@ -31,6 +31,7 @@ using OpenMobile.Threading;
 using System.Threading;
 using OpenMobile.helperFunctions.MenuObjects;
 using OpenMobile.helperFunctions.Forms;
+using OpenMobile.helperFunctions.Graphics;
 using System.Collections.Generic;
 
 namespace OMMenu
@@ -159,10 +160,7 @@ namespace OMMenu
                         List_Menu.HighlightColor = Color.White;
                         //List_Menu.SelectedItemColor1 = Color.DarkBlue;
                         List_Menu.SoftEdgeData.Color1 = Color.Black;
-                        List_Menu.SoftEdgeData.Sides[0] = true;
-                        List_Menu.SoftEdgeData.Sides[1] = false;
-                        List_Menu.SoftEdgeData.Sides[2] = true;
-                        List_Menu.SoftEdgeData.Sides[3] = false;
+                        List_Menu.SoftEdgeData.Sides = FadingEdge.GraphicSides.Top | FadingEdge.GraphicSides.Bottom;
                         List_Menu.UseSoftEdges = true;
                         //List_Menu.ListItemHeight = 70;
                         panelMenu.addControl(List_Menu);

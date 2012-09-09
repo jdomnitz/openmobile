@@ -119,7 +119,7 @@ namespace OMGraphics
 
                                                     Color borderColor;
                                                     if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
-                                                        borderColor = System.Drawing.Color.FromArgb(125, System.Drawing.Color.White);//System.Drawing.Color.LightGray;
+                                                        borderColor = BuiltInComponents.SystemSettings.SkinTextColor.SetAlpha(180).ToSystemColor();//System.Drawing.Color.FromArgb(255, System.Drawing.Color.White);//System.Drawing.Color.LightGray;
                                                     else
                                                         borderColor = gd.BorderColor.ToSystemColor();
 
@@ -969,7 +969,7 @@ namespace OMGraphics
                                         int GradientSize = (int)((bmp.Width / 2) * gd.FadeSize);
 
                                         // Left side
-                                        if (gd.Sides[3])
+                                        if ((gd.Sides & FadingEdge.GraphicSides.Left) == FadingEdge.GraphicSides.Left)
                                         {
                                             Rectangle rectGradient = new Rectangle(rect.X, rect.Y, GradientSize, rect.Height);
                                             LinearGradientBrush lgb = new LinearGradientBrush(rectGradient, Color1, Color2, 0f);
@@ -981,7 +981,7 @@ namespace OMGraphics
                                         }
 
                                         // Right side
-                                        if (gd.Sides[1])
+                                        if ((gd.Sides & FadingEdge.GraphicSides.Right) == FadingEdge.GraphicSides.Right)
                                         {
                                             Rectangle rectGradient = new Rectangle(rect.X + rect.Width - GradientSize, rect.Y, GradientSize, rect.Height);
                                             LinearGradientBrush lgb = new LinearGradientBrush(rectGradient, Color1, Color2, 180f);
@@ -993,7 +993,7 @@ namespace OMGraphics
                                         }
 
                                         // Top side
-                                        if (gd.Sides[0])
+                                        if ((gd.Sides & FadingEdge.GraphicSides.Top) == FadingEdge.GraphicSides.Top)
                                         {
                                             Rectangle rectGradient = new Rectangle(rect.X, rect.Y, rect.Width, GradientSize);
                                             LinearGradientBrush lgb = new LinearGradientBrush(rectGradient, Color1, Color2, 90f);
@@ -1006,7 +1006,7 @@ namespace OMGraphics
                                         }
 
                                         // Bottom side
-                                        if (gd.Sides[2])
+                                        if ((gd.Sides & FadingEdge.GraphicSides.Bottom) == FadingEdge.GraphicSides.Bottom)
                                         {
                                             Rectangle rectGradient = new Rectangle(rect.X, rect.Y + rect.Height - GradientSize, rect.Width, GradientSize);
                                             LinearGradientBrush lgb = new LinearGradientBrush(rectGradient, Color1, Color2, -90f);
