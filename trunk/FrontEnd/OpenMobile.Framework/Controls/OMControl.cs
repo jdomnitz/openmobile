@@ -396,7 +396,16 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         protected float RenderingParams_GetAlphaValue(renderingParams e)
         {
-            return System.Math.Max(OpacityFloat, e.Alpha);
+            return System.Math.Min(OpacityFloat, e.Alpha);
+        }
+        /// <summary>
+        /// Get's the correct alpha value to use when rendering the control taking both the current alpha level and a new alpha level into account
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        protected float GetAlphaValue(float Alpha)
+        {
+            return System.Math.Min(_RenderingValue_Alpha, Alpha);
         }
         /// <summary>
         /// Renders the control
@@ -473,7 +482,8 @@ namespace OpenMobile.Controls
             // Clone properties
             foreach (PropertyInfo propInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
             {
-                if (propInfo.CanWrite && propInfo.CanRead && (propInfo.GetGetMethod().GetParameters().Length == 0))
+                MethodInfo mi = propInfo.GetGetMethod();
+                if (propInfo.CanWrite && propInfo.CanRead && (mi!=null) && (mi.GetParameters().Length == 0))
                     try
                     {
                         //Clone IClonable object

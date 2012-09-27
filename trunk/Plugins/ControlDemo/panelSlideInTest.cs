@@ -95,22 +95,58 @@ namespace ControlDemo
             btnScrollToControl.Tag = 0;
             pSlideInTest.addControl(btnScrollToControl);
 
+            OMButton btnAnimateText = DefaultControls.GetButton("btnAnimateText", 540, 100, 180, 90, "", "Animate Text");
+            btnAnimateText.OnClick += new userInteraction(btnAnimateText_OnClick);
+            pSlideInTest.addControl(btnAnimateText);
+
             OMAnimatedLabel2 AniLabel_Test = new OMAnimatedLabel2("AniLabel_Test", 50, 400, 900, 35);
             // AniLabel_Test.SkinDebug = true;
             //AniLabel_Test.Text = String.Format("Current time and date is now {0}, this is a really long string so that we can test the animated labels in OpenMobile", DateTime.Now); //"This is a test of OMAnimatedLabel2";
             AniLabel_Test.Text = "This is a test of OMAnimatedLabel2";
             AniLabel_Test.Background = Color.Black;
             AniLabel_Test.SoftEdges = FadingEdge.GraphicSides.Left | FadingEdge.GraphicSides.Right | FadingEdge.GraphicSides.Top | FadingEdge.GraphicSides.Bottom;
-            AniLabel_Test.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
-            AniLabel_Test.AnimationSingle = OMAnimatedLabel2.eAnimation.UnveilUpSmooth;
+            AniLabel_Test.Animation = OMAnimatedLabel2.eAnimation.Flash;
+            AniLabel_Test.AnimationSingle = OMAnimatedLabel2.eAnimation.SlideUpSmooth;
             pSlideInTest.addControl(AniLabel_Test);
+
+
+            //OpenMobile.helperFunctions.Graphics.TextGraphics.GraphicData tgd = new TextGraphics.GraphicData();
+            //tgd.TextColor = Color.Transparent;
+            //tgd.Text = AniLabel_Test.Text;
+            //tgd.TextFont = AniLabel_Test.Font;
+            //tgd.textAlignment = Alignment.CenterLeft;
+            //tgd.textFormat = AniLabel_Test.Format;
+            //tgd.Height = imgTextEffect.Height;
+            //tgd.Width = imgTextEffect.Width;
+            //imgTextEffect.Image = new imageItem(OpenMobile.helperFunctions.Graphics.TextGraphics.GetImage(tgd));
+
+
+            eTextFormat format = eTextFormat.OutlineNoFillNarrow;
+            Alignment alignment = Alignment.CenterLeft;
+
+            OMImage imgTextEffect = new OMImage("imgTextEffect", 50, 450, 900, 35);
+            imgTextEffect.Image = new imageItem(
+                OpenMobile.Graphics.Graphics.GenerateTextTexture(null, 0, 
+                imgTextEffect.Left,
+                imgTextEffect.Top,
+                imgTextEffect.Width,
+                imgTextEffect.Height,
+                "This is a test of text effects",
+                AniLabel_Test.Font,
+                format,
+                alignment,
+                BuiltInComponents.SystemSettings.SkinTextColor,
+                BuiltInComponents.SystemSettings.SkinFocusColor
+                )
+                );
+            pSlideInTest.addControl(imgTextEffect);
 
             //OMAnimatedLabel AniLabel_Org_Test = new OMAnimatedLabel(50, 450, 900, 50);
             //AniLabel_Org_Test.Name = "AniLabel_Test2";
             ////AniLabel_Org_Test.SkinDebug = true;
             ////AniLabel_Org_Test.Text = String.Format("Current time and date is now {0}, this is a really long string so that we can test the animated labels in OpenMobile", DateTime.Now);//"This is a test of OMAnimatedLabel";
             //AniLabel_Org_Test.Text = "This is a test of OMAnimatedLabel1";
-            //AniLabel_Org_Test.ContiuousAnimation = eAnimation.UnveilRight;
+            //AniLabel_Org_Test.ContiuousAnimation = eAnimation.GlowPulse;
             //pSlideInTest.addControl(AniLabel_Org_Test);
 
             OMContainer Container = new OMContainer("Container", 200, 200, 300, 150);
@@ -154,6 +190,13 @@ namespace ControlDemo
 
         }
 
+        static void btnAnimateText_OnClick(OMControl sender, int screen)
+        {
+            OMAnimatedLabel2 lbl = ((OMAnimatedLabel2)sender.Parent[screen, "AniLabel_Test"]);
+
+            lbl.TransitionInText(OMAnimatedLabel2.eAnimation.Glow, "Animation effect test");
+        }
+
         static void btnScrollToControl_OnClick(OMControl sender, int screen)
         {
             OMContainer container = (OMContainer)sender.Parent[screen, "Container"];
@@ -182,30 +225,31 @@ namespace ControlDemo
             Host.SendStatusData(screen, eDataType.PopUp, PluginName, "Container test");
         }
 
-        static int lblState = 0;
         static void btnChangeText_OnClick(OMControl sender, int screen)
         {
             OMAnimatedLabel2 lbl = ((OMAnimatedLabel2)sender.Parent[screen, "AniLabel_Test"]);
-            OMAnimatedLabel lbl2 = ((OMAnimatedLabel)sender.Parent[screen, "AniLabel_Test2"]);
+
+            int lblState;
+            if (lbl.Tag == null)
+                lblState = 0;
+            else
+                lblState = (int)lbl.Tag;
             
             switch (lblState)
 	        {
                 case 0:
                     lbl.Text = String.Format("Current time and date is now {0}, this is a really long string so that we can test the animated labels in OpenMobile", DateTime.Now);
-                    lbl.AnimationSpeed = 1F;
-                    lblState = 1;
+                    lbl.Tag = 1;
                     break;
 
                 case 1:
                     lbl.Text = "This is a test of OMAnimatedLabel2";
-                    lbl.AnimationSpeed = 1F;
-                    lblState = 0;
+                    lbl.Tag = 0;
                     break;
 
                 default:
                     break;
 	        }
-            lbl2.Text = lbl.Text;
         }
 
         

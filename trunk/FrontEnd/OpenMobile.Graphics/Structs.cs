@@ -1638,7 +1638,14 @@ namespace OpenMobile.Graphics
             {
                 f = FontStyle.Bold;
             }
-            else if ((format == eTextFormat.Italic) || (format == eTextFormat.ItalicShadow))
+            else if (format == eTextFormat.Italic
+                || format == eTextFormat.ItalicShadow
+                || format == eTextFormat.OutlineItalic
+                || format == eTextFormat.OutlineItalicFat
+                || format == eTextFormat.OutlineItalicNarrow
+                || format == eTextFormat.OutlineItalicNoFill
+                || format == eTextFormat.OutlineItalicNoFillFat
+                || format == eTextFormat.OutlineItalicNoFillNarrow)
             {
                 f = FontStyle.Italic;
             }
@@ -1678,6 +1685,9 @@ namespace OpenMobile.Graphics
                 sFormat.FormatFlags = System.Drawing.StringFormatFlags.DirectionVertical;
             if (alignment == Alignment.CenterLeftEllipsis)
                 sFormat.Trimming = System.Drawing.StringTrimming.EllipsisWord;
+            if (((int)alignment & 10000) != 10000)
+                sFormat.FormatFlags = System.Drawing.StringFormatFlags.NoWrap;
+
             return sFormat;
         }
     }

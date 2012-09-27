@@ -728,6 +728,7 @@ namespace OMPlayer
         private event PlayCallback OnPlay;
         private event SpeedCallback OnSetRate;
         private event GetPositionCallback OnGetPosition;
+
         // Methods
         public AVPlayer(Zone zone)
         {
@@ -739,7 +740,7 @@ namespace OMPlayer
             sink.OnClick += new MessageProc.Click(clicked);
             sink.OnEvent += new MessageProc.eventOccured(eventOccured);
             OnSetPosition += new PositionCallback(AVPlayer_OnSetPosition);
-            OnStop+=new VoidCallback(stop);
+            OnStop += new VoidCallback(stop);
             OnSetRate+=new SpeedCallback(SetRate);
             OnPlay+=new PlayCallback(PlayMovieInWindow);
             OnGetPosition+=new GetPositionCallback(getCurrentPos);

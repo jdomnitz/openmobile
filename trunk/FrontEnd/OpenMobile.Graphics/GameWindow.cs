@@ -98,6 +98,8 @@ namespace OpenMobile
         public int FPS_Min = int.MaxValue;
         public bool FPS_MeasureMax = false;
 
+        private bool _StopRendering = false;
+
         #endregion
 
         #region Contructors
@@ -283,7 +285,10 @@ namespace OpenMobile
                 //}
                 refresh = false;
                 if (Exists && !isExiting)
-                    DispatchRenderFrame();
+                {
+                    if (Visible && !_StopRendering)
+                        DispatchRenderFrame();
+                }
                 else
                     return;
                 //if (render_time < target_render_periodMS)
@@ -394,6 +399,21 @@ namespace OpenMobile
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Prevents the rendering loop from running when true
+        /// </summary>
+        public bool StopRendering
+        {
+            get
+            {
+                return _StopRendering;
+            }
+            set
+            {
+                _StopRendering = value;
+            }
+        }
 
         #region Context
 

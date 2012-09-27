@@ -67,7 +67,7 @@ namespace OpenMobile.Graphics
         /// </summary>
         UnderlineShadow = 7,
         /// <summary>
-        /// Outlined (normal 3 pixel)
+        /// Outlined (normal 2 pixel)
         /// </summary>
         Outline = 8,
         /// <summary>
@@ -87,9 +87,62 @@ namespace OpenMobile.Graphics
         /// </summary>
         OutlineNarrow = 12,
         /// <summary>
-        /// Outlined fat (6 pixel)
+        /// Outlined fat (5 pixel)
         /// </summary>
         OutlineFat = 13,
+        /// <summary>
+        /// Outlined without any fill
+        /// </summary>
+        OutlineNoFill,
+        /// <summary>
+        /// Outlined without any fill narrow (1 pixel)
+        /// </summary>
+        OutlineNoFillNarrow,
+        /// <summary>
+        /// Outlined without any fill fat (5 pixel)
+        /// </summary>
+        OutlineNoFillFat,
+        /// <summary>
+        /// Outlined italic
+        /// </summary>
+        OutlineItalic,
+        /// <summary>
+        /// Outlined italic narrow (1 pixel)
+        /// </summary>
+        OutlineItalicNarrow,
+        /// <summary>
+        /// Outlined italic fat (5 pixel)
+        /// </summary>
+        OutlineItalicFat,
+        /// <summary>
+        /// Outlined italic without any fill
+        /// </summary>
+        OutlineItalicNoFill,
+        /// <summary>
+        /// Outlined italic without any fill narrow (1 pixel)
+        /// </summary>
+        OutlineItalicNoFillNarrow,
+        /// <summary>
+        /// Outlined italic without any fill fat (5 pixel)
+        /// </summary>
+        OutlineItalicNoFillFat,
+        /// <summary>
+        /// Glowing Italic Text
+        /// </summary>
+        GlowItalic,
+        /// <summary>
+        /// Bold Glowing Italic Text
+        /// </summary>
+        BoldGlowItalic,
+        /// <summary>
+        /// Glowing Italic Text (big glow)
+        /// </summary>
+        GlowItalicBig,
+        /// <summary>
+        /// Glowing bold Text (big glow)
+        /// </summary>
+        GlowBoldBig,
+
     };
     /// <summary>
     /// Alignment arguments

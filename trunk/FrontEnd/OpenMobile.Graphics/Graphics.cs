@@ -293,6 +293,10 @@ namespace OpenMobile.Graphics
             if (bmpH <= 0) bmpH = h;
             if (bmpH <= 0) bmpH = 1;
 
+            // Let's make sure the graphic surface we're creating is'nt too small to draw on
+            if (((bmpW * _ScaleFactors[screen].X) < 1.0f) || ((bmpH * _ScaleFactors[screen].Y) < 1.0f))
+                return null;
+
             if (image == null || image.image == null)
             {
                 System.Drawing.Bitmap bmp = new Bitmap(bmpW, bmpH);
@@ -311,7 +315,15 @@ namespace OpenMobile.Graphics
                 System.Drawing.Bitmap bmp = image.image;
 
                 // Regenerate a new bitmap if sizes are different
-                if (bmpH != bmp.Height || bmpW != bmp.Width)
+                try
+                {
+                    if (bmpH != bmp.Height || bmpW != bmp.Width)
+                    {
+                        bmp.Dispose();
+                        bmp = new Bitmap(bmpW, bmpH);
+                    }
+                }
+                catch
                 {
                     bmp.Dispose();
                     bmp = new Bitmap(bmpW, bmpH);
@@ -344,6 +356,10 @@ namespace OpenMobile.Graphics
             if (bmpH <= 0) bmpH = h;
             if (bmpH <= 0) bmpH = 1;
 
+            // Let's make sure the graphic surface we're creating is'nt too small to draw on
+            if (((bmpW * _ScaleFactors[screen].X) < 1.0f) || ((bmpH * _ScaleFactors[screen].Y) < 1.0f))
+                return null;
+
             if (image == null || image.image == null)
             {
                 System.Drawing.Bitmap bmp = new Bitmap(bmpW, bmpH);
@@ -360,9 +376,17 @@ namespace OpenMobile.Graphics
             else
             {   // Reuse already assigned image object
                 System.Drawing.Bitmap bmp = image.image;
-                
+
                 // Regenerate a new bitmap if sizes are different
-                if (bmpH != bmp.Height || bmpW != bmp.Width)
+                try
+                {
+                    if (bmpH != bmp.Height || bmpW != bmp.Width)
+                    {
+                        bmp.Dispose();
+                        bmp = new Bitmap(bmpW, bmpH);
+                    }
+                }
+                catch
                 {
                     bmp.Dispose();
                     bmp = new Bitmap(bmpW, bmpH);
@@ -502,12 +526,15 @@ namespace OpenMobile.Graphics
                 return new Rectangle(ret.X, ret.Y, ret.Width, ret.Height);
             }
         }
-        public System.Drawing.Font GetSystemFont(Font font, eTextFormat format)
+        static public System.Drawing.Font GetSystemFont(Font font, eTextFormat format)
         {
             return new System.Drawing.Font(font.Name, font.Size / dpi, (System.Drawing.FontStyle)Font.FormatToStyle(format));
         }
-        static public void renderText(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)
+/*
+        static public void renderText_Org(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)
         {
+            if (w == 1 | h == 1)
+                return;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
             System.Drawing.Color color = System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
             System.Drawing.Color secondColor = System.Drawing.Color.FromArgb(sC.A, sC.R, sC.G, sC.B);
@@ -632,6 +659,180 @@ namespace OpenMobile.Graphics
                     currentFont.Dispose();
                 }
             }
+        }
+*/
+
+        /// <summary>
+        /// Renders text to a System.Drawing.Graphics device using GDI+
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        /// <param name="text"></param>
+        /// <param name="font"></param>
+        /// <param name="format"></param>
+        /// <param name="alignment"></param>
+        /// <param name="c"></param>
+        /// <param name="sC"></param>
+        static public void renderText(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)
+        {
+            // Startup conditions
+            if (string.IsNullOrEmpty(text))
+                return;
+            if (w == 1 | h == 1)
+                return;
+
+            // Convert OpenMobile colors to system colors
+            System.Drawing.Color color = c.ToSystemColor();
+            System.Drawing.Color secondColor = sC.ToSystemColor();
+
+            // Convert OpenMobile fontstyle to system fontstyle
+            FontStyle f = OpenMobile.Graphics.Font.FormatToStyle(format);
+
+            // Convert OpenMobile alignment to system StringFormat
+            StringFormat sFormat = OpenMobile.Graphics.Font.AlignmentToStringFormat(alignment);
+
+            // Set rendering parameters
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+            // Create font object (Scaled to match the DrawString method)
+            System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, (font.Size / dpi) * 1.33f, (System.Drawing.FontStyle)f);
+
+            // Set rendering rectangle 
+            System.Drawing.Rectangle rectTxt =  new System.Drawing.Rectangle(x, y, w, h);
+
+            // Create graphics path object
+            GraphicsPath gpTxt = new GraphicsPath(FillMode.Winding);
+            gpTxt.AddString(text, currentFont.FontFamily, (int)f, currentFont.Size, rectTxt, sFormat);
+            
+            // Render text with specifed effect
+            switch (format)
+            {
+                case eTextFormat.DropShadow:
+                case eTextFormat.BoldShadow:
+                case eTextFormat.ItalicShadow:
+                case eTextFormat.UnderlineShadow:
+                    {
+                        #region DropShadow
+
+                        // Render drop shadow
+                        using (GraphicsPath gpShadow = new GraphicsPath(FillMode.Winding))
+                        {
+                            // Add path for shadow
+                            gpShadow.AddString(text, currentFont.FontFamily, (int)f, currentFont.Size, new System.Drawing.Rectangle(x + 1, y + 2, w, h), sFormat);
+
+                            // Render shadow string
+                            using (System.Drawing.SolidBrush b = new System.Drawing.SolidBrush(secondColor))
+                                g.FillPath(b, gpShadow);
+                        }
+
+                        // Render normal text string
+                        using (System.Drawing.SolidBrush b = new System.Drawing.SolidBrush(color))
+                            g.FillPath(b, gpTxt);
+
+                        #endregion
+                    }
+                    break;
+
+                case eTextFormat.OutlineNarrow:
+                case eTextFormat.OutlineFat:
+                case eTextFormat.Outline:
+                case eTextFormat.OutlineNoFill:
+                case eTextFormat.OutlineNoFillNarrow:
+                case eTextFormat.OutlineNoFillFat:
+                case eTextFormat.OutlineItalicNarrow:
+                case eTextFormat.OutlineItalicFat:
+                case eTextFormat.OutlineItalic:
+                case eTextFormat.OutlineItalicNoFill:
+                case eTextFormat.OutlineItalicNoFillNarrow:
+                case eTextFormat.OutlineItalicNoFillFat:
+                    {
+                        #region Outline
+
+                        // Configure pen size
+                        int PenSize = 1;
+                        if (format == eTextFormat.Outline)
+                            PenSize = 2;
+                        else if (format == eTextFormat.OutlineFat)
+                            PenSize = 5;
+
+                        // Only render fill its required
+                        if (format != eTextFormat.OutlineNoFill 
+                            && format != eTextFormat.OutlineNoFillNarrow
+                            && format != eTextFormat.OutlineNoFillFat
+                            && format != eTextFormat.OutlineItalicNoFill
+                            && format != eTextFormat.OutlineItalicNoFillNarrow
+                            && format != eTextFormat.OutlineItalicNoFillFat)
+                        {
+                            // Render normal text string
+                            using (System.Drawing.SolidBrush b = new System.Drawing.SolidBrush(color))
+                                g.FillPath(b, gpTxt);
+                        }
+
+                        // Render path
+                        using (System.Drawing.Pen p = new System.Drawing.Pen(secondColor, PenSize))
+                            g.DrawPath(p, gpTxt);
+
+                        #endregion
+                    }
+                    break;
+
+                case eTextFormat.Glow:
+                case eTextFormat.BoldGlow:
+                case eTextFormat.GlowBig:
+                case eTextFormat.GlowItalic:
+                case eTextFormat.BoldGlowItalic:
+                case eTextFormat.GlowItalicBig:
+                case eTextFormat.GlowBoldBig:
+                    {
+                        #region Glow
+
+                        // Configure glow size
+                        int GlowSize = 8;
+                        if (format == eTextFormat.GlowBig)
+                            GlowSize = 15;
+
+                        // Render glow effect
+                        for (int i = 1; i < GlowSize; ++i)
+                        {
+                            using (System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb((secondColor.A > 32 ? 32 : secondColor.A) - i, secondColor), i))
+                            {
+                                pen.LineJoin = LineJoin.Round;
+                                g.DrawPath(pen, gpTxt);
+                            }
+                        }
+
+                        // Render text string 
+                        using (System.Drawing.SolidBrush b = new System.Drawing.SolidBrush(color))
+                            g.FillPath(b, gpTxt);
+                        //using (System.Drawing.Pen p = new System.Drawing.Pen(secondColor, 0.5F))
+                        //    g.DrawPath(p, gpTxt);
+
+                        #endregion
+                    }
+                    break;
+
+                // All other text effects
+                default:
+                    {
+                        #region Normal 
+
+                        using (System.Drawing.SolidBrush b = new System.Drawing.SolidBrush(color))
+                            g.FillPath(b, gpTxt);
+
+                        #endregion
+                    }
+                    break;
+            }
+
+            // Clean up
+            currentFont.Dispose();
+            gpTxt.Dispose();
+            sFormat.Dispose();
         }
 
         public void ResetClip()
