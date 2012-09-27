@@ -280,23 +280,23 @@ namespace OpenMobile
 
             OMAnimatedLabel2 Label_UITopBar_TrackTitle = new OMAnimatedLabel2("Label_UITopBar_TrackTitle", 240, 3, 620, 28);
             Label_UITopBar_TrackTitle.TextAlignment = Alignment.CenterLeft;
-            Label_UITopBar_TrackTitle.Format = eTextFormat.BoldShadow;
+            Label_UITopBar_TrackTitle.Format = eTextFormat.Normal;
             Label_UITopBar_TrackTitle.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
-            Label_UITopBar_TrackTitle.AnimationSingle = OMAnimatedLabel2.eAnimation.UnveilRightSmooth;
+            Label_UITopBar_TrackTitle.AnimationSingle = OMAnimatedLabel2.eAnimation.SlideRightSmooth;
             UIPanel.addControl(Label_UITopBar_TrackTitle);
 
             OMAnimatedLabel2 Label_UITopBar_TrackAlbum = new OMAnimatedLabel2("Label_UITopBar_TrackAlbum", 240, 34, 620, 28);
             Label_UITopBar_TrackAlbum.TextAlignment = Alignment.CenterLeft;
-            Label_UITopBar_TrackAlbum.Format = eTextFormat.BoldShadow;
+            Label_UITopBar_TrackAlbum.Format = eTextFormat.Normal;
             Label_UITopBar_TrackAlbum.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
-            Label_UITopBar_TrackAlbum.AnimationSingle = OMAnimatedLabel2.eAnimation.UnveilRightSmooth;
+            Label_UITopBar_TrackAlbum.AnimationSingle = OMAnimatedLabel2.eAnimation.SlideRightSmooth;
             UIPanel.addControl(Label_UITopBar_TrackAlbum);
 
             OMAnimatedLabel2 Label_UITopBar_TrackArtist = new OMAnimatedLabel2("Label_UITopBar_TrackArtist", 240, 64, 620, 28);
             Label_UITopBar_TrackArtist.TextAlignment = Alignment.CenterLeftEllipsis;
-            Label_UITopBar_TrackArtist.Format = eTextFormat.DropShadow;
+            Label_UITopBar_TrackArtist.Format = eTextFormat.Normal;
             Label_UITopBar_TrackArtist.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
-            Label_UITopBar_TrackArtist.AnimationSingle = OMAnimatedLabel2.eAnimation.UnveilRightSmooth;
+            Label_UITopBar_TrackArtist.AnimationSingle = OMAnimatedLabel2.eAnimation.SlideRightSmooth;
             UIPanel.addControl(Label_UITopBar_TrackArtist);
 
             OMImage Image_UITopBar_Cover = new OMImage("Image_UITopBar_Cover", 143, 3, 90, 90);
@@ -893,7 +893,7 @@ namespace OpenMobile
                                             shp.Opacity = lbl.Opacity = lblFront.Opacity = 255;
                                         }
 
-                                        // Text effect opactity level
+                                        // Text effect opacity level
                                         int Opacity = lbl.Color.A - AnimationStep;
                                         if (Opacity > 0)
                                         {
@@ -916,7 +916,7 @@ namespace OpenMobile
                                             // No final value
                                         }
 
-                                        // Message label opacticy
+                                        // Message label opacity
                                         Opacity = lblFront.Color.A + (int)(AnimationStep * 8F);
                                         if (Opacity < 255)
                                         {

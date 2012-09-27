@@ -491,7 +491,16 @@ namespace OpenMobile
 
         private void RenderingWindow_Resize(object sender, EventArgs e)
         {
+            // Stop rendering if window is minimized
+            if (this.WindowState == WindowState.Minimized)
+                this.StopRendering = true;
+            else
+            {
+                this.StopRendering = false;
+            }
+
             ScaleFactors = new PointF((this.ClientRectangle.Width / 1000F), (this.ClientRectangle.Height / 600F));
+
             OnRenderFrameInternal();
             raiseResizeEvent();
 

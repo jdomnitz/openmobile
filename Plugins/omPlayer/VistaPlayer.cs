@@ -114,10 +114,10 @@ namespace OMPlayer
                 for (int i = 0; i < player.Length; i++)
                 {
                     if (player[i] != null)
-                        player[i].CloseSession();
+                        player[i].CloseSession(false);
                 }
                 if (oldPlayer != null)
-                    oldPlayer.CloseSession();
+                    oldPlayer.CloseSession(false);
                 MFExtern.MFShutdown();
             }
             GC.SuppressFinalize(this);
@@ -521,7 +521,7 @@ namespace OMPlayer
         public bool stop(Zone zone)
         {
             checkInstance(zone);
-            return player[zone.AudioDeviceInstance].stop();
+            return player[zone.AudioDeviceInstance].stop(false);
         }
 
         // Properties
@@ -629,13 +629,16 @@ namespace OMPlayer
             private delegate bool PositionCallback(float seconds);
             private delegate bool SpeedCallback(float rate);
             private delegate bool VoidCallback();
+            private delegate bool StopCallback(bool BlockStopEvent);
             private delegate bool PlayCallback(Zone zone, string filename);
             private delegate void GetPositionCallback();
             private event PositionCallback OnSetPosition;
-            private event VoidCallback OnStop;
+            private event StopCallback OnStop;
             private event PlayCallback OnPlay;
             private event SpeedCallback OnSetRate;
             private event GetPositionCallback OnGetPosition;
+            private bool _BlockStopEvent = false;
+
             // Methods
             public AVPlayer(Zone zone)
             {
@@ -647,7 +650,7 @@ namespace OMPlayer
                 drain = sink.Handle;
                 sink.OnClick += new MessageProc.Click(clicked);
                 OnSetPosition += new PositionCallback(AVPlayer_OnSetPosition);
-                OnStop += new VoidCallback(stop);
+                OnStop += new StopCallback(stop);
                 OnSetRate += new SpeedCallback(SetRate);
                 OnPlay += new PlayCallback(PlayMovieInWindow);
                 OnGetPosition += new GetPositionCallback(getCurrentPos);
@@ -674,7 +677,7 @@ namespace OMPlayer
 
             public bool play(Zone zone, string url)
             {
-                stop();
+                stop(true);
                 lock (this)
                 {
                     //object o = sink.Invoke(OnPlay, new object[] { zone, url });
@@ -704,7 +707,7 @@ namespace OMPlayer
                 }
                 return true;
             }
-            public bool stop()
+            public bool stop(bool BlockStopEvent)
             {
                 //if (sink.InvokeRequired)
                 //{
@@ -722,7 +725,7 @@ namespace OMPlayer
                     sink.Hide();
                     OnMediaEvent(eFunction.hideVideoWindow, zone, "");
                 }
-                CloseSession();
+                CloseSession(BlockStopEvent);
                 currentState = ePlayerStatus.Stopped;
                 return true;
             }
@@ -1077,7 +1080,7 @@ namespace OMPlayer
 
             private bool CreateSession()
             {
-                CloseSession();
+                CloseSession(false);
                 int hr=MFExtern.MFCreateMediaSession(null, out session);
                 if (hr != S_Ok) return false;
                 hr=session.BeginGetEvent(this, null);
@@ -1135,7 +1138,7 @@ namespace OMPlayer
                                 break;
                             case MediaEventType.MEAudioSessionDeviceRemoved:
                             case MediaEventType.MEAudioSessionServerShutdown:
-                                stop();
+                                stop(false);
                                 break;
                             case MediaEventType.MESessionRateChanged:
                                 bool thin=true;
@@ -1179,7 +1182,7 @@ namespace OMPlayer
                 if (crossfade == 0) //blocking events causes problems
                     SafeThread.Asynchronous(delegate() { OnMediaEvent(eFunction.nextMedia, zone, String.Empty); }, VistaPlayer.theHost);
                 else
-                    stop();
+                    stop(false);
                 if (!isAudioOnly)
                     OpenMobile.Platform.Windows.Functions.ShowWindow(drain, OpenMobile.Platform.Windows.ShowWindowCommand.HIDE);
             }
@@ -1220,7 +1223,9 @@ namespace OMPlayer
             private void OnSessionClosed(IMFMediaEvent pEvent)
             {
                 currentState = ePlayerStatus.Stopped;
-                OnMediaEvent(eFunction.Stop, zone, String.Empty);
+                if (!_BlockStopEvent)
+                    OnMediaEvent(eFunction.Stop, zone, String.Empty);
+                _BlockStopEvent = false;
                 clock = null;
                 m_hCloseEvent.Set();
             }
@@ -1231,8 +1236,9 @@ namespace OMPlayer
                 OnMediaEvent(eFunction.Pause, zone, String.Empty);
             }
 
-            public void CloseSession()
+            public void CloseSession(bool blockStopEvent)
             {
+                _BlockStopEvent = blockStopEvent;
                 if (m_pVideoDisplay != null)
                 {
                     Marshal.ReleaseComObject(m_pVideoDisplay);

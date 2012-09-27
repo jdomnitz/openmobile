@@ -979,4 +979,131 @@ namespace OpenMobile.helperFunctions.Graphics
         }
     }
 
+    /// <summary>
+    /// Text graphic effects
+    /// </summary>
+    public static class TextGraphics
+    {
+        /// <summary>
+        /// The different types of graphics
+        /// </summary>
+        public enum GraphicStyles
+        {
+            /// <summary>
+            /// Glow style
+            /// </summary>
+            Glow
+        }
+
+        /// <summary>
+        /// Data for generated graphics
+        /// </summary>
+        public class GraphicData
+        {
+            public GraphicData()
+            {   // Default values
+                // Default colors are read from the OM system setting (SkinFocusColor)
+                this.EffectColor = BuiltInComponents.SystemSettings.SkinFocusColor;
+                this.TextColor = BuiltInComponents.SystemSettings.SkinTextColor;
+            }
+
+            /// <summary>
+            /// Button type to generate
+            /// </summary>
+            public GraphicStyles Style { get; set; }
+            /// <summary>
+            /// Height of graphic
+            /// </summary>
+            public int Height { get; set; }
+            /// <summary>
+            /// Width of graphic
+            /// </summary>
+            public int Width { get; set; }
+            /// <summary>
+            /// Generated image
+            /// </summary>
+            public OImage Image { get; set; }
+            /// <summary>
+            /// Color to use when drawing the effect
+            /// </summary>
+            public Color EffectColor { get; set; }
+            /// <summary>
+            /// Color to use when drawing the text 
+            /// </summary>
+            public Color TextColor { get; set; }
+            /// <summary>
+            /// Text string 
+            /// </summary>
+            public string Text { get; set; }
+            /// <summary>
+            /// Font to use for the text
+            /// </summary>
+            public Font TextFont { get; set; }
+            /// <summary>
+            /// Format for the text
+            /// </summary>
+            public eTextFormat textFormat = eTextFormat.Normal;
+            /// <summary>
+            /// Text alignment
+            /// </summary>
+            public Alignment textAlignment = Alignment.CenterCenter;
+
+        }
+
+        /// <summary>
+        /// Gets a image of the requested type and the requested width and height using the default handler (OMGraphics)
+        /// </summary>
+        /// <param name="Width"></param>
+        /// <param name="Height"></param>
+        /// <param name="Style"></param>
+        /// <returns></returns>
+        public static OImage GetImage(int Width, int Height, GraphicStyles Style)
+        {
+            GraphicData gd = new GraphicData();
+            gd.Width = Width;
+            gd.Height = Height;
+            gd.Style = Style;
+            return GetImage(gd, "OMGraphics");
+        }
+        /// <summary>
+        /// Gets a image of the requested type and the requested width and height using the requested handler
+        /// </summary>
+        /// <param name="Width"></param>
+        /// <param name="Height"></param>
+        /// <param name="Style"></param>
+        /// <param name="Handler"></param>
+        /// <returns></returns>
+        public static OImage GetImage(int Width, int Height, GraphicStyles Style, string Handler)
+        {
+            GraphicData gd = new GraphicData();
+            gd.Width = Width;
+            gd.Height = Height;
+            return GetImage(gd, Handler);
+        }
+        /// <summary>
+        /// Gets a image according to the graphicdata using the default handler (OMGraphics)
+        /// </summary>
+        /// <param name="gd"></param>
+        /// <returns></returns>
+        public static OImage GetImage(GraphicData gd)
+        {
+            return GetImage(gd, "OMGraphics");
+        }
+        /// <summary>
+        /// Gets a image according to the graphicdata using the requested handler
+        /// </summary>
+        /// <param name="gd"></param>
+        /// <param name="Handler"></param>
+        /// <returns></returns>
+        public static OImage GetImage(GraphicData gd, string Handler)
+        {
+            if (!BuiltInComponents.Host.sendMessage<GraphicData>(Handler, "OpenMobile.helperFunctions.TextGraphics", "TextGraphics", ref gd))
+            {   // Log this error to the debug log
+                BuiltInComponents.Host.DebugMsg("Unable to get TextGraphics, plugin " + Handler + " not available");
+                return null;
+            }
+            return gd.Image;
+        }
+    }
+
 }

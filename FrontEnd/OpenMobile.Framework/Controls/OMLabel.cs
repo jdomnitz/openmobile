@@ -54,7 +54,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Outline color of the text
         /// </summary>
-        protected Color _outlineColor = Color.Black;
+        protected Color _outlineColor = BuiltInComponents.SystemSettings.SkinFocusColor;//Color.Black;
         /// <summary>
         /// Sensor name to subscribe to
         /// </summary>

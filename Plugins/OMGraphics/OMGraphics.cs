@@ -1263,6 +1263,88 @@ namespace OMGraphics
                     }
                     break;
 
+                case "textgraphics":
+                    {
+                        #region textgraphics
+
+                        // Convert input data to local data object (data sent in is a 
+                        TextGraphics.GraphicData gd = data as TextGraphics.GraphicData;
+                        System.Drawing.Bitmap bmp = new Bitmap(gd.Width, gd.Height);
+                        using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                        {
+                            switch (gd.Style)
+                            {
+                                case TextGraphics.GraphicStyles.Glow:
+                                    {
+
+                                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                                        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                                        #region Colors
+
+                                        Color glowColor;
+                                        if (String.IsNullOrEmpty(gd.EffectColor.Name) || gd.EffectColor.Name == "0")
+                                            glowColor = System.Drawing.Color.FromArgb(0, 0, 255);
+                                        else
+                                            glowColor = gd.EffectColor.ToSystemColor();
+
+                                        Color textColor;
+                                        if (String.IsNullOrEmpty(gd.TextColor.Name) || gd.TextColor.Name == "0")
+                                            textColor = System.Drawing.Color.LightGray;
+                                        else
+                                            textColor = gd.TextColor.ToSystemColor();
+
+                                        #endregion
+
+                                        System.Drawing.Rectangle rect = new Rectangle(0, 0, 0, 0);
+
+                                        // Calculate placement (if no text it's centered in graphic)
+                                        rect = new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                                        // Set font format
+                                        StringFormat sf = OpenMobile.Graphics.Font.AlignmentToStringFormat(gd.textAlignment);
+                                        System.Drawing.Font f = (gd.TextFont.Name == null ? new System.Drawing.Font(OpenMobile.Graphics.Font.Arial.Name, 18) : new System.Drawing.Font(gd.TextFont.Name, gd.TextFont.Size));
+
+                                        GraphicsPath gpTxt = new GraphicsPath();
+                                        gpTxt.AddString(gd.Text, f.FontFamily, (int)OpenMobile.Graphics.Font.FormatToStyle(gd.textFormat), f.Size, rect, sf);
+
+                                        #region Draw glow
+
+                                        for (int i = 1; i < 15; ++i)
+                                        {
+                                            //System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32, 0, 128, 192), i);
+                                            System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32 - i, glowColor), i);
+                                            pen.LineJoin = LineJoin.Round;
+                                            g.DrawPath(pen, gpTxt);
+                                            pen.Dispose();
+                                        }
+
+                                        #endregion
+
+                                        if (textColor != Color.Transparent)
+                                        {
+                                            System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(textColor);
+                                            g.FillPath(brush, gpTxt);
+                                        }
+                                        //g.DrawPath(new System.Drawing.Pen(glowColor, 0.5F), gpTxt);
+
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                            g.Flush();
+                        }
+                        gd.Image = new OpenMobile.Graphics.OImage(bmp);
+
+                        // Return data
+                        data = (T)Convert.ChangeType(gd, typeof(T));
+
+                        #endregion
+                    }
+                    break;
                 default:
                     break;
             }
