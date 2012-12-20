@@ -1,0 +1,1 @@
+Theese icons are a part of the Android Icon Templates Pack, see https://developer.android.com/guide/practices/ui_guidelines/icon_design.html for details about this. 
