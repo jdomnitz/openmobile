@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile", "OpenMobile\OpenMobile.csproj", "{2B8C8EB5-EBA3-4FAA-8AA7-7421F8FDDAC8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Framework", "OpenMobile.Framework\OpenMobile.Framework.csproj", "{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}"
@@ -78,6 +78,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMWinInfo", "..\Plugins\OMWinInfo\OMWinInfo.csproj", "{F1ACB266-A9D2-4E6C-8E36-3AA39C7A8686}"
 EndProject
 Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug-Fast|Any CPU = Debug-Fast|Any CPU
