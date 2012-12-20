@@ -113,15 +113,15 @@ namespace OpenMobile
                         case 3:
                         case 4:
                         case 5:
-                            Top = 260;
+                            Top = 228;
                             break;
                         case 6:
                         case 7:
                         case 8:
-                            Top = 400;
+                            Top = 368;
                             break;
                         default:
-                            Top = 116;
+                            Top = 84;
                             break;
                     }
 
@@ -134,21 +134,21 @@ namespace OpenMobile
                     mainPanel.addControl(MainMenuButtons[i]);                    
                 }
 
-                // Clock and date
-                OMLabel labelClockTime = new OMLabel("labelClockTime", 350, 522, 300, 60);
-                labelClockTime.TextAlignment = Alignment.CenterCenter;
-                labelClockTime.Font = new Font(Font.GenericSansSerif, 32F);
-                labelClockTime.Format = eTextFormat.BoldShadow;
-                labelClockTime.sensorName = "SystemSensors.Time";
-                labelClockTime.Text = "Clock";
-                mainPanel.addControl(labelClockTime);     
-                OMLabel labelClockdate = new OMLabel("labelClockdate", 350, 572, 300, 30);
-                labelClockdate.TextAlignment = Alignment.CenterCenter;
-                labelClockdate.Font = new Font(Font.GenericSansSerif, 20F);
-                labelClockdate.Format = eTextFormat.BoldShadow;
-                labelClockdate.sensorName = "SystemSensors.Date";
-                labelClockdate.Text = "Date";
-                mainPanel.addControl(labelClockdate);       
+                //// Clock and date
+                //OMLabel labelClockTime = new OMLabel("labelClockTime", 350, 522, 300, 60);
+                //labelClockTime.TextAlignment = Alignment.CenterCenter;
+                //labelClockTime.Font = new Font(Font.GenericSansSerif, 32F);
+                //labelClockTime.Format = eTextFormat.Normal;
+                //labelClockTime.sensorName = "SystemSensors.Time";
+                //labelClockTime.Text = "Clock";
+                //mainPanel.addControl(labelClockTime);     
+                //OMLabel labelClockdate = new OMLabel("labelClockdate", 350, 572, 300, 30);
+                //labelClockdate.TextAlignment = Alignment.CenterCenter;
+                //labelClockdate.Font = new Font(Font.GenericSansSerif, 20F);
+                //labelClockdate.Format = eTextFormat.Normal;
+                //labelClockdate.sensorName = "SystemSensors.Date";
+                //labelClockdate.Text = "Date";
+                //mainPanel.addControl(labelClockdate);       
 
                 screens.loadSinglePanel(mainPanel, screen, true);
             }
@@ -165,10 +165,8 @@ namespace OpenMobile
             OMPanel panelSettings = new OMPanel("Settings");
             panelSettings.Forgotten = true;
             
-            OMBasicShape Shape_AccessBlock = new OMBasicShape(0, 0, 1000, 600);
-            Shape_AccessBlock.Name = "Settings_Shape_AccessBlock";
-            Shape_AccessBlock.Shape = shapes.Rectangle;
-            Shape_AccessBlock.FillColor = Color.FromArgb(150, Color.Black);
+            OMBasicShape Shape_AccessBlock = new OMBasicShape("Settings_Shape_AccessBlock", 0, 0, 1000, 600,
+                new ShapeData(shapes.Rectangle, Color.FromArgb(150, Color.Black)));
             panelSettings.addControl(Shape_AccessBlock);
             OMButton Button_Cancel2 = new OMButton(0, 0, 1000, 600);
             Button_Cancel2.Name = "Settings_Button_Cancel";

@@ -20,6 +20,8 @@
 *********************************************************************************/
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
+using OpenMobile.Graphics.GDI;
 
 namespace OpenMobile.Graphics
 {
@@ -31,55 +33,6 @@ namespace OpenMobile.Graphics
         int height, width;
         private bool[] _GenerateTexture = new bool[10];
         private uint[] _Texture = new uint[10];
-        //private bool _GenerateTexture = true;
-        //private uint _Texture = 0;
-
-        ///// <summary>
-        ///// The OpenGL texture reference for this image (0 = not texture generated)
-        ///// </summary>
-        //public uint[] Texture
-        //{
-        //    get
-        //    {
-        //        return _Texture;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// The OpenGL texture reference for this image (0 = not texture generated)
-        ///// </summary>
-        //public uint Texture
-        //{
-        //    get
-        //    {
-        //        return _Texture;
-        //    }
-        //}
-
-        //public bool[] GenerateTexture
-        //{
-        //    get
-        //    {
-        //        return _GenerateTexture;
-        //    }
-        //}
-
-        //private void ResizeArraysToScreen(int Screen)
-        //{
-        //            // Resize texture array to match new screen 
-        //    if (Screen >= _Texture.Length)
-        //    {
-        //        lock (_Texture)
-        //        {
-        //            lock (_GenerateTexture)
-        //            {
-        //                Array.Resize<uint>(ref _Texture, Screen + 1);
-        //                Array.Resize<bool>(ref _GenerateTexture, Screen + 1);
-        //                _GenerateTexture[Screen] = true;
-        //            }
-        //        }
-        //    }
-        //}
 
         public uint GetTexture(int Screen)
         {
@@ -124,6 +77,28 @@ namespace OpenMobile.Graphics
         {
         }
         public OImage(System.Drawing.Bitmap bmp)
+        {
+            SetBmp(bmp);
+        }
+        /// <summary>
+        /// Creates a image based on a color
+        /// </summary>
+        /// <param name="color"></param>
+        public OImage(Color color, int width, int height)
+        {
+            // Create a bitmap with a solid color
+            System.Drawing.Bitmap bmpColor = new Bitmap(width, height);
+            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmpColor))
+            {
+                using (System.Drawing.Brush b = new SolidBrush(color.ToSystemColor()))
+                {
+                    g.FillRectangle(b, 0, 0, width, height);
+                    SetBmp(bmpColor);
+                }
+            }
+        }
+
+        private void SetBmp(System.Drawing.Bitmap bmp)
         {
             // Error check
             if (bmp == null)
@@ -201,6 +176,17 @@ namespace OpenMobile.Graphics
         }
 
         /// <summary>
+        /// The region this image covers
+        /// </summary>
+        public Rectangle Region
+        {
+            get
+            {
+                return new Rectangle(0, 0, width, height);
+            }
+        }
+
+        /// <summary>
         /// Can this image animate?
         /// </summary>
         public bool CanAnimate
@@ -218,11 +204,21 @@ namespace OpenMobile.Graphics
             }
         }        
         
+        public enum OverLayDirections { All, LeftToRight, RightToLeft, TopToBottom, BottomToTop }
+
         /// <summary>
         /// Add an overlay color onto this image
         /// </summary>
         /// <param name="c"></param>
         public void Overlay(Color c)
+        {
+            Overlay(c, 100, OverLayDirections.All);
+        }
+        /// <summary>
+        /// Add an overlay color onto this image
+        /// </summary>
+        /// <param name="c"></param>
+        public void Overlay(Color c, int coverPercentage, OverLayDirections direction)
         {
             if (img == null)
                 return;
@@ -230,50 +226,319 @@ namespace OpenMobile.Graphics
             // Create new Bitmap object with the size of the picture
             lock (img)
             {
-                Bitmap bmpPicture = new Bitmap(img.Width, img.Height);
-                // Image attributes for setting the attributes of the picture
-                System.Drawing.Imaging.ImageAttributes iaPicture = new System.Drawing.Imaging.ImageAttributes();
+                // Calculate color values
+                float R = 0;
+                if (c.R > 0)
+                    R = 255 / c.R;
+                float G = 0;
+                if (c.G > 0)
+                    G = 255 / c.G;
+                float B = 0;
+                if (c.B > 0)
+                    B = 255 / c.B;
 
-                System.Drawing.Imaging.ColorMatrix cmPicture = new System.Drawing.Imaging.ColorMatrix();
-                /*
-                // Change the elements
-                cmPicture.Matrix00 = -1;
-                cmPicture.Matrix11 = -1;
-                cmPicture.Matrix22 = -1;
-                // Set the new color matrix
-                iaPicture.SetColorMatrix(cmPicture);
-                */
-                // Set the Graphics object from the bitmap
-                System.Drawing.Graphics gfxPicture = System.Drawing.Graphics.FromImage(bmpPicture);
-                gfxPicture.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                // New rectangle for the picture, same size as the original picture
-                System.Drawing.Rectangle rctPicture = new System.Drawing.Rectangle(0, 0, img.Width, img.Height);
-                // Draw the new image
-                gfxPicture.DrawImage(img, rctPicture, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, iaPicture);
-
-                // Create matrix
-                cmPicture = new System.Drawing.Imaging.ColorMatrix(new float[][]
+                System.Drawing.Imaging.ColorMatrix cm = new System.Drawing.Imaging.ColorMatrix(new float[][]
                     {
-                        new float[] {1, 0, 0, 0, 0},
-                        new float[] {0, 1, 0, 0, 0},
-                        new float[] {0, 0, 1, 0, 0},
-                        new float[] {0, 0, 0, 1, 0},
-                        //new float[] {.0f, .50f, .0f, .0f, 1}
-                        new float[] {((float)c.R/255f), ((float)c.G/255f), ((float)c.B/255f), .0f, 1}
+                        // Matrix config
+                        //           R  G  B  A  w
+                        new float[] {R, 0, 0, 0, 0}, // R
+                        new float[] {0, G, 0, 0, 0}, // G
+                        new float[] {0, 0, B, 0, 0}, // B
+                        new float[] {0, 0, 0, 1, 0}, // A
+                        new float[] {0, 0, 0, 0, 1}, // w
                     });
 
-                // Set the new color matrix
-                iaPicture.SetColorMatrix(cmPicture);
-                gfxPicture.DrawImage(bmpPicture, rctPicture, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, iaPicture);
+                System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+                ia.SetColorMatrix(cm);
 
-                // Set the PictureBox to the new inverted colors bitmap
-                img = bmpPicture;
+                // Draw image using color matrix
+                Bitmap bmp = new Bitmap(img.Width, img.Height);
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                {
+                    switch (direction)
+                    {
+                        case OverLayDirections.All:
+                            {
+                                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, ia);
+                            }
+                            break;
+                        case OverLayDirections.LeftToRight:
+                            {
+                                // Draw original image without overlay
+                                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
 
+                                // Draw image with overlay 
+                                if (coverPercentage > 0)
+                                {
+                                    int left = (int)(width * (coverPercentage / 100.0f));
+                                    g.DrawImage(img, new System.Drawing.Rectangle(0, 0, left, img.Height), 0, 0, left, img.Height, GraphicsUnit.Pixel, ia);
+                                }
+                            }
+                            break;
+                        case OverLayDirections.RightToLeft:
+                            {
+                                // Draw original image without overlay
+                                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
+
+                                // Draw image with overlay 
+                                if (coverPercentage > 0)
+                                {
+                                    int left = width - (int)(width * (coverPercentage / 100.0f));
+                                    g.DrawImage(img, new System.Drawing.Rectangle(left, 0, img.Width, img.Height), left, 0, img.Width, img.Height, GraphicsUnit.Pixel, ia);
+                                }
+                            }
+                            break;
+                        case OverLayDirections.TopToBottom:
+                            {
+                                // Draw original image without overlay
+                                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
+
+                                // Draw image with overlay 
+                                if (coverPercentage > 0)
+                                {
+                                    int top = (int)(height * (coverPercentage / 100.0f));
+                                    g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, top), 0, 0, img.Width, top, GraphicsUnit.Pixel, ia);
+                                }
+                            }
+                            break;
+                        case OverLayDirections.BottomToTop:
+                            {
+                                // Draw original image without overlay
+                                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
+
+                                // Draw image with overlay 
+                                if (coverPercentage > 0)
+                                {
+                                    int top = height - (int)(height * (coverPercentage / 100.0f));
+                                    g.DrawImage(img, new System.Drawing.Rectangle(0, top, img.Width, img.Height), 0, top, img.Width, img.Height, GraphicsUnit.Pixel, ia);
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                ia.Dispose();
+
+                // Dispose original image
+                if (img != null)
+                {
+                    img.Dispose();
+                    img = null;
+                }
+
+                // Assign new image
+                img = bmp;
+
+                // Regenerate textures
                 for (int i = 0; i < _GenerateTexture.Length; i++)
                     _GenerateTexture[i] = true;
-                //_GenerateTexture = true;
-
             }
+        }
+
+        public enum CropBase { Left, Top, Bottom, Right }
+
+        /// <summary>
+        /// Crops the image
+        /// </summary>
+        /// <param name="percentage"></param>
+        /// <param name="cropBase"></param>
+        public void Crop(int percentage, CropBase cropBase)
+        {
+            if (img == null)
+                return;
+
+            float percentageF = percentage / 100f;
+
+            // Create new Bitmap object with the size of the picture
+            lock (img)
+            {
+                Bitmap bmp = new Bitmap(img.Width, img.Height);
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                {
+                    switch (cropBase)
+                    {
+                        case CropBase.Left:
+                            {
+                                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, (int)(img.Width * percentageF), img.Height), 0, 0, img.Width * percentageF, img.Height, GraphicsUnit.Pixel);
+                            }
+                            break;
+                        case CropBase.Top:
+                            {
+                                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, (int)(img.Height * percentageF)), 0, 0, img.Width, img.Height * percentageF, GraphicsUnit.Pixel);
+                            }
+                            break;
+                        case CropBase.Bottom:
+                            {
+                                int height = (int)(img.Height * percentageF);
+                                int top = img.Height - height;
+                                g.DrawImage(img, new System.Drawing.Rectangle(0, top, img.Width, height), 0, top, img.Width, height, GraphicsUnit.Pixel);
+                            }
+                            break;
+                        case CropBase.Right:
+                            {
+                                int width = (int)(img.Width * percentageF);
+                                int left = img.Width - width;
+                                g.DrawImage(img, new System.Drawing.Rectangle(left, 0, width, img.Height), left, 0, width, img.Height, GraphicsUnit.Pixel);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                // Dispose original image
+                if (img != null)
+                {
+                    img.Dispose();
+                    img = null;
+                }
+
+                // Assign new image
+                img = bmp;
+            }
+        }
+
+        /// <summary>
+        /// Adds a border around the image without changing the size of the image (orginal image is reduced)
+        /// </summary>
+        /// <param name="percentage">The percentage to reduce the image with</param>
+        /// <param name="backColor"></param>
+        public void AddBorder(int percentage, Color backColor)
+        {
+            if (img == null)
+                return;
+
+            float percentageF = 1f - (percentage / 100f);
+
+            // Create new Bitmap object with the size of the picture
+            lock (img)
+            {
+                Bitmap bmp = new Bitmap(img.Width, img.Height);
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                {
+                    int height = (int)(img.Height * percentageF);
+                    int top = (img.Height - height) / 2;
+                    int width = (int)(img.Width * percentageF);
+                    int left = (img.Width - width) / 2;
+                    using (SolidBrush b = new SolidBrush(backColor.ToSystemColor()))
+                        g.FillRectangle(b, new System.Drawing.Rectangle(0, 0, img.Width, img.Height));
+                    g.DrawImage(img, new System.Drawing.Rectangle(left, top, width, height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
+                }
+
+                // Dispose original image
+                if (img != null)
+                {
+                    img.Dispose();
+                    img = null;
+                }
+
+                // Assign new image
+                img = bmp;
+            }
+        }
+
+        public void Glow(Color c)
+        {
+            if (img == null)
+                return;
+
+            // Create new Bitmap object with the size of the picture
+            lock (img)
+            {
+                // Create workspace image
+                Bitmap bmp = new Bitmap(img.Width, img.Height);
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                    g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
+
+                // Draw glow color
+                BitmapFunctions bf = new BitmapFunctions(bmp);
+                bf.drawOneColor(c.A, c.R, c.G, c.B);
+                bf.Dispose();
+
+                // Blur (NB! Length must be an odd number)
+                Convolution conv = new Convolution();
+                fipbmp.FastZGaussian_Blur_NxN(bmp, 31, 0.01f, 255, true, false, conv);
+
+                // Increase alpha (a darker base color like blue needs a higher alpha value to ensure visibility)
+                float AlphaIncrease = c.B / 255;
+                fipbmp.IncreaseAlpha(bmp, 2.0f + AlphaIncrease);
+
+                // Draw orginal image on top
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                    g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
+
+                // Dispose original image
+                if (img != null)
+                {
+                    img.Dispose();
+                    img = null;
+                }
+
+                // Assign new image
+                img = bmp;
+
+                // Regenerate textures
+                for (int i = 0; i < _GenerateTexture.Length; i++)
+                    _GenerateTexture[i] = true;
+            }
+        }
+
+        /// <summary>
+        /// Sets the alpha channel of the image
+        /// </summary>
+        /// <param name="alpha">Alpha in the range 1 to 100</param>
+        public void SetAlpha(int alpha)
+        {
+            SetAlpha((float)(alpha / 100f));
+        }
+
+        /// <summary>
+        /// Sets the alpha channel of the image
+        /// </summary>
+        /// <param name="alpha">Alpha in the range 0.0 to 1.0</param>
+        public void SetAlpha(float alpha)
+        {
+            System.Drawing.Imaging.ColorMatrix cm = new System.Drawing.Imaging.ColorMatrix(new float[][]
+                    {
+                        // Matrix config
+                        //           R  G  B  A  w
+                        new float[] {1, 0, 0, 0, 0}, // R
+                        new float[] {0, 1, 0, 0, 0}, // G
+                        new float[] {0, 0, 1, 0, 0}, // B
+                        new float[] {0, 0, 0, alpha, 0}, // A
+                        new float[] {0, 0, 0, 0, 1}, // w
+                    });
+
+            UpdateAndSetImageWithMatrix(cm);
+        }
+
+        private void UpdateAndSetImageWithMatrix(ColorMatrix cm)
+        {
+            System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+            ia.SetColorMatrix(cm);
+
+            // Draw image using color matrix
+            Bitmap bmp = new Bitmap(img.Width, img.Height);
+            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+            {
+                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, ia);
+                ia.Dispose();
+            }
+
+            // Dispose original image
+            if (img != null)
+            {
+                img.Dispose();
+                img = null;
+            }
+
+            // Assign new image
+            img = bmp;
+
+            // Regenerate textures
+            for (int i = 0; i < _GenerateTexture.Length; i++)
+                _GenerateTexture[i] = true;
         }
 
         #region Static methods
@@ -426,16 +691,15 @@ namespace OpenMobile.Graphics
             if (img != null)
                 img.Dispose();
             img = null;
-            GC.SuppressFinalize(this);
+            //GC.SuppressFinalize(this);
         }
-        
-        public object Clone()
+
+        public Object Clone()
         {
             lock (img)
             {
                 OImage newImg = new OImage((Bitmap)img.Clone());
                 return newImg;
-                //return new OImage((Bitmap)img.Clone());
             }
         }
 

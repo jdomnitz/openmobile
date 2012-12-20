@@ -24,45 +24,11 @@ using OpenMobile.Graphics;
 namespace OpenMobile.Controls
 {
     /// <summary>
-    /// Available Shapes
-    /// </summary>
-    public enum shapes : byte
-    {
-        /// <summary>
-        /// Draws a Rectangle (or Square)
-        /// </summary>
-        Rectangle = 0,
-        /// <summary>
-        /// Draws a Triangle
-        /// </summary>
-        Triangle = 1,
-        /// <summary>
-        /// Draws an Oval/Ellipse/Circle
-        /// </summary>
-        Oval = 2,
-        /// <summary>
-        /// Draws a Rounded Rectangle
-        /// </summary>
-        RoundedRectangle = 3
-    }
-    /// <summary>
     /// Allows drawing of basic shapes
     /// </summary>
     [System.Serializable]
-    public class OMBasicShape : OMControl
+    public class OMBasicShape : OMControlGraphicsBase
     {
-        /// <summary>
-        /// Sets the corner radius of a rounded rectangle
-        /// </summary>
-        protected int cornerRadius = 10;
-        /// <summary>
-        /// Sets the corner radius of a rounded rectangle
-        /// </summary>
-        public int CornerRadius
-        {
-            get { return cornerRadius; }
-            set { cornerRadius = value; }
-        }
         /// <summary>
         /// Creates a new Basic Shape
         /// </summary>
@@ -94,8 +60,20 @@ namespace OpenMobile.Controls
             : base(name, x, y, w, h)
         {
         }
+        /// <summary>
+        /// Creates a new Basic Shape
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        public OMBasicShape(string name, int x, int y, int w, int h, ShapeData shapeData)
+            : base(name, x, y, w, h)
+        {
+            _ShapeData = shapeData;
+        }
 
-        Pen BorderPen;
         /// <summary>
         /// Draws the basic shape
         /// </summary>
@@ -104,187 +82,8 @@ namespace OpenMobile.Controls
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
             base.RenderBegin(g, e);
-
-            //float alpha = OpacityFloat;
-            //if (this.Mode == eModeType.transitioningIn)
-            //    alpha = e.globalTransitionIn;
-            //else if (this.Mode == eModeType.transitioningOut)
-            //    alpha = e.globalTransitionOut;
-
-            Brush Fill = new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * fillColor.A), fillColor));
-            if (borderSize > 0)
-                BorderPen = new Pen(Color.FromArgb((int)(_RenderingValue_Alpha * borderColor.A), borderColor), borderSize);
-
-            switch (shape)
-            {
-                case shapes.Rectangle:
-                    g.FillRectangle(Fill, left, top, width, height);
-                    if (borderSize > 0)
-                        g.DrawRectangle(BorderPen, left, top, width, height);
-                    break;
-                case shapes.Triangle:
-                    g.FillPolygon(Fill, triPoint);
-                    if (borderSize > 0)
-                        g.DrawPolygon(BorderPen, triPoint);
-                    break;
-                case shapes.Oval:
-                    g.FillEllipse(Fill, left, top, width, height);
-                    if (borderSize > 0)
-                        g.DrawEllipse(BorderPen, left, top, width, height);
-                    break;
-                case shapes.RoundedRectangle:
-                    g.FillRoundRectangle(Fill, left, top, width, height, cornerRadius);
-                    if (borderSize > 0)
-                        g.DrawRoundRectangle(BorderPen, left, top, width, height, cornerRadius);
-                    break;
-            }
-
+            base.DrawShape(g, e);
             base.RenderFinish(g, e);
-        }
-        /// <summary>
-        /// The shape to draw
-        /// </summary>
-        protected shapes shape;
-        /// <summary>
-        /// The fill color of the Shape
-        /// </summary>
-        protected Color fillColor;
-        /// <summary>
-        /// The width in pixels of a border (0 for no border)
-        /// </summary>
-        protected float borderSize = 0;
-        /// <summary>
-        /// The color of the border
-        /// </summary>
-        protected Color borderColor;
-        /// <summary>
-        /// The shape to draw
-        /// </summary>
-        public shapes Shape
-        {
-            get
-            {
-                return shape;
-            }
-            set
-            {
-                shape = value;
-                genTriangle();
-            }
-        }
-        Point[] triPoint = new Point[0];
-        private void genTriangle()
-        {
-            if (shape == shapes.Triangle)
-            {
-                triPoint = new Point[] { new Point(left, top + height), new Point(left + width, top + height), new Point(left + (width / 2), top) };
-            }
-        }
-        /// <summary>
-        /// The fill color of the Shape
-        /// </summary>
-        public Color FillColor
-        {
-            get
-            {
-                return fillColor;
-            }
-            set
-            {
-                fillColor = value;
-            }
-        }
-        /// <summary>
-        /// The color of the border
-        /// </summary>
-        public Color BorderColor
-        {
-            get
-            {
-                return borderColor;
-            }
-            set
-            {
-                borderColor = value;
-            }
-        }
-        /// <summary>
-        /// The width in pixels of a border (0 for no border)
-        /// </summary>
-        public float BorderSize
-        {
-            get
-            {
-                return borderSize;
-            }
-            set
-            {
-                borderSize = value;
-            }
-        }
-        /// <summary>
-        /// The controls height in OM units
-        /// </summary>
-        public override int Height
-        {
-            get
-            {
-                return base.Height;
-            }
-            set
-            {
-                base.Height = value;
-                genTriangle();
-                raiseUpdate(true);
-            }
-        }
-        /// <summary>
-        /// The controls width in OM units
-        /// </summary>
-        public override int Width
-        {
-            get
-            {
-                return base.Width;
-            }
-            set
-            {
-                base.Width = value;
-                genTriangle();
-                raiseUpdate(true);
-            }
-        }
-        /// <summary>
-        /// The distance between the left of the UI and the Left of the control
-        /// </summary>
-        public override int Left
-        {
-            get
-            {
-                return base.Left;
-            }
-            set
-            {
-                base.Left = value;
-                genTriangle();
-                raiseUpdate(true);
-            }
-        }
-        /// <summary>
-        /// The distance between the top of the UI and the Top of the control
-        /// </summary>
-        public override int Top
-        {
-            get
-            {
-                return base.Top;
-            }
-            set
-            {
-                base.Top = value;
-                genTriangle();
-                raiseUpdate(true);
-            }
         }
     }
 }

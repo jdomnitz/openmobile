@@ -62,18 +62,10 @@ namespace Networking
             manager = new ScreenManager(theHost.ScreenCount);
             host.OnWirelessEvent += new WirelessEvent(host_OnWirelessEvent);
             OMPanel p = new OMPanel();
-            OMBasicShape border=new OMBasicShape(20,110,620,410);
-            border.CornerRadius=15;
-            border.Shape=shapes.RoundedRectangle;
-            border.BorderSize = 4F;
-            border.BorderColor=Color.Silver;
-            border.FillColor=Color.Black;
-            OMBasicShape border2 = new OMBasicShape(660, 110, 320, 410);
-            border2.CornerRadius = 15;
-            border2.Shape = shapes.RoundedRectangle;
-            border2.BorderSize = 4F;
-            border2.BorderColor = Color.Silver;
-            border2.FillColor = Color.Black;
+            OMBasicShape border=new OMBasicShape("", 20,110,620,410, 
+                new ShapeData(shapes.RoundedRectangle, Color.Black, Color.Silver, 4, 15));
+            OMBasicShape border2 = new OMBasicShape("", 660, 110, 320, 410,
+                new ShapeData(shapes.RoundedRectangle, Color.Black, Color.Silver, 4, 15));
             OMButton connect = new OMButton(680, 300, 280, 50);
             connect.Text = "Scan";
             connect.Image = imageItem.MISSING;
@@ -91,14 +83,10 @@ namespace Networking
             OMLabel networkName = new OMLabel(745, 120, 200, 50);
             networkName.Format = OpenMobile.Graphics.eTextFormat.BoldShadow;
             OMLabel networkType = new OMLabel(660, 190, 320, 50);
-            OMBasicShape background = new OMBasicShape(0, 0, 1000, 600);
-            background.FillColor = Color.FromArgb(140, Color.Black);
-            OMBasicShape password = new OMBasicShape(300, 200, 400, 175);
-            password.FillColor = Color.Black;
-            password.CornerRadius = 10;
-            password.BorderSize = 4F;
-            password.BorderColor = Color.Red;
-            password.Shape = shapes.RoundedRectangle;
+            OMBasicShape background = new OMBasicShape("",0, 0, 1000, 600,
+                new ShapeData(shapes.Rectangle, Color.Black));
+            OMBasicShape password = new OMBasicShape("", 300, 200, 400, 175,
+                new ShapeData(shapes.RoundedRectangle, Color.Black, Color.Red, 4, 10));
             OMLabel caption = new OMLabel(300, 200, 400, 50);
             caption.Text = "Enter a Password To Connect";
             caption.Color = Color.White;

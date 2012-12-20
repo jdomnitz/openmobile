@@ -229,6 +229,10 @@ namespace OpenMobile.helperFunctions.Graphics
             }
 
             /// <summary>
+            /// Radius to use for corners
+            /// </summary>
+            public int? CornerRadius { get; set; }
+            /// <summary>
             /// Button type to generate
             /// </summary>
             public GraphicStyles Style { get; set; }
@@ -798,7 +802,14 @@ namespace OpenMobile.helperFunctions.Graphics
             /// </summary>
             public GraphicSides Sides { get; set; }
 
-
+            /// <summary>
+            /// Clone this object
+            /// </summary>
+            /// <returns></returns>
+            public GraphicData Clone()
+            {
+                return (GraphicData)this.MemberwiseClone();
+            }
         }
 
         /// <summary>

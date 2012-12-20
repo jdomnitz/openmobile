@@ -18,6 +18,7 @@
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -30,7 +31,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -92,6 +92,10 @@
   <ItemGroup>
     <Compile Include="Animator.cs" />
     <Compile Include="BuiltInComponents.cs" />
+    <Compile Include="Controls\ButtonStrip\ButtonStrip.cs" />
+    <Compile Include="Controls\ControlGroup.cs" />
+    <Compile Include="Controls\OMControlGraphicsBase.cs" />
+    <Compile Include="Controls\OMObjectList.cs" />
     <Compile Include="Controls\PanelTransitionEffects.cs" />
     <Compile Include="Controls\OMContainer.cs" />
     <Compile Include="Controls\OMAnimatedLabel2.cs" />
@@ -129,6 +133,8 @@
     <Compile Include="Data\Messages.cs" />
     <Compile Include="Data\Phone.cs" />
     <Compile Include="Data\PluginSettings.cs" />
+    <Compile Include="Data\Sensors\DataSource.cs" />
+    <Compile Include="Data\Sensors\DataHandler.cs" />
     <Compile Include="Data\SQL.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -146,7 +152,6 @@
     <Compile Include="helperFunctions\Globalization.cs" />
     <Compile Include="helperFunctions\Menu.cs" />
     <Compile Include="helperFunctions\OSK.cs" />
-    <Compile Include="helperFunctions\Sensors.cs" />
     <Compile Include="helperFunctions\StoredData.cs" />
     <Compile Include="IconManager.cs" />
     <Compile Include="Math\Calculation.cs" />
@@ -164,6 +169,8 @@
     <Compile Include="Media\ManagedTagReader.cs" />
     <Compile Include="Media\Playlist.cs" />
     <Compile Include="Net\RSS.cs" />
+    <Compile Include="UIHandler\Notification.cs" />
+    <Compile Include="UIHandler\UIHandler.cs" />
     <Compile Include="OSSpecific.cs" />
     <Compile Include="Platform\IconExtractor.cs" />
     <Compile Include="Platform\imapi2Interop.cs" />
@@ -224,7 +231,22 @@
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -248,7 +270,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

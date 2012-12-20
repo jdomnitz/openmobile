@@ -28,7 +28,7 @@ namespace OpenMobile.Plugin
     /// <summary>
     /// Interface with I/O devices and other raw hardware
     /// </summary>
-    public interface IRawHardware : ISensorProvider
+    public interface IRawHardware
     {
         /// <summary>
         /// Reset the hardware device.

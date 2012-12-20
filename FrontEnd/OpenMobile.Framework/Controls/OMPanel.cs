@@ -136,10 +136,10 @@ namespace OpenMobile.Controls
             raiseUpdate(false);
         }
 
-        internal void raiseUpdate(bool refreshNeeded)
+        internal void raiseUpdate(bool resetHighlighted)
         {
             if (UpdateThisControl != null)
-                UpdateThisControl(refreshNeeded);
+                UpdateThisControl(resetHighlighted);
         }
 
         /// <summary>
@@ -151,6 +151,14 @@ namespace OpenMobile.Controls
             control.Parent = this;
             control.UpdateThisControl += raiseUpdate;
             containedControls.Insert(0, control);
+            raiseUpdate(false);
+        }
+
+        /// <summary>
+        /// Requests a redraw of this panel
+        /// </summary>
+        public void Refresh()
+        {
             raiseUpdate(false);
         }
 
@@ -536,8 +544,8 @@ namespace OpenMobile.Controls
         /// </summary>
         [Obsolete("Always provide a panel name. Method will be removed in next release")]
         public OMPanel()
+            : this(string.Empty)
         {
-            this.name = string.Empty;
         }
         /// <summary>
         /// Create a new panel with an given name
@@ -546,6 +554,8 @@ namespace OpenMobile.Controls
         public OMPanel(string Name)
         {
             this.name = Name;
+            _IsLoaded = new bool[BuiltInComponents.Host.ScreenCount];
+            _IsVisible = new bool[BuiltInComponents.Host.ScreenCount];
         }
         //Added by Borte
         /// <summary>
@@ -660,7 +670,6 @@ namespace OpenMobile.Controls
             }
             return -1;
         }
-        //***
         /// <summary>
         /// Clear all contained controls
         /// </summary>
@@ -694,6 +703,36 @@ namespace OpenMobile.Controls
                 return String.Format("({0})", this.GetHashCode());
             return String.Format("{0}({1})", this.name, this.GetHashCode());
         }
+
+        /// <summary>
+        /// Is this panel loaded for the separate screens?
+        /// </summary>
+        public bool IsClonedForScreens()
+        {
+            return (this.Manager != null);
+        }
+
+        /// <summary>
+        /// Is this panel loaded and ready for transition
+        /// </summary>
+        public bool IsLoaded(int screen)
+        {
+            if (screen >= _IsLoaded.Length)
+                return false;
+            return _IsLoaded[screen];
+        }
+        private bool[] _IsLoaded = null; 
+
+        /// <summary>
+        /// Is this panel currently visible
+        /// </summary>
+        public bool IsVisible(int screen)
+        {
+            if (screen >= _IsVisible.Length)
+                return false;
+            return _IsVisible[screen];
+        }
+        private bool[] _IsVisible = null; 
 
         #region Events
 
@@ -731,25 +770,37 @@ namespace OpenMobile.Controls
             switch (eventType)
             {
                 case eEventType.Entering:
-                    {   // Raise event
+                    {
+                        _IsVisible[screen] = true;
+
+                        // Raise event
                         if (Entering != null)
                             OpenMobile.Threading.SafeThread.Asynchronous(() => Entering(this, screen));
                     }
                     break;
                 case eEventType.Leaving:
-                    {   // Raise event
+                    {
+                        _IsVisible[screen] = false;
+                        
+                        // Raise event
                         if (Leaving != null)
                             OpenMobile.Threading.SafeThread.Asynchronous(() => Leaving(this, screen));
                     }
                     break;
                 case eEventType.Loaded:
-                    {   // Raise event
+                    {
+                        _IsLoaded[screen] = true;
+
+                        // Raise event
                         if (Loaded != null)
                             OpenMobile.Threading.SafeThread.Asynchronous(() => Loaded(this, screen));
                     }
                     break;
                 case eEventType.Unloaded:
-                    {   // Raise event
+                    {
+                        _IsLoaded[screen] = false;
+
+                        // Raise event
                         if (Unloaded != null)
                             OpenMobile.Threading.SafeThread.Asynchronous(() => Unloaded(this, screen));
                     }

@@ -40,7 +40,6 @@ namespace ControlDemo
         static IPluginHost Host;
         static ScreenManager Manager;
         static string PluginName;
-        static OMListItem.subItemFormat subItemformat;
 
         public static void Initialize(string pluginName, ScreenManager manager, IPluginHost host)
         {

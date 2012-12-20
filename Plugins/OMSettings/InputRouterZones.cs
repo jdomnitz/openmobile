@@ -236,11 +236,8 @@ namespace OMSettings
             Screen_LabelKeyboard.TextAlignment = Alignment.CenterRight;
             panelScreen.addControl(Screen_LabelKeyboard);
 
-            OMBasicShape Screen_ShapeKeyboardCurrent = new OMBasicShape(308, 335, 416, 58);
-            Screen_ShapeKeyboardCurrent.Shape = shapes.RoundedRectangle;
-            Screen_ShapeKeyboardCurrent.Name = "Screen_ShapeKeyboardCurrent";
-            Screen_ShapeKeyboardCurrent.BorderColor = Color.White;
-            Screen_ShapeKeyboardCurrent.BorderSize = 1;
+            OMBasicShape Screen_ShapeKeyboardCurrent = new OMBasicShape("Screen_ShapeKeyboardCurrent", 308, 335, 416, 58,
+                new ShapeData(shapes.RoundedRectangle, Color.Empty, Color.White, 1));
             panelScreen.addControl(Screen_ShapeKeyboardCurrent);
 
             OMTextBox Screen_TextBoxKeyboard = new OMTextBox(291, 315, 450, 50);
@@ -296,11 +293,8 @@ namespace OMSettings
             Screen_LabelMouse.TextAlignment = Alignment.CenterRight;
             panelScreen.addControl(Screen_LabelMouse);
 
-            OMBasicShape Screen_ShapeMouseCurrent = new OMBasicShape(308, 435, 416, 58);
-            Screen_ShapeMouseCurrent.Shape = shapes.RoundedRectangle;
-            Screen_ShapeMouseCurrent.Name = "Screen_ShapeMouseCurrent";
-            Screen_ShapeMouseCurrent.BorderColor = Color.White;
-            Screen_ShapeMouseCurrent.BorderSize = 1;
+            OMBasicShape Screen_ShapeMouseCurrent = new OMBasicShape("Screen_ShapeMouseCurrent", 308, 435, 416, 58,
+                new ShapeData(shapes.RoundedRectangle, Color.Empty, Color.White, 1));
             panelScreen.addControl(Screen_ShapeMouseCurrent);
 
             OMTextBox Screen_TextBoxMouse = new OMTextBox(291, 415, 450, 50);

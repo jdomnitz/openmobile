@@ -163,12 +163,8 @@ namespace OMSettings
             providers.SelectedItemColor1 = Color.Blue;
             providers.HighlightColor = Color.White;
             providers.ListItemOffset = 80;
-            OMBasicShape backdrop = new OMBasicShape(270, 275, 660, 250);
-            backdrop.Shape = shapes.RoundedRectangle;
-            backdrop.BorderColor = Color.WhiteSmoke;
-            backdrop.FillColor = Color.Black;
-            backdrop.CornerRadius = 10;
-            backdrop.BorderSize = 2;
+            OMBasicShape backdrop = new OMBasicShape("", 270, 275, 660, 250,
+                new ShapeData(shapes.RoundedRectangle, Color.Black, Color.WhiteSmoke, 2, 10));
             data.addControl(Save4);
             data.addControl(Cancel);
             data.addControl(Heading3);

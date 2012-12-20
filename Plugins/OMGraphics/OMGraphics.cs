@@ -125,9 +125,16 @@ namespace OMGraphics
 
                                                     #endregion
 
+                                                    // Calculate corner radius (based on size of control)
+                                                    int CornerRadius = gd.Height / 4;
+                                                    if (CornerRadius > 30) CornerRadius = 30;
+                                                    if (CornerRadius < 0) CornerRadius = 0;
+                                                    if (gd.CornerRadius != null)
+                                                        CornerRadius = (int)gd.CornerRadius;
+
                                                     // Create outline path
                                                     System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, bmp.Width - 1, bmp.Height - 1);
-                                                    GraphicsPath gp = GetPath_RoundedRectangle(g, rect, 30);
+                                                    GraphicsPath gp = GetPath_RoundedRectangle(g, rect, CornerRadius);
                                                     g.SetClip(gp);
 
                                                     #region Draw ButtonBackground
@@ -351,6 +358,15 @@ namespace OMGraphics
 
                                                         // Get font
                                                         System.Drawing.Font f = (gd.TextFont.Name == null ? new System.Drawing.Font(OpenMobile.Graphics.Font.Arial.Name, 36) : new System.Drawing.Font(gd.TextFont.Name, gd.TextFont.Size));
+
+                                                        // Limit size of font to ensure it doesn't go outside the controls regions
+                                                        SizeF textSize = g.MeasureString(gd.Text, f, new SizeF(rect.Width, rect.Height), sf);
+                                                        float textHeightLimit = (gd.Height * 0.85f);
+                                                        if (textSize.Height > textHeightLimit)
+                                                        {
+                                                            float fontScale = textHeightLimit / textSize.Height;
+                                                            f = new Font(f.FontFamily, f.Size * fontScale);
+                                                        }
 
                                                         // Draw text
                                                         GraphicsPath gpTxt = new GraphicsPath();
@@ -1381,11 +1397,18 @@ namespace OMGraphics
         private static System.Drawing.Drawing2D.GraphicsPath GetPath_RoundedRectangle(System.Drawing.Graphics g, System.Drawing.Rectangle r, int d)
         {
             System.Drawing.Drawing2D.GraphicsPath gp = new System.Drawing.Drawing2D.GraphicsPath();
-            gp.AddArc(r.X, r.Y, d, d, 180, 90);
-            gp.AddArc(r.X + r.Width - d, r.Y, d, d, 270, 90);
-            gp.AddArc(r.X + r.Width - d, r.Y + r.Height - d, d, d, 0, 90);
-            gp.AddArc(r.X, r.Y + r.Height - d, d, d, 90, 90);
-            gp.AddLine(r.X, r.Y + r.Height - d, r.X, r.Y + d / 2);
+            if (d != 0)
+            {
+                gp.AddArc(r.X, r.Y, d, d, 180, 90);
+                gp.AddArc(r.X + r.Width - d, r.Y, d, d, 270, 90);
+                gp.AddArc(r.X + r.Width - d, r.Y + r.Height - d, d, d, 0, 90);
+                gp.AddArc(r.X, r.Y + r.Height - d, d, d, 90, 90);
+                gp.AddLine(r.X, r.Y + r.Height - d, r.X, r.Y + d / 2);
+            }
+            else
+            {
+                gp.AddRectangle(r);
+            }
             return gp;
         }
 

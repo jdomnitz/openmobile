@@ -109,22 +109,8 @@ namespace ControlDemo
             AniLabel_Test.AnimationSingle = OMAnimatedLabel2.eAnimation.SlideUpSmooth;
             pSlideInTest.addControl(AniLabel_Test);
 
-
-            //OpenMobile.helperFunctions.Graphics.TextGraphics.GraphicData tgd = new TextGraphics.GraphicData();
-            //tgd.TextColor = Color.Transparent;
-            //tgd.Text = AniLabel_Test.Text;
-            //tgd.TextFont = AniLabel_Test.Font;
-            //tgd.textAlignment = Alignment.CenterLeft;
-            //tgd.textFormat = AniLabel_Test.Format;
-            //tgd.Height = imgTextEffect.Height;
-            //tgd.Width = imgTextEffect.Width;
-            //imgTextEffect.Image = new imageItem(OpenMobile.helperFunctions.Graphics.TextGraphics.GetImage(tgd));
-
-
-            eTextFormat format = eTextFormat.OutlineNoFillNarrow;
-            Alignment alignment = Alignment.CenterLeft;
-
             OMImage imgTextEffect = new OMImage("imgTextEffect", 50, 450, 900, 35);
+            // Generate static text image
             imgTextEffect.Image = new imageItem(
                 OpenMobile.Graphics.Graphics.GenerateTextTexture(null, 0, 
                 imgTextEffect.Left,
@@ -133,24 +119,17 @@ namespace ControlDemo
                 imgTextEffect.Height,
                 "This is a test of text effects",
                 AniLabel_Test.Font,
-                format,
-                alignment,
+                eTextFormat.OutlineNoFillNarrow,
+                Alignment.CenterLeft,
                 BuiltInComponents.SystemSettings.SkinTextColor,
                 BuiltInComponents.SystemSettings.SkinFocusColor
                 )
                 );
             pSlideInTest.addControl(imgTextEffect);
 
-            //OMAnimatedLabel AniLabel_Org_Test = new OMAnimatedLabel(50, 450, 900, 50);
-            //AniLabel_Org_Test.Name = "AniLabel_Test2";
-            ////AniLabel_Org_Test.SkinDebug = true;
-            ////AniLabel_Org_Test.Text = String.Format("Current time and date is now {0}, this is a really long string so that we can test the animated labels in OpenMobile", DateTime.Now);//"This is a test of OMAnimatedLabel";
-            //AniLabel_Org_Test.Text = "This is a test of OMAnimatedLabel1";
-            //AniLabel_Org_Test.ContiuousAnimation = eAnimation.GlowPulse;
-            //pSlideInTest.addControl(AniLabel_Org_Test);
-
             OMContainer Container = new OMContainer("Container", 200, 200, 300, 150);
             Container.Image = Host.getSkinImage("MediaBorder");
+            Container.ScrollBar_ColorNormal = Color.Transparent;
             pSlideInTest.addControl(Container);
 
             OMImage Image_ContainerTest1 = new OMImage("Image_ContainerTest1", 0, 0, Host.getSkinImage("AlbumIcon_Highlighted"));

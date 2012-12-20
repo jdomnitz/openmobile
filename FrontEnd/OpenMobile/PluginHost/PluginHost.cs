@@ -155,7 +155,6 @@ namespace OpenMobile
         /// <summary>
         /// Controller for zones
         /// </summary>
-        private ZoneHandler _ZoneHandler = null;
         public ZoneHandler ZoneHandler 
         {
             get
@@ -163,6 +162,40 @@ namespace OpenMobile
                 return _ZoneHandler;
             }
         }
+        private ZoneHandler _ZoneHandler = null;
+
+        #endregion
+
+        #region UIHandler
+
+        /// <summary>
+        /// UIHandler
+        /// </summary>
+        public OpenMobile.UI.UIHandler UIHandler
+        {
+            get
+            {
+                return _UIHandler;
+            }
+        }
+        private OpenMobile.UI.UIHandler _UIHandler = null;
+
+        #endregion
+
+        #region Sensorhandler
+
+        /// <summary>
+        /// Sensorhandler
+        /// </summary>
+        public OpenMobile.Data.DataHandler DataHandler
+        {
+            get
+            {
+                return _DataHandler;
+            }
+        }
+        private OpenMobile.Data.DataHandler _DataHandler = null;
+
         #endregion
 
         #region Constructor and initialization
@@ -182,6 +215,11 @@ namespace OpenMobile
 
             // Save reference to the pluginhost for the framework (Do not remove this line!)
             BuiltInComponents.Host = this;
+
+            // Initialize variables
+            _ClientArea = new Rectangle[screenCount];
+            for (int i = 0; i < _ClientArea.Length; i++)
+                _ClientArea[i] = new Rectangle(0, 0, 1000, 600);
 
             // Create local data folder for OM (under users local data)
             if (Directory.Exists(DataPath) == false)
@@ -208,6 +246,12 @@ namespace OpenMobile
             // Initialize zonehandler
             _ZoneHandler = new ZoneHandler();
 
+            // Initialize UIhandler
+            _UIHandler = new OpenMobile.UI.UIHandler();
+
+            // Initialize DataHandler
+            _DataHandler = new OpenMobile.Data.DataHandler();
+
             // Initialize panel transition effects handler
             OpenMobile.Controls.PanelTransitionEffectHandler.Init();
         }
@@ -222,6 +266,9 @@ namespace OpenMobile
 
             // Start zone handler
             ZoneHandler.Start();
+
+            // Load system sensors
+            BuiltInComponents.Sensors.Init();
         }
         /// <summary>
         /// Shutsdown pluginhost
@@ -656,7 +703,7 @@ namespace OpenMobile
         /// <returns></returns>
         private static IBasePlugin getPluginByName(string name)
         {
-            return Core.pluginCollection.Find(x => x.pluginName == name);            
+            return Core.pluginCollection.Find(x => (x !=null && x.pluginName == name));            
         }
 
         #endregion
@@ -848,12 +895,8 @@ namespace OpenMobile
             security.BackgroundColor1 = Color.FromArgb(100, Color.Black);
             security.Forgotten = true;
             security.Priority = (ePriority)6;
-            OMBasicShape box = new OMBasicShape("",250, 130, 500, 300);
-            box.BorderColor = Color.Silver;
-            box.BorderSize = 3F;
-            box.CornerRadius = 15;
-            box.FillColor = Color.FromArgb(0, 0, 15);
-            box.Shape = shapes.RoundedRectangle;
+            OMBasicShape box = new OMBasicShape("",250, 130, 500, 300,
+                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(0, 0, 15), Color.Silver, 3, 15));
             security.addControl(box);
             OMImage img = new OMImage("", 400, 140, 225, 280);
             img.Image = Core.theHost.getSkinImage("Lock");
@@ -886,7 +929,7 @@ namespace OpenMobile
                 lock (Core.RenderingWindows[i])
                 {
                     Core.RenderingWindows[i].TransitionInPanel(security);
-                    Core.RenderingWindows[i].ExecuteTransition("None");
+                    Core.RenderingWindows[i].ExecuteTransition("None", 0);
                     history.setDisabled(i, true);
                     Core.RenderingWindows[i].blockHome = true;
                 }
@@ -897,7 +940,7 @@ namespace OpenMobile
                 lock (Core.RenderingWindows[i])
                 {
                     Core.RenderingWindows[i].TransitionOutPanel(security);
-                    Core.RenderingWindows[i].ExecuteTransition("None");
+                    Core.RenderingWindows[i].ExecuteTransition("None", 0);
                     history.setDisabled(i, false);
                     Core.RenderingWindows[i].blockHome = false;
                 }
@@ -1032,6 +1075,71 @@ namespace OpenMobile
         /// Sets the visibility of DebugInfo
         /// </summary>
         public bool ShowDebugInfo { get; set; }
+
+        /// <summary>
+        /// Gets the area available to plugins for placeing controls
+        /// <param name="Screen"></param>
+        /// </summary>
+        public Rectangle GetClientArea(int Screen)
+        {
+            // Error check
+            if (Screen > _ClientArea.GetUpperBound(0) && Screen < _ClientArea.GetUpperBound(0))
+                return new Rectangle();
+            return _ClientArea[Screen];
+        }
+
+        /// <summary>
+        /// Sets the area available to plugins for placeing controls
+        /// <param name="Screen"></param>
+        /// <param name="Area"></param>
+        /// </summary>
+        public void SetClientArea(int Screen, Rectangle Area)
+        {
+            // Error check
+            if (Screen > _ClientArea.GetUpperBound(0) && Screen < _ClientArea.GetUpperBound(0))
+                return;
+            SetClientArea_Internal(Screen, Area);
+        }
+        /// <summary>
+        /// Sets the area available to plugins for placeing controls (NB! ALL SCREENS ARE SET TO THE SAME SIZE)
+        /// <param name="Area"></param>
+        /// </summary>
+        public void SetClientArea(Rectangle Area)
+        {
+            for (int i = 0; i < _ClientArea.Length; i++)
+                SetClientArea_Internal(i, Area);
+        }
+
+        private void SetClientArea_Internal(int screen, Rectangle area)
+        {
+            _ClientArea[screen] = area;
+            raiseSystemEvent(eFunction.ClientAreaChanged, screen.ToString(), String.Format("{0}|{1}|{2}|{3}", area.X, area.Y, area.Width, area.Height), String.Empty);
+        }
+
+        /// <summary>
+        /// The area available to plugins for placeing controls
+        /// </summary>
+        public Rectangle[] ClientArea 
+        { 
+            get
+            {
+                return _ClientArea;
+            }
+        }
+        private Rectangle[] _ClientArea;
+
+        /// <summary>
+        /// The graphical maximum region for OM to use for rectangles
+        /// </summary>
+        public Rectangle ClientFullArea
+        { 
+            get
+            {
+                return _ClientFullArea;
+            }
+        }
+        private Rectangle _ClientFullArea = new Rectangle(0,0,1000,600);
+
 
         #endregion
 
@@ -1248,6 +1356,10 @@ namespace OpenMobile
                 // Go back to previous history item (using default transition effect)
                 case eFunction.goBack:
                     return execute(eFunction.goBack, arg, "");
+
+                // Go back to home (using default transition effect)
+                case eFunction.goHome:
+                    return execute(eFunction.goHome, arg, "");
 
                 // Unload current Audio/Video player
                 case eFunction.unloadAVPlayer:
@@ -1694,24 +1806,7 @@ namespace OpenMobile
 
                 // Execute transition with the specified effect
                 case eFunction.ExecuteTransition:
-                    string effect;
-
-                    if (_GraphicsLevel == eGraphicsLevel.Minimal)
-                        effect = "None";
-                    else if (string.IsNullOrEmpty(arg2))
-                        effect = "";
-                    else
-                        effect = arg2;
-                    if (int.TryParse(arg1, out ret) == true)
-                    {
-                        lock (Core.RenderingWindows[ret])
-                        {
-                            Core.RenderingWindows[ret].ExecuteTransition(effect);
-                        }
-                        raiseSystemEvent(eFunction.ExecuteTransition, arg1, effect, String.Empty);
-                        return true;
-                    }
-                    return false;
+                    return execute(eFunction.ExecuteTransition, arg1, arg2, String.Empty);
 
                 // Go back to previous panel in history using the specified effect
                 case eFunction.goBack:
@@ -1741,6 +1836,25 @@ namespace OpenMobile
                         history.Dequeue(ret);
                         execute(eFunction.ExecuteTransition, arg1, arg2);
                         return true;
+                    }
+                    return false;
+
+                // Go back to home
+                case eFunction.goHome:
+                    {
+                        // Convert argument to screen
+                        if (int.TryParse(arg1, out ret) == true)
+                        {
+                            if (execute(eFunction.TransitionFromAny, ret))
+                            {
+                                execute(eFunction.hideVideoWindow, ret);
+                                execute(eFunction.clearHistory, ret);
+                                execute(eFunction.TransitionToPanel, ret, "MainMenu");
+                                execute(eFunction.ExecuteTransition, ret, arg2);
+                                raiseSystemEvent(eFunction.goHome, arg1, arg2, String.Empty);
+                                return true;
+                            }
+                        }
                     }
                     return false;
 
@@ -2153,6 +2267,33 @@ namespace OpenMobile
             int ret;
             switch (function)
             {
+                // Execute transition with the specified effect and speed
+                case eFunction.ExecuteTransition:
+                    string effect;
+
+                    if (_GraphicsLevel == eGraphicsLevel.Minimal)
+                        effect = "None";
+                    else if (string.IsNullOrEmpty(arg2))
+                        effect = "";
+                    else
+                        effect = arg2;
+
+                    // Get transition effect
+                    float transSpeed = 0;
+                    if (!string.IsNullOrEmpty(arg3))
+                        float.TryParse(arg3, out transSpeed);
+
+                    if (int.TryParse(arg1, out ret) == true)
+                    {
+                        lock (Core.RenderingWindows[ret])
+                        {
+                            Core.RenderingWindows[ret].ExecuteTransition(effect, transSpeed);
+                        }
+                        raiseSystemEvent(eFunction.ExecuteTransition, arg1, effect, String.Empty);
+                        return true;
+                    }
+                    return false;
+
                 // Force refresh of data from a data provider
                 case eFunction.refreshData:
                     return ((IDataProvider)getPluginByName(arg1)).refreshData(arg2, arg3);
@@ -2173,7 +2314,7 @@ namespace OpenMobile
                         lock (Core.RenderingWindows[ret])
                         {
                             Core.RenderingWindows[ret].TransitionInPanel(panel);
-                            raiseSystemEvent(eFunction.TransitionToPanel, arg1, arg2, arg3);
+                            raiseSystemEvent(eFunction.TransitionToPanel, arg1, (panel.OwnerPlugin != null ? panel.OwnerPlugin.pluginName : ""), panel.Name);
                             if (!panel.UIPanel)
                                 history.Enqueue(ret, arg2, arg3, panel.Forgotten);
                         }
@@ -2192,7 +2333,7 @@ namespace OpenMobile
                         {
                             Core.RenderingWindows[ret].TransitionOutPanel(panel);
                         }
-                        raiseSystemEvent(eFunction.TransitionFromPanel, arg1, arg2, arg3);
+                        raiseSystemEvent(eFunction.TransitionFromPanel, arg1, (panel.OwnerPlugin != null ? panel.OwnerPlugin.pluginName : ""), panel.Name);
                         return true;
                     }
                     return false;
@@ -2576,6 +2717,10 @@ namespace OpenMobile
         public void raiseSystemEvent(eFunction e, string arg1, string arg2, string arg3)
         {
             System.Diagnostics.Debug.WriteLine(String.Format("raiseSystemEvent( eFunction: {0}, arg1: {1}, arg2: {2}, arg3: {3}", e, arg1, arg2, arg3));
+
+            // Update system sensors (Volume)
+
+
             try
             {
                 if (OnSystemEvent != null)
@@ -3095,30 +3240,6 @@ namespace OpenMobile
                             ret[i] = ret[i].Replace(Path.Combine(Application.StartupPath, "Skins", String.Empty), String.Empty);
                         data = ret;
                         return;
-
-                    // Get a list of available sensors
-                    case eGetData.GetAvailableSensors:
-                        {
-                            if (string.IsNullOrEmpty(name))
-                            {
-                                List<Sensor> Sensors = new List<Sensor>();
-                                foreach (ISensorProvider g in Core.pluginCollection.FindAll(p => typeof(ISensorProvider).IsInstanceOfType(p)))
-                                {
-                                    Sensors.AddRange(g.getAvailableSensors(eSensorType.All));
-
-                                }
-                                data = Sensors;
-                                return;
-                            }
-                            else
-                            {
-                                plugin = Core.pluginCollection.Find(s => s.pluginName == name);
-                                if (plugin == null)
-                                    return;
-                                data = ((IRawHardware)plugin).getAvailableSensors(eSensorType.All);
-                            }
-                            return;
-                        }
 
                     // Get a list of available keyboards
                     case eGetData.GetAvailableKeyboards:

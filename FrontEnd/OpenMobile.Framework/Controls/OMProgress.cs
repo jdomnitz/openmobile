@@ -30,8 +30,31 @@ namespace OpenMobile.Controls
     /// A progress bar control
     /// </summary>
     [System.Serializable]
-    public class OMProgress : OMControl, ISensorDisplay 
+    public class OMProgress : OMLabel
     {
+        #region Properties
+
+        public enum Styles { simple, shape, image }
+
+        /// <summary>
+        /// The graphic style of this progress bar
+        /// </summary>
+        public Styles Style
+        {
+            get
+            {
+                return this._Style;
+            }
+            set
+            {
+                if (this._Style != value)
+                {
+                    this._Style = value;
+                }
+            }
+        }
+        private Styles _Style;
+
         /// <summary>
         /// progress value
         /// </summary>
@@ -62,20 +85,6 @@ namespace OpenMobile.Controls
         protected Color backColor = Color.FromArgb(180, Color.White);
 
         /// <summary>
-        /// The background color of the progress bar
-        /// </summary>
-        public Color BackgroundColor
-        {
-            get
-            {
-                return backColor;
-            }
-            set
-            {
-                backColor = value;
-            }
-        }
-        /// <summary>
         /// Display the progress bar vertically instead
         /// </summary>
         public bool Vertical
@@ -91,35 +100,6 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Create the control with the default size and location
-        /// </summary>
-        public OMProgress()
-            : base("", 0, 0, 200, 200)
-        {
-        }
-        /// <summary>
-        /// Create a new progress bar
-        /// </summary>
-        /// <param name="x">Left</param>
-        /// <param name="y">Top</param>
-        /// <param name="w">Width</param>
-        /// <param name="h">Height</param>
-        public OMProgress(int x, int y, int w, int h)
-            : base("", x, y, w, h)
-        {
-        }
-        /// <summary>
-        /// Create a new progress bar
-        /// </summary>
-        /// <param name="x">Left</param>
-        /// <param name="y">Top</param>
-        /// <param name="w">Width</param>
-        /// <param name="h">Height</param>
-        public OMProgress(string name, int x, int y, int w, int h)
-            : base(name, x, y, w, h)
-        {
-        }
-        /// <summary>
         /// A number between the minimum and the maximum value
         /// </summary>
         public int Value
@@ -132,8 +112,7 @@ namespace OpenMobile.Controls
             {
                 if ((value >= this.minimum) && (value <= this.maximum))
                 {
-                    this.value = value;
-                    raiseUpdate(false);
+                    SetValue(value, value.ToString());
                 }
             }
         }
@@ -152,7 +131,14 @@ namespace OpenMobile.Controls
                     return;
                 if (Value > value)
                     Value = value;
+
+                // Reset overlay image
+                if (ImageProgressBar.image != null)
+                    _ImageProgressBarOverlay = null;
+
                 maximum = value;
+
+                Refresh();
             }
         }
         /// <summary>
@@ -167,37 +153,186 @@ namespace OpenMobile.Controls
             set
             {
                 minimum = value;
-            }
-        }
-        /// <summary>
-        /// Represents the first of two colors for the progress bars gradient
-        /// </summary>
-        public Color FirstColor
-        {
-            get
-            {
-                return firstColor;
-            }
-            set
-            {
-                firstColor = value;
+
+                // Reset overlay image
+                if (ImageProgressBar.image != null)
+                    _ImageProgressBarOverlay = null;
+
+                Refresh();
             }
         }
 
         /// <summary>
-        /// Represents the second of two colors for the progress bars gradient
+        /// Controls where the text is drawn on the control relative to the control itself
         /// </summary>
-        public Color SecondColor
+        public Point TextOffset
         {
             get
             {
-                return secondColor;
+                return this._TextOffset;
             }
             set
             {
-                secondColor = value;
+                if (this._TextOffset != value)
+                {
+                    this._TextOffset = value;
+                }
             }
         }
+        private Point _TextOffset;
+
+        /// <summary>
+        /// True = Renders the progressbar value 
+        /// </summary>
+        public bool ShowProgressBarValue
+        {
+            get
+            {
+                return this._ShowProgressBarValue;
+            }
+            set
+            {
+                if (this._ShowProgressBarValue != value)
+                {
+                    this._ShowProgressBarValue = value;
+                }
+            }
+        }
+        private bool _ShowProgressBarValue;
+        
+
+        #endregion
+
+        private void SetValue(int value, string text)
+        {
+            if ((value >= this.minimum) && (value <= this.maximum))
+            {
+                this.value = value;
+
+                // Reset overlay image
+                UpdateImageProgressBarOverlay();
+
+                // Update progressbar text
+                if (_ShowProgressBarValue)
+                    this.Text = text;
+
+                Refresh();
+            }
+        }
+
+        /// <summary>
+        /// Background image to use
+        /// </summary>
+        public imageItem ImageBackground
+        {
+            get
+            {
+                return this._ImageBackground;
+            }
+            set
+            {
+                if (this._ImageBackground != value)
+                {
+                    this._ImageBackground = value;
+                    Refresh();
+                }
+            }
+        }
+        private imageItem _ImageBackground;
+
+        /// <summary>
+        /// Image for the actual bar 
+        /// </summary>
+        public imageItem ImageProgressBar
+        {
+            get
+            {
+                return this._ImageProgressBar;
+            }
+            set
+            {
+                if (this._ImageProgressBar != value)
+                {
+                    this._ImageProgressBar = value;
+                    //UpdateImageProgressBarOverlay();
+                    Refresh();
+                }
+            }
+        }
+        private imageItem _ImageProgressBar;
+        private OImage _ImageProgressBarOverlay;
+
+        private void UpdateImageProgressBarOverlay()
+        {
+            if (ImageProgressBar.image != null)
+            {
+                if (_ImageProgressBarOverlay != null)
+                    _ImageProgressBarOverlay.Dispose();
+
+                _ImageProgressBarOverlay = (OImage)_ImageProgressBar.image.Clone();
+                int Percentage = (int)(((float)value / (float)maximum) * 100f);
+                _ImageProgressBarOverlay.Crop(Percentage, OImage.CropBase.Left);
+            }
+        }
+
+        #region Constructors
+
+        private void Init()
+        {
+        }
+
+        /// <summary>
+        /// Create the control with the default size and location
+        /// </summary>
+        [Obsolete("Use OMProgress(string name, int x, int y, int w, int h) instead")]
+        public OMProgress()
+            : base("", 0, 0, 200, 200)
+        {
+            Init();
+        }
+        /// <summary>
+        /// Create a new progress bar
+        /// </summary>
+        /// <param name="x">Left</param>
+        /// <param name="y">Top</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        [Obsolete("Use OMProgress(string name, int x, int y, int w, int h) instead")]
+        public OMProgress(int x, int y, int w, int h)
+            : base("", x, y, w, h)
+        {
+            Init();
+        }
+        /// <summary>
+        /// Create a new progress bar
+        /// </summary>
+        /// <param name="x">Left</param>
+        /// <param name="y">Top</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        public OMProgress(string name, int x, int y, int w, int h)
+            : base(name, x, y, w, h)
+        {
+            Init();
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Properties for the progressbarshape
+        /// </summary>
+        public ShapeData ProgressBarShapeData
+        {
+            get
+            {
+                return this._ProgressBarShapeData;
+            }
+            set
+            {
+                this._ProgressBarShapeData = value;
+            }
+        }
+        private ShapeData _ProgressBarShapeData = new ShapeData();
 
         /// <summary>
         /// Draws the control
@@ -208,54 +343,91 @@ namespace OpenMobile.Controls
         {
             base.RenderBegin(g, e);
 
-            //float tmp = OpacityFloat;
-            //if (Mode == eModeType.transitioningIn)
-            //    tmp = e.globalTransitionIn;
-            //else if (Mode == eModeType.transitioningOut)
-            //    tmp = e.globalTransitionOut;
-            g.FillRectangle(new Brush(Color.FromArgb((int)(backColor.A * _RenderingValue_Alpha), backColor)), left, top, width, height);
-            if (vertical == false)
-                g.FillRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * firstColor.A), firstColor), Color.FromArgb((int)(_RenderingValue_Alpha * secondColor.A), secondColor), Gradient.Horizontal), left, top, (int)(width * ((float)value / maximum)), height);
-            else
-                g.FillRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * secondColor.A), secondColor), Color.FromArgb((int)(_RenderingValue_Alpha * firstColor.A), firstColor), Gradient.Vertical), left, top + height - (int)(height * ((float)value / maximum)), width, (int)(height * ((float)value / maximum)));
+            // Render background (if any)
+            if (background != Color.Transparent)
+                using (Brush Fill = new Brush(Color.FromArgb((int)(this.GetAlphaValue255(background.A)), background)))
+                    g.FillRectangle(Fill, left, top, width, height);
+
+            switch (_Style)
+            {
+                case Styles.image:
+                    {
+                        // Draw background image
+                        g.DrawImage(ImageBackground.image, left, top, width, height, base._RenderingValue_Alpha, eAngle.Normal);
+
+                        // Draw progress bar with color overlay
+                        g.DrawImage(_ImageProgressBarOverlay, left, top, width, height, base._RenderingValue_Alpha, eAngle.Normal);
+                    }
+                    break;
+                case Styles.shape:
+                    {
+                        //base.DrawShape(g, e);
+
+                        Rectangle rect = this.Region;
+                        rect = new Rectangle(left, top, (int)(width * ((float)value / maximum)), height);
+                        rect.Inflate(-1, -1, true);
+
+                        if (ImageBackground.image == null)
+                            ImageBackground = new imageItem(new OImage(base.DrawShapeToBMP(_ShapeData, this.Region)));
+                        if (ImageProgressBar.image == null)
+                        {
+                            ImageProgressBar = new imageItem(new OImage(base.DrawShapeToBMP(_ProgressBarShapeData, this.Region)));
+                            UpdateImageProgressBarOverlay();
+                        }
+
+                        // Draw background image
+                        g.DrawImage(ImageBackground.image, left, top, width, height, base._RenderingValue_Alpha, eAngle.Normal);
+
+                        // Draw progress bar with color overlay
+                        g.DrawImage(_ImageProgressBarOverlay, left, top, width, height, base._RenderingValue_Alpha, eAngle.Normal);
+
+                        //base.DrawShape(g, rect, _ProgressBarShape, _ProgressBarFillColor1, _ProgressBarBorderColor, _ProgressBarBorderSize, _ProgressBarCornerRadius, _ProgressBarGraphicPoints, this.SkinDebug, Color.Yellow); 
+                    }
+                    break;
+                case Styles.simple:
+                    {
+                        using (Brush b = new Brush(Color.FromArgb((int)this.GetAlphaValue255(backColor.A), backColor)))
+                            g.FillRectangle(b, left, top, width, height);
+                        if (vertical == false)
+                        {
+                            using (Brush b = new Brush(Color.FromArgb((int)this.GetAlphaValue255(firstColor.A), firstColor), Color.FromArgb((int)this.GetAlphaValue255(secondColor.A), secondColor), Gradient.Horizontal))
+                                g.FillRectangle(b, left, top, (int)(width * ((float)value / maximum)), height);
+                        }
+                        else
+                        {
+                            using (Brush b = new Brush(Color.FromArgb((int)this.GetAlphaValue255(firstColor.A), firstColor), Color.FromArgb((int)this.GetAlphaValue255(secondColor.A), secondColor), Gradient.Vertical))
+                                g.FillRectangle(b, left, top + height - (int)(height * ((float)value / maximum)), width, (int)(height * ((float)value / maximum)));
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            // Draw text (if any)
+            if (_text != "")
+            {
+                if (_RefreshGraphic)
+                    textTexture = g.GenerateTextTexture(textTexture, left, top, width, height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
+                g.DrawImage(textTexture, (left + _TextOffset.X), (top + _TextOffset.Y), width, height, _RenderingValue_Alpha);
+            }
 
             base.RenderFinish(g, e);
         }
 
-        /// <summary>
-        /// sensor to be watched
-        /// </summary>
-        protected Plugin.Sensor _Sensor = null;
-        /// <summary>
-        /// Sets the sensor to subscribe to
-        /// </summary>
-        public string sensorName
+        internal override void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
         {
-            get
+            try
             {
-                if (_Sensor == null)
-                    return "";
-                return _Sensor.Name;
+                SetValue(Convert.ToInt32(dataSource.Value), dataSource.FormatedValue);
             }
-            set
-            {
-                if (String.IsNullOrEmpty(value))
-                {
-                    if (_Sensor != null)
-                        _Sensor = null;
-                    return;
-                }
-                Plugin.Sensor sensor = helperFunctions.Sensors.getPluginByName(value);
-                if (sensor != null)
-                {
-                    this._Sensor = sensor;
-                    sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
-                    {
-                        this.Value = (int)sensor.Value;
-                        raiseUpdate(false);
-                    });
-                }
-            }
+            catch { }
+            Refresh();
+        }
+
+        internal override void DataSource_Missing()
+        {
+            SetValue(0, "ERR");
         }
 
     }

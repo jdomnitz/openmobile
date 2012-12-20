@@ -113,7 +113,8 @@ namespace OpenMobile.Controls
                 if (_text == value)
                     return;
                 base.Text = value;
-                height = (int)Graphics.Graphics.MeasureString(this.Text, Font, this.Width - 1).Height + 1;
+                height = (int)Graphics.Graphics.MeasureString(_text, _font, _textFormat, _textAlignment, this.width - 1).Height + 1;
+                
                 letterHeight = Graphics.Graphics.MeasureString("A", Font).Height + 1;
             }
         }

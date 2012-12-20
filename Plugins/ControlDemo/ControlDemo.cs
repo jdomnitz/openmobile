@@ -55,6 +55,10 @@ namespace ControlDemo
             theHost = host;
             manager = new ScreenManager(theHost.ScreenCount);
 
+            OMLabel lblDataSourceTest = new OMLabel("lblDataSourceTest", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, 50);
+            lblDataSourceTest.Text = "cpu load is {System.CPU.Load} / mem usage is {System.Memory.UsedPercent}";
+            p.addControl(lblDataSourceTest);
+
             /*
             OMAnimatedLabel label1 = new OMAnimatedLabel(50, 100, 200, 30);
             label1.Text = "This is an example of scrolling text how well does it work";
@@ -241,10 +245,8 @@ namespace ControlDemo
             p.addControl(btnPopupMenu);
 
 
-            OMBasicShape shp = new OMBasicShape("shp", 0, 350, 400, 200);
-            shp.Shape = shapes.Rectangle;
-            shp.FillColor = Color.FromArgb(0xFF, 25, 25, 25);
-            shp.BorderSize = 0;
+            OMBasicShape shp = new OMBasicShape("shp", 0, 350, 400, 200,
+                new ShapeData(shapes.Rectangle, Color.FromArgb(0xFF, 25, 25, 25)));
             p.addControl(shp);
 
             OMImage TestImg = new OMImage("TestImg", 10, 400);
@@ -256,6 +258,14 @@ namespace ControlDemo
             TestImg2.FitControlToImage = true;
             TestImg2.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(100, 60, ButtonGraphic.ImageTypes.ButtonBackground, ButtonGraphic.GraphicStyles.Style1));
             p.addControl(TestImg2);
+
+            // OMList2 test
+            OMButton btnOMList2Test = DefaultControls.GetButton("btnOMList2Test", 320, 100, 300, 90, "", "OMList2");
+            btnOMList2Test.Tag = "OMList2Test";
+            btnOMList2Test.OnClick += new userInteraction(btnCommonTransitionToPanel_OnClick);
+            p.addControl(btnOMList2Test);
+            // Load OMList2 panel
+            panelOMList2Test.Initialize(this.pluginName, manager, theHost);
 
             // Playlist test
             OMButton btnPlayList = DefaultControls.GetButton("btnPlayList", 320, 200, 300, 90, "", "PlayList");
@@ -306,10 +316,21 @@ namespace ControlDemo
             t.Enabled = true;
             p.Entering += new PanelEvent(p_Entering);
             p.Leaving += new PanelEvent(p_Leaving);
-            manager.loadPanel(p);
-            manager.DefaultPanel = p.Name;
-
+            manager.loadPanel(p, true);
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void btnCommonTransitionToPanel_OnClick(OMControl sender, int screen)
+        {
+            // Get panel name from button tag
+            string panelName = sender.Tag as string;
+            if (String.IsNullOrEmpty(panelName))
+                return;
+
+            // Transition to panel
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, panelName);
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
         void btnSlideInTest_OnClick(OMControl sender, int screen)
@@ -381,9 +402,27 @@ namespace ControlDemo
         void p_Entering(OMPanel sender, int screen)
         {
             theHost.SendStatusData(screen, eDataType.Info, this, String.Format("Entering panel: {0}", sender.Name));
+
+            // Createa a buttonstrip
+            ButtonStrip PopUpMenuStrip = new ButtonStrip(sender.OwnerPlugin.pluginName, sender.Name, "PopUpMenuStrip");
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Item1", theHost.UIHandler.PopUpMenu.ButtonSize, 255, theHost.getSkinImage("Aicons|5-content-email"), "Send email", false, null, null, null));
+            // Add some more buttons to the buttonstrip
+            for (int i = 2; i < 9; i++)
+            {
+                PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Item" + i.ToString(),
+                    theHost.UIHandler.PopUpMenu.ButtonSize,
+                    255,
+                    theHost.getSkinImage("Aicons|5-content-email"),
+                    "Send email" + i.ToString(),
+                    true,
+                    null, null, null));
+            }
+
+            // Load the buttonstrip
+            theHost.UIHandler.PopUpMenu.SetButtonStrip(screen, PopUpMenuStrip);
+
         }
 
-        int frame;
         void btnDialog_OnClick(OMControl sender, int screen)
         {
             OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this.pluginName, sender.Parent.Name);

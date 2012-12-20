@@ -149,15 +149,10 @@ namespace OMDir
             left.ItemColor1 = right.ItemColor1;
             folder = theHost.getSkinImage("Folder", true).image;
             SafeThread.Asynchronous(delegate() { loadRoot(left); }, theHost);
-            OMBasicShape border = new OMBasicShape(10, 146, 975, 383);
-            border.BorderColor = Color.Silver;
-            border.BorderSize = 4F;
-            border.CornerRadius = 10;
-            border.FillColor = right.ItemColor1;
-            border.Shape = shapes.RoundedRectangle;
-            OMBasicShape back = new OMBasicShape(0, 0, 1000, 600);
-            back.Shape = shapes.Rectangle;
-            back.FillColor = Color.Black;
+            OMBasicShape border = new OMBasicShape("", 10, 146, 975, 383,
+                new ShapeData(shapes.RoundedRectangle, right.ItemColor1, Color.Silver, 4, 10));
+            OMBasicShape back = new OMBasicShape("", 0, 0, 1000, 600,
+                new ShapeData(shapes.Rectangle, Color.Black));
             p.addControl(back);
             p.addControl(border);
             p.addControl(caption);

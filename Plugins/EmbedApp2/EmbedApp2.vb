@@ -74,7 +74,7 @@ Public Class EmbedApp1
 
     Public Function loadPanel(ByVal name As String, ByVal screen As Integer) As OpenMobile.Controls.OMPanel Implements OpenMobile.Plugin.IHighLevel.loadPanel
         m_Screen = screen
-        Return New OMPanel
+        Return New OMPanel("")
     End Function
 
     Public Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean Implements OpenMobile.Plugin.IBasePlugin.incomingMessage

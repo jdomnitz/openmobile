@@ -164,7 +164,9 @@ namespace OMHal
                     foreach (DriveInfo drive in DriveInfo.GetDrives())
                         if ((drive.DriveType == DriveType.CDRom)||(drive.DriveType==DriveType.Removable))
                             if (drive.IsReady == true)
-                                raiseStorageEvent(eMediaType.NotSet,false, drive.RootDirectory.ToString());
+                            {
+                                raiseStorageEvent(eMediaType.NotSet, false, drive.RootDirectory.ToString());
+                            }
                     break;
                 case "34": //Set Volume
                     if (int.TryParse(arg2, out ret))

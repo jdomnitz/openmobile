@@ -44,4 +44,25 @@ namespace OpenMobile.Controls
         /// </summary>
         void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance);
     }
+
+    /// <summary>
+    /// A interface that's executed before any actual mouse events are executed on child controls
+    /// </summary>
+    public interface IMousePreview
+    {
+        /// <summary>
+        /// Mouse moved over the control
+        /// </summary>
+        void MouseMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance);
+
+        /// <summary>
+        /// MouseDown event for this control
+        /// </summary>
+        void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation);
+
+        /// <summary>
+        /// MouseUp event for this control
+        /// </summary>
+        void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance);
+    }
 }

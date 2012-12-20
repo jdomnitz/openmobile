@@ -162,6 +162,30 @@ namespace OpenMobile.Plugin
         /// </summary>
         Rectangle GetVideoPosition(int Screen);
         /// <summary>
+        /// Gets the area available to plugins for placeing controls
+        /// <param name="Screen"></param>
+        /// </summary>
+        Rectangle GetClientArea(int Screen);
+        /// <summary>
+        /// The area available to plugins for placeing controls
+        /// </summary>
+        Rectangle[] ClientArea { get; }
+        /// <summary>
+        /// The graphical maximum region for OM to use for rectangles
+        /// </summary>
+        Rectangle ClientFullArea { get; }
+        /// <summary>
+        /// Sets the area available to plugins for placeing controls
+        /// <param name="Screen"></param>
+        /// <param name="Area"></param>
+        /// </summary>
+        void SetClientArea(int Screen, Rectangle Area);
+        /// <summary>
+        /// Sets the area available to plugins for placeing controls (NB! ALL SCREENS ARE SET TO THE SAME SIZE)
+        /// <param name="Area"></param>
+        /// </summary>
+        void SetClientArea(Rectangle Area);
+        /// <summary>
         /// Sets the graphics level the application and plugins should use (represents the computers video performance)
         /// </summary>
         eGraphicsLevel GraphicsLevel { get; set; }
@@ -660,6 +684,16 @@ namespace OpenMobile.Plugin
         /// Multimedia zones
         /// </summary>
         ZoneHandler ZoneHandler { get; }
+
+        /// <summary>
+        /// Statusbarhandler
+        /// </summary>
+        OpenMobile.UI.UIHandler UIHandler { get; }
+
+        /// <summary>
+        /// DataHandler
+        /// </summary>
+        OpenMobile.Data.DataHandler DataHandler { get; }
 
         /// <summary>
         /// Wrapper for calling a method on each screen

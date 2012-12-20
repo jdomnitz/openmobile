@@ -107,15 +107,28 @@ namespace OMMediaDB
                 if (bCon.State != ConnectionState.Open)
                     bCon.Open();
                 bool status;
+
+                // Get amount of records to be deleted
+                long RecordCountStart = 0;
+                using (SqliteCommand cmd = new SqliteCommand("SELECT COUNT(*) FROM tblSongs", bCon))
+                    RecordCountStart = (long)cmd.ExecuteScalar();
+
                 using (SqliteCommand cmd = new SqliteCommand("DELETE FROM tblSongs; DELETE FROM tblAlbum", bCon))
-                {
-                    status= (cmd.ExecuteNonQuery() > 0);
-                }
+                    status = (cmd.ExecuteNonQuery() > 0);
+
+                // Get amount of records after deletion
+                long RecordCountEnd = 0;
+                using (SqliteCommand cmd = new SqliteCommand("SELECT COUNT(*) FROM tblSongs", bCon))
+                    RecordCountEnd = (long)cmd.ExecuteScalar();
+
                 theHost.raiseMediaEvent(eFunction.MediaDBCleared, null, this.pluginName);
-                theHost.SendStatusData(eDataType.PopUp, this, "", "Database Cleared!");
+                //theHost.SendStatusData(eDataType.PopUp, this, "", "Database Cleared!");
+                theHost.UIHandler.AddNotification(new Notification(this, null, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, "Database Cleared!", String.Format("{0} records removed from database", RecordCountStart - RecordCountEnd)));
+
                 return status;
             }
         }
+
         public List<string> listPlaylists()
         {
             if (con == null)
@@ -178,7 +191,7 @@ namespace OMMediaDB
             }
             //Phase 3 - Extract info from everything unindexed
             startCount = toBeIndexed.Count;
-            abc +=new TimerCallback(def);
+            abc +=new TimerCallback(UpdateIndexStatus);
             tmr=new System.Threading.Timer(abc,null,0,2000);
             doWork();
         }
@@ -207,38 +220,99 @@ namespace OMMediaDB
         private int lastCount;
         private string lastURL;
         private string currentURL="";
-        private void def(object state)
+        private Notification NotificationIndexingStatus = null;
+        long RecordCountStart = 0;
+        private bool IndexingCompleted = false;
+
+        private void UpdateIndexStatus(object state)
         {
-            if ((toBeIndexed == null)||(toBeIndexed.Count==0))
+
+            if (IndexingCompleted)
             {
                 if (tmr!=null)
                     tmr.Dispose();
                 theHost.raiseMediaEvent(eFunction.MediaIndexingCompleted, null, this.pluginName);
-                theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
+
+                long RecordCountEnd = 0;
+                try
+                {
+                    // Get amount of records
+                    using (SqliteCommand cmd = new SqliteCommand("SELECT COUNT(*) FROM tblSongs", bCon))
+                        RecordCountEnd = (long)cmd.ExecuteScalar();
+                }
+                catch { }
+                // Update notification
+                NotificationIndexingStatus.Header = "Media search completed";
+                long RecordCountNew = RecordCountEnd - RecordCountStart;
+
+                // Set notification as passive to allow user to clear the message
+                NotificationIndexingStatus.State = Notification.States.Passive;
+
+                if (RecordCountNew > 0)
+                {
+                    if (RecordCountNew > 1)
+                        NotificationIndexingStatus.Text = String.Format("{0} new songs indexed.", RecordCountEnd - RecordCountStart);
+                    else
+                        NotificationIndexingStatus.Text = String.Format("{0} new song indexed.", RecordCountEnd - RecordCountStart);
+                }
+                else
+                {   // Remove notification
+                    NotificationIndexingStatus.Text = "All known locations searched, no new songs found.";
+                    theHost.UIHandler.RemoveNotification(NotificationIndexingStatus, true);
+                }
+
+                RecordCountStart = 0;
                 return;
             }
             if (lastURL == currentURL)
-                theHost.SendStatusData(eDataType.Update, this, "", String.Format("Indexing: {0}",System.IO.Path.GetFileName(currentURL)));
+            {   // Progress is slow, show name of file we're working with
+                NotificationIndexingStatus.Text = String.Format("Prosessing: {0}", System.IO.Path.GetFileName(currentURL));
+            }
             else
-                theHost.SendStatusData(eDataType.Update, this, "", String.Format("Indexing: {0}", (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count) - lastCount) / 2).ToString() + " songs/sec)"));
+            {   // Normal status update
+                string IndexStatusString = String.Format("Progress: {0}", (((startCount - toBeIndexed.Count) / (double)startCount) * 100).ToString("0.00") + "% (" + (((startCount - toBeIndexed.Count) - lastCount) / 2).ToString() + " songs/sec)");
+
+                if (NotificationIndexingStatus == null)
+                {   // Create new notification
+                    NotificationIndexingStatus = new Notification(this, "NotificationIndexingStatus", theHost.getSkinImage("Icons|Icon-MusicIndexer").image, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, "Searching for new media", IndexStatusString);
+                    NotificationIndexingStatus.Global = true;
+                    NotificationIndexingStatus.State = Notification.States.Active;
+                    theHost.UIHandler.AddNotification(NotificationIndexingStatus);
+                }
+                else
+                {
+                    NotificationIndexingStatus.Text = IndexStatusString;
+                }
+            }
             lastURL = currentURL;
             lastCount=(startCount-toBeIndexed.Count);
         }
         private void doWork()
         {
+            IndexingCompleted = false;
+            // Get amount of records
+            if (RecordCountStart == 0)
+            {
+                using (SqliteCommand cmd = new SqliteCommand("SELECT COUNT(*) FROM tblSongs", bCon))
+                    RecordCountStart = (long)cmd.ExecuteScalar();
+            }
+
             while (true)
             {
                 if (toBeIndexed == null)
-                    return;
+                    break;
+                
                 lock (toBeIndexed)
                 {
                     if (toBeIndexed.Count == 0)
-                        return;
+                        break;
                     currentURL = toBeIndexed[toBeIndexed.Count-1];
                     toBeIndexed.RemoveAt(toBeIndexed.Count - 1);
                 }
                 processFile(currentURL);
             }
+
+            IndexingCompleted = true;
         }
 
         public bool indexFile(string file)

@@ -19,7 +19,7 @@ namespace OpenMobile.Controls
     /// A gauge control for openMobile
     /// </summary>
     [System.Serializable]
-    public class OMGauge : OMControl, ISensorDisplay 
+    public class OMGauge : OMControl 
     {
         #region Private Attributes
         private float minValue;
@@ -929,6 +929,7 @@ namespace OpenMobile.Controls
             return new Rectangle(controlLeft, controlTop, controlWidth, controlHeight);
         }
 
+        /*
         /// <summary>
         /// sensor to be watched
         /// </summary>
@@ -964,5 +965,6 @@ namespace OpenMobile.Controls
                 }
             }
         }
+        */
     }
 }

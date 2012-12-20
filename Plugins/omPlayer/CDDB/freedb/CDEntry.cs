@@ -207,7 +207,6 @@ namespace Freedb
 			{
 
 				// check for comment
-
 				if (line[0] == '#')
 					continue;
 

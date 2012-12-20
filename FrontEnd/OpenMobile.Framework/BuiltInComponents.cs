@@ -24,6 +24,7 @@ using OpenMobile.Data;
 using OpenMobile.Plugin;
 using OpenMobile.helperFunctions;
 using OpenMobile.Graphics;
+using OpenMobile.Framework.Data;
 
 namespace OpenMobile
 {
@@ -142,6 +143,7 @@ namespace OpenMobile
             //Setting SkinColor = new Setting(SettingTypes.Text, "UI.SkinColor", "Foreground", "Skin foreground color (R,G,B)");
             Setting SkinFocusColor = new Setting(SettingTypes.Text, "UI.SkinFocusColor", "Focus color", "Skin focus color (R,G,B)");
             Setting SkinTextColor = new Setting(SettingTypes.Text, "UI.SkinTextColor", "Text color", "Skin text color (R,G,B)");
+            Setting UseIconOverlayColor = new Setting(SettingTypes.MultiChoice, "UI.UseIconOverlayColor", String.Empty, "Overlay icons with text color", Setting.BooleanList, Setting.BooleanList);
             //Setting TransitionSpeed = new Setting(SettingTypes.MultiChoice, "UI.TransitionSpeed", "Transition speed", "Transition; speed multiplier", PanelTransitionEffectHandler.GetEffectNames(), PanelTransitionEffectHandler.GetEffectNames());
             Setting TransitionSpeed = PanelTransitionEffectHandler.Setting_TransitionSpeed();
             Setting TransitionDefaultEffect = PanelTransitionEffectHandler.Setting_TransitionDefaultEffect();
@@ -160,6 +162,7 @@ namespace OpenMobile
                 SkinTextColor.Value = settings.getSetting("UI.SkinTextColor");
                 TransitionSpeed.Value = settings.getSetting("UI.TransitionSpeed");
                 TransitionDefaultEffect.Value = settings.getSetting("UI.TransitionDefaultEffect");
+                UseIconOverlayColor.Value = settings.getSetting("UI.UseIconOverlayColor");
             }
             gl.Add(graphics);
             gl.Add(volume);
@@ -170,6 +173,7 @@ namespace OpenMobile
             //gl.Add(SkinColor);
             gl.Add(SkinFocusColor);
             gl.Add(SkinTextColor);
+            gl.Add(UseIconOverlayColor);
             gl.Add(TransitionSpeed);
             gl.Add(TransitionDefaultEffect);
             gl.OnSettingChanged += new SettingChanged(SettingsChanged);
@@ -225,6 +229,10 @@ namespace OpenMobile
                         BuiltInComponents.SystemSettings.ShowGestures = StoredData.GetBool("UI.ShowGestures");
                         break;
 
+                    case "UI.UseIconOverlayColor":
+                        BuiltInComponents.SystemSettings.UseIconOverlayColor = StoredData.GetBool("UI.UseIconOverlayColor");
+                        break;
+
                     default:
                         theHost.execute(eFunction.settingsChanged, setting.Name);
                         break;
@@ -245,21 +253,22 @@ namespace OpenMobile
                 // Set default values
                 StoredData.SetDefaultValue("UI.SkinFocusColor", "00,00,FF");
                 StoredData.SetDefaultValue("UI.SkinTextColor", "FF,FF,FF");
-                StoredData.SetDefaultValue("UI.MinGraphics", false.ToString());
-                StoredData.SetDefaultValue("UI.VolumeChangesVisible", true.ToString());
-                StoredData.SetDefaultValue("UI.ShowCursor", false.ToString());
-                StoredData.SetDefaultValue("UI.ShowDebugInfo", false.ToString());
-                StoredData.SetDefaultValue("UI.ShowGestures", false.ToString());
-                StoredData.SetDefaultValue("UI.TransitionSpeed", (1.0f).ToString());
+                StoredData.SetDefaultValue("UI.UseIconOverlayColor", false);
+                StoredData.SetDefaultValue("UI.MinGraphics", false);
+                StoredData.SetDefaultValue("UI.VolumeChangesVisible", true);
+                StoredData.SetDefaultValue("UI.ShowCursor", false);
+                StoredData.SetDefaultValue("UI.ShowDebugInfo", false);
+                StoredData.SetDefaultValue("UI.ShowGestures", false);
+                StoredData.SetDefaultValue("UI.TransitionSpeed", 1.0f);
                 StoredData.SetDefaultValue("UI.TransitionDefaultEffect", "Random");
-                StoredData.SetDefaultValue("OpenGL.VSync", false.ToString());
+                StoredData.SetDefaultValue("OpenGL.VSync", false);
 
                 // Update local data variables (for speed)
-                BuiltInComponents.Host.ShowDebugInfo = helperFunctions.StoredData.GetBool("UI.ShowDebugInfo");
-                BuiltInComponents.Host.ShowCursors = helperFunctions.StoredData.GetBool("UI.ShowCursor");
+                BuiltInComponents.Host.ShowDebugInfo = StoredData.GetBool("UI.ShowDebugInfo");
+                BuiltInComponents.Host.ShowCursors = StoredData.GetBool("UI.ShowCursor");
                 _SkinTextColor = StoredData.GetColor("UI.SkinTextColor", Color.White);
                 _SkinFocusColor = StoredData.GetColor("UI.SkinFocusColor", Color.Blue);
-                _SkinFocusColor = StoredData.GetColor("UI.SkinFocusColor", Color.Blue);
+                _UseIconOverlayColor = StoredData.GetBool("UI.UseIconOverlayColor");
             }
 
             /// <summary>
@@ -403,6 +412,26 @@ namespace OpenMobile
             }
             private static string _TransitionDefaultEffect = "";
 
+            /// <summary>
+            /// OM System setting: Use icon overlay?
+            /// </summary>
+            public static bool UseIconOverlayColor
+            {
+                get
+                {
+                    return _UseIconOverlayColor;
+                }
+                set
+                {
+                    if (_UseIconOverlayColor != value)
+                    {
+                        StoredData.Set("UI.UseIconOverlayColor", value);
+                        _UseIconOverlayColor = value;
+                    }
+                }
+            }
+            private static bool _UseIconOverlayColor;
+        
 
             private static OpenMobile.Graphics.Color _SkinFocusColor = Color.Blue;
             /// <summary>
@@ -439,6 +468,120 @@ namespace OpenMobile
                 }
             }
 
+        }
+
+        /// <summary>
+        /// System data providers
+        /// </summary>
+        public static class Sensors
+        {
+            /// <summary>
+            /// Init the system data providers
+            /// </summary>
+            static public void Init()
+            {
+                // Time with HH:MM
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "", 1000, null, DateTimeProvider));
+
+                // Time with HH:MM:SS
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "Long", 1000, null, DateTimeProvider));
+
+                // Time with local time
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "Local", 1000, null, DateTimeProvider));
+
+                // Date
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "", 1000, null, DateTimeProvider));
+
+                // Date long
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "Long", 1000, null, DateTimeProvider));
+
+                // Date text
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "Text", 1000, null, DateTimeProvider));
+
+                // CPU Usage
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "CPU", "Load", 1000, DataSource.DataTypes.percent, null, ComputerDataProvider));
+
+                // CPU Usage
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "Free", 1000, DataSource.DataTypes.bytes, null, ComputerDataProvider));
+
+                // CPU Usage
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "Used", 1000, DataSource.DataTypes.bytes, null, ComputerDataProvider));
+
+                // CPU Usage
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "UsedPercent", 1000, DataSource.DataTypes.percent, null, ComputerDataProvider));
+
+                // CPU Usage
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "ProcessUsed", 1000, DataSource.DataTypes.bytes, null, ComputerDataProvider));
+
+            }
+
+
+
+            static private System.Diagnostics.PerformanceCounter cpuCounter;
+            static private System.Diagnostics.PerformanceCounter freeRamCounter;
+            static private System.Diagnostics.Process currentProcess;
+
+            static private object ComputerDataProvider(OpenMobile.Data.DataSource dataSource, out bool result, object[] param)
+            {
+                result = true;
+                switch (dataSource.FullName)
+                {
+                    case "System.CPU.Load":
+                        if (cpuCounter == null)
+                        {
+                            cpuCounter = new System.Diagnostics.PerformanceCounter();
+                            cpuCounter.CategoryName = "Processor";
+                            cpuCounter.CounterName = "% Processor Time";
+                            cpuCounter.InstanceName = "_Total";
+                            cpuCounter.NextValue(); //init
+                        }
+                        return (float)System.Math.Round(cpuCounter.NextValue(), 0);
+
+                    case "System.Memory.Free":
+                        if (freeRamCounter == null)
+                            freeRamCounter = new System.Diagnostics.PerformanceCounter("Memory", "Available MBytes");
+                        return freeRamCounter.NextValue() * 1048576;
+                    case "System.Memory.Used":
+                        if (Configuration.RunningOnWindows)
+                            return (int)(OpenMobile.Framework.Windows.getUsedPhysicalMemory());
+                        return null;
+                    case "System.Memory.UsedPercent":
+                        if (Configuration.RunningOnWindows)
+                            return (float)System.Math.Round(OpenMobile.Framework.Windows.getUsedMemoryPercent(), 2);
+                        return null;
+                    case "System.Memory.ProcessUsed":
+                        if (currentProcess == null)
+                            currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+                        return currentProcess.WorkingSet64;
+
+                    default:
+                        result = false;
+                        return null;
+                }
+            }
+
+            static private object DateTimeProvider(OpenMobile.Data.DataSource dataSource, out bool result, object[] param)
+            {
+                result = true;
+                switch (dataSource.FullName)
+                {
+                    case "System.Time":
+                        return DateTime.Now.ToShortTimeString();
+                    case "System.Time.Long":
+                        return DateTime.Now.ToLongTimeString();
+                    case "System.Time.Local":
+                        return DateTime.Now.ToLocalTime();
+                    case "System.Date":
+                        return DateTime.Now.ToShortDateString();
+                    case "System.Date.Long":
+                        return DateTime.Now.ToLongDateString();
+                    case "System.Date.Text":
+                        return DateTime.Now.ToString("D");
+                    default:
+                        result = false;
+                        return null;
+                }
+            }
         }
 
     }

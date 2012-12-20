@@ -141,10 +141,8 @@ namespace OMDialog
                             DT.Left = (500 - (DT.Width / 2));
                         }
 
-                        OMBasicShape Shape_AccessBlock2 = new OMBasicShape(0, 0, 1000, 600);
-                        Shape_AccessBlock2.Name = "Dialog_Shape_AccessBlock";
-                        Shape_AccessBlock2.Shape = shapes.Rectangle;
-                        Shape_AccessBlock2.FillColor = Color.FromArgb(150, Color.Black);
+                        OMBasicShape Shape_AccessBlock2 = new OMBasicShape("Dialog_Shape_AccessBlock", 0, 0, 1000, 600,
+                            new ShapeData(shapes.Rectangle, Color.FromArgb(150, Color.Black)));
                         Panel.addControl(Shape_AccessBlock2);
                         OMButton Button_Cancel2 = new OMButton(0, 0, 1000, 600);
                         Button_Cancel2.Name = "Dialog_Button_None";
