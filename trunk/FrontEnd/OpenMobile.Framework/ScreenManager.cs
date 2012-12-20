@@ -57,6 +57,15 @@ namespace OpenMobile.Framework
         /// Create a new screen manager
         /// </summary>
         /// <param name="numberOfScreens"></param>
+        public ScreenManager()
+        {
+            screens = BuiltInComponents.Host.ScreenCount;
+            panels = new List<OMPanel[]>();
+        }
+        /// <summary>
+        /// Create a new screen manager
+        /// </summary>
+        /// <param name="numberOfScreens"></param>
         public ScreenManager(int numberOfScreens)
         {
             screens = numberOfScreens;
@@ -171,7 +180,7 @@ namespace OpenMobile.Framework
                 for (int i = 0; i < screens; i++)
                     if (i == screens - 1)
                     {
-                        collection[i] = source;
+                        collection[i] = source.Clone();
                         collection[i].Manager = this;
                         collection[i].ActiveScreen = i;
                     }
@@ -195,16 +204,16 @@ namespace OpenMobile.Framework
                 return;
             if (source.Length != screens)
                 return;
-            lock (this)
+            //lock (this)
             {
                 // Set this screenmanager as manager for the new panel
                 for (int i = 0; i < source.Length; i++)
                 {
-                    source[i].Manager = this;
-                    source[i].ActiveScreen = i;
+                    loadPanel(source[i]);
+                    //source[i].Manager = this;
+                    //source[i].ActiveScreen = i;
                 }
-
-                panels.Add(source);
+                //panels.Add(source);
             }
         }
 

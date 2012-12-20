@@ -327,12 +327,8 @@ namespace OMRadio
 
             #region RadioInfo field
 
-            OMBasicShape Shape_StationInfoBorder = new OMBasicShape(180, 110, 800, 110);
-            Shape_StationInfoBorder.Name = "Shape_StationInfoBorder";
-            Shape_StationInfoBorder.Shape = shapes.RoundedRectangle;
-            Shape_StationInfoBorder.FillColor = Color.FromArgb(58, 58, 58);
-            Shape_StationInfoBorder.BorderColor = Color.Gray;
-            Shape_StationInfoBorder.BorderSize = 2;
+            OMBasicShape Shape_StationInfoBorder = new OMBasicShape("Shape_StationInfoBorder", 180, 110, 800, 110,
+                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(58, 58, 58), Color.Gray, 2));
             panelMain.addControl(Shape_StationInfoBorder);
 
             OMLabel Radio_StationName = new OMLabel(Shape_StationInfoBorder.Left + 10, Shape_StationInfoBorder.Top + 5, Shape_StationInfoBorder.Width - 20 , 40);
@@ -413,12 +409,8 @@ namespace OMRadio
 
             #region Channel List
 
-            OMBasicShape Shape_ChannelListBorder = new OMBasicShape(Shape_StationInfoBorder.Left, Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height + 10, Shape_StationInfoBorder.Width, 290);
-            Shape_ChannelListBorder.Name = "Shape_ChannelListBorder";
-            Shape_ChannelListBorder.Shape = shapes.RoundedRectangle;
-            Shape_ChannelListBorder.FillColor = Color.FromArgb(58, 58, 58);
-            Shape_ChannelListBorder.BorderColor = Color.Gray;
-            Shape_ChannelListBorder.BorderSize = 2;
+            OMBasicShape Shape_ChannelListBorder = new OMBasicShape("Shape_ChannelListBorder", Shape_StationInfoBorder.Left, Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height + 10, Shape_StationInfoBorder.Width, 290,
+                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(58, 58, 58), Color.Gray, 2));
             panelMain.addControl(Shape_ChannelListBorder);
 
             OMLabel Label_StationListHeader = new OMLabel(Shape_ChannelListBorder.Left + 5, Shape_ChannelListBorder.Top, Shape_ChannelListBorder.Width - 10, 30);
@@ -461,22 +453,16 @@ namespace OMRadio
             OMPanel panelListView = new OMPanel("ListView");
             panelListView.Tag = "source";
 
-            OMBasicShape Shape_AccessBlock = new OMBasicShape(0, 0, 1000, 600);
-            Shape_AccessBlock.Name = "Shape_AccessBlock";
-            Shape_AccessBlock.Shape = shapes.Rectangle;
-            Shape_AccessBlock.FillColor = Color.FromArgb(150, Color.Black);
+            OMBasicShape Shape_AccessBlock = new OMBasicShape("Shape_AccessBlock", 0, 0, 1000, 600,
+                new ShapeData(shapes.Rectangle, Color.FromArgb(150, Color.Black)));
             panelListView.addControl(Shape_AccessBlock);
             OMButton Button_Cancel = new OMButton(0, 0, 1000, 600);
             Button_Cancel.Name = "Button_Cancel";
             Button_Cancel.OnClick += new userInteraction(Button_Cancel_OnClick);
             panelListView.addControl(Button_Cancel);
 
-            OMBasicShape Shape_Border = new OMBasicShape(200, 120, 600, 400);
-            Shape_Border.Name = "Shape_Border";
-            Shape_Border.Shape = shapes.RoundedRectangle;
-            Shape_Border.FillColor = Color.FromArgb(58, 58, 58);
-            Shape_Border.BorderColor = Color.Gray;
-            Shape_Border.BorderSize = 2;
+            OMBasicShape Shape_Border = new OMBasicShape("Shape_Border", 200, 120, 600, 400,
+                new ShapeData(shapes.Rectangle, Color.FromArgb(58, 58, 58), Color.Gray, 2));
             panelListView.addControl(Shape_Border);
 
             OMLabel Label_Header = new OMLabel(Shape_Border.Left + 5, Shape_Border.Top + 5, Shape_Border.Width - 10, 30);
@@ -484,22 +470,15 @@ namespace OMRadio
             Label_Header.Text = "Select tuned content source:";
             panelListView.addControl(Label_Header);
 
-            OMBasicShape Shape_Line = new OMBasicShape(Shape_Border.Left, Label_Header.Top + Label_Header.Height, Shape_Border.Width, 2);
-            Shape_Line.Name = "Shape_Line";
-            Shape_Line.Shape = shapes.Rectangle;
-            Shape_Line.FillColor = Color.Gray;
-            Shape_Line.BorderColor = Color.Transparent;
+            OMBasicShape Shape_Line = new OMBasicShape("Shape_Line", Shape_Border.Left, Label_Header.Top + Label_Header.Height, Shape_Border.Width, 2,
+                new ShapeData(shapes.Rectangle, Color.Gray));
             panelListView.addControl(Shape_Line);
 
-            OMBasicShape Shape_Background = new OMBasicShape(Shape_Border.Left + (int)Shape_Border.BorderSize, Shape_Line.Top + Shape_Line.Height, Shape_Border.Width - ((int)Shape_Border.BorderSize * 2), 355);
-            Shape_Background.Name = "Shape_Background";
-            Shape_Background.Shape = shapes.Rectangle;
-            Shape_Background.FillColor = Color.Black;
+            OMBasicShape Shape_Background = new OMBasicShape("Shape_Background", Shape_Border.Left + (int)Shape_Border.ShapeData.BorderSize, Shape_Line.Top + Shape_Line.Height, Shape_Border.Width - ((int)Shape_Border.ShapeData.BorderSize * 2), 355,
+                new ShapeData(shapes.Rectangle, Color.Black));
             panelListView.addControl(Shape_Background);
-            OMBasicShape Shape_Background_Lower = new OMBasicShape(Shape_Background.Left, Shape_Background.Top + Shape_Background.Height - 13, Shape_Background.Width, 20);
-            Shape_Background_Lower.Name = "Shape_Background_Lower";
-            Shape_Background_Lower.Shape = shapes.RoundedRectangle;
-            Shape_Background_Lower.FillColor = Color.Black;
+            OMBasicShape Shape_Background_Lower = new OMBasicShape("Shape_Background_Lower", Shape_Background.Left, Shape_Background.Top + Shape_Background.Height - 13, Shape_Background.Width, 20,
+                new ShapeData(shapes.RoundedRectangle, Color.Black));
             panelListView.addControl(Shape_Background_Lower);
 
             OMList ListView_List = new OMList(Label_Header.Left, Shape_Background.Top + 10, Label_Header.Width, Shape_Background.Height - 10);
@@ -525,22 +504,16 @@ namespace OMRadio
             OMPanel panelMessageBox = new OMPanel("MessageBox");
             panelMessageBox.Tag = "preset";
 
-            OMBasicShape Shape_AccessBlock2 = new OMBasicShape(0, 0, 1000, 600);
-            Shape_AccessBlock2.Name = "MessageBox_Shape_AccessBlock";
-            Shape_AccessBlock2.Shape = shapes.Rectangle;
-            Shape_AccessBlock2.FillColor = Color.FromArgb(150, Color.Black);
+            OMBasicShape Shape_AccessBlock2 = new OMBasicShape("MessageBox_Shape_AccessBlock", 0, 0, 1000, 600,
+                new ShapeData(shapes.Rectangle, Color.FromArgb(150, Color.Black)));
             panelMessageBox.addControl(Shape_AccessBlock2);
             OMButton Button_Cancel2 = new OMButton(0, 0, 1000, 600);
             Button_Cancel2.Name = "MessageBox_Button_Cancel";
             Button_Cancel2.OnClick += new userInteraction(Button_Cancel_OnClick);
             panelMessageBox.addControl(Button_Cancel2);
 
-            OMBasicShape Shape_Border2 = new OMBasicShape(250, 175, 500, 250);
-            Shape_Border2.Name = "MessageBox_Shape_Border";
-            Shape_Border2.Shape = shapes.RoundedRectangle;
-            Shape_Border2.FillColor = Color.FromArgb(58, 58, 58);
-            Shape_Border2.BorderColor = Color.Gray;
-            Shape_Border2.BorderSize = 2;
+            OMBasicShape Shape_Border2 = new OMBasicShape("MessageBox_Shape_Border", 250, 175, 500, 250,
+                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(58, 58, 58), Color.Gray, 2));
             panelMessageBox.addControl(Shape_Border2);
 
             OMLabel Label_Header2 = new OMLabel(Shape_Border2.Left + 5, Shape_Border2.Top + 5, Shape_Border2.Width - 10, 30);
@@ -548,22 +521,16 @@ namespace OMRadio
             Label_Header2.Text = "Delete preset?";
             panelMessageBox.addControl(Label_Header2);
 
-            OMBasicShape Shape_Line2 = new OMBasicShape(Shape_Border2.Left, Label_Header2.Top + Label_Header2.Height, Shape_Border2.Width, 2);
-            Shape_Line2.Name = "MessageBox_Shape_Line";
-            Shape_Line2.Shape = shapes.Rectangle;
-            Shape_Line2.FillColor = Color.Gray;
-            Shape_Line2.BorderColor = Color.Transparent;
+            OMBasicShape Shape_Line2 = new OMBasicShape("MessageBox_Shape_Line", Shape_Border2.Left, Label_Header2.Top + Label_Header2.Height, Shape_Border2.Width, 2,
+                new ShapeData(shapes.Rectangle, Color.Gray));
             panelMessageBox.addControl(Shape_Line2);
 
-            OMBasicShape Shape_Background2 = new OMBasicShape(Shape_Border2.Left + (int)Shape_Border2.BorderSize, Shape_Line2.Top + Shape_Line2.Height, Shape_Border2.Width - ((int)Shape_Border2.BorderSize * 2), 205);
-            Shape_Background2.Name = "MessageBox_Shape_Background";
-            Shape_Background2.Shape = shapes.Rectangle;
-            Shape_Background2.FillColor = Color.Black;
+            OMBasicShape Shape_Background2 = new OMBasicShape("MessageBox_Shape_Background", Shape_Border2.Left + (int)Shape_Border2.ShapeData.BorderSize, Shape_Line2.Top + Shape_Line2.Height, Shape_Border2.Width - ((int)Shape_Border2.ShapeData.BorderSize * 2), 205,
+                new ShapeData(shapes.Rectangle, Color.Black));
             panelMessageBox.addControl(Shape_Background2);
-            OMBasicShape Shape_Background_Lower2 = new OMBasicShape(Shape_Background2.Left, Shape_Background2.Top + Shape_Background2.Height - 13, Shape_Background2.Width, 20);
-            Shape_Background_Lower2.Name = "MessageBox_Shape_Background_Lower";
-            Shape_Background_Lower2.Shape = shapes.RoundedRectangle;
-            Shape_Background_Lower2.FillColor = Color.Black;
+            
+            OMBasicShape Shape_Background_Lower2 = new OMBasicShape("MessageBox_Shape_Background_Lower", Shape_Background2.Left, Shape_Background2.Top + Shape_Background2.Height - 13, Shape_Background2.Width, 20,
+                new ShapeData(shapes.RoundedRectangle, Color.Black));
             panelMessageBox.addControl(Shape_Background_Lower2);
 
             OMLabel Label_Info = new OMLabel(Shape_Border2.Left + 5, Shape_Background2.Top + 5, Shape_Border2.Width - 10, 135);

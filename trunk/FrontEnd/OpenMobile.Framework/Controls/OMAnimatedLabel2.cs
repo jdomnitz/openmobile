@@ -1446,7 +1446,14 @@ namespace OpenMobile.Controls
                 if (_Animation == value)
                     return;
                 _Animation = value;
-                Refresh();
+
+                // Cancel any ongoing animations
+                Animation_Cancel();
+
+                // Wake thread up (in case it's sleeping)
+                if (!_Animation_Running)
+                    if (_Animation_Thread_Run != null)
+                        _Animation_Thread_Run.Set();
             }
         }
 
@@ -1507,6 +1514,7 @@ namespace OpenMobile.Controls
         private SizeF GetStringSize(string Text)
         {
             return Graphics.Graphics.MeasureString(Text, this.Font, _textFormat);
+            return Graphics.Graphics.MeasureString(Text, _font, _textFormat, _textAlignment, _Region);
         }
 
         private void SleepEx(int delayMS, ref bool AbortVar)
@@ -1845,7 +1853,7 @@ namespace OpenMobile.Controls
                         //g.DrawImage(rd.Texture, rd.Position.Left, rd.Position.Top, rd.Position.Width + 5, rd.Position.Height, this.GetAlphaValue(rd.Alpha));
                         Point Dimensions = new Point((rd.Position.Width + 5) * rd.Scale.X, rd.Position.Height * rd.Scale.Y);
                         Point Offset = new Point((Dimensions.X - (rd.Position.Width + 5)) / 2, (Dimensions.Y - rd.Position.Height) / 2);
-                        g.DrawImage(rd.Texture, rd.Position.Left - Offset.X, rd.Position.Top - Offset.Y, Dimensions.X, Dimensions.Y, this.GetAlphaValue(rd.Alpha));
+                        g.DrawImage(rd.Texture, rd.Position.Left - Offset.X, rd.Position.Top - Offset.Y, Dimensions.X, Dimensions.Y, this.GetAlphaValue1(rd.Alpha));
                         // Debug: Draw text limits
                         if (this._SkinDebug)
                             using (Pen PenDebug = new Pen(new Brush(Color.Green), 1))

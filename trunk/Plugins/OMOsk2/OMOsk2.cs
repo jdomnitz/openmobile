@@ -307,9 +307,8 @@ namespace OMOsk2
                         // Reset charset to default
                         CharSet = 0;
 
-                        OMBasicShape Shape_AccessBlock2 = new OMBasicShape("Shape_AccessBlock2", 0, 0, 1000, 600);
-                        Shape_AccessBlock2.Shape = shapes.Rectangle;
-                        Shape_AccessBlock2.FillColor = Color.FromArgb(DT.BackgroundOpacity, Color.Black);
+                        OMBasicShape Shape_AccessBlock2 = new OMBasicShape("Shape_AccessBlock2", 0, 0, 1000, 600,
+                            new ShapeData(shapes.Rectangle, Color.FromArgb(DT.BackgroundOpacity, Color.Black)));
                         if (DT.MaskInput)
                             Shape_AccessBlock2.Tag = DT.MaskInput;
                         Panel.addControl(Shape_AccessBlock2);

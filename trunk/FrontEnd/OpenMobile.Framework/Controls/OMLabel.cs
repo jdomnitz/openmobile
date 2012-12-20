@@ -29,7 +29,7 @@ namespace OpenMobile.Controls
     /// A label for displaying text
     /// </summary>
     [System.Serializable]
-    public class OMLabel : OMControl, ISensorDisplay
+    public class OMLabel : OMControlGraphicsBase
     {
         /// <summary>
         /// Label Text
@@ -48,6 +48,10 @@ namespace OpenMobile.Controls
         /// </summary>
         protected Color _color = BuiltInComponents.SystemSettings.SkinTextColor;
         /// <summary>
+        /// The background color of the textbox
+        /// </summary>
+        protected Color background = Color.Transparent;
+        /// <summary>
         /// Sets the font of the text
         /// </summary>
         protected Font _font = new Font(Font.GenericSansSerif, 18F);
@@ -60,6 +64,14 @@ namespace OpenMobile.Controls
         /// </summary>
         protected string _displaySensorName = "";
 
+        /// <summary>
+        /// Get's the size of the text contained in this control
+        /// </summary>
+        public Size GetSizeOfContainedText()
+        {
+            SizeF s = Graphics.Graphics.MeasureString(_text, _font, _textFormat, _textAlignment, _Region);
+            return new Size(s.Width, s.Height);
+        }
         
         /// <summary>
         /// Sets the color of the text
@@ -77,6 +89,24 @@ namespace OpenMobile.Controls
                 raiseUpdate(false);
             }
         }
+
+        /// <summary>
+        /// Controls the background color of the textbox
+        /// </summary>
+        public Color BackgroundColor
+        {
+            get
+            {
+                return background;
+            }
+            set
+            {
+                background = value;
+                _RefreshGraphic = true;
+                raiseUpdate(false);
+            }
+        }
+
         /// <summary>
         /// Create a new OMLabel
         /// </summary>
@@ -112,6 +142,20 @@ namespace OpenMobile.Controls
         {
             Init();
         }
+        /// <summary>
+        /// Create a new OMLabel with the specified text
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        public OMLabel(string name, int x, int y, int w, int h, string text)
+            : base(name, x, y, w, h)
+        {
+            Init();
+            this.Text = text;
+        }
         private void Init()
         {
             this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
@@ -141,7 +185,7 @@ namespace OpenMobile.Controls
                     return;
                 _outlineColor = value;
                 _RefreshGraphic = true;
-                raiseUpdate(false);
+                Refresh();
             }
         }
 
@@ -160,7 +204,7 @@ namespace OpenMobile.Controls
                     return;
                 _font = value;
                 _RefreshGraphic = true;
-                raiseUpdate(false);
+                Refresh();
             }
         }
 
@@ -179,7 +223,7 @@ namespace OpenMobile.Controls
                     return;
                 _font.Size = value;
                 _RefreshGraphic = true;
-                raiseUpdate(false);
+                Refresh();
             }
         }
 
@@ -198,13 +242,17 @@ namespace OpenMobile.Controls
             }
             set
             {
-                if (value == null)
-                    value = String.Empty;
-                if (_text == value)
-                    return;
+                //if (value == null)
+                //    value = String.Empty;
+                //if (_text == value)
+                //    return;
                 _text = value;
+                
+                // Check for datasource present
+                base.DataSource_InLine(ref _text);
+
                 _RefreshGraphic = true;
-                raiseUpdate(false);
+                Refresh();
             }
         }
         /// <summary>
@@ -222,7 +270,7 @@ namespace OpenMobile.Controls
                     return;
                 _textFormat = value;
                 _RefreshGraphic = true;
-                raiseUpdate(false);
+                Refresh();
             }
         }
         /// <summary>
@@ -240,7 +288,7 @@ namespace OpenMobile.Controls
                     return;
                 _textAlignment = value;
                 _RefreshGraphic = true;
-                raiseUpdate(false);
+                Refresh();
             }
         }
 
@@ -257,56 +305,41 @@ namespace OpenMobile.Controls
             if (String.IsNullOrEmpty(_text))
                 return;
 
-            //float tmp = OpacityFloat;
-            //if (this.Mode == eModeType.transitioningIn)
-            //    tmp = e.globalTransitionIn;
-            //else if (this.Mode == eModeType.transitioningOut)
-            //    tmp = e.globalTransitionOut;
-
+            // Render background (if any)
+            if (background != Color.Transparent)
+            {
+                using (Brush Fill = new Brush(Color.FromArgb((int)(this.GetAlphaValue255(background.A)), background)))
+                {
+                    g.FillRectangle(Fill, left, top, width, height);
+                }
+            }
 
             if (_RefreshGraphic)
-                textTexture = g.GenerateTextTexture(textTexture, left, top, width + 5, height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
-            g.DrawImage(textTexture, left, top, width + 5, height, _RenderingValue_Alpha);
+                textTexture = g.GenerateTextTexture(textTexture, left, top, width, height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
+            g.DrawImage(textTexture, left, top, width, height, _RenderingValue_Alpha);
 
             base.RenderFinish(g, e);
         }
 
-        /// <summary>
-        /// sensor to be watched
-        /// </summary>
-        protected Plugin.Sensor _Sensor = null;
-        /// <summary>
-        /// Sets the sensor to subscribe to
-        /// </summary>
-        public string sensorName
+        internal override void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
         {
-            get
-            {
-                if (_Sensor == null)
-                    return "";
-                return _Sensor.Name;
-            }
-            set
-            {
-                if (String.IsNullOrEmpty(value))
-                {
-                    if (_Sensor != null)
-                        _Sensor = null;
-                    return;
-                }
-                Plugin.Sensor sensor = helperFunctions.Sensors.getPluginByName(value);
-                if (sensor != null)
-                {
-                    this._Sensor = sensor;
-                    this.Text = _Sensor.FormatedValue();
-                    sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
-                    {
-                        this.Text = sender.FormatedValue();
-                        raiseUpdate(false);
-                    });
-                }
-            }
+            _text = dataSource.FormatedValue;
+            _RefreshGraphic = true;
+            Refresh();
         }
 
+        internal override void DataSource_Missing()
+        {
+            _text = "ERR";
+            _RefreshGraphic = true;
+            Refresh();
+        }
+
+        internal override void DataSource_InLine_Changed(string s)
+        {
+            _text = s;
+            _RefreshGraphic = true;
+            Refresh();
+        }
     }
 }

@@ -468,10 +468,8 @@ namespace OpenMobile.helperFunctions.Forms
         {
             this.Forgotten = Forgotten;
 
-            Shape_AccessBlock = new OMBasicShape(0, 0, 1000, 600);
-            Shape_AccessBlock.Name = name + "_Shape_AccessBlock";
-            Shape_AccessBlock.Shape = shapes.Rectangle;
-            Shape_AccessBlock.FillColor = Color.FromArgb(150, Color.Black);
+            Shape_AccessBlock = new OMBasicShape(name + "_Shape_AccessBlock", 0, 0, 1000, 600,
+                new ShapeData(shapes.Rectangle, Color.FromArgb(150, Color.Black), Color.Empty, 1));
             this.addControl(Shape_AccessBlock);
             OMButton Button_Cancel2 = new OMButton(name + "_Button_Cancel", 0, 0, 1000, 600);
             this.addControl(Button_Cancel2);

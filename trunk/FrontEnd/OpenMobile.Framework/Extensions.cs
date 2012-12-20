@@ -93,6 +93,15 @@ namespace OpenMobile.Framework
             return returnData;
         }
 
-
+        /// <summary>
+        /// Clone a generic list's elements provided they have a clone method
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="listToClone"></param>
+        /// <returns></returns>
+        public static IList<T> Clone<T>(IList<T> listToClone) where T : ICloneable
+        {
+            return ((List<T>)listToClone).ConvertAll(x => (T)x.Clone());
+        }
     }
 }

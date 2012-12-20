@@ -151,9 +151,17 @@ namespace OpenMobile.Controls
         /// </summary>
         public FadingEdge.GraphicData SoftEdgeData { get; set; }
         /// <summary>
-        /// SoftEdge image
+        /// SoftEdge image for the sides
         /// </summary>
-        private OImage imgSoftEdge = null;
+        private OImage imgSoftEdgeSides = null;
+        /// <summary>
+        /// SoftEdge image for the top
+        /// </summary>
+        private OImage imgSoftEdgeTop = null;
+        /// <summary>
+        /// SoftEdge image for the bottom
+        /// </summary>
+        private OImage imgSoftEdgeBottom = null;
         
         /// <summary>
         /// The background color of the list (Default: Transparent)
@@ -665,20 +673,6 @@ namespace OpenMobile.Controls
                     if ((width == 0) || (height == 0))
                         return;
 
-                    // Use soft edges?
-                    if (UseSoftEdges)
-                    {
-                        if (Background != Color.Transparent)
-                        {
-                            if (imgSoftEdge == null || imgSoftEdge.Width != Width || imgSoftEdge.Height != Height)
-                            {   // Generate image
-                                SoftEdgeData.Width = Width;
-                                SoftEdgeData.Height = Height;
-                                imgSoftEdge = FadingEdge.GetImage(SoftEdgeData);
-                            }
-                        }
-                    }
-
                     //float tmp = OpacityFloat;
                     //if (this.Mode == eModeType.transitioningIn)
                     //    tmp = e.globalTransitionIn;
@@ -718,6 +712,73 @@ namespace OpenMobile.Controls
                     }
                     listStart = -(moved / listItemHeight);
 
+                    #region SoftEdge
+
+                    bool SoftEdgeTop = false;
+                    bool SoftEdgeBottom = false;
+
+                    // Use soft edges?
+                    if (UseSoftEdges)
+                    {
+                        if (Background != Color.Transparent)
+                        {
+                            if (moved < 0)
+                                SoftEdgeTop = true;
+
+                            if (moved > Height - (items.Count * listItemHeight))
+                                SoftEdgeBottom = true;
+
+                            if (imgSoftEdgeSides == null || imgSoftEdgeSides.Width != Width || imgSoftEdgeSides.Height != Height)
+                            {   // Generate image
+                                FadingEdge.GraphicData gd = SoftEdgeData.Clone();
+                                if ((gd.Sides & FadingEdge.GraphicSides.Top) == FadingEdge.GraphicSides.Top)
+                                    gd.Sides -= FadingEdge.GraphicSides.Top;
+                                if ((gd.Sides & FadingEdge.GraphicSides.Bottom) == FadingEdge.GraphicSides.Bottom)
+                                    gd.Sides -= FadingEdge.GraphicSides.Bottom;
+                                if (gd.Sides != FadingEdge.GraphicSides.None)
+                                {
+                                    gd.Width = Width;
+                                    gd.Height = Height;
+                                    imgSoftEdgeSides = FadingEdge.GetImage(gd);
+                                }
+                            }
+                            if (imgSoftEdgeTop == null || imgSoftEdgeTop.Width != Width || imgSoftEdgeTop.Height != Height)
+                            {   // Generate image
+                                FadingEdge.GraphicData gd = SoftEdgeData.Clone();
+                                if ((gd.Sides & FadingEdge.GraphicSides.Left) == FadingEdge.GraphicSides.Left)
+                                    gd.Sides -= FadingEdge.GraphicSides.Left;
+                                if ((gd.Sides & FadingEdge.GraphicSides.Right) == FadingEdge.GraphicSides.Right)
+                                    gd.Sides -= FadingEdge.GraphicSides.Right;
+                                if ((gd.Sides & FadingEdge.GraphicSides.Bottom) == FadingEdge.GraphicSides.Bottom)
+                                    gd.Sides -= FadingEdge.GraphicSides.Bottom;
+                                if (gd.Sides != FadingEdge.GraphicSides.None)
+                                {
+                                    gd.Width = Width;
+                                    gd.Height = Height;
+                                    imgSoftEdgeTop = FadingEdge.GetImage(gd);
+                                }
+                            }
+                            if (imgSoftEdgeBottom == null || imgSoftEdgeBottom.Width != Width || imgSoftEdgeBottom.Height != Height)
+                            {   // Generate image
+                                FadingEdge.GraphicData gd = SoftEdgeData.Clone();
+                                if ((gd.Sides & FadingEdge.GraphicSides.Left) == FadingEdge.GraphicSides.Left)
+                                    gd.Sides -= FadingEdge.GraphicSides.Left;
+                                if ((gd.Sides & FadingEdge.GraphicSides.Right) == FadingEdge.GraphicSides.Right)
+                                    gd.Sides -= FadingEdge.GraphicSides.Right;
+                                if ((gd.Sides & FadingEdge.GraphicSides.Top) == FadingEdge.GraphicSides.Top)
+                                    gd.Sides -= FadingEdge.GraphicSides.Top;
+                                if (gd.Sides != FadingEdge.GraphicSides.None)
+                                {
+                                    gd.Width = Width;
+                                    gd.Height = Height;
+                                    imgSoftEdgeBottom = FadingEdge.GetImage(gd);
+                                }
+                            }
+
+                        }
+                    }
+
+                    #endregion
 
                     for (int i = listStart; i <= (count + listStart + 1); i++)
                     {
@@ -835,7 +896,21 @@ namespace OpenMobile.Controls
 
                     // Draw soft edges
                     if (UseSoftEdges)
-                        g.DrawImage(imgSoftEdge, Left, Top, imgSoftEdge.Width, imgSoftEdge.Height, _RenderingValue_Alpha);
+                    {
+                        // Draw sides
+                        if (imgSoftEdgeSides != null)
+                            g.DrawImage(imgSoftEdgeSides, Left, Top, imgSoftEdgeSides.Width, imgSoftEdgeSides.Height, _RenderingValue_Alpha);
+
+                        // Draw top edge
+                        if (SoftEdgeTop)
+                            if (imgSoftEdgeTop != null)
+                                g.DrawImage(imgSoftEdgeTop, Left, Top, imgSoftEdgeTop.Width, imgSoftEdgeTop.Height, _RenderingValue_Alpha);
+
+                        // Draw bottom edge
+                        if (SoftEdgeBottom)
+                            if (imgSoftEdgeBottom != null)
+                                g.DrawImage(imgSoftEdgeBottom, Left, Top, imgSoftEdgeBottom.Width, imgSoftEdgeBottom.Height, _RenderingValue_Alpha);
+                    }
 
                     // Draw scrollbar
                     if ((scrollbars) && (count < items.Count))
@@ -1137,18 +1212,18 @@ namespace OpenMobile.Controls
 
         #region IThrow Members
 
-        void IThrow.MouseThrowStart(int screen, Point StartLocation, PointF scaleFactors, ref bool Cancel)
+        void IThrow.MouseThrowStart(int screen, Point StartLocation, PointF CursorSpeed, PointF scaleFactors, ref bool Cancel)
         {
             thrown = 0;
         }
 
-        void IThrow.MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation)
+        void IThrow.MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation, PointF CursorSpeed)
         {
             if (thrown != 0)
                 throwtmr.Enabled = true;
         }
 
-        void IThrow.MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance)
+        void IThrow.MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance, PointF CursorSpeed)
         {
             throwtmr.Enabled = false;
             thrown = 0;

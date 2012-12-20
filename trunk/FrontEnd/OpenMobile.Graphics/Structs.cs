@@ -1354,6 +1354,10 @@ namespace OpenMobile.Graphics
         {
             return ("{X=" + this.x.ToString() + ", Y=" + this.y.ToString() + "}");
         }
+        public Point ToPoint()
+        {
+            return new Point(this.x, this.y);
+        }
         static PointF()
         {
             Empty=new PointF();
@@ -1388,6 +1392,7 @@ namespace OpenMobile.Graphics
                     times = new Font("FreeSerif");
 
         }
+
         public static bool operator ==(Font left, Font right)
         {
             if (left.name != right.name)
@@ -1631,12 +1636,12 @@ namespace OpenMobile.Graphics
             this.size = size;
             this.style = style;
         }
-        public static FontStyle FormatToStyle(eTextFormat format)
+        public static System.Drawing.FontStyle FormatToStyle(eTextFormat format)
         {
-            FontStyle f = FontStyle.Regular;
+            System.Drawing.FontStyle f = System.Drawing.FontStyle.Regular;
             if ((format == eTextFormat.Bold) || (format == eTextFormat.BoldShadow) || (format == eTextFormat.BoldGlow))
             {
-                f = FontStyle.Bold;
+                f = System.Drawing.FontStyle.Bold;
             }
             else if (format == eTextFormat.Italic
                 || format == eTextFormat.ItalicShadow
@@ -1647,26 +1652,26 @@ namespace OpenMobile.Graphics
                 || format == eTextFormat.OutlineItalicNoFillFat
                 || format == eTextFormat.OutlineItalicNoFillNarrow)
             {
-                f = FontStyle.Italic;
+                f = System.Drawing.FontStyle.Italic;
             }
             else if ((format == eTextFormat.Underline) || (format == eTextFormat.UnderlineShadow))
             {
-                f = FontStyle.Underline;
+                f = System.Drawing.FontStyle.Underline;
             }
             return f;
         }
-        public static eTextFormat StyleToFormat(FontStyle format)
+        public static eTextFormat StyleToFormat(System.Drawing.FontStyle format)
         {
             eTextFormat f = eTextFormat.Normal;
-            if (format == FontStyle.Bold)
+            if (format == System.Drawing.FontStyle.Bold)
             {
                 f = eTextFormat.Bold;
             }
-            else if (format == FontStyle.Italic)
+            else if (format == System.Drawing.FontStyle.Italic)
             {
                 f = eTextFormat.Italic;
             }
-            else if (format == FontStyle.Underline)
+            else if (format == System.Drawing.FontStyle.Underline)
             {
                 f = eTextFormat.Underline;
             }
@@ -1789,7 +1794,6 @@ namespace OpenMobile.Graphics
         {
             return new OpenMobile.Math.Vector2(x, y);
         }
-
         static Point()
         {
             Empty = new Point();
@@ -1805,6 +1809,11 @@ namespace OpenMobile.Graphics
         {
             this.x += x;
             this.y += y;
+        }
+        public void Translate(Point p)
+        {
+            this.x += p.X;
+            this.y += p.Y;
         }
     }
 
@@ -2031,6 +2040,14 @@ namespace OpenMobile.Graphics
             this.Height = size.Height;
         }
 
+        public Rectangle(System.Drawing.Rectangle systemRectangle)
+        {
+            this.X = systemRectangle.X;
+            this.Y = systemRectangle.Y;
+            this.Width = systemRectangle.Width;
+            this.Height = systemRectangle.Height;
+        }
+
         public Point Location
         {
             get
@@ -2130,5 +2147,164 @@ namespace OpenMobile.Graphics
         {
             Empty = new Rectangle();
         }
+
+        /// <summary>
+        /// Translates the rectangle with the value passed in p
+        /// </summary>
+        /// <param name="p"></param>
+        public Rectangle Translate(Point p)
+        {
+            this.X += p.X;
+            this.Y += p.Y;
+            return this;
+        }
+        /// <summary>
+        /// Translates the rectangle with the value passed in X and Y
+        /// </summary>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
+        public Rectangle Translate(int x, int y)
+        {
+            this.X += x;
+            this.Y += y;
+            return this;
+        }
+        /// <summary>
+        /// Translates the rectangle with the X and Y values from the passed rectangle
+        /// </summary>
+        /// <param name="r"></param>
+        public Rectangle Translate(Rectangle r)
+        {
+            this.X += r.X;
+            this.Y += r.Y;
+            return this;
+        }
+        /// <summary>
+        /// Translates the rectangle with the X and Y values from the passed rectangle
+        /// </summary>
+        /// <param name="r"></param>
+        public Rectangle TranslateToNew(Rectangle r)
+        {
+            Rectangle newR = this;
+            newR.X += r.X;
+            newR.Y += r.Y;
+            return newR;
+        }
+        /// <summary>
+        /// Translates the rectangle with the X and Y values from the passed rectangle
+        /// </summary>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
+        public Rectangle TranslateToNew(int x, int y)
+        {
+            Rectangle newR = this;
+            newR.X += x;
+            newR.Y += y;
+            return newR;
+        }
+        /// <summary>
+        /// Scales the rectangle with the value passed in p
+        /// </summary>
+        /// <param name="p"></param>
+        public Rectangle Scale(Point p)
+        {
+            this.Width *= p.X;
+            this.Height *= p.Y;
+            return this;
+        }
+        /// <summary>
+        /// Scales the rectangle with the value passed in x and y
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public Rectangle Scale(float x, float y)
+        {
+            this.Width = (int)(((float)this.Width) * x);
+            this.Height = (int)(((float)this.Height) * y);
+            return this;
+        }
+        /// <summary>
+        /// Scales the rectangle with the X and Y values from the passed rectangle
+        /// </summary>
+        /// <param name="r"></param>
+        public Rectangle Scale(Rectangle r)
+        {
+            this.Width *= r.X;
+            this.Height *= r.Y;
+            return this;
+        }
+
+        public Rectangle Union(Rectangle r)
+        {
+            if (r.Left < this.Left)
+            {
+                int right = this.Right;
+                this.Left = r.Left;
+                this.Right = right;
+            }
+            if (r.Top < this.Top)
+            {
+                int bottom = this.Bottom;
+                this.Top = r.Top;
+                this.Bottom = bottom;
+            }
+            if (r.Right > this.Right)
+            {
+                this.Right = r.Right;
+            }
+            if (r.Bottom > this.Bottom)
+            {
+                this.Bottom = r.Bottom;
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Inflates this rectangle
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public Rectangle Inflate(Size size)
+        {
+            return Inflate(size.Width, size.Height);
+        }
+        /// <summary>
+        /// Inflates this rectangle
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        public Rectangle Inflate(int width, int height)
+        {
+            return Inflate(width, height, false);
+        }
+
+        /// <summary>
+        /// Scales the rectangle around the center
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="fixedCenter"></param>
+        /// <returns></returns>
+        public Rectangle Inflate(int width, int height, bool fixedCenter)
+        {
+            if (fixedCenter)
+            {
+                Point center = this.Center;
+                this.Width += width;
+                this.Height += height;
+                Point Offset = center - this.Center;
+                Translate(Offset);
+                return this;
+            }
+            else
+            {
+                this.Width += width;
+                this.Height += height;
+                return this;
+            }
+
+        }
+
     }
 }

@@ -280,7 +280,7 @@ namespace OpenMobile.Controls
         /// <param name="screen"></param>
         /// <param name="TotalDistance"></param>
         /// <param name="RelativeDistance"></param>
-        public void MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance)
+        public void MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance, PointF CursorSpeed)
         {
             sliderPosition += RelativeDistance.X;
             if ((sliderPosition - (sliderWidth / 2)) < 0)
@@ -297,7 +297,7 @@ namespace OpenMobile.Controls
         /// <param name="StartLocation"></param>
         /// <param name="Cancel"></param>
         /// <param name="sf"></param>
-        public void MouseThrowStart(int screen, Point StartLocation, PointF scaleFactors, ref bool Cancel)
+        public void MouseThrowStart(int screen, Point StartLocation, PointF CursorSpeed, PointF scaleFactors, ref bool Cancel)
         {
             dragged = true;
         }
@@ -306,7 +306,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="EndLocation"></param>
-        public void MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation)
+        public void MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation, PointF CursorSpeed)
         {
             dragged = false;
         }

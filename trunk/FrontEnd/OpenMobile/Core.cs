@@ -173,12 +173,12 @@ namespace OpenMobile
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "UI", "background");
                     //RenderingWindows[i].TransitionInPanel(((IHighLevel)UI).loadPanel(String.Empty, i));
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "UI", "");
-                    RenderingWindows[i].ExecuteTransition("None");
+                    RenderingWindows[i].ExecuteTransition("None", 0);
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "MainMenu", String.Empty);
                     if (a.Length == 0)
-                        RenderingWindows[i].ExecuteTransition("None");
+                        RenderingWindows[i].ExecuteTransition("None", 0);
                     else
-                        RenderingWindows[i].ExecuteTransition(((InitialTransition)a[0]).Transition.ToString());
+                        RenderingWindows[i].ExecuteTransition(((InitialTransition)a[0]).Transition.ToString(), 0);
                 }
             }//);
             object[] b = MainMenu.GetType().GetCustomAttributes(typeof(FinalTransition), false);
@@ -307,7 +307,7 @@ namespace OpenMobile
         /// <summary>
         /// Order to of types to try to load the plugins by
         /// </summary>
-        private static Type[] pluginTypes = new Type[] {  typeof(IRawHardware), typeof(ISensorProvider), typeof(IDataProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther)};
+        private static Type[] pluginTypes = new Type[] {  typeof(IRawHardware), typeof(IDataProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther)};
         public static eLoadStatus[] status;
         /// <summary>
         /// Initialize each of the plugins in the plugin's array (pluginCollection)
@@ -378,7 +378,8 @@ namespace OpenMobile
                         pluginCollection[i].Dispose();
                         if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
                         {
-                            theHost.SendStatusData(eDataType.Error, pluginCollection[i], "", String.Format("{0} CRASHED!", pluginCollection[i].pluginName));
+                            theHost.UIHandler.AddNotification(new Notification(Notification.Styles.Warning, pluginCollection[i], null, theHost.getSkinImage("AIcons|11-alerts-and-states-error").image, String.Format("Loading of plugin {0} failed", pluginCollection[i].pluginName), String.Format("Plugin {0} ({1}) by {2} was unloaded.", pluginCollection[i].pluginName, pluginCollection[i].pluginDescription, pluginCollection[i].authorName)));
+                            //theHost.SendStatusData(eDataType.Error, pluginCollection[i], "", String.Format("{0} CRASHED!", pluginCollection[i].pluginName));
                             BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", String.Format("{0} CRASHED!", pluginCollection[i].pluginName));
                         }
 
@@ -564,6 +565,8 @@ namespace OpenMobile
                     }
                     catch (ArgumentException) { break; }
                 }
+
+
             }
 
             #endregion

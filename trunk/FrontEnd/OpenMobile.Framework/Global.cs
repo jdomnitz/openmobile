@@ -76,7 +76,13 @@ namespace OpenMobile
         /// <summary>
         /// A gesture is being drawn
         /// </summary>
-        gesturing = 10
+        gesturing = 10,
+        /// <summary>
+        /// Loaded and ready for transitioning in
+        /// </summary>
+        Loaded,
+        Unloaded,
+
     };
     /// <summary>
     /// The style list to render
@@ -127,7 +133,7 @@ namespace OpenMobile
     /// <summary>
     /// An item in an OMList
     /// </summary>
-    public sealed class OMListItem : IComparable, ICloneable, OpenMobile.Controls.ISensorDisplay
+    public sealed class OMListItem : IComparable, ICloneable
     {
         /// <summary>
         /// Format information for a list subitem
@@ -542,6 +548,7 @@ namespace OpenMobile
         }
 
 
+        /*
         /// <summary>
         /// sensor to be watched
         /// </summary>
@@ -591,7 +598,7 @@ namespace OpenMobile
             else
                 this.text = string.Format(sensorText, _Sensor.FormatedValue());
         }
-
+        */
     }
 
     /// <summary>
@@ -614,42 +621,54 @@ namespace OpenMobile
     };
 
     /// <summary>
-    /// The type of transition between panels
+    /// Built in transition effects for panels
     /// </summary>
     public enum eGlobalTransition : short
     {
         /// <summary>
         /// Panel A is unloaded and Panel B is loaded (more efficient then the load and unload functions)
         /// </summary>
-        None = 0,
+        None,
         /// <summary>
         /// Panel A fades out while Panel B fades in
         /// </summary>
-        Crossfade = 1,
+        Crossfade,
         /// <summary>
         /// Panel A slides up and off the screen, Panel B slides up and onto the screen
         /// </summary>
-        SlideUp = 2,
+        SlideUp,
         /// <summary>
         /// Panel A slides up and off the screen, Panel B slides up and onto the screen
         /// </summary>
-        SlideDown = 3,
+        SlideDown,
         /// <summary>
         /// Panel A slides up and off the screen, Panel B slides up and onto the screen
         /// </summary>
-        SlideLeft = 4,
+        SlideLeft,
         /// <summary>
         /// Panel A slides up and off the screen, Panel B slides up and onto the screen
         /// </summary>
-        SlideRight = 5,
+        SlideRight,
         /// <summary>
         /// Panel A fades out while Panel B fades in (twice as fast as a regular crossfade)
         /// </summary>
-        CrossfadeFast = 6,
+        CrossfadeFast,
         /// <summary>
-        /// Cube Right
+        /// Randomly select effect
         /// </summary>
-        CubeRight = 7
+        Random,
+        /// <summary>
+        /// Collapse panel A while growing panel B
+        /// </summary>
+        CollapseGrowCrossUL,
+        /// <summary>
+        /// Collapse panel A while growing panel B
+        /// </summary>
+        CollapseGrowCrossCenter,
+        /// <summary>
+        /// Collapse panel A fully then grow panel B
+        /// </summary>
+        CollapseGrowCenter
     }
 
     /// <summary>
@@ -1162,7 +1181,7 @@ namespace OpenMobile
         /// </summary>
         vehicleStopped = 86,
         /// <summary>
-        /// Occurs when the VideoPosition property changes
+        /// Event: Occurs when the VideoPosition property changes
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen</para>
         /// <para>Arg2: Video rectangle as string: X|Y|W|H</para>
@@ -1268,7 +1287,21 @@ namespace OpenMobile
         /// Used as event only! Media database has been cleared (NB! This event is not bound to any zone)
         /// <para>Arg: Name of plugin that initialized the clearing</para>
         /// </summary>
-        MediaDBCleared
+        MediaDBCleared,
+        /// <summary>
+        /// Event: Occurs when the ClientArea property changes
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen</para>
+        /// <para>Arg2: Rectangle as string: X|Y|W|H</para>
+        /// </summary>
+        ClientAreaChanged,
+        /// <summary>
+        /// Unloads all other screens and goes back to the mainmenu screen
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// <para>Arg2: (Optional) TransitionType</para>
+        /// </summary>
+        goHome
     }
     /// <summary>
     /// The status of a plugins initialization
@@ -1600,27 +1633,31 @@ namespace OpenMobile
         /// <summary>
         /// Low Priority
         /// </summary>
-        Low = 0,
+        Low,
         /// <summary>
         /// Medium-Low Priority
         /// </summary>
-        MediumLow = 1,
+        MediumLow,
         /// <summary>
         /// Normal Priority
         /// </summary>
-        Normal = 2,
+        Normal,
         /// <summary>
         /// Medium-High Priority
         /// </summary>
-        MediumHigh = 3,
+        MediumHigh,
         /// <summary>
         /// High Priority
         /// </summary>
-        High = 4,
+        High,
+        /// <summary>
+        /// UI Level
+        /// </summary>
+        UI,
         /// <summary>
         /// Urgent Priority
         /// </summary>
-        Urgent = 5
+        Urgent
     }
     /// <summary>
     /// The type of data to retrieve
@@ -1733,12 +1770,6 @@ namespace OpenMobile
         /// <para>Param: Instance [int]</para>
         /// </summary>
         GetPlayerVolume = 22,
-        /// <summary>
-        /// Gets the list of available sensors
-        /// <para>----------------------------------------------------</para>
-        /// <para>Param: Optional Plugin Name [string]</para>
-        /// </summary>
-        GetAvailableSensors = 23,
         /// <summary>
         /// Gets a list of available keyboards
         /// </summary>

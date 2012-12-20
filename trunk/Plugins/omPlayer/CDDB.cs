@@ -177,7 +177,21 @@ namespace OMPlayer
                 media= list;
             else
                 media = new List<mediaInfo>(info);
-            theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
+
+            if (media.Count > 0)
+            {
+                if (media[0].coverArt != null)
+                {
+                    OpenMobile.Graphics.OImage img = (OpenMobile.Graphics.OImage)media[0].coverArt.Clone();
+                    img.AddBorder(10, OpenMobile.Graphics.Color.Transparent);
+                    theHost.UIHandler.AddNotification(new Notification(this, null, img, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, String.Format("Detected CD '{0}' by '{1}'", media[0].Album, media[0].Artist), String.Format("Found {0} tracks at location {1} ", media.Count, directory)));
+                }
+                else
+                    theHost.UIHandler.AddNotification(new Notification(this, null, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, String.Format("Detected CD '{0}' by '{1}'", media[0].Album, media[0].Artist), String.Format("Found {0} tracks at location {1} ", media.Count, directory)));
+            }
+            else
+                theHost.UIHandler.AddNotification(new Notification(this, null, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, "Detected CD", String.Format("Found {0} tracks at location {1} ", media.Count, directory)));
+            //theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
             theHost.raiseMediaEvent(eFunction.MediaIndexingCompleted, null, this.pluginName);
             return true;
         }
@@ -267,12 +281,16 @@ namespace OMPlayer
 
         void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
         {
-            if (function == eFunction.pluginLoadingComplete)
-            {
-                foreach (DeviceInfo drive in DeviceInfo.EnumerateDevices(theHost))
-                    if (drive.DriveType == eDriveType.CDRom)
-                        TaskManager.QueueTask(delegate() { indexDirectory(drive.path, false); }, ePriority.Normal, "Lookup CD Info");
-            }
+            // This is not needed storageevents are raised for each drive via HAL 
+            //if (function == eFunction.pluginLoadingComplete)
+            //{
+            //    foreach (DeviceInfo drive in DeviceInfo.EnumerateDevices(theHost))
+            //        if (drive.DriveType == eDriveType.CDRom)
+            //        {
+            //            string path = drive.path;
+            //            TaskManager.QueueTask(delegate() { indexDirectory(path, false); }, ePriority.Normal, "Lookup CD Info");
+            //        }
+            //}
         }
 
         void host_OnStorageEvent(eMediaType type, bool justInserted, string arg)

@@ -377,7 +377,7 @@ namespace OpenMobile.Graphics
 
         public void DrawPolygon(Pen pen, Point[] points)
         {
-            //throw new NotImplementedException();
+            DrawLine(pen, points);
         }
 
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
@@ -385,6 +385,7 @@ namespace OpenMobile.Graphics
             float[] ar = new float[] { x, y, x + width, y, x + width, y + height, x, y + height };
             Raw.EnableClientState(All.VertexArray);
             Raw.Color4(pen.Color);
+            Raw.LineWidth(pen.Width);
             Raw.VertexPointer(2, All.Float, 0, ar);
             Raw.DrawArrays(BeginMode.LineLoop, 0, 4);
             Raw.DisableClientState(All.VertexArray);

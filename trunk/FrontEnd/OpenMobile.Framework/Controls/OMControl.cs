@@ -23,6 +23,7 @@ using System.Reflection;
 using OpenMobile.Graphics;
 using OpenMobile;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace OpenMobile.Controls
 {
@@ -58,6 +59,7 @@ namespace OpenMobile.Controls
         public void RefreshGraphic()
         {
             _RefreshGraphic = true;
+            Refresh();
         }
         
         /// <summary>
@@ -90,6 +92,10 @@ namespace OpenMobile.Controls
         /// </summary>
         protected object tag;
         /// <summary>
+        /// Control details (multiple uses but for a list item it's the index number)
+        /// </summary>
+        protected object controlDetail;
+        /// <summary>
         /// The control name
         /// </summary>
         protected string name;
@@ -102,17 +108,24 @@ namespace OpenMobile.Controls
         /// </summary>
         protected byte opacity = 255;
 
+        /// <summary>
+        /// The value to use as rendering for the current alpha level
+        /// </summary>
         protected float _RenderingValue_Alpha = 1;
         /// <summary>
         /// Forces the renderer to redraw this control
         /// </summary>
         public event refreshNeeded UpdateThisControl;
 
+        /// <summary>
+        /// Is the control renderable? Returns true if is, false otherwise
+        /// </summary>
+        /// <param name="DisregardRenderingType"></param>
+        /// <returns></returns>
         public bool IsControlRenderable(bool DisregardRenderingType) 
         {
             return Visible & (!ManualRendering | DisregardRenderingType);
         }
-
 
         /// <summary>
         /// Requests the control be redrawn
@@ -134,6 +147,15 @@ namespace OpenMobile.Controls
             get
             {
                 return _Region;
+            }
+            set
+            {
+                _Region = value;
+                left = _Region.Left;
+                top = _Region.Top;
+                width = Region.Width;
+                height = Region.Height;
+                Refresh();
             }
         }
 
@@ -197,6 +219,7 @@ namespace OpenMobile.Controls
             set
             {
                 _SkinDebug = value;
+                Refresh();
             }
         }
         /// <summary>
@@ -243,8 +266,7 @@ namespace OpenMobile.Controls
                 if (visible == value)
                     return;
                 visible = value;
-                if (UpdateThisControl != null)
-                    UpdateThisControl(true);
+                Refresh();
             }
         }
 
@@ -262,8 +284,7 @@ namespace OpenMobile.Controls
                 if (disabled == value)
                     return;
                 disabled = value;
-                if (UpdateThisControl != null)
-                    UpdateThisControl(true);
+                Refresh();
             }
         }
 
@@ -281,7 +302,7 @@ namespace OpenMobile.Controls
                 if (noUserInteraction == value)
                     return;
                 noUserInteraction = value;
-                raiseUpdate(false);
+                Refresh();
             }
         }
 
@@ -299,8 +320,7 @@ namespace OpenMobile.Controls
             set { 
                 height = value;
                 _Region.Height = value;
-                //UpdateRegion();
-                raiseUpdate(true); 
+                Refresh();
             }
         }
         /// <summary>
@@ -312,8 +332,7 @@ namespace OpenMobile.Controls
             set {
                 width = value;
                 _Region.Width = value;
-                //UpdateRegion();
-                raiseUpdate(true);
+                Refresh();
             }
         }
         /// <summary>
@@ -330,6 +349,7 @@ namespace OpenMobile.Controls
                 tag = value;
             }
         }
+
         /// <summary>
         /// The distance between the top of the UI and the Top of the control
         /// </summary>
@@ -340,8 +360,7 @@ namespace OpenMobile.Controls
                 {
                     top = value;
                     _Region.Top = value;
-                    //UpdateRegion();
-                    raiseUpdate(true);
+                    Refresh();
                 }
         }
         /// <summary>
@@ -351,11 +370,10 @@ namespace OpenMobile.Controls
         {
             get { return left; }
             set 
-                { 
+                {
                     left = value;
                     _Region.Left = value;
-                    //UpdateRegion();
-                    raiseUpdate(true);
+                    Refresh();
                 }
         }
 
@@ -375,7 +393,7 @@ namespace OpenMobile.Controls
                     opacity = (byte)value;
 
                 _RenderingValue_Alpha = (Opacity / 255F);
-                raiseUpdate(false); 
+                Refresh();
             }
         }
         /// <summary>
@@ -403,9 +421,19 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="e"></param>
         /// <returns></returns>
-        protected float GetAlphaValue(float Alpha)
+        protected float GetAlphaValue1(float Alpha)
         {
             return System.Math.Min(_RenderingValue_Alpha, Alpha);
+        }
+        /// <summary>
+        /// Get's the correct alpha value to use when rendering the control taking both the current alpha level and a new alpha level into account
+        /// </summary>
+        /// <param name="Alpha"></param>
+        /// <returns></returns>
+        protected float GetAlphaValue255(float Alpha)
+        {
+            float Alpha01 = Alpha / 255f;
+            return 255f * System.Math.Min(_RenderingValue_Alpha, Alpha01);
         }
         /// <summary>
         /// Renders the control
@@ -419,7 +447,17 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Renders the control
+        /// Executes the renderingparamters whitout rendering the control
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        internal virtual void RenderEmpty(Graphics.Graphics g, renderingParams e)
+        {
+            RenderBegin(g, e);
+        }
+        
+        /// <summary>
+        /// Executes the initial rendering code
         /// </summary>
         /// <param name="g">The User Interfaces graphics object</param>
         /// <param name="e">Rendering Parameters</param>
@@ -430,7 +468,7 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Renders the control
+        /// Executes the final rendering code
         /// </summary>
         /// <param name="g">The User Interfaces graphics object</param>
         /// <param name="e">Rendering Parameters</param>
@@ -584,5 +622,191 @@ namespace OpenMobile.Controls
 
             return dataHandled;
         }
+
+        /// <summary>
+        /// Returns the total area covered by the controls passed along in the parameters
+        /// </summary>
+        /// <returns></returns>
+        static public Rectangle GetControlsArea(List<OMControl> controls)
+        {
+            int l = int.MaxValue;
+            int t = int.MaxValue;
+            int r = int.MinValue;
+            int b = int.MinValue;
+
+            // Return default area if no controls is available
+            if (controls.Count == 0)
+                return new Rectangle(0, 0, 0, 0);
+
+            foreach (OMControl control in controls)
+            {
+                // Width
+                if (control.Region.Right > r)
+                    r = control.Region.Right;
+
+                // Height
+                if (control.Region.Bottom > b)
+                    b = control.Region.Bottom;
+
+                // Left side
+                if (control.Region.Left < l)
+                    l = control.Region.Left;
+
+                // Top side
+                if (control.Region.Top < t)
+                    t = control.Region.Top;
+            }
+            return new Rectangle(l, t, r - l, b - t);
+        }
+
+        /// <summary>
+        /// Returns the control that's loaded at the active screen
+        /// </summary>
+        /// <returns></returns>
+        public OMControl GetControlAtActiveScreen()
+        {
+            if (this.parent == null)
+                return null;
+            return this.parent[this.parent.ActiveScreen, this.name];
+        }
+        /// <summary>
+        /// Returns the control that's loaded at the specific screen
+        /// </summary>
+        /// <returns></returns>
+        public OMControl GetControlAtScreen(int screen)
+        {
+            if (this.parent == null)
+                return null;
+            return this.parent[screen, this.name];
+        }
+
+        #region DataSource handling
+
+        /// <summary>
+        /// Sets the sensor to subscribe to
+        /// </summary>
+        public string DataSource
+        {
+            get
+            {
+                return this._DataSource;
+            }
+            set
+            {
+                // Unscubscribe to any existing data
+                if (!String.IsNullOrEmpty(this._DataSource))
+                    BuiltInComponents.Host.DataHandler.UnsubscribeFromDataSource(_DataSource, DataSource_OnChanged);
+
+                this._DataSource = value;
+                
+                // Subscribe to updates
+                if (!String.IsNullOrEmpty(value))
+                    if (!BuiltInComponents.Host.DataHandler.SubscribeToDataSource(_DataSource, DataSource_OnChanged))
+                        DataSource_Missing();
+            }
+        }
+        private string _DataSource;
+
+        internal virtual void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
+        { 
+        }
+
+        internal virtual void DataSource_Missing()
+        {
+        }
+        
+        #region InLine datasource prossessing
+
+        /// <summary>
+        /// If true the control can handle inline datasource references like this "cpu load is {System.CPU.Load}"
+        /// </summary>
+        public bool AllowInLineDataSources
+        {
+            get
+            {
+                return this._AllowInLineDataSources;
+            }
+            set
+            {
+                if (this._AllowInLineDataSources != value)
+                {
+                    this._AllowInLineDataSources = value;
+                }
+            }
+        }
+        private bool _AllowInLineDataSources = true;
+
+        private string[] _DataSource_InLine_Sources = null;
+        private string _DataSource_InLine;
+        internal void DataSource_InLine(ref string s)
+        {
+            // Don't do anything if we've already processed this string
+            if (!_AllowInLineDataSources || string.IsNullOrEmpty(s) || !(s.Contains("{") && s.Contains("}")) || this.parent == null || !this.parent.IsClonedForScreens())
+                return; 
+
+            // Unsubscribe to existing datasources
+            if (_DataSource_InLine_Sources != null)
+                for (int i = 0; i < _DataSource_InLine_Sources.Length; i++)
+                    BuiltInComponents.Host.DataHandler.UnsubscribeFromDataSource(_DataSource_InLine_Sources[i], _DataSource_InLine_Changed);
+
+            // Save current string to process
+            _DataSource_InLine = s;
+
+            System.Text.RegularExpressions.Regex regEx = new System.Text.RegularExpressions.Regex(@"\{.+?\}");
+            System.Text.RegularExpressions.MatchCollection Matches = regEx.Matches(s);
+
+            // Loop trough the matches and connect the subscriptions
+            _DataSource_InLine_Sources = new string[Matches.Count];
+            for (int i = 0; i < Matches.Count; i++)
+			{
+			    string match = Matches[i].ToString();
+
+                // Save data sources without the brackets
+                _DataSource_InLine_Sources[i] = match.Replace("{", "").Replace("}", "");
+
+                // Subscribe to datasource
+                BuiltInComponents.Host.DataHandler.SubscribeToDataSource(_DataSource_InLine_Sources[i], _DataSource_InLine_Changed);
+			}
+            
+        }
+
+        private void _DataSource_InLine_Changed(OpenMobile.Data.DataSource dataSource)
+        {
+            string s = _DataSource_InLine;
+
+            // Loop trough each source to ensure we've got all the data before we pass the string on
+            for (int i = 0; i < _DataSource_InLine_Sources.Length; i++)
+            {
+                string source = _DataSource_InLine_Sources[i];
+
+                // Cancel if one of the sources is null as this is an incomplete event update
+                if (string.IsNullOrEmpty(source))
+                    return;
+
+                // Replace datamarkers in string
+                if (source == dataSource.FullName)
+                    s = s.Replace(string.Format("{{{0}}}", dataSource.FullName), dataSource.FormatedValue);
+                else
+                {   // Additional data needed, query the datahandler
+                    OpenMobile.Data.DataSource AdditionalSource = BuiltInComponents.Host.DataHandler.GetDataSource(_DataSource_InLine_Sources[i]);
+                    if (AdditionalSource != null)
+                        s = s.Replace(string.Format("{{{0}}}", AdditionalSource.FullName), AdditionalSource.FormatedValue);
+                }
+
+            }
+            
+            // Send data on to the target
+            DataSource_InLine_Changed(s);
+        }
+
+        internal virtual void DataSource_InLine_Changed(string s)
+        {
+
+        }
+
+        #endregion
+
+        #endregion
+
     }
 }

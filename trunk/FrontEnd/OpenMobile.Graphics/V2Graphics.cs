@@ -304,6 +304,7 @@ namespace OpenMobile.Graphics
         {
             if (image == null)
                 return;
+            
             Raw.Enable(EnableCap.Texture2D);
             if (image.TextureGenerationRequired(screen))
                 if (!loadTexture(ref image))
@@ -376,12 +377,24 @@ namespace OpenMobile.Graphics
         {
             Raw.LineWidth(pen.Width);
             Raw.Enable(EnableCap.LineSmooth);
+            Raw.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
             Raw.Color4(pen.Color);
             Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer<Point>(2,VertexPointerType.Int, 0, points);
+            Raw.VertexPointer<Point>(2, VertexPointerType.Int, 0, points);
             Raw.DrawArrays(BeginMode.LineStrip, 0, points.Length);
             Raw.DisableClientState(ArrayCap.VertexArray);
             Raw.Disable(EnableCap.LineSmooth);
+
+            //Raw.Color4(pen.Color);
+            //Raw.LineWidth(pen.Width);
+            //Raw.Enable(EnableCap.LineSmooth);
+            //Raw.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+            //Raw.Begin(BeginMode.LineStrip);
+            //for (int i = 0; i < points.Length; i++)
+            //    Raw.Vertex2(points[i].X, points[i].Y);
+            //Raw.End();
+            //Raw.Disable(EnableCap.LineSmooth);
+
         }
         public void DrawLine(Pen pen, int x1, int y1, int x2, int y2)
         {
@@ -416,7 +429,7 @@ namespace OpenMobile.Graphics
 
         public void DrawPolygon(Pen pen, Point[] points)
         {
-            //throw new NotImplementedException();
+            DrawLine(pen, points);
         }
 
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
@@ -424,6 +437,7 @@ namespace OpenMobile.Graphics
             float[] ar = new float[] { x, y, x + width, y, x + width, y + height, x, y + height };
             Raw.EnableClientState(ArrayCap.VertexArray);
             Raw.Color4(pen.Color);
+            Raw.LineWidth(pen.Width);
             Raw.VertexPointer(2, VertexPointerType.Float, 0, ar);
             Raw.DrawArrays(BeginMode.LineLoop, 0, 4);
             Raw.DisableClientState(ArrayCap.VertexArray);
@@ -532,16 +546,31 @@ namespace OpenMobile.Graphics
 
         public void FillPolygon(Brush brush, Point[] points)
         {
-            int[] arr = new int[points.Length * 2];
+            // TODO : This does not work properly!
+            //int[] arr = new int[points.Length * 2];
+            //for (int i = 0; i < points.Length; i++)
+            //{
+            //    arr[2 * i] = points[i].X;
+            //    arr[(2 * i)+1] = points[i].Y;
+            //}
+            //Raw.Color4(brush.Color);
+            //Raw.EnableClientState(ArrayCap.VertexArray);
+            //Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            //Raw.DrawArrays(BeginMode.TriangleStrip, 0, points.Length);
+            //Raw.DisableClientState(ArrayCap.VertexArray);
+
+            //Raw.Enable(EnableCap.PolygonOffsetFill);
+            //Raw.PolygonOffset(1.0f, 1.0f);
+
+            Raw.Color4(brush.Color);
+            Raw.Enable(EnableCap.PolygonSmooth);
+            Raw.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
+            Raw.Begin(BeginMode.Polygon);
             for (int i = 0; i < points.Length; i++)
-            {
-                arr[2 * i] = points[i].X;
-                arr[(2 * i)+1] = points[i].Y;
-            }
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, points.Length);
-            Raw.DisableClientState(ArrayCap.VertexArray);
+                Raw.Vertex2(points[i].X, points[i].Y);
+            Raw.End();
+            Raw.Disable(EnableCap.PolygonSmooth);
+          
         }
 
         public void FillRectangle(Brush brush, float x, float y, float width, float height)

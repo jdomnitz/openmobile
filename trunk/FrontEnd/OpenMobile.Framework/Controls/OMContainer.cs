@@ -22,17 +22,233 @@ using System.Collections.Generic;
 using OpenMobile.Graphics;
 using System;
 using OpenMobile.Input;
+using OpenMobile.helperFunctions.Graphics;
 
 namespace OpenMobile.Controls
 {
+    /// <summary>
+    /// A OMControl that supports sub controls
+    /// </summary>
     [System.Serializable]
-    public class OMContainer : OMControl, IContainer2, IHighlightable, IThrow, IKey
-    {        
-        List<OMControl> _Controls = new List<OMControl>();
-        Rectangle oldRegion = new Rectangle();
+    public class OMContainer : OMControlGraphicsBase, IContainer2, IHighlightable, IThrow, IKey
+    {
+        /// <summary>
+        /// A collection of controls for usage in the OMContainer control
+        /// </summary>
+        public class ControlGroup : List<OMControl>
+        {
+            public Rectangle Region
+            {
+                get
+                {
+                    if (this.Count == 0)
+                        return new Rectangle();
 
+                    Rectangle TotalRegion = this[0].Region;
+                    // Return the combined area of contained controls
+                    for (int i = 1; i < this.Count; i++)
+                        TotalRegion.Union(this[i].Region);
+                    return TotalRegion;
+                }
+            }
+
+            public void Translate(Rectangle r)
+            {
+                // Run command on each contained control
+                foreach (OMControl control in this)
+                    control.Region.Translate(r);
+            }
+
+            public bool Contains(string name)
+            {
+                OMControl c = this.Find(x => x.Name == name);
+                return (c != null);
+            }
+
+            public ControlGroup()
+            {
+            }
+
+            public ControlGroup(OMControl control)
+            {
+                this.Add(control);
+            }
+
+            public bool IsHighlighted()
+            {
+                foreach (OMControl control in this)
+                {
+                    if (control.Mode == eModeType.Highlighted)
+                        return true;
+                }
+                return false;
+            }
+
+            public OMControl this[string name]
+            {
+                get
+                {
+                    return this.Find(x => x.Name.Contains(name));
+                }
+                set
+                {
+                    int index = this.FindIndex(x => x.Name.Contains(name));
+                    this.RemoveAt(index);
+                    this.Insert(index, value);
+                }
+            }
+
+            public Directions  PlacementDirection { get; set; }
+
+            public bool PlacementRelative { get; set; }
+
+            public string Key { get; set; }
+
+            public ControlGroup Clone()
+            {
+                ControlGroup newCG = new ControlGroup();
+                foreach (OMControl control in this)
+                    newCG.Add((OMControl)control.Clone());
+               return newCG;
+            }
+
+        }
+        
+        /// <summary>
+        /// The currently loaded controls
+        /// </summary>
+        protected List<ControlGroup> _Controls = new List<ControlGroup>();
+        Rectangle oldRegion = new Rectangle(int.MinValue, int.MinValue, int.MinValue, int.MinValue);
         Rectangle ScrollRegion = new Rectangle();
-        Rectangle oldScrollRegion = new Rectangle();
+        protected bool _ThrowRun = true;
+        SmoothAnimator Animation = new SmoothAnimator();
+
+        private bool _NoOffsetOnNextRender = false;
+
+        /// <summary>
+        /// Scrollpoints is an array of points that the controls will attach to
+        /// <para>This can be used to position the controls while scrolling</para>
+        /// <para>NB! The coordinates are relative to it's parent</para>
+        /// </summary>
+        public List<Point> ScrollPoints = null;
+        public ScrollDirections MainScrollDirection = ScrollDirections.Both;
+
+        /// <summary>
+        /// Autosize modes
+        /// </summary>
+        public enum AutoSizeModes
+        {
+            /// <summary>
+            /// Autosizeing is not activated
+            /// </summary>
+            NoAutoSize,
+            /// <summary>
+            /// Container will grow with controls
+            /// </summary>
+            AutoSize
+        }
+        /// <summary>
+        /// Sets the autosize mode for the container 
+        /// <para>NB! The size is only adjusted when controls are added or removed, changing a control won't affect the size of the container</para>
+        /// </summary>
+        public AutoSizeModes AutoSizeMode
+        {
+            get
+            {
+                return this._AutoSizeMode;
+            }
+            set
+            {
+                if (this._AutoSizeMode != value)
+                {
+                    this._AutoSizeMode = value;
+                }
+            }
+        }
+        private AutoSizeModes _AutoSizeMode;
+
+        private int ControlCountOld = 0;
+
+        protected List<int> _RenderOrder = null;        
+        protected List<int> _RenderOrder_ObjectsInView = null;
+        protected List<int> _RenderOrder_ObjectsOutsideView = null;
+        /// <summary>
+        /// Scroll directions
+        /// </summary>
+        public enum ScrollDirections
+        {
+            /// <summary>
+            /// Both directions are active
+            /// </summary>
+            Both,
+            /// <summary>
+            /// Direction X
+            /// </summary>
+            X,
+            /// <summary>
+            /// Direction Y
+            /// </summary>
+            Y
+        }
+
+        /// <summary>
+        /// Area the local controls covers
+        /// </summary>
+        private Rectangle ControlsArea = new Rectangle();
+
+        /// <summary>
+        /// The current rendering order of the objects in view
+        /// </summary>
+        public List<int> RenderOrder
+        {
+            get
+            {
+                return _RenderOrder_ObjectsInView;
+            }
+            set
+            {
+                _RenderOrder_ObjectsInView = value;
+            }
+        }
+
+        #region Events
+
+
+        #region OnControlAdded 
+
+        /// <summary>
+        /// Event that's raised after a controlgroup has been added to the container
+        /// </summary>
+        public event userInteraction OnControlAdded;
+        private void Raise_OnControlAdded()
+        {
+            // Cancel event if no parent is present
+            if (this.parent == null) 
+                return;
+            if (OnControlAdded != null)
+                OnControlAdded(this, this.parent.ActiveScreen);
+        }
+
+        #endregion
+
+        #region OnControlRemoved
+
+        /// <summary>
+        /// Event that's raised after a controlgroup has been removed from the container
+        /// </summary>
+        public event userInteraction OnControlRemoved;
+        private void Raise_OnControlRemoved()
+        {
+            // Cancel event if no parent is present
+            if (this.parent == null)
+                return;
+            if (OnControlRemoved != null)
+                OnControlRemoved(this, this.parent.ActiveScreen);
+        }
+
+        #endregion
+
+        #endregion
 
         #region ScrollBar properties
 
@@ -44,7 +260,7 @@ namespace OpenMobile.Controls
         private bool _ScrollBar_Horizontal_ScrollInProgress = false;
         private int _ScrollBar_ClearanceToEdge = 3;
         private int _ScrollBar_Thickness = 7;
-        private Color _ScrollBar_ColorNormal = Color.FromArgb(90, Color.White);
+        private Color _ScrollBar_ColorNormal = Color.FromArgb(70, Color.White);
         private Color _ScrollBar_ColorHighlighted = Color.FromArgb(180, Color.White);
 
         /// <summary>
@@ -169,6 +385,9 @@ namespace OpenMobile.Controls
 
         private Color _BackgroundColor = Color.Transparent;
 
+        /// <summary>
+        /// The background control for this control
+        /// </summary>
         public Color BackgroundColor
         {
             get
@@ -206,18 +425,48 @@ namespace OpenMobile.Controls
 
         #endregion
 
-        public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
-        {
-            base.RenderBegin(g, e);
+        /// <summary>
+        /// Active softedges
+        /// </summary>
+        public FadingEdge.GraphicSides SoftEdges { get; set; }
 
+        /// <summary>
+        /// Data to use for softedge
+        /// </summary>
+        private FadingEdge.GraphicData SoftEdgeData { get; set; }
+        /// <summary>
+        /// SoftEdge image
+        /// </summary>
+        private OImage imgSoftEdge = null;
+        
+        #region Local renders
+
+        /// <summary>
+        /// Initialize local renders
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void RenderLocal_Init(OpenMobile.Graphics.Graphics g, renderingParams e)
+        {
             // Limit rendering to this controls region
             g.SetClip(Region);
+        }
 
-            #region Draw background 
+        /// <summary>
+        /// Render local background
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void RenderLocal_Background(OpenMobile.Graphics.Graphics g, renderingParams e)
+        {
+            #region Draw background
 
-            // Draw image background (if any)
-            if (_BackgroundColor != Color.Transparent && _RenderingValue_Alpha == 1)
-                g.FillRectangle(new Brush(Color.FromArgb((int)(_BackgroundColor.A * OpacityFloat), _BackgroundColor)), new Rectangle(left + 1, top + 1, width - 2, height - 2));
+            // Draw solid background (if any)
+            if (_BackgroundColor != Color.Transparent)
+                g.FillRectangle(new Brush(Color.FromArgb((int)(this.GetAlphaValue255(_BackgroundColor.A)), _BackgroundColor)), new Rectangle(left + 1, top + 1, width - 2, height - 2));
+
+            // Draw any shapes (if active)
+            DrawShape(g, e);
 
             // Draw image (if any)
             if (image.image != null)
@@ -225,19 +474,41 @@ namespace OpenMobile.Controls
                     g.DrawImage(image.image, left, top, width, height, _RenderingValue_Alpha, eAngle.Normal);
 
             #endregion
+        }
 
+        /// <summary>
+        /// Render local controls
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void RenderLocal_Controls(OpenMobile.Graphics.Graphics g, renderingParams e)
+        {
             // Find region of contained controls
-            Rectangle ControlsArea = GetControlsArea();
+            ControlsArea = GetControlsArea();
+
+            //// Autosize control
+            //bool moved = false;
+            //if (ControlCountOld != _Controls.Count)
+            //    moved = AutoSizeContainer(g, ControlsArea);
+            //ControlCountOld = _Controls.Count;
 
             // Move controls with this control
-            if (!oldRegion.IsEmpty)
-                e.Offset = Region - oldRegion;
+            if (!_NoOffsetOnNextRender)
+            {
+                if (oldRegion.Left == int.MinValue && oldRegion.Top == int.MinValue)
+                    e.Offset = Region - ControlsArea;
+                else
+                    e.Offset = Region - oldRegion;
+            }
+            _NoOffsetOnNextRender = false;
             oldRegion = Region;
+
+            // Filter out changes to width and height from offset data
+            e.Offset.Width = 0;
+            e.Offset.Height = 0;
 
             // Pass offset data along with renderingparameters to move contained controls
             e.Offset += ScrollRegion;
-            // Reset scroll data so we don't accumulate offset values
-            ScrollRegion = new Rectangle();
 
             #region Limit offset so we don't move the controls outside the bounds
 
@@ -275,166 +546,577 @@ namespace OpenMobile.Controls
 
             #endregion
 
-            for (int i = 0; i < _Controls.Count; i++)
-                if (_Controls[i].IsControlRenderable(true))
-                    _Controls[i].Render(g, e);
+            // Exctract render objects
+            if (_RenderOrder != null && _Controls != null)
+            {
+                if ((!e.Offset.IsEmpty) || (_RenderOrder_ObjectsInView == null || ((_RenderOrder_ObjectsInView.Count + _RenderOrder_ObjectsOutsideView.Count) != _RenderOrder.Count)))
+                {
+                    lock (_RenderOrder)
+                    {
+                        lock (_Controls)
+                        {
+                            RenderOrder_GetObjects(e.Offset);
+                            _RenderOrder_ObjectsInView.Sort(); // Reset to default order 
+                            RenderOrder_Set(_Controls, e.Offset, ref _RenderOrder_ObjectsInView);
+                        }
+                    }
+                }
+
+                // Render controls within view
+                if (_RenderOrder_ObjectsInView != null)
+                {
+                    for (int i = 0; i < _RenderOrder_ObjectsInView.Count; i++)
+                    {
+                        int RenderIndex = _RenderOrder_ObjectsInView[i];
+                        if (!ScrollRegion.IsEmpty)
+                        {
+                            SetOffsetToScrollPoints(_Controls[RenderIndex], ref e.Offset);
+                            ModifyControlAndOffsetData(_Controls[RenderIndex], ref e.Offset);
+                        }
+                        for (int i2 = 0; i2 < _Controls[RenderIndex].Count; i2++)
+                        {
+                            if (_Controls[RenderIndex][i2].IsControlRenderable(true))
+                                _Controls[RenderIndex][i2].Render(g, e);
+                        }
+                    }
+                }
+            }
+
+            // Render controls outside the view (to ensure we scroll properly)
+            if (_RenderOrder_ObjectsOutsideView != null)
+            {
+                for (int i = 0; i < _RenderOrder_ObjectsOutsideView.Count; i++)
+                {
+                    int RenderIndex = _RenderOrder_ObjectsOutsideView[i];
+                    if (!ScrollRegion.IsEmpty)
+                    {
+                        SetOffsetToScrollPoints(_Controls[RenderIndex], ref e.Offset);
+                        ModifyControlAndOffsetData(_Controls[RenderIndex], ref e.Offset);
+                    }
+                    for (int i2 = 0; i2 < _Controls[RenderIndex].Count; i2++)
+                    {
+                        _Controls[RenderIndex][i2].RenderEmpty(g, e);
+                    }
+                }
+            }
+
+
+
+            //// Render controls (controls are only rendered if they are within this controls region)
+            //for (int i = 0; i < _Controls.Count; i++)
+            //{
+            //    RenderIndex = _RenderOrder[i];
+            //    if (!ScrollRegion.IsEmpty)
+            //    {
+            //        SetOffsetToScrollPoints(_Controls[RenderIndex], ref e.Offset);
+            //        ModifyControlAndOffsetData(_Controls[RenderIndex], ref e.Offset);
+            //    }
+            //    if (this.Region.ToSystemRectangle().IntersectsWith(_Controls[RenderIndex].Region.ToSystemRectangle()))
+            //    {
+            //        if (_Controls[RenderIndex].IsControlRenderable(true))
+            //            _Controls[RenderIndex].Render(g, e);
+            //    }
+            //    else
+            //    {   // Prosess rendering parameters even if it's not within the rendering range (to ensure we scroll properly)
+            //        _Controls[RenderIndex].RenderEmpty(g, e);
+            //    }
+            //}
+
+            // Reset scroll data so we don't accumulate offset values
+            ScrollRegion = new Rectangle();
 
             // Reset offset data
             e.Offset = new Rectangle();
 
             // Reset clip
             g.ResetClip();
+        }
 
-            #region Render scrollbar
+        internal virtual void ModifyControlAndOffsetData(ControlGroup controlGroup, ref Rectangle Offset)
+        {
+            // No action
+        }
 
-            _ScrollBar_Horizontal_Visible = ((ControlsArea.Left < Region.Left || ControlsArea.Right > Region.Right) && _ScrollBar_Horizontal_Enabled);
-            if (_ScrollBar_Horizontal_Visible)
-            {   // Horisontal scrollbar
+        internal virtual void SetOffsetToScrollPoints(ControlGroup controlGroup, ref Rectangle Offset)
+        {
+            if (ScrollPoints == null)
+                return;
 
-                // Set scrollbar color
-                Brush ScrollBarBrush;
-                if (_ScrollBar_Horizontal_ScrollInProgress | this.mode == eModeType.Highlighted)
-                    ScrollBarBrush = new Brush(_ScrollBar_ColorHighlighted);
-                else
-                    ScrollBarBrush = new Brush(_ScrollBar_ColorNormal);
+            Rectangle CalcEndRegion = controlGroup.Region;
+            CalcEndRegion.Translate(Offset);
 
-                // Calculate scrollbar length
-                int ScrollBarSize = (int)(((float)Region.Width) * (((float)Region.Width) / ((float)ControlsArea.Width)));
-                // Set minimum size of scrollbar
-                if (ScrollBarSize <= 0)
-                    ScrollBarSize = 5;
+            Point TargetPoint = new Point();
 
-                // Calculate scrollbar location
-                float MaxTravelScrollBar = System.Math.Abs(Region.Width - ScrollBarSize);
-                float MaxTravelControls = System.Math.Abs(ControlsArea.Width - Region.Width);
-                float CurrentTravel = System.Math.Abs(Region.Left - ControlsArea.Left);
-                float TravelFactor = CurrentTravel / MaxTravelControls;
-                int ScrollBarLocation = Region.Left + (int)(MaxTravelScrollBar * TravelFactor);
+            try
+            {
+                // Find matching offset data
+                switch (MainScrollDirection)
+                {
+                    case ScrollDirections.X:
+                        {
+                            // Ignore method if target position is outside this controls regions (saves execution time)
+                            if ((CalcEndRegion.Right < this.Region.Left) | (CalcEndRegion.Left > this.Region.Right))
+                                return;
 
-                // Render scrollbar
-                g.FillRectangle(ScrollBarBrush, ScrollBarLocation, Region.Bottom - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarSize, _ScrollBar_Thickness);
+                            // Convert values from absolute to relative
+                            CalcEndRegion.Left -= this.Region.Left;
+                            CalcEndRegion.Top -= this.Region.Top;
 
-                // Release resources
-                ScrollBarBrush.Dispose();
+                            // Find direct match in scroll points
+                            TargetPoint = ScrollPoints.Find(x => x.X == CalcEndRegion.Center.X);
+
+                            // TODO: Search for closest match
+                            //if (TargetPoint == null)
+                            //{
+                            //    TargetPoint = ScrollPoints.Find(x => x.X == CalcEndRegion.Center.X);
+                            //}
+                        }
+                        break;
+                    case ScrollDirections.Y:
+                        {
+                            // Ignore method if target position is outside this controls regions (saves execution time)
+                            if ((CalcEndRegion.Bottom < this.Region.Top) | (CalcEndRegion.Top > this.Region.Bottom))
+                                return;
+
+                            // Convert values from absolute to relative
+                            CalcEndRegion.Left -= this.Region.Left;
+                            CalcEndRegion.Top -= this.Region.Top;
+
+                            // Find direct match in scroll points
+                            TargetPoint = ScrollPoints.Find(x => x.Y == CalcEndRegion.Center.Y);
+
+                            // TODO: Search for closest match
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch
+            {   // Set offset to none if an error occurs
+                TargetPoint = CalcEndRegion.Center;
             }
 
-            _ScrollBar_Vertical_Visible = ((ControlsArea.Bottom > Region.Bottom || ControlsArea.Top < Region.Top) && _ScrollBar_Vertical_Enabled);
-            if (_ScrollBar_Vertical_Visible)
-            {   // Vertical scrollbar
+            // Calculate new offset based on where it should be
+            Offset.X += (TargetPoint.X - CalcEndRegion.Center.X);
+            Offset.Y += (TargetPoint.Y - CalcEndRegion.Center.Y);
+        }
 
-                // Set scrollbar color
-                Brush ScrollBarBrush = new Brush(Color.FromArgb(90, Color.White));
-                if (_ScrollBar_Vertical_ScrollInProgress | this.mode == eModeType.Highlighted)
-                    ScrollBarBrush = new Brush(Color.FromArgb(180, Color.White));
+        /// <summary>
+        /// Render local scrollbars
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void RenderLocal_Scrollbars(OpenMobile.Graphics.Graphics g, renderingParams e)
+        {
+            #region Render scrollbar
 
-                // Calculate scrollbar length
-                int ScrollBarSize = (int)(((float)Region.Height) * (((float)Region.Height) / ((float)ControlsArea.Height)));
-                // Set minimum size of scrollbar
-                if (ScrollBarSize <= 0)
-                    ScrollBarSize = 5;
+            // Find region of contained controls
+            ControlsArea = GetControlsArea();
 
-                // Calculate scrollbar location
-                float MaxTravelScrollBar = System.Math.Abs(Region.Height - ScrollBarSize);
-                float MaxTravelControls = System.Math.Abs(ControlsArea.Height - Region.Height);
-                float CurrentTravel = System.Math.Abs(Region.Top - ControlsArea.Top);
-                float TravelFactor = CurrentTravel / MaxTravelControls;
-                int ScrollBarLocation = Region.Top + (int)(MaxTravelScrollBar * TravelFactor);
+            if (MainScrollDirection == ScrollDirections.Both || MainScrollDirection == ScrollDirections.X)
+            {
+                _ScrollBar_Horizontal_Visible = ((ControlsArea.Left < Region.Left || ControlsArea.Right > Region.Right) && _ScrollBar_Horizontal_Enabled && _Controls.Count > 0);
+                if (_ScrollBar_Horizontal_Visible)
+                {   // Horisontal scrollbar
 
-                // Render scrollbar
-                g.FillRectangle(ScrollBarBrush, Region.Right - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarLocation, _ScrollBar_Thickness, ScrollBarSize);
+                    Rectangle scrollbarRect = this.Region;
 
-                // Release resources
-                ScrollBarBrush.Dispose();
+                    // Set scrollbar color
+                    Brush ScrollBarBrush;
+                    if (_ScrollBar_Horizontal_ScrollInProgress | this.mode == eModeType.Highlighted)
+                        ScrollBarBrush = new Brush(_ScrollBar_ColorHighlighted);
+                    else
+                        ScrollBarBrush = new Brush(_ScrollBar_ColorNormal);
+
+                    // Calculate scrollbar length
+                    int ScrollBarSize = (int)(((float)Region.Width) * (((float)Region.Width) / ((float)ControlsArea.Width)));
+                    // Set minimum size of scrollbar
+                    if (ScrollBarSize <= 0)
+                        ScrollBarSize = 5;
+
+                    // Calculate scrollbar location
+                    float MaxTravelScrollBar = System.Math.Abs(Region.Width - ScrollBarSize);
+                    float MaxTravelControls = System.Math.Abs(ControlsArea.Width - Region.Width);
+                    float CurrentTravel = System.Math.Abs(Region.Left - ControlsArea.Left);
+                    float TravelFactor = CurrentTravel / MaxTravelControls;
+                    int ScrollBarLocation = Region.Left + (int)(MaxTravelScrollBar * TravelFactor);
+
+                    // Render scrollbar
+                    g.FillRectangle(ScrollBarBrush, ScrollBarLocation, Region.Bottom - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarSize, _ScrollBar_Thickness);
+
+                    // Release resources
+                    ScrollBarBrush.Dispose();
+                }
+            }
+
+            if (MainScrollDirection == ScrollDirections.Both || MainScrollDirection == ScrollDirections.Y)
+            {
+                _ScrollBar_Vertical_Visible = ((ControlsArea.Bottom > Region.Bottom || ControlsArea.Top < Region.Top) && _ScrollBar_Vertical_Enabled && _Controls.Count > 0);
+                if (_ScrollBar_Vertical_Visible)
+                {   // Vertical scrollbar
+
+                    // Set scrollbar color
+                    Brush ScrollBarBrush;
+                    if (_ScrollBar_Vertical_ScrollInProgress | this.mode == eModeType.Highlighted)
+                        ScrollBarBrush = new Brush(_ScrollBar_ColorHighlighted);
+                    else
+                        ScrollBarBrush = new Brush(_ScrollBar_ColorNormal);
+
+                    // Calculate scrollbar length
+                    int ScrollBarSize = (int)(((float)Region.Height) * (((float)Region.Height) / ((float)ControlsArea.Height)));
+                    // Set minimum size of scrollbar
+                    if (ScrollBarSize <= 0)
+                        ScrollBarSize = 5;
+
+                    // Calculate scrollbar location
+                    float MaxTravelScrollBar = System.Math.Abs(Region.Height - ScrollBarSize);
+                    float MaxTravelControls = System.Math.Abs(ControlsArea.Height - Region.Height);
+                    float CurrentTravel = System.Math.Abs(Region.Top - ControlsArea.Top);
+                    float TravelFactor = CurrentTravel / MaxTravelControls;
+                    int ScrollBarLocation = Region.Top + (int)(MaxTravelScrollBar * TravelFactor);
+
+                    // Render scrollbar
+                    g.FillRectangle(ScrollBarBrush, Region.Right - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarLocation, _ScrollBar_Thickness, ScrollBarSize);
+
+                    // Release resources
+                    ScrollBarBrush.Dispose();
+                }
             }
 
             #endregion
+        }
+
+        /// <summary>
+        /// Render local softedges
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void RenderLocal_SoftEdges(OpenMobile.Graphics.Graphics g, renderingParams e)
+        {
+            #region Render soft edges
+
+            // Use soft edges?
+            if (SoftEdges != FadingEdge.GraphicSides.None)
+            {
+                if (_BackgroundColor != Color.Transparent)
+                {
+                    Size SoftEdgeSize = new Size(Width + 2, Height + 2);
+                    if (imgSoftEdge == null || imgSoftEdge.Width != SoftEdgeSize.Width || imgSoftEdge.Height != SoftEdgeSize.Height)
+                    {   // Generate image
+                        SoftEdgeData.Sides = SoftEdges;
+                        SoftEdgeData.Width = SoftEdgeSize.Width;
+                        SoftEdgeData.Height = SoftEdgeSize.Height;
+                        if (imgSoftEdge != null)
+                            imgSoftEdge.Dispose();
+                        imgSoftEdge = FadingEdge.GetImage(SoftEdgeData);
+                    }
+                    g.DrawImage(imgSoftEdge, Left - 1, Top - 1, imgSoftEdge.Width, imgSoftEdge.Height, _RenderingValue_Alpha);
+                }
+            }
+
+            #endregion
+        }
+
+        /// <summary>
+        /// Render local softedges
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void RenderLocal_ScrollPoints(OpenMobile.Graphics.Graphics g, renderingParams e)
+        {
+            if (ScrollPoints == null)
+                return;
+
+            if (this._SkinDebug)
+            {
+                List<Point> points = new List<Point>(ScrollPoints);
+                // Convert relative coordinates to absolute
+                for (int i = 0; i < points.Count; i++)
+                    points[i].Translate(this.left, this.top);
+
+                using (Pen p = new Pen(Color.Yellow, 2))
+                    g.DrawLine(p, points.ToArray());
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Renders this control
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
+        {
+            base.RenderBegin(g, e);
+
+            RenderLocal_Init(g, e);
+            RenderLocal_Background(g, e);
+            RenderLocal_Controls(g, e);
+            RenderLocal_SoftEdges(g, e);
+            RenderLocal_Scrollbars(g, e);
+            RenderLocal_ScrollPoints(g, e);
 
             base.RenderFinish(g, e);
         }
 
-        private Rectangle GetControlsArea()
+        /// <summary>
+        /// Returns the total area covered by the currently loaded controls
+        /// </summary>
+        /// <returns></returns>
+        public Rectangle GetControlsArea()
         {
-            int l = int.MaxValue;
-            int t = int.MaxValue;
-            int r = int.MinValue;
-            int b = int.MinValue;
+            if (_Controls.Count == 0)
+                return new Rectangle();
 
-            foreach (OMControl control in _Controls)
-	        {
-                // Width
-                if (control.Region.Right > r)
-                    r = control.Region.Right;
+            Rectangle TotalRegion = _Controls[0].Region;
+            for (int i = 1; i < _Controls.Count; i++)
+                TotalRegion.Union(_Controls[i].Region);
+            return TotalRegion;
+        }
 
-                // Height
-                if (control.Region.Bottom > b)
-                    b = control.Region.Bottom;
+        private void Control_Configure(ControlGroup controlGroup)
+        {
+            foreach (OMControl control in controlGroup)
+            {
+                // Connect controls parent
+                control.Parent = this.parent;
 
-                // Left side
-                if (control.Region.Left < l)
-                    l = control.Region.Left;
-
-                // Top side
-                if (control.Region.Top < t)
-                    t = control.Region.Top;
+                // Connect refresh requestor to control
+                control.UpdateThisControl += this.parent.raiseUpdate;
             }
-            return new Rectangle(l, t, r - l, b - t);
         }
-
-        private void Control_Configure(OMControl control)
+        private void Controls_PlaceAndConfigure(ControlGroup ControlToAdd, ControlGroup ControlToRemove)
         {
-            // Connect controls parent
-            control.Parent = this.parent;
-
-            // Connect refresh requestor to control
-            control.UpdateThisControl += this.parent.raiseUpdate;
-        }
-        private void Controls_Configure()
-        {
-            foreach (OMControl control in _Controls)
-                Control_Configure(control);
+            foreach (ControlGroup cg in _Controls)
+                Control_PlaceAndConfigure(cg, ControlToAdd, ControlToRemove);
         }
 
-        private void Control_PlaceRelative(OMControl control)
+        private void Control_PlaceRelative(ControlGroup controlGroup)
         {
             // Change position of this control from relative to this container to absolute on the panel
-            control.Left = this.Left + control.Left;
-            control.Top = this.Top + control.Top;
+            foreach (OMControl control in controlGroup)
+            {
+                control.Left = this.Left + control.Left;
+                control.Top = this.Top + control.Top;
+            }
         }
         private void Controls_PlaceRelative()
         {
-            foreach (OMControl control in _Controls)
-                Control_PlaceRelative(control);
+            foreach (ControlGroup cg in _Controls)
+                Control_PlaceRelative(cg);
         }
 
+        private void Control_PlaceOnScrollPoints(ControlGroup controlGroup)
+        {
+            Rectangle Offset = new Rectangle();
+            SetOffsetToScrollPoints(controlGroup, ref Offset);
+            foreach (OMControl control in controlGroup)
+            {
+                control.Left += Offset.Left;
+                control.Top += Offset.Top;
+            }
+        }
+
+        protected virtual void RenderOrder_Set(List<ControlGroup> controlGroups, Rectangle Offset, ref List<int> renderOrder)
+        {
+            // No action
+        }
+
+        private void RenderOrder_GetObjects(Rectangle offset)
+        {
+            // Exctract render objects
+            if (_Controls != null && _RenderOrder != null)
+            {
+                lock (_RenderOrder)
+                {
+                    lock (_Controls)
+                    {
+                        // Get controls based on the position they will be in AFTER offset is added
+                        _RenderOrder_ObjectsInView = _RenderOrder.FindAll(x => this.Region.ToSystemRectangle().IntersectsWith(_Controls[x].Region.TranslateToNew(offset).ToSystemRectangle()));
+                        _RenderOrder_ObjectsOutsideView = _RenderOrder.FindAll(x => !_RenderOrder_ObjectsInView.Contains(x));
+                    }
+                }
+            }
+        }
+
+        #region ScrollToControl
+
+        public void ScrollToControl(string name)
+        {
+            ScrollToControl(name, false, 1.0f);
+        }
+        public void ScrollToControl(string name, bool animate)
+        {
+            ScrollToControl(name, animate, 1.0f);
+        }
+        public void ScrollToControl(OMControl control)
+        {
+            ScrollToControl(control.Name, false, 1.0f);
+        }
+        public void ScrollToControl(OMControl control, bool animate)
+        {
+            ScrollToControl(control.Name, animate, 1.0f);
+        }
         /// <summary>
         /// Scrolls to the specified control
         /// </summary>
         /// <param name="control"></param>
-        public void ScrollToControl(OMControl control)
+        public void ScrollToControl(OMControl control, bool animate, float animationSpeed)
         {
-            ScrollToControl(control.Name);
+            ScrollToControl(control.Name, animate, animationSpeed);
         }
         /// <summary>
         /// Scrolls to the specified control
         /// </summary>
         /// <param name="name"></param>
-        public void ScrollToControl(string name)
+        public void ScrollToControl(string name, bool animate, float animationSpeed)
         {
-            OMControl controlFound = _Controls.Find(x => x.Name == name);
-            if (controlFound != null)
-            {
-                // Calculate distance from current location to control's location
-                Point Distance = (this.Region.Center - controlFound.Region.Center);
-                ScrollRegion.X = Distance.X;
-                ScrollRegion.Y = Distance.Y;
-            }
+            ControlGroup cg = _Controls.Find(x => x.Contains(name));
+            ScrollToControl(cg,animate,animationSpeed);
         }
 
+        public void ScrollToControl(ControlGroup cg, bool animate, float animationSpeed)
+        {
+            // Cancel any ongoing scrolling
+            _ThrowRun = false;
+
+            if (animationSpeed == 0)
+                animationSpeed = 1.0f;
+
+            ControlGroup controlFound;
+            lock (_Controls)
+            {
+                controlFound = _Controls.Find(x => x == cg);
+            }
+            if (controlFound != null)
+            {
+                if (animate)
+                {
+                    #region Animate scrolling
+
+                    lock (Animation)
+                    {
+                        float StepSize = 1;
+                        // Calculate distance from current location to control's location
+                        Point Distance_Start = (this.Region.Center - controlFound.Region.Center);
+                        Point Distance_Current = Distance_Start;
+
+                        // Calculatate animation speed, this is based on the total distance to move but is limited to a max time and a min time
+                        float maxTimeMS = 1000F;
+                        float minTimeMS = 500F;
+                        float TravelDistance = System.Math.Max(System.Math.Abs(Distance_Current.X), System.Math.Abs(Distance_Current.Y));
+                        float TravelSpeedMS = System.Math.Abs(TravelDistance) / animationSpeed;
+                        if (TravelSpeedMS > maxTimeMS)
+                            animationSpeed = TravelSpeedMS / maxTimeMS;
+                        if (TravelSpeedMS < minTimeMS)
+                            animationSpeed = TravelSpeedMS / minTimeMS;
+
+                        Animation.Speed = 1f * animationSpeed;
+                        float AnimationValue = 0;
+                        Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                        {
+                            // Cancel animation
+                            if (Distance_Current.IsEmpty)
+                                return false;
+
+                            // Calculate animation value
+                            AnimationValue += AnimationStepF;
+
+                            // Animation step large enough?
+                            if (AnimationValue > StepSize)
+                            {
+                                AnimationStep = (int)AnimationValue;
+                                AnimationValue -= AnimationStep;
+
+                                if (Distance_Current.X > 0)
+                                {
+                                    ScrollRegion.X = AnimationStep;
+                                    Distance_Current.X -= AnimationStep;
+                                    if (Distance_Current.X < 0)
+                                    {
+                                        ScrollRegion.X -= Distance_Current.X;
+                                        Distance_Current.X = 0;
+                                    }
+                                }
+                                else if (Distance_Current.X < 0)
+                                {
+                                    ScrollRegion.X = -AnimationStep;
+                                    Distance_Current.X += AnimationStep;
+                                    if (Distance_Current.X > 0)
+                                    {
+                                        ScrollRegion.X += Distance_Current.X;
+                                        Distance_Current.X = 0;
+                                    }
+                                }
+
+                                if (Distance_Current.Y > 0)
+                                {
+                                    ScrollRegion.Y = AnimationStep;
+                                    Distance_Current.Y -= AnimationStep;
+                                    if (Distance_Current.Y < 0)
+                                    {
+                                        ScrollRegion.Y -= Distance_Current.Y;
+                                        Distance_Current.Y = 0;
+                                    }
+                                }
+                                else if (Distance_Current.Y < 0)
+                                {
+                                    ScrollRegion.Y = -AnimationStep;
+                                    Distance_Current.Y += AnimationStep;
+                                    if (Distance_Current.Y > 0)
+                                    {
+                                        ScrollRegion.Y += Distance_Current.Y;
+                                        Distance_Current.Y = 0;
+                                    }
+                                }
+                            }
+
+                            Refresh();
+
+                            //System.Threading.Thread.Sleep(500);
+                            return true;
+                        });
+
+                    }
+                    Refresh();
+
+                    #endregion
+                }
+                else
+                {
+                    // Calculate distance from current location to control's location
+                    Point Distance = (this.Region.Center - controlFound.Region.Center);
+                    ScrollRegion.X = Distance.X;
+                    ScrollRegion.Y = Distance.Y;
+                    Refresh();
+                }
+            }
+
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Creates a new instance of the control
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
         public OMContainer(string name, int x, int y, int w, int h)
             : base(name, x, y, w, h)
         {
+            // Initialize softedge data
+            SoftEdgeData = new FadingEdge.GraphicData();
+            SoftEdgeData.Sides = FadingEdge.GraphicSides.None;
         }
 
+        /// <summary>
+        /// This controls parent
+        /// </summary>
         public override OMPanel Parent
         {
             get
@@ -443,10 +1125,12 @@ namespace OpenMobile.Controls
             }
             internal set
             {
+                if (value == null)
+                    return;
+                bool Configure = (base.parent == null);
                 base.Parent = value;
-                if (value != null)
-                    Controls_Configure();
-                //    Controls_PlaceRelative();
+                if (value != null && Configure)
+                    Controls_PlaceAndConfigure(null, null);
             }
         }
 
@@ -455,7 +1139,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public OMControl this[int index]
+        public ControlGroup this[int index]
         {
             get
             {
@@ -471,19 +1155,43 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public OMControl this[string name]
+        public ControlGroup this[string name]
         {
             get
             {
-                return _Controls.Find(p => p.Name == name);
+                return _Controls.Find(p => p.Contains(name));
+            }
+        }
+
+        /// <summary>
+        /// The controlgroups contained in this container
+        /// </summary>
+        public List<ControlGroup> ControlGroups
+        {
+            get
+            {
+                return _Controls;
             }
         }
 
         #region IContainer2 Members
 
+        // Only the controls that's in view will be returned in this list
         public List<OMControl> Controls
         {
-            get { return _Controls; }
+            get 
+            {
+                // Exit if nothing is visible
+                if (_RenderOrder_ObjectsInView == null)
+                    return new List<OMControl>();
+                
+                // Return a flatten list of all controls in the controlgroups
+                List<OMControl> controls = new List<OMControl>();
+                for (int i = 0; i < _RenderOrder_ObjectsInView.Count; i++)
+                    for (int i2 = 0; i2 < _Controls[_RenderOrder_ObjectsInView[i]].Count; i2++)
+                        controls.Add(_Controls[_RenderOrder_ObjectsInView[i]][i2]);
+                return controls; 
+            }
         }
 
         /// <summary>
@@ -518,32 +1226,620 @@ namespace OpenMobile.Controls
         /// Adds a control to this container
         /// </summary>
         /// <param name="control"></param>
+        /// <param name="Relative">Indicates that the placement of this control is releative to the container</param>
         /// <returns></returns>
         public bool addControl(OMControl control, bool Relative)
         {
-            // Only add controls that aren't already loaded
-            //if (_Controls.Find(x => x.Name == control.Name) == null)
+            return addControl(new ControlGroup(control), Relative, Directions.None);
+        }
+        /// <summary>
+        /// Adds a control to this container
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="direction">The direction to add the new controlgroup</param>
+        /// <returns></returns>
+        public bool addControl(OMControl control, Directions direction)
+        {
+            return addControl(new ControlGroup(control), false, direction);
+        }
+
+        /// <summary>
+        /// Adds a control to this container
+        /// </summary>
+        /// <param name="cg"></param>
+        /// <param name="Relative">Indicates that the placement of this control is releative to the container</param>
+        /// <returns></returns>
+        public bool addControl(ControlGroup cg, bool Relative)
+        {
+            return addControl(cg, Relative, Directions.None);
+        }
+
+        /// <summary>
+        /// Adds a control to this container
+        /// </summary>
+        /// <param name="cg"></param>
+        /// <param name="direction">The direction to add the new controlgroup</param>
+        /// <returns></returns>
+        public bool addControl(ControlGroup cg, Directions direction)
+        {
+            return addControl(cg, false, direction);
+        }
+
+        /// <summary>
+        /// Adds a control to this container
+        /// </summary>
+        /// <param name="cg"></param>
+        /// <param name="Relative">Indicates that the placement of this control is releative to the container</param>
+        /// <returns></returns>
+        public bool addControl(ControlGroup cg, bool relative, Directions direction)
+        {
+            if (cg == null)
+                return false;
+
+            // Configure direction data
+            cg.PlacementDirection = direction;
+            cg.PlacementRelative = relative;
+
+            if (direction == Directions.CenterLR)
+                _NoOffsetOnNextRender = true;
+
+            // Add control
+            _Controls.Add(cg);
+            RenderOrder_Reset();
+
+            // Add this control to the panel
+            if (this.parent != null)
+                Control_PlaceAndConfigure(cg, null, null);
+
+            AutoSizeContainer();
+
+            Raise_OnControlAdded();
+
+            return true;
+        }
+
+        /// <summary>
+        /// Adds a control to this container at a specific index
+        /// </summary>
+        /// <param name="cg"></param>
+        /// <param name="Relative">Indicates that the placement of this control is releative to the container</param>
+        /// <param name="direction"></param>
+        /// <returns></returns>
+        public bool addControl(int index, ControlGroup cg, bool relative, Directions direction)
+        {
+            if (cg == null)
+                return false;
+
+            // Configure direction data
+            cg.PlacementDirection = direction;
+            cg.PlacementRelative = relative;
+
+            if (direction == Directions.CenterLR)
+                _NoOffsetOnNextRender = true;
+
+            // Add control
+            _Controls.Insert(index, cg);
+            RenderOrder_Reset();
+
+            // Add this control to the panel
+            if (this.parent != null)
             {
-                // Add control
-                _Controls.Add(control);
+                Control_PlaceAndConfigure(cg, null, null);
 
-                // Add this control to the panel
-                if (this.parent != null)
+                // Move all other controls as well to accomodate the inserted control
+                for (int i = index+1; i < _Controls.Count; i++)
+                    Control_PlaceAndConfigure(_Controls[i], cg, null);
+            }
+
+            AutoSizeContainer();
+
+            Raise_OnControlAdded();
+            return true;
+        }
+
+        private void AutoSizeContainer()
+        {
+            if (_AutoSizeMode == AutoSizeModes.NoAutoSize)
+                return;
+
+            lock (this)
+            {
+                Rectangle ControlsArea = GetControlsArea();
+
+                // Set width and height
+                this.Width = ControlsArea.Width;
+                this.Height = ControlsArea.Height;
+            }
+        }
+
+        private void Control_PlaceAndConfigure(ControlGroup cg, ControlGroup ControlToInsert, ControlGroup ControlToRemove)
+        {
+            // Configure control
+            Control_Configure(cg);
+
+            // Place control
+            Control_SetPlacement(cg, cg.PlacementDirection, ControlToInsert, ControlToRemove);
+                //if (!UseAbsolutePlacement)
+                //    cg.PlacementRelative = true;
+            //if (cg.PlacementRelative && ControlToRemove == null && !UseAbsolutePlacement)
+            //    Control_PlaceRelative(cg);
+
+            // Place control on scroll points
+            Control_PlaceOnScrollPoints(cg);
+
+            // Block controls automatic rendering
+            foreach (OMControl control in cg)
+                control.ManualRendering = true;
+        }
+
+        /// <summary>
+        /// Removes a controlgroup based on name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool RemoveControl(string name)
+        {
+            bool result = false;
+
+            ControlGroup cg = _Controls.Find(x => x.Contains(name));
+            if (cg != null)
+                result = RemoveControl(cg);
+
+            return result;
+
+        }
+
+        /// <summary>
+        /// Removes a controlgroup based on tag
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool RemoveControlByKey(string key)
+        {
+            bool result = false;
+
+            ControlGroup cg = _Controls.Find(x => x.Key == key);
+            if (cg != null)
+                result = RemoveControl(cg);
+
+            return result;
+
+        }
+
+        /// <summary>
+        /// Removes a controlgroup based on index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public bool RemoveControl(int index)
+        {
+            bool result = false;
+
+            ControlGroup cg = _Controls[index];
+            if (cg != null)
+                result = RemoveControl(cg);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Removes a controlgroup
+        /// </summary>
+        /// <param name="cg"></param>
+        /// <returns></returns>
+        public bool RemoveControl(ControlGroup cg)
+        {
+            // Get index
+            int index = _Controls.IndexOf(cg);
+
+            // Remove control
+            bool result = _Controls.Remove(cg);
+            RenderOrder_Reset();
+
+            // Renable controls automatic rendering
+            foreach (OMControl control in cg)
+                control.ManualRendering = false;
+
+            // Move all other controls to accomodate the removed control
+            for (int i = index; i < _Controls.Count; i++)
+                Control_PlaceAndConfigure(_Controls[i], null, cg);
+
+            AutoSizeContainer();
+
+            Raise_OnControlRemoved();
+
+            return result;
+        }
+
+        /// <summary>
+        /// Directions to use when adding items
+        /// </summary>
+        public enum Directions
+        {
+            None,
+            Down = 1,
+            Up = -1,
+            Right = 2,
+            Left = -2,
+            CenterLR = 3
+        }
+
+        protected virtual void Control_SetPlacement(ControlGroup ControlToPlace, Directions direction, ControlGroup ControlToInsert, ControlGroup ControlToRemove)
+        {
+            // Note about coordinates: ControlToPlace will always be relative, 
+            //                         ControlToInsert will always be absolute
+            //                         ControlToRemove will always be absolute
+
+            // Note about controls: ControlToAdd is added to _Controls list BEFORE entering this method,
+            //                      ControToRemove is removed from _Controls list BEFORE entering this method
+
+            int ReferenceValue;
+            int Index_ControlToPlace = _Controls.IndexOf(ControlToPlace);
+
+            // Swap direction if we're removing a control
+            if (ControlToRemove != null)
+                direction = (Directions)(-((int)direction));
+
+            switch (direction)
+            {
+                case Directions.None:
+                    {
+                        // Place controls from relative to absolute
+                        foreach (OMControl control in ControlToPlace)
+                        {
+                            // Place control
+                            control.Top = this.Region.Top + control.Top;
+                            control.Left = this.Region.Left + control.Left;
+                        }
+                    }
+                    break;
+                case Directions.CenterLR:
+                    {   // Center all controls (this means that we have to reposition all controls for each control being added or removed)
+
+                        // Place control to add
+                        if (ControlToInsert == null && ControlToRemove == null)
+                            Control_SetPlacement(ControlToPlace, Directions.Right, ControlToInsert, ControlToRemove);
+
+                        // Get center position of current items
+                        int CenterMissmatch = this.Region.Center.X - this.GetControlsArea().Center.X;
+
+                        // Offset all controls according to missmatch
+                        foreach (ControlGroup cg in _Controls)
+                        {
+                            foreach (OMControl control in cg)
+                            {   // Place control
+                                control.Left += CenterMissmatch;
+                            }
+                        }
+                        
+                    }
+                    break;
+                case Directions.Down:
+                    {
+                        if (ControlToInsert == null && ControlToRemove == null)
+                        {   // A new control is being added; move control relative
+                            // Default reference value
+                            ReferenceValue = this.Region.Top;
+
+                            // Calculate reference values
+                            if (Index_ControlToPlace > 0 && _Controls.Count > 1)
+                                // Reference is the previous control in the list
+                                ReferenceValue = _Controls[Index_ControlToPlace - 1].Region.Bottom;
+
+                            // Place controls from relative to absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Top = ReferenceValue + control.Top;
+                                control.Left = this.Region.Left + control.Left;
+                            }
+                        }
+                        else if (ControlToRemove != null)
+                        {   // An existing control is being removed; move control absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Top = control.Top + ControlToRemove.Region.Height;
+                            }
+                        }
+                        else if (ControlToInsert != null)
+                        {   // An existing control is being inserted; move control absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Top = control.Top + ControlToInsert.Region.Height;
+                            }
+                        }
+                    }
+                    break;
+                case Directions.Up:
+                    {
+                        if (ControlToInsert == null && ControlToRemove == null)
+                        {   // A new control is being added; move control relative
+                            // Default reference value
+                            ReferenceValue = this.Region.Bottom - ControlToPlace.Region.Height;
+
+                            // Calculate reference values
+                            if (Index_ControlToPlace > 0 && _Controls.Count > 1)
+                                // Reference is the previous control in the list
+                                ReferenceValue = _Controls[Index_ControlToPlace - 1].Region.Top - ControlToPlace.Region.Height;
+
+                            // Place controls from relative to absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Top = ReferenceValue + control.Top;
+                                control.Left = this.Region.Left + control.Left;
+                            }
+                        }
+                        else if (ControlToRemove != null)
+                        {   // An existing control is being removed; move control absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Top = control.Top - ControlToRemove.Region.Height;
+                            }
+                        }
+                        else if (ControlToInsert != null)
+                        {   // An existing control is being inserted; move control absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Top = control.Top - ControlToInsert.Region.Height;
+                            }
+                        }
+                    }
+                    break;
+                case Directions.Right:
+                    {
+                        if (ControlToInsert == null && ControlToRemove == null)
+                        {   // A new control is being added; move control relative
+                            // Default reference value
+                            ReferenceValue = this.Region.Left;
+
+                            // Calculate reference values
+                            if (Index_ControlToPlace > 0 && _Controls.Count > 1)
+                                // Reference is the previous control in the list
+                                ReferenceValue = _Controls[Index_ControlToPlace - 1].Region.Right;
+
+                            // Place controls from relative to absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Left = ReferenceValue + control.Left;
+                                control.Top = this.Region.Top + control.Top;
+                            }
+                        }
+                        else if (ControlToRemove != null)
+                        {   // An existing control is being removed; move control absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Left = control.Left + ControlToRemove.Region.Width;
+                            }
+                        }
+                        else if (ControlToInsert != null)
+                        {   // An existing control is being inserted; move control absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Left = control.Left + ControlToInsert.Region.Width;
+                            }
+                        }
+                    }
+                    break;
+                case Directions.Left:
+                    {
+                        if (ControlToInsert == null && ControlToRemove == null)
+                        {   // A new control is being added; move control relative
+                            // Default reference value
+                            ReferenceValue = this.Region.Right - ControlToPlace.Region.Width;
+
+                            // Calculate reference values
+                            if (Index_ControlToPlace > 0 && _Controls.Count > 1)
+                                // Reference is the previous control in the list
+                                ReferenceValue = _Controls[Index_ControlToPlace - 1].Region.Left - ControlToPlace.Region.Width;
+
+                            // Place controls from relative to absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Left = ReferenceValue + control.Left;
+                                control.Top = this.Region.Top + control.Top;
+                            }
+                        }
+                        else if (ControlToRemove != null)
+                        {   // An existing control is being removed; move control absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Left = control.Left - ControlToRemove.Region.Width;
+                            }
+                        }
+                        else if (ControlToInsert != null)
+                        {   // An existing control is being inserted; move control absolute
+                            foreach (OMControl control in ControlToPlace)
+                            {
+                                // Place control
+                                control.Left = control.Left - ControlToInsert.Region.Width;
+                            }
+                        }
+
+                    }
+                    break;
+            }
+
+
+
+
+            
+            /*
+            Rectangle ControlPreviousArea = new Rectangle();
+            // Get placement of current last control (the control we're trying to place has already been added so whe have to skip this one)
+            int index = _Controls.IndexOf(ControlToPlace);
+            if (ControlToRemove == null)
+            {
+                if (_Controls.Count > 1)
                 {
-                    // Configure control
-                    Control_Configure(control);
-
-                    // Place control
-                    if (Relative)
-                        Control_PlaceRelative(control);
-
-                    // Block controls automatic rendering
-                    control.ManualRendering = true;
-
-                    return true;
+                    if (index > 0)
+                        ControlPreviousArea = _Controls[index - 1].Region;
                 }
             }
-            return false;
+            else
+            {
+                if (_Controls.Count >= 1)
+                {
+                    if (index > 0)
+                        ControlPreviousArea = _Controls[index].Region;
+                }
+            }
+                // Try to find index of current item
+                //if (index >= 0)
+                //{
+                //    if (index > 0)
+                //    {
+                //        ControlPreviousArea = _Controls[index - 1].Region;
+                //    }
+                //}
+                //else
+                //{
+                //    ControlPreviousArea = _Controls[_Controls.Count - 2].Region;
+                //}
+
+                //if (index >= 0)
+                //{
+                //    switch (direction)
+                //    {
+                //        case Directions.Down:
+                //        case Directions.Right:
+                //            {
+                //                if (index > 0 && _Controls.Count > 1)
+                //                    ControlPreviousArea = _Controls[index - 1].Region;
+                //            }
+                //            break;
+                //        case Directions.Up:
+                //        case Directions.Left:
+                //            {
+                //                if (_Controls.Count > index + 1)
+                //                    ControlPreviousArea = _Controls[index + 1].Region;
+                //            }
+                //            break;
+                //    }
+                //}
+            //}
+            
+            Rectangle ControlAreaToRemove = new Rectangle();
+            if (ControlToRemove != null)
+            {
+                ControlAreaToRemove = ControlToRemove.Region;
+                direction = (Directions)(-((int)direction));
+                index = _Controls.IndexOf(ControlToPlace);
+                if (index >= 0)
+                {
+                    //ControlPreviousArea = _Controls[index].Region;
+                }
+            }
+
+            // Set placement 
+            switch (direction)
+            {
+                case Directions.Up:
+                    {
+                        if (ControlPreviousArea.IsEmpty)
+                            ControlPreviousArea.Top = this.Region.Bottom;
+                        foreach (OMControl control in ControlToPlace)
+                        {
+                            if (!UseAbsolutePlacement)
+                                control.Top = (ControlPreviousArea.Top - this.Region.Top) + control.Top;
+                            else
+                            {
+                                if (ControlAreaToRemove.IsEmpty)
+                                    control.Top = ControlPreviousArea.Top;
+                                else
+                                    control.Top = (ControlPreviousArea.Top - this.Region.Top) + control.Top - ControlAreaToRemove.Height;
+                            }
+                        }
+                    }
+                    break;
+                case Directions.Down:
+                    {
+                        if (ControlPreviousArea.IsEmpty)
+                            ControlPreviousArea.Bottom = this.Region.Top;
+                        foreach (OMControl control in ControlToPlace)
+                        {
+                            if (!UseAbsolutePlacement)
+                                control.Top = (ControlPreviousArea.Bottom - this.Region.Top) + control.Top;
+                            else
+                            {
+                                if (ControlAreaToRemove.IsEmpty)
+                                    control.Top = ControlPreviousArea.Bottom;
+                                else
+                                    control.Top = (ControlPreviousArea.Bottom - this.Region.Top) + control.Top - ControlAreaToRemove.Height;
+                            }
+                        }
+                    }
+                    break;
+                case Directions.Right:
+                    {
+                        if (ControlPreviousArea.IsEmpty)
+                            ControlPreviousArea.Left = this.Region.Left;
+                        foreach (OMControl control in ControlToPlace)
+                        {
+                            if (!UseAbsolutePlacement)
+                                control.Left = (ControlPreviousArea.Right - this.Region.Left) + control.Left;
+                            else
+                            {
+                                if (ControlAreaToRemove.IsEmpty)
+                                    control.Left = ControlPreviousArea.Right;
+                                else
+                                    control.Left = (ControlPreviousArea.Right - this.Region.Left) + control.Left - ControlAreaToRemove.Width;
+                            }
+                        }
+                    }
+                    break;
+                case Directions.Left:
+                    {
+                        if (ControlPreviousArea.IsEmpty)
+                            ControlPreviousArea.Left = this.Region.Right;
+                        foreach (OMControl control in ControlToPlace)
+                        {
+                            if (!UseAbsolutePlacement)
+                                control.Left = (ControlPreviousArea.Left - this.Region.Left) - control.Left - control.Width;
+                            else
+                            {
+                                if (ControlAreaToRemove.IsEmpty)
+                                    control.Left = ControlPreviousArea.Left - cg.Region.Width;
+                                else
+                                    control.Left = control.Left - ControlAreaToRemove.Width;
+                            }
+                        }
+
+                    }
+                    break;
+                default:
+                    break;
+            }
+            */
+        }
+
+        private void RenderOrder_Reset()
+        {
+            if ((_RenderOrder == null) || (_RenderOrder.Count != _Controls.Count))
+                _RenderOrder = new List<int>();
+            // Reset render order to default
+            _RenderOrder.Clear();
+            for (int i = 0; i < _Controls.Count; i++)
+                _RenderOrder.Add(i);
+        }
+
+        /// <summary>
+        /// Removes all controls
+        /// </summary>
+        public void ClearControls()
+        {
+            _Controls.Clear();
+            RenderOrder_Reset();
+            Refresh();
         }
 
         #endregion
@@ -554,17 +1850,21 @@ namespace OpenMobile.Controls
         {
             OMContainer newObject = (OMContainer)this.MemberwiseClone();
             //OMContainer newObject = (OMContainer)base.Clone();
-            newObject._Controls = new List<OMControl>();
-            foreach (OMControl control in _Controls)
-                newObject._Controls.Add((OMControl)control.Clone());
+            newObject._Controls = new List<ControlGroup>();
+            foreach (ControlGroup cg in _Controls)
+            {
+                newObject._Controls.Add(cg.Clone());
+                //ControlGroup newCG = new ControlGroup();
+                //foreach (OMControl control in cg)
+                //    newCG.Add((OMControl)control.Clone());
+                //newObject._Controls.Add(newCG);
+            }
             return newObject;
         }
 
         #endregion
 
-        #region IThrow Members
-
-        public void MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance)
+        private void Scroll(Point RelativeDistance)
         {
             // Find region of contained controls
             Rectangle ControlsArea = GetControlsArea();
@@ -612,12 +1912,81 @@ namespace OpenMobile.Controls
             }
         }
 
-        public void MouseThrowStart(int screen, Point StartLocation, PointF scaleFactors, ref bool Cancel)
+        #region IThrow Members
+
+        public virtual void MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance, PointF CursorSpeed)
+        {
+            _ThrowRun = false;
+            Scroll(RelativeDistance);
+        }
+
+        public virtual void MouseThrowStart(int screen, Point StartLocation, PointF CursorSpeed, PointF scaleFactors, ref bool Cancel)
         {
         }
 
-        public void MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation)
+        public virtual void MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation, PointF CursorSpeed)
         {
+            // Continue motion when user end's the throw 
+            _ThrowRun = true;
+            int LoopSpeedMS = 10;
+            PointF DecelerationFactor = new PointF(0.003f, 0.003f);
+            PointF ThrowSpeed = new PointF(System.Math.Abs(CursorSpeed.X), System.Math.Abs(CursorSpeed.Y));
+            Point ScrollDistance = new Point();
+            PointF Deceleration = new PointF(ThrowSpeed.X * DecelerationFactor.X, ThrowSpeed.Y * DecelerationFactor.Y);
+
+            while (_ThrowRun)
+            {
+                if (!_ThrowRun)
+                    break;
+
+                if (ThrowSpeed.X > 0)
+                    ThrowSpeed.X -= Deceleration.X;
+                else
+                    ThrowSpeed.X = 0;
+
+                if (ThrowSpeed.Y > 0)
+                    ThrowSpeed.Y -= Deceleration.Y;
+                else
+                    ThrowSpeed.Y = 0;
+
+
+                if (ThrowSpeed.X > 0)
+                {
+                    if (CursorSpeed.X > 0)
+                    {
+                        ScrollDistance.X = (int)System.Math.Round((ThrowSpeed.X * LoopSpeedMS), 0);
+                    }
+                    else if (CursorSpeed.X < 0)
+                    {
+                        ScrollDistance.X = (int)-System.Math.Round((ThrowSpeed.X * LoopSpeedMS), 0);
+                    }
+                }
+
+                if (ThrowSpeed.Y > 0)
+                {
+                    if (CursorSpeed.Y > 0)
+                    {
+                        ScrollDistance.Y = (int)System.Math.Round((ThrowSpeed.Y * LoopSpeedMS), 0);
+                    }
+                    else if (CursorSpeed.Y < 0)
+                    {
+                        ScrollDistance.Y = (int)-System.Math.Round((ThrowSpeed.Y * LoopSpeedMS), 0);
+                    }
+                }
+
+                // End throw
+                if (ThrowSpeed.X <= 0 & ThrowSpeed.Y <= 0)
+                    _ThrowRun = false;
+
+                if (!_ThrowRun)
+                    break;
+
+                Scroll(ScrollDistance);
+                Refresh();
+
+                System.Threading.Thread.Sleep(LoopSpeedMS);
+            }            
+            
             _ScrollBar_Vertical_ScrollInProgress = false;
             _ScrollBar_Horizontal_ScrollInProgress = false;
         }
@@ -635,10 +2004,10 @@ namespace OpenMobile.Controls
         {
             if ((e.Key == Key.Left) || (e.Key == Key.Right) || (e.Key == Key.Up) || (e.Key == Key.Down))
             {
-                _Controls.ForEach(delegate(OMControl control)
+                _Controls.ForEach(delegate(ControlGroup cg)
                 {
-                    if (control.Mode == eModeType.Highlighted)
-                        ScrollToControl(control);
+                    if (cg.IsHighlighted())
+                        ScrollToControl(cg, false, 1.0f);
                 });
             }
         }

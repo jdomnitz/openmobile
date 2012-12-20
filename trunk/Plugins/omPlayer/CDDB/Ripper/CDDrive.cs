@@ -450,7 +450,7 @@ namespace Ripper
 		  
 		  while (i < numTracks) 
 		  {
-			  Console.WriteLine("Track {0}: {1}:{2}", i, GetSeconds(i) / 60, GetSeconds(i) % 60);
+              //Console.WriteLine("Track {0}: {1}:{2}", i, GetSeconds(i) / 60, GetSeconds(i) % 60);
 
 			  ofs = (((Toc.TrackData[ i].Address_1 * 60)+ Toc.TrackData[ i].Address_2)*75)+ Toc.TrackData[ i].Address_3;
 			  n = n + cddb_sum((Toc.TrackData[ i].Address_1 * 60) + Toc.TrackData[ i].Address_2 );
@@ -463,7 +463,7 @@ namespace Ripper
 
 		  int numSecs = Toc.TrackData[ i].Address_1 * 60 + Toc.TrackData[ i].Address_2;
           
-		  Console.WriteLine("n = {0}, numSecs = {1}, secs = {2}", n, numSecs, secs);
+          //Console.WriteLine("n = {0}, numSecs = {1}, secs = {2}", n, numSecs, secs);
 
 		  postfix += "+" + numSecs;
 		  Win32Functions.TRACK_DATA last    = Toc.TrackData[ numTracks ];

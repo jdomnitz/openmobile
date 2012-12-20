@@ -49,7 +49,10 @@ namespace OpenMobile
         float CursorDistance = 0f;
         Point CursorDistanceXYTotal = new Point();
         Point CursorDistanceXYRelative = new Point();
+        PointF CursorSpeed = new PointF();
+        Stopwatch swCursorSpeedTiming = new Stopwatch();
         bool keyboardActive;
+        bool BlockRendering = false;
         
         /// <summary>
         /// Contains the currently focused control's parent object (if any)
@@ -159,7 +162,7 @@ namespace OpenMobile
             {
                 foreach (OMControl control in panel.Controls)
                 {
-                    if (typeof(IContainer2).IsInstanceOfType(control))
+                    if (typeof(IContainer2).IsInstanceOfType(control) && control.Visible)
                     {
                         foreach (OMControl containerControl in ((IContainer2)control).Controls)
                             containerControl.RefreshGraphic();
@@ -437,25 +440,38 @@ namespace OpenMobile
         private bool RenderingError = false;
         protected void RenderPanels()
         {
-            lock (painting)
+            if (BlockRendering)
+                return;
+
+            //lock (painting)
             {
                 try
                 {
-                    for (int i = 0; i < RenderingQueue.Count; i++)
+                    // Get a filtered list of panels to render
+                    List<OMPanel> FilteredRenderingQueue = RenderingQueue.FindAll(x => (x.Mode != eModeType.Loaded && x.Mode != eModeType.Unloaded));
+
+                    for (int i = 0; i < FilteredRenderingQueue.Count; i++)
                     {
                         // Configure rendering params based on panel mode
-                        if (RenderingQueue[i].Mode == eModeType.transitioningIn)
+                        if (FilteredRenderingQueue[i].Mode == eModeType.transitioningIn)
                             // Render parameters for transition effect in
                             TransitionEffect_ConfigureRenderingParams(TransitionEffectParam_In);
-                        else if (RenderingQueue[i].Mode == eModeType.transitioningOut)
+                        else if (FilteredRenderingQueue[i].Mode == eModeType.transitioningOut)
                             // Render parameters for transition effect out
                             TransitionEffect_ConfigureRenderingParams(TransitionEffectParam_Out);
                         else
                             // Reset any transition effects
                             TransitionEffect_ConfigureRenderingParams(null);
 
-                        RenderingQueue[i].Render(g, RenderingParam);
+                        if (FilteredRenderingQueue[i].Mode != eModeType.Loaded && FilteredRenderingQueue[i].Mode != eModeType.Unloaded)
+                            FilteredRenderingQueue[i].Render(g, RenderingParam);
                     }
+
+                    // Render any modal panel a second time on top of all others
+                    OMPanel ModalPanel = GetModalPanel();
+                    if (ModalPanel != null && ModalPanel.Mode != eModeType.Loaded && ModalPanel.Mode != eModeType.Unloaded)
+                        ModalPanel.Render(g, RenderingParam);
+
                     RenderingError = false;
                 }
                 catch (Exception e)
@@ -606,6 +622,12 @@ namespace OpenMobile
             CursorDistanceXYTotal = CursorPosition - MouseMoveStartPoint;
             CursorDistanceXYRelative = CursorPosition - CursorDistanceXYRelative;
 
+            // Calculate mouse move speed (pixels since last execution)
+            swCursorSpeedTiming.Stop();
+            CursorSpeed = new PointF(CursorDistanceXYRelative.X / (float)swCursorSpeedTiming.Elapsed.TotalMilliseconds, CursorDistanceXYRelative.Y / (float)swCursorSpeedTiming.Elapsed.TotalMilliseconds);
+            swCursorSpeedTiming.Reset();
+            swCursorSpeedTiming.Start();
+
             OMControl control = null;
 
             if (e.Buttons == MouseButton.Left)
@@ -639,14 +661,14 @@ namespace OpenMobile
                             if (CursorDistance > 5)
                             {
                                 bool cancel = false;
-                                ((IThrow)FocusedControlParent).MouseThrowStart(screen, MouseMoveStartPoint, _ScaleFactors, ref cancel);
+                                ((IThrow)FocusedControlParent).MouseThrowStart(screen, MouseMoveStartPoint, CursorSpeed, _ScaleFactors, ref cancel);
                                 ThrowActive = !cancel;
                                 UpdateControlFocus(FocusedControlParent, null, false);
                             }
                         }
                         else
                         {   // Throw started, update data for throw interface
-                            ((IThrow)FocusedControlParent).MouseThrow(screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                            ((IThrow)FocusedControlParent).MouseThrow(screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative, CursorSpeed);
                         }
                     }
                 }
@@ -659,13 +681,13 @@ namespace OpenMobile
                             if (CursorDistance > 5)
                             {
                                 bool cancel = false;
-                                ((IThrow)FocusedControl).MouseThrowStart(screen, MouseMoveStartPoint, _ScaleFactors, ref cancel);
+                                ((IThrow)FocusedControl).MouseThrowStart(screen, MouseMoveStartPoint, CursorSpeed, _ScaleFactors, ref cancel);
                                 ThrowActive = !cancel;
                             }
                         }
                         else
                         {   // Throw started, update data for throw interface
-                            ((IThrow)FocusedControl).MouseThrow(screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                            ((IThrow)FocusedControl).MouseThrow(screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative, CursorSpeed);
                         }
                     }
                 }
@@ -680,6 +702,23 @@ namespace OpenMobile
 
                 // Highlight/unhighlight the control
                 UpdateControlFocus(control, ParentControl, true);
+            }
+
+            // Send mouse preview interface data
+            if (FocusedControlParent != null && ((FocusedControl != null && !typeof(IMousePreview).IsInstanceOfType(FocusedControl)) || (FocusedControl == null)))
+            {   // Send event to focused control parent
+                if (FocusedControlParent != null)
+                    if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
+                    {
+                        ((IMousePreview)FocusedControlParent).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                    }
+            }
+            else
+            {   // Send event to focused control
+                // Mouse preview interface
+                if (FocusedControl != null)
+                    if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
+                        ((IMousePreview)FocusedControl).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
             }
 
             // Send event data
@@ -734,17 +773,36 @@ namespace OpenMobile
             CursorDistanceXYTotal.Y = 0;
             CursorDistanceXYRelative = MouseMoveStartPoint;
 
-            OMControl control = FocusedControl;
             OMControl ParentControl = null;
+            OMControl control = FocusedControl;
+
+            // Verify that control under mouse is still the same
+            OMControl controlAtMouseLocation = FindControlAtLocation(MouseMoveStartPoint, out ParentControl);
 
             // If nothing is selected then try to select something
-            if (FocusedControl == null)
+            if (FocusedControl == null || controlAtMouseLocation != control)
             {
                 // Find control under mouse
                 control = FindControlAtLocation(MouseMoveStartPoint, out ParentControl);
 
                 // Highlight/unhighlight the control
                 UpdateControlFocus(control, ParentControl, true);
+            }
+
+            // Send Mouse preview interface data
+            if (FocusedControlParent != null && ((FocusedControl != null && !typeof(IMousePreview).IsInstanceOfType(FocusedControl)) || (FocusedControl == null)))
+            {   // Send event to focused control parent
+                if (FocusedControlParent != null)
+                    if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
+                    {
+                        ((IMousePreview)FocusedControlParent).MouseDown(screen, eScaled, MouseMoveStartPoint);
+                    }
+            }
+            else
+            {   // Send event to focused control
+                if (FocusedControl != null)
+                    if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
+                        ((IMousePreview)FocusedControl).MouseDown(screen, eScaled, MouseMoveStartPoint);
             }
 
             // No use in doing anything if nothing is focused
@@ -815,6 +873,19 @@ namespace OpenMobile
             // Redraw
             Invalidate();
 
+            // Send Mouse preview interface data
+            if (FocusedControlParent != null && ((FocusedControl != null && !typeof(IMousePreview).IsInstanceOfType(FocusedControl)) || (FocusedControl == null)))
+            {   // Send event to focused control parent
+                if (FocusedControlParent != null)
+                    if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
+                        ((IMousePreview)FocusedControlParent).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+            }
+            else
+            {   // Send event to focused control
+                if (FocusedControl != null)
+                    if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
+                        ((IMousePreview)FocusedControl).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+            }
 
             // Return if gesture is handled or no control has focus
             if (GestureHandled || FocusedControl == null)
@@ -867,7 +938,7 @@ namespace OpenMobile
                 {
                     if (FocusedControlParent != null)
                         if (typeof(IThrow).IsInstanceOfType(FocusedControlParent))
-                            ((IThrow)FocusedControlParent).MouseThrowEnd(screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location);
+                            ((IThrow)FocusedControlParent).MouseThrowEnd(screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
                 }
             }
             else
@@ -876,7 +947,7 @@ namespace OpenMobile
                 {
                     if (FocusedControl != null)
                         if (typeof(IThrow).IsInstanceOfType(FocusedControl))
-                            ((IThrow)FocusedControl).MouseThrowEnd(screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location);
+                            ((IThrow)FocusedControl).MouseThrowEnd(screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
                 }
             }
 
@@ -889,6 +960,8 @@ namespace OpenMobile
             CursorDistanceXYTotal.Y = 0;
             CursorDistanceXYRelative = MouseMoveStartPoint;
             ThrowActive = false;
+            swCursorSpeedTiming.Stop();
+            swCursorSpeedTiming.Reset();
         }
 
         private void RenderingWindow_MouseLeave(object sender, EventArgs e)
@@ -1004,47 +1077,67 @@ namespace OpenMobile
             Invalidate();
         }
 
-        public void ExecuteTransition(string transType)
+        public void ExecuteTransition(string transType, float transSpeed)
         {
             lock (this) // Lock to prevent multiple transitons at the same time
             {
-                List<OMPanel> panels = RenderingQueue.FindAll(x => ((x.Mode == eModeType.transitioningIn) || (x.Mode == eModeType.transitioningOut)));
+                List<OMPanel> panels = RenderingQueue.FindAll(x => ((x.Mode == eModeType.Loaded) || (x.Mode == eModeType.transitioningIn) || (x.Mode == eModeType.transitioningOut)));
 
                 // Reset transition effects parameters
                 TransitionEffectParam_In = new renderingParams();
                 TransitionEffectParam_Out = new renderingParams();
+
+                // Get transition effect
+                iPanelTransitionEffect TransitionEffect = PanelTransitionEffectHandler.GetEffect(transType);
+
+                // Get initial transition effect values
+                TransitionEffect.SetInitialTransitionEffects(TransitionEffectParam_In, TransitionEffectParam_Out);
                 
-                // Execute effect
-                PanelTransitionEffectHandler.GetEffect(transType).Run(TransitionEffectParam_In, TransitionEffectParam_Out, ReDrawPanel, BuiltInComponents.SystemSettings.TransitionSpeed);
-                
-                // Go trough each panel to set correct modes after transition effects
+                // Ensure panels are transitioned in if setting the mode was forgotten in the effect
                 foreach (OMPanel panel in panels)
                 {
-                    if (panel.Mode == eModeType.transitioningIn)
-                    {   // Panel is transitioning in, set to normal state
-                        panel.Mode = eModeType.Normal;
-
-                        // Raise event for entering panel
-                        panel.RaiseEvent(screen, eEventType.Entering);
-                    }
-                    else if (panel.Mode == eModeType.transitioningOut)
-                    {   // Panel is transitioning out, remove from rendering queue
-                        RenderingQueue.Remove(panel);
-
-                        // Unhook refresh event
-                        panel.UpdateThisControl -= UpdateThisControl;
-
-                        // Raise event for leaving panel
-                        panel.RaiseEvent(screen, eEventType.Leaving);
+                    if (panel.Mode == eModeType.Loaded)
+                    {   // Panel is loaded, set to transition in state
+                        panel.Mode = eModeType.transitioningIn;
                     }
                 }
+                
+                // Execute effect
+                TransitionEffect.Run(
+                    TransitionEffectParam_In, 
+                    TransitionEffectParam_Out, 
+                    ReDrawPanel, 
+                    (transSpeed > 0 ? transSpeed : BuiltInComponents.SystemSettings.TransitionSpeed));
+                
+                // Set all panels that's transitioned out as unloaded
+                List<OMPanel> panelsTransOut = RenderingQueue.FindAll(x => (x.Mode == eModeType.transitioningOut));
+                panelsTransOut.ForEach(delegate(OMPanel panel) { panel.Mode = eModeType.Unloaded; });            
+
+                // Go trough each panel to set correct modes after transition effects
+                lock (RenderingQueue)
+                {
+                    foreach (OMPanel panel in panels)
+                    {
+                        if (panel.Mode == eModeType.transitioningIn)
+                        {   // Panel is transitioning in, set to normal state
+                            panel.Mode = eModeType.Normal;
+
+                            // Raise event for entering panel
+                            panel.RaiseEvent(screen, eEventType.Entering);
+                        }
+                        else if (panel.Mode == eModeType.transitioningOut | panel.Mode == eModeType.Unloaded)
+                        {   // Panel is transitioning out, remove from rendering queue
+                            RenderingQueue.Remove(panel);
+                            // Unhook refresh event
+                            panel.UpdateThisControl -= UpdateThisControl;
+
+                            // Raise event for leaving panel
+                            panel.RaiseEvent(screen, eEventType.Leaving);
+                        }
+                    }
+                }
+                ReDrawPanel();
             }
-
-            // Reset transition effects parameters
-            TransitionEffectParam_In = new renderingParams();
-            TransitionEffectParam_Out = new renderingParams();
-
-            Invalidate();
         }
 
         public void TransitionInPanel(OMPanel newP)
@@ -1061,7 +1154,7 @@ namespace OpenMobile
                     UpdateControlFocus(null, null, true);
 
                     // Mark this panel as transitionin in
-                    newP.Mode = eModeType.transitioningIn;
+                    newP.Mode = eModeType.Loaded;
 
                     // Add new panel
                     insertPanel(newP);
@@ -1216,11 +1309,24 @@ namespace OpenMobile
         private void insertPanel(OMPanel newP)
         {
             for (int i = RenderingQueue.Count - 1; i >= 0; i--)
+            {
                 if (RenderingQueue[i].Priority <= newP.Priority)
                 {
-                    RenderingQueue.Insert(i + 1, newP);
-                    return;
+                    if (newP.Priority == ePriority.UI)
+                    {
+                        if (RenderingQueue[i].Priority == ePriority.UI)
+                            RenderingQueue.Insert(i, newP);
+                        else
+                            RenderingQueue.Insert(i + 1, newP);
+                        return;
+                    }
+                    else
+                    {
+                        RenderingQueue.Insert(i + 1, newP);
+                        return;
+                    }
                 }
+            }
             RenderingQueue.Insert(0, newP);
         }
 
@@ -1316,7 +1422,7 @@ namespace OpenMobile
             for (int i = panel.controlCount - 1; i >= 0; i--)
             {
                 control = panel.Controls[i];
-                if (typeof(IContainer2).IsInstanceOfType(control))
+                if (typeof(IContainer2).IsInstanceOfType(control) && control.Visible)
                 {
                     OMControl ContainerControl = null;
                     for (int i2 = ((IContainer2)control).Controls.Count - 1; i2 >= 0; i2--)
@@ -1528,7 +1634,7 @@ namespace OpenMobile
                         Controls.Add(control);
 
                         // Add sub controls to list to check
-                        if (typeof(IContainer2).IsInstanceOfType(control))
+                        if (typeof(IContainer2).IsInstanceOfType(control) && control.Visible)
                             for (int i3 = ((IContainer2)control).Controls.Count - 1; i3 >= 0; i3--)
                                 Controls.Add(((IContainer2)control).Controls[i3]);
 
@@ -1693,6 +1799,8 @@ namespace OpenMobile
             CursorDistanceXYTotal.Y = 0;
             CursorDistanceXYRelative = new Point();
             ThrowActive = false;
+            swCursorSpeedTiming.Stop();
+            swCursorSpeedTiming.Reset();
 
             // Redraw
             Invalidate();

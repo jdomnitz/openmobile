@@ -34,6 +34,7 @@ namespace OpenMobile.Controls
     {
         string Name { get; }
         void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier);
+        void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out);
     }
 
     /// <summary>
@@ -123,7 +124,10 @@ namespace OpenMobile.Controls
         {
             if (String.IsNullOrEmpty(Name))
             {
-                return GetEffect(BuiltInComponents.SystemSettings.TransitionDefaultEffect);
+                if (!String.IsNullOrEmpty(BuiltInComponents.SystemSettings.TransitionDefaultEffect))
+                    return GetEffect(BuiltInComponents.SystemSettings.TransitionDefaultEffect);
+                else
+                    return GetEffect("None");
             }
             else if (Name.ToLower() == Effect_Random.Name.ToLower())
             {
@@ -147,6 +151,13 @@ namespace OpenMobile.Controls
         public string Name
         {
             get { return "SlideLeft"; }
+        }
+
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Start values for effect
+            TransitionEffectParam_In.Offset = new Rectangle(1000, 0, 0, 0);
+            TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
         }
 
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
@@ -196,6 +207,13 @@ namespace OpenMobile.Controls
             get { return "SlideRight"; }
         }
 
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Start values for effect
+            TransitionEffectParam_In.Offset = new Rectangle(-1000, 0, 0, 0);
+            TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
+        }
+
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Animator
@@ -242,6 +260,14 @@ namespace OpenMobile.Controls
         {
             get { return "SlideUp"; }
         }
+
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Start values for effect
+            TransitionEffectParam_In.Offset = new Rectangle(0, 600, 0, 0);
+            TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
+        }
+
 
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
@@ -290,6 +316,14 @@ namespace OpenMobile.Controls
             get { return "SlideDown"; }
         }
 
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Start values for effect
+            TransitionEffectParam_In.Offset = new Rectangle(0, -600, 0, 0);
+            TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
+        }
+
+
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Animator
@@ -335,6 +369,13 @@ namespace OpenMobile.Controls
         public string Name
         {
             get { return "Crossfade"; }
+        }
+
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Start values for effect
+            TransitionEffectParam_In.Alpha = 0.01F;
+            TransitionEffectParam_Out.Alpha = 1.0F;
         }
 
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
@@ -392,6 +433,13 @@ namespace OpenMobile.Controls
             get { return "CrossfadeFast"; }
         }
 
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Start values for effect
+            TransitionEffectParam_In.Alpha = 0.01F;
+            TransitionEffectParam_Out.Alpha = 1.0F;
+        }
+
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Animator
@@ -445,6 +493,15 @@ namespace OpenMobile.Controls
         public string Name
         {
             get { return "CollapseGrowCrossUL"; }
+        }
+
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Start values for effect
+            TransitionEffectParam_In.Scale.X = 0.01F;
+            TransitionEffectParam_In.Scale.Y = 0.01F;
+            TransitionEffectParam_Out.Scale.X = 1F;
+            TransitionEffectParam_Out.Scale.Y = 1F;
         }
 
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
@@ -511,6 +568,18 @@ namespace OpenMobile.Controls
         public string Name
         {
             get { return "CollapseGrowCrossCenter"; }
+        }
+
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Start values for effect
+            TransitionEffectParam_In.Scale.X = 0.01F;
+            TransitionEffectParam_In.Scale.Y = 0.01F;
+            TransitionEffectParam_Out.Scale.X = 1F;
+            TransitionEffectParam_Out.Scale.Y = 1F;
+
+            TransitionEffectParam_In.Offset = new Rectangle(500, 300, 0, 0);
+            TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
         }
 
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
@@ -589,6 +658,18 @@ namespace OpenMobile.Controls
         public string Name
         {
             get { return "CollapseGrowCenter"; }
+        }
+
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Start values for effect
+            TransitionEffectParam_In.Scale.X = 0.01F;
+            TransitionEffectParam_In.Scale.Y = 0.01F;
+            TransitionEffectParam_Out.Scale.X = 1F;
+            TransitionEffectParam_Out.Scale.Y = 1F;
+
+            TransitionEffectParam_In.Offset = new Rectangle(500, 300, 0, 0);
+            TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
         }
 
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
@@ -677,6 +758,13 @@ namespace OpenMobile.Controls
             get { return "None"; }
         }
 
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Reset transition effects
+            TransitionEffectParam_In = new renderingParams();
+            TransitionEffectParam_Out = new renderingParams();
+        }
+
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)
         {
             // Reset transition effects
@@ -694,6 +782,13 @@ namespace OpenMobile.Controls
         public string Name
         {
             get { return "Random"; }
+        }
+
+        public void SetInitialTransitionEffects(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out)
+        {
+            // Reset transition effects
+            TransitionEffectParam_In = new renderingParams();
+            TransitionEffectParam_Out = new renderingParams();
         }
 
         public void Run(renderingParams TransitionEffectParam_In, renderingParams TransitionEffectParam_Out, ReDrawTrigger Refresh, float SpeedMultiplier)

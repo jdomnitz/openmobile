@@ -35,6 +35,19 @@ namespace OpenMobile
     public struct imageItem : ICloneable
     {
         /// <summary>
+        /// The region this image covers
+        /// </summary>
+        public Rectangle Region 
+        {
+            get
+            {
+                if (image != null)
+                    return image.Region;
+                else
+                    return new Rectangle();
+            }
+        }
+        /// <summary>
         /// The image
         /// </summary>
         public OImage image;
@@ -50,6 +63,11 @@ namespace OpenMobile
         {
             this.name = "Unknown";
             this.image = i;
+        }
+        public imageItem(Color color, int width, int height)
+        {
+            this.name = "Unknown";
+            this.image = new OImage(color, width, height);
         }
         /// <summary>
         /// Construct an image item from fully qualified path 

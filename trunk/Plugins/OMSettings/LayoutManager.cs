@@ -23,6 +23,7 @@ using OpenMobile.Graphics;
 using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Plugin;
+using OpenMobile.helperFunctions.Controls;
 
 namespace OMSettings
 {
@@ -82,7 +83,7 @@ namespace OMSettings
             else if (typeof(OMSlider).IsInstanceOfType(c))
             {
                 ((OMSlider)c).Value = int.Parse(setting.getInstanceValue(screen));
-                OMLabel lbl = ((OMContainer)c.Parent[0])["dsc" + setting.Name] as OMLabel;
+                OMLabel lbl = ((OMContainer)c.Parent[0])["dsc" + setting.Name][0] as OMLabel;
                 if (lbl != null)
                     lbl.Text = setting.Description.Replace("%value%", setting.getInstanceValue(screen));
             }
@@ -296,11 +297,12 @@ namespace OMSettings
                         button.Text = s.Description;
                         button.Font = new Font(Font.GenericSansSerif, 24F);
                         button.Width = (int)(Graphics.MeasureString(button.Text, button.Font).Width + 0.5F) + 20;
-                        button.Name = title;
+                        button = DefaultControls.GetButton(title, button.Left, button.Top, button.Width, button.Height, "", s.Description);
+                        //button.Name = title;
                         button.Tag = s.Name;
                         button.OnClick += new userInteraction(button_OnClick);
-                        button.Image = theHost.getSkinImage("Full");
-                        button.FocusImage = theHost.getSkinImage("Full.Highlighted");
+                        //button.Image = theHost.getSkinImage("Full");
+                        //button.FocusImage = theHost.getSkinImage("Full.Highlighted");
                         OMLabel mcTitle = new OMLabel(20, ofset, 250, 50);
                         mcTitle.Font = new Font(Font.GenericSansSerif, 24F, FontStyle.Regular);
                         mcTitle.Text = s.Header + (!string.IsNullOrEmpty(s.Header) ? ":" : "");
@@ -370,7 +372,7 @@ namespace OMSettings
         void scrollRight_OnClick(OMControl sender, int screen)
         {
             Setting setting=collection.Find(s => s.Name == sender.Tag.ToString().Substring(3));
-            OMTextBox tb = (OMTextBox)((OMContainer)sender.Parent[0])[setting.Name];
+            OMTextBox tb = (OMTextBox)((OMContainer)sender.Parent[0])[setting.Name][0];
             int index = setting.Options.FindIndex(s => s == tb.Text);
             if (index >= setting.Options.Count - 1)
                 return;
@@ -381,7 +383,7 @@ namespace OMSettings
         void scrollLeft_OnClick(OMControl sender, int screen)
         {
             Setting setting = collection.Find(s => s.Name == sender.Tag.ToString().Substring(3));
-            OMTextBox tb = (OMTextBox)((OMContainer)sender.Parent[0])[setting.Name];
+            OMTextBox tb = (OMTextBox)((OMContainer)sender.Parent[0])[setting.Name][0];
             int index = setting.Options.FindIndex(s => s == tb.Text);
             if (index <= 0)
                 return;

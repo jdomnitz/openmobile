@@ -10,7 +10,9 @@ namespace OpenMobile.Graphics
     public sealed class Graphics
     {
         static bool v2;
-        static Bitmap virtualG;
+        static Bitmap virtualG = new Bitmap(1000, 600);
+        static System.Drawing.Graphics gr = System.Drawing.Graphics.FromImage(virtualG);
+
         public static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
         IGraphics implementation;
         static string version;
@@ -421,7 +423,6 @@ namespace OpenMobile.Graphics
                 _ScaleFactors[i] = new PointF(1, 1);
 
             _screen = screen;
-            virtualG = new Bitmap(1000, 600);
         }
         static private float dpi = 1F;
         static private PointF[] _ScaleFactors;
@@ -485,37 +486,55 @@ namespace OpenMobile.Graphics
             }
         }
 
-        public static SizeF MeasureString(String str, Font ft, eTextFormat format)
+        public static SizeF MeasureString(String text, Font f, eTextFormat format, Alignment alignment, Rectangle maxSize)
         {
-            System.Drawing.FontStyle style = System.Drawing.FontStyle.Regular;
-            switch (format)
-            {
-                case eTextFormat.Bold:
-                case eTextFormat.BoldGlow:
-                case eTextFormat.BoldShadow:
-                    style = System.Drawing.FontStyle.Bold;
-                    break;
-                case eTextFormat.Italic:
-                case eTextFormat.ItalicShadow:
-                    style = System.Drawing.FontStyle.Italic;
-                    break;
-            }
+            // Convert OpenMobile alignment to system StringFormat
+            StringFormat sFormat = OpenMobile.Graphics.Font.AlignmentToStringFormat(alignment);
+
+            // Convert OpenMobile fontstyle to system fontstyle
+            System.Drawing.FontStyle fs = OpenMobile.Graphics.Font.FormatToStyle(format);            
+
             lock (virtualG)
             {
-                System.Drawing.Graphics gr = System.Drawing.Graphics.FromImage(virtualG);
-                System.Drawing.SizeF ret = gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, style));
-                return new SizeF(ret.Width, ret.Height);
+                using (System.Drawing.Font sysFont = new System.Drawing.Font(f.Name, f.Size, fs))
+                {
+                    System.Drawing.SizeF ret = gr.MeasureString(text, sysFont, new System.Drawing.SizeF(maxSize.Width, maxSize.Height), sFormat);
+                    return new SizeF(ret.Width, ret.Height);
+                }
             }
         }
-        public static SizeF MeasureString(String str, Font ft, int width)
+        public static SizeF MeasureString(String text, Font f, eTextFormat format)
         {
+            // Convert OpenMobile fontstyle to system fontstyle
+            System.Drawing.FontStyle fs = OpenMobile.Graphics.Font.FormatToStyle(format);
+
             lock (virtualG)
             {
-                System.Drawing.Graphics gr = System.Drawing.Graphics.FromImage(virtualG);
-                System.Drawing.SizeF ret = gr.MeasureString(str, new System.Drawing.Font(ft.Name, ft.Size, (System.Drawing.FontStyle)ft.Style), width);
-                return new SizeF(ret.Width, ret.Height);
+                using (System.Drawing.Font sysFont = new System.Drawing.Font(f.Name, f.Size, fs))
+                {
+                    System.Drawing.SizeF ret = gr.MeasureString(text, sysFont);
+                    return new SizeF(ret.Width, ret.Height);
+                }
             }
         }
+        public static SizeF MeasureString(String text, Font f, eTextFormat format, Alignment alignment, int width)
+        {
+            // Convert OpenMobile alignment to system StringFormat
+            StringFormat sFormat = OpenMobile.Graphics.Font.AlignmentToStringFormat(alignment);
+
+            // Convert OpenMobile fontstyle to system fontstyle
+            System.Drawing.FontStyle fs = OpenMobile.Graphics.Font.FormatToStyle(format);
+
+            lock (virtualG)
+            {
+                using (System.Drawing.Font sysFont = new System.Drawing.Font(f.Name, f.Size, fs))
+                {
+                    System.Drawing.SizeF ret = gr.MeasureString(text, sysFont, width, sFormat);
+                    return new SizeF(ret.Width, ret.Height);
+                }
+            }
+        }
+
         public static Rectangle MeasureCharacterRanges(string text, Font font, Rectangle rect, StringFormat format)
         {
             System.Drawing.RectangleF input = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height);
@@ -530,137 +549,6 @@ namespace OpenMobile.Graphics
         {
             return new System.Drawing.Font(font.Name, font.Size / dpi, (System.Drawing.FontStyle)Font.FormatToStyle(format));
         }
-/*
-        static public void renderText_Org(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)
-        {
-            if (w == 1 | h == 1)
-                return;
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-            System.Drawing.Color color = System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
-            System.Drawing.Color secondColor = System.Drawing.Color.FromArgb(sC.A, sC.R, sC.G, sC.B);
-            if (string.IsNullOrEmpty(text))
-                return;
-            FontStyle f = FontStyle.Regular;
-            if ((format == eTextFormat.Bold) || (format == eTextFormat.BoldShadow) || (format == eTextFormat.BoldGlow))
-            {
-                f = FontStyle.Bold;
-            }
-            else if ((format == eTextFormat.Italic) || (format == eTextFormat.ItalicShadow))
-            {
-                f = FontStyle.Italic;
-            }
-            else if ((format == eTextFormat.Underline) || (format == eTextFormat.UnderlineShadow))
-            {
-                f = FontStyle.Underline;
-            }
-            if (format == eTextFormat.Outline | format == eTextFormat.OutlineNarrow | format == eTextFormat.OutlineFat)
-            {
-                using (StringFormat sFormat = new StringFormat())
-                {
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    
-                    sFormat.Alignment = (StringAlignment)((float)alignment % 10);
-                    sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
-                    if (((int)alignment & 100) == 100)
-                        sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
-                    if (alignment == Alignment.CenterLeftEllipsis)
-                        sFormat.Trimming = StringTrimming.EllipsisWord;
-                    GraphicsPath path = new GraphicsPath(FillMode.Winding);
-
-                    path.AddString(text, new System.Drawing.Font(font.Name, 1F).FontFamily, (int)f, (font.Size + 6)/dpi, new RectangleF(x, y, w, h), sFormat);
-                    g.FillPath(new SolidBrush(color), path);
-                    if (format == eTextFormat.Outline)
-                        g.DrawPath(new System.Drawing.Pen(secondColor, 3), path);
-                    else if (format == eTextFormat.OutlineFat)
-                        g.DrawPath(new System.Drawing.Pen(secondColor, 6), path);
-                    else
-                        g.DrawPath(new System.Drawing.Pen(secondColor, 1), path);
-                }
-            }
-            else if ((format == eTextFormat.Glow) || (format == eTextFormat.BoldGlow))
-            {
-                using (StringFormat sFormat = new StringFormat())
-                {
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    sFormat.Alignment = (StringAlignment)((float)alignment % 10);
-                    sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
-                    if (((int)alignment & 100) == 100)
-                        sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
-                    if (alignment == Alignment.CenterLeftEllipsis)
-                        sFormat.Trimming = StringTrimming.EllipsisWord;
-                    using (System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)f))
-                    {
-                        for (int i = -3; i < 3; i++)
-                            for (int j = -3; j < 3; j++)
-                                g.DrawString(text, currentFont, new SolidBrush(System.Drawing.Color.FromArgb(secondColor.A / (3 * (System.Math.Abs(i) + System.Math.Abs(j) + 1)), secondColor)), new RectangleF(x + i, y + j, w, h), sFormat);
-                        g.DrawString(text, currentFont, new SolidBrush(color), new RectangleF(x, y, w, h), sFormat);
-                    }
-                }
-            }
-            else if ((format == eTextFormat.GlowBig))
-            {
-                using (StringFormat sFormat = new StringFormat())
-                {
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    sFormat.Alignment = (StringAlignment)((float)alignment % 10);
-                    sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
-                    if (((int)alignment & 100) == 100)
-                        sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
-                    if (alignment == Alignment.CenterLeftEllipsis)
-                        sFormat.Trimming = StringTrimming.EllipsisWord;
-                    using (System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size / dpi, (System.Drawing.FontStyle)f))
-                    {
-                        GraphicsPath gpTxt = new GraphicsPath();
-                        gpTxt.AddString(text, currentFont.FontFamily, (int)System.Drawing.FontStyle.Regular, currentFont.Size, new System.Drawing.Rectangle(x, y, w, h), sFormat);
-                        for (int i = 1; i < 15; ++i)
-                        {
-                            System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb((secondColor.A>32 ? 32 : secondColor.A) - i, secondColor), i);
-                            pen.LineJoin = LineJoin.Round;
-                            g.DrawPath(pen, gpTxt);
-                            pen.Dispose();
-                        }
-                        g.FillPath(new System.Drawing.SolidBrush(color), gpTxt);
-                        g.DrawPath(new System.Drawing.Pen(secondColor, 0.5F), gpTxt);
-                    }
-                }
-            }
-            else
-            {
-                using (StringFormat sFormat = new StringFormat())
-                {
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    sFormat.Alignment = (StringAlignment)((float)alignment % 10);
-                    sFormat.LineAlignment = (StringAlignment)(int)(((float)alignment % 100) / 10);
-                    if (((int)alignment & 100) == 100)
-                        sFormat.FormatFlags = StringFormatFlags.DirectionVertical;
-                    if (alignment == Alignment.CenterLeftEllipsis)
-                        sFormat.Trimming = StringTrimming.EllipsisWord;
-
-                    System.Drawing.Font currentFont = new System.Drawing.Font(font.Name, font.Size/dpi, (System.Drawing.FontStyle)f);
-
-                    // Draw text
-                    using (SolidBrush defaultBrush = new SolidBrush(color))
-                    {
-                        if (((int)alignment & 10000) != 10000)
-                            sFormat.FormatFlags = StringFormatFlags.NoWrap; 
-                        if (((int)format % 2) == 1)
-                            g.DrawString(text, currentFont, new SolidBrush(secondColor), new RectangleF(x + 1, y + 2, w, h), sFormat);
-                        g.DrawString(text, currentFont, defaultBrush, new RectangleF(x, y, w, h), sFormat);
-                    }
-
-                    currentFont.Dispose();
-                }
-            }
-        }
-*/
 
         /// <summary>
         /// Renders text to a System.Drawing.Graphics device using GDI+
@@ -689,7 +577,7 @@ namespace OpenMobile.Graphics
             System.Drawing.Color secondColor = sC.ToSystemColor();
 
             // Convert OpenMobile fontstyle to system fontstyle
-            FontStyle f = OpenMobile.Graphics.Font.FormatToStyle(format);
+            System.Drawing.FontStyle f = OpenMobile.Graphics.Font.FormatToStyle(format);
 
             // Convert OpenMobile alignment to system StringFormat
             StringFormat sFormat = OpenMobile.Graphics.Font.AlignmentToStringFormat(alignment);
@@ -893,5 +781,6 @@ namespace OpenMobile.Graphics
         {
             implementation.Scale(sx, sy, sz);
         }
+
     }
 }

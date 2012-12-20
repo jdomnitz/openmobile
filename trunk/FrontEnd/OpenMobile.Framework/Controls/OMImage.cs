@@ -221,12 +221,22 @@ namespace OpenMobile.Controls
             // Initialize rendering
             base.RenderBegin(g, e);
 
-            if (image.image == null)
+            // Render background (if any)
+            if (_BackgroundColor != Color.Transparent)
             {
-                if (image == imageItem.MISSING)
-                    g.FillRectangle(new Brush(Color.FromArgb((int)(255 * OpacityFloat), Color.Black)), left, top, width, height);
+                using (Brush Fill = new Brush(Color.FromArgb((int)(this.GetAlphaValue255(_BackgroundColor.A)), _BackgroundColor)))
+                {
+                    g.FillRectangle(Fill, left, top, width, height);
+                }
             }
-            else
+
+            //if (image.image == null)
+            //{
+            //    if (image == imageItem.MISSING)
+            //        g.FillRectangle(new Brush(Color.FromArgb((int)(255 * OpacityFloat), Color.Black)), left, top, width, height);
+            //}
+            //else
+            if (image.image != null)
             {
                 // Enable animation?
                 if (_ShowAnimation)

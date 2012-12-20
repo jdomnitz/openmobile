@@ -56,13 +56,13 @@ namespace ControlDemo
             labelClockTime.TextAlignment = Alignment.CenterCenter;
             labelClockTime.Font = new Font(Font.LED, 130F);
             labelClockTime.Format = eTextFormat.Italic;
-            labelClockTime.sensorName = "SystemSensors.Time";
+            labelClockTime.Text = "{System.Time}";
             p.addControl(labelClockTime);
             OMLabel labelClockdate = new OMLabel("labelClockdate", 0, 380, 950, 100);
             labelClockdate.TextAlignment = Alignment.CenterCenter;
             labelClockdate.Font = new Font(Font.LED, 50F);
             labelClockdate.Format = eTextFormat.Italic;
-            labelClockdate.sensorName = "SystemSensors.LongDate";
+            labelClockdate.Text = "{System.Date.Long}";
             p.addControl(labelClockdate);       
 
             p.Entering += new PanelEvent(p_Entering);

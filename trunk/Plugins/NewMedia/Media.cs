@@ -143,11 +143,8 @@ namespace NewMedia
             Source.Image = theHost.getSkinImage("Local Drive");
             Source.OnClick += new userInteraction(Sources_OnClick);
             Source.Transition = eButtonTransition.None;
-            OMBasicShape shapeBar = new OMBasicShape(4, 97, 173, 0);
-            shapeBar.FillColor = Color.Black;
-            shapeBar.Shape = shapes.Rectangle;
-            shapeBar.BorderColor = Color.Gray;
-            shapeBar.BorderSize = 2F;
+            OMBasicShape shapeBar = new OMBasicShape("", 4, 97, 173, 0,
+                new ShapeData(shapes.Rectangle, Color.Black, Color.Gray, 2));
             Font f = new Font(Font.GenericSansSerif, 17F);
             OMButton source1 = new OMButton(37, 75, 100, 100);
             source1.Visible = false;
@@ -1109,14 +1106,18 @@ namespace NewMedia
         }
         public void Dispose()
         {
-            if (theHost == null)
-                return;
-            for (int i = 0; i < theHost.ScreenCount; i++)
-                abortJob[i] = true;
-            if (manager != null)
+            try
             {
-                manager.Dispose();
+                if (theHost == null)
+                    return;
+                for (int i = 0; i < theHost.ScreenCount; i++)
+                    abortJob[i] = true;
+                if (manager != null)
+                {
+                    manager.Dispose();
+                }
             }
+            catch { }
         }
     }
 }

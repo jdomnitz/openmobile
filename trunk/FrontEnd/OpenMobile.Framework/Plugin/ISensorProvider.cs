@@ -21,6 +21,7 @@
     Copyright 2011-2012 Jonathan Heizer jheizer@gmail.com
 *********************************************************************************/
 
+/*
 using System;
 using System.Collections.Generic;
 namespace OpenMobile.Plugin
@@ -214,7 +215,7 @@ namespace OpenMobile.Plugin
             {
                 if (Type == eSensorType.deviceSuppliesData)
                     if (sensorValue == null && ReadDelegate != null)
-                        return ReadDelegate.Invoke(this);
+                        return ReadDelegate(this);
                 return sensorValue;
             }
             set
@@ -225,7 +226,7 @@ namespace OpenMobile.Plugin
                     {
                         if (this.WriteDelegate != null)
                         {
-                            if (WriteDelegate.Invoke(this, value))
+                            if (WriteDelegate(this, value))
                             {
                                 sensorValue = value;
                                 if (newSensorDataReceived != null)
@@ -245,7 +246,7 @@ namespace OpenMobile.Plugin
             if (this.Type == eSensorType.deviceSuppliesData)
             {
                 if (ReadDelegate != null) //If the IRawHardware allows a force read update call it
-                    sensorValue = ReadDelegate.Invoke(this);
+                    sensorValue = ReadDelegate(this);
                 return sensorValue;
             }
             return null;
@@ -448,3 +449,4 @@ namespace OpenMobile.Plugin
         List<Sensor> getAvailableSensors(eSensorType type);
     }
 }
+*/

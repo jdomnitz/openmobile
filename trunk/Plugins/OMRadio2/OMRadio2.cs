@@ -62,7 +62,7 @@ namespace OMRadio2
 
         public string displayName
         {
-            get { return "Radio"; }
+            get { return "Radio2"; }
         }
 
         #endregion
