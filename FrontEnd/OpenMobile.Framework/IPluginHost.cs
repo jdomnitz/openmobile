@@ -260,96 +260,6 @@ namespace OpenMobile.Plugin
         /// <param name="data"></param>
         /// <returns></returns>
         bool sendMessage<T>(string to, string from, string message, ref T data);
-
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="Screen"></param>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="Message"></param>
-        /// <param name="SourceTag"></param>
-        /// <returns></returns>
-        void SendStatusData(int Screen, eDataType DataType, string SourcePluginName, string SourceTag, string Message);
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="Screen"></param>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="Message"></param>
-        /// <param name="SourceTag"></param>
-        /// <returns></returns>
-        void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message);
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="Screen"></param>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="Message"></param>
-        /// <param name="SourceTag"></param>
-        /// <returns></returns>
-        void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message);
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="Screen"></param>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="Message"></param>
-        /// <param name="SourceTag"></param>
-        /// <returns></returns>
-        void SendStatusData(eDataType DataType, string SourcePluginName, string SourceTag, string Message);
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="Screen"></param>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="Message"></param>
-        /// <param name="SourceTag"></param>
-        /// <returns></returns>
-        void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string Message);
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="Screen"></param>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="Message"></param>
-        /// <param name="SourceTag"></param>
-        /// <returns></returns>
-        void SendStatusData(int Screen, eDataType DataType, string SourcePluginName, string Message);
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="Screen"></param>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="Message"></param>
-        /// <param name="SourceTag"></param>
-        /// <returns></returns>
-        void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin, string Message);
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="Screen"></param>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="Message"></param>
-        /// <param name="SourceTag"></param>
-        /// <returns></returns>
-        void SendStatusData(eDataType DataType, string SourcePluginName, string Message);
-        /// <summary>
-        /// Execute the function on all plugins of the given type
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="function"></param>
-        /// <param name="arg1">Optional Argument</param>
-        /// <param name="arg2">Optional Argument</param>
-        /// <returns></returns>
-        bool executeByType(Type type, eFunction function, string arg1, string arg2);
         /// <summary>
         /// Get the specified image from the skin directory
         /// </summary>
@@ -363,6 +273,13 @@ namespace OpenMobile.Plugin
         /// <param name="noCache">Dont cache the image in the gloabl cache</param>
         /// <returns></returns>
         imageItem getSkinImage(string imageName, bool noCache);
+        /// <summary>
+        /// Get an image relative to a plugins path
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
+        imageItem getPluginImage(IBasePlugin plugin, string imageName);
         /// <summary>
         /// Gets information on the currently playing media
         /// </summary>
@@ -665,20 +582,20 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="instance">AudioDevice index</param>
         /// <returns></returns>
-        string getAudioDeviceName(int instance);
+        AudioDevice getAudioDevice(int instance);
 
         /// <summary>
-        /// Get's the name of the default audio device 
+        /// Get's the default audio device 
         /// </summary>
         /// <returns></returns>
-        string GetAudioDeviceDefaultName();
+        AudioDevice GetAudioDeviceDefault();
 
         /// <summary>
-        /// Get's the audio device instance for a device name
+        /// Get's the audio device from a device name
         /// </summary>
         /// <param name="name">Audio device name</param>
-        /// <returns>Audio device instance</returns>
-        int getAudioDeviceInstance(string name);
+        /// <returns>Audio device</returns>
+        AudioDevice getAudioDevice(string name);
 
         /// <summary>
         /// Multimedia zones
@@ -694,6 +611,11 @@ namespace OpenMobile.Plugin
         /// DataHandler
         /// </summary>
         OpenMobile.Data.DataHandler DataHandler { get; }
+
+        /// <summary>
+        /// CommandHandler
+        /// </summary>
+        OpenMobile.CommandHandler CommandHandler { get; }
 
         /// <summary>
         /// Wrapper for calling a method on each screen

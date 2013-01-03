@@ -518,7 +518,7 @@ namespace OpenMobile.UI
                 // Show info icon
                 string InfoIconName = "UITopBarInfoIcon";
                 // Check if icon is already shown
-                OMContainer.ControlGroup Icon = ScreenSpecific_IconContainer[String.Format("{0}{1}", _IconContainerItemName, InfoIconName)];
+                ControlGroup Icon = ScreenSpecific_IconContainer[String.Format("{0}{1}", _IconContainerItemName, InfoIconName)];
                 bool InfoIconPresent = (Icon != null);
                 if (InfoIconShow & !InfoIconPresent)
                 {   // Show icon
@@ -527,7 +527,7 @@ namespace OpenMobile.UI
                     if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
                         Image_NotificationIcon.Image.image.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
                     Image_NotificationIcon.Opacity = 178;
-                    ScreenSpecific_IconContainer.addControl(Image_NotificationIcon, OMContainer.Directions.Left);
+                    ScreenSpecific_IconContainer.addControl(Image_NotificationIcon, ControlDirections.Left);
                 }
                 else if (!InfoIconShow & InfoIconPresent)
                 {   // Hide icon
@@ -547,9 +547,9 @@ namespace OpenMobile.UI
                         Image_NotificationIcon.Image.image.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
                     else
                         // Overlay icon with a yellow warning color
-                        Image_NotificationIcon.Image.image.Overlay(Color.LightYellow); 
+                        Image_NotificationIcon.Image.image.Overlay(Color.Yellow); 
                     Image_NotificationIcon.Opacity = 178;
-                    ScreenSpecific_IconContainer.addControl(Image_NotificationIcon, OMContainer.Directions.Left);
+                    ScreenSpecific_IconContainer.addControl(Image_NotificationIcon, ControlDirections.Left);
                 }
                 else if (!WarnIconShow & WarnIconPresent)
                 {   // Hide icon
@@ -559,6 +559,8 @@ namespace OpenMobile.UI
         }
 
         #endregion
+
+        #region Notifications
 
         #region Notification list and container
 
@@ -583,9 +585,9 @@ namespace OpenMobile.UI
         }
         private OMContainer _NotificationList = null;
 
-        private OMContainer.ControlGroup CreateNotificationListItem(Notification notification)
+        private ControlGroup NotificationList_CreateItem(Notification notification)
         {
-            OMContainer.ControlGroup ItemBase = new OMContainer.ControlGroup();
+            ControlGroup ItemBase = new ControlGroup();
             ItemBase.Key = notification.FullID;
 
             OMButton Button_ListItem = new OMButton("Button_ListItem", 0, 0, 1000, 64);
@@ -602,8 +604,30 @@ namespace OpenMobile.UI
             Shape_ListItem_Separator.NoUserInteraction = true;
             ItemBase.Add(Shape_ListItem_Separator);
 
-            OMImage Image_ListItem_Icon = new OMImage("Image_ListItem_Icon", 0, 0, 64, 64, new imageItem(notification.Icon));
+            OMImage Image_ListItem_Icon = new OMImage("Image_ListItem_Icon", 0, 0, 64, 64);
             Image_ListItem_Icon.Name += notification.FullID;
+            if (notification.Icon != null)
+                Image_ListItem_Icon.Image = new imageItem(notification.Icon);
+            else
+            {
+                switch (notification.Style)
+                {
+                    case Notification.Styles.Normal:
+                        {   // Use default info icon
+                            Image_ListItem_Icon.Image = BuiltInComponents.Host.getSkinImage("Icons|Icon-Info");
+                        }
+                        break;  
+                    case Notification.Styles.IconOnly:
+                        break; // No icon
+                    case Notification.Styles.Warning:
+                        {   // Use default warning icon
+                            Image_ListItem_Icon.Image = BuiltInComponents.Host.getSkinImage("AIcons|11-alerts-and-states-warning");
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
             //Image_ListItem_Icon.Image.image.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
             Image_ListItem_Icon.NoUserInteraction = true;
             ItemBase.Add(Image_ListItem_Icon);
@@ -656,8 +680,19 @@ namespace OpenMobile.UI
             if (notification == null)
                 return;
 
-            // Remove notification from this list
-            RemoveNotification(screen, notification);
+            // hide dropdown if a click action is defined
+            if (notification.HasClickAction)
+                DropDown_Hide(screen, true);
+
+            // Execute notification delegates
+            bool cancel = false;
+            notification.RaiseClickAction(screen, ref cancel);
+
+            if (!cancel)
+            {
+                // Remove notification from this list
+                RemoveNotification(screen, notification);
+            }
         }
 
         #endregion
@@ -702,6 +737,8 @@ namespace OpenMobile.UI
 
             notification.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(notification_PropertyChanged);
 
+            // TODO: Add queue for notifications
+
             // Get screen specific container (to support multiscreens)
             OMContainer ScreenSpecific_NotificationList = null;
             if (_NotificationList.Parent != null)
@@ -722,7 +759,7 @@ namespace OpenMobile.UI
                         case Notification.Styles.Warning:
                             {
                                 // Add notification to notification list
-                                ScreenSpecific_NotificationList.addControl(CreateNotificationListItem(notification), OMContainer.Directions.Down);
+                                ScreenSpecific_NotificationList.addControl(NotificationList_CreateItem(notification), ControlDirections.Down);
                             }
                             break;
                         case Notification.Styles.IconOnly:
@@ -735,7 +772,7 @@ namespace OpenMobile.UI
                                     if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
                                         Image_NotificationIcon.Image.image.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
                                     Image_NotificationIcon.Opacity = 178;
-                                    ScreenSpecific_IconContainer.addControl(Image_NotificationIcon, OMContainer.Directions.Left);
+                                    ScreenSpecific_IconContainer.addControl(Image_NotificationIcon, ControlDirections.Left);
                                 }
                             }
                             break;
@@ -749,7 +786,7 @@ namespace OpenMobile.UI
                         if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
                             Image_NotificationIcon.Image.image.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
                         Image_NotificationIcon.Opacity = 178;
-                        ScreenSpecific_IconContainer.addControl(Image_NotificationIcon, OMContainer.Directions.Left);
+                        ScreenSpecific_IconContainer.addControl(Image_NotificationIcon, ControlDirections.Left);
                     }
 
                     // Show / Hide statusbar notification icons
@@ -773,7 +810,6 @@ namespace OpenMobile.UI
         /// </summary>
         /// <param name="OwnerPlugin"></param>
         /// <param name="ID"></param>
-        /// <param name="Text"></param>
         private void UpdateNotification(IBasePlugin OwnerPlugin, string ID)
         {
             BuiltInComponents.Host.ForEachScreen(delegate(int screen)
@@ -797,7 +833,6 @@ namespace OpenMobile.UI
         /// <param name="screen"></param>
         /// <param name="OwnerPlugin"></param>
         /// <param name="ID"></param>
-        /// <param name="Text"></param>
         private void UpdateNotification(int screen, IBasePlugin OwnerPlugin, string ID)
         {
             // Get notification to update
@@ -817,10 +852,7 @@ namespace OpenMobile.UI
         /// <summary>
         /// Updates the contents of an existing notification
         /// </summary>
-        /// <param name="screen"></param>
-        /// <param name="OwnerPlugin"></param>
-        /// <param name="ID"></param>
-        /// <param name="Text"></param>
+        /// <param name="notification"></param>
         private void UpdateNotification(Notification notification)
         {
             if (notification == null)
@@ -836,47 +868,83 @@ namespace OpenMobile.UI
         }
 
         /// <summary>
-        /// Updates the contents of an existing notification
+        /// Internal: Updates the contents of an existing notification
         /// </summary>
         /// <param name="screen"></param>
-        /// <param name="OwnerPlugin"></param>
-        /// <param name="ID"></param>
-        /// <param name="Text"></param>
+        /// <param name="notification"></param>
         private void UpdateNotification_Internal(int screen, Notification notification)
         {
             // Get screen specific container (to support multiscreens)
+            OMContainer ScreenSpecific_IconContainer = null;
+            if (_IconContainer.Parent != null)
+                ScreenSpecific_IconContainer = (OMContainer)_IconContainer.GetControlAtScreen(screen);
             OMContainer ScreenSpecific_NotificationList = null;
             if (_NotificationList.Parent != null)
                 ScreenSpecific_NotificationList = (OMContainer)_NotificationList.GetControlAtScreen(screen);
 
-            // Also update corresponding controlgroup
-            OMContainer.ControlGroup NotificationCG = ScreenSpecific_NotificationList[String.Format("{0}{1}", "Label_ListItem_Description", notification.FullID)];
+            // Error check
+            if (ScreenSpecific_IconContainer == null || ScreenSpecific_NotificationList == null)
+                return;
+
+            // Also update corresponding controlgroup for the notification list
+            ControlGroup NotificationCG = ScreenSpecific_NotificationList[String.Format("{0}{1}", "Label_ListItem_Description", notification.FullID)];
             if (NotificationCG != null)
             {
-                // Header text
-                OMLabel lblHeader = NotificationCG[String.Format("{0}{1}", "Header", notification.FullID)] as OMLabel;
-                if (lblHeader.Text != notification.Header)
-                    lblHeader.Text = notification.Header;
+                if (notification.Style == Notification.Styles.Normal || notification.Style == Notification.Styles.Warning)
+                {
+                    // Header text
+                    OMLabel lblHeader = NotificationCG[String.Format("{0}{1}", "Header", notification.FullID)] as OMLabel;
+                    if (lblHeader.Text != notification.Header)
+                    {
+                        lblHeader.Text = notification.Header;
+                        // Set placement of header text if there is no description text available
+                        if (String.IsNullOrEmpty(notification.Text))
+                            lblHeader.Top += 15;
+                    }
 
-                // Description text
-                OMLabel lblText = NotificationCG[String.Format("{0}{1}", "Description", notification.FullID)] as OMLabel;
-                if (lblText.Text != notification.Text)
-                    lblText.Text = notification.Text;
+                    // Description text
+                    OMLabel lblText = NotificationCG[String.Format("{0}{1}", "Description", notification.FullID)] as OMLabel;
+                    if (lblText.Text != notification.Text)
+                        lblText.Text = notification.Text;
 
-                // Icon
-                OMImage imgIcon = NotificationCG[String.Format("{0}{1}", "Icon", notification.FullID)] as OMImage;
-                if (imgIcon.Image.image != notification.Icon)
-                    imgIcon.Image = new imageItem(notification.Icon);
+                    // Icon
+                    OMImage imgIcon = NotificationCG[String.Format("{0}{1}", "Icon", notification.FullID)] as OMImage;
+                    if (imgIcon.Image.image != notification.Icon)
+                        imgIcon.Image = new imageItem(notification.Icon);
 
-                // Timestamp
-                OMLabel lblTS = NotificationCG[String.Format("{0}{1}", "TimeStamp", notification.FullID)] as OMLabel;
-                if (lblTS.Text != notification.TimeStampText)
-                    lblTS.Text = notification.TimeStampText;
-
-                // Set placement of header text if there is no description text available
-                if (String.IsNullOrEmpty(lblText.Text))
-                    lblHeader.Top += 15;
+                    // Timestamp
+                    OMLabel lblTS = NotificationCG[String.Format("{0}{1}", "TimeStamp", notification.FullID)] as OMLabel;
+                    if (lblTS.Text != notification.TimeStampText)
+                        lblTS.Text = notification.TimeStampText;
+                }
+                else
+                {   // Remove notification item from list
+                    ScreenSpecific_NotificationList.RemoveControl(NotificationCG);
+                    IconContainer_UpdateNotificationIcons(screen);
+                }
             }
+
+            // Update corresponding controlgroup for the statusbar list
+            string StatusBarIconName = String.Format("{0}{1}{2}", _IconContainerItemName, notification.OwnerPlugin.pluginName, notification.ID.ToString());
+            ControlGroup StatusBarCG = ScreenSpecific_IconContainer[StatusBarIconName];
+            if (StatusBarCG != null)
+            {
+                // Icon
+                OMImage imgIcon = StatusBarCG[StatusBarIconName] as OMImage;
+
+                if (notification.IconStatusBar == null)
+                {
+                    // Remove this notification icon
+                    ScreenSpecific_IconContainer.RemoveControl(StatusBarCG);
+                    IconContainer_UpdateNotificationIcons(screen);
+                }
+                else
+                {
+                    if (imgIcon.Image.image != notification.IconStatusBar)
+                        imgIcon.Image = new imageItem(notification.IconStatusBar);
+                }
+            }
+
         }
 
         #endregion
@@ -969,9 +1037,16 @@ namespace OpenMobile.UI
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="notification"></param>
+        /// <param name="RemoveAllStates"></param>
         /// <returns></returns>
         private bool RemoveNotification_Internal(int screen, Notification notification, bool RemoveAllStates)
         {
+            // Execute notification delegates (action delegates are always executed regardless of state)
+            bool cancel = false;
+            notification.RaiseClearAction(screen, ref cancel);
+            if (cancel)
+                return false;
+
             // Don't remove an active notification
             if (!RemoveAllStates)
                 if (notification.State != Notification.States.Passive)
@@ -993,6 +1068,9 @@ namespace OpenMobile.UI
 
             // Show / Hide statusbar notification icons
             IconContainer_UpdateNotificationIcons(screen);
+
+            // Execute notification delegate
+            //notification.RaiseClearAction(screen);
 
             return result;
         }
@@ -1086,6 +1164,57 @@ namespace OpenMobile.UI
         }
 
         #endregion
-       
+
+        #endregion
+
+        #region InfoBanner
+
+        public delegate void ShowInfoBannerDelegate(int screen, InfoBanner bannerData);
+        public delegate void HideInfoBannerDelegate(int screen);
+
+        /// <summary>
+        /// Event is raised when the infobanner is requested to hide
+        /// </summary>
+        public event HideInfoBannerDelegate OnHideInfoBanner;
+        private void Raise_OnHideInfoBanner(int screen)
+        {
+            if (OnHideInfoBanner != null)
+                OnHideInfoBanner(screen);
+        }
+
+        /// <summary>
+        /// Event is raised when the infobanner is requested to show
+        /// </summary>
+        public event ShowInfoBannerDelegate OnShowInfoBanner;
+        private void Raise_OnShowInfoBanner(int screen, InfoBanner bannerData)
+        {
+            if (OnShowInfoBanner != null)
+                OnShowInfoBanner(screen, bannerData);
+        }
+
+        /// <summary>
+        /// Show the infobanner
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="bannerData"></param>
+        public void InfoBanner_Show(int screen, InfoBanner bannerData)
+        {
+            // Call event
+            Raise_OnShowInfoBanner(screen, bannerData);
+        }
+
+        /// <summary>
+        /// Hide the infobanner 
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="bannerData"></param>
+        public void InfoBanner_Hide(int screen)
+        {
+            // Call event
+            Raise_OnHideInfoBanner(screen);
+        }
+
+        #endregion
+
     }
 }

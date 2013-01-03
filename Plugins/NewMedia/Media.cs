@@ -212,6 +212,10 @@ namespace NewMedia
             format.color = Color.FromArgb(175, Color.Black);
             format.highlightColor = Color.LightGray;
             format.font = new Font(Font.GenericSansSerif, 20F);
+
+            string path = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            path = System.Reflection.Assembly.GetAssembly(this.GetType()).Location;
+            imageItem img = OM.Host.getPluginImage(this, "Icon-MediaPlayer");
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -1094,6 +1098,11 @@ namespace NewMedia
         public string pluginDescription
         {
             get { return "New Media Skin"; }
+        }
+
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getPluginImage(this, "Icon-MediaPlayer"); }
         }
 
         public bool incomingMessage(string message, string source)

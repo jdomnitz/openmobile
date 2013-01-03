@@ -32,6 +32,68 @@ namespace OpenMobile.Controls
     [System.Serializable]
     public class OMProgress : OMLabel
     {
+        #region Preconfigured controls
+
+        /// <summary>
+        /// Returns a preconfigured OMProgress control with a triangle layout (via ShapeData), layout is growing to the right
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="BorderColor"></param>
+        /// <param name="IndicatorColor"></param>
+        /// <returns></returns>
+        public static OMProgress PreConfigLayout_Triangle(string name, int left, int top, int width, int height, Color BorderColor, Color IndicatorColor)
+        {
+            OMProgress progress = new OMProgress(name, left, top, width, height);
+            progress.BackgroundColor = Color.Transparent;
+            progress.Minimum = 0;
+            progress.Maximum = 100;
+            progress.Value = 0;
+            progress.Style = OMProgress.Styles.shape;
+            progress.ShowProgressBarValue = true;
+            progress.FontSize = 10;
+            progress.TextOffset = new Point(0, 5);
+
+            // Create shapedata for progressbar background
+            ShapeData ShapeData = new ShapeData(shapes.Polygon,
+                Color.Transparent,
+                Color.FromArgb(50, BorderColor),
+                2,
+                new Point[] 
+                { 
+                    new Point(0,progress.Region.Height-2), // Slighty rounded corner A
+                    new Point(0,progress.Region.Height-8), // Slighty rounded corner B
+                    new Point(2,progress.Region.Height-10),// Slighty rounded corner B
+                    new Point(progress.Region.Width-3,0),  // Slighty rounded corner C
+                    new Point(progress.Region.Width,3),    // Slighty rounded corner C
+                    new Point(progress.Region.Width-0,progress.Region.Height-3),  // Slighty rounded corner D
+                    new Point(progress.Region.Width-3,progress.Region.Height-0),  // Slighty rounded corner D
+                    new Point(2,progress.Region.Height-0)  // Slighty rounded corner A
+                });
+            progress.ShapeData = ShapeData;
+
+            // Create shapedata for progressbar bar
+            ShapeData BarShapeData = new ShapeData(shapes.Polygon,
+                IndicatorColor,
+                IndicatorColor,
+                1,
+                new Point[] 
+                { 
+                new Point(5,progress.Region.Height-5),
+                new Point(progress.Region.Width-5,5),
+                new Point(progress.Region.Width-5,progress.Region.Height-5),
+                new Point(5,progress.Region.Height-5)
+                });
+            progress.ProgressBarShapeData = BarShapeData;
+
+            return progress;
+        }
+
+        #endregion
+
         #region Properties
 
         public enum Styles { simple, shape, image }
@@ -199,26 +261,6 @@ namespace OpenMobile.Controls
             }
         }
         private bool _ShowProgressBarValue;
-        
-
-        #endregion
-
-        private void SetValue(int value, string text)
-        {
-            if ((value >= this.minimum) && (value <= this.maximum))
-            {
-                this.value = value;
-
-                // Reset overlay image
-                UpdateImageProgressBarOverlay();
-
-                // Update progressbar text
-                if (_ShowProgressBarValue)
-                    this.Text = text;
-
-                Refresh();
-            }
-        }
 
         /// <summary>
         /// Background image to use
@@ -262,18 +304,44 @@ namespace OpenMobile.Controls
         private imageItem _ImageProgressBar;
         private OImage _ImageProgressBarOverlay;
 
-        private void UpdateImageProgressBarOverlay()
+        /// <summary>
+        /// Properties for the progressbarshape
+        /// </summary>
+        public ShapeData ProgressBarShapeData
         {
-            if (ImageProgressBar.image != null)
+            get
             {
-                if (_ImageProgressBarOverlay != null)
-                    _ImageProgressBarOverlay.Dispose();
-
-                _ImageProgressBarOverlay = (OImage)_ImageProgressBar.image.Clone();
-                int Percentage = (int)(((float)value / (float)maximum) * 100f);
-                _ImageProgressBarOverlay.Crop(Percentage, OImage.CropBase.Left);
+                return this._ProgressBarShapeData;
+            }
+            set
+            {
+                this._ProgressBarShapeData = value;
             }
         }
+        private ShapeData _ProgressBarShapeData = new ShapeData();
+
+        #endregion
+
+        #region methods
+
+        private void SetValue(int value, string text)
+        {
+            if ((value >= this.minimum) && (value <= this.maximum))
+            {
+                this.value = value;
+
+                // Reset overlay image
+                //UpdateImageProgressBarOverlay();
+
+                // Update progressbar text
+                if (_ShowProgressBarValue)
+                    this.Text = text;
+
+                Refresh();
+            }
+        }
+
+        #endregion
 
         #region Constructors
 
@@ -319,22 +387,6 @@ namespace OpenMobile.Controls
         #endregion
 
         /// <summary>
-        /// Properties for the progressbarshape
-        /// </summary>
-        public ShapeData ProgressBarShapeData
-        {
-            get
-            {
-                return this._ProgressBarShapeData;
-            }
-            set
-            {
-                this._ProgressBarShapeData = value;
-            }
-        }
-        private ShapeData _ProgressBarShapeData = new ShapeData();
-
-        /// <summary>
         /// Draws the control
         /// </summary>
         /// <param name="g">The UI's graphics object</param>
@@ -361,8 +413,6 @@ namespace OpenMobile.Controls
                     break;
                 case Styles.shape:
                     {
-                        //base.DrawShape(g, e);
-
                         Rectangle rect = this.Region;
                         rect = new Rectangle(left, top, (int)(width * ((float)value / maximum)), height);
                         rect.Inflate(-1, -1, true);
@@ -370,18 +420,14 @@ namespace OpenMobile.Controls
                         if (ImageBackground.image == null)
                             ImageBackground = new imageItem(new OImage(base.DrawShapeToBMP(_ShapeData, this.Region)));
                         if (ImageProgressBar.image == null)
-                        {
                             ImageProgressBar = new imageItem(new OImage(base.DrawShapeToBMP(_ProgressBarShapeData, this.Region)));
-                            UpdateImageProgressBarOverlay();
-                        }
 
                         // Draw background image
-                        g.DrawImage(ImageBackground.image, left, top, width, height, base._RenderingValue_Alpha, eAngle.Normal);
+                        g.DrawImage(ImageBackground.image, left, top, width, height, base._RenderingValue_Alpha);
 
                         // Draw progress bar with color overlay
-                        g.DrawImage(_ImageProgressBarOverlay, left, top, width, height, base._RenderingValue_Alpha, eAngle.Normal);
-
-                        //base.DrawShape(g, rect, _ProgressBarShape, _ProgressBarFillColor1, _ProgressBarBorderColor, _ProgressBarBorderSize, _ProgressBarCornerRadius, _ProgressBarGraphicPoints, this.SkinDebug, Color.Yellow); 
+                        float Percentage = ((float)value / (float)maximum);
+                        g.DrawImage(_ImageProgressBar.image, new Rectangle(left, top, (int)(width * Percentage), height), 0, 0, (int)(width * Percentage), height, base._RenderingValue_Alpha);
                     }
                     break;
                 case Styles.simple:
@@ -415,6 +461,8 @@ namespace OpenMobile.Controls
             base.RenderFinish(g, e);
         }
 
+        #region Datasource
+
         internal override void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
         {
             try
@@ -429,6 +477,8 @@ namespace OpenMobile.Controls
         {
             SetValue(0, "ERR");
         }
+
+        #endregion
 
     }
 }

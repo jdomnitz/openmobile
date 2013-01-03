@@ -24,12 +24,12 @@ using System.Threading;
 using OpenMobile.Plugin;
 using OpenMobile.Controls;
 using OpenMobile.Graphics;
+using OpenMobile.helperFunctions.Graphics;
 using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 using OpenMobile.helperFunctions;
 using OpenMobile.helperFunctions.Controls;
-using OpenMobile.helperFunctions.Graphics;
 
 namespace OpenMobile.helperFunctions.Forms
 {

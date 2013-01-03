@@ -849,15 +849,6 @@ namespace OpenMobile
         /// <para>Arg1: Instance</para>
         /// </summary>
         playlistChanged = 23,
-        //Data Provider
-        /// <summary>
-        /// Refresh a data providers data
-        /// <para>---------------------------------------</para>
-        /// <para>Arg1: (Optional)Plugin Name (If blank refreshes all data providers)</para>
-        /// <para>Arg2: (Optional)Plugin Specific First Arg</para>
-        /// <para>Arg3: (Optional)Plugin Specific Second Arg</para>
-        /// </summary>
-        refreshData = 24,
         //Network
         /// <summary>
         /// Connect to the internet
@@ -1279,6 +1270,10 @@ namespace OpenMobile
         /// </summary>
         ZoneUpdated,
         /// <summary>
+        /// Used as event only! Indicates that audio devices are available
+        /// </summary>
+        AudioDevicesAvailable,
+        /// <summary>
         /// Used as event only! Media indexing has completed (NB! This event is not bound to any zone)
         /// <para>Arg: Name of plugin that completed indexing</para>
         /// </summary>
@@ -1301,7 +1296,31 @@ namespace OpenMobile
         /// <para>Arg1: Screen Number</para>
         /// <para>Arg2: (Optional) TransitionType</para>
         /// </summary>
-        goHome
+        goHome,
+        /// <summary>
+        /// Shows a panel without closing any other panels
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// <para>Arg2: Full panel reference (PluginName;PanelName)</para>
+        /// <para>Arg3: <i>(Optional)</i> <seealso cref="eGlobalTransition"/> Transition Name</para>
+        /// </summary>
+        ShowPanel,
+        /// <summary>
+        /// Hides a panel without closing any other panels
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// <para>Arg2: Full panel reference (PluginName;PanelName)</para>
+        /// <para>Arg3: <i>(Optional)</i> <seealso cref="eGlobalTransition"/> Transition Name</para>
+        /// </summary>
+        HidePanel,
+        /// <summary>
+        /// Closes all other panels and shows only the specified one
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// <para>Arg2: Full panel reference (PluginName;PanelName)</para>
+        /// <para>Arg3: <i>(Optional)</i> <seealso cref="eGlobalTransition"/> Transition Name</para>
+        /// </summary>
+        GotoPanel
     }
     /// <summary>
     /// The status of a plugins initialization

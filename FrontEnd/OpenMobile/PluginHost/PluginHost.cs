@@ -32,6 +32,7 @@ using OpenMobile.Graphics;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
 using OpenMobile.Zones;
+using OpenMobile;
 
 namespace OpenMobile
 {
@@ -42,7 +43,8 @@ namespace OpenMobile
         /// <summary>
         /// Internal imageChace storage
         /// </summary>
-        private List<imageItem> imageCache = new List<imageItem>();
+        //private List<imageItem> imageCache = new List<imageItem>();
+        private Dictionary<string,imageItem> imageCache = new Dictionary<string,imageItem>();
 
         private System.Threading.Timer tmrCurrentClock;
         private DateTime CurrentClock = DateTime.MinValue;
@@ -90,7 +92,7 @@ namespace OpenMobile
         /// <summary>
         /// Amount of active screens
         /// </summary>
-        private static int screenCount = DisplayDevice.AvailableDisplays.Count;
+        private static int _ScreenCount = DisplayDevice.AvailableDisplays.Count;
 
         /// <summary>
         /// The amount of available audio devices (instances)
@@ -100,27 +102,81 @@ namespace OpenMobile
         /// <summary>
         /// Current skinpath
         /// </summary>
-        private string skinpath;
+        private string _SkinPath;
 
         /// <summary>
         /// Current datapath
         /// </summary>
-        private string datapath;
+        private string _DataPath;
 
         /// <summary>
         /// Current pluginpath
         /// </summary>
-        private string pluginpath;
+        private string _PluginPath;
 
         /// <summary>
         /// Connection state to internet
         /// </summary>
-        private bool internetAccess;
+        public bool InternetAccess
+        {
+            get
+            {
+                return this._InternetAccess;
+            }
+            set
+            {
+                if (this._InternetAccess != value)
+                {
+                    this._InternetAccess = value;
+                    // Update datasource
+                    DataSource_NetWork_Internet_Online.SetValue(value);
+                }
+            }
+        }
+        private bool _InternetAccess;
+
+        /// <summary>
+        /// State of network
+        /// </summary>
+        public bool NetWorkAvailable
+        {
+            get
+            {
+                return this._NetWorkAvailable;
+            }
+            set
+            {
+                if (this._NetWorkAvailable != value)
+                {
+                    this._NetWorkAvailable = value;
+                    // Update datasource
+                    DataSource_NetWork_Available.SetValue(value);   
+                }
+            }
+        }
+        private bool _NetWorkAvailable;        
 
         /// <summary>
         /// Current IP address
         /// </summary>
-        private string ipAddress;
+        public string IPAddress
+        {
+            get
+            {
+                return this._IPAddress;
+            }
+            private set
+            {
+                if (this._IPAddress != value)
+                {
+                    this._IPAddress = value;
+                    // Update datasource
+                    DataSource_NetWork_IP.SetValue(value);   
+                }
+            }
+        }
+        private string _IPAddress;        
+
 
         /// <summary>
         /// Hardware abstraction layer
@@ -150,7 +206,7 @@ namespace OpenMobile
         /// <summary>
         /// Panel history
         /// </summary>
-        private historyCollection history = new historyCollection(screenCount);
+        private historyCollection history = new historyCollection(_ScreenCount);
 
         /// <summary>
         /// Controller for zones
@@ -182,10 +238,10 @@ namespace OpenMobile
 
         #endregion
 
-        #region Sensorhandler
+        #region Datahandler
 
         /// <summary>
-        /// Sensorhandler
+        /// Datahandler
         /// </summary>
         public OpenMobile.Data.DataHandler DataHandler
         {
@@ -195,6 +251,22 @@ namespace OpenMobile
             }
         }
         private OpenMobile.Data.DataHandler _DataHandler = null;
+
+        #endregion
+
+        #region CommandHandler
+
+        /// <summary>
+        /// CommandHandler
+        /// </summary>
+        public OpenMobile.CommandHandler CommandHandler
+        {
+            get
+            {
+                return _CommandHandler;
+            }
+        }
+        private OpenMobile.CommandHandler _CommandHandler = null;
 
         #endregion
 
@@ -217,7 +289,7 @@ namespace OpenMobile
             BuiltInComponents.Host = this;
 
             // Initialize variables
-            _ClientArea = new Rectangle[screenCount];
+            _ClientArea = new Rectangle[_ScreenCount];
             for (int i = 0; i < _ClientArea.Length; i++)
                 _ClientArea[i] = new Rectangle(0, 0, 1000, 600);
 
@@ -231,7 +303,6 @@ namespace OpenMobile
 
             // Start a timer to get the current time (fired each minute)
             tmrCurrentClock = new System.Threading.Timer(tmrCurrentClock_time, null, 60000, 60000);
-
 
             // Connect network events
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
@@ -252,6 +323,9 @@ namespace OpenMobile
             // Initialize DataHandler
             _DataHandler = new OpenMobile.Data.DataHandler();
 
+            // Initialize CommandHandler
+            _CommandHandler = new OpenMobile.CommandHandler();
+
             // Initialize panel transition effects handler
             OpenMobile.Controls.PanelTransitionEffectHandler.Init();
         }
@@ -267,9 +341,17 @@ namespace OpenMobile
             // Start zone handler
             ZoneHandler.Start();
 
-            // Load system sensors
-            BuiltInComponents.Sensors.Init();
+            // Load system datasources
+            BuiltInComponents.DataSources.Init();
+
+            // Load datasource from the pluginHost
+            RegisterDataSources();
+
+            // Initialize data
+            IPAddress = GetLocalIPAddress();
+            NetWorkAvailable = GetNetWorkAvailable();
         }
+
         /// <summary>
         /// Shutsdown pluginhost
         /// </summary>
@@ -323,23 +405,23 @@ namespace OpenMobile
         {
             lock (nextPlaylistIndex)
             {
-                if ((random != null) && (random[zone.AudioDeviceInstance] == true) && (currentPlaylist[zone.AudioDeviceInstance].Count > 1) && (!BlockRandom))
+                if ((random != null) && (random[zone.AudioDevice.Instance] == true) && (currentPlaylist[zone.AudioDevice.Instance].Count > 1) && (!BlockRandom))
                 {
                     int result;
                     do
-                        result = OpenMobile.Framework.Math.Calculation.RandomNumber(0, currentPlaylist[zone.AudioDeviceInstance].Count);
-                    while (nextPlaylistIndex[zone.AudioDeviceInstance] == result);
-                    nextPlaylistIndex[zone.AudioDeviceInstance] = result;
+                        result = OpenMobile.Framework.Math.Calculation.RandomNumber(0, currentPlaylist[zone.AudioDevice.Instance].Count);
+                    while (nextPlaylistIndex[zone.AudioDevice.Instance] == result);
+                    nextPlaylistIndex[zone.AudioDevice.Instance] = result;
                 }
                 else
-                    nextPlaylistIndex[zone.AudioDeviceInstance] = currentPlaylistIndex[zone.AudioDeviceInstance] + 1;
-                if (nextPlaylistIndex[zone.AudioDeviceInstance] == currentPlaylist[zone.AudioDeviceInstance].Count)
-                    nextPlaylistIndex[zone.AudioDeviceInstance] = 0;
-                if ((currentPlaylist[zone.AudioDeviceInstance].Count > nextPlaylistIndex[zone.AudioDeviceInstance]) && (getPlayingMedia(zone).Location == currentPlaylist[zone.AudioDeviceInstance][nextPlaylistIndex[zone.AudioDeviceInstance]].Location))
+                    nextPlaylistIndex[zone.AudioDevice.Instance] = currentPlaylistIndex[zone.AudioDevice.Instance] + 1;
+                if (nextPlaylistIndex[zone.AudioDevice.Instance] == currentPlaylist[zone.AudioDevice.Instance].Count)
+                    nextPlaylistIndex[zone.AudioDevice.Instance] = 0;
+                if ((currentPlaylist[zone.AudioDevice.Instance].Count > nextPlaylistIndex[zone.AudioDevice.Instance]) && (getPlayingMedia(zone).Location == currentPlaylist[zone.AudioDevice.Instance][nextPlaylistIndex[zone.AudioDevice.Instance]].Location))
                 {
-                    nextPlaylistIndex[zone.AudioDeviceInstance]++;
-                    if (nextPlaylistIndex[zone.AudioDeviceInstance] == currentPlaylist[zone.AudioDeviceInstance].Count)
-                        nextPlaylistIndex[zone.AudioDeviceInstance] = 0;
+                    nextPlaylistIndex[zone.AudioDevice.Instance]++;
+                    if (nextPlaylistIndex[zone.AudioDevice.Instance] == currentPlaylist[zone.AudioDevice.Instance].Count)
+                        nextPlaylistIndex[zone.AudioDevice.Instance] = 0;
                 }
             }
         }
@@ -362,7 +444,7 @@ namespace OpenMobile
         {
             if (zone == null)
                 return null;
-            return currentPlaylist[zone.AudioDeviceInstance];
+            return currentPlaylist[zone.AudioDevice.Instance];
         }
         /// <summary>
         /// Gets the current playlist for a specific audio device (instance)
@@ -397,10 +479,10 @@ namespace OpenMobile
                 return false;
             if (source == null)
                 return false;
-            currentPlaylistIndex[zone.AudioDeviceInstance] = -1;
-            currentPlaylist[zone.AudioDeviceInstance].Clear();
-            currentPlaylist[zone.AudioDeviceInstance].AddRange(source.GetRange(0, source.Count));
-            if (currentPlaylist[zone.AudioDeviceInstance].Count > 0)
+            currentPlaylistIndex[zone.AudioDevice.Instance] = -1;
+            currentPlaylist[zone.AudioDevice.Instance].Clear();
+            currentPlaylist[zone.AudioDevice.Instance].AddRange(source.GetRange(0, source.Count));
+            if (currentPlaylist[zone.AudioDevice.Instance].Count > 0)
                 generateNext(zone, false);
             SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, zone, string.Empty); });
             return true;
@@ -447,10 +529,10 @@ namespace OpenMobile
         {
             if (Zone == null)
                 return false;
-            if (currentPlaylist[Zone.AudioDeviceInstance].Count == 0)
+            if (currentPlaylist[Zone.AudioDevice.Instance].Count == 0)
                 return setPlaylist(source, Zone);
-            bool single = (currentPlaylist[Zone.AudioDeviceInstance].Count == 1);
-            currentPlaylist[Zone.AudioDeviceInstance].AddRange(source.GetRange(0, source.Count));
+            bool single = (currentPlaylist[Zone.AudioDevice.Instance].Count == 1);
+            currentPlaylist[Zone.AudioDevice.Instance].AddRange(source.GetRange(0, source.Count));
             if (single)
                 generateNext(Zone, false);
             SandboxedThread.Asynchronous(delegate() { raiseMediaEvent(eFunction.playlistChanged, Zone, string.Empty); });
@@ -514,8 +596,7 @@ namespace OpenMobile
             return _AudioDeviceInstanceMapping[screen] - 1;
         }
         */
-        static string[] AudioDevices;
-
+        static AudioDevice[] AudioDevices = null;
 
         /// <summary>
         /// Get the audio device instance for a specific screen
@@ -523,18 +604,18 @@ namespace OpenMobile
         /// </summary>
         /// <param name="screen">Screen number</param>
         /// <returns>Audio device (instance)</returns>
-        private static int getAudioDeviceInstance(int screen)
+        private AudioDevice getAudioDeviceByScreen(int screen)
         {
             string str;
             // TODO: Remove screen + 1
             using (PluginSettings settings = new PluginSettings())
                 str = settings.getSetting("Screen" + (screen + 1).ToString() + ".SoundCard");
             if (str.Length == 0)
-                return 0;
+                return null;
             if (AudioDevices == null)
                 if (!refreshAudioDevices())
-                    return 0;
-            return Array.FindIndex(AudioDevices, p => (p != null) && (p.Replace("  ", " ") == str)); // +1;
+                    return null;
+            return Array.Find(AudioDevices, p => (p != null) && (p.Name.Replace("  ", " ") == str)); // +1;
         }
 
         /// <summary>
@@ -542,7 +623,7 @@ namespace OpenMobile
         /// </summary>
         /// <param name="instance">Audio device (instance)</param>
         /// <returns>Audio device name</returns>
-        public string getAudioDeviceName(int instance)
+        public AudioDevice getAudioDevice(int instance)
         {
             if (AudioDevices == null)
                 if (!refreshAudioDevices())
@@ -559,30 +640,26 @@ namespace OpenMobile
         /// Get's the name of the default audio device 
         /// </summary>
         /// <returns></returns>
-        public string GetAudioDeviceDefaultName()
+        public AudioDevice GetAudioDeviceDefault()
         {
-            string device = getAudioDeviceName(0);
-            if (String.IsNullOrEmpty(device))
-                return "Default Device";
-            else
-                return device;
+            return AudioDevice.DefaultDevice;
         }
 
         /// <summary>
-        /// Get's the audio device instance for a device name
+        /// Get's the audio device from a device name
         /// </summary>
         /// <param name="name">Audio device name</param>
         /// <returns>Audio device instance</returns>
-        public int getAudioDeviceInstance(string name)
+        public AudioDevice getAudioDevice(string name)
         {
             if (AudioDevices == null)
                 if (!refreshAudioDevices())
-                    return -1;
+                    return null;
 
             if (string.IsNullOrEmpty(name))
-                return -1;
+                return null;
 
-            return Array.FindIndex(AudioDevices, p => (p != null) && p == name);//(p.Replace("  ", " ") == name)); // +1;
+            return Array.Find(AudioDevices, p => (p != null) && p.Name == name);//(p.Replace("  ", " ") == name)); // +1;
         }
 
         /// <summary>
@@ -590,14 +667,14 @@ namespace OpenMobile
         /// <para>Devices are read from the currently loaded player</para>
         /// </summary>
         /// <returns></returns>
-        private static bool refreshAudioDevices()
+        private bool refreshAudioDevices()
         {
-            string[] devs = new string[0];
+            AudioDevice[] devs = null;
             foreach (IBasePlugin player in Core.pluginCollection.FindAll(p => typeof(IAVPlayer).IsInstanceOfType(p) == true))
             {
                 try
                 {
-                    devs = ((IAVPlayer)player).OutputDevices;
+                    devs = ((IPlayer)player).OutputDevices;
                 }
                 catch (Exception e)
                 {
@@ -605,11 +682,16 @@ namespace OpenMobile
                     BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, e.Source, spewException(e));
                 }
                 
-                // We set it to null if we only detected default unit as this indicates that no units was found
+                // We set it to null if we only detect the default unit as this indicates that no units was found
                 // A length of 2 would indicate a default unit and the corresponding physcial unit which is minimum for detection
                 if (devs.Length >= 2)
                 {
-                    AudioDevices = devs;
+                    if (AudioDevices == null || AudioDevices.Length != devs.Length)
+                    {
+                        AudioDevices = devs;
+                        // Raise event
+                        raiseSystemEvent(eFunction.AudioDevicesAvailable, String.Empty, String.Empty, String.Empty);
+                    }
                     return true;
                 }
             }
@@ -628,7 +710,7 @@ namespace OpenMobile
                     if (refreshAudioDevices())
                         _AudioDeviceCount = AudioDevices.Length;
                     else
-                        return -1;
+                        return 0;
                 }
                 return _AudioDeviceCount;
             }
@@ -645,24 +727,24 @@ namespace OpenMobile
         {
             get
             {
-                if (skinpath == null)
+                if (_SkinPath == null)
                 {
                     using (PluginSettings s = new PluginSettings())
                     {
-                        skinpath = s.getSetting("UI.Skin");
-                        if (skinpath.Length == 0)
+                        _SkinPath = s.getSetting("UI.Skin");
+                        if (_SkinPath.Length == 0)
                         {
-                            skinpath = "Default";
-                            s.setSetting("UI.Skin", skinpath);
+                            _SkinPath = "Default";
+                            s.setSetting("UI.Skin", _SkinPath);
                         }
                     }
-                    skinpath = Path.Combine(Application.StartupPath, "Skins", skinpath);
+                    _SkinPath = Path.Combine(Application.StartupPath, "Skins", _SkinPath);
                 }
-                return skinpath;
+                return _SkinPath;
             }
             set
             {
-                skinpath = Path.Combine(Application.StartupPath, "Skins", value);
+                _SkinPath = Path.Combine(Application.StartupPath, "Skins", value);
             }
         }
 
@@ -673,9 +755,9 @@ namespace OpenMobile
         {
             get
             {
-                if (datapath == null)
-                    datapath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile");
-                return datapath;
+                if (_DataPath == null)
+                    _DataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile");
+                return _DataPath;
             }
         }
 
@@ -686,9 +768,9 @@ namespace OpenMobile
         {
             get
             {
-                if (pluginpath == null)
-                    pluginpath = Path.Combine(Application.StartupPath, "Plugins");
-                return pluginpath;
+                if (_PluginPath == null)
+                    _PluginPath = Path.Combine(Application.StartupPath, "Plugins");
+                return _PluginPath;
             }
         }
 
@@ -961,6 +1043,26 @@ namespace OpenMobile
 
         #region Network access and control
 
+        private string GetLocalIPAddress()
+        {
+            System.Net.IPHostEntry host;
+            string localIP = "";
+            host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+            foreach (System.Net.IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    localIP = ip.ToString();
+                }
+            }
+            return localIP;
+        }
+
+        private bool GetNetWorkAvailable()
+        {
+            return System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable();
+        }
+
         /// <summary>
         /// Raises system event when network address is changed
         /// </summary>
@@ -972,13 +1074,17 @@ namespace OpenMobile
             {
                 if (i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     if (i.ToString() == "127.0.0.1")
-                        ipAddress = "0.0.0.0";
+                    {
+                        IPAddress = "0.0.0.0";
+                    }
                     else
-                        if (ipAddress != i.ToString())
+                    {
+                        if (IPAddress != i.ToString())
                         {
-                            ipAddress = i.ToString();
-                            raiseSystemEvent(eFunction.networkConnectionsAvailable, ipAddress, String.Empty, String.Empty);
+                            IPAddress = i.ToString();
+                            raiseSystemEvent(eFunction.networkConnectionsAvailable, IPAddress, String.Empty, String.Empty);
                         }
+                    }
             }
         }
 
@@ -989,16 +1095,25 @@ namespace OpenMobile
         /// <param name="e"></param>
         private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
         {
-            if (e.IsAvailable != internetAccess)
+            NetWorkAvailable = e.IsAvailable;
+            if (e.IsAvailable != _NetWorkAvailable_PreviousState)
             {
-                internetAccess = e.IsAvailable;
-                if (internetAccess == true)
+                _NetWorkAvailable_PreviousState = e.IsAvailable;
+                if (NetWorkAvailable == true)
                     if (OpenMobile.Net.Network.checkForInternet() == OpenMobile.Net.Network.connectionStatus.InternetAccess)
+                    {
+                        InternetAccess = true;
                         raiseSystemEvent(eFunction.connectedToInternet, String.Empty, String.Empty, String.Empty);
+                    }
                     else
+                    {
+                        InternetAccess = false;
                         raiseSystemEvent(eFunction.disconnectedFromInternet, String.Empty, String.Empty, String.Empty);
+                    }
             }
         }
+
+        private bool _NetWorkAvailable_PreviousState;
 
         #endregion
 
@@ -1011,9 +1126,9 @@ namespace OpenMobile
         /// <param name="e"></param>
         private void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
         {
-            if (screenCount != DisplayDevice.AvailableDisplays.Count)
+            if (_ScreenCount != DisplayDevice.AvailableDisplays.Count)
             {
-                if (screenCount < DisplayDevice.AvailableDisplays.Count)
+                if (_ScreenCount < DisplayDevice.AvailableDisplays.Count)
                 {
                     // TODO : Better handling of screen added / removed
                     raiseSystemEvent(eFunction.screenAdded, String.Empty, String.Empty, String.Empty);
@@ -1033,11 +1148,11 @@ namespace OpenMobile
         {
             get
             {
-                return screenCount;
+                return _ScreenCount;
             }
             set
             {
-                screenCount = value;
+                _ScreenCount = value;
             }
         }
 
@@ -1062,7 +1177,7 @@ namespace OpenMobile
         /// <param name="windowState"></param>
         public void SetAllWindowState(WindowState windowState)
         {
-            for (int i = 0; i < screenCount; i++)
+            for (int i = 0; i < _ScreenCount; i++)
                 Core.RenderingWindows[i].WindowState = windowState;
         }
 
@@ -1274,12 +1389,6 @@ namespace OpenMobile
                 case eFunction.settingsChanged:
                     return true;
 
-                // Forces a refresh of data from data providers
-                case eFunction.refreshData:
-                    bool result = true;
-                    foreach (IBasePlugin p in Core.pluginCollection.FindAll(i => typeof(IDataProvider).IsInstanceOfType(i)))
-                        result = result & execute(eFunction.refreshData, p.pluginName);
-                    return result;
 
             }
             return false;
@@ -1372,17 +1481,17 @@ namespace OpenMobile
                                 return false;
                             return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                             {
-                                if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                                if (currentMediaPlayer[subZone.AudioDevice.Instance] == null)
                                     return false;
                                 try
                                 {
-                                    if (currentMediaPlayer[subZone.AudioDeviceInstance].getPlayerStatus(subZone) == ePlayerStatus.Playing)
-                                        currentMediaPlayer[subZone.AudioDeviceInstance].stop(subZone);
+                                    if (currentMediaPlayer[subZone.AudioDevice.Instance].getPlayerStatus(subZone) == ePlayerStatus.Playing)
+                                        currentMediaPlayer[subZone.AudioDevice.Instance].stop(subZone);
                                 }
                                 catch (Exception) { }
-                                currentMediaPlayer[subZone.AudioDeviceInstance].OnMediaEvent -= raiseMediaEvent;
-                                string name = currentMediaPlayer[subZone.AudioDeviceInstance].pluginName;
-                                currentMediaPlayer[subZone.AudioDeviceInstance] = null;
+                                currentMediaPlayer[subZone.AudioDevice.Instance].OnMediaEvent -= raiseMediaEvent;
+                                string name = currentMediaPlayer[subZone.AudioDevice.Instance].pluginName;
+                                currentMediaPlayer[subZone.AudioDevice.Instance] = null;
                                 raiseMediaEvent(eFunction.unloadAVPlayer, subZone, name);
                                 return true;
                             });
@@ -1399,12 +1508,12 @@ namespace OpenMobile
                             if (zone == null) return false;
                             return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                             {
-                                if (currentTunedContent[subZone.AudioDeviceInstance] == null)
+                                if (currentTunedContent[subZone.AudioDevice.Instance] == null)
                                     return false;
-                                currentTunedContent[subZone.AudioDeviceInstance].setPowerState(subZone, false);
-                                currentTunedContent[subZone.AudioDeviceInstance].OnMediaEvent -= raiseMediaEvent;
-                                string name = currentTunedContent[subZone.AudioDeviceInstance].pluginName;
-                                currentTunedContent[subZone.AudioDeviceInstance] = null;
+                                currentTunedContent[subZone.AudioDevice.Instance].setPowerState(subZone, false);
+                                currentTunedContent[subZone.AudioDevice.Instance].OnMediaEvent -= raiseMediaEvent;
+                                string name = currentTunedContent[subZone.AudioDevice.Instance].pluginName;
+                                currentTunedContent[subZone.AudioDevice.Instance] = null;
                                 raiseMediaEvent(eFunction.unloadTunedContent, subZone, name);
                                 return true;
                             });
@@ -1423,9 +1532,9 @@ namespace OpenMobile
                             return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                            if (currentMediaPlayer[subZone.AudioDevice.Instance] == null)
                                 return false;
-                            return currentMediaPlayer[subZone.AudioDeviceInstance].play(subZone);
+                            return currentMediaPlayer[subZone.AudioDevice.Instance].play(subZone);
                         });
                     }
 
@@ -1439,9 +1548,9 @@ namespace OpenMobile
                         if (currentMediaPlayer == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                            if (currentMediaPlayer[subZone.AudioDevice.Instance] == null)
                                 return false;
-                            return currentMediaPlayer[subZone.AudioDeviceInstance].SetVideoVisible(subZone, true);
+                            return currentMediaPlayer[subZone.AudioDevice.Instance].SetVideoVisible(subZone, true);
                         });
                     }
 
@@ -1455,9 +1564,9 @@ namespace OpenMobile
                         if (currentMediaPlayer == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                            if ((subZone.AudioDevice == null) || (currentMediaPlayer[subZone.AudioDevice.Instance] == null))
                                 return false;
-                            return currentMediaPlayer[subZone.AudioDeviceInstance].SetVideoVisible(subZone, false);
+                            return currentMediaPlayer[subZone.AudioDevice.Instance].SetVideoVisible(subZone, false);
                         });
                     }
 
@@ -1471,16 +1580,16 @@ namespace OpenMobile
                         if (currentMediaPlayer == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                            if (currentMediaPlayer[subZone.AudioDevice.Instance] == null)
                             {
-                                if (currentTunedContent[subZone.AudioDeviceInstance] != null)
+                                if (currentTunedContent[subZone.AudioDevice.Instance] != null)
                                 {
-                                    if (typeof(IPausable).IsInstanceOfType(currentTunedContent[subZone.AudioDeviceInstance]))
-                                        return ((IPausable)currentTunedContent[subZone.AudioDeviceInstance]).pause(subZone);
+                                    if (typeof(IPausable).IsInstanceOfType(currentTunedContent[subZone.AudioDevice.Instance]))
+                                        return ((IPausable)currentTunedContent[subZone.AudioDevice.Instance]).pause(subZone);
                                 }
                                 return false;
                             }
-                            return currentMediaPlayer[subZone.AudioDeviceInstance].pause(subZone);
+                            return currentMediaPlayer[subZone.AudioDevice.Instance].pause(subZone);
                         });
                     }
 
@@ -1494,9 +1603,9 @@ namespace OpenMobile
                         if (currentMediaPlayer == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                            if (currentMediaPlayer[subZone.AudioDevice.Instance] == null)
                                 return false;
-                            return currentMediaPlayer[subZone.AudioDeviceInstance].stop(subZone);
+                            return currentMediaPlayer[subZone.AudioDevice.Instance].stop(subZone);
                         });
                     }
 
@@ -1509,10 +1618,10 @@ namespace OpenMobile
                             if (zone == null) return false;
                             return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                             {
-                                if (currentPlaylist[subZone.AudioDeviceInstance].Count == 0)
+                                if (currentPlaylist[subZone.AudioDevice.Instance].Count == 0)
                                     return false;
-                                currentPlaylistIndex[subZone.AudioDeviceInstance] = nextPlaylistIndex[subZone.AudioDeviceInstance];
-                                bool b = execute(eFunction.Play, arg, currentPlaylist[subZone.AudioDeviceInstance][currentPlaylistIndex[subZone.AudioDeviceInstance]].Location);
+                                currentPlaylistIndex[subZone.AudioDevice.Instance] = nextPlaylistIndex[subZone.AudioDevice.Instance];
+                                bool b = execute(eFunction.Play, arg, currentPlaylist[subZone.AudioDevice.Instance][currentPlaylistIndex[subZone.AudioDevice.Instance]].Location);
                                 generateNext(subZone, false);
                                 return b;
                             });
@@ -1529,15 +1638,15 @@ namespace OpenMobile
                             if (zone == null) return false;
                             return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                             {
-                                if (currentPlaylist[subZone.AudioDeviceInstance].Count == 0)
+                                if (currentPlaylist[subZone.AudioDevice.Instance].Count == 0)
                                     return false;
                                 lock (currentPlaylistIndex)
                                 {
-                                    currentPlaylistIndex[subZone.AudioDeviceInstance]--;
-                                    if (currentPlaylistIndex[subZone.AudioDeviceInstance] <= -1)
-                                        currentPlaylistIndex[subZone.AudioDeviceInstance] = currentPlaylist[subZone.AudioDeviceInstance].Count - 1;
+                                    currentPlaylistIndex[subZone.AudioDevice.Instance]--;
+                                    if (currentPlaylistIndex[subZone.AudioDevice.Instance] <= -1)
+                                        currentPlaylistIndex[subZone.AudioDevice.Instance] = currentPlaylist[subZone.AudioDevice.Instance].Count - 1;
                                 }
-                                bool b = execute(eFunction.Play, arg, currentPlaylist[subZone.AudioDeviceInstance][currentPlaylistIndex[subZone.AudioDeviceInstance]].Location);
+                                bool b = execute(eFunction.Play, arg, currentPlaylist[subZone.AudioDevice.Instance][currentPlaylistIndex[subZone.AudioDevice.Instance]].Location);
                                 generateNext(subZone, true);
                                 return b;
                             });
@@ -1553,9 +1662,9 @@ namespace OpenMobile
                         if (zone == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentTunedContent[subZone.AudioDeviceInstance] == null)
+                            if (currentTunedContent[subZone.AudioDevice.Instance] == null)
                                 return false;
-                            return currentTunedContent[subZone.AudioDeviceInstance].scanReverse(subZone);
+                            return currentTunedContent[subZone.AudioDevice.Instance].scanReverse(subZone);
                         });
                     }
                     return false;
@@ -1568,9 +1677,9 @@ namespace OpenMobile
                         if (zone == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentTunedContent[subZone.AudioDeviceInstance] == null)
+                            if (currentTunedContent[subZone.AudioDevice.Instance] == null)
                                 return false;
-                            return currentTunedContent[subZone.AudioDeviceInstance].scanForward(subZone);
+                            return currentTunedContent[subZone.AudioDevice.Instance].scanForward(subZone);
                         });
                     }
                     return false;
@@ -1583,9 +1692,9 @@ namespace OpenMobile
                         if (zone == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentTunedContent[subZone.AudioDeviceInstance] == null)
+                            if (currentTunedContent[subZone.AudioDevice.Instance] == null)
                                 return false;
-                            return currentTunedContent[subZone.AudioDeviceInstance].scanBand(subZone);
+                            return currentTunedContent[subZone.AudioDevice.Instance].scanBand(subZone);
                         });
                     }
                     return false;
@@ -1598,9 +1707,9 @@ namespace OpenMobile
                         if (zone == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentTunedContent[subZone.AudioDeviceInstance] == null)
+                            if (currentTunedContent[subZone.AudioDevice.Instance] == null)
                                 return false;
-                            return currentTunedContent[subZone.AudioDeviceInstance].stepBackward(subZone);
+                            return currentTunedContent[subZone.AudioDevice.Instance].stepBackward(subZone);
                         });
                     }
                     return false;
@@ -1614,24 +1723,12 @@ namespace OpenMobile
                         if (zone == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentTunedContent[subZone.AudioDeviceInstance] == null)
+                            if (currentTunedContent[subZone.AudioDevice.Instance] == null)
                                 return false;
-                            return currentTunedContent[subZone.AudioDeviceInstance].stepForward(subZone);
+                            return currentTunedContent[subZone.AudioDevice.Instance].stepForward(subZone);
                         });
                     }
                     return false;
-
-                // Refresh dataprovider data
-                case eFunction.refreshData:
-                    plugin = getPluginByName(arg);
-                    if (plugin == null)
-                        return false;
-                    if (typeof(IDataProvider).IsInstanceOfType(plugin))
-                        return ((IDataProvider)plugin).refreshData();
-                    else if (typeof(INetwork).IsInstanceOfType(plugin))
-                        return ((INetwork)plugin).refresh();
-                    else
-                        return false;
 
                 // Data is updated by a dataprovider
                 case eFunction.dataUpdated:
@@ -1796,6 +1893,18 @@ namespace OpenMobile
             int ret, ret2;
             switch (function)
             {
+                // Goes to a panel (NB! full panel name is used here (PluginName;PanelName)
+                case eFunction.GotoPanel:
+                    return execute(eFunction.GotoPanel, arg1, arg2, String.Empty);
+
+                // Hides a panel (NB! full panel name is used here (PluginName;PanelName)
+                case eFunction.HidePanel:
+                    return execute(eFunction.HidePanel, arg1, arg2, String.Empty);
+
+                // Shows a panel (NB! full panel name is used here (PluginName;PanelName)
+                case eFunction.ShowPanel:
+                    return execute(eFunction.ShowPanel, arg1, arg2, String.Empty);
+
                 // Transition to the defult panel from a plugin
                 case eFunction.TransitionToPanel:
                     return execute(eFunction.TransitionToPanel, arg1, arg2, String.Empty);
@@ -1863,10 +1972,6 @@ namespace OpenMobile
                     raiseSystemEvent(eFunction.userInputReady, arg1, arg2, String.Empty);
                     return true;
 
-                // Force a refresh of plugin data
-                case eFunction.refreshData:
-                    return ((IDataProvider)getPluginByName(arg1)).refreshData(arg2);
-
                 // Load a AV player with the specified instance from the specified plugin
                 case eFunction.loadAVPlayer:
                     {
@@ -1877,9 +1982,9 @@ namespace OpenMobile
                             if (currentMediaPlayer == null) return false;
                             return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                             {
-                                if (currentMediaPlayer[subZone.AudioDeviceInstance] != null)
+                                if (currentMediaPlayer[subZone.AudioDevice.Instance] != null)
                                     return false;
-                                if (currentTunedContent[subZone.AudioDeviceInstance] != null)
+                                if (currentTunedContent[subZone.AudioDevice.Instance] != null)
                                     execute(eFunction.unloadTunedContent, arg1);
                                 IAVPlayer player = (IAVPlayer)Core.pluginCollection.FindAll(i => typeof(IAVPlayer).IsInstanceOfType(i)).Find(i => i.pluginName == arg2);
                                 if (player == null)
@@ -1889,7 +1994,7 @@ namespace OpenMobile
                                 if (Array.Exists<IAVPlayer>(currentMediaPlayer, a => a == player) == false)
                                     player.OnMediaEvent += raiseMediaEvent;
 
-                                currentMediaPlayer[subZone.AudioDeviceInstance] = player;
+                                currentMediaPlayer[subZone.AudioDevice.Instance] = player;
                                 raiseMediaEvent(eFunction.loadAVPlayer, subZone, arg2);
                                 return true;
                             });
@@ -1907,9 +2012,9 @@ namespace OpenMobile
                             if (currentMediaPlayer == null) return false;
                             return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                             {
-                                if (currentTunedContent[subZone.AudioDeviceInstance] != null)
+                                if (currentTunedContent[subZone.AudioDevice.Instance] != null)
                                     return false;
-                                if (currentMediaPlayer[subZone.AudioDeviceInstance] != null)
+                                if (currentMediaPlayer[subZone.AudioDevice.Instance] != null)
                                     execute(eFunction.unloadAVPlayer, arg1);
                                 ITunedContent player = (ITunedContent)Core.pluginCollection.FindAll(i => typeof(ITunedContent).IsInstanceOfType(i)).Find(i => i.pluginName == arg2);
                                 if (player == null)
@@ -1917,8 +2022,8 @@ namespace OpenMobile
                                 //Only hook it once
                                 if (Array.Exists<ITunedContent>(currentTunedContent, a => a == player) == false)
                                     player.OnMediaEvent += raiseMediaEvent;
-                                currentTunedContent[subZone.AudioDeviceInstance] = player;
-                                if (!currentTunedContent[subZone.AudioDeviceInstance].setPowerState(subZone, true))
+                                currentTunedContent[subZone.AudioDevice.Instance] = player;
+                                if (!currentTunedContent[subZone.AudioDevice.Instance].setPowerState(subZone, true))
                                 {
                                     execute(eFunction.unloadTunedContent, arg1);
                                     return false;
@@ -1943,16 +2048,16 @@ namespace OpenMobile
                             {
                                 if (int.TryParse(arg2, out ret2) == true)
                                 {
-                                    if (currentPlaylist[subZone.AudioDeviceInstance].Count > ret2)
+                                    if (currentPlaylist[subZone.AudioDevice.Instance].Count > ret2)
                                     {
-                                        currentPlaylistIndex[subZone.AudioDeviceInstance] = ret2;
+                                        currentPlaylistIndex[subZone.AudioDevice.Instance] = ret2;
                                         generateNext(subZone, false);
                                         return true;
                                     }
                                     return false;
                                 }
-                                currentPlaylistIndex[subZone.AudioDeviceInstance] = currentPlaylist[subZone.AudioDeviceInstance].FindIndex(p => p.Location == arg2);
-                                if (currentPlaylist[subZone.AudioDeviceInstance].Count > 0)
+                                currentPlaylistIndex[subZone.AudioDevice.Instance] = currentPlaylist[subZone.AudioDevice.Instance].FindIndex(p => p.Location == arg2);
+                                if (currentPlaylist[subZone.AudioDevice.Instance].Count > 0)
                                     generateNext(subZone, false);
                                 return true;
                             });
@@ -1972,9 +2077,9 @@ namespace OpenMobile
                             if (currentMediaPlayer == null) return false;
                             return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                             {
-                                if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                                if (currentMediaPlayer[subZone.AudioDevice.Instance] == null)
                                     return findAlternatePlayerAndStartPlay(subZone, arg2, StorageAnalyzer.classifySource(arg2));
-                                if (currentMediaPlayer[subZone.AudioDeviceInstance].play(subZone, arg2, StorageAnalyzer.classifySource(arg2)) == false)
+                                if (currentMediaPlayer[subZone.AudioDevice.Instance].play(subZone, arg2, StorageAnalyzer.classifySource(arg2)) == false)
                                     return findAlternatePlayerAndStartPlay(subZone, arg2, StorageAnalyzer.classifySource(arg2));
                                 else
                                     return true;
@@ -1995,11 +2100,11 @@ namespace OpenMobile
                                 if (currentMediaPlayer == null) return false;
                                 return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                                 {
-                                    if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                                    if (currentMediaPlayer[subZone.AudioDevice.Instance] == null)
                                         return false;
                                     float pos;
                                     if (float.TryParse(arg2, out pos))
-                                        return currentMediaPlayer[subZone.AudioDeviceInstance].setPosition(subZone, pos);
+                                        return currentMediaPlayer[subZone.AudioDevice.Instance].setPosition(subZone, pos);
                                     return false;
                                 });
                             }
@@ -2020,11 +2125,11 @@ namespace OpenMobile
                                 if (currentMediaPlayer == null) return false;
                                 return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                                 {
-                                    if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                                    if (currentMediaPlayer[subZone.AudioDevice.Instance] == null)
                                         return false;
                                     float speed;
                                     if (float.TryParse(arg2, out speed))
-                                        return currentMediaPlayer[subZone.AudioDeviceInstance].setPlaybackSpeed(subZone, speed);
+                                        return currentMediaPlayer[subZone.AudioDevice.Instance].setPlaybackSpeed(subZone, speed);
                                     return false;
                                 });
                             }
@@ -2043,19 +2148,19 @@ namespace OpenMobile
                             if (currentMediaPlayer == null) return false;
                             return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                             {
-                                if (currentMediaPlayer[subZone.AudioDeviceInstance] == null)
+                                if (currentMediaPlayer[subZone.AudioDevice.Instance] == null)
                                 {
-                                    if (currentTunedContent[subZone.AudioDeviceInstance] == null)
+                                    if (currentTunedContent[subZone.AudioDevice.Instance] == null)
                                         return false;
                                     raiseMediaEvent(eFunction.setPlayerVolume, subZone, arg2);
                                     if (int.TryParse(arg2, out ret2))
-                                        return currentTunedContent[subZone.AudioDeviceInstance].setVolume(subZone, ret2);
+                                        return currentTunedContent[subZone.AudioDevice.Instance].setVolume(subZone, ret2);
                                 }
                                 else
                                 {
                                     raiseMediaEvent(eFunction.setPlayerVolume, subZone, arg2);
                                     if (int.TryParse(arg2, out ret2))
-                                        return currentMediaPlayer[subZone.AudioDeviceInstance].setVolume(subZone, ret2);
+                                        return currentMediaPlayer[subZone.AudioDevice.Instance].setVolume(subZone, ret2);
                                 }
                                 return false;
                             });
@@ -2074,9 +2179,9 @@ namespace OpenMobile
                             return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentTunedContent[subZone.AudioDeviceInstance] == null)
+                            if (currentTunedContent[subZone.AudioDevice.Instance] == null)
                                 return findAlternateTuner(subZone, arg2);
-                            if (currentTunedContent[subZone.AudioDeviceInstance].tuneTo(subZone, arg2) == false)
+                            if (currentTunedContent[subZone.AudioDevice.Instance].tuneTo(subZone, arg2) == false)
                                 return findAlternateTuner(subZone, arg2);
                             else
                                 return true;
@@ -2143,7 +2248,7 @@ namespace OpenMobile
                                 return false;
                             Zone zone = ZoneHandler.GetZone(ret);
                             if (zone == null) return false;
-                            Hal_Send("34|" + arg1 + "|" + zone.AudioDeviceInstance.ToString());
+                            Hal_Send("34|" + arg1 + "|" + zone.AudioDevice.Instance.ToString());
                             //raiseSystemEvent(eFunction.systemVolumeChanged, arg1, zone.AudioDeviceInstance.ToString(), String.Empty);
                             return true;
                         }
@@ -2163,7 +2268,7 @@ namespace OpenMobile
                             if (zone == null) return false;
                             //if ((ret2 < 0) || (ret2 >= _AudioDeviceCount))
                             //    return false;
-                            Hal_Send("66|" + zone.AudioDeviceInstance.ToString() + "|" + arg2);
+                            Hal_Send("66|" + zone.AudioDevice.Instance.ToString() + "|" + arg2);
                             return true;
                         }
                         return false;
@@ -2177,9 +2282,9 @@ namespace OpenMobile
                         if (zone == null) return false;
                         return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
                         {
-                            if (currentTunedContent[subZone.AudioDeviceInstance] == null)
+                            if (currentTunedContent[subZone.AudioDevice.Instance] == null)
                                 return false;
-                            return currentTunedContent[subZone.AudioDeviceInstance].setBand(subZone, (eTunedContentBand)Enum.Parse(typeof(eTunedContentBand), arg2, false));
+                            return currentTunedContent[subZone.AudioDevice.Instance].setBand(subZone, (eTunedContentBand)Enum.Parse(typeof(eTunedContentBand), arg2, false));
                         });
                     }
                     return false;
@@ -2188,7 +2293,7 @@ namespace OpenMobile
                 case eFunction.setMonitorBrightness:
                     if (int.TryParse(arg1, out ret) == true)
                     {
-                        if ((ret < 0) || (ret >= screenCount))
+                        if ((ret < 0) || (ret >= _ScreenCount))
                             return false;
                         if (int.TryParse(arg2, out ret2) == false)
                             return false;
@@ -2214,7 +2319,7 @@ namespace OpenMobile
                             //    return false;
                             if (int.TryParse(arg2, out ret2) == false)
                                 return false;
-                            Hal_Send("42|" + zone.AudioDeviceInstance.ToString() + "|" + arg2);
+                            Hal_Send("42|" + zone.AudioDevice.Instance.ToString() + "|" + arg2);
                             return true;
                         }
                         return false;
@@ -2267,6 +2372,83 @@ namespace OpenMobile
             int ret;
             switch (function)
             {
+                // Goes to a panel (NB! full panel name is used here (PluginName;PanelName)
+                case eFunction.GotoPanel:
+                    {
+                        int screen;
+                        if (int.TryParse(arg1, out screen) == true)
+                        {
+                            // Is panel name present?
+                            if (arg2.Contains(";"))
+                            {
+                                string[] sParts = arg2.Split(';');
+                                if (sParts.Length >= 2)
+                                {
+                                    execute(eFunction.TransitionFromAny, screen.ToString());
+                                    if (execute(eFunction.TransitionToPanel, screen.ToString(), sParts[0], sParts[1]))
+                                        return execute(eFunction.ExecuteTransition, screen.ToString(), arg3);
+                                }
+                            }
+                            else
+                            {   // Panel name is not present
+                                execute(eFunction.TransitionFromAny, screen.ToString());
+                                if (execute(eFunction.TransitionToPanel, screen.ToString(), arg2))
+                                    return execute(eFunction.ExecuteTransition, screen.ToString(), arg3);
+                            }
+                        }
+                    }
+                    return false;
+
+                // Shows a panel (NB! full panel name is used here (PluginName;PanelName)
+                case eFunction.ShowPanel:
+                    {
+                        int screen;
+                        if (int.TryParse(arg1, out screen) == true)
+                        {
+                            // Is panel name present?
+                            if (arg2.Contains(";"))
+                            {
+                                string[] sParts = arg2.Split(';');
+                                if (sParts.Length >= 2)
+                                {
+                                    if (execute(eFunction.TransitionToPanel, screen.ToString(), sParts[0], sParts[1]))
+                                        return execute(eFunction.ExecuteTransition, screen.ToString(), arg3);
+                                }
+                            }
+                            else
+                            {   // Panel name is not present
+                                if (execute(eFunction.TransitionToPanel, screen.ToString(), arg2))
+                                    return execute(eFunction.ExecuteTransition, screen.ToString(), arg3);
+                            }
+                        }
+                    }
+                    return false;
+
+                // Hides a panel (NB! full panel name is used here (PluginName;PanelName)
+                case eFunction.HidePanel:
+                    {
+                        int screen;
+                        if (int.TryParse(arg1, out screen) == true)
+                        {
+                            // Is panel name present?
+                            if (arg2.Contains(";"))
+                            {
+                                string[] sParts = arg2.Split(';');
+                                if (sParts.Length >= 2)
+                                {
+                                    if (execute(eFunction.TransitionFromPanel, screen.ToString(), sParts[0], sParts[1]))
+                                        return execute(eFunction.ExecuteTransition, screen.ToString(), arg3);
+                                }
+                            }
+                            else
+                            {   // Panel name is not present
+                                if (execute(eFunction.TransitionFromPanel, screen.ToString(), arg2))
+                                    return execute(eFunction.ExecuteTransition, screen.ToString(), arg3);
+                            }
+                        }
+                    }
+                    return false;
+                
                 // Execute transition with the specified effect and speed
                 case eFunction.ExecuteTransition:
                     string effect;
@@ -2293,10 +2475,6 @@ namespace OpenMobile
                         return true;
                     }
                     return false;
-
-                // Force refresh of data from a data provider
-                case eFunction.refreshData:
-                    return ((IDataProvider)getPluginByName(arg1)).refreshData(arg2, arg3);
 
                 // Load a specific panel from a specific plugin
                 case eFunction.TransitionToPanel:
@@ -2346,30 +2524,6 @@ namespace OpenMobile
             return false;
         }
 
-        /// <summary>
-        /// Executes a function on a specific type of plugins
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="function"></param>
-        /// <param name="arg1"></param>
-        /// <param name="arg2"></param>
-        /// <returns></returns>
-        public bool executeByType(Type type, eFunction function, string arg1, string arg2)
-        {
-            bool result = false;
-            switch (function)
-            {
-                case eFunction.refreshData:
-                    foreach (IBasePlugin p in Core.pluginCollection.FindAll(i => typeof(IDataProvider).IsInstanceOfType(i)))
-                    {
-                        result = result & execute(eFunction.refreshData, p.pluginName);
-                    }
-                    return result;
-                default:
-                    return false;
-            }
-        }
-
         #endregion
 
         #region Tuned Content
@@ -2383,9 +2537,9 @@ namespace OpenMobile
         private bool findAlternateTuner(Zone zone, string arg2)
         {
             if (currentMediaPlayer == null) return false;
-            if (currentMediaPlayer[zone.AudioDeviceInstance] != null)
+            if (currentMediaPlayer[zone.AudioDevice.Instance] != null)
                 execute(eFunction.unloadAVPlayer, zone.ToString());
-            ITunedContent tmp = currentTunedContent[zone.AudioDeviceInstance];
+            ITunedContent tmp = currentTunedContent[zone.AudioDevice.Instance];
             List<IBasePlugin> plugins = Core.pluginCollection.FindAll(p => typeof(ITunedContent).IsInstanceOfType(p));
             for (int i = 0; i < plugins.Count; i++)
             {
@@ -2393,7 +2547,7 @@ namespace OpenMobile
                 {
                     execute(eFunction.unloadTunedContent, zone.ToString());
                     execute(eFunction.loadTunedContent, zone.ToString(), plugins[i].pluginName);
-                    if ((currentTunedContent[zone.AudioDeviceInstance] != null) && (currentTunedContent[zone.AudioDeviceInstance].tuneTo(zone, arg2) == true))
+                    if ((currentTunedContent[zone.AudioDevice.Instance] != null) && (currentTunedContent[zone.AudioDevice.Instance].tuneTo(zone, arg2) == true))
                         return true;
                 }
             }
@@ -2417,9 +2571,9 @@ namespace OpenMobile
         /// <returns></returns>
         private bool findAlternatePlayerAndStartPlay(Zone zone, string arg2, eMediaType type)
         {
-            if (currentTunedContent[zone.AudioDeviceInstance] != null)
+            if (currentTunedContent[zone.AudioDevice.Instance] != null)
                 execute(eFunction.unloadTunedContent, zone.ToString());
-            IAVPlayer tmp = currentMediaPlayer[zone.AudioDeviceInstance];
+            IAVPlayer tmp = currentMediaPlayer[zone.AudioDevice.Instance];
             List<IBasePlugin> plugins = Core.pluginCollection.FindAll(p => typeof(IAVPlayer).IsInstanceOfType(p));
             for (int i = 0; i < plugins.Count; i++)
             {
@@ -2427,7 +2581,7 @@ namespace OpenMobile
                 {
                     execute(eFunction.unloadAVPlayer, zone.ToString());
                     execute(eFunction.loadAVPlayer, zone.ToString(), plugins[i].pluginName);
-                    if (currentMediaPlayer[zone.AudioDeviceInstance].play(zone, arg2, type) == true)
+                    if (currentMediaPlayer[zone.AudioDevice.Instance].play(zone, arg2, type) == true)
                         return true;
                 }
             }
@@ -2459,11 +2613,11 @@ namespace OpenMobile
                 return false;
             if (_AudioDeviceCount == -1)
                 return false;
-            if ((zone.AudioDeviceInstance < 0) || (zone.AudioDeviceInstance >= _AudioDeviceCount))
+            if ((zone.AudioDevice.Instance < 0) || (zone.AudioDevice.Instance >= _AudioDeviceCount))
                 return false;
             if (random == null)
                 random = new bool[_AudioDeviceCount];
-            return random[zone.AudioDeviceInstance];
+            return random[zone.AudioDevice.Instance];
         }
         /// <summary>
         /// Gets the random state for a given AV player instance
@@ -2504,15 +2658,15 @@ namespace OpenMobile
                 return false;
             if (_AudioDeviceCount == -1)
                 return false;
-            if ((zone.AudioDeviceInstance < 0) || (zone.AudioDeviceInstance >= _AudioDeviceCount))
+            if ((zone.AudioDevice.Instance < 0) || (zone.AudioDevice.Instance >= _AudioDeviceCount))
                 return false;
             if (random == null)
                 random = new bool[_AudioDeviceCount];
 
             // Only send events and update if the state was actually changed
-            if (value != random[zone.AudioDeviceInstance])
+            if (value != random[zone.AudioDevice.Instance])
             {
-                random[zone.AudioDeviceInstance] = value;
+                random[zone.AudioDevice.Instance] = value;
                 if (value)
                     raiseMediaEvent(eFunction.RandomChanged, zone, "Enabled");
                 else
@@ -2542,7 +2696,7 @@ namespace OpenMobile
                 random[AudioDeviceInstance] = value;
 
                 // Raise event zones using this audio instance
-                Zone zone = ZoneHandler.BaseZones.Find(x => x.AudioDeviceInstance == AudioDeviceInstance);
+                Zone zone = ZoneHandler.BaseZones.Find(x => x.AudioDevice.Instance == AudioDeviceInstance);
                 if (zone != null)
                 {
                     if (value)
@@ -2574,10 +2728,10 @@ namespace OpenMobile
             if (zone == null)
                 return null;
             if (currentMediaPlayer == null) return null;
-            if (currentMediaPlayer[zone.AudioDeviceInstance] != null)
-                return currentMediaPlayer[zone.AudioDeviceInstance].getMediaInfo(zone);
-            if (currentTunedContent[zone.AudioDeviceInstance] != null)
-                return currentTunedContent[zone.AudioDeviceInstance].getMediaInfo(zone);
+            if (currentMediaPlayer[zone.AudioDevice.Instance] != null)
+                return currentMediaPlayer[zone.AudioDevice.Instance].getMediaInfo(zone);
+            if (currentTunedContent[zone.AudioDevice.Instance] != null)
+                return currentTunedContent[zone.AudioDevice.Instance].getMediaInfo(zone);
             return new mediaInfo();
         }
 
@@ -2600,9 +2754,9 @@ namespace OpenMobile
             if (zone == null)
                 return null;
             if (currentMediaPlayer == null) return null;
-            if (currentMediaPlayer[zone.AudioDeviceInstance] == null)
+            if (currentMediaPlayer[zone.AudioDevice.Instance] == null)
                 return new mediaInfo();
-            return currentPlaylist[zone.AudioDeviceInstance][nextPlaylistIndex[zone.AudioDeviceInstance]];
+            return currentPlaylist[zone.AudioDevice.Instance][nextPlaylistIndex[zone.AudioDevice.Instance]];
         }
 
         #endregion
@@ -2622,7 +2776,7 @@ namespace OpenMobile
             if (to == "RenderingWindow")
             {
                 if (message == "Identify")
-                    for (int i = 0; i < screenCount; i++)
+                    for (int i = 0; i < _ScreenCount; i++)
                         Core.RenderingWindows[i].PaintIdentity();
                 else if (message == "MakeCurrent")
                     Core.RenderingWindows[0].MakeCurrent();
@@ -2718,8 +2872,9 @@ namespace OpenMobile
         {
             System.Diagnostics.Debug.WriteLine(String.Format("raiseSystemEvent( eFunction: {0}, arg1: {1}, arg2: {2}, arg3: {3}", e, arg1, arg2, arg3));
 
-            // Update system sensors (Volume)
-
+            // Update data sources
+            if (e == eFunction.connectedToInternet)
+                InternetAccess = true;
 
             try
             {
@@ -2803,7 +2958,7 @@ namespace OpenMobile
                 SandboxedThread.Asynchronous(delegate() { OnMediaEvent(type, zone, arg); });
 
             if (type == eFunction.nextMedia)
-                while ((!execute(eFunction.nextMedia, zone.ToString())) && (currentPlaylist[zone.AudioDeviceInstance].Count > 1))
+                while ((!execute(eFunction.nextMedia, zone.ToString())) && (currentPlaylist[zone.AudioDevice.Instance].Count > 1))
                     Thread.Sleep(200);
 
             #region Internal video playback status
@@ -2811,7 +2966,7 @@ namespace OpenMobile
             // Set internal status for video playing
             else if (type == eFunction.showVideoWindow)
             {
-                for (int i = 0; i < screenCount; i++)
+                for (int i = 0; i < _ScreenCount; i++)
                     // TODO : Might be a problem!
                     if (ZoneHandler.GetZone(i) == zone)
                         Core.RenderingWindows[i].VideoPlaying = true;
@@ -2820,7 +2975,7 @@ namespace OpenMobile
             // Reset internal status for video playing
             else if (type == eFunction.hideVideoWindow)
             {
-                for (int i = 0; i < screenCount; i++)
+                for (int i = 0; i < _ScreenCount; i++)
                     // TODO : Might be a problem!
                     if (ZoneHandler.GetZone(i) == zone)
                         Core.RenderingWindows[i].VideoPlaying = false;
@@ -2923,107 +3078,9 @@ namespace OpenMobile
             return;
         }
 
-         /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="SourceTag"></param>
-        /// <param name="Message"></param>
-        public void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin,string Message)
-        {
-            SendStatusData(-1, DataType, SourcePlugin, "", Message);
-        }
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="SourceTag"></param>
-        /// <param name="Message"></param>
-        public void SendStatusData(eDataType DataType, string SourcePluginName, string Message)
-        {
-            SendStatusData(-1, DataType, SourcePluginName, "", Message);
-        }
-
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="SourceTag"></param>
-        /// <param name="Message"></param>
-        public void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string Message)
-        {
-            SendStatusData(Screen, DataType, SourcePlugin, "", Message);
-        }
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="SourceTag"></param>
-        /// <param name="Message"></param>
-        public void SendStatusData(int Screen, eDataType DataType, string SourcePluginName, string Message)
-        {
-            SendStatusData(Screen, DataType, SourcePluginName, "", Message);
-        }
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="SourceTag"></param>
-        /// <param name="Message"></param>
-        public void SendStatusData(eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message)
-        {
-            SendStatusData(-1, DataType, SourcePlugin, SourceTag, Message);
-        }
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="SourceTag"></param>
-        /// <param name="Message"></param>
-        public void SendStatusData(eDataType DataType, string SourcePluginName, string SourceTag, string Message)
-        {
-            SendStatusData(-1, DataType, SourcePluginName, SourceTag, Message);
-        }
-
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="SourceTag"></param>
-        /// <param name="Message"></param>
-        public void SendStatusData(int Screen, eDataType DataType, IBasePlugin SourcePlugin, string SourceTag, string Message)
-        {
-            SendStatusData(Screen, DataType, SourcePlugin.pluginName, SourceTag, Message);
-        }
-        /// <summary>
-        /// Sends a status data update (Internally this raises a eFunction.backgroundOperationStatus event)
-        /// </summary>
-        /// <param name="DataType"></param>
-        /// <param name="SourcePlugin"></param>
-        /// <param name="SourceTag"></param>
-        /// <param name="Message"></param>
-        public void SendStatusData(int Screen, eDataType DataType, string SourcePluginName, string SourceTag, string Message)
-        {
-            string Source = "";
-            if (Screen >= 0)
-                Source += "{" + Screen + "}";
-            Source += SourcePluginName;
-            if (!String.IsNullOrEmpty(Source) & !String.IsNullOrEmpty(SourceTag))
-                Source += ".";
-            Source += SourceTag;
-            raiseSystemEvent(eFunction.backgroundOperationStatus, Message, Source, DataType.ToString());
-        }
-
         #endregion
 
-        #region Skin image handling
+        #region Skin and plugin image handling
 
         /// <summary>
         /// Returns the given skin image
@@ -3043,36 +3100,32 @@ namespace OpenMobile
         /// <returns></returns>
         public imageItem getSkinImage(string imageName, bool noCache)
         {
+            string fullImageName = Path.Combine(SkinPath, imageName).Replace('|', System.IO.Path.DirectorySeparatorChar);
             if (noCache == false)
             {
-                imageItem im = imageCache.Find(i => i.name == imageName);
-                if (im.image != null)
+                if (imageCache.ContainsKey(fullImageName)) //(im.image != null)
                 {
-                    return im;
+                    return imageCache[fullImageName];
                 }
                 else
                 {
                     try
                     {
-                        im.image = OImage.FromFile(Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png"));
-                        if (im.image != null)
+                        // Try to load from current skin path
+                        imageItem im = getImageFromFile(fullImageName);
+
+                        // try to load from default skin path
+                        if (im.image == null)
+                            im = getImageFromFile(Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), imageName.Replace('|', System.IO.Path.DirectorySeparatorChar)));
+
+                        if (im.image == null)
                         {
-                            im.name = imageName;
-                            imageCache.Add(im);
-                            return im;
+                            // Write log entry
+                            DebugMsg(DebugMessageType.Error, "PluginHost", String.Format("Unable to load missing skin image: {0}", fullImageName));
+                            return imageItem.MISSING;
                         }
                         else
-                        {
-                            string file = Path.Combine(SkinPath, imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".gif");
-                            if (!File.Exists(file))
-                                file = Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), imageName.Replace('|', System.IO.Path.DirectorySeparatorChar) + ".png");
-                            if (!File.Exists(file))
-                                file = Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), imageName.Replace('|', System.IO.Path.DirectorySeparatorChar));
-                            im.image = OImage.FromFile(file);
-                            im.name = imageName;
-                            imageCache.Add(im);
                             return im;
-                        }
                     }
                     catch (System.ArgumentException)
                     {
@@ -3102,6 +3155,88 @@ namespace OpenMobile
                     }
                 }
             }
+        }
+
+        public imageItem getImageFromFile(string fullImageName)
+        {
+            if (imageCache.ContainsKey(fullImageName))
+            {
+                return imageCache[fullImageName];
+            }
+            else
+            {
+                try
+                {
+                    // try to load a png (preferd)
+                    string file = fullImageName + ".png";
+
+                    // Fallback: try to load path directly
+                    if (!File.Exists(file))
+                        file = fullImageName;
+
+                    // Fallback: try to load a jpg
+                    if (!File.Exists(file))
+                        file = fullImageName + ".jpg";
+
+                    // Fallback: try to load a gif
+                    if (!File.Exists(file))
+                        file = fullImageName + ".gif";
+
+                    // Load actual imagefile
+                    if (File.Exists(file))
+                    {
+                        imageItem im = new imageItem();
+                        im.image = OImage.FromFile(file);
+                        if (im.image != null)
+                        {
+                            im.name = fullImageName;
+                            imageCache.Add(im.name, im);
+                            return im;
+                        }
+                    }
+                }
+                catch (System.ArgumentException)
+                {
+                    return imageItem.MISSING;
+                }
+            }
+            return imageItem.MISSING;
+        }
+
+        public imageItem getPluginImage(IBasePlugin plugin, string imageName)
+        {
+            // Get paths
+            string PluginPath = System.Reflection.Assembly.GetAssembly(plugin.GetType()).Location;
+            PluginPath = System.IO.Path.GetDirectoryName(PluginPath);
+            string fullImageName = Path.Combine(PluginPath, imageName).Replace('|', System.IO.Path.DirectorySeparatorChar);
+
+            try
+            {
+                if (imageCache.ContainsKey(fullImageName)) //(im.image != null)
+                {
+                    return imageCache[fullImageName];
+                }
+                else
+                {
+                    // Try to load from current skin path
+                    imageItem im = getImageFromFile(fullImageName);
+
+                    // try to load from default skin path
+                    if (im.image == null)
+                        im = getImageFromFile(Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), imageName.Replace('|', System.IO.Path.DirectorySeparatorChar)));
+
+                    if (im.image == null)
+                    {
+                        // Write log entry
+                        DebugMsg(DebugMessageType.Error, "PluginHost", String.Format("Unable to load missing plugin image: {0}", fullImageName));
+                        return imageItem.MISSING;
+                    }
+                    else
+                        return im;
+                }
+            }
+            catch (System.ArgumentException) { }
+            return imageItem.MISSING;
         }
 
         #endregion
@@ -3179,18 +3314,6 @@ namespace OpenMobile
                             data = ZoneHandler[name];
                             return;
                         }
-
-                    // Get status of the specified data provider
-                    case eGetData.DataProviderStatus:
-                        if (!string.IsNullOrEmpty(name))
-                        {
-                            plugin = Core.pluginCollection.Find(p => p.pluginName == name);
-                            if (plugin == null)
-                                return;
-                            if (plugin is IDataProvider)
-                                data = ((IDataProvider)plugin).updaterStatus();
-                        }
-                        break;
 
                     // Get the system volume of the default unit
                     case eGetData.GetSystemVolume:
@@ -3328,13 +3451,13 @@ namespace OpenMobile
                             if (zone == null) return;
                             if (currentMediaPlayer == null)
                                 return;
-                            if (currentMediaPlayer[zone.AudioDeviceInstance] == null)
-                                if (currentTunedContent[zone.AudioDeviceInstance] == null)
+                            if (currentMediaPlayer[zone.AudioDevice.Instance] == null)
+                                if (currentTunedContent[zone.AudioDevice.Instance] == null)
                                     return;
                                 else
-                                    data = currentTunedContent[zone.AudioDeviceInstance].playbackPosition;
+                                    data = currentTunedContent[zone.AudioDevice.Instance].playbackPosition;
                             else
-                                data = currentMediaPlayer[zone.AudioDeviceInstance].getCurrentPosition(zone);
+                                data = currentMediaPlayer[zone.AudioDevice.Instance].getCurrentPosition(zone);
                         }
                         return;
 
@@ -3346,13 +3469,13 @@ namespace OpenMobile
                             Zone zone = ZoneHandler.GetZone(ret);
                             if (currentMediaPlayer == null) return;
                             if (zone == null) return;
-                            if (currentMediaPlayer[zone.AudioDeviceInstance] == null)
-                                if (currentTunedContent[zone.AudioDeviceInstance] == null)
+                            if (currentMediaPlayer[zone.AudioDevice.Instance] == null)
+                                if (currentTunedContent[zone.AudioDevice.Instance] == null)
                                     return;
                                 else
-                                    data = currentTunedContent[zone.AudioDeviceInstance].getVolume(zone);
+                                    data = currentTunedContent[zone.AudioDevice.Instance].getVolume(zone);
                             else
-                                data = currentMediaPlayer[zone.AudioDeviceInstance].getVolume(zone);
+                                data = currentMediaPlayer[zone.AudioDevice.Instance].getVolume(zone);
                         }
                         return;
 
@@ -3365,7 +3488,7 @@ namespace OpenMobile
                                 Zone zone = ZoneHandler.GetZone(ret);
                                 if (zone == null) return;
 
-                                Hal_Send("3|" + zone.AudioDeviceInstance);
+                                Hal_Send("3|" + zone.AudioDevice.Instance);
                                 bool res = true;
                                 while (res == true)
                                 {
@@ -3373,7 +3496,7 @@ namespace OpenMobile
                                     res = (hal.volume == null);
                                     if (res == false)
                                     {
-                                        if (hal.volume[0] == zone.AudioDeviceInstance.ToString())
+                                        if (hal.volume[0] == zone.AudioDevice.Instance.ToString())
                                         {
                                             if (int.TryParse(hal.volume[1], out ret))
                                                 data = ret;
@@ -3422,10 +3545,10 @@ namespace OpenMobile
                             Zone zone = ZoneHandler.GetZone(ret);
                             if (currentMediaPlayer == null) return;
                             if (zone == null) return;
-                            if (currentMediaPlayer[zone.AudioDeviceInstance] == null)
+                            if (currentMediaPlayer[zone.AudioDevice.Instance] == null)
                                 return;
                             else
-                                data = currentMediaPlayer[zone.AudioDeviceInstance].getPlaybackSpeed(zone);
+                                data = currentMediaPlayer[zone.AudioDevice.Instance].getPlaybackSpeed(zone);
                         }
                         return;
 
@@ -3438,13 +3561,13 @@ namespace OpenMobile
                             if (currentMediaPlayer == null) return;
                             if (string.IsNullOrEmpty(name))
                             {
-                                if (currentMediaPlayer[zone.AudioDeviceInstance] == null)
-                                    if (currentTunedContent[zone.AudioDeviceInstance] == null)
+                                if (currentMediaPlayer[zone.AudioDevice.Instance] == null)
+                                    if (currentTunedContent[zone.AudioDevice.Instance] == null)
                                         return;
                                     else
-                                        data = currentTunedContent[zone.AudioDeviceInstance].getStationInfo(zone);
+                                        data = currentTunedContent[zone.AudioDevice.Instance].getStationInfo(zone);
                                 else
-                                    data = currentMediaPlayer[zone.AudioDeviceInstance].getPlayerStatus(zone);
+                                    data = currentMediaPlayer[zone.AudioDevice.Instance].getPlayerStatus(zone);
                             }
                             else
                             {
@@ -3467,8 +3590,8 @@ namespace OpenMobile
                             {
                                 Zone zone = ZoneHandler.GetZone(q);
                                 if (zone == null) return;
-                                if (currentTunedContent[zone.AudioDeviceInstance] != null)
-                                    data = currentTunedContent[zone.AudioDeviceInstance].getStatus(zone);
+                                if (currentTunedContent[zone.AudioDevice.Instance] != null)
+                                    data = currentTunedContent[zone.AudioDevice.Instance].getStatus(zone);
                             }
                         }
                         return;
@@ -3481,8 +3604,8 @@ namespace OpenMobile
                             {
                                 Zone zone = ZoneHandler.GetZone(q);
                                 if (zone == null) return;
-                                if (currentTunedContent[zone.AudioDeviceInstance] != null)
-                                    data = currentTunedContent[zone.AudioDeviceInstance].getStationList(zone);
+                                if (currentTunedContent[zone.AudioDevice.Instance] != null)
+                                    data = currentTunedContent[zone.AudioDevice.Instance].getStationList(zone);
                             }
                         }
                         return;
@@ -3528,8 +3651,8 @@ namespace OpenMobile
                             {
                                 Zone zone = ZoneHandler.GetZone(ret);
                                 if (zone == null) return;
-                                if (currentTunedContent[zone.AudioDeviceInstance] != null)
-                                    data = currentTunedContent[zone.AudioDeviceInstance].getSupportedBands(zone);
+                                if (currentTunedContent[zone.AudioDevice.Instance] != null)
+                                    data = currentTunedContent[zone.AudioDevice.Instance].getSupportedBands(zone);
                             }
                         }
                         return;
@@ -3651,7 +3774,7 @@ namespace OpenMobile
         {
             OpenMobile.Threading.SafeThread.Asynchronous(() => 
             {
-                for (int i = 0; i < screenCount; i++)
+                for (int i = 0; i < _ScreenCount; i++)
                     Core.RenderingWindows[i].PaintIdentity();
             }); 
         }
@@ -3659,21 +3782,21 @@ namespace OpenMobile
         {
             OpenMobile.Threading.SafeThread.Asynchronous(() =>
             {
-                for (int i = 0; i < screenCount; i++)
+                for (int i = 0; i < _ScreenCount; i++)
                     Core.RenderingWindows[i].PaintIdentity(true);
                 Thread.Sleep(MS);
-                for (int i = 0; i < screenCount; i++)
+                for (int i = 0; i < _ScreenCount; i++)
                     Core.RenderingWindows[i].PaintIdentity(false);
             });
         }
         public void ScreenShowIdentity(bool Show)
         {
-            for (int i = 0; i < screenCount; i++)
+            for (int i = 0; i < _ScreenCount; i++)
                 Core.RenderingWindows[i].PaintIdentity(Show);
         }
         public void ScreenShowIdentity(bool Show, float Opacity)
         {
-            for (int i = 0; i < screenCount; i++)
+            for (int i = 0; i < _ScreenCount; i++)
                 Core.RenderingWindows[i].PaintIdentity(Show, Opacity);
         }
         public void ScreenShowIdentity(int Screen, bool Show)
@@ -3720,6 +3843,47 @@ namespace OpenMobile
                 DebugMsg( DebugMessageType.Warning,"Message sent to HAL when HAL was not ready (" + text + ")");
         }
 
+        #endregion
+
+        #region DataSources
+
+        private DataSource DataSource_NetWork_Internet_Online;
+        private DataSource DataSource_NetWork_IP;
+        private DataSource DataSource_NetWork_Available;
+
+        private void RegisterDataSources()
+        {
+            // Internet connection available
+            DataSource_NetWork_Internet_Online = new DataSource("OM", "Network", "Internet", "Online", DataSource.DataTypes.binary, "The state of the internet connection");
+            BuiltInComponents.Host.DataHandler.AddDataProvider(DataSource_NetWork_Internet_Online, _InternetAccess);
+
+            // Current ipaddress
+            DataSource_NetWork_IP = new DataSource("OM", "Network", "IP", "", DataSource.DataTypes.raw, "Current IP address of the main adapter");
+            BuiltInComponents.Host.DataHandler.AddDataProvider(DataSource_NetWork_IP, _IPAddress);
+
+            // Network available
+            DataSource_NetWork_Available = new DataSource("OM", "Network", "Available", "", DataSource.DataTypes.binary, "The availability of a network connection");
+            BuiltInComponents.Host.DataHandler.AddDataProvider(DataSource_NetWork_Available, _NetWorkAvailable);
+        }
+
+        /*
+        private object DataSourceProvider(OpenMobile.Data.DataSource dataSource, out bool result, object[] param)
+        {
+            result = true;
+            switch (dataSource.FullName)
+            {
+                case "Network.Internet.Online":
+                        return _InternetAccess;
+
+                case "Network.IP":
+                        return _IPAddress;
+
+                case "Network.IP":
+                        return _IPAddress;
+            }
+            return null;
+        }
+        */
         #endregion
 
 

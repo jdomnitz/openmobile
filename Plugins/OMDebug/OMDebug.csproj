@@ -16,6 +16,7 @@
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -28,7 +29,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -36,7 +36,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\</OutputPath>
+    <OutputPath>..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\OMDebug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -71,10 +71,12 @@
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Framework\OpenMobile.Framework.csproj">
       <Project>{A7656801-BDB8-4964-9AF5-F52CB23EC1D8}</Project>
       <Name>OpenMobile.Framework</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
       <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
       <Name>OpenMobile.Graphics</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

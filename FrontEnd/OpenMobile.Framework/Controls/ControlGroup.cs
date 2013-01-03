@@ -18,258 +18,125 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Text;
 using OpenMobile.Graphics;
+using System;
+using OpenMobile.Input;
 
 namespace OpenMobile.Controls
 {
     /// <summary>
-    /// A group of controls referenced by a text string
+    /// Directions to use when adding items relative to each other
     /// </summary>
-    public class ControlGroup
+    public enum ControlDirections
     {
         /// <summary>
-        /// The panel that holds the controls
+        /// No direction
         /// </summary>
-        public OMPanel Panel
-        {
-            get
-            {
-                return this._Panel;
-            }
-            set
-            {
-                if (this._Panel != value)
-                {
-                    this._Panel = value;
-                }
-            }
-        }
-        private OMPanel _Panel;
+        None,
 
         /// <summary>
-        /// A string that identifies the controls
+        /// Down
         /// </summary>
-        public string IDString
-        {
-            get
-            {
-                return this._IDString;
-            }
-            set
-            {
-                if (this._IDString != value)
-                {
-                    this._IDString = value;
-
-                    // Find controls that matches the ID string
-                    _Controls = _Panel.Controls.FindAll(x => x.Name.Contains(_IDString));
-                }
-            }
-        }
-        private string _IDString;
+        Down = 1,
 
         /// <summary>
-        /// The controls that matches the ID string
+        /// Up
         /// </summary>
-        public List<OMControl> Controls
-        {
-            get
-            {
-                return this._Controls;
-            }
-            set
-            {
-                if (this._Controls != value)
-                {
-                    this._Controls = value;
-                }
-            }
-        }
-        private List<OMControl> _Controls;        
+        Up = -1,
 
         /// <summary>
-        /// Initialize a new ControlGroup
+        /// Right
         /// </summary>
-        /// <param name="panel"></param>
-        /// <param name="idString"></param>
-        public ControlGroup(OMPanel panel, string idString)
-        {
-            this.Panel = panel;
-            this.IDString = idString;
-        }
+        Right = 2,
 
         /// <summary>
-        /// Returns the control with the given name
+        /// Left
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public OMControl this[string name]
-        {
-            get
-            {
-                return _Controls.Find(x => x.Name == name);
-            }
-        }
+        Left = -2,
 
         /// <summary>
-        /// Returns the control at the given index
+        /// Centered horizontally
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        public OMControl this[int index]
-        {
-            get
-            {
-                return _Controls[index];
-            }
-        }
+        CenterHorizontally = 3
+    }
 
-        /// <summary>
-        /// The total area the controls cover
-        /// </summary>
+    /// <summary>
+    /// A collection of controls for usage in the OMContainer control
+    /// </summary>
+    public class ControlGroup : List<OMControl>
+    {
         public Rectangle Region
         {
             get
             {
-                return OMControl.GetControlsArea(_Controls);
+                if (this.Count == 0)
+                    return new Rectangle();
+
+                Rectangle TotalRegion = this[0].Region;
+                // Return the combined area of contained controls
+                for (int i = 1; i < this.Count; i++)
+                    TotalRegion.Union(this[i].Region);
+                return TotalRegion;
             }
         }
 
-        /// <summary>
-        /// Offsets the controls
-        /// </summary>
-        /// <param name="offset"></param>
-        public void Offset(Point offset)
+        public void Translate(Rectangle r)
         {
-            foreach (OMControl control in _Controls)
-            {
-                control.Left += offset.X;
-                control.Top += offset.Y;
-            }
-        }
-        /// <summary>
-        /// Offsets the controls
-        /// </summary>
-        /// <param name="X"></param>
-        /// <param name="Y"></param>
-        public void Offset(int X, int Y)
-        {
-            foreach (OMControl control in _Controls)
-            {
-                control.Left += X;
-                control.Top += Y;
-            }
+            // Run command on each contained control
+            foreach (OMControl control in this)
+                control.Region.Translate(r);
         }
 
-        /// <summary>
-        /// The absolute top value of this group
-        /// </summary>
-        /// <param name="Y"></param>
-        public int Top
+        public bool Contains(string name)
+        {
+            OMControl c = this.Find(x => x.Name == name);
+            return (c != null);
+        }
+
+        public ControlGroup()
+        {
+        }
+
+        public ControlGroup(OMControl control)
+        {
+            this.Add(control);
+        }
+
+        public bool IsHighlighted()
+        {
+            foreach (OMControl control in this)
+            {
+                if (control.Mode == eModeType.Highlighted)
+                    return true;
+            }
+            return false;
+        }
+
+        public OMControl this[string name]
         {
             get
             {
-                return this.Region.Top;
+                return this.Find(x => x.Name.Contains(name));
             }
             set
             {
-                int OffsetY = value - this.Region.Top;
-                Offset(0, OffsetY);
+                int index = this.FindIndex(x => x.Name.Contains(name));
+                this.RemoveAt(index);
+                this.Insert(index, value);
             }
         }
 
-        /// <summary>
-        /// The absolute left value of this group
-        /// </summary>
-        /// <param name="X"></param>
-        public int Left
-        {
-            get
-            {
-                return this.Region.Left;
-            }
-            set
-            {
-                int OffsetX = value - this.Region.Left;
-                Offset(OffsetX, 0);
-            }
-        }
+        public ControlDirections PlacementDirection { get; set; }
 
-        /// <summary>
-        /// The absolute bottom value of this group (NB! This moves the whole group up, does not change the height)
-        /// </summary>
-        /// <param name="X"></param>
-        public int Bottom
-        {
-            get
-            {
-                return this.Region.Bottom;
-            }
-            set
-            {
-                int OffsetY = value - this.Region.Bottom;
-                Offset(0, OffsetY);
-            }
-        }
+        public string Key { get; set; }
 
-        /// <summary>
-        /// The absolute right value of this group (NB! This moves the whole group to the left, does not change the width)
-        /// </summary>
-        /// <param name="X"></param>
-        public int Right
+        public ControlGroup Clone()
         {
-            get
-            {
-                return this.Region.Right;
-            }
-            set
-            {
-                int OffsetX = value - this.Region.Right;
-                Offset(OffsetX, 0);
-            }
+            ControlGroup newCG = new ControlGroup();
+            foreach (OMControl control in this)
+                newCG.Add((OMControl)control.Clone());
+            return newCG;
         }
-
-        /// <summary>
-        /// Shows / hides the controls
-        /// </summary>
-        public bool Visible
-        {
-            get
-            {
-                if (_Controls.Count > 0)
-                    return _Controls[0].Visible;
-                return this._Visible;
-            }
-            set
-            {
-                this._Visible = value;
-                foreach (OMControl control in _Controls)
-                    control.Visible = _Visible;
-            }
-        }
-        private bool _Visible;
-
-        /// <summary>
-        /// Sets the opacity level of the controls (0 transparent - 255 solid)
-        /// </summary>
-        public int Opacity
-        {
-            get
-            {
-                if (_Controls.Count > 0)
-                    return _Controls[0].Opacity;
-                return this._Opacity;
-            }
-            set
-            {
-                this._Opacity = value;
-                foreach (OMControl control in _Controls)
-                    control.Opacity = _Opacity;
-            }
-        }
-        private int _Opacity;
     }
 }

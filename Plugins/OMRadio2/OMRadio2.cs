@@ -90,6 +90,11 @@ namespace OMRadio2
             get { return "Radio control panel"; }
         }
 
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-RadioWaves"); }
+        }
+
         public bool incomingMessage(string message, string source)
         {
             return false;

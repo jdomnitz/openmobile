@@ -35,7 +35,7 @@ using OpenMobile.Graphics.OpenGL;
 using OpenMobile.helperFunctions.MenuObjects;
 using OpenMobile.Media;
 
-namespace ControlDemo
+namespace OMClock
 {
     [SkinIcon("#¸")]
     public sealed class OMClock : IHighLevel
@@ -119,6 +119,11 @@ namespace ControlDemo
         public string pluginDescription
         {
             get { return "A large clock"; }
+        }
+
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-Clock2"); }
         }
 
         public bool incomingMessage(string message, string source)

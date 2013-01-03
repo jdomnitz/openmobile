@@ -32,7 +32,7 @@ namespace OpenMobile.Data
     {
         private List<DataSource> _DataSources = new List<DataSource>();
         private Thread PollThread;
-        private int PollEngine_Resolution = 100;
+        private int PollEngine_Resolution = 500;
         private bool PollEngine_Run = false;
         private bool PollEngine_Enable = false;
         private EventWaitHandle PollEngine_WaitHandle;
@@ -48,8 +48,8 @@ namespace OpenMobile.Data
             PollThread.IsBackground = true;
             PollThread.Priority = ThreadPriority.BelowNormal;
             PollThread.Name = "SensorHandler.PollEngine";
-            PollThread.Start();
             PollEngine_WaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+            PollThread.Start();
         }
 
         /// <summary>
@@ -81,16 +81,26 @@ namespace OpenMobile.Data
                         while (PollEngine_Run)
                         {
                             // Check if we have some data that want's to be polled
-                            List<DataSource> DataSourcesToPoll = _DataSources.FindAll(x => (x.PollRate > 0));
+                            List<DataSource> DataSourcesToPoll = _DataSources.FindAll(x => (x.PollRate > 0 && x.Getter != null));
                             if (DataSourcesToPoll != null)
                             {
-                                // Get a list of data to refersh
+                                // Get a list of data to refresh
                                 List<DataSource> DataSourcesToRefresh = DataSourcesToPoll.FindAll(x => (x.IsPollRequired()));
                                 if (DataSourcesToRefresh.Count != 0)
                                 {
                                     // Loop trough data and get an updated value
                                     for (int i = 0; i < DataSourcesToRefresh.Count; i++)
-                                        DataSourcesToRefresh[i].RefreshValue(null, true);
+                                    {
+                                        // Spawn new thread for event update
+                                        //OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+                                        //{
+                                            try
+                                            {
+                                                DataSourcesToRefresh[i].RefreshValue(null, true, true);
+                                            }
+                                            catch { }
+                                        //});
+                                    }
                                 }
                             }
                             // Limit thread speed to not overload cpu
@@ -112,7 +122,22 @@ namespace OpenMobile.Data
             {
                 _DataSources.Add(dataSource);        // Add to internal sensor list
                 // Get a fresh value from the sensor
-                dataSource.RefreshValue(null, true);
+                dataSource.RefreshValue(null, true, true);
+            }
+            PollEngine_WaitHandle.Set();
+        }
+
+        /// <summary>
+        /// Adds a new dataprovider with initial value
+        /// </summary>
+        /// <param name="dataSource"></param>
+        public void AddDataProvider(DataSource dataSource, object initialValue)
+        {
+            lock (_DataSources)
+            {
+                _DataSources.Add(dataSource);        // Add to internal sensor list
+                // Get a fresh value from the sensor
+                dataSource.RefreshValue(initialValue, false, true);
             }
             PollEngine_WaitHandle.Set();
         }
@@ -128,6 +153,7 @@ namespace OpenMobile.Data
         }
         /// <summary>
         /// Gets a datasource
+        /// <para>Name can be part of a datasources name or it can be a full reference including a provider reference (example: OM;Screen0.Zone.Volume)</para>
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -151,6 +177,7 @@ namespace OpenMobile.Data
 
         /// <summary>
         /// Gets a datasource and supports sending parameters along in the request
+        /// <para>Name can be part of a datasources name or it can be a full reference including a provider reference (example: OM;Screen0.Zone.Volume)</para>
         /// </summary>
         /// <param name="name"></param>
         /// <param name="param"></param>
@@ -166,7 +193,28 @@ namespace OpenMobile.Data
         }
 
         /// <summary>
+        /// Pushes a value to a datasource without sending the value back to the source of the datasource (only if new value differs from the current one)
+        /// <para>Update events will still be sent to anyone subscribing to the data</para>
+        /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool PushDataSourceValue(string name, object value)
+        {
+            // Check for included provider reference
+            if (!name.Contains(DataSource.ProviderSeparator))
+                return false;
+
+            DataSource source = GetDataSource(name);
+            if (source != null)
+                return source.RefreshValue(value, false, true);
+            return false;
+        }
+
+        /// <summary>
         /// Subscribes to updates for a datasource
+        /// <para>Name can be part of a datasources name or it can be a full reference including a provider reference (example: OM;Screen0.Zone.Volume)</para>
         /// </summary>
         /// <param name="name"></param>
         /// <param name="onDataSourceChanged"></param>
@@ -182,6 +230,7 @@ namespace OpenMobile.Data
         }
         /// <summary>
         /// Unsubscribes to updates for a datasource
+        /// <para>Name can be part of a datasources name or it can be a full reference including a provider reference (example: OM;Screen0.Zone.Volume)</para>
         /// </summary>
         /// <param name="name"></param>
         /// <param name="onDataSourceChanged"></param>
@@ -203,7 +252,21 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public string GetInLineDataSource(string s)
         {
+            string result = String.Empty;
+            GetInLineDataSource(s, out result);
+            return result;
+        }
+        
+        /// <summary>
+        /// Prosesses an InLine datasource string
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public bool GetInLineDataSource(string s, out string prosessedString)
+        {
             string StringToProsess = s;
+            prosessedString = String.Empty;
 
             // Find matches for datasources
             System.Text.RegularExpressions.Regex regEx = new System.Text.RegularExpressions.Regex(@"\{.+?\}");
@@ -216,10 +279,14 @@ namespace OpenMobile.Data
                 string dataSourceName = match.Replace("{", "").Replace("}", "");
                 DataSource dataSource = GetDataSource(dataSourceName);
                 if (dataSource != null)
-                    StringToProsess = StringToProsess.Replace(string.Format("{{{0}}}", dataSource.FullName), dataSource.FormatedValue);
+                    prosessedString = StringToProsess.Replace(string.Format("{{{0}}}", dataSource.FullName), dataSource.FormatedValue);
+                else
+                {   // Error, abort
+                    break;
+                }
             }
 
-            return StringToProsess;
+            return prosessedString != String.Empty;
         }
 
     }

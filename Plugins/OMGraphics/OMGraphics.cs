@@ -65,6 +65,10 @@ namespace OMGraphics
         {
             get { return "Default style generated graphics"; }
         }
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-OM"); }
+        }
         #endregion
 
         public bool incomingMessage(string message, string source)
@@ -238,7 +242,7 @@ namespace OMGraphics
 
                                                     #region Draw Icon
 
-                                                    if ((!String.IsNullOrEmpty(gd.Icon)) && String.IsNullOrEmpty(gd.IconImage))
+                                                    if ((!String.IsNullOrEmpty(gd.Icon)) && gd.IconImage == null)
                                                     {
                                                         // Calculate placement (if no text it's centered in graphic)
                                                         rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, (int)((bmp.Width - 1) * 0.33F), bmp.Height - 1);
@@ -291,9 +295,9 @@ namespace OMGraphics
 
                                                     #region Draw Image Icon
 
-                                                    if (!String.IsNullOrEmpty(gd.IconImage))
+                                                    if (gd.IconImage != null)
                                                     {
-                                                        imageItem img = BuiltInComponents.Host.getSkinImage(gd.IconImage);
+                                                        imageItem img = new imageItem(gd.IconImage);
                                                         if (img.image != null)
                                                             if (img.image.image != null)
                                                             {

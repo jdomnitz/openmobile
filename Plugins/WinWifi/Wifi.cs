@@ -436,6 +436,11 @@ namespace WinWifi
             get { return "Wifi Support"; }
         }
 
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("AIcons|10_device_access_network_wifi"); }
+        }
+
         public bool incomingMessage(string message, string source)
         {
             throw new NotImplementedException();

@@ -25,7 +25,6 @@ using System.Timers;
 using OpenMobile.Graphics;
 using OpenMobile.Input;
 using OpenMobile.Threading;
-using OpenMobile.helperFunctions.Graphics;
 using System.Reflection;
 
 namespace OpenMobile.Controls
@@ -192,7 +191,7 @@ namespace OpenMobile.Controls
         }
         */
 
-        public class ListItem : OMContainer.ControlGroup
+        public class ListItem : ControlGroup
         {
             public SetItemInfoDelegate Action_SetItemInfo = null;
             public ItemActionDelegate Action_Select = null;
@@ -495,7 +494,7 @@ namespace OpenMobile.Controls
         //    }
         //}
 
-        public void AddItemFromItemBase(object[] values, Directions direction)
+        public void AddItemFromItemBase(object[] values, ControlDirections direction)
         {
             if (this.parent == null)
                 throw new Exception("OMObjectList needs a valid parent. Ensure the control is added to a panel before adding items to it");
@@ -521,7 +520,7 @@ namespace OpenMobile.Controls
             }
         }
 
-        public void AddItem(ListItem baseItem, object[] values, Directions direction)
+        public void AddItem(ListItem baseItem, object[] values, ControlDirections direction)
         {
             if (this.parent == null)
                 throw new Exception("OMObjectList needs a valid parent. Ensure the control is added to a panel before adding items to it");
@@ -650,9 +649,9 @@ namespace OpenMobile.Controls
             ThrowActive = false;
         }
 
-        public override object Clone()
+        public override object Clone(OMPanel parent)
         {
-            OMObjectList newList = (OMObjectList)base.Clone();
+            OMObjectList newList = (OMObjectList)base.Clone(parent);
             newList._Items = this._Items.ConvertAll(x => (ListItem)x.Clone());
             return newList;
         }
@@ -701,7 +700,7 @@ namespace OpenMobile.Controls
             return base.addControl(control, Relative);
         }
         [Obsolete("This method is not supported in the OMObjectList control", true)]
-        public new bool addControl(OMControl control, Directions direction)
+        public new bool addControl(OMControl control, ControlDirections direction)
         {
             return base.addControl(control, direction);
         }
@@ -711,17 +710,17 @@ namespace OpenMobile.Controls
             return base.addControl(cg, Relative);
         }
         [Obsolete("This method is not supported in the OMObjectList control", true)]
-        public new bool addControl(ControlGroup cg, Directions direction)
+        public new bool addControl(ControlGroup cg, ControlDirections direction)
         {
             return base.addControl(cg, direction);
         }
         [Obsolete("This method is not supported in the OMObjectList control", true)]
-        public new bool addControl(ControlGroup cg, bool relative, Directions direction)
+        public new bool addControl(ControlGroup cg, bool relative, ControlDirections direction)
         {
             return base.addControl(cg, relative, direction);
         }
         [Obsolete("This method is not supported in the OMObjectList control", true)]
-        public new bool addControl(int index, ControlGroup cg, bool relative, Directions direction)
+        public new bool addControl(int index, ControlGroup cg, bool relative, ControlDirections direction)
         {
             return base.addControl(index, cg, relative, direction);
         }

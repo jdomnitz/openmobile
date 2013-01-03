@@ -229,13 +229,13 @@ namespace OpenMobile.Graphics
                 // Calculate color values
                 float R = 0;
                 if (c.R > 0)
-                    R = 255 / c.R;
+                    R = c.R / 255f;
                 float G = 0;
                 if (c.G > 0)
-                    G = 255 / c.G;
+                    G = c.G / 255f;
                 float B = 0;
                 if (c.B > 0)
-                    B = 255 / c.B;
+                    B = c.B / 255f;
 
                 System.Drawing.Imaging.ColorMatrix cm = new System.Drawing.Imaging.ColorMatrix(new float[][]
                     {

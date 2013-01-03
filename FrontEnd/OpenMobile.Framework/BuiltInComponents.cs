@@ -29,10 +29,39 @@ using OpenMobile.Framework.Data;
 namespace OpenMobile
 {
     /// <summary>
+    /// The OM host
+    /// </summary>
+    public static class OM
+    {
+        /// <summary>
+        /// A reference to the pluginhost to use for the framework.
+        /// </summary>
+        public static IPluginHost Host
+        {
+            get
+            {
+                return BuiltInComponents.Host;
+            }
+        }
+    }
+
+    /// <summary>
     /// Built in plugins
     /// </summary>
     public static class BuiltInComponents
     {
+        private class OMInternalPluginClass : BasePluginCode
+        {
+            public OMInternalPluginClass()
+                : base("OM", BuiltInComponents.Host.getSkinImage("Icons|Icon-OM"), 1.0f, "Internal usage plugin", "OM", "")
+            {
+            }
+            public override eLoadStatus initialize(IPluginHost host)
+            {
+                return eLoadStatus.LoadSuccessful;
+            }
+        }
+
         /// <summary>
         /// A screenmanager for panels created and handled by the framework
         /// NB! Panels from the framework is always common for all screens
@@ -56,8 +85,14 @@ namespace OpenMobile
             {
                 _Host = value;
                 Panels = new OpenMobile.Framework.ScreenManager(_Host.ScreenCount);
+                OMInternalPlugin = new OMInternalPluginClass();
             }
         }
+
+        /// <summary>
+        /// An internal usage OM plugin
+        /// </summary>
+        public static IBasePlugin OMInternalPlugin { get; private set; }
 
         /// <summary>
         /// The copyright information to be displayed on the about screen
@@ -473,7 +508,7 @@ namespace OpenMobile
         /// <summary>
         /// System data providers
         /// </summary>
-        public static class Sensors
+        public static class DataSources
         {
             /// <summary>
             /// Init the system data providers
@@ -481,37 +516,40 @@ namespace OpenMobile
             static public void Init()
             {
                 // Time with HH:MM
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "", 1000, null, DateTimeProvider));
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current time in a short format"));
 
                 // Time with HH:MM:SS
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "Long", 1000, null, DateTimeProvider));
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "Long", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current time in a long format with seconds"));
 
                 // Time with local time
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "Local", 1000, null, DateTimeProvider));
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "Local", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current time in a local style format"));
 
                 // Date
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "", 1000, null, DateTimeProvider));
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date in a short format"));
 
                 // Date long
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "Long", 1000, null, DateTimeProvider));
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "Long", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date in a long format"));
 
                 // Date text
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "Text", 1000, null, DateTimeProvider));
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "Text", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date in a local format"));
+
+                // Create a datasource
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "DateTime", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date and time in a local format"));
 
                 // CPU Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "CPU", "Load", 1000, DataSource.DataTypes.percent, null, ComputerDataProvider));
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "CPU", "Load", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total CPU load"));
 
-                // CPU Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "Free", 1000, DataSource.DataTypes.bytes, null, ComputerDataProvider));
+                // Memory Usage
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "Free", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total free memory in bytes"));
 
-                // CPU Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "Used", 1000, DataSource.DataTypes.bytes, null, ComputerDataProvider));
+                // Memory Usage
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "Used", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total used memory in bytes"));
 
-                // CPU Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "UsedPercent", 1000, DataSource.DataTypes.percent, null, ComputerDataProvider));
+                // Memory Usage
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "UsedPercent", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total used memory in percent"));
 
-                // CPU Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "ProcessUsed", 1000, DataSource.DataTypes.bytes, null, ComputerDataProvider));
+                // Memory Usage
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "ProcessUsed", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Currently used memory by OM"));
 
             }
 
@@ -577,6 +615,8 @@ namespace OpenMobile
                         return DateTime.Now.ToLongDateString();
                     case "System.Date.Text":
                         return DateTime.Now.ToString("D");
+                    case "System.DateTime":
+                        return DateTime.Now.ToString();
                     default:
                         result = false;
                         return null;

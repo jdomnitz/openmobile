@@ -70,23 +70,24 @@ namespace OpenMobile
         {   // Load debug dll (if available)
             status = new eLoadStatus[1];
             IBasePlugin Plugin = null;
-            string DebugDll = Path.Combine(theHost.PluginPath, "!OMDebug.dll");
-            if (!File.Exists(DebugDll))
-            {
-                DebugDll = Path.Combine(theHost.PluginPath, "OMDebug.dll");
-                if (!File.Exists(DebugDll))
-                    return;
-            }
+            string[] DebugDlls = Directory.GetFiles(theHost.PluginPath, "*OMDebug*.dll", SearchOption.AllDirectories);
 
-            // Load dll
-            try
+            foreach (string file in DebugDlls)
             {
-                Plugin = loadAndCheck(DebugDll, true);
-                if (Plugin != null)
-                    status[0] = Plugin.initialize(theHost);
-            }
-            catch
-            {   // No error handling, dll will be loaded later if this failed
+                // Load dll
+                try
+                {
+                    Plugin = loadAndCheck(file, true);
+                    if (Plugin != null)
+                    {
+                        status[0] = Plugin.initialize(theHost);
+                        if (status[0] == eLoadStatus.LoadSuccessful)
+                            break;
+                    }
+                }
+                catch
+                {   // No error handling, dll will be loaded later if this failed
+                }
             }
         }
 
@@ -190,31 +191,35 @@ namespace OpenMobile
         /// </summary>
         private static void loadEmUp()
         {
-            foreach (string file in Directory.GetFiles(theHost.PluginPath, "*.dll"))
+            string[] Files = Directory.GetFiles(theHost.PluginPath, "*.dll", SearchOption.AllDirectories);
+            foreach (string file in Files)
             {
                 try
                 {
-                    loadAndCheck(file);
+                    loadAndCheck(file, true);
                 }
                 catch (Exception e)
                 {
                     string ex = spewException(e);
-                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Loader", "Exception: " + ex);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Loader (Plugins)", "Exception: " + ex);
 #if DEBUG
                     Debug.Print(ex);
 #endif
                 }
             }
-            foreach (string file in Directory.GetFiles(theHost.SkinPath, "*.dll"))
+
+            // Load skin specific dll's 
+            Files = Directory.GetFiles(theHost.SkinPath, "*.dll", SearchOption.AllDirectories);
+            foreach (string file in Files) //Directory.GetFiles(theHost.SkinPath, "*.dll"))
             {
                 try
                 {
-                    loadAndCheck(file);
+                    loadAndCheck(file, true);
                 }
                 catch (Exception e)
                 {
                     string ex = spewException(e);
-                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Loader", "Exception: " + ex);
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Loader (Skin)", "Exception: " + ex);
 #if DEBUG
                     Debug.Print(ex);
 #endif
@@ -234,38 +239,46 @@ namespace OpenMobile
         }
         private static IBasePlugin loadAndCheck(string file, bool LoadSpecific)
         {
-            Assembly pluginAssembly;
-            if (!LoadSpecific)
-                pluginAssembly = Assembly.Load(Path.GetFileNameWithoutExtension(file));
-            else
-                pluginAssembly = Assembly.LoadFrom(file);
-
-            IBasePlugin availablePlugin = null;
-            foreach (Type pluginType in pluginAssembly.GetTypes())
+            try
             {
-                if (pluginType.IsPublic) //Only look at public types
-                {
-                    if (!pluginType.IsAbstract)  //Only look at non-abstract types
-                    {
-                        //Make sure the interface we want to use actually exists
-                        if (typeof(IBasePlugin).IsAssignableFrom(pluginType))
-                        {
-                            availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginType);
-                            
-                            // Did we load this dll before? If so skip it
-                            if (IsPluginLoaded(availablePlugin))
-                                continue;
+                Assembly pluginAssembly;
+                if (!LoadSpecific)
+                    pluginAssembly = Assembly.Load(Path.GetFileNameWithoutExtension(file));
+                else
+                    pluginAssembly = Assembly.LoadFrom(file);
 
-                            if (typeof(INetwork).IsInstanceOfType(availablePlugin))
-                                ((INetwork)availablePlugin).OnWirelessEvent += theHost.raiseWirelessEvent;
-                            if (typeof(IBluetooth).IsInstanceOfType(availablePlugin))
-                                ((IBluetooth)availablePlugin).OnWirelessEvent += theHost.raiseWirelessEvent;
-                            pluginCollection.Add(availablePlugin);
+                IBasePlugin availablePlugin = null;
+                foreach (Type pluginType in pluginAssembly.GetTypes())
+                {
+                    if (pluginType.IsPublic) //Only look at public types
+                    {
+                        if (!pluginType.IsAbstract)  //Only look at non-abstract types
+                        {
+                            //Make sure the interface we want to use actually exists
+                            if (typeof(IBasePlugin).IsAssignableFrom(pluginType))
+                            {
+                                availablePlugin = (IBasePlugin)Activator.CreateInstance(pluginType);
+
+                                // Did we load this dll before? If so skip it
+                                if (IsPluginLoaded(availablePlugin))
+                                    continue;
+
+                                if (typeof(INetwork).IsInstanceOfType(availablePlugin))
+                                    ((INetwork)availablePlugin).OnWirelessEvent += theHost.raiseWirelessEvent;
+                                if (typeof(IBluetooth).IsInstanceOfType(availablePlugin))
+                                    ((IBluetooth)availablePlugin).OnWirelessEvent += theHost.raiseWirelessEvent;
+                                pluginCollection.Add(availablePlugin);
+                            }
                         }
                     }
                 }
+                return availablePlugin;
             }
-            return availablePlugin;
+            catch
+            {
+                BuiltInComponents.Host.DebugMsg( DebugMessageType.Error, String.Format("Unable to load file: {0}", file));
+            }
+            return null;
         }
 
         static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
@@ -307,7 +320,7 @@ namespace OpenMobile
         /// <summary>
         /// Order to of types to try to load the plugins by
         /// </summary>
-        private static Type[] pluginTypes = new Type[] {  typeof(IRawHardware), typeof(IDataProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther)};
+        private static Type[] pluginTypes = new Type[] { typeof(IRawHardware), typeof(IDataSource), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin) };
         public static eLoadStatus[] status;
         /// <summary>
         /// Initialize each of the plugins in the plugin's array (pluginCollection)

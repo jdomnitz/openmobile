@@ -74,6 +74,12 @@ namespace BatterySupport
         {
             get { return "Battery Support"; }
         }
+
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("AIcons|10-device-access-battery"); }
+        }
+
         public bool incomingMessage(string message, string source)
         {
             return false;

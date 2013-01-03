@@ -179,8 +179,8 @@ namespace Networking
                         theHost.execute(eFunction.disconnectFromInternet, list.SelectedItem.tag.ToString());
                         return;
                     case "Scan":
-                        using (PluginSettings settings = new PluginSettings())
-                            theHost.execute(eFunction.refreshData, settings.getSetting("Default.Wifi"));
+                        //using (PluginSettings settings = new PluginSettings())
+                        //    theHost.execute(eFunction.refreshData, settings.getSetting("Default.Wifi"));
                         UpdateList();
                         return;
                 }
@@ -189,7 +189,7 @@ namespace Networking
             {
                 if (((OMButton)sender).Text == "Scan")
                 {
-                    theHost.execute(eFunction.refreshData, "WinWifi");
+                    //theHost.execute(eFunction.refreshData, "WinWifi");
                     UpdateList();
                 }
             }
@@ -361,6 +361,11 @@ namespace Networking
         public string pluginDescription
         {
             get { return "Networking"; }
+        }
+
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-Network"); }
         }
 
         public bool incomingMessage(string message, string source)

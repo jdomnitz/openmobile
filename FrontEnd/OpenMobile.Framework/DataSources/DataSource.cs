@@ -18,7 +18,6 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 
-    Copyright 2011-2012 Jonathan Heizer jheizer@gmail.com
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
@@ -55,22 +54,18 @@ namespace OpenMobile.Data
     /// <param name="sensor"></param>
     public delegate void DataSourceChangedDelegate(DataSource sensor);
 
+    /// <summary>
+    /// A delegate for manually setting a datasource
+    /// </summary>
+    /// <param name="value"></param>
+    public delegate void DataSourceManualUpdateDelegate(object value);
+
 
     /// <summary>
     /// Data source
     /// </summary>
-    public class DataSource
+    public class DataSource : DataNameBase
     {
-        /// <summary>
-        /// The separator character used for a provider
-        /// </summary>
-        public static string ProviderSeparator = @";";
-
-        /// <summary>
-        /// The separator character used for type, category and name
-        /// </summary>
-        public static string Separator = @".";
-
         /// <summary>
         /// Event is raised when the data in the datasource changes
         /// </summary>
@@ -80,7 +75,7 @@ namespace OpenMobile.Data
             {
                 // Check if data is too old
                 if (IsValueOld())
-                    RefreshValue(null, true);
+                    RefreshValue(null, true, false);
 
                 //Raise the connected event to ensure the newly connected event is updated
                 value(this);
@@ -94,11 +89,22 @@ namespace OpenMobile.Data
         }
         private event DataSourceChangedDelegate _OnDataSourceChanged;
 
-        private void Raise_OnDataSourceChanged()
+        private void Raise_OnDataSourceChanged(bool spawn)
         {
             DataSourceChangedDelegate handler = _OnDataSourceChanged;
             if (handler != null)
-                handler(this);
+            {
+                if (spawn)
+                {
+                    // Spawn new thread for event update
+                    OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+                    {
+                        handler(this);
+                    });
+                }
+                else
+                    handler(this);
+            }
         }
 
         #region Properties
@@ -123,16 +129,27 @@ namespace OpenMobile.Data
         private bool _Valid;
 
         /// <summary>
-        /// The full name of this DataSource (Provider.Category.Name)
+        /// Is someone subscribing to this data
+        /// </summary>
+        public bool IsSubcribed
+        {
+            get
+            {
+                return _OnDataSourceChanged != null;
+            }
+        }
+
+        /// <summary>
+        /// The full name of this DataSource (Provider;Level1.Level2.Level3)
         /// </summary>
         public string FullName
         {
             get
             {
-                if (String.IsNullOrEmpty(_Name))
-                    return String.Format("{0}{1}{2}", _Type, Separator, _Category);
+                if (String.IsNullOrEmpty(_NameLevel3))
+                    return String.Format("{0}{1}{2}", _NameLevel1, Separator, _NameLevel2);
                 else
-                    return String.Format("{0}{1}{2}{3}{4}", _Type, Separator, _Category, Separator, _Name);
+                    return String.Format("{0}{1}{2}{3}{4}", _NameLevel1, Separator, _NameLevel2, Separator, _NameLevel3);
             }
         }
 
@@ -145,7 +162,7 @@ namespace OpenMobile.Data
             {
                 // Check if data is too old
                 if (IsValueOld())
-                    RefreshValue(null, true);
+                    RefreshValue(null, true, false);
 
                 return this._Value;
             }
@@ -155,7 +172,7 @@ namespace OpenMobile.Data
                 {
                     if (this._Value != value)
                     {
-                        RefreshValue(value, false);
+                        RefreshValue(value, false, false);
                     }
                 }
             }
@@ -242,7 +259,11 @@ namespace OpenMobile.Data
             /// <summary>
             /// OMImage
             /// </summary>
-            image
+            image,
+            /// <summary>
+            /// Plain text
+            /// </summary>
+            text
         }
 
         /// <summary>
@@ -301,87 +322,6 @@ namespace OpenMobile.Data
             }
         }
         private AccessTypes _AccessType = AccessTypes.Both;
-
-        /// <summary>
-        /// The Provider of this DataSource (usually plugin name, OM for data provided by OpenMobile framework)
-        /// </summary>
-        [System.ComponentModel.Browsable(false)]
-        public string Provider
-        {
-            get
-            {
-                return this._Provider;
-            }
-            internal set
-            {
-                if (this._Provider != value)
-                {
-                    this._Provider = value;
-                }
-            }
-        }
-        private string _Provider;
-
-        /// <summary>
-        /// The main type of this DataSource (System for OM provided data, could be weather for weather data)
-        /// </summary>
-        [System.ComponentModel.Browsable(false)]
-        public string Type
-        {
-            get
-            {
-                return this._Type;
-            }
-            internal set
-            {
-                if (this._Type != value)
-                {
-                    this._Type = value;
-                }
-            }
-        }
-        private string _Type;
-
-        /// <summary>
-        /// The category for this DataSource
-        /// </summary>
-        [System.ComponentModel.Browsable(false)]
-        public string Category
-        {
-            get
-            {
-                return this._Category;
-            }
-            internal set
-            {
-                if (this._Category != value)
-                {
-                    this._Category = value;
-                }
-            }
-        }
-        private string _Category;
-
-        /// <summary>
-        /// The name of this DataSource
-        /// </summary>
-        [System.ComponentModel.Browsable(false)]
-        public string Name
-        {
-            get
-            {
-                return this._Name;
-            }
-            internal set
-            {
-                if (this._Name != value)
-                {
-                    this._Name = value;
-                }
-            }
-        }
-        private string _Name;
-
 
         /// <summary>
         /// The pollrate for this DataSource in milliseconds
@@ -488,92 +428,175 @@ namespace OpenMobile.Data
         /// Creates a new DataSource object
         /// </summary>
         /// <param name="provider"></param>
-        /// <param name="type"></param>
-        /// <param name="category"></param>
-        /// <param name="name"></param>
-        /// <param name="pollRate"></param>
-        /// <param name="accessType"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
         /// <param name="dataType"></param>
-        /// <param name="setter"></param>
-        /// <param name="getter"></param>
-        public DataSource(string provider, string type, string category, string name, int pollRate, AccessTypes accessType, DataTypes dataType, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
+        /// <param name="description"></param>
+        public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, 0, dataType, null, description)
         {
-            this._Provider = provider;
-            this._Type = type;
-            this._Category = category;
-            this._Name = name;
-            this._PollRate = pollRate;
-            this._Setter = setter;
-            this._Getter = getter;
-            this._AccessType = accessType;
-            this._DataType = dataType;
         }
 
         /// <summary>
         /// Creates a new DataSource object
         /// </summary>
-        /// <param name="owner"></param>
-        /// <param name="category"></param>
-        /// <param name="name"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
         /// <param name="pollRate"></param>
         /// <param name="dataType"></param>
-        /// <param name="setter"></param>
         /// <param name="getter"></param>
-        public DataSource(string provider, string type, string category, string name, int pollRate, DataTypes dataType, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
+        public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceGetDelegate getter, string description)
         {
             this._Provider = provider;
-            this._Type = type;
-            this._Category = category;
-            this._Name = name;
+            this._NameLevel1 = nameLevel1;
+            this._NameLevel2 = nameLevel2;
+            this._NameLevel3 = nameLevel3;
             this._PollRate = pollRate;
-            this._Setter = setter;
+            this._Setter = null;
             this._Getter = getter;
+            this._AccessType =  AccessTypes.Read;
             this._DataType = dataType;
-            this._AccessType = AccessTypes.Read;
+            this._Description = description;
         }
-        /// <summary>
-        /// Creates a new DataSource object
-        /// </summary>
-        /// <param name="owner"></param>
-        /// <param name="category"></param>
-        /// <param name="name"></param>
-        /// <param name="pollRate"></param>
-        /// <param name="setter"></param>
-        /// <param name="getter"></param>
-        public DataSource(string provider, string type, string category, string name, int pollRate, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
-        {
-            this._Provider = provider;
-            this._Type = type;
-            this._Category = category;
-            this._Name = name;
-            this._PollRate = pollRate;
-            this._Setter = setter;
-            this._Getter = getter;
-            this._DataType = DataTypes.raw;
-            this._AccessType = AccessTypes.Read;
-        }
-        /// <summary>
-        /// Creates a new DataSource object
-        /// </summary>
-        /// <param name="owner"></param>
-        /// <param name="category"></param>
-        /// <param name="name"></param>
-        /// <param name="setter"></param>
-        /// <param name="getter"></param>
-        public DataSource(string provider, string type, string category, string name, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
-        {
-            this._Provider = provider;
-            this._Type = type;
-            this._Category = category;
-            this._Name = name;
-            this._PollRate = 0;
-            this._Setter = setter;
-            this._Getter = getter;
-            this._DataType = DataTypes.raw;
-            this._AccessType = AccessTypes.Read;
-        }
+
+
+        ///// <summary>
+        ///// Creates a new DataSource object
+        ///// </summary>
+        ///// <param name="provider"></param>
+        ///// <param name="nameLevel1"></param>
+        ///// <param name="nameLevel2"></param>
+        ///// <param name="nameLevel3"></param>
+        ///// <param name="pollRate"></param>
+        ///// <param name="accessType"></param>
+        ///// <param name="dataType"></param>
+        ///// <param name="setter"></param>
+        ///// <param name="getter"></param>
+        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, AccessTypes accessType, DataTypes dataType, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
+        //{
+        //    this._Provider = provider;
+        //    this._NameLevel1 = nameLevel1;
+        //    this._NameLevel2 = nameLevel2;
+        //    this._NameLevel3 = nameLevel3;
+        //    this._PollRate = pollRate;
+        //    this._Setter = setter;
+        //    this._Getter = getter;
+        //    this._AccessType = accessType;
+        //    this._DataType = dataType;
+        //}
+
+        ///// <summary>
+        ///// Creates a new DataSource object
+        ///// </summary>
+        ///// <param name="provider"></param>
+        ///// <param name="nameLevel1"></param>
+        ///// <param name="nameLevel2"></param>
+        ///// <param name="nameLevel3"></param>
+        ///// <param name="pollRate"></param>
+        ///// <param name="accessType"></param>
+        ///// <param name="dataType"></param>
+        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType)
+        //{
+        //    this._Provider = provider;
+        //    this._NameLevel1 = nameLevel1;
+        //    this._NameLevel2 = nameLevel2;
+        //    this._NameLevel3 = nameLevel3;
+        //    this._PollRate = 0;
+        //    this._Setter = null;
+        //    this._Getter = null;
+        //    this._AccessType = AccessTypes.Read;
+        //    this._DataType = dataType;
+        //}
+
+        ///// <summary>
+        ///// Creates a new DataSource object
+        ///// </summary>
+        ///// <param name="provider"></param>
+        ///// <param name="nameLevel1"></param>
+        ///// <param name="nameLevel2"></param>
+        ///// <param name="nameLevel3"></param>
+        ///// <param name="pollRate"></param>
+        ///// <param name="dataType"></param>
+        ///// <param name="setter"></param>
+        ///// <param name="getter"></param>
+        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
+        //{
+        //    this._Provider = provider;
+        //    this._NameLevel1 = nameLevel1;
+        //    this._NameLevel2 = nameLevel2;
+        //    this._NameLevel3 = nameLevel3;
+        //    this._PollRate = pollRate;
+        //    this._Setter = setter;
+        //    this._Getter = getter;
+        //    this._DataType = dataType;
+        //    this._AccessType = AccessTypes.Read;
+        //}
+        ///// <summary>
+        ///// Creates a new DataSource object
+        ///// </summary>
+        ///// <param name="provider"></param>
+        ///// <param name="nameLevel1"></param>
+        ///// <param name="nameLevel2"></param>
+        ///// <param name="nameLevel3"></param>
+        ///// <param name="pollRate"></param>
+        ///// <param name="dataType"></param>
+        ///// <param name="setter"></param>
+        ///// <param name="getter"></param>
+        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceSetDelegate setter, DataSourceGetDelegate getter, out DataSourceManualUpdateDelegate manual)
+        //    : this(provider, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, setter, getter)
+        //{
+        //    manual = new DataSourceManualUpdateDelegate(manualSetterMethod);
+        //}
+        ///// <summary>
+        ///// Creates a new DataSource object
+        ///// </summary>
+        ///// <param name="provider"></param>
+        ///// <param name="nameLevel1"></param>
+        ///// <param name="nameLevel2"></param>
+        ///// <param name="nameLevel3"></param>
+        ///// <param name="pollRate"></param>
+        ///// <param name="setter"></param>
+        ///// <param name="getter"></param>
+        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
+        //{
+        //    this._Provider = provider;
+        //    this._NameLevel1 = nameLevel1;
+        //    this._NameLevel2 = nameLevel2;
+        //    this._NameLevel3 = nameLevel3;
+        //    this._PollRate = pollRate;
+        //    this._Setter = setter;
+        //    this._Getter = getter;
+        //    this._DataType = DataTypes.raw;
+        //    this._AccessType = AccessTypes.Read;
+        //}
+        ///// <summary>
+        ///// Creates a new DataSource object
+        ///// </summary>
+        ///// <param name="provider"></param>
+        ///// <param name="nameLevel1"></param>
+        ///// <param name="nameLevel2"></param>
+        ///// <param name="nameLevel3"></param>
+        ///// <param name="setter"></param>
+        ///// <param name="getter"></param>
+        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
+        //{
+        //    this._Provider = provider;
+        //    this._NameLevel1 = nameLevel1;
+        //    this._NameLevel2 = nameLevel2;
+        //    this._NameLevel3 = nameLevel3;
+        //    this._PollRate = 0;
+        //    this._Setter = setter;
+        //    this._Getter = getter;
+        //    this._DataType = DataTypes.raw;
+        //    this._AccessType = AccessTypes.Read;
+        //}
 
         #endregion
+
+        #region value and polling
 
         /// <summary>
         /// Is the current value to old and need an update?
@@ -581,6 +604,10 @@ namespace OpenMobile.Data
         /// <returns></returns>
         internal bool IsValueOld()
         {
+            // No poll if no pollrate is specified
+            if (PollRate == 0)
+                return false;
+            
             // Get MS since last update
             double MSSinceLastUpdate = (DateTime.Now - _Timestamp).TotalMilliseconds;
             return MSSinceLastUpdate > _PollRate;
@@ -592,6 +619,10 @@ namespace OpenMobile.Data
         /// <returns></returns>
         internal bool IsPollRequired()
         {
+            // No poll if no pollrate is specified
+            if (PollRate == 0)
+                return false;
+
             if (_OnDataSourceChanged == null)
                 return false;
             return IsValueOld();
@@ -601,30 +632,48 @@ namespace OpenMobile.Data
         /// Refreshes the current value with data from the getter
         /// </summary>
         /// <param name="value"></param>
-        /// <param name="UseGetter"></param>
+        /// <param name="useGetter"></param>
         /// <returns></returns>
-        internal bool RefreshValue(object value, bool UseGetter)
+        internal bool RefreshValue(object value, bool useGetter, bool spawn)
         {
             try
             {
                 _Valid = false;
-                if (UseGetter)
+                bool Changed = false;
+                
+                // Don't use getter if it's not present
+                if (_Getter == null)
+                    useGetter = false;
+
+                if (useGetter)
                 {
-                    object newValue = Getter(this, out _Valid, null);
-                    if (_Valid)
-                        _Value = newValue;
+                    if (_Getter != null)
+                    {
+                        object newValue = _Getter(this, out _Valid, null);
+                        if (_Valid)
+                            if (!newValue.Equals(_Value))
+                            {
+                                _Value = newValue;
+                                Changed = false;
+                            }
+                    }
                 }
                 else
                 {
-                    _Value = value;
+                    _Valid = true;
+                    if (!value.Equals(_Value))
+                    {
+                        _Value = value;
+                        Changed = true;
+                    }
                 }
 
                 // update timestamp to block this source from being polled to often even if the result is invalid
                 _Timestamp = DateTime.Now;
                 
                 // Trigg event if result is valid
-                if (_Valid)
-                    Raise_OnDataSourceChanged();
+                if (_Valid && Changed)
+                    Raise_OnDataSourceChanged(spawn);
 
                 return _Valid;
             }
@@ -653,13 +702,33 @@ namespace OpenMobile.Data
         }
 
         /// <summary>
+        /// Manually sets the value of a datasource WITHOUT passing the set value on to the datasource
+        /// <para>This is provided as a way for datasources to manually update it's value. Use DataSource.Value to access it via "Setter" and "Getter"</para>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool SetValue(object value)
+        {
+            return RefreshValue(value, false, true);
+        }
+
+        private void manualSetterMethod(object value)
+        {
+            RefreshValue(value, false, true);
+        }
+
+        #endregion
+
+        /// <summary>
         /// Get's a string representing this object
         /// </summary>
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0} [{1}({2})]", this.FullName, (this.Value == null ? "" : this.Value), this.FormatedValue);
+            return string.Format("{0} [{1}({2})]", this.FullName, (this.Value == null ? String.Empty : this.Value), this.FormatedValue);
         }
+
+        #region Formatted value
 
         /// <summary>
         /// Format the sensor value to a pretty string
@@ -674,7 +743,7 @@ namespace OpenMobile.Data
 
             // Null check
             if (val == null)
-                return "";
+                return String.Empty;
 
             switch (dataSource.DataType)
             {
@@ -682,7 +751,7 @@ namespace OpenMobile.Data
                     return val + "A";
 
                 case DataTypes.binary:
-                    if (val.ToString() == "1")
+                    if (val.ToString() == "1" || (val is bool && (bool)val == true))
                     {
                         return "On";
                     }
@@ -770,5 +839,7 @@ namespace OpenMobile.Data
         {
             return GetFormatedValue(dataSource, dataSource.Value);
         }
+
+        #endregion
     }
 }

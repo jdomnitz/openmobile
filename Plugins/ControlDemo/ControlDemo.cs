@@ -317,6 +317,7 @@ namespace ControlDemo
             p.Entering += new PanelEvent(p_Entering);
             p.Leaving += new PanelEvent(p_Leaving);
             manager.loadPanel(p, true);
+
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -361,13 +362,13 @@ namespace ControlDemo
             //OSK osk = new OSK("", "password", "Please input password now", OSKInputTypes.Keypad, true);
             //string Result = osk.ShowOSK(screen);
             string Result = OSK.ShowDefaultOSK(screen, "", "password", "Please input password now", OSKInputTypes.Keypad, true);
-            theHost.SendStatusData(screen, eDataType.PopUp, this, String.Format("OSK result: {0}", Result));
+            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("OSK result: {0}", Result)));
         }
 
         void btnPopupMenu_OnClick(OMControl sender, int screen)
         {
             int Selection = (int)PopupMenu.ShowMenu(screen);
-            theHost.SendStatusData(screen, eDataType.PopUp, this, String.Format("PopupMenu selection: {0}", Selection));
+            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("PopupMenu selection: {0}", Selection)));
         }
 
         bool btnSelected = false;
@@ -376,7 +377,7 @@ namespace ControlDemo
             //OSK osk = new OSK("", "Type something", "Please input something now", (OSKInputTypes)sender.Tag, false);
             //string Result = osk.ShowOSK(screen);
             string Result = OSK.ShowDefaultOSK(screen, "", "Type something", "Please input something now", (OSKInputTypes)sender.Tag, false);
-            theHost.SendStatusData(screen, eDataType.PopUp, this, String.Format("OSK result: {0}", Result));
+            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("OSK result: {0}", Result)));
         }
 
         void List1_SelectedIndexChanged(OMList sender, int screen)
@@ -396,12 +397,12 @@ namespace ControlDemo
 
         void p_Leaving(OMPanel sender, int screen)
         {
-            theHost.SendStatusData(screen, eDataType.Info, this, String.Format("Leaving panel: {0}", sender.Name));
+            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("Leaving panel: {0}", sender.Name)));
         }
 
         void p_Entering(OMPanel sender, int screen)
         {
-            theHost.SendStatusData(screen, eDataType.Info, this, String.Format("Entering panel: {0}", sender.Name));
+            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("Entering panel: {0}", sender.Name)));
 
             // Createa a buttonstrip
             ButtonStrip PopUpMenuStrip = new ButtonStrip(sender.OwnerPlugin.pluginName, sender.Name, "PopUpMenuStrip");
@@ -432,8 +433,7 @@ namespace ControlDemo
             dialog.Button = OpenMobile.helperFunctions.Forms.buttons.Yes |
                                 OpenMobile.helperFunctions.Forms.buttons.No;
 
-            theHost.SendStatusData(screen, eDataType.PopUp, this, String.Format("MsgBox result: {0}", dialog.ShowMsgBox(screen)));
-
+            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("MsgBox result: {0}", dialog.ShowMsgBox(screen))));          
         }
 
         void t_Elapsed(object sender, ElapsedEventArgs e)
@@ -487,6 +487,11 @@ namespace ControlDemo
         public string pluginDescription
         {
             get { return "Demonstrate inter-panel transitions and the larger control set"; }
+        }
+
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-OM"); }
         }
 
         public bool incomingMessage(string message, string source)

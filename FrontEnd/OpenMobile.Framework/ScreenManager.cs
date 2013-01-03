@@ -180,13 +180,13 @@ namespace OpenMobile.Framework
                 for (int i = 0; i < screens; i++)
                     if (i == screens - 1)
                     {
-                        collection[i] = source.Clone();
+                        collection[i] = source.Clone(i);
                         collection[i].Manager = this;
                         collection[i].ActiveScreen = i;
                     }
                     else
                     {
-                        collection[i] = source.Clone();
+                        collection[i] = source.Clone(i);
                         collection[i].Manager = this;
                         collection[i].ActiveScreen = i;
                     }

@@ -99,6 +99,11 @@ namespace OpenMobile
             get { return "An English On Screen Keyboard"; }
         }
 
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-OM"); }
+        }
+
         public bool incomingMessage(string message, string source)
         {
             throw new NotImplementedException();

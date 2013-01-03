@@ -20,12 +20,13 @@
 *********************************************************************************/
 
 using System;
+using OpenMobile.Graphics;
 namespace OpenMobile.Plugin
 {
     /// <summary>
     /// The plugin base interface
     /// </summary>
-    public interface IBasePlugin:IDisposable
+    public interface IBasePlugin : IDisposable
     {
         /// <summary>
         /// Initialize controls and get everything ready
@@ -59,6 +60,11 @@ namespace OpenMobile.Plugin
         /// Description of the plugin
         /// </summary>
         string pluginDescription { get; }
+        /// <inheritdoc/>
+        /// <summary>
+        /// The icon for this plugin
+        /// </summary>
+        imageItem pluginIcon { get; }
         /// <summary>
         /// Interprocess messages
         /// </summary>

@@ -118,9 +118,10 @@ namespace OpenMobile.Controls
         /// Create a deep copy of the control
         /// </summary>
         /// <returns></returns>
-        public override object Clone()
+        public override object Clone(OMPanel parent)
         {
             OMAnimatedLabel l = (OMAnimatedLabel)this.MemberwiseClone();
+            l.parent = parent;
             l.init();
             l.TickSpeed = this.TickSpeed;
             return l;

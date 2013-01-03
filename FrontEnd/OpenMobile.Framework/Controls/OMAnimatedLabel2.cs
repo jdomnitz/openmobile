@@ -455,7 +455,7 @@ namespace OpenMobile.Controls
                             // Animation runs until it's canceled or changed 
                             #region Scroll Left
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -564,7 +564,7 @@ namespace OpenMobile.Controls
 
                             #region Scroll Right
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -610,7 +610,7 @@ namespace OpenMobile.Controls
                             if (EndPos > left)
                                 EndPos = left;
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -685,7 +685,7 @@ namespace OpenMobile.Controls
                             // Animation runs until it's canceled or changed 
                             #region UnveilRight
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -761,7 +761,7 @@ namespace OpenMobile.Controls
                             // Animation runs until it's canceled or changed 
                             #region SlideUp
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -841,7 +841,7 @@ namespace OpenMobile.Controls
                             // Animation runs until it's canceled or changed 
                             #region SlideDown
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -921,7 +921,7 @@ namespace OpenMobile.Controls
                             // Animation runs until it's canceled or changed 
                             #region SlideRight
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -1007,7 +1007,7 @@ namespace OpenMobile.Controls
                             // Animation runs until it's canceled or changed 
                             #region SlideLeft
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -1093,7 +1093,7 @@ namespace OpenMobile.Controls
 
                             #region CrossFade
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -1162,7 +1162,7 @@ namespace OpenMobile.Controls
 
                             float ScaleEndValue = 5.0f;
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -1312,7 +1312,7 @@ namespace OpenMobile.Controls
 
                             bool FadeIn = true;
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -1377,7 +1377,7 @@ namespace OpenMobile.Controls
 
                             bool FadeOut = true;
 
-                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                             {
                                 // Cancel animation
                                 if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
@@ -1895,9 +1895,10 @@ namespace OpenMobile.Controls
 
         #region ICloneable Members
 
-        public override object Clone()
+        public override object Clone(OMPanel parent)
         {
             OMAnimatedLabel2 newObject = (OMAnimatedLabel2)this.MemberwiseClone();
+            newObject.parent = parent;
             //OMContainer newObject = (OMContainer)base.Clone();
             newObject._RenderObjects = new List<RenderData>();
             foreach (RenderData rd in _RenderObjects)

@@ -20,9 +20,9 @@
 *********************************************************************************/
 using System.Collections.Generic;
 using OpenMobile.Graphics;
+using OpenMobile.helperFunctions.Graphics;
 using System;
 using OpenMobile.Input;
-using OpenMobile.helperFunctions.Graphics;
 
 namespace OpenMobile.Controls
 {
@@ -32,6 +32,7 @@ namespace OpenMobile.Controls
     [System.Serializable]
     public class OMContainer : OMControlGraphicsBase, IContainer2, IHighlightable, IThrow, IKey
     {
+        /*
         /// <summary>
         /// A collection of controls for usage in the OMContainer control
         /// </summary>
@@ -98,9 +99,7 @@ namespace OpenMobile.Controls
                 }
             }
 
-            public Directions  PlacementDirection { get; set; }
-
-            public bool PlacementRelative { get; set; }
+            public ControlDirections  PlacementDirection { get; set; }
 
             public string Key { get; set; }
 
@@ -111,9 +110,9 @@ namespace OpenMobile.Controls
                     newCG.Add((OMControl)control.Clone());
                return newCG;
             }
-
         }
-        
+        */
+
         /// <summary>
         /// The currently loaded controls
         /// </summary>
@@ -850,13 +849,19 @@ namespace OpenMobile.Controls
         public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
         {
             base.RenderBegin(g, e);
-
-            RenderLocal_Init(g, e);
-            RenderLocal_Background(g, e);
-            RenderLocal_Controls(g, e);
-            RenderLocal_SoftEdges(g, e);
-            RenderLocal_Scrollbars(g, e);
-            RenderLocal_ScrollPoints(g, e);
+            try
+            {
+                RenderLocal_Init(g, e);
+                RenderLocal_Background(g, e);
+                RenderLocal_Controls(g, e);
+                RenderLocal_SoftEdges(g, e);
+                RenderLocal_Scrollbars(g, e);
+                RenderLocal_ScrollPoints(g, e);
+            }
+            // We have to catch index errors as we can't lock the control list while rendering since that would block adding controls to the control most of the time
+            catch (ArgumentOutOfRangeException)
+            {
+            }
 
             base.RenderFinish(g, e);
         }
@@ -1015,7 +1020,7 @@ namespace OpenMobile.Controls
 
                         Animation.Speed = 1f * animationSpeed;
                         float AnimationValue = 0;
-                        Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                        Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                         {
                             // Cancel animation
                             if (Distance_Current.IsEmpty)
@@ -1230,7 +1235,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public bool addControl(OMControl control, bool Relative)
         {
-            return addControl(new ControlGroup(control), Relative, Directions.None);
+            return addControl(new ControlGroup(control), Relative, ControlDirections.None);
         }
         /// <summary>
         /// Adds a control to this container
@@ -1238,7 +1243,7 @@ namespace OpenMobile.Controls
         /// <param name="control"></param>
         /// <param name="direction">The direction to add the new controlgroup</param>
         /// <returns></returns>
-        public bool addControl(OMControl control, Directions direction)
+        public bool addControl(OMControl control, ControlDirections direction)
         {
             return addControl(new ControlGroup(control), false, direction);
         }
@@ -1251,7 +1256,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public bool addControl(ControlGroup cg, bool Relative)
         {
-            return addControl(cg, Relative, Directions.None);
+            return addControl(cg, Relative, ControlDirections.None);
         }
 
         /// <summary>
@@ -1260,7 +1265,7 @@ namespace OpenMobile.Controls
         /// <param name="cg"></param>
         /// <param name="direction">The direction to add the new controlgroup</param>
         /// <returns></returns>
-        public bool addControl(ControlGroup cg, Directions direction)
+        public bool addControl(ControlGroup cg, ControlDirections direction)
         {
             return addControl(cg, false, direction);
         }
@@ -1271,16 +1276,15 @@ namespace OpenMobile.Controls
         /// <param name="cg"></param>
         /// <param name="Relative">Indicates that the placement of this control is releative to the container</param>
         /// <returns></returns>
-        public bool addControl(ControlGroup cg, bool relative, Directions direction)
+        public bool addControl(ControlGroup cg, bool relative, ControlDirections direction)
         {
             if (cg == null)
                 return false;
 
             // Configure direction data
             cg.PlacementDirection = direction;
-            cg.PlacementRelative = relative;
 
-            if (direction == Directions.CenterLR)
+            if (direction == ControlDirections.CenterHorizontally)
                 _NoOffsetOnNextRender = true;
 
             // Add control
@@ -1305,16 +1309,15 @@ namespace OpenMobile.Controls
         /// <param name="Relative">Indicates that the placement of this control is releative to the container</param>
         /// <param name="direction"></param>
         /// <returns></returns>
-        public bool addControl(int index, ControlGroup cg, bool relative, Directions direction)
+        public bool addControl(int index, ControlGroup cg, bool relative, ControlDirections direction)
         {
             if (cg == null)
                 return false;
 
             // Configure direction data
             cg.PlacementDirection = direction;
-            cg.PlacementRelative = relative;
 
-            if (direction == Directions.CenterLR)
+            if (direction == ControlDirections.CenterHorizontally)
                 _NoOffsetOnNextRender = true;
 
             // Add control
@@ -1431,6 +1434,8 @@ namespace OpenMobile.Controls
         {
             // Get index
             int index = _Controls.IndexOf(cg);
+            if (index == -1)
+                return false;
 
             // Remove control
             bool result = _Controls.Remove(cg);
@@ -1451,20 +1456,7 @@ namespace OpenMobile.Controls
             return result;
         }
 
-        /// <summary>
-        /// Directions to use when adding items
-        /// </summary>
-        public enum Directions
-        {
-            None,
-            Down = 1,
-            Up = -1,
-            Right = 2,
-            Left = -2,
-            CenterLR = 3
-        }
-
-        protected virtual void Control_SetPlacement(ControlGroup ControlToPlace, Directions direction, ControlGroup ControlToInsert, ControlGroup ControlToRemove)
+        protected virtual void Control_SetPlacement(ControlGroup ControlToPlace, ControlDirections direction, ControlGroup ControlToInsert, ControlGroup ControlToRemove)
         {
             // Note about coordinates: ControlToPlace will always be relative, 
             //                         ControlToInsert will always be absolute
@@ -1478,11 +1470,11 @@ namespace OpenMobile.Controls
 
             // Swap direction if we're removing a control
             if (ControlToRemove != null)
-                direction = (Directions)(-((int)direction));
+                direction = (ControlDirections)(-((int)direction));
 
             switch (direction)
             {
-                case Directions.None:
+                case ControlDirections.None:
                     {
                         // Place controls from relative to absolute
                         foreach (OMControl control in ControlToPlace)
@@ -1493,12 +1485,12 @@ namespace OpenMobile.Controls
                         }
                     }
                     break;
-                case Directions.CenterLR:
+                case ControlDirections.CenterHorizontally:
                     {   // Center all controls (this means that we have to reposition all controls for each control being added or removed)
 
                         // Place control to add
                         if (ControlToInsert == null && ControlToRemove == null)
-                            Control_SetPlacement(ControlToPlace, Directions.Right, ControlToInsert, ControlToRemove);
+                            Control_SetPlacement(ControlToPlace, ControlDirections.Right, ControlToInsert, ControlToRemove);
 
                         // Get center position of current items
                         int CenterMissmatch = this.Region.Center.X - this.GetControlsArea().Center.X;
@@ -1514,7 +1506,7 @@ namespace OpenMobile.Controls
                         
                     }
                     break;
-                case Directions.Down:
+                case ControlDirections.Down:
                     {
                         if (ControlToInsert == null && ControlToRemove == null)
                         {   // A new control is being added; move control relative
@@ -1552,7 +1544,7 @@ namespace OpenMobile.Controls
                         }
                     }
                     break;
-                case Directions.Up:
+                case ControlDirections.Up:
                     {
                         if (ControlToInsert == null && ControlToRemove == null)
                         {   // A new control is being added; move control relative
@@ -1590,7 +1582,7 @@ namespace OpenMobile.Controls
                         }
                     }
                     break;
-                case Directions.Right:
+                case ControlDirections.Right:
                     {
                         if (ControlToInsert == null && ControlToRemove == null)
                         {   // A new control is being added; move control relative
@@ -1628,7 +1620,7 @@ namespace OpenMobile.Controls
                         }
                     }
                     break;
-                case Directions.Left:
+                case ControlDirections.Left:
                     {
                         if (ControlToInsert == null && ControlToRemove == null)
                         {   // A new control is being added; move control relative
@@ -1846,9 +1838,10 @@ namespace OpenMobile.Controls
 
         #region ICloneable Members
 
-        public override object Clone()
+        public override object Clone(OMPanel parent)
         {
             OMContainer newObject = (OMContainer)this.MemberwiseClone();
+            newObject.parent = parent;
             //OMContainer newObject = (OMContainer)base.Clone();
             newObject._Controls = new List<ControlGroup>();
             foreach (ControlGroup cg in _Controls)

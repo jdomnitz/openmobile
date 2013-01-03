@@ -43,8 +43,9 @@ namespace OMSettings
         static MenuPopup ZoneMenu;
         static MenuPopup ZoneDetail_ScreenList;
         static DialogPanel panelZonesDetail = null;
-
+        static ButtonStrip PopUpMenuStrip = null;
         static Zone TmpZone = null;
+        static OMPanel panelZones = null;
 
         public static void Initialize(string pluginName, ScreenManager manager, IPluginHost host)
         {
@@ -56,7 +57,10 @@ namespace OMSettings
 
             #region MainPanel
 
-            OMPanel panelZones = new OMPanel("Zones");
+            panelZones = new OMPanel("Zones");
+
+            // Change base point for placing controls as this panel was created with the old style UI
+            panelZones.BasePoint = new Point(Host.ClientArea[0].Left, Host.ClientArea[0].Top - (110 - Host.ClientArea[0].Top));
 
             OMLabel Label_PanelHeader = new OMLabel("Zones_Label_PanelHeader", 20, 105, 1000, 40);
             Label_PanelHeader.Text = "Configuration of zones";
@@ -91,6 +95,7 @@ namespace OMSettings
             panelZones.Entering += new PanelEvent(panelZones_Entering);
             panelZones.Leaving += new PanelEvent(panelZones_Leaving);
 
+            /*
             #region Bottom menu buttons
 
             // Calculate where to place the buttons based on amount of buttons needed
@@ -123,7 +128,7 @@ namespace OMSettings
             }
 
             #endregion
-
+            */
             Manager.loadPanel(panelZones);
 
             #endregion
@@ -287,6 +292,12 @@ namespace OMSettings
             ZoneDetail_ScreenList.AddMenuItem(ClearItem);
 
             #endregion
+
+            // Createa the buttonstrip popup
+            PopUpMenuStrip = new ButtonStrip(pluginName, panelZones.Name, "PopUpMenuStrip_Zones");
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ShowMenu", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-view-as-list"), "Show menu", false, List_Zones_OnHoldClick, null, null));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Activate", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|5-content-new"), "Activate", false, Button_BottomBar_Activate_OnClick, null, null));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Default", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|5-content-remove"), "Set defaults", false, Button_BottomBar_Restore_OnClick, null, null));
         }
 
         static void ZoneDetail_TextBox_AllowedScreens_OnClick(OMControl sender, int screen)
@@ -365,7 +376,7 @@ namespace OMSettings
                 txtName.Text = TmpZone.Name;
                 txtDescription.Text = TmpZone.Description;
                 txtScreen.Text = TmpZone.Screen.ToString();
-                txtAudioDevice.Text = TmpZone.AudioDeviceName;
+                txtAudioDevice.Text = TmpZone.AudioDevice.Name;
                 txtID.Text = TmpZone.ID.ToString();
                 txtAllowedScreens.Text = TmpZone.AllowedScreens;
 
@@ -385,7 +396,7 @@ namespace OMSettings
                 txtName.Text = String.Format("Zone{0}", Host.ZoneHandler.Zones.Count);
                 txtDescription.Text = "";
                 txtScreen.Text = "0"; //Default screen
-                txtAudioDevice.Text = Host.GetAudioDeviceDefaultName(); // Default audio device
+                txtAudioDevice.Text = Host.GetAudioDeviceDefault().Name; // Default audio device
                 txtSubZones.Text = "";
                 txtID.Text = "";
                 txtAllowedScreens.Text = "";
@@ -404,7 +415,7 @@ namespace OMSettings
             // Add items to the list (Excluding if already present in the sender textbox)
             for (int i = 0; i < Host.AudioDeviceCount; i++)
             {
-                string AudioDeviceName = Host.getAudioDeviceName(i);
+                string AudioDeviceName = Host.getAudioDevice(i).Name;
 
                 // Add item to list
                 OMListItem Item = new OMListItem(AudioDeviceName, AudioDeviceName as object);
@@ -556,8 +567,8 @@ namespace OMSettings
                 }
 
                 // Check for valid audio device
-                int AudioDeviceInstance = Host.getAudioDeviceInstance(txtAudioDevice.Text);
-                if (AudioDeviceInstance < 0)
+                AudioDevice AudioDevice = Host.getAudioDevice(txtAudioDevice.Text);
+                if (AudioDevice == null)
                 {
                     txtAudioDevice.BackgroundColor = Color.Red;
                     dialog dialogInfo = new OpenMobile.helperFunctions.Forms.dialog();
@@ -599,7 +610,7 @@ namespace OMSettings
 
                 if (TmpZone == null)
                 {   //let's create the new zone
-                    Zone NewZone = new Zone(txtName.Text, txtDescription.Text, ZoneScreen, AudioDeviceInstance);
+                    Zone NewZone = new Zone(txtName.Text, txtDescription.Text, ZoneScreen, AudioDevice);
                     if (!Host.ZoneHandler.Add(NewZone))
                     {
                         dialog dialogInfo = new OpenMobile.helperFunctions.Forms.dialog();
@@ -623,7 +634,7 @@ namespace OMSettings
                     TmpZone.Name = txtName.Text;
                     TmpZone.Description = txtDescription.Text;
                     TmpZone.Screen = ZoneScreen;
-                    TmpZone.AudioDeviceInstance = AudioDeviceInstance;
+                    TmpZone.AudioDevice = AudioDevice;
                     TmpZone.SubZones.Clear();
                     TmpZone.AllowedScreens = txtAllowedScreens.Text;
                     // Add any subzones to the zone
@@ -650,12 +661,15 @@ namespace OMSettings
 
         static void Button_BottomBar_Restore_OnClick(OMControl sender, int screen)
         {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
             RestoreZones(screen, true);
         }
 
         static void Button_BottomBar_Activate_OnClick(OMControl sender, int screen)
         {
-            OMList list = sender.Parent[screen, "List_Zones"] as OMList;
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
+
+            OMList list = panelZones[screen, "List_Zones"] as OMList;
             if (list.SelectedItem != null)
                 TmpZone = list.SelectedItem.tag as Zone;
             else
@@ -665,6 +679,8 @@ namespace OMSettings
 
         static void List_Zones_OnHoldClick(OMControl sender, int screen)
         {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
+            
             // Get sender object
             OMList list = sender.Parent[screen, "List_Zones"] as OMList;
 
@@ -816,6 +832,13 @@ namespace OMSettings
 
             // Update zone list
             ZoneList_Update(screen);
+
+            // Load the buttonstrip
+            Host.UIHandler.PopUpMenu.SetButtonStrip(screen, PopUpMenuStrip);
+
+
+            
+
         }
 
         static void panelZones_Leaving(OMPanel sender, int screen)

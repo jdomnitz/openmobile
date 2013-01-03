@@ -42,6 +42,7 @@ namespace OpenMobile.Zones
         /// </summary>
         public ZoneHandler()
         {
+            zone_OnVolumeChangedDelegate = new Zone.VolumeChangedDelegate(zone_OnVolumeChanged);
         }
 
         /// <summary>
@@ -73,12 +74,9 @@ namespace OpenMobile.Zones
         {
             return _Zones.FindAll(x => x.CanZoneBeActivated(screen));
         }
-
-
-        private int[] _ActiveZones = null;
-
+        
         /// <summary>
-        /// List of currently active zone id's (Array index is screen number)(Read only)
+        /// List of currently active zone id's per screen (Array index is screen number)(Read only)
         /// </summary>
         public int[] ActiveZones
         {
@@ -87,6 +85,7 @@ namespace OpenMobile.Zones
                 return _ActiveZones;
             }
         }
+        private int[] _ActiveZones = null;
 
         /// <summary>
         /// Gets a specific zone or the currently active zone for a screen
@@ -114,12 +113,13 @@ namespace OpenMobile.Zones
         /// <returns></returns>
         public Zone GetZoneByAudioDeviceInstance(int AudioDeviceInstance)
         {
-            return Zones.Find(x => x.AudioDeviceInstance == AudioDeviceInstance);
+            return Zones.Find(x => x.AudioDevice.Instance == AudioDeviceInstance);
         }
 
         /// <summary>
         /// A wrapper for executing code on each zone (can be used with anonymous delegates)
         /// </summary>
+        /// <param name="zone"></param>
         /// <param name="d">delegate</param>
         public bool ForEachZoneInZone(Zone zone, ForEachZoneDelegate d)
         {
@@ -131,12 +131,7 @@ namespace OpenMobile.Zones
             if (zone.SubZones.Count > 0)
             {   // Loop trough sub zones
                 for (int i = 0; i < zone.SubZones.Count; i++)
-                {
                     result = ForEachZoneInZone(GetZone(zone.SubZones[i]), d);
-                    //if (!d(GetZone(zone.SubZones[i])))
-                    //    result = false;
-                    //
-                }
             }
             else
             {   // No subzones available, use the original zone instead
@@ -181,20 +176,78 @@ namespace OpenMobile.Zones
         /// <returns>True = sucessfully set</returns>
         public bool SetActiveZone(int Screen, Zone zone)
         {
+            return _SetActiveZone_Internal(Screen, zone, false);
+        }
+
+        /// <summary>
+        /// Sets the active zone for a screen
+        /// </summary>
+        /// <param name="Screen"></param>
+        /// <param name="zone"></param>
+        /// <param name="force">forces the update even when this zone is already activated</param>
+        /// <returns>True = sucessfully set</returns>
+        private bool _SetActiveZone_Internal(int Screen, Zone zone, bool force)
+        {
             if ((Screen < 0) && (Screen > BuiltInComponents.Host.ScreenCount))
                 return false;
+
+            // Check if this zone is already set
+            if (!force && _ActiveZones[Screen] == zone.ID)
+                return true;
 
             // Does the zone allow us to activate it on this screen?
             if (!zone.CanZoneBeActivated(Screen))
                 return false;
 
+            // Disconnect from zone events
+            if (_ActiveZones[Screen] != zone.ID)
+            {
+                Zone oldZone = GetZone(_ActiveZones[Screen]);
+                if (oldZone != null)
+                    oldZone.OnVolumeChanged -= zone_OnVolumeChangedDelegate;
+            }
+
             _ActiveZones[Screen] = zone.ID;
 
-            // Raise event
+            // Connect to zone events
+            zone.OnVolumeChanged += zone_OnVolumeChangedDelegate;
+
+            // Refresh events in the zone
+            zone.ConnectEvents();
+
+            // Push data sources
+            for (int i = 0; i < _ActiveZones.Length; i++)
+            {
+                if (_ActiveZones[i] == zone.ID)
+                {
+                    BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Name", i), zone.Name);
+                    BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.AudioDevice", i), zone.AudioDevice.Name);
+
+                    // Also push audio data to ensure all data is refreshed
+                    PushDataSources_AudioDevice(i, zone.AudioDevice);
+                }
+            }
+
+            // Raise events
             BuiltInComponents.Host.raiseMediaEvent(eFunction.ZoneSetActive, zone, Screen.ToString());
+            Raise_OnZoneUpdated(zone, Screen, false);
 
             return true;
         }
+
+        /// <summary>
+        /// Gets the screen number a zone is active on (returns -1 if zone is not active)
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <returns></returns>
+        public int GetScreenZoneIsActiveOn(Zone zone)
+        {
+            for (int i = 0; i < _ActiveZones.Length; i++)
+                if (_ActiveZones[i] == zone.ID)
+                    return i;
+            return -1;
+        }
+
         /// <summary>
         /// Sets the active zone for a screen
         /// </summary>
@@ -277,7 +330,7 @@ namespace OpenMobile.Zones
         /// <summary>
         /// Get a specific zone
         /// </summary>
-        /// <param name="Name"></param>
+        /// <param name="ID"></param>
         /// <returns></returns>
         public Zone this[string ID]
         {
@@ -293,7 +346,7 @@ namespace OpenMobile.Zones
         /// <summary>
         /// Get a specific zone
         /// </summary>
-        /// <param name="Name"></param>
+        /// <param name="ID"></param>
         /// <returns></returns>
         public Zone this[int ID]
         {
@@ -306,22 +359,22 @@ namespace OpenMobile.Zones
         /// <summary>
         /// Get list of zones for a screen
         /// </summary>
-        /// <param name="Name"></param>
+        /// <param name="screen"></param>
         /// <returns></returns>
         public List<Zone> GetZonesForScreen(int screen)
         {
             return _Zones.FindAll(z => z.Screen == screen);
         }
 
-
-
         /// <summary>
         /// Initializes and starts zones
         /// </summary>
         public void Start()
         {
+            // Connect to host events
+            BuiltInComponents.Host.OnSystemEvent += new SystemEvent(Host_OnSystemEvent);
+            
             // Initialize data
-            //DefaultZones = new int[BuiltInComponents.Host.ScreenCount];
             _ActiveZones = new int[BuiltInComponents.Host.ScreenCount];
 
             // Restore settings from database (deserialize)
@@ -367,13 +420,17 @@ namespace OpenMobile.Zones
             // Ensure we have valid active zones
             for (int i = 0; i < _ActiveZones.Length; i++)
             {
-                if (GetZone(_ActiveZones[i]) == null)
+                Zone z = GetZone(_ActiveZones[i]);
+                if (z == null || z.AudioDevice == null)
+                {
                     SetToDefault = true;
+                    break;
+                }
             }
 
+            // Ensure we have a active zone for all screens
             if (!SetToDefault)
             {
-                // Ensure we have a active zone for all screens
                 for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
                 {
                     try
@@ -402,14 +459,16 @@ namespace OpenMobile.Zones
             }
 
             if (SetToDefault)
+            {
                 CreateDefaultZones();
+            }
 
             // Create zone for "all"
             UpdateZoneAll();
 
             // Trigg events for activated zones
             for (int i = 0; i < _ActiveZones.Length; i++)
-                BuiltInComponents.Host.raiseMediaEvent(eFunction.ZoneSetActive, GetZone(_ActiveZones[i]), i.ToString());
+                _SetActiveZone_Internal(i, GetZone(_ActiveZones[i]), true);
 
             //Log data
             List<string> Texts = new List<string>();
@@ -418,14 +477,209 @@ namespace OpenMobile.Zones
                 string s = "";
                 foreach (int subZoneID in zone.SubZones)
                     s += subZoneID.ToString() + ";";
-                string a = zone.AudioDeviceName;
-                if (String.IsNullOrEmpty(a))
-                    a = zone.AudioDeviceInstance.ToString();
-                Texts.Add(String.Format("{0}[{1}, Screen:{2}, Audio:{3}, SubZones:{4}] - {5}", zone.Name, zone, zone.Screen, a, s, zone.Description));
+                Texts.Add(String.Format("{0}[{1}, Screen:{2}, Audio:{3}, SubZones:{4}] - {5}", zone.Name, zone, zone.Screen, zone.AudioDevice, s, zone.Description));
             }
             BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Available zones:", Texts.ToArray());
+
+            // Register commands
+            Commands_Register();
         }
 
+        private void Commands_Register()
+        {
+            // Create commands for zones at all available screens
+            for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+            {
+                // Increment volume
+                BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", i), "Zone", "Volume.Increment", CommandExecutor, false, false, "Increments volume on the active zone"));
+
+                // Decrement volume
+                BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", i), "Zone", "Volume.Decrement", CommandExecutor, false, false, "Decrements volume on the active zone"));
+
+                // Mute
+                BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", i), "Zone", "Volume.Mute", CommandExecutor, false, false, "Mutes volume on the active zone"));
+
+                // Unmute
+                BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", i), "Zone", "Volume.Unmute", CommandExecutor, false, false, "Unmutes volume on the active zone"));
+
+                // Sets volume to a specific level
+                BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", i), "Zone", "Volume.Set", CommandExecutor, true, false, "Sets volume on the active zone. Param0: Volume in percent as int"));
+            }
+        }
+
+        private object CommandExecutor(Command command, object[] param, out bool result)
+        {
+            result = true;
+
+            // Increase volume
+            if (command.NameLevel2 == "Zone" && command.NameLevel3 == "Volume.Increment")
+                GetZone(GetScreenFromString(command.NameLevel1)).AudioDevice.Volume += 5;
+
+            // Increase volume
+            if (command.NameLevel2 == "Zone" && command.NameLevel3 == "Volume.Decrement")
+                GetZone(GetScreenFromString(command.NameLevel1)).AudioDevice.Volume -= 5;
+
+            // Mute
+            if (command.NameLevel2 == "Zone" && command.NameLevel3 == "Volume.Mute")
+                GetZone(GetScreenFromString(command.NameLevel1)).AudioDevice.Mute = true;
+
+            // Unmute
+            if (command.NameLevel2 == "Zone" && command.NameLevel3 == "Volume.Unmute")
+                GetZone(GetScreenFromString(command.NameLevel1)).AudioDevice.Mute = false;
+
+            // Set volume
+            if (command.NameLevel2 == "Zone" && command.NameLevel3 == "Volume.Set")
+            {
+                try
+                {
+                    // Get current volume level as int from params
+                    int volumeLevel = (int)param[0];
+                    GetZone(GetScreenFromString(command.NameLevel1)).AudioDevice.Volume = volumeLevel;
+                }
+                catch { }
+            }
+
+            // Default action
+            result = false;
+            return null;
+        }
+
+        private void DataSources_Register()
+        {
+            // Create data sources for zones at all available screens
+            for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+            {
+                // Volume
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "Volume", 0, DataSource.DataTypes.percent, ZoneDataProvider, "Volume for currently active zone at the screen"));
+
+                // Mute
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "Volume.Mute", 0, DataSource.DataTypes.binary, ZoneDataProvider, "Mute state for currently active zone at the screen"));
+
+                // Zone name
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "Name", 0, DataSource.DataTypes.text, ZoneDataProvider, "Name for currently active zone at the screen"));
+
+                // Zone audiodevice
+                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "AudioDevice", 0, DataSource.DataTypes.text, ZoneDataProvider, "Name of Audiodevice for currently active zone at the screen"));
+            }
+        }
+
+        private object ZoneDataProvider(OpenMobile.Data.DataSource dataSource, out bool result, object[] param)
+        {
+            result = true;
+
+            // Update volume data
+            if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "Volume")
+                return GetZone(GetScreenFromString(dataSource.NameLevel1)).AudioDevice.Volume;
+
+            // Update mute data
+            if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "Volume.Mute")
+                return GetZone(GetScreenFromString(dataSource.NameLevel1)).AudioDevice.Mute;
+
+            // Update Name data
+            if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "Name")
+                return GetZone(GetScreenFromString(dataSource.NameLevel1)).Name;
+
+            // Update AudioDevice data
+            if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "AudioDevice")
+                return GetZone(GetScreenFromString(dataSource.NameLevel1)).AudioDevice.Name;
+
+            switch (dataSource.FullName)
+            {
+                //case "Screen0.Zone.Volume":
+                //    return GetZone(0).AudioDevice.Volume;
+                default:
+                    result = false;
+                    return null;
+            }
+
+            result = false;
+            return null;
+        }
+
+        private Zone.VolumeChangedDelegate zone_OnVolumeChangedDelegate;
+        private void zone_OnVolumeChanged(Zone zone, AudioDevice audioDevice)
+        {
+            // Loop trough all active zones in case the same zone is active on more than one screen
+            for (int i = 0; i < _ActiveZones.Length; i++)
+            {
+                if (_ActiveZones[i] == zone.ID)
+                {
+                    PushDataSources_AudioDevice(i, audioDevice);
+                    Raise_OnZoneUpdated(zone, i, false);
+                }
+            }
+        }
+
+        private void PushDataSources_AudioDevice(int screen, AudioDevice audioDevice)
+        {
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Volume", screen), audioDevice.Volume);
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Volume.Mute", screen), audioDevice.Mute);
+        }
+
+        /// <summary>
+        /// Extracts the screen number from a string like this "Screen0" returns 0 if it fails
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        private int GetScreenFromString(string s)
+        {
+            int screen = 0;
+            int.TryParse(s.Substring(6), out screen);
+            return screen;
+        }
+
+        private List<Notification> _StoredNotifications = new List<Notification>();
+
+        void Host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        {
+            if (function == eFunction.AudioDevicesAvailable)
+            {
+                for (int i = 0; i < _Zones.Count; i++)
+                {
+                    Zone zone = _Zones[i];
+
+                    // Reconnect audio devices to zones
+                    if (!zone.AudioDevice.IsValid)
+                    {
+                        if (zone.AudioDevice.IsDefault)
+                        {   // Remap the default zone
+                            zone.AudioDevice = AudioDevice.DefaultDevice;
+                            zone.Valid = true;
+                        }
+                        else
+                        {   // Remap to other audio device
+                            AudioDevice audioDevice = BuiltInComponents.Host.getAudioDevice(zone.AudioDevice.Name);
+                            if (audioDevice != null)
+                            {
+                                zone.AudioDevice = audioDevice;
+                                zone.Valid = true;
+                            }
+                            else
+                            {   // Mapping failed, may be caused by missing audio devices. 
+                                zone.Valid = false;
+
+                                // Create notification to user
+                                _StoredNotifications.Add(new Notification(Notification.Styles.Warning, BuiltInComponents.OMInternalPlugin, null, null, String.Format("Zone \"{0}\" has an invalid audio device", zone.Name), String.Format("\"{0}\" is no longer available, zone will be disabled.", zone.AudioDevice.Name)));
+                            }
+                        }
+                    }
+                }
+
+                DataSources_Register();
+            }
+
+            if (function == eFunction.pluginLoadingComplete)
+            {
+                // Show stored notifications
+                for (int i = 0; i < _StoredNotifications.Count; i++)
+                    BuiltInComponents.Host.UIHandler.AddNotification(_StoredNotifications[i]);
+                _StoredNotifications.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Creates the default zones
+        /// </summary>
         public void CreateDefaultZones()
         {
             //TODO: Figure out a way to handle multiple screens and audiodevices
@@ -441,7 +695,7 @@ namespace OpenMobile.Zones
             // Create one default zone pr screen (default zone uses default audiodevice)
             for (int screen = 0; screen < BuiltInComponents.Host.ScreenCount; screen++)
             {
-                Zone zone = new Zone("Zone " + screen.ToString(), "Autogenerated zone for screen " + screen.ToString(), screen, BuiltInComponents.Host.GetAudioDeviceDefaultName());
+                Zone zone = new Zone("Zone " + screen.ToString(), "Autogenerated zone for screen " + screen.ToString(), screen, BuiltInComponents.Host.GetAudioDeviceDefault());
                 SetActiveZone(screen, zone);
                 _Zones.Add(zone);
 
@@ -456,6 +710,9 @@ namespace OpenMobile.Zones
 
             // Update zone "all"
             UpdateZoneAll();
+
+            // Create notification to user
+            BuiltInComponents.Host.UIHandler.AddNotification(new Notification(Notification.Styles.Warning, BuiltInComponents.OMInternalPlugin, null, BuiltInComponents.Host.getSkinImage("Icons|Icon-MediaZone2").image, "Media zones set to default configuration", "Media zone configuration has been reset to default"));
         }
 
         private void UpdateZoneAll()
@@ -464,7 +721,7 @@ namespace OpenMobile.Zones
             Zone ZoneAll = _Zones.Find(a => a.Name == "All");
             _Zones.Remove(ZoneAll);
 
-            Zone ScreenZone = new Zone("All", "Autogenerated zone that includes all other zones", 0, BuiltInComponents.Host.GetAudioDeviceDefaultName());
+            Zone ScreenZone = new Zone("All", "Autogenerated zone that includes all other zones", 0, BuiltInComponents.Host.GetAudioDeviceDefault());
             ScreenZone.BlockSubZoneUsage = true;
             ScreenZone.AutoGenerated = true;
             ScreenZone.AllowedScreens = "0"; // This zone can only be activated on screen 0
@@ -475,6 +732,10 @@ namespace OpenMobile.Zones
 
             // Add new zone for All
             _Zones.Add(ScreenZone);
+
+            // Connect to zone events
+            ScreenZone.OnVolumeChanged -= zone_OnVolumeChangedDelegate;
+            ScreenZone.OnVolumeChanged += zone_OnVolumeChangedDelegate;
 
             // Raise event
             BuiltInComponents.Host.raiseMediaEvent(eFunction.ZoneAdded, ScreenZone, "");
@@ -497,6 +758,39 @@ namespace OpenMobile.Zones
         {
             // Save data
             Save();
+        }
+
+        /// <summary>
+        /// Zone updated delegate
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="audioDevice"></param>
+        public delegate void ZoneUpdatedDelegate(Zone zone, int screen);
+
+        /// <summary>
+        /// Raised when an event for a zone is received or the active zone is changed
+        /// </summary>
+        public event ZoneUpdatedDelegate OnZoneUpdated;
+
+        /// <summary>
+        /// Raises the zone changed event
+        /// </summary>
+        private void Raise_OnZoneUpdated(Zone zone, int screen, bool spawn)
+        {
+            ZoneUpdatedDelegate handler = OnZoneUpdated;
+            if (handler != null)
+            {
+                if (spawn)
+                {
+                    // Spawn new thread for event update
+                    OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+                    {
+                        handler(zone, screen);
+                    });
+                }
+                else
+                    handler(zone, screen);
+            }
         }
     }
 }

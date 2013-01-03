@@ -929,6 +929,11 @@ namespace OMMediaDB
             get { return "The Default Media Database (Sqlite)"; }
         }
 
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-MusicIndexer"); }
+        }
+
         public bool incomingMessage(string message, string source)
         {
             return false;

@@ -381,11 +381,14 @@ namespace OpenMobile.Controls
             System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(width+1, height+1);
             using (System.Drawing.Graphics gBMP = System.Drawing.Graphics.FromImage(bmp))
             {
-                using (System.Drawing.Brush brush = new System.Drawing.SolidBrush(Color.FromArgb((int)this.GetAlphaValue255(properties.FillColor.A), properties.FillColor).ToSystemColor()))
+                using (System.Drawing.Brush brush = new System.Drawing.SolidBrush(Color.FromArgb(properties.FillColor.A, properties.FillColor).ToSystemColor()))
                 {
-                    System.Drawing.Pen pen = new System.Drawing.Pen(Color.FromArgb((int)this.GetAlphaValue255(properties.BorderColor.A), properties.BorderColor).ToSystemColor());
+                    System.Drawing.Pen pen = new System.Drawing.Pen(Color.FromArgb(properties.BorderColor.A, properties.BorderColor).ToSystemColor());
                     if (properties.BorderSize > 0)
-                        pen = new System.Drawing.Pen(Color.FromArgb((int)this.GetAlphaValue255(properties.BorderColor.A), properties.BorderColor).ToSystemColor(), properties.BorderSize);
+                    {
+                        pen.Dispose();
+                        pen = new System.Drawing.Pen(Color.FromArgb(properties.BorderColor.A, properties.BorderColor).ToSystemColor(), properties.BorderSize);
+                    }
 
                     switch (properties.Shape)
                     {

@@ -112,6 +112,11 @@ namespace OMWinInfo
             return false;
         }
 
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-OM"); }
+        }
+
         #endregion
 
         #region IDisposable Members
