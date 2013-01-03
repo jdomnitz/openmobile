@@ -31,128 +31,6 @@ using OpenMobile.Framework;
 
 namespace OpenMobile.helperFunctions.Graphics
 {
-    /// <summary>
-    /// A smooth animator class
-    /// </summary>
-    public class SmoothAnimator
-    {
-        /// <summary>
-        /// Delegate for Animator class. Return true when the animation should run, returning false stops the animation.
-        /// </summary>
-        /// <param name="AnimationStep"></param>
-        public delegate bool AnimatorDelegate(int AnimationStep, float AnimationStepF);
-
-        /// <summary>
-        /// Speed of animation. 
-        /// <para>A value of 1.0F indicates that the AnimationStep will correspond to milliseconds since last call to the animation loop</para>
-        /// </summary>
-        public float Speed { get; set; }
-
-        /// <summary>
-        /// Execute animation
-        /// </summary>
-        public bool Run { get; set; }
-
-        /// <summary>
-        /// Execute animation asynchronous
-        /// </summary>
-        public bool Asynchronous { get; set; }
-
-        /// <summary>
-        /// Animation thread delay (A higer delay is better for slower systems but may lead to "choppy" graphics)
-        /// </summary>
-        public int ThreadDelay { get; set; }
-
-        /// <summary>
-        /// Frames pr second to run animation at (default 30fps)
-        /// </summary>
-        public float FPS { get; set; }
-
-        /// <summary>
-        /// Initialize a new smooth animator
-        /// </summary>
-        /// <param name="Animation_Speed"></param>
-        /// <param name="Asynchronous"></param>
-        public SmoothAnimator(float Animation_Speed, bool Asynchronous)
-            : this(Animation_Speed)
-        {
-            this.Asynchronous = Asynchronous;
-        }
-        /// <summary>
-        /// Initialize a new smooth animator
-        /// </summary>
-        public SmoothAnimator()
-            : this(1.0F)
-        {
-        }
-        /// <summary>
-        /// Initialize a new smooth animator
-        /// <para>A speed of 1.0F indicates that the AnimationStep will correspond to milliseconds since last call to the animation loop</para>
-        /// </summary>
-        /// <param name="Animation_Speed"></param>
-        public SmoothAnimator(float Animation_Speed)
-        {
-            this.Speed = Animation_Speed;
-            this.FPS = 60.0F;
-            this.ThreadDelay = 1;
-            this.Asynchronous = false;
-        }
-
-        /// <summary>
-        /// Execute animation. Sample code with anonymous delegate:
-        /// <para>Animate(delegate(int AnimationStep, float AnimationStepF)</para>
-        /// <para>{</para>
-        /// <para>.... Code goes here ....</para>
-        /// <para>]);</para>
-        /// </summary>
-        /// <param name="d"></param>
-        public void Animate(AnimatorDelegate d)
-        {
-            if (this.Asynchronous)
-            {
-                OpenMobile.Threading.SafeThread.Asynchronous(delegate()
-                {
-                    RunAnimation(d);
-                });
-            }
-            else
-            {
-                RunAnimation(d);
-            }
-        }
-
-        private void RunAnimation(AnimatorDelegate d)
-        {
-            int Animation_Step;
-            float Animation_StepF;
-            double Interval = System.Diagnostics.Stopwatch.Frequency / FPS;
-            double currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
-            double lastUpdateTicks = System.Diagnostics.Stopwatch.GetTimestamp();
-            double ticks = 0;
-            double ticksMS = 0;
-
-            this.Run = true;
-            while (Run)
-            {
-                currentTicks = System.Diagnostics.Stopwatch.GetTimestamp();
-                ticks = currentTicks - lastUpdateTicks;
-                if (ticks >= Interval)
-                {
-                    lastUpdateTicks = currentTicks;
-                    ticksMS = (ticks / System.Diagnostics.Stopwatch.Frequency) * 1000;
-                    Animation_StepF = (float)(ticksMS * Speed);
-                    Animation_Step = ((int)(ticksMS * Speed));
-                    // Minimumsvalue for animation step
-                    if (Animation_Step == 0)
-                        Animation_Step = 1;
-
-                    // Call animation 
-                    Run = d(Animation_Step, Animation_StepF);
-                }
-                Thread.Sleep(ThreadDelay);
-            }
-        }
-    }
 
     /// <summary>
     /// A button style image that can be generated to match any size
@@ -284,10 +162,12 @@ namespace OpenMobile.helperFunctions.Graphics
             /// Icon string
             /// </summary>
             public string Icon { get; set; }
-            /// <summary>
-            /// Icon image string (if this is present then the referenced image will be used instead of the icon string)
-            /// </summary>
-            public string IconImage { get; set; }
+            ///// <summary>
+            ///// Icon image string (if this is present then the referenced image will be used instead of the icon string)
+            ///// </summary>
+            //public string IconImage { get; set; }
+
+            public OImage IconImage { get; set; }
             /// <summary>
             /// Font to use for the icon (default is WebDings at size 76)
             /// </summary>

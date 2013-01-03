@@ -131,6 +131,11 @@ namespace WinDialup
             get { return "Dialup Support for Windows"; }
         }
 
+        public imageItem pluginIcon
+        {
+            get { return imageItem.NONE; }
+        }
+
         public bool incomingMessage(string message, string source)
         {
             return false;

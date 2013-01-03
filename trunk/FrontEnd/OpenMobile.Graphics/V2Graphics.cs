@@ -281,6 +281,9 @@ namespace OpenMobile.Graphics
 
         public void DrawImage(OImage image, Rectangle rect, int x, int y, int Width, int Height, float transparency)
         {
+            if (image == null)
+                return;
+            
             if ((Width == 0) || (Height == 0))
                 return;
             Rectangle clp = Clip;

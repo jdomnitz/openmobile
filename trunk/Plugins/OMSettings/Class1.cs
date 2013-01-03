@@ -58,7 +58,7 @@ namespace OMSettings
             OMPanel main = new OMPanel("Main");
             main.BackgroundColor1 = Color.Black;
             main.BackgroundType = backgroundStyle.SolidColor;
-            OMList menu = new OMList(10, 100, 980, 500);
+            OMList menu = new OMList("list_Menu", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height);
             menu.ListStyle = eListStyle.MultiListText;
             menu.Background = Color.Silver;
             menu.ItemColor1 = Color.Black;
@@ -179,7 +179,8 @@ namespace OMSettings
             OMPanel hardware = new OMPanel("Plugins");
             hardware.BackgroundColor1 = Color.Black;
             hardware.BackgroundType = backgroundStyle.SolidColor;
-            OMList lstplugins = new OMList(10, 100, 980, 433);
+            //OMList lstplugins = new OMList(10, 100, 980, 433);
+            OMList lstplugins = new OMList("list_Plugins", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height);
             lstplugins.ListStyle = eListStyle.MultiListText;
             lstplugins.Background = Color.Silver;
             lstplugins.ItemColor1 = Color.Black;
@@ -298,38 +299,8 @@ namespace OMSettings
 
         void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
         {
-            if (function == eFunction.dataUpdated)
-                loadProviders();
             if (function==eFunction.pluginLoadingComplete)
                 OpenMobile.Threading.TaskManager.QueueTask(new OpenMobile.Threading.Function(loadPluginSettings), ePriority.Normal,"Load Plugin Settings");
-        }
-
-        private void loadProviders()
-        {
-            object o;
-            theHost.getData(eGetData.GetPlugins, "", out o);
-            if (o == null)
-                return;
-            List<IBasePlugin> plugins = (List<IBasePlugin>)o;
-            plugins=plugins.FindAll(p => typeof(IDataProvider).IsInstanceOfType(p));
-            for (int i = 0; i < theHost.ScreenCount; i++)
-            {
-                OMList list = (OMList)manager[i, "data"][7];
-                OImage img = null;
-                list.Clear();
-                OMListItem.subItemFormat format = new OMListItem.subItemFormat();
-                format.color = Color.FromArgb(140, Color.White);
-                foreach (IDataProvider d in plugins)
-                {
-                    if (d.updaterStatus() == 1)
-                        img = theHost.getSkinImage("Checkmark").image;
-                    if (d.updaterStatus() == -1)
-                        img = theHost.getSkinImage("Error").image;
-                    if (d.updaterStatus() == 0)
-                        img = theHost.getSkinImage("Waiting").image;
-                    list.Add(new OMListItem(d.pluginDescription, d.lastUpdated.ToString(), img, format));
-                }
-            }
         }
 
         void menu_OnClick(OMControl sender, int screen)
@@ -354,7 +325,6 @@ namespace OMSettings
                 case "data":
                     using (PluginSettings s = new PluginSettings())
                         ((OMTextBox)manager[screen, "data"][4]).Text = s.getSetting("Data.DefaultLocation");
-                    loadProviders();
                     break;
             }
 
@@ -371,11 +341,7 @@ namespace OMSettings
             using (PluginSettings settings = new PluginSettings())
             {
                 settings.setSetting("Data.DefaultLocation", ((OMTextBox)manager[screen, "data"][4]).Text);
-                settings.setSetting("Plugins.DPYWeather.LastUpdate", DateTime.MinValue.ToString());
-                settings.setSetting("Plugins.DPGWeather.LastUpdate", DateTime.MinValue.ToString());
-                settings.setSetting("Plugins.DPWeather.LastUpdate", DateTime.MinValue.ToString());
             }
-            theHost.execute(eFunction.refreshData);
             theHost.execute(eFunction.goBack, screen.ToString());
         }
 
@@ -445,6 +411,11 @@ namespace OMSettings
         public string pluginDescription
         {
             get { return "Global Settings Manager for openMobile"; }
+        }
+
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-Settings2"); }
         }
 
         public bool incomingMessage(string message, string source)

@@ -150,6 +150,8 @@ namespace OpenMobile
                 //labelClockdate.Text = "Date";
                 //mainPanel.addControl(labelClockdate);       
 
+                mainPanel.Entering += new PanelEvent(mainPanel_Entering);
+
                 screens.loadSinglePanel(mainPanel, screen, true);
             }
 
@@ -304,6 +306,11 @@ namespace OpenMobile
             return eLoadStatus.LoadSuccessful;
         }
 
+        void mainPanel_Entering(OMPanel sender, int screen)
+        {
+            MainMenu_UpdateIcons(screen);
+        }
+
         void Quit_OnHoldClick(OMControl sender, int screen)
         {
             theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "MainMenu", "Quit");
@@ -450,34 +457,46 @@ namespace OpenMobile
                     //if ((string)Button.Tag != "")
                     {
                         // Check for default icons
-                        if ((string)Button.Tag == "Exit")
-                            //Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "~", Color.Gray));
-                            Button.OverlayImage = new imageItem(ButtonGraphic.GetImage(Button.Width, Button.Height, ButtonGraphic.ImageTypes.ButtonForeground, "~", StoredData.Get(String.Format("{0}.Display", Button.Name))));
+                        //if ((string)Button.Tag == "Exit")
+                        //    //Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "~", Color.Gray));
+                        //    Button.OverlayImage = new imageItem(ButtonGraphic.GetImage(Button.Width, Button.Height, ButtonGraphic.ImageTypes.ButtonForeground, "~", StoredData.Get(String.Format("{0}.Display", Button.Name))));
 
-                        else if ((string)Button.Tag == "About")
-                            //Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "i", Color.Gray));
-                            Button.OverlayImage = new imageItem(ButtonGraphic.GetImage(Button.Width, Button.Height, ButtonGraphic.ImageTypes.ButtonForeground, "i", StoredData.Get(String.Format("{0}.Display", Button.Name))));
-
-                        else
+                        //else if ((string)Button.Tag == "About")
+                        //    //Icon.Image = new imageItem(OImage.FromWebdingsFont(100, 100, "i", Color.Gray));
+                        //    Button.OverlayImage = new imageItem(ButtonGraphic.GetImage(Button.Width, Button.Height, ButtonGraphic.ImageTypes.ButtonForeground, "i", StoredData.Get(String.Format("{0}.Display", Button.Name))));
+                            
+                        //else
                         //Icon.Image = new imageItem(plugin.GetPluginIcon((string)Button.Tag, eTextFormat.Normal, Color.Gray, Color.Gray));
                         {
                             #region Configure button data
 
+                            // Get plugin
+                            IBasePlugin plugin = Plugins.GetPlugin((string)Button.Tag);
+
                             ButtonGraphic.GraphicData gd = new ButtonGraphic.GraphicData();
 
-                            if (!String.IsNullOrEmpty((string)Button.Tag))
+                            //if (!String.IsNullOrEmpty((string)Button.Tag))
                             {
                                 // Set icon symbol
                                 Font f = Font.Webdings;
-                                gd.Icon = plugin.GetPluginIconSymbol((string)Button.Tag, ref f);
-                                gd.IconFont = f;
+                                //gd.Icon = Plugins.GetPluginIconSymbol((string)Button.Tag, ref f)               ;
+                                //gd.IconFont = f;
 
                                 // Set Icon Image
-                                if (String.IsNullOrEmpty(gd.Icon))
-                                    gd.IconImage = plugin.GetPluginIconString((string)Button.Tag);
+                                if (plugin != null)
+                                    gd.IconImage = plugin.pluginIcon.image;
+                                else
+                                {
+                                    if ((string)Button.Tag == "Exit")
+                                        gd.IconImage = OM.Host.getSkinImage("Icons|Icon-Power").image;
+                                    else if ((string)Button.Tag == "About")
+                                        gd.IconImage = OM.Host.getSkinImage("Icons|Icon-OM").image;
+                                }
+                                //if (String.IsNullOrEmpty(gd.Icon))
+                                //    gd.IconImage = Plugins.GetPluginIconString((string)Button.Tag);
 
                                 // Set default image
-                                if ((String.IsNullOrEmpty(gd.Icon)) && (String.IsNullOrEmpty(gd.IconImage)))
+                                if (String.IsNullOrEmpty(gd.Icon) && gd.IconImage == null)
                                     gd.Icon = ((char)0x85).ToString();
                             }
 
@@ -541,7 +560,7 @@ namespace OpenMobile
                 list.Add(item3);
                 if (ActiveItem == item3.text) SelectedIndex = 2; // Is this the selected item
 
-                List<IHighLevel> plugins = plugin.getPluginsOfType<IHighLevel>(PluginLevels.Normal);
+                List<IHighLevel> plugins = Plugins.getPluginsOfType<IHighLevel>(PluginLevels.Normal);
                 plugins.Sort((a, b) => a.displayName.CompareTo(b.displayName));
                 for (int i = 0; i < plugins.Count; i++)
                 {
@@ -552,7 +571,7 @@ namespace OpenMobile
 
                     OMListItem ListItem = new OMListItem(" " + b.displayName, "  " + (b.pluginDescription != "" ? b.pluginDescription : b.pluginName), subItemformat);
                     ListItem.tag = b.pluginName;
-                    ListItem.image = plugin.GetPluginIcon(b, eTextFormat.Normal, Color.Gray, Color.Gray);
+                    ListItem.image = Plugins.GetPluginIcon(b, eTextFormat.Normal, Color.Gray, Color.Gray);
                     list.Add(ListItem);
 
                     // Is this the selected item
@@ -566,10 +585,10 @@ namespace OpenMobile
         ScreenManager screens;
         public OMPanel loadPanel(string name,int screen)
         {
-            if (RefreshData)
-            {   // Refresh data
-                MainMenu_UpdateIcons(screen);
-            }
+            //if (RefreshData)
+            //{   // Refresh data
+            //    MainMenu_UpdateIcons(screen);
+            //}
 
             //if (name == "") 
             //    return screens[screen, "MainMenu"];
@@ -609,6 +628,11 @@ namespace OpenMobile
         public string pluginDescription
         {
             get { return "The main menu"; }
+        }
+
+        public imageItem pluginIcon
+        {
+            get { return imageItem.NONE; }
         }
 
         public bool incomingMessage(string message, string source)

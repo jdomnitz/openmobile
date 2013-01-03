@@ -133,11 +133,13 @@ namespace OpenMobile.Controls
         /// <param name="resetHighlighted"></param>
         protected void raiseUpdate(bool resetHighlighted)
         {
-            if (!visible)
+            if (!visible && !raiseUpdate_AllowWhenNotVisible)
                 return;
+            raiseUpdate_AllowWhenNotVisible = false;
             if (UpdateThisControl != null)
                 UpdateThisControl(resetHighlighted);
         }
+        private bool raiseUpdate_AllowWhenNotVisible = false;
 
         /// <summary>
         /// The region this control occupies
@@ -265,6 +267,7 @@ namespace OpenMobile.Controls
             {
                 if (visible == value)
                     return;
+                raiseUpdate_AllowWhenNotVisible = true;
                 visible = value;
                 Refresh();
             }
@@ -494,8 +497,17 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public virtual object Clone()
         {
+            return Clone(this.Parent);
+        }
+
+        /// <summary>
+        /// Create a deep copy of this control and specifies the parent
+        /// </summary>
+        /// <returns></returns>
+        public virtual object Clone(OMPanel parent)
+        {
             OMControl returnData = (OMControl)this.MemberwiseClone();
-            returnData.Parent = this.Parent;
+            returnData.Parent = parent;
             Type type = returnData.GetType();
 
             // Clone fields
@@ -504,14 +516,17 @@ namespace OpenMobile.Controls
                 try
                 {
                     //Clone IClonable object
-                    if (fieldInfo.FieldType.GetInterface("ICloneable", true) != null)
+                    if (fieldInfo.Name != "parent" && fieldInfo.Name != "Parent")
                     {
-                        ICloneable clone = (ICloneable)fieldInfo.GetValue(this);
-                        fieldInfo.SetValue(returnData, (clone != null ? clone.Clone() : clone));
-                    }
-                    else
-                    {
-                        fieldInfo.SetValue(returnData, fieldInfo.GetValue(this));
+                        if (fieldInfo.FieldType.GetInterface("ICloneable", true) != null)
+                        {
+                            ICloneable clone = (ICloneable)fieldInfo.GetValue(this);
+                            fieldInfo.SetValue(returnData, (clone != null ? clone.Clone() : clone));
+                        }
+                        else
+                        {
+                            fieldInfo.SetValue(returnData, fieldInfo.GetValue(this));
+                        }
                     }
                 }
                 catch { }
@@ -521,18 +536,21 @@ namespace OpenMobile.Controls
             foreach (PropertyInfo propInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
             {
                 MethodInfo mi = propInfo.GetGetMethod();
-                if (propInfo.CanWrite && propInfo.CanRead && (mi!=null) && (mi.GetParameters().Length == 0))
+                if (propInfo.CanWrite && propInfo.CanRead && (mi != null) && (mi.GetParameters().Length == 0))
                     try
                     {
-                        //Clone IClonable object
-                        if (propInfo.PropertyType.GetInterface("ICloneable", true) != null)
+                        if (propInfo.Name != "parent" && propInfo.Name != "Parent")
                         {
-                            ICloneable clone = (ICloneable)propInfo.GetValue(this, null);
-                            propInfo.SetValue(returnData, (clone != null ? clone.Clone() : clone), null);
-                        }
-                        else
-                        {
-                            propInfo.SetValue(returnData, propInfo.GetValue(this, null), null);
+                            //Clone IClonable object
+                            if (propInfo.PropertyType.GetInterface("ICloneable", true) != null)
+                            {
+                                ICloneable clone = (ICloneable)propInfo.GetValue(this, null);
+                                propInfo.SetValue(returnData, (clone != null ? clone.Clone() : clone), null);
+                            }
+                            else
+                            {
+                                propInfo.SetValue(returnData, propInfo.GetValue(this, null), null);
+                            }
                         }
                     }
                     catch { }
@@ -680,6 +698,16 @@ namespace OpenMobile.Controls
             return this.parent[screen, this.name];
         }
 
+        /// <summary>
+        /// Translates this control to a new location
+        /// </summary>
+        /// <param name="p"></param>
+        public void Translate(Point p)
+        {
+            Left += p.X;
+            Top += p.Y;
+        }
+
         #region DataSource handling
 
         /// <summary>
@@ -698,7 +726,21 @@ namespace OpenMobile.Controls
                     BuiltInComponents.Host.DataHandler.UnsubscribeFromDataSource(_DataSource, DataSource_OnChanged);
 
                 this._DataSource = value;
-                
+
+                // Don't do anything if a parent is not available
+                if (this.parent == null || !this.parent.IsClonedForScreens())
+                    return;
+
+                // Check for special dataref of screen present 
+                if (!string.IsNullOrEmpty(value))
+                {
+                    if (value.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
+                    {   // Present, replace with screen reference
+                        value = value.Replace(OpenMobile.Data.DataSource.DataTag_Screen, this.parent.ActiveScreen.ToString());
+                        this._DataSource = value;
+                    }
+                }
+               
                 // Subscribe to updates
                 if (!String.IsNullOrEmpty(value))
                     if (!BuiltInComponents.Host.DataHandler.SubscribeToDataSource(_DataSource, DataSource_OnChanged))
@@ -742,7 +784,13 @@ namespace OpenMobile.Controls
         {
             // Don't do anything if we've already processed this string
             if (!_AllowInLineDataSources || string.IsNullOrEmpty(s) || !(s.Contains("{") && s.Contains("}")) || this.parent == null || !this.parent.IsClonedForScreens())
-                return; 
+                return;
+
+            // Check for special dataref of screen present 
+            if (s.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
+            {   // Present, replace with screen reference
+                s = s.Replace(OpenMobile.Data.DataSource.DataTag_Screen, this.parent.ActiveScreen.ToString());
+            }
 
             // Unsubscribe to existing datasources
             if (_DataSource_InLine_Sources != null)

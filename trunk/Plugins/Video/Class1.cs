@@ -89,6 +89,11 @@ namespace Video
             get { return "Video Browser"; }
         }
 
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-Video"); }
+        }
+
         public bool incomingMessage(string message, string source)
         {
             throw new NotImplementedException();

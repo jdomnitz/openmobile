@@ -166,9 +166,9 @@ namespace OpenMobile.Controls
         /// Creates a deep copy of this control
         /// </summary>
         /// <returns></returns>
-        public override object Clone()
+        public override object Clone(OMPanel parent)
         {
-            return base.Clone();
+            return base.Clone(parent);
         }
         /// <summary>
         /// Sets the Glow or Outline color of the text
@@ -314,12 +314,17 @@ namespace OpenMobile.Controls
                 }
             }
 
+            // Render shape (if any)
+            base.DrawShape(g, e);
+
             if (_RefreshGraphic)
                 textTexture = g.GenerateTextTexture(textTexture, left, top, width, height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
             g.DrawImage(textTexture, left, top, width, height, _RenderingValue_Alpha);
 
             base.RenderFinish(g, e);
         }
+
+        #region DataSource
 
         internal override void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
         {
@@ -341,5 +346,7 @@ namespace OpenMobile.Controls
             _RefreshGraphic = true;
             Refresh();
         }
+
+        #endregion
     }
 }

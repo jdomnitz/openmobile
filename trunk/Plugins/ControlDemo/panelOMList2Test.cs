@@ -220,7 +220,7 @@ namespace ControlDemo
 
             // Method for controling the rendering order of the list items
             // This calculation finds the card that's located in the center and renderes this on top of all the rest
-            lstListControl3.ListItems_RenderOrderCalc = delegate(List<OMContainer.ControlGroup> controls, Rectangle Offset, ref List<int> renderOrder)
+            lstListControl3.ListItems_RenderOrderCalc = delegate(List<ControlGroup> controls, Rectangle Offset, ref List<int> renderOrder)
             {   
                 // Object in center on screen should be rendered on top of all others
                 int CenterObjectIndex = renderOrder.Count / 2;
@@ -329,7 +329,7 @@ namespace ControlDemo
 
             // Add list items
             for (int i = 0; i < CardNames.Length; i++)
-                lst.AddItemFromItemBase(new object[1] { String.Format("Cards|{0}", CardNames[i]) }, OMContainer.Directions.Right);
+                lst.AddItemFromItemBase(new object[1] { String.Format("Cards|{0}", CardNames[i]) }, ControlDirections.Right);
         }
 
         static private OMObjectList.ListItem ListControl3_CreateMessageListItem()
@@ -398,7 +398,7 @@ namespace ControlDemo
 
         static void btnItemCard_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.BuiltInComponents.Host.SendStatusData(screen, eDataType.PopUp, PluginName, String.Format("{0}", sender.Name));
+            Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("{0}", sender.Name)));
 
             OMObjectList lst = sender.Parent[screen, "lst_PanelSlideIn_ListControl3"] as OMObjectList;
             if (lst == null) return;
@@ -603,9 +603,9 @@ namespace ControlDemo
             int msgType = 1;
             string text = GetConversationText(out msgType);
             if (msgType == 1)
-                lst.AddItem(ListItem_MessageType1, new object[2] { DateTime.Now.ToShortTimeString(), text }, OMContainer.Directions.Down);
+                lst.AddItem(ListItem_MessageType1, new object[2] { DateTime.Now.ToShortTimeString(), text }, ControlDirections.Down);
             else
-                lst.AddItem(ListItem_MessageType2, new object[2] { DateTime.Now.ToShortTimeString(), text }, OMContainer.Directions.Down);
+                lst.AddItem(ListItem_MessageType2, new object[2] { DateTime.Now.ToShortTimeString(), text }, ControlDirections.Down);
         }
 
         static void btnList2_AddItem_Type1_OnClick(OMControl sender, int screen)
@@ -614,7 +614,7 @@ namespace ControlDemo
             if (lst == null) return;
 
             // Add list items
-            lst.AddItem(ListItem_MessageType1, new object[2] { DateTime.Now.ToShortTimeString(), "Text from me" }, OMContainer.Directions.Down);
+            lst.AddItem(ListItem_MessageType1, new object[2] { DateTime.Now.ToShortTimeString(), "Text from me" }, ControlDirections.Down);
         }
 
         static void btnClear_OnClick(OMControl sender, int screen)
@@ -638,12 +638,12 @@ namespace ControlDemo
 
             // Add list items
             for (int i = 0; i < 100; i++)
-                lst.AddItemFromItemBase(new object[2] { String.Format("New item {0}", lst.Items.Count), String.Format("Description for item {0}", lst.Items.Count) }, OMContainer.Directions.Down);
+                lst.AddItemFromItemBase(new object[2] { String.Format("New item {0}", lst.Items.Count), String.Format("Description for item {0}", lst.Items.Count) }, ControlDirections.Down);
         }
 
         static void chkListItemCheckBox_OnClick(OMControl sender, int screen)
         {
-            OpenMobile.BuiltInComponents.Host.SendStatusData(screen, eDataType.PopUp, PluginName, String.Format("{0}", sender.Name));
+            Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("{0}", sender.Name)));
         }
 
         static void btnAddItem_OnClick(OMControl sender, int screen)
@@ -652,7 +652,7 @@ namespace ControlDemo
             if (lst == null) return;
 
             // Add list items
-            lst.AddItemFromItemBase(new object[2] { String.Format("New item {0}", lst.Items.Count), String.Format("Description for item {0}", lst.Items.Count) }, OMContainer.Directions.Down);
+            lst.AddItemFromItemBase(new object[2] { String.Format("New item {0}", lst.Items.Count), String.Format("Description for item {0}", lst.Items.Count) }, ControlDirections.Down);
         }
 
         private static bool[] MediaBarVisible = null;
@@ -701,7 +701,7 @@ namespace ControlDemo
                     AnimationSpeed = 0.9f;
 
                 SmoothAnimator Animation = new SmoothAnimator(AnimationSpeed);
-                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                 {
                     Top -= AnimationStep;
                     if (Top <= EndPos)
@@ -727,7 +727,7 @@ namespace ControlDemo
                 int Top = MainControl.Top;
 
                 SmoothAnimator Animation = new SmoothAnimator(0.9f);
-                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                 {
                     Top += AnimationStep;
                     if (Top >= EndPos)

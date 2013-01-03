@@ -73,6 +73,29 @@ namespace OpenMobile
             return AllowedScreens.Contains(screen.ToString());
         }
 
+        /// <summary>
+        /// Is this a valid and usable zone?
+        /// </summary>
+        public bool Valid
+        {
+            get
+            {
+                if (this._AudioDevice == null)
+                    this._Valid = false;
+                return this._Valid;
+            }
+            set
+            {
+                if (this._Valid != value)
+                {
+                    this._Valid = value;
+                }
+
+                if (this._AudioDevice == null)
+                    this._Valid = false;
+            }
+        }
+        private bool _Valid;        
 
         private List<int> _SubZones = new List<int>();
         /// <summary>
@@ -99,56 +122,36 @@ namespace OpenMobile
         /// </summary>
         public int Screen { get; set; }
 
-        private string _AudioDeviceName = "";
         /// <summary>
-        /// AudioDevice name for this zone 
+        /// The currently assigned audio device
         /// </summary>
-        public string AudioDeviceName 
+        public AudioDevice AudioDevice
         {
             get
             {
-                if (String.IsNullOrEmpty(_AudioDeviceName))
-                    _AudioDeviceName = BuiltInComponents.Host.getAudioDeviceName(_AudioDeviceInstance);
-                return _AudioDeviceName;
+                return this._AudioDevice;
             }
             set
             {
-                if (_AudioDeviceName == value)
-                    return;
-                _AudioDeviceName = value;
-                _AudioDeviceInstance = -999;
+                // Disconnect from audio device events
+                if (this._AudioDevice != null)
+                    this._AudioDevice.OnUpdated -= _AudioDevice_OnUpdatedDelegate;
+
+                this._AudioDevice = value;
+
+                // Connect to audio device events
+                this._AudioDevice.OnUpdated += _AudioDevice_OnUpdatedDelegate;
             }
         }
+        private AudioDevice _AudioDevice;
 
-        private int _AudioDeviceInstance = -999;
         /// <summary>
-        /// AudioDevice instance for this zone 
-        /// <para>Returns -1 if no instance is available</para>
+        /// Reconnects the events
         /// </summary>
-        public int AudioDeviceInstance
+        internal void ConnectEvents()
         {
-            get
-            {
-                if (_AudioDeviceInstance == -999)
-                {
-                    if (!string.IsNullOrEmpty(AudioDeviceName))
-                    {
-                        _AudioDeviceInstance = BuiltInComponents.Host.getAudioDeviceInstance(AudioDeviceName);
-                        return _AudioDeviceInstance;
-                    }
-                    else
-                        return -1;
-                }
-                else
-                {
-                    return _AudioDeviceInstance;
-                }
-            }
-            set
-            {
-                _AudioDeviceInstance = value;
-                _AudioDeviceName = BuiltInComponents.Host.getAudioDeviceName(_AudioDeviceInstance);
-            }
+            this._AudioDevice.OnUpdated -= _AudioDevice_OnUpdatedDelegate;
+            this._AudioDevice.OnUpdated += _AudioDevice_OnUpdatedDelegate;
         }
 
         /// <summary>
@@ -178,31 +181,17 @@ namespace OpenMobile
         /// Create a new zone, specifying the default screen and audiodevice
         /// </summary>
         /// <param name="Name">Name of zone</param>
-        /// <param name="Name">Description for zone</param>
+        /// <param name="Description">Description for zone</param>
         /// <param name="Screen">Main screen</param>
         /// <param name="AudioDevice">Main audio device</param>
-        public Zone(string Name, string Description, int Screen, string AudioDevice)
+        public Zone(string Name, string Description, int Screen, AudioDevice AudioDevice)
+            :this()
         {
             this.Name = Name;
             this.Description = Description;
             this.Screen = Screen;
-            this.AudioDeviceName = AudioDevice;
+            this.AudioDevice = AudioDevice;
             ID = String.Format("{0}{1}{2}{3}", Name, Description, Screen, AudioDevice).GetHashCode();
-        }
-        /// <summary>
-        /// Create a new zone, specifying the default screen and audiodevice
-        /// </summary>
-        /// <param name="Name">Name of zone</param>
-        /// <param name="Name">Description for zone</param>
-        /// <param name="Screen">Main screen</param>
-        /// <param name="AudioDevice">Main audio device</param>
-        public Zone(string Name, string Description, int Screen, int AudioInstance)
-        {
-            this.Name = Name;
-            this.Description = Description;
-            this.Screen = Screen;
-            this.AudioDeviceInstance = AudioInstance;
-            ID = String.Format("{0}{1}{2}{3}", Name, Description, Screen, AudioInstance).GetHashCode();
         }
 
         /// <summary>
@@ -210,6 +199,7 @@ namespace OpenMobile
         /// </summary>
         private Zone()
         {
+            _AudioDevice_OnUpdatedDelegate = new AudioDevice.UpdatedDelegate(_AudioDevice_OnUpdated); 
         }
 
         /// <summary>
@@ -278,14 +268,57 @@ namespace OpenMobile
                 return false;
             }
             else
-                return ((a.AudioDeviceInstance == b.AudioDeviceInstance) | (a.Screen == b.Screen));
+                return ((a.AudioDevice.Instance == b.AudioDevice.Instance) | (a.Screen == b.Screen));
         }
+
+        /// <summary>
+        /// Negates two zones by looking at audiodevice and screen
+        /// NB! This compare override will return true on ANY match for audiodevice or screen in the zone or any subzones
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
         public static bool operator !=(Zone a, Zone b)
         {
             
             return !(a==b);
         }
 
-        
+        /// <summary>
+        /// AudioDevice updated delegate holder
+        /// </summary>
+        private AudioDevice.UpdatedDelegate _AudioDevice_OnUpdatedDelegate;
+
+        /// <summary>
+        /// Called when the audio device is changed
+        /// </summary>
+        /// <param name="audioDevice"></param>
+        /// <param name="action"></param>
+        /// <param name="value"></param>
+        private void _AudioDevice_OnUpdated(AudioDevice audioDevice, AudioDevice.Actions action, object value)
+        {
+            Raise_OnVolumeChanged();
+        }
+
+        /// <summary>
+        /// Volume changed delegate
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="audioDevice"></param>
+        public delegate void VolumeChangedDelegate(Zone zone, AudioDevice audioDevice);
+
+        /// <summary>
+        /// Raised when the volume on the audiodevice changes
+        /// </summary>
+        public event VolumeChangedDelegate OnVolumeChanged;
+
+        /// <summary>
+        /// Raises the volume changed event
+        /// </summary>
+        private void Raise_OnVolumeChanged()
+        {
+            if (OnVolumeChanged != null)
+                OnVolumeChanged(this, this.AudioDevice);
+        }        
     }
 }

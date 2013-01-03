@@ -334,6 +334,11 @@ namespace ControlDemo
             get { return "Displays AutoPlay Dialogs"; }
         }
 
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-OM"); }
+        }
+
         public bool incomingMessage(string message, string source)
         {
             throw new NotImplementedException();

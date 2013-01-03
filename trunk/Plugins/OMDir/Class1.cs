@@ -98,6 +98,10 @@ namespace OMDir
         {
             get { return "Provides File/Folder Selection for the framework"; }
         }
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-OM"); }
+        }
         #endregion
         public bool incomingMessage(string message, string source)
         {

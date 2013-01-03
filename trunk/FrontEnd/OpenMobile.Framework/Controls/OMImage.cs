@@ -378,5 +378,32 @@ namespace OpenMobile.Controls
                 aimg.OnRedraw -= DrawAnimationDelegate; 
         }
 
+        #region DataSource
+
+        internal override void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
+        {
+            // Is this a binary data source, if so use the true/false state to show/hide image
+            if (dataSource.DataType == OpenMobile.Data.DataSource.DataTypes.binary)
+            {
+                try
+                {
+                    this.Visible = (bool)dataSource.Value;
+                }
+                catch
+                {
+                    this.Visible = false;
+                }
+            }
+            else
+            {   // This is not a binary datasource, use null to detect state
+                this.Visible = dataSource.Value != null;
+            }
+            _RefreshGraphic = true;
+            Refresh();
+        }
+
+        #endregion
+
+
     }
 }

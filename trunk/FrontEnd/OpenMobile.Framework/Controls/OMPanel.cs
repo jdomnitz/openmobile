@@ -112,26 +112,45 @@ namespace OpenMobile.Controls
             foreach (OMControl c in source.containedControls)
                 addControl(c);
         }
+
+        /// <summary>
+        /// Adds all controls from a controlgroup to a panel relative to a basepoint
+        /// </summary>
+        /// <param name="basePoint">Base point to use when placing controls</param>
+        /// <param name="cg"></param>
+        public void addControlGroup(Point basePoint, ControlGroup cg)
+        {
+            foreach (OMControl control in cg)
+            {
+                control.Translate(basePoint);
+                addControl_Internal(control, true);
+            }
+        }
+
         /// <summary>
         /// Adds a control to the container
         /// </summary>
         /// <param name="control"></param>
         public void addControl(OMControl control)
         {
-            addControl(control, true);
+            addControl_Internal(control, true);
         }
         /// <summary>
         /// Adds a control to the container
         /// </summary>
         /// <param name="control"></param>
         /// <param name="changeParent"></param>
-        public void addControl(OMControl control, bool changeParent)
+        private void addControl_Internal(OMControl control, bool changeParent)
         {
             if (control == null)
                 return;
             if (changeParent)
                 control.Parent = this;
             control.UpdateThisControl += raiseUpdate;
+            
+            // Offset control relative to the base point
+            control.Translate(_BasePoint);
+
             containedControls.Add(control);
             raiseUpdate(false);
         }
@@ -328,22 +347,33 @@ namespace OpenMobile.Controls
             control.UpdateThisControl -= UpdateThisControl;
             containedControls.Remove(control);
         }
+
         /// <summary>
         /// Creates a deep copy of this control
         /// </summary>
         /// <returns></returns>
         public OMPanel Clone()
         {
+            return Clone(0);
+        }
+
+        /// <summary>
+        /// Creates a deep copy of this control
+        /// </summary>
+        /// <returns></returns>
+        public OMPanel Clone(int screen)
+        {
             ScreenManager manager = this.Manager;
             OMPanel two = (OMPanel)this.MemberwiseClone();
             two.Manager = manager;
+            two.ActiveScreen = screen;
 
             //two.containedControls = DeepCopy.DeepCopyBinary<List<OMControl>>(containedControls);
 
             two.containedControls = new List<OMControl>(this.containedControls.Capacity);
             for (int i = 0; i < containedControls.Count; i++)
             {
-                two.addControl((OMControl)this.containedControls[i].Clone());
+                two.addControl((OMControl)this.containedControls[i].Clone(two));
                 two[two.controlCount - 1].Parent = two;
             }
             if (this.tag is System.ICloneable)
@@ -816,6 +846,31 @@ namespace OpenMobile.Controls
         /// The current screenmanager handling this panel
         /// </summary>
         public OpenMobile.Framework.ScreenManager Manager { get; set; }
+
+        /// <summary>
+        /// The base point for placing controls on this panel
+        /// </summary>
+        public Point BasePoint
+        {
+            get
+            {
+                return this._BasePoint;
+            }
+            set
+            {
+                if (this._BasePoint != value)
+                {
+                    this._BasePoint = value;
+
+                    // Offset any controls that's already loaded
+                    Point Offset = _BasePoint - _BasePointOld;
+                    for (int i = 0; i < containedControls.Count; i++)
+                        containedControls[i].Translate(Offset);
+                }
+            }
+        }
+        private Point _BasePoint;
+        private Point _BasePointOld;        
     }
 
     /// <summary>

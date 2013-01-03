@@ -23,9 +23,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Timers;
 using OpenMobile.Graphics;
+using OpenMobile.helperFunctions.Graphics;
 using OpenMobile.Input;
 using OpenMobile.Threading;
-using OpenMobile.helperFunctions.Graphics;
 
 namespace OpenMobile.Controls
 {
@@ -1104,9 +1104,10 @@ namespace OpenMobile.Controls
         /// Provides a deep copy of this control
         /// </summary>
         /// <returns></returns>
-        public override object Clone()
+        public override object Clone(OMPanel parent)
         {
             OMList ret = (OMList)this.MemberwiseClone();
+            ret.parent = parent;
             ret.declare();
             if (this.items.Count > 0)
                 ret.items.AddRange(this.items.GetRange(0, this.items.Count));

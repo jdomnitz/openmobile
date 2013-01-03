@@ -45,18 +45,12 @@ namespace OMSettings
                 ofset = 87;
                 ret[i]= new OMPanel(s.Title);
                 controls.Add(new List<OMControl>());
-                OMContainer container = new OMContainer("SettingsContainer", 0, 100, 1000, 500);
+                OMContainer container = new OMContainer("SettingsContainer", host.ClientArea[i].Left, host.ClientArea[i].Top, host.ClientArea[i].Width, host.ClientArea[i].Height);
                 ret[i].addControl(container);
 
-                //OMButton OK = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("OMSettings.OK", 13, 56, 200, 110, "", "OK");
-                //OK.OnClick += new userInteraction(Save_OnClick);
-                //OK.Transition = eButtonTransition.None;
-                OMLabel Heading = new OMLabel(200, 0, 800, 50);
+                OMLabel Heading = new OMLabel("Label", 0, 0, container.Width, 50);
                 Heading.Font = new Font(Font.GenericSansSerif, 36F);
                 Heading.Text = s.Title;
-                Heading.Name = "Label";
-                
-                //container.addControlRelative(OK); //Always on top
                 container.addControlRelative(Heading);
                 foreach (Setting setting in s)
                     foreach (OMControl c in generate(setting, s.Title,i))
@@ -372,7 +366,12 @@ namespace OMSettings
         void scrollRight_OnClick(OMControl sender, int screen)
         {
             Setting setting=collection.Find(s => s.Name == sender.Tag.ToString().Substring(3));
-            OMTextBox tb = (OMTextBox)((OMContainer)sender.Parent[0])[setting.Name][0];
+            OMContainer container = sender.Parent[screen, "SettingsContainer"] as OMContainer;
+            if (container == null)
+                return;
+            OMTextBox tb = container[setting.Name][setting.Name] as OMTextBox;
+            if (tb == null)
+                return;
             int index = setting.Options.FindIndex(s => s == tb.Text);
             if (index >= setting.Options.Count - 1)
                 return;
@@ -383,7 +382,12 @@ namespace OMSettings
         void scrollLeft_OnClick(OMControl sender, int screen)
         {
             Setting setting = collection.Find(s => s.Name == sender.Tag.ToString().Substring(3));
-            OMTextBox tb = (OMTextBox)((OMContainer)sender.Parent[0])[setting.Name][0];
+            OMContainer container = sender.Parent[screen, "SettingsContainer"] as OMContainer;
+            if (container == null)
+                return;
+            OMTextBox tb = container[setting.Name][setting.Name] as OMTextBox;
+            if (tb == null)
+                return;
             int index = setting.Options.FindIndex(s => s == tb.Text);
             if (index <= 0)
                 return;

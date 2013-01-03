@@ -184,17 +184,23 @@ namespace OMPlayer
                 {
                     OpenMobile.Graphics.OImage img = (OpenMobile.Graphics.OImage)media[0].coverArt.Clone();
                     img.AddBorder(10, OpenMobile.Graphics.Color.Transparent);
-                    theHost.UIHandler.AddNotification(new Notification(this, null, img, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, String.Format("Detected CD '{0}' by '{1}'", media[0].Album, media[0].Artist), String.Format("Found {0} tracks at location {1} ", media.Count, directory)));
+                    theHost.UIHandler.AddNotification(new Notification(this, null, img, theHost.getSkinImage("Icons|Icon-CD").image, String.Format("Detected CD '{0}' by '{1}'", media[0].Album, media[0].Artist), String.Format("Found {0} tracks at location {1} ", media.Count, directory), Notification_ClickAction, null));
                 }
                 else
-                    theHost.UIHandler.AddNotification(new Notification(this, null, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, String.Format("Detected CD '{0}' by '{1}'", media[0].Album, media[0].Artist), String.Format("Found {0} tracks at location {1} ", media.Count, directory)));
+                    theHost.UIHandler.AddNotification(new Notification(this, null, theHost.getSkinImage("Icons|Icon-CD").image, theHost.getSkinImage("Icons|Icon-CD").image, String.Format("Detected CD '{0}' by '{1}'", media[0].Album, media[0].Artist), String.Format("Found {0} tracks at location {1} ", media.Count, directory), Notification_ClickAction, null));
             }
             else
-                theHost.UIHandler.AddNotification(new Notification(this, null, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, "Detected CD", String.Format("Found {0} tracks at location {1} ", media.Count, directory)));
+                theHost.UIHandler.AddNotification(new Notification(this, null, theHost.getSkinImage("Icons|Icon-CD").image, theHost.getSkinImage("Icons|Icon-CD").image, "Detected CD", String.Format("Found {0} tracks at location {1} ", media.Count, directory), Notification_ClickAction, null));
             //theHost.SendStatusData(eDataType.Completion, this, "", "Indexing Complete!");
             theHost.raiseMediaEvent(eFunction.MediaIndexingCompleted, null, this.pluginName);
             return true;
         }
+
+        void Notification_ClickAction(Notification notification, int screen, ref bool cancel)
+        {
+            BuiltInComponents.Host.execute(eFunction.GotoPanel, screen, "NewMedia");
+        }
+
 
         public bool indexFile(string filename)
         {
@@ -330,6 +336,11 @@ namespace OMPlayer
         public string pluginDescription
         {
             get { return "CDDB Database Provider"; }
+        }
+
+        public imageItem pluginIcon
+        {
+            get { return imageItem.NONE; }
         }
 
         public bool incomingMessage(string message, string source)

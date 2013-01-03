@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Radio", "..\Plugins\Radio\R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMNotify", "..\Plugins\OMNotify\OMNotify.csproj", "{EC4799AC-9121-4517-9AEB-1E4702CF1542}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPGContacts", "..\Plugins\DPGContacts\DPGContacts.csproj", "{D6D627D3-3C46-4908-8EC8-78760C2BB374}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPGContacts (Obsolete)", "..\Plugins\DPGContacts\DPGContacts (Obsolete).csproj", "{D6D627D3-3C46-4908-8EC8-78760C2BB374}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networking", "..\Plugins\Networking\Networking.csproj", "{779AEDF3-DD8D-44F5-BBD2-012A2F550EF3}"
 EndProject
@@ -31,15 +31,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMDebug", "..\Plugins\OMDeb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Video", "..\Plugins\Video\Video.csproj", "{3966C6FA-CF05-466A-8B4C-4CA3F147BDAF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMWeather", "..\Plugins\OMWeather\OMWeather.csproj", "{BED3CC71-3403-40F3-AF2F-FC830FE3B38E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMWeather (Obsolete)", "..\Plugins\OMWeather\OMWeather (Obsolete).csproj", "{BED3CC71-3403-40F3-AF2F-FC830FE3B38E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPGWeather", "..\Plugins\DPGWeather\DPGWeather.csproj", "{645DC5B8-026F-4D2F-B96D-24A71C87854F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DPGWeather (Obsolete)", "..\Plugins\DPGWeather\DPGWeather (Obsolete).csproj", "{645DC5B8-026F-4D2F-B96D-24A71C87854F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMobile.Graphics", "OpenMobile.Graphics\OpenMobile.Graphics.csproj", "{E1727C23-C7FD-4FBA-B09F-7160B5947F85}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatterySupport", "..\Plugins\BatterySupport\BatterySupport.csproj", "{07CBEF9C-DB75-4B76-A3A8-76956D1BBE96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMContacts", "..\Plugins\OMContacts\OMContacts.csproj", "{D71091AB-F622-4688-8B2B-377C3928F77F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMContacts (Obsolete)", "..\Plugins\OMContacts\OMContacts (Obsolete).csproj", "{D71091AB-F622-4688-8B2B-377C3928F77F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewMedia", "..\Plugins\NewMedia\NewMedia.csproj", "{F15159CB-BC40-4ABD-B23F-B41320FF16B7}"
 EndProject
@@ -76,6 +76,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMClock", "..\Plugins\OMClock\OMClock.csproj", "{87E5BF16-A4AF-4E47-A7F1-670E626D4237}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMWinInfo", "..\Plugins\OMWinInfo\OMWinInfo.csproj", "{F1ACB266-A9D2-4E6C-8E36-3AA39C7A8686}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMDataSourceSample", "..\Plugins\OMDataSourceSample\OMDataSourceSample.csproj", "{F52B3F30-2B3B-4D4E-B17B-8F322EA483B8}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "MyLCD", "..\Plugins\MyLCD\MyLCD.vbproj", "{1E8A1ABF-9776-4098-9C4E-BC6569E42879}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMWeather2", "..\Plugins\OMWeather2\OMWeather2\OMWeather2.csproj", "{2858B057-EEFC-4C16-87B0-BB9405084A32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMWeather2Data", "..\Plugins\OMWeather2\OMWeather2Data\OMWeather2Data.csproj", "{3E52835D-A658-4A82-99AF-D825BB444450}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMSkinPluginSample", "..\Plugins\OMSkinPluginSample\OMSkinPluginSample.csproj", "{CF0322AA-47BC-46D8-9430-2982257F6623}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
@@ -316,6 +326,36 @@ Global
 		{F1ACB266-A9D2-4E6C-8E36-3AA39C7A8686}.Debug-Fast|Any CPU.Build.0 = Debug-Fast|Any CPU
 		{F1ACB266-A9D2-4E6C-8E36-3AA39C7A8686}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1ACB266-A9D2-4E6C-8E36-3AA39C7A8686}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F52B3F30-2B3B-4D4E-B17B-8F322EA483B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F52B3F30-2B3B-4D4E-B17B-8F322EA483B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F52B3F30-2B3B-4D4E-B17B-8F322EA483B8}.Debug-Fast|Any CPU.ActiveCfg = Debug-Fast|Any CPU
+		{F52B3F30-2B3B-4D4E-B17B-8F322EA483B8}.Debug-Fast|Any CPU.Build.0 = Debug-Fast|Any CPU
+		{F52B3F30-2B3B-4D4E-B17B-8F322EA483B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F52B3F30-2B3B-4D4E-B17B-8F322EA483B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E8A1ABF-9776-4098-9C4E-BC6569E42879}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E8A1ABF-9776-4098-9C4E-BC6569E42879}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E8A1ABF-9776-4098-9C4E-BC6569E42879}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E8A1ABF-9776-4098-9C4E-BC6569E42879}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{1E8A1ABF-9776-4098-9C4E-BC6569E42879}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E8A1ABF-9776-4098-9C4E-BC6569E42879}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2858B057-EEFC-4C16-87B0-BB9405084A32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2858B057-EEFC-4C16-87B0-BB9405084A32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2858B057-EEFC-4C16-87B0-BB9405084A32}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{2858B057-EEFC-4C16-87B0-BB9405084A32}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{2858B057-EEFC-4C16-87B0-BB9405084A32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2858B057-EEFC-4C16-87B0-BB9405084A32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E52835D-A658-4A82-99AF-D825BB444450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E52835D-A658-4A82-99AF-D825BB444450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E52835D-A658-4A82-99AF-D825BB444450}.Debug-Fast|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E52835D-A658-4A82-99AF-D825BB444450}.Debug-Fast|Any CPU.Build.0 = Debug|Any CPU
+		{3E52835D-A658-4A82-99AF-D825BB444450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E52835D-A658-4A82-99AF-D825BB444450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF0322AA-47BC-46D8-9430-2982257F6623}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF0322AA-47BC-46D8-9430-2982257F6623}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF0322AA-47BC-46D8-9430-2982257F6623}.Debug-Fast|Any CPU.ActiveCfg = Debug-Fast|Any CPU
+		{CF0322AA-47BC-46D8-9430-2982257F6623}.Debug-Fast|Any CPU.Build.0 = Debug-Fast|Any CPU
+		{CF0322AA-47BC-46D8-9430-2982257F6623}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF0322AA-47BC-46D8-9430-2982257F6623}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -21,7 +21,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using OpenMobile.helperFunctions.Graphics;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 
@@ -170,7 +169,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
             {
                 TransitionEffectParam_In.Offset.X -= AnimationStep;
                 TransitionEffectParam_Out.Offset.X -= AnimationStep;
@@ -224,7 +223,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
             {
                 TransitionEffectParam_In.Offset.X += AnimationStep;
                 TransitionEffectParam_Out.Offset.X += AnimationStep;
@@ -279,7 +278,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
             {
                 TransitionEffectParam_In.Offset.Y -= AnimationStep;
                 TransitionEffectParam_Out.Offset.Y -= AnimationStep;
@@ -334,7 +333,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
             {
                 TransitionEffectParam_In.Offset.Y += AnimationStep;
                 TransitionEffectParam_Out.Offset.Y += AnimationStep;
@@ -388,7 +387,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Alpha = 1.0F;
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;
@@ -450,7 +449,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Alpha = 1.0F;
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;
@@ -516,7 +515,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Scale.Y = 1F;
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;
@@ -597,7 +596,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0,0,0,0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;
@@ -687,7 +686,7 @@ namespace OpenMobile.Controls
             TransitionEffectParam_Out.Offset = new Rectangle(0, 0, 0, 0);
 
             // Execute animation
-            Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
             {
                 if (AnimationStep == 0)
                     AnimationStep = 1;

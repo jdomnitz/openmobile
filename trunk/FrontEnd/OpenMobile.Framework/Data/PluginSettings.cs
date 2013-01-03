@@ -116,6 +116,23 @@ namespace OpenMobile.Data
                 return (rowsAffected > 0);
             }
         }
+
+        /// <summary>
+        /// Deletes the setting with the given name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool DeleteSetting(string name)
+        {
+            using (SqliteCommand cmd = asyncCon.CreateCommand())
+            {
+                cmd.CommandText = "DELETE FROM PluginSettings WHERE Name='" + General.escape(name) + "'";
+                int rowsAffected = cmd.ExecuteNonQuery();
+                return (rowsAffected > 0);
+            }
+        }
+
         /// <summary>
         /// Gets an array of values (saved using screen notation)
         /// </summary>

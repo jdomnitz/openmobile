@@ -176,10 +176,10 @@ namespace OMRadio
         private void AutoLoadSource(int screen,string Source)
         {
             if (theHost.execute(eFunction.loadTunedContent, screen.ToString(), Source))
-                UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
+                UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance);
             else
                 if (theHost.getPlayingMedia(screen).Type == eMediaType.Radio)
-                    UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
+                    UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance);
                 else
                     for (int i = 0; i < theHost.ScreenCount; i++)
                         ((OMLabel)manager[i]["Radio_StationName"]).Text = "Auto load failed!";
@@ -249,6 +249,11 @@ namespace OMRadio
         public string pluginDescription
         {
             get { return "Radio control panel"; }
+        }
+
+        public imageItem pluginIcon
+        {
+            get { return imageItem.NONE; }
         }
 
         public bool incomingMessage(string message, string source)
@@ -609,8 +614,8 @@ namespace OMRadio
                     {
                         theHost.execute(eFunction.goBack, screen.ToString(), eGlobalTransition.None.ToString());
                         stationInfo station = new stationInfo(((OMList)manager[screen]["List_RadioStations"]).SelectedItem.text, (string)((OMList)manager[screen]["List_RadioStations"]).SelectedItem.tag);
-                        DeletePreset(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance, station);
-                        UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
+                        DeletePreset(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance, station);
+                        UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance);
                     }
                     break;
             }
@@ -626,7 +631,7 @@ namespace OMRadio
                 System.Media.SystemSounds.Beep.Play();
                 Message(screen, "Preset saved", 1000);
                 stationInfo station = new stationInfo(List.SelectedItem.text, (string)List.SelectedItem.tag);
-                SaveToPresets(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance, station);
+                SaveToPresets(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance, station);
             }
 
             if (StationListSource == StationListSources.Presets)
@@ -684,7 +689,7 @@ namespace OMRadio
                             if (theHost.execute(eFunction.loadTunedContent,screen.ToString(), SelectedItemTag))
                             {
                                 d.Close();
-                                if (UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance))
+                                if (UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance))
                                     for (int i = 0; i < theHost.ScreenCount; i++)
                                         ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
                             }
@@ -708,7 +713,7 @@ namespace OMRadio
                         for (int i = 0; i < theHost.ScreenCount; i++)
                             ClearStationInfo(i);
                         if (theHost.execute(eFunction.setBand, screen.ToString(), SelectedItemTag))
-                            UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
+                            UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance);
 
                     }
                     break;
@@ -726,7 +731,7 @@ namespace OMRadio
                                 break;
                         }
                         ((OMLabel)manager[screen]["Label_StationListSource"]).Text = "Source: " + StationListSource.ToString();
-                        UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDeviceInstance);
+                        UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance);
                     }
                     break;
                 default:
@@ -766,7 +771,7 @@ namespace OMRadio
             }
             else if (function == eFunction.stationListUpdated)
             {
-                UpdateStationList(zone.AudioDeviceInstance);
+                UpdateStationList(zone.AudioDevice.Instance);
             }
             else if (function == eFunction.unloadTunedContent)
             {

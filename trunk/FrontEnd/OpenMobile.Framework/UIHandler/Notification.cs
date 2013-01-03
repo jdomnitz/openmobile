@@ -29,8 +29,13 @@ using OpenMobile.Graphics;
 
 namespace OpenMobile
 {
-    public class Notification : INotifyPropertyChanged
+    /// <summary>
+    /// A notification
+    /// </summary>
+    public class Notification : INotifyPropertyChanged, ICloneable
     {
+        #region Properties
+
         /// <summary>
         /// Notification styles
         /// </summary>
@@ -53,7 +58,22 @@ namespace OpenMobile
         /// <summary>
         /// The style for this notification
         /// </summary>
-        public Styles Style { get; set; }
+        public Styles Style
+        {
+            get
+            {
+                return this._Style;
+            }
+            set
+            {
+                if (this._Style != value)
+                {
+                    this._Style = value;
+                    this.OnPropertyChanged("Style");
+                }
+            }
+        }
+        private Styles _Style;        
 
         /// <summary>
         /// Notification states
@@ -259,6 +279,76 @@ namespace OpenMobile
         }
         private IBasePlugin _OwnerPlugin;
 
+        #endregion
+
+        #region events
+
+        public delegate void NotificationAction(Notification notification, int screen, ref bool cancel);
+
+        /// <summary>
+        /// The code to execute when the notification is clicked
+        /// </summary>
+        public event NotificationAction ClickAction;
+
+        /// <summary>
+        /// The code to execute when the notification is cleared
+        /// </summary>
+        public event NotificationAction ClearAction;
+
+        /// <summary>
+        /// Returns true if this notifications has click actions defined
+        /// </summary>
+        internal bool HasClickAction
+        {
+            get
+            {
+                return ClickAction != null;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if this notifications has clear actions defined
+        /// </summary>
+        internal bool HasClearAction
+        {
+            get
+            {
+                return ClearAction != null;
+            }
+        }
+
+        /// <summary>
+        /// Raises the click action of the notification
+        /// </summary>
+        /// <param name="notification"></param>
+        /// <param name="screen"></param>
+        internal bool RaiseClickAction(int screen, ref bool cancel)
+        {
+            if (ClickAction != null)
+            {
+                ClickAction(this, screen, ref cancel);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Raises the clear action of the notification
+        /// </summary>
+        /// <param name="notification"></param>
+        /// <param name="screen"></param>
+        internal bool RaiseClearAction(int screen, ref bool cancel)
+        {
+            if (ClearAction != null)
+            {
+                ClearAction(this, screen, ref cancel);
+                return true;
+            }
+            return false;
+        }
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -275,6 +365,32 @@ namespace OpenMobile
         {
             this.State = State;
         }
+        public Notification(Styles Style, States State, IBasePlugin OwnerPlugin, string ID, DateTime timeStamp, OImage Icon, string Header, string Text, NotificationAction clickAction, NotificationAction clearAction)
+            : this(Style, OwnerPlugin, ID, timeStamp, Icon, Header, Text, clickAction, clearAction)
+        {
+            this.State = State;
+        }
+
+        /// <summary>
+        /// Initializes a new notification
+        /// </summary>
+        /// <param name="OwnerPlugin"></param>
+        /// <param name="ID"></param>
+        /// <param name="timeStamp"></param>
+        /// <param name="Icon"></param>
+        /// <param name="Header"></param>
+        /// <param name="Text"></param>
+        public Notification(Styles Style, IBasePlugin OwnerPlugin, string ID, OImage Icon)
+            : this(Style, OwnerPlugin, ID, DateTime.Now, Icon, "", "")
+        {
+            this.State = States.Active;
+        }
+        public Notification(Styles Style, IBasePlugin OwnerPlugin, string ID, OImage Icon, NotificationAction clickAction, NotificationAction clearAction)
+            : this(Style, OwnerPlugin, ID, DateTime.Now, Icon, "", "", clickAction, clearAction)
+        {
+            this.State = States.Active;
+        }
+
         /// <summary>
         /// Initializes a new notification
         /// </summary>
@@ -288,6 +404,11 @@ namespace OpenMobile
             : this(Style, OwnerPlugin, ID, timeStamp, Icon, null, Header, Text)
         {
         }
+        public Notification(Styles Style, IBasePlugin OwnerPlugin, string ID, DateTime timeStamp, OImage Icon, string Header, string Text, NotificationAction clickAction, NotificationAction clearAction)
+            : this(Style, OwnerPlugin, ID, timeStamp, Icon, null, Header, Text, clickAction, clearAction)
+        {
+        }
+
         /// <summary>
         /// Initializes a new notification
         /// </summary>
@@ -306,7 +427,21 @@ namespace OpenMobile
             this._Header = Header;
             this._Text = Text;
             this._ID = ID;
-            this.TimeStamp = timeStamp;
+            this._TimeStamp = timeStamp;
+        }
+         
+        public Notification(Styles Style, IBasePlugin OwnerPlugin, string ID, DateTime timeStamp, OImage Icon, OImage IconStatusBar, string Header, string Text, NotificationAction clickAction, NotificationAction clearAction)
+        {
+            this.Style = Style;
+            this._OwnerPlugin = OwnerPlugin;
+            this._Icon = Icon;
+            this._IconStatusBar = IconStatusBar;
+            this._Header = Header;
+            this._Text = Text;
+            this._ID = ID;
+            this._TimeStamp = timeStamp;
+            this.ClearAction = clearAction;
+            this.ClickAction = clickAction;
         }
         /// <summary>
         /// Initializes a new notification
@@ -321,6 +456,12 @@ namespace OpenMobile
         {
             this.State = State;
         }
+        public Notification(Styles Style, States State, IBasePlugin OwnerPlugin, string ID, OImage Icon, string Header, string Text, NotificationAction clickAction, NotificationAction clearAction)
+            : this(Style, OwnerPlugin, ID, DateTime.Now, Icon, Header, Text, clickAction, clearAction)
+        {
+            this.State = State;
+        }
+
         /// <summary>
         /// Initializes a new notification
         /// </summary>
@@ -333,6 +474,12 @@ namespace OpenMobile
             : this(Style, OwnerPlugin, ID, DateTime.Now, Icon, Header, Text)
         {
         }
+
+        public Notification(Styles Style, IBasePlugin OwnerPlugin, string ID, OImage Icon, string Header, string Text, NotificationAction clickAction, NotificationAction clearAction)
+            : this(Style, OwnerPlugin, ID, DateTime.Now, Icon, Header, Text, clickAction, clearAction)
+        {
+        }
+
         /// <summary>
         /// Initializes a new notification
         /// </summary>
@@ -345,6 +492,12 @@ namespace OpenMobile
             : this(Styles.Normal, OwnerPlugin, ID, DateTime.Now, Icon, Header, Text)
         {
         }
+
+        public Notification(IBasePlugin OwnerPlugin, string ID, OImage Icon, string Header, string Text, NotificationAction clickAction, NotificationAction clearAction)
+            : this(Styles.Normal, OwnerPlugin, ID, DateTime.Now, Icon, Header, Text, clickAction, clearAction)
+        {
+        }
+
         /// <summary>
         /// Initializes a new notification
         /// </summary>
@@ -355,6 +508,11 @@ namespace OpenMobile
         /// <param name="Text"></param>
         public Notification(IBasePlugin OwnerPlugin, string ID, OImage Icon, OImage IconStatusBar, string Header, string Text)
             : this(Styles.Normal, OwnerPlugin, ID, DateTime.Now, Icon, IconStatusBar, Header, Text)
+        {
+        }
+
+        public Notification(IBasePlugin OwnerPlugin, string ID, OImage Icon, OImage IconStatusBar, string Header, string Text, NotificationAction clickAction, NotificationAction clearAction)
+            : this(Styles.Normal, OwnerPlugin, ID, DateTime.Now, Icon, IconStatusBar, Header, Text, clickAction, clearAction)
         {
         }
 
@@ -399,5 +557,13 @@ namespace OpenMobile
 
         #endregion
 
+        /// <summary>
+        /// Get's a shallow copy of this notification
+        /// </summary>
+        /// <returns></returns>
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }

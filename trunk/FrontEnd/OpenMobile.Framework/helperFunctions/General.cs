@@ -539,7 +539,7 @@ namespace OpenMobile.helperFunctions
     /// </summary>
     namespace Plugins
     {
-        static public class plugin
+        static public class Plugins
         {
             /// <summary>
             /// Returns a List of plugins matching the given type
@@ -807,6 +807,17 @@ namespace OpenMobile.helperFunctions
                 }
                 return "";
             }
+
+            /// <summary>
+            /// Gets a plugin
+            /// </summary>
+            /// <param name="PluginName"></param>
+            /// <returns></returns>
+            public static IBasePlugin GetPlugin(string PluginName)
+            {
+                return BuiltInComponents.Host.getData(eGetData.GetPlugins, PluginName) as IBasePlugin;
+            }
+
         }
     }
 

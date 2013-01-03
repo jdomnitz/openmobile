@@ -49,7 +49,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Returns a list of possible output devices (NOTE: the index corresponds to instance ID's)
         /// </summary>
-        string[] OutputDevices { get; }
+        AudioDevice[] OutputDevices { get; }
         /// <summary>
         /// If this plugin supports Advanced Interfaces (aka IEnhancedAVPlayer or IBufferedTunedContent)
         /// </summary>

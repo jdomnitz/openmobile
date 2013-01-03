@@ -201,7 +201,7 @@ namespace ControlDemo
 
         static void btn_ContainerTest3_OnClick(OMControl sender, int screen)
         {
-            Host.SendStatusData(screen, eDataType.PopUp, PluginName, "Container test");
+            Host.UIHandler.InfoBanner_Show(screen, new InfoBanner("Container test"));
         }
 
         static void btnChangeText_OnClick(OMControl sender, int screen)
@@ -244,7 +244,7 @@ namespace ControlDemo
 
             if (ctrl.Left != EndPos)
             {
-                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                 {
                     Pos += AnimationStep;
                     if (Pos >= EndPos)
@@ -262,7 +262,7 @@ namespace ControlDemo
             else
             {
                 EndPos = 200;
-                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                 {
                     Pos -= AnimationStep;
                     if (Pos <= EndPos)
@@ -376,7 +376,7 @@ namespace ControlDemo
                     AnimationSpeed = 0.9f;
 
                 SmoothAnimator Animation = new SmoothAnimator(AnimationSpeed);
-                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                 {
                     Top -= AnimationStep;
                     if (Top <= EndPos)
@@ -402,7 +402,7 @@ namespace ControlDemo
                 int Top = MainControl.Top;
 
                 SmoothAnimator Animation = new SmoothAnimator(0.9f);
-                Animation.Animate(delegate(int AnimationStep, float AnimationStepF)
+                Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
                 {
                     Top += AnimationStep;
                     if (Top >= EndPos)

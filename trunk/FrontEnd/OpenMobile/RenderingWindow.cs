@@ -371,13 +371,32 @@ namespace OpenMobile
 
         private StringWrapper DebugString = new StringWrapper();
         private OImage RenderDebugInfoTexture = null;
+        private string RenderUpdateMarker = "-";
         private void RenderDebugInfo()
         {
             if (BuiltInComponents.Host.ShowDebugInfo)
             {
                 lock (painting)
                 {
-                    DebugString.Text = String.Format("Screen: {0}\nFPS: {1}/{2}/{3}\nFocus: {4}.{5}\nFocusParent: {6}\nUnderMouse: {7}.{8}", screen, FPS_Min, FPS, FPS_Max, (FocusedControl != null && FocusedControl.Parent != null ? FocusedControl.Parent.Name : ""), (FocusedControl != null ? FocusedControl.Name : ""), (FocusedControlParent != null ? FocusedControlParent.Name : ""), (MouseOverControl != null && MouseOverControl.Parent != null ? MouseOverControl.Parent.Name : ""), (MouseOverControl != null ? MouseOverControl.Name : ""));
+                    switch (RenderUpdateMarker)
+                    {
+                        case @"-":
+                            RenderUpdateMarker = @"\";
+                            break;
+                        case @"\":
+                            RenderUpdateMarker = @"|";
+                            break;
+                        case @"|":
+                            RenderUpdateMarker = @"/";
+                            break;
+                        case @"/":
+                            RenderUpdateMarker = @"-";
+                            break;
+                        default:
+                            RenderUpdateMarker = @"-";
+                            break;
+                    }
+                    DebugString.Text = String.Format("Screen: {0} {1}\nFPS: {2}/{3}/{4}\nFocus: {5}.{6}\nFocusParent: {7}\nUnderMouse: {8}.{9}", screen, RenderUpdateMarker, FPS_Min, FPS, FPS_Max, (FocusedControl != null && FocusedControl.Parent != null ? FocusedControl.Parent.Name : ""), (FocusedControl != null ? FocusedControl.Name : ""), (FocusedControlParent != null ? FocusedControlParent.Name : ""), (MouseOverControl != null && MouseOverControl.Parent != null ? MouseOverControl.Parent.Name : ""), (MouseOverControl != null ? MouseOverControl.Name : ""));
                     if (DebugString.Changed)
                         RenderDebugInfoTexture = g.GenerateTextTexture(RenderDebugInfoTexture, 0, 0, 1000, 300, DebugString.Text, new Font(Font.Arial, 12), eTextFormat.Normal, Alignment.TopLeft, Color.Yellow, Color.Yellow);
                     g.DrawImage(RenderDebugInfoTexture, 0, 0, 1000, 300);

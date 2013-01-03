@@ -207,5 +207,24 @@ namespace OpenMobile.helperFunctions
                 StoredData.Set(Setting, Value);
         }
 
+        /// <summary>
+        /// Clears the value of a setting
+        /// </summary>
+        /// <param name="Setting"></param>
+        public static void Clear(string Setting)
+        {
+            Set(Setting, String.Empty);
+        }
+
+        /// <summary>
+        /// Deletes a setting from the database
+        /// </summary>
+        /// <param name="Setting"></param>
+        public static bool Delete(string Setting)
+        {
+            using (PluginSettings settings = new PluginSettings())
+                 return settings.DeleteSetting(Setting);
+        }
+
     }
 }

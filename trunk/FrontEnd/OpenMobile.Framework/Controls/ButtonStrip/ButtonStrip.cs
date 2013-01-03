@@ -9,7 +9,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A ButtonStrip button
     /// </summary>
-    public class Button : OMContainer.ControlGroup, ICloneable
+    public class Button : ControlGroup, ICloneable
     {
         #region Properties
 
@@ -138,13 +138,17 @@ namespace OpenMobile.Controls
         static public Button CreateSimpleButton(string name, Size size, int opacity, imageItem icon, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
         {
             Button btn = new Button(name);
-
+            
             // Calculate graphics size for icon in button (to ensure it's correctly aligned)
-            Size GraphicSize = icon.image.Size;
-            if (icon.image.Width > size.Width)
-                GraphicSize.Width = size.Width;
-            if (icon.image.Height > size.Height)
-                GraphicSize.Height = size.Height;
+            Size GraphicSize = new Size(size.Width, size.Height);
+            if (icon.image != null)
+            {
+                GraphicSize = icon.image.Size;
+                if (icon.image.Width > size.Width)
+                    GraphicSize.Width = size.Width;
+                if (icon.image.Height > size.Height)
+                    GraphicSize.Height = size.Height;
+            }
 
             // Button function
             OMButton Button_Settings = new OMButton(String.Format("{0}_{1}", btn.Name, "Button"), 0, 0, size.Width, size.Height);
@@ -166,22 +170,25 @@ namespace OpenMobile.Controls
             //gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundClicked;
             //Button_Settings.DownImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
 
-            // Create focus image
-            OImage oImgFocus = (OImage)icon.image.Clone();
-            oImgFocus.Glow(BuiltInComponents.SystemSettings.SkinFocusColor);
-            Button_Settings.FocusImage = new imageItem(oImgFocus);
+            if (icon.image != null)
+            {
+                // Create focus image
+                OImage oImgFocus = (OImage)icon.image.Clone();
+                oImgFocus.Glow(BuiltInComponents.SystemSettings.SkinFocusColor);
+                Button_Settings.FocusImage = new imageItem(oImgFocus);
 
-            // Create down image
-            OImage oImgDown = (OImage)icon.image.Clone();
-            oImgDown.SetAlpha(0.5F); // Slightly darken the image
-            oImgDown.Glow(BuiltInComponents.SystemSettings.SkinFocusColor);
-            Button_Settings.DownImage = new imageItem(oImgDown);
+                // Create down image
+                OImage oImgDown = (OImage)icon.image.Clone();
+                oImgDown.SetAlpha(0.5F); // Slightly darken the image
+                oImgDown.Glow(BuiltInComponents.SystemSettings.SkinFocusColor);
+                Button_Settings.DownImage = new imageItem(oImgDown);
 
-            // Create icon image
-            OImage oImgOverlay = (OImage)icon.image.Clone();
-            if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
-                oImgOverlay.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
-            Button_Settings.OverlayImage = new imageItem(oImgOverlay);
+                // Create icon image
+                OImage oImgOverlay = (OImage)icon.image.Clone();
+                if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
+                    oImgOverlay.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
+                Button_Settings.OverlayImage = new imageItem(oImgOverlay);
+            }
 
             // Map actions
             Button_Settings.OnClick += OnClick;
@@ -212,11 +219,15 @@ namespace OpenMobile.Controls
             Button btn = new Button(name);
 
             // Calculate graphics size for icon in button (to ensure it's correctly aligned)
-            Size GraphicSize = icon.image.Size;
-            if (icon.image.Width > size.Width)
-                GraphicSize.Width = size.Width;
-            if (icon.image.Height > size.Height)
-                GraphicSize.Height = size.Height;
+            Size GraphicSize = size;
+            if (icon.image != null)
+            {
+                GraphicSize = icon.image.Size;
+                if (icon.image.Width > size.Width)
+                    GraphicSize.Width = size.Width;
+                if (icon.image.Height > size.Height)
+                    GraphicSize.Height = size.Height;
+            }
 
             // Button function
             OMButton btnCtrl = new OMButton(String.Format("{0}_{1}", btn.Name, "Button"), 0, 0, size.Width, size.Height);
@@ -335,6 +346,8 @@ namespace OpenMobile.Controls
             public new void Remove(Button item)
             {
                 int index = this.IndexOf(item);
+                if (index == -1)
+                    return;
                 base.Remove(item);
                 this.Raise_OnItemRemoved(_Parent.Screen, index);
             }
@@ -389,6 +402,8 @@ namespace OpenMobile.Controls
                         if (btn != value)
                         {
                             int index = this.IndexOf(btn);
+                            if (index == -1)
+                                return;
                             base[index] = value;
                             this.Raise_OnItemChanged(_Parent.Screen, index);
                         }
@@ -912,22 +927,22 @@ namespace OpenMobile.Controls
         }
         private Alignments _Alignment = Alignments.Left;
 
-        private OMContainer.Directions GetOMContainerDirection(Alignments alignment)
+        private ControlDirections GetOMContainerDirection(Alignments alignment)
         {
             switch (alignment)
             {
                 case Alignments.Left:
-                    return OMContainer.Directions.Right;
+                    return ControlDirections.Right;
                 case Alignments.CenterLR:
-                    return OMContainer.Directions.CenterLR;
+                    return ControlDirections.CenterHorizontally;
                 case Alignments.Right:
-                    return OMContainer.Directions.Left;
+                    return ControlDirections.Left;
                 case Alignments.Up:
-                    return OMContainer.Directions.Up;
+                    return ControlDirections.Up;
                 case Alignments.Down:
-                    return OMContainer.Directions.Down;
+                    return ControlDirections.Down;
                 default:
-                    return OMContainer.Directions.Right;
+                    return ControlDirections.Right;
             }
         }
 
@@ -1074,7 +1089,7 @@ namespace OpenMobile.Controls
                                         lock (container)
                                         {
                                             container.RemoveControl(index);
-                                            container.addControl(index, (Button)_ButtonStrip[Screen].Buttons[index].Clone(), false, OMContainer.Directions.Right);
+                                            container.addControl(index, (Button)_ButtonStrip[Screen].Buttons[index].Clone(), false, ControlDirections.Right);
                                         }
                                     }
                                 }
@@ -1085,7 +1100,7 @@ namespace OpenMobile.Controls
                             lock (_Container)
                             {
                                 _Container.RemoveControl(index);
-                                _Container.addControl(index, (Button)_ButtonStrip[(int)screen].Buttons[index].Clone(), false, OMContainer.Directions.Right);
+                                _Container.addControl(index, (Button)_ButtonStrip[(int)screen].Buttons[index].Clone(), false, ControlDirections.Right);
                             }
                         }
                     }
@@ -1095,7 +1110,7 @@ namespace OpenMobile.Controls
             {   // Access a specifc container
                 OMContainer container = _Container.Parent[(int)screen, _Container.Name] as OMContainer;
                 container.RemoveControl(index);
-                container.addControl(index, (Button)_ButtonStrip[(int)screen].Buttons[index].Clone(), false, OMContainer.Directions.Right);
+                container.addControl(index, (Button)_ButtonStrip[(int)screen].Buttons[index].Clone(), false, ControlDirections.Right);
             }
         }
 

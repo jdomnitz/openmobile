@@ -259,6 +259,11 @@ namespace OMOsk2
             return 500 - (GetTotaltWidth(Keys, StartKey, EndKey, Spacing) / 2);
         }
 
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-OM"); }
+        }
+
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
             // What should we do?

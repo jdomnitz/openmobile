@@ -41,27 +41,30 @@ namespace OpenMobile
         public static void Handle(Exception e)
         {
             //string message = e.GetType().ToString() + " (" + e.Message + ")\r\n" + e.StackTrace + "\r\n********";
-            string message = spewException(e);
+//            string message = spewException(e);
 
-            BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, e.Source, message);
-#if DEBUG
-            Debug.Print(message);
-#endif
+//            BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, e.Source, message);
+//#if DEBUG
+//            Debug.Print(message);
+//#endif
+            // Log exception
+            BuiltInComponents.Host.DebugMsg("SandboxedThread exception", e);
             if (e.Source == "OpenMobile")
                 return;
             int index = Core.pluginCollection.FindIndex(p => ((p != null) && (p.pluginName == e.Source)));
-            IBasePlugin sample = null;
+            IBasePlugin CrashedPlugin = null;
             if (index > -1)
-                sample = Core.pluginCollection[index];
-            if (sample != null)
+                CrashedPlugin = Core.pluginCollection[index];
+            if (CrashedPlugin != null)
             {
                 if (Core.status != null)
                     Core.pluginCollection[index] = null;
                 else if (Core.RenderingWindows[0] != null)
-                    Core.pluginCollection.Remove(sample);
-                Core.theHost.SendStatusData(eDataType.Error, "", "SandboxedThread", String.Format("{0} CRASHED!", sample.pluginName));
-                BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "SandboxedThread", String.Format("{0} CRASHED!", sample.pluginName));
-                sample.Dispose();
+                    Core.pluginCollection.Remove(CrashedPlugin);
+
+                BuiltInComponents.Host.UIHandler.AddNotification(new Notification(Notification.Styles.Warning, CrashedPlugin, String.Empty, CrashedPlugin.pluginIcon.image, String.Format("Plugin {0} crashed", CrashedPlugin.pluginName), String.Format("Plugin {0} ({1}) by {2} was unloaded.", CrashedPlugin.pluginName, CrashedPlugin.pluginDescription, CrashedPlugin.authorName)));
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "SandboxedThread", String.Format("Plugin {0} crashed! Plugin {1} ({2}) by {3} was unloaded.", CrashedPlugin.pluginName, CrashedPlugin.pluginName, CrashedPlugin.pluginDescription, CrashedPlugin.authorName));
+                CrashedPlugin.Dispose();
             }
         }
 

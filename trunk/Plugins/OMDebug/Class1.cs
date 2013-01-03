@@ -108,6 +108,8 @@ namespace OMDebug
             {
                 OutputFilter = DebugMessageType.Unspecified;
             }
+            if (time == 0)
+                time = Environment.TickCount;
             writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + " : OMDebug.OutputFilter set to " + OutputFilter.ToString());
         }
 
@@ -136,6 +138,11 @@ namespace OMDebug
         public string pluginDescription
         {
             get { return "Provides a basic debugger for Open Mobile"; }
+        }
+
+        public imageItem pluginIcon
+        {
+            get { return OM.Host.getSkinImage("Icons|Icon-Debug"); }
         }
 
         public bool incomingMessage(string message, string source)
@@ -177,14 +184,15 @@ namespace OMDebug
 
         IPluginHost theHost;
         StreamWriter writer;
-        int time;
+        int time = 0;
         public eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
 
 
             writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
-            time = Environment.TickCount;
+            if (time == 0)
+                time = Environment.TickCount;
             writer.WriteLine("");
             writer.WriteLine("");
             writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + " : ***** OpenMobile startup initiated at " + DateTime.Now + " (Current filter level = " + OutputFilter.ToString() + ")*****");
@@ -403,6 +411,9 @@ namespace OMDebug
         }
         private void WriteToLog(bool TimeStamp, string header, DebugMessage Msg)
         {
+            if (time == 0)
+                time = Environment.TickCount;
+
             // Filter messages
             if (Msg.Type < OutputFilter)
                 return;
@@ -456,6 +467,9 @@ namespace OMDebug
         }
         private void WriteToLog(bool TimeStamp, string header, DebugMessage Msg, string[] texts)
         {
+            if (time == 0)
+                time = Environment.TickCount;
+            
             // Filter messages
             if (Msg.Type < OutputFilter)
                 return;

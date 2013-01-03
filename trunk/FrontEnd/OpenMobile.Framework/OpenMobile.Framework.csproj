@@ -80,9 +80,8 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Mono.Data.Sqlite, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\OpenMobile\bin\Debug\Mono.Data.Sqlite.dll</HintPath>
+    <Reference Include="Mono.Data.Sqlite">
+      <HintPath>.\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -92,8 +91,12 @@
   <ItemGroup>
     <Compile Include="Animator.cs" />
     <Compile Include="BuiltInComponents.cs" />
+    <Compile Include="CommandHandler\Command.cs" />
+    <Compile Include="CommandHandler\CommandHandler.cs" />
+    <Compile Include="CommandHandler\DataNameBase.cs" />
     <Compile Include="Controls\ButtonStrip\ButtonStrip.cs" />
     <Compile Include="Controls\ControlGroup.cs" />
+    <Compile Include="Controls\ControlLayout.cs" />
     <Compile Include="Controls\OMControlGraphicsBase.cs" />
     <Compile Include="Controls\OMObjectList.cs" />
     <Compile Include="Controls\PanelTransitionEffects.cs" />
@@ -133,8 +136,8 @@
     <Compile Include="Data\Messages.cs" />
     <Compile Include="Data\Phone.cs" />
     <Compile Include="Data\PluginSettings.cs" />
-    <Compile Include="Data\Sensors\DataSource.cs" />
-    <Compile Include="Data\Sensors\DataHandler.cs" />
+    <Compile Include="DataSources\DataSource.cs" />
+    <Compile Include="DataSources\DataHandler.cs" />
     <Compile Include="Data\SQL.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -152,6 +155,7 @@
     <Compile Include="helperFunctions\Globalization.cs" />
     <Compile Include="helperFunctions\Menu.cs" />
     <Compile Include="helperFunctions\OSK.cs" />
+    <Compile Include="helperFunctions\SmoothAnimator.cs" />
     <Compile Include="helperFunctions\StoredData.cs" />
     <Compile Include="IconManager.cs" />
     <Compile Include="Math\Calculation.cs" />
@@ -169,6 +173,10 @@
     <Compile Include="Media\ManagedTagReader.cs" />
     <Compile Include="Media\Playlist.cs" />
     <Compile Include="Net\RSS.cs" />
+    <Compile Include="Plugin\BasePluginCode.cs" />
+    <Compile Include="Plugin\HighLevelCode.cs" />
+    <Compile Include="Plugin\IDataSource.cs" />
+    <Compile Include="UIHandler\InfoBanner.cs" />
     <Compile Include="UIHandler\Notification.cs" />
     <Compile Include="UIHandler\UIHandler.cs" />
     <Compile Include="OSSpecific.cs" />
@@ -179,7 +187,6 @@
     <Compile Include="Plugin\IAVPlayer.cs" />
     <Compile Include="Plugin\IBasePlugin.cs" />
     <Compile Include="Plugin\IBluetooth.cs" />
-    <Compile Include="Plugin\IDataProvider.cs" />
     <Compile Include="Plugin\IHighLevel.cs" />
     <Compile Include="Plugin\IMediaDatabase.cs" />
     <Compile Include="Plugin\INavigation.cs" />
@@ -188,7 +195,6 @@
     <Compile Include="Plugin\IPausable.cs" />
     <Compile Include="Plugin\IPlayer.cs" />
     <Compile Include="Plugin\IRawHardware.cs" />
-    <Compile Include="Plugin\ISensorProvider.cs" />
     <Compile Include="Plugin\ISpeech.cs" />
     <Compile Include="Plugin\ITunedContent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -204,6 +210,7 @@
     </Compile>
     <Compile Include="Widget.cs" />
     <Compile Include="Platform\GnomeIcon.cs" />
+    <Compile Include="Zones\AudioDevice.cs" />
     <Compile Include="Zones\Zone.cs" />
     <Compile Include="Zones\ZoneHandler.cs" />
   </ItemGroup>
@@ -222,6 +229,7 @@
     <ProjectReference Include="..\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
       <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
       <Name>OpenMobile.Graphics</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -231,7 +239,7 @@
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
-      <ProductName>.NET Framework Client Profile</ProductName>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
@@ -270,7 +278,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
