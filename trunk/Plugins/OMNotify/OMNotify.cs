@@ -62,24 +62,27 @@ namespace ControlDemo
             return eLoadStatus.LoadSuccessful;
         }
 
-        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        void theHost_OnSystemEvent(eFunction function, object[] args)
         {
             if (function == eFunction.promptDialNumber)
             {
-                List3.Clear();
-                lastPath = arg1;
-                ((OMLabel)p[1]).Text = OpenMobile.Framework.Globalization.formatPhoneNumber(arg1);
-                ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|Phone", true);
-                imageItem itm = theHost.getSkinImage("Discs|Dial", true);
-                List3.Add(new OMListItem("Dial Number", itm.image));
-                itm = theHost.getSkinImage("Discs|Add", true);
-                List3.Add(new OMListItem("Add To Contacts", itm.image));
-                itm = theHost.getSkinImage("Discs|Close", true);
-                List3.Add(new OMListItem("Close", itm.image));
-                for (int i = 0; i < theHost.ScreenCount; i++)
+                if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 1))
                 {
-                    theHost.execute(eFunction.TransitionToPanel, i.ToString(), "OMNotify", "notify");
-                    theHost.execute(eFunction.ExecuteTransition, i.ToString(), "SlideDown");
+                    List3.Clear();
+                    lastPath = OpenMobile.helperFunctions.Params.GetParam<string>(args, 0);
+                    ((OMLabel)p[1]).Text = OpenMobile.Framework.Globalization.formatPhoneNumber(OpenMobile.helperFunctions.Params.GetParam<string>(args, 0));
+                    ((OMImage)p[3]).Image = theHost.getSkinImage("Discs|Phone", true);
+                    imageItem itm = theHost.getSkinImage("Discs|Dial", true);
+                    List3.Add(new OMListItem("Dial Number", itm.image));
+                    itm = theHost.getSkinImage("Discs|Add", true);
+                    List3.Add(new OMListItem("Add To Contacts", itm.image));
+                    itm = theHost.getSkinImage("Discs|Close", true);
+                    List3.Add(new OMListItem("Close", itm.image));
+                    for (int i = 0; i < theHost.ScreenCount; i++)
+                    {
+                        theHost.execute(eFunction.TransitionToPanel, i.ToString(), "OMNotify", "notify");
+                        theHost.execute(eFunction.ExecuteTransition, i.ToString(), "SlideDown");
+                    }
                 }
             }
         }
@@ -97,7 +100,7 @@ namespace ControlDemo
                     if (Configuration.RunningOnWindows)
                     {
                         string[] songs = Directory.GetFiles(lastPath);
-                        if (theHost.setPlaylist(PlaylistHandler.Convert(songs), screen))
+                        if (theHost.setPlaylist(PlayList.Convert(songs), screen))
                             theHost.execute(eFunction.nextMedia, screen.ToString());
                     }
                     else if (Configuration.RunningOnLinux)
@@ -108,7 +111,7 @@ namespace ControlDemo
                         int tracks = int.Parse(arg[1]);
                         for (int i = 1; i <= tracks; i++)
                             songs.Add("cdda://" + i.ToString());
-                        if (theHost.setPlaylist(PlaylistHandler.Convert(songs), screen))
+                        if (theHost.setPlaylist(PlayList.Convert(songs), screen))
                             theHost.execute(eFunction.nextMedia, screen.ToString());
                     }
                     break;
@@ -124,8 +127,8 @@ namespace ControlDemo
                     //theHost.SendStatusData(eDataType.Info, this, "", "Loading playlists...");
                     if (info.PlaylistFolders.Length == 0)
                         return;
-                    foreach (string playlist in PlaylistHandler.listPlaylists(info.PlaylistFolders[0]))
-                        media.AddRange(PlaylistHandler.readPlaylist(playlist));
+                    foreach (string playlist in PlayList.listPlaylists(info.PlaylistFolders[0]))
+                        media.AddRange(PlayList.readPlaylist(playlist));
                     theHost.setPlaylist(media, screen);
                     theHost.execute(eFunction.Play, screen.ToString(), media[0].Location);
                     break;

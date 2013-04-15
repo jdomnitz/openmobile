@@ -71,8 +71,18 @@ namespace ControlDemo
             btnClear.OnClick += new userInteraction(btnClear_OnClick);
             pOMList2Test.addControl(btnClear);
 
+            OMSlider Slider_RotationY = new OMSlider("Slider_RotationY", 200, 100, 400, 25, 12, 40);
+            Slider_RotationY.Slider = Host.getSkinImage("Slider");
+            Slider_RotationY.SliderBar = Host.getSkinImage("Slider.Bar");
+            Slider_RotationY.Minimum = -180;
+            Slider_RotationY.Maximum = 180;
+            Slider_RotationY.Value = 0;
+            Slider_RotationY.OnSliderMoved += new OMSlider.slidermoved(Slider_RotationY_OnSliderMoved);
+            pOMList2Test.addControl(Slider_RotationY);
+
             // List control
             OMObjectList lstListControl = new OMObjectList("lstListControl", 200, 150, 400, 400);
+            lstListControl._3D_CameraData = new _3D_Control(new OpenMobile.Math.Vector3d(0, -35, 0));
             //lstListControl.SkinDebug = true;
             lstListControl.BackgroundColor = Color.Black;
             //lstListControl.SoftEdges = FadingEdge.GraphicSides.Bottom | FadingEdge.GraphicSides.Left | FadingEdge.GraphicSides.Right | FadingEdge.GraphicSides.Top;
@@ -202,7 +212,7 @@ namespace ControlDemo
 
             OMObjectList lstListControl3 = new OMObjectList("lst_PanelSlideIn_ListControl3", 0, 600, 1000, 150);
             //lstListControl3.SkinDebug = true;
-            lstListControl3.BackgroundColor = Color.Black;
+            //lstListControl3.BackgroundColor = Color.Black;
             lstListControl3.ItemBase = ListControl3_CreateMessageListItem();
             lstListControl3.ScrollBar_ColorNormal = Color.Transparent;
             pOMList2Test.addControl(lstListControl3);
@@ -292,8 +302,35 @@ namespace ControlDemo
 
             #endregion
 
+            pOMList2Test.Entering += new PanelEvent(pOMList2Test_Entering);
+            pOMList2Test.Leaving += new PanelEvent(pOMList2Test_Leaving);
+
             // Load panel
             manager.loadPanel(pOMList2Test);
+        }
+
+        static void Slider_RotationY_OnSliderMoved(OMSlider sender, int screen)
+        {
+            OMObjectList lst = sender.Parent[screen, "lstListControl"] as OMObjectList;
+            OMSlider sldrY = sender.Parent[screen, "Slider_RotationY"] as OMSlider;
+            if (lst != null && sldrY != null)
+            {
+                lst._3D_CameraData = new _3D_Control(new OpenMobile.Math.Vector3d(sldrY.Value, 0, 0),
+                    new OpenMobile.Math.Vector3d(0, 0, 0),
+                    new OpenMobile.Math.Vector3d(0, 0, 0),
+                    new OpenMobile.Math.Vector3d(0, 0, 0),
+                    0);
+            }
+        }
+
+        static void pOMList2Test_Leaving(OMPanel sender, int screen)
+        {
+            OM.Host.UIHandler.Bars_Show(screen, false, OpenMobile.UI.UIHandler.Bars.Bottom);
+        }
+
+        static void pOMList2Test_Entering(OMPanel sender, int screen)
+        {
+            OM.Host.UIHandler.Bars_Hide(screen, false, OpenMobile.UI.UIHandler.Bars.Bottom);
         }
 
         static void lstListControl3_OnSelectedIndexChanged(OMObjectList sender, int screen)
@@ -423,7 +460,7 @@ namespace ControlDemo
             ItemBase1.Add(shpItemFrame);
             OMLabel lblListItemText = new OMLabel("lblListItemText", left + 10, 20, shpItemFrame.Width - 10, 260, "lblListItemText");
             lblListItemText.Font = new Font(Font.GenericSansSerif, 16F);
-            lblListItemText.TextAlignment = Alignment.WordWrapTL;
+            lblListItemText.TextAlignment = Alignment.WordWrap | Alignment.TopLeft;
             lblListItemText.Color = BaseColor;
             ItemBase1.Add(lblListItemText);
 

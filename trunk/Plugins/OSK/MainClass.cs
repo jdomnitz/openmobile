@@ -119,7 +119,7 @@ namespace OpenMobile
         {
             //This includes saving a reference to the Plugin Host if we need it later
             theHost=host;
-            manager = new ScreenManager(theHost.ScreenCount);
+            manager = new ScreenManager(this);
             //And loading up the controls.  In this example we load the controls using serialization.
             OMPanel regularKeyboard = OpenMobile.Framework.Serializer.deserializePanel(Path.Combine(theHost.SkinPath, "OSK.xml"), host)[0];
             if (regularKeyboard == null)
@@ -148,9 +148,9 @@ namespace OpenMobile
             theHost.OnKeyPress += new KeyboardEvent(theHost_OnKeyPress);
             theHost.OnGesture += new GestureEvent(theHost_OnGesture);
             //And then load the panel into the screen manager
-            manager.loadPanel(regularKeyboard);
-            manager.loadPanel(symKeyboard);
-            manager.loadPanel(numKeyboard);
+            manager.loadPanel(regularKeyboard, false);
+            manager.loadPanel(symKeyboard, false);
+            manager.loadPanel(numKeyboard, false);
             //And when everything is all ready to go...we return true
             return eLoadStatus.LoadSuccessful;
         }

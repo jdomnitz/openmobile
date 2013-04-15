@@ -59,7 +59,7 @@ namespace Networking
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
-            manager = new ScreenManager(theHost.ScreenCount);
+            manager = new ScreenManager(this);
             host.OnWirelessEvent += new WirelessEvent(host_OnWirelessEvent);
             OMPanel p = new OMPanel();
             OMBasicShape border=new OMBasicShape("", 20,110,620,410, 
@@ -122,7 +122,7 @@ namespace Networking
             prompt.addControl(textbox);
             prompt.addControl(textbox2);
             prompt.addControl(login);
-            manager.loadPanel(p);
+            manager.loadPanel(p, true);
             manager.loadPanel(prompt);
             OpenMobile.Threading.TaskManager.QueueTask(UpdateList, ePriority.Normal, "Refresh Networks");
             return OpenMobile.eLoadStatus.LoadSuccessful;

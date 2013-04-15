@@ -36,7 +36,7 @@ using VistaAudio.CoreAudioApi;
 
 namespace OMPlayer
 {
-    public sealed class VistaPlayer : IAVPlayer
+    public sealed class VistaPlayer : IAVPlayer, IAudioDeviceProvider
     {
         // Fields
         internal static AVPlayer[] player;
@@ -52,15 +52,15 @@ namespace OMPlayer
         {
             if (settings == null)
             {
-                settings = new Settings("OMPlayer2 Settings");
+                settings = new Settings("VistaPlayer Settings");
                 using (PluginSettings s = new PluginSettings())
                 {
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", String.Empty, "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.AutoResume")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.PlayProtected", String.Empty, "Attempt to play protected files", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.PlayProtected")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", String.Empty, "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting(this, "Music.AutoResume")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.PlayProtected", String.Empty, "Attempt to play protected files", Setting.BooleanList, Setting.BooleanList, s.getSetting(this, "Music.PlayProtected")));
                     List<string> crossfadeo = new List<string>(new string[] { "None", "1 Second", "2 Seconds", "3 Seconds", "4 Seconds", "5 Seconds" });
                     List<string> crossfadev = new List<string>(new string[] { String.Empty, "1000", "2000", "3000", "4000", "5000" });
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.CrossfadeDuration", "Crossfade", "Crossfade between songs", crossfadeo, crossfadev, s.getSetting("Music.CrossfadeDuration")));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.MediaKeys", String.Empty, "Respond to media keys", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.MediaKeys")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.CrossfadeDuration", "Crossfade", "Crossfade between songs", crossfadeo, crossfadev, s.getSetting(this, "Music.CrossfadeDuration")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.MediaKeys", String.Empty, "Respond to media keys", Setting.BooleanList, Setting.BooleanList, s.getSetting(this, "Music.MediaKeys")));
                 }
                 settings.OnSettingChanged += new SettingChanged(changed);
             }
@@ -82,7 +82,7 @@ namespace OMPlayer
                 if (!string.IsNullOrEmpty(setting.Value))
                     crossfade = int.Parse(setting.Value);
             }
-            OpenMobile.helperFunctions.StoredData.Set(setting.Name, setting.Value);
+            OpenMobile.helperFunctions.StoredData.Set(this, setting.Name, setting.Value);
         }
         private void checkInstance(Zone zone)
         {
@@ -206,21 +206,21 @@ namespace OMPlayer
                         {
                             if (getPlayerStatus(zone) == ePlayerStatus.Stopped)
                             {
-                                settings.setSetting("Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", "");
+                                settings.setSetting(this, "Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", "");
                                 continue;
                             }
-                            settings.setSetting("Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", player[zone.AudioDevice.Instance].nowPlaying.Location);
-                            settings.setSetting("Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingPosition", player[zone.AudioDevice.Instance].pos.ToString());
+                            settings.setSetting(this, "Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", player[zone.AudioDevice.Instance].nowPlaying.Location);
+                            settings.setSetting(this, "Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingPosition", player[zone.AudioDevice.Instance].pos.ToString());
                         }
                         else
                         {
-                            settings.setSetting("Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", "");
+                            settings.setSetting(this, "Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", "");
                         }
                     }
                 }
             }
         }
-        private void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        private void host_OnSystemEvent(eFunction function, object[] args)
         {
             if (function == eFunction.closeProgram)
             {
@@ -229,12 +229,15 @@ namespace OMPlayer
             }
             else if (function == eFunction.RenderingWindowResized)
             {
-                foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(arg1)))
+                if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 1))
                 {
-                    if (zone.AudioDevice.Instance >= player.Length)
-                        return;
-                    if (player[zone.AudioDevice.Instance] != null)
-                        player[zone.AudioDevice.Instance].Resize();
+                    foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(OpenMobile.helperFunctions.Params.GetParam<string>(args,0))))
+                    {
+                        if (zone.AudioDevice.Instance >= player.Length)
+                            return;
+                        if (player[zone.AudioDevice.Instance] != null)
+                            player[zone.AudioDevice.Instance].Resize();
+                    }
                 }
             }
             else if (function == eFunction.videoAreaChanged)
@@ -246,15 +249,16 @@ namespace OMPlayer
                 if (player[inst] != null)
                     player[inst].Resize();
                 */
-
-                foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(arg1)))
+                if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 1))
                 {
-                    if (zone.AudioDevice.Instance < 0 | zone.AudioDevice.Instance >= player.Length)
-                        continue;
-                    if (player[zone.AudioDevice.Instance] != null)
-                        player[zone.AudioDevice.Instance].Resize();
+                    foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(OpenMobile.helperFunctions.Params.GetParam<string>(args, 0))))
+                    {
+                        if (zone.AudioDevice.Instance < 0 | zone.AudioDevice.Instance >= player.Length)
+                            continue;
+                        if (player[zone.AudioDevice.Instance] != null)
+                            player[zone.AudioDevice.Instance].Resize();
+                    }
                 }
-
             }
         }
 
@@ -289,8 +293,8 @@ namespace OMPlayer
             OnPlayerRequested += new CreateNewPlayer(createInstance);
             using (PluginSettings setting = new PluginSettings())
             {
-                setting.setSetting("Default.AVPlayer.Files", "OMPlayer2");
-                string cf = setting.getSetting("Music.CrossfadeDuration");
+                setting.setSetting(this, "Default.AVPlayer.Files", "OMPlayer2");
+                string cf = setting.getSetting(this, "Music.CrossfadeDuration");
                 if (cf != "")
                     crossfade = int.Parse(cf);
                 _AudioDevices = OutputDevices;
@@ -485,7 +489,7 @@ namespace OMPlayer
                 if (url.EndsWith(".m4p"))
                 {
                     using (PluginSettings s = new PluginSettings())
-                        if (s.getSetting("Music.PlayProtected") != "True")
+                        if (s.getSetting(this, "Music.PlayProtected") != "True")
                             return false;
                 }
                 if (url.EndsWith(".ifo"))
@@ -693,7 +697,7 @@ namespace OMPlayer
         {
             get
             {
-                return "OMPlayer2";
+                return "VistaPlayer";
             }
         }
 

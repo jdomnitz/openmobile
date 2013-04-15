@@ -59,7 +59,7 @@ namespace OpenMobile
             //We save a reference to the plugin host for use later
             theHost = host;
 
-            screens = new ScreenManager(theHost.ScreenCount);
+            screens = new ScreenManager(this);
 
             imageItem mainMenu = theHost.getSkinImage("menuButton");
             imageItem mainMenuFocus = theHost.getSkinImage("menuButtonHighlighted");
@@ -72,7 +72,7 @@ namespace OpenMobile
 
             for (int screen = 0; screen < theHost.ScreenCount; screen++)
             {
-                if (settings.getSetting("MainMenu." + screen.ToString() + ".MainMenu1.Plugin") == "")
+                if (settings.getSetting(this, "MainMenu." + screen.ToString() + ".MainMenu1.Plugin") == "")
                     createDefaultSettings(settings, screen);
 
                 OMPanel mainPanel = new OMPanel("MainMenu");
@@ -81,7 +81,7 @@ namespace OpenMobile
                 for (int i = 0; i < MainMenuButtons.Length; i++)
                 {
                     string Name = String.Format("MainMenu.{0}.MainMenu{1}", screen.ToString(), (i + 1));
-                    string Text = settings.getSetting(String.Format("{0}.Display", Name));
+                    string Text = settings.getSetting(this, String.Format("{0}.Display", Name));
 
                     #region Calculate left placement
 
@@ -127,9 +127,10 @@ namespace OpenMobile
 
                     #endregion
 
-                    MainMenuButtons[i] = DefaultControls.GetButton(Name, Left, Top, 300, 120, "", Text);
+                    //MainMenuButtons[i] = DefaultControls.GetButton(Name, Left, Top, 300, 120, "", Text);
+                    MainMenuButtons[i] = OMButton.PreConfigLayout_BasicStyle(Name, Left, Top, 300, 120, GraphicCorners.All, "", Text);
                     MainMenuButtons[i].OnHoldClick += new userInteraction(OnHoldClick);
-                    MainMenuButtons[i].Tag = settings.getSetting(String.Format("{0}.Plugin", Name));
+                    MainMenuButtons[i].Tag = settings.getSetting(this, String.Format("{0}.Plugin", Name));
                     MainMenuButtons[i].OnClick += new userInteraction(MainMenu_OnClick);
                     mainPanel.addControl(MainMenuButtons[i]);                    
                 }
@@ -384,8 +385,8 @@ namespace OpenMobile
                 {
                     if (theList[theList.SelectedIndex].text.Trim() == "Not Set")
                         theList[theList.SelectedIndex].text = "";
-                    setting.setSetting(currentlySetting + ".Plugin", ((string)theList[theList.SelectedIndex].tag));
-                    setting.setSetting(currentlySetting + ".Display", theList[theList.SelectedIndex].text);
+                    setting.setSetting(this, currentlySetting + ".Plugin", ((string)theList[theList.SelectedIndex].tag));
+                    setting.setSetting(this, currentlySetting + ".Display", theList[theList.SelectedIndex].text);
                     screens[screen][currentlySetting].Tag = ((string)theList[theList.SelectedIndex].tag);
                     //((OMButton)screens[screen][currentlySetting]).Text = theList[theList.SelectedIndex].text;
                 }
@@ -399,19 +400,19 @@ namespace OpenMobile
 
         private void createDefaultSettings(PluginSettings settings, int screen)
         {
-            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu1.Plugin", "NewMedia"); ;
-            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu1.Display", "Music");
+            settings.setSetting(this, "MainMenu." + screen.ToString() + ".MainMenu1.Plugin", "NewMedia"); ;
+            settings.setSetting(this, "MainMenu." + screen.ToString() + ".MainMenu1.Display", "Music");
 
-            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu2.Plugin", "About");
-            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu2.Display", "About");
+            settings.setSetting(this, "MainMenu." + screen.ToString() + ".MainMenu2.Plugin", "About");
+            settings.setSetting(this, "MainMenu." + screen.ToString() + ".MainMenu2.Display", "About");
 
-            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu3.Plugin", "OMSettings");
-            settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu3.Display", "Settings");
+            settings.setSetting(this, "MainMenu." + screen.ToString() + ".MainMenu3.Plugin", "OMSettings");
+            settings.setSetting(this, "MainMenu." + screen.ToString() + ".MainMenu3.Display", "Settings");
 
             if (screen == 0)
             {   // Exit button is by default only on screen zero (main screen)
-                settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu5.Plugin", "Exit");
-                settings.setSetting("MainMenu." + screen.ToString() + ".MainMenu5.Display", "Exit");
+                settings.setSetting(this, "MainMenu." + screen.ToString() + ".MainMenu5.Plugin", "Exit");
+                settings.setSetting(this, "MainMenu." + screen.ToString() + ".MainMenu5.Display", "Exit");
             }
         }
 
@@ -501,7 +502,7 @@ namespace OpenMobile
                             }
 
                             // Set Text
-                            gd.Text = StoredData.Get(String.Format("{0}.Display", Button.Name));
+                            gd.Text = StoredData.Get(this, String.Format("{0}.Display", Button.Name));
 
                             // Set size
                             gd.Width = Button.Width;

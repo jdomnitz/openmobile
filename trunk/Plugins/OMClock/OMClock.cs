@@ -49,26 +49,33 @@ namespace OMClock
         {
             OMPanel p = new OMPanel("Clock");
             theHost = host;
-            manager = new ScreenManager(theHost.ScreenCount);
+            manager = new ScreenManager(this);
+
+            Rectangle ClientArea = theHost.ClientArea[0];
+
+            // Create a new controlgroup
+            ControlGroup clockGroup = new ControlGroup();
 
             // Clock and date
-            OMLabel labelClockTime = new OMLabel("labelClockTime", 0, 200, 950, 200);
+            OMLabel labelClockTime = new OMLabel("labelClockTime", 0, 0, theHost.ClientArea[0].Width, 200);
             labelClockTime.TextAlignment = Alignment.CenterCenter;
             labelClockTime.Font = new Font(Font.LED, 130F);
-            labelClockTime.Format = eTextFormat.Italic;
+            labelClockTime.AutoFitTextMode = FitModes.FitFillSingleLine;
             labelClockTime.Text = "{System.Time}";
-            p.addControl(labelClockTime);
-            OMLabel labelClockdate = new OMLabel("labelClockdate", 0, 380, 950, 100);
+            clockGroup.Add(labelClockTime);
+            OMLabel labelClockdate = new OMLabel("labelClockdate", labelClockTime.Region.Left, labelClockTime.Region.Bottom + 20, labelClockTime.Region.Width, 100);
             labelClockdate.TextAlignment = Alignment.CenterCenter;
             labelClockdate.Font = new Font(Font.LED, 50F);
-            labelClockdate.Format = eTextFormat.Italic;
+            labelClockdate.AutoFitTextMode = FitModes.FitFillSingleLine;
             labelClockdate.Text = "{System.Date.Long}";
-            p.addControl(labelClockdate);       
+            clockGroup.Add(labelClockdate);
+
+            // Place group in center
+            p.addControlGroup(ClientArea.Left, ClientArea.Center.Y - clockGroup.Region.Center.Y, clockGroup);
 
             p.Entering += new PanelEvent(p_Entering);
             p.Leaving += new PanelEvent(p_Leaving);
-            manager.loadPanel(p);
-            manager.DefaultPanel = p.Name;
+            manager.loadPanel(p, true);
 
             return eLoadStatus.LoadSuccessful;
         }

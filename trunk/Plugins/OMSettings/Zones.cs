@@ -74,7 +74,7 @@ namespace OMSettings
 
             OMLabel Label_PanelInfo = new OMLabel("Zones_Label_PanelInfo", 20, 270, 270, 300);
             Label_PanelInfo.Text = "Zone is a User named collection of screen and/or audio\n\nA zone can also include other zones to create new \"virtual zones\"";
-            Label_PanelInfo.TextAlignment = Alignment.WordWrapTL;
+            Label_PanelInfo.TextAlignment = Alignment.WordWrap | Alignment.TopLeft;
             panelZones.addControl(Label_PanelInfo);
 
             OMList List_Zones = new OMList("List_Zones", 300, 140, 650, 400);
@@ -834,10 +834,7 @@ namespace OMSettings
             ZoneList_Update(screen);
 
             // Load the buttonstrip
-            Host.UIHandler.PopUpMenu.SetButtonStrip(screen, PopUpMenuStrip);
-
-
-            
+            Host.UIHandler.PopUpMenu.SetButtonStrip(screen, PopUpMenuStrip);          
 
         }
 
