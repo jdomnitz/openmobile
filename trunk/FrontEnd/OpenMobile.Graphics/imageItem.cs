@@ -100,9 +100,9 @@ namespace OpenMobile
         public override string ToString()
         {
             if (image == null)
-                return null;
+                return String.Empty;
             else
-                return string.Format("{0}({1})",name,this.GetHashCode());
+                return string.Format("ImageItem (Name/Path:{0}, Hash:{1}",name,this.GetHashCode());
         }
         /// <summary>
         /// Value Comparison

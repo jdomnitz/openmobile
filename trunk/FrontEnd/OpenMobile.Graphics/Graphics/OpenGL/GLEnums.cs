@@ -3820,6 +3820,7 @@ namespace OpenMobile.Graphics.OpenGL
         TriangleStrip = 0x0005,
         TriangleFan = 0x0006,
         Quads = 0x0007,
+        QuadStrip = 0x0008,
         Polygon = 0x0009,
         LinesAdjacency = 0xA,
         LineStripAdjacency = 0xB,

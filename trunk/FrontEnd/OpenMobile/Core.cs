@@ -30,6 +30,7 @@ using OpenMobile.Plugin;
 using OpenMobile.Framework;
 using System.Diagnostics;
 using OpenMobile.Graphics;
+using OpenMobile.helperFunctions.Plugins;
 
 namespace OpenMobile
 {
@@ -38,6 +39,7 @@ namespace OpenMobile
         public static PluginHost theHost = new PluginHost();
         public static List<RenderingWindow> RenderingWindows = null;
         public static List<IBasePlugin> pluginCollection = new List<IBasePlugin>();
+        public static List<IBasePlugin> pluginCollectionDisabled = new List<IBasePlugin>();
         public static bool exitTransition = true;
         public static GameWindowFlags Fullscreen;
 
@@ -57,9 +59,9 @@ namespace OpenMobile
             {
                 using (PluginSettings s = new PluginSettings())
                 {
-                    Application.ShowError(null, "OpenMobile was unable to load required skin file:\n\n" + DLLName + ".dll\n\nMake sure that required files are located in the correct skin folder.\nSetting active skin back to \"Default\" since loading skin \"" + s.getSetting("UI.Skin") + "\" failed!\n\nApplication will now exit!", "Missing required file!");
+                    Application.ShowError(null, "OpenMobile was unable to load required skin file:\n\n" + DLLName + ".dll\n\nMake sure that required files are located in the correct skin folder.\nSetting active skin back to \"Default\" since loading skin \"" + s.getSetting(BuiltInComponents.OMInternalPlugin, "UI.Skin") + "\" failed!\n\nApplication will now exit!", "Missing required file!");
                     // Set skin back to default
-                    s.setSetting("UI.Skin", "Default");
+                    s.setSetting(BuiltInComponents.OMInternalPlugin, "UI.Skin", "Default");
                 }
                 Environment.Exit(0);
                 return null;
@@ -316,11 +318,10 @@ namespace OpenMobile
                 return false;
         }
 
-
         /// <summary>
         /// Order to of types to try to load the plugins by
         /// </summary>
-        private static Type[] pluginTypes = new Type[] { typeof(IRawHardware), typeof(IDataSource), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin) };
+        private static Type[] pluginTypes = new Type[] { typeof(IRawHardware), typeof(IDataSource),typeof(IMediaProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin) };
         public static eLoadStatus[] status;
         /// <summary>
         /// Initialize each of the plugins in the plugin's array (pluginCollection)
@@ -343,6 +344,27 @@ namespace OpenMobile
                                 if (SystemOnly)
                                     if (!IsPluginLevel(pluginCollection[i], PluginLevels.System))
                                         continue;
+
+                                // Check if required os configuration flags is valid
+                                if (!helperFunctions.Plugins.Plugins.IsPluginOSConfigurationFlagsValid(pluginCollection[i]))
+                                {
+                                    // Add to disabled plugins list instead
+                                    if (!pluginCollectionDisabled.Contains(pluginCollection[i]))
+                                        pluginCollectionDisabled.Add(pluginCollection[i]);
+                                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "Plugin Manager", String.Format("Plugin not supported on this system: {0} [Required ConfFlags: {1} | System ConfFlags: {2}]", pluginCollection[i].pluginName, Plugins.GetPluginOSConfigurationFlags(pluginCollection[i]), Plugins.GetSystemOSConfigurationFlags()));
+                                    continue;
+                                }
+
+                                // Skip plugins that's not enabled
+                                if (!helperFunctions.Plugins.Plugins.GetPluginEnabled(pluginCollection[i].pluginName))
+                                {
+                                    // Add to disabled plugins list instead
+                                    if (!pluginCollectionDisabled.Contains(pluginCollection[i]))
+                                        pluginCollectionDisabled.Add(pluginCollection[i]);
+                                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", String.Format("Plugin disabled: {0}", pluginCollection[i].pluginName));
+                                    continue;
+                                }
+
                                 BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
                                 status[i] = pluginCollection[i].initialize(theHost);
                             }
@@ -358,29 +380,49 @@ namespace OpenMobile
                 }
             }
             foreach (Type tp in pluginTypes)
-            {             
+            {
                 for (int i = 0; i < pluginCollection.Count; i++) //Give them all a second chance if they need it
-                try
-                {
-                    if (tp.IsInstanceOfType(pluginCollection[i]))
+                    try
                     {
-                        if (status[i] == eLoadStatus.LoadFailedRetryRequested)
+                        if (tp.IsInstanceOfType(pluginCollection[i]))
                         {
-                            // Skip plugins that is not marked as system if SystemOnly is true
-                            if (SystemOnly)
-                                if (!IsPluginLevel(pluginCollection[i], PluginLevels.System))
+                            if (status[i] == eLoadStatus.LoadFailedRetryRequested)
+                            {
+                                // Skip plugins that is not marked as system if SystemOnly is true
+                                if (SystemOnly)
+                                    if (!IsPluginLevel(pluginCollection[i], PluginLevels.System))
+                                        continue;
+
+                                // Check if required os configuration flags is valid
+                                if (!helperFunctions.Plugins.Plugins.IsPluginOSConfigurationFlagsValid(pluginCollection[i]))
+                                {
+                                    // Add to disabled plugins list instead
+                                    if (!pluginCollectionDisabled.Contains(pluginCollection[i]))
+                                        pluginCollectionDisabled.Add(pluginCollection[i]);
+                                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "Plugin Manager", String.Format("Plugin not supported on this system: {0} Required ConfFlags: {1}, System ConfFlags:{2}" + pluginCollection[i].pluginName, OpenMobile.helperFunctions.Plugins.Plugins.GetPluginOSConfigurationFlags(pluginCollection[i]), OpenMobile.helperFunctions.Plugins.Plugins.GetSystemOSConfigurationFlags()));
                                     continue;
-                            status[i] = pluginCollection[i].initialize(theHost);
+                                }
+
+                                // Skip plugins that's not enabled
+                                if (!helperFunctions.Plugins.Plugins.GetPluginEnabled(pluginCollection[i].pluginName))
+                                {
+                                    // Add to disabled plugins list instead
+                                    if (!pluginCollectionDisabled.Contains(pluginCollection[i]))
+                                        pluginCollectionDisabled.Add(pluginCollection[i]);
+                                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", String.Format("Plugin disabled: {0}", pluginCollection[i].pluginName));
+                                    continue;
+                                }
+                                status[i] = pluginCollection[i].initialize(theHost);
+                            }
                         }
                     }
-                }
-                catch (Exception e)
-                {
-                    status[i] = eLoadStatus.LoadFailedUnloadRequested;
-                    string ex = spewException(e);
-                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception2: " + ex);
-                    Debug.Print(ex);
-                }
+                    catch (Exception e)
+                    {
+                        status[i] = eLoadStatus.LoadFailedUnloadRequested;
+                        string ex = spewException(e);
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", "Exception2: " + ex);
+                        Debug.Print(ex);
+                    }
             }
             for (int i = 0; i < pluginCollection.Count; i++) //and then two strikes their out...kill anything that still can't initialize
             {
@@ -391,7 +433,7 @@ namespace OpenMobile
                         pluginCollection[i].Dispose();
                         if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
                         {
-                            theHost.UIHandler.AddNotification(new Notification(Notification.Styles.Warning, pluginCollection[i], null, theHost.getSkinImage("AIcons|11-alerts-and-states-error").image, String.Format("Loading of plugin {0} failed", pluginCollection[i].pluginName), String.Format("Plugin {0} ({1}) by {2} was unloaded.", pluginCollection[i].pluginName, pluginCollection[i].pluginDescription, pluginCollection[i].authorName)));
+                            theHost.UIHandler.AddNotification(new Notification(Notification.Styles.Warning, pluginCollection[i], null, null, String.Format("Loading of plugin {0} failed", pluginCollection[i].pluginName), String.Format("Plugin {0} ({1}) by {2} was unloaded.", pluginCollection[i].pluginName, pluginCollection[i].pluginDescription, pluginCollection[i].authorName)));
                             //theHost.SendStatusData(eDataType.Error, pluginCollection[i], "", String.Format("{0} CRASHED!", pluginCollection[i].pluginName));
                             BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", String.Format("{0} CRASHED!", pluginCollection[i].pluginName));
                         }
@@ -410,7 +452,12 @@ namespace OpenMobile
                     pluginCollection.RemoveAll(p => p == null);
                 }
             }
-        }        
+
+            // Filter out disabled plugins from main pluginlist
+            foreach (IBasePlugin plugin in pluginCollectionDisabled)
+                pluginCollection.Remove(plugin);
+
+        }
 
 
         private static void initialize()
@@ -444,7 +491,10 @@ namespace OpenMobile
             theHost.LateInit();
 
             // Inform system that plugin loading is completed
-            theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);
+            SandboxedThread.Asynchronous(() => 
+                {
+                    theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);
+                });
 
             // Enumerate available devices
             theHost.Hal_Send("32");
@@ -455,7 +505,7 @@ namespace OpenMobile
             // Set graphic level
             using (PluginSettings settings = new PluginSettings())
             {
-                if (settings.getSetting("UI.MinGraphics") == "True")
+                if (BuiltInComponents.SystemSettings.UseSimpleGraphics)
                     theHost.GraphicsLevel = eGraphicsLevel.Minimal;
             }
 

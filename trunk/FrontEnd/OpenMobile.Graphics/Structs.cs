@@ -1,14 +1,18 @@
 ﻿#pragma warning disable 0659,0661
 using System;
 using System.Reflection;
+using System.Collections.Generic;
+using OpenMobile.Math;
+
 namespace OpenMobile.Graphics
 {
     using Math = System.Math;
     public enum Gradient:byte
     {
-        None=0,
-        Vertical=1,
-        Horizontal=2
+        None = 0,
+        Vertical = 1,
+        Horizontal = 2,
+        Individual = 3
     }
     [Flags]
     public enum FontStyle:byte
@@ -79,44 +83,529 @@ namespace OpenMobile.Graphics
         #endregion
     }
 
+    /// <summary>
+    /// Gradient data
+    /// </summary>
+    public class GradientData : List<GradientData.ColorQuad>
+    {
+        /// <summary>
+        /// Creates a gradient type that gives a border around a specified center color. 
+        /// The color of each corner can be freely set, use Color.Empty to specifiy a transparent area
+        /// </summary>
+        /// <param name="borderSizeX"></param>
+        /// <param name="borderSizeY"></param>
+        /// <param name="c1"></param>
+        /// <param name="c2"></param>
+        /// <param name="c3"></param>
+        /// <param name="c4"></param>
+        /// <param name="c5"></param>
+        /// <returns></returns>
+        static public GradientData CreateColorBorder(float borderSizeX, float borderSizeY, Color c1, Color c2, Color c3, Color c4, Color c5)
+        {
+            PointF[] p = new PointF[8];
+            p[0] = new PointF(-1, -1);
+            p[1] = new PointF(1, -1);
+            p[2] = new PointF(1, 1);
+            p[3] = new PointF(-1, 1);
+            p[4] = new PointF(p[0].X - -borderSizeX, p[0].Y - -borderSizeY);
+            p[5] = new PointF(p[1].X - borderSizeX, p[1].Y - -borderSizeY);
+            p[6] = new PointF(p[2].X - borderSizeX, p[2].Y - borderSizeY);
+            p[7] = new PointF(p[3].X - -borderSizeX, p[3].Y - borderSizeY);
+            
+            GradientData gradient = new GradientData();
+
+            // Corner
+            gradient.Add(new ColorQuad(
+                new ColorPoint(p[0].X, p[4].Y, c1),
+                new ColorPoint(p[0].X, p[0].Y, c1),
+                new ColorPoint(p[4].X, p[0].Y, c1),
+                new ColorPoint(p[4].X, p[4].Y, c5)));
+
+            gradient.Add(new ColorQuad(
+                new ColorPoint(p[4].X, p[0].Y, c1),
+                new ColorPoint(p[5].X, p[1].Y, c2),
+                new ColorPoint(p[5].X, p[5].Y, c5),
+                new ColorPoint(p[4].X, p[4].Y, c5)));
+
+            // Corner
+            gradient.Add(new ColorQuad(
+                new ColorPoint(p[5].X, p[1].Y, c2),
+                new ColorPoint(p[1].X, p[1].Y, c2),
+                new ColorPoint(p[1].X, p[5].Y, c2),
+                new ColorPoint(p[5].X, p[5].Y, c5)));
+
+            gradient.Add(new ColorQuad(
+                new ColorPoint(p[5].X, p[5].Y, c5),
+                new ColorPoint(p[1].X, p[5].Y, c2),
+                new ColorPoint(p[1].X, p[6].Y, c3),
+                new ColorPoint(p[6].X, p[6].Y, c5)));
+
+             // Corner
+            gradient.Add(new ColorQuad(
+                new ColorPoint(p[2].X, p[6].Y, c3),
+                new ColorPoint(p[2].X, p[2].Y, c3),
+                new ColorPoint(p[6].X, p[2].Y, c3),
+                new ColorPoint(p[6].X, p[6].Y, c5)));
+
+            gradient.Add(new ColorQuad(
+                new ColorPoint(p[7].X, p[3].Y, c4),
+                new ColorPoint(p[7].X, p[7].Y, c5),
+                new ColorPoint(p[6].X, p[6].Y, c5),
+                new ColorPoint(p[6].X, p[2].Y, c3)));
+
+            // Corner
+            gradient.Add(new ColorQuad(
+                new ColorPoint(p[7].X, p[3].Y, c4),
+                new ColorPoint(p[3].X, p[3].Y, c4),
+                new ColorPoint(p[3].X, p[7].Y, c4),
+                new ColorPoint(p[7].X, p[7].Y, c5)));
+
+            gradient.Add(new ColorQuad(
+                new ColorPoint(p[3].X, p[7].Y, c4),
+                new ColorPoint(p[0].X, p[4].Y, c1),
+                new ColorPoint(p[4].X, p[4].Y, c5),
+                new ColorPoint(p[7].X, p[7].Y, c5)));
+
+            gradient.Add(new ColorQuad(
+                new ColorPoint(p[7].X, p[7].Y, c5),
+                new ColorPoint(p[4].X, p[4].Y, c5),
+                new ColorPoint(p[5].X, p[5].Y, c5),
+                new ColorPoint(p[6].X, p[6].Y, c5)));
+
+            return gradient;
+        }
+
+        /// <summary>
+        /// Creates a horizontal gradient, each color is equally spaced in the horizontal direction
+        /// </summary>
+        /// <param name="colors"></param>
+        /// <returns></returns>
+        static public GradientData CreateHorizontalGradient(params Color[] colors)
+        {
+            GradientData gradient = new GradientData();
+            double quadsize = 2.0;
+            if (colors.Length > 2)
+                quadsize /= (colors.Length-1);
+            double lastpos = -1;
+            if (colors.Length > 1)
+            {
+                for (int i = 0; i < colors.Length - 1; i++)
+                {
+                    // Create the quads
+                    gradient.Add(new ColorQuad(
+                        new ColorPoint(lastpos, -1, colors[i]),
+                        new ColorPoint(lastpos + quadsize, -1, colors[i + 1]),
+                        new ColorPoint(lastpos + quadsize, 1, colors[i + 1]),
+                        new ColorPoint(lastpos, 1, colors[i])));
+                    lastpos += quadsize;
+                }
+            }
+            else if (colors.Length == 1)
+            {   // Add just one big color
+                gradient.Add(new ColorQuad(
+                    new ColorPoint(-1, -1, colors[0]),
+                    new ColorPoint(1, -1, colors[0]),
+                    new ColorPoint(1, 1, colors[0]),
+                    new ColorPoint(-1, 1, colors[0])));
+            }
+            return gradient;
+        }
+
+        /// <summary>
+        /// Creates a horizontal gradient, the different positions for the colors can be freely set in the range -1 to 1 
+        /// where -1 is all the way to the left and 1 is all the way to the right
+        /// </summary>
+        /// <param name="colorPoints"></param>
+        /// <returns></returns>
+        static public GradientData CreateHorizontalGradient(params ColorPoint[] colorPoints)
+        {
+            GradientData gradient = new GradientData();
+            double lastpos = -1;
+            for (int i = 0; i < colorPoints.Length - 1; i++)
+            {
+                // Create the quads
+                double newX = lastpos + colorPoints[i+1].Point.X;
+                // Limit endpos
+                if (newX > 1) newX = 1;
+
+                gradient.Add(new ColorQuad(
+                    new ColorPoint(lastpos, -1, colorPoints[i].Color),
+                    new ColorPoint(newX, -1, colorPoints[i + 1].Color),
+                    new ColorPoint(newX, 1, colorPoints[i + 1].Color),
+                    new ColorPoint(lastpos, 1, colorPoints[i].Color)));
+                lastpos += colorPoints[i+1].Point.X;
+
+                // Stop if we go outside the region
+                if (lastpos >= 1 || newX >= 1) 
+                    break;
+            }
+
+            // Fill last part of gradient with last color
+            if (lastpos < 1)
+            {
+                gradient.Add(new ColorQuad(
+                    new ColorPoint(lastpos, -1, colorPoints[colorPoints.Length - 1].Color),
+                    new ColorPoint(1, -1, colorPoints[colorPoints.Length - 1].Color),
+                    new ColorPoint(1, 1, colorPoints[colorPoints.Length - 1].Color),
+                    new ColorPoint(lastpos, 1, colorPoints[colorPoints.Length - 1].Color)));
+            }
+            
+            return gradient;
+        }
+
+        /// <summary>
+        /// Creates a vertical gradient, each color is equally spaced in the horizontal direction
+        /// </summary>
+        /// <param name="colors"></param>
+        /// <returns></returns>
+        static public GradientData CreateVerticalGradient(params Color[] colors)
+        {
+            GradientData gradient = new GradientData();
+            double quadsize = 2.0;
+            if (colors.Length > 2)
+                quadsize /= (colors.Length - 1);
+            double lastpos = -1;
+            if (colors.Length > 1)
+            {
+                for (int i = 0; i < colors.Length - 1; i++)
+                {
+                    // Create the quads
+                    gradient.Add(new ColorQuad(
+                        new ColorPoint(-1, lastpos, colors[i]),
+                        new ColorPoint(1, lastpos, colors[i]),
+                        new ColorPoint(1, lastpos + quadsize, colors[i + 1]),
+                        new ColorPoint(-1, lastpos + quadsize, colors[i + 1])));
+                    lastpos += quadsize;
+                }
+            }
+            else if (colors.Length == 1)
+            {   // Add just one big color
+                gradient.Add(new ColorQuad(
+                    new ColorPoint(-1, -1, colors[0]),
+                    new ColorPoint(1, -1, colors[0]),
+                    new ColorPoint(1, 1, colors[0]),
+                    new ColorPoint(-1, 1, colors[0])));
+            }
+
+            return gradient;
+        }
+
+        /// <summary>
+        /// Creates a vertical gradient, the different positions for the colors can be freely set in the range -1 to 1 
+        /// where -1 is all the way to the left and 1 is all the way to the right
+        /// </summary>
+        /// <param name="colors"></param>
+        /// <returns></returns>
+        static public GradientData CreateVerticalGradient(params ColorPoint[] colorPoints)
+        {
+            GradientData gradient = new GradientData();
+            double lastpos = -1;
+            for (int i = 0; i < colorPoints.Length - 1; i++)
+            {
+                // Create the quads
+                double newY = lastpos + colorPoints[i + 1].Point.Y;
+                // Limit endpos
+                if (newY > 1) newY = 1;
+
+                gradient.Add(new ColorQuad(
+                    new ColorPoint(-1, lastpos, colorPoints[i].Color),
+                    new ColorPoint(1, lastpos, colorPoints[i].Color),
+                    new ColorPoint(1, newY, colorPoints[i + 1].Color),
+                    new ColorPoint(-1, newY, colorPoints[i + 1].Color)));
+                lastpos += colorPoints[i + 1].Point.Y;
+
+                // Stop if we go outside the region
+                if (lastpos >= 1 || newY >= 1)
+                    break;
+            }
+
+            // Fill last part of gradient with last color
+            if (lastpos < 1)
+            {
+                gradient.Add(new ColorQuad(
+                    new ColorPoint(-1, lastpos, colorPoints[colorPoints.Length - 1].Color),
+                    new ColorPoint(1, lastpos, colorPoints[colorPoints.Length - 1].Color),
+                    new ColorPoint(1, 1, colorPoints[colorPoints.Length - 1].Color),
+                    new ColorPoint(-1, 1, colorPoints[colorPoints.Length - 1].Color)));
+            }
+
+            return gradient;
+        }
+
+        /// <summary>
+        /// A colorpoint data
+        /// </summary>
+        public struct ColorPoint
+        {
+            public Color Color;
+            public Vector3d Point;
+
+            public ColorPoint(Vector3d point, Color color)
+            {
+                //if (point.X > 1 || point.X < -1)
+                //    throw new Exception("Vectordata for point X is outside valid range (-1 to 1)");
+                //if (point.Y > 1 || point.Y < -1)
+                //    throw new Exception("Vectordata for point Y is outside valid range (-1 to 1)");
+                //if (point.Z > 1 || point.Z < -1)
+                //    throw new Exception("Vectordata for point Z is outside valid range (-1 to 1)");
+
+                Point = point;
+                Color = color;
+            }
+            public ColorPoint(double x, double y, Color color)
+            {
+                Point = new Vector3d(x, y, 0);
+
+                //if (Point.X > 1 || Point.X < -1)
+                //    throw new Exception("Vectordata for point X is outside valid range (-1 to 1)");
+                //if (Point.Y > 1 || Point.Y < -1)
+                //    throw new Exception("Vectordata for point Y is outside valid range (-1 to 1)");
+                //if (Point.Z > 1 || Point.Z < -1)
+                //    throw new Exception("Vectordata for point Z is outside valid range (-1 to 1)");
+
+                Color = color;
+            }
+
+            public override string ToString()
+            {
+                return String.Format("[{0}, {1}]", Point, Color);
+            }
+        }
+
+        /// <summary>
+        /// A collection of four color points that's used for rendering the gradients
+        /// </summary>
+        public struct ColorQuad
+        {
+            public ColorPoint ColorPointV1;
+            public ColorPoint ColorPointV2;
+            public ColorPoint ColorPointV3;
+            public ColorPoint ColorPointV4;
+
+            public ColorQuad(ColorPoint v1, ColorPoint v2, ColorPoint v3, ColorPoint v4)
+            {
+                this.ColorPointV1 = v1;
+                this.ColorPointV2 = v2;
+                this.ColorPointV3 = v3;
+                this.ColorPointV4 = v4;
+            }
+
+            public override string ToString()
+            {
+                return String.Format("[{0}, {1}, {2}, {3}]", ColorPointV1, ColorPointV2, ColorPointV3, ColorPointV4);
+            }
+        }
+    }
+
+    /// <summary>
+    /// A brush to use when rendering
+    /// </summary>
     [Serializable]
     public struct Brush : IDisposable
     {
-        Color color;
-        Color secondColor;
-        Gradient gradient;
-        
+        Gradient _Gradient;
+        Color _Color1;
+        Color _Color2;
+        Color _Color3;
+        Color _Color4;
+        Color _Color5;
+
+        /// <summary>
+        /// Creates a single color solid brush
+        /// </summary>
+        /// <param name="color"></param>
         public Brush(Color color)
         {
-            this.color = color;
-            this.secondColor = Color.Empty;
-            gradient = Gradient.None;
+            _Color1 = color;
+            _Color2 = Color.Empty;
+            _Color3 = Color.Empty;
+            _Color4 = Color.Empty;
+            _Color5 = Color.Empty;
+            _Gradient = Gradient.None;
         }
+
+        /// <summary>
+        /// Creates a two color gradient brush
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <param name="gradient">Direction/type of gradient</param>
         public Brush(Color first, Color second,Gradient gradient)
         {
-            this.color = first;
-            this.secondColor = second;
-            this.gradient = gradient;
+            _Color1 = first;
+            _Color2 = second;
+            _Color3 = Color.Empty;
+            _Color4 = Color.Empty;
+            _Color5 = Color.Empty;
+            _Gradient = gradient;
         }
+
+        /// <summary>
+        /// Creates a four color brush where each color represents a corner of a rectangle
+        /// </summary>
+        /// <param name="first">Upper left corner</param>
+        /// <param name="second">Upper right corner</param>
+        /// <param name="third">Lower right corner</param>
+        /// <param name="forth">Lower left corner</param>
+        public Brush(Color first, Color second, Color third, Color forth)
+        {
+            _Color1 = first;
+            _Color2 = second;
+            _Color3 = third;
+            _Color4 = forth;
+            _Color5 = Color.Empty;
+            _Gradient = OpenMobile.Graphics.Gradient.Individual;
+        }
+
+        /// <summary>
+        /// Creates a five color brush where color 1 to 4 represents a corner of a rectangle and the fifth is used as center color
+        /// </summary>
+        /// <param name="first">Upper left corner</param>
+        /// <param name="second">Upper right corner</param>
+        /// <param name="third">Lower right corner</param>
+        /// <param name="forth">Lower left corner</param>
+        /// <param name="fifth">fill color</param>
+        public Brush(Color first, Color second, Color third, Color forth, Color fifth)
+        {
+            _Color1 = first;
+            _Color2 = second;
+            _Color3 = third;
+            _Color4 = forth;
+            _Color5 = fifth;
+            _Gradient = OpenMobile.Graphics.Gradient.Individual;
+        }
+
+        /// <summary>
+        /// The main color of this brush
+        /// </summary>
         public Color Color
         {
             get
             {
-                return color;
+                return _Color1;
             }
         }
+
+        /// <summary>
+        /// The gradient color of this brush
+        /// </summary>
         public Color SecondColor
         {
             get
             {
-                return secondColor;
+                return _Color2;
             }
         }
+
+        /// <summary>
+        /// Color data for the upper left corner
+        /// </summary>
+        public Color ColorData_C1
+        {
+            get
+            {
+                switch (_Gradient)
+                {
+                    case Gradient.None:
+                        return _Color1;
+                    case Gradient.Vertical:
+                        return _Color1;
+                    case Gradient.Horizontal:
+                        return _Color1;
+                    case Gradient.Individual:
+                        return _Color1;
+                }
+                return Color.Empty;
+            }
+        }
+        /// <summary>
+        /// Color data for the upper right corner
+        /// </summary>
+        public Color ColorData_C2
+        {
+            get
+            {
+                switch (_Gradient)
+                {
+                    case Gradient.None:
+                        return _Color1;
+                    case Gradient.Vertical:
+                        return _Color1;
+                    case Gradient.Horizontal:
+                        return _Color2;
+                    case Gradient.Individual:
+                        return _Color2;
+                }
+                return Color.Empty;
+            }
+        }
+        /// <summary>
+        /// Color data for the lower right corner
+        /// </summary>
+        public Color ColorData_C3
+        {
+            get
+            {
+                switch (_Gradient)
+                {
+                    case Gradient.None:
+                        return _Color1;
+                    case Gradient.Vertical:
+                        return _Color2;
+                    case Gradient.Horizontal:
+                        return _Color2;
+                    case Gradient.Individual:
+                        return _Color3;
+                }
+                return Color.Empty;
+            }
+        }
+        /// <summary>
+        /// Color data for the lower left corner
+        /// </summary>
+        public Color ColorData_C4
+        {
+            get
+            {
+                switch (_Gradient)
+                {
+                    case Gradient.None:
+                        return _Color1;
+                    case Gradient.Vertical:
+                        return _Color2;
+                    case Gradient.Horizontal:
+                        return _Color1;
+                    case Gradient.Individual:
+                        return _Color4;
+                }
+                return Color.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Fifth color data 
+        /// </summary>
+        public Color ColorData_C5
+        {
+            get
+            {
+                switch (_Gradient)
+                {
+                    case Gradient.Individual:
+                        return _Color5;
+                }
+                return Color.Empty;
+            }
+        }
+
+        /// <summary>
+        /// The direction/type of gradient
+        /// </summary>
         public Gradient Gradient
         {
             get
             {
-                return gradient;
+                return _Gradient;
             }
         }
 
@@ -129,6 +618,8 @@ namespace OpenMobile.Graphics
 
         #endregion
     }
+
+  
 
     [Serializable]
     public struct Color
@@ -1684,13 +2175,54 @@ namespace OpenMobile.Graphics
         public static System.Drawing.StringFormat AlignmentToStringFormat(Alignment alignment)
         {
             System.Drawing.StringFormat sFormat = new System.Drawing.StringFormat();
-            sFormat.Alignment = (System.Drawing.StringAlignment)((float)alignment % 10);
-            sFormat.LineAlignment = (System.Drawing.StringAlignment)(int)(((float)alignment % 100) / 10);
-            if (((int)alignment & 100) == 100)
+
+            // Convert alignment
+            if (((alignment & Alignment.CenterLeft) == Alignment.CenterLeft) ||
+                ((alignment & Alignment.BottomLeft) == Alignment.BottomLeft) ||
+                ((alignment & Alignment.TopLeft) == Alignment.TopLeft))
+            {
+                sFormat.Alignment = System.Drawing.StringAlignment.Near;
+            }
+            else if (((alignment & Alignment.CenterCenter) == Alignment.CenterCenter) ||
+                ((alignment & Alignment.BottomCenter) == Alignment.BottomCenter) ||
+                ((alignment & Alignment.TopCenter) == Alignment.TopCenter))
+            {
+                sFormat.Alignment = System.Drawing.StringAlignment.Center;
+            }
+            else if (((alignment & Alignment.CenterRight) == Alignment.CenterRight) ||
+                ((alignment & Alignment.BottomRight) == Alignment.BottomRight) ||
+                ((alignment & Alignment.TopRight) == Alignment.TopRight))
+            {
+                sFormat.Alignment = System.Drawing.StringAlignment.Far;
+            }
+
+            // Convert line alignment
+            if (((alignment & Alignment.TopCenter) == Alignment.TopCenter) ||
+                ((alignment & Alignment.TopRight) == Alignment.TopRight) ||
+                ((alignment & Alignment.TopLeft) == Alignment.TopLeft))
+            {
+                sFormat.LineAlignment = System.Drawing.StringAlignment.Near;
+            }
+            else if (((alignment & Alignment.CenterCenter) == Alignment.CenterCenter) ||
+                ((alignment & Alignment.CenterRight) == Alignment.CenterRight) ||
+                ((alignment & Alignment.CenterLeft) == Alignment.CenterLeft))
+            {
+                sFormat.LineAlignment = System.Drawing.StringAlignment.Center;
+            }
+            else if (((alignment & Alignment.BottomCenter) == Alignment.BottomCenter) ||
+                ((alignment & Alignment.BottomRight) == Alignment.BottomRight) ||
+                ((alignment & Alignment.BottomLeft) == Alignment.BottomLeft))
+            {
+                sFormat.LineAlignment = System.Drawing.StringAlignment.Far;
+            }
+
+            if ((alignment & Alignment.VerticalCentered) == Alignment.VerticalCentered)
                 sFormat.FormatFlags = System.Drawing.StringFormatFlags.DirectionVertical;
-            if (alignment == Alignment.CenterLeftEllipsis)
+
+            if ((alignment & Alignment.CenterLeftEllipsis) == Alignment.CenterLeftEllipsis)
                 sFormat.Trimming = System.Drawing.StringTrimming.EllipsisWord;
-            if (((int)alignment & 10000) != 10000)
+
+            if (!((alignment & Alignment.WordWrap) == Alignment.WordWrap))
                 sFormat.FormatFlags = System.Drawing.StringFormatFlags.NoWrap;
 
             return sFormat;

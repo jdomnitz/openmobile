@@ -38,6 +38,13 @@ namespace OpenMobile.Controls
     public delegate void ReDrawTrigger();
 
     /// <summary>
+    /// Control event
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="screen"></param>
+    public delegate void ControlEventHandler(OMControl sender, int screen);
+
+    /// <summary>
     /// The base control type
     /// </summary>
     [System.Serializable()]
@@ -143,6 +150,7 @@ namespace OpenMobile.Controls
 
         /// <summary>
         /// The region this control occupies
+        /// <para>Use this as a read only property, use the separate field for left, top, width and height to set the controls values</para>
         /// </summary>
         public Rectangle Region
         {
@@ -152,12 +160,16 @@ namespace OpenMobile.Controls
             }
             set
             {
-                _Region = value;
-                left = _Region.Left;
-                top = _Region.Top;
-                width = Region.Width;
-                height = Region.Height;
-                Refresh();
+                if (_Region != value)
+                {
+                    _Region = value;
+                    left = _Region.Left;
+                    top = _Region.Top;
+                    width = Region.Width;
+                    height = Region.Height;
+                    onSizeChanged();
+                    Refresh();
+                }
             }
         }
 
@@ -257,7 +269,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Should the control be displayed
         /// </summary>
-        public bool Visible
+        public virtual bool Visible
         {
             get
             {
@@ -312,6 +324,7 @@ namespace OpenMobile.Controls
         private void UpdateRegion()
         {
             _Region = new Rectangle(left, top, width, height);
+            onSizeChanged();
         }
 
         /// <summary>
@@ -320,10 +333,14 @@ namespace OpenMobile.Controls
         public virtual int Height
         {
             get { return height; }
-            set { 
-                height = value;
-                _Region.Height = value;
-                Refresh();
+            set {
+                if (height != value)
+                {
+                    height = value;
+                    _Region.Height = value;
+                    onSizeChanged();
+                    Refresh();
+                }
             }
         }
         /// <summary>
@@ -333,9 +350,13 @@ namespace OpenMobile.Controls
         {
             get { return width; }
             set {
-                width = value;
-                _Region.Width = value;
-                Refresh();
+                if (width != value)
+                {
+                    width = value;
+                    _Region.Width = value;
+                    onSizeChanged();
+                    Refresh();
+                }
             }
         }
         /// <summary>
@@ -379,6 +400,23 @@ namespace OpenMobile.Controls
                     Refresh();
                 }
         }
+
+        /// <summary>
+        /// Control transparency level in percent (0 solid - 100 transparent)
+        /// </summary>
+        public int Transparency
+        {
+            get
+            {
+                return (int)((opacity / 255F) * 100f);
+            }
+            set
+            {
+                int opacityLevel = 255 - (int)(255 * (value * 0.01f));
+                if (opacity != opacityLevel)
+                    Opacity = opacityLevel;
+            }
+        }        
 
         /// <summary>
         /// Control opacity level (0 transparent - 255 solid)
@@ -447,6 +485,15 @@ namespace OpenMobile.Controls
         {
             RenderBegin(g, e);
             RenderFinish(g, e);
+        }
+
+        /// <summary>
+        /// Called when the control is removed from the screen and rendering should stop
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        public virtual void RenderStop(Graphics.Graphics g, renderingParams e)
+        {
         }
 
         /// <summary>
@@ -856,5 +903,12 @@ namespace OpenMobile.Controls
 
         #endregion
 
+        /// <summary>
+        /// A virtual method that is called when the size of this control is changing
+        /// </summary>
+        protected virtual void onSizeChanged()
+        {
+            // No action
+        }
     }
 }

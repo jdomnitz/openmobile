@@ -35,7 +35,7 @@ namespace OpenMobile.Graphics.OpenGL
     #pragma warning disable 3019
     #pragma warning disable 1591
 
-    public partial class Raw
+    public partial class GL
     {
         internal static partial class Delegates
         {

@@ -111,9 +111,17 @@ namespace OpenMobile
                 glContext.MakeCurrent(WindowInfo);
                 (glContext as IGraphicsContextInternal).LoadAll();
                 Visible = true;
-                if (!Platform.Factory.IsEmbedded)
-                    OpenMobile.Graphics.OpenGL.Raw.ClearColor(OpenMobile.Graphics.Color.Black);
-                SwapBuffers();
+
+                // Only clear window if rendering is not blocked
+                if ((this.options & GameWindowFlags.BlockAllRendering) != GameWindowFlags.BlockAllRendering)
+                {
+                    if (!Platform.Factory.IsEmbedded)
+                        OpenMobile.Graphics.OpenGL.GL.ClearColor(OpenMobile.Graphics.Color.Black);
+                    SwapBuffers();
+                }
+                else
+                    this.StopRendering = true;
+
                 glContext.VSync = VSync;
             }
             catch (Exception e)
@@ -295,6 +303,17 @@ namespace OpenMobile
                 //    Thread.Sleep((int)(target_render_periodMS - render_time));
             }
         }
+
+        /// <summary>
+        /// Starts an empty window without a messagepump
+        /// </summary>
+        public void Run_Empty()
+        {
+            EnsureUndisposed();
+            Initialize(false);
+            return;
+        }
+
         public void DispatchRenderFrame()
         {
             RaiseRenderFrame();

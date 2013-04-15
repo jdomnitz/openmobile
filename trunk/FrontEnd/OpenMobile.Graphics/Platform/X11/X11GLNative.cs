@@ -628,6 +628,9 @@ namespace OpenMobile.Platform.X11
 
             // Note: width and height denote the internal (client) size.
             // To get the external (window) size, we need to add the border size.
+
+            _ClientLocation = new Point(e.ConfigureEvent.x, e.ConfigureEvent.y);
+
             Size new_size = new Size(
                 e.ConfigureEvent.width + border_left + border_right,
                 e.ConfigureEvent.height + border_top + border_bottom);
@@ -875,6 +878,20 @@ namespace OpenMobile.Platform.X11
 			}
 		}
         #endregion
+
+        #region ClientLocation
+
+        public Point ClientLocation
+        {
+            get
+            {
+                return _ClientLocation;
+            }
+        }
+        private Point _ClientLocation;
+
+        #endregion
+
         private float opacity = 1F;
         public float Opacity
         {

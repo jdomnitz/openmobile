@@ -45,7 +45,8 @@ namespace OpenMobile.helperFunctions
             Location ret = new Location();
             XmlDocument doc = new XmlDocument();
             string locale = System.Globalization.CultureInfo.CurrentCulture.Name;
-            doc.Load(@"http://where.yahooapis.com/geocode?q=" + Net.Network.urlEncode(name) + "&locale=" + locale);
+            //doc.Load(@"http://where.yahooapis.com/geocode?q=" + Net.Network.urlEncode(name) + "&locale=" + locale);
+            doc.Load(@"http://where.yahooapis.com/geocode?q=" + name + "&locale=" + locale);
             ret.Name = name;
             foreach (XmlNode n in doc.DocumentElement.ChildNodes)
             {
@@ -66,11 +67,11 @@ namespace OpenMobile.helperFunctions
                             {
                                 case "latitude":
                                     if (!string.IsNullOrEmpty(n2.InnerText))
-                                        ret.Latitude = float.Parse(n2.InnerText);
+                                        ret.Latitude = float.Parse(n2.InnerText, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.CultureInfo.InvariantCulture);
                                     break;
                                 case "longitude":
                                     if (!string.IsNullOrEmpty(n2.InnerText))
-                                        ret.Longitude = float.Parse(n2.InnerText);
+                                        ret.Longitude = float.Parse(n2.InnerText, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.CultureInfo.InvariantCulture);
                                     break;
                                 case "house":
                                     ret.Street = n2.InnerText + " " + ret.Street;
@@ -273,20 +274,23 @@ namespace OpenMobile.helperFunctions
                 return theText;
             }
 
-            void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+            void theHost_OnSystemEvent(eFunction function, object[] args)
             {
                 if (function == eFunction.userInputReady)
                 {
-                    if (arg1 == screen.ToString())
+                    if (args != null && args.Length >= 3)
                     {
-                        if (arg2 == "OSK")
+                        if (args[0] as string == screen.ToString())
                         {
-                            theText = arg3;
-                            wait.Set();
+                            if (args[1] as string == "OSK")
+                            {
+                                theText = args[2] as string;
+                                wait.Set();
+                            }
                         }
                     }
                 }
-                else if ((function == eFunction.TransitionFromAny) && (int.Parse(arg1) == screen))
+                else if ((function == eFunction.TransitionFromAny) && (int.Parse(args[0] as string) == screen))
                 {
                     if (armed)
                     {
@@ -377,16 +381,19 @@ namespace OpenMobile.helperFunctions
                 return thePath;
             }
 
-            void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+            void theHost_OnSystemEvent(eFunction function, object[] args)
             {
                 if (function == eFunction.userInputReady)
                 {
-                    if (arg1 == screen.ToString())
+                    if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 3))
                     {
-                        if (arg2 == "Dir")
+                        if (OpenMobile.helperFunctions.Params.GetParam<string>(args, 0) == screen.ToString())
                         {
-                            thePath = arg3;
-                            wait.Set();
+                            if (OpenMobile.helperFunctions.Params.GetParam<string>(args, 1) == "Dir")
+                            {
+                                thePath = OpenMobile.helperFunctions.Params.GetParam<string>(args, 2);
+                                wait.Set();
+                            }
                         }
                     }
                 }
@@ -446,7 +453,86 @@ namespace OpenMobile.helperFunctions
             }
         }
 
+        /// <summary>
+        /// Extracts info from an exception into a string
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public static string spewException(Exception e)
+        {
+            string err;
+            err = e.GetType().Name + "\r\n";
+            err += ("Exception Message: " + e.Message);
+            err += ("\r\nSource: " + e.Source);
+            err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+            err += ("\r\n");
+            int failsafe = 0;
+            while (e.InnerException != null)
+            {
+                e = e.InnerException;
+                err += ("Inner Exception: " + e.Message);
+                err += ("\r\nSource: " + e.Source);
+                err += ("\r\nStack Trace: \r\n" + e.StackTrace);
+                err += ("\r\n");
+                failsafe++;
+                if (failsafe == 4)
+                    break;
+            }
+            return err;
+        }
+    }
 
+    public static class DataHelpers
+    {
+        /// <summary>
+        /// Gets a specified type from an object
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        public static T GetDataFromObject<T>(object o)
+        {
+            return GetDataFromObject<T>(o, default(T));
+        }
+
+        /// <summary>
+        /// Gets a specified type from an object
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="o"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public static T GetDataFromObject<T>(object o, object defaultValue)
+        {
+            if (o is T)
+            {   // Object is of correct type, return data
+                return (T)o;
+            }
+            else
+            {
+                // Convert data
+                try
+                {
+                    return (T)Convert.ChangeType(o, typeof(T));
+                }
+                catch
+                {
+                    return (T)Convert.ChangeType(defaultValue, typeof(T));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Extracts the screen number from a string like this "Screen0" returns 0 if it fails
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static int GetScreenFromString(string s)
+        {
+            int screen = 0;
+            int.TryParse(s.Substring(6), out screen);
+            return screen;
+        }
     }
 
     public static class Arguments
@@ -594,6 +680,18 @@ namespace OpenMobile.helperFunctions
             /// <summary>
             /// Returns a List of plugins names matching the given type
             /// </summary>
+            /// <returns>List of plugins</returns>
+            public static List<IBasePlugin> getPluginsOfType<T>()
+            {
+                List<IBasePlugin> plugins = BuiltInComponents.Host.getData(eGetData.GetPlugins, String.Empty) as List<IBasePlugin>;
+                if (plugins == null)
+                    return null;
+                return plugins.FindAll(x => typeof(T).IsInstanceOfType(x));
+            }
+
+            /// <summary>
+            /// Returns a List of plugins names matching the given type
+            /// </summary>
             /// <param name="t"></param>
             /// <param name="host"></param>
             /// <param name="PluginLevel"></param>
@@ -658,6 +756,158 @@ namespace OpenMobile.helperFunctions
                     }
                 }
                 return ret;
+            }
+
+            /// <summary>
+            /// Gets the pluginlevel for a specific plugin
+            /// </summary>
+            /// <param name="PluginName"></param>
+            /// <returns></returns>
+            public static PluginLevels getPluginLevel(string PluginName)
+            {
+                IBasePlugin plugin = BuiltInComponents.Host.getData(eGetData.GetPlugins, PluginName) as IBasePlugin;
+                if (plugin == null)
+                    return PluginLevels.Normal;
+
+                // Check plugin level attribute flags
+                PluginLevel[] a = (PluginLevel[])plugin.GetType().GetCustomAttributes(typeof(PluginLevel), false);
+                if (a == null || a.Length == 0)
+                    return PluginLevels.Normal;
+                return a[0].TypeOfPlugin;
+            }
+
+            /// <summary>
+            /// Checks if a plugins required OS configuration flags (set as attributes) is valid when compared to the current configuration flags
+            /// </summary>
+            /// <param name="Plugin"></param>
+            /// <returns></returns>
+            public static bool IsPluginOSConfigurationFlagsValid(IBasePlugin Plugin)
+            {
+                //// Check OS Configuration attribute flags
+                //SupportedOSConfigurations[] a = (SupportedOSConfigurations[])Plugin.GetType().GetCustomAttributes(typeof(SupportedOSConfigurations), true);
+                //OSConfigurationFlags OSConfFlags = OSConfigurationFlags.Any; // Default
+                //if (a.Length > 0)
+                //    OSConfFlags = a[0].ConfigurationFlags;
+                //bool result = true;
+                //if ((OSConfFlags & OSConfigurationFlags.Embedded) == OSConfigurationFlags.Embedded)
+                //    if (!Configuration.RunningOnEmbedded) result = false;
+                //if ((OSConfFlags & OSConfigurationFlags.Linux) == OSConfigurationFlags.Linux)
+                //    if (!Configuration.RunningOnLinux) result = false;
+                //if ((OSConfFlags & OSConfigurationFlags.MacOS) == OSConfigurationFlags.MacOS)
+                //    if (!Configuration.RunningOnMacOS) result = false;
+                //if ((OSConfFlags & OSConfigurationFlags.TabletPC) == OSConfigurationFlags.TabletPC)
+                //    if (!Configuration.TabletPC) result = false;
+                //if ((OSConfFlags & OSConfigurationFlags.Unix) == OSConfigurationFlags.Unix)
+                //    if (!Configuration.RunningOnUnix) result = false;
+                //if ((OSConfFlags & OSConfigurationFlags.Windows) == OSConfigurationFlags.Windows)
+                //    if (!Configuration.RunningOnWindows) result = false;
+                //if ((OSConfFlags & OSConfigurationFlags.X11) == OSConfigurationFlags.X11)
+                //    if (!Configuration.RunningOnX11) result = false;
+                //return result;
+
+                return IsPluginOSSupportedConfigurationFlagsValid(Plugin) && IsPluginOSRequiredConfigurationFlagsValid(Plugin);
+            }
+
+            /// <summary>
+            /// Checks if a plugins required OS configuration flags (set as attributes) is valid when compared to the current configuration flags
+            /// </summary>
+            /// <param name="Plugin"></param>
+            /// <returns></returns>
+            public static bool IsPluginOSRequiredConfigurationFlagsValid(IBasePlugin Plugin)
+            {
+                // Check OS Configuration attribute flags
+                RequiredOSConfigurations[] a = (RequiredOSConfigurations[])Plugin.GetType().GetCustomAttributes(typeof(RequiredOSConfigurations), true);
+                OSConfigurationFlags OSConfFlags = OSConfigurationFlags.Any; // Default
+                if (a.Length > 0)
+                    OSConfFlags = a[0].ConfigurationFlags;
+                else
+                    return true;
+                bool result = true;
+                if ((OSConfFlags & OSConfigurationFlags.Embedded) == OSConfigurationFlags.Embedded)
+                    if (!Configuration.RunningOnEmbedded) result = false;
+                if ((OSConfFlags & OSConfigurationFlags.Linux) == OSConfigurationFlags.Linux)
+                    if (!Configuration.RunningOnLinux) result = false;
+                if ((OSConfFlags & OSConfigurationFlags.MacOS) == OSConfigurationFlags.MacOS)
+                    if (!Configuration.RunningOnMacOS) result = false;
+                if ((OSConfFlags & OSConfigurationFlags.TabletPC) == OSConfigurationFlags.TabletPC)
+                    if (!Configuration.TabletPC) result = false;
+                if ((OSConfFlags & OSConfigurationFlags.Unix) == OSConfigurationFlags.Unix)
+                    if (!Configuration.RunningOnUnix) result = false;
+                if ((OSConfFlags & OSConfigurationFlags.Windows) == OSConfigurationFlags.Windows)
+                    if (!Configuration.RunningOnWindows) result = false;
+                if ((OSConfFlags & OSConfigurationFlags.X11) == OSConfigurationFlags.X11)
+                    if (!Configuration.RunningOnX11) result = false;
+                return result;
+            }
+
+            /// <summary>
+            /// Checks if a plugins supported OS configuration flags (set as attributes) is valid when compared to the current configuration flags
+            /// </summary>
+            /// <param name="Plugin"></param>
+            /// <returns></returns>
+            public static bool IsPluginOSSupportedConfigurationFlagsValid(IBasePlugin Plugin)
+            {
+                // Check OS Configuration attribute flags
+                SupportedOSConfigurations[] a = (SupportedOSConfigurations[])Plugin.GetType().GetCustomAttributes(typeof(SupportedOSConfigurations), true);
+                OSConfigurationFlags OSConfFlags = OSConfigurationFlags.Any; // Default
+                
+                if (a.Length > 0)
+                    OSConfFlags = a[0].ConfigurationFlags;
+                else
+                    return true;
+
+                bool result = true;
+                if ((OSConfFlags & OSConfigurationFlags.Embedded) == OSConfigurationFlags.Embedded)
+                    if (Configuration.RunningOnEmbedded) result = true;
+                if ((OSConfFlags & OSConfigurationFlags.Linux) == OSConfigurationFlags.Linux)
+                    if (Configuration.RunningOnLinux) result = true;
+                if ((OSConfFlags & OSConfigurationFlags.MacOS) == OSConfigurationFlags.MacOS)
+                    if (Configuration.RunningOnMacOS) result = true;
+                if ((OSConfFlags & OSConfigurationFlags.TabletPC) == OSConfigurationFlags.TabletPC)
+                    if (Configuration.TabletPC) result = true;
+                if ((OSConfFlags & OSConfigurationFlags.Unix) == OSConfigurationFlags.Unix)
+                    if (Configuration.RunningOnUnix) result = true;
+                if ((OSConfFlags & OSConfigurationFlags.Windows) == OSConfigurationFlags.Windows)
+                    if (Configuration.RunningOnWindows) result = true;
+                if ((OSConfFlags & OSConfigurationFlags.X11) == OSConfigurationFlags.X11)
+                    if (Configuration.RunningOnX11) result = true;
+                return result;
+            }
+
+            /// <summary>
+            /// Get the OS configuration flags for this system
+            /// </summary>
+            /// <returns></returns>
+            public static OSConfigurationFlags GetSystemOSConfigurationFlags()
+            {
+                // Get OS Configuration attribute flags
+                OSConfigurationFlags OSConfFlags = OSConfigurationFlags.Any; // Default
+
+                if (Configuration.RunningOnEmbedded) OSConfFlags |= OSConfigurationFlags.Embedded;
+                if (Configuration.RunningOnLinux) OSConfFlags |= OSConfigurationFlags.Linux;
+                if (Configuration.RunningOnMacOS) OSConfFlags |= OSConfigurationFlags.MacOS;
+                if (Configuration.RunningOnUnix) OSConfFlags |= OSConfigurationFlags.Unix;
+                if (Configuration.RunningOnWindows) OSConfFlags |= OSConfigurationFlags.Windows;
+                if (Configuration.RunningOnX11) OSConfFlags |= OSConfigurationFlags.X11;
+                if (Configuration.TabletPC) OSConfFlags |= OSConfigurationFlags.TabletPC;
+
+                return OSConfFlags;
+            }
+
+
+            /// <summary>
+            /// Gets the OS Configuration flags
+            /// </summary>
+            /// <param name="Plugin"></param>
+            /// <returns></returns>
+            public static OSConfigurationFlags GetPluginOSConfigurationFlags(IBasePlugin Plugin)
+            {
+                // Check OS Configuration attribute flags
+                SupportedOSConfigurations[] a = (SupportedOSConfigurations[])Plugin.GetType().GetCustomAttributes(typeof(SupportedOSConfigurations), true);
+                OSConfigurationFlags OSConfFlags = OSConfigurationFlags.Any; // Default
+                if (a.Length > 0)
+                    OSConfFlags = a[0].ConfigurationFlags;
+                return OSConfFlags;
             }
 
             /// <summary>
@@ -818,6 +1068,49 @@ namespace OpenMobile.helperFunctions
                 return BuiltInComponents.Host.getData(eGetData.GetPlugins, PluginName) as IBasePlugin;
             }
 
+            /// <summary>
+            /// Gets the plugin enabled setting for a specific plugin
+            /// </summary>
+            /// <param name="pluginName"></param>
+            /// <returns></returns>
+            public static bool GetPluginEnabled(string pluginName)
+            {
+                List<IBasePlugin> plugins = BuiltInComponents.Host.getData(eGetData.GetPlugins, String.Empty) as List<IBasePlugin>;
+                if (plugins == null)
+                    return false;
+                IBasePlugin plugin = plugins.Find(x => x.pluginName == pluginName);
+                
+                // Get setting
+                return StoredData.GetBool(OM.GlobalSetting, String.Format("PluginSetting_{0}_Enabled", plugin.pluginName), true);
+            }
+
+            /// <summary>
+            /// Sets the plugin enabled setting for a specific plugin 
+            /// </summary>
+            /// <param name="pluginName"></param>
+            /// <param name="enabled"></param>
+            /// <returns></returns>
+            public static bool SetPluginEnabled(string pluginName, bool enabled)
+            {
+                List<IBasePlugin> plugins = BuiltInComponents.Host.getData(eGetData.GetPlugins, String.Empty) as List<IBasePlugin>;
+                if (plugins == null)
+                    return false;
+                IBasePlugin plugin = plugins.Find(x => x.pluginName == pluginName);
+                if (plugin == null)
+                {
+                    plugins = BuiltInComponents.Host.getData(eGetData.GetPluginsDisabled, String.Empty) as List<IBasePlugin>;
+                    if (plugins == null)
+                        return false;
+                    plugin = plugins.Find(x => x.pluginName == pluginName);
+                }
+
+                if (plugin != null)
+                {
+                    // Set setting
+                    return StoredData.Set(OM.GlobalSetting, String.Format("PluginSetting_{0}_Enabled", plugin.pluginName), enabled);
+                }
+                return false;
+            }
         }
     }
 
@@ -854,6 +1147,116 @@ namespace OpenMobile.helperFunctions
                 return serializedObject;
             }
         }
-    }    
+    }
+
+    namespace Strings
+    {
+        /// <summary>
+        /// Class that can automatically wrap a given string.
+        /// </summary>
+        public class StringWrap
+        {
+            /// <summary>
+            /// List of characters to break a string around.  A <c>char</c> key points to an
+            /// <c>int</c> weight.  Higher weights indicate a higher preference to break at
+            /// that character.
+            /// </summary>
+            public readonly System.Collections.Hashtable Breakable = new System.Collections.Hashtable();
+
+            /// <summary>
+            /// Class that can automatically wrap a given string.
+            /// </summary>
+            public StringWrap()
+            {
+                Breakable[' '] = 10;
+                Breakable[','] = 20;
+                Breakable[';'] = 30;
+                Breakable['.'] = 40;
+            }
+
+            /// <summary>
+            /// Cleanse the given text from duplicate (two or more in a row) characters, as
+            /// specified by <c>Breakable</c>.  Will also remove all existing newlines.
+            /// </summary>
+            /// <param name="text">Text to be cleansed.</param>
+            /// <returns>Cleansed text.</returns>
+            protected string Cleanse(string text)
+            {
+                text = text.Replace('\n', ' ');
+                string find, replace;
+                foreach (char c in Breakable.Keys)
+                {
+                    find = new string(c, 2);
+                    replace = new string(c, 1);
+                    while (text.IndexOf(find) != -1)
+                        text = text.Replace(find, replace);
+                }
+                return text;
+            }
+
+            /// <summary>
+            /// Perform an automatic wrap given text, a target ratio, and a font ratio.
+            /// </summary>
+            /// <param name="text">Text to automatically wrap.</param>
+            /// <param name="targetRatio">Ratio (Height / Width) of the target area
+            /// for this text.</param>
+            /// <param name="fontRatio">Average ratio (Height / Width) of a single
+            /// character.</param>
+            /// <returns>Automatically wrapped text.</returns>
+            public string PerformWrap(string text, float targetRatio, float fontRatio)
+            {
+                string wrap = "";
+                text = Cleanse(text);
+
+                int rows = (int)System.Math.Sqrt(targetRatio * text.Length / fontRatio),
+                    cols = text.Length / rows,
+                    start = cols, index = 0, last;
+
+                for (int i = 0; i < rows - 1; i++)
+                {
+                    last = index;
+                    index = BestBreak(text, start, cols * 2);
+                    wrap += text.Substring(last, index - last).Trim() + "\n";
+                    start = index + cols;
+                }
+
+                wrap += text.Substring(index);
+                return wrap;
+            }
+
+            /// <summary>
+            /// Find the best place to break text given a starting index and a search radius.
+            /// </summary>
+            /// <param name="text">Full text to search through.</param>
+            /// <param name="start">Index in string to start searching at.  Will be used
+            /// as the center of the radius.</param>
+            /// <param name="radius">Radius (in characters) to search around the given
+            /// starting index.</param>
+            /// <returns>Optimal index to break the text at.</returns>
+            protected int BestBreak(string text, int start, int radius)
+            {
+                int bestIndex = start;
+                float bestWeight = 0, examWeight;
+
+                radius = System.Math.Min(System.Math.Min(start + radius, text.Length - 1) - start,
+                    start - System.Math.Max(start - radius, 0));
+                for (int i = start - radius; i <= start + radius; i++)
+                {
+                    object o = Breakable[text[i]];
+                    if (o == null) continue;
+
+                    examWeight = (int)o / (float)System.Math.Abs(start - i);
+                    if (examWeight > bestWeight)
+                    {
+                        bestIndex = i;
+                        bestWeight = examWeight;
+                    }
+                }
+
+                return System.Math.Min(bestIndex + 1, text.Length - 1);
+            }
+        }
+    }
+
 
 }

@@ -95,6 +95,7 @@
     <Compile Include="ESGraphics.cs" />
     <Compile Include="DisplayDevice.cs" />
     <Compile Include="DisplayResolution.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="GameWindow.cs" />
     <Compile Include="GameWindowFlags.cs" />
     <Compile Include="GDI\CSharpFilters.cs" />
@@ -237,7 +238,7 @@
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
-      <ProductName>.NET Framework Client Profile</ProductName>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
@@ -276,7 +277,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

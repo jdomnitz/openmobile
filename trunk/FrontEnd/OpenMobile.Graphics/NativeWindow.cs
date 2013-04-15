@@ -79,21 +79,21 @@ namespace OpenMobile
             implementation = Factory.Default.CreateNativeWindow(S, X, Y, W, H, T, M, O, D);
             implementation.Visible = false;
 
-            if (flags != GameWindowFlags.Temporary)
-            {
-                if (Environment.GetCommandLineArgs().Length > 1)
-                {
-                    if (Environment.GetCommandLineArgs()[1].ToLower().StartsWith("-size=") == true)
-                    {
-                        string[] part = Environment.GetCommandLineArgs()[1].Substring(6).Split(new char[] { 'x' });
-                        try
-                        {
-                            Size = new Size(int.Parse(part[0]), int.Parse(part[1]));
-                        }
-                        catch (ArgumentException) { }
-                    }
-                }
-            }
+            //if ((flags & GameWindowFlags.Temporary) != GameWindowFlags.Temporary)
+            //{
+            //    if (Environment.GetCommandLineArgs().Length > 1)
+            //    {
+            //        if (Environment.GetCommandLineArgs()[1].ToLower().StartsWith("-size=") == true)
+            //        {
+            //            string[] part = Environment.GetCommandLineArgs()[1].Substring(6).Split(new char[] { 'x' });
+            //            try
+            //            {
+            //                Size = new Size(int.Parse(part[0]), int.Parse(part[1]));
+            //            }
+            //            catch (ArgumentException) { }
+            //        }
+            //    }
+            //}
         }
         #endregion
 
@@ -196,6 +196,21 @@ namespace OpenMobile
             set
             {
                 implementation.ClientSize = value;
+            }
+        }
+
+        #endregion
+
+        #region ClientLocation
+
+        /// <summary>
+        /// Gets or sets a <see cref="System.Drawing.Point"/> structure that contains the location of the client area on the desktop.
+        /// </summary>
+        public Point ClientLocation
+        {
+            get
+            {
+                return implementation.ClientLocation;
             }
         }
 
@@ -478,6 +493,11 @@ namespace OpenMobile
         public event EventHandler<EventArgs> Resize;
 
         /// <summary>
+        /// Occurs whenever the window is moved.
+        /// </summary>
+        public event EventHandler<EventArgs> Move;
+
+        /// <summary>
         /// Occurs when the <see cref="WindowState"/> property of the window changes.
         /// </summary>
         public event EventHandler<EventArgs> WindowStateChanged;
@@ -591,6 +611,20 @@ namespace OpenMobile
 
         #endregion
 
+        #region OnMove
+
+        /// <summary>
+        /// Called when the NativeWindow is moved.
+        /// </summary>
+        /// <param name="e">Not used.</param>
+        protected virtual void OnMove(EventArgs e)
+        {
+            if (Move != null) Move(this, e);
+        }
+
+        #endregion
+
+
         #region OnWindowStateChanged
 
         /// <summary>
@@ -630,6 +664,13 @@ namespace OpenMobile
 
         #endregion
 
+        #region OnMoveInternal
+
+        private void OnMoveInternal(object sender, EventArgs e) { OnMove(e); }
+
+        #endregion
+
+
         #region OnWindowStateChangedInternal
 
         private void OnWindowStateChangedInternal(object sender, EventArgs e) { OnWindowStateChanged(e); }
@@ -655,6 +696,7 @@ namespace OpenMobile
                     implementation.Closing += OnClosingInternal;
                     implementation.MouseLeave += OnMouseLeaveInternal;
                     implementation.Resize += OnResizeInternal;
+                    implementation.Move += OnMoveInternal;
                     implementation.WindowStateChanged += OnWindowStateChangedInternal;
                     implementation.Gesture += Gesture;
                     implementation.ResolutionChange+=ResolutionChange;
@@ -665,6 +707,7 @@ namespace OpenMobile
                     implementation.Closing -= OnClosingInternal;
                     implementation.MouseLeave -= OnMouseLeaveInternal;
                     implementation.Resize -= OnResizeInternal;
+                    implementation.Move -= OnMoveInternal;
                     implementation.WindowStateChanged -= OnWindowStateChangedInternal;
                     implementation.Gesture -= Gesture;
                     implementation.ResolutionChange -= ResolutionChange;

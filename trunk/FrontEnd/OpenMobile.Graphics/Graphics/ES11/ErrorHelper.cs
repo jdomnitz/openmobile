@@ -80,7 +80,7 @@ namespace OpenMobile.Graphics.ES11
         {
             if (Context.ErrorChecking)
             {
-                while ((ErrorCode)Raw.GetError() != ErrorCode.NoError)
+                while ((ErrorCode)GL.GetError() != ErrorCode.NoError)
                 { }
             }
         }
@@ -96,7 +96,7 @@ namespace OpenMobile.Graphics.ES11
                 ErrorCode error;
                 do
                 {
-                    error = (ErrorCode)Raw.GetError();
+                    error = (ErrorCode)GL.GetError();
                     error_list.Add(error);
                     if (error_list.Count > 10)
                         break;

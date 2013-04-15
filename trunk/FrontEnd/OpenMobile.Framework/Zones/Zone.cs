@@ -25,12 +25,14 @@ using OpenMobile;
 using OpenMobile.Plugin;
 using OpenMobile.Controls;
 using OpenMobile.Graphics;
+using OpenMobile.Media;
 
 namespace OpenMobile
 {
     /// <summary>
     /// A zone is a object consisting of one or more Screens and AudioUnits
     /// /// </summary>
+    [Serializable]
     public class Zone
     {
         /// <summary>
@@ -61,7 +63,6 @@ namespace OpenMobile
         /// Check if this zone can be activated on the given screen
         /// </summary>
         /// <param name="screen"></param>
-        /// <param name="zone"></param>
         /// <returns></returns>
         public bool CanZoneBeActivated(int screen)
         {
@@ -108,6 +109,17 @@ namespace OpenMobile
         }
 
         /// <summary>
+        /// Does this zone have subzones
+        /// </summary>
+        public bool HasSubZones
+        {
+            get
+            {
+                return _SubZones.Count > 0;
+            }
+        }
+
+        /// <summary>
         /// Name of the zone
         /// </summary>
         public string Name { get; set; }
@@ -120,7 +132,22 @@ namespace OpenMobile
         /// <summary>
         /// Screen number for this zone
         /// </summary>
-        public int Screen { get; set; }
+        public int Screen
+        {
+            get
+            {
+                return this._Screen;
+            }
+            set
+            {
+                if (this._Screen != value)
+                {
+                    this._Screen = value;
+                    this.Raise_OnPropertyChanged("Screen");
+                }
+            }
+        }
+        private int _Screen;        
 
         /// <summary>
         /// The currently assigned audio device
@@ -199,7 +226,18 @@ namespace OpenMobile
         /// </summary>
         private Zone()
         {
-            _AudioDevice_OnUpdatedDelegate = new AudioDevice.UpdatedDelegate(_AudioDevice_OnUpdated); 
+            _AudioDevice_OnUpdatedDelegate = new AudioDevice.UpdatedDelegate(_AudioDevice_OnUpdated);
+
+            // Start media handler
+            _MediaHandler = new MediaProviderHandler(this);
+        }
+
+        /// <summary>
+        /// Disposes this object
+        /// </summary>
+        public void Dispose()
+        {
+            _MediaHandler.Dispose();
         }
 
         /// <summary>
@@ -319,6 +357,48 @@ namespace OpenMobile
         {
             if (OnVolumeChanged != null)
                 OnVolumeChanged(this, this.AudioDevice);
-        }        
+        }
+
+        /// <summary>
+        /// Volume changed delegate
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="propertyName"></param>
+        public delegate void PropertyChangedDelegate(Zone zone, string propertyName);
+
+        /// <summary>
+        /// Raised when the volume on the audiodevice changes
+        /// </summary>
+        public event PropertyChangedDelegate OnPropertyChanged;
+
+        /// <summary>
+        /// Raises the property changed event
+        /// </summary>
+        private void Raise_OnPropertyChanged(string propertyName)
+        {
+            if (OnPropertyChanged != null)
+                OnPropertyChanged(this, propertyName);
+        }
+
+        /// <summary>
+        /// MediaProvider controller
+        /// </summary>
+        [System.Xml.Serialization.XmlIgnore]
+        public MediaProviderHandler MediaHandler
+        {
+            get
+            {
+                return this._MediaHandler;
+            }
+            set
+            {
+                if (this._MediaHandler != value)
+                {
+                    this._MediaHandler = value;
+                }
+            }
+        }
+        private MediaProviderHandler _MediaHandler;
+        
     }
 }

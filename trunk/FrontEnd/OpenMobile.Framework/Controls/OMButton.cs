@@ -37,6 +37,128 @@ namespace OpenMobile.Controls
     [System.Serializable]
     public class OMButton : OMLabel, IClickable, IHighlightable
     {
+        #region Preconfigured controls
+
+        /// <summary>
+        /// Creates a button with a default layout
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="corners"></param>
+        /// <returns></returns>
+        public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, GraphicCorners? corners)
+        {
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, null, null, null, null, null);
+        }
+
+        /// <summary>
+        /// Creates a button with a default layout
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="corners"></param>
+        /// <param name="icon"></param>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, GraphicCorners? corners, string icon, string text)
+        {
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, icon, text, null, null, null);
+        }
+
+        /// <summary>
+        /// Creates a button with a default layout
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="opacity"></param>
+        /// <param name="corners"></param>
+        /// <param name="icon"></param>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, int opacity, GraphicCorners? corners, string icon, string text)
+        {
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, opacity, 15, corners, icon, text, null, null, null);
+        }
+
+        /// <summary>
+        /// Creates a button with a default layout
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="opacity"></param>
+        /// <param name="cornerRadius"></param>
+        /// <param name="corners"></param>
+        /// <param name="icon"></param>
+        /// <param name="text"></param>
+        /// <param name="backColor1"></param>
+        /// <param name="backColor2"></param>
+        /// <param name="borderColor"></param>
+        /// <returns></returns>
+        public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, int? opacity, int? cornerRadius, GraphicCorners? corners, string icon, string text, Color? backColor1, Color? backColor2, Color? borderColor)
+        {
+            OMButton btn = new OMButton(name, left, top, width, height);
+
+            // Create button graphics
+            OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData gd = new OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData();
+            if (backColor1 != null)
+                gd.BackgroundColor1 = (Color)backColor1;
+            else
+                gd.BackgroundColor1 = Color.Black; //Color.FromArgb(178,Color.Black);
+            if (backColor2 != null)
+                gd.BackgroundColor2 = (Color)backColor2;
+            if (backColor2 != null)
+                gd.BorderColor = (Color)borderColor;
+            else
+                gd.BorderColor = Color.FromArgb(255, 87, 87, 87);//Color.FromArgb(128, Color.White);
+            gd.Width = btn.Width;
+            gd.Height = btn.Height;
+            if (cornerRadius != null)
+                gd.CornerRadius = cornerRadius;
+            if (corners != null)
+                gd.CornersRadiusAppliesTo = (GraphicCorners)corners;
+            if (icon != null)
+                gd.Icon = icon;
+            if (text != null)
+                gd.Text = text;
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused;
+            btn.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundClicked;
+            btn.DownImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            //gd.Opacity = 150;
+            //gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonForegroundFocused;
+            //btn.checkedImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            if (opacity != null)
+                gd.Opacity = opacity;
+            else
+                gd.Opacity = null;
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackground;
+            btn.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+
+            // Set overlay image
+            if (!String.IsNullOrEmpty(gd.Icon) || !String.IsNullOrEmpty(gd.Text))
+            {
+                gd.Opacity = 255;
+                gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonForeground;
+                btn.OverlayImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            }
+
+            return btn;
+        }
+
+        #endregion
+
         /// <summary>
         /// Mode Changed (Highlighted, Clicked, etc)
         /// </summary>
@@ -66,6 +188,10 @@ namespace OpenMobile.Controls
         /// </summary>
         protected imageItem downImage;
         /// <summary>
+        /// Checked Image
+        /// </summary>
+        protected imageItem checkedImage;
+        /// <summary>
         /// Opacity
         /// </summary>
         protected byte transparency = 100;
@@ -77,6 +203,25 @@ namespace OpenMobile.Controls
         /// Button Clicked Transition
         /// </summary>
         protected eButtonTransition transition = eButtonTransition.BoxOut;
+
+        /// <summary>
+        /// The checked state of the button
+        /// </summary>
+        public bool Checked
+        {
+            get
+            {
+                return this._Checked;
+            }
+            set
+            {
+                if (this._Checked != value)
+                {
+                    this._Checked = value;
+                }
+            }
+        }
+        private bool _Checked;        
 
         /// <summary>
         /// Draw modes for the button graphics
@@ -117,7 +262,6 @@ namespace OpenMobile.Controls
                 this._OverlayImageDrawMode = value;
             }
         }
-        private DrawModes _GraphicDrawMode;
 
         /// <summary>
         /// The draw mode to use for the button image
@@ -194,6 +338,25 @@ namespace OpenMobile.Controls
             }
         }
         private DrawModes _OverlayImageDrawMode;
+
+        /// <summary>
+        /// The draw mode to use for the checked image
+        /// </summary>
+        public DrawModes CheckedImageDrawMode
+        {
+            get
+            {
+                return this._CheckedImageDrawMode;
+            }
+            set
+            {
+                if (this._CheckedImageDrawMode != value)
+                {
+                    this._CheckedImageDrawMode = value;
+                }
+            }
+        }
+        private DrawModes _CheckedImageDrawMode;
 
         /// <summary>
         /// The size of the graphics for the button
@@ -324,6 +487,23 @@ namespace OpenMobile.Controls
             }
         }
 
+        /// <summary>
+        /// Sets the image displayed when the button is checked
+        /// </summary>
+        public imageItem CheckedImage
+        {
+            get
+            {
+                return checkedImage;
+            }
+            set
+            {
+                checkedImage = value;
+                _RefreshGraphic = true;
+                raiseUpdate(false);
+            }
+        }
+
 
         #region OverlayImage
 
@@ -347,22 +527,22 @@ namespace OpenMobile.Controls
 
         #endregion
 
-        /// <summary>
-        /// An integer from 0-100 (100% being opaque)
-        /// </summary>
-        public byte Transparency
-        {
-            get
-            {
-                return transparency;
-            }
-            set
-            {
-                transparency = value;
-                _RefreshGraphic = true;
-                raiseUpdate(false);
-            }
-        }
+        ///// <summary>
+        ///// An integer from 0-100 (100% being opaque)
+        ///// </summary>
+        //public byte Transparency
+        //{
+        //    get
+        //    {
+        //        return transparency;
+        //    }
+        //    set
+        //    {
+        //        transparency = value;
+        //        _RefreshGraphic = true;
+        //        raiseUpdate(false);
+        //    }
+        //}
 
         /// <summary>
         /// Sets the image to display when the button has focus
@@ -567,57 +747,6 @@ namespace OpenMobile.Controls
         /// </summary>
         public Point TextOffset { get; set; }
 
-/*
-        Pen BorderPen;
-        private void DrawShape(Graphics.Graphics g, renderingParams e, float Alpha)
-        {
-            Brush Fill = new Brush(Color.FromArgb((int)(Alpha * fillColor.A), fillColor));
-            if (borderSize > 0)
-                BorderPen = new Pen(Color.FromArgb((int)(Alpha * borderColor.A), borderColor), borderSize);
-
-            switch (shape)
-            {
-                case shapes.Rectangle:
-                    g.FillRectangle(Fill, left, top, width, height);
-                    if (borderSize > 0)
-                        g.DrawRectangle(BorderPen, left, top, width, height);
-                    break;
-                case shapes.Polygon:
-                    {
-                        // Convert points from relative to absolute coordinates
-                        Point[] points = (Point[])GraphicPoints.Clone();
-                        for (int i = 0; i < points.Length; i++)
-                            points[i].Translate(this.left, this.top);
-                        // BUG: Fill does not work
-                        //g.FillPolygon(_FillBrush, points);
-                        if (_borderSize > 0)
-                            g.DrawPolygon(BorderPen, points);
-
-                        // Render points
-                        if (this._SkinDebug)
-                        {
-                            using (Pen p = new Pen(Color.Yellow, _borderSize))
-                                for (int i = 0; i < points.Length; i++)
-                                {
-                                    g.DrawLine(p, points[i].X - 1, points[i].Y - 1, points[i].X + 1, points[i].Y + 1);
-                                    g.DrawLine(p, points[i].X + 1, points[i].Y - 1, points[i].X - 1, points[i].Y + 1);
-                                }
-                        }
-                    }
-                    break;
-                case shapes.Oval:
-                    g.FillEllipse(Fill, left, top, width, height);
-                    if (borderSize > 0)
-                        g.DrawEllipse(BorderPen, left, top, width, height);
-                    break;
-                case shapes.RoundedRectangle:
-                    g.FillRoundRectangle(Fill, left, top, width, height, cornerRadius);
-                    if (borderSize > 0)
-                        g.DrawRoundRectangle(BorderPen, left, top, width, height, cornerRadius);
-                    break;
-            }
-        }
-*/
         /// <summary>
         /// Draws the control
         /// </summary>
@@ -693,6 +822,16 @@ namespace OpenMobile.Controls
                         {   // Default fallback if image is missing
                             //DrawShape(g, e, _RenderingValue_Alpha);
                             base.DrawShape(g, e);
+                        }
+
+                        // Render checked state
+                        if (_Checked && checkedImage.image != null)
+                        {   // Draw down state (clicked state) if button is set to checked
+                            DrawImage(_CheckedImageDrawMode, g, checkedImage.image, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), _RenderingValue_Alpha, orientation);
+                        }
+                        else if (_Checked && downImage.image != null)
+                        {   // Draw down state (clicked state) if button is set to checked
+                            DrawImage(_DownImageDrawMode, g, downImage.image, left - transitionTop, top - transitionTop, width + (int)(transitionTop * 2.5), height + (int)(transitionTop * 2.5), _RenderingValue_Alpha, orientation);
                         }
                     }
                     break;

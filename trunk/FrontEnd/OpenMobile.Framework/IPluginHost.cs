@@ -30,22 +30,21 @@ namespace OpenMobile.Plugin
     /// A system-wide event notification
     /// </summary>
     /// <param name="function"></param>
-    /// <param name="arg1"></param>
-    /// <param name="arg2"></param>
-    /// <param name="arg3"></param>
-    public delegate void SystemEvent(eFunction function, string arg1, string arg2, string arg3);
+    /// <param name="args"></param>
+    public delegate void SystemEvent(eFunction function, object[] args);
     /// <summary>
     /// A media specific event notification
     /// </summary>
     /// <param name="function"></param>
+    /// <param name="zone"></param>
     /// <param name="arg"></param>
-    /// <param name="instance"></param>
     public delegate void MediaEvent(eFunction function, Zone zone, string arg);
     /// <summary>
     /// Triggered when a key is pressed on the keyboard
     /// </summary>
     /// <param name="type"></param>
     /// <param name="arg"></param>
+    /// <param name="handled"></param>
     public delegate bool KeyboardEvent(eKeypressType type, OpenMobile.Input.KeyboardKeyEventArgs arg, ref bool handled);
     /// <summary>
     /// Triggered when a gesture is raised
@@ -167,9 +166,13 @@ namespace OpenMobile.Plugin
         /// </summary>
         Rectangle GetClientArea(int Screen);
         /// <summary>
-        /// The area available to plugins for placeing controls
+        /// The area available to plugins for placing controls at runtime
         /// </summary>
         Rectangle[] ClientArea { get; }
+        /// <summary>
+        /// The area available to plugins for placing controls during initialization time
+        /// </summary>
+        Rectangle ClientArea_Init { get; }
         /// <summary>
         /// The graphical maximum region for OM to use for rectangles
         /// </summary>
@@ -496,10 +499,8 @@ namespace OpenMobile.Plugin
         /// Raises a systemwide event
         /// </summary>
         /// <param name="e">event to raise</param>
-        /// <param name="arg1">event specific</param>
-        /// <param name="arg2">event specific</param>
-        /// <param name="arg3">event specific</param>
-        void raiseSystemEvent(eFunction e, string arg1, string arg2, string arg3);
+        /// <param name="args">event specific</param>
+        void raiseSystemEvent(eFunction e, params object[] args);
 
         /// <summary>
         /// Raises a wireless event
@@ -628,5 +629,19 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="d"></param>
         void ForEachScreen(ForEachScreenDelegate d);
+
+        /// <summary>
+        /// Connection state to internet
+        /// </summary>
+        bool InternetAccess { get; }
+
+        /// <summary>
+        /// Gets data for the renderingwindow
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <returns></returns>
+        RenderingWindowData GetRenderingWindowData(int screen);
+
+        iRenderingWindow RenderingWindowInterface(int screen);
     }
 }

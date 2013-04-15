@@ -44,7 +44,7 @@ namespace OpenMobile.Platform.Windows
     {
         #region Fields
 
-        ExtendedWindowStyle ParentStyleEx = ExtendedWindowStyle.WindowEdge | ExtendedWindowStyle.ApplicationWindow | ExtendedWindowStyle.Topmost;
+        ExtendedWindowStyle ParentStyleEx = ExtendedWindowStyle.WindowEdge | ExtendedWindowStyle.ApplicationWindow; // | ExtendedWindowStyle.ToolWindow; // | ExtendedWindowStyle.Topmost;
         const ExtendedWindowStyle ChildStyleEx = 0;
 
         readonly IntPtr Instance = Marshal.GetHINSTANCE(typeof(WinGLNative).Module);
@@ -59,6 +59,7 @@ namespace OpenMobile.Platform.Windows
         bool exists;
         WinWindowInfo window, child_window;
         WindowBorder windowBorder = WindowBorder.Resizable;
+        //WindowBorder windowBorder = WindowBorder.Hidden;
         Nullable<WindowBorder> previous_window_border; // Set when changing to fullscreen state.
         Nullable<WindowBorder> deferred_window_border; // Set to avoid changing borders during fullscreen state.
         WindowState windowState = WindowState.Normal;
@@ -153,10 +154,17 @@ namespace OpenMobile.Platform.Windows
                     // ExitingmModal size/move loop: the timer callback is no longer
                     // necessary.
                     StopTimer(handle);
+                    
+                    // Is this a resize event?
                     if ((queueResize) && (Resize != null))
                     {
                         Resize(this, EventArgs.Empty);
                         queueResize = false;
+                    }
+                    else
+                    {   // No, This was a move message
+                        if (Move != null)
+                            Move(this, EventArgs.Empty);
                     }
                     break;
 
@@ -182,6 +190,7 @@ namespace OpenMobile.Platform.Windows
                                 bounds.Height = pos->cy;
 
                                 Win32Rectangle rect;
+                                
                                 Functions.GetClientRect(handle, out rect);
                                 client_rectangle = rect.ToRectangle();
 
@@ -192,6 +201,9 @@ namespace OpenMobile.Platform.Windows
                                 if (suppress_resize <= 0)
                                     queueResize=true;
                             }
+                            Win32Rectangle rect2;
+                            Functions.GetWindowRect(child_window.WindowHandle, out rect2);
+                            _ClientLocation = new Point(rect2.Left, rect2.Top);
                         }
                     }
                     break;
@@ -234,8 +246,13 @@ namespace OpenMobile.Platform.Windows
                             break;
                         }
                         windowState = new_state;
+
                         if (WindowStateChanged != null)
                             WindowStateChanged(this, EventArgs.Empty);
+
+                        if (windowState == WindowState.Normal)
+                            _ClientLocation = previous_clientLocation;
+
                         if (Resize != null)
                             Resize(this, EventArgs.Empty);
                     }
@@ -587,7 +604,20 @@ namespace OpenMobile.Platform.Windows
                 else
                 {
                     style |= WindowStyle.OverlappedWindow | WindowStyle.ClipChildren;
-                    ex_style = ParentStyleEx;
+                    if ((options & GameWindowFlags.Hidden) == GameWindowFlags.Hidden)
+                    {
+                        ex_style = ExtendedWindowStyle.NoActivate;
+                        style = WindowStyle.Popup;
+                    }
+                    else
+                    {
+                        ex_style = ParentStyleEx;
+                    }
+
+                    if ((options & GameWindowFlags.AlwaysOnTop) == GameWindowFlags.AlwaysOnTop)
+                    {
+                        ex_style |= ExtendedWindowStyle.Topmost;
+                    }
                 }
             }
             else
@@ -744,6 +774,20 @@ namespace OpenMobile.Platform.Windows
                 ClientSize = value.Size;
             }
         }
+
+        #endregion
+
+        #region ClientLocation
+
+        public Point ClientLocation
+        {
+            get
+            {
+                return _ClientLocation;
+            }
+        }
+        private Point _ClientLocation;
+        private Point previous_clientLocation;
 
         #endregion
 
@@ -974,6 +1018,7 @@ namespace OpenMobile.Platform.Windows
                         suppress_resize--;
                         previous_bounds = Bounds;
                         previous_window_border = WindowBorder;
+                        previous_clientLocation = _ClientLocation;
                         HideBorder();
                         command = ShowWindowCommand.MAXIMIZE;
 
@@ -1047,6 +1092,8 @@ namespace OpenMobile.Platform.Windows
 
                     case WindowBorder.Hidden:
                         style |= WindowStyle.Popup;
+                        ParentStyleEx &= ~ExtendedWindowStyle.ApplicationWindow;
+                        ParentStyleEx |= ExtendedWindowStyle.ToolWindow;
                         break;
                 }
 
@@ -1077,6 +1124,8 @@ namespace OpenMobile.Platform.Windows
         #endregion
 
         #region Events
+
+        public event EventHandler<EventArgs> Move;
 
         public event EventHandler<EventArgs> Resize;
 

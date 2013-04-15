@@ -35,7 +35,7 @@ namespace OpenMobile.Graphics.ES11
     #pragma warning disable 1572
     #pragma warning disable 1573
 
-    partial class Raw
+    partial class GL
     {
 
         
@@ -5907,7 +5907,6 @@ namespace OpenMobile.Graphics.ES11
             }
             #endif
         }
-
         
         /// <summary>[requires: v1.1 and 1.1]
         /// Replace the current matrix with the specified matrix

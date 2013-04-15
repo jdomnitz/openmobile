@@ -172,5 +172,16 @@ namespace OpenMobile
             }
         }
         protected string _Description;
+
+        /// <summary>
+        /// The full name of this data (Provider.Category.Name)
+        /// </summary>
+        public string FullNameWithProvider
+        {
+            get
+            {
+                return String.Format("{0}{1}{2}", _Provider, ProviderSeparator, FullName);
+            }
+        }
     }
 }

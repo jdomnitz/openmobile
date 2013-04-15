@@ -126,6 +126,11 @@ namespace OpenMobile
         Size ClientSize { get; set; }
 
         /// <summary>
+        /// Gets the location of the client area on the desktop
+        /// </summary>
+        Point ClientLocation { get; }
+
+        /// <summary>
         /// This property is deprecated and should not be used.
         /// </summary>
         [Obsolete]
@@ -145,6 +150,11 @@ namespace OpenMobile
         /// Occurs whenever the window is resized. 
         /// </summary>
         event EventHandler<EventArgs> Resize;
+
+        /// <summary>
+        /// Occurs whenever the window is moved. 
+        /// </summary>
+        event EventHandler<EventArgs> Move;
 
         /// <summary>
         /// Occurs when the window is about to close. 

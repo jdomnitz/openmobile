@@ -53,17 +53,33 @@ namespace OpenMobile.Controls
         /// Creates a dropdown style button for usage in a OMContainer
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="size"></param>
+        /// <param name="opacity"></param>
         /// <param name="icon"></param>
         /// <param name="text"></param>
         /// <param name="OnClick"></param>
         /// <param name="OnHoldClick"></param>
         /// <param name="OnLongClick"></param>
         /// <returns></returns>
-        static public Button CreateButton(string name, Size size, int opacity, imageItem icon, string text, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
+        static public Button PreConfigLayout_Button_Style1(string name, Size size, int opacity, imageItem icon, string text, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
         {
-            return CreateButton(name, size, opacity, icon, text, false, OnClick, OnHoldClick, OnLongClick);
+            return PreConfigLayout_Button_Style1(name, size, opacity, icon, text, false, OnClick, OnHoldClick, OnLongClick);
         }
-        static private Button CreateButton(string name, Size size, int opacity, imageItem icon, string text, bool dummy, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
+
+        /// <summary>
+        /// Creates a dropdown style button for usage in a OMContainer
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="size"></param>
+        /// <param name="opacity"></param>
+        /// <param name="icon"></param>
+        /// <param name="text"></param>
+        /// <param name="dummy"></param>
+        /// <param name="OnClick"></param>
+        /// <param name="OnHoldClick"></param>
+        /// <param name="OnLongClick"></param>
+        /// <returns></returns>
+        static private Button PreConfigLayout_Button_Style1(string name, Size size, int opacity, imageItem icon, string text, bool dummy, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
         {
             Button btn = new Button(name);
 
@@ -73,18 +89,15 @@ namespace OpenMobile.Controls
             OMButton Button_NotifyDropdown_Btn_Settings = new OMButton(String.Format("{0}_{1}", name, "Button"), BtnSize.Left, BtnSize.Top, BtnSize.Width, BtnSize.Height);
             if (!dummy)
             {
-                //Button_NotifyDropdown_Btn_Settings.FocusImage = new imageItem(Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor), Button_NotifyDropdown_Btn_Settings.Width, Button_NotifyDropdown_Btn_Settings.Height);
-                //Button_NotifyDropdown_Btn_Settings.DownImage = new imageItem(Color.FromArgb(200, BuiltInComponents.SystemSettings.SkinFocusColor), Button_NotifyDropdown_Btn_Settings.Width, Button_NotifyDropdown_Btn_Settings.Height);
-
                 OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData gd = new OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData();
-                gd.BackgroundColor = Color.Transparent;
+                gd.BackgroundColor1 = Color.Transparent;
                 gd.BorderColor = Color.Transparent;
                 gd.Width = BtnSize.Width;
                 gd.Height = BtnSize.Height;
                 gd.CornerRadius = 0;
-                gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused;
-                Button_NotifyDropdown_Btn_Settings.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
                 gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundClicked;
+                Button_NotifyDropdown_Btn_Settings.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+                gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused;
                 Button_NotifyDropdown_Btn_Settings.DownImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
 
             }
@@ -119,9 +132,15 @@ namespace OpenMobile.Controls
 
             return btn;
         }
-        static public Button CreateButtonDummy(string name, Size size)
+        /// <summary>
+        /// Creates an empty button placeholder
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        static public Button PreConfigLayout_ButtonDummy_Style1(string name, Size size)
         {
-            return CreateButton(name, size, 0, new imageItem(), null, true, null, null, null);
+            return PreConfigLayout_Button_Style1(name, size, 0, new imageItem(), null, true, null, null, null);
         }
 
         /// <summary>
@@ -131,11 +150,12 @@ namespace OpenMobile.Controls
         /// <param name="size"></param>
         /// <param name="opacity"></param>
         /// <param name="icon"></param>
+        /// <param name="corners"></param>
         /// <param name="OnClick"></param>
         /// <param name="OnHoldClick"></param>
         /// <param name="OnLongClick"></param>
         /// <returns></returns>
-        static public Button CreateSimpleButton(string name, Size size, int opacity, imageItem icon, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
+        static public Button PreConfigLayout_SimpleButton(string name, Size size, int opacity, imageItem icon, GraphicCorners corners, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
         {
             Button btn = new Button(name);
             
@@ -143,17 +163,32 @@ namespace OpenMobile.Controls
             Size GraphicSize = new Size(size.Width, size.Height);
             if (icon.image != null)
             {
-                GraphicSize = icon.image.Size;
-                if (icon.image.Width > size.Width)
-                    GraphicSize.Width = size.Width;
-                if (icon.image.Height > size.Height)
-                    GraphicSize.Height = size.Height;
+                //GraphicSize = icon.image.Size;
+                //if (icon.image.Width > size.Width)
+                //    GraphicSize.Width = size.Width;
+                //if (icon.image.Height > size.Height)
+                //    GraphicSize.Height = size.Height;
+
+                GraphicSize = new Size(icon.image.Width, icon.image.Height);
+
+                float scaleFactor = 1f;
+                if (GraphicSize.Width < GraphicSize.Height)
+                {   // Width is smallest
+                    scaleFactor = (float)GraphicSize.Width / (float)icon.image.Size.Width;
+                    GraphicSize.Height = (int)(GraphicSize.Height * scaleFactor);
+                }
+                else
+                {   // Height is smallest
+                    scaleFactor = (float)GraphicSize.Height / (float)icon.image.Size.Height;
+                    GraphicSize.Width = (int)(GraphicSize.Width * scaleFactor);
+                }
             }
 
             // Button function
-            OMButton Button_Settings = new OMButton(String.Format("{0}_{1}", btn.Name, "Button"), 0, 0, size.Width, size.Height);
-            Button_Settings.GraphicDrawMode = OMButton.DrawModes.FixedSizeCentered;
-            Button_Settings.GraphicSize = GraphicSize;
+            //OMButton Button_Settings = new OMButton(String.Format("{0}_{1}", btn.Name, "Button"), 0, 0, size.Width, size.Height);
+            OMButton Button_Settings = OMButton.PreConfigLayout_BasicStyle(String.Format("{0}_{1}", btn.Name, "Button"), -1, 0, size.Width, size.Height, corners);
+            //Button_Settings.GraphicDrawMode = OMButton.DrawModes.FixedSizeCentered;
+            //Button_Settings.GraphicSize = GraphicSize;
             Button_Settings.Opacity = opacity;
 
             //Button_Settings.FocusImage = new imageItem(Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor), size.Width, size.Height);
@@ -169,6 +204,95 @@ namespace OpenMobile.Controls
             //Button_Settings.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
             //gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundClicked;
             //Button_Settings.DownImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+
+            if (icon.image != null)
+            {
+                //// Create focus image
+                //OImage oImgFocus = (OImage)icon.image.Clone();
+                //oImgFocus.Glow(BuiltInComponents.SystemSettings.SkinFocusColor);
+                //Button_Settings.FocusImage = new imageItem(oImgFocus);
+
+                //// Create down image
+                //OImage oImgDown = (OImage)icon.image.Clone();
+                //oImgDown.SetAlpha(0.5F); // Slightly darken the image
+                //oImgDown.Glow(BuiltInComponents.SystemSettings.SkinFocusColor);
+                //Button_Settings.DownImage = new imageItem(oImgDown);
+
+                // Create icon image
+                OImage oImgOverlay = (OImage)icon.image.Clone();
+                if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
+                    oImgOverlay.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
+                Button_Settings.OverlayImage = new imageItem(oImgOverlay);
+                Button_Settings.OverlayImageDrawMode = OMButton.DrawModes.FixedSizeCentered;
+                Button_Settings.GraphicSize = GraphicSize;
+
+            }
+
+            // Map actions
+            Button_Settings.OnClick += OnClick;
+            Button_Settings.OnHoldClick += OnHoldClick;
+            Button_Settings.OnLongClick += OnLongClick;
+            //Button_Settings.SkinDebug = true;
+
+            btn.Add(Button_Settings);
+
+            return btn;
+        }
+
+        /// <summary>
+        /// Creates a simple button with no background (glowin highlight)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="size"></param>
+        /// <param name="opacity"></param>
+        /// <param name="icon"></param>
+        /// <param name="corners"></param>
+        /// <param name="OnClick"></param>
+        /// <param name="OnHoldClick"></param>
+        /// <param name="OnLongClick"></param>
+        /// <returns></returns>
+        static public Button PreConfigLayout_SimpleButton_Style2(string name, Size size, int opacity, imageItem icon, GraphicCorners corners, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
+        {
+            Button btn = new Button(name);
+
+            // Calculate graphics size for icon in button (to ensure it's correctly aligned)
+            Size GraphicSize = new Size(size.Width, size.Height);
+            if (icon.image != null)
+            {
+                GraphicSize = new Size(icon.image.Width, icon.image.Height);
+
+                float scaleFactor = 1f;
+                if (GraphicSize.Width < GraphicSize.Height)
+                {   // Width is smallest
+                    scaleFactor = (float)GraphicSize.Width / (float)icon.image.Size.Width;
+                    GraphicSize.Height = (int)(GraphicSize.Height * scaleFactor);
+                }
+                else
+                {   // Height is smallest
+                    scaleFactor = (float)GraphicSize.Height / (float)icon.image.Size.Height;
+                    GraphicSize.Width = (int)(GraphicSize.Width * scaleFactor);
+                }
+            }
+
+            // Button function
+            OMButton Button_Settings = new OMButton(String.Format("{0}_{1}", btn.Name, "Button"), 0, 0, size.Width, size.Height);
+            Button_Settings.GraphicDrawMode = OMButton.DrawModes.FixedSizeCentered;
+            Button_Settings.GraphicSize = GraphicSize;
+            Button_Settings.Opacity = opacity;
+
+            //Button_Settings.FocusImage = new imageItem(Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor), size.Width, size.Height);
+            //Button_Settings.DownImage = new imageItem(Color.FromArgb(200, BuiltInComponents.SystemSettings.SkinFocusColor), size.Width, size.Height);
+
+            OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData gd = new OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData();
+            gd.BackgroundColor1 = Color.Transparent;
+            gd.BorderColor = Color.Transparent;
+            gd.Width = size.Width;
+            gd.Height = size.Height;
+            gd.CornerRadius = 0;
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused;
+            Button_Settings.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundClicked;
+            Button_Settings.DownImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
 
             if (icon.image != null)
             {
@@ -188,6 +312,8 @@ namespace OpenMobile.Controls
                 if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
                     oImgOverlay.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
                 Button_Settings.OverlayImage = new imageItem(oImgOverlay);
+                Button_Settings.OverlayImageDrawMode = OMButton.DrawModes.FixedSizeCentered;
+                Button_Settings.GraphicSize = GraphicSize;
             }
 
             // Map actions
@@ -195,6 +321,65 @@ namespace OpenMobile.Controls
             Button_Settings.OnHoldClick += OnHoldClick;
             Button_Settings.OnLongClick += OnLongClick;
             //Button_Settings.SkinDebug = true;
+
+            btn.Add(Button_Settings);
+
+            return btn;
+        }
+
+        /// <summary>
+        /// Creates a button for usage in a menubar
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="size"></param>
+        /// <param name="opacity"></param>
+        /// <param name="icon"></param>
+        /// <param name="OnClick"></param>
+        /// <param name="OnHoldClick"></param>
+        /// <param name="OnLongClick"></param>
+        /// <returns></returns>
+        static public Button PreConfigLayout_MenuBarStyle(string name, Size size, int opacity, imageItem icon, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
+        {
+            Button btn = new Button(name);
+
+            // Calculate graphics size for icon in button (to ensure it's correctly aligned)
+            Size GraphicSize = new Size(size.Width, size.Height);
+            if (icon.image != null)
+            {
+                GraphicSize = new Size(icon.image.Width, icon.image.Height);
+
+                float scaleFactor = 1f;
+                if (GraphicSize.Width < GraphicSize.Height)
+                {   // Width is smallest
+                    scaleFactor = (float)GraphicSize.Width / (float)icon.image.Size.Width;
+                    GraphicSize.Height = (int)(GraphicSize.Height * scaleFactor);
+                }
+                else
+                {   // Height is smallest
+                    scaleFactor = (float)GraphicSize.Height / (float)icon.image.Size.Height;
+                    GraphicSize.Width = (int)(GraphicSize.Width * scaleFactor);
+                }
+            }
+
+            // Button function
+            OMButton Button_Settings = OMButton.PreConfigLayout_BasicStyle(String.Format("{0}_{1}", btn.Name, "Button"), -1, 0, size.Width, size.Height, GraphicCorners.None);
+            Button_Settings.Opacity = opacity;
+
+            if (icon.image != null)
+            {
+                // Create icon image
+                OImage oImgOverlay = (OImage)icon.image.Clone();
+                if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
+                    oImgOverlay.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
+                Button_Settings.OverlayImage = new imageItem(oImgOverlay);
+                Button_Settings.OverlayImageDrawMode = OMButton.DrawModes.FixedSizeCentered;
+                Button_Settings.GraphicSize = GraphicSize;
+            }
+
+            // Map actions
+            Button_Settings.OnClick += OnClick;
+            Button_Settings.OnHoldClick += OnHoldClick;
+            Button_Settings.OnLongClick += OnLongClick;
 
             btn.Add(Button_Settings);
 
@@ -243,7 +428,7 @@ namespace OpenMobile.Controls
             //btnCtrl.FocusImage = new imageItem(Color.FromArgb(200, BuiltInComponents.SystemSettings.SkinFocusColor), size.Width, size.Height);
 
             OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData gd = new OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData();
-            gd.BackgroundColor = Color.Transparent;
+            gd.BackgroundColor1 = Color.Transparent;
             gd.BorderColor = Color.Transparent;
             gd.Width = btnCtrl.Width;
             gd.Height = btnCtrl.Height;

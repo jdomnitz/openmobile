@@ -108,6 +108,26 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// Enabled automatically fitting of text to the label size
+        /// </summary>
+        public FitModes AutoFitTextMode
+        {
+            get
+            {
+                return this._AutoFitTextMode;
+            }
+            set
+            {
+                if (this._AutoFitTextMode != value)
+                {
+                    this._AutoFitTextMode = value;
+                    RefreshGraphic();
+                }
+            }
+        }
+        protected FitModes _AutoFitTextMode;        
+
+        /// <summary>
         /// Create a new OMLabel
         /// </summary>
         [Obsolete("Use OMLabel(string name, int x, int y, int w, int h) instead")]
@@ -293,18 +313,12 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Draws the control
+        /// Render the controls background
         /// </summary>
-        /// <param name="g">The UI's graphics object</param>
-        /// <param name="e">Rendering Parameters</param>
-        public override void Render(Graphics.Graphics g, renderingParams e)
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void Render_Background(Graphics.Graphics g, renderingParams e)
         {
-            base.RenderBegin(g, e);
-
-            // No use in rendering if text is empty
-            if (String.IsNullOrEmpty(_text))
-                return;
-
             // Render background (if any)
             if (background != Color.Transparent)
             {
@@ -316,10 +330,36 @@ namespace OpenMobile.Controls
 
             // Render shape (if any)
             base.DrawShape(g, e);
+        }
 
-            if (_RefreshGraphic)
-                textTexture = g.GenerateTextTexture(textTexture, left, top, width, height, _text, _font, _textFormat, _textAlignment, _color, _outlineColor);
-            g.DrawImage(textTexture, left, top, width, height, _RenderingValue_Alpha);
+        /// <summary>
+        /// Render the controls foreground
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void Render_Foreground(Graphics.Graphics g, renderingParams e, string text)
+        {
+            // No use in rendering if text is empty
+            if (!String.IsNullOrEmpty(text))
+            {
+                if (_RefreshGraphic)
+                    textTexture = g.GenerateTextTexture(textTexture, left, top, width, height, text, _font, _textFormat, _textAlignment, _color, _outlineColor, _AutoFitTextMode);
+
+                g.DrawImage(textTexture, left, top, width, height, _RenderingValue_Alpha);
+            }
+        }
+
+        /// <summary>
+        /// Draws the control
+        /// </summary>
+        /// <param name="g">The UI's graphics object</param>
+        /// <param name="e">Rendering Parameters</param>
+        public override void Render(Graphics.Graphics g, renderingParams e)
+        {
+            base.RenderBegin(g, e);
+
+            Render_Background(g, e);
+            Render_Foreground(g, e, _text);
 
             base.RenderFinish(g, e);
         }

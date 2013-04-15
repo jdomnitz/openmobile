@@ -332,7 +332,7 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Returns the list count
+        /// Gets the list count
         /// </summary>
         public int Count
         {
@@ -342,7 +342,7 @@ namespace OpenMobile.Controls
             }
         }
         /// <summary>
-        /// The zero based index of the currently selected item (-1 for none)
+        /// Gets or sets the zero based index of the currently selected item (-1 for none)
         /// </summary>
         public int SelectedIndex
         {
@@ -358,7 +358,7 @@ namespace OpenMobile.Controls
             }
         }
         /// <summary>
-        /// The currently selected item (null for none)
+        /// Gets the currently selected item (null for none)
         /// </summary>
         public OMListItem SelectedItem
         {
@@ -371,7 +371,7 @@ namespace OpenMobile.Controls
             }
         }
         /// <summary>
-        /// The currently highlighted item (null for none)
+        /// Gets the currently highlighted item (null for none)
         /// </summary>
         public OMListItem HighlightedItem
         {

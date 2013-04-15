@@ -47,7 +47,7 @@ namespace OpenMobile.Graphics.OpenGL
     /// </para>
     /// </remarks>
     /// <see href="http://opengl.org/registry/"/>
-    public sealed partial class Raw : GraphicsBindingsBase
+    public sealed partial class GL : GraphicsBindingsBase
     {
         #region --- Fields ---
 
@@ -60,7 +60,7 @@ namespace OpenMobile.Graphics.OpenGL
 
         #region --- Constructor ---
 
-        static Raw()
+        static GL()
         {
         }
 
@@ -92,27 +92,27 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void Color3(OpenMobile.Graphics.Color color)
         {
-            Raw.Color3(color.R, color.G, color.B);
+            GL.Color3(color.R, color.G, color.B);
         }
 
         public static void Color4(OpenMobile.Graphics.Color color)
         {
-            Raw.Color4(color.R, color.G, color.B, color.A);
+            GL.Color4(color.R, color.G, color.B, color.A);
         }
 
         public static void Color3(Vector3 color)
         {
-            Raw.Color3(color.X, color.Y, color.Z);
+            GL.Color3(color.X, color.Y, color.Z);
         }
 
         public static void Color4(Vector4 color)
         {
-            Raw.Color4(color.X, color.Y, color.Z, color.W);
+            GL.Color4(color.X, color.Y, color.Z, color.W);
         }
 
         public static void Color4(Color4 color)
         {
-            Raw.Color4(color.R, color.G, color.B, color.A);
+            GL.Color4(color.R, color.G, color.B, color.A);
         }
 
         #endregion
@@ -121,12 +121,12 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void ClearColor(OpenMobile.Graphics.Color color)
         {
-            Raw.ClearColor(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
+            GL.ClearColor(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
         }
 
         public static void ClearColor(Color4 color)
         {
-            Raw.ClearColor(color.R, color.G, color.B, color.A);
+            GL.ClearColor(color.R, color.G, color.B, color.A);
         }
 
         #endregion
@@ -135,12 +135,12 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void BlendColor(OpenMobile.Graphics.Color color)
         {
-            Raw.BlendColor(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
+            GL.BlendColor(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
         }
 
         public static void BlendColor(Color4 color)
         {
-            Raw.BlendColor(color.R, color.G, color.B, color.A);
+            GL.BlendColor(color.R, color.G, color.B, color.A);
         }
 
         #endregion
@@ -154,7 +154,7 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void Material(MaterialFace face, MaterialParameter pname, Color4 @params)
         {
-            unsafe { Raw.Material(face, pname, (float*)&@params); }
+            unsafe { GL.Material(face, pname, (float*)&@params); }
         }
 
         #endregion
@@ -163,12 +163,12 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void Light(LightName name, LightParameter pname, Vector4 @params)
         {
-            unsafe { Raw.Light(name, pname, (float*)&@params.X); }
+            unsafe { GL.Light(name, pname, (float*)&@params.X); }
         }
 
         public static void Light(LightName name, LightParameter pname, Color4 @params)
         {
-            unsafe { Raw.Light(name, pname, (float*)&@params); }
+            unsafe { GL.Light(name, pname, (float*)&@params); }
         }
 
         #endregion
@@ -177,67 +177,67 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void Normal3(Vector3 normal)
         {
-            Raw.Normal3(normal.X, normal.Y, normal.Z);
+            GL.Normal3(normal.X, normal.Y, normal.Z);
         }
 
         public static void RasterPos2(Vector2 pos)
         {
-            Raw.RasterPos2(pos.X, pos.Y);
+            GL.RasterPos2(pos.X, pos.Y);
         }
 
         public static void RasterPos3(Vector3 pos)
         {
-            Raw.RasterPos3(pos.X, pos.Y, pos.Z);
+            GL.RasterPos3(pos.X, pos.Y, pos.Z);
         }
 
         public static void RasterPos4(Vector4 pos)
         {
-            Raw.RasterPos4(pos.X, pos.Y, pos.Z, pos.W);
+            GL.RasterPos4(pos.X, pos.Y, pos.Z, pos.W);
         }
 
         public static void Vertex2(Vector2 v)
         {
-            Raw.Vertex2(v.X, v.Y);
+            GL.Vertex2(v.X, v.Y);
         }
 
         public static void Vertex3(Vector3 v)
         {
-            Raw.Vertex3(v.X, v.Y, v.Z);
+            GL.Vertex3(v.X, v.Y, v.Z);
         }
 
         public static void Vertex4(Vector4 v)
         {
-            Raw.Vertex4(v.X, v.Y, v.Z, v.W);
+            GL.Vertex4(v.X, v.Y, v.Z, v.W);
         }
 
         public static void TexCoord2(Vector2 v)
         {
-            Raw.TexCoord2(v.X, v.Y);
+            GL.TexCoord2(v.X, v.Y);
         }
 
         public static void TexCoord3(Vector3 v)
         {
-            Raw.TexCoord3(v.X, v.Y, v.Z);
+            GL.TexCoord3(v.X, v.Y, v.Z);
         }
 
         public static void TexCoord4(Vector4 v)
         {
-            Raw.TexCoord4(v.X, v.Y, v.Z, v.W);
+            GL.TexCoord4(v.X, v.Y, v.Z, v.W);
         }
 
         public static void Rotate(Single angle, Vector3 axis)
         {
-            Raw.Rotate((Single)angle, axis.X, axis.Y, axis.Z);
+            GL.Rotate((Single)angle, axis.X, axis.Y, axis.Z);
         }
 
         public static void Scale(Vector3 scale)
         {
-            Raw.Scale(scale.X, scale.Y, scale.Z);
+            GL.Scale(scale.X, scale.Y, scale.Z);
         }
 
         public static void Translate(Vector3 trans)
         {
-            Raw.Translate(trans.X, trans.Y, trans.Z);
+            GL.Translate(trans.X, trans.Y, trans.Z);
         }
 
         public static void MultMatrix(ref Matrix4 mat)
@@ -246,7 +246,7 @@ namespace OpenMobile.Graphics.OpenGL
             {
                 fixed (Single* m_ptr = &mat.Row0.X)
                 {
-                    Raw.MultMatrix((Single*)m_ptr);
+                    GL.MultMatrix((Single*)m_ptr);
                 }
             }
         }
@@ -257,7 +257,7 @@ namespace OpenMobile.Graphics.OpenGL
             {
                 fixed (Single* m_ptr = &mat.Row0.X)
                 {
-                    Raw.LoadMatrix((Single*)m_ptr);
+                    GL.LoadMatrix((Single*)m_ptr);
                 }
             }
         }
@@ -268,7 +268,7 @@ namespace OpenMobile.Graphics.OpenGL
             {
                 fixed (Single* m_ptr = &mat.Row0.X)
                 {
-                    Raw.LoadTransposeMatrix((Single*)m_ptr);
+                    GL.LoadTransposeMatrix((Single*)m_ptr);
                 }
             }
         }
@@ -279,7 +279,7 @@ namespace OpenMobile.Graphics.OpenGL
             {
                 fixed (Single* m_ptr = &mat.Row0.X)
                 {
-                    Raw.MultTransposeMatrix((Single*)m_ptr);
+                    GL.MultTransposeMatrix((Single*)m_ptr);
                 }
             }
         }
@@ -290,69 +290,69 @@ namespace OpenMobile.Graphics.OpenGL
             {
                 fixed (float* matrix_ptr = &matrix.Row0.X)
                 {
-                    Raw.UniformMatrix4(location, 1, transpose, matrix_ptr);
+                    GL.UniformMatrix4(location, 1, transpose, matrix_ptr);
                 }
             }
         }
 
         public static void Normal3(Vector3d normal)
         {
-            Raw.Normal3(normal.X, normal.Y, normal.Z);
+            GL.Normal3(normal.X, normal.Y, normal.Z);
         }
 
         public static void RasterPos3(Vector3d pos)
         {
-            Raw.RasterPos3(pos.X, pos.Y, pos.Z);
+            GL.RasterPos3(pos.X, pos.Y, pos.Z);
         }
 
         public static void RasterPos4(Vector4d pos)
         {
-            Raw.RasterPos4(pos.X, pos.Y, pos.Z, pos.W);
+            GL.RasterPos4(pos.X, pos.Y, pos.Z, pos.W);
         }
 
         public static void Vertex2(Vector2d v)
         {
-            Raw.Vertex2(v.X, v.Y);
+            GL.Vertex2(v.X, v.Y);
         }
 
         public static void Vertex3(Vector3d v)
         {
-            Raw.Vertex3(v.X, v.Y, v.Z);
+            GL.Vertex3(v.X, v.Y, v.Z);
         }
 
         public static void Vertex4(Vector4d v)
         {
-            Raw.Vertex4(v.X, v.Y, v.Z, v.W);
+            GL.Vertex4(v.X, v.Y, v.Z, v.W);
         }
 
         public static void TexCoord2(Vector2d v)
         {
-            Raw.TexCoord2(v.X, v.Y);
+            GL.TexCoord2(v.X, v.Y);
         }
 
         public static void TexCoord3(Vector3d v)
         {
-            Raw.TexCoord3(v.X, v.Y, v.Z);
+            GL.TexCoord3(v.X, v.Y, v.Z);
         }
 
         public static void TexCoord4(Vector4d v)
         {
-            Raw.TexCoord4(v.X, v.Y, v.Z, v.W);
+            GL.TexCoord4(v.X, v.Y, v.Z, v.W);
         }
 
         public static void Rotate(double angle, Vector3d axis)
         {
-            Raw.Rotate((double)angle, axis.X, axis.Y, axis.Z);
+            GL.Rotate((double)angle, axis.X, axis.Y, axis.Z);
         }
 
         public static void Scale(Vector3d scale)
         {
-            Raw.Scale(scale.X, scale.Y, scale.Z);
+            GL.Scale(scale.X, scale.Y, scale.Z);
         }
 
         public static void Translate(Vector3d trans)
         {
-            Raw.Translate(trans.X, trans.Y, trans.Z);
+            GL.Translate(trans.X, trans.Y, trans.Z);
         }
 
         public static void MultMatrix(ref Matrix4d mat)
@@ -361,7 +361,7 @@ namespace OpenMobile.Graphics.OpenGL
             {
                 fixed (Double* m_ptr = &mat.Row0.X)
                 {
-                    Raw.MultMatrix((Double*)m_ptr);
+                    GL.MultMatrix((Double*)m_ptr);
                 }
             }
         }
@@ -372,7 +372,7 @@ namespace OpenMobile.Graphics.OpenGL
             {
                 fixed (Double* m_ptr = &mat.Row0.X)
                 {
-                    Raw.LoadMatrix((Double*)m_ptr);
+                    GL.LoadMatrix((Double*)m_ptr);
                 }
             }
         }
@@ -383,7 +383,7 @@ namespace OpenMobile.Graphics.OpenGL
             {
                 fixed (Double* m_ptr = &mat.Row0.X)
                 {
-                    Raw.LoadTransposeMatrix((Double*)m_ptr);
+                    GL.LoadTransposeMatrix((Double*)m_ptr);
                 }
             }
         }
@@ -394,7 +394,7 @@ namespace OpenMobile.Graphics.OpenGL
             {
                 fixed (Double* m_ptr = &mat.Row0.X)
                 {
-                    Raw.MultTransposeMatrix((Double*)m_ptr);
+                    GL.MultTransposeMatrix((Double*)m_ptr);
                 }
             }
         }
@@ -404,44 +404,44 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void Uniform2(int location, ref Vector2 vector)
         {
-            Raw.Uniform2(location, vector.X, vector.Y);
+            GL.Uniform2(location, vector.X, vector.Y);
         }
 
 
         public static void Uniform3(int location, ref Vector3 vector)
         {
-            Raw.Uniform3(location, vector.X, vector.Y, vector.Z);
+            GL.Uniform3(location, vector.X, vector.Y, vector.Z);
         }
 
 
         public static void Uniform4(int location, ref Vector4 vector)
         {
-            Raw.Uniform4(location, vector.X, vector.Y, vector.Z, vector.W);
+            GL.Uniform4(location, vector.X, vector.Y, vector.Z, vector.W);
         }
 
         public static void Uniform2(int location, Vector2 vector)
         {
-            Raw.Uniform2(location, vector.X, vector.Y);
+            GL.Uniform2(location, vector.X, vector.Y);
         }
 
         public static void Uniform3(int location, Vector3 vector)
         {
-            Raw.Uniform3(location, vector.X, vector.Y, vector.Z);
+            GL.Uniform3(location, vector.X, vector.Y, vector.Z);
         }
 
         public static void Uniform4(int location, Vector4 vector)
         {
-            Raw.Uniform4(location, vector.X, vector.Y, vector.Z, vector.W);
+            GL.Uniform4(location, vector.X, vector.Y, vector.Z, vector.W);
         }
 
         public static void Uniform4(int location, Color4 color)
         {
-            Raw.Uniform4(location, color.R, color.G, color.B, color.A);
+            GL.Uniform4(location, color.R, color.G, color.B, color.A);
         }
 
         public static void Uniform4(int location, Quaternion quaternion)
         {
-            Raw.Uniform4(location, quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
+            GL.Uniform4(location, quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
         }
 
         #endregion
@@ -513,7 +513,7 @@ namespace OpenMobile.Graphics.OpenGL
             unsafe
             {
                 int length = @string.Length;
-                Raw.ShaderSource((UInt32)shader, 1, new string[] { @string }, &length);
+                GL.ShaderSource((UInt32)shader, 1, new string[] { @string }, &length);
             }
         }
 
@@ -537,14 +537,14 @@ namespace OpenMobile.Graphics.OpenGL
             unsafe
             {
                 int length;
-                Raw.GetShader(shader, ShaderParameter.InfoLogLength, out length);
+                GL.GetShader(shader, ShaderParameter.InfoLogLength, out length);
                 if (length == 0)
                 {
                     info = String.Empty;
                     return;
                 }
                 StringBuilder sb = new StringBuilder(length * 2);
-                Raw.GetShaderInfoLog((UInt32)shader, sb.Capacity, &length, sb);
+                GL.GetShaderInfoLog((UInt32)shader, sb.Capacity, &length, sb);
                 info = sb.ToString();
             }
         }
@@ -569,13 +569,13 @@ namespace OpenMobile.Graphics.OpenGL
             unsafe
             {
                 int length;
-                Raw.GetProgram(program, OpenMobile.Graphics.OpenGL.ProgramParameter.InfoLogLength, out length); if (length == 0)
+                GL.GetProgram(program, OpenMobile.Graphics.OpenGL.ProgramParameter.InfoLogLength, out length); if (length == 0)
                 {
                     info = String.Empty;
                     return;
                 }
                 StringBuilder sb = new StringBuilder(length * 2);
-                Raw.GetProgramInfoLog((UInt32)program, sb.Capacity, &length, sb);
+                GL.GetProgramInfoLog((UInt32)program, sb.Capacity, &length, sb);
                 info = sb.ToString();
             }
         }
@@ -595,7 +595,7 @@ namespace OpenMobile.Graphics.OpenGL
         /// </param>
         public static void PointParameter(PointSpriteCoordOriginParameter param)
         {
-            Raw.PointParameter(PointParameterName.PointSpriteCoordOrigin, (int)param);
+            GL.PointParameter(PointParameterName.PointSpriteCoordOrigin, (int)param);
         }
 
         #endregion
@@ -605,97 +605,97 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void VertexAttrib2(Int32 index, ref Vector2 v)
         {
-            Raw.VertexAttrib2(index, v.X, v.Y);
+            GL.VertexAttrib2(index, v.X, v.Y);
         }
 
 
         public static void VertexAttrib3(Int32 index, ref Vector3 v)
         {
-            Raw.VertexAttrib3(index, v.X, v.Y, v.Z);
+            GL.VertexAttrib3(index, v.X, v.Y, v.Z);
         }
 
 
         public static void VertexAttrib4(Int32 index, ref Vector4 v)
         {
-            Raw.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
+            GL.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
         }
 
         public static void VertexAttrib2(Int32 index, Vector2 v)
         {
-            Raw.VertexAttrib2(index, v.X, v.Y);
+            GL.VertexAttrib2(index, v.X, v.Y);
         }
 
         public static void VertexAttrib3(Int32 index, Vector3 v)
         {
-            Raw.VertexAttrib3(index, v.X, v.Y, v.Z);
+            GL.VertexAttrib3(index, v.X, v.Y, v.Z);
         }
 
         public static void VertexAttrib4(Int32 index, Vector4 v)
         {
-            Raw.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
+            GL.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
         }
 
         public static void MultiTexCoord2(TextureUnit target, ref Vector2 v)
         {
-            Raw.MultiTexCoord2(target, v.X, v.Y);
+            GL.MultiTexCoord2(target, v.X, v.Y);
         }
 
         public static void MultiTexCoord3(TextureUnit target, ref Vector3 v)
         {
-            Raw.MultiTexCoord3(target, v.X, v.Y, v.Z);
+            GL.MultiTexCoord3(target, v.X, v.Y, v.Z);
         }
 
         public static void MultiTexCoord4(TextureUnit target, ref Vector4 v)
         {
-            Raw.MultiTexCoord4(target, v.X, v.Y, v.Z, v.W);
+            GL.MultiTexCoord4(target, v.X, v.Y, v.Z, v.W);
         }
 
 
         public static void VertexAttrib2(Int32 index, ref Vector2d v)
         {
-            Raw.VertexAttrib2(index, v.X, v.Y);
+            GL.VertexAttrib2(index, v.X, v.Y);
         }
 
 
         public static void VertexAttrib3(Int32 index, ref Vector3d v)
         {
-            Raw.VertexAttrib3(index, v.X, v.Y, v.Z);
+            GL.VertexAttrib3(index, v.X, v.Y, v.Z);
         }
 
 
         public static void VertexAttrib4(Int32 index, ref Vector4d v)
         {
-            Raw.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
+            GL.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
         }
 
         public static void VertexAttrib2(Int32 index, Vector2d v)
         {
-            Raw.VertexAttrib2(index, v.X, v.Y);
+            GL.VertexAttrib2(index, v.X, v.Y);
         }
 
         public static void VertexAttrib3(Int32 index, Vector3d v)
         {
-            Raw.VertexAttrib3(index, v.X, v.Y, v.Z);
+            GL.VertexAttrib3(index, v.X, v.Y, v.Z);
         }
 
         public static void VertexAttrib4(Int32 index, Vector4d v)
         {
-            Raw.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
+            GL.VertexAttrib4(index, v.X, v.Y, v.Z, v.W);
         }
 
         public static void MultiTexCoord2(TextureUnit target, ref Vector2d v)
         {
-            Raw.MultiTexCoord2(target, v.X, v.Y);
+            GL.MultiTexCoord2(target, v.X, v.Y);
         }
 
         public static void MultiTexCoord3(TextureUnit target, ref Vector3d v)
         {
-            Raw.MultiTexCoord3(target, v.X, v.Y, v.Z);
+            GL.MultiTexCoord3(target, v.X, v.Y, v.Z);
         }
 
         public static void MultiTexCoord4(TextureUnit target, ref Vector4d v)
         {
-            Raw.MultiTexCoord4(target, v.X, v.Y, v.Z, v.W);
+            GL.MultiTexCoord4(target, v.X, v.Y, v.Z, v.W);
         }
 
         #endregion
@@ -704,13 +704,13 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void Rect(OpenMobile.Graphics.Rectangle rect)
         {
-            Raw.Rect(rect.Left, rect.Top, rect.Right, rect.Bottom);
+            GL.Rect(rect.Left, rect.Top, rect.Right, rect.Bottom);
         }
 
 
         public static void Rect(ref OpenMobile.Graphics.Rectangle rect)
         {
-            Raw.Rect(rect.Left, rect.Top, rect.Right, rect.Bottom);
+            GL.Rect(rect.Left, rect.Top, rect.Right, rect.Bottom);
         }
 
         #endregion
@@ -873,17 +873,17 @@ namespace OpenMobile.Graphics.OpenGL
 
         public static void Viewport(OpenMobile.Graphics.Size size)
         {
-            Raw.Viewport(0, 0, size.Width, size.Height);
+            GL.Viewport(0, 0, size.Width, size.Height);
         }
 
         public static void Viewport(OpenMobile.Graphics.Point location, OpenMobile.Graphics.Size size)
         {
-            Raw.Viewport(location.X, location.Y, size.Width, size.Height);
+            GL.Viewport(location.X, location.Y, size.Width, size.Height);
         }
 
         public static void Viewport(OpenMobile.Graphics.Rectangle rectangle)
         {
-            Raw.Viewport(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
+            GL.Viewport(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
         }
 #if NO_SYSDRAWING
         public static void Viewport(OpenMobile.Point location, OpenMobile.Size size)

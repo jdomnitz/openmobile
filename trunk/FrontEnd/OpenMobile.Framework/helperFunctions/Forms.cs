@@ -356,7 +356,7 @@ namespace OpenMobile.helperFunctions.Forms
                 BuiltInComponents.Host.OnSystemEvent += SysEv;
 
                 // load and show panel
-                BuiltInComponents.Panels.loadPanel(Panel);
+                BuiltInComponents.Panels.loadPanel(Panel, false);
                 if (BuiltInComponents.Host.execute(eFunction.TransitionToPanel, screen.ToString(), "", Panel.Name) == false)
                     return buttons.None;
                 BuiltInComponents.Host.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.CrossfadeFast.ToString());
@@ -390,7 +390,7 @@ namespace OpenMobile.helperFunctions.Forms
             Result = (buttons)sender.Tag;
             ButtonPress.Set();
         }
-        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        void theHost_OnSystemEvent(eFunction function, object[] args)
         {
             if (!String.IsNullOrEmpty(OwnerPanel) && !String.IsNullOrEmpty(OwnerPlugin))
             {
@@ -401,10 +401,13 @@ namespace OpenMobile.helperFunctions.Forms
                 }
                 if (function == eFunction.TransitionFromPanel)
                 {
-                    if ((arg1 == OwnerScreen) & (arg2 == OwnerPlugin) & (arg3 == OwnerPanel))
+                    if (Params.IsParamsValid(args, 3))
                     {
-                        // Reopen dialog
-                        ReOpenDialog = true;
+                        if ((Params.GetParam<string>(args, 0) == OwnerScreen) & (Params.GetParam<string>(args, 1) == OwnerPlugin) & (Params.GetParam<string>(args, 2) == OwnerPanel))
+                        {
+                            // Reopen dialog
+                            ReOpenDialog = true;
+                        }
                     }
                 }
                 if (function == eFunction.ExecuteTransition)
@@ -421,11 +424,14 @@ namespace OpenMobile.helperFunctions.Forms
                 {
                     if (ReOpenDialog)
                     {
-                        if ((arg1 == OwnerScreen) & (arg2 == OwnerPlugin) & (arg3 == OwnerPanel))
+                        if (Params.IsParamsValid(args, 3))
                         {
-                            // Reopen dialog
-                            OpenAtExecute = true;
-                            ReOpenDialog = false;
+                            if ((Params.GetParam<string>(args, 0) == OwnerScreen) & (Params.GetParam<string>(args, 1) == OwnerPlugin) & (Params.GetParam<string>(args, 2) == OwnerPanel))
+                            {
+                                // Reopen dialog
+                                OpenAtExecute = true;
+                                ReOpenDialog = false;
+                            }
                         }
                     }
                 }
@@ -435,10 +441,13 @@ namespace OpenMobile.helperFunctions.Forms
             {
                 if (!String.IsNullOrEmpty(PanelName))
                 {
-                    if (arg3 == PanelName)
+                    if (Params.IsParamsValid(args, 3))
                     {
-                        Result = buttons.None;
-                        ButtonPress.Set();
+                        if (Params.GetParam<string>(args, 2) == PanelName)
+                        {
+                            Result = buttons.None;
+                            ButtonPress.Set();
+                        }
                     }
                 }
                 else

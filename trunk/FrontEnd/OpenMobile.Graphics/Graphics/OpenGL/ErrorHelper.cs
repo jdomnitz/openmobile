@@ -82,7 +82,7 @@ namespace OpenMobile.Graphics.OpenGL
         {
             if (Context.ErrorChecking)
             {
-                while (Raw.GetError() != ErrorCode.NoError)
+                while (GL.GetError() != ErrorCode.NoError)
                 { }
             }
         }
@@ -98,7 +98,7 @@ namespace OpenMobile.Graphics.OpenGL
                 ErrorCode error;
                 do
                 {
-                    error = Raw.GetError();
+                    error = GL.GetError();
                     error_list.Add(error);
                 } while (error != ErrorCode.NoError);
 

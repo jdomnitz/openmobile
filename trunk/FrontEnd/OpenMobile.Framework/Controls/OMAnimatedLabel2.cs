@@ -379,7 +379,7 @@ namespace OpenMobile.Controls
                 _Animation_Running = true;
 
                 // Disable object if no text is specified
-                if (String.IsNullOrEmpty(text) && String.IsNullOrEmpty(text2))
+                if (ContinousEffect && String.IsNullOrEmpty(text) && String.IsNullOrEmpty(text2))
                     animationType = eAnimation.None;
 
                 switch (animationType)
@@ -1540,13 +1540,15 @@ namespace OpenMobile.Controls
         private class AnimationData
         {
             public OMAnimatedLabel2.eAnimation animationType;
+            public OMAnimatedLabel2.eAnimation animationType2;
             public string text;
             public string text2;
             public float AnimationSpeed;
+            public int Duration;
         }
         private void Animation_Execute(AnimationData animationData)
         {
-            Animation_Execute(animationData.animationType, animationData.text, animationData.text2, false, false, AnimationSpeed);
+            Animation_Execute(animationData.animationType, animationData.text, animationData.text2, false, false, animationData.AnimationSpeed);
         }
 
         private Thread _Animation_Thread = null;
@@ -1629,6 +1631,24 @@ namespace OpenMobile.Controls
                                         _AnimationData_Single_Next = null;
                                         _Animation_Cancel = false;
                                         Animation_Execute(_AnimationData_Single_Current);
+
+                                        // Does this animation have a duration?
+                                        if (_AnimationData_Single_Current.Duration > 0)
+                                        {   // Yes, show text for a certain time
+
+                                            // Delay before transitioning out
+                                            if (!_Animation_Cancel)
+                                                SleepEx(_AnimationData_Single_Current.Duration, ref _Animation_Cancel);
+
+                                            _AnimationData_Single_Current.text = _TextPrevious;
+                                            _AnimationData_Single_Current.text2 = _text;
+                                            _text = _TextPrevious;
+                                            // Activate next animation
+                                            _AnimationData_Single_Current.animationType = _AnimationData_Single_Current.animationType2;
+
+                                            if (!_Animation_Cancel)
+                                                Animation_Execute(_AnimationData_Single_Current);
+                                        }
                                     }
 
                                     // Execute continous animation
@@ -1664,14 +1684,47 @@ namespace OpenMobile.Controls
         /// <param name="newText"></param>
         public void TransitionInText(eAnimation animationEffect, string newText)
         {
-            TransitionInText(animationEffect, newText, _AnimationSpeed);
+            TransitionInText(animationEffect, newText, _AnimationSpeed, null);
+        }
+        /// <summary>
+        /// Transition in new text with the specified animation effect, displays it for a specifed time then transitions it out with the same effect
+        /// </summary>
+        /// <param name="animationEffect"></param>
+        /// <param name="newText"></param>
+        /// <param name="showDuration"></param>
+        public void TransitionInText(eAnimation animationEffect, string newText, int showDuration)
+        {
+            TransitionInText(animationEffect, newText, _AnimationSpeed, showDuration);
         }
         /// <summary>
         /// Transition in new text with the specified animation effect
         /// </summary>
         /// <param name="animationEffect"></param>
         /// <param name="newText"></param>
+        /// <param name="AnimationSpeed"></param>
         public void TransitionInText(eAnimation animationEffect, string newText, float AnimationSpeed)
+        {
+            TransitionInText(animationEffect, newText, _AnimationSpeed, null);
+        }
+        /// <summary>
+        /// Transition in new text with the specified animation effect, displays it for a specifed time then transitions it out with the same effect
+        /// </summary>
+        /// <param name="animationEffectIn"></param>
+        /// <param name="newText"></param>
+        /// <param name="AnimationSpeed"></param>
+        /// <param name="showDuration"></param>
+        public void TransitionInText(eAnimation animationEffectIn, string newText, float AnimationSpeed, int? showDuration)
+        {
+            TransitionInText(animationEffectIn, animationEffectIn, newText, AnimationSpeed, showDuration);
+        }
+        /// <summary>
+        /// Transition in new text with the specified animation effect, displays it for a specifed time then transitions it out with the same effect
+        /// </summary>
+        /// <param name="animationEffect"></param>
+        /// <param name="newText"></param>
+        /// <param name="AnimationSpeed"></param>
+        /// <param name="showDuration"></param>
+        public void TransitionInText(eAnimation animationEffectIn, eAnimation animationEffectOut, string newText, float AnimationSpeed, int? showDuration)
         {
             // Handle empty strings
             if (String.IsNullOrEmpty(newText))
@@ -1681,7 +1734,7 @@ namespace OpenMobile.Controls
             _text = newText;
 
             // Create new single animation
-            _AnimationData_Single_Next = new AnimationData() { animationType = animationEffect, text = _text, text2 = _TextPrevious, AnimationSpeed = AnimationSpeed };
+            _AnimationData_Single_Next = new AnimationData() { animationType = animationEffectIn, animationType2 = animationEffectOut, text = _text, text2 = _TextPrevious, AnimationSpeed = AnimationSpeed, Duration = (showDuration == null ? 0 : (int)showDuration) };
 
             // Cancel any ongoing animations
             Animation_Cancel();

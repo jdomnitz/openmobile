@@ -30,50 +30,50 @@ namespace OpenMobile.Graphics
     public sealed class V2Graphics:IGraphics
     {
         #region private vars
-        int screen;
-        static List<List<uint>> textures = new List<List<uint>>();
+        int _Screen;
+        static List<List<uint>> _Textures = new List<List<uint>>();
         public static Rectangle NoClip = new Rectangle(0, 0, 1000, 600);
-        float wscale;
-        float hscale;
-        int width;
-        int height;
+        float _WidthScale;
+        float _HeightScale;
+        int _Width;
+        int _Height;
         #endregion
 
         internal static void DeleteTexture(int screen, uint texture)
         {
-            if (screen < textures.Count)
-                textures[screen].Add(texture);
+            if (screen < _Textures.Count)
+                _Textures[screen].Add(texture);
                 //textures[screen].Remove(texture);
-            Raw.DeleteTexture(texture);
+            GL.DeleteTexture(texture);
         }
 
         public V2Graphics(int screen)
         {
-            this.screen = screen;
-            lock (textures)
+            this._Screen = screen;
+            lock (_Textures)
             {
-                if (textures.Count == 0)
+                if (_Textures.Count == 0)
                     for (int i = 0; i < DisplayDevice.AvailableDisplays.Count; i++)
-                        textures.Add(new List<uint>());
+                        _Textures.Add(new List<uint>());
             }
         }
-        private bool loadTexture(ref OImage image)
+        public bool LoadTexture(ref OImage image)
         {
             if (image == null || image.Size == Size.Empty)
                 return false;
 
             // Load texture
-            uint texture = image.GetTexture(screen);
+            uint texture = image.GetTexture(_Screen);
 
             // Delete old texture before generating a new one
             if (texture != 0)
-                Raw.DeleteTexture(texture);
+                GL.DeleteTexture(texture);
 
             // Create new texture name
-            Raw.GenTextures(1, out texture);
+            GL.GenTextures(1, out texture);
 
             // Bind texture to opengl
-            Raw.BindTexture(TextureTarget.Texture2D, texture);
+            GL.BindTexture(TextureTarget.Texture2D, texture);
 
             Bitmap img = image.image;
             bool kill = false;
@@ -97,7 +97,7 @@ namespace OpenMobile.Graphics
                             ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                         }
                         catch (InvalidOperationException) { return false; }
-                        Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
                                         OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
@@ -109,7 +109,7 @@ namespace OpenMobile.Graphics
                             ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                         }
                         catch (InvalidOperationException) { return false; }
-                        Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
+                        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
                                         OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
@@ -129,7 +129,7 @@ namespace OpenMobile.Graphics
                             ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                         }
                         catch (InvalidOperationException) { return false; }
-                        Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
+                        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
                                         OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                         tmp.UnlockBits(data);
                         tmp.Dispose();
@@ -138,12 +138,12 @@ namespace OpenMobile.Graphics
             }
             if (kill)
                 img.Dispose();
-            image.SetTexture(screen, texture);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureParameterName.ClampToBorder);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToBorder);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToBorder);
+            image.SetTexture(_Screen, texture);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureParameterName.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToBorder);
             return true;
         }
 
@@ -162,8 +162,8 @@ namespace OpenMobile.Graphics
         }
         public void Clear(Color color)
         {
-            Raw.Clear(ClearBufferMask.ColorBufferBit);
-            Raw.ClearColor(color);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.ClearColor(color);
         }
         private Rectangle _clip = NoClip;
         public Rectangle Clip
@@ -176,22 +176,22 @@ namespace OpenMobile.Graphics
             {
                 _clip = value;
                 if (_clip == NoClip)
-                    Raw.Disable(EnableCap.ScissorTest);
+                    GL.Disable(EnableCap.ScissorTest);
                 else
                 {
                     if (_clip.Height < 0)
                         _clip.Height = 0;
                     if (_clip.Width < 0)
                         _clip.Width = 0;
-                    Raw.Enable(EnableCap.ScissorTest);
+                    GL.Enable(EnableCap.ScissorTest);
                     try
                     {
-                        Raw.Scissor((int)(_clip.X * wscale), (int)((600 - _clip.Y - _clip.Height) * hscale), (int)(_clip.Width * wscale), (int)(_clip.Height * hscale));
+                        GL.Scissor((int)(_clip.X * _WidthScale), (int)((600 - _clip.Y - _clip.Height) * _HeightScale), (int)(_clip.Width * _WidthScale), (int)(_clip.Height * _HeightScale));
                     }
                     catch (Exception)
                     {
                         _clip = NoClip;
-                        Raw.Disable(EnableCap.ScissorTest);
+                        GL.Disable(EnableCap.ScissorTest);
                     }
                 }
             }
@@ -199,10 +199,14 @@ namespace OpenMobile.Graphics
 
         public void DrawArc(Pen pen, int x, int y, int width, int height, float startAngle, float sweepAngle)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.Multisample);
+            // Save matrix
+            GL.PushMatrix();
+
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+            
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
 
             float yrad = height / 2F;
             float xrad = width / 2F;
@@ -210,20 +214,19 @@ namespace OpenMobile.Graphics
             int i = 0;
             for (float t = startAngle; t <= (startAngle + sweepAngle); t = t + 0.5F)
             {
-                float rad = MathHelper.DegreesToRadians(t);
+                double rad = MathHelper.DegreesToRadians(t);
                 arr[i] = x + xrad + (float)(xrad * System.Math.Cos(rad));
                 arr[i + 1] = y + yrad + (float)(yrad * System.Math.Sin(rad));
                 i += 2;
             }
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer(2, VertexPointerType.Float, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, arr.Length / 2);
-            Raw.DisableClientState(ArrayCap.VertexArray);
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Float, 0, arr);
+            GL.DrawArrays(BeginMode.LineStrip, 0, arr.Length / 2);
+            GL.DisableClientState(ArrayCap.VertexArray);
 
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.Multisample);
+            // Restore matrix
+            GL.PopMatrix();
         }
-
         public void DrawArc(Pen pen, Rectangle rect, float startAngle, float sweepAngle)
         {
             DrawArc(pen, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
@@ -231,54 +234,54 @@ namespace OpenMobile.Graphics
 
         public void DrawEllipse(Pen pen, int x, int y, int width, int height)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
+            // Save matrix
+            GL.PushMatrix();
+
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
 
             float yrad = height / 2F;
             float xrad = width / 2F;
             float[] arr = new float[720];
             for (int t = 0; t < 360; t++)
             {
-                float rad = MathHelper.DegreesToRadians(t);
+                double rad = MathHelper.DegreesToRadians(t);
                 arr[2*t]=x + xrad + (float)(xrad * System.Math.Cos(rad));
                 arr[(2*t)+1]=y + yrad + (float)(yrad * System.Math.Sin(rad));
             }
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer(2, VertexPointerType.Float, 0, arr);
-            Raw.DrawArrays(BeginMode.LineLoop, 0, 360);
-            Raw.DisableClientState(ArrayCap.VertexArray);
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Float, 0, arr);
+            GL.DrawArrays(BeginMode.LineLoop, 0, 360);
+            GL.DisableClientState(ArrayCap.VertexArray);
 
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+            // Restore matrix
+            GL.PopMatrix();
         }
-
         public void DrawEllipse(Pen pen, Rectangle rect)
         {
             DrawEllipse(pen, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
+        int[] normalTex;
         public void DrawImage(OImage image, Rectangle rect, Rectangle srcRect)
         {
             DrawImage(image, rect, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, 1F);
         }
-
         public void DrawImage(OImage img, Rectangle rect, int x, int y, int width, int height)
         {
             DrawImage(img, rect, x, y, width, height, 1F);
         }
-
         public void DrawImage(OImage image, Rectangle rect, float transparency)
         {
             DrawImage(image, rect.X, rect.Y, rect.Width, rect.Height, transparency, eAngle.Normal);
         }
-
         public void DrawImage(OImage image, Rectangle rect, float transparency, eAngle angle)
         {
             DrawImage(image, rect.X, rect.Y, rect.Width, rect.Height, transparency, angle);
         }
-
         public void DrawImage(OImage image, Rectangle rect, int x, int y, int Width, int Height, float transparency)
         {
             if (image == null)
@@ -292,142 +295,268 @@ namespace OpenMobile.Graphics
             DrawImage(image, rect.X - (int)(xs*x), rect.Y - (int)(y*ys), (int)(xs*(image.Width-x)), (int)(ys*(image.Height-y)), transparency,eAngle.Normal);
             Clip = clp;
         }
-
         public void DrawImage(OImage image, Rectangle rect)
         {
             DrawImage(image, rect.X, rect.Y, rect.Width, rect.Height);
         }
-
         public void DrawImage(OImage image, int X, int Y, int Width, int Height)
         {
             DrawImage(image, X, Y, Width, Height, 1F, eAngle.Normal);
         }
-        int[] normalTex;
         public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle)
+        {
+            DrawImage(image, X, Y, Width, Height, transparency, angle, Math.Vector3.Zero);
+        }
+        public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation)
+        {
+            DrawImage(image, X, Y, 0, Width, Height, transparency, angle, rotation, null);
+        }
+        public void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation, ReflectionsData reflectionData)
         {
             if (image == null)
                 return;
-            
-            Raw.Enable(EnableCap.Texture2D);
-            if (image.TextureGenerationRequired(screen))
-                if (!loadTexture(ref image))
+
+            // Activate reflection?
+            bool useReflection = reflectionData != null;
+
+            GL.Enable(EnableCap.Texture2D);
+            if (image.TextureGenerationRequired(_Screen))
+                if (!LoadTexture(ref image))
                 {
-                    Raw.Disable(EnableCap.Texture2D);
+                    GL.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
+            GL.BindTexture(TextureTarget.Texture2D, image.GetTexture(_Screen));
 
             // Set texture parameters
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureParameterName.ClampToBorder);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToBorder);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureParameterName.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToBorder);
 
-            //Raw.Color4(1F, 1F, 1F, transparency);
-            
-            //Vector3 tl = new Vector3(-(Width / 2), -(Height / 2), 0);
-            //Vector3 br = new Vector3((Width / 2), (Height / 2), 0);
+            double width2 = Width / 2.0;
+            double height2 = Height / 2.0;
 
-            //Matrix4 mtx = Matrix4.CreateTranslation(X, Y, 0.0f) *
-            //    Matrix4.CreateTranslation((Width / 2), (Height / 2), 0.0f);
-            //tl = Vector3.Transform(tl, mtx);
-            //br = Vector3.Transform(br, mtx);
+            // Save current matrix
+            GL.PushMatrix(); 
 
-            //// Render texture
-            //Raw.Begin(BeginMode.Quads);
-            //Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex3(tl.X, tl.Y, tl.Z); //TOP-LEFT
-            //Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex3(br.X, tl.Y, tl.Z); //TOP-RIGHT
-            //Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex3(br.X, br.Y, br.Z); //BOTTOM-RIGHT
-            //Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex3(tl.X, br.Y, br.Z); //BOTTOM-LEFT
-            //Raw.End();
-            //Raw.Disable(EnableCap.Texture2D);
+            // Translate base point from upper left corner to place graphics correctly
+            _3D_Translate(X + width2, Y + height2, Z);
 
-            Raw.Color4(1F, 1F, 1F, transparency);
+            // Rotate graphics
+            _3D_Rotate(rotation.X, rotation.Y, rotation.Z);
 
-            int[] tex = new int[] { X, Height + Y, Width + X, Height + Y, X, Y, Width + X, Y };
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, tex);
-            Raw.EnableClientState(ArrayCap.TextureCoordArray);
-            switch (angle)
-            {
-                case eAngle.FlipHorizontal:
-                    Raw.TexCoordPointer(2, TexCoordPointerType.Int, 0, horizTex);
-                    break;
-                case eAngle.FlipVertical:
-                    Raw.TexCoordPointer(2, TexCoordPointerType.Int, 0, vertTex);
-                    break;
-                default:
-                    Raw.TexCoordPointer(2, TexCoordPointerType.Int, 0, normalTex);
-                    break;
-            }
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
-            Raw.DisableClientState(ArrayCap.TextureCoordArray);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-            Raw.Disable(EnableCap.Texture2D);
+            // Scale graphics to correct dimensions
+            GL.Scale(width2, height2, 1);
+
+            // Render texture
+            GL.Color4(1F, 1F, 1F, transparency);
+            GL.Begin(BeginMode.Quads);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1, -1, 0); //TOP-LEFT
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1, -1, 0); //TOP-RIGHT
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1, 1, 0); //BOTTOM-RIGHT
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1, 1, 0); //BOTTOM-LEFT
+            GL.End();
+
+            // Restore matrix
+            GL.PopMatrix();
+
+
+            //// Render reflection (only if rotation is around Y axis)
+            //if (useReflection && rotation.Z == 0 && rotation.X == 0)
+            //{
+            //    GL.PopMatrix();
+
+            //    // Render reflection (flipped around the Y axis)
+            //    GL.Scale(1.0, -1.0, 1.0);
+
+            //    // Rotate image
+            //    GL.Rotate(rotation.Z, 0, 0, 1);
+            //    GL.Rotate(rotation.Y, 0, 1, 0);
+            //    GL.Rotate(rotation.X, 1, 0, 0);
+
+            //    // Scale dimensions to correct values
+            //    GL.Scale(width2, height2, 1);
+
+            //    // Shift image down to place the reflection correctly
+            //    GL.Translate(0.0, -2.0, 0.0);
+
+            //    // Render texture
+
+            //    GL.Begin(BeginMode.Quads);
+            //    GL.Color4(reflectionData.FadeColorEnd);
+            //    GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1, -1, 0); //TOP-LEFT
+            //    GL.Color4(reflectionData.FadeColorEnd);
+            //    GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1, -1, 0); //TOP-RIGHT
+            //    GL.Color4(reflectionData.FadeColorStart);
+            //    GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1, 1, 0); //BOTTOM-RIGHT
+            //    GL.Color4(reflectionData.FadeColorStart);
+            //    GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1, 1, 0); //BOTTOM-LEFT
+            //    GL.End();
+            //    GL.PopMatrix();
+            //}
+            //else
+           
+
+            GL.Disable(EnableCap.Texture2D);
         }
-
         public void DrawImage(OImage image, Point[] destPoints)
         {
             //throw new NotImplementedException();
         }
-
         public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency)
         {
             DrawImage(image, X, Y, Width, Height, transparency, eAngle.Normal);
         }
+
+        public void DrawCube(OImage image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
+        {
+            GL.PushMatrix();
+
+            // Move reference to upper left corner 
+            GL.Translate(-500, -300, 0);
+
+            // Move cube to requested location
+            GL.Translate(x + (width / 2), y + (height / 2), z);
+
+            // Scale dimensions to correct values
+            GL.Scale(width / 2, height / 2, depth / 2.0);
+
+            // Translate backwards to ensure front of cube is located as zero as this is the calibrated size for the coordinate system
+            GL.Translate(0, 0, 1);
+
+            // Rotate image
+            GL.Rotate(rotation.X, 1, 0, 0);
+            GL.Rotate(rotation.Y, 0, 1, 0);
+            GL.Rotate(rotation.Z, 0, 0, 1);
+
+            //GL.PointSize(3);
+            //GL.PolygonMode(MaterialFace.Front, PolygonMode.Line);
+            //GL.PolygonMode(MaterialFace.Back, PolygonMode.Line);
+
+            bool useTexture = false;
+            if (image != null)
+            {
+                useTexture = true;
+                if (image.TextureGenerationRequired(_Screen))
+                    if (!LoadTexture(ref image))
+                    {
+                        GL.Disable(EnableCap.Texture2D);
+                        return;
+                    }
+
+                GL.Enable(EnableCap.Texture2D);
+                GL.BindTexture(TextureTarget.Texture2D, image.GetTexture(_Screen));
+
+                // Set texture parameters
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureParameterName.ClampToBorder);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToBorder);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToBorder);
+            }
+
+            GL.Begin(BeginMode.Quads);
+            GL.Color3(1.0f, 1.0f, 1.0f);	// Color Blue
+            if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, -1.0f, 1.0f);	// Top Right Of The Quad (Top)
+            if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, -1.0f, 1.0f);	// Top Left Of The Quad (Top)
+            if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, -1.0f, -1.0f);	// Bottom Left Of The Quad (Top)
+            if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, -1.0f, -1.0f);	// Bottom Right Of The Quad (Top)
+            GL.Color3(1.0f, 1.0f, 1.0f);	// Color Orange
+            if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, 1.0f, -1.0f);	// Top Right Of The Quad (Bottom)
+            if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 1.0f, -1.0f);	// Top Left Of The Quad (Bottom)
+            if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 1.0f);	// Bottom Left Of The Quad (Bottom)
+            if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, 1.0f);	// Bottom Right Of The Quad (Bottom)
+            GL.Color3(1.0f, 1.0f, 1.0f);	// Color Red	
+            if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, -1.0f, -1.0f);	// Top Right Of The Quad (Front)
+            if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, -1.0f, -1.0f);	// Top Left Of The Quad (Front)
+            if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, -1.0f);	// Bottom Left Of The Quad (Front)
+            if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, -1.0f);	// Bottom Right Of The Quad (Front)
+            GL.Color3(1.0f, 1.0f, 1.0f);	// Color Yellow
+            if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Back)
+            if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Back)
+            if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, -1.0f, 1.0f);	// Bottom Left Of The Quad (Back)
+            if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, -1.0f, 1.0f);	// Bottom Right Of The Quad (Back)
+            GL.Color3(1.0f, 1.0f, 1.0f);	// Color Blue
+            if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(1.0f, -1.0f, -1.0f);	// Top Right Of The Quad (Left)
+            if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, -1.0f, 1.0f);	// Top Left Of The Quad (Left)
+            if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 1.0f);	// Bottom Left Of The Quad (Left)
+            if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, -1.0f);	// Bottom Right Of The Quad (Left)
+            GL.Color3(1.0f, 1.0f, 1.0f);	// Color Violet
+            if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, -1.0f, 1.0f);	// Top Right Of The Quad (Right)
+            if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(-1.0f, -1.0f, -1.0f);	// Top Left Of The Quad (Right)
+            if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, -1.0f);	// Bottom Left Of The Quad (Right)
+            if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, 1.0f);	// Bottom Right Of The Quad (Right)
+
+            GL.End();
+            GL.Disable(EnableCap.Texture2D);
+
+            GL.PopMatrix();
+
+        }
+
+
         public void DrawLine(Pen pen, Point[] points)
         {
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
-            Raw.Color4(pen.Color);
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer<Point>(2, VertexPointerType.Int, 0, points);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, points.Length);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
+            // Save matrix
+            GL.PushMatrix();
 
-            //Raw.Color4(pen.Color);
-            //Raw.LineWidth(pen.Width);
-            //Raw.Enable(EnableCap.LineSmooth);
-            //Raw.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
-            //Raw.Begin(BeginMode.LineStrip);
-            //for (int i = 0; i < points.Length; i++)
-            //    Raw.Vertex2(points[i].X, points[i].Y);
-            //Raw.End();
-            //Raw.Disable(EnableCap.LineSmooth);
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            GL.LineWidth(pen.Width);
+            GL.Color4(pen.Color);
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer<Point>(2, VertexPointerType.Int, 0, points);
+            GL.DrawArrays(BeginMode.LineStrip, 0, points.Length);
+            GL.DisableClientState(ArrayCap.VertexArray);
+
+            // Restore matrix
+            GL.PopMatrix();
 
         }
         public void DrawLine(Pen pen, int x1, int y1, int x2, int y2)
         {
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            int[] arr = new int[] { x1, y1, x2, y2 };
-            Raw.Color4(pen.Color);
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.Lines, 0, 2);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
-        }
+            // Save matrix
+            GL.PushMatrix();
 
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            GL.LineWidth(pen.Width);
+            int[] arr = new int[] { x1, y1, x2, y2 };
+            GL.Color4(pen.Color);
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            GL.DrawArrays(BeginMode.Lines, 0, 2);
+            GL.DisableClientState(ArrayCap.VertexArray);
+
+            // Restore matrix
+            GL.PopMatrix();
+        }
         public void DrawLine(Pen pen, Point pt1, Point pt2)
         {
             DrawLine(pen, pt1.X, pt1.Y, pt2.X, pt2.Y);
         }
-
         public void DrawLine(Pen pen, float x1, float y1, float x2, float y2)
         {
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
+            // Save matrix
+            GL.PushMatrix();
+
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            GL.LineWidth(pen.Width);
             float[] arr = new float[] { x1, y1, x2, y2 };
-            Raw.Color4(pen.Color);
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer(2, VertexPointerType.Float, 0, arr);
-            Raw.DrawArrays(BeginMode.Lines, 0, 2);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
+            GL.Color4(pen.Color);
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Float, 0, arr);
+            GL.DrawArrays(BeginMode.Lines, 0, 2);
+            GL.DisableClientState(ArrayCap.VertexArray);
+
+            // Restore matrix
+            GL.PopMatrix();
         }
 
         public void DrawPolygon(Pen pen, Point[] points)
@@ -437,15 +566,23 @@ namespace OpenMobile.Graphics
 
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
         {
-            float[] ar = new float[] { x, y, x + width, y, x + width, y + height, x, y + height };
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.VertexPointer(2, VertexPointerType.Float, 0, ar);
-            Raw.DrawArrays(BeginMode.LineLoop, 0, 4);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-        }
+            // Save matrix
+            GL.PushMatrix();
 
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            float[] ar = new float[] { x, y, x + width, y, x + width, y + height, x, y + height };
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.VertexPointer(2, VertexPointerType.Float, 0, ar);
+            GL.DrawArrays(BeginMode.LineLoop, 0, 4);
+            GL.DisableClientState(ArrayCap.VertexArray);
+
+            // Restore matrix
+            GL.PopMatrix();
+         }
         public void DrawRectangle(Pen pen, Rectangle rect)
         {
             DrawRectangle(pen, rect.X, rect.Y, rect.Width, rect.Height);
@@ -458,62 +595,177 @@ namespace OpenMobile.Graphics
 
         public void DrawRoundRectangle(Pen pen, int x, int y, int width, int height, int radius)
         {
-            double ang = 0;
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
-            int[] arr = new int[] { x, y + radius, x, y + height - radius, x + radius-1, y, x + width - radius, y, x + width, y + radius-1, x + width, y + height - radius, x + radius, y + height, x + width - radius, y + height };
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.Lines, 0, 8);
-            float cX = x + radius, cY = y + radius;
-            arr = new int[64];
-            int count = 0;
-            for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
-            {
-                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
-                count += 2;
-            }
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
+            // Save matrix
+            GL.PushMatrix();
 
-            cX = x + width - radius;
-            count = 0;
-            for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            // Calculate base points
+            // Point order:
+            //      1           2
+            //      |-----------|
+            // 11 |-| 0       3 |-| 4
+            //    |               |
+            //    |               |
+            // 10 |-| 9       6 |-| 5
+            //      |-----------|
+            //      8           7
+            PointF[,] p = new PointF[12,2];
+            p[0, 0] = new PointF(x + radius, y + radius);
+            p[1, 0] = new PointF(x + radius, y);
+            p[2, 0] = new PointF(x + width - radius, y);
+            p[3, 0] = new PointF(x + width - radius, y + radius);
+            p[4, 0] = new PointF(x + width, y + radius);
+            p[5, 0] = new PointF(x + width, y + height - radius);
+            p[6, 0] = new PointF(x + width - radius, y + height - radius);
+            p[7, 0] = new PointF(x + width - radius, y + height);
+            p[8, 0] = new PointF(x + radius, y + height);
+            p[9, 0] = new PointF(x + radius, y + height - radius);
+            p[10, 0] = new PointF(x, y + height - radius);
+            p[11, 0] = new PointF(x, y + radius);
+
+            // Adjust points to offset the inner circle
+            p[0, 1] = new PointF(x + radius + pen.Width, y + radius + pen.Width);
+            p[1, 1] = new PointF(x + radius + pen.Width, y + pen.Width);
+            p[2, 1] = new PointF(x + width - radius - pen.Width, y + pen.Width);
+            p[3, 1] = new PointF(x + width - radius - pen.Width, y + radius + pen.Width);
+            p[4, 1] = new PointF(x + width - pen.Width, y + radius + pen.Width);
+            p[5, 1] = new PointF(x + width - pen.Width, y + height - radius - pen.Width);
+            p[6, 1] = new PointF(x + width - radius - pen.Width, y + height - radius - pen.Width);
+            p[7, 1] = new PointF(x + width - radius - pen.Width, y + height - pen.Width);
+            p[8, 1] = new PointF(x + radius + pen.Width, y + height - pen.Width);
+            p[9, 1] = new PointF(x + radius + pen.Width, y + height - radius - pen.Width);
+            p[10, 1] = new PointF(x + pen.Width, y + height - radius - pen.Width);
+            p[11, 1] = new PointF(x + pen.Width, y + radius + pen.Width);
+
+            GL.Color4(pen.Color);
+            //GL.LineWidth(pen.Width);
+
+            int steps = 12;
+            double step = MathHelper.DegreesToRadians(90) / steps;
+            double startAngle = MathHelper.DegreesToRadians(0);
+            PointF cornerPoint;
+
+            GL.Begin(BeginMode.QuadStrip);
+
+            // Starting point
+            GL.Vertex3(p[11, 1].X, p[11, 0].Y, 0);
+            GL.Vertex3(p[11, 0].X, p[11, 0].Y, 0);
+
+            #region Draw upper left corner
+
+            startAngle = MathHelper.DegreesToRadians(180);
+            cornerPoint = p[0, 0];
+            for (int i = 0; i < steps; i++)
             {
-                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
-                count += 2;
+                // Inner point
+                GL.Vertex3(
+                    cornerPoint.X + ((radius - pen.Width) * (float)System.Math.Cos(startAngle + (step * (i + 1)))),
+                    cornerPoint.Y + ((radius - pen.Width) * (float)System.Math.Sin(startAngle + (step * (i + 1)))),
+                    0);
+
+                // Outer point
+                GL.Vertex3(
+                    cornerPoint.X + (radius * (float)System.Math.Cos(startAngle + (step * (i + 1)))),
+                    cornerPoint.Y + (radius * (float)System.Math.Sin(startAngle + (step * (i + 1)))),
+                    0);
             }
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
-            cY = y + height - radius;
-            count = 0;
-            for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
+
+            #endregion
+
+            // Top line
+            GL.Vertex3(p[1, 0].X, p[1, 1].Y, 0);
+            GL.Vertex3(p[1, 0].X, p[1, 0].Y, 0);
+            GL.Vertex3(p[2, 0].X, p[2, 1].Y, 0);
+            GL.Vertex3(p[2, 0].X, p[2, 0].Y, 0);
+
+            #region Draw upper right corner
+
+            startAngle = MathHelper.DegreesToRadians(270);
+            cornerPoint = p[3, 0];
+            for (int i = 0; i < steps; i++)
             {
-                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
-                count += 2;
+                // Inner point
+                GL.Vertex3(
+                    cornerPoint.X + ((radius - pen.Width) * (float)System.Math.Cos(startAngle + (step * (i + 1)))),
+                    cornerPoint.Y + ((radius - pen.Width) * (float)System.Math.Sin(startAngle + (step * (i + 1)))),
+                    0);
+
+                // Outer point
+                GL.Vertex3(
+                    cornerPoint.X + (radius * (float)System.Math.Cos(startAngle + (step * (i + 1)))),
+                    cornerPoint.Y + (radius * (float)System.Math.Sin(startAngle + (step * (i + 1)))),
+                    0);
             }
-            cX = x + radius;
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
-            count = 0;
-            for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
+
+            #endregion
+
+            // Right line
+            GL.Vertex3(p[4, 1].X, p[4, 0].Y, 0);
+            GL.Vertex3(p[4, 0].X, p[4, 0].Y, 0);
+            GL.Vertex3(p[5, 1].X, p[5, 0].Y, 0);
+            GL.Vertex3(p[5, 0].X, p[5, 0].Y, 0);
+
+            #region Draw lower right corner
+
+            startAngle = MathHelper.DegreesToRadians(0);
+            cornerPoint = p[6, 0];
+            for (int i = 0; i < steps; i++)
             {
-                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
-                count += 2;
+                // Inner point
+                GL.Vertex3(
+                    cornerPoint.X + ((radius - pen.Width) * (float)System.Math.Cos(startAngle + (step * (i + 1)))),
+                    cornerPoint.Y + ((radius - pen.Width) * (float)System.Math.Sin(startAngle + (step * (i + 1)))),
+                    0);
+
+                // Outer point
+                GL.Vertex3(
+                    cornerPoint.X + (radius * (float)System.Math.Cos(startAngle + (step * (i + 1)))),
+                    cornerPoint.Y + (radius * (float)System.Math.Sin(startAngle + (step * (i + 1)))),
+                    0);
             }
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+
+            #endregion
+
+            // Bottom line
+            GL.Vertex3(p[7, 0].X, p[7, 1].Y, 0);
+            GL.Vertex3(p[7, 0].X, p[7, 0].Y, 0);
+            GL.Vertex3(p[8, 0].X, p[8, 1].Y, 0);
+            GL.Vertex3(p[8, 0].X, p[8, 0].Y, 0);
+
+            #region Draw lower left corner
+
+            startAngle = MathHelper.DegreesToRadians(90);
+            cornerPoint = p[9, 0];
+            for (int i = 0; i < steps; i++)
+            {
+                // Inner point
+                GL.Vertex3(
+                    cornerPoint.X + ((radius - pen.Width) * (float)System.Math.Cos(startAngle + (step * (i + 1)))),
+                    cornerPoint.Y + ((radius - pen.Width) * (float)System.Math.Sin(startAngle + (step * (i + 1)))),
+                    0);
+
+                // Outer point
+                GL.Vertex3(
+                    cornerPoint.X + (radius * (float)System.Math.Cos(startAngle + (step * (i + 1)))),
+                    cornerPoint.Y + (radius * (float)System.Math.Sin(startAngle + (step * (i + 1)))),
+                    0);
+            }
+
+            #endregion
+
+            // Left line
+            GL.Vertex3(p[10, 1].X, p[10, 0].Y, 0);
+            GL.Vertex3(p[10, 0].X, p[10, 0].Y, 0);
+            GL.Vertex3(p[11, 1].X, p[11, 0].Y, 0);
+            GL.Vertex3(p[11, 0].X, p[11, 0].Y, 0);
+
+            GL.End();
+
+            // Restore matrix
+            GL.PopMatrix();
         }
-
         public void DrawRoundRectangle(Pen p, Rectangle rect, int radius)
         {
             DrawRoundRectangle(p, rect.X, rect.Y, rect.Width, rect.Height, radius);
@@ -521,10 +773,13 @@ namespace OpenMobile.Graphics
 
         public void FillEllipse(Brush brush, int x, int y, int width, int height)
         {
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
-            Raw.Enable(EnableCap.Multisample);
-            Raw.Color4(brush.Color);
+            // Save matrix
+            GL.PushMatrix();
+
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            GL.Color4(brush.Color);
             int[] arr=new int[722];
             arr[720]=x + (width / 2);
             arr[721]=y + (height / 2);
@@ -533,92 +788,97 @@ namespace OpenMobile.Graphics
                 arr[angle*2]=(int)(x + (width / 2) + System.Math.Sin(angle) * (width / 2));
                 arr[(angle*2)+1]= (int)(y + (height / 2) + System.Math.Cos(angle) * (height / 2));
             }
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 361);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
-            Raw.Disable(EnableCap.Multisample);
-        }
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Int, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 361);
+            GL.DisableClientState(ArrayCap.VertexArray);
 
+            // Restore matrix
+            GL.PopMatrix();
+        }
         public void FillEllipse(Brush brush, Rectangle rect)
         {
             FillEllipse(brush, rect.X, rect.Y, rect.Width, rect.Height);
         }
-
         public void FillPolygon(Brush brush, Point[] points)
         {
-            // TODO : This does not work properly!
-            //int[] arr = new int[points.Length * 2];
-            //for (int i = 0; i < points.Length; i++)
-            //{
-            //    arr[2 * i] = points[i].X;
-            //    arr[(2 * i)+1] = points[i].Y;
-            //}
-            //Raw.Color4(brush.Color);
-            //Raw.EnableClientState(ArrayCap.VertexArray);
-            //Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            //Raw.DrawArrays(BeginMode.TriangleStrip, 0, points.Length);
-            //Raw.DisableClientState(ArrayCap.VertexArray);
+            // Save matrix
+            GL.PushMatrix();
 
-            //Raw.Enable(EnableCap.PolygonOffsetFill);
-            //Raw.PolygonOffset(1.0f, 1.0f);
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
 
-            Raw.Color4(brush.Color);
-            Raw.Enable(EnableCap.PolygonSmooth);
-            Raw.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
-            Raw.Begin(BeginMode.Polygon);
+            GL.Color4(brush.Color);
+            GL.Begin(BeginMode.Polygon);
             for (int i = 0; i < points.Length; i++)
-                Raw.Vertex2(points[i].X, points[i].Y);
-            Raw.End();
-            Raw.Disable(EnableCap.PolygonSmooth);
-          
+                GL.Vertex2(points[i].X, points[i].Y);
+            GL.End();
+
+            // Restore matrix
+            GL.PopMatrix();          
         }
 
-        public void FillRectangle(Brush brush, float x, float y, float width, float height)
+        public void FillRectangle(GradientData gradient, Rectangle rect)
         {
-            if (brush.Gradient == Gradient.Horizontal)
-                FillHorizRectange(brush, x, y, width, height);
-            else if (brush.Gradient == Gradient.Vertical)
-                FillVertRectange(brush, x, y, width, height);
-            else
-                FillRectangleSolid(brush.Color, x, y, width, height);
-        }
-        private void FillHorizRectange(Brush b, float x, float y, float width, float height)
-        {
-            float[] ar = new float[] { x, y, x + width, y, x, y + height, x + width, y + height };
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.EnableClientState(ArrayCap.ColorArray);
-            Raw.ColorPointer(4, ColorPointerType.UnsignedByte, 0, new byte[] { b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A, b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A });
-            Raw.VertexPointer(2, VertexPointerType.Float, 0, ar);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
-            Raw.DisableClientState(ArrayCap.ColorArray);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-        }
-        private void FillVertRectange(Brush b, float x, float y, float width, float height)
-        {
-            float[] ar = new float[] { x, y, x + width, y, x, y + height, x + width, y + height };
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.EnableClientState(ArrayCap.ColorArray);
-            Raw.ColorPointer(4, ColorPointerType.UnsignedByte, 0, new byte[] { b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A });
-            Raw.VertexPointer(2, VertexPointerType.Float, 0, ar);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
-            Raw.DisableClientState(ArrayCap.ColorArray);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-        }
-        private void FillRectangleSolid(Color c, float x, float y, float width, float height)
-        {
-            float[] ar = new float[] { x, y, x + width, y, x, y + height, x + width, y + height };
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.EnableClientState(ArrayCap.ColorArray);
-            Raw.ColorPointer(4, ColorPointerType.UnsignedByte, 0, new byte[] { c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A });
-            Raw.VertexPointer(2, VertexPointerType.Float, 0, ar);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
-            Raw.DisableClientState(ArrayCap.ColorArray);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-        }
+            double width2 = rect.Width / 2.0;
+            double height2 = rect.Height / 2.0;
 
+            // Save current matrix
+            GL.PushMatrix();
+
+            // Translate base point from center of screen to upper left corner 
+            _3D_Translate(rect.Left + width2, rect.Top + height2, 0);
+
+            // Rotate graphics
+            _3D_Rotate(0, 0, 0);
+
+            // Scale graphics to correct dimensions
+            GL.Scale(width2, height2, 1);
+
+            for (int i = 0; i < gradient.Count; i++)
+            {
+                GL.Begin(BeginMode.Quads);
+                GL.Color4(gradient[i].ColorPointV1.Color); GL.Vertex3(gradient[i].ColorPointV1.Point);
+                GL.Color4(gradient[i].ColorPointV2.Color); GL.Vertex3(gradient[i].ColorPointV2.Point);
+                GL.Color4(gradient[i].ColorPointV3.Color); GL.Vertex3(gradient[i].ColorPointV3.Point);
+                GL.Color4(gradient[i].ColorPointV4.Color); GL.Vertex3(gradient[i].ColorPointV4.Point);
+                GL.End();                
+            }
+
+            // Restore matrix
+            GL.PopMatrix();
+        }
+        public void FillRectangle(Brush brush, int x, int y, int width, int height)
+        {
+            double width2 = width / 2.0;
+            double height2 = height / 2.0;
+
+            // Save current matrix
+            GL.PushMatrix();
+
+            // Translate base point from center of screen to upper left corner 
+            _3D_Translate(x + width2, y + height2, 0);
+
+            // Rotate graphics
+            _3D_Rotate(0, 0, 0);
+
+            // Scale graphics to correct dimensions
+            GL.Scale(width2, height2, 1);
+
+            GL.Begin(BeginMode.Quads);
+            GL.Color4(brush.ColorData_C1);
+            GL.Vertex3(-1, -1, 0); //TOP-LEFT
+            GL.Color4(brush.ColorData_C2);
+            GL.Vertex3(1, -1, 0); //TOP-RIGHT
+            GL.Color4(brush.ColorData_C3);
+            GL.Vertex3(1, 1, 0); //BOTTOM-RIGHT
+            GL.Color4(brush.ColorData_C4);
+            GL.Vertex3(-1, 1, 0); //BOTTOM-LEFT
+            GL.End();
+
+            // Restore matrix
+            GL.PopMatrix();
+        }
         public void FillRectangle(Brush brush, Rectangle rect)
         {
             FillRectangle(brush, rect.X, rect.Y, rect.Width, rect.Height);
@@ -626,224 +886,266 @@ namespace OpenMobile.Graphics
 
         public void FillRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
         {
-            if (brush.Gradient == Gradient.None)
-                FillSolidRoundRectangle(brush.Color, x, y, width, height, radius);
-            else if (brush.Gradient == Gradient.Horizontal)
-                FillHorizRoundRectangle(brush, x, y, width, height, radius);
-            else
-                FillVertRoundRectangle(brush, x, y, width, height, radius);   
-        }
-        private void FillHorizRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
-        {
-            //TODO-Implement
             FillSolidRoundRectangle(brush.Color, x, y, width, height, radius);
         }
-        private void FillVertRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
-        {
-            double ang = 0;
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
-            int[] arr = new int[] 
-            { 
-                x + width - radius, y,//8
-                x + radius, y, //7
-                x + width, y + radius, //6
-                x, y + radius, //5
-                x + width, y + height - radius, //4
-                x, y + height - radius, //3
-                x + width - radius, y + height, //1
-                x + radius, y + height, //2
-            };
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.EnableClientState(ArrayCap.ColorArray);
-            Byte[] colors = new Byte[] { brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A };
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.ColorPointer(4, ColorPointerType.UnsignedByte, 0, colors);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 8);
-            Raw.DisableClientState(ArrayCap.ColorArray);
-            float cX = x + radius, cY = y + radius;
-            arr = new int[66];
-            arr[0] = (int)cX;
-            arr[1] = (int)cY;
-            int count = 2;
-            Raw.Color4(brush.Color);
-            for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
-            {
-                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
-                count += 2;
-            }
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-
-            cX = x + width - radius;
-            arr = new int[66];
-            arr[0] = (int)cX;
-            arr[1] = (int)cY;
-            count = 2;
-            for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
-            {
-                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
-                count += 2;
-            }
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            Raw.Color4(brush.SecondColor);
-            arr = new int[66];
-            arr[0] = (int)cX;
-            cY = y + height - radius;
-            arr[1] = (int)cY;
-            count = 2;
-            for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
-            {
-                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
-                count += 2;
-            }
-            cX = x + radius;
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            arr = new int[66];
-            arr[0] = (int)cX;
-            arr[1] = (int)cY;
-            count = 2;
-            for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
-            {
-                arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
-                arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
-                count += 2;
-            }
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
-        }
-
         public void FillRoundRectangle(Brush brush, Rectangle rect, int radius)
         {
-            if (brush.Gradient == Gradient.None)
-                FillSolidRoundRectangle(brush.Color, rect.X, rect.Y, rect.Width, rect.Height, radius);
-            else
-                FillRoundRectangle(brush, rect.X, rect.Y, rect.Width, rect.Height, radius);
+            FillSolidRoundRectangle(brush.Color, rect.X, rect.Y, rect.Width, rect.Height, radius);
         }
-
         private void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
         {
-            double ang = 0;
-            Raw.Color4(color);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
-            int[] arr = new int[] 
-            { 
-                x + width - radius, y,//8
-                x + radius, y, //7
-                x + width, y + radius, //6
-                x, y + radius, //5
-                x + width, y + height - radius, //4
-                x, y + height - radius, //3
-                x + width - radius, y + height, //1
-                x + radius, y + height, //2
-            };
-            Raw.EnableClientState(ArrayCap.VertexArray);
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 8);
-            float cX = x + radius, cY = y + radius;
-            arr = new int[66];
-            arr[0] = (int)cX;
-            arr[1] = (int)cY;
-            int count = 2;
-            for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
-            {
-                arr[count]=(int)(radius * System.Math.Cos(ang) + cX);
-                arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
-                count+=2;
-            }
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            
-            cX = x + width - radius;
-            arr = new int[66];
-            arr[0] = (int)cX;
-            arr[1] = (int)cY;
-            count = 2;
-            for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
-            {
-                arr[count]=(int)(radius * System.Math.Cos(ang) + cX);
-                arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
-                count+=2;
-            }
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            arr = new int[66];
-            arr[0] = (int)cX;
-            cY = y + height - radius;
-            arr[1] = (int)cY;
-            count = 2;
-            for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
-            {
-                arr[count]=(int)(radius * System.Math.Cos(ang) + cX);
-                arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
-                count+=2;
-            }
-            cX = x + radius;
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            arr = new int[66];
-            arr[0] = (int)cX;
-            arr[1] = (int)cY;
-            count = 2;
-            for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
-            {
-                arr[count]=(int)(radius * System.Math.Cos(ang) + cX);
-                arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
-                count+=2;
-            }
-            Raw.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            Raw.DisableClientState(ArrayCap.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
-        }
+            // Save matrix
+            GL.PushMatrix();
 
-        public void Finish()
-        {
-            if (textures[screen].Count > 0)
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            // Calculate base points
+            // Point order:
+            //      1           2
+            //      |-----------|
+            // 11 |-| 0       3 |-| 4
+            //    |               |
+            //    |               |
+            // 10 |-| 9       6 |-| 5
+            //      |-----------|
+            //      8           7
+            PointF[] p = new PointF[12];
+            p[0] = new PointF(x + radius, y + radius);
+            p[1] = new PointF(x + radius, y);
+            p[2] = new PointF(x + width - radius, y);
+            p[3] = new PointF(x + width - radius, y + radius);
+            p[4] = new PointF(x + width, y + radius);
+            p[5] = new PointF(x + width, y + height - radius);
+            p[6] = new PointF(x + width - radius, y + height - radius);
+            p[7] = new PointF(x + width - radius, y + height);
+            p[8] = new PointF(x + radius, y + height);
+            p[9] = new PointF(x + radius, y + height - radius);
+            p[10] = new PointF(x, y + height - radius);
+            p[11] = new PointF(x, y + radius);
+
+            // Set color
+            GL.Color4(color);
+
+            #region Draw rectangles
+
+            // Draw center rectangle
+            GL.Begin(BeginMode.Quads);
+            GL.Vertex3(p[10].X, p[10].Y, 0); //BOTTOM-LEFT
+            GL.Vertex3(p[11].X, p[11].Y, 0); //TOP-LEFT
+            GL.Vertex3(p[4].X, p[4].Y, 0); //TOP-RIGHT
+            GL.Vertex3(p[5].X, p[5].Y, 0); //BOTTOM-RIGHT
+
+            // Draw top rectangle
+            GL.Vertex3(p[0].X, p[0].Y, 0); //BOTTOM-LEFT
+            GL.Vertex3(p[1].X, p[1].Y, 0); //TOP-LEFT
+            GL.Vertex3(p[2].X, p[2].Y, 0); //TOP-RIGHT
+            GL.Vertex3(p[3].X, p[3].Y, 0); //BOTTOM-RIGHT
+
+            // Draw bottom rectangle
+            GL.Vertex3(p[8].X, p[8].Y, 0); //BOTTOM-LEFT
+            GL.Vertex3(p[9].X, p[9].Y, 0); //TOP-LEFT
+            GL.Vertex3(p[6].X, p[6].Y, 0); //TOP-RIGHT
+            GL.Vertex3(p[7].X, p[7].Y, 0); //BOTTOM-RIGHT
+            GL.End();
+
+            #endregion
+
+            // Calculate corner points
+            int steps = 12;
+            double step = MathHelper.DegreesToRadians(90) / steps;
+            double startAngle = MathHelper.DegreesToRadians(0);
+
+            #region Draw upper left corner
+
+            // Starting angle
+            startAngle = MathHelper.DegreesToRadians(180);
+
+            // Inital array definition
+            double[] points = new double[(steps + 3) * 2];
+            // Base point      
+            points[0] = p[0].X; points[1] = p[0].Y;
+            // Start point
+            points[2] = p[11].X; points[3] = p[11].Y; 
+            // Corner points
+            int index = 4;
+            for (int i = 0; i < steps; i++)
             {
-                Raw.DeleteTextures(textures[screen].Count, textures[screen].ToArray());
-                textures[screen].Clear();
+                points[index] = points[0] + (radius * (float)System.Math.Cos(startAngle + (step * (i + 1))));
+                points[index + 1] = points[1] + (radius * (float)System.Math.Sin(startAngle + (step * (i + 1))));
+                index += 2;
             }
+            // End point
+            points[index] = p[1].X; points[index + 1] = p[1].Y; 
+            
+            // Render triangles
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Double, 0, points);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, points.Length / 2);
+            GL.DisableClientState(ArrayCap.VertexArray);
+
+            #endregion
+
+            #region Draw upper right corner
+            
+            // Starting angle
+            startAngle = MathHelper.DegreesToRadians(270);
+            // Inital array definition
+            points = new double[(steps + 3) * 2];
+            // Base point      
+            points[0] = p[3].X; points[1] = p[3].Y;
+            // Start point
+            points[2] = p[2].X; points[3] = p[2].Y;
+            // Corner points
+            index = 4;
+            for (int i = 0; i < steps; i++)
+            {
+                points[index] = points[0] + (radius * (float)System.Math.Cos(startAngle + (step * (i + 1))));
+                points[index + 1] = points[1] + (radius * (float)System.Math.Sin(startAngle + (step * (i + 1))));
+                index += 2;
+            }
+            // End point
+            points[index] = p[4].X; points[index + 1] = p[4].Y;
+
+            // Render triangles
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Double, 0, points);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, points.Length / 2);
+            GL.DisableClientState(ArrayCap.VertexArray);
+
+            #endregion
+
+            #region Draw lower right corner
+
+            // Starting angle
+            startAngle = MathHelper.DegreesToRadians(0);
+            // Inital array definition
+            points = new double[(steps + 3) * 2];
+            // Base point      
+            points[0] = p[6].X; points[1] = p[6].Y;
+            // Start point
+            points[2] = p[5].X; points[3] = p[5].Y;
+            // Corner points
+            index = 4;
+            for (int i = 0; i < steps; i++)
+            {
+                points[index] = points[0] + (radius * (float)System.Math.Cos(startAngle + (step * (i + 1))));
+                points[index + 1] = points[1] + (radius * (float)System.Math.Sin(startAngle + (step * (i + 1))));
+                index += 2;
+            }
+            // End point
+            points[index] = p[7].X; points[index + 1] = p[7].Y;
+
+            // Render triangles
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Double, 0, points);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, points.Length / 2);
+            GL.DisableClientState(ArrayCap.VertexArray);
+
+            #endregion
+
+            #region Draw lower left corner
+
+            // Starting angle
+            startAngle = MathHelper.DegreesToRadians(90);
+            // Inital array definition
+            points = new double[(steps + 3) * 2];
+            // Base point      
+            points[0] = p[9].X; points[1] = p[9].Y;
+            // Start point
+            points[2] = p[8].X; points[3] = p[8].Y;
+            // Corner points
+            index = 4;
+            for (int i = 0; i < steps; i++)
+            {
+                points[index] = points[0] + (radius * (float)System.Math.Cos(startAngle + (step * (i + 1))));
+                points[index + 1] = points[1] + (radius * (float)System.Math.Sin(startAngle + (step * (i + 1))));
+                index += 2;
+            }
+            // End point
+            points[index] = p[10].X; points[index + 1] = p[10].Y;
+
+            // Render triangles
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Double, 0, points);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, points.Length / 2);
+            GL.DisableClientState(ArrayCap.VertexArray);
+
+            #endregion
+
+            // Restore matrix
+            GL.PopMatrix();
+
         }
 
         public OImage GenerateStringTexture(string s, Font font, Color color, int Left, int Top, int Width, int Height, System.Drawing.StringFormat format)
         {
             throw new NotImplementedException();
         }
-
         public OImage GenerateTextTexture(int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color color, Color secondColor)
         {
             throw new NotImplementedException();
         }
+
         int maxTextureSize;
         int[] horizTex;
         int[] vertTex;
+
         public void Initialize(int screen)
         {
-            Raw.Disable(EnableCap.DepthTest);
-            Raw.Disable(EnableCap.Multisample);
-            Raw.Enable(EnableCap.Blend);
-            Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-            Raw.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            Raw.MatrixMode(MatrixMode.Projection);
-            Raw.LoadIdentity();
-            Raw.Ortho(0, 1000, 600, 0, 0, 1);
-            Raw.MatrixMode(MatrixMode.Modelview);
-            Raw.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
+            // Set viewport
+            GL.Viewport(0, 0, _Width, _Height);
+
+            // Set rendering options
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
+            //GL.Enable(EnableCap.PolygonSmooth); // This causes artifacts with certain videocards
+            GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+            GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
+            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+
+            // Shading
+            GL.ShadeModel(ShadingModel.Smooth);
+
+            // 3D options
+            GL.CullFace(CullFaceMode.Front);
+            GL.Enable(EnableCap.Multisample);
+            GL.Enable(EnableCap.CullFace);
+
+            // Enable blending
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+            // Get texure sizes
+            GL.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
+
             //Init arrays
             normalTex = new int[] { 0, 1, 1, 1, 0, 0, 1, 0 };
             vertTex = new int[] { 0, 0, 1, 0, 0, 1, 1, 1 };
             horizTex = new int[] { 1, 1, 0, 1, 1, 0, 0, 0 };
+
+            //// Enable 2D as default
+            //_2D_SetProjection();
+            //_2D_SetModelView();
+
+            _3D_ProjectionSet(Vector3d.Zero);
+            _3D_ModelView_Set(Vector3d.Zero, Vector3d.Zero, Vector3d.Zero, 0, true);
+        }
+
+        public void Begin()
+        {
+            //_3D_SetProjection(Vector3d.Zero);
+            //_3D_SetModelView(Vector3d.Zero, Vector3d.Zero, Vector3d.Zero, 0);
+            _3D_ModelView_Activate();
+        }
+        public void End()
+        {
+            if (_Textures[_Screen].Count > 0)
+            {
+                GL.DeleteTextures(_Textures[_Screen].Count, _Textures[_Screen].ToArray());
+                _Textures[_Screen].Clear();
+            }
         }
 
         public int MaxTextureSize
@@ -856,7 +1158,7 @@ namespace OpenMobile.Graphics
 
         public void renderText(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void ResetClip()
@@ -866,16 +1168,18 @@ namespace OpenMobile.Graphics
 
         public void ResetTransform()
         {
-            Raw.LoadIdentity();
+            //GL.LoadIdentity();
+            _3D_ProjectionSet(Vector3d.Zero);
+            _3D_ModelView_Set(Vector3d.Zero, Vector3d.Zero, Vector3d.Zero, 0, true);
         }
 
         public void Resize(int Width, int Height)
         {
-            width = Width;
-            height = Height;
-            wscale = (width / 1000F);
-            hscale = (height / 600F);
-            Raw.Viewport(0, 0, width, height);
+            _Width = Width;
+            _Height = Height;
+            _WidthScale = (_Width / 1000F);
+            _HeightScale = (_Height / 600F);
+            GL.Viewport(0, 0, _Width, _Height);
         }
 
         public void SetClip(Rectangle Rect)
@@ -889,32 +1193,220 @@ namespace OpenMobile.Graphics
                 height = 0;
             if (width < 0)
                 width = 0;
-            Raw.Enable(EnableCap.ScissorTest);
-            Raw.Scissor((int)(x * wscale), (int)((600 - y - height) * hscale), (int)(width * wscale), (int)(height * hscale));
+            GL.Enable(EnableCap.ScissorTest);
+            GL.Scissor((int)(x * _WidthScale), (int)((600 - y - height) * _HeightScale), (int)(width * _WidthScale), (int)(height * _HeightScale));
         }
 
-        public void TranslateTransform(float dx, float dy)
+        public void Translate(double dx, double dy)
         {
-            Raw.Translate(dx, dy, 0);
+            GL.Translate(dx, dy, 0);
         }
 
-        public void TranslateTransform(float dx, float dy, float dz)
+        public void Translate(double dx, double dy, double dz)
         {
-            Raw.Translate(dx, dy, dz);
+            GL.Translate(dx, dy, dz);
         }
 
-        public void Rotate(float angle, Graphics.Axis axis)
+        public void Rotate(double angle, Graphics.Axis axis)
         {
-            Raw.Rotate(angle, (axis == Graphics.Axis.X ? 1 : 0), (axis == Graphics.Axis.Y ? 1 : 0), (axis == Graphics.Axis.Z ? 1 : 0));
+            GL.Rotate(angle, (axis == Graphics.Axis.X ? 1 : 0), (axis == Graphics.Axis.Y ? 1 : 0), (axis == Graphics.Axis.Z ? 1 : 0));
         }
 
-        public void Scale(float sx, float sy, float sz)
+        public void Rotate(double x, double y, double z)
         {
-            Raw.Scale(sx, sy, sz);
+            GL.Rotate(x, 1, 0, 0);
+            GL.Rotate(y, 0, 1, 0);
+            GL.Rotate(z, 0, 0, 1);
         }
-        public void Transform(Matrix4 m)
+
+        public void Scale(double sx, double sy, double sz)
         {
-            Raw.MultMatrix(ref m);
+            GL.Scale(sx, sy, sz);
+        }
+
+        public void Transform(Matrix4d m)
+        {
+            GL.MultMatrix(ref m);
+        }
+
+        private void _2D_SetProjection()
+        {
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            GL.Ortho(0, 1000, 600, 0, 0, 1);
+        }
+
+        private void _2D_SetModelView()
+        {
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadIdentity();
+        }
+
+        /// <summary>
+        /// Translates the graphics relative from a base point in the upper left corner
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        private void _3D_Translate(double x, double y, double z)
+        {
+            // Translate base point from center to upper left corner of screen
+            GL.Translate(-500, -300, 0);
+
+            // Translate graphics to correct placement
+            GL.Translate(x, y, z);
+        }
+
+        /// <summary>
+        /// Rotates the graphics (rotation order X, Y and then Z)
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        private void _3D_Rotate(double x, double y, double z)
+        {
+            GL.Rotate(x, 1, 0, 0);
+            GL.Rotate(y, 0, 1, 0);
+            GL.Rotate(z, 0, 0, 1);
+        }
+
+        /// <summary>
+        /// Sets the projection matrix
+        /// </summary>
+        /// <param name="renderLocation"></param>
+        private void _3D_ProjectionSet(Vector3d renderLocation)
+        {
+            // Create a perspective frustrum
+            Matrix4d projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), 1000.0 / 600.0, 1.0, 2000.0);
+
+            if (renderLocation != Vector3d.Zero)
+            {
+                // Move zero point for rendering to upper left corner
+                projection *= Matrix4d.CreateTranslation(-1, 1, 0);
+
+                // Translate rendering point to the specified location
+                projection *= Matrix4d.CreateTranslation(_3D_ProjectionSpace_NormalizeVector(new Vector3d(renderLocation.X, renderLocation.Y, 0)));
+            }
+
+            // Load matrix
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            GL.LoadMatrix(ref projection);
+        }
+
+        /// <summary>
+        /// Sets the model matrix
+        /// </summary>
+        /// <param name="cameraLocation">Moves the camera location while looking at 0,0,0</param>
+        /// <param name="cameraRotation">Rotates the camera while looking at 0,0,0</param>
+        /// <param name="cameraOffset">Offsets the camera</param>
+        /// <param name="zoom">Zoom level</param>
+        /// <param name="activateMatrix">Activates the matrix immediately. NB! This can only be done from the rendering thread</param>
+        public void _3D_ModelView_Set(Vector3d cameraLocation, Vector3d cameraRotation, Vector3d cameraOffset, double zoom, bool activateMatrix)
+        {
+            // Rotate world to get the correct axes in 3D (X going right, Y going down)
+            modelview = Matrix4d.CreateRotationZ(MathHelper.DegreesToRadians(180));
+
+            // Rotate camera
+            modelview *= Matrix4d.CreateRotationX(MathHelper.DegreesToRadians(cameraRotation.X));
+            modelview *= Matrix4d.CreateRotationY(MathHelper.DegreesToRadians(cameraRotation.Y));
+            modelview *= Matrix4d.CreateRotationZ(MathHelper.DegreesToRadians(cameraRotation.Z));
+
+            // Offset camera
+            modelview *= Matrix4d.CreateTranslation(cameraOffset);
+
+            // Zoom 
+            if (zoom != 0)
+                modelview *= Matrix4d.Scale(zoom);
+
+            // Set camera with fixed zoom to make the 1000x600 frame match the 1000x600 pixels
+            modelview *= Matrix4d.LookAt(new Vector3d(-cameraLocation.X, -cameraLocation.Y, cameraLocation.Z + (-724)), Vector3d.UnitZ, Vector3d.UnitY);
+
+            // Load matrix
+            if (activateMatrix)
+                _3D_ModelView_Activate();
+        }
+
+        /// <summary>
+        /// Sets or gets the modelview matrix
+        /// </summary>
+        public Matrix4d _3D_ModelViewMatrix
+        {
+            get
+            {
+                return this.modelview;
+            }
+            set
+            {
+                this.modelview = value;
+                GL.LoadMatrix(ref modelview);
+            }
+        }
+
+        /// <summary>
+        /// The matrix for the global modelview
+        /// </summary>
+        private Matrix4d modelview;
+
+        /// <summary>
+        /// Activates the model view
+        /// </summary>
+        public void _3D_ModelView_Activate()
+        {
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadIdentity();
+            GL.LoadMatrix(ref modelview);
+        }
+
+        /// <summary>
+        /// Resets the model view
+        /// </summary>
+        public void _3D_ModelView_ResetAndPlaceCamera(Vector3d cameraLocation)
+        {
+            // Rotate world to get the correct axes in 3D (X going right, Y going down)
+            modelview = Matrix4d.CreateRotationZ(MathHelper.DegreesToRadians(180));
+
+            // Set camera with fixed zoom to make the 1000x600 frame match the 1000x600 pixels
+            modelview *= Matrix4d.LookAt(new Vector3d(-cameraLocation.X, -cameraLocation.Y, cameraLocation.Z + (-724)), Vector3d.UnitZ, Vector3d.UnitY);
+
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadIdentity();
+            GL.LoadMatrix(ref modelview);
+        }
+
+        
+        /// <summary>
+        /// Normalizes a vector in projection space 
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        private Vector3d _3D_ProjectionSpace_NormalizeVector(Vector3d v)
+        {
+            // Normalize vectors and swap Y vector to get the correct coordinate system
+            return new Vector3d(v.X / (1000.0 / 2f), -(v.Y / (600.0 / 2f)), v.Z / (600.0 / 2f));
+        }
+        
+        /// <summary>
+        /// The modelview stack
+        /// </summary>
+        Stack<Matrix4d> modelViewStack = new Stack<Matrix4d>();
+
+        /// <summary>
+        /// Pushes the modelview onto the stack
+        /// </summary>
+        public void _3D_ModelView_Push()
+        {
+            GL.PushMatrix();
+            modelViewStack.Push(modelview);
+        }
+
+        /// <summary>
+        /// Pops the modelview back from the stack
+        /// </summary>
+        public void _3D_ModelView_Pop()
+        {
+            GL.PopMatrix();
+            modelview = modelViewStack.Pop();
         }
     }
 }

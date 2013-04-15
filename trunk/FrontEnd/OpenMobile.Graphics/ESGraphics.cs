@@ -58,7 +58,7 @@ namespace OpenMobile.Graphics
         }
 
 
-        private bool loadTexture(ref OImage image)
+        public bool LoadTexture(ref OImage image)
         {
             if (image == null)
                 return false;
@@ -66,8 +66,8 @@ namespace OpenMobile.Graphics
                 return false;
 
             uint texture;
-            Raw.GenTextures(1, out texture);
-            Raw.BindTexture(All.Texture2D, texture);
+            GL.GenTextures(1, out texture);
+            GL.BindTexture(All.Texture2D, texture);
             
             Bitmap img = image.image;
             bool kill = false;
@@ -88,7 +88,7 @@ namespace OpenMobile.Graphics
                             ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                         }
                         catch (InvalidOperationException) { return false; }
-                        Raw.TexImage2D(All.Texture2D, 0, All.Rgba, data.Width, data.Height, 0,
+                        GL.TexImage2D(All.Texture2D, 0, All.Rgba, data.Width, data.Height, 0,
                                         All.Rgba, All.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
@@ -99,7 +99,7 @@ namespace OpenMobile.Graphics
                             ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                         }
                         catch (InvalidOperationException) { return false; }
-                        Raw.TexImage2D(All.Texture2D, 0, All.Rgb, data.Width, data.Height, 0,
+                        GL.TexImage2D(All.Texture2D, 0, All.Rgb, data.Width, data.Height, 0,
                                         All.Rgb, All.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
@@ -118,7 +118,7 @@ namespace OpenMobile.Graphics
                             ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                         }
                         catch (InvalidOperationException) { return false; }
-                        Raw.TexImage2D(All.Texture2D, 0, All.Rgb, data.Width, data.Height, 0,
+                        GL.TexImage2D(All.Texture2D, 0, All.Rgb, data.Width, data.Height, 0,
                                         All.Rgb, All.UnsignedByte, data.Scan0);
                         tmp.UnlockBits(data);
                         tmp.Dispose();
@@ -128,10 +128,10 @@ namespace OpenMobile.Graphics
             if (kill)
                 img.Dispose();
             image.SetTexture(screen, texture);
-            Raw.TexParameter(All.Texture2D, All.TextureMinFilter, (int)TextureMinFilter.Linear);
-            Raw.TexParameter(All.Texture2D, All.TextureMagFilter, (int)TextureMagFilter.Linear);
-            Raw.TexParameter(All.Texture2D, All.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            Raw.TexParameter(All.Texture2D, All.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(All.Texture2D, All.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(All.Texture2D, All.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(All.Texture2D, All.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(All.Texture2D, All.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
             return true;
         }
 
@@ -150,8 +150,8 @@ namespace OpenMobile.Graphics
         }
         public void Clear(Color color)
         {
-            Raw.Clear(ClearBufferMask.ColorBufferBit);
-            Raw.ClearColor(color);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.ClearColor(color);
         }
         private Rectangle _clip = NoClip;
         public Rectangle Clip
@@ -164,22 +164,22 @@ namespace OpenMobile.Graphics
             {
                 _clip = value;
                 if (_clip == NoClip)
-                    Raw.Disable(EnableCap.ScissorTest);
+                    GL.Disable(EnableCap.ScissorTest);
                 else
                 {
                     if (_clip.Height < 0)
                         _clip.Height = 0;
                     if (_clip.Width < 0)
                         _clip.Width = 0;
-                    Raw.Enable(EnableCap.ScissorTest);
+                    GL.Enable(EnableCap.ScissorTest);
                     try
                     {
-                        Raw.Scissor((int)(_clip.X * wscale), (int)((600 - _clip.Y - _clip.Height) * hscale), (int)(_clip.Width * wscale), (int)(_clip.Height * hscale));
+                        GL.Scissor((int)(_clip.X * wscale), (int)((600 - _clip.Y - _clip.Height) * hscale), (int)(_clip.Width * wscale), (int)(_clip.Height * hscale));
                     }
                     catch (Exception)
                     {
                         _clip = NoClip;
-                        Raw.Disable(EnableCap.ScissorTest);
+                        GL.Disable(EnableCap.ScissorTest);
                     }
                 }
             }
@@ -187,10 +187,10 @@ namespace OpenMobile.Graphics
 
         public void DrawArc(Pen pen, int x, int y, int width, int height, float startAngle, float sweepAngle)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.Multisample);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.Multisample);
 
             float yrad = height / 2F;
             float xrad = width / 2F;
@@ -198,18 +198,18 @@ namespace OpenMobile.Graphics
             int i = 0;
             for (float t = startAngle; t <= (startAngle + sweepAngle); t = t + 0.5F)
             {
-                float rad = MathHelper.DegreesToRadians(t);
+                double rad = MathHelper.DegreesToRadians(t);
                 arr[i] = x + xrad + (float)(xrad * System.Math.Cos(rad));
                 arr[i + 1] = y + yrad + (float)(yrad * System.Math.Sin(rad));
                 i += 2;
             }
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer(2, All.Float, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, arr.Length / 2);
-            Raw.DisableClientState(All.VertexArray);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer(2, All.Float, 0, arr);
+            GL.DrawArrays(BeginMode.LineStrip, 0, arr.Length / 2);
+            GL.DisableClientState(All.VertexArray);
 
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.Multisample);
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.Multisample);
         }
 
         public void DrawArc(Pen pen, Rectangle rect, float startAngle, float sweepAngle)
@@ -219,27 +219,27 @@ namespace OpenMobile.Graphics
 
         public void DrawEllipse(Pen pen, int x, int y, int width, int height)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
 
             float yrad = height / 2F;
             float xrad = width / 2F;
             float[] arr = new float[720];
             for (int t = 0; t < 360; t++)
             {
-                float rad = MathHelper.DegreesToRadians(t);
+                double rad = MathHelper.DegreesToRadians(t);
                 arr[2*t]=x + xrad + (float)(xrad * System.Math.Cos(rad));
                 arr[(2*t)+1]=y + yrad + (float)(yrad * System.Math.Sin(rad));
             }
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer(2, All.Float, 0, arr);
-            Raw.DrawArrays(BeginMode.LineLoop, 0, 360);
-            Raw.DisableClientState(All.VertexArray);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer(2, All.Float, 0, arr);
+            GL.DrawArrays(BeginMode.LineLoop, 0, 360);
+            GL.DisableClientState(All.VertexArray);
 
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
         }
 
         public void DrawEllipse(Pen pen, Rectangle rect)
@@ -288,40 +288,46 @@ namespace OpenMobile.Graphics
             DrawImage(image, X, Y, Width, Height, 1F, eAngle.Normal);
         }
         int[] normalTex;
+        public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation)
+        {
+        }
+        public void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation, ReflectionsData reflectionData)
+        {
+        }
         public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle)
         {
             if (image == null)
                 return;
-            Raw.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Texture2D);
             if (image.GetTexture(screen) == 0)
-                if (!loadTexture(ref image))
+                if (!LoadTexture(ref image))
                 {
-                    Raw.Disable(EnableCap.Texture2D);
+                    GL.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(All.Texture2D, image.GetTexture(screen));
-            Raw.Color4(1F, 1F, 1F, transparency);
+            GL.BindTexture(All.Texture2D, image.GetTexture(screen));
+            GL.Color4(1F, 1F, 1F, transparency);
 
             int[] tex = new int[] { X, Height + Y, Width + X, Height + Y, X, Y, Width + X, Y };
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer(2, All.Short, 0, tex);
-            Raw.EnableClientState(All.TextureCoordArray);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer(2, All.Short, 0, tex);
+            GL.EnableClientState(All.TextureCoordArray);
             switch(angle)
             {
                 case eAngle.FlipHorizontal:
-                    Raw.TexCoordPointer(2, All.Short, 0, horizTex);
+                    GL.TexCoordPointer(2, All.Short, 0, horizTex);
                     break;
                 case eAngle.FlipVertical:
-                    Raw.TexCoordPointer(2, All.Short, 0, vertTex);
+                    GL.TexCoordPointer(2, All.Short, 0, vertTex);
                     break;
                 default:
-                    Raw.TexCoordPointer(2, All.Short, 0, normalTex);
+                    GL.TexCoordPointer(2, All.Short, 0, normalTex);
                     break;
             }
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
-            Raw.DisableClientState(All.TextureCoordArray);
-            Raw.DisableClientState(All.VertexArray);
-            Raw.Disable(EnableCap.Texture2D);
+            GL.DrawArrays(BeginMode.TriangleStrip, 0, 4);
+            GL.DisableClientState(All.TextureCoordArray);
+            GL.DisableClientState(All.VertexArray);
+            GL.Disable(EnableCap.Texture2D);
         }
 
         public void DrawImage(OImage image, Point[] destPoints)
@@ -333,28 +339,33 @@ namespace OpenMobile.Graphics
         {
             DrawImage(image, X, Y, Width, Height, transparency, eAngle.Normal);
         }
+
+        public void DrawCube(OImage image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
+        {
+        }
+
         public void DrawLine(Pen pen, Point[] points)
         {
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Color4(pen.Color);
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer<Point>(2,All.Short, 0, points);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, points.Length);
-            Raw.DisableClientState(All.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Color4(pen.Color);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer<Point>(2,All.Short, 0, points);
+            GL.DrawArrays(BeginMode.LineStrip, 0, points.Length);
+            GL.DisableClientState(All.VertexArray);
+            GL.Disable(EnableCap.LineSmooth);
         }
         public void DrawLine(Pen pen, int x1, int y1, int x2, int y2)
         {
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
             int[] arr = new int[] { x1, y1, x2, y2 };
-            Raw.Color4(pen.Color);
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.Lines, 0, 2);
-            Raw.DisableClientState(All.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
+            GL.Color4(pen.Color);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.Lines, 0, 2);
+            GL.DisableClientState(All.VertexArray);
+            GL.Disable(EnableCap.LineSmooth);
         }
 
         public void DrawLine(Pen pen, Point pt1, Point pt2)
@@ -364,15 +375,15 @@ namespace OpenMobile.Graphics
 
         public void DrawLine(Pen pen, float x1, float y1, float x2, float y2)
         {
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
             float[] arr = new float[] { x1, y1, x2, y2 };
-            Raw.Color4(pen.Color);
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer(2, All.Float, 0, arr);
-            Raw.DrawArrays(BeginMode.Lines, 0, 2);
-            Raw.DisableClientState(All.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
+            GL.Color4(pen.Color);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer(2, All.Float, 0, arr);
+            GL.DrawArrays(BeginMode.Lines, 0, 2);
+            GL.DisableClientState(All.VertexArray);
+            GL.Disable(EnableCap.LineSmooth);
         }
 
         public void DrawPolygon(Pen pen, Point[] points)
@@ -383,12 +394,12 @@ namespace OpenMobile.Graphics
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
         {
             float[] ar = new float[] { x, y, x + width, y, x + width, y + height, x, y + height };
-            Raw.EnableClientState(All.VertexArray);
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.VertexPointer(2, All.Float, 0, ar);
-            Raw.DrawArrays(BeginMode.LineLoop, 0, 4);
-            Raw.DisableClientState(All.VertexArray);
+            GL.EnableClientState(All.VertexArray);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.VertexPointer(2, All.Float, 0, ar);
+            GL.DrawArrays(BeginMode.LineLoop, 0, 4);
+            GL.DisableClientState(All.VertexArray);
         }
 
         public void DrawRectangle(Pen pen, Rectangle rect)
@@ -404,14 +415,14 @@ namespace OpenMobile.Graphics
         public void DrawRoundRectangle(Pen pen, int x, int y, int width, int height, int radius)
         {
             double ang = 0;
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
             int[] arr = new int[] { x, y + radius, x, y + height - radius, x + radius-1, y, x + width - radius, y, x + width, y + radius-1, x + width, y + height - radius, x + radius, y + height, x + width - radius, y + height };
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.Lines, 0, 8);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.Lines, 0, 8);
             float cX = x + radius, cY = y + radius;
             arr = new int[64];
             int count = 0;
@@ -421,8 +432,8 @@ namespace OpenMobile.Graphics
                 arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.LineStrip, 0, 32);
 
             cX = x + width - radius;
             count = 0;
@@ -432,8 +443,8 @@ namespace OpenMobile.Graphics
                 arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.LineStrip, 0, 32);
             cY = y + height - radius;
             count = 0;
             for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
@@ -443,8 +454,8 @@ namespace OpenMobile.Graphics
                 count += 2;
             }
             cX = x + radius;
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.LineStrip, 0, 32);
             count = 0;
             for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
             {
@@ -452,11 +463,11 @@ namespace OpenMobile.Graphics
                 arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.LineStrip, 0, 32);
-            Raw.DisableClientState(All.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.LineStrip, 0, 32);
+            GL.DisableClientState(All.VertexArray);
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
         }
 
         public void DrawRoundRectangle(Pen p, Rectangle rect, int radius)
@@ -466,10 +477,10 @@ namespace OpenMobile.Graphics
 
         public void FillEllipse(Brush brush, int x, int y, int width, int height)
         {
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
-            Raw.Enable(EnableCap.Multisample);
-            Raw.Color4(brush.Color);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
+            GL.Enable(EnableCap.Multisample);
+            GL.Color4(brush.Color);
             int[] arr=new int[722];
             arr[720]=x + (width / 2);
             arr[721]=y + (height / 2);
@@ -478,13 +489,13 @@ namespace OpenMobile.Graphics
                 arr[angle*2]=(int)(x + (width / 2) + System.Math.Sin(angle) * (width / 2));
                 arr[(angle*2)+1]= (int)(y + (height / 2) + System.Math.Cos(angle) * (height / 2));
             }
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 361);
-            Raw.DisableClientState(All.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
-            Raw.Disable(EnableCap.Multisample);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 361);
+            GL.DisableClientState(All.VertexArray);
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
+            GL.Disable(EnableCap.Multisample);
         }
 
         public void FillEllipse(Brush brush, Rectangle rect)
@@ -500,13 +511,13 @@ namespace OpenMobile.Graphics
                 arr[2 * i] = points[i].X;
                 arr[(2 * i)+1] = points[i].Y;
             }
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, points.Length);
-            Raw.DisableClientState(All.VertexArray);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleStrip, 0, points.Length);
+            GL.DisableClientState(All.VertexArray);
         }
 
-        public void FillRectangle(Brush brush, float x, float y, float width, float height)
+        public void FillRectangle(Brush brush, int x, int y, int width, int height)
         {
             if (brush.Gradient == Gradient.Horizontal)
                 FillHorizRectange(brush, x, y, width, height);
@@ -518,37 +529,40 @@ namespace OpenMobile.Graphics
         private void FillHorizRectange(Brush b, float x, float y, float width, float height)
         {
             float[] ar = new float[] { x, y, x + width, y, x, y + height, x + width, y + height };
-            Raw.EnableClientState(All.VertexArray);
-            Raw.EnableClientState(All.ColorArray);
-            Raw.ColorPointer(4, All.UnsignedByte, 0, new byte[] { b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A, b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A });
-            Raw.VertexPointer(2, All.Float, 0, ar);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
-            Raw.DisableClientState(All.ColorArray);
-            Raw.DisableClientState(All.VertexArray);
+            GL.EnableClientState(All.VertexArray);
+            GL.EnableClientState(All.ColorArray);
+            GL.ColorPointer(4, All.UnsignedByte, 0, new byte[] { b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A, b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A });
+            GL.VertexPointer(2, All.Float, 0, ar);
+            GL.DrawArrays(BeginMode.TriangleStrip, 0, 4);
+            GL.DisableClientState(All.ColorArray);
+            GL.DisableClientState(All.VertexArray);
         }
         private void FillVertRectange(Brush b, float x, float y, float width, float height)
         {
             float[] ar = new float[] { x, y, x + width, y, x, y + height, x + width, y + height };
-            Raw.EnableClientState(All.VertexArray);
-            Raw.EnableClientState(All.ColorArray);
-            Raw.ColorPointer(4, All.UnsignedByte, 0, new byte[] { b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A });
-            Raw.VertexPointer(2, All.Float, 0, ar);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
-            Raw.DisableClientState(All.ColorArray);
-            Raw.DisableClientState(All.VertexArray);
+            GL.EnableClientState(All.VertexArray);
+            GL.EnableClientState(All.ColorArray);
+            GL.ColorPointer(4, All.UnsignedByte, 0, new byte[] { b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.Color.R, b.Color.G, b.Color.B, b.Color.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A, b.SecondColor.R, b.SecondColor.G, b.SecondColor.B, b.SecondColor.A });
+            GL.VertexPointer(2, All.Float, 0, ar);
+            GL.DrawArrays(BeginMode.TriangleStrip, 0, 4);
+            GL.DisableClientState(All.ColorArray);
+            GL.DisableClientState(All.VertexArray);
         }
         private void FillRectangleSolid(Color c, float x, float y, float width, float height)
         {
             float[] ar = new float[] { x, y, x + width, y, x, y + height, x + width, y + height };
-            Raw.EnableClientState(All.VertexArray);
-            Raw.EnableClientState(All.ColorArray);
-            Raw.ColorPointer(4, All.UnsignedByte, 0, new byte[] { c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A });
-            Raw.VertexPointer(2, All.Float, 0, ar);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 4);
-            Raw.DisableClientState(All.ColorArray);
-            Raw.DisableClientState(All.VertexArray);
+            GL.EnableClientState(All.VertexArray);
+            GL.EnableClientState(All.ColorArray);
+            GL.ColorPointer(4, All.UnsignedByte, 0, new byte[] { c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A, c.R, c.G, c.B, c.A });
+            GL.VertexPointer(2, All.Float, 0, ar);
+            GL.DrawArrays(BeginMode.TriangleStrip, 0, 4);
+            GL.DisableClientState(All.ColorArray);
+            GL.DisableClientState(All.VertexArray);
         }
 
+        public void FillRectangle(GradientData gradient, Rectangle rect)
+        {
+        }
         public void FillRectangle(Brush brush, Rectangle rect)
         {
             FillRectangle(brush, rect.X, rect.Y, rect.Width, rect.Height);
@@ -571,8 +585,8 @@ namespace OpenMobile.Graphics
         private void FillVertRoundRectangle(Brush brush, int x, int y, int width, int height, int radius)
         {
             double ang = 0;
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
             int[] arr = new int[] 
             { 
                 x + width - radius, y,//8
@@ -584,27 +598,27 @@ namespace OpenMobile.Graphics
                 x + width - radius, y + height, //1
                 x + radius, y + height, //2
             };
-            Raw.EnableClientState(All.VertexArray);
-            Raw.EnableClientState(All.ColorArray);
+            GL.EnableClientState(All.VertexArray);
+            GL.EnableClientState(All.ColorArray);
             Byte[] colors = new Byte[] { brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A, brush.SecondColor.R, brush.SecondColor.G, brush.SecondColor.B, brush.SecondColor.A };
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.ColorPointer(4, All.UnsignedByte, 0, colors);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 8);
-            Raw.DisableClientState(All.ColorArray);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.ColorPointer(4, All.UnsignedByte, 0, colors);
+            GL.DrawArrays(BeginMode.TriangleStrip, 0, 8);
+            GL.DisableClientState(All.ColorArray);
             float cX = x + radius, cY = y + radius;
             arr = new int[66];
             arr[0] = (int)cX;
             arr[1] = (int)cY;
             int count = 2;
-            Raw.Color4(brush.Color);
+            GL.Color4(brush.Color);
             for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
             {
                 arr[count] = (int)(radius * System.Math.Cos(ang) + cX);
                 arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 33);
 
             cX = x + width - radius;
             arr = new int[66];
@@ -617,9 +631,9 @@ namespace OpenMobile.Graphics
                 arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            Raw.Color4(brush.SecondColor);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            GL.Color4(brush.SecondColor);
             arr = new int[66];
             arr[0] = (int)cX;
             cY = y + height - radius;
@@ -632,8 +646,8 @@ namespace OpenMobile.Graphics
                 count += 2;
             }
             cX = x + radius;
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 33);
             arr = new int[66];
             arr[0] = (int)cX;
             arr[1] = (int)cY;
@@ -644,11 +658,11 @@ namespace OpenMobile.Graphics
                 arr[count + 1] = (int)(radius * System.Math.Sin(ang) + cY);
                 count += 2;
             }
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            Raw.DisableClientState(All.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            GL.DisableClientState(All.VertexArray);
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
         }
 
         public void FillRoundRectangle(Brush brush, Rectangle rect, int radius)
@@ -662,9 +676,9 @@ namespace OpenMobile.Graphics
         private void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
         {
             double ang = 0;
-            Raw.Color4(color);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
+            GL.Color4(color);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
             int[] arr = new int[] 
             { 
                 x + width - radius, y,//8
@@ -676,9 +690,9 @@ namespace OpenMobile.Graphics
                 x + width - radius, y + height, //1
                 x + radius, y + height, //2
             };
-            Raw.EnableClientState(All.VertexArray);
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleStrip, 0, 8);
+            GL.EnableClientState(All.VertexArray);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleStrip, 0, 8);
             float cX = x + radius, cY = y + radius;
             arr = new int[66];
             arr[0] = (int)cX;
@@ -690,8 +704,8 @@ namespace OpenMobile.Graphics
                 arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
                 count+=2;
             }
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 33);
             
             cX = x + width - radius;
             arr = new int[66];
@@ -704,8 +718,8 @@ namespace OpenMobile.Graphics
                 arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
                 count+=2;
             }
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 33);
             arr = new int[66];
             arr[0] = (int)cX;
             cY = y + height - radius;
@@ -718,8 +732,8 @@ namespace OpenMobile.Graphics
                 count+=2;
             }
             cX = x + radius;
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 33);
             arr = new int[66];
             arr[0] = (int)cX;
             arr[1] = (int)cY;
@@ -730,20 +744,11 @@ namespace OpenMobile.Graphics
                 arr[count+1]=(int)(radius * System.Math.Sin(ang) + cY);
                 count+=2;
             }
-            Raw.VertexPointer(2, All.Short, 0, arr);
-            Raw.DrawArrays(BeginMode.TriangleFan, 0, 33);
-            Raw.DisableClientState(All.VertexArray);
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
-        }
-
-        public void Finish()
-        {
-            if (textures[screen].Count > 0)
-            {
-                Raw.DeleteTextures(textures[screen].Count, textures[screen].ToArray());
-                textures[screen].Clear();
-            }
+            GL.VertexPointer(2, All.Short, 0, arr);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, 33);
+            GL.DisableClientState(All.VertexArray);
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
         }
 
         public OImage GenerateStringTexture(string s, Font font, Color color, int Left, int Top, int Width, int Height, System.Drawing.StringFormat format)
@@ -760,20 +765,31 @@ namespace OpenMobile.Graphics
         int[] vertTex;
         public void Initialize(int screen)
         {
-            Raw.Disable(EnableCap.DepthTest);
-            Raw.Disable(EnableCap.Multisample);
-            Raw.Enable(EnableCap.Blend);
-            Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-            Raw.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            Raw.MatrixMode(MatrixMode.Projection);
-            Raw.LoadIdentity();
-            Raw.Ortho(0, 1000, 600, 0, 0, 1);
-            Raw.MatrixMode(MatrixMode.Modelview);
-            Raw.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
+            GL.Disable(EnableCap.DepthTest);
+            GL.Disable(EnableCap.Multisample);
+            GL.Enable(EnableCap.Blend);
+            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            GL.Ortho(0, 1000, 600, 0, 0, 1);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
             //Init arrays
             normalTex = new int[] { 0, 1, 1, 1, 0, 0, 1, 0 };
             vertTex = new int[] { 0, 0, 1, 0, 0, 1, 1, 1 };
             horizTex = new int[] { 1, 1, 0, 1, 1, 0, 0, 0 };
+        }
+        public void Begin()
+        {
+        }
+        public void End()
+        {
+            if (textures[screen].Count > 0)
+            {
+                GL.DeleteTextures(textures[screen].Count, textures[screen].ToArray());
+                textures[screen].Clear();
+            }
         }
         public int MaxTextureSize
         {
@@ -794,7 +810,7 @@ namespace OpenMobile.Graphics
 
         public void ResetTransform()
         {
-            Raw.LoadIdentity();
+            GL.LoadIdentity();
         }
 
         public void Resize(int Width, int Height)
@@ -803,7 +819,7 @@ namespace OpenMobile.Graphics
             height = Height;
             wscale = (width / 1000F);
             hscale = (height / 600F);
-            Raw.Viewport(0, 0, width, height);
+            GL.Viewport(0, 0, width, height);
         }
 
         public void SetClip(Rectangle Rect)
@@ -817,32 +833,84 @@ namespace OpenMobile.Graphics
                 height = 0;
             if (width < 0)
                 width = 0;
-            Raw.Enable(EnableCap.ScissorTest);
-            Raw.Scissor((int)(x * wscale), (int)((600 - y - height) * hscale), (int)(width * wscale), (int)(height * hscale));
+            GL.Enable(EnableCap.ScissorTest);
+            GL.Scissor((int)(x * wscale), (int)((600 - y - height) * hscale), (int)(width * wscale), (int)(height * hscale));
         }
 
-        public void TranslateTransform(float dx, float dy)
+        public void Translate(double dx, double dy)
         {
-            Raw.Translate(dx, dy, 0);
+            GL.Translate((float)dx, (float)dy, 0);
         }
 
-        public void TranslateTransform(float dx, float dy, float dz)
+        public void Translate(double dx, double dy, double dz)
         {
-            Raw.Translate(dx, dy, dz);
+            GL.Translate((float)dx, (float)dy, (float)dz);
         }
 
-        public void Rotate(float angle, Graphics.Axis axis)
+        public void Rotate(double angle, Graphics.Axis axis)
         {
-            Raw.Rotate(angle, (axis == Graphics.Axis.X ? 1 : 0), (axis == Graphics.Axis.Y ? 1 : 0), (axis == Graphics.Axis.Z ? 1 : 0));
+            GL.Rotate((float)angle, (axis == Graphics.Axis.X ? 1 : 0), (axis == Graphics.Axis.Y ? 1 : 0), (axis == Graphics.Axis.Z ? 1 : 0));
         }
 
-        public void Scale(float sx, float sy, float sz)
+        public void Rotate(double x, double y, double z)
         {
-            Raw.Scale(sx, sy, sz);
+            GL.Rotate((float)x, 1, 0, 0);
+            GL.Rotate((float)y, 0, 1, 0);
+            GL.Rotate((float)z, 0, 0, 1);
         }
-        public void Transform(Matrix4 m)
+
+        public void Scale(double sx, double sy, double sz)
+        {
+            GL.Scale((float)sx, (float)sy, (float)sz);
+        }
+        public void Transform(Matrix4d m)
         {
             //Raw.MultMatrix(ref m);
+        }
+
+        public void _3D_ModelView_Set(Vector3d cameraLocation, Vector3d cameraRotation, Vector3d cameraOffset, double zoom, bool activateMatrix)
+        {
+            // Not implemented
+        }
+
+        public void _3D_ModelView_Push()
+        {
+            GL.PushMatrix();
+        }
+
+        public void _3D_ModelView_Pop()
+        {
+            GL.PopMatrix();
+        }
+
+        /// <summary>
+        /// Sets or gets the modelview matrix
+        /// </summary>
+        public Matrix4d _3D_ModelViewMatrix
+        {
+            get
+            {
+                return this.modelview;
+            }
+            set
+            {
+                this.modelview = value;
+            }
+        }
+
+        /// <summary>
+        /// The matrix for the global modelview
+        /// </summary>
+        private Matrix4d modelview;
+
+        /// <summary>
+        /// Activates the model view
+        /// </summary>
+        public void _3D_ModelView_ResetAndPlaceCamera(Vector3d cameraLocation)
+        {
+            //GL.MatrixMode(MatrixMode.Modelview);
+            //GL.LoadIdentity();
+            //GL.LoadMatrix(ref modelview);
         }
 
     }

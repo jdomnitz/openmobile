@@ -50,7 +50,7 @@ namespace OpenMobile.Graphics.GDI
             return path;
         }
 
-        public static GraphicsPath PAth_CreateTopRoundRectangle(Rectangle rectangle, int radius)
+        public static GraphicsPath Path_CreateTopRoundRectangle(Rectangle rectangle, int radius)
         {
             GraphicsPath path = new GraphicsPath();
             int l = rectangle.Left;

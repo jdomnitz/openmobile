@@ -250,14 +250,14 @@ namespace OpenMobile.Controls
             base.RenderBegin(g, e);
 
             g.SetClip(this.toRegion());
-            g.TranslateTransform(left, top - scrolly);
+            g.Translate(left, top - scrolly);
             lock (Controls)
             {
                 foreach (OMControl c in Controls)
                     if (c.Visible)
                         c.Render(g, e);
             }
-            g.TranslateTransform(-left, -top + scrolly);
+            g.Translate(-left, -top + scrolly);
             if (scrollwidth > 0)
             {
                 if (area.Height > height)

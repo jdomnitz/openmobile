@@ -23,7 +23,10 @@ using Mono.Data.Sqlite;
 using OpenMobile.helperFunctions;
 using System.Resources;
 using System.Reflection;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
+using OpenMobile.Plugin;
 
 namespace OpenMobile.Data
 {
@@ -32,6 +35,17 @@ namespace OpenMobile.Data
     /// </summary>
     public sealed class PluginSettings : IDisposable
     {
+        /// <summary>
+        /// Returns a fully qualified setting name
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string SettingNameBuilder(IBasePlugin plugin, string name)
+        {
+            return String.Format("{0};{1}", (plugin == null ? "" : plugin.pluginName), name);
+        }
+
         /// <summary>
         /// True = Database tables created
         /// </summary>
@@ -76,8 +90,9 @@ namespace OpenMobile.Data
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public string getSetting(string name)
+        public string getSetting(IBasePlugin plugin, string name)
         {
+            name = SettingNameBuilder(plugin, name);
             try
             {
                 if (asyncCon.State == System.Data.ConnectionState.Closed)
@@ -102,8 +117,9 @@ namespace OpenMobile.Data
         /// <param name="name"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public bool setSetting(string name, string value)
+        public bool setSetting(IBasePlugin plugin,  string name, string value)
         {
+            name = SettingNameBuilder(plugin, name);
             using (SqliteCommand cmd = asyncCon.CreateCommand())
             {
                 cmd.CommandText = "UPDATE OR REPLACE PluginSettings SET Value='" + General.escape(value) + "' WHERE Name='" + General.escape(name) + "'";
@@ -123,8 +139,9 @@ namespace OpenMobile.Data
         /// <param name="name"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public bool DeleteSetting(string name)
+        public bool DeleteSetting(IBasePlugin plugin, string name)
         {
+            name = SettingNameBuilder(plugin, name);
             using (SqliteCommand cmd = asyncCon.CreateCommand())
             {
                 cmd.CommandText = "DELETE FROM PluginSettings WHERE Name='" + General.escape(name) + "'";
@@ -139,11 +156,11 @@ namespace OpenMobile.Data
         /// <param name="name"></param>
         /// <param name="screenCount"></param>
         /// <returns></returns>
-        public string[] getAllInstances(string name, int screenCount)
+        public string[] getAllInstances(IBasePlugin plugin, string name, int screenCount)
         {
             string[] ret = new string[screenCount];
             for (int i = 0; i < screenCount; i++)
-                ret[i] = getSetting(name + ".Screen" + (i + 1).ToString());
+                ret[i] = getSetting(plugin, name + ".Screen" + (i + 1).ToString());
             return ret;
         }
         /// <summary>
@@ -152,12 +169,12 @@ namespace OpenMobile.Data
         /// <param name="name"></param>
         /// <param name="values"></param>
         /// <returns></returns>
-        public bool setAllInstances(string name, string[] values)
+        public bool setAllInstances(IBasePlugin plugin, string name, string[] values)
         {
             if (values == null)
                 return false;
             for (int i = 0; i < values.Length; i++)
-                setSetting(name + ".Screen" + (i + 1).ToString(), values[i]);
+                setSetting(plugin, name + ".Screen" + (i + 1).ToString(), values[i]);
             return true;
         }
 
@@ -192,6 +209,214 @@ namespace OpenMobile.Data
                 return new Dictionary<String, String>();
             }
         }
+
+        /// <summary>
+        /// Gets the object with the given name from the DB
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public T GetObject<T>(IBasePlugin plugin, string name)
+        {
+            T value;
+            TryGetObject<T>(plugin, name, out value);
+            return value;
+        }
+
+        /// <summary>
+        /// Tries to get the object with the given name from the DB
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="plugin"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool TryGetObject<T>(IBasePlugin plugin, string name, out T value)
+        {
+            value = default(T);
+
+            name = SettingNameBuilder(plugin, name);
+            try
+            {
+                if (asyncCon.State == System.Data.ConnectionState.Closed)
+                    asyncCon.Open();
+                using (SqliteCommand cmd = asyncCon.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Value FROM Objects WHERE Name='" + name + "'";
+                    object result = cmd.ExecuteScalar();
+                    if (result == null)
+                        return false;
+
+                    // convert byte array to memory stream
+                    using (MemoryStream ms = new MemoryStream((byte[])result))
+                    {
+                        // create new BinaryFormatter
+                        BinaryFormatter _BinaryFormatter = new BinaryFormatter();
+
+                        // set memory stream position to starting point
+                        ms.Position = 0;
+
+                        // Deserializes a stream into an object graph and return as a object.
+                        value = (T)_BinaryFormatter.Deserialize(ms);
+                        return true;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Saves the object with the given name in DB
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool SetObject(IBasePlugin plugin, string name, object value)
+        {
+            name = SettingNameBuilder(plugin, name);
+
+            // Convert object to memorystream
+            using (MemoryStream ms = new MemoryStream())
+            {
+                try
+                {
+                    BinaryFormatter bf = new BinaryFormatter();
+                    bf.Serialize(ms, value);
+                }
+                catch (Exception e)
+                {
+                    BuiltInComponents.Host.DebugMsg("ObjectDataBase: Unable to save object to database", e);
+                    return false;
+                }
+
+                // Save object to database
+                using (SqliteCommand cmd = asyncCon.CreateCommand())
+                {
+                    cmd.Parameters.Add(new SqliteParameter("@name", General.escape(name)));
+                    cmd.Parameters.Add(new SqliteParameter("@data", ms.ToArray()));
+
+                    cmd.CommandText = "UPDATE OR REPLACE Objects SET Value=@data WHERE Name=@name";
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)//Row doesn't exist yet..has to be two queries since Sqlite doesn't support IF statements
+                    {
+                        cmd.CommandText = "INSERT INTO Objects (Name,Value)VALUES(@name,@data)";
+                        rowsAffected = cmd.ExecuteNonQuery();
+                    }
+                    return (rowsAffected > 0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Saves an object to the DB as an xml string
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool SetObjectXML(IBasePlugin plugin, string name, object value)
+        {
+            name = SettingNameBuilder(plugin, name);
+
+            string xml;
+            try
+            {
+                xml = OpenMobile.helperFunctions.XML.Serializer.toXML(value);
+            }
+            catch (Exception e)
+            {
+                BuiltInComponents.Host.DebugMsg("ObjectDataBase: Unable to save object(XML) to database", e);
+                return false;
+            }
+
+            // Save object to database
+            using (SqliteCommand cmd = asyncCon.CreateCommand())
+            {
+                cmd.Parameters.Add(new SqliteParameter("@name", General.escape(name)));
+                cmd.Parameters.Add(new SqliteParameter("@data", System.Text.UTF8Encoding.UTF8.GetBytes(xml)));
+
+                cmd.CommandText = "UPDATE OR REPLACE Objects SET Value=@data WHERE Name=@name";
+                int rowsAffected = cmd.ExecuteNonQuery();
+                if (rowsAffected == 0)//Row doesn't exist yet..has to be two queries since Sqlite doesn't support IF statements
+                {
+                    cmd.CommandText = "INSERT INTO Objects (Name,Value)VALUES(@name,@data)";
+                    rowsAffected = cmd.ExecuteNonQuery();
+                }
+                return (rowsAffected > 0);
+            }
+
+        }
+
+        /// <summary>
+        /// Tries to get the object saved as an xml string with the given name from the DB
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="plugin"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool TryGetObjectXML<T>(IBasePlugin plugin, string name, out T value)
+        {
+            value = default(T);
+
+            name = SettingNameBuilder(plugin, name);
+            try
+            {
+                if (asyncCon.State == System.Data.ConnectionState.Closed)
+                    asyncCon.Open();
+                using (SqliteCommand cmd = asyncCon.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Value FROM Objects WHERE Name='" + name + "'";
+                    object result = cmd.ExecuteScalar();
+                    if (result == null)
+                        return false;
+
+                    string xml = System.Text.UTF8Encoding.UTF8.GetString((byte[])result);
+                    value = (T)OpenMobile.helperFunctions.XML.Serializer.fromXML<T>(xml);
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets the object saved as an xml string with the given name from the DB
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="plugin"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public T GetObjectXML<T>(IBasePlugin plugin, string name)
+        {
+            T value;
+            TryGetObjectXML<T>(plugin, name, out value);
+            return value;
+        }
+
+        /// <summary>
+        /// Deletes the object with the given name from the DB
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool DeleteObject(IBasePlugin plugin, string name)
+        {
+            name = SettingNameBuilder(plugin, name);
+            using (SqliteCommand cmd = asyncCon.CreateCommand())
+            {
+                cmd.CommandText = "DELETE FROM Objects WHERE Name='" + General.escape(name) + "'";
+                int rowsAffected = cmd.ExecuteNonQuery();
+                return (rowsAffected > 0);
+            }
+        }
+
 
 
         #region IDisposable Members

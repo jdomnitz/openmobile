@@ -77,6 +77,13 @@ namespace OpenMobile.Controls
                 // Return the combined area of contained controls
                 for (int i = 1; i < this.Count; i++)
                     TotalRegion.Union(this[i].Region);
+
+                // Check for size override
+                if (!_ItemSize.IsEmpty)
+                    //return new Rectangle(TotalRegion.Center.X - (_ItemSize.Width / 2), TotalRegion.Center.Y - (_ItemSize.Height / 2), _ItemSize.Width, _ItemSize.Height);
+                    return new Rectangle(TotalRegion.Left, TotalRegion.Top, _ItemSize.Width, _ItemSize.Height);
+                
+                // No override                
                 return TotalRegion;
             }
         }
@@ -138,5 +145,19 @@ namespace OpenMobile.Controls
                 newCG.Add((OMControl)control.Clone());
             return newCG;
         }
+
+        protected Size _ItemSize = new Size();
+        public Size ItemSize
+        {
+            get
+            {
+                return _ItemSize;
+            }
+            set
+            {
+                _ItemSize = value;
+            }
+        }
+
     }
 }

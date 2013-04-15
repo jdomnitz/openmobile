@@ -27,6 +27,13 @@ using OpenMobile.Plugin;
 
 namespace OpenMobile
 {
+    /// <summary>
+    /// The delagate that holds the actual code for the command
+    /// </summary>
+    /// <param name="command"></param>
+    /// <param name="param"></param>
+    /// <param name="result"></param>
+    /// <returns></returns>
     public delegate object CommandExecDelegate(Command command, object[] param, out bool result);
 
     /// <summary>
@@ -34,6 +41,37 @@ namespace OpenMobile
     /// </summary>
     public class Command : DataNameBase
     {
+        #region Static methods
+
+        /// <summary>
+        /// The separator char to use when sending multiple commands
+        /// </summary>
+        public const char CommandSeparator = '|';
+
+        /// <summary>
+        /// Extracts the screen number from a string like this "Screen0" returns 0 if it fails
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static int GetScreenNumber(string s)
+        {
+            int screen = 0;
+            int.TryParse(s.Substring(6), out screen);
+            return screen;
+        }
+
+        /// <summary>
+        /// Writes the screen number to a string 
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <returns></returns>
+        public static string GetScreenName(int screen)
+        {
+            return String.Format("Screen{0}", screen);
+        }
+
+        #endregion
+
         /// <summary>
         /// Does this command require parameters to be passed to it
         /// </summary>
@@ -41,17 +79,9 @@ namespace OpenMobile
         {
             get
             {
-                return this._RequiresParameters;
-            }
-            set
-            {
-                if (this._RequiresParameters != value)
-                {
-                    this._RequiresParameters = value;
-                }
+                return _RequiredParamCount > 0;
             }
         }
-        private bool _RequiresParameters;
 
         /// <summary>
         /// Does this command return a value
@@ -84,23 +114,27 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// The execute delegate
+        /// The amount of required parameters
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
-        public CommandExecDelegate ExecDelegate
+        public int RequiredParamCount
         {
             get
             {
-                return this._ExecDelegate;
+                return this._RequiredParamCount;
             }
             set
             {
-                if (this._ExecDelegate != value)
+                if (this._RequiredParamCount != value)
                 {
-                    this._ExecDelegate = value;
+                    this._RequiredParamCount = value;
                 }
             }
         }
+        private int _RequiredParamCount;        
+
+        /// <summary>
+        /// The execute delegate
+        /// </summary>
         private CommandExecDelegate _ExecDelegate;
 
         /// <summary>
@@ -112,7 +146,7 @@ namespace OpenMobile
         public object Execute(object[] param, out bool result)
         {
             // Check if parameters is required
-            if (_RequiresParameters && param == null)
+            if (RequiresParameters && (param == null || param.Length < _RequiredParamCount))
             {   // Missing parameters unable to process command
                 result = false;
                 return null;
@@ -136,6 +170,17 @@ namespace OpenMobile
         }
 
         /// <summary>
+        /// Executes the command
+        /// </summary>
+        /// <returns></returns>
+        public object Execute()
+        {
+            bool result = false;
+            return Execute(null, out result);
+        }
+
+
+        /// <summary>
         /// Creates a new command
         /// </summary>
         /// <param name="provider"></param>
@@ -143,17 +188,24 @@ namespace OpenMobile
         /// <param name="nameLevel2"></param>
         /// <param name="nameLevel3"></param>
         /// <param name="execDelegate"></param>
-        public Command(string provider, string nameLevel1, string nameLevel2, string nameLevel3, CommandExecDelegate execDelegate, bool requiresParameters, bool returnsValue, string description)
+        /// <param name="requiredParamCount"></param>
+        /// <param name="returnsValue"></param>
+        /// <param name="description"></param>
+        public Command(string provider, string nameLevel1, string nameLevel2, string nameLevel3, CommandExecDelegate execDelegate, int requiredParamCount, bool returnsValue, string description)
         {
             this._Provider = provider;
             this._NameLevel1 = nameLevel1;
             this._NameLevel2 = nameLevel2;
             this._NameLevel3 = nameLevel3;
             this._ExecDelegate = execDelegate;
-            this._RequiresParameters = requiresParameters;
+            this._RequiredParamCount = requiredParamCount;
             this._ReturnsValue = returnsValue;
             this._Description = description;
         }
-        
+
+        public override string ToString()
+        {
+            return FullNameWithProvider;
+        }
     }
 }

@@ -541,6 +541,43 @@ namespace OpenMobile.Graphics
                 _GenerateTexture[i] = true;
         }
 
+        public void RenderText(int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC, FitModes fitMode)
+        {
+             // Create new Bitmap object with the size of the picture
+            lock (img)
+            {
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(img))
+                {
+                    Graphics.renderText(g, x, y, w, h, text, font, format, alignment, c, sC, fitMode);
+                }
+            }
+
+            // Regenerate textures
+            for (int i = 0; i < _GenerateTexture.Length; i++)
+                _GenerateTexture[i] = true;
+        }
+
+        public void AddImageOverlay(int x, int y, OImage image)
+        {
+            AddImageOverlay(x, y, image.image.Width, image.image.Height, image);
+        }
+
+        public void AddImageOverlay(int x, int y, int w, int h, OImage image)
+        {
+            // Create new Bitmap object with the size of the picture
+            lock (img)
+            {
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(img))
+                {
+                    g.DrawImage(image.image, x, y, w, h);
+                }
+            }
+
+            // Regenerate textures
+            for (int i = 0; i < _GenerateTexture.Length; i++)
+                _GenerateTexture[i] = true;
+        }
+
         #region Static methods
 
         /// <summary>

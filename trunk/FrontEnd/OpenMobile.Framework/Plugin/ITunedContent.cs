@@ -29,7 +29,7 @@ namespace OpenMobile.Plugin
         /// Tune to the supplied station/channel.
         /// </summary>
         /// <param name="station"></param>
-        /// <param name="instance"></param>
+        /// <param name="zone"></param>
         /// <returns>Return true if successful.</returns>
         bool tuneTo(Zone zone,string station);
         /// <summary>

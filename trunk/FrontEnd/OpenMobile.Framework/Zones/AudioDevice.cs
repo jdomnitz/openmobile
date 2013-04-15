@@ -28,6 +28,7 @@ namespace OpenMobile
     /// <summary>
     /// A audiodevice
     /// </summary>
+    [Serializable]
     public class AudioDevice
     {
         #region Static methods and properties
@@ -112,6 +113,7 @@ namespace OpenMobile
                 }
             }
         }
+        [NonSerialized()]
         private int _Instance = -999;
 
         /// <summary>
@@ -132,6 +134,7 @@ namespace OpenMobile
                 }
             }
         }
+        [NonSerialized()]
         private object _Tag;        
 
         #region Actions

@@ -34,162 +34,51 @@ namespace OpenMobile.Controls
     /// </summary>
     public class OMObjectList : OMContainer, IMousePreview
     {
-        /*
-        public class ListItem
+        #region Preconfigured controls
+
+        public static OMObjectList PreConfigLayout_ImageFlow(string name, int left, int top, int width, int height, Size itemSize, int overlap)
         {
-            public SetItemInfoDelegate Action_SetItemInfo = null;
-            public ItemActionDelegate Action_Select = null;
-            public ItemActionDelegate Action_Deselect = null;
-            public ItemActionDelegate Action_Highlight = null;
-            public ItemActionDelegate Action_Unhighlight = null;
-            public ControlGroup Controls = new ControlGroup();
+            OMObjectList list = new OMObjectList(name, left, top, width, height);
 
-            internal int myIndex = -1;
+            OMObjectList.ListItem ItemBase = new OMObjectList.ListItem();
 
-            internal bool hitTest(Point p)
-            {
-                return OMControl.GetControlsArea(Controls).Contains(p);
-            }
+            ItemBase.ItemSize = new Size(itemSize.Width - overlap, itemSize.Height);
 
-            public void AddControl(OMControl control)
-            {
-                Controls.Add(control);
-            }
-            public void Clear()
-            {
-                Controls.Clear();
-            }
+            OMImage imgImage = new OMImage("imgImage", 0, (height / 2) - (itemSize.Height / 2), itemSize.Width, itemSize.Height);
+            imgImage.Rotation = new Math.Vector3(0, -50, 0);
+            //imgImage.Transparency = 20;
+            ItemBase.Add(imgImage);
 
-            public OMControl this[int index]
+            //OMButton btnImage = new OMButton("btnImage", 0, 0, itemSize.Width, itemSize.Height);
+            //ItemBase.Add(btnImage);
+
+            ItemBase.Action_SetItemInfo = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item, object[] values)
             {
-                get
+                //OMButton btnItemCard = item["btnImage"] as OMButton;
+                //if (helperFunctions.Params.IsParamsValid(values, 1) && values[0] != null)
+                //{
+                //    if (values[0] is imageItem)
+                //        btnItemCard.Image = (imageItem)values[0];
+                //    else if (values[0] is OImage)
+                //        btnItemCard.Image = new imageItem((OImage)values[0]);
+                //}
+
+                OMImage imgItemCover = item["imgImage"] as OMImage;
+                if (helperFunctions.Params.IsParamsValid(values, 1) && values[0] != null)
                 {
-                    return Controls[index];
+                    if (values[0] is imageItem)
+                        imgItemCover.Image = (imageItem)values[0];
+                    else if (values[0] is OImage)
+                        imgItemCover.Image = new imageItem((OImage)values[0]);
                 }
-                set
-                {
-                    Controls[index] = value;
-                }
-            }
-            public OMControl this[string name]
-            {
-                get
-                {
-                    name = String.Format("{0}:", name);
-                    return Controls.Find(x => x.Name.Contains(name));
-                }
-                set
-                {
-                    name = String.Format("{0}:", name);
-                    OMControl c = Controls.Find(x => x.Name.Contains(name));
-                    if (c != null) 
-                        c = value;
-                }
-            }
+            };
 
-            public ListItem()
-            {
-            }
-            public ListItem(ControlGroup controls)
-            {
-                Controls = controls;
-            }
+            list.ItemBase = ItemBase;
 
-            private void SetControlName(int myIndex)
-            {
-                foreach (OMControl control in Controls)
-                    if (!control.Name.Contains(":"))
-                        control.Name = String.Format("{0}:{1}", control.Name, myIndex);
-            }
-
-            internal void ExecuteAction_Select(OMObjectList sender, int screen, int myIndex)
-            {
-                this.myIndex = myIndex;
-                SetControlName(myIndex);
-                if (Action_Select != null)
-                    Action_Select(sender, screen, this);
-            }
-            internal void ExecuteAction_Deselect(OMObjectList sender, int screen, int myIndex)
-            {
-                this.myIndex = myIndex;
-                SetControlName(myIndex);
-                if (Action_Deselect != null)
-                    Action_Deselect(sender, screen, this);
-            }
-            internal void ExecuteAction_Highlight(OMObjectList sender, int screen, int myIndex)
-            {
-                this.myIndex = myIndex;
-                SetControlName(myIndex);
-                
-                // Use highlight if present if not use select
-                if (Action_Highlight != null)
-                    Action_Highlight(sender, screen, this);
-                else
-                    Action_Select(sender, screen, this);
-            }
-            internal void ExecuteAction_Unhighlight(OMObjectList sender, int screen, int myIndex)
-            {
-                this.myIndex = myIndex;
-                SetControlName(myIndex);
-
-                // Use highlight if present if not use select
-                if (Action_Unhighlight != null)
-                    Action_Unhighlight(sender, screen, this);
-                else
-                    Action_Deselect(sender, screen, this);
-            }
-
-            internal void ExecuteAction_SetValues(OMObjectList sender, int screen, int myIndex, object[] values)
-            {
-                this.myIndex = myIndex;
-                SetControlName(myIndex);
-                if (Action_SetItemInfo != null)
-                    Action_SetItemInfo(sender, screen, this, values);
-            }
-
-            /// <summary>
-            /// Clones the object
-            /// </summary>
-            /// <returns></returns>
-            public ListItem Clone()
-            {                
-                ListItem newListItem = (ListItem)this.MemberwiseClone();
-                newListItem.Controls = new ControlGroup();
-                foreach (OMControl control in Controls)
-                    newListItem.AddControl((OMControl)control.Clone());
-                return newListItem;
-            }
-
-            private Size _ItemSize = new Size();
-            public Size ItemSize
-            {
-                get
-                {
-                    return _ItemSize;
-                }
-                set
-                {
-                    _ItemSize = value;
-                }
-            }
-
-            public Rectangle Region
-            {
-                get
-                {
-                    Rectangle area = OMControl.GetControlsArea(Controls);
-
-                    // Check for size override
-                    if (!_ItemSize.IsEmpty)
-                    {
-                        area.Width = _ItemSize.Width;
-                        area.Height = _ItemSize.Height;
-                    }
-                    return area;
-                }
-            }
+            return list;
         }
-        */
+
+        #endregion
 
         public class ListItem : ControlGroup
         {
@@ -256,7 +145,8 @@ namespace OpenMobile.Controls
                 if (Action_Highlight != null)
                     Action_Highlight(sender, screen, this);
                 else
-                    Action_Select(sender, screen, this);
+                    if (Action_Select != null)
+                        Action_Select(sender, screen, this);
             }
             internal void ExecuteAction_Unhighlight(OMObjectList sender, int screen, int myIndex)
             {
@@ -267,7 +157,8 @@ namespace OpenMobile.Controls
                 if (Action_Unhighlight != null)
                     Action_Unhighlight(sender, screen, this);
                 else
-                    Action_Deselect(sender, screen, this);
+                    if (Action_Deselect != null)
+                        Action_Deselect(sender, screen, this);
             }
 
             internal void ExecuteAction_SetValues(OMObjectList sender, int screen, int myIndex, object[] values)
@@ -285,6 +176,7 @@ namespace OpenMobile.Controls
             public ListItem Clone()
             {
                 ListItem newListItem = new ListItem();
+                newListItem._ItemSize = this._ItemSize;
                 newListItem.Action_SetItemInfo = Action_SetItemInfo;
                 newListItem.Action_Select = Action_Select;
                 newListItem.Action_Deselect = Action_Deselect;
@@ -293,19 +185,6 @@ namespace OpenMobile.Controls
                 for (int i = 0; i < this.Count; i++)
                     newListItem.Add((OMControl)this[i].Clone());
                 return newListItem;
-            }
-
-            private Size _ItemSize = new Size();
-            public Size ItemSize
-            {
-                get
-                {
-                    return _ItemSize;
-                }
-                set
-                {
-                    _ItemSize = value;
-                }
             }
 
             public Rectangle Region
@@ -494,6 +373,11 @@ namespace OpenMobile.Controls
         //    }
         //}
 
+        public void AddItemFromItemBase(ControlDirections direction, params object[] values)
+        {
+            AddItemFromItemBase(values, direction);
+        }
+
         public void AddItemFromItemBase(object[] values, ControlDirections direction)
         {
             if (this.parent == null)
@@ -520,6 +404,10 @@ namespace OpenMobile.Controls
             }
         }
 
+        public void AddItem(ListItem baseItem, ControlDirections direction, params object[] values)
+        {
+            AddItem(baseItem, values, direction);
+        }
         public void AddItem(ListItem baseItem, object[] values, ControlDirections direction)
         {
             if (this.parent == null)

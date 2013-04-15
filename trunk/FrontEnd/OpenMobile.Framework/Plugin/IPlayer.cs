@@ -26,18 +26,6 @@ namespace OpenMobile.Plugin
     public interface IPlayer : IBasePlugin
     {
         /// <summary>
-        /// Set the volume (range 0-100)
-        /// </summary>
-        /// <param name="percent"></param>
-        /// <param name="instance"></param>
-        /// <returns></returns>
-        bool setVolume(Zone zone, int percent);
-        /// <summary>
-        /// Get the players volume
-        /// </summary>
-        /// <returns></returns>
-        int getVolume(Zone zone);
-        /// <summary>
         /// Gets information on the currently playing media.
         /// </summary>
         /// <returns>Returns null if information is not available.</returns>
@@ -47,17 +35,9 @@ namespace OpenMobile.Plugin
         /// </summary>
         event MediaEvent OnMediaEvent;
         /// <summary>
-        /// Returns a list of possible output devices (NOTE: the index corresponds to instance ID's)
-        /// </summary>
-        AudioDevice[] OutputDevices { get; }
-        /// <summary>
-        /// If this plugin supports Advanced Interfaces (aka IEnhancedAVPlayer or IBufferedTunedContent)
-        /// </summary>
-        bool SupportsAdvancedFeatures { get; }
-        /// <summary>
         /// Toggles the visibility of the video window
         /// </summary>
-        /// <param name="instance"></param>
+        /// <param name="zone"></param>
         /// <param name="visible"></param>
         /// <returns></returns>
         bool SetVideoVisible(Zone zone,bool visible);

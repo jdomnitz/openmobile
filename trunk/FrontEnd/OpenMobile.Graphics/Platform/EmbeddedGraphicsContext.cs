@@ -35,7 +35,7 @@ namespace OpenMobile.Platform
     {
         public override void LoadAll()
         {
-            new OpenMobile.Graphics.ES11.Raw().LoadEntryPoints();
+            new OpenMobile.Graphics.ES11.GL().LoadEntryPoints();
         }
     }
 }

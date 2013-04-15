@@ -36,6 +36,11 @@ namespace OpenMobile.UI
     {
         #region DropDown menu show / hide
 
+        /// <summary>
+        /// Delegate to show / hide ui elements
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="fast"></param>
         public delegate void ShowHideControlDelegate(int screen, bool fast);
 
         /// <summary>
@@ -85,23 +90,63 @@ namespace OpenMobile.UI
         #region Top and bottom bars show / hide
 
         /// <summary>
+        /// UI Bars
+        /// </summary>
+        [Flags]
+        public enum Bars 
+        {
+            /// <summary>
+            /// None
+            /// </summary>
+            None = 0,
+            /// <summary>
+            /// Top bar
+            /// </summary>
+            Top = 1, 
+            /// <summary>
+            /// Bottom bar
+            /// </summary>
+            Bottom = 2, 
+            /// <summary>
+            /// Left bar
+            /// </summary>
+            Left = 4, 
+            /// <summary>
+            /// Right bar
+            /// </summary>
+            Right = 8,
+            /// <summary>
+            /// All bars
+            /// </summary>
+            All = Bars.Bottom | Bars.Left | Bars.Right | Bars.Top
+        }
+
+        /// <summary>
+        /// Delegate to show / hide UI bars
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="fast"></param>
+        /// <param name="executeOnBars"></param>
+        public delegate void ShowHideBarsControlDelegate(int screen, bool fast, Bars executeOnBars);
+
+        /// <summary>
         /// Event is raised when the top and bottom bars is requested to hide
         /// </summary>
-        public event ShowHideControlDelegate OnHideBars;
-        private void Raise_OnHideBars(int screen, bool fast)
+        public event ShowHideBarsControlDelegate OnHideBars;
+        private void Raise_OnHideBars(int screen, bool fast, Bars executeOnBars)
         {
             if (OnHideBars != null)
-                OnHideBars(screen, fast);
+                OnHideBars(screen, fast, executeOnBars);
         }
 
         /// <summary>
         /// Event is raised when the top and bottom bars is requested to show
         /// </summary>
-        public event ShowHideControlDelegate OnShowBars;
-        private void Raise_OnShowBars(int screen, bool fast)
+        public event ShowHideBarsControlDelegate OnShowBars;
+        private void Raise_OnShowBars(int screen, bool fast, Bars executeOnBars)
         {
             if (OnShowBars != null)
-                OnShowBars(screen, fast);
+                OnShowBars(screen, fast, executeOnBars);
         }
 
         /// <summary>
@@ -109,10 +154,11 @@ namespace OpenMobile.UI
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="fast"></param>
-        public void Bars_Show(int screen, bool fast)
+        /// <param name="executeOnBars"></param>
+        public void Bars_Show(int screen, bool fast, Bars executeOnBars)
         {
             // Call event
-            Raise_OnShowBars(screen, fast);
+            Raise_OnShowBars(screen, fast, executeOnBars);
         }
 
         /// <summary>
@@ -120,10 +166,11 @@ namespace OpenMobile.UI
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="fast"></param>
-        public void Bars_Hide(int screen, bool fast)
+        /// <param name="executeOnBars"></param>
+        public void Bars_Hide(int screen, bool fast, Bars executeOnBars)
         {
             // Call event
-            Raise_OnHideBars(screen, fast);
+            Raise_OnHideBars(screen, fast, executeOnBars);
             Raise_OnHideDropDown(screen, true);
         }
 
@@ -459,27 +506,33 @@ namespace OpenMobile.UI
 
         #region host events
 
-        void Host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        void Host_OnSystemEvent(eFunction function, object[] args)
         {
             if (function == eFunction.TransitionFromPanel)
             {   // Clear popup menu when the panel that loaded it is unloaded
                 int screen = 0;
-                if (int.TryParse(arg1, out screen))
+                if (args != null && args.Length >= 3)
                 {
-                    ButtonStrip strip = _PopUpMenu_ButtonStripContainer.GetButtonStrip(screen);
-                    if (strip != null)
+                    if (int.TryParse(args[0] as string, out screen))
                     {
-                        if (arg2 == strip.PluginName && arg3 == strip.PanelName)
-                            BuiltInComponents.Host.UIHandler.PopUpMenu.ClearButtonStrip(screen);
+                        ButtonStrip strip = _PopUpMenu_ButtonStripContainer.GetButtonStrip(screen);
+                        if (strip != null)
+                        {
+                            if (args[1] as string == strip.PluginName && args[2] as string == strip.PanelName)
+                                BuiltInComponents.Host.UIHandler.PopUpMenu.ClearButtonStrip(screen);
+                        }
                     }
                 }
             }
             else if (function == eFunction.TransitionFromAny)
             {   // Clear popup menu when going home
                 int screen = 0;
-                if (int.TryParse(arg1, out screen))
+                if (args != null && args.Length >= 1)
                 {
-                    BuiltInComponents.Host.UIHandler.PopUpMenu.ClearButtonStrip(screen);
+                    if (int.TryParse(args[0] as string, out screen))
+                    {
+                        BuiltInComponents.Host.UIHandler.PopUpMenu.ClearButtonStrip(screen);
+                    }
                 }
             }
         }
@@ -593,7 +646,20 @@ namespace OpenMobile.UI
             OMButton Button_ListItem = new OMButton("Button_ListItem", 0, 0, 1000, 64);
             Button_ListItem.Name += notification.FullID;
             Button_ListItem.BackgroundColor = Color.Transparent;
-            Button_ListItem.FocusImage = new imageItem(Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor), Button_ListItem.Region.Width, Button_ListItem.Region.Height);
+            //Button_ListItem.FocusImage = new imageItem(Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor), Button_ListItem.Region.Width, Button_ListItem.Region.Height);
+
+            // List item background
+            OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData gd = new OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData();
+            gd.BackgroundColor1 = Color.Transparent;
+            gd.BorderColor = Color.Transparent;
+            gd.Width = Button_ListItem.Width;
+            gd.Height = Button_ListItem.Height;
+            gd.CornerRadius = 0;
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused;
+            Button_ListItem.DownImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundClicked;
+            Button_ListItem.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+
             Button_ListItem.OnClick += new userInteraction(Notification_Button_OnClick);
             Button_ListItem.Tag = notification;
             ItemBase.Add(Button_ListItem);
@@ -662,8 +728,8 @@ namespace OpenMobile.UI
             ItemBase.Add(Label_ListItem_Description);
 
             // Set placement of header text if there is no description text available
-            if (String.IsNullOrEmpty(Label_ListItem_Description.Text))
-                Label_ListItem_Header.Top += 15;
+            //if (String.IsNullOrEmpty(Label_ListItem_Description.Text))
+            //    Label_ListItem_Header.Top += 15;
 
             return ItemBase;
         }
@@ -748,6 +814,9 @@ namespace OpenMobile.UI
             OMContainer ScreenSpecific_IconContainer = null;
             if (_IconContainer.Parent != null)
                 ScreenSpecific_IconContainer = (OMContainer)_IconContainer.GetControlAtScreen(screen);
+
+            if (ScreenSpecific_IconContainer == null || ScreenSpecific_NotificationList == null)
+                return "";
 
             lock (ScreenSpecific_NotificationList)
             {
@@ -1041,38 +1110,45 @@ namespace OpenMobile.UI
         /// <returns></returns>
         private bool RemoveNotification_Internal(int screen, Notification notification, bool RemoveAllStates)
         {
-            // Execute notification delegates (action delegates are always executed regardless of state)
-            bool cancel = false;
-            notification.RaiseClearAction(screen, ref cancel);
-            if (cancel)
-                return false;
-
-            // Don't remove an active notification
-            if (!RemoveAllStates)
-                if (notification.State != Notification.States.Passive)
+            try
+            {
+                // Execute notification delegates (action delegates are always executed regardless of state)
+                bool cancel = false;
+                notification.RaiseClearAction(screen, ref cancel);
+                if (cancel)
                     return false;
 
-            bool result = _Notifications[screen].Remove(notification);
+                // Don't remove an active notification
+                if (!RemoveAllStates)
+                    if (notification.State != Notification.States.Passive)
+                        return false;
 
-            // Get screen specific container (to support multiscreens)
-            OMContainer ScreenSpecific_IconContainer = null;
-            if (_IconContainer.Parent != null)
-                ScreenSpecific_IconContainer = (OMContainer)_IconContainer.GetControlAtScreen(screen);
-            OMContainer ScreenSpecific_NotificationList = null;
-            if (_NotificationList.Parent != null)
-                ScreenSpecific_NotificationList = (OMContainer)_NotificationList.GetControlAtScreen(screen);
+                bool result = _Notifications[screen].Remove(notification);
 
-            ScreenSpecific_IconContainer.RemoveControl(String.Format("{0}{1}{2}", _IconContainerItemName, notification.OwnerPlugin.pluginName, notification.ID.ToString()));
-            ScreenSpecific_NotificationList.RemoveControlByKey(notification.FullID);
-            notification.Dispose();
+                // Get screen specific container (to support multiscreens)
+                OMContainer ScreenSpecific_IconContainer = null;
+                if (_IconContainer.Parent != null)
+                    ScreenSpecific_IconContainer = (OMContainer)_IconContainer.GetControlAtScreen(screen);
+                OMContainer ScreenSpecific_NotificationList = null;
+                if (_NotificationList.Parent != null)
+                    ScreenSpecific_NotificationList = (OMContainer)_NotificationList.GetControlAtScreen(screen);
 
-            // Show / Hide statusbar notification icons
-            IconContainer_UpdateNotificationIcons(screen);
+                ScreenSpecific_IconContainer.RemoveControl(String.Format("{0}{1}{2}", _IconContainerItemName, notification.OwnerPlugin.pluginName, notification.ID.ToString()));
+                ScreenSpecific_NotificationList.RemoveControlByKey(notification.FullID);
+                notification.Dispose();
 
-            // Execute notification delegate
-            //notification.RaiseClearAction(screen);
+                // Show / Hide statusbar notification icons
+                IconContainer_UpdateNotificationIcons(screen);
 
-            return result;
+                // Execute notification delegate
+                //notification.RaiseClearAction(screen);
+
+                return result;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -1207,7 +1283,6 @@ namespace OpenMobile.UI
         /// Hide the infobanner 
         /// </summary>
         /// <param name="screen"></param>
-        /// <param name="bannerData"></param>
         public void InfoBanner_Hide(int screen)
         {
             // Call event

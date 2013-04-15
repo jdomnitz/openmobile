@@ -183,6 +183,13 @@ namespace OpenMobile.Net
         /// <returns></returns>
         public static connectionStatus checkForInternet()
         {
+            // Don't do this if running inside the IDE
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                available = 2;
+                return connectionStatus.InternetAccess;
+            }
+
             System.Net.WebRequest request = System.Net.HttpWebRequest.Create("http://www.google.com/");
             request.Timeout = 5000; //Timeout after 5 seconds
             request.Method = "HEAD";
