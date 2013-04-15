@@ -29,6 +29,58 @@ using System.Xml.Serialization;
 using System.IO;
 using OpenMobile.Framework;
 
+namespace OpenMobile.Graphics
+{
+    /// <summary>
+    /// enum indicating corners
+    /// </summary>
+    [Flags]
+    public enum GraphicCorners
+    {
+        /// <summary>
+        /// No corners
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Upper left corner
+        /// </summary>
+        TopLeft = 1,
+        /// <summary>
+        /// Upper right corner
+        /// </summary>
+        TopRight = 2,
+        /// <summary>
+        /// Lower right corner
+        /// </summary>        
+        BottomRight = 4,
+        /// <summary>
+        /// Lower left corner
+        /// </summary>
+        BottomLeft = 8,
+        /// <summary>
+        /// All corners
+        /// </summary>
+        All = 15,
+        /// <summary>
+        /// Top side
+        /// </summary>
+        Top = 3,
+        /// <summary>
+        /// Right side
+        /// </summary>
+        Right = 6,
+        /// <summary>
+        /// Bottom side
+        /// </summary>
+        Bottom = 12,
+        /// <summary>
+        /// Left side
+        /// </summary>
+        Left = 9
+    }
+
+}
+
 namespace OpenMobile.helperFunctions.Graphics
 {
 
@@ -104,12 +156,22 @@ namespace OpenMobile.helperFunctions.Graphics
                 this.BackgroundFocusColor = BuiltInComponents.SystemSettings.SkinFocusColor;
                 this.ForegroundFocusColor = this.BackgroundFocusColor;
                 this.TextColor = BuiltInComponents.SystemSettings.SkinTextColor;
+
+                this.CornersRadiusAppliesTo = GraphicCorners.All;
             }
 
+            /// <summary>
+            /// The general opacity to use for this graphic
+            /// </summary>
+            public int? Opacity { get; set; }
             /// <summary>
             /// Radius to use for corners
             /// </summary>
             public int? CornerRadius { get; set; }
+            /// <summary>
+            /// The corners the radius is applied to
+            /// </summary>
+            public GraphicCorners CornersRadiusAppliesTo { get; set; }
             /// <summary>
             /// Button type to generate
             /// </summary>
@@ -145,7 +207,11 @@ namespace OpenMobile.helperFunctions.Graphics
             /// <summary>
             /// Color to use when drawing the background color
             /// </summary>
-            public Color BackgroundColor { get; set; }
+            public Color BackgroundColor1 { get; set; }
+            /// <summary>
+            /// Color to use when drawing the background color
+            /// </summary>
+            public Color BackgroundColor2 { get; set; }
             /// <summary>
             /// Color to use when drawing the focus color on the foreground
             /// </summary>

@@ -26,13 +26,14 @@ using System.Xml;
 using OpenMobile.Data;
 using OpenMobile.Net;
 using OpenMobile.Plugin;
+using OpenMobile.Graphics;
 
 namespace OpenMobile.Media
 {
     /// <summary>
     /// Playlist types
     /// </summary>
-    public enum ePlaylistType_old
+    public enum ePlaylistType
     {
         /// <summary>
         /// M3U Playlist (aka MP3 URL)
@@ -59,11 +60,457 @@ namespace OpenMobile.Media
         /// </summary>
         PCAST
     }
+
     /// <summary>
-    /// Provides functions for reading and writing playlists
+    /// A media playlist 
     /// </summary>
-    public static class Playlist_old
+    public class PlayList
     {
+        private const int _BufferSize = 20;
+
+        #region Properties
+
+        private bool _Random = false;
+        /// <summary>
+        /// Use random playback
+        /// </summary>
+        public bool Random
+        {
+            get
+            {
+                return _Random;
+            }
+            set
+            {
+                if (value == _Random)
+                    return;
+
+                _Random = value;
+
+                // Regenerate queue
+                GenerateQueue(true);
+            }
+        }
+
+        private List<mediaInfo> _Items = new List<mediaInfo>();
+        /// <summary>
+        /// PlayList media items
+        /// </summary>
+        public List<mediaInfo> Items
+        {
+            get
+            {
+                return _Items;
+            }
+            set
+            {
+                _Items = value;
+            }
+        }
+
+        private LinkedList<int> _HistoryItems = new LinkedList<int>();
+        /// <summary>
+        /// PlayList history items
+        /// </summary>
+        public mediaInfo[] HistoryItems
+        {
+            get
+            {
+                List<mediaInfo> LocalItems = new List<mediaInfo>();
+                foreach (int index in _HistoryItems)
+                    LocalItems.Add(_Items[index]);
+                return LocalItems.ToArray();
+            }
+        }
+
+        private LinkedList<int> _QueuedItems = new LinkedList<int>();
+        /// <summary>
+        /// PlayList history items
+        /// </summary>
+        public mediaInfo[] QueuedItems
+        {
+            get
+            {
+                List<mediaInfo> LocalItems = new List<mediaInfo>();
+                foreach (int index in _QueuedItems)
+                    LocalItems.Add(_Items[index]);
+                return LocalItems.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// An array with all buffered items (history -> CurrentItem -> Queued)
+        /// <para>CurrentItem index is read from property BufferListIndex</para>
+        /// </summary>
+        public mediaInfo[] BufferList
+        {
+            get
+            {
+                List<mediaInfo> LocalItems = new List<mediaInfo>();
+
+                // Add history items
+                foreach (int index in _HistoryItems)
+                    LocalItems.Add(_Items[index]);
+
+                // Add current item
+                LocalItems.Add(CurrentItem);
+
+                // Set location of current item
+                _BufferListIndex = LocalItems.Count - 1;
+
+                // Add queued items
+                foreach (int index in _QueuedItems)
+                    LocalItems.Add(_Items[index]);
+
+                return LocalItems.ToArray();
+            }
+        }
+        
+        /// <summary>
+        /// The index where the currentitem is located in the BufferList array
+        /// <para>This property indicates the transition from historyitems to queued items</para>
+        /// </summary>
+        public int BufferListIndex
+        {
+            get
+            {
+                return _BufferListIndex;
+            }
+        }
+        private int _BufferListIndex = 0;
+
+        private string _Name = "";
+        /// <summary>
+        /// PlayList name
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                return _Name;
+            }
+            set
+            {
+                _Name = value;
+            }
+        }
+
+        #endregion
+
+        #region Current item
+
+        private int _CurrentIndex = 0;
+        /// <summary>
+        /// Gets or sets the currently active index in the list
+        /// </summary>
+        public int CurrentIndex
+        {
+            get
+            {
+                return _CurrentIndex;
+            }
+            set
+            {
+                if (value == _CurrentIndex)
+                    return;
+
+                // Save old item to history
+                SaveToHistory(_CurrentIndex);
+
+                // Activate new item
+                _CurrentIndex = value;
+
+                // Remove items from the queue to match the selected item (if present in queue)
+                if (_QueuedItems.Contains(_CurrentIndex))
+                {
+                    while (_QueuedItems.Count > 0)
+                    {
+                        int i = _QueuedItems.First.Value;
+                        _QueuedItems.RemoveFirst();
+
+                        // Cancel when current index is found
+                        if (i == _CurrentIndex)
+                            break;
+                    }
+                }
+
+                GenerateQueue(false);
+            }
+        }
+        /// <summary>
+        /// Gets or sets the currently active mediaInfo item (must be an item already loaded into the playlist)
+        /// </summary>
+        public mediaInfo CurrentItem
+        {
+            get
+            {
+                if (_CurrentIndex > (_Items.Count - 1))
+                    return null;
+                return _Items[_CurrentIndex];
+            }
+            set
+            {
+                if (value == _Items[_CurrentIndex])
+                    return;
+
+                if (!_Items.Contains(value))
+                    return;
+                
+                CurrentIndex = _Items.FindIndex(x => x == value);
+            }
+        }
+
+        #endregion
+
+        #region Next item
+
+        private int _NextIndex = 0;
+        /// <summary>
+        /// Next index to be activated in the list
+        /// </summary>
+        public int NextIndex
+        {
+            get
+            {
+                return _NextIndex;
+            }
+            set
+            {
+                _NextIndex = value;
+            }
+        }
+        /// <summary>
+        /// Gets the next mediaInfo item to be activated
+        /// </summary>
+        public mediaInfo NextItem
+        {
+            get
+            {
+                if (_NextIndex > (_Items.Count - 1))
+                    return null;
+                return _Items[_NextIndex];
+            }
+        }
+
+        #endregion
+
+        #region Add items
+
+        /// <summary>
+        /// Adds a new media item to the playlist
+        /// </summary>
+        /// <param name="item"></param>
+        public void Add(mediaInfo item)
+        {
+            _Items.Add(item);
+            GenerateQueue(false);
+        }
+        /// <summary>
+        /// Adds a new media item to the playlist from a given location
+        /// </summary>
+        /// <param name="item"></param>
+        public void Add(string location)
+        {
+            _Items.Add(new mediaInfo(location));
+            GenerateQueue(false);
+        }
+        /// <summary>
+        /// Adds a new media item to the playlist if it's not already in the list
+        /// </summary>
+        /// <param name="item"></param>
+        public void AddDistinct(mediaInfo item)
+        {
+            // Only add item if not already present in items
+            if (_Items.Find(x => x.Location == item.Location) == null)
+            {
+                _Items.Add(item);
+                GenerateQueue(false);
+            }
+        }
+
+        #endregion
+
+        #region Clear items
+
+        public void Clear()
+        {
+            _QueuedItems.Clear();
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Create a new playlist
+        /// </summary>
+        public PlayList()
+        {
+        }
+        /// <summary>
+        /// Create a new playlist
+        /// </summary>
+        /// <param name="Name"></param>
+        public PlayList(string name)
+            : this()
+        {
+            this.Name = name;
+        }
+
+        #endregion
+
+        #region Queue control 
+
+        /// <summary>
+        /// Save an index to the history
+        /// </summary>
+        /// <param name="Index"></param>
+        private void SaveToHistory(int Index)
+        {
+            // Save old item to history
+            _HistoryItems.AddLast(_CurrentIndex);
+
+            // Limit size of history 
+            if (_HistoryItems.Count > _BufferSize)
+                _HistoryItems.RemoveFirst();
+        }
+
+        /// <summary>
+        /// Get and remove an item from the history
+        /// </summary>
+        /// <returns></returns>
+        private int GetFromHistory()
+        {
+            if (_HistoryItems.Count == 0)
+                return -1;
+
+            int Index = _HistoryItems.Last.Value;
+            _HistoryItems.RemoveLast();
+
+            return Index;
+        }
+
+        /// <summary>
+        /// Changes active item to next media 
+        /// </summary>
+        public bool GotoNextMedia()
+        {
+            lock (this)
+            {
+                // Save old item to history
+                SaveToHistory(_CurrentIndex);
+
+                // Just move next index to current index
+                _CurrentIndex = _QueuedItems.First.Value;
+
+                // Remove item from queue
+                _QueuedItems.RemoveFirst();
+
+                // Update next items
+                GenerateQueue(false);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Changes active item to previous media 
+        /// </summary>
+        public bool GotoPreviousMedia()
+        {
+            lock (this)
+            {
+                // Move back trough history
+                int HistoryItem = GetFromHistory();
+                if (HistoryItem < 0)
+                    return false;
+
+                // Push current item back into active queue
+                _QueuedItems.AddFirst(_CurrentIndex);
+
+                // Set history item as active
+                _CurrentIndex = HistoryItem;
+            }
+            return true;
+        }
+
+        private void GenerateQueue(bool ClearQueue)
+        {
+            lock (this)
+            {
+                if (_Items.Count == 0)
+                    return;
+
+                if (ClearQueue)
+                    _QueuedItems.Clear();
+
+                // Fill buffer with items (calculates remaining space)
+                int ItemsToAdd = _BufferSize - _QueuedItems.Count;
+
+                // Is free space higher than available items, if so limit it
+                if (ItemsToAdd >= _Items.Count) ItemsToAdd = _Items.Count;
+
+                // Check if we already have added everything we can
+                if ((_Items.Count - _QueuedItems.Count) > 0)
+                    ItemsToAdd = _Items.Count - _QueuedItems.Count;
+
+                int newIndex = -1;
+                for (int i = 0; i < ItemsToAdd; i++)
+                {
+                    if (Random)
+                    {   // Random playback
+                        do
+                            newIndex = OpenMobile.Framework.Math.Calculation.RandomNumber(0, _Items.Count - 1);
+                        while (_QueuedItems.Contains(newIndex) || newIndex == _CurrentIndex);
+                    }
+                    else
+                    {   // Sequencial playback
+
+                        if (_QueuedItems.Count > 0)
+                            // Use the next available index after the last item in the queue as the index to add to queue
+                            newIndex = _QueuedItems.Last.Value + 1;
+                        else
+                            newIndex = _CurrentIndex + 1;
+
+                        // Ensure we don't go outside the limits, if so wrap index to start of items
+                        if (newIndex >= _Items.Count)
+                            newIndex = 0;
+                    }
+
+                    // Add items to queue
+                    _QueuedItems.AddLast(newIndex);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Playlist handling
+
+        /// <summary>
+        /// Saves this playlist to the DB
+        /// </summary>
+        /// <returns></returns>
+        public bool Save()
+        {
+            return writePlaylistToDB(_Name, _Items);
+        }
+
+        /// <summary>
+        /// Loads this playlist from the FB
+        /// </summary>
+        /// <returns></returns>
+        public bool Load()
+        {
+            _Items = readPlaylistFromDB(_Name);
+            GenerateQueue(true);
+            return true;
+        }
+
+        #endregion
+
+        
+        #region Static methods
+
         /// <summary>
         /// Writes a playlist to a file
         /// </summary>
@@ -75,6 +522,7 @@ namespace OpenMobile.Media
         {
             return writePlaylist(location, type, Convert(playlist));
         }
+
         /// <summary>
         /// Writes a playlist to a file
         /// </summary>
@@ -98,6 +546,7 @@ namespace OpenMobile.Media
             }
             return false;
         }
+
         private static bool writeWPL(string location, List<mediaInfo> playlist)
         {
 
@@ -139,6 +588,7 @@ namespace OpenMobile.Media
             }
             catch (Exception) { return false; }
         }
+
         private static bool writeXSPF(string location, List<mediaInfo> playlist)
         {
             if (!location.ToLower().EndsWith(".xspf"))
@@ -170,6 +620,7 @@ namespace OpenMobile.Media
             }
             catch (Exception) { return false; }
         }
+
         private static bool writeM3U(string location, List<mediaInfo> playlist)
         {
             if (!location.ToLower().EndsWith(".m3u"))
@@ -194,6 +645,7 @@ namespace OpenMobile.Media
             }
             catch (Exception) { return false; }
         }
+
         private static bool writePLS(string location, List<mediaInfo> p)
         {
             if (!location.ToLower().EndsWith(".pls"))
@@ -224,19 +676,16 @@ namespace OpenMobile.Media
         /// <summary>
         /// Writes a playlist to the database
         /// </summary>
-        /// <param name="theHost"></param>
         /// <param name="name"></param>
         /// <param name="playlist"></param>
         /// <returns></returns>
-        public static bool writePlaylistToDB(IPluginHost theHost, string name, List<mediaInfo> playlist)
+        public static bool writePlaylistToDB(string name, List<mediaInfo> playlist)
         {
-            if (theHost == null)
-                return false;
             if (playlist.Count == 0)
                 return false;
             object o;
             using (PluginSettings s = new PluginSettings())
-                theHost.getData(eGetData.GetMediaDatabase, s.getSetting("Default.MusicDatabase"), out o);
+                BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"), out o);
             if (o == null)
                 return false;
             IMediaDatabase db = (IMediaDatabase)o;
@@ -246,16 +695,13 @@ namespace OpenMobile.Media
         /// <summary>
         /// Writes a playlist to the database
         /// </summary>
-        /// <param name="theHost"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static bool deletePlaylistFromDB(IPluginHost theHost, string name)
+        public static bool deletePlaylistFromDB(string name)
         {
-            if (theHost == null)
-                return false;
             object o;
             using (PluginSettings s = new PluginSettings())
-                theHost.getData(eGetData.GetMediaDatabase, s.getSetting("Default.MusicDatabase"), out o);
+                BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"), out o);
             if (o == null)
                 return false;
             IMediaDatabase db = (IMediaDatabase)o;
@@ -285,29 +731,25 @@ namespace OpenMobile.Media
         /// <summary>
         /// Lists playlists available in the media database
         /// </summary>
-        /// <param name="theHost"></param>
         /// <returns></returns>
-        public static List<string> listPlaylistsFromDB(IPluginHost theHost)
+        public static List<string> listPlaylistsFromDB()
         {
             string dbName = String.Empty;
             using (PluginSettings s = new PluginSettings())
-                dbName = s.getSetting("Default.MusicDatabase");
-            return listPlaylistsFromDB(theHost, dbName);
+                dbName = s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase");
+            return listPlaylistsFromDB(dbName);
         }
         /// <summary>
         /// Lists playlists available in the given media database
         /// </summary>
-        /// <param name="theHost"></param>
         /// <param name="dbName"></param>
         /// <returns></returns>
-        public static List<string> listPlaylistsFromDB(IPluginHost theHost, string dbName)
+        public static List<string> listPlaylistsFromDB(string dbName)
         {
-            if (theHost == null)
-                return new List<string>();
             object o = null;
             for (int i = 0; ((i < 35) && (o == null)); i++)
             {
-                theHost.getData(eGetData.GetMediaDatabase, dbName, out o);
+                BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, dbName, out o);
                 if (i > 0)
                     Thread.Sleep(200);
             }
@@ -321,30 +763,28 @@ namespace OpenMobile.Media
         /// <summary>
         /// Reads a playlist from the database
         /// </summary>
-        /// <param name="theHost"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name)
+        public static List<mediaInfo> readPlaylistFromDB(string name)
         {
             string dbName = String.Empty;
             using (PluginSettings s = new PluginSettings())
-                dbName = s.getSetting("Default.MusicDatabase");
-            return readPlaylistFromDB(theHost, name, dbName);
+                dbName = s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase");
+            return readPlaylistFromDB(name, dbName);
         }
         /// <summary>
         /// Reads the given playlist from the database
         /// </summary>
-        /// <param name="theHost"></param>
         /// <param name="name"></param>
         /// <param name="dbName"></param>
         /// <returns></returns>
-        public static List<mediaInfo> readPlaylistFromDB(IPluginHost theHost, string name, string dbName)
+        public static List<mediaInfo> readPlaylistFromDB(string name, string dbName)
         {
             object o = null;
             List<mediaInfo> playlist = new List<mediaInfo>();
             for (int i = 0; ((i < 35) && (o == null)); i++)
             {
-                theHost.getData(eGetData.GetMediaDatabase, dbName, out o);
+                BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, dbName, out o);
                 if (i > 0)
                     Thread.Sleep(200);
             }
@@ -417,6 +857,7 @@ namespace OpenMobile.Media
             }
             return playlist;
         }
+
         private static List<mediaInfo> readXSPF(string location)
         {
             List<mediaInfo> playlist = new List<mediaInfo>();
@@ -454,6 +895,7 @@ namespace OpenMobile.Media
             }
             return playlist;
         }
+
         private static List<mediaInfo> readASX(string location)
         {
             List<mediaInfo> playlist = new List<mediaInfo>();
@@ -474,6 +916,7 @@ namespace OpenMobile.Media
             }
             return playlist;
         }
+
         private static List<mediaInfo> readWPL(string location)
         {
             List<mediaInfo> playlist = new List<mediaInfo>();
@@ -496,6 +939,7 @@ namespace OpenMobile.Media
             }
             return playlist;
         }
+
         private static List<mediaInfo> readM3U(string location)
         {
             List<mediaInfo> playlist = new List<mediaInfo>();
@@ -510,6 +954,7 @@ namespace OpenMobile.Media
             }
             return playlist;
         }
+
         private static List<mediaInfo> readPLS(string location)
         {
             List<mediaInfo> playlist = new List<mediaInfo>();
@@ -525,6 +970,7 @@ namespace OpenMobile.Media
             }
             return playlist;
         }
+
         /// <summary>
         /// Convert a list to a Playlist
         /// </summary>
@@ -549,5 +995,8 @@ namespace OpenMobile.Media
                 ret.Add(new mediaInfo(source[i]));
             return ret;
         }
+
+        #endregion
     }
 }
+

@@ -11,6 +11,41 @@ namespace OpenMobile.Controls
     public class OMCheckbox : OMLabel, IClickable, IHighlightable
     {
         /// <summary>
+        /// Rendering styles
+        /// </summary>
+        public enum Styles 
+        { 
+            /// <summary>
+            /// Text placed to the right of the checkbox
+            /// </summary>
+            TextToTheRight, 
+
+            /// <summary>
+            /// Text placed to the left of the checkbox
+            /// </summary>
+            TextToTheLeft 
+        }
+
+        /// <summary>
+        /// Rendering style
+        /// </summary>
+        public Styles Style
+        {
+            get
+            {
+                return this._Style;
+            }
+            set
+            {
+                if (this._Style != value)
+                {
+                    this._Style = value;
+                }
+            }
+        }
+        private Styles _Style;
+
+        /// <summary>
         /// Occurs when the control is clicked
         /// </summary>
         public event userInteraction OnClick;
@@ -83,7 +118,7 @@ namespace OpenMobile.Controls
             }
         }
 
-        private float _GraphicLineThickness = 3.0f;
+        private float _GraphicLineThickness = 1.0f;
         /// <summary>
         /// The thickness of the lines that's used for drawing the graphics
         /// </summary>
@@ -171,67 +206,102 @@ namespace OpenMobile.Controls
         {
             base.RenderBegin(g, e);
 
-            //float tmp = OpacityFloat;
-            //if (this.Mode == eModeType.transitioningIn)
-            //    tmp = e.globalTransitionIn;
-            //if (this.Mode == eModeType.transitioningOut)
-            //    tmp = e.globalTransitionOut;
             using (Brush defaultBrush = new Brush(Color.FromArgb((int)GetAlphaValue255(this.OutlineColor.A), this.OutlineColor)))
             {
                 #region Draw label
 
                 if (!string.IsNullOrEmpty(_text))
                 {
-                    if ((_RefreshGraphic) || (genHighlight != (Mode == eModeType.Highlighted)))
+                    switch (_Style)
                     {
-                        if (Mode == eModeType.Highlighted)
-                            textTexture = g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, highlightColor, this.OutlineColor);
-                        else
-                            textTexture = g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, this.Color, this.OutlineColor);
-                        genHighlight = (Mode == eModeType.Highlighted);
+                        case Styles.TextToTheRight:
+                            {
+                                if ((_RefreshGraphic) || (genHighlight != (Mode == eModeType.Highlighted)))
+                                {
+                                    if (Mode == eModeType.Highlighted)
+                                        textTexture = g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, highlightColor, this.OutlineColor);
+                                    else
+                                        textTexture = g.GenerateTextTexture(this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterLeft, this.Color, this.OutlineColor);
+                                    genHighlight = (Mode == eModeType.Highlighted);
+                                }
+                                g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, _RenderingValue_Alpha);
+                            }
+                            break;
+                        case Styles.TextToTheLeft:
+                            {
+                                if ((_RefreshGraphic) || (genHighlight != (Mode == eModeType.Highlighted)))
+                                {
+                                    if (Mode == eModeType.Highlighted)
+                                        textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterRight, highlightColor, this.OutlineColor);
+                                    else
+                                        textTexture = g.GenerateTextTexture(this.Left, this.Top, this.Width - this.Height, this.Height, this.Text, this.Font, this.Format, OpenMobile.Graphics.Alignment.CenterRight, this.Color, this.OutlineColor);
+                                    genHighlight = (Mode == eModeType.Highlighted);
+                                }
+                                g.DrawImage(textTexture, this.Left, this.Top, this.Width - this.Height, this.Height, _RenderingValue_Alpha);
+                            }
+                            break;
+                        default:
+                            break;
                     }
-                    g.DrawImage(textTexture, this.Left + this.Height + 5, this.Top, this.Width - this.Height, this.Height, _RenderingValue_Alpha);
                 }
 
                 #endregion
 
                 // Calculate rounded colors
-                int CornerRadius = this.Region.Height / 10;
-                //g.DrawRoundRectangle(new Pen(defaultBrush, _GraphicLineThickness), this.Left, this.Top, this.Height, this.Height, CornerRadius);
+                int CornerRadius = this.Region.Height / 6;
 
-                // Set frame for checkbox
-                Rectangle rectChkBox = new Rectangle(this.Left, this.Top, this.Height, this.Height);
-
-                if (this.isChecked == true)
+                using (Brush fillBrush = new Brush(Color.FromArgb((int)GetAlphaValue255(this._CheckedColor.A), this._CheckedColor)))
                 {
-                    using (Brush fillBrush = new Brush(Color.FromArgb((int)GetAlphaValue255(this._CheckedColor.A), this._CheckedColor)))
+                    // Offset fill rectangle
+                    float Offset = (_GraphicLineThickness * 2f);
+
+                    switch (_Style)
                     {
-                        // Offset fill rectangle
-                        float Offset = (_GraphicLineThickness * 2f);
-                        Rectangle rectChkBoxFill = new Rectangle(rectChkBox.Left + Offset, rectChkBox.Top + Offset, rectChkBox.Width - (Offset * 2), rectChkBox.Height - (Offset * 2));
-                        //g.FillRectangle(fillBrush, rectChkBoxFill);
-                        g.FillRoundRectangle(fillBrush, rectChkBoxFill, CornerRadius);
-                        g.DrawLine(new Pen(defaultBrush, 4.0F), this.Left + 6, this.Top + 6, this.Left + this.Height - 6, this.Top + this.Height - 6);
-                        g.DrawLine(new Pen(defaultBrush, 4.0F), this.Left + 6, this.Top + this.Height - 6, this.Left + this.Height - 6, this.Top + 6);
-                        g.DrawLine(new Pen(defaultBrush, 2.0F), this.Left + 5, this.Top + 5, this.Left + this.Height - 5, this.Top + this.Height - 5);
-                        g.DrawLine(new Pen(defaultBrush, 2.0F), this.Left + 5, this.Top + this.Height - 5, this.Left + this.Height - 5, this.Top + 5);
+                        case Styles.TextToTheRight:
+                            {
+                                // Set frame for checkbox
+                                Rectangle rectChkBox = new Rectangle(this.Left, this.Top, this.Height, this.Height);
+
+                                if (this.isChecked == true)
+                                {
+                                    Rectangle rectChkBoxFill = new Rectangle(rectChkBox.Left + Offset, rectChkBox.Top + Offset, rectChkBox.Width - (Offset * 2), rectChkBox.Height - (Offset * 2));
+                                    g.FillRoundRectangle(fillBrush, rectChkBoxFill, CornerRadius);
+                                    g.DrawLine(new Pen(defaultBrush, 4.0F), this.Left + 6, this.Top + 6, this.Left + this.Height - 6, this.Top + this.Height - 6);
+                                    g.DrawLine(new Pen(defaultBrush, 4.0F), this.Left + 6, this.Top + this.Height - 6, this.Left + this.Height - 6, this.Top + 6);
+                                    g.DrawLine(new Pen(defaultBrush, 2.0F), this.Left + 5, this.Top + 5, this.Left + this.Height - 5, this.Top + this.Height - 5);
+                                    g.DrawLine(new Pen(defaultBrush, 2.0F), this.Left + 5, this.Top + this.Height - 5, this.Left + this.Height - 5, this.Top + 5);
+                                }
+
+                                // Draw frame around checkbox
+                                using (Pen p = new Pen(defaultBrush, _GraphicLineThickness))
+                                    g.DrawRoundRectangle(p, rectChkBox, CornerRadius);
+                            }
+                            break;
+                        case Styles.TextToTheLeft:
+                            {
+                                // Set frame for checkbox
+                                Rectangle rectChkBox = new Rectangle(this.Region.Right - this.Height, this.Top, this.Height, this.Height);
+
+                                if (this.isChecked == true)
+                                {
+                                    Rectangle rectChkBoxFill = new Rectangle(rectChkBox.Left + Offset, rectChkBox.Top + Offset, rectChkBox.Width - (Offset * 2), rectChkBox.Height - (Offset * 2));
+                                    g.FillRoundRectangle(fillBrush, rectChkBoxFill, CornerRadius);
+                                    g.DrawLine(new Pen(defaultBrush, 4.0F), rectChkBox.Left + 6, rectChkBox.Top + 6, rectChkBox.Left + rectChkBox.Height - 6, rectChkBox.Top + rectChkBox.Height - 6);
+                                    g.DrawLine(new Pen(defaultBrush, 4.0F), rectChkBox.Left + 6, rectChkBox.Top + rectChkBox.Height - 6, rectChkBox.Left + rectChkBox.Height - 6, rectChkBox.Top + 6);
+                                    g.DrawLine(new Pen(defaultBrush, 2.0F), rectChkBox.Left + 5, rectChkBox.Top + 5, rectChkBox.Left + rectChkBox.Height - 5, rectChkBox.Top + rectChkBox.Height - 5);
+                                    g.DrawLine(new Pen(defaultBrush, 2.0F), rectChkBox.Left + 5, rectChkBox.Top + rectChkBox.Height - 5, rectChkBox.Left + rectChkBox.Height - 5, rectChkBox.Top + 5);
+                                }
+
+                                // Draw frame around checkbox
+                                using (Pen p = new Pen(defaultBrush, _GraphicLineThickness))
+                                    g.DrawRoundRectangle(p, rectChkBox, CornerRadius);
+                            }
+                            break;
+                        default:
+                            break;
                     }
-                }
 
-                // Draw frame around checkbox
-                using (Pen p = new Pen(defaultBrush, _GraphicLineThickness))
-                    //g.DrawRectangle(p, rectChkBox);
-                    g.DrawRoundRectangle(p, rectChkBox, CornerRadius);
-
-                //g.DrawRoundRectangle(new Pen(defaultBrush, 3.0F), this.Left, this.Top, this.Height, this.Height, 5);
-                //if (this.isChecked == true)
-                //{
-                //    g.DrawLine(new Pen(defaultBrush, 4.0F), this.Left + 6, this.Top + 6, this.Left + this.Height - 6, this.Top + this.Height - 6);
-                //    g.DrawLine(new Pen(defaultBrush, 4.0F), this.Left + 6, this.Top + this.Height - 6, this.Left + this.Height - 6, this.Top + 6);
-                //    g.DrawLine(new Pen(defaultBrush, 2.0F), this.Left + 5, this.Top + 5, this.Left + this.Height - 5, this.Top + this.Height - 5);
-                //    g.DrawLine(new Pen(defaultBrush, 2.0F), this.Left + 5, this.Top + this.Height - 5, this.Left + this.Height - 5, this.Top + 5);
-                //}
-
+                }               
             }
 
             base.RenderFinish(g, e);

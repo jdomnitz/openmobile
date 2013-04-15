@@ -29,7 +29,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Controls that support being clicked
     /// </summary>
-    public interface IClickable
+    public interface IClickable : ClickEvents
     {
         /// <summary>
         /// Fires the OnClick Event
@@ -40,13 +40,50 @@ namespace OpenMobile.Controls
         /// </summary>
         void longClickMe(int screen);
 
-        ///// <summary>
-        ///// Fires the OnHoldClick event
-        ///// </summary>
+        /// <summary>
+        /// Fires the OnHoldClick event
+        /// </summary>
         void holdClickMe(int screen);
 
+    }
+
+    /// <summary>
+    /// Click events
+    /// </summary>
+    public interface ClickEvents
+    {
+        /// <summary>
+        /// Click event
+        /// </summary>
         event userInteraction OnClick;
+        /// <summary>
+        /// Long click event
+        /// </summary>
         event userInteraction OnLongClick;
+        /// <summary>
+        /// Hold click event
+        /// </summary>
         event userInteraction OnHoldClick;
     }
+
+    /// <summary>
+    /// Controls that support being clicked
+    /// </summary>
+    public interface IClickableAdvanced : ClickEvents
+    {
+        /// <summary>
+        /// Fires the OnClick Event
+        /// </summary>
+        void clickMe(int screen, OpenMobile.Input.MouseButtonEventArgs e);
+        /// <summary>
+        /// Fires the OnLongClick event
+        /// </summary>
+        void longClickMe(int screen, OpenMobile.Input.MouseButtonEventArgs e);
+
+        /// <summary>
+        /// Fires the OnHoldClick event
+        /// </summary>
+        void holdClickMe(int screen, OpenMobile.Input.MouseButtonEventArgs e);
+    }
+
 }

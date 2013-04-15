@@ -97,8 +97,12 @@
     <Compile Include="Controls\ButtonStrip\ButtonStrip.cs" />
     <Compile Include="Controls\ControlGroup.cs" />
     <Compile Include="Controls\ControlLayout.cs" />
+    <Compile Include="Controls\OMImageFlow.cs" />
+    <Compile Include="Controls\OMCube.cs" />
     <Compile Include="Controls\OMControlGraphicsBase.cs" />
     <Compile Include="Controls\OMObjectList.cs" />
+    <Compile Include="Controls\OMTargetWindow.cs" />
+    <Compile Include="Controls\OMTestControl.cs" />
     <Compile Include="Controls\PanelTransitionEffects.cs" />
     <Compile Include="Controls\OMContainer.cs" />
     <Compile Include="Controls\OMAnimatedLabel2.cs" />
@@ -155,6 +159,8 @@
     <Compile Include="helperFunctions\Globalization.cs" />
     <Compile Include="helperFunctions\Menu.cs" />
     <Compile Include="helperFunctions\OSK.cs" />
+    <Compile Include="helperFunctions\Params.cs" />
+    <Compile Include="helperFunctions\Serial.cs" />
     <Compile Include="helperFunctions\SmoothAnimator.cs" />
     <Compile Include="helperFunctions\StoredData.cs" />
     <Compile Include="IconManager.cs" />
@@ -164,18 +170,25 @@
     <Compile Include="Math\Evaluator.cs" />
     <Compile Include="Media\DeviceInfo.cs" />
     <Compile Include="Media\MediaLoader.cs" />
-    <Compile Include="Media\PlaylistHandler.cs" />
+    <Compile Include="Media\MediaProviderState.cs" />
+    <Compile Include="Media\MediaSource.cs" />
+    <Compile Include="Media\Playlist.cs" />
     <Compile Include="Media\StorageAnalyzer.cs" />
     <Compile Include="Net\Connections.cs" />
     <Compile Include="Net\Network.cs" />
     <Compile Include="Math\SunTimes.cs" />
     <Compile Include="IPluginHost.cs" />
     <Compile Include="Media\ManagedTagReader.cs" />
-    <Compile Include="Media\Playlist.cs" />
+    <Compile Include="Media\Playlist_Obsolete.cs" />
     <Compile Include="Net\RSS.cs" />
     <Compile Include="Plugin\BasePluginCode.cs" />
+    <Compile Include="Plugin\IAudioDeviceProvider.cs" />
     <Compile Include="Plugin\HighLevelCode.cs" />
     <Compile Include="Plugin\IDataSource.cs" />
+    <Compile Include="Plugin\IPlayerVolumeControl.cs" />
+    <Compile Include="Plugin\IPlayer\IMediaProvider.cs" />
+    <Compile Include="Plugin\IPlayer\MediaProviderCode.cs" />
+    <Compile Include="RenderingWindow\iRenderingWindow.cs" />
     <Compile Include="UIHandler\InfoBanner.cs" />
     <Compile Include="UIHandler\Notification.cs" />
     <Compile Include="UIHandler\UIHandler.cs" />
@@ -211,6 +224,7 @@
     <Compile Include="Widget.cs" />
     <Compile Include="Platform\GnomeIcon.cs" />
     <Compile Include="Zones\AudioDevice.cs" />
+    <Compile Include="Zones\MediaProviderHandler.cs" />
     <Compile Include="Zones\Zone.cs" />
     <Compile Include="Zones\ZoneHandler.cs" />
   </ItemGroup>
@@ -278,7 +292,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

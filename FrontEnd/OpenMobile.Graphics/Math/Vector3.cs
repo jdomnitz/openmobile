@@ -956,6 +956,39 @@ namespace OpenMobile.Math
 
         #endregion
 
+        #region Round
+
+        /// <summary>
+        /// Rounds the vector values to the nearest int value
+        /// </summary>
+        /// <param name="decimals"></param>
+        public void Round()
+        {
+            Round(0);
+        }
+        /// <summary>
+        /// Rounds the vector values to the specified decimals 
+        /// </summary>
+        /// <param name="decimals"></param>
+        public void Round(int decimals)
+        {
+            X = (float)System.Math.Round((double)X, decimals);
+            Y = (float)System.Math.Round((double)Y, decimals);
+            Z = (float)System.Math.Round((double)Z, decimals);
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Truncs the vector values
+        /// </summary>
+        public void Trunc()
+        {
+            X = (float)(int)X;
+            Y = (float)(int)Y;
+            Z = (float)(int)Z;
+        }
+
         #endregion
 
         #region Swizzle

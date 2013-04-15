@@ -910,7 +910,7 @@ namespace OpenMobile.Controls
 
             //Draw Digital Value
             Rectangle digiFRect = new Rectangle(this.Left + this.Width / 2 - this.width / 7, this.Top + (int)(this.height / 1.18), this.width / 4, this.Height / 12);
-            g.FillRectangle(new Brush(Color.FromArgb(30, Color.Gray)), (this.Left + (float)this.Width / 2F - (float)this.width / 5F), (this.Top + (float)this.height / 1.2F), ((float)this.width / 2.5F), ((float)this.Height / 9F));
+            g.FillRectangle(new Brush(Color.FromArgb(30, Color.Gray)), (int)((this.Left + (float)this.Width / 2F - (float)this.width / 5F)), (int)((this.Top + (float)this.height / 1.2F)), (int)((float)this.width / 2.5F), (int)((float)this.Height / 9F));
             DisplayNumber(g, this.currentValue, digiFRect);
 
             //Paint the needle

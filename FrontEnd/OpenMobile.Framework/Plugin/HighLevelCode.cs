@@ -45,12 +45,13 @@ namespace OpenMobile.Plugin
             : base(pluginName, pluginIcon, pluginVersion, pluginDescription, authorName, authorEmail)
         {
             _displayName = displayName;
+            PanelManager = new ScreenManager(this);
         }
 
         /// <summary>
         /// The panel manager for this plugin
         /// </summary>
-        protected ScreenManager PanelManager = new ScreenManager();
+        protected ScreenManager PanelManager = null;
 
         /// <summary>
         /// Loads the panels from this plugin

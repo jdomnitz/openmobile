@@ -39,25 +39,6 @@ namespace OpenMobile.Controls
         public event userInteraction OnImageChange;
 
         private imageItem image;
-        private byte transparency = 100;
-        /// <summary>
-        /// Opacity (0-100%)
-        /// </summary>
-        public byte Transparency
-        {
-            get
-            {
-                return transparency;
-            }
-            set
-            {
-                if (transparency == value)
-                    return;
-                transparency = value;
-                opacity = (byte)(255 * (transparency / 100F));
-                raiseUpdate(false);
-            }
-        }
 
         private Color _BackgroundColor = Color.Transparent;
 
@@ -77,7 +58,26 @@ namespace OpenMobile.Controls
             }
         }
 
-        public OpenMobile.Math.Vector3 Rotation = new OpenMobile.Math.Vector3();
+        /// <summary>
+        /// Rotation in 3D space
+        /// </summary>
+        public OpenMobile.Math.Vector3 Rotation
+        {
+            get
+            {
+                return this._Rotation;
+            }
+            set
+            {
+                if (this._Rotation != value)
+                {
+                    this._Rotation = value;
+                    Refresh();
+                }
+            }
+        }
+        private OpenMobile.Math.Vector3 _Rotation = new OpenMobile.Math.Vector3();
+        
 
         /// <summary>
         /// Creates the control with the default size and location
@@ -279,8 +279,8 @@ namespace OpenMobile.Controls
                             g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, _RenderingValue_Alpha);
                             break;
                         case DrawModes.Scale:
-                            //TODO = g.DrawImage(image.image, left, top, width, height, alpha, eAngle.Normal, Rotation);
-                            g.DrawImage(image.image, left, top, width, height, _RenderingValue_Alpha, eAngle.Normal);
+                            g.DrawImage(image.image, left, top, 0, width, height, _RenderingValue_Alpha, eAngle.Normal, Rotation, new ReflectionsData(Color.FromArgb(255,130,130,130),Color.Black));
+                            //g.DrawImage(image.image, left, top, width, height, _RenderingValue_Alpha, eAngle.Normal);
                             break;
                     }
                 }
@@ -393,6 +393,14 @@ namespace OpenMobile.Controls
                 {
                     this.Visible = false;
                 }
+            }
+            else if (dataSource.Value is OImage)
+            {   // Actual image data present
+                this.Image = new imageItem(dataSource.Value as OImage);
+            }
+            else if (dataSource.Value is imageItem)
+            {   // Actual image data present
+                this.Image = (imageItem)dataSource.Value;
             }
             else
             {   // This is not a binary datasource, use null to detect state

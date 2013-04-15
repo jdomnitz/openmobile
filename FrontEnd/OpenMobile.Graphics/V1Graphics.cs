@@ -147,65 +147,94 @@ namespace OpenMobile.Graphics
     /// <summary>
     /// Alignment arguments
     /// </summary>
+    [Flags]
     public enum Alignment
     {
         /// <summary>
         /// Top Left
         /// </summary>
-        TopLeft = 0,
+        TopLeft = 1,
         /// <summary>
         /// Top Center
         /// </summary>
-        TopCenter = 1,
+        TopCenter = 2,
         /// <summary>
         /// Top Right
         /// </summary>
-        TopRight = 2,
+        TopRight = 4,
         /// <summary>
         /// Center Left
         /// </summary>
-        CenterLeft = 10,
+        CenterLeft = 8,
         /// <summary>
         /// Center Center
         /// </summary>
-        CenterCenter = 11,
+        CenterCenter = 16,
         /// <summary>
         /// Center Right
         /// </summary>
-        CenterRight = 12,
+        CenterRight = 32,
         /// <summary>
         /// Buttom Left
         /// </summary>
-        BottomLeft = 20,
+        BottomLeft = 64,
         /// <summary>
         /// Bottom Center
         /// </summary>
-        BottomCenter = 21,
+        BottomCenter = 128,
         /// <summary>
         /// Bottom Right
         /// </summary>
-        BottomRight = 22,
+        BottomRight = 256,
         /// <summary>
         /// Vertical
         /// </summary>
-        VerticalCentered = 111,
+        VerticalCentered = 512,
         /// <summary>
         /// Center Left (Ellipsis)
         /// </summary>
-        CenterLeftEllipsis = 1010,
+        CenterLeftEllipsis = 1024,
         /// <summary>
-        /// Centered with Word Wrap
+        /// Word Wrap
         /// </summary>
-        WordWrap = 10011,
-        /// <summary>
-        /// Top Centered Word Wrap
-        /// </summary>
-        WordWrapTC = 10001,
-        /// <summary>
-        /// Top Left Word Wrap
-        /// </summary>
-        WordWrapTL = 10000
+        WordWrap = 2048
     };
+
+    /// <summary>
+    /// Fit modes
+    /// </summary>
+    public enum FitModes
+    {
+        /// <summary>
+        /// No fit is active
+        /// </summary>
+        None,
+        /// <summary>
+        /// Ensure large objects fit inside control
+        /// </summary>
+        Fit,
+        /// <summary>
+        /// Scale small object to fill the control
+        /// </summary>
+        Fill,
+        /// <summary>
+        /// Scale large objects down to fit and scale small object up to fill
+        /// </summary>
+        FitFill,
+        /// <summary>
+        /// Scale complete string on one single line down to match control
+        /// </summary>
+        FitSingleLine,
+        /// <summary>
+        /// Scale complete string on one single line up to match control
+        /// </summary>
+        FillSingleLine,
+        /// <summary>
+        /// Scale complete string on one single line up or down to match control
+        /// </summary>
+        FitFillSingleLine
+    }
+
     /// <summary>
     /// The angle to rotate the control
     /// </summary>
@@ -254,16 +283,16 @@ namespace OpenMobile.Graphics
         #endregion
         public void Initialize(int screen)
         {
-            Raw.Disable(EnableCap.DepthTest);
-            Raw.Enable(EnableCap.Blend);
-            Raw.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-            Raw.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            Raw.MatrixMode(MatrixMode.Projection);
-            Raw.LoadIdentity();
-            Raw.Ortho(0, 1000, 600, 0, 0, 1);
-            Raw.MatrixMode(MatrixMode.Modelview);
-            string version=Raw.GetString(StringName.Version);
-            string[] extensions = Raw.GetString(StringName.Extensions).Split(new char[]{' '});
+            GL.Disable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Blend);
+            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            GL.Ortho(0, 1000, 600, 0, 0, 1);
+            GL.MatrixMode(MatrixMode.Modelview);
+            string version=GL.GetString(StringName.Version);
+            string[] extensions = GL.GetString(StringName.Extensions).Split(new char[]{' '});
             if (Array.Exists(extensions,t=>t=="GL_ARB_texture_non_power_of_two"))
                 npot = true;
             AA = ((version[0] != '1') || (int.Parse(version[2].ToString()) >= 3));
@@ -272,12 +301,24 @@ namespace OpenMobile.Graphics
             {
             #endif
             if (AA)
-                Raw.Disable(EnableCap.Multisample);
+                GL.Disable(EnableCap.Multisample);
             #if DEBUG
             }catch(Exception){}
             #endif
-            Raw.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
+            GL.GetInteger(GetPName.MaxTextureSize, out maxTextureSize);
         }
+        public void Begin()
+        {
+        }
+        public void End()
+        {
+            if (textures[screen].Count > 0)
+            {
+                GL.DeleteTextures(textures[screen].Count, textures[screen].ToArray());
+                textures[screen].Clear();
+            }
+        }
+
         public int MaxTextureSize
         {
             get
@@ -287,8 +328,8 @@ namespace OpenMobile.Graphics
         }
         public void Clear(Color color)
         {
-            Raw.Clear(ClearBufferMask.ColorBufferBit);
-            Raw.ClearColor(color);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.ClearColor(color);
         }
         public void DrawArc(Pen pen, Rectangle rect, float startAngle, float sweepAngle)
         {
@@ -297,21 +338,21 @@ namespace OpenMobile.Graphics
 
         public void DrawArc(Pen pen, int x, int y, int width, int height, float startAngle, float sweepAngle)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.Multisample);
-            Raw.Begin(BeginMode.LineStrip);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.Multisample);
+            GL.Begin(BeginMode.LineStrip);
             float yrad = height / 2F;
             float xrad = width / 2F;
             for (double t = startAngle; t <= (startAngle+sweepAngle); t=t+0.5)
             {
                 double rad = t * DEG2RAD;
-                Raw.Vertex2(x + xrad + (xrad * System.Math.Cos(rad)), y + yrad + (yrad * System.Math.Sin(rad)));
+                GL.Vertex2(x + xrad + (xrad * System.Math.Cos(rad)), y + yrad + (yrad * System.Math.Sin(rad)));
             }
-            Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.Multisample);
+            GL.End();
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.Multisample);
         }
 
         public void DrawEllipse(Pen pen, Rectangle rect)
@@ -322,23 +363,23 @@ namespace OpenMobile.Graphics
         const float DEG2RAD = (float)(System.Math.PI / 180);
         public void DrawEllipse(Pen pen, int x, int y, int width, int height)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
-            Raw.Begin(BeginMode.LineLoop);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
+            GL.Begin(BeginMode.LineLoop);
             {
                 float yrad = height / 2F;
                 float xrad = width / 2F;
                 for (double t = 0; t < 360; t++)
                 {
                     double rad = t * DEG2RAD;
-                    Raw.Vertex2(x + xrad + (xrad * System.Math.Cos(rad)), y + yrad + (yrad * System.Math.Sin(rad)));
+                    GL.Vertex2(x + xrad + (xrad * System.Math.Cos(rad)), y + yrad + (yrad * System.Math.Sin(rad)));
                 }
             }
-            Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+            GL.End();
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
         }
         public void DrawImage(OImage image, Point[] destPoints)
         {
@@ -346,24 +387,24 @@ namespace OpenMobile.Graphics
                 return;
             if (image == null)
                 return;
-            Raw.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Texture2D);
             if (image.GetTexture(screen) == 0)
-                if (!loadTexture(ref image))
+                if (!LoadTexture(ref image))
                 {
-                    Raw.Disable(EnableCap.Texture2D);
+                    GL.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
-            Raw.Color4(Color.White);
-            Raw.Begin(BeginMode.Quads);
+            GL.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
+            GL.Color4(Color.White);
+            GL.Begin(BeginMode.Quads);
             {
-                Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(destPoints[0].X, destPoints[0].Y);
-                Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(destPoints[1].X, destPoints[1].Y);
-                Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(destPoints[2].X, destPoints[2].Y);
-                Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(destPoints[3].X, destPoints[3].Y);
+                GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(destPoints[0].X, destPoints[0].Y);
+                GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(destPoints[1].X, destPoints[1].Y);
+                GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(destPoints[2].X, destPoints[2].Y);
+                GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(destPoints[3].X, destPoints[3].Y);
             }
-            Raw.End();
-            Raw.Disable(EnableCap.Texture2D);
+            GL.End();
+            GL.Disable(EnableCap.Texture2D);
         }
 
         public void DrawImage(OImage image, Rectangle rect)
@@ -378,66 +419,76 @@ namespace OpenMobile.Graphics
         {
             DrawImage(image, X, Y, Width, Height, transparency,eAngle.Normal);
         }
+        public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation)
+        {
+        }
+        public void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation, ReflectionsData reflectionData)
+        {
+        }
         public void DrawImage(OImage image,int X, int Y,int Width, int Height,float transparency,eAngle angle)
         {
             if (image == null)
                 return;
-            Raw.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Texture2D);
             if (image.TextureGenerationRequired(screen))
-                if (!loadTexture(ref image))
+                if (!LoadTexture(ref image))
                 {
-                    Raw.Disable(EnableCap.Texture2D);
+                    GL.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
-            Raw.Color4(1F,1F,1F,transparency);
-            Raw.Begin(BeginMode.Quads);
+            GL.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
+            GL.Color4(1F,1F,1F,transparency);
+            GL.Begin(BeginMode.Quads);
             {
                 switch(angle)
                 {
                     case eAngle.Normal:
-                        Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(X, Height+Y);
-                        Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(Width+X, Height+Y);
-                        Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(Width+X, Y);
-                        Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(X, Y);
+                        GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(X, Height+Y);
+                        GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(Width+X, Height+Y);
+                        GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(Width+X, Y);
+                        GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(X, Y);
                         break;
                     case eAngle.FlipHorizontal:
-                        Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(X, Height + Y); //BL
-                        Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(Width + X, Height + Y); //BR
-                        Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(Width + X, Y); //TR
-                        Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(X, Y); //TL
+                        GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(X, Height + Y); //BL
+                        GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(Width + X, Height + Y); //BR
+                        GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(Width + X, Y); //TR
+                        GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(X, Y); //TL
                         break;
                     case eAngle.FlipVertical:
-                        Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(X, Height + Y);
-                        Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(Width + X, Height + Y);
-                        Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(Width + X, Y);
-                        Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(X, Y);
+                        GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(X, Height + Y);
+                        GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(Width + X, Height + Y);
+                        GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(Width + X, Y);
+                        GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(X, Y);
                         break;
                     case eAngle.Rotate90:
-                        Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(X, Height + Y);
-                        Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(Width + X, Height + Y);
-                        Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(Width + X, Y);
-                        Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(X, Y);
+                        GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(X, Height + Y);
+                        GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(Width + X, Height + Y);
+                        GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(Width + X, Y);
+                        GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(X, Y);
                         break;
                     case eAngle.Rotate180:
-                        Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(X, Height + Y);
-                        Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(Width + X, Height + Y);
-                        Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(Width + X, Y);
-                        Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(X, Y);
+                        GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(X, Height + Y);
+                        GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(Width + X, Height + Y);
+                        GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(Width + X, Y);
+                        GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(X, Y);
                         break;
                     case eAngle.Rotate270:
-                        Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(X, Height + Y);
-                        Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(Width + X, Height + Y);
-                        Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(Width + X, Y);
-                        Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(X, Y);
+                        GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(X, Height + Y);
+                        GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(Width + X, Height + Y);
+                        GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(Width + X, Y);
+                        GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(X, Y);
                         break;
                 }
             }
-            Raw.End();
-            Raw.Disable(EnableCap.Texture2D);
+            GL.End();
+            GL.Disable(EnableCap.Texture2D);
         }
 
-        private bool loadTexture(ref OImage image)
+        public void DrawCube(OImage image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
+        {
+        }
+
+        public bool LoadTexture(ref OImage image)
         {
             if (image == null || image.Size == Size.Empty)
                 return false;
@@ -447,16 +498,16 @@ namespace OpenMobile.Graphics
 
             // Delete old texture before generating a new one
             if (texture != 0)
-                Raw.DeleteTexture(texture);
+                GL.DeleteTexture(texture);
 
             // Create new texture name
-            Raw.GenTextures(1, out texture);
+            GL.GenTextures(1, out texture);
 
             // Bind texture to opengl
-            Raw.BindTexture(TextureTarget.Texture2D, texture);
+            GL.BindTexture(TextureTarget.Texture2D, texture);
 
             Bitmap img = image.image;
-            bool kill=false;
+            bool kill = false;
             lock (image.image)
             {
                 if (!checkImage(image.image))
@@ -474,7 +525,7 @@ namespace OpenMobile.Graphics
                             ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                         }
                         catch (InvalidOperationException) { return false; }
-                        Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
                                         OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
@@ -485,7 +536,7 @@ namespace OpenMobile.Graphics
                             ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                         }
                         catch (InvalidOperationException) { return false; }
-                        Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
+                        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
                                         OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
@@ -501,7 +552,7 @@ namespace OpenMobile.Graphics
                             ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                         }
                         catch (InvalidOperationException) { return false; }
-                        Raw.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
+                        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
                                         OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                         tmp.UnlockBits(data);
                         tmp.Dispose();
@@ -512,8 +563,8 @@ namespace OpenMobile.Graphics
                 img.Dispose();
             image.SetTexture(screen, texture);
 
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             //Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToEdge);
             //Raw.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToEdge);
             return true;
@@ -561,35 +612,35 @@ namespace OpenMobile.Graphics
             double srcWidth = srcRect.Width / 1000.0;
             double srcHeight = srcRect.Height / 600.0;
 
-            Raw.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Texture2D);
             if (image.GetTexture(screen) == 0)
-                if (!loadTexture(ref image))
+                if (!LoadTexture(ref image))
                 {
-                    Raw.Disable(EnableCap.Texture2D);
+                    GL.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
-            Raw.Color4(Color.White);
-            Raw.Begin(BeginMode.Quads);
+            GL.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
+            GL.Color4(Color.White);
+            GL.Begin(BeginMode.Quads);
             {
-                Raw.TexCoord2(srcX, srcHeight); Raw.Vertex2(rect.X, rect.Height+rect.Y);
-                Raw.TexCoord2(srcWidth, srcHeight); Raw.Vertex2(rect.Width+rect.X, rect.Height+rect.Y);
-                Raw.TexCoord2(srcWidth, srcY); Raw.Vertex2(rect.Width+rect.X, rect.Y);
-                Raw.TexCoord2(srcX, srcY); Raw.Vertex2(rect.X, rect.Y);
+                GL.TexCoord2(srcX, srcHeight); GL.Vertex2(rect.X, rect.Height+rect.Y);
+                GL.TexCoord2(srcWidth, srcHeight); GL.Vertex2(rect.Width+rect.X, rect.Height+rect.Y);
+                GL.TexCoord2(srcWidth, srcY); GL.Vertex2(rect.Width+rect.X, rect.Y);
+                GL.TexCoord2(srcX, srcY); GL.Vertex2(rect.X, rect.Y);
             }
-            Raw.End();
-            Raw.Disable(EnableCap.Texture2D);
+            GL.End();
+            GL.Disable(EnableCap.Texture2D);
         }
         public void DrawLine(Pen pen, Point[] points)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Begin(BeginMode.LineStrip);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Begin(BeginMode.LineStrip);
             foreach (Point p in points)
-                Raw.Vertex2(p.X, p.Y);
-            Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
+                GL.Vertex2(p.X, p.Y);
+            GL.End();
+            GL.Disable(EnableCap.LineSmooth);
         }
         public void DrawLine(Pen pen, Point pt1, Point pt2)
         {
@@ -597,45 +648,45 @@ namespace OpenMobile.Graphics
         }
         public void DrawLine(Pen pen, int x1, int y1, int x2, int y2)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.LineSmooth);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.LineSmooth);
             if (pen.DashStyle != DashStyle.Solid)
-                Raw.Enable(EnableCap.LineStipple);
+                GL.Enable(EnableCap.LineStipple);
             if (pen.DashStyle == DashStyle.Dot)
-                Raw.LineStipple(2, 0xAAAA);
+                GL.LineStipple(2, 0xAAAA);
             else if (pen.DashStyle != DashStyle.Solid)
-                Raw.LineStipple(2, 0xFF);
-            Raw.Begin(BeginMode.Lines);
+                GL.LineStipple(2, 0xFF);
+            GL.Begin(BeginMode.Lines);
             {
-                Raw.Vertex2(x1, y1);
-                Raw.Vertex2(x2, y2);
+                GL.Vertex2(x1, y1);
+                GL.Vertex2(x2, y2);
             }
-            Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.LineStipple);
+            GL.End();
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.LineStipple);
         }
         public void DrawPolygon(Pen pen, Point[] points)
         {
             if (points.Length < 3)
                 return;
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Enable(EnableCap.PointSmooth);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Begin(BeginMode.Lines);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.Enable(EnableCap.PointSmooth);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Begin(BeginMode.Lines);
             {
                 for (int i = 0; i < points.Length-1; i++)
                 {
-                    Raw.Vertex2(points[i].X, points[i].Y);
-                    Raw.Vertex2(points[i+1].X, points[i+1].Y);
+                    GL.Vertex2(points[i].X, points[i].Y);
+                    GL.Vertex2(points[i+1].X, points[i+1].Y);
                 }
-                Raw.Vertex2(points[points.Length - 1].X, points[points.Length - 1].Y);
-                Raw.Vertex2(points[0].X, points[0].Y);
+                GL.Vertex2(points[points.Length - 1].X, points[points.Length - 1].Y);
+                GL.Vertex2(points[0].X, points[0].Y);
             }
-            Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+            GL.End();
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
         }
         public Rectangle Clip
         {
@@ -647,22 +698,22 @@ namespace OpenMobile.Graphics
             {
                 _clip = value;
                 if (_clip == NoClip)
-                    Raw.Disable(EnableCap.ScissorTest);
+                    GL.Disable(EnableCap.ScissorTest);
                 else
                 {
                     if (_clip.Height<0)
                         _clip.Height=0;
                     if (_clip.Width < 0)
                         _clip.Width=0;
-                    Raw.Enable(EnableCap.ScissorTest);
+                    GL.Enable(EnableCap.ScissorTest);
                     try
                     {
-                        Raw.Scissor((int)(_clip.X * wscale), (int)((600 - _clip.Y - _clip.Height) * hscale), (int)(_clip.Width * wscale), (int)(_clip.Height * hscale));
+                        GL.Scissor((int)(_clip.X * wscale), (int)((600 - _clip.Y - _clip.Height) * hscale), (int)(_clip.Width * wscale), (int)(_clip.Height * hscale));
                     }
                     catch(Exception)
                     {
                         _clip = NoClip;
-                        Raw.Disable(EnableCap.ScissorTest);
+                        GL.Disable(EnableCap.ScissorTest);
                     }
                 }
             }
@@ -673,65 +724,65 @@ namespace OpenMobile.Graphics
         }
         public void DrawRoundRectangle(Pen pen, int x, int y, int width, int height,int radius)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
             double ang = 0;
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
-            Raw.Begin(BeginMode.Lines);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
+            GL.Begin(BeginMode.Lines);
             {
-                Raw.Vertex2(x, y + radius);
-                Raw.Vertex2(x, y + height - radius);//Left Line 
+                GL.Vertex2(x, y + radius);
+                GL.Vertex2(x, y + height - radius);//Left Line 
 
-                Raw.Vertex2(x + radius, y);
-                Raw.Vertex2(x + width - radius, y);//Top Line 
+                GL.Vertex2(x + radius, y);
+                GL.Vertex2(x + width - radius, y);//Top Line 
 
-                Raw.Vertex2(x + width, y + radius);
-                Raw.Vertex2(x + width, y + height - radius);//Right Line 
+                GL.Vertex2(x + width, y + radius);
+                GL.Vertex2(x + width, y + height - radius);//Right Line 
 
-                Raw.Vertex2(x + radius, y + height);
-                Raw.Vertex2(x + width - radius, y + height);//Bottom Line 
+                GL.Vertex2(x + radius, y + height);
+                GL.Vertex2(x + width - radius, y + height);//Bottom Line 
             }
-            Raw.End();
+            GL.End();
 
             float cX = x + radius, cY = y + radius;
-            Raw.Begin(BeginMode.LineStrip);
+            GL.Begin(BeginMode.LineStrip);
             {
                 for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Left 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Left 
                 }
                 cX = x + width - radius;
             }
-            Raw.End();
-            Raw.Begin(BeginMode.LineStrip);
+            GL.End();
+            GL.Begin(BeginMode.LineStrip);
             {
                 for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Right 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Right 
                 }
             }
-            Raw.End();
-            Raw.Begin(BeginMode.LineStrip);
+            GL.End();
+            GL.Begin(BeginMode.LineStrip);
             {
                 cY = y + height - radius;
                 for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Bottom Right 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Bottom Right 
                 }
             }
-            Raw.End();
-            Raw.Begin(BeginMode.LineStrip);
+            GL.End();
+            GL.Begin(BeginMode.LineStrip);
             {
                 cX = x + radius;
                 for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY);//Bottom Left 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY);//Bottom Left 
                 }
             }
-            Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+            GL.End();
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
         }
         public void FillRoundRectangle(Brush brush, Rectangle rect, int radius)
         {
@@ -760,163 +811,163 @@ namespace OpenMobile.Graphics
         private void FillVertRoundRectangle(Brush gr, int x, int y, int width, int height, int radius)
         {
             double ang = 0;
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
-            Raw.Begin(BeginMode.Polygon);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
+            GL.Begin(BeginMode.Polygon);
             {
-                Raw.Color4(gr.SecondColor);
-                Raw.Vertex2(x, y + height - radius); //(0,1)
-                Raw.Vertex2(x + radius, y + height); //(1,0)
-                Raw.Vertex2(x + width - radius, y + height); //(2,0)
-                Raw.Vertex2(x + width, y + height - radius); //(3,1)
+                GL.Color4(gr.SecondColor);
+                GL.Vertex2(x, y + height - radius); //(0,1)
+                GL.Vertex2(x + radius, y + height); //(1,0)
+                GL.Vertex2(x + width - radius, y + height); //(2,0)
+                GL.Vertex2(x + width, y + height - radius); //(3,1)
             }
-            Raw.End();
-            Raw.Begin(BeginMode.Quads);
+            GL.End();
+            GL.Begin(BeginMode.Quads);
             {
-                Raw.Vertex2(x, y + height - radius); //(0,1)
-                Raw.Vertex2(x + width, y + height - radius); //(3,1)
-                Raw.Color4(gr.Color);
-                Raw.Vertex2(x + width, y + radius); //(3,2)
-                Raw.Vertex2(x, y + radius); //(0,2)
+                GL.Vertex2(x, y + height - radius); //(0,1)
+                GL.Vertex2(x + width, y + height - radius); //(3,1)
+                GL.Color4(gr.Color);
+                GL.Vertex2(x + width, y + radius); //(3,2)
+                GL.Vertex2(x, y + radius); //(0,2)
             }
-            Raw.End();
-            Raw.Begin(BeginMode.Polygon);
+            GL.End();
+            GL.Begin(BeginMode.Polygon);
             {
-                Raw.Vertex2(x + width, y + radius); //(3,2)
-                Raw.Vertex2(x + width - radius, y); //(2,3)
-                Raw.Vertex2(x + radius, y); //(1,3)  
-                Raw.Vertex2(x, y + radius); //(0,2)
+                GL.Vertex2(x + width, y + radius); //(3,2)
+                GL.Vertex2(x + width - radius, y); //(2,3)
+                GL.Vertex2(x + radius, y); //(1,3)  
+                GL.Vertex2(x, y + radius); //(0,2)
             }
-            Raw.End();
+            GL.End();
 
             float cX = x + radius, cY = y + radius; //Bottom left
-            Raw.Begin(BeginMode.TriangleFan);
+            GL.Begin(BeginMode.TriangleFan);
             {
-                Raw.Vertex2(cX, cY);
+                GL.Vertex2(cX, cY);
                 for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Left 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Left 
                 }
                 cX = x + width - radius; //bottom right
             }
-            Raw.End();
-            Raw.Begin(BeginMode.TriangleFan);
+            GL.End();
+            GL.Begin(BeginMode.TriangleFan);
             {
-                Raw.Vertex2(cX, cY);
+                GL.Vertex2(cX, cY);
                 for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Right 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Right 
                 }
             }
-            Raw.End();
-            Raw.Color4(gr.SecondColor);
-            Raw.Begin(BeginMode.TriangleFan);
+            GL.End();
+            GL.Color4(gr.SecondColor);
+            GL.Begin(BeginMode.TriangleFan);
             {
                 cY = y + height - radius; //top right
-                Raw.Vertex2(cX, cY);
+                GL.Vertex2(cX, cY);
                 for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Bottom Right 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Bottom Right 
                 }
             }
-            Raw.End();
-            Raw.Begin(BeginMode.TriangleFan);
+            GL.End();
+            GL.Begin(BeginMode.TriangleFan);
             {
                 cX = x + radius; //top left
-                Raw.Vertex2(cX, cY);
+                GL.Vertex2(cX, cY);
                 for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY);//Bottom Left 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY);//Bottom Left 
                 }
             }
-            Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+            GL.End();
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
         }
         private void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
         {
             double ang = 0;
-            Raw.Color4(color);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
-            Raw.Begin(BeginMode.Polygon);
+            GL.Color4(color);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
+            GL.Begin(BeginMode.Polygon);
             {
-                Raw.Vertex2(x + width - radius, y);
-                Raw.Vertex2(x + radius, y);
+                GL.Vertex2(x + width - radius, y);
+                GL.Vertex2(x + radius, y);
 
-                Raw.Vertex2(x, y + radius);
-                Raw.Vertex2(x, y + height - radius);
+                GL.Vertex2(x, y + radius);
+                GL.Vertex2(x, y + height - radius);
 
-                Raw.Vertex2(x + radius, y + height);
-                Raw.Vertex2(x + width - radius, y + height);
+                GL.Vertex2(x + radius, y + height);
+                GL.Vertex2(x + width - radius, y + height);
 
-                Raw.Vertex2(x + width, y + height - radius);
-                Raw.Vertex2(x + width, y + radius);
+                GL.Vertex2(x + width, y + height - radius);
+                GL.Vertex2(x + width, y + radius);
             }
-            Raw.End();
+            GL.End();
 
             float cX = x + radius, cY = y + radius;
-            Raw.Begin(BeginMode.TriangleFan);
+            GL.Begin(BeginMode.TriangleFan);
             {
-                Raw.Vertex2(cX, cY);
+                GL.Vertex2(cX, cY);
                 for (ang = System.Math.PI; ang <= (1.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Left 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Left 
                 }
                 cX = x + width - radius;
             }
-            Raw.End();
-            Raw.Begin(BeginMode.TriangleFan);
+            GL.End();
+            GL.Begin(BeginMode.TriangleFan);
             {
-                Raw.Vertex2(cX, cY);
+                GL.Vertex2(cX, cY);
                 for (ang = (1.5 * System.Math.PI); ang <= (2 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Right 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Top Right 
                 }
             }
-            Raw.End();
-            Raw.Begin(BeginMode.TriangleFan);
+            GL.End();
+            GL.Begin(BeginMode.TriangleFan);
             {
                 cY = y + height - radius;
-                Raw.Vertex2(cX, cY);
+                GL.Vertex2(cX, cY);
                 for (ang = 0; ang <= (0.5 * System.Math.PI); ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Bottom Right 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY); //Bottom Right 
                 }
             }
-            Raw.End();
-            Raw.Begin(BeginMode.TriangleFan);
+            GL.End();
+            GL.Begin(BeginMode.TriangleFan);
             {
                 cX = x + radius;
-                Raw.Vertex2(cX, cY);
+                GL.Vertex2(cX, cY);
                 for (ang = (0.5 * System.Math.PI); ang <= System.Math.PI; ang = ang + 0.05)
                 {
-                    Raw.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY);//Bottom Left 
+                    GL.Vertex2(radius * System.Math.Cos(ang) + cX, radius * System.Math.Sin(ang) + cY);//Bottom Left 
                 }
             }
-            Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+            GL.End();
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
         }
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
         {
-            Raw.Color4(pen.Color);
-            Raw.LineWidth(pen.Width);
-            Raw.Begin(BeginMode.Lines);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+            GL.Begin(BeginMode.Lines);
             {
-                Raw.Vertex2(width+x, height+y);
-                Raw.Vertex2(width+x, y);
+                GL.Vertex2(width+x, height+y);
+                GL.Vertex2(width+x, y);
 
-                Raw.Vertex2(x, height+y);
-                Raw.Vertex2(width+x, height+y);
+                GL.Vertex2(x, height+y);
+                GL.Vertex2(width+x, height+y);
 
-                Raw.Vertex2(width+x, y);
-                Raw.Vertex2(x, y);
+                GL.Vertex2(width+x, y);
+                GL.Vertex2(x, y);
 
-                Raw.Vertex2(x, y);
-                Raw.Vertex2(x, height+y);
+                GL.Vertex2(x, y);
+                GL.Vertex2(x, height+y);
             }
-            Raw.End();
+            GL.End();
         }
         int screen;
         public V1Graphics(int screen)
@@ -943,41 +994,44 @@ namespace OpenMobile.Graphics
         }
         public void FillEllipse(Brush brush, int x, int y, int width, int height)
         {
-            Raw.Color4(brush.Color);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Enable(EnableCap.PointSmooth);
+            GL.Color4(brush.Color);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PointSmooth);
             if (AA)
-                Raw.Enable(EnableCap.Multisample);
-                Raw.Begin(BeginMode.TriangleFan);
+                GL.Enable(EnableCap.Multisample);
+                GL.Begin(BeginMode.TriangleFan);
                 {
-                    Raw.Vertex2(x + (width / 2), y + (height / 2));
+                    GL.Vertex2(x + (width / 2), y + (height / 2));
                     for (int angle = 0; angle < 360; angle++)
-                        Raw.Vertex2(x + (width / 2) + System.Math.Sin(angle) * (width / 2), y + (height / 2) + System.Math.Cos(angle) * (height / 2));
+                        GL.Vertex2(x + (width / 2) + System.Math.Sin(angle) * (width / 2), y + (height / 2) + System.Math.Cos(angle) * (height / 2));
                 }
-                Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
-            Raw.Disable(EnableCap.PointSmooth);
+                GL.End();
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PointSmooth);
             if (AA)
-                Raw.Disable(EnableCap.Multisample);
+                GL.Disable(EnableCap.Multisample);
         }
         public void FillPolygon(Brush brush, Point[] points)
         {
             //TODO - Support LinearGradiantBrush
-            Raw.Color4(brush.Color);
-            Raw.Enable(EnableCap.LineSmooth);
-            Raw.Begin(BeginMode.Polygon);
+            GL.Color4(brush.Color);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Begin(BeginMode.Polygon);
             {
                 foreach (Point p in points)
-                    Raw.Vertex2(p.X, p.Y);
+                    GL.Vertex2(p.X, p.Y);
             }
-            Raw.End();
-            Raw.Disable(EnableCap.LineSmooth);
+            GL.End();
+            GL.Disable(EnableCap.LineSmooth);
+        }
+        public void FillRectangle(GradientData gradient, Rectangle rect)
+        {
         }
         public void FillRectangle(Brush brush, Rectangle rect)
         {
             FillRectangle(brush, rect.X, rect.Y, rect.Width, rect.Height);
         }
-        public void FillRectangle(Brush brush, float x, float y, float width, float height)
+        public void FillRectangle(Brush brush, int x, int y, int width, int height)
         {
             if (brush.Gradient==Gradient.None)
                 fillRectangleSolid(brush, x, y, width, height);
@@ -989,52 +1043,44 @@ namespace OpenMobile.Graphics
 
         private void fillVerticalRectangle(Brush brush, float x, float y, float width, float height)
         {
-            Raw.Begin(BeginMode.Quads);
+            GL.Begin(BeginMode.Quads);
             {
-                Raw.Color4(brush.SecondColor);
-                Raw.Vertex2(x+width, y+height); //(1,1)
-                Raw.Vertex2(x+width, y); //(1,0)
+                GL.Color4(brush.SecondColor);
+                GL.Vertex2(x+width, y+height); //(1,1)
+                GL.Vertex2(x+width, y); //(1,0)
                 
-                Raw.Color4(brush.Color);
-                Raw.Vertex2(x, y);
-                Raw.Vertex2(x, y+height);
+                GL.Color4(brush.Color);
+                GL.Vertex2(x, y);
+                GL.Vertex2(x, y+height);
             }
-            Raw.End();
+            GL.End();
         }
 
         private void fillHorizontalRectangle(Brush brush, float x, float y, float width, float height)
         {
-            Raw.Begin(BeginMode.Quads);
+            GL.Begin(BeginMode.Quads);
             {
-                Raw.Color4(brush.SecondColor);
-                Raw.Vertex2(x+width, y+height);
-                Raw.Vertex2(x, y+height);
+                GL.Color4(brush.SecondColor);
+                GL.Vertex2(x+width, y+height);
+                GL.Vertex2(x, y+height);
 
-                Raw.Color4(brush.Color);
-                Raw.Vertex2(x, y);
-                Raw.Vertex2(x+width, y);
+                GL.Color4(brush.Color);
+                GL.Vertex2(x, y);
+                GL.Vertex2(x+width, y);
             }
-            Raw.End();
+            GL.End();
         }
         private void fillRectangleSolid(Brush brush, float x, float y, float width, float height)
         {
-            Raw.Color4(brush.Color);
-            Raw.Begin(BeginMode.Quads);
+            GL.Color4(brush.Color);
+            GL.Begin(BeginMode.Quads);
             {
-                Raw.Vertex2(x+width, y+height);
-                Raw.Vertex2(x+width, y);
-                Raw.Vertex2(x, y);
-                Raw.Vertex2(x, y+height);
+                GL.Vertex2(x+width, y+height);
+                GL.Vertex2(x+width, y);
+                GL.Vertex2(x, y);
+                GL.Vertex2(x, y+height);
             }
-            Raw.End();
-        }
-        public void Finish()
-        {
-            if (textures[screen].Count > 0)
-            {
-                Raw.DeleteTextures(textures[screen].Count, textures[screen].ToArray());
-                textures[screen].Clear();
-            }
+            GL.End();
         }
 
         public void Resize(int Width, int Height)
@@ -1043,7 +1089,7 @@ namespace OpenMobile.Graphics
             height = Height;
             wscale = (width / 1000F);
             hscale = (height / 600F);
-            Raw.Viewport(0, 0, width, height);
+            GL.Viewport(0, 0, width, height);
         }
 
         internal static void DeleteTexture(int screen,uint texture)
@@ -1089,31 +1135,38 @@ namespace OpenMobile.Graphics
                 height=0;
             if (width < 0)
                 width=0;
-            Raw.Enable(EnableCap.ScissorTest);
-            Raw.Scissor((int)(x * wscale), (int)((600 - y - height) * hscale), (int)(width * wscale), (int)(height * hscale));
+            GL.Enable(EnableCap.ScissorTest);
+            GL.Scissor((int)(x * wscale), (int)((600 - y - height) * hscale), (int)(width * wscale), (int)(height * hscale));
         }
         public void ResetTransform()
         {
-            Raw.LoadIdentity();
+            GL.LoadIdentity();
         }
-        public void TranslateTransform(float dx, float dy)
+        public void Translate(double dx, double dy)
         {
-            Raw.Translate(dx, dy, 0);
+            GL.Translate(dx, dy, 0);
         }
-        public void TranslateTransform(float dx, float dy,float dz)
+        public void Translate(double dx, double dy, double dz)
         {
-            Raw.Translate(dx, dy, dz);
+            GL.Translate(dx, dy, dz);
         }
-        public void Rotate(float angle, Graphics.Axis axis)
+        public void Rotate(double angle, Graphics.Axis axis)
         {
-            Raw.Rotate(angle, (axis == Graphics.Axis.X ? 1 : 0), (axis == Graphics.Axis.Y ? 1 : 0), (axis == Graphics.Axis.Z ? 1 : 0));
+            GL.Rotate(angle, (axis == Graphics.Axis.X ? 1 : 0), (axis == Graphics.Axis.Y ? 1 : 0), (axis == Graphics.Axis.Z ? 1 : 0));
         }
 
-        public void Scale(float sx, float sy, float sz)
+        public void Rotate(double x, double y, double z)
         {
-            Raw.Scale(sx, sy, sz);
+            GL.Rotate(x, 1, 0, 0);
+            GL.Rotate(y, 0, 1, 0);
+            GL.Rotate(z, 0, 0, 1);
         }
-        public void Transform(Matrix4 m)
+
+        public void Scale(double sx, double sy, double sz)
+        {
+            GL.Scale(sx, sy, sz);
+        }
+        public void Transform(Matrix4d m)
         {
             //Raw.MultMatrix(ref m);
         }
@@ -1134,45 +1187,92 @@ namespace OpenMobile.Graphics
         {
             if (image == null)
                 return;
-            Raw.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Texture2D);
             if (image.GetTexture(screen) == 0)
-                if (!loadTexture(ref image))
+                if (!LoadTexture(ref image))
                 {
-                    Raw.Disable(EnableCap.Texture2D);
+                    GL.Disable(EnableCap.Texture2D);
                     return;
                 }
-            Raw.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
-            Raw.Color4(1F, 1F, 1F, 0.0);
-            Raw.Begin(BeginMode.Quads);
+            GL.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
+            GL.Color4(1F, 1F, 1F, 0.0);
+            GL.Begin(BeginMode.Quads);
             {
-                Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(X, (int)(Height * percent) + Y);
-                Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(Width + X, (int)(Height * percent) + Y);
-                Raw.Color4(1F, 1F, 1F, 0.2);
-                Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(Width + X, Y);
-                Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(X, Y);
+                GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(X, (int)(Height * percent) + Y);
+                GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(Width + X, (int)(Height * percent) + Y);
+                GL.Color4(1F, 1F, 1F, 0.2);
+                GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(Width + X, Y);
+                GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(X, Y);
             }
-            Raw.End();
-            Raw.Color4(1F, 1F, 1F, 0.0);
-            Raw.Begin(BeginMode.Quads);
+            GL.End();
+            GL.Color4(1F, 1F, 1F, 0.0);
+            GL.Begin(BeginMode.Quads);
             {
-                Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(X, (int)(Height * percent) + Y + 2);
-                Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(Width + X, (int)(Height*percent) + Y+2);
-                Raw.Color4(1F, 1F, 1F, 0.2);
-                Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(Width + X, Y+2);
-                Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(X, Y+2);
+                GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(X, (int)(Height * percent) + Y + 2);
+                GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(Width + X, (int)(Height*percent) + Y+2);
+                GL.Color4(1F, 1F, 1F, 0.2);
+                GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(Width + X, Y+2);
+                GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(X, Y+2);
             }
-            Raw.End();
-            Raw.Color4(1F, 1F, 1F, 0.0);
-            Raw.Begin(BeginMode.Quads);
+            GL.End();
+            GL.Color4(1F, 1F, 1F, 0.0);
+            GL.Begin(BeginMode.Quads);
             {
-                Raw.TexCoord2(0.0f, 0.0f); Raw.Vertex2(X+2, (int)(Height*percent) + Y);
-                Raw.TexCoord2(1.0f, 0.0f); Raw.Vertex2(Width + 2 + X, (int)(Height * percent) + Y);
-                Raw.Color4(1F, 1F, 1F, 0.2);
-                Raw.TexCoord2(1.0f, 1.0f); Raw.Vertex2(Width+2 + X, Y);
-                Raw.TexCoord2(0.0f, 1.0f); Raw.Vertex2(X+2, Y);
+                GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(X+2, (int)(Height*percent) + Y);
+                GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(Width + 2 + X, (int)(Height * percent) + Y);
+                GL.Color4(1F, 1F, 1F, 0.2);
+                GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(Width+2 + X, Y);
+                GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(X+2, Y);
             }
-            Raw.End();
-            Raw.Disable(EnableCap.Texture2D);
+            GL.End();
+            GL.Disable(EnableCap.Texture2D);
         }
+
+        public void _3D_ModelView_Set(Vector3d cameraLocation, Vector3d cameraRotation, Vector3d cameraOffset, double zoom, bool activateMatrix)
+        {
+            // Not implemented
+        }
+
+        public void _3D_ModelView_Push()
+        {
+            GL.PushMatrix();
+        }
+
+        public void _3D_ModelView_Pop()
+        {
+            GL.PopMatrix();
+        }
+
+        /// <summary>
+        /// Sets or gets the modelview matrix
+        /// </summary>
+        public Matrix4d _3D_ModelViewMatrix
+        {
+            get
+            {
+                return this.modelview;
+            }
+            set
+            {
+                this.modelview = value;
+            }
+        }
+
+        /// <summary>
+        /// Activates the model view
+        /// </summary>
+        public void _3D_ModelView_ResetAndPlaceCamera(Vector3d cameraLocation)
+        {
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadIdentity();
+            GL.LoadMatrix(ref modelview);
+        }
+
+
+        /// <summary>
+        /// The matrix for the global modelview
+        /// </summary>
+        private Matrix4d modelview;
+
     }
 }

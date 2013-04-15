@@ -219,9 +219,9 @@ namespace OpenMobile.Math
         /// </summary>
         /// <param name="degrees">An angle in degrees</param>
         /// <returns>The angle expressed in radians</returns>
-        public static float DegreesToRadians(float degrees)
+        public static double DegreesToRadians(double degrees)
         {
-            const float degToRad = (float)System.Math.PI / 180.0f;
+            const double degToRad = System.Math.PI / 180.0f;
             return degrees * degToRad;
         }
 
@@ -230,9 +230,9 @@ namespace OpenMobile.Math
         /// </summary>
         /// <param name="radians">An angle in radians</param>
         /// <returns>The angle expressed in degrees</returns>
-        public static float RadiansToDegrees(float radians)
+        public static double RadiansToDegrees(double radians)
         {
-            const float radToDeg = 180.0f / (float)System.Math.PI;
+            const double radToDeg = 180.0f / System.Math.PI;
             return radians * radToDeg;
         }
 

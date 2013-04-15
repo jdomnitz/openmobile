@@ -53,7 +53,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static mediaInfo UpdateMissingMediaInfo(mediaInfo item, OImage MissingCoverImage)
         {
-            return UpdateMissingMediaInfo(item, null, helperFunctions.StoredData.Get("Default.MusicDatabase"));
+            return UpdateMissingMediaInfo(item, null, helperFunctions.StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"));
         }
         /// <summary>
         /// Updates missing information in a mediaInfo data (if available) from the default music database
@@ -62,7 +62,7 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public static mediaInfo UpdateMissingMediaInfo(mediaInfo item)
         {
-            return UpdateMissingMediaInfo(item, null, helperFunctions.StoredData.Get("Default.MusicDatabase"));
+            return UpdateMissingMediaInfo(item, null, helperFunctions.StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"));
         }
         /// <summary>
         /// Updates missing information in a mediaInfo data (if available)

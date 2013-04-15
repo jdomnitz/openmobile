@@ -147,6 +147,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         MainMenu=16
     }
+
     /// <summary>
     /// Defines the plugin level
     /// </summary>
@@ -173,4 +174,104 @@ namespace OpenMobile.Plugin
             }
         }
     }
+
+
+    /// <summary>
+    /// Operating system configurations
+    /// </summary>
+    [Flags]
+    public enum OSConfigurationFlags:byte
+    {
+        /// <summary>
+        /// No specific requirements to operating system configuration flags
+        /// </summary>
+        Any=0,
+        /// <summary>
+        /// Embedded configuration flag required
+        /// </summary>
+        Embedded=1,
+        /// <summary>
+        /// Linux configuration flag required
+        /// </summary>
+        Linux=2,
+        /// <summary>
+        /// MacOS configuration flag required
+        /// </summary>
+        MacOS=4,
+        /// <summary>
+        /// Unix configuration flag required
+        /// </summary>
+        Unix=8,
+        /// <summary>
+        /// Windows configuration flag required
+        /// </summary>
+        Windows=16,
+        /// <summary>
+        /// X11 configuration flag required
+        /// </summary>
+        X11=32,
+        /// <summary>
+        /// TabletPC configuration flag required
+        /// </summary>
+        TabletPC=64
+    }
+
+    /// <summary>
+    /// Defines the supported operating system configuration flags
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class SupportedOSConfigurations : Attribute
+    {
+        OSConfigurationFlags _ConfigurationFlags = OSConfigurationFlags.Any;
+        
+        /// <summary>
+        /// Defines the supported operating system configuration flags
+        /// </summary>
+        /// <param name="type"></param>
+        public SupportedOSConfigurations(OSConfigurationFlags configurationFlags)
+        {
+            this._ConfigurationFlags = configurationFlags;
+        }
+        /// <summary>
+        /// The required supported system configuration flags
+        /// </summary>
+        public OSConfigurationFlags ConfigurationFlags
+        {
+            get
+            {
+                return _ConfigurationFlags;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Defines the required operating system configuration flags
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class RequiredOSConfigurations : Attribute
+    {
+        OSConfigurationFlags _ConfigurationFlags = OSConfigurationFlags.Any;
+
+        /// <summary>
+        /// Defines the required operating system configuration flags
+        /// </summary>
+        /// <param name="type"></param>
+        public RequiredOSConfigurations(OSConfigurationFlags configurationFlags)
+        {
+            this._ConfigurationFlags = configurationFlags;
+        }
+        /// <summary>
+        /// The required operating system configuration flags
+        /// </summary>
+        public OSConfigurationFlags ConfigurationFlags
+        {
+            get
+            {
+                return _ConfigurationFlags;
+            }
+        }
+    }
+
+
+
 }

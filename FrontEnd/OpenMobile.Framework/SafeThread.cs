@@ -116,75 +116,10 @@ namespace OpenMobile.Threading
         /// </summary>
         /// <param name="function"></param>
         /// <param name="args"></param>
-        /// <param name="host"></param>
         public static void Asynchronous(Delegate function, object[] args)
         {
             Asynchronous(function, args, BuiltInComponents.Host);
         }
-
-/*
-        private static void spawnThread()
-        {
-            if (locks.Count >= maxThreads)
-                return; //max thread count
-            Thread p = new Thread(() =>
-            {
-                Function f;
-                int id = Thread.CurrentThread.ManagedThreadId;
-                ThreadState s = locks[id];
-                availableThreads++;
-                while (s.state >= 0)
-                {
-                    availableThreads--;
-                    while (functions.Count > 0)
-                    {
-                        try
-                        {
-                            f = functions.Dequeue();
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            locks.Remove(id);
-                            return; //race condition
-                        }
-                        try
-                        {
-                            if (f != null)
-                                f();
-                        }
-                        catch (Exception e)
-                        {
-                            if (theHost != null)
-                                theHost.sendMessage("SandboxedThread", "SafeThread", "", ref e);
-                        }
-                    }
-                    s.state = 1;
-                    availableThreads++;
-                    s.waitHandle.WaitOne(30000);
-                    s.state = 0;
-                    if ((functions.Count == 0) && (availableThreads > 1))
-                    {
-                        lock (locks)
-                            s.state--;
-                        availableThreads--;
-                    }
-                }
-                lock (locks)
-                    locks.Remove(id);
-            });
-
-            lock (locks)
-            {
-                // Only spawn new thread if not already active
-                if (!locks.ContainsKey(p.ManagedThreadId))
-                {
-                    locks.Add(p.ManagedThreadId, new ThreadState());
-                    p.Name = "OpenMobile.SafeThread";
-                    p.Start();                    
-                }
-            }
-        }
-*/
 
         private static void spawnThread()
         {

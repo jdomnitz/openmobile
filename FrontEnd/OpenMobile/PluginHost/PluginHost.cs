@@ -33,6 +33,7 @@ using OpenMobile.Media;
 using OpenMobile.Plugin;
 using OpenMobile.Zones;
 using OpenMobile;
+using OpenMobile.helperFunctions;
 
 namespace OpenMobile
 {
@@ -48,11 +49,6 @@ namespace OpenMobile
 
         private System.Threading.Timer tmrCurrentClock;
         private DateTime CurrentClock = DateTime.MinValue;
-
-        /// <summary>
-        /// The current GPS position and/or city/state/zip
-        /// </summary>
-        private Location _location = new Location();
 
         /// <summary>
         /// Holds the current "random" setting for each audio device
@@ -345,7 +341,7 @@ namespace OpenMobile
             BuiltInComponents.DataSources.Init();
 
             // Load datasource from the pluginHost
-            RegisterDataSources();
+            RegisterDataSources_Early();
 
             // Initialize data
             IPAddress = GetLocalIPAddress();
@@ -391,6 +387,10 @@ namespace OpenMobile
 
             // Initialize builtin helperfunctions
             SandboxedThread.Asynchronous(OpenMobile.helperFunctions.OSK.Init);
+
+            // Register commands and datasources
+            RegisterCommands_Late();
+            RegisterDataSources_Late();
         }
 
         #endregion
@@ -549,8 +549,8 @@ namespace OpenMobile
                 // TODO: ReEnable PlayList load and save
                 for (int i = 0; i < AudioDeviceCount; i++)
                 {
-                    PlaylistHandler.writePlaylistToDB("Current" + i.ToString(), getPlaylistForAudioDeviceInstance(i));
-                    s.setSetting("Media.Instance" + i.ToString() + ".Random", getRandomForAudioDeviceInstance(i).ToString());
+                    PlayList.writePlaylistToDB("Current" + i.ToString(), getPlaylistForAudioDeviceInstance(i));
+                    s.setSetting(BuiltInComponents.OMInternalPlugin, "Media.Instance" + i.ToString() + ".Random", getRandomForAudioDeviceInstance(i).ToString());
                 }
             }
         }
@@ -563,12 +563,12 @@ namespace OpenMobile
             using (PluginSettings s = new PluginSettings())
             {
                 bool res;
-                string dbname = s.getSetting("Default.MusicDatabase");
+                string dbname = s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase");
                 // TODO: ReEnable PlayList load and save
                 for (int i = 0; i < AudioDeviceCount; i++)
                 {
-                    setPlaylistForAudioDeviceInstance(PlaylistHandler.readPlaylistFromDB("Current" + i.ToString(), dbname), i);
-                    if (bool.TryParse(s.getSetting("Media.Instance" + i.ToString() + ".Random"), out res))
+                    setPlaylistForAudioDeviceInstance(PlayList.readPlaylistFromDB("Current" + i.ToString(), dbname), i);
+                    if (bool.TryParse(s.getSetting(BuiltInComponents.OMInternalPlugin, "Media.Instance" + i.ToString() + ".Random"), out res))
                         setRandomForAudioDeviceInstance(i, res);
                 }
             }
@@ -609,7 +609,7 @@ namespace OpenMobile
             string str;
             // TODO: Remove screen + 1
             using (PluginSettings settings = new PluginSettings())
-                str = settings.getSetting("Screen" + (screen + 1).ToString() + ".SoundCard");
+                str = settings.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + (screen + 1).ToString() + ".SoundCard");
             if (str.Length == 0)
                 return null;
             if (AudioDevices == null)
@@ -670,11 +670,11 @@ namespace OpenMobile
         private bool refreshAudioDevices()
         {
             AudioDevice[] devs = null;
-            foreach (IBasePlugin player in Core.pluginCollection.FindAll(p => typeof(IAVPlayer).IsInstanceOfType(p) == true))
+            foreach (IBasePlugin player in Core.pluginCollection.FindAll(p => typeof(IAudioDeviceProvider).IsInstanceOfType(p) == true))
             {
                 try
                 {
-                    devs = ((IPlayer)player).OutputDevices;
+                    devs = ((IAudioDeviceProvider)player).OutputDevices;
                 }
                 catch (Exception e)
                 {
@@ -731,11 +731,11 @@ namespace OpenMobile
                 {
                     using (PluginSettings s = new PluginSettings())
                     {
-                        _SkinPath = s.getSetting("UI.Skin");
+                        _SkinPath = s.getSetting(BuiltInComponents.OMInternalPlugin, "UI.Skin");
                         if (_SkinPath.Length == 0)
                         {
                             _SkinPath = "Default";
-                            s.setSetting("UI.Skin", _SkinPath);
+                            s.setSetting(BuiltInComponents.OMInternalPlugin, "UI.Skin", _SkinPath);
                         }
                     }
                     _SkinPath = Path.Combine(Application.StartupPath, "Skins", _SkinPath);
@@ -756,7 +756,13 @@ namespace OpenMobile
             get
             {
                 if (_DataPath == null)
+                {
                     _DataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile");
+
+                    // Ensure path is valid, if not create it
+                    if (!Directory.Exists(_DataPath))
+                        Directory.CreateDirectory(_DataPath);
+                }
                 return _DataPath;
             }
         }
@@ -769,7 +775,13 @@ namespace OpenMobile
             get
             {
                 if (_PluginPath == null)
+                {
                     _PluginPath = Path.Combine(Application.StartupPath, "Plugins");
+                    // Ensure path is valid, if not create it
+                    if (!Directory.Exists(_PluginPath))
+                        Directory.CreateDirectory(_PluginPath);
+
+                }
                 return _PluginPath;
             }
         }
@@ -924,17 +936,37 @@ namespace OpenMobile
         {
             get
             {
+                // Try to get data from the DB
+                if (_location == null || _location.IsEmpty())
+                    CurrentLocation = StoredData.GetXML<Location>(BuiltInComponents.OMInternalPlugin, "Location.Current.Data");
+
+                // If location is still empty, default to users home position
+                if (_location == null || _location.IsEmpty())
+                    CurrentLocation = BuiltInComponents.SystemSettings.Location_Home;
+
                 return _location;
             }
             set
             {
+                // Ensure we have a valid value
                 if (value == null)
                     return;
-                _location = value;
-                if ((_location == null) || (_location.City != value.City) || (_location.Street != value.Street) || (_location.Zip != value.Zip))
+
+                // Is this a new location?
+                if (_location != value)
+                {   // Yes
+                    _location = value;
+                    // Update datasource
+                    DataSource_Location_Current.SetValue(_location);
+                    // Update database
+                    StoredData.SetXML(BuiltInComponents.OMInternalPlugin, "Location.Current.Data", _location);
+                    // Raise event
                     raiseNavigationEvent(eNavigationEvent.LocationChanged, _location.ToString());
+                }
             }
         }
+        private Location _location = new Location();
+
 
         #endregion
 
@@ -985,7 +1017,7 @@ namespace OpenMobile
             security.addControl(img);
             OMLabel label = new OMLabel("", 250, 200, 500, 115);
             label.Text = pluginName + " is requesting access to the credentials cache to access your " + requestedAccess + ".";
-            label.TextAlignment = Alignment.WordWrapTC;
+            label.TextAlignment = Alignment.WordWrap | Alignment.CenterCenter;
             label.Font = new Font(Font.Arial, 22F);
             security.addControl(label);
             OMLabel title = new OMLabel("", 260, 135, 480, 60);
@@ -1232,7 +1264,18 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// The area available to plugins for placeing controls
+        /// The area available to plugins for placing controls during initialization time
+        /// </summary>
+        public Rectangle ClientArea_Init
+        {
+            get
+            {
+                return _ClientArea[0];
+            }
+        }
+
+        /// <summary>
+        /// The area available to plugins for placing controls at runtime
         /// </summary>
         public Rectangle[] ClientArea 
         { 
@@ -1342,7 +1385,7 @@ namespace OpenMobile
                 case eFunction.listenForSpeech:
                     string s;
                     using (PluginSettings set = new PluginSettings())
-                        s = set.getSetting("Default.Speech");
+                        s = set.getSetting(BuiltInComponents.OMInternalPlugin, "Default.Speech");
                     if (s.Length > 0)
                     {
                         IBasePlugin b = Core.pluginCollection.Find(q => q.pluginName == s);
@@ -1416,6 +1459,10 @@ namespace OpenMobile
             IBasePlugin plugin;
             switch (function)
             {
+                // Load a AV player 
+                case eFunction.loadAVPlayer:
+                    return execute(eFunction.loadAVPlayer, arg, String.Empty);
+
                 // Prompt user to dial
                 case eFunction.promptDialNumber:
                     raiseSystemEvent(eFunction.promptDialNumber, arg, String.Empty, String.Empty);
@@ -1975,31 +2022,62 @@ namespace OpenMobile
                 // Load a AV player with the specified instance from the specified plugin
                 case eFunction.loadAVPlayer:
                     {
-                        if (int.TryParse(arg1, out ret) == true)
-                        {
-                            Zone zone = ZoneHandler.GetZone(ret);
-                            if (zone == null) return false;
-                            if (currentMediaPlayer == null) return false;
-                            return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
-                            {
-                                if (currentMediaPlayer[subZone.AudioDevice.Instance] != null)
-                                    return false;
-                                if (currentTunedContent[subZone.AudioDevice.Instance] != null)
-                                    execute(eFunction.unloadTunedContent, arg1);
-                                IAVPlayer player = (IAVPlayer)Core.pluginCollection.FindAll(i => typeof(IAVPlayer).IsInstanceOfType(i)).Find(i => i.pluginName == arg2);
-                                if (player == null)
-                                    return false;
+                        //int zoneID = -1;
+                        //if (int.TryParse(arg1, out zoneID))
+                        //{
+                        //    Zone zone = ZoneHandler.GetZone(zoneID);
+                        //    // Errorcheck
+                        //    if (zone == null) return false;
 
-                                //Hook events it if its not already hooked
-                                if (Array.Exists<IAVPlayer>(currentMediaPlayer, a => a == player) == false)
-                                    player.OnMediaEvent += raiseMediaEvent;
+                        //    // Get available player
+                        //    IMediaProvider player = null;
+                        //    if (String.IsNullOrEmpty(arg2))
+                        //    {   // Find first matching player
+                        //        List<IBasePlugin> alternatePlayers = Core.pluginCollection.FindAll(i => typeof(IMediaProvider).IsInstanceOfType(i));
+                        //        player = (IMediaProvider)alternatePlayers.Find(x => (((IMediaProvider)x).MediaProviderType & MediaProviderTypes.AudioPlayback) == MediaProviderTypes.AudioPlayback);
+                        //    }
+                        //    else
+                        //        // Find specific player
+                        //        player = (IMediaProvider)Core.pluginCollection.FindAll(i => typeof(IMediaProvider).IsInstanceOfType(i)).Find(i => i.pluginName == arg2);
 
-                                currentMediaPlayer[subZone.AudioDevice.Instance] = player;
-                                raiseMediaEvent(eFunction.loadAVPlayer, subZone, arg2);
-                                return true;
-                            });
-                        }
+                        //    // Errorcheck
+                        //    if (player == null) return false;
+
+                        //    // Initialize player
+                        //    if (player.ActivateMediaProvider(zone))
+                        //        // Map player
+                        //        zone.MediaHandler.ActiveMediaProvider = player;
+
+                        //    return true;
+                        //}
                         return false;
+
+
+                        //if (int.TryParse(arg1, out ret) == true)
+                        //{
+                        //    Zone zone = ZoneHandler.GetZone(ret);
+                        //    if (zone == null) return false;
+                        //    if (currentMediaPlayer == null) return false;
+                        //    return ZoneHandler.ForEachZoneInZone(zone, delegate(Zone subZone)
+                        //    {
+                        //        if (currentMediaPlayer[subZone.AudioDevice.Instance] != null)
+                        //            return false;
+                        //        if (currentTunedContent[subZone.AudioDevice.Instance] != null)
+                        //            execute(eFunction.unloadTunedContent, arg1);
+                        //        IAVPlayer player = (IAVPlayer)Core.pluginCollection.FindAll(i => typeof(IAVPlayer).IsInstanceOfType(i)).Find(i => i.pluginName == arg2);
+                        //        if (player == null)
+                        //            return false;
+
+                        //        //Hook events it if its not already hooked
+                        //        if (Array.Exists<IAVPlayer>(currentMediaPlayer, a => a == player) == false)
+                        //            player.OnMediaEvent += raiseMediaEvent;
+
+                        //        currentMediaPlayer[subZone.AudioDevice.Instance] = player;
+                        //        raiseMediaEvent(eFunction.loadAVPlayer, subZone, arg2);
+                        //        return true;
+                        //    });
+                        //}
+                        //return false;
                     }
 
                 // Load a tuned content with the specified instance from the specified plugin
@@ -2154,13 +2232,15 @@ namespace OpenMobile
                                         return false;
                                     raiseMediaEvent(eFunction.setPlayerVolume, subZone, arg2);
                                     if (int.TryParse(arg2, out ret2))
-                                        return currentTunedContent[subZone.AudioDevice.Instance].setVolume(subZone, ret2);
+                                        if (typeof(IPlayerVolumeControl).IsInstanceOfType(currentTunedContent[zone.AudioDevice.Instance]))
+                                            ((IPlayerVolumeControl)currentTunedContent[zone.AudioDevice.Instance]).setVolume(subZone, ret2);
                                 }
                                 else
                                 {
                                     raiseMediaEvent(eFunction.setPlayerVolume, subZone, arg2);
                                     if (int.TryParse(arg2, out ret2))
-                                        return currentMediaPlayer[subZone.AudioDevice.Instance].setVolume(subZone, ret2);
+                                        if (typeof(IPlayerVolumeControl).IsInstanceOfType(currentMediaPlayer[zone.AudioDevice.Instance]))
+                                            ((IPlayerVolumeControl)currentMediaPlayer[zone.AudioDevice.Instance]).setVolume(subZone, ret2);
                                 }
                                 return false;
                             });
@@ -2868,18 +2948,38 @@ namespace OpenMobile
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        public void raiseSystemEvent(eFunction e, string arg1, string arg2, string arg3)
+        public void raiseSystemEvent(eFunction e, params object[] args)
         {
-            System.Diagnostics.Debug.WriteLine(String.Format("raiseSystemEvent( eFunction: {0}, arg1: {1}, arg2: {2}, arg3: {3}", e, arg1, arg2, arg3));
+            // Log arguments
+            string sArgs = "";
+            if (args != null)
+            {
+                for (int i = 0; i < args.Length; i++)
+                {
+                    sArgs += String.Format(", arg{0}: {1}", i, args[i]);
+                }
+            }
+            System.Diagnostics.Debug.WriteLine(String.Format("raiseSystemEvent( eFunction: {0}, {1}", e, sArgs));
 
             // Update data sources
             if (e == eFunction.connectedToInternet)
+            {
                 InternetAccess = true;
+                InternetAvailable_Exec();
+            }
+            else if (e == eFunction.disconnectedFromInternet)
+                InternetAccess = false;
+
+            else if (e == eFunction.pluginLoadingComplete)
+            {
+                // Execute actions
+                PluginLoadingCompleted_Exec();
+            }
 
             try
             {
                 if (OnSystemEvent != null)
-                    OnSystemEvent(e, arg1, arg2, arg3);
+                    OnSystemEvent(e, args);
             }
             catch (Exception error) { SandboxedThread.Handle(error); }
         }
@@ -2920,7 +3020,8 @@ namespace OpenMobile
         /// <param name="arg"></param>
         public void raiseNavigationEvent(eNavigationEvent type, string arg)
         {
-            System.Diagnostics.Debug.WriteLine(String.Format("raiseNavigationEvent( eNavigationEvent: {0}, arg: {1}", type, arg));
+            if (type != eNavigationEvent.LocationChanged)
+                System.Diagnostics.Debug.WriteLine(String.Format("raiseNavigationEvent( eNavigationEvent: {0}, arg: {1}", type, arg));
             try
             {
                 if (OnNavigationEvent != null)
@@ -3282,6 +3383,9 @@ namespace OpenMobile
 
                     // Get a reference to the current media database
                     case eGetData.GetMediaDatabase:
+                        if (String.IsNullOrEmpty(name))
+                            name = BuiltInComponents.SystemSettings.DefaultDB_Music;
+
                         plugin = Core.pluginCollection.Find(t => t.pluginName == name);
                         if (plugin == null)
                             return;
@@ -3299,6 +3403,13 @@ namespace OpenMobile
                         else
                         {
                             data = Core.pluginCollection.Find(p => p.pluginName == name);
+                            return;
+                        }
+
+                    // Get a list of disabled plugins (or a single one)
+                    case eGetData.GetPluginsDisabled:
+                        {
+                            data = Core.pluginCollectionDisabled;
                             return;
                         }
 
@@ -3473,9 +3584,11 @@ namespace OpenMobile
                                 if (currentTunedContent[zone.AudioDevice.Instance] == null)
                                     return;
                                 else
-                                    data = currentTunedContent[zone.AudioDevice.Instance].getVolume(zone);
+                                    if (typeof(IPlayerVolumeControl).IsInstanceOfType(currentTunedContent[zone.AudioDevice.Instance]))
+                                        data = ((IPlayerVolumeControl)currentTunedContent[zone.AudioDevice.Instance]).getVolume(zone);
                             else
-                                data = currentMediaPlayer[zone.AudioDevice.Instance].getVolume(zone);
+                                if (typeof(IPlayerVolumeControl).IsInstanceOfType(currentMediaPlayer[zone.AudioDevice.Instance]))
+                                    data = ((IPlayerVolumeControl)currentMediaPlayer[zone.AudioDevice.Instance]).getVolume(zone);
                         }
                         return;
 
@@ -3850,42 +3963,108 @@ namespace OpenMobile
         private DataSource DataSource_NetWork_Internet_Online;
         private DataSource DataSource_NetWork_IP;
         private DataSource DataSource_NetWork_Available;
+        private DataSource DataSource_Location_Current;
 
-        private void RegisterDataSources()
+        private void RegisterDataSources_Early()
         {
             // Internet connection available
             DataSource_NetWork_Internet_Online = new DataSource("OM", "Network", "Internet", "Online", DataSource.DataTypes.binary, "The state of the internet connection");
-            BuiltInComponents.Host.DataHandler.AddDataProvider(DataSource_NetWork_Internet_Online, _InternetAccess);
+            BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_NetWork_Internet_Online, _InternetAccess);
 
             // Current ipaddress
             DataSource_NetWork_IP = new DataSource("OM", "Network", "IP", "", DataSource.DataTypes.raw, "Current IP address of the main adapter");
-            BuiltInComponents.Host.DataHandler.AddDataProvider(DataSource_NetWork_IP, _IPAddress);
+            BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_NetWork_IP, _IPAddress);
 
             // Network available
             DataSource_NetWork_Available = new DataSource("OM", "Network", "Available", "", DataSource.DataTypes.binary, "The availability of a network connection");
-            BuiltInComponents.Host.DataHandler.AddDataProvider(DataSource_NetWork_Available, _NetWorkAvailable);
+            BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_NetWork_Available, _NetWorkAvailable);
+
+            // Current location
+            DataSource_Location_Current = new DataSource("OM", "Location", "Current", "", DataSource.DataTypes.raw, "Current location as class Location");
+            BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_Location_Current, CurrentLocation);
         }
 
-        /*
-        private object DataSourceProvider(OpenMobile.Data.DataSource dataSource, out bool result, object[] param)
+        private void RegisterDataSources_Late()
+        {
+
+        }
+
+        private void RegisterCommands_Late()
+        {
+            // Create commands for all available screens
+            for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+            {
+                // Go back
+                BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", Command.GetScreenName(i), "Panel", "Goto.Previous", CommandExecutor, 0, false, "Goes to the previous panel"));
+
+                // Go home
+                BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", Command.GetScreenName(i), "Panel", "Goto.Home", CommandExecutor, 0, false, "Goes back to the main menu panel"));
+            }
+        }
+
+        private object CommandExecutor(Command command, object[] param, out bool result)
         {
             result = true;
-            switch (dataSource.FullName)
-            {
-                case "Network.Internet.Online":
-                        return _InternetAccess;
+            
+            // Go back
+            if (command.NameLevel2 == "Panel" && command.NameLevel3 == "Goto.Previous")
+                execute(eFunction.goBack, Command.GetScreenNumber(command.NameLevel1));
 
-                case "Network.IP":
-                        return _IPAddress;
+            // Go back
+            else if (command.NameLevel2 == "Panel" && command.NameLevel3 == "Goto.Home")
+                execute(eFunction.goHome, Command.GetScreenNumber(command.NameLevel1));
 
-                case "Network.IP":
-                        return _IPAddress;
-            }
+            //else
+            //{   // Default action
+            //    result = false;
+            //}
             return null;
         }
-        */
+
         #endregion
 
+        /// <summary>
+        /// Code that should be executed after all plugins are loaded
+        /// </summary>
+        private void PluginLoadingCompleted_Exec()
+        {
+            // Preload media players
+            for (int i = 0; i < ZoneHandler.Zones.Count; i++)
+                execute(eFunction.loadAVPlayer, ZoneHandler.Zones[i]);
+            
+            for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+            {
+                // Execute actions (if present)
+                string action = BuiltInComponents.SystemSettings.StartupAction(i);
+                if (!string.IsNullOrEmpty(action))
+                    CommandHandler.ExecuteCommand(action);
+            }
+        }
+
+        /// <summary>
+        /// Code that should be executed when a internet connection is available
+        /// </summary>
+        private void InternetAvailable_Exec()
+        {
+            // Check if we have enough location data available in the db
+        }
+
+        /// <summary>
+        /// Gets data for the renderingwindow
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <returns></returns>
+        public RenderingWindowData GetRenderingWindowData(int screen)
+        {
+            return new RenderingWindowData(Core.RenderingWindows[screen].ClientLocation, Core.RenderingWindows[screen].Size, Core.RenderingWindows[screen].ScaleFactors);
+        }
+
+        public iRenderingWindow RenderingWindowInterface(int screen)
+        {
+            if (screen < 0 || screen >= Core.RenderingWindows.Count)
+                return null;
+            return Core.RenderingWindows[screen] as iRenderingWindow;
+        }
 
     }
 }

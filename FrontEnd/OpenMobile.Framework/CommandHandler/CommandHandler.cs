@@ -25,14 +25,26 @@ using System.Threading;
 
 namespace OpenMobile
 {
+    /// <summary>
+    /// A class for handling commands in OM
+    /// </summary>
     public class CommandHandler
     {
+        /// <summary>
+        /// A delegate used for monitoring commands
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="param"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public delegate void CommandMonitorDelegate(Command command, object[] param, string name);
+
         private List<Command> _Commands = new List<Command>();
 
         /// <summary>
         /// Adds a new dataprovider
         /// </summary>
-        /// <param name="dataSource"></param>
+        /// <param name="command"></param>
         public void AddCommand(Command command)
         {
             // Check for valid command
@@ -88,9 +100,15 @@ namespace OpenMobile
                 // Get datasource
                 return _Commands.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Provider.ToLower() == provider.ToLower() && x.Valid));
             }
-
+            
             // Get normal datasource
-            return _Commands.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Valid));
+            Command command = _Commands.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Valid));
+
+            // Log data
+            if (command == null)
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "CommandHandler", String.Format("Command not available: {0}", name));
+
+            return command;
         }
 
         /// <summary>
@@ -103,10 +121,29 @@ namespace OpenMobile
         public object ExecuteCommand(string name, object[] param, out bool result)
         {
             result = false;
-            Command command = GetCommand(name);
-            if (command == null)
+
+            string[] names = name.Split(Command.CommandSeparator);
+            if (names.Length > 1)
+            {   // Execute multiple commands
+                for (int i = 0; i < names.Length; i++)
+                {
+                    Command command = GetCommand(names[i]);
+                    if (command == null)
+                        continue;
+                    command.Execute(param, out result);
+                    Raise_CommandExecMonitor(command, param, name);
+                }
                 return null;
-            return command.Execute(param, out result);
+            }
+            else
+            {   // Execute single command
+                Command command = GetCommand(names[0]);
+                if (command == null)
+                    return null;
+                object retVal = command.Execute(param, out result);
+                Raise_CommandExecMonitor(command, param, name);
+                return retVal;
+            }
         }
 
         /// <summary>
@@ -124,6 +161,7 @@ namespace OpenMobile
         /// Executes a command with parameters but without result check
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="param"></param>
         /// <returns></returns>
         public object ExecuteCommand(string name, object[] param)
         {
@@ -131,6 +169,21 @@ namespace OpenMobile
             return ExecuteCommand(name, param, out result);
         }
 
+        /// <summary>
+        /// Fires when a command is executed
+        /// </summary>
+        public event CommandMonitorDelegate CommandExecMonitor;
 
+        /// <summary>
+        /// Raises the command monitor event
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="param"></param>
+        /// <param name="name"></param>
+        private void Raise_CommandExecMonitor(Command command, object[] param, string name)
+        {
+            if (CommandExecMonitor != null)
+                CommandExecMonitor(command, param, name);
+        }
     }
 }

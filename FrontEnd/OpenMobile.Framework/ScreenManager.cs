@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using OpenMobile.Controls;
 using System.Threading;
 using System.Runtime.Serialization;
+using OpenMobile.Plugin;
 
 namespace OpenMobile.Framework
 {
@@ -34,43 +35,72 @@ namespace OpenMobile.Framework
     {
         private int screens;
         private List<OMPanel[]> panels;
-        private string _DefaultPanel = "";
+        private string _DefaultPanelName = "";
 
         /// <summary>
         /// Sets or gets the name of the default panel (this panel is returned if the requested panel is "")
         /// </summary>
-        public string DefaultPanel
+        public string DefaultPanelName
         {
             get
             {
-                return _DefaultPanel;
+                return _DefaultPanelName;
             }
-            set
+            private set
             {
-                if ((value == null) || (value == "") || (value == string.Empty))
-                    throw new Exception("Default panel name can not be set to null, empty or \"\"");
-                _DefaultPanel = value;
+                _DefaultPanelName = value;
             }
         }
 
         /// <summary>
-        /// Create a new screen manager
+        /// The default panel for this screen manager
         /// </summary>
-        /// <param name="numberOfScreens"></param>
-        public ScreenManager()
+        public OMPanel[] DefaultPanel
         {
-            screens = BuiltInComponents.Host.ScreenCount;
-            panels = new List<OMPanel[]>();
+            get
+            {
+                return this._DefaultPanel;
+            }
+            private set
+            {
+                if (this._DefaultPanel != value)
+                {
+                    this._DefaultPanel = value;
+                }
+            }
         }
+        private OMPanel[] _DefaultPanel;        
+
+        /// <summary>
+        /// The ownerplugin of this object
+        /// </summary>
+        public IBasePlugin OwnerPlugin
+        {
+            get
+            {
+                return this._OwnerPlugin;
+            }
+            set
+            {
+                if (this._OwnerPlugin != value)
+                {
+                    this._OwnerPlugin = value;
+                }
+            }
+        }
+        private IBasePlugin _OwnerPlugin;        
+
         /// <summary>
         /// Create a new screen manager
         /// </summary>
-        /// <param name="numberOfScreens"></param>
-        public ScreenManager(int numberOfScreens)
+        /// <param name="ownerPlugin"></param>
+        public ScreenManager(IBasePlugin ownerPlugin)
         {
-            screens = numberOfScreens;
+            screens = BuiltInComponents.Host.ScreenCount;
             panels = new List<OMPanel[]>();
+            _OwnerPlugin = ownerPlugin;
         }
+
         /// <summary>
         /// Gets the panel for the given screen (default panel)
         /// </summary>
@@ -126,12 +156,34 @@ namespace OpenMobile.Framework
             {
                 lock (this)
                 {
+                    // Exit if no panel is available 
+                    if (panels.Count == 0)
+                        return null;
+
                     if ((screen < 0) || (screen >= screens))
                         throw new IndexOutOfRangeException();
 
                     // Load default panel?
                     if (name == "")
-                        name = DefaultPanel;
+                    {
+                        // Try to get default panel based on name
+                        if (!String.IsNullOrEmpty(_DefaultPanelName))
+                            return panels.Find(x => ((x[screen] != null) && (x[screen].Name == _DefaultPanelName)))[screen];
+
+                        // Try to get default panel based on first item loaded
+                        if (_DefaultPanel != null && _DefaultPanel[screen] == null)
+                            return panels.Find(x => (x[screen] != null))[screen];
+
+                        // Try to get default panel based on object
+                        if (_DefaultPanel != null)
+                            return _DefaultPanel[screen];
+
+                        // Return first hit with an empty name
+                        if (_DefaultPanelName != null)
+                            return panels.Find(x => ((x[screen] != null) && (x[screen].Name == _DefaultPanelName)))[screen];
+
+                        return null;
+                    }
 
                     OMPanel[] p = panels.Find(x => ((x[screen] != null) && (x[screen].Name == name)));
                     if (p == null)
@@ -145,12 +197,40 @@ namespace OpenMobile.Framework
         /// <summary>
         /// Sets the default panel
         /// </summary>
-        /// <param name="panel"></param>
-        public void SetDefaultPanel(OMPanel panel)
+        /// <param name="panels"></param>
+        public void SetDefaultPanel(OMPanel[] panels)
         {
-            DefaultPanel = panel.Name;
+            _DefaultPanelName = "";
+            foreach (OMPanel panel in panels)
+                if (panel != null && panel.Name != null)
+                    _DefaultPanelName = panel.Name;
+            _DefaultPanel = panels;
+
+            for (int screen = 0; screen < BuiltInComponents.Host.ScreenCount; screen++)
+            {
+                // Create commands for goto default panels
+                BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", screen), "Panel.Goto.Default", OwnerPlugin.pluginName, CommandExecutor, 0, false, "Unloads all other panels and changes to the default panel for this plugin"));
+            }
         }
 
+        private object CommandExecutor(Command command, object[] param, out bool result)
+        {
+            result = true;
+
+            // Goto default panel
+            if (command.NameLevel2 == "Panel.Goto.Default")
+                BuiltInComponents.Host.execute(eFunction.GotoPanel, helperFunctions.DataHelpers.GetScreenFromString(command.NameLevel1), command.NameLevel3);
+
+            // Goto default panel
+            if (command.NameLevel2 == "Panel.Goto")
+                BuiltInComponents.Host.execute(eFunction.GotoPanel, helperFunctions.DataHelpers.GetScreenFromString(command.NameLevel1), command.NameLevel3.Replace(".", ";"));
+
+            else
+            {   // Default action
+                result = false;
+            }
+            return null;
+        }
 
         /// <summary>
         /// Loads a panel for duplication
@@ -159,15 +239,25 @@ namespace OpenMobile.Framework
         /// <param name="Default">True = Set as default panel</param>
         public void loadPanel(OMPanel source, bool Default)
         {
-            if (Default)
-                SetDefaultPanel(source);
-            loadPanel(source);
+            loadPanel(source, Default, true);
         }
+
         /// <summary>
         /// Loads a panel for duplication
         /// </summary>
         /// <param name="source"></param>
         public void loadPanel(OMPanel source)
+        {
+            loadPanel(source, false, true);
+        }
+
+        /// <summary>
+        /// Loads a panel for duplication
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="Default"></param>
+        /// <param name="commandGeneration"></param>
+        public void loadPanel(OMPanel source, bool Default, bool? commandGeneration)
         {
             if (source == null)
                 return;
@@ -190,7 +280,7 @@ namespace OpenMobile.Framework
                         collection[i].Manager = this;
                         collection[i].ActiveScreen = i;
                     }
-                panels.Add(collection);
+                Panels_Add_Internal(collection, Default, true);
             }
         }
         /// <summary>
@@ -200,20 +290,25 @@ namespace OpenMobile.Framework
         /// <param name="source"></param>
         public void loadPanel(OMPanel[] source)
         {
+            loadPanel(source, false, true);
+        }
+
+        /// <summary>
+        /// Load a panel array containing screen specific versions of a panel
+        /// <para>Note: All panels must have the same name</para>
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="commandGeneration"></param>
+        public void loadPanel(OMPanel[] source, bool Default, bool? commandGeneration)
+        {
             if (source == null)
                 return;
             if (source.Length != screens)
                 return;
-            //lock (this)
             {
                 // Set this screenmanager as manager for the new panel
                 for (int i = 0; i < source.Length; i++)
-                {
-                    loadPanel(source[i]);
-                    //source[i].Manager = this;
-                    //source[i].ActiveScreen = i;
-                }
-                //panels.Add(source);
+                    loadPanel(source[i], Default, commandGeneration);
             }
         }
 
@@ -224,15 +319,24 @@ namespace OpenMobile.Framework
         /// <param name="Default">True = Set as default panel</param>
         public void loadSharedPanel(OMPanel source, bool Default)
         {
-            if (Default)
-                SetDefaultPanel(source);
-            loadSharedPanel(source);
+            loadSharedPanel(source, Default, true);
         }
+
         /// <summary>
         /// Loads a panel thats shared between all screens instead of being screen-independent
         /// </summary>
         /// <param name="source"></param>
         public void loadSharedPanel(OMPanel source)
+        {
+            loadSharedPanel(source, false, true);
+        }
+
+        /// <summary>
+        /// Loads a panel thats shared between all screens instead of being screen-independent
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="commandGeneration"></param>
+        public void loadSharedPanel(OMPanel source, bool Default, bool? commandGeneration)
         {
             if (source == null)
                 return;
@@ -247,28 +351,39 @@ namespace OpenMobile.Framework
                     collection[i] = source;
                     collection[i].ActiveScreen = i;
                 }
-                panels.Add(collection);
+                Panels_Add_Internal(collection, Default, true);
             }
         }
-
 
         /// <summary>
         /// Loads a panel that belongs to a specific screen
         /// </summary>
         /// <param name="source"></param>
+        /// <param name="screen"></param>
         /// <param name="Default">True = Set as default panel</param>
         public void loadSinglePanel(OMPanel source, int screen, bool Default)
         {
-            if (Default)
-                SetDefaultPanel(source);
-            loadSinglePanel(source, screen);
+            loadSinglePanel(source, screen, Default, true);
         }
+
         /// <summary>
         /// Loads a panel that belongs to a specific screen
         /// </summary>
         /// <param name="source"></param>
         /// <param name="screen"></param>
         public void loadSinglePanel(OMPanel source, int screen)
+        {
+            loadSinglePanel(source, screen, false, true);
+        }
+
+        /// <summary>
+        /// Loads a panel that belongs to a specific screen
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="screen"></param>
+        /// <param name="Default"></param>
+        /// <param name="commandGeneration"></param>
+        public void loadSinglePanel(OMPanel source, int screen, bool Default, bool? commandGeneration)
         {
             if (source == null)
                 return;
@@ -282,7 +397,37 @@ namespace OpenMobile.Framework
                 if ((screen < 0) || (screen >= screens))
                     return;
                 collection[screen] = source;
-                panels.Add(collection);
+                Panels_Add_Internal(collection, Default, commandGeneration);
+            }
+        }
+
+        private void Panels_Add_Internal(OMPanel[] panelsToAdd, bool Default, bool? generateCommand)
+        {
+            if (generateCommand == null)
+                generateCommand = false;
+
+            // Map owner plugin
+            foreach (OMPanel panel in panelsToAdd)
+            {
+                if (panel != null)
+                    panel.OwnerPlugin = _OwnerPlugin;
+            }
+
+            this.panels.Add(panelsToAdd);
+
+            if (Default)
+                SetDefaultPanel(panelsToAdd);
+
+            if ((bool)generateCommand)
+            {
+                for (int i = 0; i < panelsToAdd.Length; i++)
+                {
+                    if (panelsToAdd[i] != null)
+                    {
+                        // Create commands to goto a panel specified via parameters
+                        BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", i), "Panel.Goto",panelsToAdd[i].OwnerPlugin.pluginName + ( String.IsNullOrEmpty(panelsToAdd[i].Name) ? "" : "." + panelsToAdd[i].Name), CommandExecutor, 0, false, "Unloads all other panels and changes to the new panel"));
+                    }
+                }
             }
         }
 
@@ -293,8 +438,8 @@ namespace OpenMobile.Framework
         public void unloadPanel(string name)
         {
             // Reset default panel
-            if (name == DefaultPanel)
-                _DefaultPanel = "";
+            if (name == DefaultPanelName)
+                _DefaultPanelName = "";
 
             unloadPanel(name, 0);
         }
@@ -306,8 +451,8 @@ namespace OpenMobile.Framework
         public void unloadPanel(string name, int screen)
         {
             // Reset default panel
-            if (name == DefaultPanel)
-                _DefaultPanel = "";
+            if (name == DefaultPanelName)
+                _DefaultPanelName = "";
 
             lock (this)
             {
@@ -364,6 +509,10 @@ namespace OpenMobile.Framework
 
         #endregion
 
+        /// <summary>
+        /// Returns a string representing this object
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return String.Format("{0}({1})", base.ToString(), this.GetHashCode());

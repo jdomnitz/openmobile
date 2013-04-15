@@ -34,7 +34,7 @@ using OpenMobile.helperFunctions.Graphics;
 
 namespace OpenMobile
 {
-    public class RenderingWindow : GameWindow
+    public class RenderingWindow : GameWindow, iRenderingWindow
     {
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace OpenMobile
 
         bool Identify;
         float IdentifyOpacity = 1f;
-        Graphics.Graphics g;
+        public Graphics.Graphics g;
         Point CursorPosition = new Point();
         float CursorDistance = 0f;
         Point CursorDistanceXYTotal = new Point();
@@ -53,7 +53,19 @@ namespace OpenMobile
         Stopwatch swCursorSpeedTiming = new Stopwatch();
         bool keyboardActive;
         bool BlockRendering = false;
-        
+        bool _RenderingReset = false;
+
+        /// <summary>
+        /// The graphic device
+        /// </summary>
+        public Graphics.Graphics graphics
+        {
+            get
+            {
+                return g;
+            }
+        }
+
         /// <summary>
         /// Contains the currently focused control's parent object (if any)
         /// <para>The control is only set if a control implements certain interfaces (like iContainer)</para>
@@ -250,9 +262,10 @@ namespace OpenMobile
             this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
             this.Closing += new EventHandler<System.ComponentModel.CancelEventArgs>(this.RenderingWindow_FormClosing);
             this.Resize += new EventHandler<EventArgs>(this.RenderingWindow_Resize);
+            this.Move += new EventHandler<EventArgs>(this.RenderingWindow_Resize);
             this.Gesture += new EventHandler<OpenMobile.Graphics.TouchEventArgs>(RenderingWindow_Gesture);
             this.ResolutionChange += new EventHandler<OpenMobile.Graphics.ResolutionChange>(RenderingWindow_ResolutionChange);
-            tmrClickHold.Elapsed += new System.Timers.ElapsedEventHandler(tmrClickLong_Elapsed);
+            tmrClickHold.Elapsed += new System.Timers.ElapsedEventHandler(tmrClickHold_Elapsed);
 
             // Start input router
             if (screen == 0)
@@ -268,7 +281,7 @@ namespace OpenMobile
                 DefaultMouse.Location = this.Location;             
         }
 
-        void tmrClickLong_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        void tmrClickHold_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             // Disable timer to prevent multiple hits
             tmrClickHold.Enabled = false;
@@ -282,7 +295,7 @@ namespace OpenMobile
                 return;
 
             // Activate hold click
-            ActivateClick(FocusedControl, ClickTypes.Hold);
+            ActivateClick(FocusedControl, ClickTypes.Hold, (tmrClickHold.Tag is MouseButtonEventArgs ? tmrClickHold.Tag : null) as MouseButtonEventArgs);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -298,6 +311,7 @@ namespace OpenMobile
 
         public void Run(GameWindowFlags flags, Size initalScreenSize)
         {
+
             //NativeInitialize(flags, 800, 480);
             //NativeInitialize(flags, 1000, 600);
             NativeInitialize(flags, initalScreenSize.Width, initalScreenSize.Height);
@@ -331,6 +345,9 @@ namespace OpenMobile
             g.Clear(Color.Black);
             g.ResetClip();
 
+            // Inform graphics that rendering begins
+            g.Begin();
+
             RenderPanels();
 
             // Render gestures
@@ -351,7 +368,8 @@ namespace OpenMobile
 
             SwapBuffers(); //show the new image before potentially lagging
 
-            g.Finish();
+            // Inform graphics that rendering ends
+            g.End();
         }
 
 
@@ -396,7 +414,7 @@ namespace OpenMobile
                             RenderUpdateMarker = @"-";
                             break;
                     }
-                    DebugString.Text = String.Format("Screen: {0} {1}\nFPS: {2}/{3}/{4}\nFocus: {5}.{6}\nFocusParent: {7}\nUnderMouse: {8}.{9}", screen, RenderUpdateMarker, FPS_Min, FPS, FPS_Max, (FocusedControl != null && FocusedControl.Parent != null ? FocusedControl.Parent.Name : ""), (FocusedControl != null ? FocusedControl.Name : ""), (FocusedControlParent != null ? FocusedControlParent.Name : ""), (MouseOverControl != null && MouseOverControl.Parent != null ? MouseOverControl.Parent.Name : ""), (MouseOverControl != null ? MouseOverControl.Name : ""));
+                    DebugString.Text = String.Format("OpenGL version {10} / OMEngine: {11} / Renderer: {12}\nScreen: {0} {1}\nFPS: {2}/{3}/{4}\nFocus: {5}.{6}\nFocusParent: {7}\nUnderMouse: {8}.{9}", screen, RenderUpdateMarker, FPS_Min, FPS, FPS_Max, (FocusedControl != null && FocusedControl.Parent != null ? FocusedControl.Parent.Name : ""), (FocusedControl != null ? FocusedControl.Name : ""), (FocusedControlParent != null ? FocusedControlParent.Name : ""), (MouseOverControl != null && MouseOverControl.Parent != null ? MouseOverControl.Parent.Name : ""), (MouseOverControl != null ? MouseOverControl.Name : ""), Graphics.Graphics.Version, Graphics.Graphics.GraphicsEngine, Graphics.Graphics.Renderer);
                     if (DebugString.Changed)
                         RenderDebugInfoTexture = g.GenerateTextTexture(RenderDebugInfoTexture, 0, 0, 1000, 300, DebugString.Text, new Font(Font.Arial, 12), eTextFormat.Normal, Alignment.TopLeft, Color.Yellow, Color.Yellow);
                     g.DrawImage(RenderDebugInfoTexture, 0, 0, 1000, 300);
@@ -436,13 +454,14 @@ namespace OpenMobile
             // Reset transformation data
             g.ResetTransform();
             RenderingParam.Alpha = 1.0f;
+            RenderingParam.TransitionActive = false;
 
             // Exit after resetting transiton effects?
             if (e == null)
                 return;
 
             // Apply any offset data
-            g.TranslateTransform(e.Offset.X, e.Offset.Y);
+            g.Translate(e.Offset.X, e.Offset.Y);
 
             // Apply any rotation data
             if (e.Rotation.Length != 0)
@@ -454,6 +473,9 @@ namespace OpenMobile
 
             // Apply transparency values (this is done via rendering parameters passed along to each control)
             RenderingParam.Alpha = e.Alpha;
+
+            // Transition active?
+            RenderingParam.TransitionActive = e.TransitionActive;
         }
 
         private bool RenderingError = false;
@@ -464,6 +486,9 @@ namespace OpenMobile
 
             //lock (painting)
             {
+                // Reset rendering parameters 
+                g.ResetTransform();
+
                 try
                 {
                     // Get a filtered list of panels to render
@@ -479,8 +504,13 @@ namespace OpenMobile
                             // Render parameters for transition effect out
                             TransitionEffect_ConfigureRenderingParams(TransitionEffectParam_Out);
                         else
-                            // Reset any transition effects
                             TransitionEffect_ConfigureRenderingParams(null);
+                        //if (_RenderingReset)
+                        //{
+                        //    // Reset any transition effects
+                        //    TransitionEffect_ConfigureRenderingParams(null);
+                        //    _RenderingReset = false;
+                        //}
 
                         if (FilteredRenderingQueue[i].Mode != eModeType.Loaded && FilteredRenderingQueue[i].Mode != eModeType.Unloaded)
                             FilteredRenderingQueue[i].Render(g, RenderingParam);
@@ -536,7 +566,8 @@ namespace OpenMobile
 
             ScaleFactors = new PointF((this.ClientRectangle.Width / 1000F), (this.ClientRectangle.Height / 600F));
 
-            OnRenderFrameInternal();
+            if (this.Context != null)
+                OnRenderFrameInternal();
             raiseResizeEvent();
 
             // Also make other windows follow the state of the main window (maximize and minimize)
@@ -566,6 +597,7 @@ namespace OpenMobile
                 DefaultMouse.ShowCursor(this.WindowInfo);
             }
             base.OnWindowStateChanged(e);
+            RenderingWindow_Resize(null, e);
         }
 
         void RenderingWindow_Gesture(object sender, OpenMobile.Graphics.TouchEventArgs e)
@@ -839,6 +871,7 @@ namespace OpenMobile
 
                 // Enable hold detection
                 tmrClickHold.Enabled = true;
+                tmrClickHold.Tag = eScaled;
             }
 
             // Send Mouse interface data
@@ -928,11 +961,11 @@ namespace OpenMobile
                 // Determine type of click (click or long click)
                 if (swClickTiming.ElapsedMilliseconds < 500)
                 {   // Normal click
-                    ActivateClick(FocusedControl, ClickTypes.Normal);
+                    ActivateClick(FocusedControl, ClickTypes.Normal, e);
                 }
                 else
                 {   // Long click
-                    ActivateClick(FocusedControl, ClickTypes.Long);
+                    ActivateClick(FocusedControl, ClickTypes.Long, e);
                 }
             }
 
@@ -1074,15 +1107,15 @@ namespace OpenMobile
                         // Check for normal enter (click), shift enter (long click) or ctrl enter (hold click)
                         if (e.Shift == true && e.Control == false)
                         {   // Long click
-                            ActivateClick(FocusedControl, ClickTypes.Long);
+                            ActivateClick(FocusedControl, ClickTypes.Long, null);
                         }
                         else if (e.Shift == true && e.Control == true)
                         {   // Hold click
-                            ActivateClick(FocusedControl, ClickTypes.Hold);
+                            ActivateClick(FocusedControl, ClickTypes.Hold, null);
                         }
                         else
                         {   // Normal click
-                            ActivateClick(FocusedControl, ClickTypes.Normal);
+                            ActivateClick(FocusedControl, ClickTypes.Normal, null);
                         }
                     }
                 }
@@ -1120,14 +1153,21 @@ namespace OpenMobile
                         panel.Mode = eModeType.transitioningIn;
                     }
                 }
-                
+
+                TransitionEffectParam_In.TransitionActive = true;
+                TransitionEffectParam_Out.TransitionActive = true;
+
                 // Execute effect
                 TransitionEffect.Run(
                     TransitionEffectParam_In, 
                     TransitionEffectParam_Out, 
                     ReDrawPanel, 
                     (transSpeed > 0 ? transSpeed : BuiltInComponents.SystemSettings.TransitionSpeed));
-                
+
+                TransitionEffectParam_In.TransitionActive = false;
+                TransitionEffectParam_Out.TransitionActive = false;
+                _RenderingReset = true;
+
                 // Set all panels that's transitioned out as unloaded
                 List<OMPanel> panelsTransOut = RenderingQueue.FindAll(x => (x.Mode == eModeType.transitioningOut));
                 panelsTransOut.ForEach(delegate(OMPanel panel) { panel.Mode = eModeType.Unloaded; });            
@@ -1137,6 +1177,10 @@ namespace OpenMobile
                 {
                     foreach (OMPanel panel in panels)
                     {
+                        // Stop rendering in each control in the panel (if applicable)
+                        for (int i = 0; i < panel.Controls.Count; i++)
+                            panel.Controls[i].RenderStop(g,RenderingParam);
+
                         if (panel.Mode == eModeType.transitioningIn)
                         {   // Panel is transitioning in, set to normal state
                             panel.Mode = eModeType.Normal;
@@ -1316,7 +1360,7 @@ namespace OpenMobile
         {
             SandboxedThread.Asynchronous(delegate()
                 {
-                    Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), String.Empty, String.Empty);
+                    Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), this.ClientLocation, this.Size, this.ScaleFactors);
                 }
             );
         }
@@ -1495,7 +1539,7 @@ namespace OpenMobile
 
             // Check if control overrides the hit test 
             if (typeof(INotClickable).IsInstanceOfType(control))
-                if (((INotClickable)this).IsPointClickable(Location.X, Location.Y))
+                if (((INotClickable)control).IsPointClickable(Location.X, Location.Y))
                     return true;
                 else
                     return false;
@@ -1553,6 +1597,48 @@ namespace OpenMobile
             return null;
         }
 
+
+        /// <summary>
+        /// Checks if the control is fully or partly covered by other controls
+        /// </summary>
+        /// <param name="Control"></param>
+        /// <returns></returns>
+        private bool IsControlCoveredByOthers(OMControl control)
+        {
+            // Find panel that contains the control and use this as a starting point
+            int panelIndex = -1;
+            for (int i = RenderingQueue.Count - 1; i >= 0; i--)
+            {
+                if (RenderingQueue[i].contains(control))
+                {
+                    panelIndex = i;
+                    break;
+                }
+            }
+
+            // Loop trough rendering queue, starting from the control going outwards
+            System.Drawing.Rectangle controlRect = control.Region.ToSystemRectangle();
+            for (int i = panelIndex; i < RenderingQueue.Count; i++)
+            {
+                for (int i2 = 0; i2 < RenderingQueue[i].Controls.Count; i2++)
+                {
+                    if (RenderingQueue[i].Controls[i2] != control)
+                    {
+                        if (RenderingQueue[i].Controls[i2].IsControlRenderable(false))
+                        {
+                            // Check if control in panel intersects with control from input param
+                            if (RenderingQueue[i].Controls[i2].Region.ToSystemRectangle().IntersectsWith(controlRect))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+
         private bool IsControlFocusable(OMControl control)
         {
             if (control == null)
@@ -1563,7 +1649,7 @@ namespace OpenMobile
 
         private bool IsControlClickable(OMControl control)
         {
-            return typeof(IClickable).IsInstanceOfType(control);
+            return typeof(IClickable).IsInstanceOfType(control) | typeof(IClickableAdvanced).IsInstanceOfType(control);
         }
 
         /// <summary>
@@ -1746,17 +1832,21 @@ namespace OpenMobile
         }
 
         private enum ClickTypes { None, Normal, Long, Hold }
-        private void ActivateClick(OMControl control, ClickTypes ClickType)
+        private void ActivateClick(OMControl control, ClickTypes ClickType, OpenMobile.Input.MouseButtonEventArgs e)
         {
             // Cancel if no control is provided
             if (control == null)
                 return;
 
+            // If no mouse data is available we'll simulate it (as indicated by the negative mouse location)
+            if (e == null)
+                e = new MouseButtonEventArgs(-1, -1, MouseButton.Left, true);
+
             // Lock the currently focused control
             lock (FocusedControl)
             {
                 // Cancel if control is not clickable
-                if (!typeof(IClickable).IsInstanceOfType(control))
+                if (!typeof(IClickable).IsInstanceOfType(control) && !typeof(IClickableAdvanced).IsInstanceOfType(control))
                     return;
 
                 Debug.WriteLine(string.Format("Click {0} on {1} activated", ClickType, control));
@@ -1769,7 +1859,10 @@ namespace OpenMobile
                         {
                             SandboxedThread.Asynchronous(delegate()
                             {
-                                ((IClickable)control).clickMe(screen);
+                                if (typeof(IClickableAdvanced).IsInstanceOfType(control))
+                                    ((IClickableAdvanced)control).clickMe(screen, e);
+                                else
+                                    ((IClickable)control).clickMe(screen);
                             });
                         }
                         break;
@@ -1777,7 +1870,10 @@ namespace OpenMobile
                         {
                             SandboxedThread.Asynchronous(delegate()
                             {
-                                ((IClickable)control).longClickMe(screen);
+                                if (typeof(IClickableAdvanced).IsInstanceOfType(control))
+                                    ((IClickableAdvanced)control).longClickMe(screen, e);
+                                else
+                                    ((IClickable)control).longClickMe(screen);
                             });
                         }
                         break;
@@ -1785,7 +1881,10 @@ namespace OpenMobile
                         {
                             SandboxedThread.Asynchronous(delegate()
                             {
-                                ((IClickable)control).holdClickMe(screen);
+                                if (typeof(IClickableAdvanced).IsInstanceOfType(control))
+                                    ((IClickableAdvanced)control).holdClickMe(screen, e);
+                                else
+                                    ((IClickable)control).holdClickMe(screen);
                             });
                         }
                         break;
@@ -1855,5 +1954,22 @@ namespace OpenMobile
         //        return FocusedControl;
         //}
 
+        //private void GetWindowHandle()
+        //{
+        //    //IWindowInfo ii = ((OpenTK.NativeWindow)this).WindowInfo;
+        //    //object inf = ((OpenTK.NativeWindow)this).WindowInfo;
+        //    //PropertyInfo pi = (inf.GetType()).GetProperty("WindowHandle");
+        //    //IntPtr hnd = ((IntPtr)pi.GetValue(ii, null));
+        //}
+
+
+        #region iRenderingWindow interface
+
+        bool iRenderingWindow.IsControlCoveredByOthers(OMControl Control)
+        {
+            return IsControlCoveredByOthers(Control);
+        }
+
+        #endregion
     }
 }

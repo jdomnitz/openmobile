@@ -30,6 +30,22 @@ namespace OpenMobile.Data
     /// </summary>
     public class DataHandler
     {
+        /// <summary>
+        /// An dataholder for queued datasource subscriptions
+        /// </summary>
+        private class DataSourceSubscriptionCacheItem
+        {
+            public DataSourceChangedDelegate Delegate { get; set; }
+            public string Name { get; set; }
+
+            public DataSourceSubscriptionCacheItem(string name, DataSourceChangedDelegate d)
+            {
+                this.Delegate = d;
+                this.Name = name;
+            }
+        }
+
+        private List<DataSourceSubscriptionCacheItem> _DataSourceSubscriptionCache = new List<DataSourceSubscriptionCacheItem>();
         private List<DataSource> _DataSources = new List<DataSource>();
         private Thread PollThread;
         private int PollEngine_Resolution = 500;
@@ -98,7 +114,9 @@ namespace OpenMobile.Data
                                             {
                                                 DataSourcesToRefresh[i].RefreshValue(null, true, true);
                                             }
-                                            catch { }
+                                            catch
+                                            { 
+                                            }
                                         //});
                                     }
                                 }
@@ -116,13 +134,17 @@ namespace OpenMobile.Data
         /// Adds a new dataprovider
         /// </summary>
         /// <param name="dataSource"></param>
-        public void AddDataProvider(DataSource dataSource)
+        public void AddDataSource(DataSource dataSource)
         {
             lock (_DataSources)
             {
                 _DataSources.Add(dataSource);        // Add to internal sensor list
+                
                 // Get a fresh value from the sensor
                 dataSource.RefreshValue(null, true, true);
+
+                // Prosess queue
+                SubscriptionCache_Prosess(dataSource);
             }
             PollEngine_WaitHandle.Set();
         }
@@ -131,13 +153,17 @@ namespace OpenMobile.Data
         /// Adds a new dataprovider with initial value
         /// </summary>
         /// <param name="dataSource"></param>
-        public void AddDataProvider(DataSource dataSource, object initialValue)
+        public void AddDataSource(DataSource dataSource, object initialValue)
         {
             lock (_DataSources)
             {
                 _DataSources.Add(dataSource);        // Add to internal sensor list
+                
                 // Get a fresh value from the sensor
                 dataSource.RefreshValue(initialValue, false, true);
+
+                // Prosess queue
+                SubscriptionCache_Prosess(dataSource);
             }
             PollEngine_WaitHandle.Set();
         }
@@ -159,6 +185,15 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public DataSource GetDataSource(string name)
         {
+            // Ensure we don't prosess empty data
+            if (String.IsNullOrEmpty(name))
+                return null;
+
+            return GetDataSource_Internal(name, true);
+        }
+
+        private DataSource GetDataSource_Internal(string name, bool log)
+        {
             string provider = String.Empty;
             if (name.Contains(DataSource.ProviderSeparator))
             {   // Extract provider
@@ -172,8 +207,16 @@ namespace OpenMobile.Data
             }
 
             // Get normal datasource
-            return _DataSources.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Valid));
+            DataSource dataSource = _DataSources.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Valid));
+
+            if (dataSource == null && log)
+            {
+                // Log data
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "DataHandler", String.Format("Datasource not available: {0}", name));
+            }
+            return dataSource;
         }
+
 
         /// <summary>
         /// Gets a datasource and supports sending parameters along in the request
@@ -186,7 +229,12 @@ namespace OpenMobile.Data
         public bool GetDataSourceValue(string name, object[] param, out object value)
         {
             value = null;
-            DataSource source = GetDataSource(name);
+
+            // Ensure we don't prosess empty data
+            if (String.IsNullOrEmpty(name))
+                return false;
+
+            DataSource source = GetDataSource_Internal(name, true);
             if (source != null)
                 return source.GetValue(param, out value);
             return false;
@@ -202,11 +250,15 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool PushDataSourceValue(string name, object value)
         {
+            // Ensure we don't prosess empty data
+            if (String.IsNullOrEmpty(name))
+                return false;
+
             // Check for included provider reference
             if (!name.Contains(DataSource.ProviderSeparator))
                 return false;
 
-            DataSource source = GetDataSource(name);
+            DataSource source = GetDataSource_Internal(name, true);
             if (source != null)
                 return source.RefreshValue(value, false, true);
             return false;
@@ -221,13 +273,28 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool SubscribeToDataSource(string name, DataSourceChangedDelegate onDataSourceChanged)
         {
-            DataSource dataSource = GetDataSource(name);
-            if (dataSource == null)
+            // Ensure we don't prosess empty data
+            if (String.IsNullOrEmpty(name))
                 return false;
+
+            return SubscribeToDataSource_Internal(name, onDataSourceChanged, true);
+        }
+
+        private bool SubscribeToDataSource_Internal(string name, DataSourceChangedDelegate onDataSourceChanged, bool UseQueue)
+        {
+            DataSource dataSource = GetDataSource_Internal(name, true);
+            if (dataSource == null)
+            {                
+                // Add this item to the subscription queue
+                if (UseQueue)
+                    SubscriptionCache_Add(name, onDataSourceChanged);
+                return false;
+            }
 
             dataSource.OnDataSourceChanged += onDataSourceChanged;
             return true;
         }
+
         /// <summary>
         /// Unsubscribes to updates for a datasource
         /// <para>Name can be part of a datasources name or it can be a full reference including a provider reference (example: OM;Screen0.Zone.Volume)</para>
@@ -237,12 +304,53 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool UnsubscribeFromDataSource(string name, DataSourceChangedDelegate onDataSourceChanged)
         {
-            DataSource dataSource = GetDataSource(name);
+            SubscriptionCache_Remove(name, onDataSourceChanged);
+
+            DataSource dataSource = GetDataSource_Internal(name, false);
             if (dataSource == null)
                 return false;
 
             dataSource.OnDataSourceChanged -= onDataSourceChanged;
             return true;
+        }
+
+        private void SubscriptionCache_Remove(string name, DataSourceChangedDelegate onDataSourceChanged)
+        {
+            // Remove item from subscription queue (if present)
+            DataSourceSubscriptionCacheItem queuedItem = _DataSourceSubscriptionCache.Find(x => (x.Name == name && x.Delegate == onDataSourceChanged));
+            if (queuedItem != null)
+            {
+                _DataSourceSubscriptionCache.Remove(queuedItem);
+            }
+        }
+
+        private void SubscriptionCache_Add(string name, DataSourceChangedDelegate onDataSourceChanged)
+        {
+            // Add this item to the subscription queue
+            _DataSourceSubscriptionCache.Add(new DataSourceSubscriptionCacheItem(name, onDataSourceChanged));
+
+            // Log data
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "DataHandler", String.Format("Datasource subscription cache, Item added: {0}", name));
+        }
+
+        private void SubscriptionCache_Prosess(DataSource datasource)
+        {
+            lock (_DataSourceSubscriptionCache)
+            {
+                
+                // Subscribe to items
+                List<DataSourceSubscriptionCacheItem> ItemsToSubscribe = _DataSourceSubscriptionCache.FindAll(x => datasource.FullName.ToLower().Contains(x.Name.ToLower()));
+                for (int i = 0; i < ItemsToSubscribe.Count; i++)
+                {
+                    if (SubscribeToDataSource_Internal(ItemsToSubscribe[i].Name, ItemsToSubscribe[i].Delegate, false))
+                    {
+                        // Remove items from queue
+                        _DataSourceSubscriptionCache.Remove(ItemsToSubscribe[i]);
+                        // Log data
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "DataHandler", String.Format("Datasource subscription cache, Cached item connected and removed from cache: {0}", ItemsToSubscribe[i].Name));
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -261,7 +369,7 @@ namespace OpenMobile.Data
         /// Prosesses an InLine datasource string
         /// </summary>
         /// <param name="s"></param>
-        /// <param name="result"></param>
+        /// <param name="prosessedString"></param>
         /// <returns></returns>
         public bool GetInLineDataSource(string s, out string prosessedString)
         {
@@ -277,7 +385,7 @@ namespace OpenMobile.Data
             {
                 string match = Matches[i].ToString();
                 string dataSourceName = match.Replace("{", "").Replace("}", "");
-                DataSource dataSource = GetDataSource(dataSourceName);
+                DataSource dataSource = GetDataSource_Internal(dataSourceName, true);
                 if (dataSource != null)
                     prosessedString = StringToProsess.Replace(string.Format("{{{0}}}", dataSource.FullName), dataSource.FormatedValue);
                 else

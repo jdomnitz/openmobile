@@ -128,6 +128,17 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// Adds all controls from a controlgroup to a panel relative to a basepoint
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="cg"></param>
+        public void addControlGroup(int left, int top, ControlGroup cg)
+        {
+            addControlGroup(new Point(left, top), cg);
+        }
+
+        /// <summary>
         /// Adds a control to the container
         /// </summary>
         /// <param name="control"></param>

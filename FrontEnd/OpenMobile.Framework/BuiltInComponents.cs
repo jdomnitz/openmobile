@@ -43,6 +43,17 @@ namespace OpenMobile
                 return BuiltInComponents.Host;
             }
         }
+
+        /// <summary>
+        /// A reference to a global setting object 
+        /// </summary>
+        public static IBasePlugin GlobalSetting
+        {
+            get
+            {
+                return BuiltInComponents.OMInternalPlugin;
+            }
+        }
     }
 
     /// <summary>
@@ -53,7 +64,7 @@ namespace OpenMobile
         private class OMInternalPluginClass : BasePluginCode
         {
             public OMInternalPluginClass()
-                : base("OM", BuiltInComponents.Host.getSkinImage("Icons|Icon-OM"), 1.0f, "Internal usage plugin", "OM", "")
+                : base("OM", (BuiltInComponents.Host == null ? imageItem.NONE : BuiltInComponents.Host.getSkinImage("Icons|Icon-OM")), 1.0f, "Internal usage plugin", "OM", "")
             {
             }
             public override eLoadStatus initialize(IPluginHost host)
@@ -77,22 +88,20 @@ namespace OpenMobile
         {
             get 
             {
-                if (_Host == null)
-                    throw new Exception("Programming error: BuiltInComponents.Host is not initialized from the core at startup");
                 return _Host; 
             }
             set
             {
                 _Host = value;
-                Panels = new OpenMobile.Framework.ScreenManager(_Host.ScreenCount);
                 OMInternalPlugin = new OMInternalPluginClass();
+                Panels = new OpenMobile.Framework.ScreenManager(OMInternalPlugin);
             }
         }
 
         /// <summary>
         /// An internal usage OM plugin
         /// </summary>
-        public static IBasePlugin OMInternalPlugin { get; private set; }
+        public static IBasePlugin OMInternalPlugin = new OMInternalPluginClass();
 
         /// <summary>
         /// The copyright information to be displayed on the about screen
@@ -102,18 +111,20 @@ namespace OpenMobile
             get
             {
                 //WARNING: REMOVING ANY OF THE BELOW DESCRIPTION IS A VIOLATION OF THE LICENSE AGREEMENT
-                string Text = "OpenMobile is copyright the openMobile Foundation and its contributors.\r\n\r\n";
+
+                string Text = "OpenMobile is copyrighted (2009 - 2013) to the OpenMobile Foundation and its contributors.\r\n\r\n";
                 Text += "This program in full or in part is protected under a clarified version of the GPLv3 license which can be found in the application directory.\r\n\r\n";
                 Text += "Contributors:\r\n";
                 Text += "Justin Domnitz (justchat_1) - Founder / Developer\r\n";
                 Text += "UnusuallyGenius - Graphics\r\n";
                 Text += "ws6vert - openOBD and Garmin Mobile PC Projects\r\n";
-                Text += "Borte - Developer\r\n";
+                Text += "Borte - Developer (Framework/Plugins/Graphics)\r\n";
                 Text += "jheizer - Developer\r\n";
-                Text += "jmullan99@gmail.com - Tester\r\n";
+                Text += "jmullan99@gmail.com - Tester / plugin developer\r\n";
                 Text += "Efess - Navit developer\r\n";
+                Text += "detlion1643 - Plugin Developer\r\n";
                 Text += "\r\nSupporting Projects:\r\n";
-                Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, Sqlite, Aqua Gauge, CoreAudio and the Open ToolKit Project";
+                Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, Sqlite, Aqua Gauge, CoreAudio, mPlayer and the Open ToolKit Project";
                 return Text;
             }
         }
@@ -168,7 +179,7 @@ namespace OpenMobile
         {
             theHost = BuiltInComponents.Host;
 
-            Settings gl = new Settings("General Settings");
+            Settings gl = new Settings("System Settings");
             Setting graphics = new Setting(SettingTypes.MultiChoice, "UI.MinGraphics", String.Empty, "Disable Enhanced Graphics", Setting.BooleanList, Setting.BooleanList);
             Setting volume = new Setting(SettingTypes.MultiChoice, "UI.VolumeChangesVisible", "", "Show Volume Level when adjusting volume", Setting.BooleanList, Setting.BooleanList);
             Setting ShowCursor = new Setting(SettingTypes.MultiChoice, "UI.ShowCursor", String.Empty, "Show OM mouse/pointer cursors", Setting.BooleanList, Setting.BooleanList);
@@ -183,21 +194,23 @@ namespace OpenMobile
             Setting TransitionSpeed = PanelTransitionEffectHandler.Setting_TransitionSpeed();
             Setting TransitionDefaultEffect = PanelTransitionEffectHandler.Setting_TransitionDefaultEffect();
             //Setting TransitionDefaultEffect = new Setting(SettingTypes.MultiChoice, "UI.TransitionDefaultEffect", "Transition effect", "Transition; Default effect", PanelTransitionEffectHandler.GetEffectNames(), PanelTransitionEffectHandler.GetEffectNames());
+            Setting IdleDetectionInterval = new Setting(SettingTypes.Text, "UI.IdleDetection.Interval", "Seconds", "Seconds before a screen is set to idle state");
             
             using (PluginSettings settings = new PluginSettings())
             {
-                graphics.Value = settings.getSetting("UI.MinGraphics");
-                volume.Value = settings.getSetting("UI.VolumeChangesVisible");
-                ShowCursor.Value = settings.getSetting("UI.ShowCursor");
-                ShowDebugInfo.Value = settings.getSetting("UI.ShowDebugInfo");
-                ShowGestures.Value = settings.getSetting("UI.ShowGestures");
-                OpenGLVsync.Value = settings.getSetting("OpenGL.VSync");
-                //SkinColor.Value = settings.getSetting("UI.SkinColor");
-                SkinFocusColor.Value = settings.getSetting("UI.SkinFocusColor");
-                SkinTextColor.Value = settings.getSetting("UI.SkinTextColor");
-                TransitionSpeed.Value = settings.getSetting("UI.TransitionSpeed");
-                TransitionDefaultEffect.Value = settings.getSetting("UI.TransitionDefaultEffect");
-                UseIconOverlayColor.Value = settings.getSetting("UI.UseIconOverlayColor");
+                graphics.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.MinGraphics");
+                volume.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.VolumeChangesVisible");
+                ShowCursor.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.ShowCursor");
+                ShowDebugInfo.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.ShowDebugInfo");
+                ShowGestures.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.ShowGestures");
+                OpenGLVsync.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "OpenGL.VSync");
+                //SkinColor.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.SkinColor");
+                SkinFocusColor.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.SkinFocusColor");
+                SkinTextColor.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.SkinTextColor");
+                TransitionSpeed.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.TransitionSpeed");
+                TransitionDefaultEffect.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.TransitionDefaultEffect");
+                UseIconOverlayColor.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.UseIconOverlayColor");
+                IdleDetectionInterval.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.IdleDetection.Interval");
             }
             gl.Add(graphics);
             gl.Add(volume);
@@ -211,7 +224,26 @@ namespace OpenMobile
             gl.Add(UseIconOverlayColor);
             gl.Add(TransitionSpeed);
             gl.Add(TransitionDefaultEffect);
+
+            // Home position setting
+            gl.Add(new Setting(SettingTypes.Text, "Location.Home.UserEntered", "Home location:", "Postcode, city and state / country, etc.", StoredData.Get(BuiltInComponents.OMInternalPlugin, "Location.Home.UserEntered")));
+            
+            gl.Add(IdleDetectionInterval);
             gl.OnSettingChanged += new SettingChanged(SettingsChanged);
+
+            // Add settings for each screen
+            for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+            {
+                // Add settings for idle actions
+                string name = String.Format("UI.IdleDetection.Action.{0}", i);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, name, "");
+                gl.Add(new Setting(SettingTypes.Text, name, String.Format("Screen {0}", i), "The action to execute when set to idle", StoredData.Get(BuiltInComponents.OMInternalPlugin, name)));
+
+                // Add settings for startup commands
+                name = String.Format("UI.Startup.Action.{0}", i);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, name, "");
+                gl.Add(new Setting(SettingTypes.Text, name, String.Format("Screen {0}", i), "The action to execute at startup", StoredData.Get(BuiltInComponents.OMInternalPlugin, name)));
+            }
 
             return gl;
         }
@@ -220,7 +252,7 @@ namespace OpenMobile
         {
             using (PluginSettings s = new PluginSettings())
             {
-                s.setSetting(setting.Name, setting.Value);
+                s.setSetting(BuiltInComponents.OMInternalPlugin, setting.Name, setting.Value);
                 switch (setting.Name)
                 {
                     case "UI.MinGraphics":
@@ -245,7 +277,7 @@ namespace OpenMobile
                         break;
 
                     case "UI.TransitionSpeed":
-                        BuiltInComponents.SystemSettings.TransitionSpeed = StoredData.GetFloat("UI.TransitionSpeed", 1.0F);
+                        BuiltInComponents.SystemSettings.TransitionSpeed = StoredData.GetFloat(OMInternalPlugin, "UI.TransitionSpeed", 1.0F);
                         break;
 
                     case "UI.TransitionDefaultEffect":
@@ -253,19 +285,38 @@ namespace OpenMobile
                         break;
 
                     case "UI.SkinTextColor":
-                        BuiltInComponents.SystemSettings.SkinTextColor = StoredData.GetColor("UI.SkinTextColor", Color.White);
+                        BuiltInComponents.SystemSettings.SkinTextColor = StoredData.GetColor(OMInternalPlugin, "UI.SkinTextColor", Color.White);
                         break;
 
-                    case "UI.SkinFocusColor":
-                        BuiltInComponents.SystemSettings.SkinFocusColor = StoredData.GetColor("UI.SkinFocusColor", Color.Blue);
+                    case "OM;UI.SkinFocusColor":
+                        BuiltInComponents.SystemSettings.SkinFocusColor = StoredData.GetColor(OMInternalPlugin, "UI.SkinFocusColor", Color.Blue);
                         break;
 
-                    case "UI.ShowGestures":
-                        BuiltInComponents.SystemSettings.ShowGestures = StoredData.GetBool("UI.ShowGestures");
+                    case "OM;UI.ShowGestures":
+                        BuiltInComponents.SystemSettings.ShowGestures = StoredData.GetBool(OMInternalPlugin, "UI.ShowGestures");
                         break;
 
                     case "UI.UseIconOverlayColor":
-                        BuiltInComponents.SystemSettings.UseIconOverlayColor = StoredData.GetBool("UI.UseIconOverlayColor");
+                        BuiltInComponents.SystemSettings.UseIconOverlayColor = StoredData.GetBool(OMInternalPlugin, "UI.UseIconOverlayColor");
+                        break;
+
+                    case "UI.IdleDetection.Interval":
+                        BuiltInComponents.SystemSettings.IdleDetectionInterval = StoredData.GetInt(OMInternalPlugin, "UI.IdleDetection.Interval");
+                        break;
+
+                    case "Location.Home.UserEntered":
+                        {   // Try to get a location based on the info the user entered
+                            if (Host.InternetAccess)
+                            {   // Use webservice to get the info
+                                BuiltInComponents.SystemSettings.Location_Home = helperFunctions.General.lookupLocation(setting.Value);
+                            }
+                            else
+                            {   // Parse info directly
+                                Location newLoc;
+                                if (Location.TryParse(setting.Value, out newLoc))
+                                    BuiltInComponents.SystemSettings.Location_Home = helperFunctions.General.lookupLocation(setting.Value);
+                            }
+                        }
                         break;
 
                     default:
@@ -286,24 +337,25 @@ namespace OpenMobile
             public static void Init()
             {
                 // Set default values
-                StoredData.SetDefaultValue("UI.SkinFocusColor", "00,00,FF");
-                StoredData.SetDefaultValue("UI.SkinTextColor", "FF,FF,FF");
-                StoredData.SetDefaultValue("UI.UseIconOverlayColor", false);
-                StoredData.SetDefaultValue("UI.MinGraphics", false);
-                StoredData.SetDefaultValue("UI.VolumeChangesVisible", true);
-                StoredData.SetDefaultValue("UI.ShowCursor", false);
-                StoredData.SetDefaultValue("UI.ShowDebugInfo", false);
-                StoredData.SetDefaultValue("UI.ShowGestures", false);
-                StoredData.SetDefaultValue("UI.TransitionSpeed", 1.0f);
-                StoredData.SetDefaultValue("UI.TransitionDefaultEffect", "Random");
-                StoredData.SetDefaultValue("OpenGL.VSync", false);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.SkinFocusColor", "00,00,FF");
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.SkinTextColor", "FF,FF,FF");
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.UseIconOverlayColor", false);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.MinGraphics", false);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.VolumeChangesVisible", true);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.ShowCursor", false);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.ShowDebugInfo", false);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.ShowGestures", false);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.TransitionSpeed", 1.0f);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.TransitionDefaultEffect", "Random");
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "OpenGL.VSync", false);
+                StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, "UI.IdleDetection.Interval", 60);
 
                 // Update local data variables (for speed)
-                BuiltInComponents.Host.ShowDebugInfo = StoredData.GetBool("UI.ShowDebugInfo");
-                BuiltInComponents.Host.ShowCursors = StoredData.GetBool("UI.ShowCursor");
-                _SkinTextColor = StoredData.GetColor("UI.SkinTextColor", Color.White);
-                _SkinFocusColor = StoredData.GetColor("UI.SkinFocusColor", Color.Blue);
-                _UseIconOverlayColor = StoredData.GetBool("UI.UseIconOverlayColor");
+                BuiltInComponents.Host.ShowDebugInfo = StoredData.GetBool(BuiltInComponents.OMInternalPlugin, "UI.ShowDebugInfo");
+                BuiltInComponents.Host.ShowCursors = StoredData.GetBool(BuiltInComponents.OMInternalPlugin, "UI.ShowCursor");
+                _SkinTextColor = StoredData.GetColor(BuiltInComponents.OMInternalPlugin, "UI.SkinTextColor", Color.White);
+                _SkinFocusColor = StoredData.GetColor(BuiltInComponents.OMInternalPlugin, "UI.SkinFocusColor", Color.Blue);
+                _UseIconOverlayColor = StoredData.GetBool(BuiltInComponents.OMInternalPlugin, "UI.UseIconOverlayColor");
             }
 
             /// <summary>
@@ -313,11 +365,11 @@ namespace OpenMobile
             {
                 get
                 {
-                    return StoredData.GetBool("UI.MinGraphics");
+                    return StoredData.GetBool(BuiltInComponents.OMInternalPlugin, "UI.MinGraphics");
                 }
                 set
                 {
-                    StoredData.SetBool("UI.MinGraphics", value);
+                    StoredData.SetBool(BuiltInComponents.OMInternalPlugin, "UI.MinGraphics", value);
                 }
             }
 
@@ -328,11 +380,11 @@ namespace OpenMobile
             {
                 get
                 {
-                    return StoredData.GetBool("UI.VolumeChangesVisible");
+                    return StoredData.GetBool(BuiltInComponents.OMInternalPlugin, "UI.VolumeChangesVisible");
                 }
                 set
                 {
-                    StoredData.SetBool("UI.VolumeChangesVisible", value);
+                    StoredData.SetBool(BuiltInComponents.OMInternalPlugin, "UI.VolumeChangesVisible", value);
                 }
             }
 
@@ -343,11 +395,11 @@ namespace OpenMobile
             {
                 get
                 {
-                    return StoredData.GetBool("UI.ShowCursor");
+                    return StoredData.GetBool(BuiltInComponents.OMInternalPlugin, "UI.ShowCursor");
                 }
                 set
                 {
-                    StoredData.SetBool("UI.ShowCursor", value);
+                    StoredData.SetBool(BuiltInComponents.OMInternalPlugin, "UI.ShowCursor", value);
                 }
             }
 
@@ -358,11 +410,11 @@ namespace OpenMobile
             {
                 get
                 {
-                    return StoredData.GetBool("UI.ShowDebugInfo");
+                    return StoredData.GetBool(BuiltInComponents.OMInternalPlugin, "UI.ShowDebugInfo");
                 }
                 set
                 {
-                    StoredData.SetBool("UI.ShowDebugInfo", value);
+                    StoredData.SetBool(BuiltInComponents.OMInternalPlugin, "UI.ShowDebugInfo", value);
                 }
             }
 
@@ -378,7 +430,7 @@ namespace OpenMobile
                 }
                 set
                 {
-                    StoredData.SetBool("UI.ShowGestures", value);
+                    StoredData.SetBool(BuiltInComponents.OMInternalPlugin, "UI.ShowGestures", value);
                     _ShowGestures = value;
                 }
             }
@@ -390,11 +442,11 @@ namespace OpenMobile
             {
                 get
                 {
-                    return StoredData.GetBool("OpenGL.VSync");
+                    return StoredData.GetBool(BuiltInComponents.OMInternalPlugin, "OpenGL.VSync");
                 }
                 set
                 {
-                    StoredData.SetBool("OpenGL.VSync", value);
+                    StoredData.SetBool(BuiltInComponents.OMInternalPlugin, "OpenGL.VSync", value);
                 }
             }
 
@@ -406,17 +458,17 @@ namespace OpenMobile
                 get
                 {
                     if (_TransitionSpeed == 0f)
-                        _TransitionSpeed = StoredData.GetFloat("UI.TransitionSpeed", 1f);
+                        _TransitionSpeed = StoredData.GetFloat(BuiltInComponents.OMInternalPlugin, "UI.TransitionSpeed", 1f);
                     if (_TransitionSpeed == 0)
                     {
                         _TransitionSpeed = 1f;
-                        StoredData.Set("UI.TransitionSpeed", 1f);
+                        StoredData.Set(BuiltInComponents.OMInternalPlugin, "UI.TransitionSpeed", 1f);
                     }
                     return _TransitionSpeed;
                 }
                 set
                 {
-                    StoredData.Set("UI.TransitionSpeed", value);
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "UI.TransitionSpeed", value);
                     _TransitionSpeed = value;
                 }
             }
@@ -430,18 +482,18 @@ namespace OpenMobile
                 get
                 {
                     if (String.IsNullOrEmpty(_TransitionDefaultEffect))
-                        _TransitionDefaultEffect = StoredData.Get("UI.TransitionDefaultEffect");
+                        _TransitionDefaultEffect = StoredData.Get(BuiltInComponents.OMInternalPlugin, "UI.TransitionDefaultEffect");
                     // Safety check
                     if (String.IsNullOrEmpty(_TransitionDefaultEffect))
                     {
-                        StoredData.Set("UI.TransitionDefaultEffect", "Random");
+                        StoredData.Set(BuiltInComponents.OMInternalPlugin, "UI.TransitionDefaultEffect", "Random");
                         _TransitionDefaultEffect = "Random";
                     }
                     return _TransitionDefaultEffect; 
                 }
                 set
                 {
-                    StoredData.Set("UI.TransitionDefaultEffect", value);
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "UI.TransitionDefaultEffect", value);
                     _TransitionDefaultEffect = value;
                 }
             }
@@ -460,7 +512,7 @@ namespace OpenMobile
                 {
                     if (_UseIconOverlayColor != value)
                     {
-                        StoredData.Set("UI.UseIconOverlayColor", value);
+                        StoredData.Set(BuiltInComponents.OMInternalPlugin, "UI.UseIconOverlayColor", value);
                         _UseIconOverlayColor = value;
                     }
                 }
@@ -480,8 +532,8 @@ namespace OpenMobile
                 }
                 set
                 {
-                    StoredData.Set("UI.SkinFocusColor", String.Format("{0},{1},{2}", value.R.ToString("X2"), value.G.ToString("X2"), value.B.ToString("X2")));
-                    _SkinTextColor = StoredData.GetColor("UI.SkinFocusColor", Color.White);
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "UI.SkinFocusColor", String.Format("{0},{1},{2}", value.R.ToString("X2"), value.G.ToString("X2"), value.B.ToString("X2")));
+                    _SkinTextColor = StoredData.GetColor(BuiltInComponents.OMInternalPlugin, "UI.SkinFocusColor", Color.White);
                 }
             }
 
@@ -498,10 +550,134 @@ namespace OpenMobile
                 }
                 set
                 {
-                    StoredData.Set("UI.SkinTextColor", String.Format("{0},{1},{2}", value.R.ToString("X2"), value.G.ToString("X2"), value.B.ToString("X2")));
-                    _SkinTextColor = StoredData.GetColor("UI.SkinTextColor", Color.White);
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "UI.SkinTextColor", String.Format("{0},{1},{2}", value.R.ToString("X2"), value.G.ToString("X2"), value.B.ToString("X2")));
+                    _SkinTextColor = StoredData.GetColor(BuiltInComponents.OMInternalPlugin, "UI.SkinTextColor", Color.White);
                 }
             }
+
+            /// <summary>
+            /// The name of the default music database 
+            /// </summary>
+            public static string DefaultDB_Music
+            {
+                get
+                {
+                    return StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase");
+                }
+                set
+                {
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase", value);
+                }
+            }
+
+            /// <summary>
+            /// The name of the default CD database 
+            /// </summary>
+            public static string DefaultDB_CD
+            {
+                get
+                {
+                    return StoredData.Get(OM.GlobalSetting, "Default.CDDatabase");
+                }
+                set
+                {
+                    StoredData.Set(OM.GlobalSetting, "Default.CDDatabase", value);
+                }
+            }
+
+            /// <summary>
+            /// The name of the default database for external media (external harddrives, phones etc...)
+            /// </summary>
+            public static string DefaultDB_Removable
+            {
+                get
+                {
+                    return StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.RemovableDatabase");
+                }
+                set
+                {
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "Default.RemovableDatabase", value);
+                }
+            }
+
+            /// <summary>
+            /// The name of the default Apple database (iPhone, iPod etc...)
+            /// </summary>
+            public static string DefaultDB_Apple
+            {
+                get
+                {
+                    return StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.AppleDatabase");
+                }
+                set
+                {
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "Default.AppleDatabase", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: Idle detection interval
+            /// </summary>
+            public static int IdleDetectionInterval
+            {
+                get
+                {
+                    return StoredData.GetInt(BuiltInComponents.OMInternalPlugin, "UI.IdleDetection.Interval");
+                }
+                set
+                {
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "UI.IdleDetection.Interval", value);
+                }
+            }
+
+            /// <summary>
+            /// OM System setting: Idle detection action (per screen setting)
+            /// </summary>
+            public static string IdleDetectionAction(int screen)
+            {
+                return StoredData.Get(BuiltInComponents.OMInternalPlugin, String.Format("UI.IdleDetection.Action.{0}", screen));
+            }
+
+            /// <summary>
+            /// OM System setting: Startup action (per screen setting)
+            /// </summary>
+            public static string StartupAction(int screen)
+            {
+                return StoredData.Get(BuiltInComponents.OMInternalPlugin, String.Format("UI.Startup.Action.{0}", screen));
+            }
+
+            /// <summary>
+            /// The position set as home by the user
+            /// </summary>
+            public static Location Location_Home
+            {
+                get
+                {
+                    // Should we get the data from the DB?
+                    if (_Location_Home == null)
+                    {   // Yes, extract data object
+                        string XML = StoredData.Get(BuiltInComponents.OMInternalPlugin, "Location.Home.Data");
+                        try
+                        {
+                            Location_Home = OpenMobile.helperFunctions.XML.Serializer.fromXML<Location>(XML);
+                        }
+                        catch 
+                        {
+                            Location_Home = new Location();
+                        }
+                    }
+                    return _Location_Home;
+                }
+                set
+                {
+                    _Location_Home = value;
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "Location.Home.Data", OpenMobile.helperFunctions.XML.Serializer.toXML(_Location_Home));
+
+                    // Push update to datasource
+                    BuiltInComponents.Host.DataHandler.PushDataSourceValue("OM;Location.Favorite.Home", _Location_Home);
+                }
+            }
+            private static Location _Location_Home = null;
 
         }
 
@@ -516,40 +692,43 @@ namespace OpenMobile
             static public void Init()
             {
                 // Time with HH:MM
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current time in a short format"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Time", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current time in a short format"));
 
                 // Time with HH:MM:SS
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "Long", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current time in a long format with seconds"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Time", "Long", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current time in a long format with seconds"));
 
                 // Time with local time
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Time", "Local", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current time in a local style format"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Time", "Local", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current time in a local style format"));
 
                 // Date
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date in a short format"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Date", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date in a short format"));
 
                 // Date long
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "Long", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date in a long format"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Date", "Long", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date in a long format"));
 
                 // Date text
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Date", "Text", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date in a local format"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Date", "Text", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date in a local format"));
 
                 // Create a datasource
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "DateTime", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date and time in a local format"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "DateTime", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date and time in a local format"));
 
                 // CPU Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "CPU", "Load", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total CPU load"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "CPU", "Load", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total CPU load"));
 
                 // Memory Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "Free", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total free memory in bytes"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "Free", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total free memory in bytes"));
 
                 // Memory Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "Used", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total used memory in bytes"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "Used", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total used memory in bytes"));
 
                 // Memory Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "UsedPercent", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total used memory in percent"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "UsedPercent", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total used memory in percent"));
 
                 // Memory Usage
-                BuiltInComponents.Host.DataHandler.AddDataProvider(new DataSource("OM", "System", "Memory", "ProcessUsed", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Currently used memory by OM"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "ProcessUsed", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Currently used memory by OM"));
+
+                // Home location
+                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "Location", "Favorite", "Home", 0, DataSource.DataTypes.raw, DataProvider, "Home location as set by the user"));
 
             }
 
@@ -622,10 +801,27 @@ namespace OpenMobile
                         return null;
                 }
             }
+
+            static private object DataProvider(OpenMobile.Data.DataSource dataSource, out bool result, object[] param)
+            {
+                result = true;
+                switch (dataSource.FullName)
+                {
+                    case "Location.Favorite.Home":
+                        return BuiltInComponents.SystemSettings.Location_Home;
+                    default:
+                        result = false;
+                        return null;
+                }
+            }
+
         }
 
     }
 
+    /// <summary>
+    /// Timing functions
+    /// </summary>
     public static class Timing
     {
         static DateTime start = DateTime.Now;

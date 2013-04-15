@@ -330,7 +330,7 @@ namespace OpenMobile.helperFunctions.MenuObjects
             MenuSelection[screen].Reset();
 
             // loadpanel
-            BuiltInComponents.Panels.loadSinglePanel(Panel, screen);
+            BuiltInComponents.Panels.loadSinglePanel(Panel, screen, false);
 
             // Connect to system events (to detect "goback" event)
             SystemEvent SysEv = new SystemEvent(theHost_OnSystemEvent);
@@ -386,15 +386,18 @@ namespace OpenMobile.helperFunctions.MenuObjects
             MenuSelection[screen].Set();
         }
 
-        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        void theHost_OnSystemEvent(eFunction function, object[] args)
         {
             if (function == eFunction.goBack)
             {
-                int screen = int.Parse(arg1);
-                if (arg3 == PanelName[screen])
+                if (args != null && args.Length >= 3)
                 {
-                    ResultIndex = -1;
-                    MenuSelection[screen].Set();
+                    int screen = int.Parse(args[0] as string);
+                    if (args[2] as string == PanelName[screen])
+                    {
+                        ResultIndex = -1;
+                        MenuSelection[screen].Set();
+                    }
                 }
             }
         }

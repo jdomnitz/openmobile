@@ -54,6 +54,9 @@ namespace OpenMobile.Controls
         RoundedRectangle,
     }
 
+    /// <summary>
+    /// Shapedata
+    /// </summary>
     public struct ShapeData
     {
         /// <summary>
@@ -149,6 +152,29 @@ namespace OpenMobile.Controls
         }
         private Point[] _GraphicPoints;
 
+        /// <summary>
+        /// Data for the gradient to use as fill
+        /// </summary>
+        public GradientData GradientData
+        {
+            get
+            {
+                return this._GradientData;
+            }
+            set
+            {
+                if (this._GradientData != value)
+                {
+                    this._GradientData = value;
+                }
+            }
+        }
+        private GradientData _GradientData;
+        
+        /// <summary>
+        /// Creates a new set of shape data
+        /// </summary>
+        /// <param name="shape"></param>
         public ShapeData(shapes shape)
         {
             _Shape = shape;
@@ -157,7 +183,14 @@ namespace OpenMobile.Controls
             _BorderSize = 0;
             _CornerRadius = 0;
             _GraphicPoints = null;
+            _GradientData = null;
         }
+
+        /// <summary>
+        /// Creates a new set of shape data
+        /// </summary>
+        /// <param name="shape"></param>
+        /// <param name="fillColor"></param>
         public ShapeData(shapes shape, Color fillColor)
         {
             _Shape = shape;
@@ -166,7 +199,16 @@ namespace OpenMobile.Controls
             _BorderSize = 0;
             _CornerRadius = 10;
             _GraphicPoints = null;
+            _GradientData = null;
         }
+
+        /// <summary>
+        /// Creates a new set of shape data
+        /// </summary>
+        /// <param name="shape"></param>
+        /// <param name="fillColor"></param>
+        /// <param name="borderColor"></param>
+        /// <param name="borderSize"></param>
         public ShapeData(shapes shape, Color fillColor, Color borderColor, int borderSize)
         {
             _Shape = shape;
@@ -175,7 +217,17 @@ namespace OpenMobile.Controls
             _BorderSize = borderSize;
             _CornerRadius = 10;
             _GraphicPoints = null;
+            _GradientData = null;
         }
+
+        /// <summary>
+        /// Creates a new set of shape data
+        /// </summary>
+        /// <param name="shape"></param>
+        /// <param name="fillColor"></param>
+        /// <param name="borderColor"></param>
+        /// <param name="borderSize"></param>
+        /// <param name="cornerRadius"></param>
         public ShapeData(shapes shape, Color fillColor, Color borderColor, int borderSize, int cornerRadius)
         {
             _Shape = shape;
@@ -184,7 +236,17 @@ namespace OpenMobile.Controls
             _BorderSize = borderSize;
             _CornerRadius = cornerRadius;
             _GraphicPoints = null;
+            _GradientData = null;
         }
+
+        /// <summary>
+        /// Creates a new set of shape data
+        /// </summary>
+        /// <param name="shape"></param>
+        /// <param name="fillColor"></param>
+        /// <param name="borderColor"></param>
+        /// <param name="borderSize"></param>
+        /// <param name="graphicPoints"></param>
         public ShapeData(shapes shape, Color fillColor, Color borderColor, int borderSize, Point[] graphicPoints)
         {
             _Shape = shape;
@@ -193,7 +255,18 @@ namespace OpenMobile.Controls
             _BorderSize = borderSize;
             _CornerRadius = 0;
             _GraphicPoints = graphicPoints;
+            _GradientData = null;
         }
+
+        /// <summary>
+        /// Creates a new set of shape data
+        /// </summary>
+        /// <param name="shape"></param>
+        /// <param name="fillColor"></param>
+        /// <param name="borderColor"></param>
+        /// <param name="borderSize"></param>
+        /// <param name="cornerRadius"></param>
+        /// <param name="graphicPoints"></param>
         public ShapeData(shapes shape, Color fillColor, Color borderColor, int borderSize, int cornerRadius, Point[] graphicPoints)
         {
             _Shape = shape;
@@ -202,6 +275,7 @@ namespace OpenMobile.Controls
             _BorderSize = borderSize;
             _CornerRadius = cornerRadius;
             _GraphicPoints = graphicPoints;
+            _GradientData = null;
         }
     }
 
@@ -224,6 +298,10 @@ namespace OpenMobile.Controls
                 this._ShapeData = value;
             }
         }
+
+        /// <summary>
+        /// Protecteded internal shapedata
+        /// </summary>
         protected ShapeData _ShapeData = new ShapeData();
 
         private Pen _BorderPen;
@@ -253,9 +331,15 @@ namespace OpenMobile.Controls
             switch (_ShapeData.Shape)
             {
                 case shapes.Rectangle:
-                    g.FillRectangle(_FillBrush, left, top, width, height);
-                    if (_ShapeData.BorderSize > 0)
-                        g.DrawRectangle(_BorderPen, left, top, width, height);
+                    {
+                        // Use gradient?
+                        if (_ShapeData.GradientData != null)
+                            g.FillRectangle(_ShapeData.GradientData, Region);
+                        else
+                            g.FillRectangle(_FillBrush, left, top, width, height);
+                        if (_ShapeData.BorderSize > 0)
+                            g.DrawRectangle(_BorderPen, left, top, width, height);
+                    }
                     break;
                 case shapes.Polygon:
                     {
@@ -293,6 +377,7 @@ namespace OpenMobile.Controls
             }
         }
 
+/*
         /// <summary>
         /// Render the requested shape
         /// </summary>
@@ -365,7 +450,7 @@ namespace OpenMobile.Controls
                 }
             }
         }
-
+*/
         /// <summary>
         /// Render the shape to a bitmap
         /// </summary>

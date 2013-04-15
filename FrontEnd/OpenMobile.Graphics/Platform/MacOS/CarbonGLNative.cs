@@ -261,6 +261,7 @@ namespace OpenMobile.Platform.MacOS
 			clientRectangle.Size = new Size(width, height);
 			Debug.Print("New Size: {0}, {1}", Width, Height);
             bounds = mDisplayDevice.Bounds;
+            _ClientLocation = new Point(0,0);
 
             
 			windowState = WindowState.Fullscreen;
@@ -670,9 +671,9 @@ namespace OpenMobile.Platform.MacOS
             LoadSize();
 
             if (Resize != null)
-            {
                 Resize(this, EventArgs.Empty);
-            }
+            if (Move != null)
+                Move(this, EventArgs.Empty);
         }
 
         private void LoadSize()
@@ -685,6 +686,7 @@ namespace OpenMobile.Platform.MacOS
 
 			r = API.GetWindowBounds(window.WindowRef, WindowRegionCode.GlobalPortRegion);
 			clientRectangle = new Rectangle(0, 0, r.Width, r.Height);
+            _ClientLocation = new Point(r.X, r.Y);
         }
 
         #endregion
@@ -923,6 +925,20 @@ namespace OpenMobile.Platform.MacOS
             }
         }
 
+        #region ClientLocation
+
+        public Point ClientLocation
+        {
+            get
+            {
+                return _ClientLocation;
+            }
+        }
+        private Point _ClientLocation;
+
+        #endregion
+
+
         public void Close()
         {
 			CancelEventArgs e = new CancelEventArgs();
@@ -1082,6 +1098,7 @@ namespace OpenMobile.Platform.MacOS
 		}
 
 		#endregion
+        public event EventHandler<EventArgs> Move;
         public event EventHandler<EventArgs> Resize;
         public event EventHandler<CancelEventArgs> Closing;
         public event EventHandler<EventArgs> Closed;

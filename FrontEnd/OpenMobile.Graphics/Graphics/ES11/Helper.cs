@@ -11,7 +11,7 @@ namespace OpenMobile.Graphics.ES11
     /// Provides access to OpenGL ES 1.1 methods.
     /// </summary>
 
-    public sealed partial class Raw : GraphicsBindingsBase
+    public sealed partial class GL : GraphicsBindingsBase
     {
         const string Library = "libGLESv1.dll";
         static readonly object sync_root = new object();

@@ -31,28 +31,28 @@ namespace OpenMobile.Data
     /// Get data delegate, returns the current data
     /// <para>Set out variable "result" to true if operation was sucessfull otherwise set to false</para>
     /// </summary>
-    /// <param name="sensor"></param>
+    /// <param name="datasource"></param>
     /// <param name="result"></param>
     /// <param name="param">An array with parameters to pass along to the source</param>
     /// <returns></returns>
-    public delegate object DataSourceGetDelegate(DataSource sensor, out bool result, object[] param);
+    public delegate object DataSourceGetDelegate(DataSource datasource, out bool result, object[] param);
 
     /// <summary>
     /// Set data delegate. New value is passed in the value field
     /// <para>Set out variable "result" to true if operation was sucessfull otherwise set to false</para>
     /// </summary>
-    /// <param name="sensor"></param>
+    /// <param name="datasource"></param>
     /// <param name="value"></param>
     /// <param name="param"></param>
     /// <param name="result"></param>
     /// <returns></returns>
-    public delegate void DataSourceSetDelegate(DataSource sensor, ref object value, object[] param, out bool result);
+    public delegate void DataSourceSetDelegate(DataSource datasource, ref object value, object[] param, out bool result);
 
     /// <summary>
     /// Datasource value changed or updated
     /// </summary>
     /// <param name="sensor"></param>
-    public delegate void DataSourceChangedDelegate(DataSource sensor);
+    public delegate void DataSourceChangedDelegate(DataSource datasource);
 
     /// <summary>
     /// A delegate for manually setting a datasource
@@ -99,11 +99,43 @@ namespace OpenMobile.Data
                     // Spawn new thread for event update
                     OpenMobile.Threading.SafeThread.Asynchronous(delegate()
                     {
-                        handler(this);
+                        Delegate[] ds = _OnDataSourceChanged.GetInvocationList();
+                        for (int i = 0; i < ds.Length; i++)
+                        {
+                            try
+                            {
+                                ds[i].DynamicInvoke(new object[] { this });
+                            }
+                            catch (Exception e)
+                            {   // Remove call to eventhandler if it fails
+                                _OnDataSourceChanged -= (DataSourceChangedDelegate)ds[i];
+                                string text = String.Format("Subscriber crashed while prosessing event (Target: {0}, Method: {1})", ds[i].Target, ds[i].Method);
+                                text += "\n";
+                                text += OpenMobile.helperFunctions.General.spewException(e);
+                                BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, String.Format("DataSource {0}", this.FullNameWithProvider), text);
+                            }
+                        }
                     });
                 }
                 else
-                    handler(this);
+                {
+                    Delegate[] ds = _OnDataSourceChanged.GetInvocationList();
+                    for (int i = 0; i < ds.Length; i++)
+                    {
+                        try
+                        {
+                            ds[i].DynamicInvoke(new object[] { this });
+                        }
+                        catch (Exception e)
+                        {   // Remove call to eventhandler if it fails
+                            _OnDataSourceChanged -= (DataSourceChangedDelegate)ds[i];
+                            string text = String.Format("Subscriber crashed while prosessing event (Target: {0}, Method: {1})", ds[i].Target, ds[i].Method);
+                            text += "\n";
+                            text += OpenMobile.helperFunctions.General.spewException(e);
+                            BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, String.Format("DataSource {0}", this.FullNameWithProvider), text);
+                        }
+                    }
+                }
             }
         }
 
@@ -172,7 +204,9 @@ namespace OpenMobile.Data
                 {
                     if (this._Value != value)
                     {
-                        RefreshValue(value, false, false);
+                        bool result = false;
+                        Setter(this, ref value, null, out result);
+                        RefreshValue(value, true, false);
                     }
                 }
             }
@@ -344,17 +378,6 @@ namespace OpenMobile.Data
         private double _PollRate;
 
         /// <summary>
-        /// The full name of this DataSource (Provider.Category.Name)
-        /// </summary>
-        public string FullNameWithProvider
-        {
-            get
-            {
-                return String.Format("{0}{1}{2}", _Provider, ProviderSeparator, FullName);
-            }
-        }
-
-        /// <summary>
         /// The set delegate for this DataSource
         /// <para>This delegate provides a method for setting the value of the DataSource</para>
         /// </summary>
@@ -458,6 +481,30 @@ namespace OpenMobile.Data
             this._Setter = null;
             this._Getter = getter;
             this._AccessType =  AccessTypes.Read;
+            this._DataType = dataType;
+            this._Description = description;
+        }
+
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="pollRate"></param>
+        /// <param name="dataType"></param>
+        /// <param name="getter"></param>
+        public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceGetDelegate getter, DataSourceSetDelegate setter, string description)
+        {
+            this._Provider = provider;
+            this._NameLevel1 = nameLevel1;
+            this._NameLevel2 = nameLevel2;
+            this._NameLevel3 = nameLevel3;
+            this._PollRate = pollRate;
+            this._Setter = setter;
+            this._Getter = getter;
+            this._AccessType = AccessTypes.Both;
             this._DataType = dataType;
             this._Description = description;
         }
@@ -651,11 +698,24 @@ namespace OpenMobile.Data
                     {
                         object newValue = _Getter(this, out _Valid, null);
                         if (_Valid)
-                            if (!newValue.Equals(_Value))
+                        {
+                            if (newValue == null)
                             {
-                                _Value = newValue;
-                                Changed = false;
+                                if (newValue != _Value)
+                                {
+                                    _Value = newValue;
+                                    Changed = true;
+                                }
                             }
+                            else
+                            {
+                                if (!newValue.Equals(_Value))
+                                {
+                                    _Value = newValue;
+                                    Changed = true;
+                                }
+                            }
+                        }
                     }
                 }
                 else

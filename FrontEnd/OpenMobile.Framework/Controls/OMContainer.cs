@@ -23,6 +23,8 @@ using OpenMobile.Graphics;
 using OpenMobile.helperFunctions.Graphics;
 using System;
 using OpenMobile.Input;
+using OpenMobile.Math;
+using OpenMobile.Graphics.OpenGL;
 
 namespace OpenMobile.Controls
 {
@@ -32,87 +34,6 @@ namespace OpenMobile.Controls
     [System.Serializable]
     public class OMContainer : OMControlGraphicsBase, IContainer2, IHighlightable, IThrow, IKey
     {
-        /*
-        /// <summary>
-        /// A collection of controls for usage in the OMContainer control
-        /// </summary>
-        public class ControlGroup : List<OMControl>
-        {
-            public Rectangle Region
-            {
-                get
-                {
-                    if (this.Count == 0)
-                        return new Rectangle();
-
-                    Rectangle TotalRegion = this[0].Region;
-                    // Return the combined area of contained controls
-                    for (int i = 1; i < this.Count; i++)
-                        TotalRegion.Union(this[i].Region);
-                    return TotalRegion;
-                }
-            }
-
-            public void Translate(Rectangle r)
-            {
-                // Run command on each contained control
-                foreach (OMControl control in this)
-                    control.Region.Translate(r);
-            }
-
-            public bool Contains(string name)
-            {
-                OMControl c = this.Find(x => x.Name == name);
-                return (c != null);
-            }
-
-            public ControlGroup()
-            {
-            }
-
-            public ControlGroup(OMControl control)
-            {
-                this.Add(control);
-            }
-
-            public bool IsHighlighted()
-            {
-                foreach (OMControl control in this)
-                {
-                    if (control.Mode == eModeType.Highlighted)
-                        return true;
-                }
-                return false;
-            }
-
-            public OMControl this[string name]
-            {
-                get
-                {
-                    return this.Find(x => x.Name.Contains(name));
-                }
-                set
-                {
-                    int index = this.FindIndex(x => x.Name.Contains(name));
-                    this.RemoveAt(index);
-                    this.Insert(index, value);
-                }
-            }
-
-            public ControlDirections  PlacementDirection { get; set; }
-
-            public string Key { get; set; }
-
-            public ControlGroup Clone()
-            {
-                ControlGroup newCG = new ControlGroup();
-                foreach (OMControl control in this)
-                    newCG.Add((OMControl)control.Clone());
-               return newCG;
-            }
-        }
-        */
-
         /// <summary>
         /// The currently loaded controls
         /// </summary>
@@ -425,6 +346,22 @@ namespace OpenMobile.Controls
         #endregion
 
         /// <summary>
+        /// 3D control data
+        /// </summary>
+        public _3D_Control _3D_CameraData
+        {
+            get
+            {
+                return this.__3D_CameraData;
+            }
+            set
+            {
+                this.__3D_CameraData = value;
+            }
+        }
+        private _3D_Control __3D_CameraData;        
+
+        /// <summary>
         /// Active softedges
         /// </summary>
         public FadingEdge.GraphicSides SoftEdges { get; set; }
@@ -491,6 +428,10 @@ namespace OpenMobile.Controls
             //    moved = AutoSizeContainer(g, ControlsArea);
             //ControlCountOld = _Controls.Count;
 
+            // Add containers opacity to the contained controls
+            float Alpha = e.Alpha;
+            e.Alpha = this.GetAlphaValue1(e.Alpha);
+
             // Move controls with this control
             if (!_NoOffsetOnNextRender)
             {
@@ -534,6 +475,7 @@ namespace OpenMobile.Controls
                 {   // Y offset is outside of bounds, limit value
                     e.Offset.Y = System.Math.Abs(Region.Top - ControlsArea.Top);
                 }
+                //Console.WriteLine(String.Format("+ {3} / {0} - Reg.Top:{1} Cont.Top:{2})", System.Math.Abs(Region.Top - ControlsArea.Top), Region.Top, ControlsArea.Top, e.Offset.Y));
             }
             else if (e.Offset.Y < 0)
             {
@@ -541,6 +483,7 @@ namespace OpenMobile.Controls
                 {   // Y offset is outside of bounds, limit value
                     e.Offset.Y = -System.Math.Abs(Region.Bottom - ControlsArea.Bottom);
                 }
+                //Console.WriteLine(String.Format("- {3} / {0} - Reg.Btn:{1} Cont.Btn:{2})", System.Math.Abs(Region.Bottom - ControlsArea.Bottom), Region.Bottom, ControlsArea.Bottom, e.Offset.Y));
             }
 
             #endregion
@@ -626,6 +569,9 @@ namespace OpenMobile.Controls
 
             // Reset offset data
             e.Offset = new Rectangle();
+
+            // Reset alpha data
+            e.Alpha = Alpha;
 
             // Reset clip
             g.ResetClip();
@@ -742,7 +688,8 @@ namespace OpenMobile.Controls
                     int ScrollBarLocation = Region.Left + (int)(MaxTravelScrollBar * TravelFactor);
 
                     // Render scrollbar
-                    g.FillRectangle(ScrollBarBrush, ScrollBarLocation, Region.Bottom - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarSize, _ScrollBar_Thickness);
+                    //g.FillRectangle(ScrollBarBrush, ScrollBarLocation, Region.Bottom - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarSize, _ScrollBar_Thickness);
+                    g.FillRoundRectangle(ScrollBarBrush, ScrollBarLocation, Region.Bottom - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarSize, _ScrollBar_Thickness, _ScrollBar_Thickness / 2);
 
                     // Release resources
                     ScrollBarBrush.Dispose();
@@ -776,7 +723,8 @@ namespace OpenMobile.Controls
                     int ScrollBarLocation = Region.Top + (int)(MaxTravelScrollBar * TravelFactor);
 
                     // Render scrollbar
-                    g.FillRectangle(ScrollBarBrush, Region.Right - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarLocation, _ScrollBar_Thickness, ScrollBarSize);
+                    //g.FillRectangle(ScrollBarBrush, Region.Right - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarLocation, _ScrollBar_Thickness, ScrollBarSize);
+                    g.FillRoundRectangle(ScrollBarBrush, Region.Right - _ScrollBar_Thickness - _ScrollBar_ClearanceToEdge, ScrollBarLocation, _ScrollBar_Thickness, ScrollBarSize, _ScrollBar_Thickness / 2);
 
                     // Release resources
                     ScrollBarBrush.Dispose();
@@ -848,6 +796,58 @@ namespace OpenMobile.Controls
         /// <param name="e"></param>
         public override void Render(OpenMobile.Graphics.Graphics g, renderingParams e)
         {
+            // Save current 3D data
+            g._3D_ModelView_Push();
+
+            // Zoom 
+            if (__3D_CameraData.CameraZoom != 0)
+            {
+                g.Scale(__3D_CameraData.CameraZoom, __3D_CameraData.CameraZoom, 1);
+            }
+
+            // Offset camera
+            if (__3D_CameraData.CameraOffset != Vector3d.Zero)
+            {
+                g.Translate(__3D_CameraData.CameraOffset.X, __3D_CameraData.CameraOffset.Y, __3D_CameraData.CameraOffset.Z);
+            }
+
+            // Rotate camera
+            if (__3D_CameraData.CameraRotation != Vector3d.Zero)
+            {
+                g.Rotate(__3D_CameraData.CameraRotation);
+            }
+
+            // Rotate control?
+            if (__3D_CameraData.ControlRotation != Vector3d.Zero)
+            {
+                // Calculate center point in absolute screen coordinates
+                Point center = g.GetScreenAbsPoint(Region.Center);
+
+                if (__3D_CameraData.ControlRotationPoint != Vector3d.Zero)
+                {
+                    // Move control to center of screen (to rotate around the center of the control)
+                    g.Translate(__3D_CameraData.ControlRotationPoint.X, __3D_CameraData.ControlRotationPoint.Y);
+
+                    // Apply rotation
+                    g.Rotate(__3D_CameraData.ControlRotation);
+
+                    // Move control back to original placement
+                    g.Translate(-__3D_CameraData.ControlRotationPoint.X, -__3D_CameraData.ControlRotationPoint.Y);
+                }
+                else
+                {
+                    // Move control to center of screen (to rotate around the center of the control)
+                    g.Translate(center.X, center.Y);
+
+                    // Apply rotation
+                    g.Rotate(__3D_CameraData.ControlRotation);
+
+                    // Move control back to original placement
+                    g.Translate(-center.X, -center.Y);
+                }
+
+            }
+
             base.RenderBegin(g, e);
             try
             {
@@ -864,6 +864,9 @@ namespace OpenMobile.Controls
             }
 
             base.RenderFinish(g, e);
+
+            // Restore 3D data
+            g._3D_ModelView_Pop();
         }
 
         /// <summary>
@@ -1189,13 +1192,21 @@ namespace OpenMobile.Controls
                 // Exit if nothing is visible
                 if (_RenderOrder_ObjectsInView == null)
                     return new List<OMControl>();
-                
-                // Return a flatten list of all controls in the controlgroups
-                List<OMControl> controls = new List<OMControl>();
-                for (int i = 0; i < _RenderOrder_ObjectsInView.Count; i++)
-                    for (int i2 = 0; i2 < _Controls[_RenderOrder_ObjectsInView[i]].Count; i2++)
-                        controls.Add(_Controls[_RenderOrder_ObjectsInView[i]][i2]);
-                return controls; 
+
+                lock (_RenderOrder_ObjectsInView)
+                {
+                    // Return a flatten list of all controls in the controlgroups
+                    List<OMControl> controls = new List<OMControl>();
+                    for (int i = 0; i < _RenderOrder_ObjectsInView.Count; i++)
+                    {
+                        if (_RenderOrder_ObjectsInView[i] < _Controls.Count)
+                        {
+                            for (int i2 = 0; i2 < _Controls[_RenderOrder_ObjectsInView[i]].Count; i2++)
+                                controls.Add(_Controls[_RenderOrder_ObjectsInView[i]][i2]);
+                        }
+                    }
+                    return controls;
+                }
             }
         }
 
@@ -1921,7 +1932,7 @@ namespace OpenMobile.Controls
         {
             // Continue motion when user end's the throw 
             _ThrowRun = true;
-            int LoopSpeedMS = 10;
+            int LoopSpeedMS = 12;
             PointF DecelerationFactor = new PointF(0.003f, 0.003f);
             PointF ThrowSpeed = new PointF(System.Math.Abs(CursorSpeed.X), System.Math.Abs(CursorSpeed.Y));
             Point ScrollDistance = new Point();

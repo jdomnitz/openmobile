@@ -546,59 +546,6 @@ namespace OpenMobile
         {
             return _text;
         }
-
-
-        /*
-        /// <summary>
-        /// sensor to be watched
-        /// </summary>
-        private Plugin.Sensor _Sensor;
-        /// <summary>
-        /// Text to be included when formatting the sensor
-        /// </summary>
-        private string sensorText;
-        /// <summary>
-        /// Sets the sensor to subscribe to
-        /// </summary>
-        public string sensorName
-        {
-            get
-            {
-                if (_Sensor == null)
-                    return "";
-                return _Sensor.Name;
-            }
-            set
-            {
-                if (String.IsNullOrEmpty(value))
-                {
-                    if (_Sensor != null)
-                        _Sensor = null;
-                    return;
-                }
-                Plugin.Sensor sensor = helperFunctions.Sensors.getPluginByName(value);
-                if (sensor != null)
-                {
-                    sensorText = this.text;
-                    this._Sensor = sensor;
-                    sensor.newSensorDataReceived += new Plugin.SensorDataReceived(delegate(OpenMobile.Plugin.Sensor sender)
-                    {
-                        updateTextFromSensor();
-                    });
-
-                    updateTextFromSensor();
-                }
-            }
-        }
-
-        private void updateTextFromSensor()
-        {
-            if (string.IsNullOrEmpty(sensorText))
-                this.text = _Sensor.FormatedValue();
-            else
-                this.text = string.Format(sensorText, _Sensor.FormatedValue());
-        }
-        */
     }
 
     /// <summary>
@@ -1025,6 +972,9 @@ namespace OpenMobile
         /// Occurs when the rendering window is resized (useful for embedded forms and video windows)
         /// <para>---------------------------------------</para>
         /// <para>Arg1: Screen Number</para>
+        /// <para>Arg2: (Point)Location of window on desktop</para>
+        /// <para>Arg3: (Size)Size of window</para>
+        /// <para>Arg4: (PointF)Scalefactors</para>
         /// </summary>
         RenderingWindowResized = 56,
         /// <summary>
@@ -1320,7 +1270,17 @@ namespace OpenMobile
         /// <para>Arg2: Full panel reference (PluginName;PanelName)</para>
         /// <para>Arg3: <i>(Optional)</i> <seealso cref="eGlobalTransition"/> Transition Name</para>
         /// </summary>
-        GotoPanel
+        GotoPanel,
+        /// <summary>
+        /// Used as event only! Entering idle mode (no user input detected in OM)
+        /// <para>Arg: Screen number</para>
+        /// </summary>
+        IdleEntering,
+        /// <summary>
+        /// Used as event only! Leaving idle mode (user input detected in OM)
+        /// <para>Arg: Screen number</para>
+        /// </summary>
+        IdleLeaving,
     }
     /// <summary>
     /// The status of a plugins initialization
@@ -1863,6 +1823,12 @@ namespace OpenMobile
         /// <para>If a name is given the returned object will be a Zone</para>
         /// </summary>
         GetZones = 37,
+
+        /// <summary>
+        /// Returns a list of the disabled plugins
+        /// </summary>
+        GetPluginsDisabled
+
     }
     /// <summary>
     /// Information on Tuned Content
@@ -2140,6 +2106,22 @@ namespace OpenMobile
     public class Location : ICloneable
     {
         /// <summary>
+        /// Is this an empty address?
+        /// </summary>
+        /// <returns></returns>
+        public bool IsEmpty()
+        {
+            return (String.IsNullOrEmpty(Name) && 
+                String.IsNullOrEmpty(Street) && 
+                String.IsNullOrEmpty(City) && 
+                String.IsNullOrEmpty(State) && 
+                String.IsNullOrEmpty(Country) && 
+                String.IsNullOrEmpty(Zip) && 
+                Latitude == 0f && 
+                Longitude == 0f);
+        }
+
+        /// <summary>
         /// The name of the location
         /// </summary>
         public string Name;
@@ -2246,7 +2228,8 @@ namespace OpenMobile
             Zip = zip;
         }
         /// <summary>
-        /// Trys to parse a string into an Address
+        /// Trys to parse a string into an Address 
+        /// <para>The string should be in a format like this [street, city, state, zip, country] where ',' is used as a separator</para>
         /// </summary>
         /// <param name="address"></param>
         /// <param name="result"></param>
@@ -2260,7 +2243,17 @@ namespace OpenMobile
             }
             result = null;
             string[] args = address.Split(new char[] { ',', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            if (args.Length == 3)
+            if (args.Length == 5)
+            {
+                result = new Location(args[0], args[1].Trim(), args[2].Trim(), args[3].Trim(), args[4].Trim());
+                return true;
+            }
+            else if (args.Length == 4)
+            {
+                result = new Location(args[0], args[1].Trim(), args[2].Trim(), "", args[4].Trim());
+                return true;
+            }
+            else if (args.Length == 3)
             {
                 result = new Location(args[0], args[1].Trim(), args[2].Trim());
                 return true;
@@ -2292,9 +2285,62 @@ namespace OpenMobile
         /// <returns></returns>
         public override string ToString()
         {
-            if (string.IsNullOrEmpty(Street) && (Latitude != 0))
-                return Latitude.ToString() + "," + Longitude.ToString();
-            return Street + "\n" + City + ", " + State;
+            //if (string.IsNullOrEmpty(Street) && (Latitude != 0) && String.IsNullOrEmpty(City))
+            //    return Latitude.ToString() + "," + Longitude.ToString();
+            return String.Format("{0}, \n{1}, \n{2}, \n{3} \n[{4};{5}]", Street, City, State, Country, Latitude, Longitude); //   Street + "\n" + City + ", " + State;
+        }
+
+        /// <summary>
+        /// ==
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static bool operator ==(Location a, Location b)
+        {
+            // If both are null, or both are same instance, return true.
+            if (System.Object.ReferenceEquals(a, b))
+                return true;
+
+            // If one is null, but not both, return false.
+            if (((object)a == null) || ((object)b == null))
+                return false;
+
+            string cityA = String.IsNullOrEmpty(a.City) ? String.Empty : a.City;
+            string cityB = String.IsNullOrEmpty(b.City) ? String.Empty : b.City;
+            if (!cityA.Equals(cityB)) return false;
+
+            string countryA = String.IsNullOrEmpty(a.Country) ? String.Empty : a.Country;
+            string countryB = String.IsNullOrEmpty(b.Country) ? String.Empty : a.Country;
+            if (!countryA.Equals(countryB)) return false;
+
+            string stateA = String.IsNullOrEmpty(a.State) ? String.Empty : a.State;
+            string stateB = String.IsNullOrEmpty(b.State) ? String.Empty : b.State;
+            if (!stateA.Equals(stateB)) return false;
+            
+            string streetA = String.IsNullOrEmpty(a.Street) ? String.Empty : a.Street;
+            string streetB = String.IsNullOrEmpty(b.Street) ? String.Empty : b.Street;
+            if (!streetA.Equals(streetB)) return false;
+            
+            string zipA = String.IsNullOrEmpty(a.Zip) ? String.Empty : a.Zip;
+            string zipB = String.IsNullOrEmpty(b.Zip) ? String.Empty : b.Zip;
+            if (!zipA.Equals(zipB)) return false;
+
+            if (a.Latitude != b.Latitude) return false;
+            if (a.Longitude != b.Longitude) return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// !=
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="B"></param>
+        /// <returns></returns>
+        public static bool operator !=(Location A, Location B)
+        {
+            return !(A == B); ;
         }
     }
     /// <summary>
@@ -2579,6 +2625,15 @@ namespace OpenMobile
         /// Create a new mediaInfo object
         /// </summary>
         /// <param name="URL"></param>
+        public mediaInfo(eMediaType type, string URL)
+        {
+            this.Type = type;
+            this.Location = URL;
+        }
+        /// <summary>
+        /// Create a new mediaInfo object
+        /// </summary>
+        /// <param name="URL"></param>
         public mediaInfo(string URL)
         {
             this.Location = URL;
@@ -2587,6 +2642,11 @@ namespace OpenMobile
         /// Create a new mediaInfo object
         /// </summary>
         public mediaInfo() { }
+
+        public override string ToString()
+        {
+            return String.Format("{0} - {1} - {2} [{3}]", Artist, Album, Name, Location);
+        }
     }
 
     /// <summary>
@@ -2615,7 +2675,7 @@ namespace OpenMobile
         /// </summary>
         public string stationGenre;
         /// <summary>
-        /// Number of Audio Channels
+        /// Number of Audio Channels (1 = Mono, 2 = Stereo)
         /// </summary>
         public int Channels;
         /// <summary>
@@ -2678,9 +2738,13 @@ namespace OpenMobile
         /// </summary>
         public float Alpha = 1.0f;
 
-        public Vector3 Rotation = new Vector3();
-        public Vector3 Scale = new Vector3(1, 1, 1);
+        public Vector3d Rotation = new Vector3d();
+        public Vector3d Scale = new Vector3d(1, 1, 1);
         public Matrix4 TransformationMatrix = new Matrix4();
+
+        public bool TransitionActive = false;
+
+        
     }
 
     /// <summary>
@@ -2826,4 +2890,40 @@ namespace OpenMobile
             }
         }
     }
+
+    /// <summary>
+    /// Data for the rendering window
+    /// </summary>
+    public class RenderingWindowData
+    {
+        /// <summary>
+        /// Location of renderingwindow
+        /// </summary>
+        public Point Location { get; set; }
+
+        /// <summary>
+        /// Size of renderingwindow
+        /// </summary>
+        public Size Size { get; set; }
+
+        /// <summary>
+        /// ScaleFactors for the rendering window
+        /// </summary>
+        public PointF ScaleFactors { get; set; }
+
+        /// <summary>
+        /// Initialize a new class of RenderingWindowData
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="size"></param>
+        /// <param name="scaleFactors"></param>
+        public RenderingWindowData(Point location, Size size, PointF scaleFactors)
+        {
+            this.Location = location;
+            this.Size = size;
+            this.ScaleFactors = scaleFactors;
+        }
+    }
+
+
 }

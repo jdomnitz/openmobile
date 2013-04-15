@@ -109,23 +109,23 @@ namespace OpenMobile.Controls
 
         #endregion
 
-        private bool _AutoFitText = true;
-        /// <summary>
-        /// Enabled or disabled automatic adjustment of font size to fit in control
-        /// </summary>
-        public bool AutoFitText 
-        {
-            get
-            {
-                return _AutoFitText;
-            }
-            set
-            {
-                _AutoFitText = value;
-                _RefreshGraphic = true;
-                raiseUpdate(false);
-            }
-        }
+        //private bool _AutoFitText = true;
+        ///// <summary>
+        ///// Enabled or disabled automatic adjustment of font size to fit in control
+        ///// </summary>
+        //public bool AutoFitText 
+        //{
+        //    get
+        //    {
+        //        return _AutoFitText;
+        //    }
+        //    set
+        //    {
+        //        _AutoFitText = value;
+        //        _RefreshGraphic = true;
+        //        raiseUpdate(false);
+        //    }
+        //}
 
         /// <summary>
         /// Raised when the text value is changed
@@ -264,7 +264,6 @@ namespace OpenMobile.Controls
             }
         }
 
-        private int count;
         /// <summary>
         /// The text contained by the textbox
         /// </summary>
@@ -290,36 +289,34 @@ namespace OpenMobile.Controls
                     if (IsAlphabetic(value) == false)
                         return;
                 }
-                if (((flags & textboxFlags.Password) == textboxFlags.Password) && (value != null) && ((_text != "") || ((value.Length == 1))) && ((_text != null) && (value.Contains(_text))))
-                    count = 6;
                 _RefreshGraphic = true; 
                 _text = value;
 
-                #region AutoFit
+                //#region AutoFit
 
-                // Autofit size of string
-                if (fontScaleFactor != 0)
-                {
-                    this._font.Size = orgFontSize;
-                    fontScaleFactor = 0;
-                }
-                if (AutoFitText)
-                {
-                    SizeF TextSize = Graphics.Graphics.MeasureString(_text, this.Font, this.Format);
+                //// Autofit size of string
+                //if (fontScaleFactor != 0)
+                //{
+                //    this._font.Size = orgFontSize;
+                //    fontScaleFactor = 0;
+                //}
+                //if (AutoFitText)
+                //{
+                //    SizeF TextSize = Graphics.Graphics.MeasureString(_text, this.Font, this.Format);
 
-                    if (TextSize.Width > this.width)
-                    {   // Reduce text size to fit
-                        orgFontSize = this._font.Size;
+                //    if (TextSize.Width > this.width)
+                //    {   // Reduce text size to fit
+                //        orgFontSize = this._font.Size;
 
-                        fontScaleFactor = TextSize.Width / this.width;
-                        this._font.Size = this._font.Size / fontScaleFactor;
+                //        fontScaleFactor = TextSize.Width / this.width;
+                //        this._font.Size = this._font.Size / fontScaleFactor;
 
-                        // Reset text texture to regenerate text
-                        _RefreshGraphic = true;
-                    }
-                }
+                //        // Reset text texture to regenerate text
+                //        _RefreshGraphic = true;
+                //    }
+                //}
 
-                #endregion
+                //#endregion
 
                 raiseUpdate(false);
                 try
@@ -393,7 +390,49 @@ namespace OpenMobile.Controls
             this.Format = OpenMobile.Graphics.eTextFormat.Normal;
             this.Color = Color.Black;
             this.OutlineColor = BuiltInComponents.SystemSettings.SkinFocusColor;
+            this.AutoFitTextMode = FitModes.Fit;
         }
+
+        /// <summary>
+        /// Render the controls background
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void Render_Background(Graphics.Graphics g, renderingParams e)
+        {
+            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * 255), (this.disabled ? disabledBackgroundColor : background))), left, top, width, height, 10);
+            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(_RenderingValue_Alpha * 255), this.Color), 1F), left, top, width, height, 10);
+
+            if (this.Mode == eModeType.Highlighted)
+            {
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(40 * _RenderingValue_Alpha), this.OutlineColor), 5F), left, top, width, height, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * _RenderingValue_Alpha), this.OutlineColor), 4F), left, top, width, height, 10);
+                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * _RenderingValue_Alpha), this.OutlineColor), 3F), left, top, width, height, 10);
+            }
+        }
+
+        /// <summary>
+        /// Render the controls foreground
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        protected void Render_Foreground(Graphics.Graphics g, renderingParams e)
+        {
+            if (!String.IsNullOrEmpty(_text))
+            {
+                // Generate password masking characters if needed
+                string tempStr = _text;
+                if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (_text.Length > 0))
+                {
+                    tempStr = "";
+                    tempStr = tempStr.PadRight(_text.Length);
+                }
+
+                // Render labels foreground
+                base.Render_Foreground(g, e, tempStr);
+            }
+        }
+
         /// <summary>
         /// Draws the control
         /// </summary>
@@ -403,76 +442,23 @@ namespace OpenMobile.Controls
         {
             base.RenderBegin(g, e);
 
-            //float tmp = OpacityFloat;
-            //if (this.Mode == eModeType.transitioningIn)
-            //    tmp = e.globalTransitionIn;
-            //else if (this.Mode == eModeType.transitioningOut)
-            //    tmp = e.globalTransitionOut;
+            // Render labels background
+            base.Render_Background(g, e);
 
-            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * 255), (this.disabled ? disabledBackgroundColor : background))), left, top, width, height, 10);
-            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(_RenderingValue_Alpha * 255), this.Color), 1F), left, top, width, height, 10);
+            // Render this controls background
+            Render_Background(g, e);
 
-            if (this.Mode == eModeType.Highlighted)
-            {
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(40 * _RenderingValue_Alpha), this.OutlineColor), 4F), left + 1, top + 1, width - 2, height - 2, 10);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * _RenderingValue_Alpha), this.OutlineColor), 3F), left + 1, top + 1, width - 2, height - 2, 10);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * _RenderingValue_Alpha), this.OutlineColor), 2F), left + 1, top + 1, width - 2, height - 2, 10);
-            }
-            if (_text != null)
-            {
-                // Generate password masking characters if needed
-                //TODO: Remove this masking 
-                string tempStr = _text;
-                if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (_text.Length > 0))
-                {
-                    tempStr = new String('*', _text.Length - 1);
-                    if (count > 1)
-                        tempStr += _text[_text.Length - 1];
-                    else
-                        tempStr += "*";
-                    count--;
-                }
-
-                if ((_RefreshGraphic) || (count > 0))
-                    textTexture = g.GenerateTextTexture(textTexture, left+5, top, width, height, tempStr, _font, _textFormat, _textAlignment, _color, _outlineColor);
-                g.DrawImage(textTexture, this.Left + 5, this.Top, this.Width, this.Height, _RenderingValue_Alpha);
-
-                /*
-                using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
-                {
-                    f.Alignment = System.Drawing.StringAlignment.Center;
-                    f.LineAlignment = System.Drawing.StringAlignment.Center;
-                    if ((flags & textboxFlags.EllipsisCenter) == textboxFlags.EllipsisCenter)
-                        f.Trimming = System.Drawing.StringTrimming.EllipsisPath;
-                    else if ((flags & textboxFlags.EllipsisEnd) == textboxFlags.EllipsisEnd)
-                        f.Trimming = System.Drawing.StringTrimming.EllipsisCharacter;
-                    else if ((flags & textboxFlags.TrimNearestWord) == textboxFlags.TrimNearestWord)
-                        f.Trimming = System.Drawing.StringTrimming.Word;
-                 * 
-                    // Generate password masking characters if needed
-                    string tempStr = text;
-                    if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (text.Length > 0))
-                    {
-                        tempStr = new String('*', text.Length - 1);
-                        if (count > 1)
-                            tempStr += text[text.Length - 1];
-                        else
-                            tempStr += "*";
-                        count--;
-                    }
-
-                    if ((g.TextureGenerationRequired(textTexture)) || (count > 0))
-                    {
-                        textTexture = g.GenerateStringTexture(textTexture, tempStr, this.Font, Color.FromArgb((int)(tmp * Color.A), this.Color), this.Left, this.Top, this.Width + 5, this.Height, f);
-                    }
-                    g.DrawImage(textTexture, this.Left, this.Top, this.Width + 5, this.Height, tmp);
-                }
-                */
-            }
+            // Render this controls foreground
+            Render_Foreground(g, e);
 
             base.RenderFinish(g, e);
         }
 
+        /// <summary>
+        /// Clones this object
+        /// </summary>
+        /// <param name="ClearEvents"></param>
+        /// <returns></returns>
         public object Clone(bool ClearEvents)
         {
             OMTextBox TextBox = (OMTextBox)base.Clone();

@@ -399,7 +399,7 @@ namespace OpenMobile.helperFunctions
                 }
 
                 // loadpanel
-                BuiltInComponents.Panels.loadSinglePanel(Panel, screen);
+                BuiltInComponents.Panels.loadSinglePanel(Panel, screen, false);
 
                 CloseOSK.Reset();
 
@@ -488,14 +488,17 @@ namespace OpenMobile.helperFunctions
                 CloseOSK.Set();
             }
 
-            void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+            void theHost_OnSystemEvent(eFunction function, object[] args)
             {
                 if (function == eFunction.goBack)
                 {
-                    if (arg3 == PanelName)
+                    if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 3))
                     {
-                        Result = "";
-                        CloseOSK.Set();
+                        if (OpenMobile.helperFunctions.Params.GetParam<string>(args,2) == PanelName)
+                        {
+                            Result = "";
+                            CloseOSK.Set();
+                        }
                     }
                 }
             }

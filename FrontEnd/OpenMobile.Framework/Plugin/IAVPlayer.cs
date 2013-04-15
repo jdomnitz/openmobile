@@ -38,7 +38,7 @@ namespace OpenMobile.Plugin
         bool stop(Zone zone);
         /// <summary>
         /// The the media playback position (in seconds)
-        /// </summary>
+        /// </summary>but what 
         /// <param name="seconds"></param>
         /// <param name="instance"></param>
         /// <returns></returns>

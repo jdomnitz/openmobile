@@ -210,7 +210,7 @@ namespace OpenMobile.Media
         public static OImage getCoverFromDB(string artist, string album)
         {
             using (PluginSettings s = new PluginSettings())
-                return getCoverFromDB(artist, album, s.getSetting("Default.MusicDatabase"));
+                return getCoverFromDB(artist, album, s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"));
         }
         /// <summary>
         /// Retrieves the cover art from the given database

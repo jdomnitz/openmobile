@@ -45,5 +45,20 @@ namespace OpenMobile
         /// Indicates that the GameWindow should cover the whole screen.
         /// </summary>
         Fullscreen = 1,
+
+        /// <summary>
+        /// A "hidden" window style
+        /// </summary>
+        Hidden = 2,
+
+        /// <summary>
+        /// Always on top
+        /// </summary>
+        AlwaysOnTop = 4,
+
+        /// <summary>
+        /// Blocks rendering on this window
+        /// </summary>
+        BlockAllRendering = 8
     }
 }

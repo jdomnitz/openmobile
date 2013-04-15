@@ -24,6 +24,7 @@ using OpenMobile.Data;
 using System;
 using System.IO;
 using System.Collections.Generic;
+using OpenMobile.helperFunctions;
 
 namespace OpenMobile
 {
@@ -33,6 +34,11 @@ namespace OpenMobile
 
         public const string DefaultUnit = "OS Default";
         public const string DisabledUnit = "Disabled";
+
+        /// <summary>
+        /// Time for detecting when OM is idle
+        /// </summary>
+        private static Timer[] tmrIdleDetection;
 
         /// <summary>
         /// Current device mappings
@@ -63,7 +69,7 @@ namespace OpenMobile
                 string[] Units = new string[Core.theHost.ScreenCount];
                 using (PluginSettings s = new PluginSettings())
                     for (int i = 0; i < Core.theHost.ScreenCount; i++)
-                        Units[i] = s.getSetting("Screen" + (i+1).ToString() + ".Keyboard");
+                        Units[i] = s.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + (i + 1).ToString() + ".Keyboard");
                 return Units;
             }
         }
@@ -209,7 +215,7 @@ namespace OpenMobile
                 string[] Units = new string[Core.theHost.ScreenCount];
                 using (PluginSettings s = new PluginSettings())
                     for (int i = 0; i < Core.theHost.ScreenCount; i++)
-                        Units[i] = s.getSetting("Screen" + (i+1).ToString() + ".Mouse");
+                        Units[i] = s.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + (i + 1).ToString() + ".Mouse");
                 return Units;
             }
         }
@@ -562,14 +568,36 @@ namespace OpenMobile
 
             BuiltInComponents.Host.OnSystemEvent += new OpenMobile.Plugin.SystemEvent(Host_OnSystemEvent);
 
+            // Idle detection
+            int IdleDetectionInterval = BuiltInComponents.SystemSettings.IdleDetectionInterval;
+            if (IdleDetectionInterval > 0)
+            {
+                tmrIdleDetection = new Timer[BuiltInComponents.Host.ScreenCount];
+                for (int i = 0; i < tmrIdleDetection.Length; i++)
+                {
+                    tmrIdleDetection[i] = new Timer(IdleDetectionInterval * 1000);
+                    tmrIdleDetection[i].Screen = i;
+                    tmrIdleDetection[i].Tag = IdleDetectionState.Normal;
+                    tmrIdleDetection[i].Elapsed += new System.Timers.ElapsedEventHandler(tmrIdleDetection_Elapsed);
+                }
+            }
+
+            //DataSources_Register();
         }
 
-        static void Host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        static void Host_OnSystemEvent(eFunction function, object[] args)
         {
             if (function == eFunction.closeProgram)
             {
                 // Unhide default OS mouse (in case it was hidden at time of crash)
                 Core.RenderingWindows[0].DefaultMouse.ShowCursor(Core.RenderingWindows[0].WindowInfo);
+            }
+
+            if (function == eFunction.pluginLoadingComplete)
+            {
+                // Start idle timers
+                for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+                    IdleDetection_Restart(i);
             }
 
         }
@@ -621,6 +649,7 @@ namespace OpenMobile
                     {
                         Core.RenderingWindows[SenderScreen].defaultMouse = true;
                         Core.RenderingWindows[SenderScreen].RenderingWindow_MouseMove(SenderScreen, e);
+                        IdleDetection_Restart(SenderScreen);
                     }
                 }
                 else
@@ -637,6 +666,7 @@ namespace OpenMobile
                                 return;
                             Core.RenderingWindows[i].defaultMouse = (MouseMapping[i] == DefaultUnit);
                             Core.RenderingWindows[i].RenderingWindow_MouseMove(i, e);
+                            IdleDetection_Restart(i);
                         }
                     }
                 }
@@ -646,6 +676,7 @@ namespace OpenMobile
                 int i = ((int)sender + 1) * -1;
                 Core.RenderingWindows[i].defaultMouse = (MouseMapping[i] == DefaultUnit);
                 Core.RenderingWindows[i].RenderingWindow_MouseMove(i, e);
+                IdleDetection_Restart(i);
             }
         }
 
@@ -665,6 +696,7 @@ namespace OpenMobile
                     {
                         Core.RenderingWindows[SenderScreen].defaultMouse = true;
                         Core.RenderingWindows[SenderScreen].RenderingWindow_MouseClick(SenderScreen, e);
+                        IdleDetection_Restart(SenderScreen);
                     }
                 }
                 else
@@ -685,6 +717,7 @@ namespace OpenMobile
                             //    return;
                             //}
                             Core.RenderingWindows[i].RenderingWindow_MouseClick(i, e);
+                            IdleDetection_Restart(i);
                         }
                     }
                 }
@@ -693,6 +726,7 @@ namespace OpenMobile
             {
                 int i = ((int)sender + 1) * -1;
                 Core.RenderingWindows[i].RenderingWindow_MouseClick(i, e);
+                IdleDetection_Restart(i);
             }
         }
 
@@ -716,6 +750,7 @@ namespace OpenMobile
                     {
                         Core.RenderingWindows[SenderScreen].defaultMouse = true;
                         Core.RenderingWindows[SenderScreen].RenderingWindow_MouseUp(SenderScreen, e);
+                        IdleDetection_Restart(SenderScreen);
                     }
                 }
                 else
@@ -723,7 +758,10 @@ namespace OpenMobile
                     for (int i = 0; i < MouseMapping.Length; i++)
                     {
                         if (GetMouseMapIndex(MouseMapping[i]) == (int)sender)
+                        {
                             Core.RenderingWindows[i].RenderingWindow_MouseUp(i, e);
+                            IdleDetection_Restart(i);
+                        }
                     }
                 }
             }
@@ -731,6 +769,7 @@ namespace OpenMobile
             {
                 int i = ((int)sender + 1) * -1;
                 Core.RenderingWindows[i].RenderingWindow_MouseUp(i, e);
+                IdleDetection_Restart(i);
             }
         }
 
@@ -755,6 +794,7 @@ namespace OpenMobile
                     {
                         Core.RenderingWindows[SenderScreen].defaultMouse = true;
                         Core.RenderingWindows[SenderScreen].RenderingWindow_MouseDown(SenderScreen, e);
+                        IdleDetection_Restart(SenderScreen);
                     }
                 }
                 else
@@ -770,6 +810,7 @@ namespace OpenMobile
                                 return;
 
                             Core.RenderingWindows[i].RenderingWindow_MouseDown(i, e);
+                            IdleDetection_Restart(i);
                         }
                     }
                 }
@@ -778,6 +819,7 @@ namespace OpenMobile
             {
                 int i = ((int)sender + 1) * -1;
                 Core.RenderingWindows[i].RenderingWindow_MouseDown(i, e);
+                IdleDetection_Restart(i);
             }
         }
 
@@ -1019,7 +1061,9 @@ namespace OpenMobile
             if (dev.Instance < 0)
             {
                 if (KeyboardMapping[SenderScreen] == DefaultUnit)
+                {
                     raiseSourceUp(SenderScreen, e);
+                }
             }
             else
             {
@@ -1027,7 +1071,9 @@ namespace OpenMobile
                 {
                     e.Screen = i;
                     if (GetKeyboardMapIndex(KeyboardMapping[i]) == dev.Instance)
+                    {
                         raiseSourceUp(sender, e);
+                    }
                 }
             }
         }
@@ -1043,12 +1089,18 @@ namespace OpenMobile
             if (e.Screen == -1)
             {
                 for (int i = 0; i < Core.RenderingWindows.Count; i++)
+                {
                     Core.RenderingWindows[i].RenderingWindow_KeyUp(sender, e);
+                    IdleDetection_Restart(i);
+                }
             }
             else if (e.Screen < Core.RenderingWindows.Count)
             {
                 if (Core.RenderingWindows[e.Screen].WindowState != WindowState.Minimized)
+                {
                     Core.RenderingWindows[e.Screen].RenderingWindow_KeyUp(sender, e);
+                    IdleDetection_Restart(e.Screen);
+                }
             }
         }
         public static void SourceDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
@@ -1096,12 +1148,18 @@ namespace OpenMobile
             if (e.Screen == -1)
             {
                 for (int i = 0; i < Core.RenderingWindows.Count; i++)
+                {
                     Core.RenderingWindows[i].RenderingWindow_KeyDown(sender, e);
+                    IdleDetection_Restart(i);
+                }
             }
             else
             {
                 if (Core.RenderingWindows[e.Screen].WindowState != WindowState.Minimized)
+                {
                     Core.RenderingWindows[e.Screen].RenderingWindow_KeyDown(sender, e);
+                    IdleDetection_Restart(e.Screen);
+                }
             }
         }
         public static bool SendKeyUp(int screen, string Key)
@@ -1113,6 +1171,7 @@ namespace OpenMobile
             if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return false;
             Core.RenderingWindows[screen].RenderingWindow_KeyUp(null, new KeyboardKeyEventArgs(getKey(Key)));
+            IdleDetection_Restart(screen);
             return true;
         }
         public static bool SendKeyDown(int screen, string Key)
@@ -1124,6 +1183,7 @@ namespace OpenMobile
             if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return false;
             Core.RenderingWindows[screen].RenderingWindow_KeyDown(null, new KeyboardKeyEventArgs(getKey(Key)));
+            IdleDetection_Restart(screen);
             return true;
         }
         private static Key getKey(string key)
@@ -1259,5 +1319,131 @@ namespace OpenMobile
         #endregion
 
         #endregion
+
+        #region IdleDetection
+
+        private enum IdleDetectionState
+        {
+            Normal,
+            IdleEntering,
+            Idle,
+            IdleLeaving
+        }
+        
+        /// <summary>
+        /// Raises the idle event 
+        /// </summary>
+        private static void raiseIdleEvent(int screen, bool leaving)
+        {
+            SandboxedThread.Asynchronous(delegate()
+            {
+                if (leaving)
+                    Core.theHost.raiseSystemEvent(eFunction.IdleLeaving, screen.ToString(), String.Empty, String.Empty);
+                else
+                {
+                    Core.theHost.raiseSystemEvent(eFunction.IdleEntering, screen.ToString(), String.Empty, String.Empty);
+                    
+                    // Execute configured action
+                    string action = BuiltInComponents.SystemSettings.IdleDetectionAction(screen);
+                    if (!string.IsNullOrEmpty(action))
+                        BuiltInComponents.Host.CommandHandler.ExecuteCommand(action);
+                }
+            }
+            );
+        }
+
+        /// <summary>
+        /// Idle detection timer event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void tmrIdleDetection_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            int screen = ((Timer)sender).Screen;
+            tmrIdleDetection[screen].Stop();
+            tmrIdleDetection[screen].Tag = IdleDetectionState.IdleEntering;
+            raiseIdleEvent(screen, false);
+            tmrIdleDetection[screen].Tag = IdleDetectionState.Idle;
+        }
+
+        /// <summary>
+        /// Restarts the idledetection timer
+        /// </summary>
+        /// <param name="screen"></param>
+        private static void IdleDetection_Restart(int screen)
+        {
+            if (tmrIdleDetection != null)
+            {
+                if (tmrIdleDetection.Length > screen)
+                {
+                    if (tmrIdleDetection[screen] != null)
+                    {
+                        if ((IdleDetectionState)tmrIdleDetection[screen].Tag == IdleDetectionState.Idle)
+                        {   // Timer was active, send leaving idle mode event
+                            tmrIdleDetection[screen].Tag = IdleDetectionState.IdleLeaving;
+                            raiseIdleEvent(screen, true);
+                            tmrIdleDetection[screen].Tag = IdleDetectionState.Normal;
+                        }
+
+                        tmrIdleDetection[screen].Stop();
+                        tmrIdleDetection[screen].Start();
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        //#region DataSources
+
+        //private static void DataSources_Register()
+        //{
+        //    // Create data sources for zones at all available screens
+        //    for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+        //    {
+        //        // Volume
+        //        BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Input", "IdleDetectionInterval", 0, DataSource.DataTypes.raw, DataSourceGetter, DataSourceSetter, "Time in seconds before the idle event is fired"));
+        //    }
+        //}
+
+        //private static object DataSourceGetter(DataSource dataSource, out bool result, object[] param)
+        //{
+        //    result = true;
+
+        //    // Update volume data
+        //    if (dataSource.NameLevel2 == "Input" && dataSource.NameLevel3 == "IdleDetectionInterval")
+        //        return (tmrIdleDetection[helperFunctions.General.GetScreenFromString(dataSource.NameLevel1)].Interval / 1000);
+
+        //    result = false;
+        //    return null;
+        //}
+
+        //private static void DataSourceSetter(DataSource dataSource, ref object value, object[] param, out bool result)
+        //{
+        //    result = true;
+
+        //    // Update volume data
+        //    if (dataSource.NameLevel2 == "Input" && dataSource.NameLevel3 == "IdleDetectionInterval")
+        //    {
+        //        int screen = helperFunctions.General.GetScreenFromString(dataSource.NameLevel1);
+        //        int delay = helperFunctions.General.GetDataFromObject<int>(value, 60);
+        //        tmrIdleDetection[screen].Interval = delay * 1000;
+
+        //        // Write data to database
+        //        SaveIdleDetectionInterval(screen, delay);
+        //    }
+        //    result = false;
+        //    return;
+        //}
+
+        //private static void SaveIdleDetectionInterval(int screen, int value)
+        //{
+        //    string SettingName = String.Format("Screen{0}.Input.IdleDetectionInterval", screen);
+        //    StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, SettingName, 60);
+        //    StoredData.Set(BuiltInComponents.OMInternalPlugin, SettingName, value);
+        //}
+
+        //#endregion
+
     }
 }
