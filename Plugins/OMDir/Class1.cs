@@ -118,7 +118,7 @@ namespace OMDir
             theHost = host;
             theHost.OnStorageEvent += new StorageEvent(on_storageEvent);
             OMPanel p = new OMPanel();
-            manager = new ScreenManager(theHost.ScreenCount);
+            manager = new ScreenManager(this);
             OMLabel caption = new OMLabel(275, 95, 400, 60);
             caption.OutlineColor = Color.FromArgb(120, Color.PowderBlue);
             caption.Font = new Font(Font.GenericSansSerif, 34F);
@@ -164,10 +164,10 @@ namespace OMDir
             p.addControl(right);
             p.addControl(top);
             p.addControl(select);
-            manager.loadPanel(p);
+            manager.loadPanel(p, true);
             type = new int[theHost.ScreenCount];
             using (PluginSettings settings = new PluginSettings())
-                settings.setSetting("Default.DirectoryBrowser", "OMDir");
+                settings.setSetting(this, "Default.DirectoryBrowser", "OMDir");
             return eLoadStatus.LoadSuccessful;
         }
 

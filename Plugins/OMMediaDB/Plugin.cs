@@ -49,8 +49,8 @@ namespace OMMediaDB
                 s = new Settings("Media Database");
                 using (PluginSettings settings = new PluginSettings())
                 {
-                    s.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoIndex", "", "Index New Music on Every Startup", Setting.BooleanList, Setting.BooleanList, settings.getSetting("Music.AutoIndex")));
-                    s.Add(new Setting(SettingTypes.Folder, "Music.Path", "", "Music Path", settings.getSetting("Music.Path")));
+                    s.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoIndex", "", "Index New Music on Every Startup", Setting.BooleanList, Setting.BooleanList, settings.getSetting(this, "Music.AutoIndex")));
+                    s.Add(new Setting(SettingTypes.Folder, "Music.Path", "", "Music Path", settings.getSetting(this, "Music.Path")));
                     s.Add(new Setting(SettingTypes.Button,"ClearDB","","Clear Database"));
                     s.Add(new Setting(SettingTypes.Button, "Index", "", "Index Music Now"));
                     s.OnSettingChanged += new SettingChanged(changed);
@@ -62,15 +62,15 @@ namespace OMMediaDB
         {
             using (PluginSettings settings = new PluginSettings())
             {
-                if ((s.Name == "Music.AutoIndex")|| (s.Name == "Music.Path"))
-                    settings.setSetting(s.Name, s.Value);
+                if ((s.Name == "Music.AutoIndex") || (s.Name == "Music.Path"))
+                    settings.setSetting(this, s.Name, s.Value);
                 else if (s.Name == "ClearDB")
                 {
                     this.clearIndex();
                 }
                 else if (s.Name == "Index")
                 {
-                    this.indexDirectory(settings.getSetting("Music.Path"), true);
+                    this.indexDirectory(settings.getSetting(this, "Music.Path"), true);
                 }
             }
         }
@@ -229,6 +229,14 @@ namespace OMMediaDB
 
             if (IndexingCompleted)
             {
+                if (NotificationIndexingStatus == null)
+                {   // Create new notification
+                    NotificationIndexingStatus = new Notification(this, "NotificationIndexingStatus", theHost.getSkinImage("Icons|Icon-MusicIndexer").image, theHost.getSkinImage("Icons|Icon-MusicIndexer").image, "Media search completed", "");
+                    NotificationIndexingStatus.Global = true;
+                    NotificationIndexingStatus.State = Notification.States.Active;
+                    theHost.UIHandler.AddNotification(NotificationIndexingStatus);
+                }
+
                 if (tmr!=null)
                     tmr.Dispose();
                 theHost.raiseMediaEvent(eFunction.MediaIndexingCompleted, null, this.pluginName);
@@ -351,6 +359,9 @@ namespace OMMediaDB
                     info.Artist = "Unknown Artist";
                 if ((info.Album == album)&&(info.Artist==artist))
                 {
+                    // Set default image if image is missing
+                    if (info.coverArt == null)
+                        info.coverArt = BuiltInComponents.Host.getSkinImage("Images|Image-UnknownAlbum").image;
                     if ((hasCover == false) && (info.coverArt != null))
                         updateCover(info);
                     writeSong(info);
@@ -361,10 +372,15 @@ namespace OMMediaDB
                         writeSong(info);
                     else
                     {
+                        //Try to get image from folder
                         if (info.coverArt == null)
                             info.coverArt = TagReader.getFolderImage(info.Location);
+                        // Try to get cover image from lastFM
                         if (info.coverArt == null)
                             info.coverArt = TagReader.getLastFMImage(info.Artist, info.Album);
+                        // Set default image if image is missing
+                        if (info.coverArt == null)
+                            info.coverArt = BuiltInComponents.Host.getSkinImage("Images|Image-UnknownAlbum").image;
                         writeAlbum(info);
                         writeSong(info);
                     }
@@ -495,11 +511,9 @@ namespace OMMediaDB
                 con.Open();
                 SqliteCommand command = con.CreateCommand();
                 if (covers == false)
-                    command.CommandText = "SELECT Distinct Artist FROM tblAlbum";
+                    command.CommandText = "SELECT Artist FROM tblAlbum GROUP BY Artist";
                 else
-                    command.CommandText = "SELECT Distinct(Artist),Cover FROM tblAlbum";
-                    // Comment from Borte: This SQL query contains a bug since it returns multiple rows for one artist if the images are different
-                    //command.CommandText = "SELECT Distinct Artist,Cover FROM tblAlbum";
+                    command.CommandText = "SELECT Artist, Cover FROM tblAlbum GROUP BY Artist"; 
                 reader = command.ExecuteReader();
             }
             field = eMediaField.Artist;
@@ -516,9 +530,9 @@ namespace OMMediaDB
             {
                 SqliteCommand command = con.CreateCommand();
                 if (covers == false)
-                    command.CommandText = "SELECT Distinct Artist,Album FROM tblAlbum";
+                    command.CommandText = "SELECT Artist,Album FROM tblAlbum GROUP BY Album";
                 else
-                    command.CommandText = "SELECT Distinct Artist,Album,Cover FROM tblAlbum";
+                    command.CommandText = "SELECT Artist,Album,Cover FROM tblAlbum GROUP BY Album"; //"SELECT Distinct Artist,Album,Cover FROM tblAlbum";
                 reader = command.ExecuteReader();
             }
             field = eMediaField.Album;
@@ -535,9 +549,9 @@ namespace OMMediaDB
             {
                 SqliteCommand command = con.CreateCommand();
                 if (covers == false)
-                    command.CommandText = "SELECT Distinct Artist,Album FROM tblAlbum WHERE Artist='" + General.escape(artist) + "'";
+                    command.CommandText = "SELECT Artist,Album FROM tblAlbum WHERE Artist='" + General.escape(artist) + "' GROUP BY Album";//"SELECT Distinct Artist,Album FROM tblAlbum WHERE Artist='" + General.escape(artist) + "'";
                 else
-                    command.CommandText = "SELECT Distinct Artist,Album,Cover FROM tblAlbum WHERE Artist='" + General.escape(artist) + "'";
+                    command.CommandText = "SELECT Artist,Album,Cover FROM tblAlbum WHERE Artist='" + General.escape(artist) + "' GROUP BY Album";
                 reader = command.ExecuteReader();
             }
             field = eMediaField.Album;
@@ -959,20 +973,20 @@ namespace OMMediaDB
             PluginSettings settings = new PluginSettings();
             if (File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2")) == false)
             {
-                settings.setSetting("Default.MusicDatabase", "OMMediaDB");
+                settings.setSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase", "OMMediaDB");
                 createDB();
             }
 
             // Should we set default settings?
-            if (settings.getSetting("Music.Path") == "")
+            if (settings.getSetting(BuiltInComponents.OMInternalPlugin, "Music.Path") == "")
             {   // Yes
                 foreach (DeviceInfo device in DeviceInfo.EnumerateDevices(theHost))
                     if (device.systemDrive)
                     {
                         if (device.MusicFolders.Length > 0)
                         {   // Save reference to first available source
-                            settings.setSetting("Music.Path", device.MusicFolders[0]);
-                            settings.setSetting("OMMediaDB.FirstRun", "True");
+                            settings.setSetting(BuiltInComponents.OMInternalPlugin, "Music.Path", device.MusicFolders[0]);
+                            settings.setSetting(this, "OMMediaDB.FirstRun", "True");
                         }
                     }
             }
@@ -980,20 +994,20 @@ namespace OMMediaDB
             return eLoadStatus.LoadSuccessful;
         }
 
-        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        void theHost_OnSystemEvent(eFunction function, object[] args)
         {
             if (function == eFunction.pluginLoadingComplete)
             {
                 string path = null;
                 using (PluginSettings settings = new PluginSettings())
                 {
-                    if (settings.getSetting("Music.AutoIndex") == "True")
-                        path = settings.getSetting("Music.Path");
-                    settings.setSetting("Default.MusicDatabase", "OMMediaDB");
-                    if (settings.getSetting("OMMediaDB.FirstRun") == "True")
+                    if (settings.getSetting(this, "Music.AutoIndex") == "True")
+                        path = settings.getSetting(BuiltInComponents.OMInternalPlugin, "Music.Path");
+                    settings.setSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase", "OMMediaDB");
+                    if (settings.getSetting(this, "OMMediaDB.FirstRun") == "True")
                     {
-                        path = settings.getSetting("Music.Path");
-                        settings.setSetting("OMMediaDB.FirstRun", "False");
+                        path = settings.getSetting(this, "Music.Path");
+                        settings.setSetting(this, "OMMediaDB.FirstRun", "False");
                     }
                 }
                 if ((path != null) && (path.Length > 0))

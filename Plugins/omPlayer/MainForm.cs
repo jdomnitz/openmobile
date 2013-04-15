@@ -34,7 +34,7 @@ using OpenMobile.Plugin;
 
 namespace OMPlayer
 {
-    public sealed class OMPlayer : IAVPlayer, IDisposable
+    public sealed class OMPlayer : IAVPlayer, IDisposable, IAudioDeviceProvider
 {
     // Fields
     private AVPlayer[] player;
@@ -56,12 +56,12 @@ namespace OMPlayer
             settings = new Settings("OMPlayer Settings");
             using (PluginSettings s = new PluginSettings())
             {
-                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", "", "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.AutoResume")));
-                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.PlayProtected", "", "Attempt to play protected files", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.PlayProtected")));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.AutoResume", "", "Resume Playback at startup", Setting.BooleanList, Setting.BooleanList, s.getSetting(this, "Music.AutoResume")));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.PlayProtected", "", "Attempt to play protected files", Setting.BooleanList, Setting.BooleanList, s.getSetting(this, "Music.PlayProtected")));
                 List<string> crossfadeo = new List<string>(new string[] { "None", "1 Second", "2 Seconds", "3 Seconds", "4 Seconds", "5 Seconds" });
                 List<string> crossfadev = new List<string>(new string[] { "", "1000", "2000", "3000", "4000", "5000" });
-                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.CrossfadeDuration", "Crossfade", "Crossfade between songs",crossfadeo,crossfadev, s.getSetting("Music.CrossfadeDuration")));
-                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.MediaKeys", "", "Respond to media keys", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.MediaKeys")));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.CrossfadeDuration", "Crossfade", "Crossfade between songs", crossfadeo, crossfadev, s.getSetting(this, "Music.CrossfadeDuration")));
+                settings.Add(new Setting(SettingTypes.MultiChoice, "Music.MediaKeys", "", "Respond to media keys", Setting.BooleanList, Setting.BooleanList, s.getSetting(this, "Music.MediaKeys")));
             }
             settings.OnSettingChanged += new SettingChanged(changed);
         }
@@ -76,7 +76,7 @@ namespace OMPlayer
                 crossfade = int.Parse(s.Value);
         }
         using (PluginSettings setting = new PluginSettings())
-            setting.setSetting(s.Name, s.Value);
+            setting.setSetting(this, s.Name, s.Value);
     }
     private void checkInstance(Zone zone)
     {
@@ -248,21 +248,21 @@ namespace OMPlayer
                     {
                         if ((getPlayerStatus(zone) == ePlayerStatus.Stopped) || (getPlayerStatus(zone) == ePlayerStatus.Ready))
                         {
-                            settings.setSetting("Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", "");
+                            settings.setSetting(this, "Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", "");
                             continue;
                         }
-                        settings.setSetting("Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", player[zone.AudioDevice.Instance].nowPlaying.Location);
-                        settings.setSetting("Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingPosition", player[zone.AudioDevice.Instance].pos.ToString());
+                        settings.setSetting(this, "Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", player[zone.AudioDevice.Instance].nowPlaying.Location);
+                        settings.setSetting(this, "Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingPosition", player[zone.AudioDevice.Instance].pos.ToString());
                     }
                     else
                     {
-                        settings.setSetting("Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", "");
+                        settings.setSetting(this, "Music.Instance" + zone.AudioDevice.Instance.ToString() + ".LastPlayingURL", "");
                     }
                 }
             }
         }
     }
-    private void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+    private void host_OnSystemEvent(eFunction function, object[] args)
     {
         if (function == eFunction.closeProgram)
         {
@@ -271,12 +271,18 @@ namespace OMPlayer
         }
         else if (function == eFunction.RenderingWindowResized)
         {
-            foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(arg1)))
+            if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 1))
             {
-                if (zone.AudioDevice.Instance >= player.Length)
-                    return;
-                if (player[zone.AudioDevice.Instance] != null)
-                    player[zone.AudioDevice.Instance].Resize();
+                foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(OpenMobile.helperFunctions.Params.GetParam<string>(args, 0))))
+                {
+                    if (zone.AudioDevice != null)
+                    {
+                        if (zone.AudioDevice.Instance >= player.Length)
+                            return;
+                        if (player[zone.AudioDevice.Instance] != null)
+                            player[zone.AudioDevice.Instance].Resize();
+                    }
+                }
             }
 
             /*
@@ -289,12 +295,15 @@ namespace OMPlayer
         }
         else if (function == eFunction.videoAreaChanged)
         {
-            foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(arg1)))
+            if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 1))
             {
-                if (zone.AudioDevice.Instance < 0 | zone.AudioDevice.Instance >= player.Length)
-                    continue;
-                if (player[zone.AudioDevice.Instance] != null)
-                    player[zone.AudioDevice.Instance].Resize();
+                foreach (Zone zone in theHost.ZoneHandler.GetZonesForScreen(int.Parse(OpenMobile.helperFunctions.Params.GetParam<string>(args, 0))))
+                {
+                    if (zone.AudioDevice.Instance < 0 | zone.AudioDevice.Instance >= player.Length)
+                        continue;
+                    if (player[zone.AudioDevice.Instance] != null)
+                        player[zone.AudioDevice.Instance].Resize();
+                }
             }
 
             /*
@@ -341,8 +350,8 @@ namespace OMPlayer
         OnPlayerRequested += new CreateNewPlayer(createInstance);
         using (PluginSettings setting = new PluginSettings())
         {
-            setting.setSetting("Default.AVPlayer.Files", "OMPlayer");
-            string cf = setting.getSetting("Music.CrossfadeDuration");
+            setting.setSetting(this, "Default.AVPlayer.Files", "OMPlayer");
+            string cf = setting.getSetting(this, "Music.CrossfadeDuration");
             if (cf != "")
                 crossfade = int.Parse(cf);
             if (!vistaMode)
@@ -567,7 +576,7 @@ namespace OMPlayer
             if (url.EndsWith(".m4p"))
             {
                 using (PluginSettings s = new PluginSettings())
-                    if (s.getSetting("Music.PlayProtected") != "True")
+                    if (s.getSetting(this, "Music.PlayProtected") != "True")
                         return false;
             }
             if (url.EndsWith(".ifo"))
@@ -967,7 +976,7 @@ namespace OMPlayer
             pos = 0;
             if (url.EndsWith(".cda")==true)
             {
-                nowPlaying = CDDB.getSongInfo(theHost,url);
+                //nowPlaying = CDDB.getSongInfo(theHost,url);
                 if (nowPlaying == null)
                     nowPlaying = new mediaInfo();
                 if (nowPlaying.coverArt==null)

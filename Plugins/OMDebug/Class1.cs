@@ -89,7 +89,7 @@ namespace OMDebug
                 {
                     // Output filter level
                     List<string> OptionList = new List<string>(Enum.GetNames(typeof(DebugMessageType)));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "OMDebug.OutputFilter", "Filter", "Show messages of this type and above", OptionList, OptionList, setting.getSetting("OMDebug.OutputFilter")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "OMDebug.OutputFilter", "Filter", "Show messages of this type and above", OptionList, OptionList, setting.getSetting(this, "OMDebug.OutputFilter")));
                 }
                 settings.OnSettingChanged += new SettingChanged(Setting_Changed);
             }
@@ -99,7 +99,7 @@ namespace OMDebug
         private void Setting_Changed(int screen, Setting s)
         {
             using (PluginSettings settings = new PluginSettings())
-                settings.setSetting(s.Name, s.Value);
+                settings.setSetting(this, s.Name, s.Value);
             try
             {
                 OutputFilter = (DebugMessageType)Enum.Parse(typeof(DebugMessageType), s.Value);
@@ -189,6 +189,19 @@ namespace OMDebug
         {
             theHost = host;
 
+            // Get setting from DB
+            using (PluginSettings setting = new PluginSettings())
+            {
+                string value = setting.getSetting(this, "OMDebug.OutputFilter");
+                try
+                {
+                    OutputFilter = (DebugMessageType)Enum.Parse(typeof(DebugMessageType), setting.getSetting(this, "OMDebug.OutputFilter"));
+                }
+                catch
+                {
+                    OutputFilter = DebugMessageType.Unspecified;
+                }
+            }
 
             writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
             if (time == 0)
@@ -207,10 +220,10 @@ namespace OMDebug
             // Get setting from DB
             using (PluginSettings setting = new PluginSettings())
             {
-                string value = setting.getSetting("OMDebug.OutputFilter");
+                string value = setting.getSetting(this, "OMDebug.OutputFilter");
                 try
                 {
-                    OutputFilter = (DebugMessageType)Enum.Parse(typeof(DebugMessageType), setting.getSetting("OMDebug.OutputFilter"));
+                    OutputFilter = (DebugMessageType)Enum.Parse(typeof(DebugMessageType), setting.getSetting(this, "OMDebug.OutputFilter"));
                 }
                 catch
                 {
@@ -321,7 +334,7 @@ namespace OMDebug
             WriteToLog("(Event:AssemblyLoad) => \t" + args.LoadedAssembly.GetName() + ")@" + args.LoadedAssembly.CodeBase);
         }
 
-        void theHost_OnSystemEvent(OpenMobile.eFunction function, string arg1, string arg2, string arg3)
+        void theHost_OnSystemEvent(OpenMobile.eFunction function, object[] args)
         {
             List<string> Texts = new List<string>();
             
@@ -329,7 +342,16 @@ namespace OMDebug
                 || (function == eFunction.multiTouchGesture))
                 return; //Protect Users Privacy - Potentially contains password info
 
-            WriteToLog("(Event:OnSystemEvent) => \t" + function.ToString() + ", " + arg1 + ", " + arg2 + ", " + arg3);
+            // Log arguments
+            string sArgs = "";
+            if (args != null)
+            {
+                for (int i = 0; i < args.Length; i++)
+                {
+                    sArgs += String.Format(", arg{0}: {1}", i, args[i]);
+                }
+            }
+            WriteToLog("(Event:OnSystemEvent) => \t" + function.ToString() + sArgs);
 
             if (function == eFunction.inputRouterInitialized)
             {
@@ -355,9 +377,9 @@ namespace OMDebug
                 {
                     for (int i = 0; i < theHost.ScreenCount; i++)
                     {
-                        Texts.Add("Screen" + (i + 1).ToString() + ".SoundCard: " + settings.getSetting("Screen" + (i + 1).ToString() + ".SoundCard"));
-                        Texts.Add("Screen" + (i + 1).ToString() + ".Keyboard: " + settings.getSetting("Screen" + (i + 1).ToString() + ".Keyboard"));
-                        Texts.Add("Screen" + (i + 1).ToString() + ".Mouse: " + settings.getSetting("Screen" + (i + 1).ToString() + ".Mouse"));
+                        Texts.Add("Screen" + (i + 1).ToString() + ".SoundCard: " + settings.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + (i + 1).ToString() + ".SoundCard"));
+                        Texts.Add("Screen" + (i + 1).ToString() + ".Keyboard: " + settings.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + (i + 1).ToString() + ".Keyboard"));
+                        Texts.Add("Screen" + (i + 1).ToString() + ".Mouse: " + settings.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + (i + 1).ToString() + ".Mouse"));
                     }
                 }
                 Texts.Add("---------------------------------------------");

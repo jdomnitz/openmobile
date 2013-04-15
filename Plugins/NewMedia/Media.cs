@@ -66,7 +66,7 @@ namespace NewMedia
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             theHost.OnMediaEvent += new MediaEvent(theHost_OnMediaEvent);
 
-            manager = new ScreenManager(host.ScreenCount);
+            manager = new ScreenManager(this);
             OMPanel p = new OMPanel("Media");
             imageItem opt1 = theHost.getSkinImage("DownTab");
             OMImage Background = new OMImage(150, 140, 700, 400);
@@ -194,7 +194,7 @@ namespace NewMedia
             p.addControl(label2);
             p.addControl(label3);
             p.addControl(label4);
-            manager.loadPanel(p);
+            manager.loadPanel(p, true);
 
             using (PluginSettings ps = new PluginSettings())
             {
@@ -203,7 +203,7 @@ namespace NewMedia
                     Zone zone = theHost.ZoneHandler.GetZone(i);
                     if (zone != null)
                         ((OMButton)manager[i]["Button_Media_Zones"]).Text = zone.Name;
-                    dbname[i] = ps.getSetting("Default.MusicDatabase");
+                    dbname[i] = ps.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase");
                 }
             }
             abortJob = new bool[theHost.ScreenCount];
@@ -227,6 +227,11 @@ namespace NewMedia
                 if (int.TryParse(arg, out Screen))
                     ((OMButton)manager[Screen]["Button_Media_Zones"]).Text = zone.Name;
             }
+            else if (function == eFunction.MediaIndexingCompleted)
+                loadArtists();
+            else if (function == eFunction.MediaDBCleared)
+                loadArtists();
+
         }
 
         void Button_Media_Zones_OnClick(OMControl sender, int screen)
@@ -256,13 +261,8 @@ namespace NewMedia
             }
         }
 
-        void theHost_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        void theHost_OnSystemEvent(eFunction function, object[] args)
         {
-            if (function == eFunction.MediaIndexingCompleted)
-                loadArtists();
-            else if (function == eFunction.MediaDBCleared)
-                loadArtists();
-
             /*
             if (function == eFunction.backgroundOperationStatus)
                 if ((arg1 == "Indexing Complete!")||(arg1=="Database Cleared!"))
@@ -279,21 +279,20 @@ namespace NewMedia
             if ((currentSource[screen].DriveType == eDriveType.Removable) || (currentSource[screen].DriveType == eDriveType.Phone))
             {
                 using (PluginSettings s = new PluginSettings())
-                    dbname[screen] = s.getSetting("Default.RemovableDatabase");
+                    dbname[screen] = s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.RemovableDatabase");
             }
             else if (currentSource[screen].DriveType == eDriveType.iPod)
             {
                 using (PluginSettings s = new PluginSettings())
                 {
-                    dbname[screen] = s.getSetting("Default.AppleDatabase");
+                    dbname[screen] = s.getSetting(this, "Default.AppleDatabase");
                     if (dbname[screen] == "")
-                        dbname[screen] = s.getSetting("Default.RemovableDatabase");
+                        dbname[screen] = s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.RemovableDatabase");
                 }
             }
             else if (currentSource[screen].DriveType == eDriveType.CDRom)
             {
-                using (PluginSettings s = new PluginSettings())
-                    dbname[screen] = s.getSetting("Default.CDDatabase");
+                dbname[screen] = OpenMobile.helperFunctions.StoredData.Get(OM.GlobalSetting, "Default.CDDatabase");
                 Sources_OnClick(sender, screen);
                 loadArtists(screen);
                 Tracks_OnClick(sender, screen);
@@ -302,7 +301,7 @@ namespace NewMedia
             else
             {
                 using (PluginSettings ps = new PluginSettings())
-                    dbname[screen] = ps.getSetting("Default.MusicDatabase");
+                    dbname[screen] = ps.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase");
             }
             Sources_OnClick(sender, screen);
             loadArtists(screen);
@@ -350,7 +349,7 @@ namespace NewMedia
                                 {
                                     currentSource[i] = info;
                                     using (PluginSettings ps = new PluginSettings())
-                                        dbname[i] = ps.getSetting("Default.MusicDatabase");
+                                        dbname[i] = ps.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase");
                                     ((OMButton)manager[0][15]).Image = theHost.getSkinImage("Local Drive");
                                     int tmp = i;
                                     SafeThread.Asynchronous(delegate()
@@ -434,7 +433,7 @@ namespace NewMedia
                     List<string> queue = new List<string>();
                     for (int i = 0; i < l.Count; i++)
                         queue.Add(l[i].tag.ToString());
-                    theHost.appendPlaylist(PlaylistHandler.Convert(queue), screen);
+                    theHost.appendPlaylist(PlayList.Convert(queue), screen);
                 }
             }
             else if (level[screen] == 1)
@@ -447,13 +446,13 @@ namespace NewMedia
                     for (int i = 1; i < l.Count; i++)
                         ret.AddRange(getSongs(l[i].subItem, l[i].text, screen));
                     if (ret.Count > 0)
-                        theHost.appendPlaylist(PlaylistHandler.Convert(ret), screen);
+                        theHost.appendPlaylist(PlayList.Convert(ret), screen);
                 }
                 else
                 {
                     List<string> ret = getSongs(l[l.SelectedIndex].subItem, l[l.SelectedIndex].text, screen);
                     if (ret.Count > 0)
-                        theHost.appendPlaylist(PlaylistHandler.Convert(ret), screen);
+                        theHost.appendPlaylist(PlayList.Convert(ret), screen);
                 }
             }
             else if (level[screen] == 0)
@@ -461,13 +460,13 @@ namespace NewMedia
                 if (l.Count == 0)
                     return;
                 List<string> ret = getSongs(l[0].text, screen);
-                theHost.appendPlaylist(PlaylistHandler.Convert(ret), screen);
+                theHost.appendPlaylist(PlayList.Convert(ret), screen);
                 ret.Clear();
                 for (int i = 1; i < l.Count; i++)
                 {
                     ret.AddRange(getSongs(l[i].text, screen));
                     if (ret.Count > 0)
-                        theHost.appendPlaylist(PlaylistHandler.Convert(ret), screen);
+                        theHost.appendPlaylist(PlayList.Convert(ret), screen);
                     ret.Clear();
                 }
             }
@@ -495,7 +494,7 @@ namespace NewMedia
                 List<string> queue = new List<string>();
                 for (int i = 0; i < l.Count; i++)
                     queue.Add(l[i].tag.ToString());
-                theHost.setPlaylist(PlaylistHandler.Convert(queue), screen);
+                theHost.setPlaylist(PlayList.Convert(queue), screen);
                 theHost.execute(eFunction.setPlaylistPosition, screen.ToString(), index.ToString());
             }
             else if (level[screen] == 2)
@@ -525,7 +524,7 @@ namespace NewMedia
                     List<string> queue = new List<string>();
                     for (int i = 0; i < l.Count; i++)
                         queue.Add(l[i].tag.ToString());
-                    theHost.setPlaylist(PlaylistHandler.Convert(queue), screen);
+                    theHost.setPlaylist(PlayList.Convert(queue), screen);
                 }
             }
             else if (level[screen] == 1)
@@ -550,7 +549,7 @@ namespace NewMedia
                     for (int i = 1; i < l.Count; i++)
                         ret.AddRange(getSongs(l[i].subItem, l[i].text, screen));
                     if (ret.Count > 0)
-                        theHost.setPlaylist(PlaylistHandler.Convert(ret), screen);
+                        theHost.setPlaylist(PlayList.Convert(ret), screen);
                 }
                 else
                 {
@@ -564,7 +563,7 @@ namespace NewMedia
                         }
                         else
                             theHost.execute(eFunction.Play, screen.ToString(), ret[0]);
-                        theHost.setPlaylist(PlaylistHandler.Convert(ret), screen);
+                        theHost.setPlaylist(PlayList.Convert(ret), screen);
                     }
                 }
             }
@@ -585,13 +584,13 @@ namespace NewMedia
                     else
                         theHost.execute(eFunction.Play, screen.ToString(), ret[0]);
                 }
-                theHost.setPlaylist(PlaylistHandler.Convert(ret), screen);
+                theHost.setPlaylist(PlayList.Convert(ret), screen);
                 ret.Clear();
                 for (int i = 1; i < l.Count; i++)
                 {
                     ret.AddRange(getSongs(l[i].text, screen));
                     if (ret.Count > 0)
-                        theHost.appendPlaylist(PlaylistHandler.Convert(ret), screen);
+                        theHost.appendPlaylist(PlayList.Convert(ret), screen);
                     ret.Clear();
                 }
             }
@@ -671,7 +670,7 @@ namespace NewMedia
                     string title = osk.ShowOSK(screen);
                     if (!string.IsNullOrEmpty(title))
                     {
-                        PlaylistHandler.writePlaylistToDB(title, theHost.getPlaylist(screen));
+                        PlayList.writePlaylistToDB(title, theHost.getPlaylist(screen));
                         ((OMLabel)sender.Parent[6]).Text = title + " Tracks";
                         SafeThread.Asynchronous(delegate() { showPlaylist(screen, title); }, theHost);
                         moveToTracks(screen);
@@ -679,7 +678,7 @@ namespace NewMedia
                 }
                 else if (l.SelectedItem != null)
                 {
-                    PlaylistHandler.deletePlaylistFromDB(l.SelectedItem.text);
+                    PlayList.deletePlaylistFromDB(l.SelectedItem.text);
                     SafeThread.Asynchronous(delegate() { showPlaylists(screen); }, theHost);
                 }
             }
@@ -690,13 +689,13 @@ namespace NewMedia
                 string title = label.Text.Substring(0, label.Text.Length - 7);
                 List<mediaInfo> list;
                 if (title != "Current Playlist")
-                    list = PlaylistHandler.readPlaylistFromDB(title);
+                    list = PlayList.readPlaylistFromDB(title);
                 else
                     list = theHost.getPlaylist(screen);
                 if (list.RemoveAll(l => l.Location == song) > 0)
                 {
                     if (title != "Current Playlist")
-                        PlaylistHandler.writePlaylistToDB(title, list);
+                        PlayList.writePlaylistToDB(title, list);
                     SafeThread.Asynchronous(delegate() { showPlaylist(screen, title); }, theHost);
                 }
             }
@@ -741,7 +740,7 @@ namespace NewMedia
             l.ListItemOffset = 0;
             l.ListItemHeight = 0;
             l.Add(new OMListItem("Current Playlist", null, "Current Playlist"));
-            foreach (string playlist in PlaylistHandler.listPlaylistsFromDB(dbname[screen]))
+            foreach (string playlist in PlayList.listPlaylistsFromDB(dbname[screen]))
             {
                 if ((playlist.Length != 8) && (!playlist.StartsWith("Current")))
                     l.Add(new OMListItem(playlist, null, playlist));
@@ -755,7 +754,7 @@ namespace NewMedia
         private void loadPlaylists(DeviceInfo info, OMList l)
         {
             foreach (string playlistPath in info.PlaylistFolders)
-                foreach (string playlist in PlaylistHandler.listPlaylists(playlistPath))
+                foreach (string playlist in PlayList.listPlaylists(playlistPath))
                     l.Add(new OMListItem(Path.GetFileNameWithoutExtension(playlist), null, playlist));
         }
         private void showPlaylist(int screen, string path)
@@ -793,7 +792,7 @@ namespace NewMedia
                 }
                 else if (System.IO.Path.IsPathRooted(path))
                 {
-                    List<mediaInfo> playlist = PlaylistHandler.readPlaylist(path);
+                    List<mediaInfo> playlist = PlayList.readPlaylist(path);
                     l.Clear();
                     foreach (mediaInfo info in playlist)
                     {
@@ -814,7 +813,7 @@ namespace NewMedia
                 else
                 {
                     l.Clear();
-                    foreach (mediaInfo info in PlaylistHandler.readPlaylistFromDB(path, dbname[screen]))
+                    foreach (mediaInfo info in PlayList.readPlaylistFromDB(path, dbname[screen]))
                     {
                         if (abortJob[screen])
                             return;
@@ -1061,7 +1060,7 @@ namespace NewMedia
                 settings = new Settings("Music");
                 settings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
                 using (PluginSettings s = new PluginSettings())
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.SortByTrack", "", "Sort by track #", Setting.BooleanList, Setting.BooleanList, s.getSetting("Music.SortByTrack")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Music.SortByTrack", "", "Sort by track #", Setting.BooleanList, Setting.BooleanList, s.getSetting(this, "Music.SortByTrack")));
                 sortByTrack = (settings[0].Value == "True");
             }
             return settings;
@@ -1070,7 +1069,7 @@ namespace NewMedia
         void settings_OnSettingChanged(int screen, Setting setting)
         {
             using (PluginSettings s = new PluginSettings())
-                s.setSetting(setting.Name, setting.Value);
+                s.setSetting(this, setting.Name, setting.Value);
             sortByTrack = (settings[0].Value == "True");
         }
 

@@ -26,6 +26,7 @@ using System.Threading;
 
 namespace OMWinInfo
 {
+    [SupportedOSConfigurations(OSConfigurationFlags.Windows)]
     public sealed class OMWinInfo : IBasePlugin
     {
         #region IBasePlugin Members
@@ -33,10 +34,27 @@ namespace OMWinInfo
         public eLoadStatus initialize(IPluginHost host)
         {
             if (Configuration.RunningOnWindows)
+            {
+                // Provide a command to go straight to the wininfo panel
+                host.CommandHandler.AddCommand(new Command(this.pluginName, this.pluginName, "InfoForm", "Show", CommandExecutor, 0, false, "Shows the info form"));
+
                 return eLoadStatus.LoadSuccessful;
+            }
             else
                 return eLoadStatus.LoadFailedUnloadRequested;
         }
+
+        private object CommandExecutor(Command command, object[] param, out bool result)
+        {
+            result = true;
+
+            // Go back
+            if (command.FullName == this.pluginName + ".InfoForm.Show")
+                ShowForm();
+
+            return null;
+        }
+
 
         public Settings loadSettings()
         {
@@ -54,18 +72,23 @@ namespace OMWinInfo
             {
                 case "OMWinInfo.Show":
                     {
-                        // Spawn windows form
-                        if (th == null)
-                        {
-                            th = new Thread(SpawnForm);
-                            th.IsBackground = true;
-                            th.SetApartmentState(ApartmentState.STA);
-                            th.Start();
-                        }
+                        ShowForm();
                     }
                     break;
                 default:
                     break;
+            }
+        }
+
+        private void ShowForm()
+        {
+            // Spawn windows form
+            if (th == null)
+            {
+                th = new Thread(SpawnForm);
+                th.IsBackground = true;
+                th.SetApartmentState(ApartmentState.STA);
+                th.Start();
             }
         }
 

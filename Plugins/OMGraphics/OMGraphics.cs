@@ -94,6 +94,7 @@ namespace OMGraphics
                                     #region Create base style button graphic
 
                                     System.Drawing.Bitmap bmp = new Bitmap(gd.Width, gd.Height);
+                                    Bitmap bmpAlpha = new Bitmap(bmp.Width, bmp.Height);
                                     using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
                                     {
                                         switch (gd.ImageType)
@@ -114,12 +115,18 @@ namespace OMGraphics
                                                     else
                                                         glowColor = gd.BackgroundFocusColor.ToSystemColor();
 
-                                                    Color backColor;
-                                                    if (String.IsNullOrEmpty(gd.BackgroundColor.Name) || gd.BackgroundColor.Name == "0")
+                                                    Color backColor1;
+                                                    if (String.IsNullOrEmpty(gd.BackgroundColor1.Name) || gd.BackgroundColor1.Name == "0")
                                                         //backColor = Color.FromArgb(0x7f, System.Drawing.Color.Black);
-                                                        backColor = Color.FromArgb(255, System.Drawing.Color.Black);
+                                                        backColor1 = Color.FromArgb(255, System.Drawing.Color.Black);
                                                     else
-                                                        backColor = gd.BackgroundColor.ToSystemColor();
+                                                        backColor1 = gd.BackgroundColor1.ToSystemColor();
+
+                                                    Color backColor2;
+                                                    if (String.IsNullOrEmpty(gd.BackgroundColor2.Name) || gd.BackgroundColor2.Name == "0")
+                                                        backColor2 = Color.FromArgb(158, 85, 98, 130);
+                                                    else
+                                                        backColor2 = gd.BackgroundColor2.ToSystemColor();
 
                                                     Color borderColor;
                                                     if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
@@ -138,7 +145,7 @@ namespace OMGraphics
 
                                                     // Create outline path
                                                     System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, bmp.Width - 1, bmp.Height - 1);
-                                                    GraphicsPath gp = GetPath_RoundedRectangle(g, rect, CornerRadius);
+                                                    GraphicsPath gp = GetPath_RoundedRectangle(g, rect, CornerRadius, gd.CornersRadiusAppliesTo);
                                                     g.SetClip(gp);
 
                                                     #region Draw ButtonBackground
@@ -146,19 +153,19 @@ namespace OMGraphics
                                                     // Draw background
                                                     using (GraphicsPath bb = CreateRoundRectangle(rect, 2))
                                                     {
-                                                        using (System.Drawing.Brush br = new System.Drawing.SolidBrush(backColor))
+                                                        using (System.Drawing.Brush br = new System.Drawing.SolidBrush(backColor1))
                                                             g.FillPath(br, bb);
                                                     }
 
                                                     System.Drawing.Rectangle rect2 = rect;
                                                     rect2.Height >>= 1;
                                                     rect2.Height++;
-                                                    System.Drawing.Color shineColor = System.Drawing.Color.FromArgb(85, 98, 130); // System.Drawing.Color.White;
+                                                    System.Drawing.Color shineColor = backColor2;//System.Drawing.Color.FromArgb(85, 98, 130); // System.Drawing.Color.White;
                                                     using (GraphicsPath bh = CreateTopRoundRectangle(rect2, 2))
                                                     {
                                                         rect2.Height++;
-                                                        int opacity = 0x99;
-                                                        using (LinearGradientBrush br = new LinearGradientBrush(rect2, System.Drawing.Color.FromArgb(opacity, shineColor), System.Drawing.Color.FromArgb(opacity / 3, shineColor), LinearGradientMode.Vertical))
+                                                        int opacity = shineColor.A;//0xFF;//0x85;
+                                                        using (LinearGradientBrush br = new LinearGradientBrush(rect2, System.Drawing.Color.FromArgb(opacity, shineColor), System.Drawing.Color.FromArgb((int)(opacity * 0.1f), shineColor), LinearGradientMode.Vertical))
                                                             g.FillPath(br, bh);
                                                     }
                                                     rect2.Height -= 2;
@@ -229,6 +236,8 @@ namespace OMGraphics
                                                         iconColor = System.Drawing.Color.FromArgb(225, 225, 255);
                                                     else
                                                         iconColor = gd.IconColor.ToSystemColor();
+                                                    if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
+                                                        iconColor = gd.TextColor.ToSystemColor();
 
                                                     Color textColor;
                                                     if (String.IsNullOrEmpty(gd.TextColor.Name) || gd.TextColor.Name == "0")
@@ -288,7 +297,7 @@ namespace OMGraphics
 
                                                         System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(iconColor);
                                                         g.FillPath(brush, gpTxt);
-                                                        g.DrawPath(new System.Drawing.Pen(glowColor, 0.5F), gpTxt);
+                                                        //g.DrawPath(new System.Drawing.Pen(glowColor, 0.5F), gpTxt);
                                                     }
 
                                                     #endregion
@@ -334,6 +343,9 @@ namespace OMGraphics
                                                                     imgRect.Width = (int)(imgRect.Height * Aspect);
                                                                 }
 
+                                                                if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
+                                                                    img.image.Overlay(gd.TextColor);
+
                                                                 // Draw image
                                                                 g.DrawImage(img.image.image, imgRect);
                                                             }
@@ -375,6 +387,23 @@ namespace OMGraphics
                                                         // Draw text
                                                         GraphicsPath gpTxt = new GraphicsPath();
                                                         gpTxt.AddString(gd.Text, f.FontFamily, (int)System.Drawing.FontStyle.Regular, f.Size, rect, sf);
+
+                                                        if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonForegroundFocused)
+                                                        {
+                                                            #region Draw Text glow
+
+                                                            for (int i = 1; i < 20; ++i)
+                                                            {
+                                                                //System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32, 0, 128, 192), i);
+                                                                System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32 - i, glowColor), i);
+                                                                pen.LineJoin = LineJoin.Round;
+                                                                g.DrawPath(pen, gpTxt);
+                                                                pen.Dispose();
+                                                            }
+
+                                                            #endregion
+                                                        }
+
                                                         g.FillPath(new System.Drawing.SolidBrush(textColor), gpTxt);
                                                     }
 
@@ -384,9 +413,40 @@ namespace OMGraphics
                                             default:
                                                 break;
                                         }
+
+                                        #region Apply overall opacity to resulting image
+                                        float Alpha = 1f;
+                                        if (gd.Opacity != null)
+                                            Alpha = ((int)gd.Opacity / 255f);
+
+                                        // Apply overall opacity to resulting image
+                                        System.Drawing.Imaging.ColorMatrix cm = new System.Drawing.Imaging.ColorMatrix(new float[][]
+                                        {
+                                            // Matrix config
+                                            //           R  G  B  A  w
+                                            new float[] {1, 0, 0, 0, 0}, // R
+                                            new float[] {0, 1, 0, 0, 0}, // G
+                                            new float[] {0, 0, 1, 0, 0}, // B
+                                            new float[] {0, 0, 0, Alpha, 0}, // A
+                                            new float[] {0, 0, 0, 0, 1}, // w
+                                        });
+
+                                        System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+                                        ia.SetColorMatrix(cm);
+
+                                        // Draw image using color matrix
+                                        using (System.Drawing.Graphics gAlpha = System.Drawing.Graphics.FromImage(bmpAlpha))
+                                        {
+                                            gAlpha.DrawImage(bmp, new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, ia);
+                                            ia.Dispose();
+                                            bmp.Dispose();
+                                        }
+
+                                        #endregion
+
                                         g.Flush();
                                     }
-                                    gd.Image = new OpenMobile.Graphics.OImage(bmp);
+                                    gd.Image = new OpenMobile.Graphics.OImage(bmpAlpha);
 
                                     #endregion
                                 }
@@ -416,11 +476,11 @@ namespace OMGraphics
                                                         glowColor = gd.BackgroundFocusColor.ToSystemColor();
 
                                                     Color backColor;
-                                                    if (String.IsNullOrEmpty(gd.BackgroundColor.Name) || gd.BackgroundColor.Name == "0")
+                                                    if (String.IsNullOrEmpty(gd.BackgroundColor1.Name) || gd.BackgroundColor1.Name == "0")
                                                         //backColor = Color.FromArgb(0x7f, System.Drawing.Color.Black);
                                                         backColor = Color.FromArgb(255, 0x7, 0x7, 0x7);
                                                     else
-                                                        backColor = gd.BackgroundColor.ToSystemColor();
+                                                        backColor = gd.BackgroundColor1.ToSystemColor();
 
                                                     Color borderColor;
                                                     if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
@@ -599,7 +659,7 @@ namespace OMGraphics
 
                                         // Create outline path
                                         System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, bmp.Width - ShadowDistance, bmp.Height - ShadowDistance);
-                                        GraphicsPath gp = GetPath_RoundedRectangle(g, rect, 30);
+                                        GraphicsPath gp = GetPath_RoundedRectangle(g, rect, 30, OpenMobile.Graphics.GraphicCorners.All);
 
                                         // Save client area
                                         gd.ClientArea = new OpenMobile.Graphics.Rectangle(rect.X + 10, rect.Y + HeaderSize + 10, rect.Width - 20, rect.Height - HeaderSize - 20);
@@ -615,7 +675,7 @@ namespace OMGraphics
                                         {
                                             // Move shadow off to the side of the object
                                             System.Drawing.Rectangle rectShadow = new System.Drawing.Rectangle(0, 0, bmp.Width - ShadowDistance, bmp.Height - ShadowDistance);
-                                            GraphicsPath gpShadow = GetPath_RoundedRectangle(g, rectShadow, 30);
+                                            GraphicsPath gpShadow = GetPath_RoundedRectangle(g, rectShadow, 30, OpenMobile.Graphics.GraphicCorners.All);
                                             Matrix _Matrix = new Matrix();
                                             _Matrix.Translate(ShadowDistance, ShadowDistance);
                                             gpShadow.Transform(_Matrix);
@@ -801,7 +861,7 @@ namespace OMGraphics
                                         System.Drawing.Rectangle rect = new System.Drawing.Rectangle((int)(ShadowDistance * 1.5f), ShadowDistance, bmp.Width - (ShadowDistance * 3), bmp.Height - (ShadowDistance * 2));
                                         GraphicsPath gp = gd.GraphicPath;
                                         if (gp == null)
-                                            gp = GetPath_RoundedRectangle(g, rect, 30);
+                                            gp = GetPath_RoundedRectangle(g, rect, 30, OpenMobile.Graphics.GraphicCorners.All);
                                         else
                                             CustomPath = true;
 
@@ -1398,16 +1458,63 @@ namespace OMGraphics
             g.DrawPath(p, gp);
         }
 
-        private static System.Drawing.Drawing2D.GraphicsPath GetPath_RoundedRectangle(System.Drawing.Graphics g, System.Drawing.Rectangle r, int d)
+        private static System.Drawing.Drawing2D.GraphicsPath GetPath_RoundedRectangle(System.Drawing.Graphics g, System.Drawing.Rectangle r, int d, OpenMobile.Graphics.GraphicCorners corners)
         {
             System.Drawing.Drawing2D.GraphicsPath gp = new System.Drawing.Drawing2D.GraphicsPath();
             if (d != 0)
             {
-                gp.AddArc(r.X, r.Y, d, d, 180, 90);
-                gp.AddArc(r.X + r.Width - d, r.Y, d, d, 270, 90);
-                gp.AddArc(r.X + r.Width - d, r.Y + r.Height - d, d, d, 0, 90);
-                gp.AddArc(r.X, r.Y + r.Height - d, d, d, 90, 90);
-                gp.AddLine(r.X, r.Y + r.Height - d, r.X, r.Y + d / 2);
+                if ((corners & OpenMobile.Graphics.GraphicCorners.TopLeft) == OpenMobile.Graphics.GraphicCorners.TopLeft)
+                {
+                    gp.AddArc(r.X, r.Y, d, d, 180, 90);
+                }
+                else
+                {
+                    gp.AddLine(r.X, r.Y, r.X, r.Y);
+                }
+
+                if ((corners & OpenMobile.Graphics.GraphicCorners.TopRight) == OpenMobile.Graphics.GraphicCorners.TopRight)
+                {
+                    gp.AddArc(r.X + r.Width - d, r.Y, d, d, 270, 90);
+                }
+                else
+                {
+                    gp.AddLine(r.X + r.Width, r.Y, r.X + r.Width, r.Y);
+                }
+
+                if ((corners & OpenMobile.Graphics.GraphicCorners.BottomRight) == OpenMobile.Graphics.GraphicCorners.BottomRight)
+                {
+                    gp.AddArc(r.X + r.Width - d, r.Y + r.Height - d, d, d, 0, 90);
+                }
+                else
+                {
+                    gp.AddLine(r.X + r.Width, r.Y + r.Height, r.X + r.Width, r.Y + r.Height);
+                }
+
+                if ((corners & OpenMobile.Graphics.GraphicCorners.BottomLeft) == OpenMobile.Graphics.GraphicCorners.BottomLeft)
+                {
+                    gp.AddArc(r.X, r.Y + r.Height - d, d, d, 90, 90);
+                }
+                else
+                {
+                    gp.AddLine(r.X, r.Y + r.Height, r.X, r.Y + r.Height);
+                }
+
+                // Close figure
+                if ((corners & OpenMobile.Graphics.GraphicCorners.TopLeft) == OpenMobile.Graphics.GraphicCorners.TopLeft)
+                {
+                    if ((corners & OpenMobile.Graphics.GraphicCorners.BottomLeft) == OpenMobile.Graphics.GraphicCorners.BottomLeft)
+                        gp.AddLine(r.X, r.Y + r.Height - d, r.X, r.Y + d / 2);
+                    else
+                        gp.AddLine(r.X, r.Y + r.Height, r.X, r.Y + d / 2);
+                }
+                else
+                {
+                    if ((corners & OpenMobile.Graphics.GraphicCorners.BottomLeft) == OpenMobile.Graphics.GraphicCorners.BottomLeft)
+                        gp.AddLine(r.X, r.Y + r.Height - d, r.X, r.Y);
+                    else
+                        gp.AddLine(r.X, r.Y + r.Height, r.X, r.Y);
+                }
+
             }
             else
             {

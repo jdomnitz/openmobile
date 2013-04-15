@@ -360,7 +360,7 @@ namespace WinWifi
             if (client.Interfaces.Length == 0)
                 return eLoadStatus.LoadFailedGracefulUnloadRequested; //No Wifi Adapters Present
             using (PluginSettings settings = new PluginSettings())
-                settings.setSetting("Default.Wifi", "WinWifi");
+                settings.setSetting(this, "Default.Wifi", "WinWifi");
             client.Interfaces[0].WlanConnectionNotification += new WlanClient.WlanInterface.WlanConnectionNotificationEventHandler(Wifi_WlanConnectionNotification);
             client.Interfaces[0].WlanNotification += new WlanClient.WlanInterface.WlanNotificationEventHandler(Wifi_WlanNotification);
             return OpenMobile.eLoadStatus.LoadSuccessful;

@@ -38,11 +38,14 @@ namespace OMSkinPluginSample
             // Create a new panel
             OMPanel panel = new OMPanel("Panel");
 
-            // Create a new label
-            OMLabel lblHelloWorld = new OMLabel("lblHelloWorld", OM.Host.ClientArea[0].Left, OM.Host.ClientArea[0].Top, OM.Host.ClientArea[0].Width, OM.Host.ClientArea[0].Height, "Hello World!");
+            //// Create a new label
+            //OMLabel lblHelloWorld = new OMLabel("lblHelloWorld", OM.Host.ClientArea[0].Left, OM.Host.ClientArea[0].Top, OM.Host.ClientArea[0].Width, OM.Host.ClientArea[0].Height, "Hello World!");
             
-            // Add the new label to the panel
-            panel.addControl(lblHelloWorld);
+            //// Add the new label to the panel
+            //panel.addControl(lblHelloWorld);
+
+            OMButton btnPlay = OMButton.PreConfigLayout_BasicStyle("btnPlay", 0, 100, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Play");
+            panel.addControl(btnPlay);
 
             // Load the panel into the local manager for panels
             PanelManager.loadPanel(panel, true);

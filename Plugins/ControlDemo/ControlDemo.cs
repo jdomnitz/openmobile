@@ -51,13 +51,41 @@ namespace ControlDemo
 
         public eLoadStatus initialize(IPluginHost host)
         {
+            StoredData.ObjectCollection<int> dtaList = new StoredData.ObjectCollection<int>();
+            //dtaList.Add(1, 1f);
+            //int i = dtaList.GetValue<int>(1);
+            //i = dtaList.GetValue<int>(2);
+            //dtaList.Save(this, "DataTest");
+            //dtaList.Clear();
+            dtaList.Load(this, "DataTest");
+
+            
             OMPanel p = new OMPanel("ControlDemo");
             theHost = host;
-            manager = new ScreenManager(theHost.ScreenCount);
+            manager = new ScreenManager(this);
 
-            OMLabel lblDataSourceTest = new OMLabel("lblDataSourceTest", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, 50);
-            lblDataSourceTest.Text = "cpu load is {System.CPU.Load} / mem usage is {System.Memory.UsedPercent}";
-            p.addControl(lblDataSourceTest);
+            //OMLabel lblDataSourceTest1 = new OMLabel("lblDataSourceTest1", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, 250, 50);
+            //lblDataSourceTest1.Text = "cpu load is {System.CPU.Load} / mem usage is {System.Memory.UsedPercent}";
+            //lblDataSourceTest1.TextAlignment = Alignment.WordWrap | Alignment.CenterCenter;
+            //lblDataSourceTest1.AutoFitTextMode = FitModes.Fit;
+            //lblDataSourceTest1.FontSize = 30;
+            ////lblDataSourceTest1.SkinDebug = true;
+            //p.addControl(lblDataSourceTest1);
+            //OMLabel lblDataSourceTest2 = new OMLabel("lblDataSourceTest2", lblDataSourceTest1.Region.Right, lblDataSourceTest1.Region.Top, lblDataSourceTest1.Region.Width, lblDataSourceTest1.Region.Height / 2);
+            //lblDataSourceTest2.Text = "cpu load is {System.CPU.Load} / mem usage is {System.Memory.UsedPercent}";
+            //lblDataSourceTest2.TextAlignment = Alignment.WordWrap | Alignment.CenterCenter;
+            //lblDataSourceTest2.AutoFitTextMode = FitModes.Fit;
+            //lblDataSourceTest2.FontSize = 30;
+            ////lblDataSourceTest2.SkinDebug = true;
+            //p.addControl(lblDataSourceTest2);
+            //OMLabel lblDataSourceTest3 = new OMLabel("lblDataSourceTest3", lblDataSourceTest2.Region.Right, lblDataSourceTest2.Region.Top, lblDataSourceTest1.Region.Width / 2, lblDataSourceTest1.Region.Height);
+            //lblDataSourceTest3.Text = "cpu load is {System.CPU.Load} / mem usage is {System.Memory.UsedPercent}";
+            //lblDataSourceTest3.TextAlignment = Alignment.WordWrap | Alignment.CenterCenter;
+            //lblDataSourceTest3.AutoFitTextMode = FitModes.Fit;
+            //lblDataSourceTest3.FontSize = 30;
+            ////lblDataSourceTest3.SkinDebug = true;
+            //p.addControl(lblDataSourceTest3);
+
 
             /*
             OMAnimatedLabel label1 = new OMAnimatedLabel(50, 100, 200, 30);
@@ -222,25 +250,30 @@ namespace ControlDemo
             #endregion
 
             // OSK Buttons
-            OMButton OSKButton = DefaultControls.GetButton("OSKButton", 650, 165, 300, 90, ">", "Keypad");
+            OMButton OSKButton = OMButton.PreConfigLayout_BasicStyle("OSKButton", 650, 100, 300, 90, GraphicCorners.Top, ">", "Keypad");
             OSKButton.Tag = OSKInputTypes.Keypad;
             OSKButton.OnClick += new userInteraction(OSKButton_OnClick);
             p.addControl(OSKButton);
-            OMButton OSKButton2 = DefaultControls.GetButton("OSKButton2", 650, 265, 300, 90, ">", "Numpad");
+            OMButton OSKButton2 = OMButton.PreConfigLayout_BasicStyle("OSKButton2", OSKButton.Region.Left, OSKButton.Region.Bottom - 1, 300, 90, GraphicCorners.None, ">", "Numpad");
             OSKButton2.Tag = OSKInputTypes.Numpad;
             OSKButton2.OnClick += new userInteraction(OSKButton_OnClick);
             p.addControl(OSKButton2);
-            OMButton OSKButton3 = DefaultControls.GetButton("OSKButton2", 650, 365, 300, 90, ">", "Password");
+            OMButton OSKButton3 = OMButton.PreConfigLayout_BasicStyle("OSKButton3", OSKButton.Region.Left, OSKButton2.Region.Bottom - 1, 300, 90, GraphicCorners.Bottom, ">", "Password");
+            //OMButton OSKButton3 = DefaultControls.GetButton("OSKButton2", 650, 365, 300, 90, ">", "Password");
             OSKButton3.OnClick += new userInteraction(OSKButton3_OnClick);
             p.addControl(OSKButton3);
 
+            OMButton btn3D = OMButton.PreConfigLayout_BasicStyle("btn3D", OSKButton.Region.Left, OSKButton3.Region.Bottom + 10, 300, 90, GraphicCorners.All, "", "3D");
+            btn3D.OnClick += new userInteraction(btn3D_OnClick);
+            p.addControl(btn3D);
+
             // Add default button
-            OMButton btnDialog = DefaultControls.GetButton("btnDialog", 10, 100, 300, 90, "", "DialogTest");
+            OMButton btnDialog = OMButton.PreConfigLayout_BasicStyle("btnDialog", 10, 100, 300, 90, GraphicCorners.All, "", "DialogTest");
             btnDialog.OnClick += new userInteraction(btnDialog_OnClick);
             p.addControl(btnDialog);
 
             // Add default button
-            OMButton btnPopupMenu = DefaultControls.GetButton("btnPopupMenu", 10, 200, 300, 90, "", "PopupMenu");
+            OMButton btnPopupMenu = OMButton.PreConfigLayout_BasicStyle("btnPopupMenu", 10, 200, 300, 90, GraphicCorners.All, "", "PopupMenu");
             btnPopupMenu.OnClick += new userInteraction(btnPopupMenu_OnClick);
             p.addControl(btnPopupMenu);
 
@@ -260,7 +293,7 @@ namespace ControlDemo
             p.addControl(TestImg2);
 
             // OMList2 test
-            OMButton btnOMList2Test = DefaultControls.GetButton("btnOMList2Test", 320, 100, 300, 90, "", "OMList2");
+            OMButton btnOMList2Test = OMButton.PreConfigLayout_BasicStyle("btnOMList2Test", 320, 100, 300, 90, GraphicCorners.All, "", "OMList2");
             btnOMList2Test.Tag = "OMList2Test";
             btnOMList2Test.OnClick += new userInteraction(btnCommonTransitionToPanel_OnClick);
             p.addControl(btnOMList2Test);
@@ -268,17 +301,17 @@ namespace ControlDemo
             panelOMList2Test.Initialize(this.pluginName, manager, theHost);
 
             // Playlist test
-            OMButton btnPlayList = DefaultControls.GetButton("btnPlayList", 320, 200, 300, 90, "", "PlayList");
+            OMButton btnPlayList = OMButton.PreConfigLayout_BasicStyle("btnPlayList", 320, 200, 300, 90, GraphicCorners.All, "", "PlayList");
             btnPlayList.OnClick += new userInteraction(btnPlayList_OnClick);
             p.addControl(btnPlayList);
 
             // Images test
-            OMButton btnImages = DefaultControls.GetButton("btnImages", 320, 300, 300, 90, "", "Images");
+            OMButton btnImages = OMButton.PreConfigLayout_BasicStyle("btnImages", 320, 300, 300, 90, GraphicCorners.All, "", "Images");
             btnImages.OnClick += new userInteraction(btnImages_OnClick);
             p.addControl(btnImages);
 
             // SlideIn test
-            OMButton btnSlideInTest = DefaultControls.GetButton("btnSlideInTest", 320, 400, 300, 90, "", "SlideIn");
+            OMButton btnSlideInTest = OMButton.PreConfigLayout_BasicStyle("btnSlideInTest", 320, 400, 300, 90, GraphicCorners.All, "", "SlideIn");
             btnSlideInTest.OnClick += new userInteraction(btnSlideInTest_OnClick);
             p.addControl(btnSlideInTest);
 
@@ -301,12 +334,22 @@ namespace ControlDemo
             p.addControl(TestImg4);
             */
 
+            //OMTestControl tstControl = new OMTestControl();
+            //tstControl.Left = 200;
+            //tstControl.Top = OM.Host.ClientArea_Init.Top + 0;
+            //tstControl.Width = 400;
+            //tstControl.Height = 400; // 35;
+            //p.addControl(tstControl);
+
 
             // Load playlist panel
             panelPlayListTest.Initialize(this.pluginName, manager, theHost);
 
             // Load images panel
             panelImages.Initialize(this.pluginName, manager, theHost);
+
+            // Load 3D panel
+            panel3D.Initialize(this.pluginName, manager, theHost);
 
             // Load SlideIn panel
             panelSlideInTest.Initialize(this.pluginName, manager, theHost);
@@ -319,6 +362,13 @@ namespace ControlDemo
             manager.loadPanel(p, true);
 
             return eLoadStatus.LoadSuccessful;
+        }
+
+        void btn3D_OnClick(OMControl sender, int screen)
+        {
+            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
+            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "panel3D");
+            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
         void btnCommonTransitionToPanel_OnClick(OMControl sender, int screen)
@@ -415,7 +465,7 @@ namespace ControlDemo
                     255,
                     theHost.getSkinImage("Aicons|5-content-email"),
                     "Send email" + i.ToString(),
-                    true,
+                    false,
                     null, null, null));
             }
 
@@ -463,12 +513,12 @@ namespace ControlDemo
 
         public string authorName
         {
-            get { return "Justin Domnitz"; }
+            get { return "OM DevTeam/Borte"; }
         }
 
         public string authorEmail
         {
-            get { return "admin@domnitzsolutions.com"; }
+            get { return ""; }
         }
 
         public string pluginName
@@ -486,7 +536,7 @@ namespace ControlDemo
 
         public string pluginDescription
         {
-            get { return "Demonstrate inter-panel transitions and the larger control set"; }
+            get { return "Controls demo"; }
         }
 
         public imageItem pluginIcon

@@ -32,7 +32,7 @@ namespace OMDataSourceSample
         public eLoadStatus initialize(IPluginHost host)
         {
             // Create a datasource
-            host.DataHandler.AddDataProvider(new DataSource(this.pluginName, "DateTime", "Current", "", 1000, DataSource.DataTypes.text, DataSource_Get_DateTime, "A sample data source"));
+            host.DataHandler.AddDataSource(new DataSource(this.pluginName, "DateTime", "Current", "", 1000, DataSource.DataTypes.text, DataSource_Get_DateTime, "A sample data source"));
 
             return eLoadStatus.LoadSuccessful;
         }

@@ -70,7 +70,7 @@ namespace OMRadio
             {
                 if (!SourceSelected)
                 {
-                    string Source = setting.getSetting("Radio.DefaultTunedContentSource");
+                    string Source = setting.getSetting(this, "Radio.DefaultTunedContentSource");
                     if ((Source != "None")&&(Source!=""))
                     {
                         object o = new object();
@@ -193,7 +193,7 @@ namespace OMRadio
                 using (PluginSettings setting = new PluginSettings())
                 {
                     // Default station list source
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "Radio.UsePresetAsStartupListSource", "", "Use presets as default list source", Setting.BooleanList, Setting.BooleanList, setting.getSetting("Radio.UsePresetAsStartupListSource")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Radio.UsePresetAsStartupListSource", "", "Use presets as default list source", Setting.BooleanList, Setting.BooleanList, setting.getSetting(this, "Radio.UsePresetAsStartupListSource")));
 
                     // Default tuned content source
                     List<string> TunedContentList = new List<string>();
@@ -207,7 +207,7 @@ namespace OMRadio
                         foreach (IBasePlugin b in lst)
                             TunedContentList.Add(b.pluginName);
 
-                        settings.Add(new Setting(SettingTypes.MultiChoice, "Radio.DefaultTunedContentSource", "Source", "Default radio source", TunedContentList, TunedContentList, setting.getSetting("Radio.DefaultTunedContentSource")));
+                        settings.Add(new Setting(SettingTypes.MultiChoice, "Radio.DefaultTunedContentSource", "Source", "Default radio source", TunedContentList, TunedContentList, setting.getSetting(this, "Radio.DefaultTunedContentSource")));
                     }
                 }
                 settings.OnSettingChanged += new SettingChanged(Setting_Changed);
@@ -218,7 +218,7 @@ namespace OMRadio
         private void Setting_Changed(int screen,Setting s)
         {
             using (PluginSettings settings = new PluginSettings())
-                settings.setSetting(s.Name, s.Value);
+                settings.setSetting(this, s.Name, s.Value);
         }
 
         public string displayName
@@ -274,7 +274,7 @@ namespace OMRadio
             // Default data
             using (PluginSettings setting = new PluginSettings())
             {
-                if (setting.getSetting("Radio.UsePresetAsStartupListSource") == "True")
+                if (setting.getSetting(this, "Radio.UsePresetAsStartupListSource") == "True")
                     StationListSource = StationListSources.Presets;
                 else
                     StationListSource = StationListSources.Live;
@@ -563,8 +563,8 @@ namespace OMRadio
 
             #endregion
 
-            manager = new ScreenManager(theHost.ScreenCount);
-            manager.loadPanel(panelMain);
+            manager = new ScreenManager(this);
+            manager.loadPanel(panelMain, true);
             manager.loadPanel(panelListView);
             manager.loadPanel(panelMessageBox);
             return eLoadStatus.LoadSuccessful;
@@ -816,11 +816,16 @@ namespace OMRadio
         }
         private void UpdateStationInfo(Zone zone)
         {
+            if (zone == null)
+                return;
+
             object o = new object();
             theHost.getData(eGetData.GetTunedContentInfo, "", zone.ToString(), out o);
             if (o == null)
                 return;
             tunedContentInfo info = (tunedContentInfo)o;
+            if (info.currentStation == null)
+                return;
 
             mediaInfo mediaInfo = theHost.getPlayingMedia(zone);
 
@@ -830,14 +835,17 @@ namespace OMRadio
 
                 #region Frequency
 
-                if (((info.band == eTunedContentBand.AM) | (info.band == eTunedContentBand.FM)) && (info.currentStation.stationID.IndexOf(':') < (info.currentStation.stationID.Length-1)))
+                if (((info.band == eTunedContentBand.AM) | (info.band == eTunedContentBand.FM)))
                 {
-                    int Frequency = int.Parse(info.currentStation.stationID.Substring(info.currentStation.stationID.IndexOf(':') + 1));
-                    ((OMLabel)manager[i]["Radio_StationFrequency"]).Text = (Frequency / 1000.0F).ToString("##.00") + "MHz";
-                }
-                else
-                {
-                    ((OMLabel)manager[i]["Radio_StationFrequency"]).Text = "";
+                    if ((info.currentStation.stationID.Contains(":")) && (info.currentStation.stationID.IndexOf(':') < (info.currentStation.stationID.Length - 1)))
+                    {
+                        int Frequency = int.Parse(info.currentStation.stationID.Substring(info.currentStation.stationID.IndexOf(':') + 1));
+                        ((OMLabel)manager[i]["Radio_StationFrequency"]).Text = (Frequency / 1000.0F).ToString("##.00") + "MHz";
+                    }
+                    else
+                    {
+                        ((OMLabel)manager[i]["Radio_StationFrequency"]).Text = "";
+                    }
                 }
 
                 #endregion
@@ -990,8 +998,8 @@ namespace OMRadio
                     {
                         string DataName = "TunedContent." + info.band.ToString() + ".Preset" + PresetCount.ToString();
                         stationInfo station = new stationInfo();
-                        station.stationName = setting.getSetting(DataName + ".StationName");
-                        station.stationID = setting.getSetting(DataName + ".StationID");
+                        station.stationName = setting.getSetting(this, DataName + ".StationName");
+                        station.stationID = setting.getSetting(this, DataName + ".StationID");
                         if ((station.stationName == "") | (station.stationID == ""))
                             // No more presets available, exit
                             PresetCount = -1;
@@ -1058,12 +1066,12 @@ namespace OMRadio
                     {
                         string DataName = "TunedContent." + band + ".Preset" + PresetCount.ToString();
                         stationInfo station = new stationInfo();
-                        station.stationName = setting.getSetting(DataName + ".StationName");
-                        station.stationID = setting.getSetting(DataName + ".StationID");
+                        station.stationName = setting.getSetting(this, DataName + ".StationName");
+                        station.stationID = setting.getSetting(this, DataName + ".StationID");
                         if ((station.stationName != "") | (station.stationID != ""))
                         {   // Clear data
-                            setting.setSetting(DataName + ".StationName", "");
-                            setting.setSetting(DataName + ".StationID", "");
+                            setting.setSetting(this, DataName + ".StationName", "");
+                            setting.setSetting(this, DataName + ".StationID", "");
                             // Continue to next data
                             PresetCount++;
                         }
@@ -1082,8 +1090,8 @@ namespace OMRadio
                 for (int i = 0; i < Presets.Count; i++)
                 {
                     string DataName = "TunedContent." + band + ".Preset" + i.ToString();
-                    setting.setSetting(DataName + ".StationName", Presets[i].stationName);
-                    setting.setSetting(DataName + ".StationID", Presets[i].stationID);
+                    setting.setSetting(this, DataName + ".StationName", Presets[i].stationName);
+                    setting.setSetting(this, DataName + ".StationID", Presets[i].stationID);
                 }
             }
         }

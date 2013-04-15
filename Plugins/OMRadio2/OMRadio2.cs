@@ -107,7 +107,7 @@ namespace OMRadio2
         public eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
-            manager = new ScreenManager(theHost.ScreenCount);
+            manager = new ScreenManager(this);
 
 
             OMPanel panelRadio = new OMPanel("Radio");

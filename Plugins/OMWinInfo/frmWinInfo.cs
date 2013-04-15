@@ -199,6 +199,15 @@ namespace OMWinInfo
             this.dataGridView1.DataSource = null;
             _DataSources = new SortableBindingList<DataSource>(BuiltInComponents.Host.DataHandler.GetDataSources(""));
             this.dataGridView1.DataSource = _DataSources;
+            this.dataGridView1.Sort(this.dataGridView1.Columns["FullName"], ListSortDirection.Ascending);
+            this.dataGridView1.Columns["Description"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            this.dataGridView1.Columns["FullName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            this.dataGridView1.DataError += new DataGridViewDataErrorEventHandler(dataGridView1_DataError);
+        }
+
+        void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            e.Cancel = true;
         }
 
         private void Refresh_Commands()
@@ -206,6 +215,15 @@ namespace OMWinInfo
             this.dataGridView2.DataSource = null;
             _Commands = new SortableBindingList<Command>(BuiltInComponents.Host.CommandHandler.GetCommands(""));
             this.dataGridView2.DataSource = _Commands;
+
+            foreach (Command command in _Commands)
+	        {
+                this.cmbCommand.Items.Add(command.FullName);
+	        }
+
+            this.dataGridView2.Sort(this.dataGridView2.Columns["FullName"], ListSortDirection.Ascending);
+            this.dataGridView2.Columns["Description"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            this.dataGridView2.Columns["FullName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;            
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -276,14 +294,14 @@ namespace OMWinInfo
             sb.AppendLine(String.Format("OpenMobile Commands export - {0}", DateTime.Now));
             sb.AppendLine("-----------------------------------------------------------------------------------------------------------");
             //sb.AppendLine("FullName                                DataType       Provider                       Description / sample data");
-            sb.AppendLine(String.Format("{0,-40} {1,-8} {2,-8} {3,-20} Description", "FullName", "ReqPar", "RetVal", "Provider"));
+            sb.AppendLine(String.Format("{0,-60} {1,-8} {2,-8} {3,-20} Description", "FullName", "ReqPar", "RetVal", "Provider"));
             sb.AppendLine("-----------------------------------------------------------------------------------------------------------");
 
             foreach (Command command in dataCommands)
             {
                 try
                 {
-                    sb.Append(String.Format("{0,-40} {1,-8} {2,-8} {3,-20} {4}", command.FullName, command.RequiresParameters, command.ReturnsValue, command.Provider, command.Description));
+                    sb.Append(String.Format("{0,-60} {1,-8} {2,-8} {3,-20} {4}", command.FullName, command.RequiresParameters, command.ReturnsValue, command.Provider, command.Description));
                     sb.AppendLine();
                 }
                 catch { }
@@ -306,6 +324,61 @@ namespace OMWinInfo
 
             }
 
+        }
+
+        private void btnExecCommand_Click(object sender, EventArgs e)
+        {
+            if (cmbCommand.Text.Contains(Command.CommandSeparator))
+            {   // Multiple commands
+                BuiltInComponents.Host.CommandHandler.ExecuteCommand(cmbCommand.Text);
+            }
+            else
+            {   // Single command
+                Command cmd = BuiltInComponents.Host.CommandHandler.GetCommand(cmbCommand.Text);
+                if (cmd != null)
+                {
+                    if (cmd.RequiresParameters)
+                    {
+                        object[] param = null;
+                        frmCmdParams frmParam = new frmCmdParams();
+                        if (frmParam.ShowDialog(this, cmd, out param) == System.Windows.Forms.DialogResult.OK)
+                        {
+                            BuiltInComponents.Host.CommandHandler.ExecuteCommand(cmbCommand.Text, param.ToArray());
+                        }
+                    }
+                    else
+                    {
+                        BuiltInComponents.Host.CommandHandler.ExecuteCommand(cmbCommand.Text);
+                    }
+                }
+            }
+        }
+
+        private void dataGridView2_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridView2.SelectedRows.Count > 0)
+                this.cmbCommand.Text = (string)dataGridView2.SelectedRows[0].Cells["FullName"].Value;
+        }
+
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count > 0)
+                this.cmdDataSource.Text = (string)dataGridView1.SelectedRows[0].Cells["FullName"].Value;
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            DataSource datasource = BuiltInComponents.Host.DataHandler.GetDataSource(this.cmdDataSource.Text);
+            if (datasource != null)
+            {
+                datasource.Value = this.txtDataSourceValue.Text;
+            }
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            frmHistoryView frmCmdHistory = new frmHistoryView("Commands history", frmHistoryView.DataTypes.Commands);
+            frmCmdHistory.Show();
         }
     }
 }

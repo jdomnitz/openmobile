@@ -40,7 +40,7 @@ namespace OMSettings
         static int SelectedScreen = -1;
         static string[] KeyboardDevices = null;
         static string[] MouseDevices = null;
-        static string[] AudioDevices = null;
+        //static string[] AudioDevices = null;
         static OMPanel panelScreen = new OMPanel("InputRouterScreen");
         static OMPanel panelMultiScreen = new OMPanel("InputRouterScreenSelection");
         static bool MZSettingsChanged = false;
@@ -244,6 +244,7 @@ namespace OMSettings
             Screen_TextBoxKeyboard.Flags = textboxFlags.EllipsisEnd;
             Screen_TextBoxKeyboard.Font = new Font(Font.GenericSansSerif, 21.75F);
             Screen_TextBoxKeyboard.Name = "Screen_TextBoxKeyboard";
+            Screen_TextBoxKeyboard.SkinDebug = true;
             panelScreen.addControl(Screen_TextBoxKeyboard);
 
             OMLabel Screen_LabelKeyboardCurrent = new OMLabel(291, 369, 450, 20);
@@ -474,15 +475,15 @@ namespace OMSettings
                 dialog.Icon = icons.Exclamation;
                 dialog.Button = buttons.OK;
                 dialog.ShowMsgBox(screen);
-                Host.execute(eFunction.goBack, screen.ToString());
+                //Host.execute(eFunction.goBack, screen.ToString());
             }
 
             // Save new settings
             using (PluginSettings settings = new PluginSettings())
             {
                 //settings.setSetting("Screen" + SelectedScreen.ToString() + ".SoundCard", ((OMLabel)panelScreen[screen, "Screen_TextBoxAudioUnit"]).Text);
-                settings.setSetting("Screen" + SelectedScreen.ToString() + ".Keyboard", ((OMLabel)panelScreen[screen, "Screen_TextBoxKeyboard"]).Text);
-                settings.setSetting("Screen" + SelectedScreen.ToString() + ".Mouse", ((OMLabel)panelScreen[screen, "Screen_TextBoxMouse"]).Text);
+                settings.setSetting(BuiltInComponents.OMInternalPlugin, "Screen" + SelectedScreen.ToString() + ".Keyboard", ((OMLabel)panelScreen[screen, "Screen_TextBoxKeyboard"]).Text);
+                settings.setSetting(BuiltInComponents.OMInternalPlugin, "Screen" + SelectedScreen.ToString() + ".Mouse", ((OMLabel)panelScreen[screen, "Screen_TextBoxMouse"]).Text);
             }
 
             Host.execute(eFunction.goBack, screen.ToString());
@@ -505,7 +506,7 @@ namespace OMSettings
                 dialog.Icon = icons.Error;
                 dialog.Button = buttons.OK;
                 dialog.ShowMsgBox(screen);
-                Host.execute(eFunction.goBack, screen.ToString());
+                //Host.execute(eFunction.goBack, screen.ToString());
                 Host.execute(eFunction.goBack, screen.ToString());
                 return;
             }
@@ -517,18 +518,18 @@ namespace OMSettings
             using (PluginSettings settings = new PluginSettings())
             {
                 //((OMLabel)panelScreen[screen, "Screen_TextBoxAudioUnit"]).Text = settings.getSetting("Screen" + SelectedScreen.ToString() + ".SoundCard");
-                ((OMLabel)panelScreen[screen, "Screen_TextBoxKeyboard"]).Text = settings.getSetting("Screen" + SelectedScreen.ToString() + ".Keyboard");
-                ((OMLabel)panelScreen[screen, "Screen_TextBoxMouse"]).Text = settings.getSetting("Screen" + SelectedScreen.ToString() + ".Mouse");
+                ((OMLabel)panelScreen[screen, "Screen_TextBoxKeyboard"]).Text = settings.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + SelectedScreen.ToString() + ".Keyboard");
+                ((OMLabel)panelScreen[screen, "Screen_TextBoxMouse"]).Text = settings.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + SelectedScreen.ToString() + ".Mouse");
             }
 
             // Get Audio devices
-            object o;
-            Host.getData(eGetData.GetAudioDevices, "", out o);
-            if (o != null)
-                AudioDevices = (string[])o;
+            //object o;
+            //Host.getData(eGetData.GetAudioDevices, "", out o);
+            //if (o != null)
+            //    AudioDevices = (string[])o;
 
             // Get keyboard units
-            o = new object();
+            object o = new object();
             Host.getData(eGetData.GetKeyboardUnitsForScreen, "", (SelectedScreen-1).ToString(), out o);
             if (o != null)
                 KeyboardDevices = (string[])o;
@@ -559,9 +560,9 @@ namespace OMSettings
 
             using (PluginSettings settings = new PluginSettings())
             {
-                CurrentAudioSetting = settings.getSetting("Screen" + SelectedScreen.ToString() + ".SoundCard");
-                CurrentKeyboardSetting = settings.getSetting("Screen" + SelectedScreen.ToString() + ".Keyboard");
-                CurrentMouseSetting = settings.getSetting("Screen" + SelectedScreen.ToString() + ".Mouse");
+                CurrentAudioSetting = settings.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + SelectedScreen.ToString() + ".SoundCard");
+                CurrentKeyboardSetting = settings.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + SelectedScreen.ToString() + ".Keyboard");
+                CurrentMouseSetting = settings.getSetting(BuiltInComponents.OMInternalPlugin, "Screen" + SelectedScreen.ToString() + ".Mouse");
             }
 
             // Compare to current values

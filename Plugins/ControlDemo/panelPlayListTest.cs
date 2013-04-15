@@ -258,10 +258,10 @@ namespace ControlDemo
         {
             playlist = new PlayList("TestList");
 
-            List<string> PlayLists = PlaylistHandler.listPlaylistsFromDB();
+            List<string> PlayLists = PlayList.listPlaylistsFromDB();
             if (PlayLists.Count > 0)
             {
-                foreach (mediaInfo MediaItem in PlaylistHandler.readPlaylistFromDB(PlayLists[PlayLists.Count-1]))
+                foreach (mediaInfo MediaItem in PlayList.readPlaylistFromDB(PlayLists[PlayLists.Count - 1]))
                 {
                     playlist.Add(MediaLoader.UpdateMissingMediaInfo(MediaItem));
 

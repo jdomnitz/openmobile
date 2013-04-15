@@ -252,8 +252,7 @@ namespace OMPlayer
         {
             string dbname;
             object o;
-            using (PluginSettings ps = new PluginSettings())
-                dbname = ps.getSetting("Default.CDDatabase");
+            dbname = OpenMobile.helperFunctions.StoredData.Get(OM.GlobalSetting, "Default.CDDatabase");
             theHost.getData(eGetData.GetMediaDatabase, dbname, out  o);
             if (o == null)
                 return new mediaInfo(path);
@@ -277,15 +276,16 @@ namespace OMPlayer
         IPluginHost theHost;
         public OpenMobile.eLoadStatus initialize(IPluginHost host)
         {
+            return eLoadStatus.LoadFailedGracefulUnloadRequested;
+
             theHost = host;
             host.OnStorageEvent += new StorageEvent(host_OnStorageEvent);
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
-            using (PluginSettings settings = new PluginSettings())
-                settings.setSetting("Default.CDDatabase", "CDDB");
+            OpenMobile.helperFunctions.StoredData.Set(OM.GlobalSetting, "Default.CDDatabase", "OMCDDB");
             return eLoadStatus.LoadSuccessful;
         }
 
-        void host_OnSystemEvent(eFunction function, string arg1, string arg2, string arg3)
+        void host_OnSystemEvent(eFunction function, object[] args)
         {
             // This is not needed storageevents are raised for each drive via HAL 
             //if (function == eFunction.pluginLoadingComplete)
