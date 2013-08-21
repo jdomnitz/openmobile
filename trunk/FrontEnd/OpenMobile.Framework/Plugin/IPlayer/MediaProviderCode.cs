@@ -32,7 +32,7 @@ namespace OpenMobile.Plugin
     /// A common code base for the IMediaProvider interface
     /// </summary>
     /// <typeparam name="T">Type of data for local ZoneSpecificLocalData</typeparam>
-    public abstract class MediaProviderCode : BasePluginCode, IMediaProvider
+    public abstract class MediaProviderBase : BasePluginCode, IMediaProvider
     {
         /// <summary>
         /// Zone specific local data
@@ -54,7 +54,7 @@ namespace OpenMobile.Plugin
         /// <param name="pluginDescription"></param>
         /// <param name="authorName"></param>
         /// <param name="authorEmail"></param>
-        public MediaProviderCode(string pluginName, imageItem pluginIcon, float pluginVersion, string pluginDescription, string authorName, string authorEmail)
+        public MediaProviderBase(string pluginName, imageItem pluginIcon, float pluginVersion, string pluginDescription, string authorName, string authorEmail)
             : base(pluginName, pluginIcon, pluginVersion, pluginDescription, authorName, authorEmail)
         {
         }
