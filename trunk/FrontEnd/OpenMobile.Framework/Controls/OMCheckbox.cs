@@ -115,6 +115,7 @@ namespace OpenMobile.Controls
             {
                 isChecked = value;
                 _RefreshGraphic = true;
+                Refresh();
             }
         }
 

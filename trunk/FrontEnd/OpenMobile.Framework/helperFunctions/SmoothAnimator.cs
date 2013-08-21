@@ -67,17 +67,71 @@ namespace OpenMobile.Graphics
         /// <param name="controls"></param>
         /// <param name="screen"></param>
         /// <param name="speed"></param>
-        /// <param name="cancel">A controlclass for controlling the animation. Use Null if this is not required</param>
+        public static void PresetAnimation_FadeIn(ControlLayout controls, int screen, float speed)
+        {
+            PresetAnimation_FadeIn(controls, screen, speed, null);
+        }
+
+        /// <summary>
+        /// Animates a set of controls contained in a ControlLayout object
+        /// <para>Controls is faded in via the opacity and visibility properties</para>
+        /// </summary>
+        /// <param name="controls"></param>
+        /// <param name="screen"></param>
+        /// <param name="speed"></param>
+        /// <param name="control">A controlclass for controlling the animation. Use Null if this is not required</param>
         public static void PresetAnimation_FadeIn(ControlLayout controls, int screen, float speed, AnimatorControl control)
+        {
+            PresetAnimation_FadeIn(screen, speed, control, controls);
+        }
+
+        /// <summary>
+        /// Animates a set of controls contained in a ControlLayout object
+        /// <para>Controls is faded in via the opacity and visibility properties</para>
+        /// </summary>
+        /// <param name="controls"></param>
+        /// <param name="screen"></param>
+        /// <param name="speed"></param>
+        /// <param name="control">A controlclass for controlling the animation. Use Null if this is not required</param>
+        public static void PresetAnimation_FadeIn(int screen, float speed, AnimatorControl control, params ControlLayout[] controls)
+        {
+            PresetAnimation_FadeIn(screen, speed, control, 255, true, controls);
+        }
+        /// <summary>
+        /// Animates a set of controls contained in a ControlLayout object
+        /// <para>Controls is faded in via the opacity and visibility properties</para>
+        /// </summary>
+        /// <param name="controls"></param>
+        /// <param name="screen"></param>
+        /// <param name="speed"></param>
+        /// <param name="control">A controlclass for controlling the animation. Use Null if this is not required</param>
+        public static void PresetAnimation_FadeIn(int screen, float speed, AnimatorControl control, int targetOpacity, bool setVisible, params ControlLayout[] controls)
         {
             if (control != null && control.Cancel)
                 return;
 
-            if (controls.Opacity < 255 || !controls.Visible)
+            // Activate animation?
+            bool runAnimation = false;
+            for (int i = 0; i < controls.Length; i++)
             {
-                // Ensure visibility
-                controls.Visible = true;
-                controls.Opacity = 0;
+                if (!controls[i].Visible || controls[i].Opacity < targetOpacity)
+                {
+                    runAnimation = true;
+                    break;
+                }
+            }
+            if (!runAnimation)
+                return;
+
+            if (runAnimation)
+            {
+                for (int i = 0; i < controls.Length; i++)
+                {
+                    // Ensure visibility
+                    if (setVisible)
+                        controls[i].Visible = true;
+                    //controls[i].Opacity = 0;
+                }
 
                 // Animate
                 SmoothAnimator Animation = new SmoothAnimator(speed * BuiltInComponents.SystemSettings.TransitionSpeed);
@@ -87,19 +141,31 @@ namespace OpenMobile.Graphics
                     if (control != null && control.Cancel)
                         return false;
 
-                    controls.Opacity += AnimationStep;
+                    bool animationCompleted = true;
+                    for (int i = 0; i < controls.Length; i++)
+                    {
 
-                    if (controls.Opacity >= 255)
+                        if (controls[i].Opacity < targetOpacity)
+                        {
+                            controls[i].Opacity += AnimationStep;
+                            animationCompleted = false;
+                        }
+
+                        // Request a screen redraw
+                        controls[i].Refresh();
+                    }
+
+                    if (animationCompleted)
                         return false;
-
-                    // Request a screen redraw
-                    controls.Refresh();
 
                     // Continue animation
                     return true;
                 });
-                controls.Opacity = 255;
-                controls.Refresh();
+                for (int i = 0; i < controls.Length; i++)
+                {
+                    controls[i].Opacity = targetOpacity;
+                    controls[i].Refresh();
+                }
             }
         }
 
@@ -110,37 +176,201 @@ namespace OpenMobile.Graphics
         /// <param name="controls"></param>
         /// <param name="screen"></param>
         /// <param name="speed"></param>
+        public static void PresetAnimation_FadeOut(ControlLayout controls, int screen, float speed)
+        {
+            PresetAnimation_FadeOut(controls, screen, speed, null);
+        }
+        /// <summary>
+        /// Animates a set of controls contained in a ControlLayout object
+        /// <para>Controls is faded out via the opacity and visibility properties</para>
+        /// </summary>
+        /// <param name="controls"></param>
+        /// <param name="screen"></param>
+        /// <param name="speed"></param>
         /// <param name="control">A controlclass for controlling the animation</param>
         public static void PresetAnimation_FadeOut(ControlLayout controls, int screen, float speed, AnimatorControl control)
+        {
+            PresetAnimation_FadeOut(screen, speed, control, controls);
+        }
+        /// <summary>
+        /// Animates a set of controls contained in a ControlLayout object
+        /// <para>Controls is faded out via the opacity and visibility properties</para>
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="speed"></param>
+        /// <param name="control">A controlclass for controlling the animation</param>
+        /// <param name="controls"></param>
+        public static void PresetAnimation_FadeOut(int screen, float speed, AnimatorControl control, params ControlLayout[] controls)
+        {
+            PresetAnimation_FadeOut(screen, speed, control, 0, true, controls);
+        }
+        /// <summary>
+        /// Animates a set of controls contained in a ControlLayout object
+        /// <para>Controls is faded out via the opacity and visibility properties</para>
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="speed"></param>
+        /// <param name="control">A controlclass for controlling the animation</param>
+        /// <param name="controls"></param>
+        public static void PresetAnimation_FadeOut(int screen, float speed, AnimatorControl control, int targetOpacity, bool setInvisible, params ControlLayout[] controls)
         {
             // Check for cancel
             if (control != null && control.Cancel)
                 return;
 
-            if (controls.Visible && controls.Opacity > 0)
+            // Activate animation?
+            bool runAnimation = false;
+            for (int i = 0; i < controls.Length; i++)
             {
-                // Animate
-                SmoothAnimator Animation = new SmoothAnimator(speed * BuiltInComponents.SystemSettings.TransitionSpeed);
-                Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
+                if (controls[i].Visible || controls[i].Opacity > targetOpacity)
                 {
-                    // Check for cancel
-                    if (control != null && control.Cancel)
-                        return false;
+                    runAnimation = true;
+                    break;
+                }
+            }
+            if (!runAnimation)
+                return;
 
-                    controls.Opacity -= AnimationStep;
+            // Animate
+            SmoothAnimator Animation = new SmoothAnimator(speed * BuiltInComponents.SystemSettings.TransitionSpeed);
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
+            {
+                // Check for cancel
+                if (control != null && control.Cancel)
+                    return false;
 
-                    if (controls.Opacity <= 0)
-                        return false;
+                bool animationCompleted = true;
+                for (int i = 0; i < controls.Length; i++)
+                {
+                    if (controls[i].Opacity > targetOpacity)
+                    {
+                        controls[i].Opacity -= AnimationStep;
+                        animationCompleted = false;
+                    }
 
                     // Request a screen redraw
-                    controls.Refresh();
+                    controls[i].Refresh();
+                }
 
-                    // Continue animation
-                    return true;
-                });
-                controls.Visible = false;
-                controls.Opacity = 0;
-                controls.Refresh();
+                if (animationCompleted)
+                    return false;
+
+                // Continue animation
+                return true;
+            });
+            for (int i = 0; i < controls.Length; i++)
+            {
+                if (setInvisible)
+                    controls[i].Visible = false;
+                controls[i].Opacity = targetOpacity;
+                controls[i].Refresh();
+            }
+        }
+
+        /// <summary>
+        /// Animates a set of controls contained in a ControlLayout object
+        /// <para>Controls is moved from the current position towards the end position</para>
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="speed"></param>
+        /// <param name="control"></param>
+        /// <param name="startPoint"></param>
+        /// <param name="endPoint"></param>
+        /// <param name="mainGroup"></param>
+        /// <param name="slaveGroups"></param>
+        public static void PresetAnimation_MoveAbs(int screen, float speed, AnimatorControl control, Point startPoint, Point endPoint, ControlLayout mainGroup, params ControlLayout[] slaveGroups)
+        {
+            if (control != null && control.Cancel)
+                return;
+
+            // Activate animation?
+            if ((System.Math.Abs(endPoint.X - startPoint.X) == 0 ||  mainGroup.Region.Left == endPoint.X)
+                && (System.Math.Abs(endPoint.Y - startPoint.Y) == 0 ||  mainGroup.Region.Top == endPoint.Y))
+                return;
+
+            // Calculate directions
+            int directionX = 0;
+            if (mainGroup.Region.Left < endPoint.X)
+                directionX = 1;
+            else if (mainGroup.Region.Left > endPoint.X)
+                directionX = -1;
+            int directionY = 0;
+            if (mainGroup.Region.Top < endPoint.Y)
+                directionY = 1;
+            else if (mainGroup.Region.Top > endPoint.Y)
+                directionY = -1;
+
+            // Animate
+            SmoothAnimator Animation = new SmoothAnimator(speed * BuiltInComponents.SystemSettings.TransitionSpeed);
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
+            {
+                // Check for cancel
+                if (control != null && control.Cancel)
+                    return false;
+
+                bool animationCompleted = true;
+
+                // Animate X direction
+                if (directionX > 0)
+                {
+                    mainGroup.Left += AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Left += AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Left < endPoint.X)
+                        animationCompleted = false;
+                }
+                else if (directionX < 0)
+                {
+                    mainGroup.Left -= AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Left -= AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Left > endPoint.X)
+                        animationCompleted = false;
+                }
+
+                // Animate Y direction
+                if (directionY > 0)
+                {
+                    mainGroup.Top += AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Top += AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Top < endPoint.Y)
+                        animationCompleted = false;
+                }
+                else if (directionY < 0)
+                {
+                    mainGroup.Top -= AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Top -= AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Top > endPoint.Y)
+                        animationCompleted = false;
+                }
+
+                if (animationCompleted)
+                    return false;
+
+                // Continue animation
+                return true;
+            });
+
+            // Set final values
+            Point distanceError = new Point(endPoint.X - mainGroup.Left, endPoint.Y - mainGroup.Top);
+
+            mainGroup.Left += distanceError.X;
+            mainGroup.Top += distanceError.Y;
+
+            for (int i = 0; i < slaveGroups.Length; i++)
+            {
+                slaveGroups[i].Left += distanceError.X;
+                slaveGroups[i].Top += distanceError.Y;
             }
         }
 

@@ -38,10 +38,14 @@ namespace OpenMobile
 #if WINDOWS
             if (Configuration.RunningOnWindows)
             {
-                if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", String.Empty)), "OMHal.exe"), String.Empty, false))
-                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "HalInterface", "Unable to start HAL!");
-                else
-                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "HalInterface", "WinHAL Started");
+                // Check for already running and close if it is
+                if (OpenMobile.Framework.OSSpecific.Process_Close("OMHal"))
+                {
+                    if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", String.Empty)), "OMHal.exe"), String.Empty, false))
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "HalInterface", "Unable to start HAL!");
+                    else
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "HalInterface", "WinHAL Started");
+                }
             }
 #endif
 #if LINUX
@@ -50,10 +54,13 @@ namespace OpenMobile
 #endif
                 if (Configuration.RunningOnLinux)
                 {
-                    if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:", String.Empty)), "OMHal.exe"), String.Empty, false))
-                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "HalInterface", "Unable to start HAL!");
-                    else
-                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "HalInterface", "LinHAL Started");
+                    if (OpenMobile.Framework.OSSpecific.Process_Close("OMHal"))
+                    {
+                        if (!OpenMobile.Framework.OSSpecific.runManagedProcess(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:", String.Empty)), "OMHal.exe"), String.Empty, false))
+                            BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "HalInterface", "Unable to start HAL!");
+                        else
+                            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "HalInterface", "LinHAL Started");
+                    }
                 }
 #endif
             UDPReceive = new System.Net.Sockets.UdpClient(8550);

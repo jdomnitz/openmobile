@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using OpenMobile.Math;
+using System.ComponentModel;
 
 namespace OpenMobile.Graphics
 {
@@ -214,6 +215,7 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Creates a horizontal gradient, the different positions for the colors can be freely set in the range -1 to 1 
         /// where -1 is all the way to the left and 1 is all the way to the right
+        /// <para>NB! Colorpoints positions are relative to each other</para>
         /// </summary>
         /// <param name="colorPoints"></param>
         /// <returns></returns>
@@ -292,7 +294,8 @@ namespace OpenMobile.Graphics
 
         /// <summary>
         /// Creates a vertical gradient, the different positions for the colors can be freely set in the range -1 to 1 
-        /// where -1 is all the way to the left and 1 is all the way to the right
+        /// where -1 is all the way to the top and 1 is all the way to the bottom
+        /// <para>NB! Colorpoints positions are relative to each other</para>
         /// </summary>
         /// <param name="colors"></param>
         /// <returns></returns>
@@ -749,6 +752,50 @@ namespace OpenMobile.Graphics
                 return name;
             }
         }
+
+        /// <summary>
+        /// Gets the R part as a value in the range 0 - 1
+        /// </summary>
+        public double Rd
+        {
+            get
+            {
+                return r / 255.0;
+            }
+        }
+        /// <summary>
+        /// Gets the G part as a value in the range 0 - 1
+        /// </summary>
+        public double Gd
+        {
+            get
+            {
+                return g / 255.0;
+            }
+        }
+        /// <summary>
+        /// Gets the B part as a value in the range 0 - 1
+        /// </summary>
+        public double Bd
+        {
+            get
+            {
+                return b / 255.0;
+            }
+        }
+        /// <summary>
+        /// Gets the A part as a value in the range 0 - 1
+        /// </summary>
+        public double Ad
+        {
+            get
+            {
+                return a / 255.0;
+            }
+        }
+
+        #region Predefined colors
+
         public static Color AliceBlue
         {
             get
@@ -1749,6 +1796,9 @@ namespace OpenMobile.Graphics
                 return new Color(0xFF, 154, 205, 50, "YellowGreen");
             }
         }
+
+        #endregion
+
         public static Color FromArgb(int alpha, int red, int green, int blue)
         {
             return new Color(alpha, red, green, blue, "Custom");
@@ -2506,13 +2556,90 @@ namespace OpenMobile.Graphics
     }
 
     [Serializable]
-    public struct Rectangle
+    public struct Rectangle //: System.ComponentModel.INotifyPropertyChanged
     {
         public static readonly Rectangle Empty;
-        public int X;
-        public int Y;
-        public int Width;
-        public int Height;
+
+        /// <summary>
+        /// X dimension
+        /// </summary>
+        public int X
+        {
+            get
+            {
+                return _X;
+            }
+            set
+            {
+                if (_X != value)
+                {
+                    _X = value;
+                    //OnPropertyChanged("X");
+                }
+            }
+        }
+        private int _X;
+
+        /// <summary>
+        /// Y dimension
+        /// </summary>
+        public int Y
+        {
+            get
+            {
+                return _Y;
+            }
+            set
+            {
+                if (_Y != value)
+                {
+                    _Y = value;
+                    //OnPropertyChanged("Y");
+                }
+            }
+        }
+        private int _Y;
+
+        /// <summary>
+        /// Width
+        /// </summary>
+        public int Width
+        {
+            get
+            {
+                return _Width;
+            }
+            set
+            {
+                if (_Width != value)
+                {
+                    _Width = value;
+                    //OnPropertyChanged("Width");
+                }
+            }
+        }
+        private int _Width;
+
+        /// <summary>
+        /// Height
+        /// </summary>
+        public int Height
+        {
+            get
+            {
+                return _Height;
+            }
+            set
+            {
+                if (_Height != value)
+                {
+                    _Height = value;
+                    //OnPropertyChanged("Height");
+                }
+            }
+        }
+        private int _Height;
+     
         public bool Contains(Point p)
         {
             if ((p.X < X) || p.Y < Y)
@@ -2550,34 +2677,38 @@ namespace OpenMobile.Graphics
         }
         public Rectangle(int x, int y, int width, int height)
         {
-            this.X = x;
-            this.Y = y;
-            this.Width = width;
-            this.Height = height;
+            this._X = x;
+            this._Y = y;
+            this._Width = width;
+            this._Height = height;
+            //this.PropertyChanged = null;
         }
 
         public Rectangle(float x, float y, float width, float height)
         {
-            this.X = (int)Math.Round(x);
-            this.Y = (int)Math.Round(y);
-            this.Width = (int)Math.Round(width);
-            this.Height = (int)Math.Round(height);
+            this._X = (int)Math.Round(x);
+            this._Y = (int)Math.Round(y);
+            this._Width = (int)Math.Round(width);
+            this._Height = (int)Math.Round(height);
+            //this.PropertyChanged = null;
         }
 
         public Rectangle(Point location, Size size)
         {
-            this.X = location.X;
-            this.Y = location.Y;
-            this.Width = size.Width;
-            this.Height = size.Height;
+            this._X = location.X;
+            this._Y = location.Y;
+            this._Width = size.Width;
+            this._Height = size.Height;
+            //this.PropertyChanged = null;
         }
 
         public Rectangle(System.Drawing.Rectangle systemRectangle)
         {
-            this.X = systemRectangle.X;
-            this.Y = systemRectangle.Y;
-            this.Width = systemRectangle.Width;
-            this.Height = systemRectangle.Height;
+            this._X = systemRectangle.X;
+            this._Y = systemRectangle.Y;
+            this._Width = systemRectangle.Width;
+            this._Height = systemRectangle.Height;
+            //this.PropertyChanged = null;
         }
 
         public Point Location
@@ -2837,6 +2968,36 @@ namespace OpenMobile.Graphics
             }
 
         }
+
+
+        //#region INotifyPropertyChanged Members
+
+        ///// <summary>
+        ///// Propertychanged event
+        ///// </summary>
+        //public event PropertyChangedEventHandler PropertyChanged;
+
+        ///// <summary>
+        ///// Propertychanged event
+        ///// </summary>
+        ///// <param name="e"></param>
+        //private void OnPropertyChanged(PropertyChangedEventArgs e)
+        //{
+        //    PropertyChangedEventHandler handler = PropertyChanged;
+        //    if (handler != null)
+        //        handler(this, e);
+        //}
+
+        ///// <summary>
+        ///// Propertychanged event
+        ///// </summary>
+        ///// <param name="propertyName"></param>
+        //private void OnPropertyChanged(string propertyName)
+        //{
+        //    OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+        //}
+
+        //#endregion
 
     }
 }

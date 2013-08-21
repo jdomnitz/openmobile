@@ -163,7 +163,7 @@ namespace OpenMobile
         /// <param name="name"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object ExecuteCommand(string name, object[] param)
+        public object ExecuteCommand(string name, params object[] param)
         {
             bool result = false;
             return ExecuteCommand(name, param, out result);

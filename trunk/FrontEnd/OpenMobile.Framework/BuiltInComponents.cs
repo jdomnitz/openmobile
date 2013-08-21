@@ -744,20 +744,37 @@ namespace OpenMobile
                 switch (dataSource.FullName)
                 {
                     case "System.CPU.Load":
-                        if (cpuCounter == null)
                         {
-                            cpuCounter = new System.Diagnostics.PerformanceCounter();
-                            cpuCounter.CategoryName = "Processor";
-                            cpuCounter.CounterName = "% Processor Time";
-                            cpuCounter.InstanceName = "_Total";
-                            cpuCounter.NextValue(); //init
+                            try
+                            {
+                                if (cpuCounter == null)
+                                {
+                                    cpuCounter = new System.Diagnostics.PerformanceCounter();
+                                    cpuCounter.CategoryName = "Processor";
+                                    cpuCounter.CounterName = "% Processor Time";
+                                    cpuCounter.InstanceName = "_Total";
+                                    cpuCounter.NextValue(); //init
+                                }
+                                return (float)System.Math.Round(cpuCounter.NextValue(), 0);
+                            }
+                            catch
+                            {   // Error handler in case performance counter fails
+                                return 0;
+                            }
                         }
-                        return (float)System.Math.Round(cpuCounter.NextValue(), 0);
-
                     case "System.Memory.Free":
-                        if (freeRamCounter == null)
-                            freeRamCounter = new System.Diagnostics.PerformanceCounter("Memory", "Available MBytes");
-                        return freeRamCounter.NextValue() * 1048576;
+                        {
+                            try
+                            {
+                                if (freeRamCounter == null)
+                                    freeRamCounter = new System.Diagnostics.PerformanceCounter("Memory", "Available MBytes");
+                                return freeRamCounter.NextValue() * 1048576;
+                            }
+                            catch
+                            {   // Error handler in case performance counter fails
+                                return 0;
+                            }
+                        }
                     case "System.Memory.Used":
                         if (Configuration.RunningOnWindows)
                             return (int)(OpenMobile.Framework.Windows.getUsedPhysicalMemory());

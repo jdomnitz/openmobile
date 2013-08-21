@@ -334,7 +334,7 @@ namespace OpenMobile.Controls
                     {
                         // Use gradient?
                         if (_ShapeData.GradientData != null)
-                            g.FillRectangle(_ShapeData.GradientData, Region);
+                            g.FillRectangle(_ShapeData.GradientData, Region, _RenderingValue_Alpha);
                         else
                             g.FillRectangle(_FillBrush, left, top, width, height);
                         if (_ShapeData.BorderSize > 0)

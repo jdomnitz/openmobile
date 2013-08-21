@@ -19,44 +19,11 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Text;
-using OpenMobile.Controls;
 
-namespace OpenMobile
+namespace OpenMobile.Controls
 {
-    /// <summary>
-    /// A OpenMobile version of the system.Timer object
-    /// </summary>
-    public class Timer : System.Timers.Timer
+    public interface IVisibility
     {
-        /// <summary>
-        /// Initializes a new openmobile timer
-        /// </summary>
-        /// <param name="interval"></param>
-        public Timer(double interval)
-            : base(interval)
-        {
-        }
-
-        /// <summary>
-        /// A general purpose tag object
-        /// </summary>
-        public object Tag { get; set; }
-
-        /// <summary>
-        /// A general purpose tag object
-        /// </summary>
-        public object Tag2 { get; set; }
-
-        /// <summary>
-        /// The screen assosiated with this timer (must be set manually)
-        /// </summary>
-        public int Screen { get; set; }
-
-        /// <summary>
-        /// The panel assosiated with this timer (must be set manually)
-        /// </summary>
-        public OMPanel Panel { get; set; }
+        bool Internal_Visibility { get; set; }
     }
 }

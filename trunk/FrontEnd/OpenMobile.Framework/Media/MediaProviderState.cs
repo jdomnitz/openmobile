@@ -21,9 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using OpenMobile.Plugin;
 
 namespace OpenMobile.Media
 {
+    /// <summary>
+    /// State of media provider
+    /// </summary>
     public class MediaProviderState
     {
         /// <summary>
@@ -78,6 +82,9 @@ namespace OpenMobile.Media
 
     }
 
+    /// <summary>
+    /// Media type info
+    /// </summary>
     public class MediaTypeInfo
     {
         /// <summary>
@@ -130,12 +137,15 @@ namespace OpenMobile.Media
         }
     }
 
+    /// <summary>
+    /// Zone specific media provider data
+    /// </summary>
     public class MediaProviderInfo
     {
         /// <summary>
         /// The current zone this info belongs to
         /// </summary>
-        public Zone zone
+        public Zone Zone
         {
             get
             {
@@ -154,7 +164,7 @@ namespace OpenMobile.Media
         /// <summary>
         /// The current media source
         /// </summary>
-        public MediaSource mediaSource
+        public MediaSource MediaSource
         {
             get
             {
@@ -228,43 +238,42 @@ namespace OpenMobile.Media
         private string _MediaText2;
 
         /// <summary>
-        /// Text describing the current media (could be artist, song, album and so on)
+        /// Current Playback data
         /// </summary>
-        public string MediaText3
+        public MediaProvider_PlaybackData PlaybackData
         {
             get
             {
-                return this._MediaText3;
+                return this._PlaybackData;
             }
             set
             {
-                if (this._MediaText3 != value)
+                if (this._PlaybackData != value)
                 {
-                    this._MediaText3 = value;
+                    this._PlaybackData = value;
                 }
             }
         }
-        private string _MediaText3;
+        private MediaProvider_PlaybackData _PlaybackData = new MediaProvider_PlaybackData();
 
         /// <summary>
-        /// The current state of the media provider
+        /// Current active media
         /// </summary>
-        public MediaProviderState State
+        public mediaInfo MediaInfo
         {
             get
             {
-                return this._State;
+                return this._MediaInfo;
             }
             set
             {
-                if (this._State != value)
+                if (this._MediaInfo != value)
                 {
-                    this._State = value;
+                    this._MediaInfo = value;
                 }
             }
         }
-        private MediaProviderState _State;
-        
+        private mediaInfo _MediaInfo = new mediaInfo();
     }
 
 }

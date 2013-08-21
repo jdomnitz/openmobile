@@ -48,7 +48,7 @@ namespace OpenMobile.Controls
     /// The base control type
     /// </summary>
     [System.Serializable()]
-    public abstract class OMControl : ICloneable
+    public abstract class OMControl : ICloneable, IVisibility
     {
         /// <summary>
         /// True = rendering for this control is not called automatically
@@ -116,6 +116,11 @@ namespace OpenMobile.Controls
         protected byte opacity = 255;
 
         /// <summary>
+        /// Indicates wether this control has been rendered
+        /// </summary>
+        protected bool _ControlRendered = false;
+
+        /// <summary>
         /// The value to use as rendering for the current alpha level
         /// </summary>
         protected float _RenderingValue_Alpha = 1;
@@ -129,9 +134,9 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="DisregardRenderingType"></param>
         /// <returns></returns>
-        public bool IsControlRenderable(bool DisregardRenderingType) 
+        public bool IsControlRenderable(bool DisregardRenderingType=true) 
         {
-            return Visible & (!ManualRendering | DisregardRenderingType);
+            return Visible & _Internal_Visibility & (!ManualRendering | DisregardRenderingType);
         }
 
         /// <summary>
@@ -148,6 +153,8 @@ namespace OpenMobile.Controls
         }
         private bool raiseUpdate_AllowWhenNotVisible = false;
 
+
+
         /// <summary>
         /// The region this control occupies
         /// <para>Use this as a read only property, use the separate field for left, top, width and height to set the controls values</para>
@@ -156,13 +163,36 @@ namespace OpenMobile.Controls
         {
             get
             {
+                //// Connect events to ensure we get updates
+                //if (_Region_PropertyChangedHandler == null)
+                //{
+                //    _Region_PropertyChangedHandler = new PropertyChangedEventHandler(_Region_PropertyChanged);
+                //    if (_Region != null)
+                //        _Region.PropertyChanged += _Region_PropertyChangedHandler;
+                //}                
+
                 return _Region;
             }
             set
             {
+                //if (_Region_PropertyChangedHandler == null)
+                //{
+                //    _Region_PropertyChangedHandler = new PropertyChangedEventHandler(_Region_PropertyChanged);
+                //    if (_Region!= null)
+                //        _Region.PropertyChanged += _Region_PropertyChangedHandler;
+                //}
+                
                 if (_Region != value)
                 {
+                    //// Disconnect old events
+                    //if (_Region != null)
+                    //    _Region.PropertyChanged -= _Region_PropertyChangedHandler;
+                    
                     _Region = value;
+
+                    //// Connect new events
+                    //_Region.PropertyChanged += _Region_PropertyChangedHandler;
+
                     left = _Region.Left;
                     top = _Region.Top;
                     width = Region.Width;
@@ -171,6 +201,19 @@ namespace OpenMobile.Controls
                     Refresh();
                 }
             }
+        }
+
+        private PropertyChangedEventHandler _Region_PropertyChangedHandler = null;
+        void _Region_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
+            // Update local properties
+            left = _Region.Left;
+            top = _Region.Top;
+            width = Region.Width;
+            height = Region.Height;
+            onSizeChanged();
+            Refresh();
         }
 
         /// <summary>
@@ -284,6 +327,8 @@ namespace OpenMobile.Controls
                 Refresh();
             }
         }
+
+
 
         /// <summary>
         /// Disable control
@@ -524,6 +569,7 @@ namespace OpenMobile.Controls
         /// <param name="e">Rendering Parameters</param>
         internal virtual void RenderFinish(Graphics.Graphics g, renderingParams e)
         {
+            _ControlRendered = true;
             _RefreshGraphic = false;
             // Skin debug function 
             if (_SkinDebug)
@@ -755,7 +801,90 @@ namespace OpenMobile.Controls
             Top += p.Y;
         }
 
+        /// <summary>
+        /// Translates this control to a new location
+        /// </summary>
+        /// <param name="p"></param>
+        public void Translate(int x, int y)
+        {
+            Left += x;
+            Top += y;
+        }
+
+        /// <summary>
+        /// Translates this control to a new location
+        /// </summary>
+        /// <param name="p"></param>
+        public void Translate(Rectangle r)
+        {
+            Left += r.X;
+            Top += r.Y;
+        }
+
         #region DataSource handling
+
+        /// <summary>
+        /// Refreshes the controls underlying datasource subscriptions
+        /// </summary>
+        public void DataSource_Refresh()
+        {
+            Data.DataSource ds = BuiltInComponents.Host.DataHandler.GetDataSource(_DataSource);
+            if (ds != null)
+            {   // Simulate an updated datasource value
+                DataSource_OnChanged(ds);
+            }
+
+            if (_DataSource_InLine_Sources != null)
+            {
+                for (int i = 0; i < _DataSource_InLine_Sources.Length; i++)
+                {
+                    ds = BuiltInComponents.Host.DataHandler.GetDataSource(_DataSource_InLine_Sources[i]);
+                    if (ds != null)
+                    {   // Simulate an updated datasource value
+                        _DataSource_InLine_Changed(ds);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the datasource to use for visibility (a null or binary value can be used)
+        /// </summary>
+        public string Visible_DataSource
+        {
+            get
+            {
+                return this._Visible_DataSource;
+            }
+            set
+            {
+                // Unscubscribe to any existing data
+                if (!String.IsNullOrEmpty(this._Visible_DataSource))
+                    BuiltInComponents.Host.DataHandler.UnsubscribeFromDataSource(this._Visible_DataSource, Visible_DataSource_OnChanged);
+
+                this._Visible_DataSource = value;
+
+                // Don't do anything if a parent is not available
+                if (this.parent == null || !this.parent.IsClonedForScreens())
+                    return;
+
+                // Check for special dataref of screen present 
+                if (!string.IsNullOrEmpty(value))
+                {
+                    if (value.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
+                    {   // Present, replace with screen reference
+                        value = value.Replace(OpenMobile.Data.DataSource.DataTag_Screen, this.parent.ActiveScreen.ToString());
+                        this._Visible_DataSource = value;
+                    }
+                }
+
+                // Subscribe to updates
+                if (!String.IsNullOrEmpty(value))
+                    if (!BuiltInComponents.Host.DataHandler.SubscribeToDataSource(this._Visible_DataSource, Visible_DataSource_OnChanged))
+                        DataSource_Missing(String.Empty);
+            }
+        }
+        private string _Visible_DataSource;
 
         /// <summary>
         /// Sets the sensor to subscribe to
@@ -791,16 +920,38 @@ namespace OpenMobile.Controls
                 // Subscribe to updates
                 if (!String.IsNullOrEmpty(value))
                     if (!BuiltInComponents.Host.DataHandler.SubscribeToDataSource(_DataSource, DataSource_OnChanged))
-                        DataSource_Missing();
+                        DataSource_Missing(String.Empty);
             }
         }
         private string _DataSource;
+
+        internal virtual void Visible_DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
+        {
+            // Is this a binary data source, if so use the true/false state to show/hide image
+            if (dataSource.DataType == OpenMobile.Data.DataSource.DataTypes.binary)
+            {
+                try
+                {
+                    _Internal_Visibility = (bool)dataSource.Value;
+                }
+                catch
+                {
+                    _Internal_Visibility = false;
+                }
+            }
+            else
+            {   // This is not a binary datasource, use null to detect state
+                _Internal_Visibility = dataSource.Value != null;
+            }
+            _RefreshGraphic = true;
+            Refresh();
+        }
 
         internal virtual void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
         { 
         }
 
-        internal virtual void DataSource_Missing()
+        internal virtual void DataSource_Missing(string propertyName)
         {
         }
         
@@ -827,11 +978,16 @@ namespace OpenMobile.Controls
 
         private string[] _DataSource_InLine_Sources = null;
         private string _DataSource_InLine;
-        internal void DataSource_InLine(ref string s)
+        internal bool DataSource_InLine(ref string s)
         {
             // Don't do anything if we've already processed this string
             if (!_AllowInLineDataSources || string.IsNullOrEmpty(s) || !(s.Contains("{") && s.Contains("}")) || this.parent == null || !this.parent.IsClonedForScreens())
-                return;
+            {
+                if (!string.IsNullOrEmpty(s) && s.Contains("{") && s.Contains("}"))
+                    return true;
+                else
+                    return false;
+            }
 
             // Check for special dataref of screen present 
             if (s.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
@@ -862,7 +1018,7 @@ namespace OpenMobile.Controls
                 // Subscribe to datasource
                 BuiltInComponents.Host.DataHandler.SubscribeToDataSource(_DataSource_InLine_Sources[i], _DataSource_InLine_Changed);
 			}
-            
+            return true;   
         }
 
         private void _DataSource_InLine_Changed(OpenMobile.Data.DataSource dataSource)
@@ -901,7 +1057,81 @@ namespace OpenMobile.Controls
 
         #endregion
 
+
+        #region MultiProperty support
+
+        protected Dictionary<string, string> _DataSource_PropertyList = new Dictionary<string, string>();
+
+        internal virtual void DataSource_RegisterProperty(string propertyName, string datasource)
+        {
+            // Don't do anything if a parent is not available
+            if (this.parent == null || !this.parent.IsClonedForScreens() || datasource == null)
+                return;
+
+            // Check for already existing datasource property, if not create it
+            if (!_DataSource_PropertyList.ContainsKey(propertyName))
+                _DataSource_PropertyList.Add(propertyName, datasource);
+            
+            // Unscubscribe to any existing data
+            if (!String.IsNullOrEmpty(_DataSource_PropertyList[propertyName]))
+                BuiltInComponents.Host.DataHandler.UnsubscribeFromDataSource(_DataSource_PropertyList[propertyName], Internal_DataSource_MultiProperty_OnChanged);
+
+            _DataSource_PropertyList[propertyName] = datasource;
+
+            // Check for special dataref of screen present 
+            if (!string.IsNullOrEmpty(datasource))
+            {
+                if (datasource.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
+                {   // Present, replace with screen reference
+                    datasource = datasource.Replace(OpenMobile.Data.DataSource.DataTag_Screen, this.parent.ActiveScreen.ToString());
+                    _DataSource_PropertyList[propertyName] = datasource;
+                }
+            }
+
+            // Subscribe to updates
+            if (!String.IsNullOrEmpty(datasource))
+                if (!BuiltInComponents.Host.DataHandler.SubscribeToDataSource(datasource, Internal_DataSource_MultiProperty_OnChanged))
+                    DataSource_Missing(propertyName);
+
+        }
+
+        private void Internal_DataSource_MultiProperty_OnChanged(OpenMobile.Data.DataSource dataSource)
+        {
+            // Find the matching property name for this datasource
+            foreach (KeyValuePair<string,string> datasourceProperty in _DataSource_PropertyList)
+            {
+                if (datasourceProperty.Value == dataSource.FullName)
+                {
+                    // Send update to this property
+                    DataSource_MultiProperty_OnChanged(datasourceProperty.Key, dataSource);
+                }
+            }
+        }
+
+        internal virtual void DataSource_MultiProperty_OnChanged(string propertyName, OpenMobile.Data.DataSource dataSource)
+        {
+        }
+
         #endregion
+
+        #endregion
+
+
+
+        internal virtual object Command_Execute(string command)
+        {
+            // Check for special dataref of screen present 
+            if (!string.IsNullOrEmpty(command))
+            {
+                if (command.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
+                {   // Present, replace with screen reference
+                    command = command.Replace(OpenMobile.Data.DataSource.DataTag_Screen, this.parent.ActiveScreen.ToString());
+                }
+
+                return OM.Host.CommandHandler.ExecuteCommand(command);
+            }
+            return null;
+        }
 
         /// <summary>
         /// A virtual method that is called when the size of this control is changing
@@ -910,5 +1140,25 @@ namespace OpenMobile.Controls
         {
             // No action
         }
+
+        /// <summary>
+        /// Sets or gets the status of the internal visibility control variable
+        /// </summary>
+        bool IVisibility.Internal_Visibility
+        {
+            get
+            {
+                return _Internal_Visibility;
+            }
+            set
+            {
+                if (_Internal_Visibility == value)
+                    return;
+
+                _Internal_Visibility = value;
+                Refresh();
+            }
+        }
+        private bool _Internal_Visibility = true;
     }
 }

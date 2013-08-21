@@ -783,28 +783,6 @@ namespace OpenMobile.helperFunctions
             /// <returns></returns>
             public static bool IsPluginOSConfigurationFlagsValid(IBasePlugin Plugin)
             {
-                //// Check OS Configuration attribute flags
-                //SupportedOSConfigurations[] a = (SupportedOSConfigurations[])Plugin.GetType().GetCustomAttributes(typeof(SupportedOSConfigurations), true);
-                //OSConfigurationFlags OSConfFlags = OSConfigurationFlags.Any; // Default
-                //if (a.Length > 0)
-                //    OSConfFlags = a[0].ConfigurationFlags;
-                //bool result = true;
-                //if ((OSConfFlags & OSConfigurationFlags.Embedded) == OSConfigurationFlags.Embedded)
-                //    if (!Configuration.RunningOnEmbedded) result = false;
-                //if ((OSConfFlags & OSConfigurationFlags.Linux) == OSConfigurationFlags.Linux)
-                //    if (!Configuration.RunningOnLinux) result = false;
-                //if ((OSConfFlags & OSConfigurationFlags.MacOS) == OSConfigurationFlags.MacOS)
-                //    if (!Configuration.RunningOnMacOS) result = false;
-                //if ((OSConfFlags & OSConfigurationFlags.TabletPC) == OSConfigurationFlags.TabletPC)
-                //    if (!Configuration.TabletPC) result = false;
-                //if ((OSConfFlags & OSConfigurationFlags.Unix) == OSConfigurationFlags.Unix)
-                //    if (!Configuration.RunningOnUnix) result = false;
-                //if ((OSConfFlags & OSConfigurationFlags.Windows) == OSConfigurationFlags.Windows)
-                //    if (!Configuration.RunningOnWindows) result = false;
-                //if ((OSConfFlags & OSConfigurationFlags.X11) == OSConfigurationFlags.X11)
-                //    if (!Configuration.RunningOnX11) result = false;
-                //return result;
-
                 return IsPluginOSSupportedConfigurationFlagsValid(Plugin) && IsPluginOSRequiredConfigurationFlagsValid(Plugin);
             }
 
@@ -1080,6 +1058,18 @@ namespace OpenMobile.helperFunctions
                     return false;
                 IBasePlugin plugin = plugins.Find(x => x.pluginName == pluginName);
                 
+                PluginLevels pluginLevel = getPluginLevel(plugin.pluginName);
+
+                // Also report any system levels as enabled
+                if ((pluginLevel & PluginLevels.System) == PluginLevels.System)
+                    return true;
+                if ((pluginLevel & PluginLevels.UI) == PluginLevels.UI)
+                    return true;
+                if ((pluginLevel & PluginLevels.MainMenu) == PluginLevels.MainMenu)
+                    return true;
+                if ((pluginLevel & PluginLevels.NoDisable) == PluginLevels.NoDisable)
+                    return true;
+
                 // Get setting
                 return StoredData.GetBool(OM.GlobalSetting, String.Format("PluginSetting_{0}_Enabled", plugin.pluginName), true);
             }
@@ -1110,6 +1100,16 @@ namespace OpenMobile.helperFunctions
                     return StoredData.Set(OM.GlobalSetting, String.Format("PluginSetting_{0}_Enabled", plugin.pluginName), enabled);
                 }
                 return false;
+            }
+
+            /// <summary>
+            /// Gets the plugin base folder
+            /// </summary>
+            /// <param name="plugin"></param>
+            /// <returns></returns>
+            public static string GetPluginFolder(IBasePlugin plugin)
+            {
+                return System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(plugin.GetType()).Location);
             }
         }
     }

@@ -254,7 +254,7 @@ namespace OpenMobile.Controls
             lock (Controls)
             {
                 foreach (OMControl c in Controls)
-                    if (c.Visible)
+                    if (c.IsControlRenderable())
                         c.Render(g, e);
             }
             g.Translate(-left, -top + scrolly);

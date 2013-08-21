@@ -227,9 +227,6 @@ namespace OpenMobile
         private Zone()
         {
             _AudioDevice_OnUpdatedDelegate = new AudioDevice.UpdatedDelegate(_AudioDevice_OnUpdated);
-
-            // Start media handler
-            _MediaHandler = new MediaProviderHandler(this);
         }
 
         /// <summary>
@@ -237,7 +234,8 @@ namespace OpenMobile
         /// </summary>
         public void Dispose()
         {
-            _MediaHandler.Dispose();
+            if (_MediaHandler != null)
+                _MediaHandler.Dispose();
         }
 
         /// <summary>

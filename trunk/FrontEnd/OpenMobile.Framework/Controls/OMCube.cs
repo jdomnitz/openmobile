@@ -28,23 +28,175 @@ namespace OpenMobile.Controls
     public class OMCube : OMControl
     {
         /// <summary>
-        /// The image to use for the cube
+        /// The images to use for the cube 
+        /// </summary>
+        public imageItem[] Images
+        {
+            get
+            {
+                return this._ImageItems;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    _ImageItems = null;
+                    _Images = null;
+                    return;
+                }
+
+                if (value.Length > 6 || value.Length == 0)
+                {
+                    if (this._ImageItems != value)
+                    {
+                        this._ImageItems = value;
+                        _Images = new OImage[_ImageItems.Length];
+                        for (int i = 0; i < _ImageItems.Length; i++)
+                            _Images[i] = _ImageItems[i].image;
+                    }
+                }
+                else
+                {
+                    throw new Exception("Invalid array length! Length must in the range 1 to 6 items");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets or gets the single image to use for all sides of the cube
         /// </summary>
         public imageItem Image
         {
             get
             {
-                return this._Image;
+                return this._ImageItems[0];
             }
             set
             {
-                if (this._Image != value)
+                for (int i = 0; i < _ImageItems.Length; i++)
                 {
-                    this._Image = value;
+                    _ImageItems[i] = value;
+                    _Images[i] = value.image;
                 }
             }
         }
-        private imageItem _Image;
+
+        private imageItem[] _ImageItems = new imageItem[6];
+        private OImage[] _Images = new OImage[6];
+
+        /// <summary>
+        /// Sets or gets the image for side 1 (top)
+        /// </summary>
+        public imageItem Image1
+        {
+            get
+            {
+                return this._ImageItems[0];
+            }
+            set
+            {
+                if (this._ImageItems[0] != value)
+                {
+                    this._ImageItems[0] = value;
+                    this._Images[0] = value.image;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets or gets the image for side 2 (bottom)
+        /// </summary>
+        public imageItem Image2
+        {
+            get
+            {
+                return this._ImageItems[1];
+            }
+            set
+            {
+                if (this._ImageItems[1] != value)
+                {
+                    this._ImageItems[1] = value;
+                    this._Images[1] = value.image;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets or gets the image for side 3 (front)
+        /// </summary>
+        public imageItem Image3
+        {
+            get
+            {
+                return this._ImageItems[2];
+            }
+            set
+            {
+                if (this._ImageItems[2] != value)
+                {
+                    this._ImageItems[2] = value;
+                    this._Images[2] = value.image;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets or gets the image for side 4 (back)
+        /// </summary>
+        public imageItem Image4
+        {
+            get
+            {
+                return this._ImageItems[3];
+            }
+            set
+            {
+                if (this._ImageItems[3] != value)
+                {
+                    this._ImageItems[3] = value;
+                    this._Images[3] = value.image;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets or gets the image for side 5 (right)
+        /// </summary>
+        public imageItem Image5
+        {
+            get
+            {
+                return this._ImageItems[4];
+            }
+            set
+            {
+                if (this._ImageItems[4] != value)
+                {
+                    this._ImageItems[4] = value;
+                    this._Images[4] = value.image;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets or gets the image for side 6 (left)
+        /// </summary>
+        public imageItem Image6
+        {
+            get
+            {
+                return this._ImageItems[5];
+            }
+            set
+            {
+                if (this._ImageItems[5] != value)
+                {
+                    this._ImageItems[5] = value;
+                    this._Images[5] = value.image;
+                }
+            }
+        }
 
         /// <summary>
         /// Rotation of the object
@@ -64,12 +216,49 @@ namespace OpenMobile.Controls
                 }
             }
         }
-        private Math.Vector3 _Rotation;        
+        private Math.Vector3 _Rotation;
 
+        /// <summary>
+        /// Creates a new cube style control
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public OMCube(string name, int left, int top, int width, int height)
+            : base(name, left, top, width, height)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new cube style control
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="image"></param>
         public OMCube(string name, int left, int top, int width, int height, imageItem image)
             : base(name, left, top, width, height)
         {
             this.Image = image;
+        }
+
+        /// <summary>
+        /// Creates a new cube style control
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="images"></param>
+        public OMCube(string name, int left, int top, int width, int height, imageItem[] images)
+            : base(name, left, top, width, height)
+        {
+            this.Images = images;
         }
 
 
@@ -82,9 +271,20 @@ namespace OpenMobile.Controls
         {
             base.RenderBegin(g, e);
 
-            g.DrawCube(_Image.image, left, top, 0, 300, 300, 300, _Rotation);
+            g.DrawCube(_Images, left, top, 0, 300, 300, 300, _Rotation);
 
             base.RenderFinish(g, e);
         }
+
+        public override object Clone(OMPanel parent)
+        {
+            OMCube newObject = (OMCube)this.MemberwiseClone();
+            for (int i = 0; i < _ImageItems.Length; i++)
+            {
+                newObject._ImageItems[i] = _ImageItems[i];
+                newObject._Images[i] = _Images[i];
+            }
+            return newObject;
+        } 
     }
 }

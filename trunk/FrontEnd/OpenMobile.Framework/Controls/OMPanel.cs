@@ -338,8 +338,16 @@ namespace OpenMobile.Controls
                     break;
             }
             for (int i = 0; i < containedControls.Count; i++)
+            {
                 if (containedControls[i].IsControlRenderable(false))
+                {
                     containedControls[i].Render(g, e);
+                }
+                else
+                {
+                    containedControls[i].RenderEmpty(g, e);
+                }
+            }
         }
         /// <summary>
         /// The panel priority (used to set panel layer)
@@ -598,7 +606,31 @@ namespace OpenMobile.Controls
             _IsLoaded = new bool[BuiltInComponents.Host.ScreenCount];
             _IsVisible = new bool[BuiltInComponents.Host.ScreenCount];
         }
-        //Added by Borte
+        /// <summary>
+        /// Create a new panel with an given name
+        /// <param name="Name">Name of the panel</param>
+        /// <param name="Header">Header of the panel (Descriptive text that can be shown to the user)</param>
+        /// </summary>
+        public OMPanel(string Name, string Header)
+            : this(Name)
+        {
+            this._Header = Header;
+        }
+
+        /// <summary>
+        /// Create a new panel with an given name
+        /// <param name="Name">Name of the panel</param>
+        /// <param name="Header">Header of the panel (Descriptive text that can be shown to the user)</param>
+        /// <param name="backgroundColor">background color to use for the panel</param>
+        /// </summary>
+        public OMPanel(string Name, string Header, Color backgroundColor)
+            : this(Name)
+        {
+            this._Header = Header;
+            this.BackgroundType = backgroundStyle.SolidColor;
+            this.BackgroundColor1 = backgroundColor;
+        }
+
         /// <summary>
         /// Moves the control to the back of the display order
         /// </summary>
@@ -881,7 +913,67 @@ namespace OpenMobile.Controls
             }
         }
         private Point _BasePoint;
-        private Point _BasePointOld;        
+        private Point _BasePointOld;
+
+        /// <summary>
+        /// Sets or gets the header text for the panel
+        /// </summary>
+        public string Header
+        {
+            get
+            {
+                return this._Header;
+            }
+            set
+            {
+                if (this._Header != value)
+                {
+                    this._Header = value;
+                }
+            }
+        }
+        private string _Header;
+
+        /// <summary>
+        /// The transition effect to use when showing this panel
+        /// <para>NB! This will override what ever effect is requested by the transition command but only if this is the only panel being transitioned in</para>
+        /// </summary>
+        public eGlobalTransition TransitionEffect_Show
+        {
+            get
+            {
+                return this._TransitionEffect_Show;
+            }
+            set
+            {
+                if (this._TransitionEffect_Show != value)
+                {
+                    this._TransitionEffect_Show = value;
+                }
+            }
+        }
+        private eGlobalTransition _TransitionEffect_Show;
+
+        /// <summary>
+        /// The transition effect to use when hideing this panel
+        /// <para>NB! This will override what ever effect is requested by the transition command but only if this is the only panel being transitioned in</para>
+        /// </summary>
+        public eGlobalTransition TransitionEffect_Hide
+        {
+            get
+            {
+                return this._TransitionEffect_Hide;
+            }
+            set
+            {
+                if (this._TransitionEffect_Hide != value)
+                {
+                    this._TransitionEffect_Hide = value;
+                }
+            }
+        }
+        private eGlobalTransition _TransitionEffect_Hide;
+
     }
 
     /// <summary>
@@ -913,5 +1005,7 @@ namespace OpenMobile.Controls
         /// </summary>
         Unloaded 
     };
+
+        
     
 }

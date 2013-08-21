@@ -25,6 +25,9 @@ using System.Reflection;
 
 namespace OpenMobile
 {
+    /// <summary>
+    /// Provides methods for deep copying objects (Deep cloning)
+    /// </summary>
     public static class DeepCopy
     {
         /// <summary>
@@ -126,6 +129,9 @@ namespace OpenMobile
 
     }
 
+    /// <summary>
+    /// Extensions for enums
+    /// </summary>
     public static class Enums
     {
         /// <summary>
@@ -142,6 +148,73 @@ namespace OpenMobile
             //     throw new ArgumentException();
             long longFlags = Convert.ToInt64(flags);
             return (Convert.ToInt64(value) & longFlags) == longFlags;
+        }
+    }
+
+    /// <summary>
+    /// Extensions for collections
+    /// </summary>
+    public static class Collections
+    {
+        static readonly Random Random = new Random();
+
+        /// <summary>
+        /// Shuffles the contents of a list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = Random.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
+
+        /// <summary>
+        /// Shuffles the contents of a list, starting at the given index
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="startIndex"></param>
+        public static void Shuffle<T>(this IList<T> list, int startIndex)
+        {
+            int n = list.Count;
+
+            // Do we have something to shuffle?
+            if (startIndex > n)
+                return;
+
+            // Shuffle items
+            while (n > startIndex)
+            {
+                n--;
+                int k = Random.Next(startIndex, n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
+
+
+    }
+
+    public static class DateTimeExtenstions
+    {
+        public static bool IsBetween(this DateTime time, DateTime startTime, DateTime endTime)
+        {
+            if (time.TimeOfDay == startTime.TimeOfDay) return true;
+            if (time.TimeOfDay == endTime.TimeOfDay) return true;
+
+            if (startTime.TimeOfDay <= endTime.TimeOfDay)
+                return (time.TimeOfDay >= startTime.TimeOfDay && time.TimeOfDay <= endTime.TimeOfDay);
+            else
+                return !(time.TimeOfDay >= endTime.TimeOfDay && time.TimeOfDay <= startTime.TimeOfDay);
         }
     }
 }

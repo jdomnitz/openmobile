@@ -47,7 +47,7 @@ namespace OpenMobile
         //private List<imageItem> imageCache = new List<imageItem>();
         private Dictionary<string,imageItem> imageCache = new Dictionary<string,imageItem>();
 
-        private System.Threading.Timer tmrCurrentClock;
+        private Timer tmrCurrentClock;
         private DateTime CurrentClock = DateTime.MinValue;
 
         /// <summary>
@@ -298,7 +298,11 @@ namespace OpenMobile
             Credentials.Open();
 
             // Start a timer to get the current time (fired each minute)
-            tmrCurrentClock = new System.Threading.Timer(tmrCurrentClock_time, null, 60000, 60000);
+            //tmrCurrentClock = new System.Threading.Timer(tmrCurrentClock_time, null, 60000, 60000);
+            tmrCurrentClock = new Timer(1000);
+            tmrCurrentClock.Elapsed += new System.Timers.ElapsedEventHandler(tmrCurrentClock_Elapsed);
+            tmrCurrentClock.Enabled = true;
+
 
             // Connect network events
             NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
@@ -324,6 +328,11 @@ namespace OpenMobile
 
             // Initialize panel transition effects handler
             OpenMobile.Controls.PanelTransitionEffectHandler.Init();
+        }
+
+        void tmrCurrentClock_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            tmrCurrentClock_time(null);
         }
 
         /// <summary>
@@ -956,10 +965,16 @@ namespace OpenMobile
                 if (_location != value)
                 {   // Yes
                     _location = value;
+                    
                     // Update datasource
                     DataSource_Location_Current.SetValue(_location);
+
                     // Update database
                     StoredData.SetXML(BuiltInComponents.OMInternalPlugin, "Location.Current.Data", _location);
+
+                    // Update sunrise / sunset data
+                    _Update_SunSetSunrise(_location);
+
                     // Raise event
                     raiseNavigationEvent(eNavigationEvent.LocationChanged, _location.ToString());
                 }
@@ -967,17 +982,86 @@ namespace OpenMobile
         }
         private Location _location = new Location();
 
+        private void _Update_SunSetSunrise(Location location)
+        {
+            _CurrentLocation_Sunrise = OpenMobile.Framework.Math.Calculation.getSunrise(location.Longitude, location.Latitude);
+            _CurrentLocation_Sunset = OpenMobile.Framework.Math.Calculation.getSunset(location.Longitude, location.Latitude);
+
+            // Update datasource
+            if (DataSource_Location_Current_Sunset != null)
+                DataSource_Location_Current_Sunset.SetValue(_CurrentLocation_Sunset);
+            if (DataSource_Location_Current_Sunrise != null)
+                DataSource_Location_Current_Sunrise.SetValue(_CurrentLocation_Sunrise);
+        }
+
+        /// <summary>
+        /// The current calculated time for sunrise
+        /// </summary>
+        public DateTime CurrentLocation_Sunrise
+        {
+            get
+            {
+                return this._CurrentLocation_Sunrise;
+            }
+        }
+        private DateTime _CurrentLocation_Sunrise;
+        
+        /// <summary>
+        /// A internal helper state variable to control how the sunrise/sunset events are raised. 0 = no state, 1 = sunset , 2 = sunrise
+        /// </summary>
+        private int _CurrentLocation_Sunrise_EventState;
+
+        /// <summary>
+        /// The current calculated time for sunset
+        /// </summary>
+        public DateTime CurrentLocation_Sunset
+        {
+            get
+            {
+                return this._CurrentLocation_Sunset;
+            }
+        }
+        private DateTime _CurrentLocation_Sunset;
+
+        /// <summary>
+        /// a bool indicating if the current location is defined as daytime
+        /// </summary>
+        public bool CurrentLocation_Daytime
+        {
+            get
+            {
+                return this._CurrentLocation_Daytime;
+            }
+            private set
+            {
+                if (value != _CurrentLocation_Daytime)
+                {   // value changed
+                    _CurrentLocation_Daytime = value;
+                    if (DataSource_Location_Current_Daytime != null)
+                        DataSource_Location_Current_Daytime.SetValue(_CurrentLocation_Daytime);
+
+                    // Raise events
+                    raiseSystemEvent((_CurrentLocation_Daytime ? eFunction.CurrentLocationDay : eFunction.CurrentLocationNight), String.Empty, String.Empty, String.Empty);
+                }
+            }
+        }
+        private bool _CurrentLocation_Daytime;
+        private bool _CurrentLocation_Daytime_Temp;
 
         #endregion
 
         #region Time and date (System clock)
       
+
+
         /// <summary>
         /// Raises time and date related events (One minute resolution)
         /// </summary>
         /// <param name="state"></param>
         private void tmrCurrentClock_time(object state)
         {
+            tmrCurrentClock.Enabled = false;
+
             // Initialize clock values
             if (CurrentClock == DateTime.MinValue)
                 CurrentClock = DateTime.Now;
@@ -993,11 +1077,38 @@ namespace OpenMobile
                     raiseSystemEvent(eFunction.dateChanged, String.Empty, String.Empty, String.Empty);
             }
 
+            // Check for sunrise / sunset times, if so raise event
+            bool dayTime = CurrentClock.IsBetween(CurrentLocation_Sunrise, CurrentLocation_Sunset);
+            if (_CurrentLocation_Daytime_Temp != dayTime)
+            {
+                _CurrentLocation_Daytime_Temp = dayTime;
+                CurrentLocation_Daytime = dayTime;
+                if (CurrentLocation_Daytime)
+                {
+                    if (_CurrentLocation_Sunrise_EventState == 0 || _CurrentLocation_Sunrise_EventState != 1)
+                    {
+                        _CurrentLocation_Sunrise_EventState = 1;
+                        raiseSystemEvent(eFunction.CurrentLocationSunrise, String.Empty, String.Empty, String.Empty);
+                    }
+                }
+                else
+                {
+                    if (_CurrentLocation_Sunrise_EventState == 0 || _CurrentLocation_Sunrise_EventState != 2)
+                    {
+                        _CurrentLocation_Sunrise_EventState = 2;
+                        raiseSystemEvent(eFunction.CurrentLocationSunset, String.Empty, String.Empty, String.Empty);
+                    }
+                }
+            }
+
             // Update current clock values (min. resolution 1 minute)
             CurrentClock = DateTime.Now;
+
+            tmrCurrentClock.Enabled = true;
         }
 
         #endregion
+
 
         #region Security
 
@@ -1345,11 +1456,13 @@ namespace OpenMobile
                         if (!closing)
                         {
                             closing = true;
-                            RenderingWindow.CloseRenderer();
-                            Hal_Send("44");
+                            SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.CloseProgramPreview, String.Empty, String.Empty, String.Empty); });                            
                             savePlaylists();
-                            SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty); });
+                            //SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty); });
+                            raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
+                            Hal_Send("44");
                             Stop();
+                            RenderingWindow.CloseRenderer();
                         }
                     }
                     return true;
@@ -2571,7 +2684,8 @@ namespace OpenMobile
 
                         lock (Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[ret].TransitionInPanel(panel);
+                            if (!Core.RenderingWindows[ret].TransitionInPanel(panel))
+                                return false;
                             raiseSystemEvent(eFunction.TransitionToPanel, arg1, (panel.OwnerPlugin != null ? panel.OwnerPlugin.pluginName : ""), panel.Name);
                             if (!panel.UIPanel)
                                 history.Enqueue(ret, arg2, arg3, panel.Forgotten);
@@ -2589,7 +2703,8 @@ namespace OpenMobile
                             return false;
                         lock (Core.RenderingWindows[ret])
                         {
-                            Core.RenderingWindows[ret].TransitionOutPanel(panel);
+                            if (!Core.RenderingWindows[ret].TransitionOutPanel(panel))
+                                return false;
                         }
                         raiseSystemEvent(eFunction.TransitionFromPanel, arg1, (panel.OwnerPlugin != null ? panel.OwnerPlugin.pluginName : ""), panel.Name);
                         return true;
@@ -2972,7 +3087,6 @@ namespace OpenMobile
 
             else if (e == eFunction.pluginLoadingComplete)
             {
-                // Execute actions
                 PluginLoadingCompleted_Exec();
             }
 
@@ -3222,7 +3336,7 @@ namespace OpenMobile
                         if (im.image == null)
                         {
                             // Write log entry
-                            DebugMsg(DebugMessageType.Error, "PluginHost", String.Format("Unable to load missing skin image: {0}", fullImageName));
+                            DebugMsg(DebugMessageType.Warning, "PluginHost", String.Format("Unable to load missing skin image: {0}", fullImageName));
                             return imageItem.MISSING;
                         }
                         else
@@ -3329,7 +3443,7 @@ namespace OpenMobile
                     if (im.image == null)
                     {
                         // Write log entry
-                        DebugMsg(DebugMessageType.Error, "PluginHost", String.Format("Unable to load missing plugin image: {0}", fullImageName));
+                        DebugMsg(DebugMessageType.Warning, "PluginHost", String.Format("Unable to load missing plugin image: {0}", fullImageName));
                         return imageItem.MISSING;
                     }
                     else
@@ -3964,24 +4078,39 @@ namespace OpenMobile
         private DataSource DataSource_NetWork_IP;
         private DataSource DataSource_NetWork_Available;
         private DataSource DataSource_Location_Current;
+        private DataSource DataSource_Location_Current_Sunset;
+        private DataSource DataSource_Location_Current_Sunrise;
+        private DataSource DataSource_Location_Current_Daytime;
 
         private void RegisterDataSources_Early()
         {
             // Internet connection available
-            DataSource_NetWork_Internet_Online = new DataSource("OM", "Network", "Internet", "Online", DataSource.DataTypes.binary, "The state of the internet connection");
+            DataSource_NetWork_Internet_Online = new DataSource("OM", "Network", "Internet", "Online", DataSource.DataTypes.binary, "The state of the internet connection as bool");
             BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_NetWork_Internet_Online, _InternetAccess);
 
             // Current ipaddress
-            DataSource_NetWork_IP = new DataSource("OM", "Network", "IP", "", DataSource.DataTypes.raw, "Current IP address of the main adapter");
+            DataSource_NetWork_IP = new DataSource("OM", "Network", "IP", "", DataSource.DataTypes.raw, "Current IP address of the main adapter as string");
             BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_NetWork_IP, _IPAddress);
 
             // Network available
-            DataSource_NetWork_Available = new DataSource("OM", "Network", "Available", "", DataSource.DataTypes.binary, "The availability of a network connection");
+            DataSource_NetWork_Available = new DataSource("OM", "Network", "Available", "", DataSource.DataTypes.binary, "The availability of a network connection as bool");
             BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_NetWork_Available, _NetWorkAvailable);
 
             // Current location
             DataSource_Location_Current = new DataSource("OM", "Location", "Current", "", DataSource.DataTypes.raw, "Current location as class Location");
             BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_Location_Current, CurrentLocation);
+
+            // Sunset
+            DataSource_Location_Current_Sunset = new DataSource("OM", "Location", "Current", "Sunset", DataSource.DataTypes.raw, "Sunset for current location as DateTime");
+            BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_Location_Current_Sunset, CurrentLocation_Sunset);
+
+            // Sunrise
+            DataSource_Location_Current_Sunrise = new DataSource("OM", "Location", "Current", "Sunrise", DataSource.DataTypes.raw, "Sunrise for current location as DateTime");
+            BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_Location_Current_Sunrise, CurrentLocation_Sunrise);
+
+            // Daytime
+            DataSource_Location_Current_Daytime = new DataSource("OM", "Location", "Current", "Daytime", DataSource.DataTypes.binary, "Is current location considered daytime as bool");
+            BuiltInComponents.Host.DataHandler.AddDataSource(DataSource_Location_Current_Daytime, CurrentLocation_Daytime);
         }
 
         private void RegisterDataSources_Late()
@@ -4000,6 +4129,9 @@ namespace OpenMobile
                 // Go home
                 BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", Command.GetScreenName(i), "Panel", "Goto.Home", CommandExecutor, 0, false, "Goes back to the main menu panel"));
             }
+
+            // Toggle day/night
+            BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", "System", "Daytime", "Toggle", CommandExecutor, 0, false, "Toggles between day and night mode"));
         }
 
         private object CommandExecutor(Command command, object[] param, out bool result)
@@ -4013,6 +4145,10 @@ namespace OpenMobile
             // Go back
             else if (command.NameLevel2 == "Panel" && command.NameLevel3 == "Goto.Home")
                 execute(eFunction.goHome, Command.GetScreenNumber(command.NameLevel1));
+
+            // Toggle day/night
+            else if (command.NameLevel1 == "System" && command.NameLevel2 == "Daytime" && command.NameLevel3 == "Toggle")
+                CurrentLocation_Daytime = !CurrentLocation_Daytime;
 
             //else
             //{   // Default action

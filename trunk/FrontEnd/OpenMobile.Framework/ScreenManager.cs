@@ -33,9 +33,12 @@ namespace OpenMobile.Framework
     [Serializable]
     public sealed class ScreenManager : IDisposable
     {
+        public delegate OMPanel PanelInitializeMethod(); 
+
         private int screens;
         private List<OMPanel[]> panels;
         private string _DefaultPanelName = "";
+        private Dictionary<string, PanelInitializeMethod> _QueuedPanels = new Dictionary<string, PanelInitializeMethod>();
 
         /// <summary>
         /// Sets or gets the name of the default panel (this panel is returned if the requested panel is "")
@@ -156,6 +159,15 @@ namespace OpenMobile.Framework
             {
                 lock (this)
                 {
+                    // Load any default panels
+                    if (!String.IsNullOrEmpty(_QueuedDefaultPanel))
+                    {
+                        // Check for queued panel
+                        QueuedPanel_Initialize(screen, _QueuedDefaultPanel);
+                        _DefaultPanelName = _QueuedDefaultPanel;
+                        _QueuedDefaultPanel = String.Empty;
+                    }
+
                     // Exit if no panel is available 
                     if (panels.Count == 0)
                         return null;
@@ -175,7 +187,7 @@ namespace OpenMobile.Framework
                             return panels.Find(x => (x[screen] != null))[screen];
 
                         // Try to get default panel based on object
-                        if (_DefaultPanel != null)
+                        if (_DefaultPanel != null && _DefaultPanel.Length >= screen)
                             return _DefaultPanel[screen];
 
                         // Return first hit with an empty name
@@ -187,11 +199,79 @@ namespace OpenMobile.Framework
 
                     OMPanel[] p = panels.Find(x => ((x[screen] != null) && (x[screen].Name == name)));
                     if (p == null)
+                    {
+                        // Check for queued panel
+                        if (QueuedPanel_Initialize(screen, name))
+                            return this[screen, name];
+
                         return null;
+                    }
                     else
                         return p[screen];
                 }
             }
+        }
+
+        private bool QueuedPanel_Initialize(int screen, string panelName)
+        {
+            if (!_QueuedPanels.ContainsKey(panelName))
+                return false;
+
+            // Inform user
+            OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner( InfoBanner.Styles.AnimatedBanner, "Please wait, loading panel"));
+
+            OMPanel p = null;
+            // Initialize panel
+            try
+            {
+                p = _QueuedPanels[panelName]();
+            }
+            catch (Exception e)
+            {
+                BuiltInComponents.Host.DebugMsg(String.Format("ScreenManager: Exception while loading queued panel {0}", panelName), e);
+                OM.Host.UIHandler.InfoBanner_Hide(screen);
+                return false;
+            }
+
+            if (p == null)
+            {
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "ScreenManager", String.Format("Failed to load queued panel {0}", panelName));
+                OM.Host.UIHandler.InfoBanner_Hide(screen);
+                return false;
+            }
+
+            // Save initialize panel to cache
+            lock (this)
+            {
+                // Set this screenmanager as manager for the new panel
+                p.Manager = this;
+
+                OMPanel[] panelsToAdd = new OMPanel[screens];
+                for (int i = 0; i < screens; i++)
+                {
+                    panelsToAdd[i] = p.Clone(i);
+                    panelsToAdd[i].Manager = this;
+                    panelsToAdd[i].ActiveScreen = i;
+                    panelsToAdd[i].OwnerPlugin = _OwnerPlugin;
+                }
+
+                // Save panel
+                this.panels.Add(panelsToAdd);
+            }
+
+            OM.Host.UIHandler.InfoBanner_Hide(screen);
+            return true;
+        }
+
+        /// <summary>
+        /// Is the specified panel loaded and available from this screenmanager
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool IsPanelLoaded(int screen, string name)
+        {
+            return panels.Find(x => ((x[screen] != null) && (x[screen].Name == name))) != null;
         }
 
         /// <summary>
@@ -230,6 +310,42 @@ namespace OpenMobile.Framework
                 result = false;
             }
             return null;
+        }
+
+        private string _QueuedDefaultPanel = String.Empty;
+
+        /// <summary>
+        /// Loads a panel as available but does not initialize it until it's needed (saves memory)
+        /// </summary>
+        /// <param name="panelName"></param>
+        /// <param name="initMethod"></param>
+        public void QueuePanel(string panelName, PanelInitializeMethod initMethod, bool Default = false)
+        {
+            // Check for already existing panel
+            if (_QueuedPanels.ContainsKey(panelName))
+                return;
+
+            if (Default)
+                _QueuedDefaultPanel = panelName;
+
+            // Queue this panel
+            _QueuedPanels.Add(panelName, initMethod);
+
+            // Create commands to goto a panel specified via parameters
+            for (int i = 0; i < screens; i++)
+            {                
+                BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", i), "Panel.Goto", _OwnerPlugin.pluginName + (String.IsNullOrEmpty(panelName) ? "" : "." + panelName), CommandExecutor, 0, false, "Unloads all other panels and changes to the new panel"));
+            }
+
+            // Create default panel commands
+            if (Default)
+            {
+                for (int i = 0; i < screens; i++)
+                {
+                    // Create commands for goto default panels
+                    BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", i), "Panel.Goto.Default", _OwnerPlugin.pluginName, CommandExecutor, 0, false, "Unloads all other panels and changes to the default panel for this plugin"));
+                }
+            }
         }
 
         /// <summary>
@@ -517,58 +633,5 @@ namespace OpenMobile.Framework
         {
             return String.Format("{0}({1})", base.ToString(), this.GetHashCode());
         }
-
     }
-
-
-/*
-    static class DeepCopy<T>
-    {
-        public static T CreateDeepCopy(T obj)
-        {
-            System.IO.MemoryStream ms = new System.IO.MemoryStream();
-            System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            if (obj is ISerializable)
-            {
-                formatter.Serialize(ms, obj);
-                ms.Position = 0;
-                return (T)formatter.Deserialize(ms);
-            }
-            else
-            {
-                ObjectWrapper<T> wrapper = new ObjectWrapper<T>(obj);
-                formatter.Serialize(ms, wrapper);
-                ms.Position = 0;
-                ObjectWrapper<T> copy = (ObjectWrapper<T>)formatter.Deserialize(ms);
-                return copy.GetObj();
-            }
-        }
-    }
-
-    [Serializable]
-    class ObjectWrapper<T> : ISerializable
-    {
-        T obj;
-
-        protected ObjectWrapper(SerializationInfo info, StreamingContext context)
-        {
-            obj = (T)info.GetValue("object", typeof(T));
-        }
-
-        public ObjectWrapper(T core)
-        {
-            this.obj = core;
-        }
-
-        public T GetObj()
-        {
-            return obj;
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("object", obj);
-        }
-    }
-    */
 }

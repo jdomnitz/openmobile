@@ -214,6 +214,7 @@ namespace OpenMobile.Plugin
         /// <param name="append"></param>
         /// <returns></returns>
         bool writePlaylist(List<string> URLs,string name,bool append);
+
         /// <summary>
         /// Deletes a playlist from the database
         /// </summary>
@@ -225,6 +226,8 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <returns></returns>
         List<string> listPlaylists();
+
+        mediaInfo GetMediaInfoByUrl(string url);
         #endregion
 
     }

@@ -39,6 +39,12 @@ namespace OpenMobile.Controls
     {
         #region Preconfigured controls
 
+        public static OMButton PreConfigLayout_BasicStyle_NoBackground(string name, int left, int top, int width, int height, GraphicCorners? corners, Color? borderColor)
+        {
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, null, null, null, Color.Transparent, Color.Transparent, borderColor);
+        }
+
+
         /// <summary>
         /// Creates a button with a default layout
         /// </summary>
@@ -51,7 +57,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, GraphicCorners? corners)
         {
-            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, null, null, null, null, null);
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, null, null, null, null, null, null);
         }
 
         /// <summary>
@@ -68,7 +74,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, GraphicCorners? corners, string icon, string text)
         {
-            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, icon, text, null, null, null);
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, icon, null, text, null, null, null);
         }
 
         /// <summary>
@@ -86,7 +92,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, int opacity, GraphicCorners? corners, string icon, string text)
         {
-            return PreConfigLayout_BasicStyle(name, left, top, width, height, opacity, 15, corners, icon, text, null, null, null);
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, opacity, 15, corners, icon, null, text, null, null, null);
         }
 
         /// <summary>
@@ -101,12 +107,13 @@ namespace OpenMobile.Controls
         /// <param name="cornerRadius"></param>
         /// <param name="corners"></param>
         /// <param name="icon"></param>
+        /// <param name="iconImg"></param>
         /// <param name="text"></param>
         /// <param name="backColor1"></param>
         /// <param name="backColor2"></param>
         /// <param name="borderColor"></param>
         /// <returns></returns>
-        public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, int? opacity, int? cornerRadius, GraphicCorners? corners, string icon, string text, Color? backColor1, Color? backColor2, Color? borderColor)
+        public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, int? opacity, int? cornerRadius, GraphicCorners? corners, string icon, OImage iconImg, string text, Color? backColor1, Color? backColor2, Color? borderColor)
         {
             OMButton btn = new OMButton(name, left, top, width, height);
 
@@ -118,7 +125,7 @@ namespace OpenMobile.Controls
                 gd.BackgroundColor1 = Color.Black; //Color.FromArgb(178,Color.Black);
             if (backColor2 != null)
                 gd.BackgroundColor2 = (Color)backColor2;
-            if (backColor2 != null)
+            if (borderColor != null)
                 gd.BorderColor = (Color)borderColor;
             else
                 gd.BorderColor = Color.FromArgb(255, 87, 87, 87);//Color.FromArgb(128, Color.White);
@@ -152,6 +159,10 @@ namespace OpenMobile.Controls
                 gd.Opacity = 255;
                 gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonForeground;
                 btn.OverlayImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            }
+            else if (iconImg != null)
+            {
+                btn.OverlayImage = new imageItem(iconImg);
             }
 
             return btn;
@@ -221,7 +232,67 @@ namespace OpenMobile.Controls
                 }
             }
         }
-        private bool _Checked;        
+        private bool _Checked;
+
+        /// <summary>
+        /// The command to execute when clicked
+        /// <para>NB! Only commands without parameters is supported</para>
+        /// </summary>
+        public string Command_Click
+        {
+            get
+            {
+                return this._Command_Click;
+            }
+            set
+            {
+                if (this._Command_Click != value)
+                {
+                    this._Command_Click = value;
+                }
+            }
+        }
+        private string _Command_Click;
+
+        /// <summary>
+        /// The command to execute when button is held (Command is not repeated, only executed once)
+        /// <para>NB! Only commands without parameters is supported</para>
+        /// </summary>
+        public string Command_HoldClick
+        {
+            get
+            {
+                return this._Command_Holdclick;
+            }
+            set
+            {
+                if (this._Command_Holdclick != value)
+                {
+                    this._Command_Holdclick = value;
+                }
+            }
+        }
+        private string _Command_Holdclick;
+
+        /// <summary>
+        /// The command to execute when button is long clicked
+        /// <para>NB! Only commands without parameters is supported</para>
+        /// </summary>
+        public string Command_LongClick
+        {
+            get
+            {
+                return this._Command_LongClick;
+            }
+            set
+            {
+                if (this._Command_LongClick != value)
+                {
+                    this._Command_LongClick = value;
+                }
+            }
+        }
+        private string _Command_LongClick;
 
         /// <summary>
         /// Draw modes for the button graphics
@@ -393,7 +464,7 @@ namespace OpenMobile.Controls
                 if (OnModeChange != null)
                 {
                     int screen = this.containingScreen();
-                    if ((screen >= 0) && (Visible))
+                    if ((screen >= 0) && (IsControlRenderable()))
                         OnModeChange(this, screen, mode);
                 }
             }
@@ -411,6 +482,10 @@ namespace OpenMobile.Controls
         /// </summary>
         public void clickMe(int screen)
         {
+            // Execute attached command
+            if (!String.IsNullOrEmpty(_Command_Click))
+                base.Command_Execute(_Command_Click);
+
             if (OnClick != null)
                 OnClick(this, screen);
             raiseUpdate(false);
@@ -421,6 +496,25 @@ namespace OpenMobile.Controls
         /// </summary>
         public void holdClickMe(int screen)
         {
+            // Execute attached command
+            if (!String.IsNullOrEmpty(_Command_Holdclick))
+            {
+                // Check for loop command parameter present {:L:}
+                if (_Command_Holdclick.Contains(OpenMobile.Data.DataSource.DataTag_Loop))
+                {   // Present, replace with screen reference
+                    string cmd = _Command_Holdclick.Replace(OpenMobile.Data.DataSource.DataTag_Loop, String.Empty);
+                    while (this.Mode == eModeType.Clicked)
+                    {
+                        base.Command_Execute(cmd);
+                        System.Threading.Thread.Sleep(100);
+                    }
+                }
+                else
+                {
+                    base.Command_Execute(_Command_Holdclick);
+                }
+            }
+
             if (OnHoldClick != null)
                 OnHoldClick(this, screen);
             raiseUpdate(false);
@@ -431,6 +525,10 @@ namespace OpenMobile.Controls
         /// </summary>
         public void longClickMe(int screen)
         {
+            // Execute attached command
+            if (!String.IsNullOrEmpty(_Command_LongClick))
+                base.Command_Execute(_Command_LongClick);
+
             if (OnLongClick != null)
                 OnLongClick(this, screen);
             raiseUpdate(false);
@@ -948,5 +1046,117 @@ namespace OpenMobile.Controls
             btn.OnModeChange = null;
             return btn;
         }
+
+        /// <summary>
+        /// DataSource for the Image property
+        /// </summary>
+        public string DataSource_Image
+        {
+            get
+            {
+                return this._DataSource_Image;
+            }
+            set
+            {
+                this._DataSource_Image = value;
+                DataSource_RegisterProperty("Image", this._DataSource_Image);
+            }
+        }
+        private string _DataSource_Image;
+
+        /// <summary>
+        /// DataSource for the DownImage property
+        /// </summary>
+        public string DataSource_DownImage
+        {
+            get
+            {
+                return this._DataSource_DownImage;
+            }
+            set
+            {
+                this._DataSource_DownImage = value;
+                DataSource_RegisterProperty("DownImage", this._DataSource_DownImage);
+            }
+        }
+        private string _DataSource_DownImage;
+
+        /// <summary>
+        /// DataSource for the FocusImage property
+        /// </summary>
+        public string DataSource_FocusImage
+        {
+            get
+            {
+                return this._DataSource_FocusImage;
+            }
+            set
+            {
+                this._DataSource_FocusImage = value;
+                DataSource_RegisterProperty("FocusImage", this._DataSource_FocusImage);
+            }
+        }
+        private string _DataSource_FocusImage;
+
+        /// <summary>
+        /// DataSource for the OverlayImage property
+        /// </summary>
+        public string DataSource_OverlayImage
+        {
+            get
+            {
+                return this._DataSource_OverlayImage;
+            }
+            set
+            {
+                this._DataSource_OverlayImage = value;
+                DataSource_RegisterProperty("OverlayImage", this._DataSource_OverlayImage);
+            }
+        }
+        private string _DataSource_OverlayImage;
+
+        /// <summary>
+        /// DataSource for the CheckedImage property
+        /// </summary>
+        public string DataSource_CheckedImage
+        {
+            get
+            {
+                return this._DataSource_CheckedImage;
+            }
+            set
+            {
+                this._DataSource_CheckedImage = value;
+                DataSource_RegisterProperty("CheckedImage", this._DataSource_CheckedImage);
+            }
+        }
+        private string _DataSource_CheckedImage;
+
+        internal override void DataSource_MultiProperty_OnChanged(string propertyName, Data.DataSource dataSource)
+        {
+            base.DataSource_MultiProperty_OnChanged(propertyName, dataSource);
+
+            switch (propertyName)
+            {
+                case "Image":
+                    this.Image = dataSource.GetValueAsImageItem();
+                    break;
+                case "DownImage":
+                    this.DownImage = dataSource.GetValueAsImageItem();
+                    break;
+                case "FocusImage":
+                    this.FocusImage = dataSource.GetValueAsImageItem();
+                    break;
+                case "OverlayImage":
+                    this.OverlayImage = dataSource.GetValueAsImageItem();
+                    break;
+                case "CheckedImage":
+                    this.CheckedImage = dataSource.GetValueAsImageItem();
+                    break;
+                default:
+                    break;
+            }
+        }
+        
     }
 }

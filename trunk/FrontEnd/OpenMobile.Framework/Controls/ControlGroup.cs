@@ -58,7 +58,18 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Centered horizontally
         /// </summary>
-        CenterHorizontally = 3
+        CenterHorizontally = 3,
+
+        /// <summary>
+        /// Placement is relative to the parent
+        /// </summary>
+        RelativeToParent = 4,
+
+        /// <summary>
+        /// Placement is absolute on the screen
+        /// </summary>
+        Absolute = 5
+
     }
 
     /// <summary>
@@ -88,11 +99,60 @@ namespace OpenMobile.Controls
             }
         }
 
+        /// <summary>
+        /// The X placement of this control group
+        /// </summary>
+        public int X
+        {
+            get
+            {
+                return Region.X;
+            }
+            set
+            {
+                Rectangle r = Region;
+                if (r.X != value)
+                {
+                    // Calculate offset 
+                    int offset = value - r.X;
+                    Translate(offset, 0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// The Y placement of this control group
+        /// </summary>
+        public int Y
+        {
+            get
+            {
+                return Region.Y;
+            }
+            set
+            {
+                Rectangle r = Region;
+                if (r.Y != value)
+                {
+                    // Calculate offset 
+                    int offset = value - r.Y;
+                    Translate(0, offset);
+                }
+            }
+        }
+
         public void Translate(Rectangle r)
         {
             // Run command on each contained control
             foreach (OMControl control in this)
-                control.Region.Translate(r);
+                control.Translate(r);
+        }
+
+        public void Translate(int x, int y)
+        {
+            // Run command on each contained control
+            foreach (OMControl control in this)
+                control.Translate(x, y);
         }
 
         public bool Contains(string name)
@@ -138,11 +198,11 @@ namespace OpenMobile.Controls
 
         public string Key { get; set; }
 
-        public ControlGroup Clone()
+        public ControlGroup Clone(OMPanel parent)
         {
             ControlGroup newCG = new ControlGroup();
             foreach (OMControl control in this)
-                newCG.Add((OMControl)control.Clone());
+                newCG.Add((OMControl)control.Clone(parent));
             return newCG;
         }
 

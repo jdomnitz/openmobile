@@ -44,6 +44,11 @@ namespace OpenMobile
         public static GameWindowFlags Fullscreen;
 
         /// <summary>
+        /// The maximum allowed time for a plugin to use for initialization
+        /// </summary>
+        private static int _Plugin_MaxInitTimeMS = 250;
+
+        /// <summary>
         /// Loads an assembly with error message if it fails.
         /// Application exits when an error is detected
         /// </summary>
@@ -323,6 +328,23 @@ namespace OpenMobile
         /// </summary>
         private static Type[] pluginTypes = new Type[] { typeof(IRawHardware), typeof(IDataSource),typeof(IMediaProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin) };
         public static eLoadStatus[] status;
+
+        private static void Plugin_Initialize(int index)
+        {
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", String.Format("Initializing {0}", pluginCollection[index].pluginName));
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            status[index] = pluginCollection[index].initialize(theHost);
+            sw.Stop();
+            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", String.Format("Initialization of {0} completed (used {1}ms)", pluginCollection[index].pluginName, sw.ElapsedMilliseconds));
+            // Inform user about slow plugins
+            if (sw.ElapsedMilliseconds > _Plugin_MaxInitTimeMS)
+            {
+                theHost.UIHandler.AddNotification(new Notification(Notification.Styles.Warning, pluginCollection[index], null, null, String.Format("Plugin {0} is slow to initialize", pluginCollection[index].pluginName), String.Format("Used a total of {0}ms of maximum {1}ms", sw.ElapsedMilliseconds, _Plugin_MaxInitTimeMS)));
+                BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "Plugin Manager", String.Format("Plugin {0} has slow initializing (used {1}ms)", pluginCollection[index].pluginName, sw.ElapsedMilliseconds));
+            }
+        }
+
         /// <summary>
         /// Initialize each of the plugins in the plugin's array (pluginCollection)
         /// </summary>
@@ -365,8 +387,7 @@ namespace OpenMobile
                                     continue;
                                 }
 
-                                BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", "Initializing " + pluginCollection[i].pluginName);
-                                status[i] = pluginCollection[i].initialize(theHost);
+                                Plugin_Initialize(i);
                             }
                         }
                     }
@@ -412,7 +433,8 @@ namespace OpenMobile
                                     BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", String.Format("Plugin disabled: {0}", pluginCollection[i].pluginName));
                                     continue;
                                 }
-                                status[i] = pluginCollection[i].initialize(theHost);
+
+                                Plugin_Initialize(i);
                             }
                         }
                     }
@@ -434,7 +456,6 @@ namespace OpenMobile
                         if (status[i] != eLoadStatus.LoadFailedGracefulUnloadRequested)
                         {
                             theHost.UIHandler.AddNotification(new Notification(Notification.Styles.Warning, pluginCollection[i], null, null, String.Format("Loading of plugin {0} failed", pluginCollection[i].pluginName), String.Format("Plugin {0} ({1}) by {2} was unloaded.", pluginCollection[i].pluginName, pluginCollection[i].pluginDescription, pluginCollection[i].authorName)));
-                            //theHost.SendStatusData(eDataType.Error, pluginCollection[i], "", String.Format("{0} CRASHED!", pluginCollection[i].pluginName));
                             BuiltInComponents.Host.DebugMsg(DebugMessageType.Error, "Plugin Manager", String.Format("{0} CRASHED!", pluginCollection[i].pluginName));
                         }
 
@@ -456,7 +477,6 @@ namespace OpenMobile
             // Filter out disabled plugins from main pluginlist
             foreach (IBasePlugin plugin in pluginCollectionDisabled)
                 pluginCollection.Remove(plugin);
-
         }
 
 

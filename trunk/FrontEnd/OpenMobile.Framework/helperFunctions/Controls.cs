@@ -176,4 +176,17 @@ namespace OpenMobile.helperFunctions.Controls
         }
 
     }
+
+    public static class Controls
+    {
+        /// <summary>
+        /// Sets the state of the internal visibility property on a control
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="visibility"></param>
+        public static void SetInternalVisibility(OMControl control, bool visibility)
+        {
+            ((IVisibility)control).Internal_Visibility = visibility;
+        }
+    }
 }

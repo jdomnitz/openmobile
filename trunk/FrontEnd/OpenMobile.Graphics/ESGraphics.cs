@@ -340,7 +340,7 @@ namespace OpenMobile.Graphics
             DrawImage(image, X, Y, Width, Height, transparency, eAngle.Normal);
         }
 
-        public void DrawCube(OImage image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
+        public void DrawCube(OImage[] image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
         {
         }
 
@@ -560,7 +560,7 @@ namespace OpenMobile.Graphics
             GL.DisableClientState(All.VertexArray);
         }
 
-        public void FillRectangle(GradientData gradient, Rectangle rect)
+        public void FillRectangle(GradientData gradient, Rectangle rect, float opacity)
         {
         }
         public void FillRectangle(Brush brush, Rectangle rect)

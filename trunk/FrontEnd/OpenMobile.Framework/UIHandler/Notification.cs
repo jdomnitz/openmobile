@@ -279,6 +279,44 @@ namespace OpenMobile
         }
         private IBasePlugin _OwnerPlugin;
 
+        /// <summary>
+        /// The width of the statusbar icon
+        /// </summary>
+        public int IconSize_Width
+        {
+            get
+            {
+                return this._IconSize_Width;
+            }
+            set
+            {
+                if (this._IconSize_Width != value)
+                {
+                    this._IconSize_Width = value;
+                }
+            }
+        }
+        private int _IconSize_Width;
+
+        /// <summary>
+        /// The height of the statusbar icon
+        /// </summary>
+        public int IconSize_Height
+        {
+            get
+            {
+                return this._IconSize_Height;
+            }
+            set
+            {
+                if (this._IconSize_Height != value)
+                {
+                    this._IconSize_Height = value;
+                }
+            }
+        }
+        private int _IconSize_Height;        
+
         #endregion
 
         #region events
