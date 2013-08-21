@@ -29,7 +29,7 @@ namespace OpenMobile.mPlayer
 {
     public class mPlayer
     {
-        public enum MediaTypes {None, File, CD, DVD, BluRay }
+        public enum MediaTypes { None, File, CD, DVD, BluRay, Stream_HTTP, Other }
 
         public class MediaData
         {
@@ -369,6 +369,29 @@ namespace OpenMobile.mPlayer
 
         #endregion
 
+        /// <summary>
+        /// Load states for player
+        /// </summary>
+        public enum PlayerLoadStates
+        {
+            /// <summary>
+            /// Player not loaded
+            /// </summary>
+            NotReady,
+            /// <summary>
+            /// Player loaded without errors
+            /// </summary>
+            Ready,
+            /// <summary>
+            /// Player failed to load: mPlayer exe file not available
+            /// </summary>
+            Failed_mPlayerFileNotAvailable,
+            /// <summary>
+            /// Player failed to load: Unable to start mPlayer process
+            /// </summary>
+            Failed_mPlayerUnableToStart
+        }
+
         #region Player properties
 
         /// <summary>
@@ -408,7 +431,7 @@ namespace OpenMobile.mPlayer
                 }
             }
         }
-        private string _BaseArgs = @"-input nodefault-bindings -noconfig all -slave -quiet -idle -nomouseinput -v -osdlevel 0 -cache 4096";
+        private string _BaseArgs = @"-input nodefault-bindings -noconfig all -slave -quiet -idle -nomouseinput -v -osdlevel 0"; // -cache 8192";
 
         /// <summary>
         /// Gets or sets the active window handle (used for Video output)
@@ -486,7 +509,19 @@ namespace OpenMobile.mPlayer
                 }
             }
         }
-        private string _Name;        
+        private string _Name;
+
+        /// <summary>
+        /// Gets the player load state
+        /// </summary>
+        public PlayerLoadStates PlayerLoadState
+        {
+            get
+            {
+                return this._PlayerLoadState;
+            }
+         }
+        private PlayerLoadStates _PlayerLoadState;
 
         #endregion
 
@@ -796,6 +831,8 @@ namespace OpenMobile.mPlayer
 
         private void Init(bool spawnPlayer)
         {
+            _PlayerLoadState = PlayerLoadStates.NotReady;
+
             // Initialize video and audio modes
             _VideoMode = new MPlayerVideoMode();
             _AudioMode = new MPlayerAudioMode();
@@ -876,6 +913,7 @@ namespace OpenMobile.mPlayer
                 catch { }
                 _PlayerProcess = null;
             }
+            _PlayerLoadState = PlayerLoadStates.NotReady;
         }
 
         private string GetLocalPath()
@@ -921,7 +959,10 @@ namespace OpenMobile.mPlayer
 
             // Check for player file present
             if (!File.Exists(_mPlayerFileNameFullPath))
+            {
+                _PlayerLoadState = PlayerLoadStates.Failed_mPlayerFileNotAvailable;
                 return;
+            }
 
             // Create arguments
             string args = _BaseArgs;
@@ -1064,6 +1105,8 @@ namespace OpenMobile.mPlayer
             catch
             {
                 killPlayer();
+                _PlayerLoadState = PlayerLoadStates.Failed_mPlayerUnableToStart;
+                return;
             }
 
             // if we're detecting audio then we're waiting for startup, if not we're just starting
@@ -1258,7 +1301,8 @@ namespace OpenMobile.mPlayer
             int ClipInfoID = 0;
             while (prossessClipInfo)
 	        {
-                if (_MediaProperties.ContainsKey(string.Format("CLIP_INFO_NAME{0}", ClipInfoID)) && _MediaProperties.ContainsKey(string.Format("CLIP_INFO_VALUE{0}", ClipInfoID)))
+                if (_MediaProperties.ContainsKey(string.Format("CLIP_INFO_NAME{0}", ClipInfoID)) && 
+                    _MediaProperties.ContainsKey(string.Format("CLIP_INFO_VALUE{0}", ClipInfoID)))
                 {
                     // Get matching property name and value
                     string propertyName = _MediaProperties[string.Format("CLIP_INFO_NAME{0}", ClipInfoID)];
@@ -1427,6 +1471,10 @@ namespace OpenMobile.mPlayer
             if (string.IsNullOrEmpty(line) || string.IsNullOrEmpty(line.Trim()))
                 return;
 
+            // Detect player ready
+            if (line.Contains("MPlayer "))
+                _PlayerLoadState = PlayerLoadStates.Ready;
+
             // Detect startup completed
             if (_PlayerState == PlayerStates.AudioDetection && line.Contains("EOF code: 1"))
             {
@@ -1465,6 +1513,19 @@ namespace OpenMobile.mPlayer
             {   // Save data in media properties 
                 AddMediaData(line);
             }
+
+            // Get streaming data (if any)
+                // Genre
+                if (line.StartsWith(" 4 - icy-genre: "))
+                    _MediaInfo.Genre = line.Substring(16);
+                if (line.StartsWith(" 3 - icy-description: "))
+                    _MediaInfo.Comment = line.Substring(22);
+                if (line.StartsWith(" 7 - icy-url: "))
+                    _MediaInfo.Comment += String.Format(" ({0})", line.Substring(14));
+
+            // Set media type (if streaming)
+                if (line.StartsWith("STREAM_HTTP("))
+                    _MediaInfo.MediaType = MediaTypes.Stream_HTTP;
 
             switch (_PlaybackMode)
             {

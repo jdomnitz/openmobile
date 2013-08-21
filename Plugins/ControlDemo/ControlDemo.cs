@@ -51,18 +51,10 @@ namespace ControlDemo
 
         public eLoadStatus initialize(IPluginHost host)
         {
-            StoredData.ObjectCollection<int> dtaList = new StoredData.ObjectCollection<int>();
-            //dtaList.Add(1, 1f);
-            //int i = dtaList.GetValue<int>(1);
-            //i = dtaList.GetValue<int>(2);
-            //dtaList.Save(this, "DataTest");
-            //dtaList.Clear();
-            dtaList.Load(this, "DataTest");
-
-            
-            OMPanel p = new OMPanel("ControlDemo");
             theHost = host;
             manager = new ScreenManager(this);
+
+            #region Disabled code
 
             //OMLabel lblDataSourceTest1 = new OMLabel("lblDataSourceTest1", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, 250, 50);
             //lblDataSourceTest1.Text = "cpu load is {System.CPU.Load} / mem usage is {System.Memory.UsedPercent}";
@@ -217,6 +209,7 @@ namespace ControlDemo
                     p.addControl(tstButton);
             */
 
+            /*
             #region Menu popup
 
             // Popup menu
@@ -293,7 +286,7 @@ namespace ControlDemo
             p.addControl(TestImg2);
 
             // OMList2 test
-            OMButton btnOMList2Test = OMButton.PreConfigLayout_BasicStyle("btnOMList2Test", 320, 100, 300, 90, GraphicCorners.All, "", "OMList2");
+            OMButton btnOMList2Test = OMButton.PreConfigLayout_BasicStyle("btnOMList2Test", 320, OM.Host.ClientArea_Init.Top+10, 300, 90, GraphicCorners.Top, "", "OMList2");
             btnOMList2Test.Tag = "OMList2Test";
             btnOMList2Test.OnClick += new userInteraction(btnCommonTransitionToPanel_OnClick);
             p.addControl(btnOMList2Test);
@@ -301,19 +294,25 @@ namespace ControlDemo
             panelOMList2Test.Initialize(this.pluginName, manager, theHost);
 
             // Playlist test
-            OMButton btnPlayList = OMButton.PreConfigLayout_BasicStyle("btnPlayList", 320, 200, 300, 90, GraphicCorners.All, "", "PlayList");
+            OMButton btnPlayList = OMButton.PreConfigLayout_BasicStyle("btnPlayList", btnOMList2Test.Region.Left, btnOMList2Test.Region.Bottom-1, 300, 90, GraphicCorners.None, "", "PlayList");
             btnPlayList.OnClick += new userInteraction(btnPlayList_OnClick);
             p.addControl(btnPlayList);
 
             // Images test
-            OMButton btnImages = OMButton.PreConfigLayout_BasicStyle("btnImages", 320, 300, 300, 90, GraphicCorners.All, "", "Images");
+            OMButton btnImages = OMButton.PreConfigLayout_BasicStyle("btnImages", btnOMList2Test.Region.Left, btnPlayList.Region.Bottom-1, 300, 90, GraphicCorners.None, "", "Images");
             btnImages.OnClick += new userInteraction(btnImages_OnClick);
             p.addControl(btnImages);
 
             // SlideIn test
-            OMButton btnSlideInTest = OMButton.PreConfigLayout_BasicStyle("btnSlideInTest", 320, 400, 300, 90, GraphicCorners.All, "", "SlideIn");
+            OMButton btnSlideInTest = OMButton.PreConfigLayout_BasicStyle("btnSlideInTest", btnOMList2Test.Region.Left, btnImages.Region.Bottom-1, 300, 90, GraphicCorners.None, "", "SlideIn");
             btnSlideInTest.OnClick += new userInteraction(btnSlideInTest_OnClick);
             p.addControl(btnSlideInTest);
+
+            // Datasources
+            OMButton btnDataSources = OMButton.PreConfigLayout_BasicStyle("btnDataSources", btnOMList2Test.Region.Left, btnSlideInTest.Region.Bottom-1, 300, 90, GraphicCorners.Bottom, "", "DataSources");
+            btnDataSources.Command_Click = "Screen{:S:}.Panel.Goto.ControlDemo.DataSources";
+            p.addControl(btnDataSources);
+            */
 
             /*
             OMImage TestImg = new OMImage("TestImg", 10, 100);
@@ -341,27 +340,153 @@ namespace ControlDemo
             //tstControl.Height = 400; // 35;
             //p.addControl(tstControl);
 
+            #endregion
+
+            // Queue any loading of panels as these panels are likely to not being used so we don't have to load them into memory
+
+            // Load main panel (default)
+            manager.QueuePanel("ControlDemo", Initialize, true);
 
             // Load playlist panel
-            panelPlayListTest.Initialize(this.pluginName, manager, theHost);
+            manager.QueuePanel("PlayListTest", panelPlayListTest.Initialize);
 
             // Load images panel
-            panelImages.Initialize(this.pluginName, manager, theHost);
+            manager.QueuePanel("Images", panelImages.Initialize);
 
             // Load 3D panel
-            panel3D.Initialize(this.pluginName, manager, theHost);
+            manager.QueuePanel("panel3D", panel3D.Initialize);
 
             // Load SlideIn panel
-            panelSlideInTest.Initialize(this.pluginName, manager, theHost);
+            manager.QueuePanel("SlideInTest", panelSlideInTest.Initialize);
 
-            System.Timers.Timer t = new System.Timers.Timer(100);
-            t.Elapsed += new ElapsedEventHandler(t_Elapsed);
-            t.Enabled = true;
-            p.Entering += new PanelEvent(p_Entering);
-            p.Leaving += new PanelEvent(p_Leaving);
-            manager.loadPanel(p, true);
+            // Load DataSources panel
+            manager.QueuePanel("DataSources", panelDataSources.Initialize);
+
 
             return eLoadStatus.LoadSuccessful;
+        }
+
+        private OMPanel Initialize()
+        {
+            OMPanel p = new OMPanel("ControlDemo");
+
+            #region Menu popup
+
+            // Popup menu
+            PopupMenu = new MenuPopup("ZoneMenu", MenuPopup.ReturnTypes.Index);
+
+            // Popup menu items
+            OMListItem ListItem = new OMListItem("New", "mnuItemNewZone" as object);
+            ListItem.image = OImage.FromFont(50, 50, "+", new Font(Font.Arial, 40F), eTextFormat.Outline, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinTextColor);
+            PopupMenu.AddMenuItem(ListItem);
+
+            OMListItem ListItem2 = new OMListItem("Edit", "mnuItemEditZone" as object);
+            ListItem2.image = OImage.FromWebdingsFont(50, 50, "@", BuiltInComponents.SystemSettings.SkinTextColor);
+            PopupMenu.AddMenuItem(ListItem2);
+
+            OMListItem ListItem3 = new OMListItem("Remove", "mnuItemRemoveZone" as object);
+            ListItem3.image = OImage.FromWebdingsFont(50, 50, "r", BuiltInComponents.SystemSettings.SkinTextColor);
+            PopupMenu.AddMenuItem(ListItem3);
+
+            OMListItem ListItem4 = new OMListItem("Default", "mnuItemSetDefaultZone" as object);
+            ListItem4.image = OImage.FromWebdingsFont(50, 50, "a", BuiltInComponents.SystemSettings.SkinTextColor);
+            PopupMenu.AddMenuItem(ListItem4);
+
+            OMListItem ListItem5 = new OMListItem("Set active", "mnuItemSetActive" as object);
+            ListItem5.image = OImage.FromWebdingsFont(50, 50, "a", BuiltInComponents.SystemSettings.SkinTextColor);
+            PopupMenu.AddMenuItem(ListItem5);
+
+            OMListItem ListItem6 = new OMListItem("Restore defaults", "mnuItemRestoreDefaults" as object);
+            ListItem6.image = OImage.FromWebdingsFont(50, 50, "Ó", BuiltInComponents.SystemSettings.SkinTextColor);
+            PopupMenu.AddMenuItem(ListItem6);
+
+            #endregion
+
+            // OSK Buttons
+            OMButton OSKButton = OMButton.PreConfigLayout_BasicStyle("OSKButton", 650, OM.Host.ClientArea_Init.Top + 10, 300, 90, GraphicCorners.Top, ">", "Keypad");
+            OSKButton.Tag = OSKInputTypes.Keypad;
+            OSKButton.OnClick += new userInteraction(OSKButton_OnClick);
+            p.addControl(OSKButton);
+            OMButton OSKButton2 = OMButton.PreConfigLayout_BasicStyle("OSKButton2", OSKButton.Region.Left, OSKButton.Region.Bottom - 1, 300, 90, GraphicCorners.None, ">", "Numpad");
+            OSKButton2.Tag = OSKInputTypes.Numpad;
+            OSKButton2.OnClick += new userInteraction(OSKButton_OnClick);
+            p.addControl(OSKButton2);
+            OMButton OSKButton3 = OMButton.PreConfigLayout_BasicStyle("OSKButton3", OSKButton.Region.Left, OSKButton2.Region.Bottom - 1, 300, 90, GraphicCorners.Bottom, ">", "Password");
+            //OMButton OSKButton3 = DefaultControls.GetButton("OSKButton2", 650, 365, 300, 90, ">", "Password");
+            OSKButton3.OnClick += new userInteraction(OSKButton3_OnClick);
+            p.addControl(OSKButton3);
+
+            OMButton btn3D = OMButton.PreConfigLayout_BasicStyle("btn3D", OSKButton.Region.Left, OSKButton3.Region.Bottom + 10, 300, 90, GraphicCorners.All, "", "3D");
+            btn3D.OnClick += new userInteraction(btn3D_OnClick);
+            p.addControl(btn3D);
+
+            OMButton btnTest = OMButton.PreConfigLayout_BasicStyle("btnTest", OSKButton.Region.Left, btn3D.Region.Bottom + 10, 300, 90, GraphicCorners.All, "", "Test");
+            btnTest.OnClick += new userInteraction(btnTest_OnClick);
+            p.addControl(btnTest);
+
+            // Add default button
+            OMButton btnDialog = OMButton.PreConfigLayout_BasicStyle("btnDialog", 10, 100, 300, 90, GraphicCorners.All, "", "DialogTest");
+            btnDialog.OnClick += new userInteraction(btnDialog_OnClick);
+            p.addControl(btnDialog);
+
+            // Add default button
+            OMButton btnPopupMenu = OMButton.PreConfigLayout_BasicStyle("btnPopupMenu", 10, 200, 300, 90, GraphicCorners.All, "", "PopupMenu");
+            btnPopupMenu.OnClick += new userInteraction(btnPopupMenu_OnClick);
+            p.addControl(btnPopupMenu);
+
+
+            OMBasicShape shp = new OMBasicShape("shp", 0, 350, 400, 200,
+                new ShapeData(shapes.Rectangle, Color.FromArgb(0xFF, 25, 25, 25)));
+            p.addControl(shp);
+
+            OMImage TestImg = new OMImage("TestImg", 10, 400);
+            TestImg.FitControlToImage = true;
+            TestImg.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(180, 107, ButtonGraphic.ImageTypes.ButtonBackground, ButtonGraphic.GraphicStyles.Style1));
+            p.addControl(TestImg);
+
+            OMImage TestImg2 = new OMImage("TestImg2", 210, 400);
+            TestImg2.FitControlToImage = true;
+            TestImg2.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(100, 60, ButtonGraphic.ImageTypes.ButtonBackground, ButtonGraphic.GraphicStyles.Style1));
+            p.addControl(TestImg2);
+
+            // OMList2 test
+            OMButton btnOMList2Test = OMButton.PreConfigLayout_BasicStyle("btnOMList2Test", 320, OM.Host.ClientArea_Init.Top + 10, 300, 90, GraphicCorners.Top, "", "OMList2");
+            btnOMList2Test.Tag = "OMList2Test";
+            btnOMList2Test.OnClick += new userInteraction(btnCommonTransitionToPanel_OnClick);
+            p.addControl(btnOMList2Test);
+            // Load OMList2 panel
+            panelOMList2Test.Initialize(this.pluginName, manager, theHost);
+
+            // Playlist test
+            OMButton btnPlayList = OMButton.PreConfigLayout_BasicStyle("btnPlayList", btnOMList2Test.Region.Left, btnOMList2Test.Region.Bottom - 1, 300, 90, GraphicCorners.None, "", "PlayList");
+            btnPlayList.OnClick += new userInteraction(btnPlayList_OnClick);
+            p.addControl(btnPlayList);
+
+            // Images test
+            OMButton btnImages = OMButton.PreConfigLayout_BasicStyle("btnImages", btnOMList2Test.Region.Left, btnPlayList.Region.Bottom - 1, 300, 90, GraphicCorners.None, "", "Images");
+            btnImages.OnClick += new userInteraction(btnImages_OnClick);
+            p.addControl(btnImages);
+
+            // SlideIn test
+            OMButton btnSlideInTest = OMButton.PreConfigLayout_BasicStyle("btnSlideInTest", btnOMList2Test.Region.Left, btnImages.Region.Bottom - 1, 300, 90, GraphicCorners.None, "", "SlideIn");
+            btnSlideInTest.OnClick += new userInteraction(btnSlideInTest_OnClick);
+            p.addControl(btnSlideInTest);
+
+            // Datasources
+            OMButton btnDataSources = OMButton.PreConfigLayout_BasicStyle("btnDataSources", btnOMList2Test.Region.Left, btnSlideInTest.Region.Bottom - 1, 300, 90, GraphicCorners.Bottom, "", "DataSources");
+            btnDataSources.Command_Click = "Screen{:S:}.Panel.Goto.ControlDemo.DataSources";
+            p.addControl(btnDataSources);
+
+            p.Entering += new PanelEvent(p_Entering);
+            p.Leaving += new PanelEvent(p_Leaving);
+
+            return p;
+        }
+
+        void btnTest_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.UIHandler.PopUpMenu.GetButtonStrip(screen).Buttons["Item1"] = 
+                Button.CreateMenuItem("Item1", theHost.UIHandler.PopUpMenu.ButtonSize, 255, theHost.getSkinImage("Aicons|3-rating-good"), "Changed item", false, null, null, null);
         }
 
         void btn3D_OnClick(OMControl sender, int screen)
@@ -447,14 +572,15 @@ namespace ControlDemo
 
         void p_Leaving(OMPanel sender, int screen)
         {
-            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("Leaving panel: {0}", sender.Name)));
+            //theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("Leaving panel: {0}", sender.Name)));
+            OM.Host.UIHandler.RemoveAllMyNotifications(this);
         }
 
         void p_Entering(OMPanel sender, int screen)
         {
-            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("Entering panel: {0}", sender.Name)));
+            //theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("Entering panel: {0}", sender.Name)));
 
-            // Createa a buttonstrip
+            // Create a buttonstrip
             ButtonStrip PopUpMenuStrip = new ButtonStrip(sender.OwnerPlugin.pluginName, sender.Name, "PopUpMenuStrip");
             PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Item1", theHost.UIHandler.PopUpMenu.ButtonSize, 255, theHost.getSkinImage("Aicons|5-content-email"), "Send email", false, null, null, null));
             // Add some more buttons to the buttonstrip
@@ -471,6 +597,17 @@ namespace ControlDemo
 
             // Load the buttonstrip
             theHost.UIHandler.PopUpMenu.SetButtonStrip(screen, PopUpMenuStrip);
+
+            // Demo temperature notification
+            OImage tempIcon = new OImage(Color.Transparent, 85, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height);
+            Font f = Font.Arial;
+            f.Size = 24;
+            tempIcon.RenderText(0, 0, tempIcon.Width, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height, Globalization.convertToLocalTemp(10.0, true), f, eTextFormat.Normal, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinFocusColor, FitModes.FitFillSingleLine);
+
+            Notification notification = new Notification(Notification.Styles.IconOnly, this, "ControlDemo_Notification", DateTime.Now, null, tempIcon, "Notification test", "");
+            notification.State = Notification.States.Active;
+            notification.IconSize_Width = tempIcon.Width;
+            OM.Host.UIHandler.AddNotification(screen, notification);
 
         }
 

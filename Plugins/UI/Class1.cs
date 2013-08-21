@@ -35,6 +35,7 @@ using OpenMobile.helperFunctions;
 using System.Collections;
 using System.Collections.Generic;
 using OpenMobile.UI;
+using OpenMobile.Media;
 
 namespace OpenMobile
 {
@@ -44,6 +45,16 @@ namespace OpenMobile
         private IPluginHost theHost;
         private System.Timers.Timer tick = new System.Timers.Timer();
         private System.Timers.Timer statusReset = new System.Timers.Timer(2100);
+
+        private enum OpacityModes
+        {
+            None,
+            All,
+            BackgroundOnly
+        }
+
+        private OpacityModes _OpacityMode = OpacityModes.None;
+        private int _OpacityLevel = 255;
 
         //private StatusBarHandler.DropDownButtonStripContainer DropDown_MainButtonStrip = null;
         //private StatusBarHandler.DropDownButtonStripContainer DropDown_PowerOptionsStrip = null;
@@ -130,9 +141,64 @@ namespace OpenMobile
             return manager[screen,name];
         }
 
+        #endregion
+
+        #region Settings
+
         public Settings loadSettings()
         {
-            return null;
+            Settings settings = new Settings("UI Skin");
+            settings.Add(new Setting(SettingTypes.File, "Background.Image", "", "Background image", StoredData.Get(this, "Background.Image")));
+            settings.Add(new Setting(SettingTypes.Button, "Background.Clear", String.Empty, "Clear background image", null, null));
+            settings.Add(new Setting(SettingTypes.Range, "System.Opacitylevel", "Brightness at night", "The opacity of the screen at night", null, new List<string>() { "0", "255" }, _OpacityLevel.ToString()));
+
+            // Setting for what the opacity setting should affect
+            List<string> Texts = new List<string>();
+            List<string> Values = new List<string>();
+            Texts.Add("Nothing"); Values.Add(((int)OpacityModes.None).ToString());
+            Texts.Add("All"); Values.Add(((int)OpacityModes.All).ToString());
+            Texts.Add("Background only"); Values.Add(((int)OpacityModes.BackgroundOnly).ToString());
+            settings.Add(new Setting(SettingTypes.MultiChoice, "System.OpacityMode", "Brightness affects", "What the brightness adjustment affects", Texts, Values, ((int)_OpacityMode).ToString()));
+
+            settings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
+
+            return settings;
+        }
+
+        void settings_OnSettingChanged(int screen, Setting setting)
+        {
+            StoredData.Set(this, setting.Name, setting.Value);
+
+            if (setting.Name == "Background.Image")
+                BackgroundImage_Change(screen, setting.Value);
+
+            if (setting.Name == "Background.Clear")
+            {
+                StoredData.Set(this, "Background.Image", String.Empty);
+                BackgroundImage_Change(screen, String.Empty);
+            }
+
+            if (setting.Name == "System.Opacitylevel")
+            {
+                _OpacityLevel = StoredData.GetInt(this, "System.Opacitylevel");
+                SetDayNightMode_SetOpacityManually(screen, StoredData.GetInt(this, "System.Opacitylevel"));
+            }
+
+            if (setting.Name == "System.OpacityMode")
+            {
+                _OpacityMode = (OpacityModes)StoredData.GetInt(this, "System.OpacityMode", 0);
+            }
+        }
+
+        private void settingsLoadValuesAndSetDefault()
+        {
+            // Set default settings values
+            StoredData.SetDefaultValue(this, "Background.Image", Path.Combine(OM.Host.SkinPath, "Backgrounds", "Highway 1.png"));
+            StoredData.SetDefaultValue(this, "System.Opacitylevel", "100");
+            StoredData.SetDefaultValue(this, "System.OpacityMode", 0);
+
+            _OpacityMode = (OpacityModes)StoredData.GetInt(this, "System.OpacityMode", 0);
+            _OpacityLevel = StoredData.GetInt(this, "System.Opacitylevel", (_OpacityMode == OpacityModes.BackgroundOnly ? 255 : 0));
         }
 
         #endregion
@@ -145,7 +211,7 @@ namespace OpenMobile
         //ButtonStripContainer ButtonStrip_UIBottomBar;
         //ButtonStripContainer ButtonStrip_NotifyDropdown;        
         //ButtonStrip btnStrip_Media;
-        ButtonStrip btnStrip_Media2;
+        //ButtonStrip btnStrip_Media2;
         //ButtonStrip btnStrip_NotifyMain;
         ButtonStrip btnStrip_NotifyPower;
 
@@ -161,6 +227,9 @@ namespace OpenMobile
             UIPanel = new OMPanel("UI");
             theHost = host;
             manager = new ScreenManager(this);
+
+            settingsLoadValuesAndSetDefault();
+
 
             //tick.BeginInit();
             //tick.EndInit();
@@ -248,8 +317,105 @@ namespace OpenMobile
 
             #region BottomBar (Dynamic menu)
 
-            OMImage Image_UIBottomBar_Background = new OMImage("Image_UIBottomBar_Background", 0, 535, 1000, 65, new imageItem(Color.Black, 1000, 65));
+            int bottomBarPlacement = 535;
+
+            /*
+            #region CoverFlow
+
+            // Coverflow background
+            int coverFlowHeight = 100;
+            OMBasicShape shape_UIBottomBar_MediaImages_Background = new OMBasicShape("shape_UIBottomBar_MediaImages_Background", 0, bottomBarPlacement - coverFlowHeight, 1000, coverFlowHeight,
+                new ShapeData(shapes.Rectangle, Color.Black));
+            shape_UIBottomBar_MediaImages_Background.Transparency = 15;
+            shape_UIBottomBar_MediaImages_Background.NoUserInteraction = true;
+            shape_UIBottomBar_MediaImages_Background.Visible = false;
+            UIPanel.addControl(shape_UIBottomBar_MediaImages_Background);
+
+            // Separator
+            OMBasicShape Shape_UIBottomBar_MediaImages_Background_Separator = new OMBasicShape("Shape_UIBottomBar_MediaImages_Background_Separator", shape_UIBottomBar_MediaImages_Background.Region.Left, shape_UIBottomBar_MediaImages_Background.Region.Top, shape_UIBottomBar_MediaImages_Background.Region.Width, 1,
+            new ShapeData(shapes.Rectangle)
+            {
+                GradientData = GradientData.CreateHorizontalGradient(
+                    new GradientData.ColorPoint(0.0, 0, Color.Black),
+                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5, 0, Color.Black))
+            });
+            Shape_UIBottomBar_MediaImages_Background_Separator.Visible = false;
+            UIPanel.addControl(Shape_UIBottomBar_MediaImages_Background_Separator);
+
+            // Create coverflow popup when changing media
+            OMMediaFlow mediaFlow_UIBottomBar_MediaImages_CoverFlow = new OMMediaFlow("mediaFlow_UIBottomBar_MediaImages_CoverFlow", shape_UIBottomBar_MediaImages_Background.Region.Left, shape_UIBottomBar_MediaImages_Background.Region.Top, shape_UIBottomBar_MediaImages_Background.Region.Width, shape_UIBottomBar_MediaImages_Background.Region.Height);
+            OMImageFlow.PreConfigLayout_Flat_ApplyToControl(mediaFlow_UIBottomBar_MediaImages_CoverFlow);
+            //mediaFlow_UIBottomBar_MediaImages.MediaInfoFormatString = "{1} - {0}\n{6}";
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.Animation_FadeOutDistance = 6;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.ReflectionsEnabled = false;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.NoUserInteraction = true;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.ImageSize = new Size(mediaFlow_UIBottomBar_MediaImages_CoverFlow.Height * 0.7f, mediaFlow_UIBottomBar_MediaImages_CoverFlow.Height * 0.7f);
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.Visible = false;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.ListSource = OMMediaFlow.ListSources.Buffer;
+            UIPanel.addControl(mediaFlow_UIBottomBar_MediaImages_CoverFlow);
+
+            // Mediasource icon
+            OMImage image_UIBottomBar_MediaImages_Icon_MediaSource = new OMImage("image_UIBottomBar_MediaImages_Icon_MediaSource",
+                mediaFlow_UIBottomBar_MediaImages_CoverFlow.Region.Left,
+                mediaFlow_UIBottomBar_MediaImages_CoverFlow.Region.Top + 10, 40, 40);
+            image_UIBottomBar_MediaImages_Icon_MediaSource.DataSource = "Screen{:S:}.Zone.MediaProvider.MediaSource.Icon";
+            image_UIBottomBar_MediaImages_Icon_MediaSource.Opacity = 178;
+            //image_UIBottomBar_MediaImages_Icon_MediaSource.Visible = false;
+            UIPanel.addControl(image_UIBottomBar_MediaImages_Icon_MediaSource);
+
+            // Suffle icon
+            OMImage image_UIBottomBar_MediaImages_Icon_Suffle = new OMImage("image_UIBottomBar_MediaImages_Icon_Suffle",
+                mediaFlow_UIBottomBar_MediaImages_CoverFlow.Region.Right - 40,
+                mediaFlow_UIBottomBar_MediaImages_CoverFlow.Region.Top + 10, 40, 40, OM.Host.getSkinImage("AIcons|9-av-shuffle").Copy());
+            //image_UIBottomBar_MediaImages_Icon_Suffle.Image.image.Glow(BuiltInComponents.SystemSettings.SkinFocusColor, 17);
+            image_UIBottomBar_MediaImages_Icon_Suffle.DataSource = "Screen{:S:}.Zone.MediaProvider.Shuffle";
+            image_UIBottomBar_MediaImages_Icon_Suffle.DataSourceControlsVisibility = true;
+            image_UIBottomBar_MediaImages_Icon_Suffle.Opacity = 178;
+            image_UIBottomBar_MediaImages_Icon_Suffle.Visible = false;
+            UIPanel.addControl(image_UIBottomBar_MediaImages_Icon_Suffle);
+
+            // Repeat icon
+            OMImage image_UIBottomBar_MediaImages_Icon_Repeat = new OMImage("image_UIBottomBar_MediaImages_Icon_Repeat",
+                image_UIBottomBar_MediaImages_Icon_Suffle.Region.Left,
+                image_UIBottomBar_MediaImages_Icon_Suffle.Region.Bottom, 40, 40, OM.Host.getSkinImage("AIcons|9-av-repeat").Copy());
+            //image_UIBottomBar_MediaImages_Icon_Repeat.Image.image.Glow(BuiltInComponents.SystemSettings.SkinFocusColor, 17);
+            image_UIBottomBar_MediaImages_Icon_Repeat.DataSource = "Screen{:S:}.Zone.MediaProvider.Repeat";
+            image_UIBottomBar_MediaImages_Icon_Repeat.DataSourceControlsVisibility = true;
+            image_UIBottomBar_MediaImages_Icon_Repeat.Opacity = 178;
+            image_UIBottomBar_MediaImages_Icon_Repeat.Visible = false;
+            UIPanel.addControl(image_UIBottomBar_MediaImages_Icon_Repeat);
+
+            #endregion
+            */
+            OMImage Image_UIBottomBar_Background = new OMImage("Image_UIBottomBar_Background", 0, bottomBarPlacement, 1000, 65, new imageItem(Color.Black, 1000, 65));
             UIPanel.addControl(Image_UIBottomBar_Background);
+
+            OMBasicShape Shape_UIBottomBar_Background = new OMBasicShape("Shape_UIBottomBar_Background", 0, bottomBarPlacement, 1000, 65,
+            new ShapeData(shapes.Rectangle)
+            {
+                GradientData = GradientData.CreateVerticalGradient
+                (
+                    new GradientData.ColorPoint(0, 0.0, Color.FromArgb(255, 0, 0, 0)),
+                    new GradientData.ColorPoint(0, 1.0, Color.FromArgb(255, 0, 0, 0)),
+                    new GradientData.ColorPoint(0, 1.0, Color.FromArgb(255, 30, 30, 50))
+                    )
+            });
+            UIPanel.addControl(Shape_UIBottomBar_Background);
+
+            OMBasicShape Shape_UIBottomBar_Separator = new OMBasicShape("Shape_UIBottomBar_Separator", 0, Shape_UIBottomBar_Background.Region.Top, 1000, 1,
+            new ShapeData(shapes.Rectangle)
+            {
+                GradientData = GradientData.CreateHorizontalGradient(
+                    new GradientData.ColorPoint(0.0, 0, Color.Black),
+                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5, 0, Color.Black))
+            });
+            //Shape_UIBottomBar_Separator.Opacity = 128;
+            UIPanel.addControl(Shape_UIBottomBar_Separator);
+
 
             //OMImage Image_UIBottomBar_Separator = new OMImage("Image_UIBottomBar_Separator", 0, Image_UIBottomBar_Background.Region.Top, 1000, 1);
             //Image_UIBottomBar_Separator.BackgroundColor = Color.FromArgb(50, Color.White);
@@ -260,7 +426,7 @@ namespace OpenMobile
             #region Volume control
 
             // Volume button background
-            OMButton Button_UIBottomBar_VolBackground = OMButton.PreConfigLayout_BasicStyle("Button_UIBottomBar_VolBackground", 5, Image_UIBottomBar_Background.Region.Top + 5, 140, Image_UIBottomBar_Background.Region.Height - 10, GraphicCorners.Left);
+            OMButton Button_UIBottomBar_VolBackground = OMButton.PreConfigLayout_BasicStyle_NoBackground("Button_UIBottomBar_VolBackground", 5, Image_UIBottomBar_Background.Region.Top, 140, Image_UIBottomBar_Background.Region.Height, GraphicCorners.None, Color.Transparent);
             Button_UIBottomBar_VolBackground.Opacity = 128;
             UIPanel.addControl(Button_UIBottomBar_VolBackground);
 
@@ -348,20 +514,20 @@ namespace OpenMobile
             //gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackground;
             //Button_UIBottomBar_Back.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
 
-            OMButton Button_UIBottomBar_Back = OMButton.PreConfigLayout_BasicStyle("Button_UIBottomBar_Back", 925, Image_UIBottomBar_Background.Region.Top + 5, 70, Image_UIBottomBar_Background.Region.Height - 10, GraphicCorners.Right);
+            OMButton Button_UIBottomBar_Back = OMButton.PreConfigLayout_BasicStyle_NoBackground("Button_UIBottomBar_Back", 925, Image_UIBottomBar_Background.Region.Top + 5, 70, Image_UIBottomBar_Background.Region.Height - 10, GraphicCorners.None, Color.Transparent);
             Button_UIBottomBar_Back.OverlayImage = theHost.getSkinImage("AIcons|5-content-undo");
             Button_UIBottomBar_Back.OverlayImageDrawMode = OMButton.DrawModes.FixedSizeCentered;
             Button_UIBottomBar_Back.GraphicSize = new Size(Image_UIBottomBar_Background.Region.Height, Image_UIBottomBar_Background.Region.Height);
 
             //Button_UIBottomBar_Back.GraphicDrawMode = OMButton.DrawModes.FixedSizeCentered;
             //Button_UIBottomBar_Back.GraphicSize = new Size(Image_UIBottomBar_Background.Region.Height, Image_UIBottomBar_Background.Region.Height);
-            Button_UIBottomBar_Back.Opacity = 128;
+            Button_UIBottomBar_Back.Opacity = 178;
             Button_UIBottomBar_Back.OnClick += new userInteraction(Button_UIBottomBar_Back_OnClick);
             Button_UIBottomBar_Back.OnHoldClick += new userInteraction(Button_UIBottomBar_Back_OnHoldClick);
             UIPanel.addControl(Button_UIBottomBar_Back);
 
             // Popup menu icon
-            OMButton Button_UIBottomBar_MenuPopUp = OMButton.PreConfigLayout_BasicStyle("Button_UIBottomBar_MenuPopUp", Button_UIBottomBar_Back.Region.Left - 69, Image_UIBottomBar_Background.Region.Top + 5, 70, Image_UIBottomBar_Background.Region.Height - 10, GraphicCorners.None);
+            OMButton Button_UIBottomBar_MenuPopUp = OMButton.PreConfigLayout_BasicStyle_NoBackground("Button_UIBottomBar_MenuPopUp", Button_UIBottomBar_Back.Region.Left - 69, Image_UIBottomBar_Background.Region.Top + 5, 70, Image_UIBottomBar_Background.Region.Height - 10, GraphicCorners.None, Color.Transparent);
             Button_UIBottomBar_MenuPopUp.OverlayImage = theHost.getSkinImage("AIcons|1-navigation-expand");
             imgPopUpMenuButton_Expand_Focus = Button_UIBottomBar_MenuPopUp.FocusImage;
             imgPopUpMenuButton_Expand_Down = Button_UIBottomBar_MenuPopUp.DownImage;
@@ -374,16 +540,19 @@ namespace OpenMobile
             Button_UIBottomBar_MenuPopUp.OverlayImage = imageItem.NONE;
             Button_UIBottomBar_MenuPopUp.DownImage = imageItem.NONE;
             Button_UIBottomBar_MenuPopUp.OnClick += new userInteraction(Button_UIBottomBar_MenuPopUp_OnClick);
-            Button_UIBottomBar_MenuPopUp.Opacity = 128;
+            Button_UIBottomBar_MenuPopUp.Opacity = 178;
             //Button_UIBottomBar_MenuPopUp.Visible = false;
             UIPanel.addControl(Button_UIBottomBar_MenuPopUp);
 
-            // Button to fill the area between the outmost controls in the bottombar
-            OMButton Button_UIBottomBar_Background = OMButton.PreConfigLayout_BasicStyle("Button_UIBottomBar_Background", Button_UIBottomBar_VolBackground.Region.Right - 1, Button_UIBottomBar_VolBackground.Region.Top, Button_UIBottomBar_MenuPopUp.Region.Left - Button_UIBottomBar_VolBackground.Region.Right + 2, Button_UIBottomBar_VolBackground.Region.Height, GraphicCorners.None);
-            Button_UIBottomBar_Background.FocusImage = imageItem.NONE;
-            Button_UIBottomBar_Background.DownImage = imageItem.NONE;
-            Button_UIBottomBar_Background.Opacity = 128;
-            UIPanel.addControl(Button_UIBottomBar_Background);
+            //// Button to fill the area between the outmost controls in the bottombar
+            //OMButton Button_UIBottomBar_Background = OMButton.PreConfigLayout_BasicStyle("Button_UIBottomBar_Background", Button_UIBottomBar_VolBackground.Region.Right - 1, Button_UIBottomBar_VolBackground.Region.Top, Button_UIBottomBar_MenuPopUp.Region.Left - Button_UIBottomBar_VolBackground.Region.Right + 2, Button_UIBottomBar_VolBackground.Region.Height, GraphicCorners.None);
+            //Button_UIBottomBar_Background.FocusImage = imageItem.NONE;
+            //Button_UIBottomBar_Background.DownImage = imageItem.NONE;
+            //Button_UIBottomBar_Background.Opacity = 128;
+            //Button_UIBottomBar_Background.Visible = false;
+            //UIPanel.addControl(Button_UIBottomBar_Background);
+
+
 
             //OMButton Button_UIBottomBar_MenuPopUp = new OMButton("Button_UIBottomBar_MenuPopUp", Button_UIBottomBar_Back.Region.Left - 80, Image_UIBottomBar_Background.Region.Top, 80, Image_UIBottomBar_Background.Region.Height);
             //ButtonGraphics_SetGlowingFocusImages(Button_UIBottomBar_MenuPopUp, theHost.getSkinImage("AIcons|1-navigation-expand").image);
@@ -414,19 +583,37 @@ namespace OpenMobile
             // Create a buttonstrip
             theHost.UIHandler.ControlButtons.ButtonSize = new Size(80, theHost.UIHandler.ControlButtons.SuggestedButtonSize.Height);
             ButtonStrip btnStrip_Media = new ButtonStrip(this.pluginName, UIPanel.Name, "MediaControl");
-            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn1", theHost.UIHandler.ControlButtons.ButtonSize, 128, theHost.getSkinImage("AIcons|9-av-previous"), null, null, null));
-            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn2", theHost.UIHandler.ControlButtons.ButtonSize, 128, theHost.getSkinImage("AIcons|9-av-rewind"),  null, null, null));
-            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn3", theHost.UIHandler.ControlButtons.ButtonSize, 128, theHost.getSkinImage("AIcons|9-av-play"),MediaButtonStrip_Play_OnClick, null, null));
-            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn4", theHost.UIHandler.ControlButtons.ButtonSize, 128, theHost.getSkinImage("AIcons|9_av_fast_forward"), null, null, null));
-            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn5", theHost.UIHandler.ControlButtons.ButtonSize, 128, theHost.getSkinImage("AIcons|9-av-next"), null, null, null));
+            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn1", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-previous"), ControlButton_Previous_OnClick, null, null, false, false));
+            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn2", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-rewind"), ControlButton_SeekBackward_OnClick, ControlButton_SeekBackward_OnHoldClick, null, false, false));
+            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn3", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), ControlButton_Play_OnClick, ControlButton_Play_OnHoldClick, null, false, false));
+            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn4", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-stop"), ControlButton_Stop_OnClick, null, null, false, false));
+            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn5", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9_av_fast_forward"), ControlButton_SeekForward_OnClick, ControlButton_SeekForward_OnHoldClick, null, false, false));
+            btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn6", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-next"), ControlButton_Next_OnClick, null, null, false, false));
+            //btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn1", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-previous"), String.Format("Screen{0}.Zone.MediaProvider.Previous", DataSource.DataTag_Screen), null, null, false, false));
+            //btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn2", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-rewind"), String.Format("Screen{0}.Zone.MediaProvider.SeekBackward", DataSource.DataTag_Screen), String.Format("Screen{0}.Zone.MediaProvider.SeekBackward{1}", DataSource.DataTag_Screen, DataSource.DataTag_Loop), null, false, false));
+            //btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn3", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), String.Format("Screen{0}.Zone.MediaProvider.Play", DataSource.DataTag_Screen), String.Format("Screen{0}.Zone.MediaProvider.Stop", DataSource.DataTag_Screen), null, false, false));
+            //btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn4", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9_av_fast_forward"), String.Format("Screen{0}.Zone.MediaProvider.SeekForward", DataSource.DataTag_Screen), String.Format("Screen{0}.Zone.MediaProvider.SeekForward{1}", DataSource.DataTag_Screen, DataSource.DataTag_Loop), null, false, false));
+            //btnStrip_Media.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn5", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-next"), String.Format("Screen{0}.Zone.MediaProvider.Next", DataSource.DataTag_Screen), null, null, false, false));
             theHost.UIHandler.ControlButtons.SetButtonStrip(btnStrip_Media);
+
+            // Connect to dataSources for media provider to change button icons according to playback state
+            OM.Host.ForEachScreen(delegate(int screen)
+            {
+                OM.Host.DataHandler.SubscribeToDataSource(screen, "Screen{:S:}.Zone.MediaProvider.Playback.Stopped", ControlButtonDataSourceChanged);
+                OM.Host.DataHandler.SubscribeToDataSource(screen, "Screen{:S:}.Zone.MediaProvider.Playback.Playing", ControlButtonDataSourceChanged);
+                OM.Host.DataHandler.SubscribeToDataSource(screen, "Screen{:S:}.Zone.MediaProvider.Playback.Paused", ControlButtonDataSourceChanged);
+            });
+            
+            //OM.Host.DataHandler.SubscribeToDataSource("Screen0.Zone.MediaProvider.Playback.Stopped"
+
+            
 
             // Set the main bottombar buttonstrip in OM
             theHost.UIHandler.ControlButtons_MainButtonStrip = btnStrip_Media;            
 
-            // Create a second buttonstrip
-            btnStrip_Media2 = new ButtonStrip(this.pluginName, UIPanel.Name, "MediaControl2");
-            btnStrip_Media2.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn1", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), MediaButtonStrip_Play_OnClick, null, null));
+            //// Create a second buttonstrip
+            //btnStrip_Media2 = new ButtonStrip(this.pluginName, UIPanel.Name, "MediaControl2");
+            //btnStrip_Media2.Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn1", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), MediaButtonStrip_Play_OnClick, null, null, false, false));
 
             #region Zone info bar (including volume bar)
 
@@ -469,6 +656,46 @@ namespace OpenMobile
             //UIPanel.addControl(label_UIBottomBar_ZoneName);
 
             #endregion
+
+            // Bottom bar media info
+            OMImage Image_UIBottomBar_MediaInfo_CoverArt = new OMImage("Image_UIBottomBar_MediaInfo_CoverArt", Button_UIBottomBar_VolBackground.Region.Right + 20, Image_UIBottomBar_Background.Region.Top + 5, Image_UIBottomBar_Background.Region.Height - 10, Image_UIBottomBar_Background.Region.Height - 10);
+            Image_UIBottomBar_MediaInfo_CoverArt.DataSource = String.Format("Screen{0}.Zone.MediaInfo.CoverArt", DataSource.DataTag_Screen);
+            UIPanel.addControl(Image_UIBottomBar_MediaInfo_CoverArt);
+
+            OMLabel Label_UIBottomBar_MediaInfo_Line1 = new OMLabel("Label_UIBottomBar_MediaInfo_Line1", 
+                Image_UIBottomBar_MediaInfo_CoverArt.Region.Right, 
+                Image_UIBottomBar_MediaInfo_CoverArt.Region.Top, 
+                theHost.UIHandler.ControlButtons.Container.Region.Right - Image_UIBottomBar_MediaInfo_CoverArt.Region.Right,
+                Image_UIBottomBar_MediaInfo_CoverArt.Height / 2,
+                "{Screen{:S:}.Zone.MediaProvider.MediaText1}");
+            Label_UIBottomBar_MediaInfo_Line1.FontSize = 18;
+            Label_UIBottomBar_MediaInfo_Line1.TextAlignment = Alignment.CenterLeft;
+            UIPanel.addControl(Label_UIBottomBar_MediaInfo_Line1);
+
+            OMLabel Label_UIBottomBar_MediaInfo_Line2 = new OMLabel("Label_UIBottomBar_MediaInfo_Line2",
+                Label_UIBottomBar_MediaInfo_Line1.Region.Left,
+                Label_UIBottomBar_MediaInfo_Line1.Region.Bottom,
+                Label_UIBottomBar_MediaInfo_Line1.Region.Width,
+                Label_UIBottomBar_MediaInfo_Line1.Region.Height,
+                "{Screen{:S:}.Zone.MediaProvider.MediaText2}");
+            Label_UIBottomBar_MediaInfo_Line2.FontSize = 18;
+            Label_UIBottomBar_MediaInfo_Line2.TextAlignment = Alignment.CenterLeft;
+            UIPanel.addControl(Label_UIBottomBar_MediaInfo_Line2);
+
+            //OMLabel Label_UIBottomBar_MediaInfo_Line3 = new OMLabel("Label_UIBottomBar_MediaInfo_Line3",
+            //    Label_UIBottomBar_MediaInfo_Line2.Region.Left,
+            //    Label_UIBottomBar_MediaInfo_Line2.Region.Bottom,
+            //    Label_UIBottomBar_MediaInfo_Line2.Region.Width,
+            //    Label_UIBottomBar_MediaInfo_Line2.Region.Height,
+            //    "{Screen{:S:}.Zone.MediaInfo.TrackNumber} - {Screen{:S:}.Zone.MediaInfo.Genre}");
+            //Label_UIBottomBar_MediaInfo_Line3.FontSize = 14;
+            //Label_UIBottomBar_MediaInfo_Line3.TextAlignment = Alignment.CenterLeft;
+            //UIPanel.addControl(Label_UIBottomBar_MediaInfo_Line3);            
+
+            // Add invisible button over media info to show control buttons
+            OMButton Button_UIBottomBar_ShowMediaInfo = new OMButton("Button_UIBottomBar_ShowMediaInfo", theHost.UIHandler.ControlButtons.Container.Region.Left, theHost.UIHandler.ControlButtons.Container.Region.Top, theHost.UIHandler.ControlButtons.Container.Region.Width, theHost.UIHandler.ControlButtons.Container.Region.Height);
+            Button_UIBottomBar_ShowMediaInfo.OnClick += new userInteraction(Button_UIBottomBar_MediaInfo_OnClick);
+            UIPanel.addControl(Button_UIBottomBar_ShowMediaInfo);
 
             ////OMButton Button_UIBottomBar_Back = DefaultControls.GetHorisontalEdgeButton("Button_UIBottomBar_Back", 831, 533, 160, 70, "", "Back");
             //OMButton Button_UIBottomBar_Back = new OMButton("Button_UIBottomBar_Back", 831, 533, 160, 70);
@@ -581,8 +808,8 @@ namespace OpenMobile
             {
                 GradientData = GradientData.CreateHorizontalGradient(
                     new GradientData.ColorPoint(0.0, 0, Color.Black),
-                    new GradientData.ColorPoint(0.5, 0, BuiltInComponents.SystemSettings.SkinFocusColor),
-                    new GradientData.ColorPoint(1.0, 0, BuiltInComponents.SystemSettings.SkinFocusColor),
+                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
                     new GradientData.ColorPoint(0.5, 0, Color.Black))
             });
             UIPanel.addControl(Shape_UITopBar_Separator);
@@ -790,10 +1017,29 @@ namespace OpenMobile
             theHost.UIHandler.OnHideInfoBanner += new UIHandler.HideInfoBannerDelegate(UIHandler_OnHideInfoBanner);
             theHost.UIHandler.OnShowInfoBanner += new UIHandler.ShowInfoBannerDelegate(UIHandler_OnShowInfoBanner);
 
+            theHost.UIHandler.OnHideInfoBar += new UIHandler.HideInfoBarDelegate(UIHandler_OnHideInfoBar);
+            theHost.UIHandler.OnShowInfoBar += new UIHandler.ShowInfoBarDelegate(UIHandler_OnShowInfoBar);
+
+            theHost.UIHandler.OnHideMediaBanner += new UIHandler.HideMediaBannerDelegate(UIHandler_OnHideMediaBanner);
+            theHost.UIHandler.OnShowMediaBanner += new UIHandler.ShowMediaBannerDelegate(UIHandler_OnShowMediaBanner);
+            theHost.UIHandler.OnEnableMediaBanner += new UIHandler.EnableMediaBannerDelegate(UIHandler_OnEnableMediaBanner);
+
             UIPanel.Priority = ePriority.UI;
             UIPanel.UIPanel = true;
 
             UIPanel.Entering += new PanelEvent(UIPanel_Entering);
+
+            #region Brightness adjustment graphics
+
+            OMBasicShape shpBrightnessAdjustment = new OMBasicShape("shpBrightnessAdjustment", OM.Host.ClientFullArea.Left, OM.Host.ClientFullArea.Top, OM.Host.ClientFullArea.Width, OM.Host.ClientFullArea.Height,
+                new ShapeData(shapes.Rectangle, Color.Black));
+            shpBrightnessAdjustment.Opacity = (OM.Host.CurrentLocation_Daytime ? 255 : StoredData.GetInt(this, "System.Opacitylevel", 0));
+            shpBrightnessAdjustment.NoUserInteraction = true;
+            if (_OpacityMode != OpacityModes.All)
+                shpBrightnessAdjustment.Visible = false;
+            UIPanel.addControl(shpBrightnessAdjustment);
+
+            #endregion
 
             manager.loadPanel(UIPanel, true);
 
@@ -894,6 +1140,16 @@ namespace OpenMobile
             background.Priority = ePriority.Low;
             background.UIPanel = true;
             background.Forgotten = true;
+
+            // Screen background image
+            OMImage backgroundImage = new OMImage("backgroundImage", OM.Host.ClientFullArea.Left, OM.Host.ClientFullArea.Top, OM.Host.ClientFullArea.Width, OM.Host.ClientFullArea.Height);
+            backgroundImage.Image = OM.Host.getImageFromFile(StoredData.Get(this, "Background.Image"));//OM.Host.getSkinImage("Backgrounds|Highway 1");
+            
+            // Set opacity based on day/night setting
+            if (_OpacityMode == OpacityModes.BackgroundOnly)
+                backgroundImage.Opacity = (OM.Host.CurrentLocation_Daytime ? 255 : StoredData.GetInt(this, "System.Opacitylevel"));
+            background.addControl(backgroundImage);             
+
             manager.loadPanel(background);
 
             #endregion
@@ -910,10 +1166,153 @@ namespace OpenMobile
             ClientArea.Bottom = Image_UIBottomBar_Background.Region.Top; //Image_UIBottomBar_Separator.Region.Top;
             BuiltInComponents.Host.SetClientArea(ClientArea);
 
+            CreateAndLoadPanel_MediaBar();
+
             // Connect to zone events
             theHost.ZoneHandler.OnZoneUpdated += new Zones.ZoneHandler.ZoneUpdatedDelegate(ZoneHandler_OnZoneUpdated);
 
+
             return eLoadStatus.LoadSuccessful;
+        }
+
+        private void CreateAndLoadPanel_MediaBar()
+        {
+            // Create a new panel
+            OMPanel panel = new OMPanel("MediaBar");
+
+            // Set transition effects
+            panel.TransitionEffect_Show = eGlobalTransition.SlideUp;
+            panel.TransitionEffect_Hide = eGlobalTransition.SlideDown;
+
+            // Coverflow background
+            int coverFlowHeight = 120;
+            OMBasicShape shape_UIBottomBar_MediaImages_Background = new OMBasicShape("shape_Background", 0, OM.Host.ClientArea_Init.Bottom - coverFlowHeight, 1000, coverFlowHeight,
+                new ShapeData(shapes.Rectangle, Color.Black));
+            shape_UIBottomBar_MediaImages_Background.Transparency = 10;
+            //shape_UIBottomBar_MediaImages_Background.NoUserInteraction = true;
+            //shape_UIBottomBar_MediaImages_Background.Visible = false;
+            panel.addControl(shape_UIBottomBar_MediaImages_Background);
+
+            // Separator
+            OMBasicShape Shape_UIBottomBar_MediaImages_Background_Separator = new OMBasicShape("Shape_Background_Separator", shape_UIBottomBar_MediaImages_Background.Region.Left, shape_UIBottomBar_MediaImages_Background.Region.Top, shape_UIBottomBar_MediaImages_Background.Region.Width, 1,
+            new ShapeData(shapes.Rectangle)
+            {
+                GradientData = GradientData.CreateHorizontalGradient(
+                    new GradientData.ColorPoint(0.0, 0, Color.Black),
+                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5, 0, Color.Black))
+            });
+            //Shape_UIBottomBar_MediaImages_Background_Separator.Visible = false;
+            panel.addControl(Shape_UIBottomBar_MediaImages_Background_Separator);
+
+            // Create coverflow popup when changing media
+            OMMediaFlow mediaFlow_UIBottomBar_MediaImages_CoverFlow = new OMMediaFlow("mediaFlow_CoverFlow", shape_UIBottomBar_MediaImages_Background.Region.Left, shape_UIBottomBar_MediaImages_Background.Region.Top, shape_UIBottomBar_MediaImages_Background.Region.Width, shape_UIBottomBar_MediaImages_Background.Region.Height);
+            OMImageFlow.PreConfigLayout_Flat_ApplyToControl(mediaFlow_UIBottomBar_MediaImages_CoverFlow);
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.MediaInfoFormatString = "{1} - {0} - {6}";
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.FontSize = 14;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.Color = Color.FromArgb(178, Color.White);
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.TextAlignment = Alignment.TopCenter;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.Animation_FadeOutDistance = 6;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.ReflectionsEnabled = false;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.NoUserInteraction = true;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.Control_PlacementOffsetY = 5;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.ImageSize = new Size(mediaFlow_UIBottomBar_MediaImages_CoverFlow.Height * 0.6f, mediaFlow_UIBottomBar_MediaImages_CoverFlow.Height * 0.6f);
+            //mediaFlow_UIBottomBar_MediaImages_CoverFlow.Visible = false;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.ListSource = OMMediaFlow.ListSources.Buffer;
+            panel.addControl(mediaFlow_UIBottomBar_MediaImages_CoverFlow);
+
+            //// Mediasource icon
+            //OMImage image_UIBottomBar_MediaImages_Icon_MediaSource = new OMImage("image_Icon_MediaSource",
+            //    mediaFlow_UIBottomBar_MediaImages_CoverFlow.Region.Left,
+            //    mediaFlow_UIBottomBar_MediaImages_CoverFlow.Region.Top + 10, 40, 40);
+            //image_UIBottomBar_MediaImages_Icon_MediaSource.DataSource = "Screen{:S:}.Zone.MediaProvider.MediaSource.Icon";
+            //image_UIBottomBar_MediaImages_Icon_MediaSource.Opacity = 178;
+            ////image_UIBottomBar_MediaImages_Icon_MediaSource.Visible = false;
+            //panel.addControl(image_UIBottomBar_MediaImages_Icon_MediaSource);
+
+            //OMLabel label_Icon_MediaSource_Text = new OMLabel("label_Icon_MediaSource_Text",
+            //    image_UIBottomBar_MediaImages_Icon_MediaSource.Region.Right-7,
+            //    image_UIBottomBar_MediaImages_Icon_MediaSource.Region.Top,
+            //    100,
+            //    image_UIBottomBar_MediaImages_Icon_MediaSource.Region.Height,
+            //    "{Screen{:S:}.Zone.MediaProvider.MediaSource.Name}");
+            //label_Icon_MediaSource_Text.TextAlignment = Alignment.CenterLeft;
+            //label_Icon_MediaSource_Text.FontSize = 16;
+            //label_Icon_MediaSource_Text.Color = Color.White;
+            //label_Icon_MediaSource_Text.Opacity = 178;
+            //panel.addControl(label_Icon_MediaSource_Text);
+
+            //// Suffle icon
+            //OMImage image_UIBottomBar_MediaImages_Icon_Suffle = new OMImage("image_Icon_Suffle",
+            //    mediaFlow_UIBottomBar_MediaImages_CoverFlow.Region.Right - 40,
+            //    mediaFlow_UIBottomBar_MediaImages_CoverFlow.Region.Top + 10, 40, 40, OM.Host.getSkinImage("AIcons|9-av-shuffle").Copy());
+            ////image_UIBottomBar_MediaImages_Icon_Suffle.Image.image.Glow(BuiltInComponents.SystemSettings.SkinFocusColor, 17);
+            //image_UIBottomBar_MediaImages_Icon_Suffle.DataSource = "Screen{:S:}.Zone.MediaProvider.Shuffle";
+            //image_UIBottomBar_MediaImages_Icon_Suffle.DataSourceControlsVisibility = true;
+            //image_UIBottomBar_MediaImages_Icon_Suffle.Opacity = 178;
+            ////image_UIBottomBar_MediaImages_Icon_Suffle.Visible = false;
+            //panel.addControl(image_UIBottomBar_MediaImages_Icon_Suffle);
+
+            //// Repeat icon
+            //OMImage image_UIBottomBar_MediaImages_Icon_Repeat = new OMImage("image_Icon_Repeat",
+            //    image_UIBottomBar_MediaImages_Icon_Suffle.Region.Left,
+            //    image_UIBottomBar_MediaImages_Icon_Suffle.Region.Bottom, 40, 40, OM.Host.getSkinImage("AIcons|9-av-repeat").Copy());
+            ////image_UIBottomBar_MediaImages_Icon_Repeat.Image.image.Glow(BuiltInComponents.SystemSettings.SkinFocusColor, 17);
+            //image_UIBottomBar_MediaImages_Icon_Repeat.DataSource = "Screen{:S:}.Zone.MediaProvider.Repeat";
+            //image_UIBottomBar_MediaImages_Icon_Repeat.DataSourceControlsVisibility = true;
+            //image_UIBottomBar_MediaImages_Icon_Repeat.Opacity = 178;
+            ////image_UIBottomBar_MediaImages_Icon_Repeat.Visible = false;
+            //panel.addControl(image_UIBottomBar_MediaImages_Icon_Repeat);
+
+            panel.Forgotten = true;
+            panel.Priority = ePriority.UI;
+
+            // Load the panel into the local manager for panels
+            manager.loadPanel(panel);
+        }
+
+        private void BottomBar_MediaInfo_Show(int screen, bool fast)
+        {
+            // skip if media banner is not enabled
+            if (!OM.Host.UIHandler.MediaBanner_IsEnabled(screen))
+                return;
+
+            OMPanel panel = manager[screen, "UI"];
+            ControlLayout ZoneInfo = new ControlLayout(panel, "_UIBottomBar_MediaInfo_");
+            ZoneInfo.Visible = true;
+            if (!fast)
+                SmoothAnimator.PresetAnimation_FadeIn(ZoneInfo, screen, 2f);
+        }
+        private void BottomBar_MediaInfo_Hide(int screen, bool fast)
+        {
+            OMPanel panel = manager[screen, "UI"];
+            ControlLayout ZoneInfo = new ControlLayout(panel, "_UIBottomBar_MediaInfo_");
+            if (!fast)
+                SmoothAnimator.PresetAnimation_FadeOut(ZoneInfo, screen, 2f);
+            ZoneInfo.Visible = false;
+        }
+
+        private void BottomBar_MediaInfo_ButtonOverlay_Show(int screen)
+        {
+            OMPanel panel = manager[screen, "UI"];
+            OMButton btn = panel[screen, "Button_UIBottomBar_ShowMediaInfo"] as OMButton;
+            if (btn != null)
+                btn.Visible = true;
+        }
+        private void BottomBar_MediaInfo_ButtonOverlay_Hide(int screen)
+        {
+            OMPanel panel = manager[screen, "UI"];
+            OMButton btn = panel[screen, "Button_UIBottomBar_ShowMediaInfo"] as OMButton;
+            if (btn != null)
+                btn.Visible = false;
+        }
+
+
+
+        void Button_UIBottomBar_MediaInfo_OnClick(OMControl sender, int screen)
+        {
+            theHost.UIHandler.ControlButtons_Show(screen, false, 5);
         }
 
         void ZoneHandler_OnZoneUpdated(Zone zone, int screen)
@@ -955,6 +1354,7 @@ namespace OpenMobile
                         BuiltInComponents.Host.UIHandler.ControlButtons_Hide(screen, true);
                     }
 
+                    ZoneInfo.Visible = true;
                     while (AnimationControl.Cancel)
                     {
                         AnimationControl.Cancel = false;
@@ -999,6 +1399,27 @@ namespace OpenMobile
             OMBasicShape shp = InfoBanner["Shape_InfoBanner_Background"] as OMBasicShape;
             OMLabel lblBack = InfoBanner["Label_InfoBanner_Background"] as OMLabel;
             OMLabel lblText = InfoBanner["Label_InfoBanner_Text"] as OMLabel;
+
+            // Scale size of graphics to match lines
+            string[] lines = bannerData.Text.Split('\n');
+            int calculatedSize = 100;
+            if (lines.Length > 1)
+            {   // Dynamic size
+                calculatedSize = (int)((100 * 0.75f) * lines.Length);
+                if (shp.Region.Height < calculatedSize)
+                {
+                    int diff = calculatedSize - shp.Region.Height;
+                    shp.Height += diff;
+                    lblBack.Height += diff;
+                    lblText.Height += diff;
+                }
+            }
+            else
+            {   // Default size
+                shp.Height = 100;
+                lblBack.Height = 100;
+                lblText.Height = 100;
+            }
 
             if (!InfoBanner.Visible)
             {
@@ -1098,7 +1519,7 @@ namespace OpenMobile
                                         {
                                             #region Delay while showing message
 
-                                            if (AnimationDurationMS < Delay)
+                                            if (AnimationDurationMS < Delay || Delay == 0)
                                                 ContinueAnimation = true;
 
                                             if (lblText.Tag != null)
@@ -1165,6 +1586,54 @@ namespace OpenMobile
 
         #endregion 
 
+        #region Infobar (topbar info field)
+
+        void UIHandler_OnShowInfoBar(int screen, InfoBar barData)
+        {
+            OMPanel panel = manager[screen, "UI"];
+            OMAnimatedLabel2 InfoLabel = panel["label_UITopBar_Info"] as OMAnimatedLabel2;
+            if (InfoLabel != null)
+            {
+                if (barData.Timeout > 0)
+                    InfoLabel.TransitionInText(OMAnimatedLabel2.eAnimation.SlideDownSmooth, OMAnimatedLabel2.eAnimation.SlideUpSmooth, barData.Text, 2.0f, barData.Timeout);
+                else
+                    InfoLabel.TransitionInText(OMAnimatedLabel2.eAnimation.SlideDownSmooth, barData.Text, 2.0f);
+            }
+        }
+
+        void UIHandler_OnHideInfoBar(int screen)
+        {
+            OMPanel panel = manager[screen, "UI"];
+            OMAnimatedLabel2 InfoLabel = panel["label_UITopBar_Info"] as OMAnimatedLabel2;
+            if (InfoLabel != null)
+                InfoLabel.TransitionInText(OMAnimatedLabel2.eAnimation.SlideUpSmooth, String.Empty, 2.0f);
+        }
+
+        #endregion 
+
+        #region MediaBanner
+
+        private void UIHandler_OnShowMediaBanner(int screen, bool fast)
+        {
+            // Check for valid data before showing media banner
+            PlayList2 playlist = OM.Host.ZoneHandler.GetActiveZone(screen).MediaHandler.Playlist;
+            if (playlist == null || !playlist.HasItems)
+                return;
+
+            OM.Host.execute(eFunction.ShowPanel, screen, String.Format("{0};{1}", this.pluginName, "MediaBar"));//, eGlobalTransition.SlideUp);
+        }
+        private void UIHandler_OnHideMediaBanner(int screen, bool fast)
+        {
+            OM.Host.execute(eFunction.HidePanel, screen, String.Format("{0};{1}", this.pluginName, "MediaBar"));//, eGlobalTransition.SlideDown);
+        }
+
+        void UIHandler_OnEnableMediaBanner(int screen, bool fast)
+        {
+
+        }
+
+        #endregion
+
         #region Control Buttons
 
         void UIHandler_OnControlButtonsChanged(object sender, int screen, bool popupAvailable)
@@ -1174,30 +1643,148 @@ namespace OpenMobile
 
         void UIHandler_OnShowControlButtons(int screen, bool fast)
         {
+            BottomBar_MediaInfo_Hide(screen, fast);
+            BottomBar_MediaInfo_ButtonOverlay_Hide(screen);
             OMPanel panel = manager[screen, "UI"];
             OMContainer container = panel["Container_UIBottomBar_ButtonStrip"] as OMContainer;
             if (container != null)
+            {
                 if (fast)
                     container.Visible = true;
                 else
                 {
+                    //ControlLayout CoverFlowGroup = new ControlLayout(panel, "_UIBottomBar_MediaImages_");
+                    //CoverFlowGroup.Visible_Force(true);
                     ControlLayout ButtonStripGroup = new ControlLayout(panel, "Container_UIBottomBar_ButtonStrip");
-                    SmoothAnimator.PresetAnimation_FadeIn(ButtonStripGroup, screen, 1.2f, null);
+                    ButtonStripGroup.Visible = true;
+                    SmoothAnimator.PresetAnimation_FadeIn(screen, 1.2f, null, ButtonStripGroup);
+
+                    //// Animate multiple groups
+                    //SmoothAnimator.PresetAnimation_FadeIn(screen, 1.2f, null, ButtonStripGroup, CoverFlowGroup);
+
                 }
+            }
+            //BottomBar_CoverFlow_Show(screen, fast);
+            OM.Host.UIHandler.MediaBanner_Show(screen, fast);
         }
 
         void UIHandler_OnHideControlButtons(int screen, bool fast)
         {
+            OM.Host.UIHandler.MediaBanner_Hide(screen, fast);
+
             OMPanel panel = manager[screen, "UI"];
             OMContainer container = panel["Container_UIBottomBar_ButtonStrip"] as OMContainer;
             if (container != null)
+            {
                 if (fast)
                     container.Visible = false;
                 else
                 {
+                    //ControlLayout CoverFlowGroup = new ControlLayout(panel, "_UIBottomBar_MediaImages_");
                     ControlLayout ButtonStripGroup = new ControlLayout(panel, "Container_UIBottomBar_ButtonStrip");
-                    SmoothAnimator.PresetAnimation_FadeOut(ButtonStripGroup, screen, 1.2f, null);
+
+                    // Animate multiple groups
+                    //SmoothAnimator.PresetAnimation_FadeOut(screen, 1.2f, null, ButtonStripGroup, CoverFlowGroup);
+                    SmoothAnimator.PresetAnimation_FadeOut(screen, 1.2f, null, ButtonStripGroup);
                 }
+            }
+            BottomBar_MediaInfo_Show(screen, fast);
+            BottomBar_MediaInfo_ButtonOverlay_Show(screen);
+        }
+
+        void ControlButton_Pause_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.Pause", screen));
+            OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+        }
+        void ControlButton_Play_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.Play", screen));
+            OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+        }
+        void ControlButton_Play_OnHoldClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.Pause", screen));
+            OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+        }
+
+        void ControlButton_Stop_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.Stop", screen));
+            OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+        }
+
+        void ControlButton_SeekForward_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.SeekForward", screen));
+            OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+        }
+        void ControlButton_SeekForward_OnHoldClick(OMControl sender, int screen)
+        {
+            while (sender.Mode == eModeType.Clicked)
+            {
+                OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.SeekForward", screen));
+                OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+                System.Threading.Thread.Sleep(100);
+            }
+        }
+
+        void ControlButton_SeekBackward_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.SeekBackward", screen));
+            OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+        }
+        void ControlButton_SeekBackward_OnHoldClick(OMControl sender, int screen)
+        {
+            while (sender.Mode == eModeType.Clicked)
+            {
+                OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.SeekBackward", screen));
+                OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+                System.Threading.Thread.Sleep(100);
+            }
+        }
+
+        void ControlButton_Previous_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.Previous", screen));
+            OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+        }
+
+        void ControlButton_Next_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.Next", screen));
+            OM.Host.UIHandler.ControlButtons_AutoHideTimer_Reset(screen);
+        }
+
+        private void ControlButtonDataSourceChanged(OpenMobile.Data.DataSource dataSource)
+        {
+            if (dataSource.Value == null)
+                return;
+
+            if (dataSource.NameLevel3 == "MediaProvider.Playback.Stopped")
+            {
+                if ((bool)dataSource.Value == true)
+                {
+                    OM.Host.UIHandler.ControlButtons.GetButtonStrip(dataSource.Screen.Value).Buttons["Btn3"] =
+                        Button.PreConfigLayout_MenuBarStyle("Btn3", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), ControlButton_Play_OnClick, null, null, false, false);
+                }
+            }
+            else if (dataSource.NameLevel3 == "MediaProvider.Playback.Playing")
+            {
+                if ((bool)dataSource.Value == true)
+                {
+                    OM.Host.UIHandler.ControlButtons.GetButtonStrip(dataSource.Screen.Value).Buttons["Btn3"] =
+                        Button.PreConfigLayout_MenuBarStyle("Btn3", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-pause"), ControlButton_Pause_OnClick, null, null, false, false);
+                }
+            }
+            else if (dataSource.NameLevel3 == "MediaProvider.Playback.Paused")
+            {
+                if ((bool)dataSource.Value == true)
+                {
+                    OM.Host.UIHandler.ControlButtons.GetButtonStrip(dataSource.Screen.Value).Buttons["Btn3"] =
+                        Button.PreConfigLayout_MenuBarStyle("Btn3", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), ControlButton_Play_OnClick, null, null, false, false);
+                }
+            }
         }
 
         #endregion
@@ -1847,10 +2434,11 @@ namespace OpenMobile
             theHost.execute(eFunction.goBack, screen.ToString());
         }
 
+/*
         void MediaButtonStrip_Play_OnClick(OMControl sender, int screen)
         {
             // Add a new button
-            theHost.UIHandler.ControlButtons.GetButtonStrip(screen).Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn6", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), MediaButtonStrip_Play_OnClick, null, null));
+            //theHost.UIHandler.ControlButtons.GetButtonStrip(screen).Buttons.Add(Button.PreConfigLayout_MenuBarStyle("Btn6", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), MediaButtonStrip_Play_OnClick, null, null));
 
             // Update button
             //theHost.StatusBarHandler.BottomBar_ButtonStripContainer.GetButtonStrip(screen).Buttons["Btn3"] = Button.CreateSimpleButton("Btn6", theHost.StatusBarHandler.BottomBar_ButtonStripContainer.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-pause"), MediaButtonStrip_Play_OnClick, null, null); ;
@@ -1860,8 +2448,53 @@ namespace OpenMobile
             //    theHost.StatusBarHandler.BottomBar_ButtonStripContainer.SetButtonStrip(screen, btnStrip_Media2);
             //else
             //    theHost.StatusBarHandler.BottomBar_ButtonStripContainer.SetButtonStrip(screen, btnStrip_Media);
-        }
 
+            Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+            zone.MediaHandler.Play();
+        }
+        void MediaButtonStrip_Play_OnHoldClick(OMControl sender, int screen)
+        {
+            Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+            zone.MediaHandler.Stop();
+        }
+        void MediaButtonStrip_Fwd_OnClick(OMControl sender, int screen)
+        {
+            Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+            zone.MediaHandler.SeekFwd();
+        }
+        void MediaButtonStrip_Fwd_OnHoldClick(OMControl sender, int screen)
+        {
+            Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+            while (sender.Mode == eModeType.Clicked)
+            {
+                zone.MediaHandler.SeekFwd();
+                Thread.Sleep(100);
+            }
+        }
+        void MediaButtonStrip_Bwd_OnClick(OMControl sender, int screen)
+        {
+            Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+        }
+        void MediaButtonStrip_Bwd_OnHoldClick(OMControl sender, int screen)
+        {
+            Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+            while (sender.Mode == eModeType.Clicked)
+            {
+                zone.MediaHandler.SeekBwd();
+                Thread.Sleep(100);
+            }
+        }
+        void MediaButtonStrip_Next_OnClick(OMControl sender, int screen)
+        {
+            Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+            zone.MediaHandler.Next();
+        }
+        void MediaButtonStrip_Prev_OnClick(OMControl sender, int screen)
+        {
+            Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+            zone.MediaHandler.Previous();
+        }
+*/
         #endregion
 
         #region helper methods
@@ -1900,6 +2533,26 @@ namespace OpenMobile
         }
 
         #endregion
+
+        private void BackgroundImage_Change(int screen, string imagePath)
+        {
+            OMPanel panel = manager[screen, "background"];
+            OMImage img = panel["backgroundImage"] as OMImage;
+            if (img == null)
+                return;
+
+            ControlLayout backgroundGroup = new ControlLayout(panel, "backgroundImage");
+
+            // Fade current image out
+            SmoothAnimator.PresetAnimation_FadeOut(screen, 1.2f, null, backgroundGroup);
+
+            // Change image
+            img.Image = OM.Host.getImageFromFile(imagePath);
+
+            // Fade new image in
+            SmoothAnimator.PresetAnimation_FadeIn(screen, 1.2f, null, backgroundGroup);
+        }
+
 
         void UIPanel_Entering(OMPanel sender, int screen)
         {   // Update initial data
@@ -2739,6 +3392,131 @@ namespace OpenMobile
  
         #endregion
 
+        #region Day/Night mode change over
+
+        private void SetDayNightMode_SetOpacityManually(int screen, int opacity)
+        {
+            switch (_OpacityMode)
+            {
+                case OpacityModes.None:
+                    return;
+                case OpacityModes.All:
+                    {
+                        OMPanel panel = manager[screen, "UI"];
+                        if (panel != null)
+                        {
+                            OMControl control = panel["shpBrightnessAdjustment"] as OMControl;
+                            if (control != null)
+                                control.Opacity = opacity;
+                        }
+                    }
+                    break;
+                case OpacityModes.BackgroundOnly:
+                    {
+                        OMPanel panel = manager[screen, "background"];
+                        if (panel != null)
+                        {
+                            OMControl control = panel["backgroundImage"] as OMControl;
+                            if (control != null)
+                                control.Opacity = opacity;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+        }
+        
+        private void SetDayNightMode(bool night = false)
+        {
+            switch (_OpacityMode)
+            {
+                case OpacityModes.None:
+                    // Ensure we have full brightness if this function is disabled
+                    theHost.ForEachScreen(delegate(int screen)
+                    {
+                        OMPanel panel = manager[screen, "background"];
+                        if (panel != null)
+                        {
+                            ControlLayout backgroundGroup = new ControlLayout(panel, "backgroundImage");
+                            backgroundGroup.AddControls("shpBrightnessAdjustment");
+                            SmoothAnimator.PresetAnimation_FadeIn(screen, 1.2f, null, 255, true, backgroundGroup);
+                        }
+                        panel = manager[screen, "UI"];
+                        if (panel != null)
+                        {
+                            ControlLayout backgroundGroup = new ControlLayout(panel, "shpBrightnessAdjustment");
+                            SmoothAnimator.PresetAnimation_FadeOut(screen, 1.2f, null, 0, true, backgroundGroup);
+                            backgroundGroup.Visible = false;
+                        }
+                    });
+                    return;
+                case OpacityModes.All:
+                     {
+                        if (!night)
+                        {
+                            theHost.ForEachScreen(delegate(int screen)
+                            {
+                                OMPanel panel = manager[screen, "UI"];
+                                if (panel != null)
+                                {
+                                    ControlLayout backgroundGroup = new ControlLayout(panel, "shpBrightnessAdjustment");
+                                    backgroundGroup.Visible = true;
+                                    SmoothAnimator.PresetAnimation_FadeOut(screen, 1.2f, null, 0, false, backgroundGroup);
+                                }
+                            });
+                        }
+                        else
+                        {
+                            theHost.ForEachScreen(delegate(int screen)
+                            {
+                                OMPanel panel = manager[screen, "UI"];
+                                if (panel != null)
+                                {
+                                    ControlLayout backgroundGroup = new ControlLayout(panel, "shpBrightnessAdjustment");
+                                    backgroundGroup.Visible = true;
+                                    SmoothAnimator.PresetAnimation_FadeIn(screen, 1.2f, null, _OpacityLevel, false, backgroundGroup);
+                                }
+                            });
+                        }
+                    }
+                   break;
+                case OpacityModes.BackgroundOnly:
+                    {
+                        if (!night)
+                        {
+                            theHost.ForEachScreen(delegate(int screen)
+                            {
+                                OMPanel panel = manager[screen, "background"];
+                                if (panel != null)
+                                {
+                                    ControlLayout backgroundGroup = new ControlLayout(panel, "backgroundImage");
+                                    SmoothAnimator.PresetAnimation_FadeIn(screen, 1.2f, null, 255, false, backgroundGroup);
+                                }
+                            });
+                        }
+                        else
+                        {
+                            theHost.ForEachScreen(delegate(int screen)
+                            {
+                                OMPanel panel = manager[screen, "background"];
+                                if (panel != null)
+                                {
+                                    ControlLayout backgroundGroup = new ControlLayout(panel, "backgroundImage");
+                                    SmoothAnimator.PresetAnimation_FadeOut(screen, 1.2f, null, _OpacityLevel, false, backgroundGroup);
+                                }
+                            });
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        #endregion
+
         void statusReset_Elapsed(object sender, ElapsedEventArgs e)
         {
             theHost.ForEachScreen(delegate(int screen)
@@ -2759,7 +3537,7 @@ namespace OpenMobile
             // Show icon for connected to internet
             if (function == eFunction.connectedToInternet)
             {
-                Notification notificationInternetOnline = new Notification(this, "Internet_Online", theHost.getSkinImage("Icons|Icon-Link").image, theHost.getSkinImage("Icons|Icon-Link").image, "Internet connection detected", "");
+                Notification notificationInternetOnline = new Notification(this, "Internet_Online", theHost.getSkinImage("Icons|Icon-Internet").image, theHost.getSkinImage("Icons|Icon-Internet").image, "Internet connection detected", "");
                 notificationInternetOnline.ClearAction += new Notification.NotificationAction(notificationInternetOnline_ClearAction);
                 theHost.UIHandler.AddNotification(notificationInternetOnline);
 
@@ -2773,6 +3551,18 @@ namespace OpenMobile
             }
 
             #endregion
+
+            // Shutdown program
+            if (function == eFunction.CloseProgramPreview)
+            {
+                OM.Host.UIHandler.InfoBanner_Show(0, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Closing program, please wait...", 0));
+            }
+
+            // Toggle day/night
+            if (function == eFunction.CurrentLocationDay)
+                SetDayNightMode(false);
+            if (function == eFunction.CurrentLocationNight)
+                SetDayNightMode(true);
 
             return;
 
@@ -2951,10 +3741,24 @@ namespace OpenMobile
 
             // Cancel the clear request on this notification
             cancel = true;
+
         }
 
         void theHost_OnMediaEvent(eFunction function, Zone zone, string arg)
         {
+            if (function == eFunction.MediaProviderChanged)
+            {
+                // Loop trough screens for this zone and update data
+                int[] screens = OM.Host.ZoneHandler.GetScreensForActiveZone(zone);
+                for (int i = 0; i < screens.Length; i++)
+                {
+                    // Map mediaHandler playlist to mediaFlow control
+                    OMMediaFlow mediaFlow = manager[screens[i], "MediaBar"]["mediaFlow_CoverFlow"] as OMMediaFlow;
+                    if (mediaFlow != null)
+                        mediaFlow.PlayListSource = zone.MediaHandler.Playlist;
+                }
+            }
+
             return;
 
             if (function == eFunction.loadTunedContent)

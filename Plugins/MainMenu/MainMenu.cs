@@ -76,6 +76,12 @@ namespace OpenMobile
                     createDefaultSettings(settings, screen);
 
                 OMPanel mainPanel = new OMPanel("MainMenu");
+
+                //// Screen background image
+                //OMImage backgroundImage = new OMImage("backgroundImage", OM.Host.ClientFullArea.Left, OM.Host.ClientFullArea.Top, OM.Host.ClientFullArea.Width, OM.Host.ClientFullArea.Height);
+                //backgroundImage.Image = OM.Host.getSkinImage("Backgrounds|Highway 1");
+                //mainPanel.addControl(backgroundImage);             
+
                 OMButton[] MainMenuButtons = new OMButton[9];
 
                 for (int i = 0; i < MainMenuButtons.Length; i++)

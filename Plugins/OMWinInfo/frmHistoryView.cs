@@ -29,7 +29,7 @@ namespace OMWinInfo
 
         void CommandHandler_CommandExecMonitor(Command command, object[] param, string name)
         {
-            string txt = String.Format("[{0}] ", DateTime.Now.ToString("yyyyMMdd-HHmmss.fff"));
+            string txt = String.Format("[{0}] ", DateTime.Now.ToString("yyyy.MM.dd - HH:mm:ss.fff"));
             if (command != null)
                 txt += String.Format("Cmd: {0, -55} | Param: {1}", command, (param != null ? param.ToString() : ""));
             else

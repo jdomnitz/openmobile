@@ -29,7 +29,7 @@ namespace OMSkinPluginSample
     public sealed class OMSkinPluginSample : HighLevelCode
     {
         public OMSkinPluginSample()
-            : base("OMSkinPluginSample", OM.Host.getSkinImage("Icons|Icon-OM"), 1f, "A sample plugin for a simple panel", "Panel Sample", "OM Dev team/Borte", "")
+            : base("OMSkinPluginSample", OM.Host.getSkinImage("Icons|Icon-OM"), 1f, "A sample plugin for a simple panel", "Plugin Sample", "OM Dev team/Borte", "")
         {
         }
 
@@ -38,17 +38,17 @@ namespace OMSkinPluginSample
             // Create a new panel
             OMPanel panel = new OMPanel("Panel");
 
-            //// Create a new label
-            //OMLabel lblHelloWorld = new OMLabel("lblHelloWorld", OM.Host.ClientArea[0].Left, OM.Host.ClientArea[0].Top, OM.Host.ClientArea[0].Width, OM.Host.ClientArea[0].Height, "Hello World!");
+            // Create a new label
+            OMLabel lblHelloWorld = new OMLabel("lblHelloWorld", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height, "Hello World!");
             
-            //// Add the new label to the panel
-            //panel.addControl(lblHelloWorld);
+            // Add the new label to the panel
+            panel.addControl(lblHelloWorld);
 
-            OMButton btnPlay = OMButton.PreConfigLayout_BasicStyle("btnPlay", 0, 100, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Play");
-            panel.addControl(btnPlay);
+            OMButton btnHello = OMButton.PreConfigLayout_BasicStyle("btnHello", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Hello");
+            panel.addControl(btnHello);
 
             // Load the panel into the local manager for panels
-            PanelManager.loadPanel(panel, true);
+            base.PanelManager.loadPanel(panel, true);
 
             // Return
             return eLoadStatus.LoadSuccessful;

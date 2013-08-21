@@ -20,6 +20,7 @@
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -32,7 +33,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -41,7 +41,7 @@
     <DebugType>full</DebugType>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
-    <OutputPath>..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\</OutputPath>
+    <OutputPath>..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\OMVisteonRadio\</OutputPath>
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
@@ -59,6 +59,11 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AudioRouter, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\AudioRouter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="HDRadioComm, Version=1.6.0.3, Culture=neutral, PublicKeyToken=6059837a14fef3b8, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\HDRadioComm.dll</HintPath>
@@ -66,6 +71,7 @@
     <Reference Include="OpenMobile.Framework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\FrontEnd\OpenMobile\bin\Debug\OpenMobile.Framework.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
@@ -80,13 +86,10 @@
     <Compile Include="RadioComm.vb" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\branches\Libraries\AudioRouter\AudioRouter.csproj">
-      <Project>{B1FF1393-9BE4-49E0-B1C2-BD748EC445B9}</Project>
-      <Name>AudioRouter</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\FrontEnd\OpenMobile.Graphics\OpenMobile.Graphics.csproj">
       <Project>{E1727C23-C7FD-4FBA-B09F-7160B5947F85}</Project>
       <Name>OpenMobile.Graphics</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -108,6 +111,11 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icon-Radio.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

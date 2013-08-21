@@ -38,22 +38,14 @@ namespace ControlDemo
 {
     public static class panelSlideInTest
     {
-        static IPluginHost Host;
-        static ScreenManager Manager;
-        static string PluginName;
         static OMPanel pSlideInTest = null;
         static imageItem imgPanel_Background_Highlighted;
         static imageItem imgPanel_Background;
         static GestureEvent Gesture = new GestureEvent(Host_OnGesture);
 
 
-        public static void Initialize(string pluginName, ScreenManager manager, IPluginHost host)
+        public static OMPanel Initialize()
         {
-            // Save reference to host objects
-            Host = host;
-            Manager = manager;
-            PluginName = pluginName;
-
             pSlideInTest = new OMPanel("SlideInTest");
 
             #region Bottom menu buttons
@@ -99,6 +91,10 @@ namespace ControlDemo
             btnAnimateText.OnClick += new userInteraction(btnAnimateText_OnClick);
             pSlideInTest.addControl(btnAnimateText);
 
+            OMButton btnContainer2Test = DefaultControls.GetButton("btnContainer2Test", 720, 100, 180, 90, "", "Cont2 Test");
+            btnContainer2Test.OnClick += new userInteraction(btnContainer2Test_OnClick);
+            pSlideInTest.addControl(btnContainer2Test);
+
             OMAnimatedLabel2 AniLabel_Test = new OMAnimatedLabel2("AniLabel_Test", 50, 400, 900, 35);
             // AniLabel_Test.SkinDebug = true;
             //AniLabel_Test.Text = String.Format("Current time and date is now {0}, this is a really long string so that we can test the animated labels in OpenMobile", DateTime.Now); //"This is a test of OMAnimatedLabel2";
@@ -127,14 +123,14 @@ namespace ControlDemo
                 );
             pSlideInTest.addControl(imgTextEffect);
 
-            OMContainer Container = new OMContainer("Container", 200, 200, 300, 150);
-            Container.Image = Host.getSkinImage("MediaBorder");
+            OMContainer Container = new OMContainer("Container", 0, 200, 300, 150);
+            Container.Image = OM.Host.getSkinImage("MediaBorder");
             Container.ScrollBar_ColorNormal = Color.Transparent;
             pSlideInTest.addControl(Container);
 
-            OMImage Image_ContainerTest1 = new OMImage("Image_ContainerTest1", 0, 0, Host.getSkinImage("AlbumIcon_Highlighted"));
+            OMImage Image_ContainerTest1 = new OMImage("Image_ContainerTest1", 0, 0, OM.Host.getSkinImage("AlbumIcon_Highlighted"));
             Container.addControlRelative(Image_ContainerTest1);
-            OMImage Image_ContainerTest2 = new OMImage("Image_ContainerTest2", 250, 50, Host.getSkinImage("AlbumIcon_SelectedHighlighted"));
+            OMImage Image_ContainerTest2 = new OMImage("Image_ContainerTest2", 250, 50, OM.Host.getSkinImage("AlbumIcon_SelectedHighlighted"));
             Container.addControlRelative(Image_ContainerTest2);
             OMButton btn_ContainerTest3 = DefaultControls.GetButton("btn_ContainerTest3", 50, 50, 180, 90, "", "Test");
             btn_ContainerTest3.OnClick += new userInteraction(btn_ContainerTest3_OnClick);
@@ -143,6 +139,17 @@ namespace ControlDemo
             OMButton Button_PanelSlideIn  = DefaultControls.GetHorisontalEdgeButton("Button_SlideIn", 420, 540, 160, 70, "5", "");
             Button_PanelSlideIn.OnClick += new userInteraction(menuButton_OnClick);
             pSlideInTest.addControl(Button_PanelSlideIn);
+
+            OMContainer Container2 = new OMContainer("Container2", 500, 200, 300, 150);
+            Container2.SkinDebug = true;
+            pSlideInTest.addControl(Container2);
+            OMImage Image_Container2Test1 = new OMImage("Image_Container2Test1", 0, 0, OM.Host.getSkinImage("AIcons|9_av_fast_forward"));
+            Container2.addControl(Image_Container2Test1, ControlDirections.CenterHorizontally);
+            //OMImage Image_Container2Test2 = new OMImage("Image_Container2Test2", 0, 0, Host.getSkinImage("AIcons|9_av_fast_forward"));
+            //Container2.addControl(Image_Container2Test2, ControlDirections.CenterHorizontally);
+            //OMImage Image_Container2Test3 = new OMImage("Image_Container2Test3", 0, 0, Host.getSkinImage("AIcons|9_av_fast_forward"));
+            //Container2.addControl(Image_Container2Test3, ControlDirections.CenterHorizontally);
+
 
             PanelOutlineGraphic.GraphicData gd = new PanelOutlineGraphic.GraphicData();
             gd.Width = 1100;
@@ -165,8 +172,15 @@ namespace ControlDemo
             pSlideInTest.Entering += new PanelEvent(pSlideInTest_Entering);
             pSlideInTest.Leaving += new PanelEvent(pSlideInTest_Leaving);
 
-            manager.loadPanel(pSlideInTest);
+            return pSlideInTest;
+        }
 
+        static void btnContainer2Test_OnClick(OMControl sender, int screen)
+        {
+            OMContainer container = (OMContainer)sender.Parent[screen, "Container2"];
+            OMImage Image = new OMImage("img", 0, 0, OM.Host.getSkinImage("AIcons|9-av-play"));
+            //container.addControl(Image, ControlDirections.Right);
+            container.addControl(1, new ControlGroup(Image), false, ControlDirections.CenterHorizontally);
         }
 
         static void btnAnimateText_OnClick(OMControl sender, int screen)
@@ -201,7 +215,7 @@ namespace ControlDemo
 
         static void btn_ContainerTest3_OnClick(OMControl sender, int screen)
         {
-            Host.UIHandler.InfoBanner_Show(screen, new InfoBanner("Container test"));
+            OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner("Container test"));
         }
 
         static void btnChangeText_OnClick(OMControl sender, int screen)
@@ -283,19 +297,19 @@ namespace ControlDemo
         static void pSlideInTest_Leaving(OMPanel sender, int screen)
         {
             // Disconnect host events
-            Host.OnGesture -= Gesture;
+            OM.Host.OnGesture -= Gesture;
         }
 
         static void pSlideInTest_Entering(OMPanel sender, int screen)
         {
             // Connect host events
-            Host.OnGesture += Gesture;
+            OM.Host.OnGesture += Gesture;
         }
 
         static bool Host_OnGesture(int screen, string character, string pluginName, string panelName, ref bool handled)
         {
-            if (pluginName == PluginName && panelName == pSlideInTest.Name)
-                menuButton_OnClick(pSlideInTest[screen, "Button_SlideIn"], screen);
+            //if (pluginName == PluginName && panelName == pSlideInTest.Name)
+            //    menuButton_OnClick(pSlideInTest[screen, "Button_SlideIn"], screen);
 
             return false;
         }
@@ -336,7 +350,7 @@ namespace ControlDemo
         {
             // Initialize variable 
             if (MediaBarVisible == null)
-                MediaBarVisible = new bool[Host.ScreenCount];
+                MediaBarVisible = new bool[OM.Host.ScreenCount];
 
             List<OMControl> Controls = pSlideInTest.getPanelAtScreen(screen).Controls.FindAll(x => x.Name.Contains("Panel"));
             OMControl MainControl = pSlideInTest[screen, "Button_SlideIn"];

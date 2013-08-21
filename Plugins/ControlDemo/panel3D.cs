@@ -37,27 +37,21 @@ namespace ControlDemo
 {
     public static class panel3D
     {
-        static IPluginHost Host;
-        static ScreenManager Manager;
-        static string PluginName;
         static OpenMobile.Timer tmrAutoRot;
         static ButtonStrip PopUpMenuStrip;
 
-        public static void Initialize(string pluginName, ScreenManager manager, IPluginHost host)
+        public static OMPanel Initialize()
         {
-            // Save reference to host objects
-            Host = host;
-            Manager = manager;
-            PluginName = pluginName;
+            OMPanel p = new OMPanel("panel3D", "ControlDemo > 3D Rotation test");
 
-            OMPanel p = new OMPanel("panel3D");
-
-            OMLabel lblHeader = new OMLabel("lblHeader", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, 50);
-            lblHeader.Text = "ControlDemo -> 3D Rotation test";
-            lblHeader.TextAlignment = Alignment.TopLeft;
-            p.addControl(lblHeader);
-
-            OMCube cubeTest = new OMCube("cubeTest", 500, OM.Host.ClientArea_Init.Top + 100, 200, 200, new imageItem(MediaLoader.MissingCoverImage));//OM.Host.getSkinImage("Unknown Album"));
+            // Configure cube            
+            OMCube cubeTest = new OMCube("cubeTest", 500, OM.Host.ClientArea_Init.Top + 100, 200, 200); //, new imageItem(MediaLoader.MissingCoverImage));//OM.Host.getSkinImage("Unknown Album"));
+            cubeTest.Image1 = new imageItem(MediaLoader.MissingCoverImage);
+            cubeTest.Image2 = new imageItem(MediaLoader.MissingCoverImage);
+            cubeTest.Image3 = new imageItem(MediaLoader.MissingCoverImage);
+            cubeTest.Image4 = new imageItem(MediaLoader.MissingCoverImage);
+            cubeTest.Image5 = new imageItem(MediaLoader.MissingCoverImage);
+            cubeTest.Image6 = new imageItem(MediaLoader.MissingCoverImage);
             p.addControl(cubeTest);
 
             OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 500, OM.Host.ClientArea_Init.Top + 100, 200, 200, new imageItem(MediaLoader.MissingCoverImage));//host.getSkinImage("Unknown Album.png"));
@@ -82,8 +76,8 @@ namespace ControlDemo
             p.addControl(lblRotationX);
 
             OMSlider Slider_RotationX = new OMSlider("Slider_RotationX", 100, 400, 200, 25, 12, 40);
-            Slider_RotationX.Slider = Host.getSkinImage("Slider");
-            Slider_RotationX.SliderBar = Host.getSkinImage("Slider.Bar");
+            Slider_RotationX.Slider = OM.Host.getSkinImage("Slider");
+            Slider_RotationX.SliderBar = OM.Host.getSkinImage("Slider.Bar");
             Slider_RotationX.Minimum = -180;
             Slider_RotationX.Maximum = 180;
             Slider_RotationX.Value = 0;
@@ -96,8 +90,8 @@ namespace ControlDemo
             p.addControl(lblRotationY);
 
             OMSlider Slider_RotationY = new OMSlider("Slider_RotationY", 100, 450, 200, 25, 12, 40);
-            Slider_RotationY.Slider = Host.getSkinImage("Slider");
-            Slider_RotationY.SliderBar = Host.getSkinImage("Slider.Bar");
+            Slider_RotationY.Slider = OM.Host.getSkinImage("Slider");
+            Slider_RotationY.SliderBar = OM.Host.getSkinImage("Slider.Bar");
             Slider_RotationY.Minimum = -180;
             Slider_RotationY.Maximum = 180;
             Slider_RotationY.Value = 0;
@@ -110,8 +104,8 @@ namespace ControlDemo
             p.addControl(lblRotationZ);
 
             OMSlider Slider_RotationZ = new OMSlider("Slider_RotationZ", 100, 500, 200, 25, 12, 40);
-            Slider_RotationZ.Slider = Host.getSkinImage("Slider");
-            Slider_RotationZ.SliderBar = Host.getSkinImage("Slider.Bar");
+            Slider_RotationZ.Slider = OM.Host.getSkinImage("Slider");
+            Slider_RotationZ.SliderBar = OM.Host.getSkinImage("Slider.Bar");
             Slider_RotationZ.Minimum = -180;
             Slider_RotationZ.Maximum = 180;
             Slider_RotationZ.Value = 0;
@@ -119,10 +113,11 @@ namespace ControlDemo
             p.addControl(Slider_RotationZ);
 
             p.Entering += new PanelEvent(p_Entering);
-            manager.loadPanel(p);
 
             tmrAutoRot = new Timer(1);
             tmrAutoRot.Elapsed += new System.Timers.ElapsedEventHandler(tmrAutoRot_Elapsed);
+
+            return p;
         }
 
         static bool _CameraControl = false;
