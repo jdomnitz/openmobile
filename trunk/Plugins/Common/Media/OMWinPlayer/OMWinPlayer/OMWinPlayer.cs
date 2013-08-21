@@ -69,6 +69,8 @@ namespace OMPlayer2
 
         MediaSource _MediaSource_File;
 
+        private const string _Text_PleaseWaitLoadingMedia = "Please wait, loading media...";
+
         #region Constructor / Plugin config
 
         public OMWinPlayer()
@@ -190,6 +192,9 @@ namespace OMPlayer2
                                                 _ZonePlayers[zone].Player.PlayFile(media.Location);
                                             }
                                             _ZonePlayers[zone].RequestedPlayBackMode = PlaybackModes.Play;
+
+                                            // Inform user that we're loading media
+                                            base.MediaInfo_MediaText_Set(zone, _Text_PleaseWaitLoadingMedia, media.Location);
                                         }
                                         return true;
                                     case eMediaType.AudioCD:
@@ -940,6 +945,12 @@ namespace OMPlayer2
             {
                 Zone zone = (Zone)sender.Tag;
 
+                mediaInfo media = base.GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo;
+
+                // Mask media loading text
+                if (media.Name == _Text_PleaseWaitLoadingMedia)
+                    media.Name = String.Empty;
+
                 // Update missing media info
                 switch (sender.MediaInfo.MediaType)
 	            {
@@ -955,7 +966,6 @@ namespace OMPlayer2
                 base.MediaInfo_PlaybackPositionData_Set(zone, sender.MediaInfo.PlaybackPos, sender.MediaInfo.Length);
 
                 // Also update the provider info fields
-                mediaInfo media = base.GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo;
                 switch (media.Type)
                 {
                     case eMediaType.AudioCD:
