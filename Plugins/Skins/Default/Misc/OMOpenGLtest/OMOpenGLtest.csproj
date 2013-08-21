@@ -79,7 +79,7 @@
       <Name>OpenMobile.Framework</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="mPlayerCom\mPlayerCom.csproj">
+    <ProjectReference Include="..\..\..\..\Common\Media\OMWinPlayer\mPlayerCom\mPlayerCom.csproj">
       <Project>{84E3ABD9-BEB3-49E5-8646-902294F65AC5}</Project>
       <Name>mPlayerCom</Name>
     </ProjectReference>
